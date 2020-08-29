@@ -215,3 +215,5 @@ vignettes/*.pdf
 data/
 .mustashe/
 cache/
+temp/
+
