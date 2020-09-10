@@ -13,6 +13,7 @@
 ### Data preparation
 
 1. [Prepare DepMap data](munge/005_prepare-depmap-data.md)
+2. [Prepare modeling data](munge/010_prepare-modeling-data.md)
 
 ### Analysis
 
