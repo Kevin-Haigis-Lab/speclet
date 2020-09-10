@@ -1,0 +1,2251 @@
+# Prepare DepMap data
+
+
+```python
+import pandas as pd
+import numpy as np
+from matplotlib import pyplot as plt
+import seaborn as sns
+import janitor
+from pathlib import Path
+import re
+```
+
+
+```python
+data_dir = Path('../data')
+save_dir = Path('../modeling_data')
+```
+
+## 'sample_info.csv'
+
+
+```python
+sample_info_columns = [
+    'depmap_id', 'stripped_cell_line_name', 'ccle_name', 'sex', 
+    'cas9_activity', 'primary_or_metastasis', 'primary_disease',
+    'subtype', 'lineage', 'lineage_subtype',
+]
+
+sample_info = pd.read_csv(data_dir / 'sample_info.csv') \
+    .clean_names() \
+    [sample_info_columns]
+sample_info.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>depmap_id</th>
+      <th>stripped_cell_line_name</th>
+      <th>ccle_name</th>
+      <th>sex</th>
+      <th>cas9_activity</th>
+      <th>primary_or_metastasis</th>
+      <th>primary_disease</th>
+      <th>subtype</th>
+      <th>lineage</th>
+      <th>lineage_subtype</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACH-000001</td>
+      <td>NIHOVCAR3</td>
+      <td>NIHOVCAR3_OVARY</td>
+      <td>Female</td>
+      <td>NaN</td>
+      <td>Metastasis</td>
+      <td>Ovarian Cancer</td>
+      <td>Adenocarcinoma, high grade serous</td>
+      <td>ovary</td>
+      <td>ovary_adenocarcinoma</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ACH-000002</td>
+      <td>HL60</td>
+      <td>HL60_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE</td>
+      <td>Female</td>
+      <td>NaN</td>
+      <td>Primary</td>
+      <td>Leukemia</td>
+      <td>Acute Myelogenous Leukemia (AML), M3 (Promyelo...</td>
+      <td>blood</td>
+      <td>AML</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-000003</td>
+      <td>CACO2</td>
+      <td>CACO2_LARGE_INTESTINE</td>
+      <td>Male</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>Colon/Colorectal Cancer</td>
+      <td>Adenocarcinoma</td>
+      <td>colorectal</td>
+      <td>colorectal_adenocarcinoma</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-000004</td>
+      <td>HEL</td>
+      <td>HEL_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE</td>
+      <td>Male</td>
+      <td>47.6</td>
+      <td>NaN</td>
+      <td>Leukemia</td>
+      <td>Acute Myelogenous Leukemia (AML), M6 (Erythrol...</td>
+      <td>blood</td>
+      <td>AML</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-000005</td>
+      <td>HEL9217</td>
+      <td>HEL9217_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE</td>
+      <td>Male</td>
+      <td>13.4</td>
+      <td>NaN</td>
+      <td>Leukemia</td>
+      <td>Acute Myelogenous Leukemia (AML), M6 (Erythrol...</td>
+      <td>blood</td>
+      <td>AML</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+sample_info.to_csv(save_dir / 'sample_info.csv', index=False)
+```
+
+## 'Achilles_guide_map.csv'
+
+
+```python
+achilles_guide_map = pd.read_csv(data_dir / 'Achilles_guide_map.csv') \
+    .clean_names() \
+    .assign(hugo_symbol=lambda x: [a.split(' ')[0] for a in x.gene]) \
+    .drop(['gene'], axis=1)
+
+achilles_guide_map.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>sgrna</th>
+      <th>genome_alignment</th>
+      <th>n_alignments</th>
+      <th>hugo_symbol</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>AAAAAAATCCAGCAATGCAG</td>
+      <td>chr10_110964620_+</td>
+      <td>1</td>
+      <td>SHOC2</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>AAAAAACCCGTAGATAGCCT</td>
+      <td>chr12_95003615_+</td>
+      <td>1</td>
+      <td>NDUFA12</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>AAAAAAGAAGAAAAAACCAG</td>
+      <td>chr4_75970356_-</td>
+      <td>1</td>
+      <td>SDAD1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>AAAAAAGCTCAAGAAGGAGG</td>
+      <td>chr2_33588446_-</td>
+      <td>1</td>
+      <td>FAM98A</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>AAAAAAGGCTGTAAAAGCGT</td>
+      <td>chr19_19891600_+</td>
+      <td>1</td>
+      <td>ZNF253</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+## 'Achilles_dropped_guides.csv'
+
+
+```python
+achilles_dropped_guides = pd.read_csv(data_dir / 'Achilles_dropped_guides.csv') \
+    .clean_names() \
+    .rename({'unnamed_0': 'sgrna'}, axis=1)
+
+achilles_dropped_guides.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>sgrna</th>
+      <th>genomic_coordinates</th>
+      <th>gene</th>
+      <th>n_alignments</th>
+      <th>fail_reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>AAAAAGCTTCCGCCTGATGG</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>0.0</td>
+      <td>not_aligned</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>AAAAATCCTAAAATAAAATA</td>
+      <td>chrX_145827835.0_-</td>
+      <td>NaN</td>
+      <td>1.0</td>
+      <td>in_dropped_guides</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>AAAACAGAATATAGTCAGTG</td>
+      <td>chrX_145827787.0_-</td>
+      <td>NaN</td>
+      <td>1.0</td>
+      <td>guide_dropped_by_ceres</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>AAAACAGGACGATGTGCGGC</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>0.0</td>
+      <td>not_aligned</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>AAAACATCGACCGAAAGCGT</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>0.0</td>
+      <td>not_aligned</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+len(np.unique(achilles_dropped_guides.sgrna))
+```
+
+
+
+
+    2554
+
+
+
+
+```python
+achilles_guide_map = achilles_guide_map[~achilles_guide_map.sgrna.isin(achilles_dropped_guides.sgrna)]
+achilles_guide_map = achilles_guide_map.reset_index(drop=True)
+```
+
+
+```python
+achilles_guide_map.to_csv(save_dir / 'achilles_guide_map.csv', index=False)
+```
+
+## 'Achilles_replicate_map.csv'
+
+
+```python
+achilles_replicate_map = pd.read_csv(data_dir / 'Achilles_replicate_map.csv') \
+    .clean_names() \
+    .assign(replicate_id=lambda x: x.replicate_id.str.lower())
+achilles_replicate_map.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>replicate_id</th>
+      <th>depmap_id</th>
+      <th>pdna_batch</th>
+      <th>passes_qc</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>pacadd188-311cas9_repb_p6_batch3</td>
+      <td>ACH-001382</td>
+      <td>3</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>kmrc20-311cas9_repa_p6_batch3</td>
+      <td>ACH-000250</td>
+      <td>3</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>253j-311cas9_repa_p5_batch3</td>
+      <td>ACH-000011</td>
+      <td>3</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ocug1-311cas9-repb-p6_batch3</td>
+      <td>ACH-001619</td>
+      <td>3</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>raji-311cas9_repb_p6_batch3</td>
+      <td>ACH-000654</td>
+      <td>3</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+np.max(achilles_replicate_map.pdna_batch)
+```
+
+
+
+
+    4
+
+
+
+
+```python
+len(np.unique(achilles_replicate_map.replicate_id))
+```
+
+
+
+
+    1638
+
+
+
+
+```python
+np.round(np.mean(achilles_replicate_map.passes_qc), 3)
+```
+
+
+
+
+    0.996
+
+
+
+
+```python
+achilles_replicate_map.to_csv(save_dir / 'achilles_replicate_map.csv', index=False)
+```
+
+## 'Achilles_logfold_change.csv'
+
+
+```python
+achilles_logfold_change = pd.read_csv(data_dir / 'Achilles_logfold_change.csv') \
+    .rename({'Construct Barcode': 'sgrna'}, axis=1) \
+    .set_index('sgrna') \
+    .melt(var_name='replicate_id', value_name='lfc', ignore_index=False) \
+    .reset_index() \
+    .assign(replicate_id=lambda x: x.replicate_id.str.lower()) \
+    .merge(achilles_replicate_map, on='replicate_id', how='left') \
+    .pipe(lambda x: x[x.passes_qc])
+
+achilles_logfold_change.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>sgrna</th>
+      <th>replicate_id</th>
+      <th>lfc</th>
+      <th>depmap_id</th>
+      <th>pdna_batch</th>
+      <th>passes_qc</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>AAAAAAATCCAGCAATGCAG</td>
+      <td>143b-311cas9_repa_p6_batch3</td>
+      <td>0.289694</td>
+      <td>ACH-001001</td>
+      <td>3</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>AAAAAACCCGTAGATAGCCT</td>
+      <td>143b-311cas9_repa_p6_batch3</td>
+      <td>0.170172</td>
+      <td>ACH-001001</td>
+      <td>3</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>AAAAAAGAAGAAAAAACCAG</td>
+      <td>143b-311cas9_repa_p6_batch3</td>
+      <td>-0.695947</td>
+      <td>ACH-001001</td>
+      <td>3</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>AAAAAAGCTCAAGAAGGAGG</td>
+      <td>143b-311cas9_repa_p6_batch3</td>
+      <td>-0.324935</td>
+      <td>ACH-001001</td>
+      <td>3</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>AAAAAAGGCTGTAAAAGCGT</td>
+      <td>143b-311cas9_repa_p6_batch3</td>
+      <td>0.142874</td>
+      <td>ACH-001001</td>
+      <td>3</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+if achilles_logfold_change.depmap_id.isnull().values.any():
+    raise Exception('Some data points are missing cell line assignments.')
+```
+
+
+```python
+if not np.all(achilles_logfold_change.passes_qc):
+    raise Exception('Some data does not pass QC.')
+```
+
+
+```python
+achilles_logfold_change.shape
+```
+
+
+
+
+    (121067627, 6)
+
+
+
+
+```python
+achilles_logfold_change.to_csv(save_dir / 'achilles_logfold_change.csv', 
+                               index=False)
+```
+
+## 'CCLE_mutations.csv'
+
+
+```python
+ccle_mutations_columns = [
+    'depmap_id', 
+    'hugo_symbol', 'chromosome', 'start_position', 'end_position',
+    'variant_classification', 'variant_type', 'reference_allele', 
+    'tumor_seq_allele1', 'cdna_change', 'codon_change', 'protein_change',
+    'isdeleterious', 'istcgahotspot', 'iscosmichotspot'
+]
+
+ccle_mutations = pd.read_csv(data_dir / 'CCLE_mutations.csv', 
+                             delimiter='\t', low_memory=False) \
+    .clean_names() \
+    [ccle_mutations_columns]
+
+ccle_mutations.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>depmap_id</th>
+      <th>hugo_symbol</th>
+      <th>chromosome</th>
+      <th>start_position</th>
+      <th>end_position</th>
+      <th>variant_classification</th>
+      <th>variant_type</th>
+      <th>reference_allele</th>
+      <th>tumor_seq_allele1</th>
+      <th>cdna_change</th>
+      <th>codon_change</th>
+      <th>protein_change</th>
+      <th>isdeleterious</th>
+      <th>istcgahotspot</th>
+      <th>iscosmichotspot</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACH-000986</td>
+      <td>A1BG</td>
+      <td>19</td>
+      <td>58858743</td>
+      <td>58858743</td>
+      <td>Missense_Mutation</td>
+      <td>SNP</td>
+      <td>C</td>
+      <td>T</td>
+      <td>c.1456G&gt;A</td>
+      <td>c.(1456-1458)Gac&gt;Aac</td>
+      <td>p.D486N</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ACH-000988</td>
+      <td>A1BG</td>
+      <td>19</td>
+      <td>58858810</td>
+      <td>58858810</td>
+      <td>Silent</td>
+      <td>SNP</td>
+      <td>C</td>
+      <td>T</td>
+      <td>c.1389G&gt;A</td>
+      <td>c.(1387-1389)caG&gt;caA</td>
+      <td>p.Q463Q</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-002182</td>
+      <td>A1BG</td>
+      <td>19</td>
+      <td>58858867</td>
+      <td>58858867</td>
+      <td>Missense_Mutation</td>
+      <td>SNP</td>
+      <td>C</td>
+      <td>G</td>
+      <td>c.1332G&gt;C</td>
+      <td>c.(1330-1332)aaG&gt;aaC</td>
+      <td>p.K444N</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-000985</td>
+      <td>A1BG</td>
+      <td>19</td>
+      <td>58858872</td>
+      <td>58858872</td>
+      <td>Missense_Mutation</td>
+      <td>SNP</td>
+      <td>C</td>
+      <td>T</td>
+      <td>c.1327G&gt;A</td>
+      <td>c.(1327-1329)Gtg&gt;Atg</td>
+      <td>p.V443M</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-001793</td>
+      <td>A1BG</td>
+      <td>19</td>
+      <td>58858914</td>
+      <td>58858914</td>
+      <td>Missense_Mutation</td>
+      <td>SNP</td>
+      <td>C</td>
+      <td>T</td>
+      <td>c.1285G&gt;A</td>
+      <td>c.(1285-1287)Gac&gt;Aac</td>
+      <td>p.D429N</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+ccle_mutations.to_csv(save_dir / 'ccle_mutations.csv', index=False)
+```
+
+### *KRAS* mutations
+
+
+```python
+kras_mutations_columns = [
+    'depmap_id', 'start_position', 'end_position', 
+    'variant_classification', 'variant_type', 'protein_change',
+    'isdeleterious', 'istcgahotspot', 'iscosmichotspot'
+]
+
+kras_hotspot_codons = ['12', '13', '61', '146']
+
+kras_mutations = ccle_mutations[ccle_mutations.hugo_symbol == 'KRAS'] \
+    [kras_mutations_columns] \
+    .assign(
+        variant_classification=lambda x: x.variant_classification.str.lower(),
+        variant_type=lambda x: x.variant_type.str.lower(),
+        codon=lambda x: [re.sub('\D', '', a) for a in x.protein_change],
+        is_kras_hotspot=lambda x: x.codon.isin(kras_hotspot_codons)
+    ) \
+    .pipe(lambda x: x[x.variant_classification != 'silent']) \
+    .pipe(lambda x: x[x.is_kras_hotspot | x.iscosmichotspot | x.istcgahotspot | x.isdeleterious]) \
+    .assign(kras_allele=lambda x: [a if b else "other" for a,b in zip(x.protein_change, x.is_kras_hotspot)]) \
+    .assign(kras_allele=lambda x: [re.sub('p.', '', a) for a in x.kras_allele]) \
+    .drop_duplicates() \
+    .reset_index(drop=True)
+
+
+kras_mutations.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>depmap_id</th>
+      <th>start_position</th>
+      <th>end_position</th>
+      <th>variant_classification</th>
+      <th>variant_type</th>
+      <th>protein_change</th>
+      <th>isdeleterious</th>
+      <th>istcgahotspot</th>
+      <th>iscosmichotspot</th>
+      <th>codon</th>
+      <th>is_kras_hotspot</th>
+      <th>kras_allele</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACH-000981</td>
+      <td>25368390</td>
+      <td>25368390</td>
+      <td>frame_shift_del</td>
+      <td>del</td>
+      <td>p.K185fs</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>185</td>
+      <td>False</td>
+      <td>other</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ACH-001650</td>
+      <td>25368390</td>
+      <td>25368390</td>
+      <td>frame_shift_del</td>
+      <td>del</td>
+      <td>p.K185fs</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>185</td>
+      <td>False</td>
+      <td>other</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-002238</td>
+      <td>25368390</td>
+      <td>25368390</td>
+      <td>frame_shift_del</td>
+      <td>del</td>
+      <td>p.K185fs</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>185</td>
+      <td>False</td>
+      <td>other</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-000996</td>
+      <td>25368455</td>
+      <td>25368455</td>
+      <td>nonsense_mutation</td>
+      <td>snp</td>
+      <td>p.R164*</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>164</td>
+      <td>False</td>
+      <td>other</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-000218</td>
+      <td>25378561</td>
+      <td>25378561</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.A146V</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>146</td>
+      <td>True</td>
+      <td>A146V</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+kras_mutations[['kras_allele', 'depmap_id']] \
+    .groupby('kras_allele') \
+    .count() \
+    .sort_values('depmap_id', ascending=False)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>depmap_id</th>
+    </tr>
+    <tr>
+      <th>kras_allele</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>G12D</th>
+      <td>68</td>
+    </tr>
+    <tr>
+      <th>G12V</th>
+      <td>47</td>
+    </tr>
+    <tr>
+      <th>G12C</th>
+      <td>27</td>
+    </tr>
+    <tr>
+      <th>other</th>
+      <td>18</td>
+    </tr>
+    <tr>
+      <th>G12A</th>
+      <td>16</td>
+    </tr>
+    <tr>
+      <th>G13D</th>
+      <td>14</td>
+    </tr>
+    <tr>
+      <th>Q61H</th>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>G12S</th>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>G12R</th>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>A146T</th>
+      <td>7</td>
+    </tr>
+    <tr>
+      <th>G13C</th>
+      <td>6</td>
+    </tr>
+    <tr>
+      <th>Q61K</th>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>A146V</th>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>Q61L</th>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>Q61R</th>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>G12F</th>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>A146P</th>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+kras_mutations.to_csv(save_dir / 'kras_mutations.csv', index=False)
+```
+
+
+```python
+mult_kras_mutations = kras_mutations[['depmap_id', 'kras_allele']] \
+    .groupby('depmap_id') \
+    .count() \
+    .pipe(lambda x: x[x.kras_allele > 1]) \
+    .sort_values('kras_allele', ascending=False) \
+    .reset_index(drop=False)
+
+mult_kras_mutations
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>depmap_id</th>
+      <th>kras_allele</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACH-000718</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ACH-000249</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-000264</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-000314</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-000344</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>ACH-001001</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>ACH-001094</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>ACH-001378</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>ACH-001650</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>ACH-001857</td>
+      <td>2</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+kras_mult_mutations_fix = kras_mutations[kras_mutations.depmap_id.isin(mult_kras_mutations.depmap_id)] \
+    .reset_index(drop=True) \
+    .pipe(lambda x: x[x.is_kras_hotspot]) \
+    .sort_values('depmap_id')
+
+kras_mult_mutations_fix
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>depmap_id</th>
+      <th>start_position</th>
+      <th>end_position</th>
+      <th>variant_classification</th>
+      <th>variant_type</th>
+      <th>protein_change</th>
+      <th>isdeleterious</th>
+      <th>istcgahotspot</th>
+      <th>iscosmichotspot</th>
+      <th>codon</th>
+      <th>is_kras_hotspot</th>
+      <th>kras_allele</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>ACH-000249</td>
+      <td>25380275</td>
+      <td>25380275</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.Q61H</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>61</td>
+      <td>True</td>
+      <td>Q61H</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-000264</td>
+      <td>25380277</td>
+      <td>25380277</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.Q61K</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>61</td>
+      <td>True</td>
+      <td>Q61K</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>ACH-000264</td>
+      <td>25380277</td>
+      <td>25380278</td>
+      <td>missense_mutation</td>
+      <td>dnp</td>
+      <td>p.Q61K</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>61</td>
+      <td>True</td>
+      <td>Q61K</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-000314</td>
+      <td>25380275</td>
+      <td>25380275</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.Q61H</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>61</td>
+      <td>True</td>
+      <td>Q61H</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>ACH-000314</td>
+      <td>25398282</td>
+      <td>25398282</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.G13C</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>13</td>
+      <td>True</td>
+      <td>G13C</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-000344</td>
+      <td>25380277</td>
+      <td>25380277</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.Q61K</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>61</td>
+      <td>True</td>
+      <td>Q61K</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>ACH-000344</td>
+      <td>25380277</td>
+      <td>25380278</td>
+      <td>missense_mutation</td>
+      <td>dnp</td>
+      <td>p.Q61K</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>61</td>
+      <td>True</td>
+      <td>Q61K</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>ACH-000718</td>
+      <td>25398284</td>
+      <td>25398284</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.G12V</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>12</td>
+      <td>True</td>
+      <td>G12V</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>ACH-000718</td>
+      <td>25398285</td>
+      <td>25398285</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.G12C</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>12</td>
+      <td>True</td>
+      <td>G12C</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>ACH-000718</td>
+      <td>25398284</td>
+      <td>25398285</td>
+      <td>missense_mutation</td>
+      <td>dnp</td>
+      <td>p.G12F</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>12</td>
+      <td>True</td>
+      <td>G12F</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>ACH-001001</td>
+      <td>25398285</td>
+      <td>25398285</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.G12S</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>12</td>
+      <td>True</td>
+      <td>G12S</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>ACH-001094</td>
+      <td>25398285</td>
+      <td>25398285</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.G12S</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>12</td>
+      <td>True</td>
+      <td>G12S</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>ACH-001378</td>
+      <td>25398284</td>
+      <td>25398284</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.G12V</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>12</td>
+      <td>True</td>
+      <td>G12V</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>ACH-001378</td>
+      <td>25398285</td>
+      <td>25398285</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.G12S</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>12</td>
+      <td>True</td>
+      <td>G12S</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>ACH-001650</td>
+      <td>25398284</td>
+      <td>25398284</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.G12D</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>12</td>
+      <td>True</td>
+      <td>G12D</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>ACH-001857</td>
+      <td>25398285</td>
+      <td>25398285</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.G12C</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>12</td>
+      <td>True</td>
+      <td>G12C</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>ACH-001857</td>
+      <td>25398284</td>
+      <td>25398284</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.G12V</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>12</td>
+      <td>True</td>
+      <td>G12V</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+kras_mut_blacklist = [
+    'ACH-000718'
+]
+
+kras_mult_mutations_fix[['depmap_id', 'kras_allele']] \
+    .pipe(lambda x: x[~x.depmap_id.isin(kras_mut_blacklist)]) \
+    .groupby('depmap_id') \
+    .count() \
+    .sort_values('kras_allele', ascending=False) \
+    .reset_index(drop=False)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>depmap_id</th>
+      <th>kras_allele</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACH-000264</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ACH-000314</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-000344</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-001378</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-001857</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>ACH-000249</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>ACH-001001</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>ACH-001094</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>ACH-001650</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+## 'CCLE_segment_cn.csv'
+
+
+```python
+ccle_segment_cn = pd.read_csv(data_dir / 'CCLE_segment_cn.csv') \
+    .clean_names()
+ccle_segment_cn.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>depmap_id</th>
+      <th>chromosome</th>
+      <th>start</th>
+      <th>end</th>
+      <th>num_probes</th>
+      <th>segment_mean</th>
+      <th>source</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACH-000001</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1969745</td>
+      <td>286</td>
+      <td>2.546065</td>
+      <td>Sanger WES</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ACH-000001</td>
+      <td>1</td>
+      <td>1969746</td>
+      <td>6354345</td>
+      <td>365</td>
+      <td>2.175759</td>
+      <td>Sanger WES</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-000001</td>
+      <td>1</td>
+      <td>6354346</td>
+      <td>6958256</td>
+      <td>100</td>
+      <td>3.109430</td>
+      <td>Sanger WES</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-000001</td>
+      <td>1</td>
+      <td>6958257</td>
+      <td>15977206</td>
+      <td>884</td>
+      <td>2.134831</td>
+      <td>Sanger WES</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-000001</td>
+      <td>1</td>
+      <td>15977207</td>
+      <td>16174774</td>
+      <td>57</td>
+      <td>2.952592</td>
+      <td>Sanger WES</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+ccle_segment_cn.to_csv(save_dir / 'ccle_semgent_cn.csv', index=False)
+```
+
+## 'CCLE_gene_cn.csv'
+
+
+```python
+ccle_gene_cn = pd.read_csv(data_dir / 'CCLE_gene_cn.csv') \
+    .rename({'Unnamed: 0': 'depmap_id'}, axis=1) \
+    .melt(id_vars='depmap_id', var_name='hugo_symbol', value_name='log2_cn_p1') \
+    .assign(hugo_symbol=lambda x: [a.split(' ')[0] for a in x.hugo_symbol],
+            cn=lambda x: np.exp(x.log2_cn_p1) - 1)
+
+ccle_gene_cn.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>depmap_id</th>
+      <th>hugo_symbol</th>
+      <th>log2_cn_p1</th>
+      <th>cn</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACH-000001</td>
+      <td>A1BG</td>
+      <td>1.179621</td>
+      <td>2.253141</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ACH-000002</td>
+      <td>A1BG</td>
+      <td>1.009801</td>
+      <td>1.745055</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-000003</td>
+      <td>A1BG</td>
+      <td>1.022828</td>
+      <td>1.781048</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-000004</td>
+      <td>A1BG</td>
+      <td>1.232225</td>
+      <td>2.428849</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-000005</td>
+      <td>A1BG</td>
+      <td>1.151880</td>
+      <td>2.164136</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+fig = plt.figure(figsize=(12, 8))
+x = [np.min([a, 6]) for a in ccle_gene_cn.cn.sample(n=1000)]
+sns.distplot(x, kde=False)
+plt.show()
+```
+
+
+![png](005_prepare-depmap-data_files/005_prepare-depmap-data_40_0.png)
+
+
+## 'CCLE_fusions.csv'
+
+
+```python
+ccle_fusions = pd.read_csv(data_dir / 'CCLE_fusions.csv', delimiter='\t') \
+    .clean_names() \
+    .rename({'#fusionname': 'fusion_name',
+             'junctionreadcount': 'junction_read_count',
+             'spanningfragcount': 'spanning_frag_count',
+             'splicetype': 'splice_type',
+             'leftgene': 'left_gene',
+            'leftbreakpoint': 'left_break_point',
+            'rightgene': 'right_gene',
+            'rightbreakpoint': 'right_break_point',
+            'largeanchorsupport': 'large_anchor_support',
+            'leftbreakdinuc': 'left_break_dinuc',
+            'leftbreakentropy': 'left_break_entropy',
+            'rightbreakdinuc': 'right_break_dinuc',
+            'rightbreakentropy': 'right_break_entropy'},
+            axis=1)
+ccle_fusions.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>depmap_id</th>
+      <th>fusion_name</th>
+      <th>junction_read_count</th>
+      <th>spanning_frag_count</th>
+      <th>splice_type</th>
+      <th>left_gene</th>
+      <th>left_break_point</th>
+      <th>right_gene</th>
+      <th>right_break_point</th>
+      <th>large_anchor_support</th>
+      <th>ffpm</th>
+      <th>left_break_dinuc</th>
+      <th>left_break_entropy</th>
+      <th>right_break_dinuc</th>
+      <th>right_break_entropy</th>
+      <th>annots</th>
+      <th>ccle_count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACH-001113</td>
+      <td>CACNA2D1--SEMA3E</td>
+      <td>48</td>
+      <td>53</td>
+      <td>ONLY_REF_SPLICE</td>
+      <td>CACNA2D1 (ENSG00000153956)</td>
+      <td>chr7:82335135:-</td>
+      <td>SEMA3E (ENSG00000170381)</td>
+      <td>chr7:83469302:-</td>
+      <td>YES_LDAS</td>
+      <td>1.5703</td>
+      <td>GT</td>
+      <td>1.9899</td>
+      <td>AG</td>
+      <td>1.9899</td>
+      <td>["CCLE_StarF2019","INTRACHROMOSOMAL[chr7:0.92M...</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ACH-001113</td>
+      <td>ADNP2--PLIN3</td>
+      <td>50</td>
+      <td>40</td>
+      <td>INCL_NON_REF_SPLICE</td>
+      <td>ADNP2 (ENSG00000101544)</td>
+      <td>chr18:80117650:+</td>
+      <td>PLIN3 (ENSG00000105355)</td>
+      <td>chr19:4867657:-</td>
+      <td>YES_LDAS</td>
+      <td>1.3993</td>
+      <td>GT</td>
+      <td>1.7819</td>
+      <td>AG</td>
+      <td>1.8323</td>
+      <td>["CCLE_StarF2019","INTERCHROMOSOMAL[chr18--chr...</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-001113</td>
+      <td>XRCC4--SUGCT</td>
+      <td>23</td>
+      <td>104</td>
+      <td>ONLY_REF_SPLICE</td>
+      <td>XRCC4 (ENSG00000152422)</td>
+      <td>chr5:83111203:+</td>
+      <td>SUGCT (ENSG00000175600)</td>
+      <td>chr7:40749434:+</td>
+      <td>YES_LDAS</td>
+      <td>1.9745</td>
+      <td>GT</td>
+      <td>1.9656</td>
+      <td>AG</td>
+      <td>1.9656</td>
+      <td>["CCLE_StarF2019","INTERCHROMOSOMAL[chr5--chr7]"]</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-001113</td>
+      <td>PCYT1A--RBFOX1</td>
+      <td>26</td>
+      <td>48</td>
+      <td>ONLY_REF_SPLICE</td>
+      <td>PCYT1A (ENSG00000161217)</td>
+      <td>chr3:196247367:-</td>
+      <td>RBFOX1 (ENSG00000078328)</td>
+      <td>chr16:6654603:+</td>
+      <td>YES_LDAS</td>
+      <td>1.1505</td>
+      <td>GT</td>
+      <td>1.7819</td>
+      <td>AG</td>
+      <td>1.8295</td>
+      <td>["CCLE_StarF2019","INTERCHROMOSOMAL[chr3--chr1...</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-001113</td>
+      <td>AF117829.1--PIP4P2</td>
+      <td>25</td>
+      <td>31</td>
+      <td>ONLY_REF_SPLICE</td>
+      <td>AF117829.1 (ENSG00000251136)</td>
+      <td>chr8:89757045:-</td>
+      <td>PIP4P2 (ENSG00000155099)</td>
+      <td>chr8:90996744:-</td>
+      <td>YES_LDAS</td>
+      <td>0.8707</td>
+      <td>GT</td>
+      <td>1.8062</td>
+      <td>AG</td>
+      <td>1.9329</td>
+      <td>["INTRACHROMOSOMAL[chr8:1.24Mb]"]</td>
+      <td>2</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+ccle_fusions.to_csv(save_dir / 'ccle_fusions.csv', index=False)
+```
+
+## 'CCLE_expression_full_v2.csv'
+
+
+```python
+pd.read_csv(data_dir / 'CCLE_expression_full_v2.csv', nrows=10)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Unnamed: 0</th>
+      <th>TSPAN6 (ENSG00000000003)</th>
+      <th>TNMD (ENSG00000000005)</th>
+      <th>DPM1 (ENSG00000000419)</th>
+      <th>SCYL3 (ENSG00000000457)</th>
+      <th>C1orf112 (ENSG00000000460)</th>
+      <th>FGR (ENSG00000000938)</th>
+      <th>CFH (ENSG00000000971)</th>
+      <th>FUCA2 (ENSG00000001036)</th>
+      <th>GCLC (ENSG00000001084)</th>
+      <th>...</th>
+      <th>AC136297.1 (ENSG00000285985)</th>
+      <th>BX248415.1 (ENSG00000285986)</th>
+      <th>AL157886.1 (ENSG00000285987)</th>
+      <th>AL392086.3 (ENSG00000285988)</th>
+      <th>AL357123.1 (ENSG00000285989)</th>
+      <th>AL589743.7 (ENSG00000285990)</th>
+      <th>AL355312.5 (ENSG00000285991)</th>
+      <th>AC120036.5 (ENSG00000285992)</th>
+      <th>AC018931.1 (ENSG00000285993)</th>
+      <th>AL731559.1 (ENSG00000285994)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACH-001097</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>4.667324</td>
+      <td>1.761285</td>
+      <td>3.554589</td>
+      <td>4.358959</td>
+      <td>0.641546</td>
+      <td>2.201634</td>
+      <td>1.941106</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.056584</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ACH-001636</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>6.198887</td>
+      <td>2.032101</td>
+      <td>3.755956</td>
+      <td>2.601697</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>3.415488</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.111031</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-001804</td>
+      <td>4.934988</td>
+      <td>0.0</td>
+      <td>6.635464</td>
+      <td>1.929791</td>
+      <td>2.503349</td>
+      <td>0.000000</td>
+      <td>4.883621</td>
+      <td>6.772546</td>
+      <td>3.889474</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.298658</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-000534</td>
+      <td>0.839960</td>
+      <td>0.0</td>
+      <td>5.376082</td>
+      <td>2.687061</td>
+      <td>4.440288</td>
+      <td>4.938286</td>
+      <td>0.536053</td>
+      <td>3.584963</td>
+      <td>2.935460</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.028569</td>
+      <td>0.0</td>
+      <td>1.084064</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-001498</td>
+      <td>1.744161</td>
+      <td>0.0</td>
+      <td>6.846744</td>
+      <td>2.147307</td>
+      <td>3.666757</td>
+      <td>5.252098</td>
+      <td>0.014355</td>
+      <td>1.641546</td>
+      <td>4.100978</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.111031</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>ACH-000742</td>
+      <td>3.722466</td>
+      <td>0.0</td>
+      <td>6.029674</td>
+      <td>2.192194</td>
+      <td>2.533563</td>
+      <td>0.150560</td>
+      <td>5.933809</td>
+      <td>6.973382</td>
+      <td>5.192194</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.604071</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>ACH-002018</td>
+      <td>5.121015</td>
+      <td>0.0</td>
+      <td>5.989139</td>
+      <td>1.863938</td>
+      <td>4.035624</td>
+      <td>0.028569</td>
+      <td>0.056584</td>
+      <td>5.948601</td>
+      <td>4.627607</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.097611</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>ACH-000836</td>
+      <td>4.632268</td>
+      <td>0.0</td>
+      <td>6.704180</td>
+      <td>2.792855</td>
+      <td>4.079805</td>
+      <td>0.097611</td>
+      <td>1.150560</td>
+      <td>5.729553</td>
+      <td>4.802193</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.871844</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>ACH-000545</td>
+      <td>4.251719</td>
+      <td>0.0</td>
+      <td>5.651052</td>
+      <td>3.440952</td>
+      <td>3.275007</td>
+      <td>1.541019</td>
+      <td>6.659496</td>
+      <td>6.478648</td>
+      <td>5.566206</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>ACH-001617</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>6.916357</td>
+      <td>2.722466</td>
+      <td>4.120186</td>
+      <td>0.432959</td>
+      <td>0.000000</td>
+      <td>0.056584</td>
+      <td>4.426936</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.056584</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+  </tbody>
+</table>
+<p>10 rows × 58677 columns</p>
+</div>
+
+
+
+
+```python
+ccle_expression = pd.read_csv(data_dir / 'CCLE_expression_full_v2.csv') \
+    .rename({'Unnamed: 0': 'dep_map_id'}, axis=1) \
+    .melt(id_vars='dep_map_id', 
+          var_name="hugo_symbol", 
+          value_name="rna_expr") \
+    .assign(hugo_symbol=lambda x: [a.split(' ')[0] for a in x.hugo_symbol])
+
+ccle_expression.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>dep_map_id</th>
+      <th>hugo_symbol</th>
+      <th>rna_expr</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACH-001097</td>
+      <td>TSPAN6</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ACH-001636</td>
+      <td>TSPAN6</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-001804</td>
+      <td>TSPAN6</td>
+      <td>4.934988</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-000534</td>
+      <td>TSPAN6</td>
+      <td>0.839960</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-001498</td>
+      <td>TSPAN6</td>
+      <td>1.744161</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+ccle_expression.to_csv(save_dir / 'ccle_expression.csv', index=False)
+```
+
+
+```python
+
+```
