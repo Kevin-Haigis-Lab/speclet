@@ -10,10 +10,22 @@
 
 ## Index
 
-### Data preparation
+### [Data preparation](munge/README.md)
 
 1. [Prepare DepMap data](munge/005_prepare-depmap-data.md)
 2. [Prepare modeling data](munge/010_prepare-modeling-data.md)
 
 ### Analysis
 
+
+
+
+---
+
+## To-Do
+
+- finish preparing modeling data
+- design increasingly complex models
+- design a processing workflow for the models
+    - should be consistent yet customizable to the needs of different models
+    - decide on diagnositic values and plots to collect and a system of documentation
