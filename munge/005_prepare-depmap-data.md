@@ -13,8 +13,8 @@ import re
 
 
 ```python
-data_dir = Path('../data')
-save_dir = Path('../modeling_data')
+data_dir = Path("../data")
+save_dir = Path("../modeling_data")
 ```
 
 ## 'sample_info.csv'
@@ -22,14 +22,21 @@ save_dir = Path('../modeling_data')
 
 ```python
 sample_info_columns = [
-    'depmap_id', 'stripped_cell_line_name', 'ccle_name', 'sex', 
-    'cas9_activity', 'primary_or_metastasis', 'primary_disease',
-    'subtype', 'lineage', 'lineage_subtype',
+    "depmap_id",
+    "stripped_cell_line_name",
+    "ccle_name",
+    "sex",
+    "cas9_activity",
+    "primary_or_metastasis",
+    "primary_disease",
+    "subtype",
+    "lineage",
+    "lineage_subtype",
 ]
 
-sample_info = pd.read_csv(data_dir / 'sample_info.csv') \
-    .clean_names() \
-    [sample_info_columns]
+sample_info = pd.read_csv(data_dir / "sample_info.csv").clean_names()[
+    sample_info_columns
+]
 sample_info.head()
 ```
 
@@ -140,17 +147,19 @@ sample_info.head()
 
 
 ```python
-sample_info.to_csv(save_dir / 'sample_info.csv', index=False)
+sample_info.to_csv(save_dir / "sample_info.csv", index=False)
 ```
 
 ## 'Achilles_guide_map.csv'
 
 
 ```python
-achilles_guide_map = pd.read_csv(data_dir / 'Achilles_guide_map.csv') \
-    .clean_names() \
-    .assign(hugo_symbol=lambda x: [a.split(' ')[0] for a in x.gene]) \
-    .drop(['gene'], axis=1)
+achilles_guide_map = (
+    pd.read_csv(data_dir / "Achilles_guide_map.csv")
+    .clean_names()
+    .assign(hugo_symbol=lambda x: [a.split(" ")[0] for a in x.gene])
+    .drop(["gene"], axis=1)
+)
 
 achilles_guide_map.head()
 ```
@@ -228,9 +237,11 @@ achilles_guide_map.head()
 
 
 ```python
-achilles_dropped_guides = pd.read_csv(data_dir / 'Achilles_dropped_guides.csv') \
-    .clean_names() \
-    .rename({'unnamed_0': 'sgrna'}, axis=1)
+achilles_dropped_guides = (
+    pd.read_csv(data_dir / "Achilles_dropped_guides.csv")
+    .clean_names()
+    .rename({"unnamed_0": "sgrna"}, axis=1)
+)
 
 achilles_dropped_guides.head()
 ```
@@ -324,22 +335,26 @@ len(np.unique(achilles_dropped_guides.sgrna))
 
 
 ```python
-achilles_guide_map = achilles_guide_map[~achilles_guide_map.sgrna.isin(achilles_dropped_guides.sgrna)]
+achilles_guide_map = achilles_guide_map[
+    ~achilles_guide_map.sgrna.isin(achilles_dropped_guides.sgrna)
+]
 achilles_guide_map = achilles_guide_map.reset_index(drop=True)
 ```
 
 
 ```python
-achilles_guide_map.to_csv(save_dir / 'achilles_guide_map.csv', index=False)
+achilles_guide_map.to_csv(save_dir / "achilles_guide_map.csv", index=False)
 ```
 
 ## 'Achilles_replicate_map.csv'
 
 
 ```python
-achilles_replicate_map = pd.read_csv(data_dir / 'Achilles_replicate_map.csv') \
-    .clean_names() \
+achilles_replicate_map = (
+    pd.read_csv(data_dir / "Achilles_replicate_map.csv")
+    .clean_names()
     .assign(replicate_id=lambda x: x.replicate_id.str.lower())
+)
 achilles_replicate_map.head()
 ```
 
@@ -450,21 +465,23 @@ np.round(np.mean(achilles_replicate_map.passes_qc), 3)
 
 
 ```python
-achilles_replicate_map.to_csv(save_dir / 'achilles_replicate_map.csv', index=False)
+achilles_replicate_map.to_csv(save_dir / "achilles_replicate_map.csv", index=False)
 ```
 
 ## 'Achilles_logfold_change.csv'
 
 
 ```python
-achilles_logfold_change = pd.read_csv(data_dir / 'Achilles_logfold_change.csv') \
-    .rename({'Construct Barcode': 'sgrna'}, axis=1) \
-    .set_index('sgrna') \
-    .melt(var_name='replicate_id', value_name='lfc', ignore_index=False) \
-    .reset_index() \
-    .assign(replicate_id=lambda x: x.replicate_id.str.lower()) \
-    .merge(achilles_replicate_map, on='replicate_id', how='left') \
+achilles_logfold_change = (
+    pd.read_csv(data_dir / "Achilles_logfold_change.csv")
+    .rename({"Construct Barcode": "sgrna"}, axis=1)
+    .set_index("sgrna")
+    .melt(var_name="replicate_id", value_name="lfc", ignore_index=False)
+    .reset_index()
+    .assign(replicate_id=lambda x: x.replicate_id.str.lower())
+    .merge(achilles_replicate_map, on="replicate_id", how="left")
     .pipe(lambda x: x[x.passes_qc])
+)
 
 achilles_logfold_change.head()
 ```
@@ -553,13 +570,13 @@ achilles_logfold_change.head()
 
 ```python
 if achilles_logfold_change.depmap_id.isnull().values.any():
-    raise Exception('Some data points are missing cell line assignments.')
+    raise Exception("Some data points are missing cell line assignments.")
 ```
 
 
 ```python
 if not np.all(achilles_logfold_change.passes_qc):
-    raise Exception('Some data does not pass QC.')
+    raise Exception("Some data does not pass QC.")
 ```
 
 
@@ -576,8 +593,7 @@ achilles_logfold_change.shape
 
 
 ```python
-achilles_logfold_change.to_csv(save_dir / 'achilles_logfold_change.csv', 
-                               index=False)
+achilles_logfold_change.to_csv(save_dir / "achilles_logfold_change.csv", index=False)
 ```
 
 ## 'CCLE_mutations.csv'
@@ -585,17 +601,26 @@ achilles_logfold_change.to_csv(save_dir / 'achilles_logfold_change.csv',
 
 ```python
 ccle_mutations_columns = [
-    'depmap_id', 
-    'hugo_symbol', 'chromosome', 'start_position', 'end_position',
-    'variant_classification', 'variant_type', 'reference_allele', 
-    'tumor_seq_allele1', 'cdna_change', 'codon_change', 'protein_change',
-    'isdeleterious', 'istcgahotspot', 'iscosmichotspot'
+    "depmap_id",
+    "hugo_symbol",
+    "chromosome",
+    "start_position",
+    "end_position",
+    "variant_classification",
+    "variant_type",
+    "reference_allele",
+    "tumor_seq_allele1",
+    "cdna_change",
+    "codon_change",
+    "protein_change",
+    "isdeleterious",
+    "istcgahotspot",
+    "iscosmichotspot",
 ]
 
-ccle_mutations = pd.read_csv(data_dir / 'CCLE_mutations.csv', 
-                             delimiter='\t', low_memory=False) \
-    .clean_names() \
-    [ccle_mutations_columns]
+ccle_mutations = pd.read_csv(
+    data_dir / "CCLE_mutations.csv", delimiter="\t", low_memory=False
+).clean_names()[ccle_mutations_columns]
 
 ccle_mutations.head()
 ```
@@ -737,7 +762,7 @@ ccle_mutations.head()
 
 
 ```python
-ccle_mutations.to_csv(save_dir / 'ccle_mutations.csv', index=False)
+ccle_mutations.to_csv(save_dir / "ccle_mutations.csv", index=False)
 ```
 
 ### *KRAS* mutations
@@ -745,27 +770,44 @@ ccle_mutations.to_csv(save_dir / 'ccle_mutations.csv', index=False)
 
 ```python
 kras_mutations_columns = [
-    'depmap_id', 'start_position', 'end_position', 
-    'variant_classification', 'variant_type', 'protein_change',
-    'isdeleterious', 'istcgahotspot', 'iscosmichotspot'
+    "depmap_id",
+    "start_position",
+    "end_position",
+    "variant_classification",
+    "variant_type",
+    "protein_change",
+    "isdeleterious",
+    "istcgahotspot",
+    "iscosmichotspot",
 ]
 
-kras_hotspot_codons = ['12', '13', '61', '146']
+kras_hotspot_codons = ["12", "13", "61", "146"]
 
-kras_mutations = ccle_mutations[ccle_mutations.hugo_symbol == 'KRAS'] \
-    [kras_mutations_columns] \
+
+kras_mutations = (
+    ccle_mutations[ccle_mutations.hugo_symbol == "KRAS"][kras_mutations_columns]
     .assign(
         variant_classification=lambda x: x.variant_classification.str.lower(),
         variant_type=lambda x: x.variant_type.str.lower(),
-        codon=lambda x: [re.sub('\D', '', a) for a in x.protein_change],
-        is_kras_hotspot=lambda x: x.codon.isin(kras_hotspot_codons)
-    ) \
-    .pipe(lambda x: x[x.variant_classification != 'silent']) \
-    .pipe(lambda x: x[x.is_kras_hotspot | x.iscosmichotspot | x.istcgahotspot | x.isdeleterious]) \
-    .assign(kras_allele=lambda x: [a if b else "other" for a,b in zip(x.protein_change, x.is_kras_hotspot)]) \
-    .assign(kras_allele=lambda x: [re.sub('p.', '', a) for a in x.kras_allele]) \
-    .drop_duplicates() \
+        codon=lambda x: [re.sub("\D", "", a) for a in x.protein_change],
+        is_kras_hotspot=lambda x: x.codon.isin(kras_hotspot_codons),
+    )
+    .pipe(lambda x: x[x.variant_classification != "silent"])
+    .pipe(
+        lambda x: x[
+            x.is_kras_hotspot | x.iscosmichotspot | x.istcgahotspot | x.isdeleterious
+        ]
+    )
+    .assign(
+        kras_mutation=lambda x: [
+            pc if vt == "missense_mutation" else vt
+            for vt, pc in zip(x.variant_classification, x.protein_change)
+        ]
+    )
+    .assign(kras_mutation=lambda x: [re.sub("p\\.", "", a) for a in x.kras_mutation])
+    .drop_duplicates()
     .reset_index(drop=True)
+)
 
 
 kras_mutations.head()
@@ -803,7 +845,7 @@ kras_mutations.head()
       <th>iscosmichotspot</th>
       <th>codon</th>
       <th>is_kras_hotspot</th>
-      <th>kras_allele</th>
+      <th>kras_mutation</th>
     </tr>
   </thead>
   <tbody>
@@ -820,7 +862,7 @@ kras_mutations.head()
       <td>False</td>
       <td>185</td>
       <td>False</td>
-      <td>other</td>
+      <td>frame_shift_del</td>
     </tr>
     <tr>
       <th>1</th>
@@ -835,7 +877,7 @@ kras_mutations.head()
       <td>False</td>
       <td>185</td>
       <td>False</td>
-      <td>other</td>
+      <td>frame_shift_del</td>
     </tr>
     <tr>
       <th>2</th>
@@ -850,7 +892,7 @@ kras_mutations.head()
       <td>False</td>
       <td>185</td>
       <td>False</td>
-      <td>other</td>
+      <td>frame_shift_del</td>
     </tr>
     <tr>
       <th>3</th>
@@ -865,7 +907,7 @@ kras_mutations.head()
       <td>False</td>
       <td>164</td>
       <td>False</td>
-      <td>other</td>
+      <td>nonsense_mutation</td>
     </tr>
     <tr>
       <th>4</th>
@@ -890,10 +932,19 @@ kras_mutations.head()
 
 
 ```python
-kras_mutations[['kras_allele', 'depmap_id']] \
-    .groupby('kras_allele') \
-    .count() \
-    .sort_values('depmap_id', ascending=False)
+kras_mutation_counts = (
+    kras_mutations[["kras_mutation", "depmap_id"]]
+    .groupby("kras_mutation")
+    .count()
+    .sort_values("depmap_id", ascending=False)
+)
+
+# List of KRAS mutations to group as "other".
+kras_others = (
+    kras_mutation_counts.reset_index().pipe(lambda x: x[x.depmap_id < 2]).kras_mutation
+)
+
+kras_mutation_counts
 ```
 
 
@@ -920,7 +971,7 @@ kras_mutations[['kras_allele', 'depmap_id']] \
       <th>depmap_id</th>
     </tr>
     <tr>
-      <th>kras_allele</th>
+      <th>kras_mutation</th>
       <th></th>
     </tr>
   </thead>
@@ -938,10 +989,6 @@ kras_mutations[['kras_allele', 'depmap_id']] \
       <td>27</td>
     </tr>
     <tr>
-      <th>other</th>
-      <td>18</td>
-    </tr>
-    <tr>
       <th>G12A</th>
       <td>16</td>
     </tr>
@@ -954,11 +1001,11 @@ kras_mutations[['kras_allele', 'depmap_id']] \
       <td>9</td>
     </tr>
     <tr>
-      <th>G12S</th>
+      <th>G12R</th>
       <td>8</td>
     </tr>
     <tr>
-      <th>G12R</th>
+      <th>G12S</th>
       <td>8</td>
     </tr>
     <tr>
@@ -974,8 +1021,24 @@ kras_mutations[['kras_allele', 'depmap_id']] \
       <td>4</td>
     </tr>
     <tr>
+      <th>frame_shift_del</th>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>A59T</th>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>K117N</th>
+      <td>3</td>
+    </tr>
+    <tr>
       <th>A146V</th>
       <td>3</td>
+    </tr>
+    <tr>
+      <th>V14I</th>
+      <td>2</td>
     </tr>
     <tr>
       <th>Q61L</th>
@@ -986,11 +1049,39 @@ kras_mutations[['kras_allele', 'depmap_id']] \
       <td>2</td>
     </tr>
     <tr>
-      <th>G12F</th>
+      <th>in_frame_ins</th>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>nonsense_mutation</th>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>V14L</th>
       <td>1</td>
     </tr>
     <tr>
       <th>A146P</th>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>L19F</th>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>G12F</th>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>D33E</th>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>A59G</th>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>splice_site</th>
       <td>1</td>
     </tr>
   </tbody>
@@ -1001,17 +1092,24 @@ kras_mutations[['kras_allele', 'depmap_id']] \
 
 
 ```python
-kras_mutations.to_csv(save_dir / 'kras_mutations.csv', index=False)
+# Assign rare KRAS mutations to "other" group.
+kras_mutations = kras_mutations.assign(
+    kras_mutation=lambda x: [
+        "other" if kras_others.isin([a]).any() else a for a in x.kras_mutation
+    ]
+)
 ```
 
 
 ```python
-mult_kras_mutations = kras_mutations[['depmap_id', 'kras_allele']] \
-    .groupby('depmap_id') \
-    .count() \
-    .pipe(lambda x: x[x.kras_allele > 1]) \
-    .sort_values('kras_allele', ascending=False) \
+mult_kras_mutations = (
+    kras_mutations[["depmap_id", "kras_mutation"]]
+    .groupby("depmap_id")
+    .count()
+    .pipe(lambda x: x[x.kras_mutation > 1])
+    .sort_values("kras_mutation", ascending=False)
     .reset_index(drop=False)
+)
 
 mult_kras_mutations
 ```
@@ -1038,7 +1136,7 @@ mult_kras_mutations
     <tr style="text-align: right;">
       <th></th>
       <th>depmap_id</th>
-      <th>kras_allele</th>
+      <th>kras_mutation</th>
     </tr>
   </thead>
   <tbody>
@@ -1100,10 +1198,13 @@ mult_kras_mutations
 
 
 ```python
-kras_mult_mutations_fix = kras_mutations[kras_mutations.depmap_id.isin(mult_kras_mutations.depmap_id)] \
-    .reset_index(drop=True) \
-    .pipe(lambda x: x[x.is_kras_hotspot]) \
-    .sort_values('depmap_id')
+kras_mult_mutations_fix = (
+    kras_mutations[kras_mutations.depmap_id.isin(mult_kras_mutations.depmap_id)]
+    .reset_index(drop=True)
+    .pipe(lambda x: x[x.is_kras_hotspot])
+    .sort_values("depmap_id")
+    .reset_index(drop=True)
+)
 
 kras_mult_mutations_fix
 ```
@@ -1140,12 +1241,12 @@ kras_mult_mutations_fix
       <th>iscosmichotspot</th>
       <th>codon</th>
       <th>is_kras_hotspot</th>
-      <th>kras_allele</th>
+      <th>kras_mutation</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>1</th>
+      <th>0</th>
       <td>ACH-000249</td>
       <td>25380275</td>
       <td>25380275</td>
@@ -1160,7 +1261,7 @@ kras_mult_mutations_fix
       <td>Q61H</td>
     </tr>
     <tr>
-      <th>3</th>
+      <th>1</th>
       <td>ACH-000264</td>
       <td>25380277</td>
       <td>25380277</td>
@@ -1175,7 +1276,7 @@ kras_mult_mutations_fix
       <td>Q61K</td>
     </tr>
     <tr>
-      <th>6</th>
+      <th>2</th>
       <td>ACH-000264</td>
       <td>25380277</td>
       <td>25380278</td>
@@ -1190,7 +1291,7 @@ kras_mult_mutations_fix
       <td>Q61K</td>
     </tr>
     <tr>
-      <th>2</th>
+      <th>3</th>
       <td>ACH-000314</td>
       <td>25380275</td>
       <td>25380275</td>
@@ -1205,7 +1306,7 @@ kras_mult_mutations_fix
       <td>Q61H</td>
     </tr>
     <tr>
-      <th>10</th>
+      <th>4</th>
       <td>ACH-000314</td>
       <td>25398282</td>
       <td>25398282</td>
@@ -1220,7 +1321,7 @@ kras_mult_mutations_fix
       <td>G13C</td>
     </tr>
     <tr>
-      <th>4</th>
+      <th>5</th>
       <td>ACH-000344</td>
       <td>25380277</td>
       <td>25380277</td>
@@ -1235,7 +1336,7 @@ kras_mult_mutations_fix
       <td>Q61K</td>
     </tr>
     <tr>
-      <th>5</th>
+      <th>6</th>
       <td>ACH-000344</td>
       <td>25380277</td>
       <td>25380278</td>
@@ -1250,7 +1351,7 @@ kras_mult_mutations_fix
       <td>Q61K</td>
     </tr>
     <tr>
-      <th>11</th>
+      <th>7</th>
       <td>ACH-000718</td>
       <td>25398284</td>
       <td>25398284</td>
@@ -1265,7 +1366,7 @@ kras_mult_mutations_fix
       <td>G12V</td>
     </tr>
     <tr>
-      <th>16</th>
+      <th>8</th>
       <td>ACH-000718</td>
       <td>25398285</td>
       <td>25398285</td>
@@ -1280,7 +1381,7 @@ kras_mult_mutations_fix
       <td>G12C</td>
     </tr>
     <tr>
-      <th>15</th>
+      <th>9</th>
       <td>ACH-000718</td>
       <td>25398284</td>
       <td>25398285</td>
@@ -1292,10 +1393,10 @@ kras_mult_mutations_fix
       <td>True</td>
       <td>12</td>
       <td>True</td>
-      <td>G12F</td>
+      <td>other</td>
     </tr>
     <tr>
-      <th>18</th>
+      <th>10</th>
       <td>ACH-001001</td>
       <td>25398285</td>
       <td>25398285</td>
@@ -1310,7 +1411,7 @@ kras_mult_mutations_fix
       <td>G12S</td>
     </tr>
     <tr>
-      <th>19</th>
+      <th>11</th>
       <td>ACH-001094</td>
       <td>25398285</td>
       <td>25398285</td>
@@ -1340,7 +1441,7 @@ kras_mult_mutations_fix
       <td>G12V</td>
     </tr>
     <tr>
-      <th>20</th>
+      <th>13</th>
       <td>ACH-001378</td>
       <td>25398285</td>
       <td>25398285</td>
@@ -1370,7 +1471,7 @@ kras_mult_mutations_fix
       <td>G12D</td>
     </tr>
     <tr>
-      <th>17</th>
+      <th>15</th>
       <td>ACH-001857</td>
       <td>25398285</td>
       <td>25398285</td>
@@ -1385,7 +1486,7 @@ kras_mult_mutations_fix
       <td>G12C</td>
     </tr>
     <tr>
-      <th>13</th>
+      <th>16</th>
       <td>ACH-001857</td>
       <td>25398284</td>
       <td>25398284</td>
@@ -1407,16 +1508,17 @@ kras_mult_mutations_fix
 
 
 ```python
-kras_mut_blacklist = [
-    'ACH-000718'
-]
+# Cell lines to ignore because they have multiple KRAS mutations that are
+# not easily resolved.
+true_kras_double_muts = ["ACH-000718", "ACH-000314", "ACH-001378", "ACH-001857"]
 
-kras_mult_mutations_fix[['depmap_id', 'kras_allele']] \
-    .pipe(lambda x: x[~x.depmap_id.isin(kras_mut_blacklist)]) \
-    .groupby('depmap_id') \
-    .count() \
-    .sort_values('kras_allele', ascending=False) \
+(
+    kras_mult_mutations_fix[["depmap_id", "kras_mutation"]]
+    .groupby("depmap_id")
+    .count()
+    .sort_values("kras_mutation", ascending=False)
     .reset_index(drop=False)
+)
 ```
 
 
@@ -1441,52 +1543,57 @@ kras_mult_mutations_fix[['depmap_id', 'kras_allele']] \
     <tr style="text-align: right;">
       <th></th>
       <th>depmap_id</th>
-      <th>kras_allele</th>
+      <th>kras_mutation</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
+      <td>ACH-000718</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>1</th>
       <td>ACH-000264</td>
       <td>2</td>
     </tr>
     <tr>
-      <th>1</th>
+      <th>2</th>
       <td>ACH-000314</td>
       <td>2</td>
     </tr>
     <tr>
-      <th>2</th>
+      <th>3</th>
       <td>ACH-000344</td>
       <td>2</td>
     </tr>
     <tr>
-      <th>3</th>
+      <th>4</th>
       <td>ACH-001378</td>
       <td>2</td>
     </tr>
     <tr>
-      <th>4</th>
+      <th>5</th>
       <td>ACH-001857</td>
       <td>2</td>
     </tr>
     <tr>
-      <th>5</th>
+      <th>6</th>
       <td>ACH-000249</td>
       <td>1</td>
     </tr>
     <tr>
-      <th>6</th>
+      <th>7</th>
       <td>ACH-001001</td>
       <td>1</td>
     </tr>
     <tr>
-      <th>7</th>
+      <th>8</th>
       <td>ACH-001094</td>
       <td>1</td>
     </tr>
     <tr>
-      <th>8</th>
+      <th>9</th>
       <td>ACH-001650</td>
       <td>1</td>
     </tr>
@@ -1496,12 +1603,254 @@ kras_mult_mutations_fix[['depmap_id', 'kras_allele']] \
 
 
 
+
+```python
+kras_mult_mutations_fix = (
+    kras_mult_mutations_fix.assign(
+        kras_mutation=lambda x: [
+            "double_mut" if a in true_kras_double_muts else b
+            for a, b in zip(x.depmap_id, x.kras_mutation)
+        ]
+    )
+    .groupby("depmap_id")
+    .first()
+    .reset_index(drop=False)
+)
+kras_mult_mutations_fix
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>depmap_id</th>
+      <th>start_position</th>
+      <th>end_position</th>
+      <th>variant_classification</th>
+      <th>variant_type</th>
+      <th>protein_change</th>
+      <th>isdeleterious</th>
+      <th>istcgahotspot</th>
+      <th>iscosmichotspot</th>
+      <th>codon</th>
+      <th>is_kras_hotspot</th>
+      <th>kras_mutation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACH-000249</td>
+      <td>25380275</td>
+      <td>25380275</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.Q61H</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>61</td>
+      <td>True</td>
+      <td>Q61H</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ACH-000264</td>
+      <td>25380277</td>
+      <td>25380277</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.Q61K</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>61</td>
+      <td>True</td>
+      <td>Q61K</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-000314</td>
+      <td>25380275</td>
+      <td>25380275</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.Q61H</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>61</td>
+      <td>True</td>
+      <td>double_mut</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-000344</td>
+      <td>25380277</td>
+      <td>25380277</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.Q61K</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>61</td>
+      <td>True</td>
+      <td>Q61K</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-000718</td>
+      <td>25398284</td>
+      <td>25398284</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.G12V</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>12</td>
+      <td>True</td>
+      <td>double_mut</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>ACH-001001</td>
+      <td>25398285</td>
+      <td>25398285</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.G12S</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>12</td>
+      <td>True</td>
+      <td>G12S</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>ACH-001094</td>
+      <td>25398285</td>
+      <td>25398285</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.G12S</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>12</td>
+      <td>True</td>
+      <td>G12S</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>ACH-001378</td>
+      <td>25398284</td>
+      <td>25398284</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.G12V</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>12</td>
+      <td>True</td>
+      <td>double_mut</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>ACH-001650</td>
+      <td>25398284</td>
+      <td>25398284</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.G12D</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>12</td>
+      <td>True</td>
+      <td>G12D</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>ACH-001857</td>
+      <td>25398285</td>
+      <td>25398285</td>
+      <td>missense_mutation</td>
+      <td>snp</td>
+      <td>p.G12C</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>12</td>
+      <td>True</td>
+      <td>double_mut</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+kras_mutations = kras_mutations.pipe(
+    lambda x: x[~x.depmap_id.isin(kras_mult_mutations_fix.depmap_id)]
+)
+
+kras_mutations = pd.concat([kras_mutations, kras_mult_mutations_fix])
+```
+
+
+```python
+mult_kras_mutations = (
+    kras_mutations[["depmap_id", "kras_mutation"]]
+    .groupby("depmap_id")
+    .count()
+    .pipe(lambda x: x[x.kras_mutation > 1])
+    .sort_values("kras_mutation", ascending=False)
+    .reset_index(drop=False)
+)
+
+print(f"Number of cell lines with multiple KRAS mutations: {len(mult_kras_mutations)}")
+```
+
+    Number of cell lines with multiple KRAS mutations: 0
+
+
+
+```python
+kras_mutations.to_csv(save_dir / "kras_mutations.csv", index=False)
+```
+
 ## 'CCLE_segment_cn.csv'
 
 
 ```python
-ccle_segment_cn = pd.read_csv(data_dir / 'CCLE_segment_cn.csv') \
+ccle_segment_cn = (
+    pd.read_csv(data_dir / "CCLE_segment_cn.csv")
     .clean_names()
+    .assign(copy_number=lambda x: [2 ** a for a in x.segment_mean])
+)
 ccle_segment_cn.head()
 ```
 
@@ -1533,6 +1882,7 @@ ccle_segment_cn.head()
       <th>num_probes</th>
       <th>segment_mean</th>
       <th>source</th>
+      <th>copy_number</th>
     </tr>
   </thead>
   <tbody>
@@ -1545,6 +1895,7 @@ ccle_segment_cn.head()
       <td>286</td>
       <td>2.546065</td>
       <td>Sanger WES</td>
+      <td>5.840389</td>
     </tr>
     <tr>
       <th>1</th>
@@ -1555,6 +1906,7 @@ ccle_segment_cn.head()
       <td>365</td>
       <td>2.175759</td>
       <td>Sanger WES</td>
+      <td>4.518235</td>
     </tr>
     <tr>
       <th>2</th>
@@ -1565,6 +1917,7 @@ ccle_segment_cn.head()
       <td>100</td>
       <td>3.109430</td>
       <td>Sanger WES</td>
+      <td>8.630414</td>
     </tr>
     <tr>
       <th>3</th>
@@ -1575,6 +1928,7 @@ ccle_segment_cn.head()
       <td>884</td>
       <td>2.134831</td>
       <td>Sanger WES</td>
+      <td>4.391857</td>
     </tr>
     <tr>
       <th>4</th>
@@ -1585,6 +1939,7 @@ ccle_segment_cn.head()
       <td>57</td>
       <td>2.952592</td>
       <td>Sanger WES</td>
+      <td>7.741386</td>
     </tr>
   </tbody>
 </table>
@@ -1594,18 +1949,22 @@ ccle_segment_cn.head()
 
 
 ```python
-ccle_segment_cn.to_csv(save_dir / 'ccle_semgent_cn.csv', index=False)
+ccle_segment_cn.to_csv(save_dir / "ccle_semgent_cn.csv", index=False)
 ```
 
 ## 'CCLE_gene_cn.csv'
 
 
 ```python
-ccle_gene_cn = pd.read_csv(data_dir / 'CCLE_gene_cn.csv') \
-    .rename({'Unnamed: 0': 'depmap_id'}, axis=1) \
-    .melt(id_vars='depmap_id', var_name='hugo_symbol', value_name='log2_cn_p1') \
-    .assign(hugo_symbol=lambda x: [a.split(' ')[0] for a in x.hugo_symbol],
-            cn=lambda x: np.exp(x.log2_cn_p1) - 1)
+ccle_gene_cn = (
+    pd.read_csv(data_dir / "CCLE_gene_cn.csv")
+    .rename({"Unnamed: 0": "depmap_id"}, axis=1)
+    .melt(id_vars="depmap_id", var_name="hugo_symbol", value_name="log2_cn_p1")
+    .assign(
+        hugo_symbol=lambda x: [a.split(" ")[0] for a in x.hugo_symbol],
+        copy_number=lambda x: np.exp(x.log2_cn_p1) - 1,
+    )
+)
 
 ccle_gene_cn.head()
 ```
@@ -1634,7 +1993,7 @@ ccle_gene_cn.head()
       <th>depmap_id</th>
       <th>hugo_symbol</th>
       <th>log2_cn_p1</th>
-      <th>cn</th>
+      <th>copy_number</th>
     </tr>
   </thead>
   <tbody>
@@ -1682,35 +2041,43 @@ ccle_gene_cn.head()
 
 ```python
 fig = plt.figure(figsize=(12, 8))
-x = [np.min([a, 6]) for a in ccle_gene_cn.cn.sample(n=1000)]
-sns.distplot(x, kde=False)
+x = [np.min([a, 6]) for a in ccle_gene_cn.copy_number.sample(n=1000)]
+sns.histplot(x, kde=False)
 plt.show()
 ```
 
 
-![png](005_prepare-depmap-data_files/005_prepare-depmap-data_40_0.png)
+    
+![png](005_prepare-depmap-data_files/005_prepare-depmap-data_44_0.png)
+    
 
 
 ## 'CCLE_fusions.csv'
 
 
 ```python
-ccle_fusions = pd.read_csv(data_dir / 'CCLE_fusions.csv', delimiter='\t') \
-    .clean_names() \
-    .rename({'#fusionname': 'fusion_name',
-             'junctionreadcount': 'junction_read_count',
-             'spanningfragcount': 'spanning_frag_count',
-             'splicetype': 'splice_type',
-             'leftgene': 'left_gene',
-            'leftbreakpoint': 'left_break_point',
-            'rightgene': 'right_gene',
-            'rightbreakpoint': 'right_break_point',
-            'largeanchorsupport': 'large_anchor_support',
-            'leftbreakdinuc': 'left_break_dinuc',
-            'leftbreakentropy': 'left_break_entropy',
-            'rightbreakdinuc': 'right_break_dinuc',
-            'rightbreakentropy': 'right_break_entropy'},
-            axis=1)
+ccle_fusions = (
+    pd.read_csv(data_dir / "CCLE_fusions.csv", delimiter="\t")
+    .clean_names()
+    .rename(
+        {
+            "#fusionname": "fusion_name",
+            "junctionreadcount": "junction_read_count",
+            "spanningfragcount": "spanning_frag_count",
+            "splicetype": "splice_type",
+            "leftgene": "left_gene",
+            "leftbreakpoint": "left_break_point",
+            "rightgene": "right_gene",
+            "rightbreakpoint": "right_break_point",
+            "largeanchorsupport": "large_anchor_support",
+            "leftbreakdinuc": "left_break_dinuc",
+            "leftbreakentropy": "left_break_entropy",
+            "rightbreakdinuc": "right_break_dinuc",
+            "rightbreakentropy": "right_break_entropy",
+        },
+        axis=1,
+    )
+)
 ccle_fusions.head()
 ```
 
@@ -1863,14 +2230,14 @@ ccle_fusions.head()
 
 
 ```python
-ccle_fusions.to_csv(save_dir / 'ccle_fusions.csv', index=False)
+ccle_fusions.to_csv(save_dir / "ccle_fusions.csv", index=False)
 ```
 
 ## 'CCLE_expression_full_v2.csv'
 
 
 ```python
-pd.read_csv(data_dir / 'CCLE_expression_full_v2.csv', nrows=10)
+pd.read_csv(data_dir / "CCLE_expression_full_v2.csv", nrows=10)
 ```
 
 
@@ -2167,12 +2534,12 @@ pd.read_csv(data_dir / 'CCLE_expression_full_v2.csv', nrows=10)
 
 
 ```python
-ccle_expression = pd.read_csv(data_dir / 'CCLE_expression_full_v2.csv') \
-    .rename({'Unnamed: 0': 'dep_map_id'}, axis=1) \
-    .melt(id_vars='dep_map_id', 
-          var_name="hugo_symbol", 
-          value_name="rna_expr") \
-    .assign(hugo_symbol=lambda x: [a.split(' ')[0] for a in x.hugo_symbol])
+ccle_expression = (
+    pd.read_csv(data_dir / "CCLE_expression_full_v2.csv")
+    .rename({"Unnamed: 0": "dep_map_id"}, axis=1)
+    .melt(id_vars="dep_map_id", var_name="hugo_symbol", value_name="rna_expr")
+    .assign(hugo_symbol=lambda x: [a.split(" ")[0] for a in x.hugo_symbol])
+)
 
 ccle_expression.head()
 ```
@@ -2242,7 +2609,7 @@ ccle_expression.head()
 
 
 ```python
-ccle_expression.to_csv(save_dir / 'ccle_expression.csv', index=False)
+ccle_expression.to_csv(save_dir / "ccle_expression.csv", index=False)
 ```
 
 
