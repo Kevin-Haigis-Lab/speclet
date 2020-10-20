@@ -35,6 +35,7 @@ $$
 
 Simulated values:
 
+- number of cell lines: 20
 - $\alpha$ = 0.5
 - $\beta$ = -1
 - $\sigma$ = 0.3
@@ -69,7 +70,7 @@ data = pd.DataFrame({"rna": rna, "logfc": logfc})
 
 
 
-    <ggplot: (8773775981597)>
+    <ggplot: (8786399322613)>
 
 
 
@@ -95,8 +96,22 @@ with pm.Model() as model1:
     Initializing NUTS using jitter+adapt_diag...
     Multiprocess sampling (2 chains in 2 jobs)
     NUTS: [sigma, beta, alpha]
-    Sampling 2 chains, 0 divergences: 100%|██████████| 3000/3000 [00:01<00:00, 2105.83draws/s]
-    100%|██████████| 2000/2000 [00:03<00:00, 572.72it/s]
+    Sampling 2 chains, 0 divergences: 100%|██████████| 3000/3000 [00:01<00:00, 2023.34draws/s]
+    100%|██████████| 2000/2000 [00:02<00:00, 821.66it/s]
+
+
+
+```python
+pm.model_to_graphviz(model1)
+```
+
+
+
+
+    
+![svg](005_010_modeling_files/005_010_modeling_7_0.svg)
+    
+
 
 
 
@@ -211,7 +226,7 @@ plt.show()
 
 
     
-![png](005_010_modeling_files/005_010_modeling_9_1.png)
+![png](005_010_modeling_files/005_010_modeling_10_1.png)
     
 
 
@@ -223,7 +238,7 @@ plt.show()
 
 
     
-![png](005_010_modeling_files/005_010_modeling_10_0.png)
+![png](005_010_modeling_files/005_010_modeling_11_0.png)
     
 
 
@@ -260,14 +275,14 @@ model1_preds["pred"] = pd.Categorical(
 
 
     
-![png](005_010_modeling_files/005_010_modeling_11_0.png)
+![png](005_010_modeling_files/005_010_modeling_12_0.png)
     
 
 
 
 
 
-    <ggplot: (8773776036105)>
+    <ggplot: (8786398375625)>
 
 
 
@@ -304,20 +319,681 @@ post_summary = pd.DataFrame(
 
 
     
-![png](005_010_modeling_files/005_010_modeling_12_0.png)
+![png](005_010_modeling_files/005_010_modeling_13_0.png)
     
 
 
 
 
 
-    <ggplot: (8773775981601)>
+    <ggplot: (8786400363829)>
 
 
 
 ---
 
 ## Model 2. Multiple genes hierarchical model with one covariate
+
+Model the logFC of multiple genes in multiple cell lines using a single predictor: RNA expression.
+A hierarchcial model will be used to pool information across genes.
+
+$$
+logFC \sim Normal(\mu, \sigma) \\
+\mu_g = \alpha_g + \beta_g R \\
+\alpha_g \sim \mathcal{N}(\mu_\alpha, \sigma_\alpha) \\
+\mu_\alpha \sim \mathcal{N}(0, 10) \qquad \sigma_\alpha \sim \text{HalfNormal}(5) \\
+\beta_g \sim \mathcal{N}(\mu_\beta, \sigma_\beta) \\
+\mu_\beta \sim \mathcal{N}(0, 10) \qquad \sigma_\beta \sim \text{HalfNormal}(5) \\
+\sigma \sim \text{HalfNormal}(5)
+$$
+
+Simulated values:
+
+- number of cell lines: 30
+- number of genes: 5
+- $\mu_\alpha$ = -1, $\sigma_\alpha$ = 1
+- $\mu_\beta$ = -1, $\sigma_\beta$ = 2
+- $\sigma$ = 0.3
+
+
+```python
+import string
+
+np.random.seed(RANDOM_SEED)
+
+num_cell_lines = 30
+num_genes = 5
+
+real_mu_alpha, real_sigma_alpha = -1, 1
+real_mu_beta, real_sigma_beta = -1, 2
+real_sigma = 0.5
+
+real_alpha = np.random.normal(loc=real_mu_alpha, scale=real_sigma_alpha, size=num_genes)
+real_beta = np.random.normal(loc=real_mu_beta, scale=real_sigma_beta, size=num_genes)
+
+genes = ["gene" + a for a in string.ascii_uppercase[:num_genes]]
+rna = np.random.randn(num_genes, num_cell_lines)
+
+logfc = (
+    real_alpha
+    + real_beta * rna.T
+    + np.random.normal(loc=0, scale=real_sigma, size=(rna.T.shape))
+)
+logfc = logfc.T
+```
+
+
+```python
+rna_flat = rna.flatten()
+logfc_flat = logfc.flatten()
+gene_idx = np.repeat(range(num_genes), num_cell_lines)
+```
+
+
+```python
+tidy_data = pd.DataFrame(
+    {"gene": [genes[i] for i in gene_idx], "rna": rna_flat, "logfc": logfc_flat}
+)
+
+tidy_real_data = pd.DataFrame({"alpha": real_alpha, "beta": real_beta, "gene": genes})
+
+
+(
+    gg.ggplot(tidy_data)
+    + gg.geom_point(gg.aes(x="rna", y="logfc", color="gene"))
+    + gg.geom_abline(
+        gg.aes(slope="beta", intercept="alpha", color="gene"),
+        data=tidy_real_data,
+        linetype="--",
+    )
+    + gg.labs(
+        x="RNA expression", y="logFC", color="gene", title="Model 2 synthetic data"
+    )
+)
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_17_0.png)
+    
+
+
+
+
+
+    <ggplot: (8786236796025)>
+
+
+
+
+```python
+with pm.Model() as model2:
+    # Hyper-priors
+    mu_alpha = pm.Normal("mu_alpha", 0, 5)
+    sigma_alpha = pm.HalfNormal("sigma_alpha", 5)
+    mu_beta = pm.Normal("mu_beta", 0, 2)
+    sigma_beta = pm.HalfNormal("sigma_beta", 2)
+
+    # Priors
+    alpha = pm.Normal("alpha", mu_alpha, sigma_alpha, shape=num_genes)
+    beta = pm.Normal("beta", mu_beta, sigma_beta, shape=num_genes)
+    mu = pm.Deterministic("mu", alpha[gene_idx] + beta[gene_idx] * rna_flat)
+    sigma = pm.HalfNormal("sigma", 5)
+
+    # Likelihood
+    logfc = pm.Normal("logfc", mu=mu, sigma=sigma, observed=logfc_flat)
+
+    # Sampling
+    model2_prior_check = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
+    model2_trace = pm.sample(2000, tune=2000)
+    model2_post_check = pm.sample_posterior_predictive(
+        model2_trace, random_seed=RANDOM_SEED
+    )
+```
+
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using jitter+adapt_diag...
+    Multiprocess sampling (2 chains in 2 jobs)
+    NUTS: [sigma, beta, alpha, sigma_beta, mu_beta, sigma_alpha, mu_alpha]
+    Sampling 2 chains, 2 divergences: 100%|██████████| 8000/8000 [00:11<00:00, 699.64draws/s]
+    There were 2 divergences after tuning. Increase `target_accept` or reparameterize.
+    100%|██████████| 4000/4000 [00:05<00:00, 713.01it/s]
+
+
+
+```python
+pm.model_to_graphviz(model2)
+```
+
+
+
+
+    
+![svg](005_010_modeling_files/005_010_modeling_19_0.svg)
+    
+
+
+
+
+```python
+az_model2 = az.from_pymc3(
+    trace=model2_trace, prior=model2_prior_check, posterior_predictive=model2_post_check
+)
+az.summary(az_model2, var_names=["alpha", "beta", "sigma"])
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hpd_3%</th>
+      <th>hpd_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>alpha[0]</th>
+      <td>-2.414</td>
+      <td>0.097</td>
+      <td>-2.592</td>
+      <td>-2.228</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>7751.0</td>
+      <td>7751.0</td>
+      <td>7715.0</td>
+      <td>3293.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>alpha[1]</th>
+      <td>-1.271</td>
+      <td>0.097</td>
+      <td>-1.446</td>
+      <td>-1.082</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>8893.0</td>
+      <td>8875.0</td>
+      <td>9014.0</td>
+      <td>2617.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>alpha[2]</th>
+      <td>-0.764</td>
+      <td>0.099</td>
+      <td>-0.939</td>
+      <td>-0.568</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>9058.0</td>
+      <td>8647.0</td>
+      <td>9087.0</td>
+      <td>2851.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>alpha[3]</th>
+      <td>-1.377</td>
+      <td>0.099</td>
+      <td>-1.563</td>
+      <td>-1.191</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>8102.0</td>
+      <td>8096.0</td>
+      <td>8119.0</td>
+      <td>3169.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>alpha[4]</th>
+      <td>-2.149</td>
+      <td>0.103</td>
+      <td>-2.345</td>
+      <td>-1.960</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>7082.0</td>
+      <td>7049.0</td>
+      <td>7077.0</td>
+      <td>2720.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>beta[0]</th>
+      <td>3.587</td>
+      <td>0.107</td>
+      <td>3.390</td>
+      <td>3.787</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>8371.0</td>
+      <td>8331.0</td>
+      <td>8413.0</td>
+      <td>2970.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>beta[1]</th>
+      <td>-0.355</td>
+      <td>0.101</td>
+      <td>-0.536</td>
+      <td>-0.157</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>7656.0</td>
+      <td>6965.0</td>
+      <td>7639.0</td>
+      <td>2580.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>beta[2]</th>
+      <td>-0.145</td>
+      <td>0.103</td>
+      <td>-0.336</td>
+      <td>0.051</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>8554.0</td>
+      <td>4536.0</td>
+      <td>8541.0</td>
+      <td>3048.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>beta[3]</th>
+      <td>-2.839</td>
+      <td>0.102</td>
+      <td>-3.020</td>
+      <td>-2.643</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>6684.0</td>
+      <td>6622.0</td>
+      <td>6688.0</td>
+      <td>2715.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>beta[4]</th>
+      <td>-2.359</td>
+      <td>0.094</td>
+      <td>-2.536</td>
+      <td>-2.183</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>7047.0</td>
+      <td>6979.0</td>
+      <td>6996.0</td>
+      <td>2634.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>sigma</th>
+      <td>0.539</td>
+      <td>0.033</td>
+      <td>0.480</td>
+      <td>0.603</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>6629.0</td>
+      <td>6478.0</td>
+      <td>6758.0</td>
+      <td>3010.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+# Real values
+pd.DataFrame({"real alpha": real_alpha, "real beta": real_beta})
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>real alpha</th>
+      <th>real beta</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>-2.249278</td>
+      <td>3.654438</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>-1.260331</td>
+      <td>-0.138414</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-0.616207</td>
+      <td>-0.135368</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-1.385461</td>
+      <td>-2.960023</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-2.085137</td>
+      <td>-2.263930</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.plot_trace(az_model2, var_names=var_names)
+plt.show()
+```
+
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_22_1.png)
+    
+
+
+
+```python
+az.plot_forest(az_model2, var_names=var_names)
+```
+
+
+
+
+    array([<AxesSubplot:title={'center':'94.0% Credible Interval'}>],
+          dtype=object)
+
+
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_23_1.png)
+    
+
+
+
+```python
+post = (
+    az_model2.posterior.to_dataframe()
+    .query("alpha_dim_0 == beta_dim_0")
+    .reset_index()
+    .groupby(["alpha_dim_0", "beta_dim_0"])
+    .apply(lambda x: x.sample(frac=0.1))
+    .reset_index(drop=True)
+)
+```
+
+
+```python
+post.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>alpha_dim_0</th>
+      <th>beta_dim_0</th>
+      <th>chain</th>
+      <th>draw</th>
+      <th>mu_dim_0</th>
+      <th>mu_alpha</th>
+      <th>mu_beta</th>
+      <th>alpha</th>
+      <th>beta</th>
+      <th>sigma_alpha</th>
+      <th>sigma_beta</th>
+      <th>mu</th>
+      <th>sigma</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1297</td>
+      <td>58</td>
+      <td>-2.005934</td>
+      <td>0.896238</td>
+      <td>-2.533306</td>
+      <td>3.537462</td>
+      <td>1.057965</td>
+      <td>2.704487</td>
+      <td>-1.491174</td>
+      <td>0.513907</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1427</td>
+      <td>105</td>
+      <td>-1.612549</td>
+      <td>1.361572</td>
+      <td>-2.416255</td>
+      <td>3.616562</td>
+      <td>0.481319</td>
+      <td>2.038553</td>
+      <td>-1.192133</td>
+      <td>0.546126</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1811</td>
+      <td>43</td>
+      <td>-1.090456</td>
+      <td>-0.989185</td>
+      <td>-2.351589</td>
+      <td>3.509903</td>
+      <td>0.789774</td>
+      <td>1.742488</td>
+      <td>-0.946303</td>
+      <td>0.543524</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>22</td>
+      <td>50</td>
+      <td>-1.913872</td>
+      <td>-0.134479</td>
+      <td>-2.430872</td>
+      <td>3.541012</td>
+      <td>0.541700</td>
+      <td>2.727996</td>
+      <td>-1.483219</td>
+      <td>0.489283</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1620</td>
+      <td>46</td>
+      <td>-0.050011</td>
+      <td>-1.155751</td>
+      <td>-2.401856</td>
+      <td>3.715742</td>
+      <td>2.398424</td>
+      <td>3.717638</td>
+      <td>-1.243279</td>
+      <td>0.527196</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+post['gene'] = [genes[i] for i in post.alpha_dim_0]
+
+(
+    gg.ggplot(post) +
+    gg.geom_abline(gg.aes(slope="beta", intercept="alpha", color = "gene"), alpha=0.01)
+     + gg.geom_point(gg.aes(x="rna", y="logfc", color="gene"), data = tidy_data, size = 2)
+    + gg.geom_abline(
+        gg.aes(slope="beta", intercept="alpha", color="gene"),
+        data=tidy_real_data,
+        linetype="--",
+        size=2
+    )
+    + gg.labs(
+        x="RNA expression", y="logFC", color="gene", title="Model 2 synthetic data"
+    )
+)
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_26_0.png)
+    
+
+
+
+
+
+    <ggplot: (8786400825553)>
+
+
+
+---
+
+## Model 3. Multiple genes and multiple cell lines hierarchical model with one covariate
+
+Model the logFC of multiple genes in multiple cell lines using a single predictor: RNA expression.
+A hierarchcial model will be used to pool information across genes and cell lines.
+
+**Note:** Need to include repeated measure of logFC per cell line (but only 1 measure of RNA expression...).
+
+$$
+logFC \sim Normal(\mu, \sigma) \\
+\mu_{g, c} = \alpha_{g, c} + \beta_{g, c} R \\
+\alpha_{g, c} \sim \mathcal{N}(\mu_\alpha, \sigma_\alpha) \\
+\mu_\alpha \sim \mathcal{N}(0, 10) \qquad \sigma_\alpha \sim \text{HalfNormal}(5) \\
+\beta{g, c} \sim \mathcal{N}(\mu_\beta, \sigma_\beta) \\
+\mu_\beta \sim \mathcal{N}(0, 10) \qquad \sigma_\beta \sim \text{HalfNormal}(5) \\
+\sigma \sim \text{HalfNormal}(5)
+$$
+
+Simulated values:
+
+- number of cell lines: 30
+- number of genes: 5
+- $\mu_\alpha$ = -1, $\sigma_\alpha$ = 1
+- $\mu_\beta$ = -1, $\sigma_\beta$ = 2
+- $\sigma$ = 0.3
 
 
 ```python
