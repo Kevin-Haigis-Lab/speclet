@@ -1,0 +1,51 @@
+{
+    "__default__" :
+    {
+        "partition" : "short",
+        "cores"     : 1,
+        "mem"       : "1000",
+        "time"      : "00:10:00",
+        "out"       : "logs/modeling-data-prep/%j_{rule}.log",
+        "err"       : "logs/modeling-data-prep/%j_{rule}.log",
+        "mail"      : "NONE",
+        "J"         : "snakejob"
+    },
+    "split_cna" :
+    {
+        "cores" : 1,
+        "mem"   : "5000",
+        "time"  : "00:30:00"
+    },
+    "split_mut" :
+    {
+        "cores" : 1,
+        "mem"   : "5000",
+        "time"  : "00:30:00"
+    },
+    "split_logfc" :
+    {
+        "partition" : "priority",
+        "cores" : 1,
+        "mem"   : "80000",
+        "time"  : "03:00:00"
+    },
+    "split_rna" :
+    {
+        "cores" : 1,
+        "mem"   : "10000",
+        "time"  : "01:00:00"
+    },
+    "merge_data" :
+    {
+        "cores" : 1,
+        "mem"   : "1000",
+        "time"  : "00:15:00"
+    },
+    "combine_data" :
+    {
+        "partition": "priority",
+        "cores" : 1,
+        "mem"   : "100000",
+        "time"  : "03:00:00"
+    }
+}
