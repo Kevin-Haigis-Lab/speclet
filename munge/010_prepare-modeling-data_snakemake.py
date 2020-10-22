@@ -76,7 +76,7 @@ rule merge_data:
     output:
         out_file = (temp_dir / "merged_{depmapid}.qs").as_posix()
     script:
-        "019_merge-modeling-data.R"
+        "016_merge-modeling-data.R"
 
 
 
@@ -87,6 +87,4 @@ rule combine_data:
     output:
         out_file = (save_dir / "depmap_modeling_dataframe.csv").as_posix()
     script:
-        "020_combine-modeling-data.R"
-
-
+        "017_combine-modeling-data.R"
