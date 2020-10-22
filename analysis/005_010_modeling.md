@@ -72,7 +72,7 @@ data = pd.DataFrame({"rna": rna, "logfc": logfc})
 
 
 
-    <ggplot: (8780682040453)>
+    <ggplot: (8769487291493)>
 
 
 
@@ -98,8 +98,8 @@ with pm.Model() as model1:
     Initializing NUTS using jitter+adapt_diag...
     Multiprocess sampling (2 chains in 2 jobs)
     NUTS: [sigma, beta, alpha]
-    Sampling 2 chains, 0 divergences: 100%|██████████| 3000/3000 [00:01<00:00, 1737.49draws/s]
-    100%|██████████| 2000/2000 [00:02<00:00, 728.22it/s]
+    Sampling 2 chains, 0 divergences: 100%|██████████| 3000/3000 [00:02<00:00, 1065.63draws/s]
+    100%|██████████| 2000/2000 [00:02<00:00, 797.61it/s]
 
 
 
@@ -284,7 +284,7 @@ model1_preds["pred"] = pd.Categorical(
 
 
 
-    <ggplot: (8780683756489)>
+    <ggplot: (8769490396641)>
 
 
 
@@ -328,7 +328,7 @@ post_summary = pd.DataFrame(
 
 
 
-    <ggplot: (8780683819241)>
+    <ggplot: (8769489452853)>
 
 
 
@@ -421,7 +421,7 @@ tidy_real_data = pd.DataFrame({"alpha": real_alpha, "beta": real_beta, "gene": g
 
 
 
-    <ggplot: (8780520493869)>
+    <ggplot: (8769326550461)>
 
 
 
@@ -455,9 +455,9 @@ with pm.Model() as model2:
     Initializing NUTS using jitter+adapt_diag...
     Multiprocess sampling (2 chains in 2 jobs)
     NUTS: [sigma, beta, alpha, sigma_beta, mu_beta, sigma_alpha, mu_alpha]
-    Sampling 2 chains, 2 divergences: 100%|██████████| 8000/8000 [00:09<00:00, 828.55draws/s] 
+    Sampling 2 chains, 2 divergences: 100%|██████████| 8000/8000 [00:08<00:00, 912.35draws/s] 
     There were 2 divergences after tuning. Increase `target_accept` or reparameterize.
-    100%|██████████| 4000/4000 [00:04<00:00, 821.85it/s]
+    100%|██████████| 4000/4000 [00:04<00:00, 921.91it/s]
 
 
 
@@ -964,7 +964,7 @@ post["gene"] = [genes[i] for i in post.alpha_dim_0]
 
 
 
-    <ggplot: (8780521004353)>
+    <ggplot: (8769325807021)>
 
 
 
@@ -1028,10 +1028,8 @@ cell_line_idx = list(range(num_cell_lines))
 
 # RNA expression data (scaled within each gene)
 rna = np.random.normal(loc=0, scale=1, size=(num_genes, num_cell_lines))
-rna_data = pd.DataFrame(
-    list(product(genes, cell_lines)), columns=["gene", "cell_line"]
-)
-rna_data['rna'] = rna.flatten()
+rna_data = pd.DataFrame(list(product(genes, cell_lines)), columns=["gene", "cell_line"])
+rna_data["rna"] = rna.flatten()
 
 for c in ["gene", "cell_line"]:
     rna_data[c] = pd.Categorical(rna_data[c])
@@ -1045,9 +1043,6 @@ real_sigma_alpha = np.random.exponential(real_sigma_g, num_genes)
 real_alpha_g = np.random.normal(real_mu_alpha, real_sigma_alpha)
 real_mu_g = real_alpha_g
 
-
-# logfc_sample = np.random.normal(real_mu_g, real_sigma)
-
 ko_idx = list(range(num_logfc_datum))
 logfc_data = pd.DataFrame(
     list(product(ko_idx, genes, cell_lines)), columns=["ko_idx", "gene", "cell_line"]
@@ -1056,7 +1051,7 @@ logfc_data = pd.DataFrame(
 for c in ["gene", "cell_line"]:
     logfc_data[c] = pd.Categorical(logfc_data[c])
 
-    
+
 logfc_data["logfc"] = np.nan
 for i in range(len(logfc_data)):
     g = logfc_data["gene"].cat.codes[i]
@@ -1179,17 +1174,27 @@ logfc_data
 
 
 ```python
-known_logfc_values_df = pd.DataFrame({"gene": genes, "logfc": real_alpha_g, 'sd': real_sigma_alpha})
-known_logfc_values_df['lower_err'] = known_logfc_values_df['logfc'] - known_logfc_values_df['sd']
-known_logfc_values_df['upper_err'] = known_logfc_values_df['logfc'] + known_logfc_values_df['sd']
+known_logfc_values_df = pd.DataFrame(
+    {"gene": genes, "logfc": real_alpha_g, "sd": real_sigma_alpha}
+)
+known_logfc_values_df["lower_err"] = (
+    known_logfc_values_df["logfc"] - known_logfc_values_df["sd"]
+)
+known_logfc_values_df["upper_err"] = (
+    known_logfc_values_df["logfc"] + known_logfc_values_df["sd"]
+)
 
 pos = gg.position_nudge(x=0.1)
 
 (
-    gg.ggplot(logfc_data, gg.aes(x = "gene", y = "logfc")) +
-    gg.geom_boxplot(outlier_color = "") +
-    gg.geom_linerange(gg.aes(ymin="lower_err", ymax="upper_err"), data=known_logfc_values_df, position = pos) +
-    gg.geom_point(data=known_logfc_values_df, position = pos)
+    gg.ggplot(logfc_data, gg.aes(x="gene", y="logfc"))
+    + gg.geom_boxplot(outlier_color="")
+    + gg.geom_linerange(
+        gg.aes(ymin="lower_err", ymax="upper_err"),
+        data=known_logfc_values_df,
+        position=pos,
+    )
+    + gg.geom_point(data=known_logfc_values_df, position=pos)
 )
 ```
 
@@ -1202,17 +1207,17 @@ pos = gg.position_nudge(x=0.1)
 
 
 
-    <ggplot: (8780456513733)>
+    <ggplot: (8769488932725)>
 
 
 
 
 ```python
-merged_data = pd.merge(logfc_data, rna_data, how = "inner", on = ['gene', 'cell_line'])
+merged_data = pd.merge(logfc_data, rna_data, how="inner", on=["gene", "cell_line"])
 
 (
-    gg.ggplot(merged_data, gg.aes(x="rna", y="logfc", color="gene")) +
-    gg.geom_point(gg.aes(shape="factor(ko_idx)"), alpha = 0.8, size = 1.8)
+    gg.ggplot(merged_data, gg.aes(x="rna", y="logfc", color="gene"))
+    + gg.geom_point(gg.aes(shape="factor(ko_idx)"), alpha=0.8, size=1.8)
 )
 ```
 
@@ -1225,7 +1230,7 @@ merged_data = pd.merge(logfc_data, rna_data, how = "inner", on = ['gene', 'cell_
 
 
 
-    <ggplot: (8780458411269)>
+    <ggplot: (8769488872769)>
 
 
 
@@ -1239,6 +1244,1416 @@ Though it is not the right model the purposes of this project, I'll leave it her
 
 Model the logFC of multiple genes in multiple cell lines using a single predictor: RNA expression.
 A hierarchcial model will be used to pool information across genes and cell lines.
+Also, to better mimic real data, I have added in the fact that there are multiple measures of logFC for each gene, but only one measure for RNA expression.
+
+$
+logFC_{g,c} \sim Normal(\mu_{g,c}, \sigma) \\
+\quad \mu_g = \alpha_g + \gamma_c + \beta_g R \\
+\qquad \alpha_g \sim \mathcal{N}(\mu_\alpha, \sigma_\alpha) \\
+\qquad \quad \mu_\alpha \sim \mathcal{N}(0, 5) \quad \sigma_\alpha \sim \text{Exp}(1) \\
+\qquad \gamma_c \sim \mathcal{N}(\mu_\gamma, \sigma_\gamma) \\
+\qquad \quad \mu_\gamma \sim \mathcal{N}(0, 5) \quad \sigma_\gamma \sim \text{Exp}(1) \\
+\qquad \beta_g \sim \mathcal{N}(\mu_\beta, \sigma_\beta) \\
+\qquad \quad \mu_\beta \sim \mathcal{N}(0, 2) \quad \sigma_\beta \sim \text{Exp}(1) \\
+\quad \sigma \sim \text{Exp}(1)
+$
+
+
+Simulated values:
+
+- number of cell lines: 20
+- number of genes: 5
+- number of repeated measures: 3
+- $\mu_\alpha = -1$, $\sigma_\alpha = 1$
+- $\mu_\gamma = 0$, $\sigma_\gamma = 3$
+- $\mu_\beta = -1$, $\sigma_\beta = 2$
+- $\sigma = 0.3$
+
+
+```python
+N = 2000
+np.random.seed(0)
+sigma_dists = pd.DataFrame(
+    {
+        "name": np.repeat(["normal", "exponential"], N),
+        "value": np.concatenate(
+            [np.abs(np.random.normal(0, 5, N)), np.random.exponential(1, N)]
+        ).flatten(),
+    }
+)
+
+(
+    gg.ggplot(sigma_dists, gg.aes("value"))
+    + gg.geom_density(gg.aes(color="name", fill="name"), alpha=0.2, size=1.2)
+    + gg.scale_color_brewer(type="qual", palette="Set1")
+    + gg.theme(legend_position=(0.7, 0.7))
+    + gg.labs(title="Visualization of two common distributions for std. dev.")
+)
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_34_0.png)
+    
+
+
+
+
+
+    <ggplot: (8769488847345)>
+
+
+
+
+```python
+np.random.seed(RANDOM_SEED)
+
+# Real data parameters.
+num_genes = 5
+num_cell_lines = 20
+num_logfc_datum = 3
+
+# Real model values.
+real_mu_alpha, real_sigma_alpha = -1, 1
+real_mu_gamma, real_sigma_gamma = 0, 3
+real_mu_beta, real_sigma_beta = -1, 2
+real_sigma = 0.3
+
+# Sample from real distributions for the rest of the model parameters.
+real_alpha_g = np.random.normal(real_mu_alpha, real_sigma_alpha, num_genes)
+real_gamma_c = np.random.normal(real_mu_gamma, real_sigma_gamma, num_cell_lines)
+real_beta_g = np.random.normal(real_mu_beta, real_sigma_beta, num_genes)
+
+rna_data = pd.DataFrame(list(product(genes, cell_lines)), columns=["gene", "cell_line"])
+
+# RNA data (scaled by gene).
+rna_data["rna"] = np.random.normal(0, 1, len(rna_data))
+
+for c in ["gene", "cell_line"]:
+    rna_data[c] = pd.Categorical(rna_data[c])
+
+logfc_data = []
+for i in range(num_logfc_datum):
+    x = rna_data.copy()
+    x["sgrna_idx"] = i
+    logfc_data.append(x)
+
+logfc_data = pd.concat(logfc_data).reset_index(drop=True)
+
+logfc_data["logfc"] = np.nan
+for i in range(len(logfc_data)):
+    gene_i = logfc_data["gene"].cat.codes[i]
+    cell_line_i = logfc_data["cell_line"].cat.codes[i]
+    mu = (
+        real_alpha_g[gene_i]
+        + real_gamma_c[cell_line_i]
+        + real_beta_g[gene_i] * logfc_data.loc[i, "rna"]
+    )
+    logfc_data.loc[i, "logfc"] = np.random.normal(mu, real_sigma)
+
+logfc_data
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>gene</th>
+      <th>cell_line</th>
+      <th>rna</th>
+      <th>sgrna_idx</th>
+      <th>logfc</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>geneA</td>
+      <td>cellA</td>
+      <td>-1.187443</td>
+      <td>0</td>
+      <td>7.516370</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>geneA</td>
+      <td>cellB</td>
+      <td>0.299138</td>
+      <td>0</td>
+      <td>-1.184598</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>geneA</td>
+      <td>cellC</td>
+      <td>-0.947764</td>
+      <td>0</td>
+      <td>1.945419</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>geneA</td>
+      <td>cellD</td>
+      <td>-1.843382</td>
+      <td>0</td>
+      <td>-0.861100</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>geneA</td>
+      <td>cellE</td>
+      <td>0.810589</td>
+      <td>0</td>
+      <td>-6.491923</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>295</th>
+      <td>geneE</td>
+      <td>cellP</td>
+      <td>1.219362</td>
+      <td>2</td>
+      <td>0.194254</td>
+    </tr>
+    <tr>
+      <th>296</th>
+      <td>geneE</td>
+      <td>cellQ</td>
+      <td>-0.840481</td>
+      <td>2</td>
+      <td>-5.967522</td>
+    </tr>
+    <tr>
+      <th>297</th>
+      <td>geneE</td>
+      <td>cellR</td>
+      <td>0.607882</td>
+      <td>2</td>
+      <td>-0.719954</td>
+    </tr>
+    <tr>
+      <th>298</th>
+      <td>geneE</td>
+      <td>cellS</td>
+      <td>0.429605</td>
+      <td>2</td>
+      <td>1.885927</td>
+    </tr>
+    <tr>
+      <th>299</th>
+      <td>geneE</td>
+      <td>cellT</td>
+      <td>-1.014537</td>
+      <td>2</td>
+      <td>-1.022285</td>
+    </tr>
+  </tbody>
+</table>
+<p>300 rows × 5 columns</p>
+</div>
+
+
+
+
+```python
+(
+    gg.ggplot(logfc_data, gg.aes(x="rna", y="logfc", color="gene"))
+    + gg.geom_point(size=1.8, alpha=0.8)
+    + gg.scale_color_brewer(type="qual", palette="Set1")
+    + gg.labs(x="RNA expression (scaled)", y="logFC", color="")
+)
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_36_0.png)
+    
+
+
+
+
+
+    <ggplot: (8769312674937)>
+
+
+
+
+```python
+(
+    gg.ggplot(logfc_data, gg.aes(x="rna", y="logfc", color="gene"))
+    + gg.facet_wrap("gene", nrow=2)
+    + gg.geom_point(size=1.8, alpha=0.8)
+    + gg.geom_smooth(method="lm")
+    + gg.scale_color_brewer(type="qual", palette="Set1")
+    + gg.labs(x="RNA expression (scaled)", y="logFC", color="")
+)
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_37_0.png)
+    
+
+
+
+
+
+    <ggplot: (8769312313805)>
+
+
+
+
+```python
+(
+    gg.ggplot(logfc_data, gg.aes(x="cell_line", y="logfc"))
+    + gg.geom_hline(yintercept=0, color="gray")
+    + gg.geom_boxplot(color="black", fill="black", alpha=0.05, outlier_color="")
+    + gg.geom_jitter(gg.aes(color="gene"), width=0.3, size=1)
+    + gg.scale_color_brewer(type="qual", palette="Set1")
+    + gg.scale_x_discrete(labels=[a.replace("cell", "") for a in cell_lines])
+    + gg.scale_y_continuous(breaks=range(-16, 16, 2))
+    + gg.theme(panel_grid_major_x=gg.element_blank())
+    + gg.labs(x="cell line", y="logFC", color="")
+)
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_38_0.png)
+    
+
+
+
+
+
+    <ggplot: (8769327027405)>
+
+
+
+
+```python
+gene_idx = logfc_data["gene"].cat.codes.to_list()
+cell_line_idx = logfc_data["cell_line"].cat.codes.to_list()
+
+with pm.Model() as model4:
+    # Hyper-priors
+    mu_alpha = pm.Normal("mu_alpha", 0, 2)
+    sigma_alpha = pm.Exponential("sigma_alpha", 1)
+    mu_gamma = pm.Normal("mu_gamma", 0, 2)
+    sigma_gamma = pm.Exponential("sigma_gamma", 1)
+    mu_beta = pm.Normal("mu_beta", 0, 1)
+    sigma_beta = pm.Exponential("sigma_beta", 1)
+
+    # Priors
+    alpha_g = pm.Normal("alpha_g", mu_alpha, sigma_alpha, shape=num_genes)
+    gamma_c = pm.Normal("gamma_c", mu_gamma, sigma_gamma, shape=num_cell_lines)
+    beta_g = pm.Normal("beta_g", mu_beta, sigma_beta, shape=num_genes)
+    mu_gc = pm.Deterministic(
+        "mu_gc",
+        alpha_g[gene_idx] + gamma_c[cell_line_idx] + beta_g[gene_idx] * logfc_data.rna,
+    )
+    sigma = pm.Exponential("sigma", 1)
+
+    # Likelihood
+    logfc = pm.Normal("logfc", mu=mu_gc, sigma=sigma, observed=logfc_data.logfc)
+
+    # Sampling
+    model4_prior_check = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
+    model4_trace = pm.sample(2000, tune=2000)
+    model4_post_check = pm.sample_posterior_predictive(
+        model4_trace, random_seed=RANDOM_SEED
+    )
+```
+
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using jitter+adapt_diag...
+    Multiprocess sampling (2 chains in 2 jobs)
+    NUTS: [sigma, beta_g, gamma_c, alpha_g, sigma_beta, mu_beta, sigma_gamma, mu_gamma, sigma_alpha, mu_alpha]
+    Sampling 2 chains, 0 divergences: 100%|██████████| 8000/8000 [02:35<00:00, 51.46draws/s]
+    The number of effective samples is smaller than 10% for some parameters.
+    100%|██████████| 4000/4000 [00:05<00:00, 794.97it/s]
+
+
+
+```python
+pm.model_to_graphviz(model4)
+```
+
+
+
+
+    
+![svg](005_010_modeling_files/005_010_modeling_40_0.svg)
+    
+
+
+
+
+```python
+az_model4 = az.from_pymc3(
+    trace=model4_trace, prior=model4_prior_check, posterior_predictive=model4_post_check
+)
+```
+
+
+```python
+var_names1 = ["mu_" + a for a in ["alpha", "gamma", "beta"]]
+var_names2 = ["sigma_" + a for a in ["alpha", "gamma", "beta"]]
+az.plot_trace(az_model4, var_names=var_names1 + var_names2 + ["sigma"])
+plt.show()
+```
+
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_42_1.png)
+    
+
+
+
+```python
+s = az.summary(az_model4, var_names=var_names1 + var_names2)
+s["real_values"] = [
+    real_mu_alpha,
+    real_mu_gamma,
+    real_mu_beta,
+    real_sigma_alpha,
+    real_sigma_gamma,
+    real_sigma_beta,
+]
+s
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hpd_3%</th>
+      <th>hpd_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>real_values</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>mu_alpha</th>
+      <td>-0.215</td>
+      <td>1.455</td>
+      <td>-2.923</td>
+      <td>2.475</td>
+      <td>0.088</td>
+      <td>0.063</td>
+      <td>271.0</td>
+      <td>271.0</td>
+      <td>281.0</td>
+      <td>329.0</td>
+      <td>1.0</td>
+      <td>-1</td>
+    </tr>
+    <tr>
+      <th>mu_gamma</th>
+      <td>-0.284</td>
+      <td>1.441</td>
+      <td>-3.060</td>
+      <td>2.365</td>
+      <td>0.081</td>
+      <td>0.058</td>
+      <td>313.0</td>
+      <td>313.0</td>
+      <td>322.0</td>
+      <td>472.0</td>
+      <td>1.0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>mu_beta</th>
+      <td>-1.483</td>
+      <td>0.534</td>
+      <td>-2.376</td>
+      <td>-0.407</td>
+      <td>0.011</td>
+      <td>0.008</td>
+      <td>2204.0</td>
+      <td>2204.0</td>
+      <td>2458.0</td>
+      <td>2038.0</td>
+      <td>1.0</td>
+      <td>-1</td>
+    </tr>
+    <tr>
+      <th>sigma_alpha</th>
+      <td>0.824</td>
+      <td>0.347</td>
+      <td>0.363</td>
+      <td>1.442</td>
+      <td>0.007</td>
+      <td>0.006</td>
+      <td>2194.0</td>
+      <td>1971.0</td>
+      <td>3154.0</td>
+      <td>2274.0</td>
+      <td>1.0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>sigma_gamma</th>
+      <td>3.220</td>
+      <td>0.503</td>
+      <td>2.390</td>
+      <td>4.217</td>
+      <td>0.009</td>
+      <td>0.006</td>
+      <td>3434.0</td>
+      <td>3215.0</td>
+      <td>3750.0</td>
+      <td>2602.0</td>
+      <td>1.0</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>sigma_beta</th>
+      <td>1.191</td>
+      <td>0.478</td>
+      <td>0.506</td>
+      <td>2.064</td>
+      <td>0.010</td>
+      <td>0.007</td>
+      <td>2221.0</td>
+      <td>2095.0</td>
+      <td>2724.0</td>
+      <td>2324.0</td>
+      <td>1.0</td>
+      <td>2</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.summary(az_model4, var_names=["alpha_g"]).assign(real_values=real_alpha_g)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hpd_3%</th>
+      <th>hpd_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>real_values</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>alpha_g[0]</th>
+      <td>-1.014</td>
+      <td>1.464</td>
+      <td>-3.873</td>
+      <td>1.610</td>
+      <td>0.091</td>
+      <td>0.065</td>
+      <td>257.0</td>
+      <td>257.0</td>
+      <td>269.0</td>
+      <td>308.0</td>
+      <td>1.0</td>
+      <td>-2.249278</td>
+    </tr>
+    <tr>
+      <th>alpha_g[1]</th>
+      <td>0.047</td>
+      <td>1.465</td>
+      <td>-2.563</td>
+      <td>2.918</td>
+      <td>0.092</td>
+      <td>0.065</td>
+      <td>256.0</td>
+      <td>256.0</td>
+      <td>268.0</td>
+      <td>299.0</td>
+      <td>1.0</td>
+      <td>-1.260331</td>
+    </tr>
+    <tr>
+      <th>alpha_g[2]</th>
+      <td>0.673</td>
+      <td>1.463</td>
+      <td>-1.971</td>
+      <td>3.484</td>
+      <td>0.091</td>
+      <td>0.070</td>
+      <td>257.0</td>
+      <td>221.0</td>
+      <td>268.0</td>
+      <td>295.0</td>
+      <td>1.0</td>
+      <td>-0.616207</td>
+    </tr>
+    <tr>
+      <th>alpha_g[3]</th>
+      <td>-0.120</td>
+      <td>1.465</td>
+      <td>-2.835</td>
+      <td>2.653</td>
+      <td>0.092</td>
+      <td>0.065</td>
+      <td>256.0</td>
+      <td>256.0</td>
+      <td>268.0</td>
+      <td>293.0</td>
+      <td>1.0</td>
+      <td>-1.385461</td>
+    </tr>
+    <tr>
+      <th>alpha_g[4]</th>
+      <td>-0.717</td>
+      <td>1.463</td>
+      <td>-3.455</td>
+      <td>2.014</td>
+      <td>0.091</td>
+      <td>0.065</td>
+      <td>257.0</td>
+      <td>257.0</td>
+      <td>269.0</td>
+      <td>295.0</td>
+      <td>1.0</td>
+      <td>-2.085137</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.plot_forest(az_model4, var_names=["alpha_g"])
+plt.show()
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_45_0.png)
+    
+
+
+
+```python
+az.summary(az_model4, var_names=["beta_g"]).assign(real_values=real_beta_g)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hpd_3%</th>
+      <th>hpd_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>real_values</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>beta_g[0]</th>
+      <td>-2.552</td>
+      <td>0.045</td>
+      <td>-2.633</td>
+      <td>-2.464</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>4058.0</td>
+      <td>4058.0</td>
+      <td>4060.0</td>
+      <td>2405.0</td>
+      <td>1.0</td>
+      <td>-2.634413</td>
+    </tr>
+    <tr>
+      <th>beta_g[1]</th>
+      <td>-2.887</td>
+      <td>0.049</td>
+      <td>-2.980</td>
+      <td>-2.798</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>4987.0</td>
+      <td>4985.0</td>
+      <td>4991.0</td>
+      <td>2794.0</td>
+      <td>1.0</td>
+      <td>-2.892255</td>
+    </tr>
+    <tr>
+      <th>beta_g[2]</th>
+      <td>-0.563</td>
+      <td>0.050</td>
+      <td>-0.664</td>
+      <td>-0.474</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3627.0</td>
+      <td>3607.0</td>
+      <td>3662.0</td>
+      <td>2532.0</td>
+      <td>1.0</td>
+      <td>-0.558722</td>
+    </tr>
+    <tr>
+      <th>beta_g[3]</th>
+      <td>-2.240</td>
+      <td>0.043</td>
+      <td>-2.324</td>
+      <td>-2.164</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>5926.0</td>
+      <td>5915.0</td>
+      <td>5923.0</td>
+      <td>2951.0</td>
+      <td>1.0</td>
+      <td>-2.201467</td>
+    </tr>
+    <tr>
+      <th>beta_g[4]</th>
+      <td>-1.284</td>
+      <td>0.045</td>
+      <td>-1.365</td>
+      <td>-1.189</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>4700.0</td>
+      <td>4678.0</td>
+      <td>4698.0</td>
+      <td>2743.0</td>
+      <td>1.0</td>
+      <td>-1.305132</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.plot_forest(az_model4, var_names=["beta_g"])
+plt.show()
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_47_0.png)
+    
+
+
+
+```python
+az.summary(az_model4, var_names=["gamma_c"]).assign(real_values=real_gamma_c)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hpd_3%</th>
+      <th>hpd_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>real_values</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>gamma_c[0]</th>
+      <td>5.528</td>
+      <td>1.464</td>
+      <td>2.643</td>
+      <td>8.114</td>
+      <td>0.091</td>
+      <td>0.065</td>
+      <td>257.0</td>
+      <td>257.0</td>
+      <td>268.0</td>
+      <td>288.0</td>
+      <td>1.0</td>
+      <td>6.981657</td>
+    </tr>
+    <tr>
+      <th>gamma_c[1]</th>
+      <td>0.043</td>
+      <td>1.463</td>
+      <td>-2.768</td>
+      <td>2.700</td>
+      <td>0.091</td>
+      <td>0.065</td>
+      <td>257.0</td>
+      <td>257.0</td>
+      <td>269.0</td>
+      <td>298.0</td>
+      <td>1.0</td>
+      <td>1.292379</td>
+    </tr>
+    <tr>
+      <th>gamma_c[2]</th>
+      <td>-0.023</td>
+      <td>1.468</td>
+      <td>-2.928</td>
+      <td>2.551</td>
+      <td>0.091</td>
+      <td>0.065</td>
+      <td>258.0</td>
+      <td>258.0</td>
+      <td>269.0</td>
+      <td>303.0</td>
+      <td>1.0</td>
+      <td>1.296947</td>
+    </tr>
+    <tr>
+      <th>gamma_c[3]</th>
+      <td>-4.242</td>
+      <td>1.467</td>
+      <td>-7.167</td>
+      <td>-1.686</td>
+      <td>0.091</td>
+      <td>0.069</td>
+      <td>257.0</td>
+      <td>225.0</td>
+      <td>268.0</td>
+      <td>319.0</td>
+      <td>1.0</td>
+      <td>-2.940034</td>
+    </tr>
+    <tr>
+      <th>gamma_c[4]</th>
+      <td>-3.311</td>
+      <td>1.463</td>
+      <td>-6.046</td>
+      <td>-0.629</td>
+      <td>0.091</td>
+      <td>0.070</td>
+      <td>257.0</td>
+      <td>219.0</td>
+      <td>268.0</td>
+      <td>295.0</td>
+      <td>1.0</td>
+      <td>-1.895896</td>
+    </tr>
+    <tr>
+      <th>gamma_c[5]</th>
+      <td>0.572</td>
+      <td>1.467</td>
+      <td>-2.475</td>
+      <td>3.019</td>
+      <td>0.091</td>
+      <td>0.065</td>
+      <td>258.0</td>
+      <td>258.0</td>
+      <td>269.0</td>
+      <td>292.0</td>
+      <td>1.0</td>
+      <td>1.732326</td>
+    </tr>
+    <tr>
+      <th>gamma_c[6]</th>
+      <td>-1.580</td>
+      <td>1.468</td>
+      <td>-4.443</td>
+      <td>1.038</td>
+      <td>0.092</td>
+      <td>0.072</td>
+      <td>256.0</td>
+      <td>209.0</td>
+      <td>267.0</td>
+      <td>307.0</td>
+      <td>1.0</td>
+      <td>-0.374273</td>
+    </tr>
+    <tr>
+      <th>gamma_c[7]</th>
+      <td>1.762</td>
+      <td>1.466</td>
+      <td>-1.054</td>
+      <td>4.405</td>
+      <td>0.092</td>
+      <td>0.065</td>
+      <td>255.0</td>
+      <td>255.0</td>
+      <td>267.0</td>
+      <td>289.0</td>
+      <td>1.0</td>
+      <td>2.936844</td>
+    </tr>
+    <tr>
+      <th>gamma_c[8]</th>
+      <td>3.383</td>
+      <td>1.466</td>
+      <td>0.610</td>
+      <td>6.067</td>
+      <td>0.092</td>
+      <td>0.065</td>
+      <td>256.0</td>
+      <td>256.0</td>
+      <td>268.0</td>
+      <td>301.0</td>
+      <td>1.0</td>
+      <td>4.784765</td>
+    </tr>
+    <tr>
+      <th>gamma_c[9]</th>
+      <td>-4.818</td>
+      <td>1.466</td>
+      <td>-7.800</td>
+      <td>-2.308</td>
+      <td>0.091</td>
+      <td>0.069</td>
+      <td>259.0</td>
+      <td>230.0</td>
+      <td>271.0</td>
+      <td>303.0</td>
+      <td>1.0</td>
+      <td>-3.605834</td>
+    </tr>
+    <tr>
+      <th>gamma_c[10]</th>
+      <td>-5.487</td>
+      <td>1.467</td>
+      <td>-8.319</td>
+      <td>-2.868</td>
+      <td>0.092</td>
+      <td>0.068</td>
+      <td>257.0</td>
+      <td>231.0</td>
+      <td>269.0</td>
+      <td>304.0</td>
+      <td>1.0</td>
+      <td>-4.129107</td>
+    </tr>
+    <tr>
+      <th>gamma_c[11]</th>
+      <td>1.955</td>
+      <td>1.466</td>
+      <td>-0.737</td>
+      <td>4.745</td>
+      <td>0.091</td>
+      <td>0.065</td>
+      <td>258.0</td>
+      <td>258.0</td>
+      <td>269.0</td>
+      <td>298.0</td>
+      <td>1.0</td>
+      <td>3.163037</td>
+    </tr>
+    <tr>
+      <th>gamma_c[12]</th>
+      <td>-1.517</td>
+      <td>1.467</td>
+      <td>-4.235</td>
+      <td>1.244</td>
+      <td>0.092</td>
+      <td>0.072</td>
+      <td>256.0</td>
+      <td>210.0</td>
+      <td>267.0</td>
+      <td>310.0</td>
+      <td>1.0</td>
+      <td>-0.116560</td>
+    </tr>
+    <tr>
+      <th>gamma_c[13]</th>
+      <td>0.827</td>
+      <td>1.464</td>
+      <td>-1.921</td>
+      <td>3.528</td>
+      <td>0.091</td>
+      <td>0.065</td>
+      <td>258.0</td>
+      <td>258.0</td>
+      <td>270.0</td>
+      <td>309.0</td>
+      <td>1.0</td>
+      <td>2.040857</td>
+    </tr>
+    <tr>
+      <th>gamma_c[14]</th>
+      <td>2.743</td>
+      <td>1.467</td>
+      <td>0.004</td>
+      <td>5.491</td>
+      <td>0.091</td>
+      <td>0.065</td>
+      <td>259.0</td>
+      <td>259.0</td>
+      <td>271.0</td>
+      <td>308.0</td>
+      <td>1.0</td>
+      <td>3.987525</td>
+    </tr>
+    <tr>
+      <th>gamma_c[15]</th>
+      <td>2.410</td>
+      <td>1.464</td>
+      <td>-0.430</td>
+      <td>5.024</td>
+      <td>0.091</td>
+      <td>0.064</td>
+      <td>260.0</td>
+      <td>260.0</td>
+      <td>271.0</td>
+      <td>311.0</td>
+      <td>1.0</td>
+      <td>3.850349</td>
+    </tr>
+    <tr>
+      <th>gamma_c[16]</th>
+      <td>-6.558</td>
+      <td>1.466</td>
+      <td>-9.230</td>
+      <td>-3.756</td>
+      <td>0.091</td>
+      <td>0.068</td>
+      <td>258.0</td>
+      <td>235.0</td>
+      <td>270.0</td>
+      <td>296.0</td>
+      <td>1.0</td>
+      <td>-5.274761</td>
+    </tr>
+    <tr>
+      <th>gamma_c[17]</th>
+      <td>0.583</td>
+      <td>1.465</td>
+      <td>-2.250</td>
+      <td>3.231</td>
+      <td>0.091</td>
+      <td>0.064</td>
+      <td>259.0</td>
+      <td>259.0</td>
+      <td>270.0</td>
+      <td>307.0</td>
+      <td>1.0</td>
+      <td>1.842918</td>
+    </tr>
+    <tr>
+      <th>gamma_c[18]</th>
+      <td>3.326</td>
+      <td>1.466</td>
+      <td>0.622</td>
+      <td>6.082</td>
+      <td>0.091</td>
+      <td>0.065</td>
+      <td>257.0</td>
+      <td>257.0</td>
+      <td>268.0</td>
+      <td>298.0</td>
+      <td>1.0</td>
+      <td>4.549074</td>
+    </tr>
+    <tr>
+      <th>gamma_c[19]</th>
+      <td>-1.843</td>
+      <td>1.467</td>
+      <td>-4.694</td>
+      <td>0.781</td>
+      <td>0.092</td>
+      <td>0.071</td>
+      <td>256.0</td>
+      <td>211.0</td>
+      <td>267.0</td>
+      <td>300.0</td>
+      <td>1.0</td>
+      <td>-0.587932</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.plot_forest(az_model4, var_names=["gamma_c"])
+plt.show()
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_49_0.png)
+    
+
+
+
+```python
+post_alpha_g = model4_trace.get_values(varname="alpha_g")
+post_gamma_c = model4_trace.get_values(varname="gamma_c")
+post_beta_g = model4_trace.get_values(varname="beta_g")
+post_mu_gc = model4_trace.get_values(varname="mu_gc")
+```
+
+
+```python
+logfc_data.shape
+```
+
+
+
+
+    (300, 5)
+
+
+
+
+```python
+post_mu_gc.shape
+```
+
+
+
+
+    (4000, 300)
+
+
+
+
+```python
+post_mu_mean = post_mu_gc.mean(axis=0)
+post_mu_hdi = np.array([az.hpd(x, credible_interval=0.89) for x in post_mu_gc.T])
+
+logfc_post_df = logfc_data.copy()
+logfc_post_df["post_logfc"] = post_mu_mean
+logfc_post_df["hpi_lower"] = [x[0] for x in post_mu_hdi]
+logfc_post_df["hpi_upper"] = [x[1] for x in post_mu_hdi]
+logfc_post_df
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>gene</th>
+      <th>cell_line</th>
+      <th>rna</th>
+      <th>sgrna_idx</th>
+      <th>logfc</th>
+      <th>post_logfc</th>
+      <th>hpi_lower</th>
+      <th>hpi_upper</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>geneA</td>
+      <td>cellA</td>
+      <td>-1.187443</td>
+      <td>0</td>
+      <td>7.516370</td>
+      <td>7.544614</td>
+      <td>7.390785</td>
+      <td>7.706855</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>geneA</td>
+      <td>cellB</td>
+      <td>0.299138</td>
+      <td>0</td>
+      <td>-1.184598</td>
+      <td>-1.734859</td>
+      <td>-1.879098</td>
+      <td>-1.604324</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>geneA</td>
+      <td>cellC</td>
+      <td>-0.947764</td>
+      <td>0</td>
+      <td>1.945419</td>
+      <td>1.381095</td>
+      <td>1.228576</td>
+      <td>1.537456</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>geneA</td>
+      <td>cellD</td>
+      <td>-1.843382</td>
+      <td>0</td>
+      <td>-0.861100</td>
+      <td>-0.552129</td>
+      <td>-0.737418</td>
+      <td>-0.380728</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>geneA</td>
+      <td>cellE</td>
+      <td>0.810589</td>
+      <td>0</td>
+      <td>-6.491923</td>
+      <td>-6.393723</td>
+      <td>-6.527592</td>
+      <td>-6.239647</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>295</th>
+      <td>geneE</td>
+      <td>cellP</td>
+      <td>1.219362</td>
+      <td>2</td>
+      <td>0.194254</td>
+      <td>0.127571</td>
+      <td>-0.022881</td>
+      <td>0.287405</td>
+    </tr>
+    <tr>
+      <th>296</th>
+      <td>geneE</td>
+      <td>cellQ</td>
+      <td>-0.840481</td>
+      <td>2</td>
+      <td>-5.967522</td>
+      <td>-6.196416</td>
+      <td>-6.337464</td>
+      <td>-6.040493</td>
+    </tr>
+    <tr>
+      <th>297</th>
+      <td>geneE</td>
+      <td>cellR</td>
+      <td>0.607882</td>
+      <td>2</td>
+      <td>-0.719954</td>
+      <td>-0.914405</td>
+      <td>-1.061922</td>
+      <td>-0.757333</td>
+    </tr>
+    <tr>
+      <th>298</th>
+      <td>geneE</td>
+      <td>cellS</td>
+      <td>0.429605</td>
+      <td>2</td>
+      <td>1.885927</td>
+      <td>2.057401</td>
+      <td>1.918837</td>
+      <td>2.200657</td>
+    </tr>
+    <tr>
+      <th>299</th>
+      <td>geneE</td>
+      <td>cellT</td>
+      <td>-1.014537</td>
+      <td>2</td>
+      <td>-1.022285</td>
+      <td>-1.258244</td>
+      <td>-1.408770</td>
+      <td>-1.101493</td>
+    </tr>
+  </tbody>
+</table>
+<p>300 rows × 8 columns</p>
+</div>
+
+
+
+
+```python
+(
+    gg.ggplot(logfc_post_df, gg.aes(x="cell_line"))
+    + gg.facet_wrap("gene", ncol=1, scales="free")
+    + gg.geom_linerange(
+        gg.aes(ymin="hpi_lower", ymax="hpi_upper"), position=gg.position_nudge(x=0.3)
+    )
+    + gg.geom_point(gg.aes(y="post_logfc"), position=gg.position_nudge(x=0.3), size=1)
+    + gg.geom_point(gg.aes(y="logfc"), position=gg.position_nudge(x=-0.3), color="blue")
+    + gg.scale_x_discrete(labels=[a.replace("cell", "") for a in cell_lines])
+    + gg.theme(subplots_adjust={"hspace": 0.25, "wspace": 0.25}, figure_size=(8, 20))
+    + gg.labs(x="cell lines", y="logFC", title="Posterior predictive check")
+)
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_54_0.png)
+    
+
+
+
+
+
+    <ggplot: (8769329310481)>
+
+
 
 
 ```python
@@ -1255,50 +2670,11 @@ A hierarchcial model will be used to pool information across genes and cell line
 
 ```
 
+---
 
-```python
+#### Notes
 
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
+- Model where some cell lines tend to have higher RNA expression.
 
 
 ```python
