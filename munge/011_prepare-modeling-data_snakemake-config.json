@@ -38,14 +38,14 @@
     "merge_data" :
     {
         "cores" : 1,
-        "mem"   : "1000",
-        "time"  : "00:15:00"
+        "mem"   : "2000",
+        "time"  : "00:25:00"
     },
     "combine_data" :
     {
         "partition": "priority",
         "cores" : 1,
-        "mem"   : "100000",
-        "time"  : "03:00:00"
+        "mem"   : "35000",
+        "time"  : "00:25:00"
     }
 }
