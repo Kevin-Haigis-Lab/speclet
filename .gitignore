@@ -216,5 +216,9 @@ data/
 .mustashe/
 cache/
 temp/
-modeling_data/
+modeling_data/*
 .snakemake/
+
+# Specific files to except from the rules above
+!modeling_data/depmap_modeling_dataframe_subsample.csv
+
