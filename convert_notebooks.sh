@@ -11,6 +11,5 @@ fi
 
 for ipynb in $DIR/*.ipynb
 do
-	echo $ipynb
-    # jupyter nbconvert --to markdown $ipynb
+    jupyter nbconvert --to markdown $ipynb
 done

@@ -9,6 +9,7 @@ import pymc3 as pm
 import arviz as az
 import seaborn as sns
 import matplotlib.pyplot as plt
+import string
 ```
 
 
@@ -70,7 +71,7 @@ data = pd.DataFrame({"rna": rna, "logfc": logfc})
 
 
 
-    <ggplot: (8786399322613)>
+    <ggplot: (8762697970041)>
 
 
 
@@ -96,8 +97,8 @@ with pm.Model() as model1:
     Initializing NUTS using jitter+adapt_diag...
     Multiprocess sampling (2 chains in 2 jobs)
     NUTS: [sigma, beta, alpha]
-    Sampling 2 chains, 0 divergences: 100%|██████████| 3000/3000 [00:01<00:00, 2023.34draws/s]
-    100%|██████████| 2000/2000 [00:02<00:00, 821.66it/s]
+    Sampling 2 chains, 0 divergences: 100%|██████████| 3000/3000 [00:02<00:00, 1480.79draws/s]
+    100%|██████████| 2000/2000 [00:02<00:00, 692.90it/s]
 
 
 
@@ -282,7 +283,7 @@ model1_preds["pred"] = pd.Categorical(
 
 
 
-    <ggplot: (8786398375625)>
+    <ggplot: (8762699362861)>
 
 
 
@@ -326,7 +327,7 @@ post_summary = pd.DataFrame(
 
 
 
-    <ggplot: (8786400363829)>
+    <ggplot: (8762699300897)>
 
 
 
@@ -357,8 +358,6 @@ Simulated values:
 
 
 ```python
-import string
-
 np.random.seed(RANDOM_SEED)
 
 num_cell_lines = 30
@@ -421,7 +420,7 @@ tidy_real_data = pd.DataFrame({"alpha": real_alpha, "beta": real_beta, "gene": g
 
 
 
-    <ggplot: (8786236796025)>
+    <ggplot: (8762699227713)>
 
 
 
@@ -455,9 +454,9 @@ with pm.Model() as model2:
     Initializing NUTS using jitter+adapt_diag...
     Multiprocess sampling (2 chains in 2 jobs)
     NUTS: [sigma, beta, alpha, sigma_beta, mu_beta, sigma_alpha, mu_alpha]
-    Sampling 2 chains, 2 divergences: 100%|██████████| 8000/8000 [00:11<00:00, 699.64draws/s]
+    Sampling 2 chains, 2 divergences: 100%|██████████| 8000/8000 [00:38<00:00, 208.94draws/s]
     There were 2 divergences after tuning. Increase `target_accept` or reparameterize.
-    100%|██████████| 4000/4000 [00:05<00:00, 713.01it/s]
+    100%|██████████| 4000/4000 [00:19<00:00, 200.90it/s]
 
 
 
@@ -937,17 +936,17 @@ post.head()
 
 
 ```python
-post['gene'] = [genes[i] for i in post.alpha_dim_0]
+post["gene"] = [genes[i] for i in post.alpha_dim_0]
 
 (
-    gg.ggplot(post) +
-    gg.geom_abline(gg.aes(slope="beta", intercept="alpha", color = "gene"), alpha=0.01)
-     + gg.geom_point(gg.aes(x="rna", y="logfc", color="gene"), data = tidy_data, size = 2)
+    gg.ggplot(post)
+    + gg.geom_abline(gg.aes(slope="beta", intercept="alpha", color="gene"), alpha=0.01)
+    + gg.geom_point(gg.aes(x="rna", y="logfc", color="gene"), data=tidy_data, size=2)
     + gg.geom_abline(
         gg.aes(slope="beta", intercept="alpha", color="gene"),
         data=tidy_real_data,
         linetype="--",
-        size=2
+        size=2,
     )
     + gg.labs(
         x="RNA expression", y="logFC", color="gene", title="Model 2 synthetic data"
@@ -964,7 +963,7 @@ post['gene'] = [genes[i] for i in post.alpha_dim_0]
 
 
 
-    <ggplot: (8786400825553)>
+    <ggplot: (8762698880705)>
 
 
 
@@ -974,26 +973,209 @@ post['gene'] = [genes[i] for i in post.alpha_dim_0]
 
 Model the logFC of multiple genes in multiple cell lines using a single predictor: RNA expression.
 A hierarchcial model will be used to pool information across genes and cell lines.
+There are repeated measure for logFC of a gene in each cell line, but only one measure of RNA seq per cell line per gene.
 
 **Note:** Need to include repeated measure of logFC per cell line (but only 1 measure of RNA expression...).
 
-$$
-logFC \sim Normal(\mu, \sigma) \\
-\mu_{g, c} = \alpha_{g, c} + \beta_{g, c} R \\
-\alpha_{g, c} \sim \mathcal{N}(\mu_\alpha, \sigma_\alpha) \\
-\mu_\alpha \sim \mathcal{N}(0, 10) \qquad \sigma_\alpha \sim \text{HalfNormal}(5) \\
-\beta{g, c} \sim \mathcal{N}(\mu_\beta, \sigma_\beta) \\
-\mu_\beta \sim \mathcal{N}(0, 10) \qquad \sigma_\beta \sim \text{HalfNormal}(5) \\
-\sigma \sim \text{HalfNormal}(5)
-$$
+Modeling options:
+
+- separate intercept and slope for cell line
+- single intercept and slope per gene that are each composed of a higher level model that varys by cell line
+
+$
+logFC_{g,c} \sim \mathcal{N}(\mu_{g,c}, \sigma_c) \\
+\quad \mu_{g,c} = \alpha_g + \beta_c \\
+\quad \quad \alpha_g \sim \mathcal{N}(\alpha, \sigma_\alpha) \\
+\quad \quad \quad \alpha = \gamma_0 + \gamma_1 R \\
+\quad \quad \quad \quad \gamma \sim \mathcal{N}(0, 5, \text{dim} = 2) \\
+\quad \quad \quad\sigma_\alpha \sim \text{Exp}(1) \\
+\quad \quad \beta_c \sim \mathcal{N}(\beta, \sigma_\beta) \\
+\quad \quad \quad \beta = \delta_0 + \delta_1 R \\
+\quad \quad \quad \quad \delta \sim \mathcal{N}(0, 5, \text{dim} = 2) \\
+\quad \quad \quad\sigma_\beta \sim \text{Exp}(1) \\
+\quad \sigma_c \sim \text{Exp}(\sigma) \\
+\quad \quad \sigma \sim \text{Exp}(1)
+$
 
 Simulated values:
 
 - number of cell lines: 30
+- number of logFC data points per gene per cell line: 3
 - number of genes: 5
-- $\mu_\alpha$ = -1, $\sigma_\alpha$ = 1
-- $\mu_\beta$ = -1, $\sigma_\beta$ = 2
-- $\sigma$ = 0.3
+- $\gamma = [0, 1]$
+- $\sigma_\alpha = 0.5$
+- $\delta = [0, 0]$
+- $\sigma_\beta = 1$
+- $\sigma = 1$
+
+Notes on above model:
+
+(Comments about about $\gamma$ is also true for $\delta$.)
+
+- what is currently represented by $\gamma$ should be two separate varaibles
+- should there be another level on top of $\gamma$?
+    - $\gamma \sim \mathcal{N}(\mu_\gamma, \sigma_\gamma) \quad \text{and} \quad \mu_\gamma \sim \mathcal{N}(0, 5) \quad \sigma_\gamma \sim \text{Exp}(1)$
+    - would then have a separate $\gamma$ per gene
+        - that's a varying intercept and a varying slope per gene
+
+
+```python
+np.random.seed(RANDOM_SEED)
+
+# Synthetic data parmeters
+num_cell_lines = 20
+num_logfc_datum = 3
+num_genes = 5
+
+# Real hyper-parameter values
+real_gamma = [0, 1]
+real_sigma_alpha = 0.5
+real_delta = [0, 0]
+real_sigma_beta = 1
+real_sigma = 1
+
+
+rna = np.random.normal(0, 1, num_cell_lines * num_genes)
+genes = ["gene" + a for a in string.ascii_uppercase[:num_genes]]
+cell_lines = ["cell" + a for a in string.ascii_uppercase[:num_cell_lines]]
+
+data = pd.DataFrame(
+    {
+        "rna": rna,
+        "gene": np.repeat(genes, num_cell_lines),
+        "cell_line": np.tile(cell_lines, num_genes),
+    }
+)
+
+data.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>rna</th>
+      <th>gene</th>
+      <th>cell_line</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>-1.249278</td>
+      <td>geneA</td>
+      <td>cellA</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>-0.260331</td>
+      <td>geneA</td>
+      <td>cellB</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.383793</td>
+      <td>geneA</td>
+      <td>cellC</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-0.385461</td>
+      <td>geneA</td>
+      <td>cellD</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-1.085137</td>
+      <td>geneA</td>
+      <td>cellE</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+alpha_gene = gamma[0] + gamma[1]
+mu = alpha + beta
+```
+
+
+    ---------------------------------------------------------------------------
+
+    NameError                                 Traceback (most recent call last)
+
+    <ipython-input-26-c75faf2b6737> in <module>
+    ----> 1 alpha_gene = gamma[0] + gamma[1]
+          2 mu = alpha + beta
+
+
+    NameError: name 'gamma' is not defined
+
+
+
+```python
+
+```
+
+
+```python
+
+```
+
+
+```python
+(
+    gg.ggplot(data, gg.aes("gene", "rna"))
+    + gg.geom_boxplot(gg.aes(color="gene", fill="gene"), alpha=0.1, outlier_shape="")
+    + gg.geom_jitter(gg.aes(color="gene"), width=0.3)
+    + gg.scale_y_continuous(expand=(0, 0, 0.02, 0))
+    + gg.scale_color_brewer(type="qual", palette="Set1", guide=False)
+    + gg.scale_fill_brewer(type="qual", palette="Set1", guide=False)
+    + gg.theme(axis_title_x=gg.element_blank())
+    + gg.labs(y="RNA expression (scaled)", title="Synthetic data RNA expression")
+)
+```
+
+
+```python
+
+```
+
+
+```python
+
+```
+
+
+```python
+
+```
+
+---
+
+Note:
+
+- model if there is correlation between RNA expression and cell lines (some cells tend to have higher RNA expression)
 
 
 ```python
