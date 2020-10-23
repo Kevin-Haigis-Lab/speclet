@@ -11,6 +11,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import string
 from itertools import product
+from numpy.random import normal, exponential
 ```
 
 
@@ -72,7 +73,7 @@ data = pd.DataFrame({"rna": rna, "logfc": logfc})
 
 
 
-    <ggplot: (8769487291493)>
+    <ggplot: (8779171034873)>
 
 
 
@@ -98,8 +99,8 @@ with pm.Model() as model1:
     Initializing NUTS using jitter+adapt_diag...
     Multiprocess sampling (2 chains in 2 jobs)
     NUTS: [sigma, beta, alpha]
-    Sampling 2 chains, 0 divergences: 100%|██████████| 3000/3000 [00:02<00:00, 1065.63draws/s]
-    100%|██████████| 2000/2000 [00:02<00:00, 797.61it/s]
+    Sampling 2 chains, 0 divergences: 100%|██████████| 3000/3000 [00:01<00:00, 1618.76draws/s]
+    100%|██████████| 2000/2000 [00:03<00:00, 635.46it/s]
 
 
 
@@ -284,7 +285,7 @@ model1_preds["pred"] = pd.Categorical(
 
 
 
-    <ggplot: (8769490396641)>
+    <ggplot: (8779174061189)>
 
 
 
@@ -328,7 +329,7 @@ post_summary = pd.DataFrame(
 
 
 
-    <ggplot: (8769489452853)>
+    <ggplot: (8779173590809)>
 
 
 
@@ -421,7 +422,7 @@ tidy_real_data = pd.DataFrame({"alpha": real_alpha, "beta": real_beta, "gene": g
 
 
 
-    <ggplot: (8769326550461)>
+    <ggplot: (8779009650193)>
 
 
 
@@ -455,9 +456,9 @@ with pm.Model() as model2:
     Initializing NUTS using jitter+adapt_diag...
     Multiprocess sampling (2 chains in 2 jobs)
     NUTS: [sigma, beta, alpha, sigma_beta, mu_beta, sigma_alpha, mu_alpha]
-    Sampling 2 chains, 2 divergences: 100%|██████████| 8000/8000 [00:08<00:00, 912.35draws/s] 
+    Sampling 2 chains, 2 divergences: 100%|██████████| 8000/8000 [00:11<00:00, 725.96draws/s]
     There were 2 divergences after tuning. Increase `target_accept` or reparameterize.
-    100%|██████████| 4000/4000 [00:04<00:00, 921.91it/s]
+    100%|██████████| 4000/4000 [00:05<00:00, 776.01it/s]
 
 
 
@@ -964,7 +965,7 @@ post["gene"] = [genes[i] for i in post.alpha_dim_0]
 
 
 
-    <ggplot: (8769325807021)>
+    <ggplot: (8779008895913)>
 
 
 
@@ -1207,7 +1208,7 @@ pos = gg.position_nudge(x=0.1)
 
 
 
-    <ggplot: (8769488932725)>
+    <ggplot: (8779173311677)>
 
 
 
@@ -1230,7 +1231,7 @@ merged_data = pd.merge(logfc_data, rna_data, how="inner", on=["gene", "cell_line
 
 
 
-    <ggplot: (8769488872769)>
+    <ggplot: (8779010163289)>
 
 
 
@@ -1300,7 +1301,7 @@ sigma_dists = pd.DataFrame(
 
 
 
-    <ggplot: (8769488847345)>
+    <ggplot: (8779010135737)>
 
 
 
@@ -1497,7 +1498,7 @@ logfc_data
 
 
 
-    <ggplot: (8769312674937)>
+    <ggplot: (8779010235881)>
 
 
 
@@ -1522,7 +1523,7 @@ logfc_data
 
 
 
-    <ggplot: (8769312313805)>
+    <ggplot: (8779172877457)>
 
 
 
@@ -1550,7 +1551,7 @@ logfc_data
 
 
 
-    <ggplot: (8769327027405)>
+    <ggplot: (8779171887881)>
 
 
 
@@ -1593,9 +1594,9 @@ with pm.Model() as model4:
     Initializing NUTS using jitter+adapt_diag...
     Multiprocess sampling (2 chains in 2 jobs)
     NUTS: [sigma, beta_g, gamma_c, alpha_g, sigma_beta, mu_beta, sigma_gamma, mu_gamma, sigma_alpha, mu_alpha]
-    Sampling 2 chains, 0 divergences: 100%|██████████| 8000/8000 [02:35<00:00, 51.46draws/s]
+    Sampling 2 chains, 0 divergences: 100%|██████████| 8000/8000 [02:53<00:00, 46.16draws/s]
     The number of effective samples is smaller than 10% for some parameters.
-    100%|██████████| 4000/4000 [00:05<00:00, 794.97it/s]
+    100%|██████████| 4000/4000 [00:06<00:00, 660.76it/s]
 
 
 
@@ -1795,6 +1796,9 @@ s
 
 
 
+I believe that the $\alpha_g$ values were poorly estimated because they do not add much information to the model.
+The other parameters fit well, but these have very wide posterior distributions.
+
 
 ```python
 az.summary(az_model4, var_names=["alpha_g"]).assign(real_values=real_alpha_g)
@@ -1925,7 +1929,7 @@ plt.show()
 
 
     
-![png](005_010_modeling_files/005_010_modeling_45_0.png)
+![png](005_010_modeling_files/005_010_modeling_46_0.png)
     
 
 
@@ -2059,7 +2063,7 @@ plt.show()
 
 
     
-![png](005_010_modeling_files/005_010_modeling_47_0.png)
+![png](005_010_modeling_files/005_010_modeling_48_0.png)
     
 
 
@@ -2418,7 +2422,7 @@ plt.show()
 
 
     
-![png](005_010_modeling_files/005_010_modeling_49_0.png)
+![png](005_010_modeling_files/005_010_modeling_50_0.png)
     
 
 
@@ -2428,34 +2432,7 @@ post_alpha_g = model4_trace.get_values(varname="alpha_g")
 post_gamma_c = model4_trace.get_values(varname="gamma_c")
 post_beta_g = model4_trace.get_values(varname="beta_g")
 post_mu_gc = model4_trace.get_values(varname="mu_gc")
-```
 
-
-```python
-logfc_data.shape
-```
-
-
-
-
-    (300, 5)
-
-
-
-
-```python
-post_mu_gc.shape
-```
-
-
-
-
-    (4000, 300)
-
-
-
-
-```python
 post_mu_mean = post_mu_gc.mean(axis=0)
 post_mu_hdi = np.array([az.hpd(x, credible_interval=0.89) for x in post_mu_gc.T])
 
@@ -2644,14 +2621,1696 @@ logfc_post_df
 
 
     
-![png](005_010_modeling_files/005_010_modeling_54_0.png)
+![png](005_010_modeling_files/005_010_modeling_52_0.png)
     
 
 
 
 
 
-    <ggplot: (8769329310481)>
+    <ggplot: (8779008889113)>
+
+
+
+---
+
+## Model 5. Move the varying gene intercept into a higher level
+
+Model the logFC for knocking-out a gene $g$ in cell line $c$ with sgRNA $s$.
+Use a varying intercept for the sgRNA and cell line.
+Include the target gene as a varying intercept for the level of the intercept for the sgRNA.
+
+$
+logFC_{s,g,c} \sim \mathcal{N}(\mu_{s,g,c}, \sigma) \\
+\quad \mu_{s,g,c} = \alpha_s + \beta_c \\
+\qquad \alpha_s \sim \mathcal{N}(\mu_\alpha, \sigma_\alpha) \\
+\qquad \quad \mu_\alpha = \epsilon_g \\
+\qquad \qquad \epsilon_g \sim \mathcal{N}(\mu_\epsilon, \sigma_\epsilon) \\
+\qquad \qquad \quad \mu_\epsilon \sim \mathcal{N}(0, 5) \quad \sigma_\epsilon \sim \text{Exp(1)} \\
+\qquad \quad \sigma_\alpha \sim \text{Exp}(1) \\
+\qquad \beta_c \sim \mathcal{N}(\mu_\beta, \sigma_\beta) \\
+\qquad \quad \mu_\beta \sim \mathcal{N}(0, 5) \quad \sigma_\beta \sim \text{Exp}(1) \\
+\quad \sigma \sim \text{Exp}(1)
+$
+
+Simulated values:
+
+- number of cell lines: 20
+- number of genes: 5
+- number of repeated measures: 4
+- manually define the values for each sgRNA in $\alpha_s$
+- $\mu_\beta = 0$, $\sigma_\beta = 1$
+- $\sigma = 0.5$
+
+
+```python
+np.random.seed(RANDOM_SEED)
+
+# Data parameters.
+num_cell_lines = 20
+num_genes = 5
+num_sgrna_per_gene = list(range(1, num_genes + 1))  # Different number of guides.
+num_sgRNA = sum(num_sgrna_per_gene)
+
+# Model parameters.
+real_params = {
+    "mu_beta": 0,
+    "sigma_beta": 1,
+    "sigma": 0.5,
+    "alpha_s": [
+        -0.4,
+        -0.2,
+        -0.3,
+        0,
+        -0.5,
+        -0.6,
+        -1,
+        -1.2,
+        -1.7,
+        -0.8,
+        2,
+        1.7,
+        2.4,
+        2.1,
+        0,
+    ],
+}
+
+real_params["beta_c"] = normal(
+    real_params["mu_beta"], real_params["sigma_beta"], num_cell_lines
+)
+
+# Check to make sure therre are enough values.
+if len(real_params["alpha_s"]) != sum(num_sgrna_per_gene):
+    raise Exception(
+        f"Incorrect number of values for `alpha_s`: have {len(real_params['alpha_s'])}; need {sum(num_sgrna_per_gene)}"
+    )
+
+
+def alphabet_list(n, prefix=""):
+    if n > len(string.ascii_uppercase):
+        raise Exception(f"Max number of values is {len(string.ascii_uppercase)}")
+    return [prefix + a for a in string.ascii_uppercase[:n]]
+
+
+def make_cat(df, col, categories=None, ordered=None):
+    df[col] = pd.Categorical(df[col], categories=categories)
+    return df
+
+
+cell_lines = alphabet_list(num_cell_lines, "cell")
+genes = alphabet_list(num_genes, "gene")
+guides = ["sgRNA_" + str(i) for i in range(sum(num_sgrna_per_gene))]
+
+alpha_s_table = pd.DataFrame(
+    {
+        "gene": np.repeat(genes, num_sgrna_per_gene),
+        "sgRNA": guides,
+        "alpha_s": real_params["alpha_s"],
+    }
+)
+alpha_s_table = make_cat(alpha_s_table, "gene", categories=genes)
+alpha_s_table = make_cat(alpha_s_table, "sgRNA", categories=guides)
+
+data = pd.DataFrame(
+    product(genes, cell_lines), columns=["gene", "cell_line"], dtype="category"
+)
+data = pd.merge(data, alpha_s_table[["gene", "sgRNA"]], how="right", on="gene")
+data = data.reset_index(drop=True)
+data = make_cat(data, "cell_line", categories=cell_lines)
+data = make_cat(data, "gene", categories=genes)
+data = make_cat(data, "sgRNA", categories=guides)
+
+data["logfc"] = np.nan
+for i in range(len(data)):
+    s = data["sgRNA"].cat.codes[i]
+    c = data["cell_line"].cat.codes[i]
+    logfc = normal(
+        real_params["alpha_s"][s] + real_params["beta_c"][c], real_params["sigma"]
+    )
+    data.loc[i, "logfc"] = logfc
+
+data.head(10)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>gene</th>
+      <th>cell_line</th>
+      <th>sgRNA</th>
+      <th>logfc</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>geneA</td>
+      <td>cellA</td>
+      <td>sgRNA_0</td>
+      <td>-1.007554</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>geneA</td>
+      <td>cellB</td>
+      <td>sgRNA_0</td>
+      <td>-1.539458</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>geneA</td>
+      <td>cellC</td>
+      <td>sgRNA_0</td>
+      <td>0.290946</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>geneA</td>
+      <td>cellD</td>
+      <td>sgRNA_0</td>
+      <td>-0.027282</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>geneA</td>
+      <td>cellE</td>
+      <td>sgRNA_0</td>
+      <td>-1.583125</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>geneA</td>
+      <td>cellF</td>
+      <td>sgRNA_0</td>
+      <td>1.518616</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>geneA</td>
+      <td>cellG</td>
+      <td>sgRNA_0</td>
+      <td>-0.442271</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>geneA</td>
+      <td>cellH</td>
+      <td>sgRNA_0</td>
+      <td>0.142635</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>geneA</td>
+      <td>cellI</td>
+      <td>sgRNA_0</td>
+      <td>-1.680378</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>geneA</td>
+      <td>cellJ</td>
+      <td>sgRNA_0</td>
+      <td>-1.108248</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+(
+    gg.ggplot(data, gg.aes(x="gene", y="logfc"))
+    + gg.geom_boxplot(outlier_color="")
+    + gg.geom_jitter(gg.aes(color="sgRNA"), width=0.2, size=1, alpha=0.7)
+    + gg.scale_color_discrete()
+    + gg.labs(x="", y="logFC", title="Synthetic data")
+)
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_56_0.png)
+    
+
+
+
+
+
+    <ggplot: (8779171864173)>
+
+
+
+
+```python
+(
+    gg.ggplot(data, gg.aes(x="sgRNA", y="logfc"))
+    + gg.geom_boxplot(gg.aes(color="gene"), outlier_color="")
+    + gg.geom_jitter(gg.aes(color="gene"), width=0.2, size=1, alpha=0.7)
+    + gg.scale_color_discrete()
+    + gg.scale_x_discrete(labels=[a.replace("sgRNA_", "") for a in guides])
+    + gg.theme(figure_size=(12, 5))
+    + gg.labs(x="", y="logFC", title="Synthetic data")
+)
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_57_0.png)
+    
+
+
+
+
+
+    <ggplot: (8779105775297)>
+
+
+
+
+```python
+(
+    gg.ggplot(data, gg.aes(x="cell_line", y="logfc"))
+    + gg.geom_boxplot(outlier_color="")
+    + gg.geom_jitter(gg.aes(color="gene"), width=0.2, size=1, alpha=0.7)
+    + gg.scale_color_discrete()
+    + gg.theme(figure_size=(12, 5))
+    + gg.labs(x="", y="logFC", title="Synthetic data")
+)
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_58_0.png)
+    
+
+
+
+
+
+    <ggplot: (8779102786933)>
+
+
+
+This model samples very slowly and only gets a few effective samples (~200) for some of the higher-level parameters.
+Taking more samples fixes this problem, but for experimental purposes, the posterior distributions are actually quite accurate (i.e. taking more samples adds more effective samples for the higher-level parameters, but doesn't really change the shape of the posteriors).
+
+
+```python
+sgrna_idx = data["sgRNA"].cat.codes.to_list()
+gene_idx = data["gene"].cat.codes.to_list()
+cell_line_idx = data["cell_line"].cat.codes.to_list()
+
+sgrna_to_gene_idx = alpha_s_table["gene"].cat.codes.to_list()
+
+with pm.Model() as model5:
+    # Hyper-priors
+    mu_epsilon = pm.Normal("mu_epsilon", 0, 5)
+    sigma_epsilon = pm.Exponential("sigma_epsilon", 1)
+    sigma_alpha = pm.Exponential("sigma_alpha", 1)
+    mu_beta = pm.Normal("mu_beta", 0, 5)
+    sigma_beta = pm.Exponential("sigma_beta", 1)
+
+    # sgRNA level
+    epsilon_g = pm.Normal("epsilon_g", mu_epsilon, sigma_epsilon, shape=num_genes)
+    mu_alpha = epsilon_g[sgrna_to_gene_idx]
+
+    # Main level priors
+    alpha_s = pm.Normal("alpha_s", mu_alpha, sigma_alpha, shape=num_sgRNA)
+    beta_c = pm.Normal("beta_c", mu_beta, sigma_beta, shape=num_cell_lines)
+
+    # Main level
+    mu_sgc = pm.Deterministic("mu_sgc", alpha_s[sgrna_idx] + beta_c[cell_line_idx])
+    sigma = pm.Exponential("sigma", 1)
+
+    # Likelihood
+    logfc = pm.Normal("logfc", mu_sgc, sigma, observed=data.logfc)
+
+    # Sampling
+    model5_prior_check = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
+    model5_trace = pm.sample(3000, tune=2000)
+    model5_post_check = pm.sample_posterior_predictive(
+        model5_trace, random_seed=RANDOM_SEED
+    )
+```
+
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using jitter+adapt_diag...
+    Multiprocess sampling (2 chains in 2 jobs)
+    NUTS: [sigma, beta_c, alpha_s, epsilon_g, sigma_beta, mu_beta, sigma_alpha, sigma_epsilon, mu_epsilon]
+    Sampling 2 chains, 3 divergences: 100%|██████████| 44000/44000 [12:20<00:00, 59.43draws/s] 
+    There were 2 divergences after tuning. Increase `target_accept` or reparameterize.
+    The acceptance probability does not match the target. It is 0.8919250649269245, but should be close to 0.8. Try to increase the number of tuning steps.
+    There was 1 divergence after tuning. Increase `target_accept` or reparameterize.
+    The number of effective samples is smaller than 10% for some parameters.
+    100%|██████████| 40000/40000 [00:59<00:00, 673.75it/s]
+
+
+
+```python
+pm.model_to_graphviz(model5)
+```
+
+
+
+
+    
+![svg](005_010_modeling_files/005_010_modeling_61_0.svg)
+    
+
+
+
+
+```python
+az_model5 = az.from_pymc3(
+    trace=model5_trace, prior=model5_prior_check, posterior_predictive=model5_post_check
+)
+```
+
+
+```python
+az.summary(az_model5, var_names=["alpha_s"]).assign(
+    real_values=alpha_s_table["alpha_s"].values
+)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hpd_3%</th>
+      <th>hpd_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>real_values</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>alpha_s[0]</th>
+      <td>-0.440</td>
+      <td>3.475</td>
+      <td>-6.733</td>
+      <td>6.525</td>
+      <td>0.092</td>
+      <td>0.065</td>
+      <td>1411.0</td>
+      <td>1411.0</td>
+      <td>1415.0</td>
+      <td>1643.0</td>
+      <td>1.0</td>
+      <td>-0.4</td>
+    </tr>
+    <tr>
+      <th>alpha_s[1]</th>
+      <td>-0.172</td>
+      <td>3.475</td>
+      <td>-6.443</td>
+      <td>6.817</td>
+      <td>0.092</td>
+      <td>0.065</td>
+      <td>1412.0</td>
+      <td>1412.0</td>
+      <td>1415.0</td>
+      <td>1644.0</td>
+      <td>1.0</td>
+      <td>-0.2</td>
+    </tr>
+    <tr>
+      <th>alpha_s[2]</th>
+      <td>-0.084</td>
+      <td>3.475</td>
+      <td>-6.282</td>
+      <td>6.975</td>
+      <td>0.093</td>
+      <td>0.065</td>
+      <td>1411.0</td>
+      <td>1411.0</td>
+      <td>1414.0</td>
+      <td>1634.0</td>
+      <td>1.0</td>
+      <td>-0.3</td>
+    </tr>
+    <tr>
+      <th>alpha_s[3]</th>
+      <td>0.121</td>
+      <td>3.474</td>
+      <td>-6.127</td>
+      <td>7.153</td>
+      <td>0.093</td>
+      <td>0.065</td>
+      <td>1411.0</td>
+      <td>1409.0</td>
+      <td>1414.0</td>
+      <td>1646.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>alpha_s[4]</th>
+      <td>-0.388</td>
+      <td>3.475</td>
+      <td>-6.604</td>
+      <td>6.678</td>
+      <td>0.092</td>
+      <td>0.065</td>
+      <td>1412.0</td>
+      <td>1412.0</td>
+      <td>1416.0</td>
+      <td>1634.0</td>
+      <td>1.0</td>
+      <td>-0.5</td>
+    </tr>
+    <tr>
+      <th>alpha_s[5]</th>
+      <td>-0.558</td>
+      <td>3.475</td>
+      <td>-6.772</td>
+      <td>6.491</td>
+      <td>0.092</td>
+      <td>0.065</td>
+      <td>1411.0</td>
+      <td>1411.0</td>
+      <td>1415.0</td>
+      <td>1649.0</td>
+      <td>1.0</td>
+      <td>-0.6</td>
+    </tr>
+    <tr>
+      <th>alpha_s[6]</th>
+      <td>-0.972</td>
+      <td>3.476</td>
+      <td>-7.254</td>
+      <td>6.031</td>
+      <td>0.093</td>
+      <td>0.065</td>
+      <td>1410.0</td>
+      <td>1410.0</td>
+      <td>1413.0</td>
+      <td>1652.0</td>
+      <td>1.0</td>
+      <td>-1.0</td>
+    </tr>
+    <tr>
+      <th>alpha_s[7]</th>
+      <td>-1.099</td>
+      <td>3.474</td>
+      <td>-7.318</td>
+      <td>5.937</td>
+      <td>0.093</td>
+      <td>0.065</td>
+      <td>1411.0</td>
+      <td>1411.0</td>
+      <td>1414.0</td>
+      <td>1628.0</td>
+      <td>1.0</td>
+      <td>-1.2</td>
+    </tr>
+    <tr>
+      <th>alpha_s[8]</th>
+      <td>-1.816</td>
+      <td>3.475</td>
+      <td>-8.049</td>
+      <td>5.236</td>
+      <td>0.092</td>
+      <td>0.065</td>
+      <td>1411.0</td>
+      <td>1411.0</td>
+      <td>1415.0</td>
+      <td>1659.0</td>
+      <td>1.0</td>
+      <td>-1.7</td>
+    </tr>
+    <tr>
+      <th>alpha_s[9]</th>
+      <td>-0.804</td>
+      <td>3.474</td>
+      <td>-6.992</td>
+      <td>6.251</td>
+      <td>0.093</td>
+      <td>0.065</td>
+      <td>1410.0</td>
+      <td>1410.0</td>
+      <td>1413.0</td>
+      <td>1645.0</td>
+      <td>1.0</td>
+      <td>-0.8</td>
+    </tr>
+    <tr>
+      <th>alpha_s[10]</th>
+      <td>2.089</td>
+      <td>3.475</td>
+      <td>-4.290</td>
+      <td>8.976</td>
+      <td>0.093</td>
+      <td>0.071</td>
+      <td>1410.0</td>
+      <td>1197.0</td>
+      <td>1413.0</td>
+      <td>1646.0</td>
+      <td>1.0</td>
+      <td>2.0</td>
+    </tr>
+    <tr>
+      <th>alpha_s[11]</th>
+      <td>1.730</td>
+      <td>3.475</td>
+      <td>-4.469</td>
+      <td>8.796</td>
+      <td>0.092</td>
+      <td>0.071</td>
+      <td>1412.0</td>
+      <td>1209.0</td>
+      <td>1415.0</td>
+      <td>1627.0</td>
+      <td>1.0</td>
+      <td>1.7</td>
+    </tr>
+    <tr>
+      <th>alpha_s[12]</th>
+      <td>2.376</td>
+      <td>3.475</td>
+      <td>-3.871</td>
+      <td>9.389</td>
+      <td>0.093</td>
+      <td>0.071</td>
+      <td>1411.0</td>
+      <td>1193.0</td>
+      <td>1414.0</td>
+      <td>1641.0</td>
+      <td>1.0</td>
+      <td>2.4</td>
+    </tr>
+    <tr>
+      <th>alpha_s[13]</th>
+      <td>2.016</td>
+      <td>3.475</td>
+      <td>-4.257</td>
+      <td>9.015</td>
+      <td>0.093</td>
+      <td>0.071</td>
+      <td>1410.0</td>
+      <td>1199.0</td>
+      <td>1413.0</td>
+      <td>1653.0</td>
+      <td>1.0</td>
+      <td>2.1</td>
+    </tr>
+    <tr>
+      <th>alpha_s[14]</th>
+      <td>0.119</td>
+      <td>3.475</td>
+      <td>-6.145</td>
+      <td>7.123</td>
+      <td>0.092</td>
+      <td>0.066</td>
+      <td>1412.0</td>
+      <td>1407.0</td>
+      <td>1415.0</td>
+      <td>1647.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.summary(az_model5, var_names="sigma_beta").assign(
+    real_value=real_params["sigma_beta"]
+)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hpd_3%</th>
+      <th>hpd_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>real_value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>sigma_beta</th>
+      <td>1.029</td>
+      <td>0.178</td>
+      <td>0.718</td>
+      <td>1.357</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>8880.0</td>
+      <td>8756.0</td>
+      <td>9129.0</td>
+      <td>10531.0</td>
+      <td>1.0</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.summary(az_model5, var_names=["epsilon_g"]).assign(
+    real_value=alpha_s_table.groupby("gene").mean().alpha_s.values
+)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hpd_3%</th>
+      <th>hpd_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>real_value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>epsilon_g[0]</th>
+      <td>-0.309</td>
+      <td>3.520</td>
+      <td>-7.240</td>
+      <td>6.190</td>
+      <td>0.092</td>
+      <td>0.065</td>
+      <td>1455.0</td>
+      <td>1455.0</td>
+      <td>1457.0</td>
+      <td>1722.0</td>
+      <td>1.0</td>
+      <td>-0.400000</td>
+    </tr>
+    <tr>
+      <th>epsilon_g[1]</th>
+      <td>-0.103</td>
+      <td>3.501</td>
+      <td>-6.598</td>
+      <td>6.749</td>
+      <td>0.092</td>
+      <td>0.065</td>
+      <td>1433.0</td>
+      <td>1433.0</td>
+      <td>1435.0</td>
+      <td>1710.0</td>
+      <td>1.0</td>
+      <td>-0.250000</td>
+    </tr>
+    <tr>
+      <th>epsilon_g[2]</th>
+      <td>-0.238</td>
+      <td>3.488</td>
+      <td>-6.708</td>
+      <td>6.620</td>
+      <td>0.092</td>
+      <td>0.065</td>
+      <td>1427.0</td>
+      <td>1427.0</td>
+      <td>1430.0</td>
+      <td>1663.0</td>
+      <td>1.0</td>
+      <td>-0.366667</td>
+    </tr>
+    <tr>
+      <th>epsilon_g[3]</th>
+      <td>-1.033</td>
+      <td>3.486</td>
+      <td>-7.198</td>
+      <td>6.104</td>
+      <td>0.093</td>
+      <td>0.065</td>
+      <td>1419.0</td>
+      <td>1419.0</td>
+      <td>1422.0</td>
+      <td>1657.0</td>
+      <td>1.0</td>
+      <td>-1.175000</td>
+    </tr>
+    <tr>
+      <th>epsilon_g[4]</th>
+      <td>1.499</td>
+      <td>3.491</td>
+      <td>-5.054</td>
+      <td>8.275</td>
+      <td>0.092</td>
+      <td>0.070</td>
+      <td>1425.0</td>
+      <td>1238.0</td>
+      <td>1428.0</td>
+      <td>1660.0</td>
+      <td>1.0</td>
+      <td>1.640000</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.plot_trace(az_model5, var_names=["epsilon_g"])
+plt.show()
+```
+
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_66_1.png)
+    
+
+
+
+```python
+az.summary(az_model5, var_names=["sigma_epsilon", "mu_epsilon"])
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hpd_3%</th>
+      <th>hpd_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>sigma_epsilon</th>
+      <td>1.177</td>
+      <td>0.507</td>
+      <td>0.429</td>
+      <td>2.141</td>
+      <td>0.006</td>
+      <td>0.004</td>
+      <td>7419.0</td>
+      <td>7419.0</td>
+      <td>7136.0</td>
+      <td>6557.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>mu_epsilon</th>
+      <td>-0.035</td>
+      <td>3.473</td>
+      <td>-6.646</td>
+      <td>6.648</td>
+      <td>0.091</td>
+      <td>0.065</td>
+      <td>1442.0</td>
+      <td>1442.0</td>
+      <td>1444.0</td>
+      <td>1727.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.plot_forest(az_model5, var_names=["sigma_epsilon", "mu_epsilon"])
+plt.show()
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_68_0.png)
+    
+
+
+
+```python
+az.summary(az_model5, var_names=["beta_c"]).assign(real_value=real_params["beta_c"])
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hpd_3%</th>
+      <th>hpd_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>real_value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>beta_c[0]</th>
+      <td>-1.309</td>
+      <td>3.475</td>
+      <td>-8.332</td>
+      <td>4.937</td>
+      <td>0.093</td>
+      <td>0.070</td>
+      <td>1411.0</td>
+      <td>1232.0</td>
+      <td>1414.0</td>
+      <td>1643.0</td>
+      <td>1.0</td>
+      <td>-1.249278</td>
+    </tr>
+    <tr>
+      <th>beta_c[1]</th>
+      <td>-0.191</td>
+      <td>3.476</td>
+      <td>-7.247</td>
+      <td>6.044</td>
+      <td>0.092</td>
+      <td>0.066</td>
+      <td>1412.0</td>
+      <td>1397.0</td>
+      <td>1416.0</td>
+      <td>1649.0</td>
+      <td>1.0</td>
+      <td>-0.260331</td>
+    </tr>
+    <tr>
+      <th>beta_c[2]</th>
+      <td>0.099</td>
+      <td>3.475</td>
+      <td>-6.947</td>
+      <td>6.324</td>
+      <td>0.093</td>
+      <td>0.065</td>
+      <td>1411.0</td>
+      <td>1411.0</td>
+      <td>1414.0</td>
+      <td>1637.0</td>
+      <td>1.0</td>
+      <td>0.383793</td>
+    </tr>
+    <tr>
+      <th>beta_c[3]</th>
+      <td>-0.258</td>
+      <td>3.476</td>
+      <td>-7.268</td>
+      <td>6.011</td>
+      <td>0.093</td>
+      <td>0.066</td>
+      <td>1411.0</td>
+      <td>1383.0</td>
+      <td>1414.0</td>
+      <td>1643.0</td>
+      <td>1.0</td>
+      <td>-0.385461</td>
+    </tr>
+    <tr>
+      <th>beta_c[4]</th>
+      <td>-1.040</td>
+      <td>3.476</td>
+      <td>-8.052</td>
+      <td>5.214</td>
+      <td>0.093</td>
+      <td>0.069</td>
+      <td>1411.0</td>
+      <td>1259.0</td>
+      <td>1414.0</td>
+      <td>1640.0</td>
+      <td>1.0</td>
+      <td>-1.085137</td>
+    </tr>
+    <tr>
+      <th>beta_c[5]</th>
+      <td>2.198</td>
+      <td>3.476</td>
+      <td>-4.839</td>
+      <td>8.452</td>
+      <td>0.093</td>
+      <td>0.065</td>
+      <td>1410.0</td>
+      <td>1410.0</td>
+      <td>1413.0</td>
+      <td>1638.0</td>
+      <td>1.0</td>
+      <td>2.327219</td>
+    </tr>
+    <tr>
+      <th>beta_c[6]</th>
+      <td>0.244</td>
+      <td>3.476</td>
+      <td>-6.590</td>
+      <td>6.685</td>
+      <td>0.093</td>
+      <td>0.065</td>
+      <td>1412.0</td>
+      <td>1412.0</td>
+      <td>1415.0</td>
+      <td>1642.0</td>
+      <td>1.0</td>
+      <td>0.430793</td>
+    </tr>
+    <tr>
+      <th>beta_c[7]</th>
+      <td>0.374</td>
+      <td>3.475</td>
+      <td>-6.467</td>
+      <td>6.798</td>
+      <td>0.093</td>
+      <td>0.065</td>
+      <td>1411.0</td>
+      <td>1411.0</td>
+      <td>1414.0</td>
+      <td>1634.0</td>
+      <td>1.0</td>
+      <td>0.432316</td>
+    </tr>
+    <tr>
+      <th>beta_c[8]</th>
+      <td>-1.010</td>
+      <td>3.476</td>
+      <td>-7.980</td>
+      <td>5.289</td>
+      <td>0.093</td>
+      <td>0.069</td>
+      <td>1411.0</td>
+      <td>1264.0</td>
+      <td>1414.0</td>
+      <td>1643.0</td>
+      <td>1.0</td>
+      <td>-0.980011</td>
+    </tr>
+    <tr>
+      <th>beta_c[9]</th>
+      <td>-0.735</td>
+      <td>3.476</td>
+      <td>-7.757</td>
+      <td>5.500</td>
+      <td>0.093</td>
+      <td>0.068</td>
+      <td>1411.0</td>
+      <td>1296.0</td>
+      <td>1414.0</td>
+      <td>1643.0</td>
+      <td>1.0</td>
+      <td>-0.631965</td>
+    </tr>
+    <tr>
+      <th>beta_c[10]</th>
+      <td>0.359</td>
+      <td>3.477</td>
+      <td>-6.556</td>
+      <td>6.725</td>
+      <td>0.093</td>
+      <td>0.065</td>
+      <td>1411.0</td>
+      <td>1411.0</td>
+      <td>1414.0</td>
+      <td>1648.0</td>
+      <td>1.0</td>
+      <td>0.577442</td>
+    </tr>
+    <tr>
+      <th>beta_c[11]</th>
+      <td>-0.123</td>
+      <td>3.476</td>
+      <td>-7.149</td>
+      <td>6.118</td>
+      <td>0.092</td>
+      <td>0.065</td>
+      <td>1412.0</td>
+      <td>1412.0</td>
+      <td>1415.0</td>
+      <td>1656.0</td>
+      <td>1.0</td>
+      <td>-0.124758</td>
+    </tr>
+    <tr>
+      <th>beta_c[12]</th>
+      <td>0.745</td>
+      <td>3.476</td>
+      <td>-6.100</td>
+      <td>7.176</td>
+      <td>0.093</td>
+      <td>0.065</td>
+      <td>1412.0</td>
+      <td>1412.0</td>
+      <td>1415.0</td>
+      <td>1639.0</td>
+      <td>1.0</td>
+      <td>0.978948</td>
+    </tr>
+    <tr>
+      <th>beta_c[13]</th>
+      <td>1.252</td>
+      <td>3.476</td>
+      <td>-5.754</td>
+      <td>7.511</td>
+      <td>0.093</td>
+      <td>0.065</td>
+      <td>1411.0</td>
+      <td>1411.0</td>
+      <td>1414.0</td>
+      <td>1645.0</td>
+      <td>1.0</td>
+      <td>1.594922</td>
+    </tr>
+    <tr>
+      <th>beta_c[14]</th>
+      <td>-1.319</td>
+      <td>3.476</td>
+      <td>-8.300</td>
+      <td>4.960</td>
+      <td>0.093</td>
+      <td>0.070</td>
+      <td>1412.0</td>
+      <td>1231.0</td>
+      <td>1415.0</td>
+      <td>1630.0</td>
+      <td>1.0</td>
+      <td>-1.201945</td>
+    </tr>
+    <tr>
+      <th>beta_c[15]</th>
+      <td>-1.298</td>
+      <td>3.476</td>
+      <td>-8.320</td>
+      <td>4.955</td>
+      <td>0.093</td>
+      <td>0.070</td>
+      <td>1412.0</td>
+      <td>1238.0</td>
+      <td>1415.0</td>
+      <td>1647.0</td>
+      <td>1.0</td>
+      <td>-1.376369</td>
+    </tr>
+    <tr>
+      <th>beta_c[16]</th>
+      <td>1.049</td>
+      <td>3.476</td>
+      <td>-5.844</td>
+      <td>7.435</td>
+      <td>0.093</td>
+      <td>0.065</td>
+      <td>1411.0</td>
+      <td>1411.0</td>
+      <td>1414.0</td>
+      <td>1647.0</td>
+      <td>1.0</td>
+      <td>1.054346</td>
+    </tr>
+    <tr>
+      <th>beta_c[17]</th>
+      <td>0.035</td>
+      <td>3.475</td>
+      <td>-6.671</td>
+      <td>6.615</td>
+      <td>0.093</td>
+      <td>0.065</td>
+      <td>1411.0</td>
+      <td>1411.0</td>
+      <td>1414.0</td>
+      <td>1629.0</td>
+      <td>1.0</td>
+      <td>-0.038853</td>
+    </tr>
+    <tr>
+      <th>beta_c[18]</th>
+      <td>0.451</td>
+      <td>3.476</td>
+      <td>-6.498</td>
+      <td>6.774</td>
+      <td>0.093</td>
+      <td>0.065</td>
+      <td>1412.0</td>
+      <td>1412.0</td>
+      <td>1415.0</td>
+      <td>1646.0</td>
+      <td>1.0</td>
+      <td>0.680286</td>
+    </tr>
+    <tr>
+      <th>beta_c[19]</th>
+      <td>1.353</td>
+      <td>3.476</td>
+      <td>-5.746</td>
+      <td>7.515</td>
+      <td>0.092</td>
+      <td>0.065</td>
+      <td>1412.0</td>
+      <td>1412.0</td>
+      <td>1415.0</td>
+      <td>1641.0</td>
+      <td>1.0</td>
+      <td>1.329175</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.summary(az_model5, var_names=["mu_beta", "sigma_beta"])
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hpd_3%</th>
+      <th>hpd_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>mu_beta</th>
+      <td>0.045</td>
+      <td>3.474</td>
+      <td>-6.700</td>
+      <td>6.575</td>
+      <td>0.092</td>
+      <td>0.065</td>
+      <td>1415.0</td>
+      <td>1415.0</td>
+      <td>1418.0</td>
+      <td>1659.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>sigma_beta</th>
+      <td>1.029</td>
+      <td>0.178</td>
+      <td>0.718</td>
+      <td>1.357</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>8880.0</td>
+      <td>8756.0</td>
+      <td>9129.0</td>
+      <td>10531.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+model5_mu_post = model5_trace.get_values("mu_sgc")
+model5_mu_mean = model5_mu_post.mean(axis=0)
+model5_mu_hdi = [az.hpd(x, credible_interval=0.89) for x in model5_mu_post.T]
+
+model5_ppc = data.copy()
+model5_ppc["mu_mean"] = model5_mu_mean
+model5_ppc["lower_ci"] = [x[0] for x in model5_mu_hdi]
+model5_ppc["upper_ci"] = [x[1] for x in model5_mu_hdi]
+
+pos_shift = 0.15
+
+(
+    gg.ggplot(model5_ppc, gg.aes("sgRNA"))
+    + gg.facet_wrap("gene", scales="free")
+    + gg.geom_point(gg.aes(y="logfc"), position=gg.position_nudge(x=-pos_shift))
+    + gg.geom_point(
+        gg.aes(y="mu_mean"), position=gg.position_nudge(x=pos_shift), color="purple"
+    )
+    + gg.geom_linerange(
+        gg.aes(ymin="lower_ci", ymax="lower_ci"),
+        position=gg.position_nudge(x=pos_shift),
+        color="purple",
+    )
+    + gg.theme(subplots_adjust={"hspace": 0.4, "wspace": 0.25}, figure_size=(10, 8))
+)
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_71_0.png)
+    
+
+
+
+
+
+    <ggplot: (8779032827969)>
+
+
+
+### Notes on the above Model 5
+
+The model fits well, as shown by the very tight posterior predictions of each data point.
+Reassuringly, there is also visible shrinkage in the predictions.
+
+The posterior distributions of the parameters of $\alpha_s$, $\epsilon_g$, and $\beta_c$ are *very* wide, though the mean/MAP values are very accurate.
+To me, this suggests that there is a lot of correlation between the posterior values. 
+This would lead to greater play in the posteriors while maintaining very high accuracy in posterior predictions.
+
+This is proven with the following plot. 🤦🏻‍♂️
+
+
+```python
+d = pd.DataFrame(
+    {
+        "alpha_s": model5_trace.get_values("alpha_s").mean(axis=1),
+        "beta_c": model5_trace.get_values("beta_c").mean(axis=1),
+    }
+)
+
+(gg.ggplot(d, gg.aes("alpha_s", "beta_c")) + gg.geom_point(size=0.1, alpha=0.2))
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_73_0.png)
+    
+
+
+
+
+
+    <ggplot: (8779061305961)>
+
+
+
+
+```python
+sgrna_idx = data["sgRNA"].cat.codes.to_list()
+gene_idx = data["gene"].cat.codes.to_list()
+cell_line_idx = data["cell_line"].cat.codes.to_list()
+
+with pm.Model() as model5_flat:
+    # Hyper-priors
+    # mu_alpha = pm.Normal("mu_epsilon", 0, 2)
+    # sigma_alpha = pm.Exponential("sigma_alpha", 0.5)
+    mu_beta = pm.Normal("mu_beta", 0, 2)
+    sigma_beta = pm.Exponential("sigma_beta", 0.5)
+    mu_gamma = pm.Normal("mu_gamma", 0, 2)
+    sigma_gamma = pm.Exponential("sigma_gamma", 0.5)
+
+    # Main level priors
+    # alpha_s = pm.Normal("alpha_s", mu_alpha, sigma_alpha, shape=num_sgRNA)
+    beta_c = pm.Normal("beta_c", mu_beta, sigma_beta, shape=num_cell_lines)
+    gamma_g = pm.Normal("gamma_g", mu_gamma, sigma_gamma, shape=num_genes)
+
+    # Main level
+    mu_sgc = pm.Deterministic(
+        "mu_sgc", beta_c[cell_line_idx] + gamma_g[gene_idx]  # + alpha_s[sgrna_idx]
+    )
+    sigma = pm.Exponential("sigma", 1)
+
+    # Likelihood
+    logfc = pm.Normal("logfc", mu_sgc, sigma, observed=data.logfc)
+
+    # Sampling
+    model5f_prior_check = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
+    model5f_trace = pm.sample(2000, tune=2000)
+    model5f_post_check = pm.sample_posterior_predictive(
+        model5f_trace, random_seed=RANDOM_SEED
+    )
+```
+
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using jitter+adapt_diag...
+    Multiprocess sampling (2 chains in 2 jobs)
+    NUTS: [sigma, gamma_g, beta_c, sigma_gamma, mu_gamma, sigma_beta, mu_beta]
+    Sampling 2 chains, 0 divergences: 100%|██████████| 8000/8000 [00:48<00:00, 164.68draws/s]
+    The acceptance probability does not match the target. It is 0.9020131860786756, but should be close to 0.8. Try to increase the number of tuning steps.
+    The estimated number of effective samples is smaller than 200 for some parameters.
+    100%|██████████| 4000/4000 [00:05<00:00, 673.71it/s]
+
+
+
+```python
+pm.model_to_graphviz(model5_flat)
+```
+
+
+
+
+    
+![svg](005_010_modeling_files/005_010_modeling_75_0.svg)
+    
+
+
+
+
+```python
+az_model5f = az.from_pymc3(
+    trace=model5f_trace,
+    prior=model5f_prior_check,
+    posterior_predictive=model5f_post_check,
+)
+```
+
+
+```python
+az.summary(az_model5f, var_names=["gamma_g"])
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hpd_3%</th>
+      <th>hpd_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>gamma_g[0]</th>
+      <td>-0.265</td>
+      <td>1.400</td>
+      <td>-2.618</td>
+      <td>2.395</td>
+      <td>0.102</td>
+      <td>0.073</td>
+      <td>187.0</td>
+      <td>187.0</td>
+      <td>185.0</td>
+      <td>307.0</td>
+      <td>1.02</td>
+    </tr>
+    <tr>
+      <th>gamma_g[1]</th>
+      <td>0.040</td>
+      <td>1.390</td>
+      <td>-2.350</td>
+      <td>2.644</td>
+      <td>0.102</td>
+      <td>0.073</td>
+      <td>184.0</td>
+      <td>184.0</td>
+      <td>183.0</td>
+      <td>299.0</td>
+      <td>1.02</td>
+    </tr>
+    <tr>
+      <th>gamma_g[2]</th>
+      <td>-0.110</td>
+      <td>1.390</td>
+      <td>-2.504</td>
+      <td>2.491</td>
+      <td>0.102</td>
+      <td>0.072</td>
+      <td>185.0</td>
+      <td>185.0</td>
+      <td>184.0</td>
+      <td>302.0</td>
+      <td>1.02</td>
+    </tr>
+    <tr>
+      <th>gamma_g[3]</th>
+      <td>-1.002</td>
+      <td>1.389</td>
+      <td>-3.340</td>
+      <td>1.638</td>
+      <td>0.102</td>
+      <td>0.072</td>
+      <td>184.0</td>
+      <td>184.0</td>
+      <td>183.0</td>
+      <td>303.0</td>
+      <td>1.02</td>
+    </tr>
+    <tr>
+      <th>gamma_g[4]</th>
+      <td>1.832</td>
+      <td>1.387</td>
+      <td>-0.478</td>
+      <td>4.482</td>
+      <td>0.102</td>
+      <td>0.072</td>
+      <td>184.0</td>
+      <td>184.0</td>
+      <td>183.0</td>
+      <td>306.0</td>
+      <td>1.02</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.plot_trace(az_model5f, var_names="gamma_g")
+plt.show()
+```
+
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.7/site-packages/arviz/plots/backends/matplotlib/distplot.py:38: UserWarning: Argument backend_kwargs has not effect in matplotlib.plot_distSupplied value won't be used
+
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_78_1.png)
+    
+
+
+
+```python
+d = pd.DataFrame(
+    {
+        "gamma_g": model5f_trace.get_values("gamma_g").mean(axis=1),
+        "beta_c": model5f_trace.get_values("beta_c").mean(axis=1),
+    }
+)
+
+(gg.ggplot(d, gg.aes("gamma_g", "beta_c")) + gg.geom_point(size=0.1, alpha=0.2))
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_79_0.png)
+    
+
+
+
+
+
+    <ggplot: (8779016207877)>
 
 
 
@@ -2672,9 +4331,32 @@ logfc_post_df
 
 ---
 
-#### Notes
+### Other Models
+
+#### Model C
+
+- same as Model 5, but with $\sigma_{i,c}$
+
+#### Model A
+
+- multiple sgRNAs per gene and not all in each cell line
+- varying intercept for cell line and gene; covariate with RNA in each
+- copy number as a covariate at the sgRNA level
+
+#### Model B
+
+- Model A
+- another covariate for if the gene is mutated
+    - sometimes the mutation makes a difference and sometimes it doesn't
+        - when it does make a difference, how much of a difference varies, too
+    - is this a mixture model or varying effect? - probably a mixture model, but I'm lacking needed knowledge
+
+---
+
+#### General Notes
 
 - Model where some cell lines tend to have higher RNA expression.
+- Add another level for cell line varying effects corresponding to shared lineages. (To get practice with adding another level, build a model with just these effects.)
 
 
 ```python
