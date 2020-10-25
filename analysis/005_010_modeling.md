@@ -17,7 +17,10 @@ from numpy.random import normal, exponential
 
 ```python
 import warnings
+<<<<<<< HEAD
 
+=======
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
 warnings.simplefilter(action="ignore", category=UserWarning)
 ```
 
@@ -77,14 +80,22 @@ data = pd.DataFrame({"rna": rna, "logfc": logfc})
 
 
     
+<<<<<<< HEAD
 ![png](005_010_modeling_files/005_010_modeling_6_1.png)
+=======
+![png](005_010_modeling_files/005_010_modeling_6_0.png)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
 
 
 
+<<<<<<< HEAD
     <ggplot: (8786095405999)>
+=======
+    <ggplot: (8791466031193)>
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
 
 
 
@@ -110,8 +121,13 @@ with pm.Model() as model1:
     Initializing NUTS using jitter+adapt_diag...
     Multiprocess sampling (4 chains in 4 jobs)
     NUTS: [sigma, beta, alpha]
+<<<<<<< HEAD
     Sampling 4 chains, 0 divergences: 100%|██████████| 6000/6000 [00:01<00:00, 3720.85draws/s]
     100%|██████████| 4000/4000 [00:04<00:00, 886.22it/s]
+=======
+    Sampling 2 chains, 0 divergences: 100%|██████████| 3000/3000 [00:02<00:00, 1236.59draws/s]
+    100%|██████████| 2000/2000 [00:02<00:00, 740.45it/s]
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
 
 
 
@@ -232,7 +248,11 @@ plt.show()
 
 
     
+<<<<<<< HEAD
 ![png](005_010_modeling_files/005_010_modeling_11_0.png)
+=======
+![png](005_010_modeling_files/005_010_modeling_11_1.png)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
@@ -284,14 +304,22 @@ model1_preds["pred"] = pd.Categorical(
 
 
     
+<<<<<<< HEAD
 ![png](005_010_modeling_files/005_010_modeling_13_1.png)
+=======
+![png](005_010_modeling_files/005_010_modeling_13_0.png)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
 
 
 
+<<<<<<< HEAD
     <ggplot: (8786093237462)>
+=======
+    <ggplot: (8791468746825)>
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
 
 
 
@@ -335,7 +363,11 @@ post_summary = pd.DataFrame(
 
 
 
+<<<<<<< HEAD
     <ggplot: (8786095403783)>
+=======
+    <ggplot: (8791303451869)>
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
 
 
 
@@ -428,7 +460,11 @@ tidy_real_data = pd.DataFrame({"alpha": real_alpha, "beta": real_beta, "gene": g
 
 
 
+<<<<<<< HEAD
     <ggplot: (8786093734882)>
+=======
+    <ggplot: (8791303445221)>
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
 
 
 
@@ -462,11 +498,17 @@ with pm.Model() as model2:
     Initializing NUTS using jitter+adapt_diag...
     Multiprocess sampling (4 chains in 4 jobs)
     NUTS: [sigma, beta, alpha, sigma_beta, mu_beta, sigma_alpha, mu_alpha]
+<<<<<<< HEAD
     Sampling 4 chains, 11 divergences: 100%|██████████| 16000/16000 [00:08<00:00, 1888.44draws/s]
     There were 8 divergences after tuning. Increase `target_accept` or reparameterize.
     There was 1 divergence after tuning. Increase `target_accept` or reparameterize.
     There were 2 divergences after tuning. Increase `target_accept` or reparameterize.
     100%|██████████| 8000/8000 [00:08<00:00, 995.51it/s] 
+=======
+    Sampling 2 chains, 2 divergences: 100%|██████████| 8000/8000 [00:10<00:00, 765.40draws/s]
+    There were 2 divergences after tuning. Increase `target_accept` or reparameterize.
+    100%|██████████| 4000/4000 [00:05<00:00, 769.33it/s]
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
 
 
 
@@ -757,7 +799,11 @@ plt.show()
 
 
     
+<<<<<<< HEAD
 ![png](005_010_modeling_files/005_010_modeling_23_0.png)
+=======
+![png](005_010_modeling_files/005_010_modeling_23_1.png)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
@@ -769,7 +815,11 @@ plt.show()
 
 
     
+<<<<<<< HEAD
 ![png](005_010_modeling_files/005_010_modeling_24_0.png)
+=======
+![png](005_010_modeling_files/005_010_modeling_24_1.png)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
@@ -942,7 +992,11 @@ post["gene"] = [genes[i] for i in post.alpha_dim_0]
 
 
 
+<<<<<<< HEAD
     <ggplot: (8786084724721)>
+=======
+    <ggplot: (8791467632829)>
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
 
 
 
@@ -1185,7 +1239,11 @@ pos = gg.position_nudge(x=0.1)
 
 
 
+<<<<<<< HEAD
     <ggplot: (8786076979652)>
+=======
+    <ggplot: (8791468248437)>
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
 
 
 
@@ -1208,7 +1266,11 @@ merged_data = pd.merge(logfc_data, rna_data, how="inner", on=["gene", "cell_line
 
 
 
+<<<<<<< HEAD
     <ggplot: (8786093441410)>
+=======
+    <ggplot: (8791304705509)>
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
 
 
 
@@ -1278,7 +1340,11 @@ sigma_dists = pd.DataFrame(
 
 
 
+<<<<<<< HEAD
     <ggplot: (8786076989669)>
+=======
+    <ggplot: (8791303540341)>
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
 
 
 
@@ -1475,7 +1541,11 @@ logfc_data
 
 
 
+<<<<<<< HEAD
     <ggplot: (8786089856458)>
+=======
+    <ggplot: (8791304539205)>
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
 
 
 
@@ -1500,7 +1570,11 @@ logfc_data
 
 
 
+<<<<<<< HEAD
     <ggplot: (8786089849101)>
+=======
+    <ggplot: (8791304512477)>
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
 
 
 
@@ -1528,7 +1602,11 @@ logfc_data
 
 
 
+<<<<<<< HEAD
     <ggplot: (8786076985546)>
+=======
+    <ggplot: (8791468702013)>
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
 
 
 
@@ -1571,9 +1649,15 @@ with pm.Model() as model4:
     Initializing NUTS using jitter+adapt_diag...
     Multiprocess sampling (4 chains in 4 jobs)
     NUTS: [sigma, beta_g, gamma_c, alpha_g, sigma_beta, mu_beta, sigma_gamma, mu_gamma, sigma_alpha, mu_alpha]
+<<<<<<< HEAD
     Sampling 4 chains, 0 divergences: 100%|██████████| 16000/16000 [02:46<00:00, 96.21draws/s] 
     The number of effective samples is smaller than 10% for some parameters.
     100%|██████████| 8000/8000 [00:07<00:00, 1003.90it/s]
+=======
+    Sampling 2 chains, 0 divergences: 100%|██████████| 8000/8000 [02:56<00:00, 45.24draws/s]
+    The number of effective samples is smaller than 10% for some parameters.
+    100%|██████████| 4000/4000 [00:06<00:00, 649.67it/s]
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
 
 
 
@@ -1610,7 +1694,11 @@ plt.show()
 
 
     
+<<<<<<< HEAD
 ![png](005_010_modeling_files/005_010_modeling_43_0.png)
+=======
+![png](005_010_modeling_files/005_010_modeling_43_1.png)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
@@ -3208,9 +3296,37 @@ az.summary(az_model5_2, var_names=["mu_epsilon"]).assign(
 
 
 ```python
+<<<<<<< HEAD
 az.summary(az_model5_2, var_names=["epsilon_g"]).assign(
     real_values=real_params["epsilon_g"]
 )
+=======
+az.plot_forest(az_model4, var_names=["gamma_c"])
+plt.show()
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_51_0.png)
+    
+
+
+
+```python
+post_alpha_g = model4_trace.get_values(varname="alpha_g")
+post_gamma_c = model4_trace.get_values(varname="gamma_c")
+post_beta_g = model4_trace.get_values(varname="beta_g")
+post_mu_gc = model4_trace.get_values(varname="mu_gc")
+
+post_mu_mean = post_mu_gc.mean(axis=0)
+post_mu_hdi = np.array([az.hpd(x, credible_interval=0.89) for x in post_mu_gc.T])
+
+logfc_post_df = logfc_data.copy()
+logfc_post_df["post_logfc"] = post_mu_mean
+logfc_post_df["hpi_lower"] = [x[0] for x in post_mu_hdi]
+logfc_post_df["hpi_upper"] = [x[1] for x in post_mu_hdi]
+logfc_post_df
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
 ```
 
 
@@ -3350,7 +3466,11 @@ plt.show()
 
 
     
+<<<<<<< HEAD
 ![png](005_010_modeling_files/005_010_modeling_75_0.png)
+=======
+![png](005_010_modeling_files/005_010_modeling_53_0.png)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
@@ -3361,9 +3481,13 @@ plt.show()
 ```
 
 
+<<<<<<< HEAD
     
 ![png](005_010_modeling_files/005_010_modeling_76_0.png)
     
+=======
+    <ggplot: (8791468315977)>
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
 
 
 
@@ -3382,6 +3506,681 @@ az.plot_forest(az_model5_2, var_names="beta_c", combined=True)
 
     
 ![png](005_010_modeling_files/005_010_modeling_77_1.png)
+    
+
+
+
+```python
+
+```
+
+<<<<<<< HEAD
+
+```python
+
+```
+
+
+```python
+
+```
+
+
+```python
+
+```
+=======
+- number of cell lines: 20
+- number of genes: 5
+- number of repeated measures: 4
+- $\mu_\epsilon = -0.5$, $\sigma_\epsilon = 1$
+- $\sigma_\alpha = 2$
+- $\mu_\beta = 0$, $\sigma_\beta = 1$
+- $\sigma = 0.5$
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
+
+
+```python
+np.random.seed(RANDOM_SEED)
+
+# Data parameters.
+num_cell_lines = 50
+num_genes = 5
+num_sgrna_per_gene = list(range(1, num_genes + 1))  # Different number of guides.
+num_sgRNA = sum(num_sgrna_per_gene)
+
+# Model parameters.
+real_params = {
+    "mu_epsilon": -0.5,
+    "sigma_epsilon": 1,
+    "sigma_alpha": 2,
+    "mu_beta": 0,
+    "sigma_beta": 1,
+    "sigma": 0.5,
+}
+
+real_params["epsilon_g"] = normal(
+    real_params["mu_epsilon"], real_params["sigma_epsilon"], num_genes
+)
+
+real_params["mu_alpha"] = real_params["epsilon_g"]
+
+real_alpha_s = []
+for gene_idx, n in enumerate(num_sgrna_per_gene):
+    a_s = normal(real_params["mu_alpha"][gene_idx], real_params["sigma_alpha"], n)
+    real_alpha_s.append(a_s)
+
+real_params["alpha_s"] = np.concatenate(real_alpha_s)
+
+real_params["beta_c"] = normal(
+    real_params["mu_beta"], real_params["sigma_beta"], num_cell_lines
+)
+
+
+def alphabet_list(n, prefix=""):
+    if n > len(string.ascii_uppercase):
+        raise Exception(f"Max number of values is {len(string.ascii_uppercase)}")
+    return [prefix + a for a in string.ascii_uppercase[:n]]
+
+
+def make_cat(df, col, categories=None, ordered=None):
+    df[col] = pd.Categorical(df[col], categories=categories)
+    return df
+
+
+# cell_lines = alphabet_list(num_cell_lines, "cell_")
+cell_lines = ["cell_" + str(i) for i in range(num_cell_lines)]
+genes = alphabet_list(num_genes, "gene_")
+guides = ["sgRNA_" + str(i) for i in range(sum(num_sgrna_per_gene))]
+
+alpha_s_table = pd.DataFrame(
+    {
+        "gene": np.repeat(genes, num_sgrna_per_gene),
+        "sgRNA": guides,
+        "alpha_s": real_params["alpha_s"],
+    }
+)
+
+for col, vals in zip(["gene", "sgRNA"], [genes, guides]):
+    alpha_s_table = make_cat(alpha_s_table, col, categories=vals)
+
+data = pd.DataFrame(
+    product(genes, cell_lines), columns=["gene", "cell_line"], dtype="category"
+)
+data = pd.merge(data, alpha_s_table[["gene", "sgRNA"]], how="right", on="gene")
+data = data.reset_index(drop=True)
+
+for col, vals in zip(["cell_line", "gene", "sgRNA"], [cell_lines, genes, guides]):
+    data = make_cat(data, col, categories=vals)
+
+data["logfc"] = np.nan
+for i in range(len(data)):
+    s = data["sgRNA"].cat.codes[i]
+    c = data["cell_line"].cat.codes[i]
+    logfc = normal(
+        real_params["alpha_s"][s] + real_params["beta_c"][c], real_params["sigma"]
+    )
+    data.loc[i, "logfc"] = logfc
+
+data.head(10)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>gene</th>
+      <th>cell_line</th>
+      <th>sgRNA</th>
+      <th>logfc</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>gene_A</td>
+      <td>cell_0</td>
+      <td>sgRNA_0</td>
+      <td>4.143208</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>gene_A</td>
+      <td>cell_1</td>
+      <td>sgRNA_0</td>
+      <td>1.662986</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>gene_A</td>
+      <td>cell_2</td>
+      <td>sgRNA_0</td>
+      <td>3.761585</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>gene_A</td>
+      <td>cell_3</td>
+      <td>sgRNA_0</td>
+      <td>4.226526</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>gene_A</td>
+      <td>cell_4</td>
+      <td>sgRNA_0</td>
+      <td>2.658188</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>gene_A</td>
+      <td>cell_5</td>
+      <td>sgRNA_0</td>
+      <td>3.011802</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>gene_A</td>
+      <td>cell_6</td>
+      <td>sgRNA_0</td>
+      <td>2.296339</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>gene_A</td>
+      <td>cell_7</td>
+      <td>sgRNA_0</td>
+      <td>2.429402</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>gene_A</td>
+      <td>cell_8</td>
+      <td>sgRNA_0</td>
+      <td>2.014935</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>gene_A</td>
+      <td>cell_9</td>
+      <td>sgRNA_0</td>
+      <td>2.628343</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+(
+    gg.ggplot(data, gg.aes(x="gene", y="logfc"))
+    + gg.geom_boxplot(outlier_color="")
+    + gg.geom_jitter(gg.aes(color="sgRNA"), width=0.2, size=1, alpha=0.7)
+    + gg.scale_color_discrete()
+    + gg.labs(x="", y="logFC", title="Synthetic data")
+)
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_57_0.png)
+    
+
+
+
+
+
+    <ggplot: (8791251465181)>
+
+
+
+
+```python
+(
+    gg.ggplot(data, gg.aes(x="sgRNA", y="logfc"))
+    + gg.geom_boxplot(gg.aes(color="gene"), outlier_color="")
+    + gg.geom_jitter(gg.aes(color="gene"), width=0.2, size=1, alpha=0.7)
+    + gg.scale_color_discrete()
+    + gg.scale_x_discrete(labels=[a.replace("sgRNA_", "") for a in guides])
+    + gg.theme(figure_size=(12, 5))
+    + gg.labs(x="sgRNA", y="logFC", title="Synthetic data")
+)
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_58_0.png)
+    
+
+
+
+
+
+    <ggplot: (8791247694985)>
+
+
+
+
+```python
+(
+    gg.ggplot(data, gg.aes(x="cell_line", y="logfc"))
+    + gg.geom_boxplot(outlier_color="")
+    + gg.geom_jitter(gg.aes(color="gene"), width=0.2, size=1, alpha=0.7)
+    + gg.scale_color_discrete()
+    + gg.theme(figure_size=(12, 5), axis_text_x = gg.element_blank())
+    + gg.labs(x="", y="logFC", title="Synthetic data")
+)
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_59_0.png)
+    
+
+
+
+
+
+    <ggplot: (8791258358389)>
+
+
+
+
+```python
+# Data with the cell line effect removed.
+rm_cell_line_effect = []
+for i in range(len(data)):
+    c_idx = data["cell_line"].cat.codes[i]
+    c_eff = real_params["beta_c"][c_idx]
+    rm_cell_line_effect.append(data["logfc"].values[i] - c_eff)
+
+mod_data = data.copy()
+mod_data["logfc_no_cell"] = rm_cell_line_effect
+```
+
+
+```python
+(
+    gg.ggplot(mod_data, gg.aes(x="cell_line", y="logfc_no_cell"))
+    + gg.geom_boxplot(outlier_color="")
+    + gg.geom_jitter(gg.aes(color="gene"), width=0.2, size=1, alpha=0.7)
+    + gg.scale_color_discrete()
+    + gg.theme(figure_size=(12, 5), axis_text_x = gg.element_blank())
+    + gg.labs(x="", y="logFC", title="Synthetic data without the cell line effect")
+)
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_61_0.png)
+    
+
+
+
+
+
+    <ggplot: (8791247933585)>
+
+
+
+
+```python
+(
+    gg.ggplot(mod_data, gg.aes(x="gene", y="logfc_no_cell"))
+    + gg.geom_boxplot(outlier_color="")
+    + gg.geom_jitter(gg.aes(color="sgRNA"), width=0.2, size=1, alpha=0.7)
+    + gg.scale_color_discrete()
+    + gg.labs(x="", y="logFC", title="Synthetic data without the cell lines effect")
+)
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_62_0.png)
+    
+
+
+
+
+
+    <ggplot: (8791247608853)>
+
+
+
+
+```python
+cell_line_idx = data["cell_line"].cat.codes.to_list()
+sgrna_idx = data["sgRNA"].cat.codes.to_list()
+sgrna_to_gene_idx = (
+    data[["gene", "sgRNA"]].drop_duplicates()["gene"].cat.codes.to_list()
+)
+
+with pm.Model() as model5_2:
+    # Gene level model
+    mu_epsilon = pm.Normal("mu_epsilon", 0, 3)
+    sigma_epsilon = pm.Exponential("sigma_epsilon", 0.7)
+    epsilon_g = pm.Normal("epsilon_g", mu_epsilon, sigma_epsilon, shape=num_genes)
+
+    # Guide level model
+    mu_alpha = pm.Deterministic("mu_alpha", epsilon_g[sgrna_to_gene_idx])
+    sigma_alpha = pm.Exponential("sigma_alpha", 1)
+    alpha_s = pm.Normal("alpha_s", mu_alpha, sigma_alpha, shape=num_sgRNA)
+
+    # Cell line level
+    mu_beta = pm.Normal("mu_beta", 0, 3)
+    sigma_beta = pm.Exponential("sigma_beta", 1)
+    beta_c = pm.Normal("beta_c", mu_beta, sigma_beta, shape=num_cell_lines)
+
+    # Likelihood
+    mu_sgc = pm.Deterministic("mu_sgc", alpha_s[sgrna_idx] + beta_c[cell_line_idx])
+    sigma = pm.Exponential("sigma", 1)
+    logfc = pm.Normal("logfc", mu_sgc, sigma, observed=data["logfc"].values)
+
+    # Sampling
+    model5_2_prior_check = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
+    model5_2_trace = pm.sample(10000, tune=2000, random_seed=RANDOM_SEED)
+    model5_2_post_check = pm.sample_posterior_predictive(
+        model5_2_trace, random_seed=RANDOM_SEED
+    )
+```
+
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using jitter+adapt_diag...
+    Multiprocess sampling (2 chains in 2 jobs)
+    NUTS: [sigma, beta_c, sigma_beta, mu_beta, alpha_s, sigma_alpha, epsilon_g, sigma_epsilon, mu_epsilon]
+    Sampling 2 chains, 1,122 divergences: 100%|██████████| 24000/24000 [03:53<00:00, 102.97draws/s]
+    There were 456 divergences after tuning. Increase `target_accept` or reparameterize.
+    The acceptance probability does not match the target. It is 0.697830015588132, but should be close to 0.8. Try to increase the number of tuning steps.
+    There were 666 divergences after tuning. Increase `target_accept` or reparameterize.
+    The acceptance probability does not match the target. It is 0.5719304476919391, but should be close to 0.8. Try to increase the number of tuning steps.
+    The estimated number of effective samples is smaller than 200 for some parameters.
+    100%|██████████| 20000/20000 [00:30<00:00, 653.02it/s]
+
+
+
+```python
+pm.model_to_graphviz(model5_2)
+```
+
+
+
+
+    
+![svg](005_010_modeling_files/005_010_modeling_64_0.svg)
+    
+
+
+
+
+```python
+az_model5_2 = az.from_pymc3(
+    trace=model5_2_trace,
+    prior=model5_2_prior_check,
+    posterior_predictive=model5_2_post_check,
+    model=model5_2,
+)
+```
+
+
+```python
+az_model5_2.prior.to_dataframe().head()
+```
+
+
+```python
+az.summary(az_model5_2, var_names=['mu_epsilon']).assign(real_values=real_params['mu_epsilon'])
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hpd_3%</th>
+      <th>hpd_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>real_values</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>mu_epsilon</th>
+      <td>-0.018</td>
+      <td>2.279</td>
+      <td>-4.369</td>
+      <td>4.251</td>
+      <td>0.148</td>
+      <td>0.105</td>
+      <td>238.0</td>
+      <td>238.0</td>
+      <td>237.0</td>
+      <td>366.0</td>
+      <td>1.01</td>
+      <td>-0.5</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.summary(az_model5_2, var_names=['epsilon_g']).assign(real_values=real_params['epsilon_g'])
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hpd_3%</th>
+      <th>hpd_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>real_values</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>epsilon_g[0]</th>
+      <td>0.425</td>
+      <td>2.436</td>
+      <td>-4.014</td>
+      <td>5.240</td>
+      <td>0.148</td>
+      <td>0.105</td>
+      <td>271.0</td>
+      <td>271.0</td>
+      <td>269.0</td>
+      <td>489.0</td>
+      <td>1.01</td>
+      <td>-1.749278</td>
+    </tr>
+    <tr>
+      <th>epsilon_g[1]</th>
+      <td>0.016</td>
+      <td>2.366</td>
+      <td>-4.454</td>
+      <td>4.584</td>
+      <td>0.151</td>
+      <td>0.107</td>
+      <td>245.0</td>
+      <td>245.0</td>
+      <td>244.0</td>
+      <td>382.0</td>
+      <td>1.01</td>
+      <td>-0.760331</td>
+    </tr>
+    <tr>
+      <th>epsilon_g[2]</th>
+      <td>-0.186</td>
+      <td>2.380</td>
+      <td>-4.614</td>
+      <td>4.438</td>
+      <td>0.153</td>
+      <td>0.108</td>
+      <td>243.0</td>
+      <td>243.0</td>
+      <td>241.0</td>
+      <td>381.0</td>
+      <td>1.01</td>
+      <td>-0.116207</td>
+    </tr>
+    <tr>
+      <th>epsilon_g[3]</th>
+      <td>-0.035</td>
+      <td>2.353</td>
+      <td>-4.441</td>
+      <td>4.522</td>
+      <td>0.151</td>
+      <td>0.107</td>
+      <td>244.0</td>
+      <td>244.0</td>
+      <td>244.0</td>
+      <td>378.0</td>
+      <td>1.01</td>
+      <td>-0.885461</td>
+    </tr>
+    <tr>
+      <th>epsilon_g[4]</th>
+      <td>-0.255</td>
+      <td>2.368</td>
+      <td>-4.783</td>
+      <td>4.249</td>
+      <td>0.154</td>
+      <td>0.109</td>
+      <td>237.0</td>
+      <td>237.0</td>
+      <td>235.0</td>
+      <td>356.0</td>
+      <td>1.01</td>
+      <td>-1.585137</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.plot_trace(az_model5_2, var_names=['epsilon_g'])
+plt.show()
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_69_0.png)
+    
+
+
+
+```python
+az.plot_forest(az_model5_2, var_names=['epsilon_g'], combined=True)
+plt.show()
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_70_0.png)
+    
+
+
+
+```python
+az.plot_forest(az_model5_2, var_names=['alpha_s'], combined=True)
+plt.show()
+```
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_71_0.png)
+    
+
+
+
+```python
+az.plot_forest(az_model5_2, var_names='beta_c', combined=True)
+```
+
+
+
+
+    array([<AxesSubplot:title={'center':'94.0% Credible Interval'}>],
+          dtype=object)
+
+
+
+
+    
+![png](005_010_modeling_files/005_010_modeling_72_1.png)
     
 
 
@@ -3613,7 +4412,11 @@ data.head(10)
 
 
     
+<<<<<<< HEAD
 ![png](005_010_modeling_files/005_010_modeling_83_0.png)
+=======
+![png](005_010_modeling_files/005_010_modeling_78_0.png)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
@@ -3639,7 +4442,11 @@ data.head(10)
 
 
     
+<<<<<<< HEAD
 ![png](005_010_modeling_files/005_010_modeling_84_0.png)
+=======
+![png](005_010_modeling_files/005_010_modeling_79_0.png)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
@@ -3664,7 +4471,11 @@ data.head(10)
 
 
     
+<<<<<<< HEAD
 ![png](005_010_modeling_files/005_010_modeling_85_0.png)
+=======
+![png](005_010_modeling_files/005_010_modeling_80_0.png)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
@@ -3739,7 +4550,11 @@ pm.model_to_graphviz(model5)
 
 
     
+<<<<<<< HEAD
 ![svg](005_010_modeling_files/005_010_modeling_88_0.svg)
+=======
+![svg](005_010_modeling_files/005_010_modeling_83_0.svg)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
@@ -4233,7 +5048,11 @@ plt.show()
 
 
     
+<<<<<<< HEAD
 ![png](005_010_modeling_files/005_010_modeling_93_1.png)
+=======
+![png](005_010_modeling_files/005_010_modeling_88_1.png)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
@@ -4319,7 +5138,11 @@ plt.show()
 
 
     
+<<<<<<< HEAD
 ![png](005_010_modeling_files/005_010_modeling_95_0.png)
+=======
+![png](005_010_modeling_files/005_010_modeling_90_0.png)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
@@ -4775,7 +5598,11 @@ pos_shift = 0.15
 
 
     
+<<<<<<< HEAD
 ![png](005_010_modeling_files/005_010_modeling_98_0.png)
+=======
+![png](005_010_modeling_files/005_010_modeling_93_0.png)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
@@ -4811,7 +5638,11 @@ d = pd.DataFrame(
 
 
     
+<<<<<<< HEAD
 ![png](005_010_modeling_files/005_010_modeling_100_0.png)
+=======
+![png](005_010_modeling_files/005_010_modeling_95_0.png)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
@@ -4878,7 +5709,11 @@ pm.model_to_graphviz(model5_flat)
 
 
     
+<<<<<<< HEAD
 ![svg](005_010_modeling_files/005_010_modeling_102_0.svg)
+=======
+![svg](005_010_modeling_files/005_010_modeling_97_0.svg)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
@@ -5028,7 +5863,11 @@ plt.show()
 
 
     
+<<<<<<< HEAD
 ![png](005_010_modeling_files/005_010_modeling_105_1.png)
+=======
+![png](005_010_modeling_files/005_010_modeling_100_1.png)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
@@ -5046,7 +5885,11 @@ d = pd.DataFrame(
 
 
     
+<<<<<<< HEAD
 ![png](005_010_modeling_files/005_010_modeling_106_0.png)
+=======
+![png](005_010_modeling_files/005_010_modeling_101_0.png)
+>>>>>>> de8b078... analysis: example of two varying intercepts for Discourse question
     
 
 
