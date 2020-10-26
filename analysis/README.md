@@ -2,8 +2,10 @@
 
 Modeling construction and fitting.
 
-1. [Experiment with model designs](005_010_modeling.md)
+## Building increasingly complex models
 
-## To-Do
-
-- Build models with increasing complexity that incorporate all information available.
+1. [Model 1.](005_005_model-experimentation-m1.md) Standard linear model of one gene using RNA expression as a predictor.
+2. [Model 2.](005_007_model-experimentation-m2.md) A hierarchical linear model of multiple genes with a varying intercept and slope on RNA expression.
+3. [Model 3.](005_009_model-experimentation-m3.md) (Failed) A hierarhcical model of multiple genes and cell lines with a varying intercept for each. The gene level model consisted of an intercept and slope for RNA expression.
+4. [Model 4.](005_011_model-experimentation-m4.md) A hierarchical model of multiple genes and cell lines with a varying intercept for each and a slope for each gene on RNA expression.
+5. [Model 5.](005_013_model-experimentation-m5.md) A multi-level hierarchical model with the main level consisting of two varying intercepts, one for the sgRNA and one for the cell line. The sgRNA varying intercept had an additional level where each guide came from a distribtuion for each gene.

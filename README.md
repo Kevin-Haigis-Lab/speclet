@@ -3,7 +3,7 @@
 **Using Bayesian statistics to model CRISPR-Cas9 genetic screen data to identify, with measureable uncertainty, synthetic lethal interactions that are specific to the individual *KRAS* mutations.**
 
 [![python](https://img.shields.io/badge/Python-3.7.4-3776AB.svg?style=flat&logo=python)](https://www.python.org) 
-[![python](https://img.shields.io/badge/Jupyter-Lab-F37626.svg?style=flat&logo=jupyter)](https://jupyter.org) 
+[![jupyerlab](https://img.shields.io/badge/Jupyter-Lab-F37626.svg?style=flat&logo=jupyter)](https://jupyter.org) 
 
 
 ---
@@ -18,7 +18,7 @@
 
 ### [Analysis](analysis/)
 
-1. [Experiment with model designs](analysis/005_010_modeling.md)
+1. [Experiment with model designs](analysis/)
 
 
 ---
