@@ -23,7 +23,7 @@ warnings.simplefilter(action="ignore", category=UserWarning)
 
 
 ```python
-gg.theme_set(gg.theme_minimal(base_family="Arial"))
+gg.theme_set(gg.theme_minimal())
 ```
 
 
@@ -130,7 +130,7 @@ print(data.head(10).to_markdown())
 
 
 
-    <ggplot: (8787209965265)>
+    <ggplot: (8786276810051)>
 
 
 
@@ -157,7 +157,7 @@ print(data.head(10).to_markdown())
 
 
 
-    <ggplot: (8787210946017)>
+    <ggplot: (8786279778687)>
 
 
 
@@ -169,10 +169,10 @@ gene_idx = data["gene"].values
 
 with pm.Model() as model:
     # Hyper-priors
-    mu_alpha = pm.Normal("mu_alpha", 0, 5)
-    sigma_alpha = pm.Exponential("sigma_alpha", 1)
-    mu_beta = pm.Normal("mu_beta", 0, 5)
-    sigma_beta = pm.Exponential("sigma_beta", 1)
+    mu_alpha = pm.Normal("mu_alpha", -1, 2)
+    sigma_alpha = pm.Exponential("sigma_alpha", 0.5)
+    mu_beta = pm.Normal("mu_beta", 0, 2)
+    sigma_beta = pm.Exponential("sigma_beta", 0.5)
 
     # Priors
     alpha_g = pm.Normal("alpha_g", mu_alpha, sigma_alpha, shape=num_genes)
@@ -185,7 +185,7 @@ with pm.Model() as model:
 
     # Sampling
     model_prior_check = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
-    model_trace = pm.sample(4000, tune=1000, random_seed=RANDOM_SEED)
+    model_trace = pm.sample(2000, tune=1000, random_seed=RANDOM_SEED)
     model_post_check = pm.sample_posterior_predictive(
         model_trace, random_seed=RANDOM_SEED
     )
@@ -193,13 +193,58 @@ with pm.Model() as model:
 
     Auto-assigning NUTS sampler...
     Initializing NUTS using jitter+adapt_diag...
-    Multiprocess sampling (2 chains in 2 jobs)
+    Multiprocess sampling (4 chains in 4 jobs)
     NUTS: [sigma, beta_c, alpha_g, sigma_beta, mu_beta, sigma_alpha, mu_alpha]
-    Sampling 2 chains, 0 divergences: 100%|██████████| 10000/10000 [09:17<00:00, 17.94draws/s]
+
+
+
+
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='12000' class='' max='12000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [12000/12000 03:54<00:00 Sampling 4 chains, 0 divergences]
+</div>
+
+
+
+    Sampling 4 chains for 1_000 tune and 2_000 draw iterations (4_000 + 8_000 draws total) took 235 seconds.
     The chain reached the maximum tree depth. Increase max_treedepth, increase target_accept or reparameterize.
     The chain reached the maximum tree depth. Increase max_treedepth, increase target_accept or reparameterize.
-    The number of effective samples is smaller than 10% for some parameters.
-    100%|██████████| 8000/8000 [00:10<00:00, 769.95it/s]
+    The chain reached the maximum tree depth. Increase max_treedepth, increase target_accept or reparameterize.
+    The chain reached the maximum tree depth. Increase max_treedepth, increase target_accept or reparameterize.
+    The number of effective samples is smaller than 25% for some parameters.
+
+
+
+
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [8000/8000 00:08<00:00]
+</div>
+
 
 
 
@@ -267,8 +312,8 @@ az.summary(az_model, var_names=var_names).assign(
       <th></th>
       <th>mean</th>
       <th>sd</th>
-      <th>hpd_3%</th>
-      <th>hpd_97%</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
       <th>mcse_mean</th>
       <th>mcse_sd</th>
       <th>ess_mean</th>
@@ -282,61 +327,61 @@ az.summary(az_model, var_names=var_names).assign(
   <tbody>
     <tr>
       <th>mu_alpha</th>
-      <td>-0.464</td>
-      <td>3.432</td>
-      <td>-6.606</td>
-      <td>5.973</td>
-      <td>0.215</td>
-      <td>0.152</td>
-      <td>254.0</td>
-      <td>254.0</td>
-      <td>255.0</td>
-      <td>474.0</td>
+      <td>-1.062</td>
+      <td>1.454</td>
+      <td>-3.775</td>
+      <td>1.739</td>
+      <td>0.044</td>
+      <td>0.031</td>
+      <td>1094.0</td>
+      <td>1094.0</td>
+      <td>1095.0</td>
+      <td>1291.0</td>
       <td>1.0</td>
       <td>-1.0</td>
     </tr>
     <tr>
       <th>sigma_alpha</th>
-      <td>0.675</td>
-      <td>0.454</td>
-      <td>0.183</td>
-      <td>1.468</td>
-      <td>0.011</td>
-      <td>0.008</td>
+      <td>0.834</td>
+      <td>0.680</td>
+      <td>0.175</td>
+      <td>1.980</td>
+      <td>0.017</td>
+      <td>0.012</td>
       <td>1651.0</td>
       <td>1651.0</td>
-      <td>2043.0</td>
-      <td>2123.0</td>
+      <td>2433.0</td>
+      <td>2209.0</td>
       <td>1.0</td>
       <td>0.5</td>
     </tr>
     <tr>
       <th>mu_beta</th>
-      <td>-0.639</td>
-      <td>3.410</td>
-      <td>-7.206</td>
-      <td>5.310</td>
-      <td>0.215</td>
-      <td>0.152</td>
-      <td>252.0</td>
-      <td>252.0</td>
-      <td>253.0</td>
-      <td>455.0</td>
+      <td>-0.038</td>
+      <td>1.471</td>
+      <td>-2.742</td>
+      <td>2.845</td>
+      <td>0.047</td>
+      <td>0.035</td>
+      <td>973.0</td>
+      <td>895.0</td>
+      <td>977.0</td>
+      <td>1050.0</td>
       <td>1.0</td>
       <td>0.0</td>
     </tr>
     <tr>
       <th>sigma_beta</th>
-      <td>0.572</td>
-      <td>0.159</td>
-      <td>0.338</td>
-      <td>0.866</td>
+      <td>0.588</td>
+      <td>0.170</td>
+      <td>0.326</td>
+      <td>0.899</td>
       <td>0.003</td>
-      <td>0.003</td>
-      <td>2118.0</td>
-      <td>1665.0</td>
-      <td>3126.0</td>
-      <td>1714.0</td>
+      <td>0.002</td>
+      <td>2731.0</td>
+      <td>2496.0</td>
+      <td>3330.0</td>
+      <td>2580.0</td>
       <td>1.0</td>
       <td>0.5</td>
     </tr>
@@ -398,7 +443,7 @@ post_data["row_i"] = list(range(len(post_data)))
 
 
 
-    <ggplot: (8787213610861)>
+    <ggplot: (8786277693555)>
 
 
 
@@ -433,6 +478,39 @@ d = pd.DataFrame({"alpha_g": alpha_g_post, "beta_a": beta_a_post})
 
 
 
-    <ggplot: (8787213110793)>
+    <ggplot: (8786277693648)>
 
 
+
+
+```python
+%load_ext watermark
+%watermark -d -u -v -iv -b -h -m
+```
+
+    plotnine 0.7.1
+    pymc3    3.9.3
+    pandas   1.1.3
+    seaborn  0.11.0
+    numpy    1.19.2
+    arviz    0.10.0
+    last updated: 2020-10-26 
+    
+    CPython 3.8.5
+    IPython 7.18.1
+    
+    compiler   : GCC 7.3.0
+    system     : Linux
+    release    : 3.10.0-1062.el7.x86_64
+    machine    : x86_64
+    processor  : x86_64
+    CPU cores  : 28
+    interpreter: 64bit
+    host name  : compute-e-16-237.o2.rc.hms.harvard.edu
+    Git branch : models
+
+
+
+```python
+
+```
