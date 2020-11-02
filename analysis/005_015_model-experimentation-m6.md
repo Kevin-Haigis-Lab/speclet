@@ -128,16 +128,9 @@ data["sgRNA"] = pd.Categorical(data["sgRNA"], categories=sgrnas)
 
 gene_lambdas = [1, 0.8, -1, 1.5, 2]
 
-data["logfc"] = np.nan
 data["cna"] = np.nan
-
 for i in range(len(data)):
     gene_i = data.gene.cat.codes[i]
-    sgrna_i = data.sgRNA.cat.codes[i]
-
-    alpha_s = real_params["alpha_s"][sgrna_i]
-    beta_s = real_params["beta_s"][sgrna_i]
-
     gene_cna_lambda = gene_lambdas[gene_i]
     cna = -1
     if gene_cna_lambda == -1:
@@ -145,30 +138,25 @@ for i in range(len(data)):
     else:
         cna = np.random.poisson(lam=gene_cna_lambda)
 
-    cna = np.max([cna + normal(0, 0.1, 1), 0])
-    mu_s = alpha_s + beta_s * cna
-    data.loc[i, "cna"] = cna
+    data.loc[i, "cna"] = np.max([cna + normal(0, 0.1, 1), 0])
+
+
+# Scale CNA data within a gene
+data["cna_z"] = data.groupby("gene")["cna"].apply(
+    lambda x: ((x - np.mean(x)) / np.std(x))
+)
+
+data["logfc"] = np.nan
+for i in range(len(data)):
+    gene_i = data.gene.cat.codes[i]
+    sgrna_i = data.sgRNA.cat.codes[i]
+
+    alpha_s = real_params["alpha_s"][sgrna_i]
+    beta_s = real_params["beta_s"][sgrna_i]
+
+    mu_s = alpha_s + beta_s * data.cna.values[i]
     data.loc[i, "logfc"] = normal(mu_s, real_params["sigma"])
 ```
-
-> **I need to adjust the synthetic CNA data so that it gets scaled within each gene.**
-
-
-```python
-raise Exception("See note above.")
-```
-
-
-    ---------------------------------------------------------------------------
-
-    Exception                                 Traceback (most recent call last)
-
-    <ipython-input-94-aaaa3151472d> in <module>
-    ----> 1 raise Exception("See note above.")
-    
-
-    Exception: See note above.
-
 
 
 ```python
@@ -199,8 +187,9 @@ data.head()
       <th>gene</th>
       <th>cell_line</th>
       <th>sgRNA</th>
-      <th>logfc</th>
       <th>cna</th>
+      <th>cna_z</th>
+      <th>logfc</th>
     </tr>
   </thead>
   <tbody>
@@ -209,40 +198,45 @@ data.head()
       <td>gene_0</td>
       <td>cell_0</td>
       <td>sgRNA_0</td>
-      <td>1.955566</td>
       <td>2.016189</td>
+      <td>1.133899</td>
+      <td>1.556512</td>
     </tr>
     <tr>
       <th>1</th>
       <td>gene_0</td>
       <td>cell_1</td>
       <td>sgRNA_0</td>
-      <td>-0.462166</td>
-      <td>0.024873</td>
+      <td>0.113033</td>
+      <td>-0.930018</td>
+      <td>-0.484596</td>
     </tr>
     <tr>
       <th>2</th>
       <td>gene_0</td>
       <td>cell_2</td>
       <td>sgRNA_0</td>
-      <td>-1.055512</td>
-      <td>0.000000</td>
+      <td>1.848434</td>
+      <td>0.951974</td>
+      <td>1.482701</td>
     </tr>
     <tr>
       <th>3</th>
       <td>gene_0</td>
       <td>cell_3</td>
       <td>sgRNA_0</td>
-      <td>-1.130967</td>
       <td>0.000000</td>
+      <td>-1.052599</td>
+      <td>-1.162076</td>
     </tr>
     <tr>
       <th>4</th>
       <td>gene_0</td>
       <td>cell_4</td>
       <td>sgRNA_0</td>
-      <td>0.372521</td>
-      <td>0.954111</td>
+      <td>0.970350</td>
+      <td>-0.000282</td>
+      <td>0.441627</td>
     </tr>
   </tbody>
 </table>
@@ -254,6 +248,34 @@ data.head()
 ```python
 (
     gg.ggplot(data, gg.aes(x="cna", y="logfc"))
+    + gg.geom_point(gg.aes(color="gene"), alpha=0.5, size=2)
+    + gg.scale_color_brewer(type="qual", palette="Set1")
+    + gg.labs(
+        x="gene copy number",
+        y="logFC",
+        color="gene",
+        title="Synthetic data with CNA covariate",
+    )
+)
+```
+
+
+    
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_8_0.png)
+    
+
+
+
+
+
+    <ggplot: (8759126028418)>
+
+
+
+
+```python
+(
+    gg.ggplot(data, gg.aes(x="cna_z", y="logfc"))
     + gg.geom_jitter(gg.aes(color="gene"), alpha=0.5, size=2)
     + gg.scale_color_brewer(type="qual", palette="Set1")
     + gg.labs(
@@ -267,14 +289,14 @@ data.head()
 
 
     
-![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_10_0.png)
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_9_0.png)
     
 
 
 
 
 
-    <ggplot: (8749579222559)>
+    <ggplot: (8759125996460)>
 
 
 
@@ -291,14 +313,14 @@ data.head()
 
 
     
-![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_11_0.png)
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_10_0.png)
     
 
 
 
 
 
-    <ggplot: (8749579178234)>
+    <ggplot: (8759125424424)>
 
 
 
@@ -334,7 +356,7 @@ with pm.Model() as model6:
 
     # Linear model
     mu_s = pm.Deterministic(
-        "mu_s", alpha_s[sgrna_idx] + beta_s[sgrna_idx] * data.cna.values
+        "mu_s", alpha_s[sgrna_idx] + beta_s[sgrna_idx] * data.cna_z.values
     )
     sigma = pm.Exponential("sigma", 1)
 
@@ -373,17 +395,12 @@ with pm.Model() as model6:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 01:31<00:00 Sampling 4 chains, 43 divergences]
+  100.00% [16000/16000 00:21<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
 
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 93 seconds.
-    There were 19 divergences after tuning. Increase `target_accept` or reparameterize.
-    There were 9 divergences after tuning. Increase `target_accept` or reparameterize.
-    There were 11 divergences after tuning. Increase `target_accept` or reparameterize.
-    There were 4 divergences after tuning. Increase `target_accept` or reparameterize.
-    The number of effective samples is smaller than 25% for some parameters.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 22 seconds.
 
 
 
@@ -402,7 +419,7 @@ with pm.Model() as model6:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:10<00:00]
+  100.00% [8000/8000 00:08<00:00]
 </div>
 
 
@@ -416,7 +433,7 @@ pm.model_to_graphviz(model6)
 
 
     
-![svg](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_13_0.svg)
+![svg](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_12_0.svg)
     
 
 
@@ -444,14 +461,14 @@ az_model6 = az.from_pymc3(
 
 
     
-![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_15_0.png)
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_14_0.png)
     
 
 
 
 
 
-    <ggplot: (8749580521771)>
+    <ggplot: (8759119638077)>
 
 
 
@@ -498,76 +515,76 @@ az.summary(az_model6, var_names=["gamma_g"]).assign(real_value=real_params["gamm
   <tbody>
     <tr>
       <th>gamma_g[0]</th>
-      <td>-0.824</td>
-      <td>0.161</td>
-      <td>-1.113</td>
-      <td>-0.494</td>
-      <td>0.002</td>
-      <td>0.001</td>
-      <td>7105.0</td>
-      <td>6900.0</td>
-      <td>7237.0</td>
-      <td>4828.0</td>
+      <td>0.040</td>
+      <td>0.544</td>
+      <td>-0.959</td>
+      <td>1.083</td>
+      <td>0.006</td>
+      <td>0.007</td>
+      <td>8290.0</td>
+      <td>3128.0</td>
+      <td>9156.0</td>
+      <td>4576.0</td>
       <td>1.0</td>
       <td>-1.124639</td>
     </tr>
     <tr>
       <th>gamma_g[1]</th>
-      <td>-0.671</td>
-      <td>0.140</td>
-      <td>-0.954</td>
-      <td>-0.420</td>
-      <td>0.002</td>
-      <td>0.002</td>
-      <td>3951.0</td>
-      <td>3857.0</td>
-      <td>3977.0</td>
-      <td>4753.0</td>
+      <td>-1.059</td>
+      <td>0.370</td>
+      <td>-1.738</td>
+      <td>-0.375</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>9914.0</td>
+      <td>7031.0</td>
+      <td>10779.0</td>
+      <td>4881.0</td>
       <td>1.0</td>
       <td>-0.630166</td>
     </tr>
     <tr>
       <th>gamma_g[2]</th>
-      <td>-0.625</td>
-      <td>0.390</td>
-      <td>-1.246</td>
-      <td>0.175</td>
-      <td>0.011</td>
-      <td>0.008</td>
-      <td>1352.0</td>
-      <td>1352.0</td>
-      <td>1712.0</td>
-      <td>1328.0</td>
+      <td>-1.299</td>
+      <td>0.301</td>
+      <td>-1.862</td>
+      <td>-0.721</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>11967.0</td>
+      <td>9490.0</td>
+      <td>13051.0</td>
+      <td>5717.0</td>
       <td>1.0</td>
       <td>-0.308103</td>
     </tr>
     <tr>
       <th>gamma_g[3]</th>
-      <td>-0.793</td>
-      <td>0.101</td>
-      <td>-0.984</td>
-      <td>-0.607</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>5569.0</td>
-      <td>5473.0</td>
-      <td>5559.0</td>
-      <td>4803.0</td>
+      <td>-3.858</td>
+      <td>0.260</td>
+      <td>-4.336</td>
+      <td>-3.364</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>11053.0</td>
+      <td>11053.0</td>
+      <td>11852.0</td>
+      <td>5412.0</td>
       <td>1.0</td>
       <td>-0.692731</td>
     </tr>
     <tr>
       <th>gamma_g[4]</th>
-      <td>-1.060</td>
-      <td>0.103</td>
-      <td>-1.237</td>
-      <td>-0.849</td>
+      <td>-4.423</td>
+      <td>0.236</td>
+      <td>-4.842</td>
+      <td>-3.968</td>
       <td>0.002</td>
-      <td>0.001</td>
-      <td>3828.0</td>
-      <td>3828.0</td>
-      <td>3944.0</td>
-      <td>4100.0</td>
+      <td>0.002</td>
+      <td>11998.0</td>
+      <td>11998.0</td>
+      <td>12888.0</td>
+      <td>5675.0</td>
       <td>1.0</td>
       <td>-1.042568</td>
     </tr>
@@ -585,7 +602,7 @@ plt.show()
 
 
     
-![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_17_0.png)
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_16_0.png)
     
 
 
@@ -600,13 +617,28 @@ plt.show()
 
 
     
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_17_0.png)
+    
+
+
+
+```python
+var_names = ["mu_delta", "sigma_delta", "delta_g", "beta_s"]
+az.plot_forest(
+    az_model6, var_names=var_names, combined=True
+)
+plt.show()
+```
+
+
+    
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_18_0.png)
     
 
 
 
 ```python
-az.summary(az_model6, var_names=var_names)
+az.summary(az_model6, var_names='gamma_g').assign(real_value = real_params['gamma_g'])
 ```
 
 
@@ -641,316 +673,84 @@ az.summary(az_model6, var_names=var_names)
       <th>ess_bulk</th>
       <th>ess_tail</th>
       <th>r_hat</th>
+      <th>real_value</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>mu_gamma</th>
-      <td>-0.791</td>
-      <td>0.202</td>
-      <td>-1.142</td>
-      <td>-0.405</td>
-      <td>0.004</td>
-      <td>0.003</td>
-      <td>2878.0</td>
-      <td>2878.0</td>
-      <td>3457.0</td>
-      <td>2629.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>sigma_gamma</th>
-      <td>0.319</td>
-      <td>0.234</td>
-      <td>0.017</td>
-      <td>0.716</td>
-      <td>0.006</td>
-      <td>0.004</td>
-      <td>1565.0</td>
-      <td>1565.0</td>
-      <td>1604.0</td>
-      <td>1798.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
       <th>gamma_g[0]</th>
-      <td>-0.824</td>
-      <td>0.161</td>
-      <td>-1.113</td>
-      <td>-0.494</td>
-      <td>0.002</td>
-      <td>0.001</td>
-      <td>7105.0</td>
-      <td>6900.0</td>
-      <td>7237.0</td>
-      <td>4828.0</td>
+      <td>0.040</td>
+      <td>0.544</td>
+      <td>-0.959</td>
+      <td>1.083</td>
+      <td>0.006</td>
+      <td>0.007</td>
+      <td>8290.0</td>
+      <td>3128.0</td>
+      <td>9156.0</td>
+      <td>4576.0</td>
       <td>1.0</td>
+      <td>-1.124639</td>
     </tr>
     <tr>
       <th>gamma_g[1]</th>
-      <td>-0.671</td>
-      <td>0.140</td>
-      <td>-0.954</td>
-      <td>-0.420</td>
-      <td>0.002</td>
-      <td>0.002</td>
-      <td>3951.0</td>
-      <td>3857.0</td>
-      <td>3977.0</td>
-      <td>4753.0</td>
+      <td>-1.059</td>
+      <td>0.370</td>
+      <td>-1.738</td>
+      <td>-0.375</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>9914.0</td>
+      <td>7031.0</td>
+      <td>10779.0</td>
+      <td>4881.0</td>
       <td>1.0</td>
+      <td>-0.630166</td>
     </tr>
     <tr>
       <th>gamma_g[2]</th>
-      <td>-0.625</td>
-      <td>0.390</td>
-      <td>-1.246</td>
-      <td>0.175</td>
-      <td>0.011</td>
-      <td>0.008</td>
-      <td>1352.0</td>
-      <td>1352.0</td>
-      <td>1712.0</td>
-      <td>1328.0</td>
+      <td>-1.299</td>
+      <td>0.301</td>
+      <td>-1.862</td>
+      <td>-0.721</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>11967.0</td>
+      <td>9490.0</td>
+      <td>13051.0</td>
+      <td>5717.0</td>
       <td>1.0</td>
+      <td>-0.308103</td>
     </tr>
     <tr>
       <th>gamma_g[3]</th>
-      <td>-0.793</td>
-      <td>0.101</td>
-      <td>-0.984</td>
-      <td>-0.607</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>5569.0</td>
-      <td>5473.0</td>
-      <td>5559.0</td>
-      <td>4803.0</td>
+      <td>-3.858</td>
+      <td>0.260</td>
+      <td>-4.336</td>
+      <td>-3.364</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>11053.0</td>
+      <td>11053.0</td>
+      <td>11852.0</td>
+      <td>5412.0</td>
       <td>1.0</td>
+      <td>-0.692731</td>
     </tr>
     <tr>
       <th>gamma_g[4]</th>
-      <td>-1.060</td>
-      <td>0.103</td>
-      <td>-1.237</td>
-      <td>-0.849</td>
+      <td>-4.423</td>
+      <td>0.236</td>
+      <td>-4.842</td>
+      <td>-3.968</td>
       <td>0.002</td>
-      <td>0.001</td>
-      <td>3828.0</td>
-      <td>3828.0</td>
-      <td>3944.0</td>
-      <td>4100.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>alpha_s[0]</th>
-      <td>-0.827</td>
-      <td>0.084</td>
-      <td>-0.979</td>
-      <td>-0.665</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>8192.0</td>
-      <td>8068.0</td>
-      <td>8203.0</td>
-      <td>6278.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>alpha_s[1]</th>
-      <td>-0.490</td>
-      <td>0.107</td>
-      <td>-0.696</td>
-      <td>-0.296</td>
       <td>0.002</td>
-      <td>0.001</td>
-      <td>4244.0</td>
-      <td>4132.0</td>
-      <td>4238.0</td>
-      <td>5308.0</td>
+      <td>11998.0</td>
+      <td>11998.0</td>
+      <td>12888.0</td>
+      <td>5675.0</td>
       <td>1.0</td>
-    </tr>
-    <tr>
-      <th>alpha_s[2]</th>
-      <td>-0.759</td>
-      <td>0.085</td>
-      <td>-0.917</td>
-      <td>-0.599</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>5286.0</td>
-      <td>5273.0</td>
-      <td>5290.0</td>
-      <td>6116.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>alpha_s[3]</th>
-      <td>-0.603</td>
-      <td>0.419</td>
-      <td>-1.328</td>
-      <td>0.200</td>
-      <td>0.011</td>
-      <td>0.008</td>
-      <td>1534.0</td>
-      <td>1534.0</td>
-      <td>1886.0</td>
-      <td>1515.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>alpha_s[4]</th>
-      <td>-0.518</td>
-      <td>0.426</td>
-      <td>-1.235</td>
-      <td>0.328</td>
-      <td>0.011</td>
-      <td>0.008</td>
-      <td>1500.0</td>
-      <td>1500.0</td>
-      <td>1826.0</td>
-      <td>1612.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>alpha_s[5]</th>
-      <td>-0.692</td>
-      <td>0.424</td>
-      <td>-1.419</td>
-      <td>0.161</td>
-      <td>0.011</td>
-      <td>0.008</td>
-      <td>1504.0</td>
-      <td>1504.0</td>
-      <td>1809.0</td>
-      <td>1422.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>alpha_s[6]</th>
-      <td>-0.653</td>
-      <td>0.100</td>
-      <td>-0.837</td>
-      <td>-0.465</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>4927.0</td>
-      <td>4914.0</td>
-      <td>4939.0</td>
-      <td>5724.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>alpha_s[7]</th>
-      <td>-0.807</td>
-      <td>0.099</td>
-      <td>-0.996</td>
-      <td>-0.625</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>6299.0</td>
-      <td>6234.0</td>
-      <td>6300.0</td>
-      <td>6166.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>alpha_s[8]</th>
-      <td>-0.817</td>
-      <td>0.097</td>
-      <td>-0.993</td>
-      <td>-0.626</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>6744.0</td>
-      <td>6649.0</td>
-      <td>6759.0</td>
-      <td>5811.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>alpha_s[9]</th>
-      <td>-0.867</td>
-      <td>0.098</td>
-      <td>-1.048</td>
-      <td>-0.680</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>5597.0</td>
-      <td>5597.0</td>
-      <td>5624.0</td>
-      <td>5918.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>alpha_s[10]</th>
-      <td>-1.145</td>
-      <td>0.100</td>
-      <td>-1.343</td>
-      <td>-0.969</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>6501.0</td>
-      <td>6418.0</td>
-      <td>6505.0</td>
-      <td>5763.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>alpha_s[11]</th>
-      <td>-1.240</td>
-      <td>0.097</td>
-      <td>-1.417</td>
-      <td>-1.055</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>4664.0</td>
-      <td>4664.0</td>
-      <td>4657.0</td>
-      <td>4858.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>alpha_s[12]</th>
-      <td>-0.964</td>
-      <td>0.109</td>
-      <td>-1.157</td>
-      <td>-0.751</td>
-      <td>0.002</td>
-      <td>0.001</td>
-      <td>4525.0</td>
-      <td>4518.0</td>
-      <td>4507.0</td>
-      <td>6041.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>alpha_s[13]</th>
-      <td>-1.108</td>
-      <td>0.091</td>
-      <td>-1.284</td>
-      <td>-0.942</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>7111.0</td>
-      <td>7075.0</td>
-      <td>7117.0</td>
-      <td>6484.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>alpha_s[14]</th>
-      <td>-1.018</td>
-      <td>0.108</td>
-      <td>-1.215</td>
-      <td>-0.812</td>
-      <td>0.002</td>
-      <td>0.001</td>
-      <td>5015.0</td>
-      <td>5015.0</td>
-      <td>5102.0</td>
-      <td>5374.0</td>
-      <td>1.0</td>
+      <td>-1.042568</td>
     </tr>
   </tbody>
 </table>
@@ -960,27 +760,129 @@ az.summary(az_model6, var_names=var_names)
 
 
 ```python
-az.plot_forest(
-    az_model6, var_names=["mu_delta", "sigma_delta", "delta_g", "beta_s"], combined=True
-)
-plt.show()
+az.summary(az_model6, var_names='delta_g').assign(real_value = real_params['delta_g'])
 ```
 
 
-    
-![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_20_0.png)
-    
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>real_value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>delta_g[0]</th>
+      <td>1.113</td>
+      <td>0.282</td>
+      <td>0.551</td>
+      <td>1.616</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>9396.0</td>
+      <td>9396.0</td>
+      <td>10067.0</td>
+      <td>5367.0</td>
+      <td>1.0</td>
+      <td>1.327219</td>
+    </tr>
+    <tr>
+      <th>delta_g[1]</th>
+      <td>-0.377</td>
+      <td>0.195</td>
+      <td>-0.755</td>
+      <td>-0.023</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>9817.0</td>
+      <td>7636.0</td>
+      <td>10457.0</td>
+      <td>5444.0</td>
+      <td>1.0</td>
+      <td>-0.569207</td>
+    </tr>
+    <tr>
+      <th>delta_g[2]</th>
+      <td>-0.113</td>
+      <td>0.158</td>
+      <td>-0.402</td>
+      <td>0.197</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>10247.0</td>
+      <td>5036.0</td>
+      <td>10486.0</td>
+      <td>5388.0</td>
+      <td>1.0</td>
+      <td>-0.567684</td>
+    </tr>
+    <tr>
+      <th>delta_g[3]</th>
+      <td>-2.461</td>
+      <td>0.141</td>
+      <td>-2.722</td>
+      <td>-2.179</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>10937.0</td>
+      <td>10937.0</td>
+      <td>11088.0</td>
+      <td>5386.0</td>
+      <td>1.0</td>
+      <td>-1.980011</td>
+    </tr>
+    <tr>
+      <th>delta_g[4]</th>
+      <td>-2.575</td>
+      <td>0.123</td>
+      <td>-2.807</td>
+      <td>-2.345</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>10279.0</td>
+      <td>10279.0</td>
+      <td>10720.0</td>
+      <td>5161.0</td>
+      <td>1.0</td>
+      <td>-1.631965</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 
 
-```python
+**TODO**: add covariance into the model
 
-```
-
-
-```python
-
-```
+DOes adding a global intercept make a difference?
 
 
 ```python
@@ -1041,7 +943,7 @@ plt.show()
     pandas   1.1.3
     arviz    0.10.0
     numpy    1.19.2
-    last updated: 2020-10-26 
+    last updated: 2020-11-02 
     
     CPython 3.8.5
     IPython 7.18.1
@@ -1053,6 +955,6 @@ plt.show()
     processor  : x86_64
     CPU cores  : 28
     interpreter: 64bit
-    host name  : compute-e-16-237.o2.rc.hms.harvard.edu
+    host name  : compute-e-16-231.o2.rc.hms.harvard.edu
     Git branch : models
 
