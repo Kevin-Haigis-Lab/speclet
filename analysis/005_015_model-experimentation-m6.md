@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import plotnine as gg
 import pymc3 as pm
+from theano import tensor as tt
 import arviz as az
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -268,7 +269,7 @@ data.head()
 
 
 
-    <ggplot: (8759126028418)>
+    <ggplot: (8764417680023)>
 
 
 
@@ -296,7 +297,7 @@ data.head()
 
 
 
-    <ggplot: (8759125996460)>
+    <ggplot: (8764417161439)>
 
 
 
@@ -320,7 +321,7 @@ data.head()
 
 
 
-    <ggplot: (8759125424424)>
+    <ggplot: (8764417741032)>
 
 
 
@@ -395,12 +396,12 @@ with pm.Model() as model6:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 00:21<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [16000/16000 00:20<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
 
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 22 seconds.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 21 seconds.
 
 
 
@@ -419,7 +420,7 @@ with pm.Model() as model6:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:08<00:00]
+  100.00% [8000/8000 00:09<00:00]
 </div>
 
 
@@ -468,7 +469,7 @@ az_model6 = az.from_pymc3(
 
 
 
-    <ggplot: (8759119638077)>
+    <ggplot: (8764411309812)>
 
 
 
@@ -624,9 +625,7 @@ plt.show()
 
 ```python
 var_names = ["mu_delta", "sigma_delta", "delta_g", "beta_s"]
-az.plot_forest(
-    az_model6, var_names=var_names, combined=True
-)
+az.plot_forest(az_model6, var_names=var_names, combined=True)
 plt.show()
 ```
 
@@ -638,7 +637,7 @@ plt.show()
 
 
 ```python
-az.summary(az_model6, var_names='gamma_g').assign(real_value = real_params['gamma_g'])
+az.summary(az_model6, var_names="gamma_g").assign(real_value=real_params["gamma_g"])
 ```
 
 
@@ -760,7 +759,7 @@ az.summary(az_model6, var_names='gamma_g').assign(real_value = real_params['gamm
 
 
 ```python
-az.summary(az_model6, var_names='delta_g').assign(real_value = real_params['delta_g'])
+az.summary(az_model6, var_names="delta_g").assign(real_value=real_params["delta_g"])
 ```
 
 
@@ -880,53 +879,668 @@ az.summary(az_model6, var_names='delta_g').assign(real_value = real_params['delt
 
 
 
-**TODO**: add covariance into the model
+### Does adding a global intercept make a difference?
 
-DOes adding a global intercept make a difference?
+Adding in a global intercept made the model way to flexible to fit - I believe it is technically non-identifiable.
+The fitting takes a long time and there is a lot of autocorrelation.
+Interestingly, there are no divergences.
+
+$
+logFC_s \sim \mathcal{N}(\mu_s, \sigma) \\
+\mu_s = \alpha + \alpha_s + \beta_s X \\
+\quad \alpha \sim \mathcal{N}(0, 3) \\
+\dots
+$
 
 
 ```python
+sgrna_idx = data["sgRNA"].cat.codes.to_list()
+sgrna_to_gene_idx = gene_to_sgrna_map["gene"].cat.codes.to_list()
 
+
+with pm.Model() as model6_2:
+    # Hyper-priors
+    mu_gamma = pm.Normal("mu_gamma", -1, 5)
+    sigma_gamma = pm.Exponential("sigma_gamma", 1)
+    mu_delta = pm.Normal("mu_delta", -1, 5)
+    sigma_delta = pm.Exponential("sigma_delta", 1)
+
+    # Hyper parameters
+    gamma_g = pm.Normal("gamma_g", mu_gamma, sigma_gamma, shape=num_genes)
+    mu_alpha = gamma_g
+    sigma_alpha = pm.Exponential("sigma_alpha", 1)
+
+    delta_g = pm.Normal("delta_g", mu_delta, sigma_delta, shape=num_genes)
+    mu_beta = delta_g
+    sigma_beta = pm.Exponential("sigma_beta", 1)
+
+    # Main level parameters
+    alpha = pm.Normal("alpha", 0, 3)
+    alpha_s = pm.Normal(
+        "alpha_s", mu_alpha[sgrna_to_gene_idx], sigma_alpha, shape=num_sgrnas
+    )
+    beta_s = pm.Normal(
+        "beta_s", mu_beta[sgrna_to_gene_idx], sigma_beta, shape=num_sgrnas
+    )
+
+    # Linear model
+    mu_s = pm.Deterministic(
+        "mu_s", alpha + alpha_s[sgrna_idx] + beta_s[sgrna_idx] * data.cna_z.values
+    )
+    sigma = pm.Exponential("sigma", 1)
+
+    # Likelihood
+    logfc = pm.Normal("logfc", mu_s, sigma, observed=data.logfc.values)
+
+    # Sampling
+    model6_2_prior_check = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
+    model6_2_trace = pm.sample(
+        1000, tune=1000, random_seed=RANDOM_SEED, target_accept=0.95
+    )
+    model6_2_post_check = pm.sample_posterior_predictive(
+        model6_2_trace, random_seed=RANDOM_SEED
+    )
+```
+
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using jitter+adapt_diag...
+    Multiprocess sampling (4 chains in 4 jobs)
+    NUTS: [sigma, beta_s, alpha_s, alpha, sigma_beta, delta_g, sigma_alpha, gamma_g, sigma_delta, mu_delta, sigma_gamma, mu_gamma]
+
+
+
+
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [8000/8000 05:39<00:00 Sampling 4 chains, 0 divergences]
+</div>
+
+
+
+    Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 339 seconds.
+    The chain reached the maximum tree depth. Increase max_treedepth, increase target_accept or reparameterize.
+    The estimated number of effective samples is smaller than 200 for some parameters.
+
+
+
+
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 00:04<00:00]
+</div>
+
+
+
+
+```python
+pm.model_to_graphviz(model6_2)
+```
+
+
+
+
+    
+![svg](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_23_0.svg)
+    
+
+
+
+
+```python
+az_model6_2 = az.from_pymc3(
+    trace=model6_2_trace,
+    prior=model6_2_prior_check,
+    posterior_predictive=model6_2_post_check,
+    model=model6_2,
+)
 ```
 
 
 ```python
-
+(
+    gg.ggplot(
+        pd.DataFrame({"logfc": model6_2_prior_check["logfc"][:, 1:5].flatten()}),
+        gg.aes(x="logfc"),
+    )
+    + gg.geom_density()
+)
 ```
 
 
-```python
+    
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_25_0.png)
+    
 
+
+
+
+
+    <ggplot: (8764408965491)>
+
+
+
+
+```python
+az.summary(az_model6_2, var_names=["gamma_g"]).assign(real_value=real_params["gamma_g"])
 ```
 
 
-```python
 
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>real_value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>gamma_g[0]</th>
+      <td>0.336</td>
+      <td>2.708</td>
+      <td>-4.638</td>
+      <td>5.309</td>
+      <td>0.190</td>
+      <td>0.134</td>
+      <td>204.0</td>
+      <td>204.0</td>
+      <td>206.0</td>
+      <td>545.0</td>
+      <td>1.02</td>
+      <td>-1.124639</td>
+    </tr>
+    <tr>
+      <th>gamma_g[1]</th>
+      <td>-0.758</td>
+      <td>2.682</td>
+      <td>-5.603</td>
+      <td>4.165</td>
+      <td>0.189</td>
+      <td>0.134</td>
+      <td>201.0</td>
+      <td>201.0</td>
+      <td>203.0</td>
+      <td>566.0</td>
+      <td>1.02</td>
+      <td>-0.630166</td>
+    </tr>
+    <tr>
+      <th>gamma_g[2]</th>
+      <td>-0.997</td>
+      <td>2.670</td>
+      <td>-5.805</td>
+      <td>3.901</td>
+      <td>0.188</td>
+      <td>0.133</td>
+      <td>201.0</td>
+      <td>201.0</td>
+      <td>203.0</td>
+      <td>508.0</td>
+      <td>1.02</td>
+      <td>-0.308103</td>
+    </tr>
+    <tr>
+      <th>gamma_g[3]</th>
+      <td>-3.559</td>
+      <td>2.670</td>
+      <td>-8.350</td>
+      <td>1.382</td>
+      <td>0.189</td>
+      <td>0.136</td>
+      <td>200.0</td>
+      <td>193.0</td>
+      <td>202.0</td>
+      <td>527.0</td>
+      <td>1.02</td>
+      <td>-0.692731</td>
+    </tr>
+    <tr>
+      <th>gamma_g[4]</th>
+      <td>-4.125</td>
+      <td>2.663</td>
+      <td>-8.740</td>
+      <td>0.884</td>
+      <td>0.189</td>
+      <td>0.137</td>
+      <td>198.0</td>
+      <td>190.0</td>
+      <td>200.0</td>
+      <td>502.0</td>
+      <td>1.02</td>
+      <td>-1.042568</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.plot_trace(az_model6_2, var_names=["gamma_g"])
+plt.show()
 ```
 
 
-```python
+    
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_27_0.png)
+    
 
+
+
+```python
+var_names = ["mu_gamma", "sigma_gamma", "gamma_g", "alpha_s"]
+az.plot_forest(
+    az_model6_2, var_names=var_names, combined=True,
+)
+plt.show()
 ```
 
 
-```python
+    
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_28_0.png)
+    
 
+
+
+```python
+var_names = ["mu_delta", "sigma_delta", "delta_g", "beta_s"]
+az.plot_forest(az_model6_2, var_names=var_names, combined=True)
+plt.show()
 ```
 
 
-```python
+    
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_29_0.png)
+    
 
+
+
+```python
+az.summary(az_model6_2, var_names="gamma_g").assign(real_value=real_params["gamma_g"])
 ```
 
 
-```python
 
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>real_value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>gamma_g[0]</th>
+      <td>0.336</td>
+      <td>2.708</td>
+      <td>-4.638</td>
+      <td>5.309</td>
+      <td>0.190</td>
+      <td>0.134</td>
+      <td>204.0</td>
+      <td>204.0</td>
+      <td>206.0</td>
+      <td>545.0</td>
+      <td>1.02</td>
+      <td>-1.124639</td>
+    </tr>
+    <tr>
+      <th>gamma_g[1]</th>
+      <td>-0.758</td>
+      <td>2.682</td>
+      <td>-5.603</td>
+      <td>4.165</td>
+      <td>0.189</td>
+      <td>0.134</td>
+      <td>201.0</td>
+      <td>201.0</td>
+      <td>203.0</td>
+      <td>566.0</td>
+      <td>1.02</td>
+      <td>-0.630166</td>
+    </tr>
+    <tr>
+      <th>gamma_g[2]</th>
+      <td>-0.997</td>
+      <td>2.670</td>
+      <td>-5.805</td>
+      <td>3.901</td>
+      <td>0.188</td>
+      <td>0.133</td>
+      <td>201.0</td>
+      <td>201.0</td>
+      <td>203.0</td>
+      <td>508.0</td>
+      <td>1.02</td>
+      <td>-0.308103</td>
+    </tr>
+    <tr>
+      <th>gamma_g[3]</th>
+      <td>-3.559</td>
+      <td>2.670</td>
+      <td>-8.350</td>
+      <td>1.382</td>
+      <td>0.189</td>
+      <td>0.136</td>
+      <td>200.0</td>
+      <td>193.0</td>
+      <td>202.0</td>
+      <td>527.0</td>
+      <td>1.02</td>
+      <td>-0.692731</td>
+    </tr>
+    <tr>
+      <th>gamma_g[4]</th>
+      <td>-4.125</td>
+      <td>2.663</td>
+      <td>-8.740</td>
+      <td>0.884</td>
+      <td>0.189</td>
+      <td>0.137</td>
+      <td>198.0</td>
+      <td>190.0</td>
+      <td>200.0</td>
+      <td>502.0</td>
+      <td>1.02</td>
+      <td>-1.042568</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.summary(az_model6_2, var_names="delta_g").assign(real_value=real_params["delta_g"])
 ```
 
 
-```python
 
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>real_value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>delta_g[0]</th>
+      <td>1.116</td>
+      <td>0.281</td>
+      <td>0.614</td>
+      <td>1.679</td>
+      <td>0.005</td>
+      <td>0.003</td>
+      <td>3477.0</td>
+      <td>3477.0</td>
+      <td>3642.0</td>
+      <td>2197.0</td>
+      <td>1.0</td>
+      <td>1.327219</td>
+    </tr>
+    <tr>
+      <th>delta_g[1]</th>
+      <td>-0.377</td>
+      <td>0.196</td>
+      <td>-0.751</td>
+      <td>-0.010</td>
+      <td>0.003</td>
+      <td>0.003</td>
+      <td>3199.0</td>
+      <td>2108.0</td>
+      <td>3612.0</td>
+      <td>2437.0</td>
+      <td>1.0</td>
+      <td>-0.569207</td>
+    </tr>
+    <tr>
+      <th>delta_g[2]</th>
+      <td>-0.107</td>
+      <td>0.160</td>
+      <td>-0.419</td>
+      <td>0.186</td>
+      <td>0.003</td>
+      <td>0.003</td>
+      <td>3922.0</td>
+      <td>1645.0</td>
+      <td>4073.0</td>
+      <td>2460.0</td>
+      <td>1.0</td>
+      <td>-0.567684</td>
+    </tr>
+    <tr>
+      <th>delta_g[3]</th>
+      <td>-2.462</td>
+      <td>0.141</td>
+      <td>-2.737</td>
+      <td>-2.211</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>3972.0</td>
+      <td>3972.0</td>
+      <td>4141.0</td>
+      <td>2586.0</td>
+      <td>1.0</td>
+      <td>-1.980011</td>
+    </tr>
+    <tr>
+      <th>delta_g[4]</th>
+      <td>-2.571</td>
+      <td>0.128</td>
+      <td>-2.826</td>
+      <td>-2.344</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>3986.0</td>
+      <td>3986.0</td>
+      <td>4062.0</td>
+      <td>2485.0</td>
+      <td>1.0</td>
+      <td>-1.631965</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+### Add a covariance matrix between the varying intercept and slope
+
+I was hoping to incorporate a covariance matrix in the model to account for correlations between varying effects, however, I was unable to figure out how to do it for a multilevel model that is constructed here.
+
+$
+logFC_s \sim \mathcal{N}(\mu_s, \sigma) \\
+\mu_s = \alpha_s + \beta_s X \\
+\quad \alpha_s \sim \mathcal{N}(\mu_\alpha, \sigma_\alpha) \\
+\qquad \mu_\alpha = \gamma_g \\
+\qquad\quad \gamma_g \sim \mathcal{N}(\mu_\gamma, \sigma_\gamma) \\
+\qquad\qquad \mu_\gamma \sim \mathcal{N}(0, 5) \quad \sigma_\gamma \sim \text{Exp}(1) \\
+\qquad \sigma_\alpha \sim \text{Exp}(1) \\
+\quad \beta_s \sim \mathcal{N}(\mu_\beta, \sigma_\beta) \\
+\qquad \mu_\beta = \delta_g \\
+\qquad\quad \delta_g \sim \mathcal{N}(\mu_\delta, \sigma_\delta) \\
+\qquad\qquad \mu_\delta \sim \mathcal{N}(0, 5) \quad \sigma_\delta \sim \text{Exp}(1) \\
+\qquad \sigma_\beta \sim \text{Exp}(1) \\
+\quad \begin{bmatrix} 
+  \alpha_s \\ 
+  \beta_s 
+\end{bmatrix} \sim \text{MvNormal}(
+  \begin{bmatrix} 
+    \alpha \\ 
+    \beta 
+  \end{bmatrix}, 
+  \Sigma) \\
+\qquad \Sigma = 
+  \begin{pmatrix}
+    \sigma_\alpha & 0 \\
+    0 & \sigma_\beta
+  \end{pmatrix}
+  P
+  \begin{pmatrix}
+    \sigma_\alpha & 0 \\
+    0 & \sigma_\beta
+  \end{pmatrix} \\
+\sigma \sim \text{Exp}(1)
+$
+
+
+```python
+if False:
+
+    sgrna_idx = data["sgRNA"].cat.codes.to_list()
+    sgrna_to_gene_idx = gene_to_sgrna_map["gene"].cat.codes.to_list()
+
+    with pm.Model() as model6_corr:
+        # Hyper-priors
+        mu_gamma = pm.Normal("mu_gamma", -1, 5)
+        sigma_gamma = pm.Exponential("sigma_gamma", 1)
+        mu_delta = pm.Normal("mu_delta", -1, 5)
+        sigma_delta = pm.Exponential("sigma_delta", 1)
+
+        # Hyper parameters
+        gamma_g = pm.Normal("gamma_g", mu_gamma, sigma_gamma, shape=num_genes)
+        mu_alpha = gamma_g[sgrna_to_gene_idx]
+
+        delta_g = pm.Normal("delta_g", mu_delta, sigma_delta, shape=num_genes)
+        mu_beta = delta_g[sgrna_to_gene_idx]
+
+        # Correlation covariance matrix
+        sd_dist = pm.Exponential.dist(0.5)  # prior standard deviations
+        chol, corr, stds = pm.LKJCholeskyCov(
+            "chol", n=2, eta=2.0, sd_dist=sd_dist, compute_corr=True
+        )
+
+        # Main level parameters
+        alpha_beta_s = pm.MvNormal(
+            "alpha_beta_s",
+            mu=tt.stack([mu_alpha, mu_beta]),
+            chol=chol,
+            shape=(num_sgrnas, 2),
+        )
+
+        # Linear model
+        mu_s = pm.Deterministic(
+            "mu_s",
+            alpha_beta_s[sgrna_idx, 0] + alpha_beta_s[sgrna_idx, 1] * data.cna_z.values,
+        )
+        sigma = pm.Exponential("sigma", 1)
+
+        # Likelihood
+        logfc = pm.Normal("logfc", mu_s, sigma, observed=data.logfc.values)
+
+        # Sampling
+    #     model6_corr_prior_check = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
+    #     model6_corr_trace = pm.sample(
+    #         2000, tune=2000, random_seed=RANDOM_SEED, target_accept=0.95
+    #     )
+    #     model6_corr_post_check = pm.sample_posterior_predictive(
+    #         model6_corr_trace, random_seed=RANDOM_SEED
+    #
 ```
 
 ---
@@ -937,13 +1551,13 @@ DOes adding a global intercept make a difference?
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    pymc3    3.9.3
-    plotnine 0.7.1
-    seaborn  0.11.0
-    pandas   1.1.3
-    arviz    0.10.0
     numpy    1.19.2
-    last updated: 2020-11-02 
+    seaborn  0.11.0
+    plotnine 0.7.1
+    arviz    0.10.0
+    pandas   1.1.3
+    pymc3    3.9.3
+    last updated: 2020-11-07 
     
     CPython 3.8.5
     IPython 7.18.1
@@ -955,6 +1569,6 @@ DOes adding a global intercept make a difference?
     processor  : x86_64
     CPU cores  : 28
     interpreter: 64bit
-    host name  : compute-e-16-231.o2.rc.hms.harvard.edu
+    host name  : compute-e-16-229.o2.rc.hms.harvard.edu
     Git branch : models
 
