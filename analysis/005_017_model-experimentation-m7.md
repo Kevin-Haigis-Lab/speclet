@@ -274,7 +274,7 @@ real_gene_vals = pd.DataFrame({"gene": genes, "log_fc": RP["gamma_g"]})
 
 
 
-    <ggplot: (8760584917471)>
+    <ggplot: (8759225604054)>
 
 
 
@@ -305,7 +305,7 @@ real_cellline_vals = pd.DataFrame({"cell_line": cell_lines, "log_fc": RP["beta_c
 
 
 
-    <ggplot: (8760573461218)>
+    <ggplot: (8759224964331)>
 
 
 
@@ -333,7 +333,7 @@ real_cellline_vals = pd.DataFrame({"cell_line": cell_lines, "log_fc": RP["beta_c
 
 
 
-    <ggplot: (8760582603644)>
+    <ggplot: (8759224964151)>
 
 
 
@@ -359,7 +359,7 @@ with pm.Model() as m7a:
 
     # Linear model parameters
     alpha_gc = pm.Normal(
-        "alpha_sc", mu_alpha_gc, sigma_alpha, shape=(num_genes, num_cell_lines)
+        "alpha_gc", mu_alpha_gc, sigma_alpha, shape=(num_genes, num_cell_lines)
     )
 
     # Linear model
@@ -381,7 +381,7 @@ with pm.Model() as m7a:
     Initializing NUTS using jitter+adapt_diag...
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     Multiprocess sampling (4 chains in 4 jobs)
-    NUTS: [sigma, alpha_sc, sigma_alpha, mu_alpha_gc]
+    NUTS: [sigma, alpha_gc, sigma_alpha, mu_alpha_gc]
 
 
 
@@ -405,7 +405,7 @@ with pm.Model() as m7a:
 
 
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 24 seconds.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 25 seconds.
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 
@@ -464,7 +464,7 @@ az_m7a = az.from_pymc3(
 
 ```python
 m7a_post = (
-    az.summary(az_m7a, var_names=["alpha_sc"])
+    az.summary(az_m7a, var_names=["alpha_gc"])
     .reset_index()
     .rename(columns={"index": "intercept"})
     .assign(
@@ -523,7 +523,7 @@ m7a_post.head(n=10)
   <tbody>
     <tr>
       <th>0</th>
-      <td>alpha_sc[0,0]</td>
+      <td>alpha_gc[0,0]</td>
       <td>-0.972</td>
       <td>0.327</td>
       <td>-1.561</td>
@@ -542,7 +542,7 @@ m7a_post.head(n=10)
     </tr>
     <tr>
       <th>1</th>
-      <td>alpha_sc[0,1]</td>
+      <td>alpha_gc[0,1]</td>
       <td>-2.230</td>
       <td>0.329</td>
       <td>-2.864</td>
@@ -561,7 +561,7 @@ m7a_post.head(n=10)
     </tr>
     <tr>
       <th>2</th>
-      <td>alpha_sc[0,2]</td>
+      <td>alpha_gc[0,2]</td>
       <td>-0.912</td>
       <td>0.331</td>
       <td>-1.516</td>
@@ -580,7 +580,7 @@ m7a_post.head(n=10)
     </tr>
     <tr>
       <th>3</th>
-      <td>alpha_sc[0,3]</td>
+      <td>alpha_gc[0,3]</td>
       <td>-0.789</td>
       <td>0.335</td>
       <td>-1.406</td>
@@ -599,7 +599,7 @@ m7a_post.head(n=10)
     </tr>
     <tr>
       <th>4</th>
-      <td>alpha_sc[0,4]</td>
+      <td>alpha_gc[0,4]</td>
       <td>-2.692</td>
       <td>0.335</td>
       <td>-3.307</td>
@@ -618,7 +618,7 @@ m7a_post.head(n=10)
     </tr>
     <tr>
       <th>5</th>
-      <td>alpha_sc[0,5]</td>
+      <td>alpha_gc[0,5]</td>
       <td>-2.934</td>
       <td>0.335</td>
       <td>-3.578</td>
@@ -637,7 +637,7 @@ m7a_post.head(n=10)
     </tr>
     <tr>
       <th>6</th>
-      <td>alpha_sc[0,6]</td>
+      <td>alpha_gc[0,6]</td>
       <td>-0.800</td>
       <td>0.335</td>
       <td>-1.405</td>
@@ -656,7 +656,7 @@ m7a_post.head(n=10)
     </tr>
     <tr>
       <th>7</th>
-      <td>alpha_sc[0,7]</td>
+      <td>alpha_gc[0,7]</td>
       <td>-1.661</td>
       <td>0.334</td>
       <td>-2.290</td>
@@ -675,7 +675,7 @@ m7a_post.head(n=10)
     </tr>
     <tr>
       <th>8</th>
-      <td>alpha_sc[0,8]</td>
+      <td>alpha_gc[0,8]</td>
       <td>-1.630</td>
       <td>0.337</td>
       <td>-2.245</td>
@@ -694,7 +694,7 @@ m7a_post.head(n=10)
     </tr>
     <tr>
       <th>9</th>
-      <td>alpha_sc[0,9]</td>
+      <td>alpha_gc[0,9]</td>
       <td>-0.460</td>
       <td>0.332</td>
       <td>-1.089</td>
@@ -740,7 +740,7 @@ m7a_post.head(n=10)
 
 
 
-    <ggplot: (8760557300017)>
+    <ggplot: (8759201241432)>
 
 
 
@@ -775,7 +775,7 @@ gene_posteriors = m7a_post[["gene", "mean"]].groupby("gene").mean().reset_index(
 
 
 
-    <ggplot: (8760572722387)>
+    <ggplot: (8759201252729)>
 
 
 
@@ -814,7 +814,7 @@ cell_line_posteriors = (
 
 
 
-    <ggplot: (8760557317581)>
+    <ggplot: (8759201180823)>
 
 
 
@@ -826,7 +826,7 @@ cell_line_idx = data.cell_line.cat.codes.to_list()
 with pm.Model() as m7a_pool:
 
     # Linear model parameters
-    alpha_gc = pm.Normal("alpha_sc", 0, 5, shape=(num_genes, num_cell_lines))
+    alpha_gc = pm.Normal("alpha_gc", 0, 5, shape=(num_genes, num_cell_lines))
 
     # Linear model
     mu_gc = pm.Deterministic("mu_gc", alpha_gc[gene_idx, cell_line_idx])
@@ -850,7 +850,7 @@ with pm.Model() as m7a_pool:
     Initializing NUTS using jitter+adapt_diag...
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     Multiprocess sampling (4 chains in 4 jobs)
-    NUTS: [sigma, alpha_sc]
+    NUTS: [sigma, alpha_gc]
 
 
 
@@ -869,12 +869,12 @@ with pm.Model() as m7a_pool:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 00:23<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [16000/16000 00:24<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
 
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 24 seconds.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 25 seconds.
 
 
 
@@ -931,7 +931,7 @@ az_m7a_pool = az.from_pymc3(
 
 ```python
 m7a_pool_post = (
-    az.summary(az_m7a_pool, var_names=["alpha_sc"])
+    az.summary(az_m7a_pool, var_names=["alpha_gc"])
     .reset_index()
     .rename(columns={"index": "intercept"})
     .assign(
@@ -990,7 +990,7 @@ m7a_pool_post.head(n=10)
   <tbody>
     <tr>
       <th>0</th>
-      <td>alpha_sc[0,0]</td>
+      <td>alpha_gc[0,0]</td>
       <td>-0.966</td>
       <td>0.340</td>
       <td>-1.615</td>
@@ -1009,7 +1009,7 @@ m7a_pool_post.head(n=10)
     </tr>
     <tr>
       <th>1</th>
-      <td>alpha_sc[0,1]</td>
+      <td>alpha_gc[0,1]</td>
       <td>-2.349</td>
       <td>0.348</td>
       <td>-3.020</td>
@@ -1028,7 +1028,7 @@ m7a_pool_post.head(n=10)
     </tr>
     <tr>
       <th>2</th>
-      <td>alpha_sc[0,2]</td>
+      <td>alpha_gc[0,2]</td>
       <td>-0.907</td>
       <td>0.340</td>
       <td>-1.550</td>
@@ -1047,7 +1047,7 @@ m7a_pool_post.head(n=10)
     </tr>
     <tr>
       <th>3</th>
-      <td>alpha_sc[0,3]</td>
+      <td>alpha_gc[0,3]</td>
       <td>-0.770</td>
       <td>0.351</td>
       <td>-1.399</td>
@@ -1066,7 +1066,7 @@ m7a_pool_post.head(n=10)
     </tr>
     <tr>
       <th>4</th>
-      <td>alpha_sc[0,4]</td>
+      <td>alpha_gc[0,4]</td>
       <td>-2.849</td>
       <td>0.347</td>
       <td>-3.503</td>
@@ -1085,7 +1085,7 @@ m7a_pool_post.head(n=10)
     </tr>
     <tr>
       <th>5</th>
-      <td>alpha_sc[0,5]</td>
+      <td>alpha_gc[0,5]</td>
       <td>-3.114</td>
       <td>0.356</td>
       <td>-3.748</td>
@@ -1104,7 +1104,7 @@ m7a_pool_post.head(n=10)
     </tr>
     <tr>
       <th>6</th>
-      <td>alpha_sc[0,6]</td>
+      <td>alpha_gc[0,6]</td>
       <td>-0.793</td>
       <td>0.345</td>
       <td>-1.445</td>
@@ -1123,7 +1123,7 @@ m7a_pool_post.head(n=10)
     </tr>
     <tr>
       <th>7</th>
-      <td>alpha_sc[0,7]</td>
+      <td>alpha_gc[0,7]</td>
       <td>-1.723</td>
       <td>0.352</td>
       <td>-2.413</td>
@@ -1142,7 +1142,7 @@ m7a_pool_post.head(n=10)
     </tr>
     <tr>
       <th>8</th>
-      <td>alpha_sc[0,8]</td>
+      <td>alpha_gc[0,8]</td>
       <td>-1.690</td>
       <td>0.347</td>
       <td>-2.317</td>
@@ -1161,7 +1161,7 @@ m7a_pool_post.head(n=10)
     </tr>
     <tr>
       <th>9</th>
-      <td>alpha_sc[0,9]</td>
+      <td>alpha_gc[0,9]</td>
       <td>-0.413</td>
       <td>0.346</td>
       <td>-1.064</td>
@@ -1194,16 +1194,20 @@ m7a_compare_post = pd.merge(
     m7a_post[var_names].rename(columns={"mean": "part_pool"}),
     m7a_pool_post[var_names].rename(columns={"mean": "full_pool"}),
     on=["gene", "cell_line"],
-).melt(id_vars=['gene', 'cell_line'], var_name="pool", value_name="mean")
+).melt(id_vars=["gene", "cell_line"], var_name="pool", value_name="mean")
 
 for col in ["gene", "cell_line"]:
     m7a_compare_post = make_cat(m7a_compare_post, col)
 
 (
     gg.ggplot(m7a_compare_post, gg.aes(x="gene", y="mean"))
-    + gg.geom_point(gg.aes(color="pool"), position = gg.position_dodge(width = 0.5))
+    + gg.geom_point(gg.aes(color="pool"), position=gg.position_dodge(width=0.5))
     + gg.scale_color_brewer(type="qual", palette="Set1")
-    + gg.labs(x="gene", y="posterior mean", title="Comparing posteriors of fully and partially pooled models")
+    + gg.labs(
+        x="gene",
+        y="posterior mean",
+        title="Comparing posteriors of fully and partially pooled models",
+    )
 )
 ```
 
@@ -1216,7 +1220,7 @@ for col in ["gene", "cell_line"]:
 
 
 
-    <ggplot: (8760557019031)>
+    <ggplot: (8759221233378)>
 
 
 
@@ -1224,10 +1228,14 @@ for col in ["gene", "cell_line"]:
 ```python
 (
     gg.ggplot(m7a_compare_post, gg.aes(x="cell_line", y="mean"))
-    + gg.geom_point(gg.aes(color="pool"), position = gg.position_dodge(width = 0.5))
+    + gg.geom_point(gg.aes(color="pool"), position=gg.position_dodge(width=0.5))
     + gg.scale_color_brewer(type="qual", palette="Set1")
-    + gg.theme(axis_text_x = gg.element_text(angle=90))
-    + gg.labs(x="cell_line", y="posterior mean", title="Comparing posteriors of fully and partially pooled models")
+    + gg.theme(axis_text_x=gg.element_text(angle=90))
+    + gg.labs(
+        x="cell_line",
+        y="posterior mean",
+        title="Comparing posteriors of fully and partially pooled models",
+    )
 )
 ```
 
@@ -1240,7 +1248,830 @@ for col in ["gene", "cell_line"]:
 
 
 
-    <ggplot: (8760557103854)>
+    <ggplot: (8759221925554)>
+
+
+
+
+```python
+az.summary(az_m7a, var_names=["mu_alpha_gc", "sigma_alpha"])
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>mu_alpha_gc</th>
+      <td>-0.936</td>
+      <td>0.082</td>
+      <td>-1.094</td>
+      <td>-0.787</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>11858.0</td>
+      <td>11826.0</td>
+      <td>11823.0</td>
+      <td>5764.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>sigma_alpha</th>
+      <td>1.110</td>
+      <td>0.058</td>
+      <td>1.000</td>
+      <td>1.216</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>13260.0</td>
+      <td>13026.0</td>
+      <td>13424.0</td>
+      <td>6046.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+## Model 7b. A d-Dimensional varying intercept with a hierarchical link between the sgRNA and gene
+
+$
+logFC_{i,s,c} \sim \mathcal{N}(\mu_{s,c}, \sigma) \\
+\mu_{s,c} = \alpha_{s,c} \\
+\quad \alpha_{s,c} \sim \mathcal{N}(\mu_{\alpha_{s,c}}, \sigma_\alpha) \\
+\qquad \mu_{\alpha_{s,c}} = \gamma_{g,c} \\
+\qquad\quad \gamma_{g,c} \sim \mathcal{N}(\mu_\gamma, \sigma_\gamma) \\
+\qquad\qquad \mu_\gamma \sim \mathcal{N}(0,5) \quad \sigma_\gamma \sim \text{Exp}(1) \\
+\qquad \sigma_\alpha \sim \text{Exp}(1) \\
+\sigma \sim \text{Exp}(1)
+$
+
+
+```python
+gene_idx = data.gene.cat.codes.to_list()
+cell_line_idx = data.cell_line.cat.codes.to_list()
+
+with pm.Model() as m7a:
+    # Hyper-priors
+    mu_alpha_gc = pm.Normal("mu_alpha_gc", 0, 5)
+    sigma_alpha = pm.Exponential("sigma_alpha", 1)
+
+    # Linear model parameters
+    alpha_gc = pm.Normal(
+        "alpha_gc", mu_alpha_gc, sigma_alpha, shape=(num_genes, num_cell_lines)
+    )
+
+    # Linear model
+    mu_gc = pm.Deterministic("mu_gc", alpha_gc[gene_idx, cell_line_idx])
+    sigma = pm.Exponential("sigma", 1)
+
+    # Likelihood
+    log_fc = pm.Normal("log_fc", mu_gc, sigma, observed=data.log_fc.to_list())
+
+    # Sampling
+    m7a_prior_check = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
+    m7a_trace = pm.sample(2000, tune=2000, random_seed=RANDOM_SEED, target_accept=0.95)
+    m7a_post_check = pm.sample_posterior_predictive(m7a_trace, random_seed=RANDOM_SEED)
+```
+
+
+```python
+sgrna_idx = data.sgRNA.cat.codes.to_list()
+gene_idx = data.gene.cat.codes.to_list()
+sgrna_to_gene_idx = sgrna_df.gene.cat.codes.to_list()
+cell_line_idx = data.cell_line.cat.codes.to_list()
+
+with pm.Model() as m7b:
+    # Priors for varying intercept for [gene, cell line].
+    mu_gamma = pm.Normal("mu_gamma", 0, 5)
+    sigma_gamma = pm.Exponential("sigma_gamma", 1)
+
+    # Varying intercept for [gene, cell line].
+    gamma_gc = pm.Normal(
+        "gamma_gc", mu_gamma, sigma_gamma, shape=(num_genes, num_cell_lines)
+    )
+
+    # Priors for varying intercept for [sgRNA, cell line].
+    mu_alpha_sc = pm.Deterministic("mu_alpha_sc", gamma_gc[sgrna_to_gene_idx,])
+    sigma_alpha = pm.Exponential("sigma_alpha", 1)
+
+    # Varying intercept for [sgRNA, cell line].
+    alpha_sc = pm.Normal(
+        "alpha_sc", mu_alpha_sc, sigma_alpha, shape=(num_sgrnas, num_cell_lines)
+    )
+
+    # level 0. Linear model
+    mu_sc = pm.Deterministic("mu_gc", alpha_sc[sgrna_idx, cell_line_idx])
+    sigma = pm.Exponential("sigma", 1)
+
+    # Likelihood
+    log_fc = pm.Normal("log_fc", mu_sc, sigma, observed=data.log_fc.to_list())
+
+    # Sampling
+    m7b_prior_check = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
+    m7b_trace = pm.sample(2000, tune=2000, random_seed=RANDOM_SEED, target_accept=0.95)
+    m7b_post_check = pm.sample_posterior_predictive(m7b_trace, random_seed=RANDOM_SEED)
+```
+
+
+    ---------------------------------------------------------------------------
+
+    ValueError                                Traceback (most recent call last)
+
+    <ipython-input-59-655a47c25c62> in <module>
+         17 
+         18     # Varying intercept for [sgRNA, cell line].
+    ---> 19     alpha_sc = pm.Normal(
+         20         "alpha_sc", mu_alpha_sc, sigma_alpha, shape=(num_sgrnas, num_cell_lines)
+         21     )
+
+
+    ~/.conda/envs/speclet/lib/python3.8/site-packages/pymc3/distributions/distribution.py in __new__(cls, name, *args, **kwargs)
+         81         else:
+         82             dist = cls.dist(*args, **kwargs)
+    ---> 83         return model.Var(name, dist, data, total_size, dims=dims)
+         84 
+         85     def __getnewargs__(self):
+
+
+    ~/.conda/envs/speclet/lib/python3.8/site-packages/pymc3/model.py in Var(self, name, dist, data, total_size, dims)
+       1069             if getattr(dist, "transform", None) is None:
+       1070                 with self:
+    -> 1071                     var = FreeRV(
+       1072                         name=name, distribution=dist, total_size=total_size, model=self
+       1073                     )
+
+
+    ~/.conda/envs/speclet/lib/python3.8/site-packages/pymc3/model.py in __init__(self, type, owner, index, name, distribution, total_size, model)
+       1589             self.distribution = distribution
+       1590             self.tag.test_value = (
+    -> 1591                 np.ones(distribution.shape, distribution.dtype) * distribution.default()
+       1592             )
+       1593             self.logp_elemwiset = distribution.logp(self)
+
+
+    ValueError: operands could not be broadcast together with shapes (55,20) (1100,20) 
+
+
+
+```python
+pm.model_to_graphviz(m7b)
+```
+
+
+
+
+    
+![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_28_0.svg)
+    
+
+
+
+
+```python
+az_m7b = az.from_pymc3(
+    trace=m7b_trace,
+    model=m7b,
+    posterior_predictive=m7b_post_check,
+    prior=m7b_prior_check,
+)
+```
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+
+
+
+```python
+sgrna_idx = data.sgRNA.cat.codes.to_list()
+cell_line_idx = data.cell_line.cat.codes.to_list()
+
+with pm.Model() as m7b_pool:
+
+    # Linear model parameters
+    alpha_sc = pm.Normal("alpha_sc", 0, 5, shape=(num_sgrnas, num_cell_lines))
+
+    # Linear model
+    mu_sc = pm.Deterministic("mu_sc", alpha_sc[sgrna_idx, cell_line_idx])
+    sigma = pm.Exponential("sigma", 1)
+
+    # Likelihood
+    log_fc = pm.Normal("log_fc", mu_sc, sigma, observed=data.log_fc.to_list())
+
+    # Sampling
+    m7b_pool_prior_check = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
+    m7b_pool_trace = pm.sample(
+        2000, tune=2000, random_seed=RANDOM_SEED, target_accept=0.95
+    )
+    m7b_pool_post_check = pm.sample_posterior_predictive(
+        m7b_pool_trace, random_seed=RANDOM_SEED
+    )
+```
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using jitter+adapt_diag...
+    Multiprocess sampling (4 chains in 4 jobs)
+    NUTS: [sigma, alpha_sc]
+
+
+
+
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [16000/16000 01:05<00:00 Sampling 4 chains, 0 divergences]
+</div>
+
+
+
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 67 seconds.
+    The acceptance probability does not match the target. It is 0.9012349306269171, but should be close to 0.95. Try to increase the number of tuning steps.
+    The acceptance probability does not match the target. It is 0.8568385429631933, but should be close to 0.95. Try to increase the number of tuning steps.
+    The rhat statistic is larger than 1.4 for some parameters. The sampler did not converge.
+    The estimated number of effective samples is smaller than 200 for some parameters.
+
+
+
+
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [8000/8000 00:08<00:00]
+</div>
+
+
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+
+
+
+```python
+pm.model_to_graphviz(m7b_pool)
+```
+
+
+
+
+    
+![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_31_0.svg)
+    
+
+
+
+
+```python
+az_m7b_pool = az.from_pymc3(
+    trace=m7b_pool_trace,
+    model=m7b_pool,
+    posterior_predictive=m7b_pool_post_check,
+    prior=m7b_pool_prior_check,
+)
+```
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+
+
+
+```python
+az.summary(az_m7b, var_names=["mu_gamma", "sigma_gamma"])
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>mu_gamma</th>
+      <td>-0.937</td>
+      <td>0.080</td>
+      <td>-1.091</td>
+      <td>-0.791</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>7195.0</td>
+      <td>7036.0</td>
+      <td>7238.0</td>
+      <td>4670.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>sigma_gamma</th>
+      <td>1.111</td>
+      <td>0.057</td>
+      <td>1.004</td>
+      <td>1.217</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>7371.0</td>
+      <td>7240.0</td>
+      <td>7566.0</td>
+      <td>5498.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+m7b_post = (
+    az.summary(az_m7b, var_names=["gamma_gc"])
+    .reset_index()
+    .rename(columns={"index": "intercept"})
+    .assign(
+        gene_idx=lambda d: d["intercept"].str.extract(r"\[(\d+),"),
+        cell_line_idx=lambda d: d["intercept"].str.extract(r",(\d+)\]"),
+    )
+    .assign(
+        gene_idx=lambda d: [int(x) for x in d.gene_idx],
+        gene=lambda d: [genes[i] for i in d.gene_idx],
+        cell_line_idx=lambda d: [int(x) for x in d.cell_line_idx],
+        cell_line=lambda d: [cell_lines[i] for i in d.cell_line_idx],
+    )
+)
+m7b_post.head(n=10)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>intercept</th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>gene_idx</th>
+      <th>cell_line_idx</th>
+      <th>gene</th>
+      <th>cell_line</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>gamma_gc[0,0]</td>
+      <td>-0.973</td>
+      <td>0.333</td>
+      <td>-1.581</td>
+      <td>-0.323</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>7409.0</td>
+      <td>7210.0</td>
+      <td>7413.0</td>
+      <td>5646.0</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>gene_0</td>
+      <td>cell_0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>gamma_gc[0,1]</td>
+      <td>-2.238</td>
+      <td>0.338</td>
+      <td>-2.845</td>
+      <td>-1.579</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>6961.0</td>
+      <td>6710.0</td>
+      <td>6937.0</td>
+      <td>5555.0</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>gene_0</td>
+      <td>cell_1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>gamma_gc[0,2]</td>
+      <td>-0.919</td>
+      <td>0.335</td>
+      <td>-1.535</td>
+      <td>-0.297</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>6872.0</td>
+      <td>6710.0</td>
+      <td>6853.0</td>
+      <td>5865.0</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>gene_0</td>
+      <td>cell_2</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>gamma_gc[0,3]</td>
+      <td>-0.786</td>
+      <td>0.332</td>
+      <td>-1.411</td>
+      <td>-0.162</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>7373.0</td>
+      <td>6793.0</td>
+      <td>7375.0</td>
+      <td>5699.0</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>3</td>
+      <td>gene_0</td>
+      <td>cell_3</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>gamma_gc[0,4]</td>
+      <td>-2.688</td>
+      <td>0.343</td>
+      <td>-3.329</td>
+      <td>-2.043</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>6362.0</td>
+      <td>6362.0</td>
+      <td>6365.0</td>
+      <td>4661.0</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>4</td>
+      <td>gene_0</td>
+      <td>cell_4</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>gamma_gc[0,5]</td>
+      <td>-2.933</td>
+      <td>0.332</td>
+      <td>-3.541</td>
+      <td>-2.306</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>6775.0</td>
+      <td>6698.0</td>
+      <td>6768.0</td>
+      <td>5607.0</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>5</td>
+      <td>gene_0</td>
+      <td>cell_5</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>gamma_gc[0,6]</td>
+      <td>-0.798</td>
+      <td>0.335</td>
+      <td>-1.407</td>
+      <td>-0.153</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>6232.0</td>
+      <td>6019.0</td>
+      <td>6225.0</td>
+      <td>5431.0</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>6</td>
+      <td>gene_0</td>
+      <td>cell_6</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>gamma_gc[0,7]</td>
+      <td>-1.659</td>
+      <td>0.333</td>
+      <td>-2.278</td>
+      <td>-1.021</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>6903.0</td>
+      <td>6903.0</td>
+      <td>6903.0</td>
+      <td>5653.0</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>7</td>
+      <td>gene_0</td>
+      <td>cell_7</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>gamma_gc[0,8]</td>
+      <td>-1.630</td>
+      <td>0.336</td>
+      <td>-2.251</td>
+      <td>-0.997</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>6776.0</td>
+      <td>6623.0</td>
+      <td>6773.0</td>
+      <td>5693.0</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>8</td>
+      <td>gene_0</td>
+      <td>cell_8</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>gamma_gc[0,9]</td>
+      <td>-0.461</td>
+      <td>0.325</td>
+      <td>-1.090</td>
+      <td>0.128</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>6099.0</td>
+      <td>5351.0</td>
+      <td>6106.0</td>
+      <td>5485.0</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>9</td>
+      <td>gene_0</td>
+      <td>cell_9</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+(
+    gg.ggplot(m7b_post, gg.aes(x="gene", y="cell_line"))
+    + gg.geom_tile(gg.aes(fill="mean"))
+    + gg.labs(
+        x="gene",
+        y="cell line",
+        fill="posterior mean",
+        title="Posterior means of the varying intercepts",
+    )
+)
+```
+
+
+    
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_35_0.png)
+    
+
+
+
+
+
+    <ggplot: (8759130021130)>
+
+
+
+
+```python
+var_names = ["gene", "cell_line", "mean"]
+m7ab_compare_post = (
+    pd.merge(
+        m7a_pool_post[var_names].rename(columns={"mean": "full_pool"}),
+        m7a_post[var_names].rename(columns={"mean": "part_pool"}),
+        on=["gene", "cell_line"],
+    )
+    .merge(
+        m7b_post[var_names].rename(columns={"mean": "hierarchical"}),
+        on=["gene", "cell_line"],
+    )
+    .melt(id_vars=["gene", "cell_line"], var_name="pool", value_name="mean")
+)
+
+for col in ["gene", "cell_line", "pool"]:
+    m7ab_compare_post = make_cat(m7ab_compare_post, col)
+
+
+(
+    gg.ggplot(m7ab_compare_post, gg.aes(x="gene", y="mean"))
+    + gg.geom_point(gg.aes(color="pool"), position=gg.position_dodge(width=0.6))
+    + gg.scale_color_brewer(type="qual", palette="Set1")
+    + gg.labs(
+        x="gene",
+        y="posterior mean",
+        title="Comparing posteriors of fully and partially pooled models",
+    )
+)
+```
+
+
+    
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_36_0.png)
+    
+
+
+
+
+
+    <ggplot: (8759129885284)>
+
+
+
+
+```python
+def parse_alpha_sc(az_obj):
+    post_df = (
+        az.summary(az_obj, var_names=["alpha_sc"])
+        .reset_index()
+        .rename(columns={"index": "intercept"})
+        .assign(
+            sgrna_idx=lambda d: d["intercept"].str.extract(r"\[(\d+),"),
+            cell_line_idx=lambda d: d["intercept"].str.extract(r",(\d+)\]"),
+        )
+        .assign(
+            sgrna_idx=lambda d: [int(x) for x in d.sgrna_idx],
+            sgRNA=lambda d: [sgrnas[i] for i in d.sgrna_idx],
+            cell_line_idx=lambda d: [int(x) for x in d.cell_line_idx],
+            cell_line=lambda d: [cell_lines[i] for i in d.cell_line_idx],
+            gene=lambda d: [genes[sgrna_to_gene_idx[i]] for i in d.sgrna_idx],
+        )
+    )
+    
+    for col in ["gene", "cell_line", "sgRNA"]:
+        post_df = make_cat(m7b_post, col)
+    
+    return post_df
+
+
+m7b_alpha_sc = parse_alpha_sc(az_m7b)
+m7b_pool_alpha_sc = parse_alpha_sc(az_m7b_pool)
+```
+
+
+```python
+gene_posteriors = m7b_alpha_sc[["gene", "mean"]].groupby("gene").mean().reset_index()
+
+(
+    gg.ggplot(m7b_alpha_sc, gg.aes(x="gene", y="mean"))
+    + gg.geom_jitter(gg.aes(color="cell_line"), height=0, width=0.3, alpha=0.8, size=1)
+    + gg.scale_color_discrete(guide=gg.guide_legend(title="cell line", ncol=2))
+    + gg.geom_crossbar(
+        gg.aes(ymin="log_fc", ymax="log_fc", y="log_fc"), data=real_gene_vals
+    )
+    + gg.geom_crossbar(
+        gg.aes(ymin="mean", ymax="mean", y="mean"), data=gene_posteriors, color="blue"
+    )
+)
+```
+
+
+    
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_38_0.png)
+    
+
+
+
+
+
+    <ggplot: (8759167098025)>
+
+
+
+
+```python
+compare_alpha_sc = pd.concat([
+    m7b_alpha_sc.assign(pool="partial"),
+    m7b_pool_alpha_sc.assign(pool="full")
+])
+
+(
+    gg.ggplot(compare_alpha_sc, gg.aes(x="sgRNA", y="mean"))
+    + gg.facet_wrap("gene", scales="free_x")
+    + gg.geom_point(gg.aes(color="pool"), position=gg.position_dodge(width=0.3))
+)
+```
+
+
+    
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_39_0.png)
+    
+
+
+
+
+
+    <ggplot: (8759127025655)>
 
 
 
@@ -1253,6 +2084,8 @@ for col in ["gene", "cell_line"]:
 ```python
 
 ```
+
+**TODO:** Plot of the varying intercept values for sgRNA and cell line in `az_m7b` vs `az_m7b_pool` as x and y to show shrinkage.
 
 
 ```python
@@ -1292,12 +2125,12 @@ for col in ["gene", "cell_line"]:
 %watermark -d -u -v -iv -b -h -m
 ```
 
+    numpy    1.19.2
+    pymc3    3.9.3
     pandas   1.1.3
     arviz    0.10.0
-    pymc3    3.9.3
     seaborn  0.11.0
     plotnine 0.7.1
-    numpy    1.19.2
     last updated: 2020-11-09 
     
     CPython 3.8.5
