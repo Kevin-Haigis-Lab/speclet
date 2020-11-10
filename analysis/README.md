@@ -19,4 +19,5 @@ Modeling construction and fitting.
 
 > Notebook series `010`
 
-1. [Exploratory data analysis.](010_exploratory-data-analysis.ipynb) Exploration of the subset of data.
+1. [Exploratory data analysis.](010_005_exploratory-data-analysis.md) Exploration of the subset of data.
+2. [Mimic CERES.](010_010_ceres-replicate.md) Replicate the results of the CERES model by recreating the model using PyMC3.
