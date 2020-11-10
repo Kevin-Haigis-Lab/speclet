@@ -274,7 +274,7 @@ real_gene_vals = pd.DataFrame({"gene": genes, "log_fc": RP["gamma_g"]})
 
 
 
-    <ggplot: (8759225604054)>
+    <ggplot: (8735955646561)>
 
 
 
@@ -305,7 +305,7 @@ real_cellline_vals = pd.DataFrame({"cell_line": cell_lines, "log_fc": RP["beta_c
 
 
 
-    <ggplot: (8759224964331)>
+    <ggplot: (8735954978220)>
 
 
 
@@ -333,11 +333,15 @@ real_cellline_vals = pd.DataFrame({"cell_line": cell_lines, "log_fc": RP["beta_c
 
 
 
-    <ggplot: (8759224964151)>
+    <ggplot: (8735953394243)>
 
 
 
 ## Model 7a. A 2-Dimensional varying intercept.
+
+A model with just a varying intercept in the main level.
+The varying intercept is 2-dimensional: one dimension for gene and one for the cell line.
+This varying intercept has a 1D prior.
 
 $
 logFC_{i,g,c} \sim \mathcal{N}(\mu_{g,c}, \sigma) \\
@@ -740,7 +744,7 @@ m7a_post.head(n=10)
 
 
 
-    <ggplot: (8759201241432)>
+    <ggplot: (8735931206548)>
 
 
 
@@ -775,9 +779,12 @@ gene_posteriors = m7a_post[["gene", "mean"]].groupby("gene").mean().reset_index(
 
 
 
-    <ggplot: (8759201252729)>
+    <ggplot: (8735931079608)>
 
 
+
+The cell line effect is exaggerated and the gene effect is well estimated. 
+This is probably because most of the effect is comming from the genes, but the varying intercept only has one value per gene-cell line pair.
 
 
 ```python
@@ -807,16 +814,18 @@ cell_line_posteriors = (
 
 
     
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_16_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_17_0.png)
     
 
 
 
 
 
-    <ggplot: (8759201180823)>
+    <ggplot: (8735931201199)>
 
 
+
+A model with complete pooling of the data to compare with the hierarhical model to highlight the effects of partial pooling.
 
 
 ```python
@@ -910,7 +919,7 @@ pm.model_to_graphviz(m7a_pool)
 
 
     
-![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_18_0.svg)
+![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_20_0.svg)
     
 
 
@@ -1213,14 +1222,14 @@ for col in ["gene", "cell_line"]:
 
 
     
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_22_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_24_0.png)
     
 
 
 
 
 
-    <ggplot: (8759221233378)>
+    <ggplot: (8735946388505)>
 
 
 
@@ -1241,14 +1250,14 @@ for col in ["gene", "cell_line"]:
 
 
     
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_23_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_25_0.png)
     
 
 
 
 
 
-    <ggplot: (8759221925554)>
+    <ggplot: (8736005771472)>
 
 
 
@@ -1326,7 +1335,10 @@ az.summary(az_m7a, var_names=["mu_alpha_gc", "sigma_alpha"])
 
 
 
-## Model 7b. A d-Dimensional varying intercept with a hierarchical link between the sgRNA and gene
+## Model 7b. A 2-Dimensional varying intercept with a hierarchical link between the sgRNA and gene
+
+The same model as above, but with another hierarchcial level connecting the sgRNAs by their gene.
+The first level uses a varying intercept of $[sgRNA, cell]$ which is then given a prior with a varying intercept of shape $[gene, cell]$.
 
 $
 logFC_{i,s,c} \sim \mathcal{N}(\mu_{s,c}, \sigma) \\
@@ -1338,34 +1350,6 @@ logFC_{i,s,c} \sim \mathcal{N}(\mu_{s,c}, \sigma) \\
 \qquad \sigma_\alpha \sim \text{Exp}(1) \\
 \sigma \sim \text{Exp}(1)
 $
-
-
-```python
-gene_idx = data.gene.cat.codes.to_list()
-cell_line_idx = data.cell_line.cat.codes.to_list()
-
-with pm.Model() as m7a:
-    # Hyper-priors
-    mu_alpha_gc = pm.Normal("mu_alpha_gc", 0, 5)
-    sigma_alpha = pm.Exponential("sigma_alpha", 1)
-
-    # Linear model parameters
-    alpha_gc = pm.Normal(
-        "alpha_gc", mu_alpha_gc, sigma_alpha, shape=(num_genes, num_cell_lines)
-    )
-
-    # Linear model
-    mu_gc = pm.Deterministic("mu_gc", alpha_gc[gene_idx, cell_line_idx])
-    sigma = pm.Exponential("sigma", 1)
-
-    # Likelihood
-    log_fc = pm.Normal("log_fc", mu_gc, sigma, observed=data.log_fc.to_list())
-
-    # Sampling
-    m7a_prior_check = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
-    m7a_trace = pm.sample(2000, tune=2000, random_seed=RANDOM_SEED, target_accept=0.95)
-    m7a_post_check = pm.sample_posterior_predictive(m7a_trace, random_seed=RANDOM_SEED)
-```
 
 
 ```python
@@ -1406,105 +1390,12 @@ with pm.Model() as m7b:
     m7b_post_check = pm.sample_posterior_predictive(m7b_trace, random_seed=RANDOM_SEED)
 ```
 
-
-    ---------------------------------------------------------------------------
-
-    ValueError                                Traceback (most recent call last)
-
-    <ipython-input-59-655a47c25c62> in <module>
-         17 
-         18     # Varying intercept for [sgRNA, cell line].
-    ---> 19     alpha_sc = pm.Normal(
-         20         "alpha_sc", mu_alpha_sc, sigma_alpha, shape=(num_sgrnas, num_cell_lines)
-         21     )
-
-
-    ~/.conda/envs/speclet/lib/python3.8/site-packages/pymc3/distributions/distribution.py in __new__(cls, name, *args, **kwargs)
-         81         else:
-         82             dist = cls.dist(*args, **kwargs)
-    ---> 83         return model.Var(name, dist, data, total_size, dims=dims)
-         84 
-         85     def __getnewargs__(self):
-
-
-    ~/.conda/envs/speclet/lib/python3.8/site-packages/pymc3/model.py in Var(self, name, dist, data, total_size, dims)
-       1069             if getattr(dist, "transform", None) is None:
-       1070                 with self:
-    -> 1071                     var = FreeRV(
-       1072                         name=name, distribution=dist, total_size=total_size, model=self
-       1073                     )
-
-
-    ~/.conda/envs/speclet/lib/python3.8/site-packages/pymc3/model.py in __init__(self, type, owner, index, name, distribution, total_size, model)
-       1589             self.distribution = distribution
-       1590             self.tag.test_value = (
-    -> 1591                 np.ones(distribution.shape, distribution.dtype) * distribution.default()
-       1592             )
-       1593             self.logp_elemwiset = distribution.logp(self)
-
-
-    ValueError: operands could not be broadcast together with shapes (55,20) (1100,20) 
-
-
-
-```python
-pm.model_to_graphviz(m7b)
-```
-
-
-
-
-    
-![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_28_0.svg)
-    
-
-
-
-
-```python
-az_m7b = az.from_pymc3(
-    trace=m7b_trace,
-    model=m7b,
-    posterior_predictive=m7b_post_check,
-    prior=m7b_prior_check,
-)
-```
-
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-
-
-
-```python
-sgrna_idx = data.sgRNA.cat.codes.to_list()
-cell_line_idx = data.cell_line.cat.codes.to_list()
-
-with pm.Model() as m7b_pool:
-
-    # Linear model parameters
-    alpha_sc = pm.Normal("alpha_sc", 0, 5, shape=(num_sgrnas, num_cell_lines))
-
-    # Linear model
-    mu_sc = pm.Deterministic("mu_sc", alpha_sc[sgrna_idx, cell_line_idx])
-    sigma = pm.Exponential("sigma", 1)
-
-    # Likelihood
-    log_fc = pm.Normal("log_fc", mu_sc, sigma, observed=data.log_fc.to_list())
-
-    # Sampling
-    m7b_pool_prior_check = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
-    m7b_pool_trace = pm.sample(
-        2000, tune=2000, random_seed=RANDOM_SEED, target_accept=0.95
-    )
-    m7b_pool_post_check = pm.sample_posterior_predictive(
-        m7b_pool_trace, random_seed=RANDOM_SEED
-    )
-```
-
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     Auto-assigning NUTS sampler...
     Initializing NUTS using jitter+adapt_diag...
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     Multiprocess sampling (4 chains in 4 jobs)
-    NUTS: [sigma, alpha_sc]
+    NUTS: [sigma, alpha_sc, sigma_alpha, gamma_gc, sigma_gamma, mu_gamma]
 
 
 
@@ -1523,15 +1414,14 @@ with pm.Model() as m7b_pool:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 01:05<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [16000/16000 01:46<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
 
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 67 seconds.
-    The acceptance probability does not match the target. It is 0.9012349306269171, but should be close to 0.95. Try to increase the number of tuning steps.
-    The acceptance probability does not match the target. It is 0.8568385429631933, but should be close to 0.95. Try to increase the number of tuning steps.
-    The rhat statistic is larger than 1.4 for some parameters. The sampler did not converge.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 107 seconds.
+    The acceptance probability does not match the target. It is 0.9023624303207955, but should be close to 0.95. Try to increase the number of tuning steps.
+    The rhat statistic is larger than 1.05 for some parameters. This indicates slight problems during sampling.
     The estimated number of effective samples is smaller than 200 for some parameters.
 
 
@@ -1561,6 +1451,120 @@ with pm.Model() as m7b_pool:
 
 
 ```python
+pm.model_to_graphviz(m7b)
+```
+
+
+
+
+    
+![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_29_0.svg)
+    
+
+
+
+
+```python
+az_m7b = az.from_pymc3(
+    trace=m7b_trace,
+    model=m7b,
+    posterior_predictive=m7b_post_check,
+    prior=m7b_prior_check,
+)
+```
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+
+
+Again, to identify the effects of the hierarchcial model on sharing of data, below is a non-hierarchical equivalent.
+
+
+```python
+sgrna_idx = data.sgRNA.cat.codes.to_list()
+cell_line_idx = data.cell_line.cat.codes.to_list()
+
+with pm.Model() as m7b_pool:
+
+    # Linear model parameters
+    alpha_sc = pm.Normal("alpha_sc", 0, 5, shape=(num_sgrnas, num_cell_lines))
+
+    # Linear model
+    mu_sc = pm.Deterministic("mu_sc", alpha_sc[sgrna_idx, cell_line_idx])
+    sigma = pm.Exponential("sigma", 1)
+
+    # Likelihood
+    log_fc = pm.Normal("log_fc", mu_sc, sigma, observed=data.log_fc.to_list())
+
+    # Sampling
+    m7b_pool_prior_check = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
+    m7b_pool_trace = pm.sample(
+        2000, tune=2000, random_seed=RANDOM_SEED, target_accept=0.95
+    )
+    m7b_pool_post_check = pm.sample_posterior_predictive(
+        m7b_pool_trace, random_seed=RANDOM_SEED
+    )
+```
+
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using jitter+adapt_diag...
+    Multiprocess sampling (4 chains in 4 jobs)
+    NUTS: [sigma, alpha_sc]
+
+
+
+
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [16000/16000 01:05<00:00 Sampling 4 chains, 0 divergences]
+</div>
+
+
+
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 66 seconds.
+    The acceptance probability does not match the target. It is 0.9012349306269171, but should be close to 0.95. Try to increase the number of tuning steps.
+    The acceptance probability does not match the target. It is 0.8568385429631933, but should be close to 0.95. Try to increase the number of tuning steps.
+    The rhat statistic is larger than 1.4 for some parameters. The sampler did not converge.
+    The estimated number of effective samples is smaller than 200 for some parameters.
+
+
+
+
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [8000/8000 00:09<00:00]
+</div>
+
+
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+
+
+
+```python
 pm.model_to_graphviz(m7b_pool)
 ```
 
@@ -1568,7 +1572,7 @@ pm.model_to_graphviz(m7b_pool)
 
 
     
-![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_31_0.svg)
+![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_33_0.svg)
     
 
 
@@ -1932,14 +1936,14 @@ m7b_post.head(n=10)
 
 
     
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_35_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_37_0.png)
     
 
 
 
 
 
-    <ggplot: (8759130021130)>
+    <ggplot: (8735899365735)>
 
 
 
@@ -1977,14 +1981,14 @@ for col in ["gene", "cell_line", "pool"]:
 
 
     
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_36_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_38_0.png)
     
 
 
 
 
 
-    <ggplot: (8759129885284)>
+    <ggplot: (8735899367268)>
 
 
 
@@ -2007,10 +2011,10 @@ def parse_alpha_sc(az_obj):
             gene=lambda d: [genes[sgrna_to_gene_idx[i]] for i in d.sgrna_idx],
         )
     )
-    
+
     for col in ["gene", "cell_line", "sgRNA"]:
-        post_df = make_cat(m7b_post, col)
-    
+        post_df = make_cat(post_df, col)
+
     return post_df
 
 
@@ -2037,85 +2041,940 @@ gene_posteriors = m7b_alpha_sc[["gene", "mean"]].groupby("gene").mean().reset_in
 
 
     
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_38_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_40_0.png)
     
 
 
 
 
 
-    <ggplot: (8759167098025)>
+    <ggplot: (8735899367364)>
 
 
 
 
 ```python
-compare_alpha_sc = pd.concat([
-    m7b_alpha_sc.assign(pool="partial"),
-    m7b_pool_alpha_sc.assign(pool="full")
-])
+compare_alpha_sc = pd.concat(
+    [m7b_alpha_sc.assign(pool="partial"), m7b_pool_alpha_sc.assign(pool="full")]
+)
 
 (
     gg.ggplot(compare_alpha_sc, gg.aes(x="sgRNA", y="mean"))
-    + gg.facet_wrap("gene", scales="free_x")
-    + gg.geom_point(gg.aes(color="pool"), position=gg.position_dodge(width=0.3))
+    + gg.facet_wrap("gene", ncol=2, scales="free_x")
+    + gg.geom_point(gg.aes(color="pool"), position=gg.position_dodge(width=0.6), size=1)
+    + gg.scale_color_brewer(type="qual", palette="Set1")
+    + gg.theme(figure_size=(8, 12), axis_text_x=gg.element_text(size=8))
 )
 ```
 
 
     
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_39_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_41_0.png)
     
 
 
 
 
 
-    <ggplot: (8759127025655)>
+    <ggplot: (8735931064480)>
+
+
+
+One issue is still that the cell line and gene effects are muddled and inseparable.
+Therefore, drawing useful conclusions about the impact of knocking out a gene using a specific guide is very difficult, potentially impossible.
+
+
+```python
+pred_alpha_s = sgrna_df.copy()
+m7b_alpha_sc_post = m7b_trace.get_values("alpha_sc")
+
+# For each posterior sample, the average for each cell line.
+cell_line_avg = m7b_alpha_sc_post.mean(axis=1)
+
+for i in range(len(pred_alpha_s)):
+    p = (m7b_alpha_sc_post[:, i, :] - cell_line_avg).flatten()
+    pred_alpha_s.loc[i, "mean"] = np.mean(p)
+    hdi = az.hdi(p, hdi_prob=0.89)
+    pred_alpha_s.loc[i, "hdi_89_lower"] = hdi[0]
+    pred_alpha_s.loc[i, "hdi_89_upper"] = hdi[1]
+
+pred_alpha_s["real_value"] = RP["alpha_s"]
+pred_alpha_s
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>gene</th>
+      <th>sgRNA</th>
+      <th>mean</th>
+      <th>hdi_89_lower</th>
+      <th>hdi_89_upper</th>
+      <th>real_value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>gene_0</td>
+      <td>sgRNA_0</td>
+      <td>-0.778723</td>
+      <td>-1.400583</td>
+      <td>-0.181332</td>
+      <td>-1.862128</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>gene_1</td>
+      <td>sgRNA_1</td>
+      <td>-0.108910</td>
+      <td>-0.605927</td>
+      <td>0.331777</td>
+      <td>-1.070338</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>gene_1</td>
+      <td>sgRNA_2</td>
+      <td>-0.256802</td>
+      <td>-0.760342</td>
+      <td>0.269939</td>
+      <td>-1.319719</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>gene_2</td>
+      <td>sgRNA_3</td>
+      <td>-0.125926</td>
+      <td>-0.586036</td>
+      <td>0.326831</td>
+      <td>-1.176780</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>gene_2</td>
+      <td>sgRNA_4</td>
+      <td>0.239965</td>
+      <td>-0.313550</td>
+      <td>0.808423</td>
+      <td>-0.645986</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>gene_2</td>
+      <td>sgRNA_5</td>
+      <td>-0.057022</td>
+      <td>-0.571905</td>
+      <td>0.446365</td>
+      <td>-0.958555</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>gene_3</td>
+      <td>sgRNA_6</td>
+      <td>-0.262592</td>
+      <td>-0.663229</td>
+      <td>0.137196</td>
+      <td>-1.280025</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>gene_3</td>
+      <td>sgRNA_7</td>
+      <td>-0.213017</td>
+      <td>-0.684585</td>
+      <td>0.244540</td>
+      <td>-1.183275</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>gene_3</td>
+      <td>sgRNA_8</td>
+      <td>-0.240960</td>
+      <td>-0.668431</td>
+      <td>0.221597</td>
+      <td>-1.242896</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>gene_3</td>
+      <td>sgRNA_9</td>
+      <td>-0.269438</td>
+      <td>-0.718198</td>
+      <td>0.197026</td>
+      <td>-1.159313</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>gene_4</td>
+      <td>sgRNA_10</td>
+      <td>-0.436543</td>
+      <td>-0.866166</td>
+      <td>-0.048008</td>
+      <td>-1.409439</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>gene_4</td>
+      <td>sgRNA_11</td>
+      <td>-0.262738</td>
+      <td>-0.674895</td>
+      <td>0.149165</td>
+      <td>-1.203135</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>gene_4</td>
+      <td>sgRNA_12</td>
+      <td>-0.330748</td>
+      <td>-0.649573</td>
+      <td>-0.012195</td>
+      <td>-1.331831</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>gene_4</td>
+      <td>sgRNA_13</td>
+      <td>-0.430378</td>
+      <td>-0.889111</td>
+      <td>-0.027717</td>
+      <td>-1.484044</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>gene_4</td>
+      <td>sgRNA_14</td>
+      <td>-0.510773</td>
+      <td>-0.949362</td>
+      <td>-0.072013</td>
+      <td>-1.707468</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>gene_5</td>
+      <td>sgRNA_15</td>
+      <td>1.210059</td>
+      <td>0.832455</td>
+      <td>1.593072</td>
+      <td>0.183812</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>gene_5</td>
+      <td>sgRNA_16</td>
+      <td>1.307093</td>
+      <td>0.912301</td>
+      <td>1.724179</td>
+      <td>0.213355</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>gene_5</td>
+      <td>sgRNA_17</td>
+      <td>1.452508</td>
+      <td>0.995970</td>
+      <td>1.956044</td>
+      <td>0.506672</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>gene_5</td>
+      <td>sgRNA_18</td>
+      <td>1.170990</td>
+      <td>0.662711</td>
+      <td>1.611710</td>
+      <td>0.088151</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>gene_5</td>
+      <td>sgRNA_19</td>
+      <td>0.927563</td>
+      <td>0.439936</td>
+      <td>1.376086</td>
+      <td>-0.256121</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>gene_5</td>
+      <td>sgRNA_20</td>
+      <td>1.101143</td>
+      <td>0.635387</td>
+      <td>1.546210</td>
+      <td>0.043019</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>gene_6</td>
+      <td>sgRNA_21</td>
+      <td>0.117491</td>
+      <td>-0.298694</td>
+      <td>0.531630</td>
+      <td>-0.888385</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>gene_6</td>
+      <td>sgRNA_22</td>
+      <td>-0.117770</td>
+      <td>-0.573604</td>
+      <td>0.333768</td>
+      <td>-1.227153</td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td>gene_6</td>
+      <td>sgRNA_23</td>
+      <td>0.121497</td>
+      <td>-0.243612</td>
+      <td>0.493045</td>
+      <td>-0.865815</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>gene_6</td>
+      <td>sgRNA_24</td>
+      <td>0.202855</td>
+      <td>-0.197562</td>
+      <td>0.601364</td>
+      <td>-0.843903</td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td>gene_6</td>
+      <td>sgRNA_25</td>
+      <td>0.251114</td>
+      <td>-0.177150</td>
+      <td>0.709654</td>
+      <td>-0.730256</td>
+    </tr>
+    <tr>
+      <th>26</th>
+      <td>gene_6</td>
+      <td>sgRNA_26</td>
+      <td>0.088825</td>
+      <td>-0.284919</td>
+      <td>0.434666</td>
+      <td>-0.876381</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>gene_6</td>
+      <td>sgRNA_27</td>
+      <td>0.232411</td>
+      <td>-0.205694</td>
+      <td>0.690829</td>
+      <td>-0.691828</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>gene_7</td>
+      <td>sgRNA_28</td>
+      <td>0.116012</td>
+      <td>-0.290056</td>
+      <td>0.502420</td>
+      <td>-0.989358</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>gene_7</td>
+      <td>sgRNA_29</td>
+      <td>0.273582</td>
+      <td>-0.157127</td>
+      <td>0.648921</td>
+      <td>-0.749392</td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td>gene_7</td>
+      <td>sgRNA_30</td>
+      <td>0.293197</td>
+      <td>-0.082148</td>
+      <td>0.717992</td>
+      <td>-0.665104</td>
+    </tr>
+    <tr>
+      <th>31</th>
+      <td>gene_7</td>
+      <td>sgRNA_31</td>
+      <td>0.234749</td>
+      <td>-0.295798</td>
+      <td>0.639004</td>
+      <td>-0.845472</td>
+    </tr>
+    <tr>
+      <th>32</th>
+      <td>gene_7</td>
+      <td>sgRNA_32</td>
+      <td>0.156232</td>
+      <td>-0.224168</td>
+      <td>0.522039</td>
+      <td>-0.968587</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>gene_7</td>
+      <td>sgRNA_33</td>
+      <td>0.160303</td>
+      <td>-0.264191</td>
+      <td>0.592128</td>
+      <td>-0.924400</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>gene_7</td>
+      <td>sgRNA_34</td>
+      <td>0.326817</td>
+      <td>-0.092062</td>
+      <td>0.765680</td>
+      <td>-0.581153</td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td>gene_7</td>
+      <td>sgRNA_35</td>
+      <td>0.490441</td>
+      <td>0.096167</td>
+      <td>0.928749</td>
+      <td>-0.478120</td>
+    </tr>
+    <tr>
+      <th>36</th>
+      <td>gene_8</td>
+      <td>sgRNA_36</td>
+      <td>-0.329779</td>
+      <td>-0.770623</td>
+      <td>0.180444</td>
+      <td>-1.384790</td>
+    </tr>
+    <tr>
+      <th>37</th>
+      <td>gene_8</td>
+      <td>sgRNA_37</td>
+      <td>-0.259593</td>
+      <td>-0.583078</td>
+      <td>0.061469</td>
+      <td>-1.152245</td>
+    </tr>
+    <tr>
+      <th>38</th>
+      <td>gene_8</td>
+      <td>sgRNA_38</td>
+      <td>-0.450223</td>
+      <td>-0.818707</td>
+      <td>-0.067932</td>
+      <td>-1.487493</td>
+    </tr>
+    <tr>
+      <th>39</th>
+      <td>gene_8</td>
+      <td>sgRNA_39</td>
+      <td>-0.306725</td>
+      <td>-0.778048</td>
+      <td>0.180823</td>
+      <td>-1.321872</td>
+    </tr>
+    <tr>
+      <th>40</th>
+      <td>gene_8</td>
+      <td>sgRNA_40</td>
+      <td>-0.451817</td>
+      <td>-0.893742</td>
+      <td>-0.014955</td>
+      <td>-1.508166</td>
+    </tr>
+    <tr>
+      <th>41</th>
+      <td>gene_8</td>
+      <td>sgRNA_41</td>
+      <td>-0.251108</td>
+      <td>-0.664497</td>
+      <td>0.167122</td>
+      <td>-1.283574</td>
+    </tr>
+    <tr>
+      <th>42</th>
+      <td>gene_8</td>
+      <td>sgRNA_42</td>
+      <td>-0.398168</td>
+      <td>-0.774630</td>
+      <td>-0.041777</td>
+      <td>-1.393158</td>
+    </tr>
+    <tr>
+      <th>43</th>
+      <td>gene_8</td>
+      <td>sgRNA_43</td>
+      <td>-0.492080</td>
+      <td>-0.962591</td>
+      <td>-0.086261</td>
+      <td>-1.568002</td>
+    </tr>
+    <tr>
+      <th>44</th>
+      <td>gene_8</td>
+      <td>sgRNA_44</td>
+      <td>-0.415149</td>
+      <td>-0.805317</td>
+      <td>-0.026994</td>
+      <td>-1.510403</td>
+    </tr>
+    <tr>
+      <th>45</th>
+      <td>gene_9</td>
+      <td>sgRNA_45</td>
+      <td>-0.024745</td>
+      <td>-0.405813</td>
+      <td>0.367533</td>
+      <td>-0.946443</td>
+    </tr>
+    <tr>
+      <th>46</th>
+      <td>gene_9</td>
+      <td>sgRNA_46</td>
+      <td>-0.163600</td>
+      <td>-0.644673</td>
+      <td>0.313142</td>
+      <td>-1.181060</td>
+    </tr>
+    <tr>
+      <th>47</th>
+      <td>gene_9</td>
+      <td>sgRNA_47</td>
+      <td>-0.469718</td>
+      <td>-0.866518</td>
+      <td>-0.065697</td>
+      <td>-1.594541</td>
+    </tr>
+    <tr>
+      <th>48</th>
+      <td>gene_9</td>
+      <td>sgRNA_48</td>
+      <td>-0.332914</td>
+      <td>-0.686800</td>
+      <td>0.005252</td>
+      <td>-1.431779</td>
+    </tr>
+    <tr>
+      <th>49</th>
+      <td>gene_9</td>
+      <td>sgRNA_49</td>
+      <td>-0.333479</td>
+      <td>-0.711872</td>
+      <td>0.041447</td>
+      <td>-1.365683</td>
+    </tr>
+    <tr>
+      <th>50</th>
+      <td>gene_9</td>
+      <td>sgRNA_50</td>
+      <td>-0.304353</td>
+      <td>-0.690348</td>
+      <td>0.073534</td>
+      <td>-1.420578</td>
+    </tr>
+    <tr>
+      <th>51</th>
+      <td>gene_9</td>
+      <td>sgRNA_51</td>
+      <td>-0.213426</td>
+      <td>-0.698639</td>
+      <td>0.267757</td>
+      <td>-1.221988</td>
+    </tr>
+    <tr>
+      <th>52</th>
+      <td>gene_9</td>
+      <td>sgRNA_52</td>
+      <td>-0.394072</td>
+      <td>-0.933308</td>
+      <td>0.062759</td>
+      <td>-1.500064</td>
+    </tr>
+    <tr>
+      <th>53</th>
+      <td>gene_9</td>
+      <td>sgRNA_53</td>
+      <td>-0.236368</td>
+      <td>-0.578915</td>
+      <td>0.117060</td>
+      <td>-1.322028</td>
+    </tr>
+    <tr>
+      <th>54</th>
+      <td>gene_9</td>
+      <td>sgRNA_54</td>
+      <td>-0.245188</td>
+      <td>-0.580735</td>
+      <td>0.087996</td>
+      <td>-1.299649</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+## Model 7c. Two varying intercepts
+
+Due to the issue mentioned above about the gene/sgRNA and cell line effects being combined, I want to attempt the two-varying-intercept model again.
+This time, I will use more strict priors.
+
+$
+logFC_{i,s,c} \sim \mathcal{N}(\mu_{g,c}, \sigma) \\
+\mu_{g,c} = \alpha_g + \beta_c \\
+\quad \alpha_g \sim \mathcal{N}(\mu_\alpha, \sigma_\alpha) \\
+\qquad \mu_\alpha \sim \mathcal{N}(0,5) \quad \sigma_\alpha \sim \text{Exp}(1) \\
+\quad \beta_c \sim \mathcal{N}(\mu_\beta, \sigma_\beta) \\
+\qquad \mu_\beta \sim \mathcal{N}(0,5) \quad \sigma_\beta \sim \text{Exp}(1) \\
+\sigma \sim \text{Exp}(1)
+$
+
+
+```python
+gene_idx = data.gene.cat.codes.to_list()
+cell_line_idx = data.cell_line.cat.codes.to_list()
+
+with pm.Model() as m7c:
+
+    # Hyper-priors
+    mu_alpha = pm.Normal("mu_alpha", -1, 1)
+    sigma_alpha = pm.Exponential("sigma_alpha", 1)
+    mu_beta = pm.Normal("mu_beta", 0, 0.2)
+    sigma_beta = pm.Exponential("sigma_beta", 1)
+
+    # Varying intercept for gene and cell line.
+    alpha_g = pm.Normal("alpha_g", mu_alpha, sigma_alpha, shape=(num_genes))
+    beta_c = pm.Normal("beta_c", mu_beta, sigma_beta, shape=(num_cell_lines))
+
+    # level 0. Linear model
+    mu_gc = pm.Deterministic("mu_gc", alpha_g[gene_idx] + beta_c[cell_line_idx])
+    sigma = pm.Exponential("sigma", 1)
+
+    # Likelihood
+    log_fc = pm.Normal("log_fc", mu_gc, sigma, observed=data.log_fc.to_list())
+
+    # Sampling
+    m7c_prior_check = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
+    m7c_trace = pm.sample(2000, tune=2000, random_seed=RANDOM_SEED, target_accept=0.95)
+    m7c_post_check = pm.sample_posterior_predictive(m7c_trace, random_seed=RANDOM_SEED)
+```
+
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using jitter+adapt_diag...
+    Multiprocess sampling (4 chains in 4 jobs)
+    NUTS: [sigma, beta_c, alpha_g, sigma_beta, mu_beta, sigma_alpha, mu_alpha]
+
+
+
+
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [16000/16000 00:54<00:00 Sampling 4 chains, 0 divergences]
+</div>
+
+
+
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 54 seconds.
+    The acceptance probability does not match the target. It is 0.8963706202106828, but should be close to 0.95. Try to increase the number of tuning steps.
+    The number of effective samples is smaller than 10% for some parameters.
+
+
+
+
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [8000/8000 00:09<00:00]
+</div>
 
 
 
 
 ```python
-
+pm.model_to_graphviz(m7c)
 ```
+
+
+
+
+    
+![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_46_0.svg)
+    
+
+
 
 
 ```python
-
+az_m7c = az.from_pymc3(
+    trace=m7c_trace,
+    model=m7c,
+    posterior_predictive=m7c_post_check,
+    prior=m7c_prior_check,
+)
 ```
 
-**TODO:** Plot of the varying intercept values for sgRNA and cell line in `az_m7b` vs `az_m7b_pool` as x and y to show shrinkage.
+This approach seems to work great!
+More sampling will be required to get more effective samples of the posterior, but as a proof-of-concept, this worked.
 
 
 ```python
-
+az.plot_trace(az_m7c, var_names="alpha_g")
+plt.show()
 ```
+
+
+    
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_49_0.png)
+    
+
 
 
 ```python
-
+az.summary(
+    az_m7c, var_names=["mu_alpha", "sigma_alpha", "mu_beta", "sigma_beta"]
+).assign(
+    real_value=[RP[k] for k in ["mu_gamma", "sigma_gamma", "mu_beta", "sigma_beta"]]
+)
 ```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>real_value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>mu_alpha</th>
+      <td>-0.956</td>
+      <td>0.356</td>
+      <td>-1.631</td>
+      <td>-0.301</td>
+      <td>0.016</td>
+      <td>0.011</td>
+      <td>494.0</td>
+      <td>485.0</td>
+      <td>497.0</td>
+      <td>638.0</td>
+      <td>1.01</td>
+      <td>-1.0</td>
+    </tr>
+    <tr>
+      <th>sigma_alpha</th>
+      <td>0.597</td>
+      <td>0.163</td>
+      <td>0.348</td>
+      <td>0.895</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>2557.0</td>
+      <td>2497.0</td>
+      <td>2883.0</td>
+      <td>2801.0</td>
+      <td>1.00</td>
+      <td>0.5</td>
+    </tr>
+    <tr>
+      <th>mu_beta</th>
+      <td>0.003</td>
+      <td>0.199</td>
+      <td>-0.381</td>
+      <td>0.363</td>
+      <td>0.007</td>
+      <td>0.005</td>
+      <td>849.0</td>
+      <td>849.0</td>
+      <td>850.0</td>
+      <td>1293.0</td>
+      <td>1.00</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>sigma_beta</th>
+      <td>1.053</td>
+      <td>0.178</td>
+      <td>0.747</td>
+      <td>1.382</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>3021.0</td>
+      <td>2927.0</td>
+      <td>3214.0</td>
+      <td>3535.0</td>
+      <td>1.00</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+Both the gene and cell line effects were estimated very well.
+Again, the sampling was not perfect, but that can be fixed with more compute & time,
 
 
 ```python
+m7c_alpha_g_post = (
+    az.summary(az_m7c, var_names="alpha_g")
+    .reset_index()
+    .rename(columns={"index": "alpha_g"})
+    .assign(gene_idx=lambda d: d["alpha_g"].str.extract(r"\[(\d+)\]"))
+    .assign(
+        gene_idx=lambda d: [int(x) for x in d.gene_idx],
+        gene=lambda d: [genes[i] for i in d.gene_idx],
+    )
+)
 
+nudge_x = 0.3
+
+(
+    gg.ggplot(m7c_alpha_g_post, gg.aes(x="gene"))
+    + gg.geom_linerange(gg.aes(ymin="hdi_3%", ymax="hdi_97%"), color="blue", size=0.8)
+    + gg.geom_point(gg.aes(y="mean"), color="blue", size=2)
+    + gg.geom_point(
+        gg.aes(y="log_fc"),
+        data=real_gene_vals,
+        color="black",
+        shape="^",
+        size=2,
+        alpha=0.7,
+    )
+)
 ```
+
+
+    
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_52_0.png)
+    
+
+
+
+
+
+    <ggplot: (8735811091423)>
+
+
 
 
 ```python
+m7c_beta_c_post = (
+    az.summary(az_m7c, var_names="beta_c")
+    .reset_index()
+    .rename(columns={"index": "beta_c"})
+    .assign(cell_line_idx=lambda d: d["beta_c"].str.extract(r"\[(\d+)\]"))
+    .assign(
+        cell_line_idx=lambda d: [int(x) for x in d.cell_line_idx],
+        cell_line=lambda d: [cell_lines[i] for i in d.cell_line_idx],
+    )
+)
 
+nudge_x = 0.3
+
+(
+    gg.ggplot(m7c_beta_c_post, gg.aes(x="cell_line"))
+    + gg.geom_linerange(gg.aes(ymin="hdi_3%", ymax="hdi_97%"), color="blue", size=0.8)
+    + gg.geom_point(gg.aes(y="mean"), color="blue", size=2)
+    + gg.geom_point(
+        gg.aes(y="log_fc"),
+        data=real_cellline_vals,
+        color="black",
+        shape="^",
+        size=2,
+        alpha=0.7,
+    )
+)
 ```
 
 
-```python
+    
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_53_0.png)
+    
 
-```
 
 
-```python
 
-```
+
+    <ggplot: (8735811000953)>
+
+
+
+### Conclusions and final thoughts
+
+All of the models above fit the data and can be used as templates in the future.
+The last model, `m7c`, using two varying intercepts, demonstrated that more informative priors are required for the model to fit.
+A hierarchical version of `m7c` should be the focus of further analysis.
 
 ---
 
@@ -2125,13 +2984,13 @@ compare_alpha_sc = pd.concat([
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    numpy    1.19.2
     pymc3    3.9.3
-    pandas   1.1.3
-    arviz    0.10.0
-    seaborn  0.11.0
+    numpy    1.19.2
     plotnine 0.7.1
-    last updated: 2020-11-09 
+    arviz    0.10.0
+    pandas   1.1.3
+    seaborn  0.11.0
+    last updated: 2020-11-10 
     
     CPython 3.8.5
     IPython 7.18.1
@@ -2143,6 +3002,6 @@ compare_alpha_sc = pd.concat([
     processor  : x86_64
     CPU cores  : 28
     interpreter: 64bit
-    host name  : compute-e-16-235.o2.rc.hms.harvard.edu
+    host name  : compute-e-16-233.o2.rc.hms.harvard.edu
     Git branch : models
 

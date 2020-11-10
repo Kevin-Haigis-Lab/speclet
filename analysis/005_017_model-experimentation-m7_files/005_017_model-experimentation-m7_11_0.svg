@@ -64,7 +64,7 @@
 <text text-anchor="middle" x="252.1" y="-168.73" font-family="Times,serif" font-size="14.00">Exponential</text>
 </g>
 <!-- log_fc -->
-<g id="node6" class="node">
+<g id="node5" class="node">
 <title>log_fc</title>
 <ellipse fill="lightgrey" stroke="black" cx="133.1" cy="-76.48" rx="41.94" ry="37.45"/>
 <text text-anchor="middle" x="133.1" y="-87.78" font-family="Times,serif" font-size="14.00">log_fc</text>
@@ -78,7 +78,7 @@
 <polygon fill="black" stroke="black" points="171.52,-107.9 161.78,-103.73 166.79,-113.07 171.52,-107.9"/>
 </g>
 <!-- mu_gc -->
-<g id="node5" class="node">
+<g id="node6" class="node">
 <title>mu_gc</title>
 <polygon fill="none" stroke="black" points="176.6,-213.93 85.6,-213.93 85.6,-160.93 176.6,-160.93 176.6,-213.93"/>
 <text text-anchor="middle" x="131.1" y="-198.73" font-family="Times,serif" font-size="14.00">mu_gc</text>
