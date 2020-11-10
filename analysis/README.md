@@ -4,6 +4,8 @@ Modeling construction and fitting.
 
 ## Experimentation with model design
 
+> Notebook series `005`
+
 1. [Model 1.](005_005_model-experimentation-m1.md) Standard linear model of one gene using RNA expression as a predictor.
 2. [Model 2.](005_007_model-experimentation-m2.md) A hierarchical linear model of multiple genes with a varying intercept and slope on RNA expression.
 3. [Model 3.](005_009_model-experimentation-m3.md) (Failed) A hierarhcical model of multiple genes and cell lines with a varying intercept for each. The gene level model consisted of an intercept and slope for RNA expression.
@@ -13,6 +15,8 @@ Modeling construction and fitting.
 7. [Model 7.](005_017_model-experimentation-m7.md) A model with a single 2D varying intercept with one dimension for sgRNA and one for cell line. Then try to have the sgRNA dimension vary by gene. A model with two varying intercepts was also successfully fit in this notebook.
 
 
-## Experimentation with a subset of real data
+## Experimentation with a subset of real data 
 
-1. [Exploratory data analysis]() (**in progress**)
+> Notebook series `010`
+
+1. [Exploratory data analysis.](010_exploratory-data-analysis.ipynb) Exploration of the subset of data.
