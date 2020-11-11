@@ -218,6 +218,7 @@ cache/
 temp/
 modeling_data/*
 .snakemake/
+.virtual_documents/
 
 # Specific files to except from the rules above
 !modeling_data/depmap_modeling_dataframe_subsample.csv
