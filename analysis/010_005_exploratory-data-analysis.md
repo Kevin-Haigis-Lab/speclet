@@ -387,9 +387,9 @@ data.columns
 ```
 
 
-    
+
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_7_0.png)
-    
+
 
 
 
@@ -417,9 +417,9 @@ faceting_theme_dict = {
 ```
 
 
-    
+
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_8_0.png)
-    
+
 
 
 
@@ -444,9 +444,9 @@ faceting_theme_dict = {
 ```
 
 
-    
+
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_9_0.png)
-    
+
 
 
 
@@ -471,9 +471,9 @@ faceting_theme_dict = {
 ```
 
 
-    
+
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_10_0.png)
-    
+
 
 
 
@@ -515,9 +515,9 @@ plot_highlight_muts(
 ```
 
 
-    
+
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_12_0.png)
-    
+
 
 
 
@@ -538,9 +538,9 @@ plot_highlight_muts(
 ```
 
 
-    
+
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_13_0.png)
-    
+
 
 
 
@@ -562,9 +562,9 @@ plot_highlight_muts(
 ```
 
 
-    
+
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_14_0.png)
-    
+
 
 
 
@@ -594,9 +594,9 @@ plot_highlight_muts(
 ```
 
 
-    
+
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_15_0.png)
-    
+
 
 
 
@@ -624,9 +624,9 @@ data["sgrna_idx"] = data["sgrna"].cat.codes
 ```
 
 
-    
+
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_16_0.png)
-    
+
 
 
 
@@ -651,14 +651,12 @@ data["sgrna_idx"] = data["sgrna"].cat.codes
 ```
 
 
-    
+
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_17_0.png)
-    
+
 
 
 
 
 
     <ggplot: (8790655599330)>
-
-

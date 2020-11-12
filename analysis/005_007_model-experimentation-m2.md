@@ -112,9 +112,9 @@ tidy_real_data = pd.DataFrame({"alpha": real_alpha, "beta": real_beta, "gene": g
 ```
 
 
-    
+
 ![png](005_007_model-experimentation-m2_files/005_007_model-experimentation-m2_8_0.png)
-    
+
 
 
 
@@ -212,9 +212,9 @@ pm.model_to_graphviz(model2)
 
 
 
-    
+
 ![svg](005_007_model-experimentation-m2_files/005_007_model-experimentation-m2_10_0.svg)
-    
+
 
 
 
@@ -492,9 +492,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_007_model-experimentation-m2_files/005_007_model-experimentation-m2_13_0.png)
-    
+
 
 
 The varying effects were captured *very* well.
@@ -506,9 +506,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_007_model-experimentation-m2_files/005_007_model-experimentation-m2_15_0.png)
-    
+
 
 
 
@@ -672,9 +672,9 @@ post["gene"] = [genes[i] for i in post.alpha_dim_0]
 ```
 
 
-    
+
 ![png](005_007_model-experimentation-m2_files/005_007_model-experimentation-m2_18_0.png)
-    
+
 
 
 
@@ -702,11 +702,11 @@ This hierharchcial model fit very well and the results were interpretable.
     seaborn  0.11.0
     pymc3    3.9.3
     numpy    1.19.2
-    last updated: 2020-10-26 
-    
+    last updated: 2020-10-26
+
     CPython 3.8.5
     IPython 7.18.1
-    
+
     compiler   : GCC 7.3.0
     system     : Linux
     release    : 3.10.0-1062.el7.x86_64
@@ -716,4 +716,3 @@ This hierharchcial model fit very well and the results were interpretable.
     interpreter: 64bit
     host name  : compute-e-16-237.o2.rc.hms.harvard.edu
     Git branch : models
-

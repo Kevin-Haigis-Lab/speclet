@@ -266,9 +266,9 @@ real_gene_vals = pd.DataFrame({"gene": genes, "log_fc": RP["gamma_g"]})
 ```
 
 
-    
+
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_6_0.png)
-    
+
 
 
 
@@ -297,9 +297,9 @@ real_cellline_vals = pd.DataFrame({"cell_line": cell_lines, "log_fc": RP["beta_c
 ```
 
 
-    
+
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_7_0.png)
-    
+
 
 
 
@@ -325,9 +325,9 @@ real_cellline_vals = pd.DataFrame({"cell_line": cell_lines, "log_fc": RP["beta_c
 ```
 
 
-    
+
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_8_0.png)
-    
+
 
 
 
@@ -446,9 +446,9 @@ pm.model_to_graphviz(m7a)
 
 
 
-    
+
 ![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_11_0.svg)
-    
+
 
 
 
@@ -736,9 +736,9 @@ m7a_post.head(n=10)
 ```
 
 
-    
+
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_14_0.png)
-    
+
 
 
 
@@ -771,9 +771,9 @@ gene_posteriors = m7a_post[["gene", "mean"]].groupby("gene").mean().reset_index(
 ```
 
 
-    
+
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_15_0.png)
-    
+
 
 
 
@@ -783,7 +783,7 @@ gene_posteriors = m7a_post[["gene", "mean"]].groupby("gene").mean().reset_index(
 
 
 
-The cell line effect is exaggerated and the gene effect is well estimated. 
+The cell line effect is exaggerated and the gene effect is well estimated.
 This is probably because most of the effect is comming from the genes, but the varying intercept only has one value per gene-cell line pair.
 
 
@@ -813,9 +813,9 @@ cell_line_posteriors = (
 ```
 
 
-    
+
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_17_0.png)
-    
+
 
 
 
@@ -918,9 +918,9 @@ pm.model_to_graphviz(m7a_pool)
 
 
 
-    
+
 ![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_20_0.svg)
-    
+
 
 
 
@@ -1221,9 +1221,9 @@ for col in ["gene", "cell_line"]:
 ```
 
 
-    
+
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_24_0.png)
-    
+
 
 
 
@@ -1249,9 +1249,9 @@ for col in ["gene", "cell_line"]:
 ```
 
 
-    
+
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_25_0.png)
-    
+
 
 
 
@@ -1457,9 +1457,9 @@ pm.model_to_graphviz(m7b)
 
 
 
-    
+
 ![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_29_0.svg)
-    
+
 
 
 
@@ -1571,9 +1571,9 @@ pm.model_to_graphviz(m7b_pool)
 
 
 
-    
+
 ![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_33_0.svg)
-    
+
 
 
 
@@ -1935,9 +1935,9 @@ m7b_post.head(n=10)
 ```
 
 
-    
+
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_37_0.png)
-    
+
 
 
 
@@ -1980,9 +1980,9 @@ for col in ["gene", "cell_line", "pool"]:
 ```
 
 
-    
+
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_38_0.png)
-    
+
 
 
 
@@ -2040,9 +2040,9 @@ gene_posteriors = m7b_alpha_sc[["gene", "mean"]].groupby("gene").mean().reset_in
 ```
 
 
-    
+
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_40_0.png)
-    
+
 
 
 
@@ -2068,9 +2068,9 @@ compare_alpha_sc = pd.concat(
 ```
 
 
-    
+
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_41_0.png)
-    
+
 
 
 
@@ -2739,9 +2739,9 @@ pm.model_to_graphviz(m7c)
 
 
 
-    
+
 ![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_46_0.svg)
-    
+
 
 
 
@@ -2765,9 +2765,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_49_0.png)
-    
+
 
 
 
@@ -2915,9 +2915,9 @@ nudge_x = 0.3
 ```
 
 
-    
+
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_52_0.png)
-    
+
 
 
 
@@ -2958,9 +2958,9 @@ nudge_x = 0.3
 ```
 
 
-    
+
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_53_0.png)
-    
+
 
 
 
@@ -2990,11 +2990,11 @@ A hierarchical version of `m7c` should be the focus of further analysis.
     arviz    0.10.0
     pandas   1.1.3
     seaborn  0.11.0
-    last updated: 2020-11-10 
-    
+    last updated: 2020-11-10
+
     CPython 3.8.5
     IPython 7.18.1
-    
+
     compiler   : GCC 7.3.0
     system     : Linux
     release    : 3.10.0-1062.el7.x86_64
@@ -3004,4 +3004,3 @@ A hierarchical version of `m7c` should be the focus of further analysis.
     interpreter: 64bit
     host name  : compute-e-16-233.o2.rc.hms.harvard.edu
     Git branch : models
-

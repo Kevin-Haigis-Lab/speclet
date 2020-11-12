@@ -311,9 +311,9 @@ data["segment_mean_z"] = data.groupby("hugo_symbol")["segment_mean_z"].apply(
 ```
 
 
-    
+
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_9_0.png)
-    
+
 
 
 
@@ -370,9 +370,9 @@ pm.model_to_graphviz(ceres_m1)
 
 
 
-    
+
 ![svg](010_010_ceres-replicate_files/010_010_ceres-replicate_12_0.svg)
-    
+
 
 
 
@@ -420,9 +420,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_15_0.png)
-    
+
 
 
 
@@ -432,9 +432,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_16_0.png)
-    
+
 
 
 
@@ -444,9 +444,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_17_0.png)
-    
+
 
 
 
@@ -689,9 +689,9 @@ data.is_deleterious.unique()
 ```
 
 
-    
+
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_23_0.png)
-    
+
 
 
 
@@ -713,9 +713,9 @@ data.is_deleterious.unique()
 ```
 
 
-    
+
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_24_0.png)
-    
+
 
 
 
@@ -740,9 +740,9 @@ data.is_deleterious.unique()
 ```
 
 
-    
+
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_25_0.png)
-    
+
 
 
 
@@ -766,9 +766,9 @@ data.is_deleterious.unique()
 ```
 
 
-    
+
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_26_0.png)
-    
+
 
 
 
@@ -793,9 +793,9 @@ kras_gene_effect = gene_effect_post_df[
 ```
 
 
-    
+
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_27_0.png)
-    
+
 
 
 

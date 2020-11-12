@@ -82,9 +82,9 @@ sigma_dists = pd.DataFrame(
 ```
 
 
-    
+
 ![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_5_0.png)
-    
+
 
 
 
@@ -285,9 +285,9 @@ logfc_data
 ```
 
 
-    
+
 ![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_7_0.png)
-    
+
 
 
 
@@ -310,9 +310,9 @@ logfc_data
 ```
 
 
-    
+
 ![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_8_0.png)
-    
+
 
 
 
@@ -338,9 +338,9 @@ logfc_data
 ```
 
 
-    
+
 ![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_9_0.png)
-    
+
 
 
 
@@ -445,9 +445,9 @@ pm.model_to_graphviz(model4)
 
 
 
-    
+
 ![svg](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_11_0.svg)
-    
+
 
 
 
@@ -470,9 +470,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_13_0.png)
-    
+
 
 
 
@@ -753,9 +753,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_17_0.png)
-    
+
 
 
 
@@ -887,9 +887,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_19_0.png)
-    
+
 
 
 
@@ -1246,9 +1246,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_21_0.png)
-    
+
 
 
 
@@ -1445,9 +1445,9 @@ logfc_post_df
 ```
 
 
-    
+
 ![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_23_0.png)
-    
+
 
 
 
@@ -1461,7 +1461,7 @@ logfc_post_df
 
 The model fit well, as demonstrated by the final plot of the posterior predictions.
 However, many of the variables' posterior distributions were very wide.
-This indicates that there is multicolinearity between the predictors. 
+This indicates that there is multicolinearity between the predictors.
 
 ---
 
@@ -1477,11 +1477,11 @@ This indicates that there is multicolinearity between the predictors.
     pymc3    3.9.3
     plotnine 0.7.1
     pandas   1.1.3
-    last updated: 2020-10-26 
-    
+    last updated: 2020-10-26
+
     CPython 3.8.5
     IPython 7.18.1
-    
+
     compiler   : GCC 7.3.0
     system     : Linux
     release    : 3.10.0-1062.el7.x86_64
@@ -1491,4 +1491,3 @@ This indicates that there is multicolinearity between the predictors.
     interpreter: 64bit
     host name  : compute-e-16-237.o2.rc.hms.harvard.edu
     Git branch : models
-

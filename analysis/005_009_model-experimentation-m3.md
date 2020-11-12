@@ -259,9 +259,9 @@ pos = gg.position_nudge(x=0.1)
 ```
 
 
-    
+
 ![png](005_009_model-experimentation-m3_files/005_009_model-experimentation-m3_7_0.png)
-    
+
 
 
 
@@ -282,9 +282,9 @@ merged_data = pd.merge(logfc_data, rna_data, how="inner", on=["gene", "cell_line
 ```
 
 
-    
+
 ![png](005_009_model-experimentation-m3_files/005_009_model-experimentation-m3_8_0.png)
-    
+
 
 
 
@@ -313,11 +313,11 @@ Though it is not the right model the purposes of this project, I'll leave it her
     pymc3    3.9.3
     arviz    0.10.0
     plotnine 0.7.1
-    last updated: 2020-10-26 
-    
+    last updated: 2020-10-26
+
     CPython 3.8.5
     IPython 7.18.1
-    
+
     compiler   : GCC 7.3.0
     system     : Linux
     release    : 3.10.0-1062.el7.x86_64
@@ -327,4 +327,3 @@ Though it is not the right model the purposes of this project, I'll leave it her
     interpreter: 64bit
     host name  : compute-e-16-237.o2.rc.hms.harvard.edu
     Git branch : models
-

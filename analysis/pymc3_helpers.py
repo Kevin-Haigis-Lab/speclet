@@ -33,7 +33,7 @@ def pymc3_sampling_procedure(
 ):
     """
     Run the standard PyMC3 sampling procedure.
-    
+
         Parameters:
             model(pymc3 model): A model from PyMC3
             num_mcmc(int): number of MCMC samples

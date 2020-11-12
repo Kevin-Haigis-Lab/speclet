@@ -70,9 +70,9 @@ data = pd.DataFrame({"rna": rna, "logfc": logfc})
 ```
 
 
-    
+
 ![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_5_0.png)
-    
+
 
 
 
@@ -159,9 +159,9 @@ pm.model_to_graphviz(model1)
 
 
 
-    
+
 ![svg](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_7_0.svg)
-    
+
 
 
 
@@ -271,9 +271,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_10_0.png)
-    
+
 
 
 
@@ -283,9 +283,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_11_0.png)
-    
+
 
 
 
@@ -320,9 +320,9 @@ model1_preds["pred"] = pd.Categorical(
 ```
 
 
-    
+
 ![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_12_0.png)
-    
+
 
 
 
@@ -364,9 +364,9 @@ post_summary = pd.DataFrame(
 ```
 
 
-    
+
 ![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_13_0.png)
-    
+
 
 
 
@@ -378,7 +378,7 @@ post_summary = pd.DataFrame(
 
 ### Conclusions and final thoughts
 
-This model fit well and is easy to interpret. 
+This model fit well and is easy to interpret.
 Ready to move onto more complex models with more variables and levels.
 
 ---
@@ -395,11 +395,11 @@ Ready to move onto more complex models with more variables and levels.
     pymc3    3.9.3
     seaborn  0.11.0
     plotnine 0.7.1
-    last updated: 2020-10-26 
-    
+    last updated: 2020-10-26
+
     CPython 3.8.5
     IPython 7.18.1
-    
+
     compiler   : GCC 7.3.0
     system     : Linux
     release    : 3.10.0-1062.el7.x86_64
@@ -409,4 +409,3 @@ Ready to move onto more complex models with more variables and levels.
     interpreter: 64bit
     host name  : compute-e-16-237.o2.rc.hms.harvard.edu
     Git branch : models
-

@@ -122,9 +122,9 @@ print(data.head(10).to_markdown())
 ```
 
 
-    
+
 ![png](999_005_experimentation_files/999_005_experimentation_8_0.png)
-    
+
 
 
 
@@ -149,9 +149,9 @@ print(data.head(10).to_markdown())
 ```
 
 
-    
+
 ![png](999_005_experimentation_files/999_005_experimentation_9_0.png)
-    
+
 
 
 
@@ -264,9 +264,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](999_005_experimentation_files/999_005_experimentation_12_0.png)
-    
+
 
 
 
@@ -276,9 +276,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](999_005_experimentation_files/999_005_experimentation_13_0.png)
-    
+
 
 
 
@@ -398,9 +398,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](999_005_experimentation_files/999_005_experimentation_15_0.png)
-    
+
 
 
 
@@ -435,9 +435,9 @@ post_data["row_i"] = list(range(len(post_data)))
 ```
 
 
-    
+
 ![png](999_005_experimentation_files/999_005_experimentation_16_0.png)
-    
+
 
 
 
@@ -470,9 +470,9 @@ d = pd.DataFrame({"alpha_g": alpha_g_post, "beta_a": beta_a_post})
 ```
 
 
-    
+
 ![png](999_005_experimentation_files/999_005_experimentation_17_0.png)
-    
+
 
 
 
@@ -494,11 +494,11 @@ d = pd.DataFrame({"alpha_g": alpha_g_post, "beta_a": beta_a_post})
     seaborn  0.11.0
     numpy    1.19.2
     arviz    0.10.0
-    last updated: 2020-10-26 
-    
+    last updated: 2020-10-26
+
     CPython 3.8.5
     IPython 7.18.1
-    
+
     compiler   : GCC 7.3.0
     system     : Linux
     release    : 3.10.0-1062.el7.x86_64

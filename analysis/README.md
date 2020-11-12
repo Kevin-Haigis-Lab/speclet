@@ -15,7 +15,7 @@ Modeling construction and fitting.
 7. [Model 7.](005_017_model-experimentation-m7.md) A model with a single 2D varying intercept with one dimension for sgRNA and one for cell line. Then try to have the sgRNA dimension vary by gene. A model with two varying intercepts was also successfully fit in this notebook.
 
 
-## Experimentation with a subset of real data 
+## Experimentation with a subset of real data
 
 > Notebook series `010`
 

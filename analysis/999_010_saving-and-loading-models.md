@@ -152,9 +152,9 @@ pm.model_to_graphviz(m1)
 
 
 
-    
+
 ![svg](999_010_saving-and-loading-models_files/999_010_saving-and-loading-models_4_0.svg)
-    
+
 
 
 
@@ -190,7 +190,7 @@ def pymc3_sampling_procedure(
 ):
     """
     Run the standard PyMC3 sampling procedure.
-    
+
         Parameters:
             model(pymc3 model): A model from PyMC3
             num_mcmc(int): number of MCMC samples
@@ -257,9 +257,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](999_010_saving-and-loading-models_files/999_010_saving-and-loading-models_8_0.png)
-    
+
 
 
 

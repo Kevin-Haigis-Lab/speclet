@@ -261,9 +261,9 @@ data.head()
 ```
 
 
-    
+
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_8_0.png)
-    
+
 
 
 
@@ -289,9 +289,9 @@ data.head()
 ```
 
 
-    
+
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_9_0.png)
-    
+
 
 
 
@@ -313,9 +313,9 @@ data.head()
 ```
 
 
-    
+
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_10_0.png)
-    
+
 
 
 
@@ -433,9 +433,9 @@ pm.model_to_graphviz(model6)
 
 
 
-    
+
 ![svg](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_12_0.svg)
-    
+
 
 
 
@@ -461,9 +461,9 @@ az_model6 = az.from_pymc3(
 ```
 
 
-    
+
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_14_0.png)
-    
+
 
 
 
@@ -602,9 +602,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_16_0.png)
-    
+
 
 
 
@@ -617,9 +617,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_17_0.png)
-    
+
 
 
 
@@ -630,9 +630,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_18_0.png)
-    
+
 
 
 
@@ -1003,9 +1003,9 @@ pm.model_to_graphviz(model6_2)
 
 
 
-    
+
 ![svg](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_23_0.svg)
-    
+
 
 
 
@@ -1031,9 +1031,9 @@ az_model6_2 = az.from_pymc3(
 ```
 
 
-    
+
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_25_0.png)
-    
+
 
 
 
@@ -1172,9 +1172,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_27_0.png)
-    
+
 
 
 
@@ -1187,9 +1187,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_28_0.png)
-    
+
 
 
 
@@ -1200,9 +1200,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_29_0.png)
-    
+
 
 
 
@@ -1466,16 +1466,16 @@ logFC_s \sim \mathcal{N}(\mu_s, \sigma) \\
 \qquad\quad \delta_g \sim \mathcal{N}(\mu_\delta, \sigma_\delta) \\
 \qquad\qquad \mu_\delta \sim \mathcal{N}(0, 5) \quad \sigma_\delta \sim \text{Exp}(1) \\
 \qquad \sigma_\beta \sim \text{Exp}(1) \\
-\quad \begin{bmatrix} 
-  \alpha_s \\ 
-  \beta_s 
+\quad \begin{bmatrix}
+  \alpha_s \\
+  \beta_s
 \end{bmatrix} \sim \text{MvNormal}(
-  \begin{bmatrix} 
-    \alpha \\ 
-    \beta 
-  \end{bmatrix}, 
+  \begin{bmatrix}
+    \alpha \\
+    \beta
+  \end{bmatrix},
   \Sigma) \\
-\qquad \Sigma = 
+\qquad \Sigma =
   \begin{pmatrix}
     \sigma_\alpha & 0 \\
     0 & \sigma_\beta
@@ -1557,11 +1557,11 @@ if False:
     arviz    0.10.0
     pandas   1.1.3
     pymc3    3.9.3
-    last updated: 2020-11-07 
-    
+    last updated: 2020-11-07
+
     CPython 3.8.5
     IPython 7.18.1
-    
+
     compiler   : GCC 7.3.0
     system     : Linux
     release    : 3.10.0-1062.el7.x86_64
@@ -1571,4 +1571,3 @@ if False:
     interpreter: 64bit
     host name  : compute-e-16-229.o2.rc.hms.harvard.edu
     Git branch : models
-

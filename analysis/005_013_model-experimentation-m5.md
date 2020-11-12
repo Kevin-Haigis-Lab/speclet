@@ -278,9 +278,9 @@ print(real_params["beta_c"])
 ```
 
 
-    
+
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_8_0.png)
-    
+
 
 
 
@@ -304,9 +304,9 @@ print(real_params["beta_c"])
 ```
 
 
-    
+
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_9_0.png)
-    
+
 
 
 
@@ -329,9 +329,9 @@ print(real_params["beta_c"])
 ```
 
 
-    
+
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_10_0.png)
-    
+
 
 
 
@@ -367,9 +367,9 @@ mod_data["logfc_no_cell"] = rm_cell_line_effect
 ```
 
 
-    
+
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_12_0.png)
-    
+
 
 
 
@@ -391,9 +391,9 @@ mod_data["logfc_no_cell"] = rm_cell_line_effect
 ```
 
 
-    
+
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_13_0.png)
-    
+
 
 
 
@@ -505,9 +505,9 @@ pm.model_to_graphviz(model5)
 
 
 
-    
+
 ![svg](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_15_0.svg)
-    
+
 
 
 
@@ -532,9 +532,9 @@ plot_variable_prior(model5_prior_check, "epsilon_g")
 ```
 
 
-    
+
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_17_0.png)
-    
+
 
 
 
@@ -550,9 +550,9 @@ plot_variable_prior(model5_prior_check, "alpha_s")
 ```
 
 
-    
+
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_18_0.png)
-    
+
 
 
 
@@ -568,9 +568,9 @@ plot_variable_prior(model5_prior_check, "beta_c") + gg.theme(legend_position="no
 ```
 
 
-    
+
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_19_0.png)
-    
+
 
 
 
@@ -592,9 +592,9 @@ logfc_priors = pd.DataFrame({"logfc": model5_prior_check["logfc"].flatten()[::10
 ```
 
 
-    
+
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_20_0.png)
-    
+
 
 
 
@@ -809,9 +809,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_24_0.png)
-    
+
 
 
 
@@ -821,9 +821,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_25_0.png)
-    
+
 
 
 
@@ -833,9 +833,9 @@ plt.show()
 ```
 
 
-    
+
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_26_0.png)
-    
+
 
 
 
@@ -851,9 +851,9 @@ az.plot_forest(az_model5, var_names="beta_c", combined=True)
 
 
 
-    
+
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_27_1.png)
-    
+
 
 
 
@@ -886,9 +886,9 @@ pos_shift = 0.15
 ```
 
 
-    
+
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_28_0.png)
-    
+
 
 
 
@@ -904,7 +904,7 @@ The model fits well, as shown by the very tight posterior predictions of each da
 Reassuringly, there is also visible shrinkage in the predictions.
 
 The posterior distributions of the parameters of $\alpha_s$, $\epsilon_g$, and $\beta_c$ are *very* wide, though the mean/MAP values are very accurate.
-To me, this suggests that there is a lot of correlation between the posterior values. 
+To me, this suggests that there is a lot of correlation between the posterior values.
 This would lead to greater play in the posteriors while maintaining very high accuracy in posterior predictions.
 
 This is proven with the following plot. 🤦🏻‍♂️
@@ -926,9 +926,9 @@ d = pd.DataFrame(
 ```
 
 
-    
+
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_30_0.png)
-    
+
 
 
 
@@ -952,11 +952,11 @@ d = pd.DataFrame(
     pandas   1.1.3
     arviz    0.10.0
     numpy    1.19.2
-    last updated: 2020-10-26 
-    
+    last updated: 2020-10-26
+
     CPython 3.8.5
     IPython 7.18.1
-    
+
     compiler   : GCC 7.3.0
     system     : Linux
     release    : 3.10.0-1062.el7.x86_64
@@ -966,4 +966,3 @@ d = pd.DataFrame(
     interpreter: 64bit
     host name  : compute-e-16-237.o2.rc.hms.harvard.edu
     Git branch : models
-
