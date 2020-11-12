@@ -13,8 +13,13 @@ import re
 
 
 ```python
-data_dir = Path("../data")
+data_dir = Path("../data/depmap_20q3")
 save_dir = Path("../modeling_data")
+
+if not data_dir.exists():
+    raise Exception(
+        "Data directory does not exist. Make sure to download the DepMap data."
+    )
 ```
 
 ## 'sample_info.csv'
@@ -119,7 +124,7 @@ sample_info.head()
       <td>HEL</td>
       <td>HEL_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE</td>
       <td>Male</td>
-      <td>47.6</td>
+      <td>52.4</td>
       <td>NaN</td>
       <td>Leukemia</td>
       <td>Acute Myelogenous Leukemia (AML), M6 (Erythrol...</td>
@@ -132,7 +137,7 @@ sample_info.head()
       <td>HEL9217</td>
       <td>HEL9217_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE</td>
       <td>Male</td>
-      <td>13.4</td>
+      <td>86.6</td>
       <td>NaN</td>
       <td>Leukemia</td>
       <td>Acute Myelogenous Leukemia (AML), M6 (Erythrol...</td>
@@ -388,36 +393,36 @@ achilles_replicate_map.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>pacadd188-311cas9_repb_p6_batch3</td>
-      <td>ACH-001382</td>
-      <td>3</td>
+      <td>pe_ca-pj-34clone c12-311cas9_repb_p5_batch2</td>
+      <td>ACH-000606</td>
+      <td>2</td>
       <td>True</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>kmrc20-311cas9_repa_p6_batch3</td>
-      <td>ACH-000250</td>
+      <td>nci-h1944-311cas9 rep c p5_batch3</td>
+      <td>ACH-000414</td>
       <td>3</td>
       <td>True</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>253j-311cas9_repa_p5_batch3</td>
-      <td>ACH-000011</td>
-      <td>3</td>
+      <td>mdamb231-311cas9_repb_p5_batch2</td>
+      <td>ACH-000768</td>
+      <td>2</td>
       <td>True</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>ocug1-311cas9-repb-p6_batch3</td>
-      <td>ACH-001619</td>
+      <td>skrc20-311cas9_repa_p6_batch3</td>
+      <td>ACH-000385</td>
       <td>3</td>
       <td>True</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>raji-311cas9_repb_p6_batch3</td>
-      <td>ACH-000654</td>
+      <td>skpndw-311cas9_repb_p6_batch3</td>
+      <td>ACH-001193</td>
       <td>3</td>
       <td>True</td>
     </tr>
@@ -447,7 +452,7 @@ len(np.unique(achilles_replicate_map.replicate_id))
 
 
 
-    1638
+    1759
 
 
 
@@ -459,7 +464,7 @@ np.round(np.mean(achilles_replicate_map.passes_qc), 3)
 
 
 
-    0.996
+    0.948
 
 
 
@@ -587,7 +592,7 @@ achilles_logfold_change.shape
 
 
 
-    (121067627, 6)
+    (123756359, 6)
 
 
 
@@ -2047,10 +2052,15 @@ plt.show()
 ```
 
 
-    
-![png](005_prepare-depmap-data_files/005_prepare-depmap-data_44_0.png)
-    
 
+![png](005_prepare-depmap-data_files/005_prepare-depmap-data_44_0.png)
+
+
+
+
+```python
+ccle_gene_cn.to_csv(save_dir / "ccle_gene_cn.csv", index=False)
+```
 
 ## 'CCLE_fusions.csv'
 
@@ -2238,7 +2248,7 @@ ccle_fusions.to_csv(save_dir / "ccle_fusions.csv", index=False)
 
 ```python
 ccle_expression = (
-    pd.read_csv(data_dir / "CCLE_expression_full_v2.csv")
+    pd.read_csv(data_dir / "CCLE_expression_full.csv")
     .rename({"Unnamed: 0": "depmap_id"}, axis=1)
     .melt(id_vars="depmap_id", var_name="hugo_symbol", value_name="rna_expr")
     .assign(hugo_symbol=lambda x: [a.split(" ")[0] for a in x.hugo_symbol])
@@ -2313,4 +2323,115 @@ ccle_expression.head()
 
 ```python
 ccle_expression.to_csv(save_dir / "ccle_expression.csv", index=False)
+```
+
+## 'Achilles_gene_effect.csv' & 'Achilles_gene_effect_unscaled.csv'
+
+
+```python
+def prep_gene_effect_data(fpath, col_name):
+    d = (
+        pd.read_csv(fpath)
+        .rename({"DepMap_ID": "depmap_id"}, axis=1)
+        .melt(id_vars="depmap_id", var_name="hugo_symbol", value_name=col_name)
+        .assign(hugo_symbol=lambda x: [a.split(" ")[0] for a in x.hugo_symbol])
+    )
+    return d
+
+
+gene_effect_scaled = prep_gene_effect_data(
+    data_dir / "Achilles_gene_effect.csv", "gene_effect"
+)
+gene_effect_unscaled = prep_gene_effect_data(
+    data_dir / "Achilles_gene_effect_unscaled.csv", "gene_effect_unscaled"
+)
+
+# Check that the two data frames are the same shape.
+if not gene_effect_scaled.shape == gene_effect_unscaled.shape:
+    raise Exception("Gene effect data frames are not the same shape as expected.")
+
+gene_effect = pd.merge(
+    gene_effect_scaled, gene_effect_unscaled, on=["depmap_id", "hugo_symbol"]
+)
+
+gene_effect.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>depmap_id</th>
+      <th>hugo_symbol</th>
+      <th>gene_effect</th>
+      <th>gene_effect_unscaled</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACH-000004</td>
+      <td>A1BG</td>
+      <td>0.181037</td>
+      <td>0.542787</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ACH-000005</td>
+      <td>A1BG</td>
+      <td>-0.090250</td>
+      <td>0.440018</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-000007</td>
+      <td>A1BG</td>
+      <td>0.071568</td>
+      <td>0.104889</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-000009</td>
+      <td>A1BG</td>
+      <td>0.110311</td>
+      <td>0.478258</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-000011</td>
+      <td>A1BG</td>
+      <td>0.275160</td>
+      <td>0.589944</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+gene_effect.to_csv(save_dir / "achilles_gene_effect.csv", index=False)
+```
+
+
+```python
+
 ```
