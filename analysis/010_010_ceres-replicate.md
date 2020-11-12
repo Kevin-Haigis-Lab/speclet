@@ -55,14 +55,16 @@ pymc3_cache_dir = Path("pymc3_model_cache")
 data_path = Path("../modeling_data/depmap_modeling_dataframe_subsample.csv")
 data = pd.read_csv(data_path)
 
-SAMPLED_GENES=['KRAS', "BRAF", "DPH7", "KF3C"]
-SAMPLED_DEPMAPIDS=data[["depmap_id"]].drop_duplicates().sample(n=40).depmap_id.to_list()
+# print(data.hugo_symbol.unique())
+SAMPLED_GENES = ["KRAS", "BRAF", "DPH7", "KIF3C", "SCMH1", "UQCRC1"]
+SAMPLED_DEPMAPIDS = data["depmap_id"].unique()
+SAMPLED_DEPMAPIDS = np.random.choice(SAMPLED_DEPMAPIDS, 70, replace=False)
 
 data = data[~np.isnan(data.segment_mean)]
-data = data[data['hugo_symbol'].isin(SAMPLED_GENES)]
-data = data[data['depmap_id'].isin(SAMPLED_DEPMAPIDS)]
+# data = data[data["hugo_symbol"].isin(SAMPLED_GENES)]
+data = data[data["depmap_id"].isin(SAMPLED_DEPMAPIDS)]
 
-data.head(n=10)
+data.head(n=5)
 ```
 
 
@@ -111,20 +113,68 @@ data.head(n=10)
   </thead>
   <tbody>
     <tr>
-      <th>4225</th>
+      <th>309</th>
+      <td>AAGAGGCCGGTCAAATTCAG</td>
+      <td>253j-311cas9_repa_p5_batch3</td>
+      <td>0.819737</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000011</td>
+      <td>Metastasis</td>
+      <td>urinary_tract</td>
+      <td>bladder_carcinoma</td>
+      <td>WT</td>
+      <td>...</td>
+      <td>0.814602</td>
+      <td>1.758813</td>
+      <td>0</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>0.799087</td>
+    </tr>
+    <tr>
+      <th>310</th>
+      <td>AATCAACCCACAGCTGCACA</td>
+      <td>253j-311cas9_repa_p5_batch3</td>
+      <td>3.432823</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000011</td>
+      <td>Metastasis</td>
+      <td>urinary_tract</td>
+      <td>bladder_carcinoma</td>
+      <td>WT</td>
+      <td>...</td>
+      <td>1.122527</td>
+      <td>2.177280</td>
+      <td>0</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>5.629357</td>
+    </tr>
+    <tr>
+      <th>311</th>
       <td>AATTACTACTTGCTTCCTGT</td>
-      <td>a375skincj3-311cas9_repa_p6_batch3</td>
-      <td>-1.549750</td>
+      <td>253j-311cas9_repa_p5_batch3</td>
+      <td>-0.020514</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-002003</td>
-      <td>NaN</td>
-      <td>skin</td>
-      <td>melanoma</td>
+      <td>ACH-000011</td>
+      <td>Metastasis</td>
+      <td>urinary_tract</td>
+      <td>bladder_carcinoma</td>
       <td>WT</td>
       <td>...</td>
-      <td>1.143535</td>
-      <td>2.209217</td>
+      <td>1.160464</td>
+      <td>2.235293</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -132,23 +182,23 @@ data.head(n=10)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>4.266037</td>
+      <td>2.903038</td>
     </tr>
     <tr>
-      <th>4230</th>
-      <td>AGAGGAGTACAGTGCAATGA</td>
-      <td>a375skincj3-311cas9_repa_p6_batch3</td>
-      <td>-0.730231</td>
+      <th>312</th>
+      <td>ACCTGTATGACGAAACCGTG</td>
+      <td>253j-311cas9_repa_p5_batch3</td>
+      <td>-0.936162</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-002003</td>
-      <td>NaN</td>
-      <td>skin</td>
-      <td>melanoma</td>
+      <td>ACH-000011</td>
+      <td>Metastasis</td>
+      <td>urinary_tract</td>
+      <td>bladder_carcinoma</td>
       <td>WT</td>
       <td>...</td>
-      <td>1.143535</td>
-      <td>2.209217</td>
+      <td>1.159818</td>
+      <td>2.234293</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -156,47 +206,23 @@ data.head(n=10)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>4.266037</td>
+      <td>3.354734</td>
     </tr>
     <tr>
-      <th>4236</th>
-      <td>ATACCCAATAGAGTCCGAGG</td>
-      <td>a375skincj3-311cas9_repa_p6_batch3</td>
-      <td>-1.583222</td>
+      <th>313</th>
+      <td>ACTCTGTTCCTTCATCTCCG</td>
+      <td>253j-311cas9_repa_p5_batch3</td>
+      <td>-0.231509</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-002003</td>
-      <td>NaN</td>
-      <td>skin</td>
-      <td>melanoma</td>
+      <td>ACH-000011</td>
+      <td>Metastasis</td>
+      <td>urinary_tract</td>
+      <td>bladder_carcinoma</td>
       <td>WT</td>
       <td>...</td>
-      <td>1.472983</td>
-      <td>2.775953</td>
-      <td>1</td>
-      <td>False</td>
-      <td>missense_mutation</td>
-      <td>FALSE</td>
-      <td>TRUE</td>
-      <td>TRUE</td>
-      <td>False</td>
-      <td>3.667892</td>
-    </tr>
-    <tr>
-      <th>4248</th>
-      <td>CCTCAGGTGTCACATCCCGG</td>
-      <td>a375skincj3-311cas9_repa_p6_batch3</td>
-      <td>-0.775751</td>
-      <td>3</td>
-      <td>True</td>
-      <td>ACH-002003</td>
-      <td>NaN</td>
-      <td>skin</td>
-      <td>melanoma</td>
-      <td>WT</td>
-      <td>...</td>
-      <td>1.079963</td>
-      <td>2.113982</td>
+      <td>1.158529</td>
+      <td>2.232297</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -204,155 +230,11 @@ data.head(n=10)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>4.167519</td>
-    </tr>
-    <tr>
-      <th>4251</th>
-      <td>CGAATATGATCCAACAATAG</td>
-      <td>a375skincj3-311cas9_repa_p6_batch3</td>
-      <td>0.239417</td>
-      <td>3</td>
-      <td>True</td>
-      <td>ACH-002003</td>
-      <td>NaN</td>
-      <td>skin</td>
-      <td>melanoma</td>
-      <td>WT</td>
-      <td>...</td>
-      <td>1.143535</td>
-      <td>2.209217</td>
-      <td>0</td>
-      <td>False</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>False</td>
-      <td>4.266037</td>
-    </tr>
-    <tr>
-      <th>4266</th>
-      <td>GCACCACTCCACCGAGTCCG</td>
-      <td>a375skincj3-311cas9_repa_p6_batch3</td>
-      <td>-0.403133</td>
-      <td>3</td>
-      <td>True</td>
-      <td>ACH-002003</td>
-      <td>NaN</td>
-      <td>skin</td>
-      <td>melanoma</td>
-      <td>WT</td>
-      <td>...</td>
-      <td>1.079963</td>
-      <td>2.113982</td>
-      <td>0</td>
-      <td>False</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>False</td>
-      <td>4.167519</td>
-    </tr>
-    <tr>
-      <th>4288</th>
-      <td>GGGCCAGGCTCTGTTCAACG</td>
-      <td>a375skincj3-311cas9_repa_p6_batch3</td>
-      <td>-2.012851</td>
-      <td>3</td>
-      <td>True</td>
-      <td>ACH-002003</td>
-      <td>NaN</td>
-      <td>skin</td>
-      <td>melanoma</td>
-      <td>WT</td>
-      <td>...</td>
-      <td>1.472983</td>
-      <td>2.775953</td>
-      <td>1</td>
-      <td>False</td>
-      <td>missense_mutation</td>
-      <td>FALSE</td>
-      <td>TRUE</td>
-      <td>TRUE</td>
-      <td>False</td>
-      <td>3.667892</td>
-    </tr>
-    <tr>
-      <th>4292</th>
-      <td>GGTGGACACCGAGCTGACCG</td>
-      <td>a375skincj3-311cas9_repa_p6_batch3</td>
-      <td>-2.156874</td>
-      <td>3</td>
-      <td>True</td>
-      <td>ACH-002003</td>
-      <td>NaN</td>
-      <td>skin</td>
-      <td>melanoma</td>
-      <td>WT</td>
-      <td>...</td>
-      <td>1.079963</td>
-      <td>2.113982</td>
-      <td>0</td>
-      <td>False</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>False</td>
-      <td>4.167519</td>
-    </tr>
-    <tr>
-      <th>4298</th>
-      <td>GTCCGCAGCCGAAGAGGCCG</td>
-      <td>a375skincj3-311cas9_repa_p6_batch3</td>
-      <td>-0.264441</td>
-      <td>3</td>
-      <td>True</td>
-      <td>ACH-002003</td>
-      <td>NaN</td>
-      <td>skin</td>
-      <td>melanoma</td>
-      <td>WT</td>
-      <td>...</td>
-      <td>1.472983</td>
-      <td>2.775953</td>
-      <td>1</td>
-      <td>False</td>
-      <td>missense_mutation</td>
-      <td>FALSE</td>
-      <td>TRUE</td>
-      <td>TRUE</td>
-      <td>False</td>
-      <td>3.667892</td>
-    </tr>
-    <tr>
-      <th>4308</th>
-      <td>TCATCAGCAGTGACTCCACA</td>
-      <td>a375skincj3-311cas9_repa_p6_batch3</td>
-      <td>0.661678</td>
-      <td>3</td>
-      <td>True</td>
-      <td>ACH-002003</td>
-      <td>NaN</td>
-      <td>skin</td>
-      <td>melanoma</td>
-      <td>WT</td>
-      <td>...</td>
-      <td>1.079963</td>
-      <td>2.113982</td>
-      <td>0</td>
-      <td>False</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>False</td>
-      <td>4.167519</td>
+      <td>5.207112</td>
     </tr>
   </tbody>
 </table>
-<p>10 rows × 25 columns</p>
+<p>5 rows × 25 columns</p>
 </div>
 
 
@@ -362,7 +244,7 @@ data.head(n=10)
 print(f"testing with {data.shape[0]} data points")
 ```
 
-    testing with 1044 data points
+    testing with 14523 data points
 
 
 
@@ -421,8 +303,9 @@ data["segment_mean_z"] = data.groupby("hugo_symbol")["segment_mean_z"].apply(
 ```python
 (
     gg.ggplot(data, gg.aes(x="segment_mean_z"))
-    + gg.geom_density(gg.aes(color="hugo_symbol"), size=0.7)
+    + gg.geom_density(gg.aes(color="hugo_symbol"), size=0.5)
     + gg.scale_color_discrete(guide=False)
+    + gg.theme(figure_size=(8, 5))
     + gg.labs(x="z-scaled segment mean", y="density")
 )
 ```
@@ -436,7 +319,7 @@ data["segment_mean_z"] = data.groupby("hugo_symbol")["segment_mean_z"].apply(
 
 
 
-    <ggplot: (8789751417835)>
+    <ggplot: (8732286816895)>
 
 
 
@@ -457,7 +340,6 @@ $
 
 
 ```python
-%%time
 with pm.Model() as ceres_m1:
     # Priors
     q_i = pm.Beta("q_i", alpha=2, beta=2, shape=num_sgrnas)
@@ -480,10 +362,6 @@ with pm.Model() as ceres_m1:
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 
-    CPU times: user 2.21 s, sys: 448 ms, total: 2.66 s
-    Wall time: 7.25 s
-
-
 
 ```python
 pm.model_to_graphviz(ceres_m1)
@@ -500,6 +378,8 @@ pm.model_to_graphviz(ceres_m1)
 
 
 ```python
+%%time
+
 ceres_m1_cachedir = pymc3_cache_dir / "ceres_m1"
 
 ceres_m1_samples = pmhelp.pymc3_sampling_procedure(
@@ -511,11 +391,13 @@ ceres_m1_samples = pmhelp.pymc3_sampling_procedure(
     ppc_samples=1000,
     random_seed=RANDOM_SEED,
     cache_dir=ceres_m1_cachedir,
-    force=False
+    force=False,
 )
 ```
 
     Loading cached trace and posterior sample...
+    CPU times: user 592 ms, sys: 315 ms, total: 906 ms
+    Wall time: 917 ms
 
 
 
@@ -576,7 +458,7 @@ gene_effect_post.shape
 
 
 
-    (4000, 3, 40)
+    (4000, 26, 70)
 
 
 
@@ -589,19 +471,23 @@ gene_effect_mean.shape
 
 
 
-    (3, 40)
+    (26, 70)
 
 
 
 
 ```python
-data['hugo_symbol'].cat.categories
+data["hugo_symbol"].cat.categories
 ```
 
 
 
 
-    Index(['KRAS', 'BRAF', 'DPH7'], dtype='object')
+    Index(['PDE5A', 'TP53', 'KRAS', 'KIF3C', 'ZSWIM8', 'MDM2', 'HIST1H2BO',
+           'NDUFAF3', 'DISP1', 'BRAF', 'PTK2', 'IQCK', 'LGALS7B', 'CXCL2',
+           'LGALS4', 'ADAMTS13', 'SLC7A14', 'DPH7', 'RNF125', 'GHSR', 'SCMH1',
+           'PIK3CA', 'PHACTR3', 'FAM43B', 'UQCRC1', 'SMAD7'],
+          dtype='object')
 
 
 
@@ -621,6 +507,15 @@ gene_effect_post_df = (
         ],
     )
 )
+
+cols = ["depmap_id", "kras_mutation", "is_deleterious"]
+mutation_info = data[cols].drop_duplicates()
+mutation_info[cols[:-1]] = mutation_info[cols[:-1]].astype("str")
+
+gene_effect_post_df = gene_effect_post_df.merge(
+    mutation_info, how="left", on=["depmap_id"]
+)
+
 gene_effect_post_df.head(n=10)
 ```
 
@@ -650,6 +545,8 @@ gene_effect_post_df.head(n=10)
       <th>gene_effect</th>
       <th>hugo_symbol</th>
       <th>depmap_id</th>
+      <th>kras_mutation</th>
+      <th>is_deleterious</th>
     </tr>
   </thead>
   <tbody>
@@ -657,81 +554,101 @@ gene_effect_post_df.head(n=10)
       <th>0</th>
       <td>0</td>
       <td>0</td>
-      <td>-0.809170</td>
-      <td>KRAS</td>
-      <td>ACH-002003</td>
+      <td>1.040254</td>
+      <td>PDE5A</td>
+      <td>ACH-000011</td>
+      <td>WT</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>1</td>
       <td>0</td>
-      <td>-2.136512</td>
-      <td>BRAF</td>
-      <td>ACH-002003</td>
+      <td>0</td>
+      <td>1.040254</td>
+      <td>PDE5A</td>
+      <td>ACH-000011</td>
+      <td>WT</td>
+      <td>FALSE</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>2</td>
+      <td>1</td>
       <td>0</td>
-      <td>-2.888485</td>
-      <td>DPH7</td>
-      <td>ACH-002003</td>
+      <td>3.376785</td>
+      <td>TP53</td>
+      <td>ACH-000011</td>
+      <td>WT</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0</td>
       <td>1</td>
-      <td>-1.020171</td>
-      <td>KRAS</td>
-      <td>ACH-000757</td>
+      <td>0</td>
+      <td>3.376785</td>
+      <td>TP53</td>
+      <td>ACH-000011</td>
+      <td>WT</td>
+      <td>FALSE</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>1</td>
-      <td>1</td>
-      <td>0.140421</td>
-      <td>BRAF</td>
-      <td>ACH-000757</td>
+      <td>2</td>
+      <td>0</td>
+      <td>0.974897</td>
+      <td>KRAS</td>
+      <td>ACH-000011</td>
+      <td>WT</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>5</th>
       <td>2</td>
-      <td>1</td>
-      <td>-0.652821</td>
-      <td>DPH7</td>
-      <td>ACH-000757</td>
+      <td>0</td>
+      <td>0.974897</td>
+      <td>KRAS</td>
+      <td>ACH-000011</td>
+      <td>WT</td>
+      <td>FALSE</td>
     </tr>
     <tr>
       <th>6</th>
+      <td>3</td>
       <td>0</td>
-      <td>2</td>
-      <td>-0.007476</td>
-      <td>KRAS</td>
-      <td>ACH-000528</td>
+      <td>-0.649296</td>
+      <td>KIF3C</td>
+      <td>ACH-000011</td>
+      <td>WT</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>7</th>
-      <td>1</td>
-      <td>2</td>
-      <td>0.480153</td>
-      <td>BRAF</td>
-      <td>ACH-000528</td>
+      <td>3</td>
+      <td>0</td>
+      <td>-0.649296</td>
+      <td>KIF3C</td>
+      <td>ACH-000011</td>
+      <td>WT</td>
+      <td>FALSE</td>
     </tr>
     <tr>
       <th>8</th>
-      <td>2</td>
-      <td>2</td>
-      <td>-0.170117</td>
-      <td>DPH7</td>
-      <td>ACH-000528</td>
+      <td>4</td>
+      <td>0</td>
+      <td>0.054926</td>
+      <td>ZSWIM8</td>
+      <td>ACH-000011</td>
+      <td>WT</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>9</th>
+      <td>4</td>
       <td>0</td>
-      <td>3</td>
-      <td>-0.113334</td>
-      <td>KRAS</td>
-      <td>ACH-000222</td>
+      <td>0.054926</td>
+      <td>ZSWIM8</td>
+      <td>ACH-000011</td>
+      <td>WT</td>
+      <td>FALSE</td>
     </tr>
   </tbody>
 </table>
@@ -741,37 +658,33 @@ gene_effect_post_df.head(n=10)
 
 
 ```python
-(
-    gg.ggplot(gene_effect_post_df, gg.aes(x="hugo_symbol", y="depmap_id"))
-    + gg.geom_tile(gg.aes(fill="gene_effect"))
-    + gg.theme(
-        figure_size=(1, 10),
-        axis_text_x=gg.element_text(angle=90),
-        axis_text_y=gg.element_text(size=6),
-    )
-)
+data.is_deleterious.unique()
 ```
 
 
-    
-![png](010_010_ceres-replicate_files/010_010_ceres-replicate_22_0.png)
-    
 
 
-
-
-
-    <ggplot: (8789678696298)>
+    array([nan, 'FALSE', 'FALSE;FALSE', 'TRUE', 'FALSE;TRUE;FALSE',
+           'FALSE;FALSE;FALSE', 'TRUE;FALSE', 'FALSE;TRUE'], dtype=object)
 
 
 
 
 ```python
 (
-    gg.ggplot(gene_effect_post_df, gg.aes(x="hugo_symbol", y="gene_effect"))
-    + gg.geom_boxplot(alpha=0, color="gray", outlier_size=-1)
-    + gg.geom_jitter(alpha=0.5, size=0.2, height=0, width=0.4)
-    + gg.theme(axis_text_x=gg.element_text(angle=90, hjust=0.5, vjust=1))
+    gg.ggplot(gene_effect_post_df, gg.aes(x="hugo_symbol", y="depmap_id"))
+    + gg.geom_tile(gg.aes(fill="gene_effect"))
+    + gg.theme(
+        figure_size=(5, 10),
+        axis_text_x=gg.element_text(angle=90),
+        axis_text_y=gg.element_text(size=6),
+    )
+    + gg.labs(
+        x="gene",
+        y="cell line",
+        fill="gene effect",
+        title="CERES model estimated gene effect",
+    )
 )
 ```
 
@@ -784,28 +697,18 @@ gene_effect_post_df.head(n=10)
 
 
 
-    <ggplot: (8789676950038)>
+    <ggplot: (8732273703665)>
 
 
 
 
 ```python
-kras_muts = data[["depmap_id", "kras_mutation"]].drop_duplicates()
-kras_muts[["depmap_id", "kras_mutation"]] = kras_muts[
-    ["depmap_id", "kras_mutation"]
-].astype("str")
-
-kras_gene_effect = (
-    gene_effect_post_df[gene_effect_post_df.hugo_symbol == "KRAS"]
-    .reset_index(drop=True)
-    .merge(kras_muts, how="left", on=["depmap_id"])
-)
-
 (
-    gg.ggplot(kras_gene_effect, gg.aes(x="kras_mutation", y="gene_effect"))
-    + gg.geom_boxplot(alpha=0, color="gray", outlier_size=-1)
-    + gg.geom_jitter(gg.aes(color="kras_mutation"), width=0.4, height=0)
-    + gg.theme(axis_text_x = gg.element_text(angle=90, hjust=0.5, vjust=1))
+    gg.ggplot(gene_effect_post_df, gg.aes(x="hugo_symbol", y="gene_effect"))
+    + gg.geom_boxplot(alpha=0, color="black", outlier_alpha=0, size=1)
+    + gg.geom_jitter(alpha=0.4, size=0.3, height=0, width=0.3, color="steelblue")
+    + gg.theme(axis_text_x=gg.element_text(angle=90, hjust=0.5, vjust=1), figure_size=(10, 5))
+    + gg.labs(x=None, y="estimated gene effect")
 )
 ```
 
@@ -818,7 +721,87 @@ kras_gene_effect = (
 
 
 
-    <ggplot: (8789676969819)>
+    <ggplot: (8732273699615)>
+
+
+
+
+```python
+(
+    gg.ggplot(gene_effect_post_df, gg.aes(x="gene_effect"))
+    + gg.facet_wrap("hugo_symbol", ncol=4, scales="free")
+    + gg.geom_density(
+        gg.aes(color="hugo_symbol", fill="hugo_symbol"), alpha=0.2, size=0.3
+    )
+    + gg.geom_rug(gg.aes(color="hugo_symbol"))
+    + gg.theme(figure_size=(10, 16), legend_position="none", subplots_adjust = {"hspace": 0.4, "wspace": 0.3})
+    + gg.labs(x="estimated gene effect per cell line", y="denisty")
+)
+```
+
+
+    
+![png](010_010_ceres-replicate_files/010_010_ceres-replicate_25_0.png)
+    
+
+
+
+
+
+    <ggplot: (8732273461836)>
+
+
+
+
+```python
+(
+    gg.ggplot(gene_effect_post_df, gg.aes(x="depmap_id", y="gene_effect"))
+    + gg.geom_jitter(alpha=0.3, size=0.6, height=0, width=0, color="steelblue")
+    + gg.geom_boxplot(alpha=0, color="black", outlier_alpha=0)
+    + gg.theme(
+        axis_text_x=gg.element_text(angle=90, hjust=0.5, vjust=1), figure_size=(10, 5)
+    )
+    + gg.labs(x=None, y="estimated gene effect")
+)
+```
+
+
+    
+![png](010_010_ceres-replicate_files/010_010_ceres-replicate_26_0.png)
+    
+
+
+
+
+
+    <ggplot: (8732275656304)>
+
+
+
+
+```python
+kras_gene_effect = gene_effect_post_df[
+    gene_effect_post_df.hugo_symbol == "KRAS"
+].reset_index(drop=True)
+
+(
+    gg.ggplot(kras_gene_effect, gg.aes(x="kras_mutation", y="gene_effect"))
+    + gg.geom_boxplot(alpha=0, color="gray", outlier_alpha=0)
+    + gg.geom_jitter(gg.aes(color="kras_mutation"), width=0.4, height=0)
+    + gg.theme(axis_text_x=gg.element_text(angle=90, hjust=0.5, vjust=1))
+)
+```
+
+
+    
+![png](010_010_ceres-replicate_files/010_010_ceres-replicate_27_0.png)
+    
+
+
+
+
+
+    <ggplot: (8732273613972)>
 
 
 
