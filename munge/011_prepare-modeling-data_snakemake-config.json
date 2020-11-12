@@ -10,7 +10,13 @@
         "mail"      : "NONE",
         "J"         : "snakejob"
     },
-    "split_cna" :
+    "split_segmentcn" :
+    {
+        "cores" : 1,
+        "mem"   : "5000",
+        "time"  : "00:30:00"
+    },
+    "split_genecn" :
     {
         "cores" : 1,
         "mem"   : "5000",

@@ -7,16 +7,16 @@ library(tidyverse)
 ```
 
     ── [1mAttaching packages[22m ─────────────────────────────────────── tidyverse 1.3.0 ──
-    
+
     [32m✔[39m [34mggplot2[39m 3.3.2     [32m✔[39m [34mpurrr  [39m 0.3.4
     [32m✔[39m [34mtibble [39m 3.0.3     [32m✔[39m [34mdplyr  [39m 1.0.1
     [32m✔[39m [34mtidyr  [39m 1.1.1     [32m✔[39m [34mstringr[39m 1.4.0
     [32m✔[39m [34mreadr  [39m 1.3.1     [32m✔[39m [34mforcats[39m 0.5.0
-    
+
     ── [1mConflicts[22m ────────────────────────────────────────── tidyverse_conflicts() ──
     [31m✖[39m [34mdplyr[39m::[32mfilter()[39m masks [34mstats[39m::filter()
     [31m✖[39m [34mdplyr[39m::[32mlag()[39m    masks [34mstats[39m::lag()
-    
+
 
 
 
@@ -47,9 +47,9 @@ head(modeling_data)
       mutated_at_guide_location = [33mcol_logical()[39m,
       rna_expr = [32mcol_double()[39m
     )
-    
+
     See spec(...) for full column specifications.
-    
+
 
 
 
