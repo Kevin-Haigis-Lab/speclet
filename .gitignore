@@ -212,7 +212,7 @@ vignettes/*.pdf
 # End of https://www.toptal.com/developers/gitignore/api/linux,python,jupyternotebooks,r
 
 
-data/
+data/*
 .mustashe/
 cache/
 temp/
@@ -222,4 +222,5 @@ modeling_data/*
 
 # Specific files to except from the rules above
 !modeling_data/depmap_modeling_dataframe_subsample.csv
+!data/download-depmap-data.sh
 
