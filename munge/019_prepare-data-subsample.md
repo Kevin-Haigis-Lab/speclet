@@ -3,22 +3,13 @@
 ```R
 library(nakedpipe)
 library(tidyverse)
+
+theme_set(theme_minimal(base_size=11))
 ```
-
-    ── [1mAttaching packages[22m ─────────────────────────────────────── tidyverse 1.3.0 ──
-
-    [32m✔[39m [34mggplot2[39m 3.3.2     [32m✔[39m [34mpurrr  [39m 0.3.4
-    [32m✔[39m [34mtibble [39m 3.0.3     [32m✔[39m [34mdplyr  [39m 1.0.1
-    [32m✔[39m [34mtidyr  [39m 1.1.1     [32m✔[39m [34mstringr[39m 1.4.0
-    [32m✔[39m [34mreadr  [39m 1.3.1     [32m✔[39m [34mforcats[39m 0.5.0
-
-    ── [1mConflicts[22m ────────────────────────────────────────── tidyverse_conflicts() ──
-    [31m✖[39m [34mdplyr[39m::[32mfilter()[39m masks [34mstats[39m::filter()
-    [31m✖[39m [34mdplyr[39m::[32mlag()[39m    masks [34mstats[39m::lag()
 
 ```R
 data_dir <- file.path("..", "modeling_data")
-modeling_data_path <- file.path(data_dir, "depmap_modeling_dataframe_OLD.csv")
+modeling_data_path <- file.path(data_dir, "depmap_modeling_dataframe.csv")
 out_path <- file.path(data_dir, "depmap_modeling_dataframe_subsample.csv")
 ```
 
@@ -44,7 +35,7 @@ head(modeling_data)
       mutated_at_guide_location = [33mcol_logical()[39m,
       rna_expr = [32mcol_double()[39m
     )
-
+    
     See spec(...) for full column specifications.
 
 <table>
@@ -67,7 +58,7 @@ head(modeling_data)
 glimpse(modeling_data)
 ```
 
-    Rows: 595,600
+    Rows: 120,235,860
     Columns: 27
     $ sgrna                     [3m[90m<chr>[39m[23m "AAAAAAATCCAGCAATGCAG", "AAAAAACCCGTAGATAGC…
     $ replicate_id              [3m[90m<chr>[39m[23m "143b-311cas9_repa_p6_batch3", "143b-311cas…
@@ -109,7 +100,7 @@ n_distinct(modeling_data$sgrna)
 n_distinct(modeling_data$depmap_id)
 ```
 
-5
+767
 
 ```R
 # Number of genes.
@@ -148,36 +139,117 @@ subsample_genes
 <ol class=list-inline><li>'PHACTR3'</li><li>'ZSWIM8'</li><li>'DPH7'</li><li>'LGALS7B'</li><li>'DISP1'</li><li>'KIF3C'</li><li>'RNF125'</li><li>'LGALS4'</li><li>'SLC7A14'</li><li>'UQCRC1'</li><li>'SCMH1'</li><li>'SMAD7'</li><li>'GHSR'</li><li>'IQCK'</li><li>'NDUFAF3'</li><li>'FAM43B'</li><li>'PDE5A'</li><li>'HIST1H2BO'</li><li>'ADAMTS13'</li><li>'CXCL2'</li><li>'KRAS'</li><li>'BRAF'</li><li>'PIK3CA'</li><li>'PTK2'</li><li>'MDM2'</li><li>'TP53'</li></ol>
 
 ```R
-num_random_lineages <- 5
-lineages <- sample(unique(modeling_data$lineage), num_random_lineages)
-lineages
+sort(unique(modeling_data$lineage))
 ```
 
-    Error in sample.int(length(x), size, replace, prob): cannot take a sample larger than the population when 'replace = FALSE'
-    Traceback:
-
-
-    1. sample(unique(modeling_data$lineage), num_random_lineages)
-
-    2. sample.int(length(x), size, replace, prob)
+<style>
+.list-inline {list-style: none; margin:0; padding: 0}
+.list-inline>li {display: inline-block}
+.list-inline>li:not(:last-child)::after {content: "\00b7"; padding: 0 .5ex}
+</style>
+<ol class=list-inline><li>'bile_duct'</li><li>'blood'</li><li>'bone'</li><li>'breast'</li><li>'central_nervous_system'</li><li>'cervix'</li><li>'colorectal'</li><li>'esophagus'</li><li>'eye'</li><li>'fibroblast'</li><li>'gastric'</li><li>'kidney'</li><li>'liver'</li><li>'lung'</li><li>'lymphocyte'</li><li>'ovary'</li><li>'pancreas'</li><li>'peripheral_nervous_system'</li><li>'plasma_cell'</li><li>'prostate'</li><li>'skin'</li><li>'soft_tissue'</li><li>'thyroid'</li><li>'upper_aerodigestive'</li><li>'urinary_tract'</li><li>'uterus'</li></ol>
 
 ```R
-subsample_modeling_data <- modeling_data %>% filter(hugo_symbol %in% subsample_genes)
+lineages <- c("colorectal", "pancreas", "lung", "liver", "central_nervous_system")
+modeling_data %>%
+    filter(lineage %in% lineages) %>%
+    distinct(lineage, depmap_id) %>%
+    count(lineage)
+```
+
+<table>
+<caption>A tibble: 5 × 2</caption>
+<thead>
+	<tr><th scope=col>lineage</th><th scope=col>n</th></tr>
+	<tr><th scope=col>&lt;chr&gt;</th><th scope=col>&lt;int&gt;</th></tr>
+</thead>
+<tbody>
+	<tr><td>central_nervous_system</td><td> 60</td></tr>
+	<tr><td>colorectal            </td><td> 36</td></tr>
+	<tr><td>liver                 </td><td> 22</td></tr>
+	<tr><td>lung                  </td><td>106</td></tr>
+	<tr><td>pancreas              </td><td> 34</td></tr>
+</tbody>
+</table>
+
+```R
+subsample_modeling_data <- modeling_data %>%
+    filter(hugo_symbol %in% !!subsample_genes) %>%
+    filter(lineage %in% !!lineages)
+
 pryr::object_size(subsample_modeling_data)
 ```
 
-    200 kB
+    Registered S3 method overwritten by 'pryr':
+      method      from
+      print.bytes Rcpp
+    
+
+
+
+    12.4 MB
 
 ```R
 nrow(subsample_modeling_data)
 ```
 
-824
+60049
+
+```R
+subsample_modeling_data %>%
+    filter(is.na(lfc)) %>%
+    nrow()
+```
+
+0
+
+```R
+subsample_modeling_data %>%
+    filter(is.na(segment_cn)) %>%
+    nrow()
+```
+
+206
+
+```R
+subsample_modeling_data %>%
+    filter(is.na(gene_cn)) %>%
+    nrow()
+```
+
+0
+
+```R
+subsample_modeling_data %>%
+    filter(!is.na(segment_cn) & !is.na(gene_cn)) %>%
+    ggplot(aes(x = log10(gene_cn), y = log10(segment_cn))) +
+    geom_point() +
+    theme(plot.title = element_text(hjust = 0.5)) +
+    labs(x = "gene CN (log10)",
+         y = "segment CN (log10)",
+         title = "Correspondance of segment and gene copy number")
+```
+
+![png](019_prepare-data-subsample_files/019_prepare-data-subsample_17_0.png)
+
+```R
+subsample_modeling_data %>%
+    mutate(gene_cn = scales::squish(gene_cn, range = c(0, 10))) %>%
+    ggplot(aes(x = gene_cn)) +
+    geom_histogram(binwidth = 1) +
+    scale_x_continuous(limits = c(0, 10), breaks = c(0:12)) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.02))) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+    labs(x = "gene CN",
+         y = "count",
+         title = "Distribution of gene copy number")
+```
+
+    Warning message:
+    “Removed 2 rows containing missing values (geom_bar).”
+
+![png](019_prepare-data-subsample_files/019_prepare-data-subsample_18_1.png)
 
 ```R
 write_csv(subsample_modeling_data, out_path)
-```
-
-```R
-
 ```
