@@ -1394,11 +1394,11 @@ if False:
     arviz    0.10.0
     pandas   1.1.3
     pymc3    3.9.3
-    last updated: 2020-11-07
-
+    last updated: 2020-11-07 
+    
     CPython 3.8.5
     IPython 7.18.1
-
+    
     compiler   : GCC 7.3.0
     system     : Linux
     release    : 3.10.0-1062.el7.x86_64

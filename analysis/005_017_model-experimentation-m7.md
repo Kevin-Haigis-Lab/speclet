@@ -2695,11 +2695,11 @@ A hierarchical version of `m7c` should be the focus of further analysis.
     arviz    0.10.0
     pandas   1.1.3
     seaborn  0.11.0
-    last updated: 2020-11-10
-
+    last updated: 2020-11-10 
+    
     CPython 3.8.5
     IPython 7.18.1
-
+    
     compiler   : GCC 7.3.0
     system     : Linux
     release    : 3.10.0-1062.el7.x86_64

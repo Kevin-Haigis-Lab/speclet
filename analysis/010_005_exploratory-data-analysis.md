@@ -55,8 +55,8 @@ data.head(n=10)
       <th>lineage_subtype</th>
       <th>kras_mutation</th>
       <th>...</th>
-      <th>segment_mean</th>
-      <th>copy_number</th>
+      <th>log2_gene_cn_p1</th>
+      <th>gene_cn</th>
       <th>n_muts</th>
       <th>any_deleterious</th>
       <th>variant_classification</th>
@@ -71,18 +71,18 @@ data.head(n=10)
     <tr>
       <th>0</th>
       <td>AAGAGGCCGGTCAAATTCAG</td>
-      <td>143b-311cas9_repa_p6_batch3</td>
-      <td>0.409139</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>-0.405499</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-001001</td>
+      <td>ACH-000323</td>
       <td>Primary</td>
-      <td>bone</td>
-      <td>osteosarcoma</td>
-      <td>G12S</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
       <td>...</td>
-      <td>0.894624</td>
-      <td>1.859125</td>
+      <td>0.845287</td>
+      <td>1.328646</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -90,95 +90,95 @@ data.head(n=10)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>1.275007</td>
+      <td>1.263034</td>
     </tr>
     <tr>
       <th>1</th>
       <td>AATCAACCCACAGCTGCACA</td>
-      <td>143b-311cas9_repa_p6_batch3</td>
-      <td>0.387921</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>-0.133541</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-001001</td>
+      <td>ACH-000323</td>
       <td>Primary</td>
-      <td>bone</td>
-      <td>osteosarcoma</td>
-      <td>G12S</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
       <td>...</td>
-      <td>1.329208</td>
-      <td>2.512647</td>
-      <td>1</td>
+      <td>0.827398</td>
+      <td>1.287359</td>
+      <td>2</td>
       <td>False</td>
-      <td>missense_mutation</td>
-      <td>FALSE</td>
-      <td>TRUE</td>
-      <td>TRUE</td>
+      <td>missense_mutation;missense_mutation</td>
+      <td>FALSE;FALSE</td>
+      <td>TRUE;TRUE</td>
+      <td>TRUE;TRUE</td>
       <td>False</td>
-      <td>6.109570</td>
+      <td>5.220330</td>
     </tr>
     <tr>
       <th>2</th>
       <td>AATTACTACTTGCTTCCTGT</td>
-      <td>143b-311cas9_repa_p6_batch3</td>
-      <td>-3.105034</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>-0.491495</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-001001</td>
+      <td>ACH-000323</td>
       <td>Primary</td>
-      <td>bone</td>
-      <td>osteosarcoma</td>
-      <td>G12S</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
       <td>...</td>
-      <td>0.971364</td>
-      <td>1.960694</td>
-      <td>4</td>
+      <td>0.879280</td>
+      <td>1.409165</td>
+      <td>0</td>
       <td>False</td>
-      <td>silent;silent;missense_mutation;missense_mutation</td>
-      <td>FALSE;FALSE;FALSE;FALSE</td>
-      <td>FALSE;FALSE;TRUE;TRUE</td>
-      <td>FALSE;FALSE;TRUE;TRUE</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
       <td>False</td>
-      <td>8.166866</td>
+      <td>3.008989</td>
     </tr>
     <tr>
       <th>3</th>
       <td>ACCTGTATGACGAAACCGTG</td>
-      <td>143b-311cas9_repa_p6_batch3</td>
-      <td>0.087322</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>-0.015850</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-001001</td>
+      <td>ACH-000323</td>
       <td>Primary</td>
-      <td>bone</td>
-      <td>osteosarcoma</td>
-      <td>G12S</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
       <td>...</td>
-      <td>1.046162</td>
-      <td>2.065029</td>
-      <td>1</td>
+      <td>0.818549</td>
+      <td>1.267208</td>
+      <td>0</td>
       <td>False</td>
-      <td>silent</td>
-      <td>FALSE</td>
-      <td>FALSE</td>
-      <td>FALSE</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
       <td>False</td>
-      <td>2.080658</td>
+      <td>4.083213</td>
     </tr>
     <tr>
       <th>4</th>
       <td>ACTCTGTTCCTTCATCTCCG</td>
-      <td>143b-311cas9_repa_p6_batch3</td>
-      <td>-0.210116</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>-0.530277</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-001001</td>
+      <td>ACH-000323</td>
       <td>Primary</td>
-      <td>bone</td>
-      <td>osteosarcoma</td>
-      <td>G12S</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
       <td>...</td>
-      <td>1.143428</td>
-      <td>2.209053</td>
+      <td>0.990378</td>
+      <td>1.692253</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -186,47 +186,47 @@ data.head(n=10)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>4.335569</td>
+      <td>5.822730</td>
     </tr>
     <tr>
       <th>5</th>
       <td>ACTGCTGCGGGAATTCCAAG</td>
-      <td>143b-311cas9_repa_p6_batch3</td>
-      <td>0.539430</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>0.778827</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-001001</td>
+      <td>ACH-000323</td>
       <td>Primary</td>
-      <td>bone</td>
-      <td>osteosarcoma</td>
-      <td>G12S</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
       <td>...</td>
-      <td>1.046162</td>
-      <td>2.065029</td>
-      <td>1</td>
+      <td>0.818549</td>
+      <td>1.267208</td>
+      <td>0</td>
       <td>False</td>
-      <td>silent</td>
-      <td>FALSE</td>
-      <td>FALSE</td>
-      <td>FALSE</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
       <td>False</td>
-      <td>2.080658</td>
+      <td>4.083213</td>
     </tr>
     <tr>
       <th>6</th>
       <td>AGACACTTATACTATGAAAG</td>
-      <td>143b-311cas9_repa_p6_batch3</td>
-      <td>-0.166730</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>0.035950</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-001001</td>
+      <td>ACH-000323</td>
       <td>Primary</td>
-      <td>bone</td>
-      <td>osteosarcoma</td>
-      <td>G12S</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
       <td>...</td>
-      <td>0.885059</td>
-      <td>1.846840</td>
+      <td>0.872323</td>
+      <td>1.392463</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -234,47 +234,47 @@ data.head(n=10)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>3.880686</td>
+      <td>3.701549</td>
     </tr>
     <tr>
       <th>7</th>
       <td>AGAGGAGTACAGTGCAATGA</td>
-      <td>143b-311cas9_repa_p6_batch3</td>
-      <td>-3.004429</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>0.370832</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-001001</td>
+      <td>ACH-000323</td>
       <td>Primary</td>
-      <td>bone</td>
-      <td>osteosarcoma</td>
-      <td>G12S</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
       <td>...</td>
-      <td>0.971364</td>
-      <td>1.960694</td>
-      <td>4</td>
+      <td>0.879280</td>
+      <td>1.409165</td>
+      <td>0</td>
       <td>False</td>
-      <td>silent;silent;missense_mutation;missense_mutation</td>
-      <td>FALSE;FALSE;FALSE;FALSE</td>
-      <td>FALSE;FALSE;TRUE;TRUE</td>
-      <td>FALSE;FALSE;TRUE;TRUE</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
       <td>False</td>
-      <td>8.166866</td>
+      <td>3.008989</td>
     </tr>
     <tr>
       <th>8</th>
       <td>AGATAGAGTAACTCTCTTTG</td>
-      <td>143b-311cas9_repa_p6_batch3</td>
-      <td>0.045331</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>-0.217851</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-001001</td>
+      <td>ACH-000323</td>
       <td>Primary</td>
-      <td>bone</td>
-      <td>osteosarcoma</td>
-      <td>G12S</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
       <td>...</td>
-      <td>1.085596</td>
-      <td>2.122252</td>
+      <td>1.024361</td>
+      <td>1.785314</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -282,23 +282,23 @@ data.head(n=10)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>1.859970</td>
+      <td>1.748461</td>
     </tr>
     <tr>
       <th>9</th>
       <td>AGTGCGGATGAGTTTCAGCG</td>
-      <td>143b-311cas9_repa_p6_batch3</td>
-      <td>0.331650</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>-0.829300</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-001001</td>
+      <td>ACH-000323</td>
       <td>Primary</td>
-      <td>bone</td>
-      <td>osteosarcoma</td>
-      <td>G12S</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
       <td>...</td>
-      <td>1.143428</td>
-      <td>2.209053</td>
+      <td>0.990378</td>
+      <td>1.692253</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -306,11 +306,11 @@ data.head(n=10)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>4.335569</td>
+      <td>5.822730</td>
     </tr>
   </tbody>
 </table>
-<p>10 rows × 25 columns</p>
+<p>10 rows × 27 columns</p>
 </div>
 
 ```python
@@ -342,11 +342,11 @@ print(
 )
 ```
 
-     num data points: 166345
+     num data points: 60049
            num genes: 26
            num sgRNA: 103
-        num lineages: 26
-      num cell lines: 767
+        num lineages: 5
+      num cell lines: 258
 
 ```python
 data.columns
@@ -355,9 +355,10 @@ data.columns
     Index(['sgrna', 'replicate_id', 'lfc', 'pdna_batch', 'passes_qc', 'depmap_id',
            'primary_or_metastasis', 'lineage', 'lineage_subtype', 'kras_mutation',
            'genome_alignment', 'n_alignments', 'hugo_symbol', 'chromosome',
-           'chrom_pos', 'segment_mean', 'copy_number', 'n_muts', 'any_deleterious',
-           'variant_classification', 'is_deleterious', 'is_tcga_hotspot',
-           'is_cosmic_hotspot', 'mutated_at_guide_location', 'rna_expr'],
+           'chrom_pos', 'segment_mean', 'segment_cn', 'log2_gene_cn_p1', 'gene_cn',
+           'n_muts', 'any_deleterious', 'variant_classification', 'is_deleterious',
+           'is_tcga_hotspot', 'is_cosmic_hotspot', 'mutated_at_guide_location',
+           'rna_expr'],
           dtype='object')
 
 ```python
@@ -371,7 +372,7 @@ data.columns
 
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_7_0.png)
 
-    <ggplot: (8790666976247)>
+    <ggplot: (8759140016336)>
 
 ```python
 faceting_theme_dict = {
@@ -380,7 +381,7 @@ faceting_theme_dict = {
 }
 
 (
-    gg.ggplot(data.sample(frac=0.2), gg.aes(x="lfc"))
+    gg.ggplot(data, gg.aes(x="lfc"))
     + gg.facet_wrap("hugo_symbol", ncol=5, scales="free")
     + gg.geom_vline(xintercept=0, linetype="--", size=0.5, color="black")
     + gg.geom_density(size=0.7, color="black", fill="gray", alpha=0.2)
@@ -391,11 +392,11 @@ faceting_theme_dict = {
 
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_8_0.png)
 
-    <ggplot: (8790666228258)>
+    <ggplot: (8759138899080)>
 
 ```python
 (
-    gg.ggplot(data.sample(frac=0.2), gg.aes(x="segment_mean"))
+    gg.ggplot(data, gg.aes(x="segment_mean"))
     + gg.facet_wrap("hugo_symbol", ncol=5, scales="free")
     + gg.geom_vline(xintercept=1, linetype="--", size=0.5, color="black")
     + gg.geom_density(size=0.7, color="black", fill="gray", alpha=0.2)
@@ -408,24 +409,42 @@ faceting_theme_dict = {
 
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_9_0.png)
 
-    <ggplot: (8790666289701)>
+    <ggplot: (8759129715788)>
 
 ```python
 (
-    gg.ggplot(data.sample(frac=0.2), gg.aes(x="segment_mean", y="lfc"))
+    gg.ggplot(data, gg.aes(x="gene_cn"))
     + gg.facet_wrap("hugo_symbol", ncol=5, scales="free")
-    + gg.geom_point(color="darkcyan", alpha=0.4, size=0.1)
-    + gg.geom_smooth(method="lm")
+    + gg.geom_vline(xintercept=2, linetype="--", size=0.5, color="black")
+    + gg.geom_density(size=0.7, color="black", fill="gray", alpha=0.2)
     + gg.theme(**faceting_theme_dict)
     + gg.labs(
-        x="segment mean", y="logFC", title="Correlation between segment mean and logFC"
+        x="segment mean", y="density", title="Distributions of segment mean values"
     )
 )
 ```
 
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_10_0.png)
 
-    <ggplot: (8790655247839)>
+    <ggplot: (8759130055159)>
+
+```python
+(
+    gg.ggplot(data, gg.aes(x="gene_cn", y="lfc"))
+    + gg.facet_wrap("hugo_symbol", ncol=5, scales="free")
+    + gg.geom_density_2d(color="grey", size=0.7)
+    + gg.geom_point(color="darkcyan", alpha=0.4, size=0.1)
+    + gg.geom_smooth(method="lm")
+    + gg.theme(**faceting_theme_dict)
+    + gg.labs(
+        x="segment mean", y="logFC", title="Correlation between copy number and logFC"
+    )
+)
+```
+
+![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_11_0.png)
+
+    <ggplot: (8759122620064)>
 
 ```python
 def plot_highlight_muts(df, x, y="lfc", x_label=None, y_label="logFC", title=""):
@@ -446,6 +465,7 @@ def plot_highlight_muts(df, x, y="lfc", x_label=None, y_label="logFC", title="")
         + gg.labs(
             x=x_label,
             y=y_label,
+            color="any deleterious",
             title=title,
         )
     )
@@ -454,15 +474,15 @@ def plot_highlight_muts(df, x, y="lfc", x_label=None, y_label="logFC", title="")
 ```python
 plot_highlight_muts(
     data,
-    x="segment_mean",
-    x_label="segment mean",
-    title="Correlation between segment mean and logFC",
+    x="gene_cn",
+    x_label="gene CN",
+    title="Correlation between copy number and logFC",
 )
 ```
 
-![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_12_0.png)
+![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_13_0.png)
 
-    <ggplot: (8790666903339)>
+    <ggplot: (8759129289265)>
 
 ```python
 plot_highlight_muts(
@@ -473,9 +493,9 @@ plot_highlight_muts(
 )
 ```
 
-![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_13_0.png)
+![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_14_0.png)
 
-    <ggplot: (8790663409698)>
+    <ggplot: (8759129860214)>
 
 ```python
 (
@@ -487,15 +507,13 @@ plot_highlight_muts(
 )
 ```
 
-![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_14_0.png)
+![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_15_0.png)
 
-    <ggplot: (8790647726090)>
+    <ggplot: (8759120401592)>
 
 ```python
 (
-    gg.ggplot(
-        data.sample(frac=0.2), gg.aes(x="lfc", color="pdna_batch", fill="pdna_batch")
-    )
+    gg.ggplot(data, gg.aes(x="lfc", color="pdna_batch", fill="pdna_batch"))
     + gg.facet_wrap("hugo_symbol", nrow=5, scales="free")
     + gg.geom_density(alpha=0.3)
     + gg.theme(**faceting_theme_dict)
@@ -509,9 +527,9 @@ plot_highlight_muts(
 )
 ```
 
-![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_15_0.png)
+![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_16_0.png)
 
-    <ggplot: (8790647721307)>
+    <ggplot: (8759129264731)>
 
 ```python
 data["sgrna_idx"] = data["sgrna"].cat.codes
@@ -529,23 +547,27 @@ data["sgrna_idx"] = data["sgrna"].cat.codes
 )
 ```
 
-![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_16_0.png)
+![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_17_0.png)
 
-    <ggplot: (8790655097998)>
+    <ggplot: (8759120455705)>
 
 ```python
 (
-    gg.ggplot(data.sample(frac=0.5), gg.aes(x="hugo_symbol", y="lfc"))
-    + gg.facet_wrap("lineage", ncol=2, scales="free_y")
+    gg.ggplot(data, gg.aes(x="hugo_symbol", y="lfc"))
+    + gg.facet_wrap("lineage", ncol=1, scales="free")
     + gg.geom_boxplot(outlier_size=0.1)
     + gg.theme(
-        figure_size=(15, 30),
+        figure_size=(8, 20),
         subplots_adjust={"hspace": 0.4, "wspace": 0.3},
-        axis_text_x=gg.element_text(size=8, angle=35, hjust=1),
+        axis_text_x=gg.element_text(size=8, angle=90, hjust=0.5),
     )
 )
 ```
 
-![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_17_0.png)
+![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_18_0.png)
 
-    <ggplot: (8790655599330)>
+    <ggplot: (8759122259188)>
+
+```python
+
+```

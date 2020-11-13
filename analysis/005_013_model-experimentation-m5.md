@@ -773,11 +773,11 @@ d = pd.DataFrame(
     pandas   1.1.3
     arviz    0.10.0
     numpy    1.19.2
-    last updated: 2020-10-26
-
+    last updated: 2020-10-26 
+    
     CPython 3.8.5
     IPython 7.18.1
-
+    
     compiler   : GCC 7.3.0
     system     : Linux
     release    : 3.10.0-1062.el7.x86_64
