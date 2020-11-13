@@ -1,16 +1,17 @@
 ```python
-import pandas as pd
+import string
+import warnings
+from itertools import product
+
+import arviz as az
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import plotnine as gg
 import pymc3 as pm
-from theano import tensor as tt
-import arviz as az
 import seaborn as sns
-import matplotlib.pyplot as plt
-import string
-from itertools import product
-from numpy.random import normal, exponential, seed
-import warnings
+from numpy.random import exponential, normal, seed
+from theano import tensor as tt
 
 # Remove annoying filters from some dated ArViz functions.
 warnings.simplefilter(action="ignore", category=UserWarning)
@@ -320,7 +321,11 @@ real_cellline_vals = pd.DataFrame({"cell_line": cell_lines, "log_fc": RP["beta_c
     + gg.theme(
         axis_text_x=gg.element_text(angle=90, hjust=0.5, vjust=1), figure_size=(12, 5)
     )
-    + gg.labs(x="sgRNA", y="logFC", title="Synthetic data by sgRNA",)
+    + gg.labs(
+        x="sgRNA",
+        y="logFC",
+        title="Synthetic data by sgRNA",
+    )
 )
 ```
 
@@ -1369,7 +1374,12 @@ with pm.Model() as m7b:
     )
 
     # Priors for varying intercept for [sgRNA, cell line].
-    mu_alpha_sc = pm.Deterministic("mu_alpha_sc", gamma_gc[sgrna_to_gene_idx,])
+    mu_alpha_sc = pm.Deterministic(
+        "mu_alpha_sc",
+        gamma_gc[
+            sgrna_to_gene_idx,
+        ],
+    )
     sigma_alpha = pm.Exponential("sigma_alpha", 1)
 
     # Varying intercept for [sgRNA, cell line].

@@ -1,14 +1,15 @@
 ```python
-import pandas as pd
-import numpy as np
-import plotnine as gg
-import pymc3 as pm
-import arviz as az
-import seaborn as sns
-import matplotlib.pyplot as plt
 import string
 from itertools import product
-from numpy.random import normal, exponential
+
+import arviz as az
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import plotnine as gg
+import pymc3 as pm
+import seaborn as sns
+from numpy.random import exponential, normal
 ```
 
 
@@ -516,7 +517,8 @@ pm.model_to_graphviz(model5)
 def plot_variable_prior(prior_check, var):
     prior_df = prior_check[var]
     prior_df = pd.DataFrame(
-        prior_df, columns=[f"{var}[" + str(i) + "]" for i in range(prior_df.shape[1])],
+        prior_df,
+        columns=[f"{var}[" + str(i) + "]" for i in range(prior_df.shape[1])],
     ).melt()
 
     return (

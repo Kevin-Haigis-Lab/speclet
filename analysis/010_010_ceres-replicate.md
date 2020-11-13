@@ -24,19 +24,20 @@ where:
 
 
 ```python
-import pandas as pd
-import numpy as np
-import plotnine as gg
-import pymc3 as pm
-from theano import tensor as tt
-import arviz as az
-import seaborn as sns
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 import string
 import warnings
 from pathlib import Path
+
+import arviz as az
+import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import plotnine as gg
+import pymc3 as pm
 import pymc3_helpers as pmhelp
+import seaborn as sns
+from theano import tensor as tt
 
 warnings.simplefilter(action="ignore", category=UserWarning)
 
@@ -707,7 +708,9 @@ data.is_deleterious.unique()
     gg.ggplot(gene_effect_post_df, gg.aes(x="hugo_symbol", y="gene_effect"))
     + gg.geom_boxplot(alpha=0, color="black", outlier_alpha=0, size=1)
     + gg.geom_jitter(alpha=0.4, size=0.3, height=0, width=0.3, color="steelblue")
-    + gg.theme(axis_text_x=gg.element_text(angle=90, hjust=0.5, vjust=1), figure_size=(10, 5))
+    + gg.theme(
+        axis_text_x=gg.element_text(angle=90, hjust=0.5, vjust=1), figure_size=(10, 5)
+    )
     + gg.labs(x=None, y="estimated gene effect")
 )
 ```
@@ -734,7 +737,11 @@ data.is_deleterious.unique()
         gg.aes(color="hugo_symbol", fill="hugo_symbol"), alpha=0.2, size=0.3
     )
     + gg.geom_rug(gg.aes(color="hugo_symbol"))
-    + gg.theme(figure_size=(10, 16), legend_position="none", subplots_adjust = {"hspace": 0.4, "wspace": 0.3})
+    + gg.theme(
+        figure_size=(10, 16),
+        legend_position="none",
+        subplots_adjust={"hspace": 0.4, "wspace": 0.3},
+    )
     + gg.labs(x="estimated gene effect per cell line", y="denisty")
 )
 ```

@@ -4,15 +4,16 @@
 
 
 ```python
-import pandas as pd
-import numpy as np
-from plotnine.data import diamonds
-import pymc3 as pm
-import arviz as az
-import matplotlib.pyplot as plt
+import pickle
 import warnings
 from pathlib import Path
-import pickle
+
+import arviz as az
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import pymc3 as pm
+from plotnine.data import diamonds
 
 warnings.simplefilter(action="ignore", category=UserWarning)
 

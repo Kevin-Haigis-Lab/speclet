@@ -2,13 +2,14 @@
 
 
 ```python
-import pandas as pd
-import numpy as np
-from matplotlib import pyplot as plt
-import seaborn as sns
-import janitor
-from pathlib import Path
 import re
+from pathlib import Path
+
+import janitor
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from matplotlib import pyplot as plt
 ```
 
 
@@ -794,7 +795,7 @@ kras_mutations = (
     .assign(
         variant_classification=lambda x: x.variant_classification.str.lower(),
         variant_type=lambda x: x.variant_type.str.lower(),
-        codon=lambda x: [re.sub("\D", "", a) for a in x.protein_change],
+        codon=lambda x: [re.sub(r"\D", "", a) for a in x.protein_change],
         is_kras_hotspot=lambda x: x.codon.isin(kras_hotspot_codons),
     )
     .pipe(lambda x: x[x.variant_classification != "silent"])

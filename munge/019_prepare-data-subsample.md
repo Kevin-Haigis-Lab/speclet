@@ -22,7 +22,7 @@ library(tidyverse)
 
 ```R
 data_dir <- file.path("..", "modeling_data")
-modeling_data_path <- file.path(data_dir, "depmap_modeling_dataframe.csv")
+modeling_data_path <- file.path(data_dir, "depmap_modeling_dataframe_OLD.csv")
 out_path <- file.path(data_dir, "depmap_modeling_dataframe_subsample.csv")
 ```
 
@@ -41,7 +41,9 @@ head(modeling_data)
       n_alignments = [32mcol_double()[39m,
       chrom_pos = [32mcol_double()[39m,
       segment_mean = [32mcol_double()[39m,
-      copy_number = [32mcol_double()[39m,
+      segment_cn = [32mcol_double()[39m,
+      log2_gene_cn_p1 = [32mcol_double()[39m,
+      gene_cn = [32mcol_double()[39m,
       n_muts = [32mcol_double()[39m,
       any_deleterious = [33mcol_logical()[39m,
       mutated_at_guide_location = [33mcol_logical()[39m,
@@ -54,18 +56,18 @@ head(modeling_data)
 
 
 <table>
-<caption>A tibble: 6 × 25</caption>
+<caption>A tibble: 6 × 27</caption>
 <thead>
-	<tr><th scope=col>sgrna</th><th scope=col>replicate_id</th><th scope=col>lfc</th><th scope=col>pdna_batch</th><th scope=col>passes_qc</th><th scope=col>depmap_id</th><th scope=col>primary_or_metastasis</th><th scope=col>lineage</th><th scope=col>lineage_subtype</th><th scope=col>kras_mutation</th><th scope=col>⋯</th><th scope=col>segment_mean</th><th scope=col>copy_number</th><th scope=col>n_muts</th><th scope=col>any_deleterious</th><th scope=col>variant_classification</th><th scope=col>is_deleterious</th><th scope=col>is_tcga_hotspot</th><th scope=col>is_cosmic_hotspot</th><th scope=col>mutated_at_guide_location</th><th scope=col>rna_expr</th></tr>
+	<tr><th scope=col>sgrna</th><th scope=col>replicate_id</th><th scope=col>lfc</th><th scope=col>pdna_batch</th><th scope=col>passes_qc</th><th scope=col>depmap_id</th><th scope=col>primary_or_metastasis</th><th scope=col>lineage</th><th scope=col>lineage_subtype</th><th scope=col>kras_mutation</th><th scope=col>⋯</th><th scope=col>log2_gene_cn_p1</th><th scope=col>gene_cn</th><th scope=col>n_muts</th><th scope=col>any_deleterious</th><th scope=col>variant_classification</th><th scope=col>is_deleterious</th><th scope=col>is_tcga_hotspot</th><th scope=col>is_cosmic_hotspot</th><th scope=col>mutated_at_guide_location</th><th scope=col>rna_expr</th></tr>
 	<tr><th scope=col>&lt;chr&gt;</th><th scope=col>&lt;chr&gt;</th><th scope=col>&lt;dbl&gt;</th><th scope=col>&lt;dbl&gt;</th><th scope=col>&lt;lgl&gt;</th><th scope=col>&lt;chr&gt;</th><th scope=col>&lt;chr&gt;</th><th scope=col>&lt;chr&gt;</th><th scope=col>&lt;chr&gt;</th><th scope=col>&lt;chr&gt;</th><th scope=col>⋯</th><th scope=col>&lt;dbl&gt;</th><th scope=col>&lt;dbl&gt;</th><th scope=col>&lt;dbl&gt;</th><th scope=col>&lt;lgl&gt;</th><th scope=col>&lt;chr&gt;</th><th scope=col>&lt;chr&gt;</th><th scope=col>&lt;chr&gt;</th><th scope=col>&lt;chr&gt;</th><th scope=col>&lt;lgl&gt;</th><th scope=col>&lt;dbl&gt;</th></tr>
 </thead>
 <tbody>
-	<tr><td>AAAAAAATCCAGCAATGCAG</td><td>143b-311cas9_repa_p6_batch3</td><td> 0.2896938</td><td>3</td><td>TRUE</td><td>ACH-001001</td><td>Primary</td><td>bone</td><td>osteosarcoma</td><td>G12S</td><td>⋯</td><td>1.1434280</td><td>2.209053</td><td>0</td><td>FALSE</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>FALSE</td><td>4.1009776</td></tr>
-	<tr><td>AAAAAACCCGTAGATAGCCT</td><td>143b-311cas9_repa_p6_batch3</td><td> 0.1701723</td><td>3</td><td>TRUE</td><td>ACH-001001</td><td>Primary</td><td>bone</td><td>osteosarcoma</td><td>G12S</td><td>⋯</td><td>0.8850587</td><td>1.846840</td><td>0</td><td>FALSE</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>FALSE</td><td>7.4709435</td></tr>
-	<tr><td>AAAAAAGAAGAAAAAACCAG</td><td>143b-311cas9_repa_p6_batch3</td><td>-0.6959467</td><td>3</td><td>TRUE</td><td>ACH-001001</td><td>Primary</td><td>bone</td><td>osteosarcoma</td><td>G12S</td><td>⋯</td><td>0.8946238</td><td>1.859125</td><td>0</td><td>FALSE</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>FALSE</td><td>4.6270231</td></tr>
-	<tr><td>AAAAAAGCTCAAGAAGGAGG</td><td>143b-311cas9_repa_p6_batch3</td><td>-0.3249354</td><td>3</td><td>TRUE</td><td>ACH-001001</td><td>Primary</td><td>bone</td><td>osteosarcoma</td><td>G12S</td><td>⋯</td><td>1.0461620</td><td>2.065029</td><td>0</td><td>FALSE</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>FALSE</td><td>4.7750505</td></tr>
-	<tr><td>AAAAAAGGCTGTAAAAGCGT</td><td>143b-311cas9_repa_p6_batch3</td><td> 0.1428739</td><td>3</td><td>TRUE</td><td>ACH-001001</td><td>Primary</td><td>bone</td><td>osteosarcoma</td><td>G12S</td><td>⋯</td><td>0.8744568</td><td>1.833318</td><td>0</td><td>FALSE</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>FALSE</td><td>0.2265085</td></tr>
-	<tr><td>AAAAAAGGGCTCCAAAAAGG</td><td>143b-311cas9_repa_p6_batch3</td><td>-0.2998787</td><td>3</td><td>TRUE</td><td>ACH-001001</td><td>Primary</td><td>bone</td><td>osteosarcoma</td><td>G12S</td><td>⋯</td><td>1.0855960</td><td>2.122252</td><td>0</td><td>FALSE</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>FALSE</td><td>0.3785116</td></tr>
+	<tr><td>AAAAAAATCCAGCAATGCAG</td><td>143b-311cas9_repa_p6_batch3</td><td> 0.2896938</td><td>3</td><td>TRUE</td><td>ACH-001001</td><td>Primary</td><td>bone</td><td>osteosarcoma</td><td>G12S</td><td>⋯</td><td>1.0999200</td><td>2.003926</td><td>0</td><td>FALSE</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>FALSE</td><td>4.1009776</td></tr>
+	<tr><td>AAAAAACCCGTAGATAGCCT</td><td>143b-311cas9_repa_p6_batch3</td><td> 0.1701723</td><td>3</td><td>TRUE</td><td>ACH-001001</td><td>Primary</td><td>bone</td><td>osteosarcoma</td><td>G12S</td><td>⋯</td><td>0.9146094</td><td>1.495800</td><td>0</td><td>FALSE</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>FALSE</td><td>7.4709435</td></tr>
+	<tr><td>AAAAAAGAAGAAAAAACCAG</td><td>143b-311cas9_repa_p6_batch3</td><td>-0.6959467</td><td>3</td><td>TRUE</td><td>ACH-001001</td><td>Primary</td><td>bone</td><td>osteosarcoma</td><td>G12S</td><td>⋯</td><td>0.9219114</td><td>1.514091</td><td>0</td><td>FALSE</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>FALSE</td><td>4.6270231</td></tr>
+	<tr><td>AAAAAAGCTCAAGAAGGAGG</td><td>143b-311cas9_repa_p6_batch3</td><td>-0.3249354</td><td>3</td><td>TRUE</td><td>ACH-001001</td><td>Primary</td><td>bone</td><td>osteosarcoma</td><td>G12S</td><td>⋯</td><td>1.0329204</td><td>1.809258</td><td>0</td><td>FALSE</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>FALSE</td><td>4.7750505</td></tr>
+	<tr><td>AAAAAAGGCTGTAAAAGCGT</td><td>143b-311cas9_repa_p6_batch3</td><td> 0.1428739</td><td>3</td><td>TRUE</td><td>ACH-001001</td><td>Primary</td><td>bone</td><td>osteosarcoma</td><td>G12S</td><td>⋯</td><td>0.9064726</td><td>1.475575</td><td>0</td><td>FALSE</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>FALSE</td><td>0.2265085</td></tr>
+	<tr><td>AAAAAAGGGCTCCAAAAAGG</td><td>143b-311cas9_repa_p6_batch3</td><td>-0.2998787</td><td>3</td><td>TRUE</td><td>ACH-001001</td><td>Primary</td><td>bone</td><td>osteosarcoma</td><td>G12S</td><td>⋯</td><td>1.0604597</td><td>1.887698</td><td>0</td><td>FALSE</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>FALSE</td><td>0.3785116</td></tr>
 </tbody>
 </table>
 
@@ -76,8 +78,8 @@ head(modeling_data)
 glimpse(modeling_data)
 ```
 
-    Rows: 120,235,860
-    Columns: 25
+    Rows: 595,600
+    Columns: 27
     $ sgrna                     [3m[90m<chr>[39m[23m "AAAAAAATCCAGCAATGCAG", "AAAAAACCCGTAGATAGC…
     $ replicate_id              [3m[90m<chr>[39m[23m "143b-311cas9_repa_p6_batch3", "143b-311cas…
     $ lfc                       [3m[90m<dbl>[39m[23m 0.28969381, 0.17017231, -0.69594665, -0.324…
@@ -94,7 +96,9 @@ glimpse(modeling_data)
     $ chromosome                [3m[90m<chr>[39m[23m "10", "12", "4", "2", "19", "6", "14", "1",…
     $ chrom_pos                 [3m[90m<dbl>[39m[23m 110964620, 95003615, 75970356, 33588446, 19…
     $ segment_mean              [3m[90m<dbl>[39m[23m 1.1434280, 0.8850587, 0.8946238, 1.0461620,…
-    $ copy_number               [3m[90m<dbl>[39m[23m 2.209053, 1.846840, 1.859125, 2.065029, 1.8…
+    $ segment_cn                [3m[90m<dbl>[39m[23m 2.209053, 1.846840, 1.859125, 2.065029, 1.8…
+    $ log2_gene_cn_p1           [3m[90m<dbl>[39m[23m 1.0999200, 0.9146094, 0.9219114, 1.0329204,…
+    $ gene_cn                   [3m[90m<dbl>[39m[23m 2.0039256, 1.4958003, 1.5140913, 1.8092579,…
     $ n_muts                    [3m[90m<dbl>[39m[23m 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0…
     $ any_deleterious           [3m[90m<lgl>[39m[23m FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, F…
     $ variant_classification    [3m[90m<chr>[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
@@ -122,7 +126,7 @@ n_distinct(modeling_data$depmap_id)
 ```
 
 
-767
+5
 
 
 
@@ -139,6 +143,7 @@ n_distinct(modeling_data$hugo_symbol)
 ```R
 # Some specific genes to subset.
 specific_genes <- c("KRAS", "BRAF", "PIK3CA", "PTK2", "MDM2", "TP53")
+ceres_correction_genes <- c("TRPS1", "ESR1", "NAMPT", "CDK4")
 
 set.seed(0)
 num_random_genes <- 20
@@ -172,12 +177,29 @@ subsample_genes
 
 
 ```R
+num_random_lineages <- 5
+lineages <- sample(unique(modeling_data$lineage), num_random_lineages)
+lineages
+```
+
+
+    Error in sample.int(length(x), size, replace, prob): cannot take a sample larger than the population when 'replace = FALSE'
+    Traceback:
+
+
+    1. sample(unique(modeling_data$lineage), num_random_lineages)
+
+    2. sample.int(length(x), size, replace, prob)
+
+
+
+```R
 subsample_modeling_data <- modeling_data %>% filter(hugo_symbol %in% subsample_genes)
 pryr::object_size(subsample_modeling_data)
 ```
 
 
-    31.5 MB
+    200 kB
 
 
 
@@ -186,7 +208,7 @@ nrow(subsample_modeling_data)
 ```
 
 
-166345
+824
 
 
 

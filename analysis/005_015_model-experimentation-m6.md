@@ -1,15 +1,16 @@
 ```python
-import pandas as pd
-import numpy as np
-import plotnine as gg
-import pymc3 as pm
-from theano import tensor as tt
-import arviz as az
-import seaborn as sns
-import matplotlib.pyplot as plt
 import string
 from itertools import product
-from numpy.random import normal, exponential, seed
+
+import arviz as az
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import plotnine as gg
+import pymc3 as pm
+import seaborn as sns
+from numpy.random import exponential, normal, seed
+from theano import tensor as tt
 ```
 
 
@@ -611,7 +612,9 @@ plt.show()
 ```python
 var_names = ["mu_gamma", "sigma_gamma", "gamma_g", "alpha_s"]
 az.plot_forest(
-    az_model6, var_names=var_names, combined=True,
+    az_model6,
+    var_names=var_names,
+    combined=True,
 )
 plt.show()
 ```
@@ -1181,7 +1184,9 @@ plt.show()
 ```python
 var_names = ["mu_gamma", "sigma_gamma", "gamma_g", "alpha_s"]
 az.plot_forest(
-    az_model6_2, var_names=var_names, combined=True,
+    az_model6_2,
+    var_names=var_names,
+    combined=True,
 )
 plt.show()
 ```

@@ -2,16 +2,17 @@
 
 
 ```python
-import pandas as pd
-import numpy as np
-import plotnine as gg
-import pymc3 as pm
-import arviz as az
-import seaborn as sns
-import matplotlib.pyplot as plt
 import string
 from itertools import product
-from numpy.random import normal, exponential
+
+import arviz as az
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import plotnine as gg
+import pymc3 as pm
+import seaborn as sns
+from numpy.random import exponential, normal
 ```
 
 

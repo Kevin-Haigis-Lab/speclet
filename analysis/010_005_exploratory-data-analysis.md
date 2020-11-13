@@ -2,15 +2,16 @@
 
 
 ```python
-import pandas as pd
-import numpy as np
-import plotnine as gg
-import seaborn as sns
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 import string
 import warnings
 from pathlib import Path
+
+import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import plotnine as gg
+import seaborn as sns
 
 warnings.simplefilter(action="ignore", category=UserWarning)
 
@@ -500,7 +501,11 @@ def plot_highlight_muts(df, x, y="lfc", x_label=None, y_label="logFC", title="")
         + gg.scale_color_manual(values=["gray", "red"])
         + gg.scale_alpha_manual(values=[0.2, 0.8])
         + gg.theme(**faceting_theme_dict)
-        + gg.labs(x=x_label, y=y_label, title=title,)
+        + gg.labs(
+            x=x_label,
+            y=y_label,
+            title=title,
+        )
     )
 ```
 
