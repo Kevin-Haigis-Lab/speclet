@@ -30,7 +30,6 @@
     },
     "split_logfc" :
     {
-        "partition" : "priority",
         "cores" : 1,
         "mem"   : "80000",
         "time"  : "03:00:00"
@@ -49,9 +48,9 @@
     },
     "combine_data" :
     {
-        "partition": "priority",
+        "partition": "short",
         "cores" : 1,
-        "mem"   : "35000",
-        "time"  : "00:25:00"
+        "mem"   : "55000",
+        "time"  : "00:30:00"
     }
 }

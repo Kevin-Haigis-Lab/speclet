@@ -3,7 +3,7 @@
 #SBATCH -c 1
 #SBATCH -p priority
 #SBATCH -t 2-00:00
-#SBATCH --mem 4G
+#SBATCH --mem 10G
 #SBATCH -o logs/modeling-data-prep/snakemake_%A.log
 #SBATCH -e logs/modeling-data-prep/snakemake_%A.log
 
