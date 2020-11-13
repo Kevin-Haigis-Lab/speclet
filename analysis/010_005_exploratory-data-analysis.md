@@ -1,6 +1,5 @@
 # Exporatory data analysis of the subset of data
 
-
 ```python
 import string
 import warnings
@@ -21,15 +20,11 @@ RANDOM_SEED = 927
 np.random.seed(RANDOM_SEED)
 ```
 
-
 ```python
 data_path = Path("../modeling_data/depmap_modeling_dataframe_subsample.csv")
 data = pd.read_csv(data_path)
 data.head(n=10)
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -318,15 +313,11 @@ data.head(n=10)
 <p>10 rows × 25 columns</p>
 </div>
 
-
-
-
 ```python
 def make_cat(df, col, ordered=False):
     df[col] = pd.Categorical(df[col], ordered=ordered)
     return df
 ```
-
 
 ```python
 for col in [
@@ -340,7 +331,6 @@ for col in [
 ]:
     data = make_cat(data, col)
 ```
-
 
 ```python
 print(
@@ -358,14 +348,9 @@ print(
         num lineages: 26
       num cell lines: 767
 
-
-
 ```python
 data.columns
 ```
-
-
-
 
     Index(['sgrna', 'replicate_id', 'lfc', 'pdna_batch', 'passes_qc', 'depmap_id',
            'primary_or_metastasis', 'lineage', 'lineage_subtype', 'kras_mutation',
@@ -374,9 +359,6 @@ data.columns
            'variant_classification', 'is_deleterious', 'is_tcga_hotspot',
            'is_cosmic_hotspot', 'mutated_at_guide_location', 'rna_expr'],
           dtype='object')
-
-
-
 
 ```python
 (
@@ -387,19 +369,9 @@ data.columns
 )
 ```
 
-
-
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_7_0.png)
 
-
-
-
-
-
     <ggplot: (8790666976247)>
-
-
-
 
 ```python
 faceting_theme_dict = {
@@ -417,19 +389,9 @@ faceting_theme_dict = {
 )
 ```
 
-
-
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_8_0.png)
 
-
-
-
-
-
     <ggplot: (8790666228258)>
-
-
-
 
 ```python
 (
@@ -444,19 +406,9 @@ faceting_theme_dict = {
 )
 ```
 
-
-
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_9_0.png)
 
-
-
-
-
-
     <ggplot: (8790666289701)>
-
-
-
 
 ```python
 (
@@ -471,19 +423,9 @@ faceting_theme_dict = {
 )
 ```
 
-
-
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_10_0.png)
 
-
-
-
-
-
     <ggplot: (8790655247839)>
-
-
-
 
 ```python
 def plot_highlight_muts(df, x, y="lfc", x_label=None, y_label="logFC", title=""):
@@ -509,7 +451,6 @@ def plot_highlight_muts(df, x, y="lfc", x_label=None, y_label="logFC", title="")
     )
 ```
 
-
 ```python
 plot_highlight_muts(
     data,
@@ -519,19 +460,9 @@ plot_highlight_muts(
 )
 ```
 
-
-
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_12_0.png)
 
-
-
-
-
-
     <ggplot: (8790666903339)>
-
-
-
 
 ```python
 plot_highlight_muts(
@@ -542,19 +473,9 @@ plot_highlight_muts(
 )
 ```
 
-
-
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_13_0.png)
 
-
-
-
-
-
     <ggplot: (8790663409698)>
-
-
-
 
 ```python
 (
@@ -566,19 +487,9 @@ plot_highlight_muts(
 )
 ```
 
-
-
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_14_0.png)
 
-
-
-
-
-
     <ggplot: (8790647726090)>
-
-
-
 
 ```python
 (
@@ -598,19 +509,9 @@ plot_highlight_muts(
 )
 ```
 
-
-
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_15_0.png)
 
-
-
-
-
-
     <ggplot: (8790647721307)>
-
-
-
 
 ```python
 data["sgrna_idx"] = data["sgrna"].cat.codes
@@ -628,19 +529,9 @@ data["sgrna_idx"] = data["sgrna"].cat.codes
 )
 ```
 
-
-
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_16_0.png)
 
-
-
-
-
-
     <ggplot: (8790655097998)>
-
-
-
 
 ```python
 (
@@ -655,13 +546,6 @@ data["sgrna_idx"] = data["sgrna"].cat.codes
 )
 ```
 
-
-
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_17_0.png)
-
-
-
-
-
 
     <ggplot: (8790655599330)>

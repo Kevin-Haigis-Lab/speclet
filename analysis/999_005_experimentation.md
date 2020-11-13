@@ -1,6 +1,5 @@
 # An ephemeral notebook for experimentation
 
-
 ```python
 import string
 from itertools import product
@@ -15,18 +14,15 @@ import seaborn as sns
 from numpy.random import exponential, normal
 ```
 
-
 ```python
 import warnings
 
 warnings.simplefilter(action="ignore", category=UserWarning)
 ```
 
-
 ```python
 gg.theme_set(gg.theme_minimal())
 ```
-
 
 ```python
 RANDOM_SEED = 103
@@ -53,7 +49,6 @@ $
 \qquad \mu_\beta = \mathcal{N}(0,5) \quad \sigma_\beta \sim \text{Exp}(1) \\
 \sigma \sim \text{Exp}(1)
 $
-
 
 ```python
 np.random.seed(RANDOM_SEED)
@@ -92,7 +87,6 @@ for i in range(len(data)):
     data.loc[i, "logfc"] = normal(mu_gc, real_params["sigma"], 1)
 ```
 
-
 ```python
 print(data.head(10).to_markdown())
 ```
@@ -110,8 +104,6 @@ print(data.head(10).to_markdown())
     |  8 |           0 |      2 |      2 | -1.08875  |
     |  9 |           1 |      0 |      0 | -2.13649  |
 
-
-
 ```python
 (
     gg.ggplot(data, gg.aes(x="factor(gene)", y="logfc", color="factor(gene)"))
@@ -122,19 +114,9 @@ print(data.head(10).to_markdown())
 )
 ```
 
-
-
 ![png](999_005_experimentation_files/999_005_experimentation_8_0.png)
 
-
-
-
-
-
     <ggplot: (8786276810051)>
-
-
-
 
 ```python
 (
@@ -149,19 +131,9 @@ print(data.head(10).to_markdown())
 )
 ```
 
-
-
 ![png](999_005_experimentation_files/999_005_experimentation_9_0.png)
 
-
-
-
-
-
     <ggplot: (8786279778687)>
-
-
-
 
 ```python
 cell_line_idx = data["cell_line"].values
@@ -197,16 +169,13 @@ with pm.Model() as model:
     Multiprocess sampling (4 chains in 4 jobs)
     NUTS: [sigma, beta_c, alpha_g, sigma_beta, mu_beta, sigma_alpha, mu_alpha]
 
-
-
-
 <div>
     <style>
-        /* Turns off some styling */
+        /*Turns off some styling*/
         progress {
-            /* gets rid of default border in Firefox and Opera. */
+            /*gets rid of default border in Firefox and Opera.*/
             border: none;
-            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
             background-size: auto;
         }
         .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
@@ -217,8 +186,6 @@ with pm.Model() as model:
   100.00% [12000/12000 03:54<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-
-
     Sampling 4 chains for 1_000 tune and 2_000 draw iterations (4_000 + 8_000 draws total) took 235 seconds.
     The chain reached the maximum tree depth. Increase max_treedepth, increase target_accept or reparameterize.
     The chain reached the maximum tree depth. Increase max_treedepth, increase target_accept or reparameterize.
@@ -226,16 +193,13 @@ with pm.Model() as model:
     The chain reached the maximum tree depth. Increase max_treedepth, increase target_accept or reparameterize.
     The number of effective samples is smaller than 25% for some parameters.
 
-
-
-
 <div>
     <style>
-        /* Turns off some styling */
+        /*Turns off some styling*/
         progress {
-            /* gets rid of default border in Firefox and Opera. */
+            /*gets rid of default border in Firefox and Opera.*/
             border: none;
-            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
             background-size: auto;
         }
         .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
@@ -246,9 +210,6 @@ with pm.Model() as model:
   100.00% [8000/8000 00:08<00:00]
 </div>
 
-
-
-
 ```python
 az_model = az.from_pymc3(
     trace=model_trace,
@@ -258,30 +219,19 @@ az_model = az.from_pymc3(
 )
 ```
 
-
 ```python
 az.plot_trace(az_model, var_names=["alpha_g", "beta_c"])
 plt.show()
 ```
 
-
-
 ![png](999_005_experimentation_files/999_005_experimentation_12_0.png)
-
-
-
 
 ```python
 az.plot_forest(az_model, var_names=["alpha_g", "beta_c"], combined=True)
 plt.show()
 ```
 
-
-
 ![png](999_005_experimentation_files/999_005_experimentation_13_0.png)
-
-
-
 
 ```python
 var_names = ["mu_alpha", "sigma_alpha", "mu_beta", "sigma_beta"]
@@ -289,9 +239,6 @@ az.summary(az_model, var_names=var_names).assign(
     real_value=[np.mean(real_params[v]) for v in var_names]
 )
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -390,20 +337,12 @@ az.summary(az_model, var_names=var_names).assign(
 </table>
 </div>
 
-
-
-
 ```python
 az.plot_posterior(az_model, var_names=var_names)
 plt.show()
 ```
 
-
-
 ![png](999_005_experimentation_files/999_005_experimentation_15_0.png)
-
-
-
 
 ```python
 mu_post = model_trace.get_values("mu_gc")
@@ -435,19 +374,9 @@ post_data["row_i"] = list(range(len(post_data)))
 )
 ```
 
-
-
 ![png](999_005_experimentation_files/999_005_experimentation_16_0.png)
 
-
-
-
-
-
     <ggplot: (8786277693555)>
-
-
-
 
 ```python
 col_names = ["gene_" + str(i) for i in range(num_genes)]
@@ -470,19 +399,9 @@ d = pd.DataFrame({"alpha_g": alpha_g_post, "beta_a": beta_a_post})
 )
 ```
 
-
-
 ![png](999_005_experimentation_files/999_005_experimentation_17_0.png)
 
-
-
-
-
-
     <ggplot: (8786277693648)>
-
-
-
 
 ```python
 %load_ext watermark
@@ -509,8 +428,6 @@ d = pd.DataFrame({"alpha_g": alpha_g_post, "beta_a": beta_a_post})
     interpreter: 64bit
     host name  : compute-e-16-237.o2.rc.hms.harvard.edu
     Git branch : models
-
-
 
 ```python
 

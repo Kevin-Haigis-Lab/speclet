@@ -13,18 +13,15 @@ from numpy.random import exponential, normal, seed
 from theano import tensor as tt
 ```
 
-
 ```python
 import warnings
 
 warnings.simplefilter(action="ignore", category=UserWarning)
 ```
 
-
 ```python
 gg.theme_set(gg.theme_minimal())
 ```
-
 
 ```python
 RANDOM_SEED = 103
@@ -63,7 +60,6 @@ Simulated values:
 - $\mu_\delta = -1$, $\sigma_\delta = 1$
 - $\sigma_\beta = 0.2$
 - $\sigma = 0.3$
-
 
 ```python
 seed(RANDOM_SEED)
@@ -160,13 +156,9 @@ for i in range(len(data)):
     data.loc[i, "logfc"] = normal(mu_s, real_params["sigma"])
 ```
 
-
 ```python
 data.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -244,9 +236,6 @@ data.head()
 </table>
 </div>
 
-
-
-
 ```python
 (
     gg.ggplot(data, gg.aes(x="cna", y="logfc"))
@@ -261,19 +250,9 @@ data.head()
 )
 ```
 
-
-
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_8_0.png)
 
-
-
-
-
-
     <ggplot: (8764417680023)>
-
-
-
 
 ```python
 (
@@ -289,19 +268,9 @@ data.head()
 )
 ```
 
-
-
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_9_0.png)
 
-
-
-
-
-
     <ggplot: (8764417161439)>
-
-
-
 
 ```python
 (
@@ -313,19 +282,9 @@ data.head()
 )
 ```
 
-
-
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_10_0.png)
 
-
-
-
-
-
     <ggplot: (8764417741032)>
-
-
-
 
 ```python
 sgrna_idx = data["sgRNA"].cat.codes.to_list()
@@ -380,16 +339,13 @@ with pm.Model() as model6:
     Multiprocess sampling (4 chains in 4 jobs)
     NUTS: [sigma, beta_s, alpha_s, sigma_beta, delta_g, sigma_alpha, gamma_g, sigma_delta, mu_delta, sigma_gamma, mu_gamma]
 
-
-
-
 <div>
     <style>
-        /* Turns off some styling */
+        /*Turns off some styling*/
         progress {
-            /* gets rid of default border in Firefox and Opera. */
+            /*gets rid of default border in Firefox and Opera.*/
             border: none;
-            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
             background-size: auto;
         }
         .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
@@ -400,20 +356,15 @@ with pm.Model() as model6:
   100.00% [16000/16000 00:20<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-
-
     Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 21 seconds.
-
-
-
 
 <div>
     <style>
-        /* Turns off some styling */
+        /*Turns off some styling*/
         progress {
-            /* gets rid of default border in Firefox and Opera. */
+            /*gets rid of default border in Firefox and Opera.*/
             border: none;
-            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
             background-size: auto;
         }
         .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
@@ -424,22 +375,11 @@ with pm.Model() as model6:
   100.00% [8000/8000 00:09<00:00]
 </div>
 
-
-
-
 ```python
 pm.model_to_graphviz(model6)
 ```
 
-
-
-
-
 ![svg](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_12_0.svg)
-
-
-
-
 
 ```python
 az_model6 = az.from_pymc3(
@@ -449,7 +389,6 @@ az_model6 = az.from_pymc3(
     model=model6,
 )
 ```
-
 
 ```python
 (
@@ -461,26 +400,13 @@ az_model6 = az.from_pymc3(
 )
 ```
 
-
-
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_14_0.png)
 
-
-
-
-
-
     <ggplot: (8764411309812)>
-
-
-
 
 ```python
 az.summary(az_model6, var_names=["gamma_g"]).assign(real_value=real_params["gamma_g"])
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -594,20 +520,12 @@ az.summary(az_model6, var_names=["gamma_g"]).assign(real_value=real_params["gamm
 </table>
 </div>
 
-
-
-
 ```python
 az.plot_trace(az_model6, var_names=["gamma_g"])
 plt.show()
 ```
 
-
-
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_16_0.png)
-
-
-
 
 ```python
 var_names = ["mu_gamma", "sigma_gamma", "gamma_g", "alpha_s"]
@@ -619,12 +537,7 @@ az.plot_forest(
 plt.show()
 ```
 
-
-
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_17_0.png)
-
-
-
 
 ```python
 var_names = ["mu_delta", "sigma_delta", "delta_g", "beta_s"]
@@ -632,19 +545,11 @@ az.plot_forest(az_model6, var_names=var_names, combined=True)
 plt.show()
 ```
 
-
-
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_18_0.png)
-
-
-
 
 ```python
 az.summary(az_model6, var_names="gamma_g").assign(real_value=real_params["gamma_g"])
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -758,15 +663,9 @@ az.summary(az_model6, var_names="gamma_g").assign(real_value=real_params["gamma_
 </table>
 </div>
 
-
-
-
 ```python
 az.summary(az_model6, var_names="delta_g").assign(real_value=real_params["delta_g"])
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -880,8 +779,6 @@ az.summary(az_model6, var_names="delta_g").assign(real_value=real_params["delta_
 </table>
 </div>
 
-
-
 ### Does adding a global intercept make a difference?
 
 Adding in a global intercept made the model way to flexible to fit - I believe it is technically non-identifiable.
@@ -894,7 +791,6 @@ logFC_s \sim \mathcal{N}(\mu_s, \sigma) \\
 \quad \alpha \sim \mathcal{N}(0, 3) \\
 \dots
 $
-
 
 ```python
 sgrna_idx = data["sgRNA"].cat.codes.to_list()
@@ -950,16 +846,13 @@ with pm.Model() as model6_2:
     Multiprocess sampling (4 chains in 4 jobs)
     NUTS: [sigma, beta_s, alpha_s, alpha, sigma_beta, delta_g, sigma_alpha, gamma_g, sigma_delta, mu_delta, sigma_gamma, mu_gamma]
 
-
-
-
 <div>
     <style>
-        /* Turns off some styling */
+        /*Turns off some styling*/
         progress {
-            /* gets rid of default border in Firefox and Opera. */
+            /*gets rid of default border in Firefox and Opera.*/
             border: none;
-            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
             background-size: auto;
         }
         .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
@@ -970,22 +863,17 @@ with pm.Model() as model6_2:
   100.00% [8000/8000 05:39<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-
-
     Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 339 seconds.
     The chain reached the maximum tree depth. Increase max_treedepth, increase target_accept or reparameterize.
     The estimated number of effective samples is smaller than 200 for some parameters.
 
-
-
-
 <div>
     <style>
-        /* Turns off some styling */
+        /*Turns off some styling*/
         progress {
-            /* gets rid of default border in Firefox and Opera. */
+            /*gets rid of default border in Firefox and Opera.*/
             border: none;
-            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
             background-size: auto;
         }
         .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
@@ -996,22 +884,11 @@ with pm.Model() as model6_2:
   100.00% [4000/4000 00:04<00:00]
 </div>
 
-
-
-
 ```python
 pm.model_to_graphviz(model6_2)
 ```
 
-
-
-
-
 ![svg](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_23_0.svg)
-
-
-
-
 
 ```python
 az_model6_2 = az.from_pymc3(
@@ -1021,7 +898,6 @@ az_model6_2 = az.from_pymc3(
     model=model6_2,
 )
 ```
-
 
 ```python
 (
@@ -1033,26 +909,13 @@ az_model6_2 = az.from_pymc3(
 )
 ```
 
-
-
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_25_0.png)
 
-
-
-
-
-
     <ggplot: (8764408965491)>
-
-
-
 
 ```python
 az.summary(az_model6_2, var_names=["gamma_g"]).assign(real_value=real_params["gamma_g"])
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -1166,20 +1029,12 @@ az.summary(az_model6_2, var_names=["gamma_g"]).assign(real_value=real_params["ga
 </table>
 </div>
 
-
-
-
 ```python
 az.plot_trace(az_model6_2, var_names=["gamma_g"])
 plt.show()
 ```
 
-
-
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_27_0.png)
-
-
-
 
 ```python
 var_names = ["mu_gamma", "sigma_gamma", "gamma_g", "alpha_s"]
@@ -1191,12 +1046,7 @@ az.plot_forest(
 plt.show()
 ```
 
-
-
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_28_0.png)
-
-
-
 
 ```python
 var_names = ["mu_delta", "sigma_delta", "delta_g", "beta_s"]
@@ -1204,19 +1054,11 @@ az.plot_forest(az_model6_2, var_names=var_names, combined=True)
 plt.show()
 ```
 
-
-
 ![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_29_0.png)
-
-
-
 
 ```python
 az.summary(az_model6_2, var_names="gamma_g").assign(real_value=real_params["gamma_g"])
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -1330,15 +1172,9 @@ az.summary(az_model6_2, var_names="gamma_g").assign(real_value=real_params["gamm
 </table>
 </div>
 
-
-
-
 ```python
 az.summary(az_model6_2, var_names="delta_g").assign(real_value=real_params["delta_g"])
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -1452,8 +1288,6 @@ az.summary(az_model6_2, var_names="delta_g").assign(real_value=real_params["delt
 </table>
 </div>
 
-
-
 ### Add a covariance matrix between the varying intercept and slope
 
 I was hoping to incorporate a covariance matrix in the model to account for correlations between varying effects, however, I was unable to figure out how to do it for a multilevel model that is constructed here.
@@ -1492,7 +1326,6 @@ logFC_s \sim \mathcal{N}(\mu_s, \sigma) \\
   \end{pmatrix} \\
 \sigma \sim \text{Exp}(1)
 $
-
 
 ```python
 if False:
@@ -1549,7 +1382,6 @@ if False:
 ```
 
 ---
-
 
 ```python
 %load_ext watermark

@@ -12,18 +12,15 @@ import seaborn as sns
 from numpy.random import exponential, normal
 ```
 
-
 ```python
 import warnings
 
 warnings.simplefilter(action="ignore", category=UserWarning)
 ```
 
-
 ```python
 gg.theme_set(gg.theme_minimal())
 ```
-
 
 ```python
 RANDOM_SEED = 103
@@ -62,7 +59,6 @@ Simulated real values:
 - $\sigma_\delta = 1$
 - $\sigma_g = 0.4$
 - $\sigma = 0.3$
-
 
 ```python
 np.random.seed(RANDOM_SEED)
@@ -120,9 +116,6 @@ for i in range(len(logfc_data)):
 
 logfc_data
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -231,9 +224,6 @@ logfc_data
 <p>300 rows × 4 columns</p>
 </div>
 
-
-
-
 ```python
 known_logfc_values_df = pd.DataFrame(
     {"gene": genes, "logfc": real_alpha_g, "sd": real_sigma_alpha}
@@ -259,19 +249,9 @@ pos = gg.position_nudge(x=0.1)
 )
 ```
 
-
-
 ![png](005_009_model-experimentation-m3_files/005_009_model-experimentation-m3_7_0.png)
 
-
-
-
-
-
     <ggplot: (8737775755237)>
-
-
-
 
 ```python
 merged_data = pd.merge(logfc_data, rna_data, how="inner", on=["gene", "cell_line"])
@@ -282,18 +262,9 @@ merged_data = pd.merge(logfc_data, rna_data, how="inner", on=["gene", "cell_line
 )
 ```
 
-
-
 ![png](005_009_model-experimentation-m3_files/005_009_model-experimentation-m3_8_0.png)
 
-
-
-
-
-
     <ggplot: (8737725598501)>
-
-
 
 ### Conclusions and final thoughts
 
@@ -301,7 +272,6 @@ This was an incorrect understanding of how to use a predictor variable in a high
 Though it is not the right model the purposes of this project, I'll leave it here as an example.
 
 ---
-
 
 ```python
 %load_ext watermark

@@ -1,6 +1,5 @@
 # Make a smaller data set for testing models
 
-
 ```R
 library(nakedpipe)
 library(tidyverse)
@@ -17,15 +16,11 @@ library(tidyverse)
     [31m✖[39m [34mdplyr[39m::[32mfilter()[39m masks [34mstats[39m::filter()
     [31m✖[39m [34mdplyr[39m::[32mlag()[39m    masks [34mstats[39m::lag()
 
-
-
-
 ```R
 data_dir <- file.path("..", "modeling_data")
 modeling_data_path <- file.path(data_dir, "depmap_modeling_dataframe_OLD.csv")
 out_path <- file.path(data_dir, "depmap_modeling_dataframe_subsample.csv")
 ```
-
 
 ```R
 modeling_data <- read_csv(modeling_data_path, guess_max = 1e5)
@@ -52,9 +47,6 @@ head(modeling_data)
 
     See spec(...) for full column specifications.
 
-
-
-
 <table>
 <caption>A tibble: 6 × 27</caption>
 <thead>
@@ -70,9 +62,6 @@ head(modeling_data)
 	<tr><td>AAAAAAGGGCTCCAAAAAGG</td><td>143b-311cas9_repa_p6_batch3</td><td>-0.2998787</td><td>3</td><td>TRUE</td><td>ACH-001001</td><td>Primary</td><td>bone</td><td>osteosarcoma</td><td>G12S</td><td>⋯</td><td>1.0604597</td><td>1.887698</td><td>0</td><td>FALSE</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>FALSE</td><td>0.3785116</td></tr>
 </tbody>
 </table>
-
-
-
 
 ```R
 glimpse(modeling_data)
@@ -108,37 +97,26 @@ glimpse(modeling_data)
     $ mutated_at_guide_location [3m[90m<lgl>[39m[23m FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, F…
     $ rna_expr                  [3m[90m<dbl>[39m[23m 4.1009776, 7.4709435, 4.6270231, 4.7750505,…
 
-
-
 ```R
 # Number of unique guides.
 n_distinct(modeling_data$sgrna)
 ```
 
-
 72133
-
-
 
 ```R
 # Number of unique cell lines.
 n_distinct(modeling_data$depmap_id)
 ```
 
-
 5
-
-
 
 ```R
 # Number of genes.
 n_distinct(modeling_data$hugo_symbol)
 ```
 
-
 18524
-
-
 
 ```R
 # Some specific genes to subset.
@@ -156,15 +134,11 @@ subsample_genes <- c(
 all(subsample_genes %in% modeling_data$hugo_symbol)
 ```
 
-
 TRUE
-
-
 
 ```R
 subsample_genes
 ```
-
 
 <style>
 .list-inline {list-style: none; margin:0; padding: 0}
@@ -173,15 +147,11 @@ subsample_genes
 </style>
 <ol class=list-inline><li>'PHACTR3'</li><li>'ZSWIM8'</li><li>'DPH7'</li><li>'LGALS7B'</li><li>'DISP1'</li><li>'KIF3C'</li><li>'RNF125'</li><li>'LGALS4'</li><li>'SLC7A14'</li><li>'UQCRC1'</li><li>'SCMH1'</li><li>'SMAD7'</li><li>'GHSR'</li><li>'IQCK'</li><li>'NDUFAF3'</li><li>'FAM43B'</li><li>'PDE5A'</li><li>'HIST1H2BO'</li><li>'ADAMTS13'</li><li>'CXCL2'</li><li>'KRAS'</li><li>'BRAF'</li><li>'PIK3CA'</li><li>'PTK2'</li><li>'MDM2'</li><li>'TP53'</li></ol>
 
-
-
-
 ```R
 num_random_lineages <- 5
 lineages <- sample(unique(modeling_data$lineage), num_random_lineages)
 lineages
 ```
-
 
     Error in sample.int(length(x), size, replace, prob): cannot take a sample larger than the population when 'replace = FALSE'
     Traceback:
@@ -191,31 +161,22 @@ lineages
 
     2. sample.int(length(x), size, replace, prob)
 
-
-
 ```R
 subsample_modeling_data <- modeling_data %>% filter(hugo_symbol %in% subsample_genes)
 pryr::object_size(subsample_modeling_data)
 ```
 
-
     200 kB
-
-
 
 ```R
 nrow(subsample_modeling_data)
 ```
 
-
 824
-
-
 
 ```R
 write_csv(subsample_modeling_data, out_path)
 ```
-
 
 ```R
 

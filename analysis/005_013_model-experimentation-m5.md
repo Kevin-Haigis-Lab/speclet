@@ -12,18 +12,15 @@ import seaborn as sns
 from numpy.random import exponential, normal
 ```
 
-
 ```python
 import warnings
 
 warnings.simplefilter(action="ignore", category=UserWarning)
 ```
 
-
 ```python
 gg.theme_set(gg.theme_minimal())
 ```
-
 
 ```python
 RANDOM_SEED = 103
@@ -59,7 +56,6 @@ Simulated values:
 - $\sigma_\alpha = 0.1$
 - $\mu_\beta = 0$, $\sigma_\beta = 1$
 - $\sigma = 0.05$
-
 
 ```python
 np.random.seed(RANDOM_SEED)
@@ -145,9 +141,6 @@ for i in range(len(data)):
 
 data.head(10)
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -248,9 +241,6 @@ data.head(10)
 </table>
 </div>
 
-
-
-
 ```python
 print(real_params["epsilon_g"])
 print(real_params["alpha_s"])
@@ -266,8 +256,6 @@ print(real_params["beta_c"])
      -0.94776417 -1.84338194  0.81058919 -0.75225658 -0.43646901  0.04727664
      -0.25082764  0.16708739]
 
-
-
 ```python
 (
     gg.ggplot(data, gg.aes(x="gene", y="logfc"))
@@ -278,19 +266,9 @@ print(real_params["beta_c"])
 )
 ```
 
-
-
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_8_0.png)
 
-
-
-
-
-
     <ggplot: (8754076262154)>
-
-
-
 
 ```python
 (
@@ -304,19 +282,9 @@ print(real_params["beta_c"])
 )
 ```
 
-
-
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_9_0.png)
 
-
-
-
-
-
     <ggplot: (8754075597894)>
-
-
-
 
 ```python
 (
@@ -329,19 +297,9 @@ print(real_params["beta_c"])
 )
 ```
 
-
-
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_10_0.png)
 
-
-
-
-
-
     <ggplot: (8754069720558)>
-
-
-
 
 ```python
 # Data with the cell line effect removed.
@@ -355,7 +313,6 @@ mod_data = data.copy()
 mod_data["logfc_no_cell"] = rm_cell_line_effect
 ```
 
-
 ```python
 (
     gg.ggplot(mod_data, gg.aes(x="cell_line", y="logfc_no_cell"))
@@ -367,19 +324,9 @@ mod_data["logfc_no_cell"] = rm_cell_line_effect
 )
 ```
 
-
-
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_12_0.png)
 
-
-
-
-
-
     <ggplot: (8754069728814)>
-
-
-
 
 ```python
 (
@@ -391,19 +338,9 @@ mod_data["logfc_no_cell"] = rm_cell_line_effect
 )
 ```
 
-
-
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_13_0.png)
 
-
-
-
-
-
     <ggplot: (8754069614044)>
-
-
-
 
 ```python
 cell_line_idx = data["cell_line"].cat.codes.to_list()
@@ -446,16 +383,13 @@ with pm.Model() as model5:
     Multiprocess sampling (4 chains in 4 jobs)
     NUTS: [sigma, beta_c, sigma_beta, mu_beta, alpha_s, sigma_alpha, epsilon_g, sigma_epsilon, mu_epsilon]
 
-
-
-
 <div>
     <style>
-        /* Turns off some styling */
+        /*Turns off some styling*/
         progress {
-            /* gets rid of default border in Firefox and Opera. */
+            /*gets rid of default border in Firefox and Opera.*/
             border: none;
-            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
             background-size: auto;
         }
         .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
@@ -466,8 +400,6 @@ with pm.Model() as model5:
   100.00% [20000/20000 08:46<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-
-
     Sampling 4 chains for 1_000 tune and 4_000 draw iterations (4_000 + 16_000 draws total) took 527 seconds.
     The chain reached the maximum tree depth. Increase max_treedepth, increase target_accept or reparameterize.
     The chain reached the maximum tree depth. Increase max_treedepth, increase target_accept or reparameterize.
@@ -476,16 +408,13 @@ with pm.Model() as model5:
     The chain reached the maximum tree depth. Increase max_treedepth, increase target_accept or reparameterize.
     The number of effective samples is smaller than 10% for some parameters.
 
-
-
-
 <div>
     <style>
-        /* Turns off some styling */
+        /*Turns off some styling*/
         progress {
-            /* gets rid of default border in Firefox and Opera. */
+            /*gets rid of default border in Firefox and Opera.*/
             border: none;
-            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
             background-size: auto;
         }
         .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
@@ -496,22 +425,11 @@ with pm.Model() as model5:
   100.00% [16000/16000 00:17<00:00]
 </div>
 
-
-
-
 ```python
 pm.model_to_graphviz(model5)
 ```
 
-
-
-
-
 ![svg](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_15_0.svg)
-
-
-
-
 
 ```python
 def plot_variable_prior(prior_check, var):
@@ -528,60 +446,29 @@ def plot_variable_prior(prior_check, var):
     )
 ```
 
-
 ```python
 plot_variable_prior(model5_prior_check, "epsilon_g")
 ```
 
-
-
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_17_0.png)
 
-
-
-
-
-
     <ggplot: (8754069623447)>
-
-
-
 
 ```python
 plot_variable_prior(model5_prior_check, "alpha_s")
 ```
 
-
-
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_18_0.png)
 
-
-
-
-
-
     <ggplot: (8754067062947)>
-
-
-
 
 ```python
 plot_variable_prior(model5_prior_check, "beta_c") + gg.theme(legend_position="none")
 ```
 
-
-
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_19_0.png)
 
-
-
-
-
-
     <ggplot: (8754067540866)>
-
-
-
 
 ```python
 logfc_priors = pd.DataFrame({"logfc": model5_prior_check["logfc"].flatten()[::100]})
@@ -593,19 +480,9 @@ logfc_priors = pd.DataFrame({"logfc": model5_prior_check["logfc"].flatten()[::10
 )
 ```
 
-
-
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_20_0.png)
 
-
-
-
-
-
     <ggplot: (8754068147779)>
-
-
-
 
 ```python
 az_model5 = az.from_pymc3(
@@ -616,15 +493,11 @@ az_model5 = az.from_pymc3(
 )
 ```
 
-
 ```python
 az.summary(az_model5, var_names=["mu_epsilon"]).assign(
     real_values=real_params["mu_epsilon"]
 )
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -678,17 +551,11 @@ az.summary(az_model5, var_names=["mu_epsilon"]).assign(
 </table>
 </div>
 
-
-
-
 ```python
 az.summary(az_model5, var_names=["epsilon_g"]).assign(
     real_values=real_params["epsilon_g"]
 )
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -802,62 +669,34 @@ az.summary(az_model5, var_names=["epsilon_g"]).assign(
 </table>
 </div>
 
-
-
-
 ```python
 az.plot_trace(az_model5, var_names=["epsilon_g"])
 plt.show()
 ```
 
-
-
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_24_0.png)
-
-
-
 
 ```python
 az.plot_forest(az_model5, var_names=["epsilon_g"], combined=True)
 plt.show()
 ```
 
-
-
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_25_0.png)
-
-
-
 
 ```python
 az.plot_forest(az_model5, var_names=["alpha_s"], combined=True)
 plt.show()
 ```
 
-
-
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_26_0.png)
-
-
-
 
 ```python
 az.plot_forest(az_model5, var_names="beta_c", combined=True)
 ```
 
-
-
-
     array([<AxesSubplot:title={'center':'94.0% HDI'}>], dtype=object)
 
-
-
-
-
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_27_1.png)
-
-
-
 
 ```python
 model5_mu_post = model5_trace.get_values("mu_sgc")
@@ -887,18 +726,9 @@ pos_shift = 0.15
 )
 ```
 
-
-
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_28_0.png)
 
-
-
-
-
-
     <ggplot: (8754058941425)>
-
-
 
 ### Conclusions and final thoughts
 
@@ -910,7 +740,6 @@ To me, this suggests that there is a lot of correlation between the posterior va
 This would lead to greater play in the posteriors while maintaining very high accuracy in posterior predictions.
 
 This is proven with the following plot. 🤦🏻‍♂️
-
 
 ```python
 d = pd.DataFrame(
@@ -927,21 +756,11 @@ d = pd.DataFrame(
 )
 ```
 
-
-
 ![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_30_0.png)
-
-
-
-
-
 
     <ggplot: (8754075590379)>
 
-
-
 ---
-
 
 ```python
 %load_ext watermark

@@ -4,7 +4,6 @@
 
 The following is the CERES model as desicrbed in ["Computational correction of copy number effect improves specificity of CRISPR–Cas9 essentiality screens in cancer cells"](https://www.nature.com/articles/ng.3984#Sec24) (Meyeres *et al*, 2017).
 
-
 $
 \quad D_{ij} = q_i \lgroup \sum_{k \in G_i} (h_k + g_{kj}) + \mathcal{f} (\sum_{l \in L_i} C_{lj}) \rgroup + o_i + \epsilon
 $
@@ -21,7 +20,6 @@ where:
 - $C_{lj}$: copy number of target locus $l$ in cell line $j$
 - $o_i$: sgRNA-sepcific effect to account for noise in the measurement of sgRNA abundance in the reference pool
 - $\epsilon$: normal error
-
 
 ```python
 import string
@@ -51,7 +49,6 @@ pymc3_cache_dir = Path("pymc3_model_cache")
 
 ### Data preparation
 
-
 ```python
 data_path = Path("../modeling_data/depmap_modeling_dataframe_subsample.csv")
 data = pd.read_csv(data_path)
@@ -67,9 +64,6 @@ data = data[data["depmap_id"].isin(SAMPLED_DEPMAPIDS)]
 
 data.head(n=5)
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -238,16 +232,11 @@ data.head(n=5)
 <p>5 rows × 25 columns</p>
 </div>
 
-
-
-
 ```python
 print(f"testing with {data.shape[0]} data points")
 ```
 
     testing with 14523 data points
-
-
 
 ```python
 def make_cat(df, col, ordered=True):
@@ -271,7 +260,6 @@ for col in cat_cols:
     data = make_cat(data, col)
 ```
 
-
 ```python
 def count_unique(df, col):
     """Count the number of unique values in a column."""
@@ -292,14 +280,12 @@ gene_idx = get_indices(data, "hugo_symbol")
 cell_line_idx = get_indices(data, "depmap_id")
 ```
 
-
 ```python
 data["segment_mean_z"] = data["segment_mean"].apply(lambda x: np.min((x, 10)))
 data["segment_mean_z"] = data.groupby("hugo_symbol")["segment_mean_z"].apply(
     lambda x: (x - np.mean(x)) / np.std(x)
 )
 ```
-
 
 ```python
 (
@@ -311,18 +297,9 @@ data["segment_mean_z"] = data.groupby("hugo_symbol")["segment_mean_z"].apply(
 )
 ```
 
-
-
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_9_0.png)
 
-
-
-
-
-
     <ggplot: (8732286816895)>
-
-
 
 ### Model 1.
 
@@ -338,7 +315,6 @@ $
 \qquad o_i \sim \mathcal{N}(0, 1) \\
 \quad \epsilon \sim \text{Exp}(1)
 $
-
 
 ```python
 with pm.Model() as ceres_m1:
@@ -362,21 +338,11 @@ with pm.Model() as ceres_m1:
 
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
-
-
 ```python
 pm.model_to_graphviz(ceres_m1)
 ```
 
-
-
-
-
 ![svg](010_010_ceres-replicate_files/010_010_ceres-replicate_12_0.svg)
-
-
-
-
 
 ```python
 %%time
@@ -400,8 +366,6 @@ ceres_m1_samples = pmhelp.pymc3_sampling_procedure(
     CPU times: user 592 ms, sys: 315 ms, total: 906 ms
     Wall time: 917 ms
 
-
-
 ```python
 az_ceres_m1 = az.from_pymc3(
     trace=ceres_m1_samples["trace"],
@@ -413,85 +377,50 @@ az_ceres_m1 = az.from_pymc3(
 
     arviz.data.io_pymc3 - WARNING - posterior predictive variable D_ij's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
 
-
-
 ```python
 az.plot_forest(az_ceres_m1, var_names="q_i", combined=True)
 plt.show()
 ```
 
-
-
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_15_0.png)
-
-
-
 
 ```python
 az.plot_forest(az_ceres_m1, var_names="o_i", combined=True)
 plt.show()
 ```
 
-
-
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_16_0.png)
-
-
-
 
 ```python
 az.plot_forest(az_ceres_m1, var_names="h_k", combined=True)
 plt.show()
 ```
 
-
-
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_17_0.png)
-
-
-
 
 ```python
 gene_effect_post = ceres_m1_samples["trace"].get_values("g_kj")
 gene_effect_post.shape
 ```
 
-
-
-
     (4000, 26, 70)
-
-
-
 
 ```python
 gene_effect_mean = gene_effect_post.mean(axis=0)
 gene_effect_mean.shape
 ```
 
-
-
-
     (26, 70)
-
-
-
 
 ```python
 data["hugo_symbol"].cat.categories
 ```
-
-
-
 
     Index(['PDE5A', 'TP53', 'KRAS', 'KIF3C', 'ZSWIM8', 'MDM2', 'HIST1H2BO',
            'NDUFAF3', 'DISP1', 'BRAF', 'PTK2', 'IQCK', 'LGALS7B', 'CXCL2',
            'LGALS4', 'ADAMTS13', 'SLC7A14', 'DPH7', 'RNF125', 'GHSR', 'SCMH1',
            'PIK3CA', 'PHACTR3', 'FAM43B', 'UQCRC1', 'SMAD7'],
           dtype='object')
-
-
-
 
 ```python
 gene_effect_post_df = (
@@ -519,9 +448,6 @@ gene_effect_post_df = gene_effect_post_df.merge(
 
 gene_effect_post_df.head(n=10)
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -655,21 +581,12 @@ gene_effect_post_df.head(n=10)
 </table>
 </div>
 
-
-
-
 ```python
 data.is_deleterious.unique()
 ```
 
-
-
-
     array([nan, 'FALSE', 'FALSE;FALSE', 'TRUE', 'FALSE;TRUE;FALSE',
            'FALSE;FALSE;FALSE', 'TRUE;FALSE', 'FALSE;TRUE'], dtype=object)
-
-
-
 
 ```python
 (
@@ -689,19 +606,9 @@ data.is_deleterious.unique()
 )
 ```
 
-
-
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_23_0.png)
 
-
-
-
-
-
     <ggplot: (8732273703665)>
-
-
-
 
 ```python
 (
@@ -715,19 +622,9 @@ data.is_deleterious.unique()
 )
 ```
 
-
-
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_24_0.png)
 
-
-
-
-
-
     <ggplot: (8732273699615)>
-
-
-
 
 ```python
 (
@@ -746,19 +643,9 @@ data.is_deleterious.unique()
 )
 ```
 
-
-
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_25_0.png)
 
-
-
-
-
-
     <ggplot: (8732273461836)>
-
-
-
 
 ```python
 (
@@ -772,19 +659,9 @@ data.is_deleterious.unique()
 )
 ```
 
-
-
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_26_0.png)
 
-
-
-
-
-
     <ggplot: (8732275656304)>
-
-
-
 
 ```python
 kras_gene_effect = gene_effect_post_df[
@@ -799,19 +676,9 @@ kras_gene_effect = gene_effect_post_df[
 )
 ```
 
-
-
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_27_0.png)
 
-
-
-
-
-
     <ggplot: (8732273613972)>
-
-
-
 
 ```python
 

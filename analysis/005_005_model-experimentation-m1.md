@@ -12,24 +12,22 @@ import seaborn as sns
 from numpy.random import exponential, normal
 ```
 
-
 ```python
 import warnings
 
 warnings.simplefilter(action="ignore", category=UserWarning)
 ```
 
-
 ```python
 gg.theme_set(gg.theme_minimal())
 ```
-
 
 ```python
 RANDOM_SEED = 103
 ```
 
 ---
+
 ## Model 1. Single gene linear model with one covariate
 
 Model the logFC of one gene in multiple cell lines using a single predictor: RNA expression.
@@ -48,7 +46,6 @@ Simulated values:
 - $\alpha$ = 0.5
 - $\beta$ = -1
 - $\sigma$ = 0.3
-
 
 ```python
 N_CELL_LINES = 20
@@ -70,19 +67,9 @@ data = pd.DataFrame({"rna": rna, "logfc": logfc})
 )
 ```
 
-
-
 ![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_5_0.png)
 
-
-
-
-
-
     <ggplot: (8742305370609)>
-
-
-
 
 ```python
 with pm.Model() as model1:
@@ -106,16 +93,13 @@ with pm.Model() as model1:
     Multiprocess sampling (4 chains in 4 jobs)
     NUTS: [sigma, beta, alpha]
 
-
-
-
 <div>
     <style>
-        /* Turns off some styling */
+        /*Turns off some styling*/
         progress {
-            /* gets rid of default border in Firefox and Opera. */
+            /*gets rid of default border in Firefox and Opera.*/
             border: none;
-            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
             background-size: auto;
         }
         .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
@@ -126,20 +110,15 @@ with pm.Model() as model1:
   100.00% [8000/8000 00:02<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-
-
     Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 2 seconds.
-
-
-
 
 <div>
     <style>
-        /* Turns off some styling */
+        /*Turns off some styling*/
         progress {
-            /* gets rid of default border in Firefox and Opera. */
+            /*gets rid of default border in Firefox and Opera.*/
             border: none;
-            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
             background-size: auto;
         }
         .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
@@ -150,22 +129,11 @@ with pm.Model() as model1:
   100.00% [4000/4000 00:04<00:00]
 </div>
 
-
-
-
 ```python
 pm.model_to_graphviz(model1)
 ```
 
-
-
-
-
 ![svg](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_7_0.svg)
-
-
-
-
 
 ```python
 az_model1 = az.from_pymc3(
@@ -176,14 +144,10 @@ az_model1 = az.from_pymc3(
 )
 ```
 
-
 ```python
 var_names = ["alpha", "beta", "sigma"]
 az.summary(az_model1, var_names=var_names)
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -263,32 +227,19 @@ az.summary(az_model1, var_names=var_names)
 </table>
 </div>
 
-
-
-
 ```python
 az.plot_trace(az_model1, var_names=var_names)
 plt.show()
 ```
 
-
-
 ![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_10_0.png)
-
-
-
 
 ```python
 az.plot_posterior(az_model1, var_names=var_names)
 plt.show()
 ```
 
-
-
 ![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_11_0.png)
-
-
-
 
 ```python
 prior_pred = (
@@ -320,19 +271,9 @@ model1_preds["pred"] = pd.Categorical(
 )
 ```
 
-
-
 ![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_12_0.png)
 
-
-
-
-
-
     <ggplot: (8742303034631)>
-
-
-
 
 ```python
 post = az_model1.posterior.to_dataframe()
@@ -364,18 +305,9 @@ post_summary = pd.DataFrame(
 )
 ```
 
-
-
 ![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_13_0.png)
 
-
-
-
-
-
     <ggplot: (8742302978422)>
-
-
 
 ### Conclusions and final thoughts
 
@@ -383,7 +315,6 @@ This model fit well and is easy to interpret.
 Ready to move onto more complex models with more variables and levels.
 
 ---
-
 
 ```python
 %load_ext watermark

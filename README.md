@@ -21,7 +21,6 @@
 
 1. [Experiment with model designs](analysis/)
 
-
 ---
 
 ## To-Do

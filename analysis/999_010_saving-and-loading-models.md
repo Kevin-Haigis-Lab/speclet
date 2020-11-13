@@ -1,8 +1,5 @@
 # Saving and loading data
 
-
-
-
 ```python
 import pickle
 import warnings
@@ -20,13 +17,9 @@ warnings.simplefilter(action="ignore", category=UserWarning)
 RANDOM_SEED = 123
 ```
 
-
 ```python
 diamonds.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -128,9 +121,6 @@ diamonds.head()
 </table>
 </div>
 
-
-
-
 ```python
 with pm.Model() as m1:
     # Priors
@@ -145,22 +135,13 @@ with pm.Model() as m1:
     carat = pm.Normal("carat", mu, sigma, observed=diamonds.carat)
 ```
 
-
 ```python
 pm.model_to_graphviz(m1)
 ```
 
-
-
-
-
 ![svg](999_010_saving-and-loading-models_files/999_010_saving-and-loading-models_4_0.svg)
 
-
-
-
 > **The following functions have been copied to "pymc3_helpers.py".**
-
 
 ```python
 def write_pickle(x, fp):
@@ -238,7 +219,6 @@ def pymc3_sampling_procedure(
     }
 ```
 
-
 ```python
 m1_save_dir = Path("pymc3_model_cache/m1")
 
@@ -251,18 +231,12 @@ az_m1 = az.from_pymc3(
 )
 ```
 
-
 ```python
 az.plot_trace(az_m1, var_names=["alpha", "beta", "sigma"])
 plt.show()
 ```
 
-
-
 ![png](999_010_saving-and-loading-models_files/999_010_saving-and-loading-models_8_0.png)
-
-
-
 
 ```python
 

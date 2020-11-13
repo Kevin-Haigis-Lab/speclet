@@ -1,6 +1,5 @@
 # Prepare DepMap data
 
-
 ```python
 import re
 from pathlib import Path
@@ -11,7 +10,6 @@ import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
 ```
-
 
 ```python
 data_dir = Path("../data/depmap_20q3")
@@ -24,7 +22,6 @@ if not data_dir.exists():
 ```
 
 ## 'sample_info.csv'
-
 
 ```python
 sample_info_columns = [
@@ -45,9 +42,6 @@ sample_info = pd.read_csv(data_dir / "sample_info.csv").clean_names()[
 ]
 sample_info.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -149,15 +143,11 @@ sample_info.head()
 </table>
 </div>
 
-
-
-
 ```python
 sample_info.to_csv(save_dir / "sample_info.csv", index=False)
 ```
 
 ## 'Achilles_guide_map.csv'
-
 
 ```python
 achilles_guide_map = (
@@ -169,9 +159,6 @@ achilles_guide_map = (
 
 achilles_guide_map.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -237,10 +224,7 @@ achilles_guide_map.head()
 </table>
 </div>
 
-
-
 ## 'Achilles_dropped_guides.csv'
-
 
 ```python
 achilles_dropped_guides = (
@@ -251,9 +235,6 @@ achilles_dropped_guides = (
 
 achilles_dropped_guides.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -325,20 +306,11 @@ achilles_dropped_guides.head()
 </table>
 </div>
 
-
-
-
 ```python
 len(np.unique(achilles_dropped_guides.sgrna))
 ```
 
-
-
-
     2554
-
-
-
 
 ```python
 achilles_guide_map = achilles_guide_map[
@@ -347,13 +319,11 @@ achilles_guide_map = achilles_guide_map[
 achilles_guide_map = achilles_guide_map.reset_index(drop=True)
 ```
 
-
 ```python
 achilles_guide_map.to_csv(save_dir / "achilles_guide_map.csv", index=False)
 ```
 
 ## 'Achilles_replicate_map.csv'
-
 
 ```python
 achilles_replicate_map = (
@@ -363,9 +333,6 @@ achilles_replicate_map = (
 )
 achilles_replicate_map.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -431,51 +398,29 @@ achilles_replicate_map.head()
 </table>
 </div>
 
-
-
-
 ```python
 np.max(achilles_replicate_map.pdna_batch)
 ```
 
-
-
-
     4
-
-
-
 
 ```python
 len(np.unique(achilles_replicate_map.replicate_id))
 ```
 
-
-
-
     1759
-
-
-
 
 ```python
 np.round(np.mean(achilles_replicate_map.passes_qc), 3)
 ```
 
-
-
-
     0.948
-
-
-
 
 ```python
 achilles_replicate_map.to_csv(save_dir / "achilles_replicate_map.csv", index=False)
 ```
 
 ## 'Achilles_logfold_change.csv'
-
 
 ```python
 achilles_logfold_change = (
@@ -491,9 +436,6 @@ achilles_logfold_change = (
 
 achilles_logfold_change.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -571,39 +513,27 @@ achilles_logfold_change.head()
 </table>
 </div>
 
-
-
-
 ```python
 if achilles_logfold_change.depmap_id.isnull().values.any():
     raise Exception("Some data points are missing cell line assignments.")
 ```
-
 
 ```python
 if not np.all(achilles_logfold_change.passes_qc):
     raise Exception("Some data does not pass QC.")
 ```
 
-
 ```python
 achilles_logfold_change.shape
 ```
 
-
-
-
     (123756359, 6)
-
-
-
 
 ```python
 achilles_logfold_change.to_csv(save_dir / "achilles_logfold_change.csv", index=False)
 ```
 
 ## 'CCLE_mutations.csv'
-
 
 ```python
 ccle_mutations_columns = [
@@ -630,9 +560,6 @@ ccle_mutations = pd.read_csv(
 
 ccle_mutations.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -764,15 +691,11 @@ ccle_mutations.head()
 </table>
 </div>
 
-
-
-
 ```python
 ccle_mutations.to_csv(save_dir / "ccle_mutations.csv", index=False)
 ```
 
 ### *KRAS* mutations
-
 
 ```python
 kras_mutations_columns = [
@@ -818,9 +741,6 @@ kras_mutations = (
 
 kras_mutations.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -934,9 +854,6 @@ kras_mutations.head()
 </table>
 </div>
 
-
-
-
 ```python
 kras_mutation_counts = (
     kras_mutations[["kras_mutation", "depmap_id"]]
@@ -952,9 +869,6 @@ kras_others = (
 
 kras_mutation_counts
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -1094,9 +1008,6 @@ kras_mutation_counts
 </table>
 </div>
 
-
-
-
 ```python
 # Assign rare KRAS mutations to "other" group.
 kras_mutations = kras_mutations.assign(
@@ -1105,7 +1016,6 @@ kras_mutations = kras_mutations.assign(
     ]
 )
 ```
-
 
 ```python
 mult_kras_mutations = (
@@ -1119,9 +1029,6 @@ mult_kras_mutations = (
 
 mult_kras_mutations
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -1200,9 +1107,6 @@ mult_kras_mutations
 </table>
 </div>
 
-
-
-
 ```python
 kras_mult_mutations_fix = (
     kras_mutations[kras_mutations.depmap_id.isin(mult_kras_mutations.depmap_id)]
@@ -1214,9 +1118,6 @@ kras_mult_mutations_fix = (
 
 kras_mult_mutations_fix
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -1510,9 +1411,6 @@ kras_mult_mutations_fix
 </table>
 </div>
 
-
-
-
 ```python
 # Cell lines to ignore because they have multiple KRAS mutations that are
 # not easily resolved.
@@ -1526,9 +1424,6 @@ true_kras_double_muts = ["ACH-000718", "ACH-000314", "ACH-001378", "ACH-001857"]
     .reset_index(drop=False)
 )
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -1607,9 +1502,6 @@ true_kras_double_muts = ["ACH-000718", "ACH-000314", "ACH-001378", "ACH-001857"]
 </table>
 </div>
 
-
-
-
 ```python
 kras_mult_mutations_fix = (
     kras_mult_mutations_fix.assign(
@@ -1624,9 +1516,6 @@ kras_mult_mutations_fix = (
 )
 kras_mult_mutations_fix
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -1815,9 +1704,6 @@ kras_mult_mutations_fix
 </table>
 </div>
 
-
-
-
 ```python
 kras_mutations = kras_mutations.pipe(
     lambda x: x[~x.depmap_id.isin(kras_mult_mutations_fix.depmap_id)]
@@ -1825,7 +1711,6 @@ kras_mutations = kras_mutations.pipe(
 
 kras_mutations = pd.concat([kras_mutations, kras_mult_mutations_fix])
 ```
-
 
 ```python
 mult_kras_mutations = (
@@ -1842,14 +1727,11 @@ print(f"Number of cell lines with multiple KRAS mutations: {len(mult_kras_mutati
 
     Number of cell lines with multiple KRAS mutations: 0
 
-
-
 ```python
 kras_mutations.to_csv(save_dir / "kras_mutations.csv", index=False)
 ```
 
 ## 'CCLE_segment_cn.csv'
-
 
 ```python
 ccle_segment_cn = (
@@ -1859,9 +1741,6 @@ ccle_segment_cn = (
 )
 ccle_segment_cn.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -1951,15 +1830,11 @@ ccle_segment_cn.head()
 </table>
 </div>
 
-
-
-
 ```python
 ccle_segment_cn.to_csv(save_dir / "ccle_semgent_cn.csv", index=False)
 ```
 
 ## 'CCLE_gene_cn.csv'
-
 
 ```python
 ccle_gene_cn = (
@@ -1974,9 +1849,6 @@ ccle_gene_cn = (
 
 ccle_gene_cn.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -2042,9 +1914,6 @@ ccle_gene_cn.head()
 </table>
 </div>
 
-
-
-
 ```python
 fig = plt.figure(figsize=(12, 8))
 x = [np.min([a, 6]) for a in ccle_gene_cn.copy_number.sample(n=1000)]
@@ -2052,19 +1921,13 @@ sns.histplot(x, kde=False)
 plt.show()
 ```
 
-
-
 ![png](005_prepare-depmap-data_files/005_prepare-depmap-data_44_0.png)
-
-
-
 
 ```python
 ccle_gene_cn.to_csv(save_dir / "ccle_gene_cn.csv", index=False)
 ```
 
 ## 'CCLE_fusions.csv'
-
 
 ```python
 ccle_fusions = (
@@ -2091,9 +1954,6 @@ ccle_fusions = (
 )
 ccle_fusions.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -2237,15 +2097,11 @@ ccle_fusions.head()
 </table>
 </div>
 
-
-
-
 ```python
 ccle_fusions.to_csv(save_dir / "ccle_fusions.csv", index=False)
 ```
 
 ## 'CCLE_expression_full_v2.csv'
-
 
 ```python
 ccle_expression = (
@@ -2257,9 +2113,6 @@ ccle_expression = (
 
 ccle_expression.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -2319,15 +2172,11 @@ ccle_expression.head()
 </table>
 </div>
 
-
-
-
 ```python
 ccle_expression.to_csv(save_dir / "ccle_expression.csv", index=False)
 ```
 
 ## 'Achilles_gene_effect.csv' & 'Achilles_gene_effect_unscaled.csv'
-
 
 ```python
 def prep_gene_effect_data(fpath, col_name):
@@ -2357,9 +2206,6 @@ gene_effect = pd.merge(
 
 gene_effect.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -2425,13 +2271,9 @@ gene_effect.head()
 </table>
 </div>
 
-
-
-
 ```python
 gene_effect.to_csv(save_dir / "achilles_gene_effect.csv", index=False)
 ```
-
 
 ```python
 
