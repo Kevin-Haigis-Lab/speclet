@@ -239,6 +239,33 @@ knot_list
 (
     gg.ggplot(d2, gg.aes(x="year", y="doy"))
     + gg.geom_point(color="black", alpha=0.4, size=1.3)
+    + gg.theme(figure_size=(10, 5))
+    + gg.labs(x="year", y="days of year", title="Cherry blossom data")
+)
+```
+
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_8_0.png)
+
+    <ggplot: (8783701835561)>
+
+```python
+(
+    gg.ggplot(d2, gg.aes(x="year", y="doy"))
+    + gg.geom_point(color="black", alpha=0.4, size=1.3)
+    + gg.geom_vline(xintercept=knot_list, color="gray", alpha=0.8)
+    + gg.theme(figure_size=(10, 5))
+    + gg.labs(x="year", y="days of year", title="Cherry blossom data with spline knots")
+)
+```
+
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_9_0.png)
+
+    <ggplot: (8783702133465)>
+
+```python
+(
+    gg.ggplot(d2, gg.aes(x="year", y="doy"))
+    + gg.geom_point(color="black", alpha=0.4, size=1.3)
     + gg.geom_smooth(method="loess", span=0.3, size=1.5, color="blue", linetype="-")
     + gg.geom_vline(xintercept=knot_list, color="gray", alpha=0.8)
     + gg.theme(figure_size=(10, 5))
@@ -246,9 +273,9 @@ knot_list
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_8_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_10_0.png)
 
-    <ggplot: (8786206584585)>
+    <ggplot: (8783702372545)>
 
 ```python
 d2["knot_group"] = [np.where(a <= knot_list)[0][0] for a in d2.year]
@@ -268,9 +295,9 @@ d2["knot_group"] = pd.Categorical(d2["knot_group"], ordered=True)
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_10_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_12_0.png)
 
-    <ggplot: (8786207523417)>
+    <ggplot: (8783703094129)>
 
 ```python
 B = dmatrix(
@@ -313,14 +340,15 @@ spline_df = (
 (
     gg.ggplot(spline_df, gg.aes(x="year", y="value"))
     + gg.geom_line(gg.aes(group="spline_i", color="spline_i"))
-    + gg.scale_color_discrete(guide=gg.guide_legend(ncol=2))
+    + gg.scale_color_discrete(guide=gg.guide_legend(ncol=2), color_space="husl")
+    + gg.theme(figure_size=(10, 5))
     + gg.labs(x="year", y="basis", color="spline idx")
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_12_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_14_0.png)
 
-    <ggplot: (8786198444337)>
+    <ggplot: (8783703262025)>
 
 ```python
 with pm.Model() as m4_7:
@@ -336,7 +364,7 @@ with pm.Model() as m4_7:
 pm.model_to_graphviz(m4_7)
 ```
 
-![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_14_0.svg)
+![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_16_0.svg)
 
 ```python
 with m4_7:
@@ -349,9 +377,9 @@ with m4_7:
     Initializing NUTS using jitter+adapt_diag...
     Multiprocess sampling (2 chains in 2 jobs)
     NUTS: [sigma, w, a]
-    Sampling 2 chains, 0 divergences: 100%|██████████| 8000/8000 [00:30<00:00, 259.07draws/s]
+    Sampling 2 chains, 0 divergences: 100%|██████████| 8000/8000 [00:30<00:00, 264.84draws/s]
     The number of effective samples is smaller than 25% for some parameters.
-    100%|██████████| 4000/4000 [00:06<00:00, 591.29it/s]
+    100%|██████████| 4000/4000 [00:05<00:00, 755.90it/s]
 
 ```python
 az_m4_7 = az.from_pymc3(
@@ -696,19 +724,44 @@ az.plot_trace(az_m4_7, var_names=["a", "sigma"])
 plt.show()
 ```
 
-    array([[<AxesSubplot:title={'center':'a'}>,
-            <AxesSubplot:title={'center':'a'}>],
-           [<AxesSubplot:title={'center':'sigma'}>,
-            <AxesSubplot:title={'center':'sigma'}>]], dtype=object)
-
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_19_1.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_21_0.png)
 
 ```python
 az.plot_forest(az_m4_7, var_names=["w"], combined=True)
 plt.show()
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_20_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_22_0.png)
+
+```python
+wp = trace_m4_7["w"].mean(0)
+
+spline_df = (
+    pd.DataFrame(B * wp.T)
+    .assign(year=d2.year.values)
+    .melt("year", var_name="spline_i", value_name="value")
+)
+
+spline_df_merged = (
+    pd.DataFrame(np.dot(B, wp.T))
+    .assign(year=d2.year.values)
+    .melt("year", var_name="spline_i", value_name="value")
+)
+
+(
+    gg.ggplot(spline_df, gg.aes(x="year", y="value"))
+    + gg.geom_vline(xintercept=knot_list, color="gray", alpha=0.5)
+    + gg.geom_line(data=spline_df_merged, linetype="-", color="blue", size=2, alpha=0.7)
+    + gg.geom_line(gg.aes(group="spline_i", color="spline_i"), alpha=0.7, size=1)
+    + gg.scale_color_discrete(guide=gg.guide_legend(ncol=2), color_space="husl")
+    + gg.theme(figure_size=(10, 5))
+    + gg.labs(x="year", y="basis", title="Fit spline", color="spline idx")
+)
+```
+
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_23_0.png)
+
+    <ggplot: (8783680126061)>
 
 ```python
 post_pred = az.summary(az_m4_7, var_names=["mu"]).reset_index(drop=True)
@@ -736,9 +789,9 @@ d2_post["pred_hdi_upper"] = post_pred["hdi_97%"]
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_22_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_25_0.png)
 
-    <ggplot: (8786210500689)>
+    <ggplot: (8783680300445)>
 
 ## Example with CNA data
 
@@ -1073,7 +1126,7 @@ ptk2_data = ptk2_data.sample(n=500)
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_25_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_28_0.png)
 
     <ggplot: (8789285110896)>
 
@@ -1109,7 +1162,7 @@ ptk2_spline_df = (
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_28_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_31_0.png)
 
     <ggplot: (8789285083263)>
 
@@ -1127,7 +1180,7 @@ with pm.Model() as m_ptk2:
 pm.model_to_graphviz(m_ptk2)
 ```
 
-![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_30_0.svg)
+![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_33_0.svg)
 
 ```python
 with m_ptk2:
@@ -1379,7 +1432,7 @@ ptk2_post.head()
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_34_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_37_0.png)
 
     <ggplot: (8789284853068)>
 
