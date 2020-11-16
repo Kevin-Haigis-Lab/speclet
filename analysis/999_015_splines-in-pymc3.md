@@ -246,7 +246,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_8_0.png)
 
-    <ggplot: (8783701835561)>
+    <ggplot: (8737175186318)>
 
 ```python
 (
@@ -260,7 +260,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_9_0.png)
 
-    <ggplot: (8783702133465)>
+    <ggplot: (8737175186201)>
 
 ```python
 (
@@ -275,7 +275,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_10_0.png)
 
-    <ggplot: (8783702372545)>
+    <ggplot: (8737172993434)>
 
 ```python
 d2["knot_group"] = [np.where(a <= knot_list)[0][0] for a in d2.year]
@@ -297,7 +297,7 @@ d2["knot_group"] = pd.Categorical(d2["knot_group"], ordered=True)
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_12_0.png)
 
-    <ggplot: (8783703094129)>
+    <ggplot: (8737174616640)>
 
 ```python
 B = dmatrix(
@@ -348,14 +348,13 @@ spline_df = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_14_0.png)
 
-    <ggplot: (8783703262025)>
+    <ggplot: (8737173014974)>
 
 ```python
 with pm.Model() as m4_7:
-    a = pm.Normal("a", 100, 10)
-    w = pm.Normal("w", mu=0, sd=10, shape=B.shape[1])
+    a = pm.Normal("a", 100, 5)
+    w = pm.Normal("w", mu=0, sd=3, shape=B.shape[1])
     mu = pm.Deterministic("mu", a + pm.math.dot(np.asarray(B, order="F"), w.T))
-    # mu = pm.Deterministic("mu", a + pm.math.dot(B.base, w.T))
     sigma = pm.Exponential("sigma", 1)
     D = pm.Normal("D", mu, sigma, observed=d2.doy)
 ```
@@ -369,17 +368,51 @@ pm.model_to_graphviz(m4_7)
 ```python
 with m4_7:
     prior_pc = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
-    trace_m4_7 = pm.sample(2000, tune=2000, random_seed=RANDOM_SEED)
+    trace_m4_7 = pm.sample(2000, tune=2000, random_seed=RANDOM_SEED, chains=2)
     post_pc = pm.sample_posterior_predictive(trace_m4_7, random_seed=RANDOM_SEED)
 ```
 
     Auto-assigning NUTS sampler...
     Initializing NUTS using jitter+adapt_diag...
-    Multiprocess sampling (2 chains in 2 jobs)
+    Multiprocess sampling (2 chains in 4 jobs)
     NUTS: [sigma, w, a]
-    Sampling 2 chains, 0 divergences: 100%|██████████| 8000/8000 [00:30<00:00, 264.84draws/s]
-    The number of effective samples is smaller than 25% for some parameters.
-    100%|██████████| 4000/4000 [00:05<00:00, 755.90it/s]
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [8000/8000 00:12<00:00 Sampling 2 chains, 0 divergences]
+</div>
+
+    Sampling 2 chains for 2_000 tune and 2_000 draw iterations (4_000 + 4_000 draws total) took 12 seconds.
+    The acceptance probability does not match the target. It is 0.70487961130992, but should be close to 0.8. Try to increase the number of tuning steps.
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 00:04<00:00]
+</div>
 
 ```python
 az_m4_7 = az.from_pymc3(
@@ -425,268 +458,268 @@ az.summary(az_m4_7, var_names=["a", "w", "sigma"])
   <tbody>
     <tr>
       <th>a</th>
-      <td>103.303</td>
-      <td>2.424</td>
-      <td>98.879</td>
-      <td>107.724</td>
-      <td>0.098</td>
-      <td>0.069</td>
-      <td>615.0</td>
-      <td>614.0</td>
-      <td>618.0</td>
-      <td>1027.0</td>
+      <td>103.620</td>
+      <td>0.764</td>
+      <td>102.131</td>
+      <td>105.028</td>
+      <td>0.019</td>
+      <td>0.014</td>
+      <td>1552.0</td>
+      <td>1552.0</td>
+      <td>1557.0</td>
+      <td>1786.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[0]</th>
-      <td>-2.876</td>
-      <td>3.862</td>
-      <td>-10.391</td>
-      <td>4.208</td>
-      <td>0.110</td>
-      <td>0.078</td>
-      <td>1225.0</td>
-      <td>1225.0</td>
-      <td>1223.0</td>
-      <td>2105.0</td>
+      <td>-1.783</td>
+      <td>2.233</td>
+      <td>-5.919</td>
+      <td>2.496</td>
+      <td>0.041</td>
+      <td>0.035</td>
+      <td>2905.0</td>
+      <td>2071.0</td>
+      <td>2925.0</td>
+      <td>2491.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[1]</th>
-      <td>-0.920</td>
-      <td>3.944</td>
-      <td>-7.944</td>
-      <td>6.870</td>
-      <td>0.109</td>
-      <td>0.077</td>
-      <td>1303.0</td>
-      <td>1303.0</td>
-      <td>1306.0</td>
-      <td>1794.0</td>
+      <td>-1.563</td>
+      <td>2.099</td>
+      <td>-5.652</td>
+      <td>2.242</td>
+      <td>0.040</td>
+      <td>0.029</td>
+      <td>2704.0</td>
+      <td>2588.0</td>
+      <td>2699.0</td>
+      <td>2649.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[2]</th>
-      <td>-0.950</td>
-      <td>3.640</td>
-      <td>-7.690</td>
-      <td>5.972</td>
-      <td>0.115</td>
-      <td>0.082</td>
-      <td>994.0</td>
-      <td>994.0</td>
-      <td>995.0</td>
-      <td>1799.0</td>
+      <td>-0.269</td>
+      <td>1.898</td>
+      <td>-3.956</td>
+      <td>3.179</td>
+      <td>0.040</td>
+      <td>0.032</td>
+      <td>2252.0</td>
+      <td>1747.0</td>
+      <td>2254.0</td>
+      <td>2232.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[3]</th>
-      <td>4.896</td>
-      <td>2.917</td>
-      <td>-1.005</td>
-      <td>10.029</td>
-      <td>0.099</td>
-      <td>0.070</td>
-      <td>871.0</td>
-      <td>871.0</td>
-      <td>872.0</td>
-      <td>1236.0</td>
+      <td>3.412</td>
+      <td>1.483</td>
+      <td>0.622</td>
+      <td>6.140</td>
+      <td>0.033</td>
+      <td>0.024</td>
+      <td>2017.0</td>
+      <td>1903.0</td>
+      <td>2017.0</td>
+      <td>2268.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[4]</th>
-      <td>-0.827</td>
-      <td>2.937</td>
-      <td>-6.642</td>
-      <td>4.437</td>
-      <td>0.105</td>
-      <td>0.075</td>
-      <td>776.0</td>
-      <td>776.0</td>
-      <td>781.0</td>
-      <td>1199.0</td>
+      <td>0.182</td>
+      <td>1.498</td>
+      <td>-2.734</td>
+      <td>2.939</td>
+      <td>0.032</td>
+      <td>0.022</td>
+      <td>2246.0</td>
+      <td>2246.0</td>
+      <td>2256.0</td>
+      <td>2508.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[5]</th>
-      <td>4.384</td>
-      <td>2.969</td>
-      <td>-0.994</td>
-      <td>10.089</td>
-      <td>0.098</td>
-      <td>0.069</td>
-      <td>921.0</td>
-      <td>921.0</td>
-      <td>922.0</td>
-      <td>1600.0</td>
+      <td>2.147</td>
+      <td>1.598</td>
+      <td>-0.934</td>
+      <td>5.068</td>
+      <td>0.031</td>
+      <td>0.023</td>
+      <td>2723.0</td>
+      <td>2364.0</td>
+      <td>2721.0</td>
+      <td>2360.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[6]</th>
-      <td>-5.305</td>
-      <td>2.848</td>
-      <td>-10.728</td>
-      <td>-0.249</td>
-      <td>0.103</td>
-      <td>0.073</td>
-      <td>771.0</td>
-      <td>771.0</td>
-      <td>774.0</td>
-      <td>1226.0</td>
+      <td>-3.533</td>
+      <td>1.484</td>
+      <td>-6.309</td>
+      <td>-0.774</td>
+      <td>0.030</td>
+      <td>0.021</td>
+      <td>2517.0</td>
+      <td>2393.0</td>
+      <td>2513.0</td>
+      <td>2494.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[7]</th>
-      <td>7.899</td>
-      <td>2.845</td>
-      <td>2.319</td>
-      <td>12.968</td>
-      <td>0.098</td>
-      <td>0.070</td>
-      <td>848.0</td>
-      <td>818.0</td>
-      <td>849.0</td>
-      <td>1546.0</td>
+      <td>5.566</td>
+      <td>1.504</td>
+      <td>2.722</td>
+      <td>8.346</td>
+      <td>0.031</td>
+      <td>0.022</td>
+      <td>2416.0</td>
+      <td>2382.0</td>
+      <td>2415.0</td>
+      <td>2594.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[8]</th>
-      <td>-0.974</td>
-      <td>2.921</td>
-      <td>-6.470</td>
-      <td>4.431</td>
-      <td>0.100</td>
-      <td>0.070</td>
-      <td>861.0</td>
-      <td>861.0</td>
-      <td>863.0</td>
-      <td>1402.0</td>
+      <td>-0.014</td>
+      <td>1.575</td>
+      <td>-2.908</td>
+      <td>3.064</td>
+      <td>0.030</td>
+      <td>0.023</td>
+      <td>2681.0</td>
+      <td>2333.0</td>
+      <td>2678.0</td>
+      <td>2782.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[9]</th>
-      <td>3.132</td>
-      <td>3.007</td>
-      <td>-2.191</td>
-      <td>9.091</td>
-      <td>0.100</td>
-      <td>0.071</td>
-      <td>910.0</td>
-      <td>906.0</td>
-      <td>913.0</td>
-      <td>1399.0</td>
+      <td>2.246</td>
+      <td>1.609</td>
+      <td>-0.682</td>
+      <td>5.345</td>
+      <td>0.032</td>
+      <td>0.023</td>
+      <td>2512.0</td>
+      <td>2487.0</td>
+      <td>2513.0</td>
+      <td>2540.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[10]</th>
-      <td>4.676</td>
-      <td>2.909</td>
-      <td>-0.455</td>
-      <td>10.563</td>
-      <td>0.104</td>
-      <td>0.074</td>
-      <td>780.0</td>
-      <td>780.0</td>
-      <td>781.0</td>
-      <td>1377.0</td>
+      <td>3.811</td>
+      <td>1.527</td>
+      <td>1.143</td>
+      <td>6.786</td>
+      <td>0.031</td>
+      <td>0.022</td>
+      <td>2414.0</td>
+      <td>2307.0</td>
+      <td>2408.0</td>
+      <td>2615.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[11]</th>
-      <td>-0.085</td>
-      <td>2.952</td>
-      <td>-5.434</td>
-      <td>5.604</td>
-      <td>0.098</td>
-      <td>0.069</td>
-      <td>909.0</td>
-      <td>909.0</td>
-      <td>911.0</td>
-      <td>1468.0</td>
+      <td>0.394</td>
+      <td>1.568</td>
+      <td>-2.575</td>
+      <td>3.282</td>
+      <td>0.032</td>
+      <td>0.025</td>
+      <td>2342.0</td>
+      <td>1984.0</td>
+      <td>2343.0</td>
+      <td>2373.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[12]</th>
-      <td>5.600</td>
-      <td>2.947</td>
-      <td>0.167</td>
-      <td>11.290</td>
-      <td>0.104</td>
-      <td>0.073</td>
-      <td>809.0</td>
-      <td>809.0</td>
-      <td>813.0</td>
-      <td>1279.0</td>
+      <td>4.146</td>
+      <td>1.505</td>
+      <td>1.349</td>
+      <td>7.029</td>
+      <td>0.030</td>
+      <td>0.021</td>
+      <td>2591.0</td>
+      <td>2591.0</td>
+      <td>2587.0</td>
+      <td>2394.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[13]</th>
-      <td>0.784</td>
-      <td>3.116</td>
-      <td>-5.015</td>
-      <td>6.579</td>
-      <td>0.103</td>
-      <td>0.073</td>
-      <td>924.0</td>
-      <td>924.0</td>
-      <td>927.0</td>
-      <td>1382.0</td>
+      <td>1.100</td>
+      <td>1.637</td>
+      <td>-1.962</td>
+      <td>4.157</td>
+      <td>0.033</td>
+      <td>0.025</td>
+      <td>2430.0</td>
+      <td>2192.0</td>
+      <td>2439.0</td>
+      <td>2261.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[14]</th>
-      <td>-0.782</td>
-      <td>3.333</td>
-      <td>-7.152</td>
-      <td>5.164</td>
-      <td>0.104</td>
-      <td>0.073</td>
-      <td>1030.0</td>
-      <td>1030.0</td>
-      <td>1030.0</td>
-      <td>1404.0</td>
+      <td>-1.781</td>
+      <td>1.860</td>
+      <td>-5.288</td>
+      <td>1.657</td>
+      <td>0.037</td>
+      <td>0.028</td>
+      <td>2498.0</td>
+      <td>2247.0</td>
+      <td>2508.0</td>
+      <td>2446.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[15]</th>
-      <td>-6.933</td>
-      <td>3.501</td>
-      <td>-13.454</td>
-      <td>-0.133</td>
-      <td>0.106</td>
-      <td>0.075</td>
-      <td>1091.0</td>
-      <td>1091.0</td>
-      <td>1084.0</td>
-      <td>1684.0</td>
+      <td>-5.955</td>
+      <td>1.922</td>
+      <td>-9.663</td>
+      <td>-2.402</td>
+      <td>0.037</td>
+      <td>0.026</td>
+      <td>2664.0</td>
+      <td>2639.0</td>
+      <td>2671.0</td>
+      <td>2651.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[16]</th>
-      <td>-7.610</td>
-      <td>3.292</td>
-      <td>-14.056</td>
-      <td>-1.642</td>
-      <td>0.104</td>
-      <td>0.075</td>
-      <td>1003.0</td>
-      <td>965.0</td>
-      <td>1005.0</td>
-      <td>1368.0</td>
+      <td>-6.198</td>
+      <td>1.842</td>
+      <td>-9.718</td>
+      <td>-2.806</td>
+      <td>0.033</td>
+      <td>0.024</td>
+      <td>3043.0</td>
+      <td>2889.0</td>
+      <td>3053.0</td>
+      <td>2499.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>sigma</th>
-      <td>5.946</td>
-      <td>0.147</td>
-      <td>5.660</td>
-      <td>6.199</td>
+      <td>5.951</td>
+      <td>0.148</td>
+      <td>5.668</td>
+      <td>6.233</td>
+      <td>0.003</td>
       <td>0.002</td>
-      <td>0.002</td>
-      <td>3684.0</td>
-      <td>3671.0</td>
-      <td>3709.0</td>
-      <td>2558.0</td>
+      <td>2617.0</td>
+      <td>2617.0</td>
+      <td>2577.0</td>
+      <td>1628.0</td>
       <td>1.0</td>
     </tr>
   </tbody>
@@ -694,44 +727,18 @@ az.summary(az_m4_7, var_names=["a", "w", "sigma"])
 </div>
 
 ```python
-print(az.summary(az_m4_7, var_names=["a", "w", "sigma"]).to_markdown())
-```
-
-    |       |    mean |    sd |   hdi_3% |   hdi_97% |   mcse_mean |   mcse_sd |   ess_mean |   ess_sd |   ess_bulk |   ess_tail |   r_hat |
-    |:------|--------:|------:|---------:|----------:|------------:|----------:|-----------:|---------:|-----------:|-----------:|--------:|
-    | a     | 103.303 | 2.424 |   98.879 |   107.724 |       0.098 |     0.069 |        615 |      614 |        618 |       1027 |       1 |
-    | w[0]  |  -2.876 | 3.862 |  -10.391 |     4.208 |       0.11  |     0.078 |       1225 |     1225 |       1223 |       2105 |       1 |
-    | w[1]  |  -0.92  | 3.944 |   -7.944 |     6.87  |       0.109 |     0.077 |       1303 |     1303 |       1306 |       1794 |       1 |
-    | w[2]  |  -0.95  | 3.64  |   -7.69  |     5.972 |       0.115 |     0.082 |        994 |      994 |        995 |       1799 |       1 |
-    | w[3]  |   4.896 | 2.917 |   -1.005 |    10.029 |       0.099 |     0.07  |        871 |      871 |        872 |       1236 |       1 |
-    | w[4]  |  -0.827 | 2.937 |   -6.642 |     4.437 |       0.105 |     0.075 |        776 |      776 |        781 |       1199 |       1 |
-    | w[5]  |   4.384 | 2.969 |   -0.994 |    10.089 |       0.098 |     0.069 |        921 |      921 |        922 |       1600 |       1 |
-    | w[6]  |  -5.305 | 2.848 |  -10.728 |    -0.249 |       0.103 |     0.073 |        771 |      771 |        774 |       1226 |       1 |
-    | w[7]  |   7.899 | 2.845 |    2.319 |    12.968 |       0.098 |     0.07  |        848 |      818 |        849 |       1546 |       1 |
-    | w[8]  |  -0.974 | 2.921 |   -6.47  |     4.431 |       0.1   |     0.07  |        861 |      861 |        863 |       1402 |       1 |
-    | w[9]  |   3.132 | 3.007 |   -2.191 |     9.091 |       0.1   |     0.071 |        910 |      906 |        913 |       1399 |       1 |
-    | w[10] |   4.676 | 2.909 |   -0.455 |    10.563 |       0.104 |     0.074 |        780 |      780 |        781 |       1377 |       1 |
-    | w[11] |  -0.085 | 2.952 |   -5.434 |     5.604 |       0.098 |     0.069 |        909 |      909 |        911 |       1468 |       1 |
-    | w[12] |   5.6   | 2.947 |    0.167 |    11.29  |       0.104 |     0.073 |        809 |      809 |        813 |       1279 |       1 |
-    | w[13] |   0.784 | 3.116 |   -5.015 |     6.579 |       0.103 |     0.073 |        924 |      924 |        927 |       1382 |       1 |
-    | w[14] |  -0.782 | 3.333 |   -7.152 |     5.164 |       0.104 |     0.073 |       1030 |     1030 |       1030 |       1404 |       1 |
-    | w[15] |  -6.933 | 3.501 |  -13.454 |    -0.133 |       0.106 |     0.075 |       1091 |     1091 |       1084 |       1684 |       1 |
-    | w[16] |  -7.61  | 3.292 |  -14.056 |    -1.642 |       0.104 |     0.075 |       1003 |      965 |       1005 |       1368 |       1 |
-    | sigma |   5.946 | 0.147 |    5.66  |     6.199 |       0.002 |     0.002 |       3684 |     3671 |       3709 |       2558 |       1 |
-
-```python
 az.plot_trace(az_m4_7, var_names=["a", "sigma"])
 plt.show()
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_21_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_20_0.png)
 
 ```python
 az.plot_forest(az_m4_7, var_names=["w"], combined=True)
 plt.show()
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_22_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_21_0.png)
 
 ```python
 wp = trace_m4_7["w"].mean(0)
@@ -759,9 +766,9 @@ spline_df_merged = (
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_23_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_22_0.png)
 
-    <ggplot: (8783680126061)>
+    <ggplot: (8737142661994)>
 
 ```python
 post_pred = az.summary(az_m4_7, var_names=["mu"]).reset_index(drop=True)
@@ -789,9 +796,9 @@ d2_post["pred_hdi_upper"] = post_pred["hdi_97%"]
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_25_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_24_0.png)
 
-    <ggplot: (8783680300445)>
+    <ggplot: (8737153146119)>
 
 ## Example with gene CN data of a single gene
 
@@ -1126,9 +1133,9 @@ ptk2_data = modeling_data[modeling_data.hugo_symbol == "PTK2"]
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_29_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_28_0.png)
 
-    <ggplot: (8761379076648)>
+    <ggplot: (8737142694900)>
 
 ```python
 ptk2_data.shape[0]
@@ -1165,16 +1172,15 @@ ptk2_spline_df = (
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_32_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_31_0.png)
 
-    <ggplot: (8761379518784)>
+    <ggplot: (8737151079946)>
 
 ```python
 with pm.Model() as m_ptk2:
-    a = pm.Normal("a", mu=0, sd=5)
-    w = pm.Normal("w", mu=0, sd=2, shape=ptk2_B.shape[1])
+    a = pm.Normal("a", mu=0, sd=2)
+    w = pm.Normal("w", mu=-0.5, sd=1, shape=ptk2_B.shape[1])
     mu = pm.Deterministic("mu", a + pm.math.dot(np.asarray(ptk2_B, order="F"), w.T))
-    # mu = pm.Deterministic("mu", a + pm.math.dot(ptk2_B.base, w.T))
     sigma = pm.Exponential("sigma", 1)
     D = pm.Normal("D", mu, sigma, observed=ptk2_data.lfc)
 ```
@@ -1183,18 +1189,18 @@ with pm.Model() as m_ptk2:
 pm.model_to_graphviz(m_ptk2)
 ```
 
-![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_34_0.svg)
+![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_33_0.svg)
 
 ```python
 with m_ptk2:
     prior_pc = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
-    trace_m_ptk2 = pm.sample(1000, random_seed=RANDOM_SEED)
+    trace_m_ptk2 = pm.sample(3000, tune=2000, chains=2, random_seed=RANDOM_SEED)
     post_pc = pm.sample_posterior_predictive(trace_m_ptk2, random_seed=RANDOM_SEED)
 ```
 
     Auto-assigning NUTS sampler...
     Initializing NUTS using jitter+adapt_diag...
-    Multiprocess sampling (4 chains in 4 jobs)
+    Multiprocess sampling (2 chains in 4 jobs)
     NUTS: [sigma, w, a]
 
 <div>
@@ -1210,12 +1216,12 @@ with m_ptk2:
             background: #F44336;
         }
     </style>
-  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:41<00:00 Sampling 4 chains, 0 divergences]
+  <progress value='10000' class='' max='10000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [10000/10000 00:55<00:00 Sampling 2 chains, 163 divergences]
 </div>
 
-    Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 42 seconds.
-    The acceptance probability does not match the target. It is 0.881635488786398, but should be close to 0.8. Try to increase the number of tuning steps.
+    Sampling 2 chains for 2_000 tune and 3_000 draw iterations (4_000 + 6_000 draws total) took 56 seconds.
+    There were 163 divergences after tuning. Increase `target_accept` or reparameterize.
     The number of effective samples is smaller than 25% for some parameters.
 
 <div>
@@ -1231,8 +1237,8 @@ with m_ptk2:
             background: #F44336;
         }
     </style>
-  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 00:05<00:00]
+  <progress value='6000' class='' max='6000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [6000/6000 00:07<00:00]
 </div>
 
 ```python
@@ -1313,8 +1319,8 @@ ptk2_post.head()
       <td>False</td>
       <td>5.878235</td>
       <td>-0.645</td>
-      <td>-0.686</td>
-      <td>-0.606</td>
+      <td>-0.685</td>
+      <td>-0.605</td>
     </tr>
     <tr>
       <th>1</th>
@@ -1337,8 +1343,8 @@ ptk2_post.head()
       <td>False</td>
       <td>5.878235</td>
       <td>-0.645</td>
-      <td>-0.686</td>
-      <td>-0.606</td>
+      <td>-0.685</td>
+      <td>-0.605</td>
     </tr>
     <tr>
       <th>2</th>
@@ -1361,8 +1367,8 @@ ptk2_post.head()
       <td>False</td>
       <td>5.878235</td>
       <td>-0.645</td>
-      <td>-0.686</td>
-      <td>-0.606</td>
+      <td>-0.685</td>
+      <td>-0.605</td>
     </tr>
     <tr>
       <th>3</th>
@@ -1385,8 +1391,8 @@ ptk2_post.head()
       <td>False</td>
       <td>5.878235</td>
       <td>-0.645</td>
-      <td>-0.686</td>
-      <td>-0.606</td>
+      <td>-0.685</td>
+      <td>-0.605</td>
     </tr>
     <tr>
       <th>4</th>
@@ -1409,8 +1415,8 @@ ptk2_post.head()
       <td>False</td>
       <td>5.878235</td>
       <td>-0.645</td>
-      <td>-0.686</td>
-      <td>-0.606</td>
+      <td>-0.685</td>
+      <td>-0.605</td>
     </tr>
   </tbody>
 </table>
@@ -1435,9 +1441,9 @@ ptk2_post.head()
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_38_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_37_0.png)
 
-    <ggplot: (8761381506030)>
+    <ggplot: (8737146028270)>
 
 ### A "misbehaved" gene: *MDM2*
 
@@ -1458,9 +1464,9 @@ mdm2_data["log_gene_cn"] = np.log10(mdm2_data.gene_cn.values)
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_40_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_39_0.png)
 
-    <ggplot: (8761372111357)>
+    <ggplot: (8737142684459)>
 
 ```python
 mdm2_data.shape[0]
@@ -1503,14 +1509,14 @@ mdm2_spline_df = (
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_43_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_42_0.png)
 
-    <ggplot: (8761383551979)>
+    <ggplot: (8737145947356)>
 
 ```python
 with pm.Model() as m_mdm2:
-    a = pm.Normal("a", mu=0, sd=5)
-    w = pm.Normal("w", mu=0, sd=2, shape=mdm2_B.shape[1])
+    a = pm.Normal("a", mu=0, sd=2)
+    w = pm.Normal("w", mu=-0.5, sd=1, shape=mdm2_B.shape[1])
     mu = pm.Deterministic("mu", a + pm.math.dot(np.asarray(mdm2_B, order="F"), w.T))
     sigma = pm.Exponential("sigma", 1)
     D = pm.Normal("D", mu, sigma, observed=mdm2_data.lfc)
@@ -1520,18 +1526,18 @@ with pm.Model() as m_mdm2:
 pm.model_to_graphviz(m_mdm2)
 ```
 
-![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_45_0.svg)
+![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_44_0.svg)
 
 ```python
 with m_mdm2:
     prior_pc = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
-    trace_m_mdm2 = pm.sample(1000, random_seed=RANDOM_SEED)
+    trace_m_mdm2 = pm.sample(3000, tune=3000, chains=2, random_seed=RANDOM_SEED)
     post_pc = pm.sample_posterior_predictive(trace_m_mdm2, random_seed=RANDOM_SEED)
 ```
 
     Auto-assigning NUTS sampler...
     Initializing NUTS using jitter+adapt_diag...
-    Multiprocess sampling (4 chains in 4 jobs)
+    Multiprocess sampling (2 chains in 4 jobs)
     NUTS: [sigma, w, a]
 
 <div>
@@ -1547,12 +1553,12 @@ with m_mdm2:
             background: #F44336;
         }
     </style>
-  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:53<00:00 Sampling 4 chains, 0 divergences]
+  <progress value='12000' class='' max='12000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [12000/12000 01:15<00:00 Sampling 2 chains, 15 divergences]
 </div>
 
-    Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 54 seconds.
-    The acceptance probability does not match the target. It is 0.8807772574577065, but should be close to 0.8. Try to increase the number of tuning steps.
+    Sampling 2 chains for 3_000 tune and 3_000 draw iterations (6_000 + 6_000 draws total) took 76 seconds.
+    There were 15 divergences after tuning. Increase `target_accept` or reparameterize.
     The number of effective samples is smaller than 25% for some parameters.
 
 <div>
@@ -1568,8 +1574,8 @@ with m_mdm2:
             background: #F44336;
         }
     </style>
-  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 00:05<00:00]
+  <progress value='6000' class='' max='6000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [6000/6000 00:07<00:00]
 </div>
 
 ```python
@@ -1577,6 +1583,13 @@ az_mdm2 = az.from_pymc3(
     model=m_mdm2, trace=trace_m_mdm2, posterior_predictive=post_pc, prior=prior_pc
 )
 ```
+
+```python
+az.plot_trace(az_mdm2, var_names=["a", "sigma"])
+plt.show()
+```
+
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_47_0.png)
 
 ```python
 post_pred = az.summary(az_mdm2, var_names=["mu"]).reset_index(drop=True)
@@ -1649,9 +1662,9 @@ mdm2_post.head()
       <td>False</td>
       <td>3.701549</td>
       <td>0.143784</td>
-      <td>-0.002</td>
-      <td>-0.055</td>
-      <td>0.056</td>
+      <td>0.003</td>
+      <td>-0.053</td>
+      <td>0.058</td>
     </tr>
     <tr>
       <th>1</th>
@@ -1673,9 +1686,9 @@ mdm2_post.head()
       <td>False</td>
       <td>3.701549</td>
       <td>0.143784</td>
-      <td>-0.002</td>
-      <td>-0.055</td>
-      <td>0.056</td>
+      <td>0.003</td>
+      <td>-0.053</td>
+      <td>0.058</td>
     </tr>
     <tr>
       <th>2</th>
@@ -1697,9 +1710,9 @@ mdm2_post.head()
       <td>False</td>
       <td>3.701549</td>
       <td>0.143784</td>
-      <td>-0.002</td>
-      <td>-0.055</td>
-      <td>0.056</td>
+      <td>0.003</td>
+      <td>-0.053</td>
+      <td>0.058</td>
     </tr>
     <tr>
       <th>3</th>
@@ -1721,9 +1734,9 @@ mdm2_post.head()
       <td>False</td>
       <td>3.701549</td>
       <td>0.143784</td>
-      <td>-0.002</td>
-      <td>-0.055</td>
-      <td>0.056</td>
+      <td>0.003</td>
+      <td>-0.053</td>
+      <td>0.058</td>
     </tr>
     <tr>
       <th>4</th>
@@ -1745,9 +1758,9 @@ mdm2_post.head()
       <td>False</td>
       <td>3.701549</td>
       <td>0.143784</td>
-      <td>-0.002</td>
-      <td>-0.055</td>
-      <td>0.056</td>
+      <td>0.003</td>
+      <td>-0.053</td>
+      <td>0.058</td>
     </tr>
   </tbody>
 </table>
@@ -1775,7 +1788,7 @@ mdm2_post.head()
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_49_0.png)
 
-    <ggplot: (8761379277876)>
+    <ggplot: (8737145791943)>
 
 ```python
 (
@@ -1798,13 +1811,53 @@ mdm2_post.head()
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_50_0.png)
 
-    <ggplot: (8761380914755)>
+    <ggplot: (8737142932535)>
 
 ### Multi-level
 
 How to do this with multiple levels?
 The original 2017 paper created a spline function for each cell line.
 I think the only change would be to have an additional index on `w` and keep all of the `B` matrices in a list that gets indexed, too.
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
 
 ```python
 
