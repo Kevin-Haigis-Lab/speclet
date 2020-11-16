@@ -7,3 +7,6 @@ Each piece of raw data is first prepared in a single notebook and then a SnakeMa
 
 1. [Prepare DepMap data](005_prepare-depmap-data.md)
 2. [Prepare modeling data SnakeMake workflow](010_prepare-modeling-data_snakemake.py)
+3. [Subsample some data for model experimentation](019_prepare-data-subsample.md)
+    - `modeling_data/depmap_modeling_dataframe_subsample.csv`: a few genes from many cell lines
+    - `modeling_data/depmap_modeling_dataframe_subsample2.csv`: many genes from a few cell lines
