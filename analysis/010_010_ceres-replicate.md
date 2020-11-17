@@ -21,6 +21,13 @@ where:
 - $o_i$: sgRNA-sepcific effect to account for noise in the measurement of sgRNA abundance in the reference pool
 - $\epsilon$: normal error
 
+### Notebook goal
+
+Here I will build three models: (1) without a CN covariate, (2) with a standard linear covariate for copy number, and (3) with a spline function for the CNA covariate.
+In this notebook, the models will be run with a subsample of the data, but they will eventually be turned into Python scripts to run on the full data set.
+
+### Set-up
+
 ```python
 import string
 import warnings
@@ -41,6 +48,8 @@ warnings.simplefilter(action="ignore", category=UserWarning)
 
 gg.theme_set(gg.theme_minimal())
 
+%config InlineBackend.figure_format = 'retina'
+
 RANDOM_SEED = 847
 np.random.seed(RANDOM_SEED)
 
@@ -52,17 +61,7 @@ pymc3_cache_dir = Path("pymc3_model_cache")
 ```python
 data_path = Path("../modeling_data/depmap_modeling_dataframe_subsample.csv")
 data = pd.read_csv(data_path)
-
-# print(data.hugo_symbol.unique())
-SAMPLED_GENES = ["KRAS", "BRAF", "DPH7", "KIF3C", "SCMH1", "UQCRC1"]
-SAMPLED_DEPMAPIDS = data["depmap_id"].unique()
-SAMPLED_DEPMAPIDS = np.random.choice(SAMPLED_DEPMAPIDS, 70, replace=False)
-
-data = data[~np.isnan(data.segment_mean)]
-# data = data[data["hugo_symbol"].isin(SAMPLED_GENES)]
-data = data[data["depmap_id"].isin(SAMPLED_DEPMAPIDS)]
-
-data.head(n=5)
+data.head(n=7)
 ```
 
 <div>
@@ -94,8 +93,8 @@ data.head(n=5)
       <th>lineage_subtype</th>
       <th>kras_mutation</th>
       <th>...</th>
-      <th>segment_mean</th>
-      <th>copy_number</th>
+      <th>log2_gene_cn_p1</th>
+      <th>gene_cn</th>
       <th>n_muts</th>
       <th>any_deleterious</th>
       <th>variant_classification</th>
@@ -108,20 +107,20 @@ data.head(n=5)
   </thead>
   <tbody>
     <tr>
-      <th>309</th>
+      <th>0</th>
       <td>AAGAGGCCGGTCAAATTCAG</td>
-      <td>253j-311cas9_repa_p5_batch3</td>
-      <td>0.819737</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>-0.405499</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-000011</td>
-      <td>Metastasis</td>
-      <td>urinary_tract</td>
-      <td>bladder_carcinoma</td>
+      <td>ACH-000323</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
       <td>WT</td>
       <td>...</td>
-      <td>0.814602</td>
-      <td>1.758813</td>
+      <td>0.845287</td>
+      <td>1.328646</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -129,47 +128,47 @@ data.head(n=5)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>0.799087</td>
+      <td>1.263034</td>
     </tr>
     <tr>
-      <th>310</th>
+      <th>1</th>
       <td>AATCAACCCACAGCTGCACA</td>
-      <td>253j-311cas9_repa_p5_batch3</td>
-      <td>3.432823</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>-0.133541</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-000011</td>
-      <td>Metastasis</td>
-      <td>urinary_tract</td>
-      <td>bladder_carcinoma</td>
+      <td>ACH-000323</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
       <td>WT</td>
       <td>...</td>
-      <td>1.122527</td>
-      <td>2.177280</td>
-      <td>0</td>
+      <td>0.827398</td>
+      <td>1.287359</td>
+      <td>2</td>
       <td>False</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
+      <td>missense_mutation;missense_mutation</td>
+      <td>FALSE;FALSE</td>
+      <td>TRUE;TRUE</td>
+      <td>TRUE;TRUE</td>
       <td>False</td>
-      <td>5.629357</td>
+      <td>5.220330</td>
     </tr>
     <tr>
-      <th>311</th>
+      <th>2</th>
       <td>AATTACTACTTGCTTCCTGT</td>
-      <td>253j-311cas9_repa_p5_batch3</td>
-      <td>-0.020514</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>-0.491495</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-000011</td>
-      <td>Metastasis</td>
-      <td>urinary_tract</td>
-      <td>bladder_carcinoma</td>
+      <td>ACH-000323</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
       <td>WT</td>
       <td>...</td>
-      <td>1.160464</td>
-      <td>2.235293</td>
+      <td>0.879280</td>
+      <td>1.409165</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -177,23 +176,23 @@ data.head(n=5)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>2.903038</td>
+      <td>3.008989</td>
     </tr>
     <tr>
-      <th>312</th>
+      <th>3</th>
       <td>ACCTGTATGACGAAACCGTG</td>
-      <td>253j-311cas9_repa_p5_batch3</td>
-      <td>-0.936162</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>-0.015850</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-000011</td>
-      <td>Metastasis</td>
-      <td>urinary_tract</td>
-      <td>bladder_carcinoma</td>
+      <td>ACH-000323</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
       <td>WT</td>
       <td>...</td>
-      <td>1.159818</td>
-      <td>2.234293</td>
+      <td>0.818549</td>
+      <td>1.267208</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -201,23 +200,23 @@ data.head(n=5)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>3.354734</td>
+      <td>4.083213</td>
     </tr>
     <tr>
-      <th>313</th>
+      <th>4</th>
       <td>ACTCTGTTCCTTCATCTCCG</td>
-      <td>253j-311cas9_repa_p5_batch3</td>
-      <td>-0.231509</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>-0.530277</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-000011</td>
-      <td>Metastasis</td>
-      <td>urinary_tract</td>
-      <td>bladder_carcinoma</td>
+      <td>ACH-000323</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
       <td>WT</td>
       <td>...</td>
-      <td>1.158529</td>
-      <td>2.232297</td>
+      <td>0.990378</td>
+      <td>1.692253</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -225,18 +224,74 @@ data.head(n=5)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>5.207112</td>
+      <td>5.822730</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>ACTGCTGCGGGAATTCCAAG</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>0.778827</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000323</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
+      <td>...</td>
+      <td>0.818549</td>
+      <td>1.267208</td>
+      <td>0</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>4.083213</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>AGACACTTATACTATGAAAG</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>0.035950</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000323</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
+      <td>...</td>
+      <td>0.872323</td>
+      <td>1.392463</td>
+      <td>0</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>3.701549</td>
     </tr>
   </tbody>
 </table>
-<p>5 rows × 25 columns</p>
+<p>7 rows × 27 columns</p>
 </div>
+
+```python
+np.random.seed(RANDOM_SEED)
+SAMPLED_GENES = data["hugo_symbol"].unique()
+SAMPLED_CELL_LINES = np.random.choice(data["depmap_id"].unique(), 10)
+data = data[data["hugo_symbol"].isin(SAMPLED_GENES)]
+data = data[data["depmap_id"].isin(SAMPLED_CELL_LINES)]
+```
 
 ```python
 print(f"testing with {data.shape[0]} data points")
 ```
 
-    testing with 14523 data points
+    testing with 2266 data points
 
 ```python
 def make_cat(df, col, ordered=True):
@@ -268,7 +323,7 @@ def count_unique(df, col):
 
 def get_indices(df, col):
     """Get a list of the indices for a column."""
-    return df[col].cat.codes.to_list()
+    return df[col].cat.codes.to_numpy()
 
 
 num_sgrnas = count_unique(data, "sgrna")
@@ -281,37 +336,38 @@ cell_line_idx = get_indices(data, "depmap_id")
 ```
 
 ```python
-data["segment_mean_z"] = data["segment_mean"].apply(lambda x: np.min((x, 10)))
-data["segment_mean_z"] = data.groupby("hugo_symbol")["segment_mean_z"].apply(
+data["gene_cn_z"] = data["gene_cn"].apply(lambda x: np.min((x, 10)))
+data["gene_cn_z"] = data.groupby("hugo_symbol")["gene_cn_z"].apply(
     lambda x: (x - np.mean(x)) / np.std(x)
 )
 ```
 
 ```python
 (
-    gg.ggplot(data, gg.aes(x="segment_mean_z"))
+    gg.ggplot(data, gg.aes(x="gene_cn_z"))
     + gg.geom_density(gg.aes(color="hugo_symbol"), size=0.5)
     + gg.scale_color_discrete(guide=False)
     + gg.theme(figure_size=(8, 5))
-    + gg.labs(x="z-scaled segment mean", y="density")
+    + gg.labs(x="z-scaled gene copy number", y="density")
 )
 ```
 
-![png](010_010_ceres-replicate_files/010_010_ceres-replicate_9_0.png)
+![png](010_010_ceres-replicate_files/010_010_ceres-replicate_11_0.png)
 
-    <ggplot: (8732286816895)>
+    <ggplot: (8784022179045)>
+
+## Modeling
 
 ### Model 1.
 
-Below is the model that will be fit with PyMC3 as the mimic of CERES.
+Below is the model that will be fit with PyMC3 as the mimic of CERES without any covariate for the gene CN.
 
 $
 \quad D_{ij} \sim \mathcal{N}(\mu_{ij}, \epsilon) \\
-\quad \mu_{ij} = q_i \lgroup h_k + g_{kj} \beta_{ij} C_{ij} \rgroup + o_i \\
+\quad \mu_{ij} = q_i \lgroup h_k + g_{kj} \rgroup + o_i \\
 \qquad q_i \sim \text{Beta}(2, 2) \\
 \qquad h_k \sim \mathcal{N}(0, 1) \\
 \qquad g_{kj} \sim \mathcal{N}(0, 1) \\
-\qquad \beta_{ij} \sim \mathcal{N}(-0.2, 0.5) \\
 \qquad o_i \sim \mathcal{N}(0, 1) \\
 \quad \epsilon \sim \text{Exp}(1)
 $
@@ -321,14 +377,14 @@ with pm.Model() as ceres_m1:
     # Priors
     q_i = pm.Beta("q_i", alpha=2, beta=2, shape=num_sgrnas)
     h_k = pm.Normal("h_k", 0, 1, shape=num_genes)
-    g_kj = pm.Normal("g_kj", 0, 1, shape=(num_genes, num_cell_lines))
-    #     beta_ij = pm.Normal("beta_ij", -0.2, 0.5, shape=(num_sgrnas, num_cell_lines))
+    g_kj = pm.Normal("g_kj", 0, 2, shape=(num_genes, num_cell_lines))
     o_i = pm.Normal("o_i", 0, 1, shape=num_sgrnas)
 
     # Model
-    mu_ij = (
+    mu_ij = pm.Deterministic(
+        "mu",
         q_i[sgrna_idx] * (h_k[gene_idx] + g_kj[gene_idx, cell_line_idx])
-        + o_i[sgrna_idx]
+        + o_i[sgrna_idx],
     )
     epsilon = pm.Exponential("epsilon", 1)
 
@@ -342,7 +398,7 @@ with pm.Model() as ceres_m1:
 pm.model_to_graphviz(ceres_m1)
 ```
 
-![svg](010_010_ceres-replicate_files/010_010_ceres-replicate_12_0.svg)
+![svg](010_010_ceres-replicate_files/010_010_ceres-replicate_15_0.svg)
 
 ```python
 %%time
@@ -351,20 +407,69 @@ ceres_m1_cachedir = pymc3_cache_dir / "ceres_m1"
 
 ceres_m1_samples = pmhelp.pymc3_sampling_procedure(
     model=ceres_m1,
-    num_mcmc=2000,
-    tune=1000,
-    chains=2,
+    num_mcmc=3000,
+    tune=1500,
+    chains=3,
     prior_check_samples=1000,
-    ppc_samples=1000,
+    ppc_samples=2000,
     random_seed=RANDOM_SEED,
     cache_dir=ceres_m1_cachedir,
     force=False,
 )
 ```
 
-    Loading cached trace and posterior sample...
-    CPU times: user 592 ms, sys: 315 ms, total: 906 ms
-    Wall time: 917 ms
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using jitter+adapt_diag...
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    Multiprocess sampling (3 chains in 4 jobs)
+    NUTS: [epsilon, o_i, g_kj, h_k, q_i]
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='13500' class='' max='13500' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [13500/13500 05:24<00:00 Sampling 3 chains, 2 divergences]
+</div>
+
+    Sampling 3 chains for 1_500 tune and 3_000 draw iterations (4_500 + 9_000 draws total) took 325 seconds.
+    There was 1 divergence after tuning. Increase `target_accept` or reparameterize.
+    There was 1 divergence after tuning. Increase `target_accept` or reparameterize.
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='2000' class='' max='2000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [2000/2000 00:02<00:00]
+</div>
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+
+
+    Caching trace and posterior sample...
+    CPU times: user 28.9 s, sys: 3.5 s, total: 32.4 s
+    Wall time: 5min 47s
 
 ```python
 az_ceres_m1 = az.from_pymc3(
@@ -382,45 +487,35 @@ az.plot_forest(az_ceres_m1, var_names="q_i", combined=True)
 plt.show()
 ```
 
-![png](010_010_ceres-replicate_files/010_010_ceres-replicate_15_0.png)
+![png](010_010_ceres-replicate_files/010_010_ceres-replicate_18_0.png)
 
 ```python
 az.plot_forest(az_ceres_m1, var_names="o_i", combined=True)
 plt.show()
 ```
 
-![png](010_010_ceres-replicate_files/010_010_ceres-replicate_16_0.png)
+![png](010_010_ceres-replicate_files/010_010_ceres-replicate_19_0.png)
 
 ```python
 az.plot_forest(az_ceres_m1, var_names="h_k", combined=True)
 plt.show()
 ```
 
-![png](010_010_ceres-replicate_files/010_010_ceres-replicate_17_0.png)
+![png](010_010_ceres-replicate_files/010_010_ceres-replicate_20_0.png)
 
 ```python
 gene_effect_post = ceres_m1_samples["trace"].get_values("g_kj")
 gene_effect_post.shape
 ```
 
-    (4000, 26, 70)
+    (9000, 26, 10)
 
 ```python
 gene_effect_mean = gene_effect_post.mean(axis=0)
 gene_effect_mean.shape
 ```
 
-    (26, 70)
-
-```python
-data["hugo_symbol"].cat.categories
-```
-
-    Index(['PDE5A', 'TP53', 'KRAS', 'KIF3C', 'ZSWIM8', 'MDM2', 'HIST1H2BO',
-           'NDUFAF3', 'DISP1', 'BRAF', 'PTK2', 'IQCK', 'LGALS7B', 'CXCL2',
-           'LGALS4', 'ADAMTS13', 'SLC7A14', 'DPH7', 'RNF125', 'GHSR', 'SCMH1',
-           'PIK3CA', 'PHACTR3', 'FAM43B', 'UQCRC1', 'SMAD7'],
-          dtype='object')
+    (26, 10)
 
 ```python
 gene_effect_post_df = (
@@ -446,7 +541,7 @@ gene_effect_post_df = gene_effect_post_df.merge(
     mutation_info, how="left", on=["depmap_id"]
 )
 
-gene_effect_post_df.head(n=10)
+gene_effect_post_df.head(n=7)
 ```
 
 <div>
@@ -481,9 +576,9 @@ gene_effect_post_df.head(n=10)
       <th>0</th>
       <td>0</td>
       <td>0</td>
-      <td>1.040254</td>
+      <td>-0.721432</td>
       <td>PDE5A</td>
-      <td>ACH-000011</td>
+      <td>ACH-000535</td>
       <td>WT</td>
       <td>NaN</td>
     </tr>
@@ -491,9 +586,9 @@ gene_effect_post_df.head(n=10)
       <th>1</th>
       <td>0</td>
       <td>0</td>
-      <td>1.040254</td>
+      <td>-0.721432</td>
       <td>PDE5A</td>
-      <td>ACH-000011</td>
+      <td>ACH-000535</td>
       <td>WT</td>
       <td>FALSE</td>
     </tr>
@@ -501,9 +596,9 @@ gene_effect_post_df.head(n=10)
       <th>2</th>
       <td>1</td>
       <td>0</td>
-      <td>3.376785</td>
+      <td>0.393648</td>
       <td>TP53</td>
-      <td>ACH-000011</td>
+      <td>ACH-000535</td>
       <td>WT</td>
       <td>NaN</td>
     </tr>
@@ -511,9 +606,9 @@ gene_effect_post_df.head(n=10)
       <th>3</th>
       <td>1</td>
       <td>0</td>
-      <td>3.376785</td>
+      <td>0.393648</td>
       <td>TP53</td>
-      <td>ACH-000011</td>
+      <td>ACH-000535</td>
       <td>WT</td>
       <td>FALSE</td>
     </tr>
@@ -521,9 +616,9 @@ gene_effect_post_df.head(n=10)
       <th>4</th>
       <td>2</td>
       <td>0</td>
-      <td>0.974897</td>
+      <td>0.552273</td>
       <td>KRAS</td>
-      <td>ACH-000011</td>
+      <td>ACH-000535</td>
       <td>WT</td>
       <td>NaN</td>
     </tr>
@@ -531,9 +626,9 @@ gene_effect_post_df.head(n=10)
       <th>5</th>
       <td>2</td>
       <td>0</td>
-      <td>0.974897</td>
+      <td>0.552273</td>
       <td>KRAS</td>
-      <td>ACH-000011</td>
+      <td>ACH-000535</td>
       <td>WT</td>
       <td>FALSE</td>
     </tr>
@@ -541,41 +636,11 @@ gene_effect_post_df.head(n=10)
       <th>6</th>
       <td>3</td>
       <td>0</td>
-      <td>-0.649296</td>
+      <td>0.417423</td>
       <td>KIF3C</td>
-      <td>ACH-000011</td>
+      <td>ACH-000535</td>
       <td>WT</td>
       <td>NaN</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>3</td>
-      <td>0</td>
-      <td>-0.649296</td>
-      <td>KIF3C</td>
-      <td>ACH-000011</td>
-      <td>WT</td>
-      <td>FALSE</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>4</td>
-      <td>0</td>
-      <td>0.054926</td>
-      <td>ZSWIM8</td>
-      <td>ACH-000011</td>
-      <td>WT</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>4</td>
-      <td>0</td>
-      <td>0.054926</td>
-      <td>ZSWIM8</td>
-      <td>ACH-000011</td>
-      <td>WT</td>
-      <td>FALSE</td>
     </tr>
   </tbody>
 </table>
@@ -585,8 +650,7 @@ gene_effect_post_df.head(n=10)
 data.is_deleterious.unique()
 ```
 
-    array([nan, 'FALSE', 'FALSE;FALSE', 'TRUE', 'FALSE;TRUE;FALSE',
-           'FALSE;FALSE;FALSE', 'TRUE;FALSE', 'FALSE;TRUE'], dtype=object)
+    array([nan, 'FALSE', 'TRUE', 'FALSE;FALSE'], dtype=object)
 
 ```python
 (
@@ -606,9 +670,9 @@ data.is_deleterious.unique()
 )
 ```
 
-![png](010_010_ceres-replicate_files/010_010_ceres-replicate_23_0.png)
+![png](010_010_ceres-replicate_files/010_010_ceres-replicate_25_0.png)
 
-    <ggplot: (8732273703665)>
+    <ggplot: (8783961159358)>
 
 ```python
 (
@@ -622,9 +686,9 @@ data.is_deleterious.unique()
 )
 ```
 
-![png](010_010_ceres-replicate_files/010_010_ceres-replicate_24_0.png)
+![png](010_010_ceres-replicate_files/010_010_ceres-replicate_26_0.png)
 
-    <ggplot: (8732273699615)>
+    <ggplot: (8783795051307)>
 
 ```python
 (
@@ -643,9 +707,9 @@ data.is_deleterious.unique()
 )
 ```
 
-![png](010_010_ceres-replicate_files/010_010_ceres-replicate_25_0.png)
+![png](010_010_ceres-replicate_files/010_010_ceres-replicate_27_0.png)
 
-    <ggplot: (8732273461836)>
+    <ggplot: (8783797962861)>
 
 ```python
 (
@@ -659,9 +723,9 @@ data.is_deleterious.unique()
 )
 ```
 
-![png](010_010_ceres-replicate_files/010_010_ceres-replicate_26_0.png)
+![png](010_010_ceres-replicate_files/010_010_ceres-replicate_28_0.png)
 
-    <ggplot: (8732275656304)>
+    <ggplot: (8783798109793)>
 
 ```python
 kras_gene_effect = gene_effect_post_df[
@@ -676,9 +740,297 @@ kras_gene_effect = gene_effect_post_df[
 )
 ```
 
-![png](010_010_ceres-replicate_files/010_010_ceres-replicate_27_0.png)
+![png](010_010_ceres-replicate_files/010_010_ceres-replicate_29_0.png)
 
-    <ggplot: (8732273613972)>
+    <ggplot: (8783798223583)>
+
+---
+
+### Model 2.
+
+Below is the model that will be fit with PyMC3 as the mimic of CERES with a covariate for the gene CN modeled as a standard linear coefficient.
+The copy number values were z-scaled within each gene.
+
+$
+\quad D_{ij} \sim \mathcal{N}(\mu_{ij}, \epsilon) \\
+\quad \mu_{ij} = q_i \lgroup h_k + g_{kj} + \beta_{ij} C \rgroup + o_i \\
+\qquad q_i \sim \text{Beta}(2, 2) \\
+\qquad h_k \sim \mathcal{N}(0, 1) \\
+\qquad g_{kj} \sim \mathcal{N}(0, 1) \\
+\qquad o_i \sim \mathcal{N}(0, 1) \\
+\quad \epsilon \sim \text{Exp}(1)
+$
+
+```python
+BATCH_SIZE = 100
+sgrna_idx_mb = pm.Minibatch(sgrna_idx, batch_size=BATCH_SIZE)
+gene_idx_mb = pm.Minibatch(gene_idx, batch_size=BATCH_SIZE)
+cell_line_idx_mb = pm.Minibatch(cell_line_idx, batch_size=BATCH_SIZE)
+
+gene_cn_z_mb = pm.Minibatch(data.gene_cn_z.to_numpy(), batch_size=BATCH_SIZE)
+lfc_mb = pm.Minibatch(data.lfc.to_numpy(), batch_size=BATCH_SIZE)
+
+with pm.Model() as ceres_m2:
+    # Priors
+    q_i = pm.Beta("q_i", alpha=2, beta=2, shape=num_sgrnas)
+    h_k = pm.Normal("h_k", 0, 1, shape=num_genes)
+    g_kj = pm.Normal("g_kj", 0, 2, shape=(num_genes, num_cell_lines))
+    beta_ij = pm.Normal("beta_ij", -0.5, 1, shape=(num_sgrnas, num_cell_lines))
+    o_i = pm.Normal("o_i", 0, 1, shape=num_sgrnas)
+
+    # Model
+    mu_ij = pm.Deterministic(
+        "mu",
+        q_i[sgrna_idx_mb]
+        * (
+            h_k[gene_idx_mb]
+            + g_kj[gene_idx_mb, cell_line_idx_mb]
+            + beta_ij[sgrna_idx_mb, cell_line_idx_mb] * gene_cn_z_mb
+        )
+        + o_i[sgrna_idx_mb],
+    )
+    epsilon = pm.Exponential("epsilon", 1)
+
+    # Likelihood
+    D_ij = pm.Normal("D_ij", mu_ij, epsilon, observed=lfc_mb, total_size=len(data))
+```
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/pymc3/data.py:307: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/pymc3/data.py:307: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+
+```python
+pm.model_to_graphviz(ceres_m2)
+```
+
+![svg](010_010_ceres-replicate_files/010_010_ceres-replicate_32_0.svg)
+
+```python
+%%time
+
+with ceres_m2:
+    ceres_m2_advi_meanfield = pm.fit(
+        40000,
+        method="advi",
+        callbacks=[pm.callbacks.CheckParametersConvergence(tolerance=1e-4)],
+    )
+```
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='40000' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [40000/40000 00:28<00:00 Average Loss = 110.98]
+</div>
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    Finished [100%]: Average Loss = 110.98
+
+
+    CPU times: user 32.6 s, sys: 949 ms, total: 33.6 s
+    Wall time: 40 s
+
+```python
+df = pd.DataFrame(
+    {
+        "loss": ceres_m2_advi_meanfield.hist,
+        "idx": range(len(ceres_m2_advi_meanfield.hist)),
+    }
+)
+(
+    gg.ggplot(df, gg.aes(x="idx", y="loss"))
+    + gg.geom_line(group="a", color="black", alpha=0.5)
+    + gg.geom_smooth(method="loess", se=False, color="firebrick")
+    + gg.scale_y_continuous(trans="log")
+)
+```
+
+![png](010_010_ceres-replicate_files/010_010_ceres-replicate_34_0.png)
+
+    <ggplot: (8783948656153)>
+
+```python
+(
+    gg.ggplot(df.tail(n=5000), gg.aes(x="idx", y="loss"))
+    + gg.geom_line(group="a", color="black", alpha=0.5)
+    + gg.geom_smooth(method="loess", se=False, color="firebrick")
+)
+```
+
+![png](010_010_ceres-replicate_files/010_010_ceres-replicate_35_0.png)
+
+    <ggplot: (8783948656948)>
+
+```python
+with pm.Model() as ceres_m2_full:
+    # Priors
+    q_i = pm.Beta("q_i", alpha=2, beta=2, shape=num_sgrnas)
+    h_k = pm.Normal("h_k", 0, 1, shape=num_genes)
+    g_kj = pm.Normal("g_kj", 0, 2, shape=(num_genes, num_cell_lines))
+    beta_ij = pm.Normal("beta_ij", -0.5, 1, shape=(num_sgrnas, num_cell_lines))
+    o_i = pm.Normal("o_i", 0, 1, shape=num_sgrnas)
+
+    # Model
+    mu_ij = pm.Deterministic(
+        "mu",
+        q_i[sgrna_idx]
+        * (
+            h_k[gene_idx]
+            + g_kj[gene_idx, cell_line_idx]
+            + beta_ij[sgrna_idx, cell_line_idx] * data.gene_cn_z.values
+        )
+        + o_i[sgrna_idx],
+    )
+    epsilon = pm.Exponential("epsilon", 1)
+
+    # Likelihood
+    D_ij = pm.Normal("D_ij", mu_ij, epsilon, observed=data.lfc.values)
+```
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+
+```python
+%%time
+with ceres_m2_full:
+    ceres_m2_trace = pm.sample(2000, tune=2000, random_seed=RANDOM_SEED)
+```
+
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using jitter+adapt_diag...
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    Multiprocess sampling (4 chains in 4 jobs)
+    NUTS: [epsilon, o_i, beta_ij, g_kj, h_k, q_i]
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [16000/16000 03:28<00:00 Sampling 4 chains, 1 divergences]
+</div>
+
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 209 seconds.
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    There was 1 divergence after tuning. Increase `target_accept` or reparameterize.
+
+
+    CPU times: user 25.7 s, sys: 2.11 s, total: 27.9 s
+    Wall time: 3min 43s
+
+```python
+%%time
+with ceres_m2_full:
+    #     step = pm.NUTS(scaling=ceres_m2_advi_meanfield.cov.eval(), is_cov=True)
+    ceres_m2_trace_advi = pm.sample(
+        2000,
+        init="advi",
+        n_init=40000,
+        tune=2000,
+        progressbar=True,
+        random_seed=RANDOM_SEED,
+    )
+```
+
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using advi...
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='40000' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [40000/40000 00:42<00:00 Average Loss = 1,460]
+</div>
+
+    Finished [100%]: Average Loss = 1,460
+    Multiprocess sampling (4 chains in 4 jobs)
+    NUTS: [epsilon, o_i, beta_ij, g_kj, h_k, q_i]
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [16000/16000 04:27<00:00 Sampling 4 chains, 0 divergences]
+</div>
+
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 268 seconds.
+    The number of effective samples is smaller than 10% for some parameters.
+
+
+    CPU times: user 1min 10s, sys: 2.63 s, total: 1min 12s
+    Wall time: 5min 28s
+
+todo
+
+- compare the results of using ADVI initialization
+- compare ADVI samples to MCMC
+- figure out why the MCMC refuses to start with too many parameters
+
+```python
+# %%time
+
+# ceres_m2_cachedir = pymc3_cache_dir / "ceres_m2"
+
+# ceres_m2_samples = pmhelp.pymc3_sampling_procedure(
+#     model=ceres_m2,
+#     num_mcmc=3000,
+#     tune=1500,
+#     chains=3,
+#     prior_check_samples=1000,
+#     ppc_samples=2000,
+#     random_seed=RANDOM_SEED,
+#     cache_dir=ceres_m2_cachedir,
+#     force=False,
+# )
+```
+
+```python
+# az_ceres_m2 = az.from_pymc3(
+#     trace=ceres_m2_samples["trace"],
+#     model=ceres_m2,
+#     prior=ceres_m2_samples["prior_predictive"],
+#     posterior_predictive=ceres_m2_samples["posterior_predictive"],
+# )
+```
 
 ```python
 
