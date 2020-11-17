@@ -31,6 +31,7 @@ np.random.seed(RANDOM_SEED)
 pymc3_cache_dir = Path("pymc3_model_cache")
 rethinking_data_path = Path("../data/rethinking_data")
 modeling_data_path = Path("../modeling_data/depmap_modeling_dataframe_subsample.csv")
+modeling_data2_path = Path("../modeling_data/depmap_modeling_dataframe_subsample2.csv")
 ```
 
 ## Replicate the example from *Statistical Rethinking*
@@ -246,7 +247,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_8_0.png)
 
-    <ggplot: (8737175186318)>
+    <ggplot: (8746894729834)>
 
 ```python
 (
@@ -260,7 +261,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_9_0.png)
 
-    <ggplot: (8737175186201)>
+    <ggplot: (8746894158222)>
 
 ```python
 (
@@ -275,7 +276,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_10_0.png)
 
-    <ggplot: (8737172993434)>
+    <ggplot: (8746892524364)>
 
 ```python
 d2["knot_group"] = [np.where(a <= knot_list)[0][0] for a in d2.year]
@@ -297,7 +298,7 @@ d2["knot_group"] = pd.Categorical(d2["knot_group"], ordered=True)
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_12_0.png)
 
-    <ggplot: (8737174616640)>
+    <ggplot: (8746892535772)>
 
 ```python
 B = dmatrix(
@@ -348,7 +349,7 @@ spline_df = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_14_0.png)
 
-    <ggplot: (8737173014974)>
+    <ggplot: (8746892557210)>
 
 ```python
 with pm.Model() as m4_7:
@@ -768,7 +769,7 @@ spline_df_merged = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_22_0.png)
 
-    <ggplot: (8737142661994)>
+    <ggplot: (8746863362058)>
 
 ```python
 post_pred = az.summary(az_m4_7, var_names=["mu"]).reset_index(drop=True)
@@ -798,13 +799,13 @@ d2_post["pred_hdi_upper"] = post_pred["hdi_97%"]
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_24_0.png)
 
-    <ggplot: (8737153146119)>
+    <ggplot: (8746889999171)>
 
 ## Example with gene CN data of a single gene
 
 ```python
 modeling_data = pd.read_csv(modeling_data_path)
-modeling_data
+modeling_data.head(n=7)
 ```
 
 <div>
@@ -970,68 +971,20 @@ modeling_data
       <td>5.822730</td>
     </tr>
     <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>60044</th>
-      <td>TTATTAATGTAGCCTCACGG</td>
-      <td>ykg1-311cas9_repb_p6_batch3</td>
-      <td>-0.096160</td>
+      <th>5</th>
+      <td>ACTGCTGCGGGAATTCCAAG</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>0.778827</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-000570</td>
+      <td>ACH-000323</td>
       <td>Primary</td>
       <td>central_nervous_system</td>
       <td>glioma</td>
       <td>WT</td>
       <td>...</td>
-      <td>1.129110</td>
-      <td>2.092901</td>
-      <td>1</td>
-      <td>False</td>
-      <td>missense_mutation</td>
-      <td>FALSE</td>
-      <td>TRUE</td>
-      <td>TRUE</td>
-      <td>False</td>
-      <td>3.792855</td>
-    </tr>
-    <tr>
-      <th>60045</th>
-      <td>TTCCGTTTATCATGAAGCCG</td>
-      <td>ykg1-311cas9_repb_p6_batch3</td>
-      <td>-0.975325</td>
-      <td>3</td>
-      <td>True</td>
-      <td>ACH-000570</td>
-      <td>Primary</td>
-      <td>central_nervous_system</td>
-      <td>glioma</td>
-      <td>WT</td>
-      <td>...</td>
-      <td>1.129110</td>
-      <td>2.092901</td>
+      <td>0.818549</td>
+      <td>1.267208</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -1039,23 +992,23 @@ modeling_data
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>6.134426</td>
+      <td>4.083213</td>
     </tr>
     <tr>
-      <th>60046</th>
-      <td>TTGCAATGTGATGGAAGGGG</td>
-      <td>ykg1-311cas9_repb_p6_batch3</td>
-      <td>0.408497</td>
+      <th>6</th>
+      <td>AGACACTTATACTATGAAAG</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>0.035950</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-000570</td>
+      <td>ACH-000323</td>
       <td>Primary</td>
       <td>central_nervous_system</td>
       <td>glioma</td>
       <td>WT</td>
       <td>...</td>
-      <td>0.950623</td>
-      <td>1.587322</td>
+      <td>0.872323</td>
+      <td>1.392463</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -1063,59 +1016,11 @@ modeling_data
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>3.645010</td>
-    </tr>
-    <tr>
-      <th>60047</th>
-      <td>TTGTCCCAGCCGTCAAACCG</td>
-      <td>ykg1-311cas9_repb_p6_batch3</td>
-      <td>-0.050832</td>
-      <td>3</td>
-      <td>True</td>
-      <td>ACH-000570</td>
-      <td>Primary</td>
-      <td>central_nervous_system</td>
-      <td>glioma</td>
-      <td>WT</td>
-      <td>...</td>
-      <td>1.071891</td>
-      <td>1.920898</td>
-      <td>0</td>
-      <td>False</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>False</td>
-      <td>0.992768</td>
-    </tr>
-    <tr>
-      <th>60048</th>
-      <td>TTTGACCTGGAGTTGCCTGA</td>
-      <td>ykg1-311cas9_repb_p6_batch3</td>
-      <td>0.083380</td>
-      <td>3</td>
-      <td>True</td>
-      <td>ACH-000570</td>
-      <td>Primary</td>
-      <td>central_nervous_system</td>
-      <td>glioma</td>
-      <td>WT</td>
-      <td>...</td>
-      <td>0.962893</td>
-      <td>1.619263</td>
-      <td>0</td>
-      <td>False</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>False</td>
-      <td>2.134221</td>
+      <td>3.701549</td>
     </tr>
   </tbody>
 </table>
-<p>60049 rows × 27 columns</p>
+<p>7 rows × 27 columns</p>
 </div>
 
 ### A "well-behaved" gene: *PTK2*
@@ -1135,7 +1040,7 @@ ptk2_data = modeling_data[modeling_data.hugo_symbol == "PTK2"]
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_28_0.png)
 
-    <ggplot: (8737142694900)>
+    <ggplot: (8746870549571)>
 
 ```python
 ptk2_data.shape[0]
@@ -1174,7 +1079,7 @@ ptk2_spline_df = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_31_0.png)
 
-    <ggplot: (8737151079946)>
+    <ggplot: (8746868766826)>
 
 ```python
 with pm.Model() as m_ptk2:
@@ -1217,10 +1122,10 @@ with m_ptk2:
         }
     </style>
   <progress value='10000' class='' max='10000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [10000/10000 00:55<00:00 Sampling 2 chains, 163 divergences]
+  100.00% [10000/10000 00:56<00:00 Sampling 2 chains, 163 divergences]
 </div>
 
-    Sampling 2 chains for 2_000 tune and 3_000 draw iterations (4_000 + 6_000 draws total) took 56 seconds.
+    Sampling 2 chains for 2_000 tune and 3_000 draw iterations (4_000 + 6_000 draws total) took 57 seconds.
     There were 163 divergences after tuning. Increase `target_accept` or reparameterize.
     The number of effective samples is smaller than 25% for some parameters.
 
@@ -1238,7 +1143,7 @@ with m_ptk2:
         }
     </style>
   <progress value='6000' class='' max='6000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [6000/6000 00:07<00:00]
+  100.00% [6000/6000 00:08<00:00]
 </div>
 
 ```python
@@ -1443,7 +1348,7 @@ ptk2_post.head()
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_37_0.png)
 
-    <ggplot: (8737146028270)>
+    <ggplot: (8746890195818)>
 
 ### A "misbehaved" gene: *MDM2*
 
@@ -1466,7 +1371,7 @@ mdm2_data["log_gene_cn"] = np.log10(mdm2_data.gene_cn.values)
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_39_0.png)
 
-    <ggplot: (8737142684459)>
+    <ggplot: (8746861602792)>
 
 ```python
 mdm2_data.shape[0]
@@ -1511,7 +1416,7 @@ mdm2_spline_df = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_42_0.png)
 
-    <ggplot: (8737145947356)>
+    <ggplot: (8746870469608)>
 
 ```python
 with pm.Model() as m_mdm2:
@@ -1788,7 +1693,7 @@ mdm2_post.head()
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_49_0.png)
 
-    <ggplot: (8737145791943)>
+    <ggplot: (8746861100662)>
 
 ```python
 (
@@ -1811,7 +1716,96 @@ mdm2_post.head()
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_50_0.png)
 
-    <ggplot: (8737142932535)>
+    <ggplot: (8746861100602)>
+
+```python
+np.asarray(mdm2_B).shape
+```
+
+    (2332, 7)
+
+```python
+mdm2_data.shape
+```
+
+    (2332, 28)
+
+```python
+np.round(np.asarray(mdm2_B)[:5, :5], 1)
+```
+
+    array([[0. , 0.2, 0.6, 0.3, 0. ],
+           [0. , 0.2, 0.6, 0.3, 0. ],
+           [0. , 0.2, 0.6, 0.3, 0. ],
+           [0. , 0.2, 0.6, 0.3, 0. ],
+           [0. , 0.2, 0.6, 0.3, 0. ]])
+
+```python
+mdm2_data.reset_index().loc[0:5, ["lfc", "gene_cn"]]
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>lfc</th>
+      <th>gene_cn</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.035950</td>
+      <td>1.392463</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.059690</td>
+      <td>1.392463</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.148150</td>
+      <td>1.392463</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-0.102953</td>
+      <td>1.392463</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-0.469799</td>
+      <td>1.392463</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>0.107208</td>
+      <td>1.392463</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+np.round(cn_knot_list, 2)
+```
+
+    array([  0.  ,   1.44,   1.73,   2.03, 328.39])
 
 ### Multi-level
 
@@ -1820,55 +1814,522 @@ The original 2017 paper created a spline function for each cell line.
 I think the only change would be to have an additional index on `w` and keep all of the `B` matrices in a list that gets indexed, too.
 
 ```python
+modeling_data2 = pd.read_csv(modeling_data2_path)
 
+for col in ["depmap_id", "hugo_symbol", "sgrna"]:
+    modeling_data2[col] = pd.Categorical(modeling_data2[col], ordered=True)
+
+modeling_data2.head(n=7)
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>sgrna</th>
+      <th>replicate_id</th>
+      <th>lfc</th>
+      <th>pdna_batch</th>
+      <th>passes_qc</th>
+      <th>depmap_id</th>
+      <th>primary_or_metastasis</th>
+      <th>lineage</th>
+      <th>lineage_subtype</th>
+      <th>kras_mutation</th>
+      <th>...</th>
+      <th>log2_gene_cn_p1</th>
+      <th>gene_cn</th>
+      <th>n_muts</th>
+      <th>any_deleterious</th>
+      <th>variant_classification</th>
+      <th>is_deleterious</th>
+      <th>is_tcga_hotspot</th>
+      <th>is_cosmic_hotspot</th>
+      <th>mutated_at_guide_location</th>
+      <th>rna_expr</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>AAAACCCAGGAAATTAGCAA</td>
+      <td>dkmg-311cas9_repa_p5_batch3</td>
+      <td>0.205242</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000244</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
+      <td>...</td>
+      <td>1.010773</td>
+      <td>1.747725</td>
+      <td>0</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>6.130931</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>AAAAGTCCACCAGAGCCATG</td>
+      <td>dkmg-311cas9_repa_p5_batch3</td>
+      <td>-0.079548</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000244</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
+      <td>...</td>
+      <td>0.988893</td>
+      <td>1.688256</td>
+      <td>0</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>AAACAACTATCATGAGCGCG</td>
+      <td>dkmg-311cas9_repa_p5_batch3</td>
+      <td>0.123618</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000244</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
+      <td>...</td>
+      <td>0.664765</td>
+      <td>0.944034</td>
+      <td>0</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>6.034084</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>AAACCCTAAAGAAAACCCAG</td>
+      <td>dkmg-311cas9_repa_p5_batch3</td>
+      <td>-0.147315</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000244</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
+      <td>...</td>
+      <td>0.996234</td>
+      <td>1.708064</td>
+      <td>0</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>3.790772</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>AAACCTGCTGATATTCCTGG</td>
+      <td>dkmg-311cas9_repa_p5_batch3</td>
+      <td>0.076666</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000244</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
+      <td>...</td>
+      <td>1.006521</td>
+      <td>1.736065</td>
+      <td>0</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>AAACGGTGCCTGTAAGTACG</td>
+      <td>dkmg-311cas9_repa_p5_batch3</td>
+      <td>0.141762</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000244</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
+      <td>...</td>
+      <td>1.094310</td>
+      <td>1.987120</td>
+      <td>0</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>6.603775</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>AAACGTGCACGGTCCGGCCG</td>
+      <td>dkmg-311cas9_repa_p5_batch3</td>
+      <td>0.043855</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000244</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
+      <td>...</td>
+      <td>0.611721</td>
+      <td>0.843602</td>
+      <td>0</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>0.344828</td>
+    </tr>
+  </tbody>
+</table>
+<p>7 rows × 27 columns</p>
+</div>
+
+```python
+modeling_data2.shape
+```
+
+    (25922, 27)
+
+```python
+d = modeling_data2.copy()
+d["gene_cn_max"] = [np.min((10.0, x)) for x in d.gene_cn]
+(
+    gg.ggplot(d, gg.aes(x="gene_cn_max"))
+    + gg.facet_wrap("depmap_id", scales="free_y")
+    + gg.geom_histogram(
+        gg.aes(color="depmap_id", fill="depmap_id"), alpha=0.7, binwidth=1.0
+    )
+    + gg.scale_color_brewer(type="qual", palette="Dark2")
+    + gg.scale_fill_brewer(type="qual", palette="Dark2")
+    + gg.scale_x_continuous(breaks=list(range(12)), expand=(0, 0, 0, 0))
+    + gg.theme(figure_size=(10, 8), subplots_adjust={"hspace": 0.4, "wspace": 0.3})
+)
+```
+
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_59_0.png)
+
+    <ggplot: (8746861566660)>
+
+```python
+(
+    gg.ggplot(d, gg.aes(x="lfc"))
+    + gg.facet_wrap("depmap_id", scales="free_y")
+    + gg.geom_density(gg.aes(color="depmap_id", fill="depmap_id"), alpha=0.7)
+    + gg.scale_color_brewer(type="qual", palette="Dark2")
+    + gg.scale_fill_brewer(type="qual", palette="Dark2")
+    + gg.theme(figure_size=(10, 8), subplots_adjust={"hspace": 0.4, "wspace": 0.3})
+)
+```
+
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_60_0.png)
+
+    <ggplot: (8746863281140)>
+
+```python
+d = modeling_data2.copy()
+d["gene_cn_log"] = np.log2(d.gene_cn.values + 1)
+(
+    gg.ggplot(d, gg.aes(x="gene_cn_log", y="lfc"))
+    + gg.facet_wrap("depmap_id", scales="free_y")
+    + gg.geom_point(gg.aes(color="depmap_id"), alpha=0.4, size=0.2)
+    + gg.scale_color_brewer(type="qual", palette="Dark2")
+    + gg.scale_fill_brewer(type="qual", palette="Dark2")
+    + gg.theme(figure_size=(10, 8), subplots_adjust={"hspace": 0.4, "wspace": 0.3})
+)
+```
+
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_61_0.png)
+
+    <ggplot: (8746860931955)>
+
+```python
+(
+    gg.ggplot(d, gg.aes(x="gene_cn", y="lfc"))
+    + gg.facet_wrap("depmap_id", scales="free")
+    + gg.geom_point(gg.aes(color="depmap_id"), alpha=0.4, size=0.2)
+    + gg.geom_smooth(method="loess")
+    + gg.scale_color_brewer(type="qual", palette="Dark2")
+    + gg.scale_fill_brewer(type="qual", palette="Dark2")
+    + gg.theme(figure_size=(10, 8), subplots_adjust={"hspace": 0.4, "wspace": 0.3})
+)
+```
+
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_62_0.png)
+
+    <ggplot: (8746860831269)>
+
+$
+D_j \sim \mathcal{N}(\mu, \sigma) \\
+\quad \mu_j = a + B[\text{cell line}] \bullet w[:, \text{cell line}] \\
+\qquad a \sim \mathcal{N}(0, 2) \\
+\qquad w \sim \mathcal{N}(-0.5, 1) \quad ||w|| = [\text{# knots}, \text{# cell lines}] \\
+\quad \sigma \sim \text{Exp}(1)
+$
+
+```python
+NUM_KNOTS = 10
+
+B_cn_multi = []
+for cell_line_i in modeling_data2.depmap_id.cat.categories:
+
+    cell_line_df = modeling_data2.copy()[modeling_data2.depmap_id == cell_line_i]
+    cell_line_df = cell_line_df.reset_index(drop=True)
+
+    cell_cn_data = (
+        cell_line_df[["depmap_id", "hugo_symbol", "gene_cn"]]
+        .drop_duplicates()
+        .reset_index(drop=True)
+    )
+
+    knot_list = np.quantile(cell_cn_data.gene_cn, np.linspace(0, 1, NUM_KNOTS))
+
+    B = dmatrix(
+        "bs(x, knots=knots, degree=3, include_intercept=True) - 1",
+        {"x": cell_line_df.gene_cn, "knots": knot_list[1:-1]},
+    )
+
+    B_cn_multi.append(np.asarray(B, order="F"))
+B_cn_multi = np.asarray(B_cn_multi)
 ```
 
 ```python
-
+for i, B in enumerate(B_cn_multi):
+    print(f"B[{i}]: {B.shape[0]}, {B.shape[1]}")
 ```
 
-```python
+    B[0]: 5982, 12
+    B[1]: 3988, 12
+    B[2]: 3988, 12
+    B[3]: 3988, 12
+    B[4]: 3988, 12
+    B[5]: 3988, 12
 
+```python
+B_cn_multi_idx = []
+
+for i, B in enumerate(B_cn_multi):
+    start = int(np.sum([len(x) for x in B_cn_multi[0:i]]))
+    length = len(B)
+    B_cn_multi_idx.append(np.asarray(range(start, start + length), dtype=int))
+
+B_cn_multi_idx = np.asarray(B_cn_multi_idx)[:, None]
+B_cn_multi_idx.dtype
 ```
 
-```python
+    dtype('O')
 
+```python
+B_cn_multi_cat = np.concatenate(B_cn_multi)
+B_cn_multi_cat.shape
 ```
 
-```python
+    (25922, 12)
 
+```python
+cell_line_idx = modeling_data2.depmap_id.cat.codes.to_numpy()
+w_shape = (NUM_KNOTS + 2, len(np.unique(modeling_data2.depmap_id)))
+
+with pm.Model() as m_cn_multi:
+    # Priors
+    a = pm.Normal("a", 0, 2)
+    w = pm.Normal("w", -0.5, 1, shape=w_shape)
+
+    # Linear model
+    mu = pm.Deterministic(
+        "mu", a + pm.math.dot(B_cn_multi[cell_line_idx], w[:, cell_line_idx])
+    )
+    sigma = pm.Exponential("sigma", 1)
+
+    # Likelihood
+    D = pm.Normal("D", mu, sigma, observed=modeling_data2.lfc)
 ```
 
-```python
+    ---------------------------------------------------------------------------
 
+    KeyError                                  Traceback (most recent call last)
+
+    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/type.py in dtype_specs(self)
+        253         try:
+    --> 254             return {
+        255                 'float16': (float, 'npy_float16', 'NPY_FLOAT16'),
+
+
+    KeyError: 'object'
+
+    
+    During handling of the above exception, another exception occurred:
+
+
+    TypeError                                 Traceback (most recent call last)
+
+    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/basic.py in constant(x, name, ndim, dtype)
+        245     try:
+    --> 246         ttype = TensorType(dtype=x_.dtype, broadcastable=bcastable)
+        247         if not constant.enable:
+
+
+    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/type.py in __init__(self, dtype, broadcastable, name, sparse_grad)
+         50         self.broadcastable = tuple(bool(b) for b in broadcastable)
+    ---> 51         self.dtype_specs()  # error checking is done there
+         52         self.name = name
+
+
+    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/type.py in dtype_specs(self)
+        270         except KeyError:
+    --> 271             raise TypeError("Unsupported dtype for %s: %s"
+        272                             % (self.__class__.__name__, self.dtype))
+
+
+    TypeError: Unsupported dtype for TensorType: object
+
+    
+    During handling of the above exception, another exception occurred:
+
+
+    TypeError                                 Traceback (most recent call last)
+
+    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/basic.py in as_tensor_variable(x, name, ndim)
+        193     try:
+    --> 194         return constant(x, name=name, ndim=ndim)
+        195     except TypeError:
+
+
+    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/basic.py in constant(x, name, ndim, dtype)
+        265     except Exception:
+    --> 266         raise TypeError("Could not convert %s to TensorType" % x, type(x))
+        267 
+
+
+    TypeError: ('Could not convert [array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        8.63742722e-04, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 1.71880194e-05, 6.57152521e-03, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [6.27153564e-02, 3.28686212e-01, 4.30617042e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        2.26923168e-01, 1.55882338e-02, 6.03703977e-05],\n       [3.84348239e-05, 2.05188523e-02, 2.46019072e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        8.63742722e-04, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 1.71880194e-05, 6.57152521e-03, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [6.27153564e-02, 3.28686212e-01, 4.30617042e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        2.26923168e-01, 1.55882338e-02, 6.03703977e-05],\n       [3.84348239e-05, 2.05188523e-02, 2.46019072e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        8.63742722e-04, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 1.71880194e-05, 6.57152521e-03, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [6.27153564e-02, 3.28686212e-01, 4.30617042e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        2.26923168e-01, 1.55882338e-02, 6.03703977e-05],\n       [3.84348239e-05, 2.05188523e-02, 2.46019072e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n ...\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        5.90254982e-05, 0.00000000e+00, 0.00000000e+00],\n       [5.66039126e-02, 3.82431006e-01, 4.21976316e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        5.90254982e-05, 0.00000000e+00, 0.00000000e+00],\n       [5.66039126e-02, 3.82431006e-01, 4.21976316e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        5.90254982e-05, 0.00000000e+00, 0.00000000e+00],\n       [5.66039126e-02, 3.82431006e-01, 4.21976316e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])] to TensorType', <class 'numpy.ndarray'>)
+
+    
+    During handling of the above exception, another exception occurred:
+
+
+    AsTensorError                             Traceback (most recent call last)
+
+    <ipython-input-98-2c32d28ce219> in <module>
+          9     # Linear model
+         10     mu = pm.Deterministic(
+    ---> 11         "mu", a + pm.math.dot(B_cn_multi[cell_line_idx], w[:, cell_line_idx])
+         12     )
+         13     sigma = pm.Exponential("sigma", 1)
+
+
+    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/basic.py in dot(a, b)
+       6096 
+       6097     """
+    -> 6098     a, b = as_tensor_variable(a), as_tensor_variable(b)
+       6099 
+       6100     if a.ndim == 0 or b.ndim == 0:
+
+
+    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/basic.py in as_tensor_variable(x, name, ndim)
+        198         except Exception:
+        199             str_x = repr(x)
+    --> 200         raise AsTensorError("Cannot convert %s to TensorType" % str_x, type(x))
+        201 
+        202 # this has a different name, because _as_tensor_variable is the
+
+
+    AsTensorError: ('Cannot convert [array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        8.63742722e-04, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 1.71880194e-05, 6.57152521e-03, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [6.27153564e-02, 3.28686212e-01, 4.30617042e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        2.26923168e-01, 1.55882338e-02, 6.03703977e-05],\n       [3.84348239e-05, 2.05188523e-02, 2.46019072e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        8.63742722e-04, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 1.71880194e-05, 6.57152521e-03, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [6.27153564e-02, 3.28686212e-01, 4.30617042e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        2.26923168e-01, 1.55882338e-02, 6.03703977e-05],\n       [3.84348239e-05, 2.05188523e-02, 2.46019072e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        8.63742722e-04, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 1.71880194e-05, 6.57152521e-03, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [6.27153564e-02, 3.28686212e-01, 4.30617042e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        2.26923168e-01, 1.55882338e-02, 6.03703977e-05],\n       [3.84348239e-05, 2.05188523e-02, 2.46019072e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n ...\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        5.90254982e-05, 0.00000000e+00, 0.00000000e+00],\n       [5.66039126e-02, 3.82431006e-01, 4.21976316e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        5.90254982e-05, 0.00000000e+00, 0.00000000e+00],\n       [5.66039126e-02, 3.82431006e-01, 4.21976316e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        5.90254982e-05, 0.00000000e+00, 0.00000000e+00],\n       [5.66039126e-02, 3.82431006e-01, 4.21976316e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])] to TensorType', <class 'numpy.ndarray'>)
+
+```python
+pm.model_to_graphviz(m_cn_multi)
 ```
 
-```python
+    ---------------------------------------------------------------------------
 
+    NameError                                 Traceback (most recent call last)
+
+    <ipython-input-2-711986024a8d> in <module>
+    ----> 1 pm.model_to_graphviz(m_cn_multi)
+    
+
+    NameError: name 'pm' is not defined
+
+```python
+B_cn_multi_cat[B_cn_multi_idx[np.array([0, 1])], :]
 ```
 
-```python
+    ---------------------------------------------------------------------------
 
-```
+    IndexError                                Traceback (most recent call last)
 
-```python
+    <ipython-input-86-6fa48521647a> in <module>
+    ----> 1 B_cn_multi_cat[B_cn_multi_idx[np.array([0, 1])], :]
+    
 
-```
-
-```python
-
-```
+    IndexError: arrays used as indices must be of integer (or boolean) type
 
 ```python
+group_idx = d["group"].cat.codes.to_list()
+w_shape = (NUM_KNOTS + 2, len(np.unique(d["group"])))
 
-```
+with pm.Model() as m:
+    # Priors
+    a = pm.Normal("a", 0, 2)
+    w = pm.Normal("w", 0, 1, shape=w_shape)
 
-```python
+    # Linear model
+    mu = pm.Deterministic("mu", a + pm.math.dot(B_list[group_idx], w[:, group_idx]))
+    sgima = pm.Exponential("sigma", 1)
 
-```
-
-```python
-
+    # Likelihood
+    D =  pm.Normal("D", mu, sigma, observed=d["observed_D"])
 ```
 
 ```python
