@@ -30,6 +30,7 @@ def pymc3_sampling_procedure(
     random_seed=1234,
     cache_dir=None,
     force=False,
+    sample_kwags=None,
 ):
     """
     Run the standard PyMC3 sampling procedure.
@@ -44,7 +45,8 @@ def pymc3_sampling_procedure(
             ppc_samples(int): number of posterior predictive samples to take
             random_seed(int): random seed to use in all sampling processes
             cache_dir(Path): the directory to cache the output (leave as `None` to skip caching)
-            force(bool): ignore cached results and compute trace and predictive checks
+            force(bool): ignore cached results and compute trace and predictive checks,
+            sample_kwags(dict): keyword arguments passed to `pm.sample()`.
         Returns:
             dict: contains the "trace", "posterior_predictive", and "prior_predictive"
     """
@@ -63,7 +65,12 @@ def pymc3_sampling_procedure(
                 prior_check_samples, random_seed=random_seed
             )
             trace = pm.sample(
-                num_mcmc, tune=tune, random_seed=random_seed, chains=chains, cores=cores
+                num_mcmc,
+                tune=tune,
+                chains=chains,
+                cores=cores,
+                random_seed=random_seed,
+                **sample_kwags
             )
             post_check = pm.sample_posterior_predictive(
                 trace, samples=ppc_samples, random_seed=random_seed
