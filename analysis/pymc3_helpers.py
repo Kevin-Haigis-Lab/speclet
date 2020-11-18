@@ -30,7 +30,7 @@ def pymc3_sampling_procedure(
     random_seed=1234,
     cache_dir=None,
     force=False,
-    sample_kwags=None,
+    sample_kwags={},
 ):
     """
     Run the standard PyMC3 sampling procedure.

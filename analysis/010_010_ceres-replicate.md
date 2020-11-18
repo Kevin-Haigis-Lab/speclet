@@ -282,7 +282,7 @@ data.head(n=7)
 ```python
 np.random.seed(RANDOM_SEED)
 SAMPLED_GENES = data["hugo_symbol"].unique()
-SAMPLED_CELL_LINES = np.random.choice(data["depmap_id"].unique(), 10)
+SAMPLED_CELL_LINES = np.random.choice(data["depmap_id"].unique(), 100)
 data = data[data["hugo_symbol"].isin(SAMPLED_GENES)]
 data = data[data["depmap_id"].isin(SAMPLED_CELL_LINES)]
 ```
@@ -291,7 +291,7 @@ data = data[data["depmap_id"].isin(SAMPLED_CELL_LINES)]
 print(f"testing with {data.shape[0]} data points")
 ```
 
-    testing with 2266 data points
+    testing with 19982 data points
 
 ```python
 def make_cat(df, col, ordered=True):
@@ -354,7 +354,7 @@ data["gene_cn_z"] = data.groupby("hugo_symbol")["gene_cn_z"].apply(
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_11_0.png)
 
-    <ggplot: (8784022179045)>
+    <ggplot: (8760942248653)>
 
 ## Modeling
 
@@ -410,6 +410,7 @@ ceres_m1_samples = pmhelp.pymc3_sampling_procedure(
     num_mcmc=3000,
     tune=1500,
     chains=3,
+    cores=4,
     prior_check_samples=1000,
     ppc_samples=2000,
     random_seed=RANDOM_SEED,
@@ -418,58 +419,14 @@ ceres_m1_samples = pmhelp.pymc3_sampling_procedure(
 )
 ```
 
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    Auto-assigning NUTS sampler...
-    Initializing NUTS using jitter+adapt_diag...
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    Multiprocess sampling (3 chains in 4 jobs)
-    NUTS: [epsilon, o_i, g_kj, h_k, q_i]
+    Loading cached trace and posterior sample...
 
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='13500' class='' max='13500' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [13500/13500 05:24<00:00 Sampling 3 chains, 2 divergences]
-</div>
 
-    Sampling 3 chains for 1_500 tune and 3_000 draw iterations (4_500 + 9_000 draws total) took 325 seconds.
-    There was 1 divergence after tuning. Increase `target_accept` or reparameterize.
-    There was 1 divergence after tuning. Increase `target_accept` or reparameterize.
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='2000' class='' max='2000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [2000/2000 00:02<00:00]
-</div>
-
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 
-    Caching trace and posterior sample...
-    CPU times: user 28.9 s, sys: 3.5 s, total: 32.4 s
-    Wall time: 5min 47s
+    CPU times: user 6.09 s, sys: 1.25 s, total: 7.34 s
+    Wall time: 8.29 s
 
 ```python
 az_ceres_m1 = az.from_pymc3(
@@ -480,6 +437,7 @@ az_ceres_m1 = az.from_pymc3(
 )
 ```
 
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     arviz.data.io_pymc3 - WARNING - posterior predictive variable D_ij's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
 
 ```python
@@ -508,14 +466,14 @@ gene_effect_post = ceres_m1_samples["trace"].get_values("g_kj")
 gene_effect_post.shape
 ```
 
-    (9000, 26, 10)
+    (9000, 26, 86)
 
 ```python
 gene_effect_mean = gene_effect_post.mean(axis=0)
 gene_effect_mean.shape
 ```
 
-    (26, 10)
+    (26, 86)
 
 ```python
 gene_effect_post_df = (
@@ -576,70 +534,70 @@ gene_effect_post_df.head(n=7)
       <th>0</th>
       <td>0</td>
       <td>0</td>
-      <td>-0.721432</td>
+      <td>1.189885</td>
       <td>PDE5A</td>
-      <td>ACH-000535</td>
-      <td>WT</td>
+      <td>ACH-000757</td>
+      <td>G12D</td>
       <td>NaN</td>
     </tr>
     <tr>
       <th>1</th>
       <td>0</td>
       <td>0</td>
-      <td>-0.721432</td>
+      <td>1.189885</td>
       <td>PDE5A</td>
-      <td>ACH-000535</td>
-      <td>WT</td>
+      <td>ACH-000757</td>
+      <td>G12D</td>
       <td>FALSE</td>
     </tr>
     <tr>
       <th>2</th>
       <td>1</td>
       <td>0</td>
-      <td>0.393648</td>
+      <td>0.933719</td>
       <td>TP53</td>
-      <td>ACH-000535</td>
-      <td>WT</td>
+      <td>ACH-000757</td>
+      <td>G12D</td>
       <td>NaN</td>
     </tr>
     <tr>
       <th>3</th>
       <td>1</td>
       <td>0</td>
-      <td>0.393648</td>
+      <td>0.933719</td>
       <td>TP53</td>
-      <td>ACH-000535</td>
-      <td>WT</td>
+      <td>ACH-000757</td>
+      <td>G12D</td>
       <td>FALSE</td>
     </tr>
     <tr>
       <th>4</th>
       <td>2</td>
       <td>0</td>
-      <td>0.552273</td>
+      <td>-1.244338</td>
       <td>KRAS</td>
-      <td>ACH-000535</td>
-      <td>WT</td>
+      <td>ACH-000757</td>
+      <td>G12D</td>
       <td>NaN</td>
     </tr>
     <tr>
       <th>5</th>
       <td>2</td>
       <td>0</td>
-      <td>0.552273</td>
+      <td>-1.244338</td>
       <td>KRAS</td>
-      <td>ACH-000535</td>
-      <td>WT</td>
+      <td>ACH-000757</td>
+      <td>G12D</td>
       <td>FALSE</td>
     </tr>
     <tr>
       <th>6</th>
       <td>3</td>
       <td>0</td>
-      <td>0.417423</td>
+      <td>0.993389</td>
       <td>KIF3C</td>
-      <td>ACH-000535</td>
-      <td>WT</td>
+      <td>ACH-000757</td>
+      <td>G12D</td>
       <td>NaN</td>
     </tr>
   </tbody>
@@ -650,7 +608,10 @@ gene_effect_post_df.head(n=7)
 data.is_deleterious.unique()
 ```
 
-    array([nan, 'FALSE', 'TRUE', 'FALSE;FALSE'], dtype=object)
+    array([nan, 'FALSE', 'TRUE', 'FALSE;TRUE', 'FALSE;FALSE;FALSE',
+           'TRUE;TRUE;FALSE', 'FALSE;FALSE', 'FALSE;FALSE;TRUE;FALSE;TRUE',
+           'TRUE;TRUE', 'FALSE;TRUE;TRUE', 'FALSE;TRUE;FALSE', 'TRUE;FALSE'],
+          dtype=object)
 
 ```python
 (
@@ -672,7 +633,7 @@ data.is_deleterious.unique()
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_25_0.png)
 
-    <ggplot: (8783961159358)>
+    <ggplot: (8760909532950)>
 
 ```python
 (
@@ -688,7 +649,7 @@ data.is_deleterious.unique()
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_26_0.png)
 
-    <ggplot: (8783795051307)>
+    <ggplot: (8760909561296)>
 
 ```python
 (
@@ -709,7 +670,7 @@ data.is_deleterious.unique()
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_27_0.png)
 
-    <ggplot: (8783797962861)>
+    <ggplot: (8760666590838)>
 
 ```python
 (
@@ -717,7 +678,8 @@ data.is_deleterious.unique()
     + gg.geom_jitter(alpha=0.3, size=0.6, height=0, width=0, color="steelblue")
     + gg.geom_boxplot(alpha=0, color="black", outlier_alpha=0)
     + gg.theme(
-        axis_text_x=gg.element_text(angle=90, hjust=0.5, vjust=1), figure_size=(10, 5)
+        axis_text_x=gg.element_text(angle=90, hjust=0.5, vjust=1, size=8),
+        figure_size=(10, 5),
     )
     + gg.labs(x=None, y="estimated gene effect")
 )
@@ -725,7 +687,7 @@ data.is_deleterious.unique()
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_28_0.png)
 
-    <ggplot: (8783798109793)>
+    <ggplot: (8760666701927)>
 
 ```python
 kras_gene_effect = gene_effect_post_df[
@@ -735,14 +697,14 @@ kras_gene_effect = gene_effect_post_df[
 (
     gg.ggplot(kras_gene_effect, gg.aes(x="kras_mutation", y="gene_effect"))
     + gg.geom_boxplot(alpha=0, color="gray", outlier_alpha=0)
-    + gg.geom_jitter(gg.aes(color="kras_mutation"), width=0.4, height=0)
+    + gg.geom_jitter(gg.aes(color="kras_mutation"), width=0.4, height=0, alpha=0.8)
     + gg.theme(axis_text_x=gg.element_text(angle=90, hjust=0.5, vjust=1))
 )
 ```
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_29_0.png)
 
-    <ggplot: (8783798223583)>
+    <ggplot: (8760909018447)>
 
 ---
 
@@ -796,7 +758,6 @@ with pm.Model() as ceres_m2:
 ```
 
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/pymc3/data.py:307: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/pymc3/data.py:307: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 ```python
@@ -813,6 +774,7 @@ with ceres_m2:
         40000,
         method="advi",
         callbacks=[pm.callbacks.CheckParametersConvergence(tolerance=1e-4)],
+        random_seed=RANDOM_SEED,
     )
 ```
 
@@ -830,15 +792,15 @@ with ceres_m2:
         }
     </style>
   <progress value='40000' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [40000/40000 00:28<00:00 Average Loss = 110.98]
+  100.00% [40000/40000 02:03<00:00 Average Loss = 92.613]
 </div>
 
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    Finished [100%]: Average Loss = 110.98
+    Finished [100%]: Average Loss = 92.575
 
 
-    CPU times: user 32.6 s, sys: 949 ms, total: 33.6 s
-    Wall time: 40 s
+    CPU times: user 2min 5s, sys: 1.86 s, total: 2min 7s
+    Wall time: 2min 7s
 
 ```python
 df = pd.DataFrame(
@@ -857,7 +819,7 @@ df = pd.DataFrame(
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_34_0.png)
 
-    <ggplot: (8783948656153)>
+    <ggplot: (8760653738277)>
 
 ```python
 (
@@ -869,7 +831,7 @@ df = pd.DataFrame(
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_35_0.png)
 
-    <ggplot: (8783948656948)>
+    <ggplot: (8760654245852)>
 
 ```python
 with pm.Model() as ceres_m2_full:
@@ -901,16 +863,25 @@ with pm.Model() as ceres_m2_full:
 
 ```python
 %%time
-with ceres_m2_full:
-    ceres_m2_trace = pm.sample(2000, tune=2000, random_seed=RANDOM_SEED)
+
+ceres_m2_mcmc_cachedir = pymc3_cache_dir / "ceres_m2_mcmc"
+
+ceres_m2_mcmc_res = pmhelp.pymc3_sampling_procedure(
+    model=ceres_m2_full,
+    num_mcmc=2000,
+    tune=2000,
+    chains=2,
+    cores=1,
+    random_seed=RANDOM_SEED,
+    cache_dir=ceres_m2_mcmc_cachedir,
+    sample_kwags={},  # REMOVE THIS ARG NEXT TIME (FIXED)
+)
 ```
 
     Auto-assigning NUTS sampler...
     Initializing NUTS using jitter+adapt_diag...
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    Multiprocess sampling (4 chains in 4 jobs)
+    Sequential sampling (2 chains in 1 job)
     NUTS: [epsilon, o_i, beta_ij, g_kj, h_k, q_i]
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 <div>
     <style>
@@ -925,32 +896,84 @@ with ceres_m2_full:
             background: #F44336;
         }
     </style>
-  <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 03:28<00:00 Sampling 4 chains, 1 divergences]
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 25:34<00:00 Sampling chain 0, 0 divergences]
 </div>
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 209 seconds.
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 25:32<00:00 Sampling chain 1, 0 divergences]
+</div>
+
+    Sampling 2 chains for 2_000 tune and 2_000 draw iterations (4_000 + 4_000 draws total) took 3066 seconds.
+    The number of effective samples is smaller than 10% for some parameters.
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='1000' class='' max='1000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [1000/1000 00:02<00:00]
+</div>
+
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    There was 1 divergence after tuning. Increase `target_accept` or reparameterize.
 
 
-    CPU times: user 25.7 s, sys: 2.11 s, total: 27.9 s
-    Wall time: 3min 43s
+    Caching trace and posterior sample...
+    CPU times: user 4h 32min 28s, sys: 35min 22s, total: 5h 7min 51s
+    Wall time: 52min 42s
+
+```python
+az_ceres_m2 = az.from_pymc3(
+    trace=ceres_m2_mcmc_res["trace"],
+    model=ceres_m2_full,
+    posterior_predictive=ceres_m2_mcmc_res["posterior_predictive"],
+    prior=ceres_m2_mcmc_res["prior_predictive"],
+)
+```
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    arviz.data.io_pymc3 - WARNING - posterior predictive variable D_ij's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
 
 ```python
 %%time
-with ceres_m2_full:
-    #     step = pm.NUTS(scaling=ceres_m2_advi_meanfield.cov.eval(), is_cov=True)
-    ceres_m2_trace_advi = pm.sample(
-        2000,
-        init="advi",
-        n_init=40000,
-        tune=2000,
-        progressbar=True,
-        random_seed=RANDOM_SEED,
-    )
+
+ceres_m2_mcmc_advi_cachedir = pymc3_cache_dir / "ceres_m2_mcmc_advi"
+
+ceres_m2_mcmc_advi_res = pmhelp.pymc3_sampling_procedure(
+    model=ceres_m2_full,
+    num_mcmc=2000,
+    tune=2000,
+    chains=2,
+    cores=1,
+    random_seed=RANDOM_SEED,
+    cache_dir=ceres_m2_mcmc_advi_cachedir,
+    sample_kwags={"init": "advi", "n_init": 40000},
+)
 ```
 
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     Auto-assigning NUTS sampler...
     Initializing NUTS using advi...
 
@@ -968,11 +991,14 @@ with ceres_m2_full:
         }
     </style>
   <progress value='40000' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [40000/40000 00:42<00:00 Average Loss = 1,460]
+  100.00% [40000/40000 04:33<00:00 Average Loss = 8,389.8]
 </div>
 
-    Finished [100%]: Average Loss = 1,460
-    Multiprocess sampling (4 chains in 4 jobs)
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    Finished [100%]: Average Loss = 8,389.8
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    Sequential sampling (2 chains in 1 job)
     NUTS: [epsilon, o_i, beta_ij, g_kj, h_k, q_i]
 
 <div>
@@ -988,50 +1014,249 @@ with ceres_m2_full:
             background: #F44336;
         }
     </style>
-  <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 04:27<00:00 Sampling 4 chains, 0 divergences]
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 09:51<00:00 Sampling chain 0, 0 divergences]
 </div>
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 268 seconds.
-    The number of effective samples is smaller than 10% for some parameters.
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 09:52<00:00 Sampling chain 1, 0 divergences]
+</div>
+
+    Sampling 2 chains for 2_000 tune and 2_000 draw iterations (4_000 + 4_000 draws total) took 1183 seconds.
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    The rhat statistic is larger than 1.2 for some parameters.
+    The estimated number of effective samples is smaller than 200 for some parameters.
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='1000' class='' max='1000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [1000/1000 00:02<00:00]
+</div>
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 
-    CPU times: user 1min 10s, sys: 2.63 s, total: 1min 12s
-    Wall time: 5min 28s
-
-todo
-
-- compare the results of using ADVI initialization
-- compare ADVI samples to MCMC
-- figure out why the MCMC refuses to start with too many parameters
+    Caching trace and posterior sample...
+    CPU times: user 1h 50min 32s, sys: 13min 47s, total: 2h 4min 19s
+    Wall time: 26min 6s
 
 ```python
-# %%time
+az_ceres_m2_advi = az.from_pymc3(
+    trace=ceres_m2_mcmc_advi_res["trace"],
+    model=ceres_m2_full,
+    posterior_predictive=ceres_m2_mcmc_advi_res["posterior_predictive"],
+    prior=ceres_m2_mcmc_advi_res["prior_predictive"],
+)
+```
 
-# ceres_m2_cachedir = pymc3_cache_dir / "ceres_m2"
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    arviz.data.io_pymc3 - WARNING - posterior predictive variable D_ij's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
 
-# ceres_m2_samples = pmhelp.pymc3_sampling_procedure(
-#     model=ceres_m2,
-#     num_mcmc=3000,
-#     tune=1500,
-#     chains=3,
-#     prior_check_samples=1000,
-#     ppc_samples=2000,
-#     random_seed=RANDOM_SEED,
-#     cache_dir=ceres_m2_cachedir,
-#     force=False,
-# )
+### Compare ADVI, MCMC, ADVI + MCMC
+
+```python
+# Sample from posterior of ADVI fit.
+np.random.seed(RANDOM_SEED)
+ceres_m2_advi_sample = ceres_m2_advi_meanfield.sample(1000)
+
+
+def mod_az_summary(df, trace_lbl):
+    colname_changes = {
+        "index": "variable",
+        "hdi_5.5%": "hdi_lower",
+        "hdi_94.5%": "hdi_upper",
+    }
+    keep_cols = ["trace", "variable", "mean", "hdi_lower", "hdi_upper"]
+    mod_df = (
+        df.reset_index(drop=False)
+        .rename(columns=colname_changes)
+        .assign(trace=trace_lbl)[keep_cols]
+    )
+    return mod_df
+
+
+def mod_advi_summary(df, trace_lbl="ADVI"):
+    return df.assign(trace=trace_lbl)
+
+
+def summarise_advi_sample(ary, axis=0, hdi_prob=0.89):
+    means = ary.mean(axis=axis)
+    hdi = az.hdi(ary, hdi_prob=hdi_prob)
+    return pd.DataFrame({"mean": means, "hdi_lower": hdi[:, 0], "hdi_upper": hdi[:, 1]})
+
+
+def get_merged_posterior(var_name):
+    mcmc_post = az.summary(az_ceres_m2, var_names=var_name, hdi_prob=0.89)
+    mcmc_advi_post = az.summary(az_ceres_m2_advi, var_names=var_name, hdi_prob=0.89)
+    advi_post = summarise_advi_sample(ceres_m2_advi_sample[var_name])
+    advi_post["variable"] = mcmc_post.index.values
+
+    merged_post = pd.concat(
+        [
+            mod_az_summary(mcmc_post, "MCMC"),
+            mod_az_summary(mcmc_advi_post, "ADVI + MCMC"),
+            mod_advi_summary(advi_post),
+        ]
+    ).reset_index(drop=True)
+    merged_post["variable"] = pd.Categorical(
+        merged_post["variable"],
+        categories=mcmc_post.index.values,
+        ordered=True,
+    )
+
+    return merged_post
+```
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+
+```python
+merged_qi_posterior = get_merged_posterior("q_i")
+merged_qi_posterior.head()
+```
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/arviz/stats/stats.py:484: FutureWarning: hdi currently interprets 2d data as (draw, shape) but this will change in a future release to (chain, draw) for coherence with other functions
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>trace</th>
+      <th>variable</th>
+      <th>mean</th>
+      <th>hdi_lower</th>
+      <th>hdi_upper</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>MCMC</td>
+      <td>q_i[0]</td>
+      <td>0.052</td>
+      <td>0.022</td>
+      <td>0.083</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>MCMC</td>
+      <td>q_i[1]</td>
+      <td>0.213</td>
+      <td>0.185</td>
+      <td>0.238</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>MCMC</td>
+      <td>q_i[2]</td>
+      <td>0.308</td>
+      <td>0.276</td>
+      <td>0.346</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>MCMC</td>
+      <td>q_i[3]</td>
+      <td>0.038</td>
+      <td>0.015</td>
+      <td>0.060</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>MCMC</td>
+      <td>q_i[4]</td>
+      <td>0.108</td>
+      <td>0.081</td>
+      <td>0.132</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+pos = gg.position_dodge(width=0.5)
+
+(
+    gg.ggplot(merged_qi_posterior, gg.aes(x="variable"))
+    + gg.geom_linerange(
+        gg.aes(ymin="hdi_lower", ymax="hdi_upper", color="trace"),
+        position=pos,
+        size=0.7,
+        alpha=0.4,
+    )
+    + gg.geom_point(gg.aes(y="mean", color="trace"), position=pos, size=1, alpha=0.7)
+    + gg.theme(
+        figure_size=(10, 4),
+        axis_text_x=gg.element_text(size=6, angle=90, hjust=0.5, vjust=1),
+        legend_position="right",
+    )
+    + gg.labs(x="q_i", y="posterior of `q_i`", color=None)
+)
+```
+
+![png](010_010_ceres-replicate_files/010_010_ceres-replicate_44_0.png)
+
+    <ggplot: (8760647170588)>
+
+```python
+
 ```
 
 ```python
-# az_ceres_m2 = az.from_pymc3(
-#     trace=ceres_m2_samples["trace"],
-#     model=ceres_m2,
-#     prior=ceres_m2_samples["prior_predictive"],
-#     posterior_predictive=ceres_m2_samples["posterior_predictive"],
-# )
+
 ```
 
 ```python
 
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+%load_ext watermark
+%watermark -d -u -v -iv -b -h -m
 ```
