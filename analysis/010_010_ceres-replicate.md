@@ -29,6 +29,7 @@ In this notebook, the models will be run with a subsample of the data, but they 
 ### Set-up
 
 ```python
+import re
 import string
 import warnings
 from pathlib import Path
@@ -354,7 +355,7 @@ data["gene_cn_z"] = data.groupby("hugo_symbol")["gene_cn_z"].apply(
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_11_0.png)
 
-    <ggplot: (8760942248653)>
+    <ggplot: (8726649709614)>
 
 ## Modeling
 
@@ -425,8 +426,8 @@ ceres_m1_samples = pmhelp.pymc3_sampling_procedure(
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 
-    CPU times: user 6.09 s, sys: 1.25 s, total: 7.34 s
-    Wall time: 8.29 s
+    CPU times: user 8.16 s, sys: 2.1 s, total: 10.3 s
+    Wall time: 18.7 s
 
 ```python
 az_ceres_m1 = az.from_pymc3(
@@ -633,7 +634,7 @@ data.is_deleterious.unique()
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_25_0.png)
 
-    <ggplot: (8760909532950)>
+    <ggplot: (8726373777140)>
 
 ```python
 (
@@ -649,7 +650,7 @@ data.is_deleterious.unique()
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_26_0.png)
 
-    <ggplot: (8760909561296)>
+    <ggplot: (8726373675764)>
 
 ```python
 (
@@ -670,7 +671,7 @@ data.is_deleterious.unique()
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_27_0.png)
 
-    <ggplot: (8760666590838)>
+    <ggplot: (8726373705635)>
 
 ```python
 (
@@ -687,7 +688,7 @@ data.is_deleterious.unique()
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_28_0.png)
 
-    <ggplot: (8760666701927)>
+    <ggplot: (8726374318617)>
 
 ```python
 kras_gene_effect = gene_effect_post_df[
@@ -704,7 +705,7 @@ kras_gene_effect = gene_effect_post_df[
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_29_0.png)
 
-    <ggplot: (8760909018447)>
+    <ggplot: (8726373836716)>
 
 ---
 
@@ -758,6 +759,7 @@ with pm.Model() as ceres_m2:
 ```
 
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/pymc3/data.py:307: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/pymc3/data.py:307: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 ```python
@@ -792,15 +794,15 @@ with ceres_m2:
         }
     </style>
   <progress value='40000' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [40000/40000 02:03<00:00 Average Loss = 92.613]
+  100.00% [40000/40000 02:25<00:00 Average Loss = 92.727]
 </div>
 
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    Finished [100%]: Average Loss = 92.575
+    Finished [100%]: Average Loss = 92.682
 
 
-    CPU times: user 2min 5s, sys: 1.86 s, total: 2min 7s
-    Wall time: 2min 7s
+    CPU times: user 2min 28s, sys: 3 s, total: 2min 31s
+    Wall time: 2min 39s
 
 ```python
 df = pd.DataFrame(
@@ -811,7 +813,7 @@ df = pd.DataFrame(
 )
 (
     gg.ggplot(df, gg.aes(x="idx", y="loss"))
-    + gg.geom_line(group="a", color="black", alpha=0.5)
+    + gg.geom_point(color="gray", alpha=0.5, size=0.2)
     + gg.geom_smooth(method="loess", se=False, color="firebrick")
     + gg.scale_y_continuous(trans="log")
 )
@@ -819,19 +821,19 @@ df = pd.DataFrame(
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_34_0.png)
 
-    <ggplot: (8760653738277)>
+    <ggplot: (8726373163816)>
 
 ```python
 (
     gg.ggplot(df.tail(n=5000), gg.aes(x="idx", y="loss"))
-    + gg.geom_line(group="a", color="black", alpha=0.5)
-    + gg.geom_smooth(method="loess", se=False, color="firebrick")
+    + gg.geom_point(color="gray", alpha=0.5, size=0.4)
+    + gg.geom_smooth(method="loess", se=False, color="firebrick", size=1.5)
 )
 ```
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_35_0.png)
 
-    <ggplot: (8760654245852)>
+    <ggplot: (8726360235524)>
 
 ```python
 with pm.Model() as ceres_m2_full:
@@ -878,71 +880,14 @@ ceres_m2_mcmc_res = pmhelp.pymc3_sampling_procedure(
 )
 ```
 
-    Auto-assigning NUTS sampler...
-    Initializing NUTS using jitter+adapt_diag...
-    Sequential sampling (2 chains in 1 job)
-    NUTS: [epsilon, o_i, beta_ij, g_kj, h_k, q_i]
+    Loading cached trace and posterior sample...
 
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 25:34<00:00 Sampling chain 0, 0 divergences]
-</div>
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 25:32<00:00 Sampling chain 1, 0 divergences]
-</div>
-
-    Sampling 2 chains for 2_000 tune and 2_000 draw iterations (4_000 + 4_000 draws total) took 3066 seconds.
-    The number of effective samples is smaller than 10% for some parameters.
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='1000' class='' max='1000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [1000/1000 00:02<00:00]
-</div>
 
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 
-    Caching trace and posterior sample...
-    CPU times: user 4h 32min 28s, sys: 35min 22s, total: 5h 7min 51s
-    Wall time: 52min 42s
+    CPU times: user 6.08 s, sys: 1.52 s, total: 7.6 s
+    Wall time: 14.3 s
 
 ```python
 az_ceres_m2 = az.from_pymc3(
@@ -973,97 +918,9 @@ ceres_m2_mcmc_advi_res = pmhelp.pymc3_sampling_procedure(
 )
 ```
 
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    Auto-assigning NUTS sampler...
-    Initializing NUTS using advi...
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='40000' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [40000/40000 04:33<00:00 Average Loss = 8,389.8]
-</div>
-
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    Finished [100%]: Average Loss = 8,389.8
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    Sequential sampling (2 chains in 1 job)
-    NUTS: [epsilon, o_i, beta_ij, g_kj, h_k, q_i]
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 09:51<00:00 Sampling chain 0, 0 divergences]
-</div>
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 09:52<00:00 Sampling chain 1, 0 divergences]
-</div>
-
-    Sampling 2 chains for 2_000 tune and 2_000 draw iterations (4_000 + 4_000 draws total) took 1183 seconds.
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    The rhat statistic is larger than 1.2 for some parameters.
-    The estimated number of effective samples is smaller than 200 for some parameters.
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='1000' class='' max='1000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [1000/1000 00:02<00:00]
-</div>
-
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-
-
-    Caching trace and posterior sample...
-    CPU times: user 1h 50min 32s, sys: 13min 47s, total: 2h 4min 19s
-    Wall time: 26min 6s
+    Loading cached trace and posterior sample...
+    CPU times: user 5.89 s, sys: 1.55 s, total: 7.45 s
+    Wall time: 12 s
 
 ```python
 az_ceres_m2_advi = az.from_pymc3(
@@ -1074,7 +931,6 @@ az_ceres_m2_advi = az.from_pymc3(
 )
 ```
 
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     arviz.data.io_pymc3 - WARNING - posterior predictive variable D_ij's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
 
 ### Compare ADVI, MCMC, ADVI + MCMC
@@ -1228,13 +1084,1292 @@ pos = gg.position_dodge(width=0.5)
         axis_text_x=gg.element_text(size=6, angle=90, hjust=0.5, vjust=1),
         legend_position="right",
     )
-    + gg.labs(x="q_i", y="posterior of `q_i`", color=None)
+    + gg.labs(x=None, y="posterior of 'q_i'", color=None)
 )
 ```
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_44_0.png)
 
-    <ggplot: (8760647170588)>
+    <ggplot: (8726373741909)>
+
+## Comparing CERES with and without a covariate for CNA
+
+```python
+var_names = ["q_i", "h_k", "g_kj", "o_i", "epsilon"]
+ceres_m1_summary = az.summary(az_ceres_m1, var_names=var_names, hdi_prob=0.89)
+ceres_m2_summary = az.summary(
+    az_ceres_m2_advi, var_names=var_names + ["beta_ij"], hdi_prob=0.89
+)
+```
+
+```python
+ceres_m2_summary
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>q_i[0]</th>
+      <td>0.051</td>
+      <td>0.020</td>
+      <td>0.020</td>
+      <td>0.082</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>1034.0</td>
+      <td>1034.0</td>
+      <td>1023.0</td>
+      <td>1145.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>q_i[1]</th>
+      <td>0.213</td>
+      <td>0.016</td>
+      <td>0.189</td>
+      <td>0.241</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>866.0</td>
+      <td>866.0</td>
+      <td>848.0</td>
+      <td>2060.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>q_i[2]</th>
+      <td>0.309</td>
+      <td>0.022</td>
+      <td>0.272</td>
+      <td>0.343</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>196.0</td>
+      <td>193.0</td>
+      <td>200.0</td>
+      <td>438.0</td>
+      <td>1.02</td>
+    </tr>
+    <tr>
+      <th>q_i[3]</th>
+      <td>0.038</td>
+      <td>0.014</td>
+      <td>0.014</td>
+      <td>0.060</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>1415.0</td>
+      <td>1415.0</td>
+      <td>1340.0</td>
+      <td>1120.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>q_i[4]</th>
+      <td>0.108</td>
+      <td>0.016</td>
+      <td>0.081</td>
+      <td>0.130</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>2143.0</td>
+      <td>2118.0</td>
+      <td>2155.0</td>
+      <td>2667.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>beta_ij[102,81]</th>
+      <td>-0.469</td>
+      <td>0.970</td>
+      <td>-2.056</td>
+      <td>1.051</td>
+      <td>0.010</td>
+      <td>0.015</td>
+      <td>9359.0</td>
+      <td>1970.0</td>
+      <td>9373.0</td>
+      <td>2523.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>beta_ij[102,82]</th>
+      <td>-0.499</td>
+      <td>0.956</td>
+      <td>-2.090</td>
+      <td>0.979</td>
+      <td>0.010</td>
+      <td>0.016</td>
+      <td>8285.0</td>
+      <td>1874.0</td>
+      <td>8398.0</td>
+      <td>2701.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>beta_ij[102,83]</th>
+      <td>-0.381</td>
+      <td>0.998</td>
+      <td>-1.972</td>
+      <td>1.193</td>
+      <td>0.010</td>
+      <td>0.018</td>
+      <td>9081.0</td>
+      <td>1563.0</td>
+      <td>9027.0</td>
+      <td>2248.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>beta_ij[102,84]</th>
+      <td>-0.500</td>
+      <td>0.965</td>
+      <td>-2.088</td>
+      <td>1.009</td>
+      <td>0.010</td>
+      <td>0.016</td>
+      <td>9591.0</td>
+      <td>1819.0</td>
+      <td>9714.0</td>
+      <td>2333.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>beta_ij[102,85]</th>
+      <td>-0.515</td>
+      <td>0.973</td>
+      <td>-2.126</td>
+      <td>0.976</td>
+      <td>0.011</td>
+      <td>0.017</td>
+      <td>7792.0</td>
+      <td>1662.0</td>
+      <td>7779.0</td>
+      <td>2267.0</td>
+      <td>1.00</td>
+    </tr>
+  </tbody>
+</table>
+<p>11327 rows × 11 columns</p>
+</div>
+
+```python
+def prep_summary_for_merge(df, ceres_lbl):
+    return (
+        df.reset_index(drop=False)
+        .rename(columns={"index": "variable"})
+        .assign(ceres=ceres_lbl)
+    )
+
+
+ceres_merged_summary = pd.concat(
+    [
+        prep_summary_for_merge(ceres_m1_summary, "M1"),
+        prep_summary_for_merge(ceres_m2_summary, "M2"),
+    ]
+)
+
+ceres_merged_summary
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>variable</th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>ceres</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>q_i[0]</td>
+      <td>0.055</td>
+      <td>0.022</td>
+      <td>0.021</td>
+      <td>0.091</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>1965.0</td>
+      <td>1965.0</td>
+      <td>1935.0</td>
+      <td>2521.0</td>
+      <td>1.00</td>
+      <td>M1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>q_i[1]</td>
+      <td>0.261</td>
+      <td>0.024</td>
+      <td>0.221</td>
+      <td>0.297</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>858.0</td>
+      <td>847.0</td>
+      <td>881.0</td>
+      <td>1503.0</td>
+      <td>1.00</td>
+      <td>M1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>q_i[2]</td>
+      <td>0.367</td>
+      <td>0.031</td>
+      <td>0.315</td>
+      <td>0.413</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>606.0</td>
+      <td>606.0</td>
+      <td>597.0</td>
+      <td>1247.0</td>
+      <td>1.01</td>
+      <td>M1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>q_i[3]</td>
+      <td>0.042</td>
+      <td>0.016</td>
+      <td>0.015</td>
+      <td>0.067</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>3401.0</td>
+      <td>3401.0</td>
+      <td>3289.0</td>
+      <td>3989.0</td>
+      <td>1.00</td>
+      <td>M1</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>q_i[4]</td>
+      <td>0.120</td>
+      <td>0.018</td>
+      <td>0.091</td>
+      <td>0.148</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>3252.0</td>
+      <td>3252.0</td>
+      <td>3254.0</td>
+      <td>4673.0</td>
+      <td>1.00</td>
+      <td>M1</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>11322</th>
+      <td>beta_ij[102,81]</td>
+      <td>-0.469</td>
+      <td>0.970</td>
+      <td>-2.056</td>
+      <td>1.051</td>
+      <td>0.010</td>
+      <td>0.015</td>
+      <td>9359.0</td>
+      <td>1970.0</td>
+      <td>9373.0</td>
+      <td>2523.0</td>
+      <td>1.00</td>
+      <td>M2</td>
+    </tr>
+    <tr>
+      <th>11323</th>
+      <td>beta_ij[102,82]</td>
+      <td>-0.499</td>
+      <td>0.956</td>
+      <td>-2.090</td>
+      <td>0.979</td>
+      <td>0.010</td>
+      <td>0.016</td>
+      <td>8285.0</td>
+      <td>1874.0</td>
+      <td>8398.0</td>
+      <td>2701.0</td>
+      <td>1.00</td>
+      <td>M2</td>
+    </tr>
+    <tr>
+      <th>11324</th>
+      <td>beta_ij[102,83]</td>
+      <td>-0.381</td>
+      <td>0.998</td>
+      <td>-1.972</td>
+      <td>1.193</td>
+      <td>0.010</td>
+      <td>0.018</td>
+      <td>9081.0</td>
+      <td>1563.0</td>
+      <td>9027.0</td>
+      <td>2248.0</td>
+      <td>1.00</td>
+      <td>M2</td>
+    </tr>
+    <tr>
+      <th>11325</th>
+      <td>beta_ij[102,84]</td>
+      <td>-0.500</td>
+      <td>0.965</td>
+      <td>-2.088</td>
+      <td>1.009</td>
+      <td>0.010</td>
+      <td>0.016</td>
+      <td>9591.0</td>
+      <td>1819.0</td>
+      <td>9714.0</td>
+      <td>2333.0</td>
+      <td>1.00</td>
+      <td>M2</td>
+    </tr>
+    <tr>
+      <th>11326</th>
+      <td>beta_ij[102,85]</td>
+      <td>-0.515</td>
+      <td>0.973</td>
+      <td>-2.126</td>
+      <td>0.976</td>
+      <td>0.011</td>
+      <td>0.017</td>
+      <td>7792.0</td>
+      <td>1662.0</td>
+      <td>7779.0</td>
+      <td>2267.0</td>
+      <td>1.00</td>
+      <td>M2</td>
+    </tr>
+  </tbody>
+</table>
+<p>13796 rows × 13 columns</p>
+</div>
+
+```python
+sgrna_to_gene_idx = (
+    data[["sgrna", "hugo_symbol"]]
+    .drop_duplicates()
+    .reset_index(drop=True)
+    .sort_values(by="sgrna")
+    .assign(
+        sgrna_idx=lambda d: d.sgrna.cat.codes,
+        gene_idx=lambda d: d.hugo_symbol.cat.codes,
+    )
+)
+
+ceres_q1_post = (
+    ceres_merged_summary[ceres_merged_summary["variable"].str.contains("q_i")]
+    .reset_index(drop=True)
+    .assign(sgrna_idx=lambda d: [int(re.findall(r"\d+", x)[0]) for x in d.variable])
+    .merge(sgrna_to_gene_idx, how="left", on="sgrna_idx")
+)
+
+ceres_q1_post.tail()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>variable</th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>ceres</th>
+      <th>sgrna_idx</th>
+      <th>sgrna</th>
+      <th>hugo_symbol</th>
+      <th>gene_idx</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>201</th>
+      <td>q_i[98]</td>
+      <td>0.226</td>
+      <td>0.021</td>
+      <td>0.191</td>
+      <td>0.256</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>723.0</td>
+      <td>723.0</td>
+      <td>723.0</td>
+      <td>1675.0</td>
+      <td>1.0</td>
+      <td>M2</td>
+      <td>98</td>
+      <td>TTATTAATGTAGCCTCACGG</td>
+      <td>PIK3CA</td>
+      <td>21</td>
+    </tr>
+    <tr>
+      <th>202</th>
+      <td>q_i[99]</td>
+      <td>0.062</td>
+      <td>0.014</td>
+      <td>0.040</td>
+      <td>0.084</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>2294.0</td>
+      <td>2294.0</td>
+      <td>2291.0</td>
+      <td>2381.0</td>
+      <td>1.0</td>
+      <td>M2</td>
+      <td>99</td>
+      <td>TTCCGTTTATCATGAAGCCG</td>
+      <td>NDUFAF3</td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <th>203</th>
+      <td>q_i[100]</td>
+      <td>0.188</td>
+      <td>0.017</td>
+      <td>0.159</td>
+      <td>0.212</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>847.0</td>
+      <td>842.0</td>
+      <td>855.0</td>
+      <td>1303.0</td>
+      <td>1.0</td>
+      <td>M2</td>
+      <td>100</td>
+      <td>TTGCAATGTGATGGAAGGGG</td>
+      <td>MDM2</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>204</th>
+      <td>q_i[101]</td>
+      <td>0.043</td>
+      <td>0.013</td>
+      <td>0.022</td>
+      <td>0.063</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>2626.0</td>
+      <td>2626.0</td>
+      <td>2539.0</td>
+      <td>1545.0</td>
+      <td>1.0</td>
+      <td>M2</td>
+      <td>101</td>
+      <td>TTGTCCCAGCCGTCAAACCG</td>
+      <td>LGALS4</td>
+      <td>14</td>
+    </tr>
+    <tr>
+      <th>205</th>
+      <td>q_i[102]</td>
+      <td>0.033</td>
+      <td>0.013</td>
+      <td>0.013</td>
+      <td>0.055</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>2510.0</td>
+      <td>2510.0</td>
+      <td>2381.0</td>
+      <td>1795.0</td>
+      <td>1.0</td>
+      <td>M2</td>
+      <td>102</td>
+      <td>TTTGACCTGGAGTTGCCTGA</td>
+      <td>ADAMTS13</td>
+      <td>15</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+pos = gg.position_dodge(width=0.5)
+
+(
+    gg.ggplot(ceres_q1_post, gg.aes(x="variable", y="mean", color="ceres"))
+    + gg.facet_wrap("hugo_symbol", scales="free_x", ncol=4)
+    + gg.geom_linerange(gg.aes(ymin="hdi_5.5%", ymax="hdi_94.5%"), position=pos)
+    + gg.geom_point(position=pos)
+    + gg.scale_color_brewer(type="qual", palette="Set2")
+    + gg.scale_y_continuous(limits=(0, None), expand=(0, 0, 0.02, 0))
+    + gg.theme(
+        figure_size=(8, 20),
+        panel_spacing_x=0.25,
+        panel_spacing_y=0.5,
+        axis_text_x=gg.element_text(size=6),
+    )
+    + gg.labs(x="sgRNA[idx]", y="posterior distribution of $q_i$", color="model")
+)
+```
+
+![png](010_010_ceres-replicate_files/010_010_ceres-replicate_50_0.png)
+
+    <ggplot: (8726361679083)>
+
+```python
+def make_index_df(df, col, idx_col_name):
+    return (
+        df[[col]]
+        .drop_duplicates()
+        .assign(_idx=lambda d: d[col].cat.codes)
+        .reset_index(drop=True)
+        .rename(columns={"_idx": idx_col_name})
+    )
+
+
+gene_idx_df = make_index_df(data, "hugo_symbol", "gene_idx")
+cell_line_idx_df = make_index_df(data, "depmap_id", "cell_line_idx")
+
+ceres_g_kj_post = (
+    ceres_merged_summary[ceres_merged_summary["variable"].str.contains("g_kj")]
+    .reset_index(drop=True)
+    .assign(
+        indices=lambda d: [re.findall(r"\d+", x) for x in d.variable],
+        gene_idx=lambda d: [int(x[0]) for x in d.indices],
+        cell_line_idx=lambda d: [int(x[1]) for x in d.indices],
+    )
+    .merge(gene_idx_df, how="left", on="gene_idx")
+    .merge(cell_line_idx_df, how="left", on="cell_line_idx")
+)
+
+ceres_g_kj_post.head()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>variable</th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>ceres</th>
+      <th>indices</th>
+      <th>gene_idx</th>
+      <th>cell_line_idx</th>
+      <th>hugo_symbol</th>
+      <th>depmap_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>g_kj[0,0]</td>
+      <td>1.190</td>
+      <td>1.553</td>
+      <td>-1.244</td>
+      <td>3.685</td>
+      <td>0.016</td>
+      <td>0.014</td>
+      <td>9948.0</td>
+      <td>6561.0</td>
+      <td>10021.0</td>
+      <td>5778.0</td>
+      <td>1.0</td>
+      <td>M1</td>
+      <td>[0, 0]</td>
+      <td>0</td>
+      <td>0</td>
+      <td>PDE5A</td>
+      <td>ACH-000757</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>g_kj[0,1]</td>
+      <td>1.265</td>
+      <td>1.632</td>
+      <td>-1.313</td>
+      <td>3.940</td>
+      <td>0.017</td>
+      <td>0.015</td>
+      <td>9094.0</td>
+      <td>6306.0</td>
+      <td>9108.0</td>
+      <td>6568.0</td>
+      <td>1.0</td>
+      <td>M1</td>
+      <td>[0, 1]</td>
+      <td>0</td>
+      <td>1</td>
+      <td>PDE5A</td>
+      <td>ACH-001329</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>g_kj[0,2]</td>
+      <td>-0.993</td>
+      <td>1.715</td>
+      <td>-3.641</td>
+      <td>1.832</td>
+      <td>0.020</td>
+      <td>0.016</td>
+      <td>7069.0</td>
+      <td>5481.0</td>
+      <td>7065.0</td>
+      <td>6420.0</td>
+      <td>1.0</td>
+      <td>M1</td>
+      <td>[0, 2]</td>
+      <td>0</td>
+      <td>2</td>
+      <td>PDE5A</td>
+      <td>ACH-000535</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>g_kj[0,3]</td>
+      <td>-1.046</td>
+      <td>1.738</td>
+      <td>-3.822</td>
+      <td>1.725</td>
+      <td>0.022</td>
+      <td>0.016</td>
+      <td>5967.0</td>
+      <td>5691.0</td>
+      <td>5984.0</td>
+      <td>5622.0</td>
+      <td>1.0</td>
+      <td>M1</td>
+      <td>[0, 3]</td>
+      <td>0</td>
+      <td>3</td>
+      <td>PDE5A</td>
+      <td>ACH-001460</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>g_kj[0,4]</td>
+      <td>-0.099</td>
+      <td>1.622</td>
+      <td>-2.664</td>
+      <td>2.553</td>
+      <td>0.020</td>
+      <td>0.016</td>
+      <td>6512.0</td>
+      <td>4914.0</td>
+      <td>6518.0</td>
+      <td>6268.0</td>
+      <td>1.0</td>
+      <td>M1</td>
+      <td>[0, 4]</td>
+      <td>0</td>
+      <td>4</td>
+      <td>PDE5A</td>
+      <td>ACH-000867</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+values = ["mean", "hdi_5.5%", "hdi_94.5%"]
+ceres_g_kj_wide = None
+
+for value in values:
+    df = (
+        ceres_g_kj_post.pivot(
+            index=["variable", "gene_idx", "cell_line_idx", "hugo_symbol", "depmap_id"],
+            columns="ceres",
+            values=value,
+        )
+        .reset_index()
+        .rename(columns={"M1": f"M1_{value}", "M2": f"M2_{value}"})
+    )
+    if ceres_g_kj_wide is None:
+        ceres_g_kj_wide = df
+    else:
+        ceres_g_kj_wide = ceres_g_kj_wide.merge(df)
+
+
+ceres_g_kj_wide = ceres_g_kj_wide.merge(
+    data[["hugo_symbol", "depmap_id", "gene_cn"]], how="left"
+).drop_duplicates()
+
+ceres_g_kj_wide.head()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>variable</th>
+      <th>gene_idx</th>
+      <th>cell_line_idx</th>
+      <th>hugo_symbol</th>
+      <th>depmap_id</th>
+      <th>M1_mean</th>
+      <th>M2_mean</th>
+      <th>M1_hdi_5.5%</th>
+      <th>M2_hdi_5.5%</th>
+      <th>M1_hdi_94.5%</th>
+      <th>M2_hdi_94.5%</th>
+      <th>gene_cn</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>g_kj[0,0]</td>
+      <td>0</td>
+      <td>0</td>
+      <td>PDE5A</td>
+      <td>ACH-000757</td>
+      <td>1.190</td>
+      <td>1.464</td>
+      <td>-1.244</td>
+      <td>-1.138</td>
+      <td>3.685</td>
+      <td>3.978</td>
+      <td>1.645961</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>g_kj[0,10]</td>
+      <td>0</td>
+      <td>10</td>
+      <td>PDE5A</td>
+      <td>ACH-001054</td>
+      <td>-0.040</td>
+      <td>0.422</td>
+      <td>-2.641</td>
+      <td>-2.183</td>
+      <td>2.634</td>
+      <td>3.138</td>
+      <td>1.933830</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>g_kj[0,11]</td>
+      <td>0</td>
+      <td>11</td>
+      <td>PDE5A</td>
+      <td>ACH-000243</td>
+      <td>-0.326</td>
+      <td>-0.520</td>
+      <td>-2.575</td>
+      <td>-2.744</td>
+      <td>1.960</td>
+      <td>2.003</td>
+      <td>1.151427</td>
+    </tr>
+    <tr>
+      <th>40</th>
+      <td>g_kj[0,12]</td>
+      <td>0</td>
+      <td>12</td>
+      <td>PDE5A</td>
+      <td>ACH-000706</td>
+      <td>-0.089</td>
+      <td>0.051</td>
+      <td>-2.539</td>
+      <td>-2.603</td>
+      <td>2.673</td>
+      <td>2.427</td>
+      <td>1.961443</td>
+    </tr>
+    <tr>
+      <th>48</th>
+      <td>g_kj[0,13]</td>
+      <td>0</td>
+      <td>13</td>
+      <td>PDE5A</td>
+      <td>ACH-000738</td>
+      <td>-0.294</td>
+      <td>-0.359</td>
+      <td>-3.070</td>
+      <td>-3.062</td>
+      <td>2.100</td>
+      <td>2.110</td>
+      <td>1.303132</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+(
+    gg.ggplot(ceres_g_kj_wide, gg.aes(x="M1_mean", y="M2_mean"))
+    + gg.facet_wrap("hugo_symbol", ncol=4, scales="free")
+    + gg.geom_hline(yintercept=0, color="black")
+    + gg.geom_vline(xintercept=0, color="black")
+    + gg.geom_abline(slope=1, intercept=0, color="gray", linetype="--")
+    + gg.geom_point(gg.aes(color="gene_cn", size="gene_cn"), alpha=0.7)
+    + gg.scale_color_distiller(type="seq", palette="YlOrRd", direction=1)
+    + gg.scale_size_continuous(range=(2, 4))
+    + gg.theme(
+        figure_size=(10, 20),
+        panel_spacing_x=0.5,
+        panel_spacing_y=0.5,
+    )
+    + gg.labs(
+        x="gene effect without CN",
+        y="gene effect with CN",
+        color="gene CN",
+        size="gene CN",
+        title="Comparison of gene effects with and without a covariate for gene copy number",
+    )
+)
+```
+
+![png](010_010_ceres-replicate_files/010_010_ceres-replicate_53_0.png)
+
+    <ggplot: (8726616821393)>
+
+```python
+def summarize_ppc(az_m, var_name):
+    x = az_m.posterior_predictive[var_name].values[0, :, :]
+    x_mean = x.mean(axis=0)
+    x_hdi = az.hdi(x, hdi_prob=0.89)
+    return pd.DataFrame(
+        {"mean": x_mean, "hdi_lower": x_hdi[:, 0], "hdi_upper": x_hdi[:, 1]}
+    )
+```
+
+```python
+ceres_ppc_summary = []
+for m, name in zip([az_ceres_m1, az_ceres_m2_advi], ["M1", "M2"]):
+    df = summarize_ppc(az_ceres_m1, "D_ij").assign(
+        ceres=name, idx=lambda d: list(range(len(d)))
+    )
+    df = pd.concat(
+        [df, data[["lfc", "sgrna", "hugo_symbol", "depmap_id"]].reset_index(drop=True)],
+        axis=1,
+    )
+    ceres_ppc_summary.append(df)
+
+ceres_ppc_summary = pd.concat(ceres_ppc_summary).reset_index(drop=True)
+ceres_ppc_summary.head(n=10)
+```
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/arviz/stats/stats.py:484: FutureWarning: hdi currently interprets 2d data as (draw, shape) but this will change in a future release to (chain, draw) for coherence with other functions
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>hdi_lower</th>
+      <th>hdi_upper</th>
+      <th>ceres</th>
+      <th>idx</th>
+      <th>lfc</th>
+      <th>sgrna</th>
+      <th>hugo_symbol</th>
+      <th>depmap_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.324936</td>
+      <td>-0.226344</td>
+      <td>0.856244</td>
+      <td>M1</td>
+      <td>0</td>
+      <td>0.388453</td>
+      <td>AAGAGGCCGGTCAAATTCAG</td>
+      <td>PDE5A</td>
+      <td>ACH-000757</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.590178</td>
+      <td>0.044552</td>
+      <td>1.143577</td>
+      <td>M1</td>
+      <td>1</td>
+      <td>0.582574</td>
+      <td>AATCAACCCACAGCTGCACA</td>
+      <td>TP53</td>
+      <td>ACH-000757</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-1.262714</td>
+      <td>-1.774204</td>
+      <td>-0.738222</td>
+      <td>M1</td>
+      <td>2</td>
+      <td>-1.464233</td>
+      <td>AATTACTACTTGCTTCCTGT</td>
+      <td>KRAS</td>
+      <td>ACH-000757</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.010341</td>
+      <td>-0.549601</td>
+      <td>0.490825</td>
+      <td>M1</td>
+      <td>3</td>
+      <td>0.213791</td>
+      <td>ACCTGTATGACGAAACCGTG</td>
+      <td>KIF3C</td>
+      <td>ACH-000757</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-0.049381</td>
+      <td>-0.558570</td>
+      <td>0.476010</td>
+      <td>M1</td>
+      <td>4</td>
+      <td>0.283606</td>
+      <td>ACTCTGTTCCTTCATCTCCG</td>
+      <td>ZSWIM8</td>
+      <td>ACH-000757</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>0.405142</td>
+      <td>-0.137215</td>
+      <td>0.910960</td>
+      <td>M1</td>
+      <td>5</td>
+      <td>0.506093</td>
+      <td>ACTGCTGCGGGAATTCCAAG</td>
+      <td>KIF3C</td>
+      <td>ACH-000757</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>-0.968127</td>
+      <td>-1.498412</td>
+      <td>-0.419038</td>
+      <td>M1</td>
+      <td>6</td>
+      <td>-0.714605</td>
+      <td>AGACACTTATACTATGAAAG</td>
+      <td>MDM2</td>
+      <td>ACH-000757</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>-1.106449</td>
+      <td>-1.662529</td>
+      <td>-0.581180</td>
+      <td>M1</td>
+      <td>7</td>
+      <td>-1.388436</td>
+      <td>AGAGGAGTACAGTGCAATGA</td>
+      <td>KRAS</td>
+      <td>ACH-000757</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>0.059115</td>
+      <td>-0.470620</td>
+      <td>0.563549</td>
+      <td>M1</td>
+      <td>8</td>
+      <td>-0.172670</td>
+      <td>AGATAGAGTAACTCTCTTTG</td>
+      <td>HIST1H2BO</td>
+      <td>ACH-000757</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>0.040366</td>
+      <td>-0.482223</td>
+      <td>0.602149</td>
+      <td>M1</td>
+      <td>9</td>
+      <td>0.139808</td>
+      <td>AGTGCGGATGAGTTTCAGCG</td>
+      <td>ZSWIM8</td>
+      <td>ACH-000757</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+def sample_ceres_ppc(az_m, n=200, label=None):
+    ppc_sample = (
+        pd.DataFrame(az_m.posterior_predictive["D_ij"].values[0, :, :])
+        .sample(n=n)
+        .reset_index(drop=True)
+        .T
+    )
+    data_vars = ["depmap_id", "sgrna", "hugo_symbol"]
+    df = pd.concat(
+        [data[data_vars].copy().reset_index(drop=True), ppc_sample], axis=1
+    ).melt(id_vars=data_vars, var_name="ppc_sample_idx", value_name="ppc_sample")
+
+    if not label is None:
+        df["label"] = label
+
+    return df
+```
+
+```python
+ceres_ppc_df = pd.concat(
+    [
+        sample_ceres_ppc(az_ceres_m1, label="M1"),
+        sample_ceres_ppc(az_ceres_m2_advi, label="M2"),
+    ]
+).reset_index(drop=True)
+ceres_ppc_df.head()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>depmap_id</th>
+      <th>sgrna</th>
+      <th>hugo_symbol</th>
+      <th>ppc_sample_idx</th>
+      <th>ppc_sample</th>
+      <th>label</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACH-000757</td>
+      <td>AAGAGGCCGGTCAAATTCAG</td>
+      <td>PDE5A</td>
+      <td>0</td>
+      <td>0.254352</td>
+      <td>M1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ACH-000757</td>
+      <td>AATCAACCCACAGCTGCACA</td>
+      <td>TP53</td>
+      <td>0</td>
+      <td>0.444961</td>
+      <td>M1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-000757</td>
+      <td>AATTACTACTTGCTTCCTGT</td>
+      <td>KRAS</td>
+      <td>0</td>
+      <td>-1.268235</td>
+      <td>M1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-000757</td>
+      <td>ACCTGTATGACGAAACCGTG</td>
+      <td>KIF3C</td>
+      <td>0</td>
+      <td>-0.068042</td>
+      <td>M1</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-000757</td>
+      <td>ACTCTGTTCCTTCATCTCCG</td>
+      <td>ZSWIM8</td>
+      <td>0</td>
+      <td>-0.386413</td>
+      <td>M1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
 
 ```python
 
