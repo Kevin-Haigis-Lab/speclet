@@ -1,8 +1,8 @@
 # Splines in PyMC3
 
-- [Question on PyMC Discourse](https://discourse.pymc.io/t/spline-regression-in-pymc3/6235)
-- [*Statistical Rethinking* example in PyMC3](https://github.com/pymc-devs/resources/blob/master/Rethinking_2/Chp_04.ipynb)
-- [*Statistical Rethinking* example in Stan](https://vincentarelbundock.github.io/rethinking2/04.html)
+- [Question](https://discourse.pymc.io/t/spline-regression-in-pymc3/6235) on PyMC Discourse
+- *Statistical Rethinking* example in [PyMC3](https://github.com/pymc-devs/resources/blob/master/Rethinking_2/Chp_04.ipynb) and [Stan](https://vincentarelbundock.github.io/rethinking2/04.html)
+- My [post](https://joshuacook.netlify.app/post/pymc3-spline/) with additional visualization and explination
 
 ```python
 import string
@@ -247,7 +247,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_8_0.png)
 
-    <ggplot: (8746894729834)>
+    <ggplot: (8749127536595)>
 
 ```python
 (
@@ -261,7 +261,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_9_0.png)
 
-    <ggplot: (8746894158222)>
+    <ggplot: (8749166099776)>
 
 ```python
 (
@@ -276,7 +276,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_10_0.png)
 
-    <ggplot: (8746892524364)>
+    <ggplot: (8749126939763)>
 
 ```python
 d2["knot_group"] = [np.where(a <= knot_list)[0][0] for a in d2.year]
@@ -298,7 +298,7 @@ d2["knot_group"] = pd.Categorical(d2["knot_group"], ordered=True)
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_12_0.png)
 
-    <ggplot: (8746892535772)>
+    <ggplot: (8749127536553)>
 
 ```python
 B = dmatrix(
@@ -349,7 +349,7 @@ spline_df = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_14_0.png)
 
-    <ggplot: (8746892557210)>
+    <ggplot: (8749126940468)>
 
 ```python
 with pm.Model() as m4_7:
@@ -392,10 +392,10 @@ with m4_7:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:12<00:00 Sampling 2 chains, 0 divergences]
+  100.00% [8000/8000 00:13<00:00 Sampling 2 chains, 0 divergences]
 </div>
 
-    Sampling 2 chains for 2_000 tune and 2_000 draw iterations (4_000 + 4_000 draws total) took 12 seconds.
+    Sampling 2 chains for 2_000 tune and 2_000 draw iterations (4_000 + 4_000 draws total) took 13 seconds.
     The acceptance probability does not match the target. It is 0.70487961130992, but should be close to 0.8. Try to increase the number of tuning steps.
 
 <div>
@@ -412,7 +412,7 @@ with m4_7:
         }
     </style>
   <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 00:04<00:00]
+  100.00% [4000/4000 00:05<00:00]
 </div>
 
 ```python
@@ -769,7 +769,7 @@ spline_df_merged = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_22_0.png)
 
-    <ggplot: (8746863362058)>
+    <ggplot: (8749125268255)>
 
 ```python
 post_pred = az.summary(az_m4_7, var_names=["mu"]).reset_index(drop=True)
@@ -799,7 +799,7 @@ d2_post["pred_hdi_upper"] = post_pred["hdi_97%"]
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_24_0.png)
 
-    <ggplot: (8746889999171)>
+    <ggplot: (8749091940660)>
 
 ## Example with gene CN data of a single gene
 
@@ -1040,7 +1040,7 @@ ptk2_data = modeling_data[modeling_data.hugo_symbol == "PTK2"]
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_28_0.png)
 
-    <ggplot: (8746870549571)>
+    <ggplot: (8749092018815)>
 
 ```python
 ptk2_data.shape[0]
@@ -1079,7 +1079,7 @@ ptk2_spline_df = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_31_0.png)
 
-    <ggplot: (8746868766826)>
+    <ggplot: (8749091940765)>
 
 ```python
 with pm.Model() as m_ptk2:
@@ -1122,10 +1122,10 @@ with m_ptk2:
         }
     </style>
   <progress value='10000' class='' max='10000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [10000/10000 00:56<00:00 Sampling 2 chains, 163 divergences]
+  100.00% [10000/10000 00:58<00:00 Sampling 2 chains, 163 divergences]
 </div>
 
-    Sampling 2 chains for 2_000 tune and 3_000 draw iterations (4_000 + 6_000 draws total) took 57 seconds.
+    Sampling 2 chains for 2_000 tune and 3_000 draw iterations (4_000 + 6_000 draws total) took 58 seconds.
     There were 163 divergences after tuning. Increase `target_accept` or reparameterize.
     The number of effective samples is smaller than 25% for some parameters.
 
@@ -1348,7 +1348,7 @@ ptk2_post.head()
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_37_0.png)
 
-    <ggplot: (8746890195818)>
+    <ggplot: (8749092142403)>
 
 ### A "misbehaved" gene: *MDM2*
 
@@ -1371,7 +1371,7 @@ mdm2_data["log_gene_cn"] = np.log10(mdm2_data.gene_cn.values)
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_39_0.png)
 
-    <ggplot: (8746861602792)>
+    <ggplot: (8749092142400)>
 
 ```python
 mdm2_data.shape[0]
@@ -1416,7 +1416,7 @@ mdm2_spline_df = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_42_0.png)
 
-    <ggplot: (8746870469608)>
+    <ggplot: (8749118253445)>
 
 ```python
 with pm.Model() as m_mdm2:
@@ -1459,10 +1459,10 @@ with m_mdm2:
         }
     </style>
   <progress value='12000' class='' max='12000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [12000/12000 01:15<00:00 Sampling 2 chains, 15 divergences]
+  100.00% [12000/12000 01:20<00:00 Sampling 2 chains, 15 divergences]
 </div>
 
-    Sampling 2 chains for 3_000 tune and 3_000 draw iterations (6_000 + 6_000 draws total) took 76 seconds.
+    Sampling 2 chains for 3_000 tune and 3_000 draw iterations (6_000 + 6_000 draws total) took 81 seconds.
     There were 15 divergences after tuning. Increase `target_accept` or reparameterize.
     The number of effective samples is smaller than 25% for some parameters.
 
@@ -1480,7 +1480,7 @@ with m_mdm2:
         }
     </style>
   <progress value='6000' class='' max='6000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [6000/6000 00:07<00:00]
+  100.00% [6000/6000 00:08<00:00]
 </div>
 
 ```python
@@ -1693,7 +1693,7 @@ mdm2_post.head()
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_49_0.png)
 
-    <ggplot: (8746861100662)>
+    <ggplot: (8749118234242)>
 
 ```python
 (
@@ -1716,96 +1716,7 @@ mdm2_post.head()
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_50_0.png)
 
-    <ggplot: (8746861100602)>
-
-```python
-np.asarray(mdm2_B).shape
-```
-
-    (2332, 7)
-
-```python
-mdm2_data.shape
-```
-
-    (2332, 28)
-
-```python
-np.round(np.asarray(mdm2_B)[:5, :5], 1)
-```
-
-    array([[0. , 0.2, 0.6, 0.3, 0. ],
-           [0. , 0.2, 0.6, 0.3, 0. ],
-           [0. , 0.2, 0.6, 0.3, 0. ],
-           [0. , 0.2, 0.6, 0.3, 0. ],
-           [0. , 0.2, 0.6, 0.3, 0. ]])
-
-```python
-mdm2_data.reset_index().loc[0:5, ["lfc", "gene_cn"]]
-```
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>lfc</th>
-      <th>gene_cn</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>0.035950</td>
-      <td>1.392463</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>0.059690</td>
-      <td>1.392463</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>0.148150</td>
-      <td>1.392463</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>-0.102953</td>
-      <td>1.392463</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>-0.469799</td>
-      <td>1.392463</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>0.107208</td>
-      <td>1.392463</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-```python
-np.round(cn_knot_list, 2)
-```
-
-    array([  0.  ,   1.44,   1.73,   2.03, 328.39])
+    <ggplot: (8749103721328)>
 
 ### Multi-level
 
@@ -2059,9 +1970,9 @@ d["gene_cn_max"] = [np.min((10.0, x)) for x in d.gene_cn]
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_59_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_54_0.png)
 
-    <ggplot: (8746861566660)>
+    <ggplot: (8749095826089)>
 
 ```python
 (
@@ -2074,9 +1985,9 @@ d["gene_cn_max"] = [np.min((10.0, x)) for x in d.gene_cn]
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_60_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_55_0.png)
 
-    <ggplot: (8746863281140)>
+    <ggplot: (8749048536869)>
 
 ```python
 d = modeling_data2.copy()
@@ -2091,9 +2002,9 @@ d["gene_cn_log"] = np.log2(d.gene_cn.values + 1)
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_61_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_56_0.png)
 
-    <ggplot: (8746860931955)>
+    <ggplot: (8749092323615)>
 
 ```python
 (
@@ -2107,9 +2018,9 @@ d["gene_cn_log"] = np.log2(d.gene_cn.values + 1)
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_62_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_57_0.png)
 
-    <ggplot: (8746860831269)>
+    <ggplot: (8749074684760)>
 
 $
 D_j \sim \mathcal{N}(\mu, \sigma) \\
@@ -2142,7 +2053,7 @@ for cell_line_i in modeling_data2.depmap_id.cat.categories:
     )
 
     B_cn_multi.append(np.asarray(B, order="F"))
-B_cn_multi = np.asarray(B_cn_multi)
+# B_cn_multi = np.asarray(B_cn_multi)
 ```
 
 ```python
@@ -2178,6 +2089,8 @@ B_cn_multi_cat.shape
 
     (25922, 12)
 
+*(Original model)*
+
 ```python
 cell_line_idx = modeling_data2.depmap_id.cat.codes.to_numpy()
 w_shape = (NUM_KNOTS + 2, len(np.unique(modeling_data2.depmap_id)))
@@ -2197,123 +2110,106 @@ with pm.Model() as m_cn_multi:
     D = pm.Normal("D", mu, sigma, observed=modeling_data2.lfc)
 ```
 
+```python
+cell_line_idx = modeling_data2.depmap_id.cat.codes.to_numpy()
+w_shape = (NUM_KNOTS + 2, len(np.unique(modeling_data2.depmap_id)))
+
+with pm.Model() as m_cn_multi:
+    # Priors
+    a = pm.Normal("a", 0, 2)
+    w = pm.Normal("w", -0.5, 1, shape=w_shape)
+
+    # Linear model
+    _mu = a
+
+# Build `mu` for each group.
+for cell_line_i in cell_line_idx:
+    with m_cn_multi:
+        _mu += pm.math.dot(B_cn_multi[cell_line_i], w[:, cell_line_i])
+
+with m_cn_multi:
+    mu = pm.Deterministic("mu", _mu)
+    sigma = pm.Exponential("sigma", 1)
+
+    # Likelihood
+    D = pm.Normal("D", mu, sigma, observed=modeling_data2.lfc)
+```
+
     ---------------------------------------------------------------------------
 
-    KeyError                                  Traceback (most recent call last)
+    ValueError                                Traceback (most recent call last)
 
-    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/type.py in dtype_specs(self)
-        253         try:
-    --> 254             return {
-        255                 'float16': (float, 'npy_float16', 'NPY_FLOAT16'),
-
-
-    KeyError: 'object'
-
-    
-    During handling of the above exception, another exception occurred:
+    <ipython-input-62-e7ea456a23d2> in <module>
+         13 for cell_line_i in cell_line_idx:
+         14     with m_cn_multi:
+    ---> 15         _mu += pm.math.dot(B_cn_multi[cell_line_i], w[:, cell_line_i])
+         16 
+         17 with m_cn_multi:
 
 
-    TypeError                                 Traceback (most recent call last)
-
-    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/basic.py in constant(x, name, ndim, dtype)
-        245     try:
-    --> 246         ttype = TensorType(dtype=x_.dtype, broadcastable=bcastable)
-        247         if not constant.enable:
-
-
-    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/type.py in __init__(self, dtype, broadcastable, name, sparse_grad)
-         50         self.broadcastable = tuple(bool(b) for b in broadcastable)
-    ---> 51         self.dtype_specs()  # error checking is done there
-         52         self.name = name
+    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/var.py in __add__(self, other)
+        126     def __add__(self, other):
+        127         try:
+    --> 128             return theano.tensor.basic.add(self, other)
+        129         # We should catch the minimum number of exception here.
+        130         # Otherwise this will convert error when Theano flags
 
 
-    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/type.py in dtype_specs(self)
-        270         except KeyError:
-    --> 271             raise TypeError("Unsupported dtype for %s: %s"
-        272                             % (self.__class__.__name__, self.dtype))
+    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/gof/op.py in __call__(self, *inputs, **kwargs)
+        672                 thunk.outputs = [storage_map[v] for v in node.outputs]
+        673 
+    --> 674                 required = thunk()
+        675                 assert not required  # We provided all inputs
+        676 
 
 
-    TypeError: Unsupported dtype for TensorType: object
-
-    
-    During handling of the above exception, another exception occurred:
-
-
-    TypeError                                 Traceback (most recent call last)
-
-    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/basic.py in as_tensor_variable(x, name, ndim)
-        193     try:
-    --> 194         return constant(x, name=name, ndim=ndim)
-        195     except TypeError:
+    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/gof/op.py in rval()
+        860 
+        861         def rval():
+    --> 862             thunk()
+        863             for o in node.outputs:
+        864                 compute_map[o][0] = True
 
 
-    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/basic.py in constant(x, name, ndim, dtype)
-        265     except Exception:
-    --> 266         raise TypeError("Could not convert %s to TensorType" % x, type(x))
-        267 
+    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/gof/cc.py in __call__(self)
+       1737                 print(self.error_storage, file=sys.stderr)
+       1738                 raise
+    -> 1739             reraise(exc_type, exc_value, exc_trace)
+       1740 
+       1741 
 
 
-    TypeError: ('Could not convert [array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        8.63742722e-04, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 1.71880194e-05, 6.57152521e-03, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [6.27153564e-02, 3.28686212e-01, 4.30617042e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        2.26923168e-01, 1.55882338e-02, 6.03703977e-05],\n       [3.84348239e-05, 2.05188523e-02, 2.46019072e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        8.63742722e-04, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 1.71880194e-05, 6.57152521e-03, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [6.27153564e-02, 3.28686212e-01, 4.30617042e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        2.26923168e-01, 1.55882338e-02, 6.03703977e-05],\n       [3.84348239e-05, 2.05188523e-02, 2.46019072e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        8.63742722e-04, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 1.71880194e-05, 6.57152521e-03, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [6.27153564e-02, 3.28686212e-01, 4.30617042e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        2.26923168e-01, 1.55882338e-02, 6.03703977e-05],\n       [3.84348239e-05, 2.05188523e-02, 2.46019072e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n ...\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        5.90254982e-05, 0.00000000e+00, 0.00000000e+00],\n       [5.66039126e-02, 3.82431006e-01, 4.21976316e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        5.90254982e-05, 0.00000000e+00, 0.00000000e+00],\n       [5.66039126e-02, 3.82431006e-01, 4.21976316e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        5.90254982e-05, 0.00000000e+00, 0.00000000e+00],\n       [5.66039126e-02, 3.82431006e-01, 4.21976316e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])] to TensorType', <class 'numpy.ndarray'>)
-
-    
-    During handling of the above exception, another exception occurred:
-
-
-    AsTensorError                             Traceback (most recent call last)
-
-    <ipython-input-98-2c32d28ce219> in <module>
-          9     # Linear model
-         10     mu = pm.Deterministic(
-    ---> 11         "mu", a + pm.math.dot(B_cn_multi[cell_line_idx], w[:, cell_line_idx])
-         12     )
-         13     sigma = pm.Exponential("sigma", 1)
+    ~/.conda/envs/speclet/lib/python3.8/site-packages/six.py in reraise(tp, value, tb)
+        701             if value.__traceback__ is not tb:
+        702                 raise value.with_traceback(tb)
+    --> 703             raise value
+        704         finally:
+        705             value = None
 
 
-    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/basic.py in dot(a, b)
-       6096 
-       6097     """
-    -> 6098     a, b = as_tensor_variable(a), as_tensor_variable(b)
-       6099 
-       6100     if a.ndim == 0 or b.ndim == 0:
-
-
-    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/basic.py in as_tensor_variable(x, name, ndim)
-        198         except Exception:
-        199             str_x = repr(x)
-    --> 200         raise AsTensorError("Cannot convert %s to TensorType" % str_x, type(x))
-        201 
-        202 # this has a different name, because _as_tensor_variable is the
-
-
-    AsTensorError: ('Cannot convert [array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        8.63742722e-04, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 1.71880194e-05, 6.57152521e-03, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [6.27153564e-02, 3.28686212e-01, 4.30617042e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        2.26923168e-01, 1.55882338e-02, 6.03703977e-05],\n       [3.84348239e-05, 2.05188523e-02, 2.46019072e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        8.63742722e-04, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 1.71880194e-05, 6.57152521e-03, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [6.27153564e-02, 3.28686212e-01, 4.30617042e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        2.26923168e-01, 1.55882338e-02, 6.03703977e-05],\n       [3.84348239e-05, 2.05188523e-02, 2.46019072e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        8.63742722e-04, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 1.71880194e-05, 6.57152521e-03, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [6.27153564e-02, 3.28686212e-01, 4.30617042e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        2.26923168e-01, 1.55882338e-02, 6.03703977e-05],\n       [3.84348239e-05, 2.05188523e-02, 2.46019072e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n ...\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        5.90254982e-05, 0.00000000e+00, 0.00000000e+00],\n       [5.66039126e-02, 3.82431006e-01, 4.21976316e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        5.90254982e-05, 0.00000000e+00, 0.00000000e+00],\n       [5.66039126e-02, 3.82431006e-01, 4.21976316e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])\n array([[0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       ...,\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        5.90254982e-05, 0.00000000e+00, 0.00000000e+00],\n       [5.66039126e-02, 3.82431006e-01, 4.21976316e-01, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00],\n       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,\n        0.00000000e+00, 0.00000000e+00, 0.00000000e+00]])] to TensorType', <class 'numpy.ndarray'>)
+    ValueError: Input dimension mis-match. (input[0].shape[0] = 3988, input[1].shape[0] = 5982)
 
 ```python
 pm.model_to_graphviz(m_cn_multi)
 ```
 
-    ---------------------------------------------------------------------------
-
-    NameError                                 Traceback (most recent call last)
-
-    <ipython-input-2-711986024a8d> in <module>
-    ----> 1 pm.model_to_graphviz(m_cn_multi)
-    
-
-    NameError: name 'pm' is not defined
-
 ```python
-B_cn_multi_cat[B_cn_multi_idx[np.array([0, 1])], :]
+
 ```
 
-    ---------------------------------------------------------------------------
+```python
 
-    IndexError                                Traceback (most recent call last)
+```
 
-    <ipython-input-86-6fa48521647a> in <module>
-    ----> 1 B_cn_multi_cat[B_cn_multi_idx[np.array([0, 1])], :]
-    
+```python
 
-    IndexError: arrays used as indices must be of integer (or boolean) type
+```
+
+```python
+
+```
+
+*(Used in PyMC3 Discourse question)*
 
 ```python
 group_idx = d["group"].cat.codes.to_list()
