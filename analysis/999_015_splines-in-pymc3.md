@@ -247,7 +247,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_8_0.png)
 
-    <ggplot: (8749127536595)>
+    <ggplot: (8762232664188)>
 
 ```python
 (
@@ -261,7 +261,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_9_0.png)
 
-    <ggplot: (8749166099776)>
+    <ggplot: (8762232064597)>
 
 ```python
 (
@@ -276,7 +276,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_10_0.png)
 
-    <ggplot: (8749126939763)>
+    <ggplot: (8762230464988)>
 
 ```python
 d2["knot_group"] = [np.where(a <= knot_list)[0][0] for a in d2.year]
@@ -298,7 +298,7 @@ d2["knot_group"] = pd.Categorical(d2["knot_group"], ordered=True)
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_12_0.png)
 
-    <ggplot: (8749127536553)>
+    <ggplot: (8762230439735)>
 
 ```python
 B = dmatrix(
@@ -349,7 +349,7 @@ spline_df = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_14_0.png)
 
-    <ggplot: (8749126940468)>
+    <ggplot: (8762230440412)>
 
 ```python
 with pm.Model() as m4_7:
@@ -395,7 +395,7 @@ with m4_7:
   100.00% [8000/8000 00:13<00:00 Sampling 2 chains, 0 divergences]
 </div>
 
-    Sampling 2 chains for 2_000 tune and 2_000 draw iterations (4_000 + 4_000 draws total) took 13 seconds.
+    Sampling 2 chains for 2_000 tune and 2_000 draw iterations (4_000 + 4_000 draws total) took 14 seconds.
     The acceptance probability does not match the target. It is 0.70487961130992, but should be close to 0.8. Try to increase the number of tuning steps.
 
 <div>
@@ -769,7 +769,7 @@ spline_df_merged = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_22_0.png)
 
-    <ggplot: (8749125268255)>
+    <ggplot: (8762203095248)>
 
 ```python
 post_pred = az.summary(az_m4_7, var_names=["mu"]).reset_index(drop=True)
@@ -799,7 +799,7 @@ d2_post["pred_hdi_upper"] = post_pred["hdi_97%"]
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_24_0.png)
 
-    <ggplot: (8749091940660)>
+    <ggplot: (8762180246363)>
 
 ## Example with gene CN data of a single gene
 
@@ -1040,7 +1040,7 @@ ptk2_data = modeling_data[modeling_data.hugo_symbol == "PTK2"]
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_28_0.png)
 
-    <ggplot: (8749092018815)>
+    <ggplot: (8762180358364)>
 
 ```python
 ptk2_data.shape[0]
@@ -1079,7 +1079,7 @@ ptk2_spline_df = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_31_0.png)
 
-    <ggplot: (8749091940765)>
+    <ggplot: (8762230430422)>
 
 ```python
 with pm.Model() as m_ptk2:
@@ -1122,10 +1122,10 @@ with m_ptk2:
         }
     </style>
   <progress value='10000' class='' max='10000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [10000/10000 00:58<00:00 Sampling 2 chains, 163 divergences]
+  100.00% [10000/10000 01:01<00:00 Sampling 2 chains, 163 divergences]
 </div>
 
-    Sampling 2 chains for 2_000 tune and 3_000 draw iterations (4_000 + 6_000 draws total) took 58 seconds.
+    Sampling 2 chains for 2_000 tune and 3_000 draw iterations (4_000 + 6_000 draws total) took 62 seconds.
     There were 163 divergences after tuning. Increase `target_accept` or reparameterize.
     The number of effective samples is smaller than 25% for some parameters.
 
@@ -1348,7 +1348,7 @@ ptk2_post.head()
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_37_0.png)
 
-    <ggplot: (8749092142403)>
+    <ggplot: (8762205304905)>
 
 ### A "misbehaved" gene: *MDM2*
 
@@ -1371,7 +1371,7 @@ mdm2_data["log_gene_cn"] = np.log10(mdm2_data.gene_cn.values)
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_39_0.png)
 
-    <ggplot: (8749092142400)>
+    <ggplot: (8762205304872)>
 
 ```python
 mdm2_data.shape[0]
@@ -1416,7 +1416,7 @@ mdm2_spline_df = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_42_0.png)
 
-    <ggplot: (8749118253445)>
+    <ggplot: (8762223780334)>
 
 ```python
 with pm.Model() as m_mdm2:
@@ -1459,10 +1459,10 @@ with m_mdm2:
         }
     </style>
   <progress value='12000' class='' max='12000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [12000/12000 01:20<00:00 Sampling 2 chains, 15 divergences]
+  100.00% [12000/12000 01:24<00:00 Sampling 2 chains, 15 divergences]
 </div>
 
-    Sampling 2 chains for 3_000 tune and 3_000 draw iterations (6_000 + 6_000 draws total) took 81 seconds.
+    Sampling 2 chains for 3_000 tune and 3_000 draw iterations (6_000 + 6_000 draws total) took 85 seconds.
     There were 15 divergences after tuning. Increase `target_accept` or reparameterize.
     The number of effective samples is smaller than 25% for some parameters.
 
@@ -1693,7 +1693,7 @@ mdm2_post.head()
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_49_0.png)
 
-    <ggplot: (8749118234242)>
+    <ggplot: (8762153976016)>
 
 ```python
 (
@@ -1716,7 +1716,7 @@ mdm2_post.head()
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_50_0.png)
 
-    <ggplot: (8749103721328)>
+    <ggplot: (8762153959301)>
 
 ### Multi-level
 
@@ -1972,7 +1972,7 @@ d["gene_cn_max"] = [np.min((10.0, x)) for x in d.gene_cn]
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_54_0.png)
 
-    <ggplot: (8749095826089)>
+    <ggplot: (8785892613783)>
 
 ```python
 (
@@ -1987,7 +1987,7 @@ d["gene_cn_max"] = [np.min((10.0, x)) for x in d.gene_cn]
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_55_0.png)
 
-    <ggplot: (8749048536869)>
+    <ggplot: (8785943276538)>
 
 ```python
 d = modeling_data2.copy()
@@ -2004,7 +2004,7 @@ d["gene_cn_log"] = np.log2(d.gene_cn.values + 1)
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_56_0.png)
 
-    <ggplot: (8749092323615)>
+    <ggplot: (8785888428195)>
 
 ```python
 (
@@ -2020,7 +2020,7 @@ d["gene_cn_log"] = np.log2(d.gene_cn.values + 1)
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_57_0.png)
 
-    <ggplot: (8749074684760)>
+    <ggplot: (8785891814626)>
 
 $
 D_j \sim \mathcal{N}(\mu, \sigma) \\
@@ -2053,7 +2053,16 @@ for cell_line_i in modeling_data2.depmap_id.cat.categories:
     )
 
     B_cn_multi.append(np.asarray(B, order="F"))
-# B_cn_multi = np.asarray(B_cn_multi)
+```
+
+```python
+LARGEST_B_CN = np.max([b.shape[0] for b in B_cn_multi])
+B_zeros = np.zeros((LARGEST_B_CN, B_cn_multi[0].shape[1]))
+
+for i, B in enumerate(B_cn_multi):
+    B_padded = B_zeros.copy()
+    B_padded[: B.shape[0], : B.shape[1]] = B
+    B_cn_multi[i] = B_padded
 ```
 
 ```python
@@ -2062,39 +2071,32 @@ for i, B in enumerate(B_cn_multi):
 ```
 
     B[0]: 5982, 12
-    B[1]: 3988, 12
-    B[2]: 3988, 12
-    B[3]: 3988, 12
-    B[4]: 3988, 12
-    B[5]: 3988, 12
+    B[1]: 5982, 12
+    B[2]: 5982, 12
+    B[3]: 5982, 12
+    B[4]: 5982, 12
+    B[5]: 5982, 12
 
 ```python
-B_cn_multi_idx = []
-
-for i, B in enumerate(B_cn_multi):
-    start = int(np.sum([len(x) for x in B_cn_multi[0:i]]))
-    length = len(B)
-    B_cn_multi_idx.append(np.asarray(range(start, start + length), dtype=int))
-
-B_cn_multi_idx = np.asarray(B_cn_multi_idx)[:, None]
-B_cn_multi_idx.dtype
+# Total number of rows.
+np.sum([B.shape[0] for B in B_cn_multi])
 ```
 
-    dtype('O')
+    35892
 
 ```python
-B_cn_multi_cat = np.concatenate(B_cn_multi)
-B_cn_multi_cat.shape
+B_cn_array = np.stack(B_cn_multi)
+B_cn_array.shape
 ```
 
-    (25922, 12)
-
-*(Original model)*
+    (6, 5982, 12)
 
 ```python
 cell_line_idx = modeling_data2.depmap_id.cat.codes.to_numpy()
 w_shape = (NUM_KNOTS + 2, len(np.unique(modeling_data2.depmap_id)))
+```
 
+```python
 with pm.Model() as m_cn_multi:
     # Priors
     a = pm.Normal("a", 0, 2)
@@ -2102,7 +2104,14 @@ with pm.Model() as m_cn_multi:
 
     # Linear model
     mu = pm.Deterministic(
-        "mu", a + pm.math.dot(B_cn_multi[cell_line_idx], w[:, cell_line_idx])
+        #         "mu", a + pm.math.dot(B_cn_array[cell_line_idx, :, :], w[:, cell_line_idx])
+        "mu",
+        a
+        + tt.sum(
+            B_cn_array[cell_line_idx, :, :].transpose((2, 0, 1))
+            * w[:, cell_line_idx, None],
+            axis=-1,
+        ),
     )
     sigma = pm.Exponential("sigma", 1)
 
@@ -2110,91 +2119,52 @@ with pm.Model() as m_cn_multi:
     D = pm.Normal("D", mu, sigma, observed=modeling_data2.lfc)
 ```
 
-```python
-cell_line_idx = modeling_data2.depmap_id.cat.codes.to_numpy()
-w_shape = (NUM_KNOTS + 2, len(np.unique(modeling_data2.depmap_id)))
-
-with pm.Model() as m_cn_multi:
-    # Priors
-    a = pm.Normal("a", 0, 2)
-    w = pm.Normal("w", -0.5, 1, shape=w_shape)
-
-    # Linear model
-    _mu = a
-
-# Build `mu` for each group.
-for cell_line_i in cell_line_idx:
-    with m_cn_multi:
-        _mu += pm.math.dot(B_cn_multi[cell_line_i], w[:, cell_line_i])
-
-with m_cn_multi:
-    mu = pm.Deterministic("mu", _mu)
-    sigma = pm.Exponential("sigma", 1)
-
-    # Likelihood
-    D = pm.Normal("D", mu, sigma, observed=modeling_data2.lfc)
-```
-
-    ---------------------------------------------------------------------------
-
-    ValueError                                Traceback (most recent call last)
-
-    <ipython-input-62-e7ea456a23d2> in <module>
-         13 for cell_line_i in cell_line_idx:
-         14     with m_cn_multi:
-    ---> 15         _mu += pm.math.dot(B_cn_multi[cell_line_i], w[:, cell_line_i])
-         16 
-         17 with m_cn_multi:
-
-
-    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/var.py in __add__(self, other)
-        126     def __add__(self, other):
-        127         try:
-    --> 128             return theano.tensor.basic.add(self, other)
-        129         # We should catch the minimum number of exception here.
-        130         # Otherwise this will convert error when Theano flags
-
-
-    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/gof/op.py in __call__(self, *inputs, **kwargs)
-        672                 thunk.outputs = [storage_map[v] for v in node.outputs]
-        673 
-    --> 674                 required = thunk()
-        675                 assert not required  # We provided all inputs
-        676 
-
-
-    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/gof/op.py in rval()
-        860 
-        861         def rval():
-    --> 862             thunk()
-        863             for o in node.outputs:
-        864                 compute_map[o][0] = True
-
-
-    ~/.conda/envs/speclet/lib/python3.8/site-packages/theano/gof/cc.py in __call__(self)
-       1737                 print(self.error_storage, file=sys.stderr)
-       1738                 raise
-    -> 1739             reraise(exc_type, exc_value, exc_trace)
-       1740 
-       1741 
-
-
-    ~/.conda/envs/speclet/lib/python3.8/site-packages/six.py in reraise(tp, value, tb)
-        701             if value.__traceback__ is not tb:
-        702                 raise value.with_traceback(tb)
-    --> 703             raise value
-        704         finally:
-        705             value = None
-
-
-    ValueError: Input dimension mis-match. (input[0].shape[0] = 3988, input[1].shape[0] = 5982)
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 ```python
 pm.model_to_graphviz(m_cn_multi)
 ```
 
-```python
+![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_66_0.svg)
 
+```python
+raise Exception("Block - need to figure out issue with sampling... (try less data)")
+```
+
+    ---------------------------------------------------------------------------
+
+    Exception                                 Traceback (most recent call last)
+
+    <ipython-input-1-f7b683f5e470> in <module>
+    ----> 1 raise Exception("Block - need to figure out issue with sampling... (try less data)")
+    
+
+    Exception: Block - need to figure out issue with sampling... (try less data)
+
+```python
+with m_cn_multi:
+    prior_pc_m_cn_multi = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
+    trace_m_cn_multi = pm.sample(
+        3000,
+        tune=3000,
+        chains=2,
+        cores=1,
+        init="advi",
+        n_init=200000,
+        random_seed=RANDOM_SEED,
+    )
+    post_pc_m_cn_multi = pm.sample_posterior_predictive(
+        trace_m_cn_multi, random_seed=RANDOM_SEED
+    )
+```
+
+```python
+az_cn_multi = az.from_pymc3(
+    model=m_cn_multi,
+    trace=trace_m_cn_multi,
+    posterior_predictive=post_pc_m_cn_multi,
+    prior=prior_pc_m_cn_multi,
+)
 ```
 
 ```python
