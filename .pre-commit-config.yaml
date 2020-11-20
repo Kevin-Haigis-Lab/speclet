@@ -43,3 +43,8 @@ repos:
     hooks:
     -   id: markdownlint
         args: [--fix]
+-   repo: https://github.com/pycqa/isort
+    rev: 5.5.2
+    hooks:
+    - id: isort
+      types: [python]
