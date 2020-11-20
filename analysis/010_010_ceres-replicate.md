@@ -2387,11 +2387,33 @@ ceres_ppc_df.head()
 
 ```
 
-```python
+---
 
-```
+### To-do
+
+1. Update the Goal at the top indicating that the spline is unlikely to be viable.
+2. Compare to the actual "gene effect" values reported by DepMap. This may require additional processing of the values in order to be comparable, so try to turn these into functions to be imported elsewhere, too.
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
+```
+
+    last updated: 2020-11-20 
+    
+    CPython 3.8.5
+    IPython 7.18.1
+    
+    compiler   : GCC 7.3.0
+    system     : Linux
+    release    : 3.10.0-1062.el7.x86_64
+    machine    : x86_64
+    processor  : x86_64
+    CPU cores  : 28
+    interpreter: 64bit
+    host name  : compute-e-16-231.o2.rc.hms.harvard.edu
+    Git branch : subset-data
+
+```python
+
 ```
