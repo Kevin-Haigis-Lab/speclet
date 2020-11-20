@@ -247,7 +247,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_8_0.png)
 
-    <ggplot: (8762232664188)>
+    <ggplot: (8774371095890)>
 
 ```python
 (
@@ -261,7 +261,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_9_0.png)
 
-    <ggplot: (8762232064597)>
+    <ggplot: (8774319905612)>
 
 ```python
 (
@@ -276,7 +276,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_10_0.png)
 
-    <ggplot: (8762230464988)>
+    <ggplot: (8774320505483)>
 
 ```python
 d2["knot_group"] = [np.where(a <= knot_list)[0][0] for a in d2.year]
@@ -298,7 +298,7 @@ d2["knot_group"] = pd.Categorical(d2["knot_group"], ordered=True)
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_12_0.png)
 
-    <ggplot: (8762230439735)>
+    <ggplot: (8774318281744)>
 
 ```python
 B = dmatrix(
@@ -349,7 +349,7 @@ spline_df = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_14_0.png)
 
-    <ggplot: (8762230440412)>
+    <ggplot: (8774318305711)>
 
 ```python
 with pm.Model() as m4_7:
@@ -392,10 +392,10 @@ with m4_7:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:13<00:00 Sampling 2 chains, 0 divergences]
+  100.00% [8000/8000 00:12<00:00 Sampling 2 chains, 0 divergences]
 </div>
 
-    Sampling 2 chains for 2_000 tune and 2_000 draw iterations (4_000 + 4_000 draws total) took 14 seconds.
+    Sampling 2 chains for 2_000 tune and 2_000 draw iterations (4_000 + 4_000 draws total) took 13 seconds.
     The acceptance probability does not match the target. It is 0.70487961130992, but should be close to 0.8. Try to increase the number of tuning steps.
 
 <div>
@@ -412,7 +412,7 @@ with m4_7:
         }
     </style>
   <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 00:05<00:00]
+  100.00% [4000/4000 00:04<00:00]
 </div>
 
 ```python
@@ -769,7 +769,7 @@ spline_df_merged = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_22_0.png)
 
-    <ggplot: (8762203095248)>
+    <ggplot: (8774268181245)>
 
 ```python
 post_pred = az.summary(az_m4_7, var_names=["mu"]).reset_index(drop=True)
@@ -799,7 +799,7 @@ d2_post["pred_hdi_upper"] = post_pred["hdi_97%"]
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_24_0.png)
 
-    <ggplot: (8762180246363)>
+    <ggplot: (8774268267511)>
 
 ## Example with gene CN data of a single gene
 
@@ -1040,7 +1040,7 @@ ptk2_data = modeling_data[modeling_data.hugo_symbol == "PTK2"]
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_28_0.png)
 
-    <ggplot: (8762180358364)>
+    <ggplot: (8774268187007)>
 
 ```python
 ptk2_data.shape[0]
@@ -1079,7 +1079,7 @@ ptk2_spline_df = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_31_0.png)
 
-    <ggplot: (8762230430422)>
+    <ggplot: (8774268187329)>
 
 ```python
 with pm.Model() as m_ptk2:
@@ -1122,10 +1122,10 @@ with m_ptk2:
         }
     </style>
   <progress value='10000' class='' max='10000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [10000/10000 01:01<00:00 Sampling 2 chains, 163 divergences]
+  100.00% [10000/10000 00:53<00:00 Sampling 2 chains, 163 divergences]
 </div>
 
-    Sampling 2 chains for 2_000 tune and 3_000 draw iterations (4_000 + 6_000 draws total) took 62 seconds.
+    Sampling 2 chains for 2_000 tune and 3_000 draw iterations (4_000 + 6_000 draws total) took 53 seconds.
     There were 163 divergences after tuning. Increase `target_accept` or reparameterize.
     The number of effective samples is smaller than 25% for some parameters.
 
@@ -1143,7 +1143,7 @@ with m_ptk2:
         }
     </style>
   <progress value='6000' class='' max='6000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [6000/6000 00:08<00:00]
+  100.00% [6000/6000 00:07<00:00]
 </div>
 
 ```python
@@ -1348,7 +1348,7 @@ ptk2_post.head()
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_37_0.png)
 
-    <ggplot: (8762205304905)>
+    <ggplot: (8774317650180)>
 
 ### A "misbehaved" gene: *MDM2*
 
@@ -1371,7 +1371,7 @@ mdm2_data["log_gene_cn"] = np.log10(mdm2_data.gene_cn.values)
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_39_0.png)
 
-    <ggplot: (8762205304872)>
+    <ggplot: (8774317649017)>
 
 ```python
 mdm2_data.shape[0]
@@ -1416,7 +1416,7 @@ mdm2_spline_df = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_42_0.png)
 
-    <ggplot: (8762223780334)>
+    <ggplot: (8774317649044)>
 
 ```python
 with pm.Model() as m_mdm2:
@@ -1459,10 +1459,10 @@ with m_mdm2:
         }
     </style>
   <progress value='12000' class='' max='12000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [12000/12000 01:24<00:00 Sampling 2 chains, 15 divergences]
+  100.00% [12000/12000 01:21<00:00 Sampling 2 chains, 15 divergences]
 </div>
 
-    Sampling 2 chains for 3_000 tune and 3_000 draw iterations (6_000 + 6_000 draws total) took 85 seconds.
+    Sampling 2 chains for 3_000 tune and 3_000 draw iterations (6_000 + 6_000 draws total) took 81 seconds.
     There were 15 divergences after tuning. Increase `target_accept` or reparameterize.
     The number of effective samples is smaller than 25% for some parameters.
 
@@ -1480,7 +1480,7 @@ with m_mdm2:
         }
     </style>
   <progress value='6000' class='' max='6000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [6000/6000 00:08<00:00]
+  100.00% [6000/6000 00:07<00:00]
 </div>
 
 ```python
@@ -1693,7 +1693,7 @@ mdm2_post.head()
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_49_0.png)
 
-    <ggplot: (8762153976016)>
+    <ggplot: (8774317817941)>
 
 ```python
 (
@@ -1716,7 +1716,7 @@ mdm2_post.head()
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_50_0.png)
 
-    <ggplot: (8762153959301)>
+    <ggplot: (8774317901572)>
 
 ### Multi-level
 
@@ -1949,10 +1949,18 @@ modeling_data2.head(n=7)
 </div>
 
 ```python
+np.random.seed(RANDOM_SEED)
+SAMPLED_GENES = np.random.choice(
+    modeling_data2.hugo_symbol.unique(), 100, replace=False
+)
+modeling_data2 = modeling_data2[modeling_data2.hugo_symbol.isin(SAMPLED_GENES)]
+```
+
+```python
 modeling_data2.shape
 ```
 
-    (25922, 27)
+    (5096, 27)
 
 ```python
 d = modeling_data2.copy()
@@ -1970,9 +1978,9 @@ d["gene_cn_max"] = [np.min((10.0, x)) for x in d.gene_cn]
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_54_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_55_0.png)
 
-    <ggplot: (8785892613783)>
+    <ggplot: (8774238814980)>
 
 ```python
 (
@@ -1985,9 +1993,9 @@ d["gene_cn_max"] = [np.min((10.0, x)) for x in d.gene_cn]
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_55_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_56_0.png)
 
-    <ggplot: (8785943276538)>
+    <ggplot: (8774238815552)>
 
 ```python
 d = modeling_data2.copy()
@@ -2002,9 +2010,9 @@ d["gene_cn_log"] = np.log2(d.gene_cn.values + 1)
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_56_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_57_0.png)
 
-    <ggplot: (8785888428195)>
+    <ggplot: (8774203228139)>
 
 ```python
 (
@@ -2018,9 +2026,9 @@ d["gene_cn_log"] = np.log2(d.gene_cn.values + 1)
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_57_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_58_0.png)
 
-    <ggplot: (8785891814626)>
+    <ggplot: (8774268071539)>
 
 $
 D_j \sim \mathcal{N}(\mu, \sigma) \\
@@ -2031,7 +2039,7 @@ D_j \sim \mathcal{N}(\mu, \sigma) \\
 $
 
 ```python
-NUM_KNOTS = 10
+NUM_KNOTS = 5
 
 B_cn_multi = []
 for cell_line_i in modeling_data2.depmap_id.cat.categories:
@@ -2070,26 +2078,26 @@ for i, B in enumerate(B_cn_multi):
     print(f"B[{i}]: {B.shape[0]}, {B.shape[1]}")
 ```
 
-    B[0]: 5982, 12
-    B[1]: 5982, 12
-    B[2]: 5982, 12
-    B[3]: 5982, 12
-    B[4]: 5982, 12
-    B[5]: 5982, 12
+    B[0]: 1176, 7
+    B[1]: 1176, 7
+    B[2]: 1176, 7
+    B[3]: 1176, 7
+    B[4]: 1176, 7
+    B[5]: 1176, 7
 
 ```python
 # Total number of rows.
 np.sum([B.shape[0] for B in B_cn_multi])
 ```
 
-    35892
+    7056
 
 ```python
 B_cn_array = np.stack(B_cn_multi)
 B_cn_array.shape
 ```
 
-    (6, 5982, 12)
+    (6, 1176, 7)
 
 ```python
 cell_line_idx = modeling_data2.depmap_id.cat.codes.to_numpy()
@@ -2125,7 +2133,7 @@ with pm.Model() as m_cn_multi:
 pm.model_to_graphviz(m_cn_multi)
 ```
 
-![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_66_0.svg)
+![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_67_0.svg)
 
 ```python
 raise Exception("Block - need to figure out issue with sampling... (try less data)")
@@ -2135,7 +2143,7 @@ raise Exception("Block - need to figure out issue with sampling... (try less dat
 
     Exception                                 Traceback (most recent call last)
 
-    <ipython-input-1-f7b683f5e470> in <module>
+    <ipython-input-60-f7b683f5e470> in <module>
     ----> 1 raise Exception("Block - need to figure out issue with sampling... (try less data)")
     
 
@@ -2149,14 +2157,42 @@ with m_cn_multi:
         tune=3000,
         chains=2,
         cores=1,
-        init="advi",
-        n_init=200000,
+        # init="advi",
+        # n_init=200000,
         random_seed=RANDOM_SEED,
     )
     post_pc_m_cn_multi = pm.sample_posterior_predictive(
         trace_m_cn_multi, random_seed=RANDOM_SEED
     )
 ```
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using jitter+adapt_diag...
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    Sequential sampling (2 chains in 1 job)
+    NUTS: [sigma, w, a]
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='343' class='' max='6000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  5.72% [343/6000 17:43<4:52:18 Sampling chain 0, 0 divergences]
+</div>
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
+    Sampling 1 chain for 343 tune and 0 draw iterations (343 + 0 draws total) took 1065 seconds.
+    No posterior samples. Unable to run convergence checks
 
 ```python
 az_cn_multi = az.from_pymc3(
@@ -2168,48 +2204,17 @@ az_cn_multi = az.from_pymc3(
 ```
 
 ```python
-
-```
-
-```python
-
-```
-
-```python
-
-```
-
-*(Used in PyMC3 Discourse question)*
-
-```python
-group_idx = d["group"].cat.codes.to_list()
-w_shape = (NUM_KNOTS + 2, len(np.unique(d["group"])))
-
-with pm.Model() as m:
-    # Priors
-    a = pm.Normal("a", 0, 2)
-    w = pm.Normal("w", 0, 1, shape=w_shape)
-
-    # Linear model
-    mu = pm.Deterministic("mu", a + pm.math.dot(B_list[group_idx], w[:, group_idx]))
-    sgima = pm.Exponential("sigma", 1)
-
-    # Likelihood
-    D =  pm.Normal("D", mu, sigma, observed=d["observed_D"])
-```
-
-```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    plotnine 0.7.1
+    seaborn  0.11.0
     pandas   1.1.3
+    plotnine 0.7.1
+    numpy    1.19.2
     arviz    0.10.0
     pymc3    3.9.3
-    numpy    1.19.2
-    seaborn  0.11.0
-    last updated: 2020-11-13 
+    last updated: 2020-11-20 
     
     CPython 3.8.5
     IPython 7.18.1
@@ -2221,5 +2226,9 @@ with pm.Model() as m:
     processor  : x86_64
     CPU cores  : 28
     interpreter: 64bit
-    host name  : compute-e-16-229.o2.rc.hms.harvard.edu
+    host name  : compute-e-16-231.o2.rc.hms.harvard.edu
     Git branch : subset-data
+
+```python
+
+```

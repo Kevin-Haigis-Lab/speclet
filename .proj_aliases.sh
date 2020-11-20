@@ -13,3 +13,4 @@ alias speclet_snakemake_env="conda activate speclet_smakemake && bash .proj_alia
 
 # Misc.
 alias tmd='jupyter nbconvert --to markdown'
+alias pcr='pre-commit run'
