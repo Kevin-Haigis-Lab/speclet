@@ -33,6 +33,7 @@ import re
 import string
 import warnings
 from pathlib import Path
+from time import time
 
 import arviz as az
 import matplotlib.colors as mcolors
@@ -45,6 +46,7 @@ import pymc3_helpers as pmhelp
 import seaborn as sns
 from theano import tensor as tt
 
+notebook_tic = time()
 warnings.simplefilter(action="ignore", category=UserWarning)
 
 gg.theme_set(gg.theme_minimal())
@@ -355,7 +357,7 @@ data["gene_cn_z"] = data.groupby("hugo_symbol")["gene_cn_z"].apply(
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_11_0.png)
 
-    <ggplot: (8726649709614)>
+    <ggplot: (8768007891231)>
 
 ## Modeling
 
@@ -426,8 +428,8 @@ ceres_m1_samples = pmhelp.pymc3_sampling_procedure(
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 
-    CPU times: user 8.16 s, sys: 2.1 s, total: 10.3 s
-    Wall time: 18.7 s
+    CPU times: user 8.02 s, sys: 1.96 s, total: 9.99 s
+    Wall time: 20.1 s
 
 ```python
 az_ceres_m1 = az.from_pymc3(
@@ -634,7 +636,7 @@ data.is_deleterious.unique()
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_25_0.png)
 
-    <ggplot: (8726373777140)>
+    <ggplot: (8768007899832)>
 
 ```python
 (
@@ -650,7 +652,7 @@ data.is_deleterious.unique()
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_26_0.png)
 
-    <ggplot: (8726373675764)>
+    <ggplot: (8767733980151)>
 
 ```python
 (
@@ -671,7 +673,7 @@ data.is_deleterious.unique()
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_27_0.png)
 
-    <ggplot: (8726373705635)>
+    <ggplot: (8768004622873)>
 
 ```python
 (
@@ -688,7 +690,7 @@ data.is_deleterious.unique()
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_28_0.png)
 
-    <ggplot: (8726374318617)>
+    <ggplot: (8767733544223)>
 
 ```python
 kras_gene_effect = gene_effect_post_df[
@@ -705,7 +707,7 @@ kras_gene_effect = gene_effect_post_df[
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_29_0.png)
 
-    <ggplot: (8726373836716)>
+    <ggplot: (8767733814736)>
 
 ---
 
@@ -794,15 +796,15 @@ with ceres_m2:
         }
     </style>
   <progress value='40000' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [40000/40000 02:25<00:00 Average Loss = 92.727]
+  100.00% [40000/40000 02:30<00:00 Average Loss = 92.73]
 </div>
 
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    Finished [100%]: Average Loss = 92.682
+    Finished [100%]: Average Loss = 92.68
 
 
-    CPU times: user 2min 28s, sys: 3 s, total: 2min 31s
-    Wall time: 2min 39s
+    CPU times: user 2min 34s, sys: 13.5 s, total: 2min 48s
+    Wall time: 4min 14s
 
 ```python
 df = pd.DataFrame(
@@ -821,7 +823,7 @@ df = pd.DataFrame(
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_34_0.png)
 
-    <ggplot: (8726373163816)>
+    <ggplot: (8767723087035)>
 
 ```python
 (
@@ -833,7 +835,7 @@ df = pd.DataFrame(
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_35_0.png)
 
-    <ggplot: (8726360235524)>
+    <ggplot: (8767734001297)>
 
 ```python
 with pm.Model() as ceres_m2_full:
@@ -886,8 +888,8 @@ ceres_m2_mcmc_res = pmhelp.pymc3_sampling_procedure(
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 
-    CPU times: user 6.08 s, sys: 1.52 s, total: 7.6 s
-    Wall time: 14.3 s
+    CPU times: user 5.99 s, sys: 1.68 s, total: 7.67 s
+    Wall time: 14.9 s
 
 ```python
 az_ceres_m2 = az.from_pymc3(
@@ -919,8 +921,8 @@ ceres_m2_mcmc_advi_res = pmhelp.pymc3_sampling_procedure(
 ```
 
     Loading cached trace and posterior sample...
-    CPU times: user 5.89 s, sys: 1.55 s, total: 7.45 s
-    Wall time: 12 s
+    CPU times: user 5.81 s, sys: 1.47 s, total: 7.28 s
+    Wall time: 12.2 s
 
 ```python
 az_ceres_m2_advi = az.from_pymc3(
@@ -1090,7 +1092,7 @@ pos = gg.position_dodge(width=0.5)
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_44_0.png)
 
-    <ggplot: (8726373741909)>
+    <ggplot: (8767719904401)>
 
 ## Comparing CERES with and without a covariate for CNA
 
@@ -1717,7 +1719,7 @@ pos = gg.position_dodge(width=0.5)
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_50_0.png)
 
-    <ggplot: (8726361679083)>
+    <ggplot: (8768008337815)>
 
 ```python
 def make_index_df(df, col, idx_col_name):
@@ -2062,7 +2064,7 @@ ceres_g_kj_wide.head()
 
 ![png](010_010_ceres-replicate_files/010_010_ceres-replicate_53_0.png)
 
-    <ggplot: (8726616821393)>
+    <ggplot: (8767734468819)>
 
 ```python
 def summarize_ppc(az_m, var_name):
@@ -2308,7 +2310,7 @@ ceres_ppc_df.head()
       <td>AAGAGGCCGGTCAAATTCAG</td>
       <td>PDE5A</td>
       <td>0</td>
-      <td>0.254352</td>
+      <td>0.070913</td>
       <td>M1</td>
     </tr>
     <tr>
@@ -2317,7 +2319,7 @@ ceres_ppc_df.head()
       <td>AATCAACCCACAGCTGCACA</td>
       <td>TP53</td>
       <td>0</td>
-      <td>0.444961</td>
+      <td>0.894884</td>
       <td>M1</td>
     </tr>
     <tr>
@@ -2326,7 +2328,7 @@ ceres_ppc_df.head()
       <td>AATTACTACTTGCTTCCTGT</td>
       <td>KRAS</td>
       <td>0</td>
-      <td>-1.268235</td>
+      <td>-1.393183</td>
       <td>M1</td>
     </tr>
     <tr>
@@ -2335,7 +2337,7 @@ ceres_ppc_df.head()
       <td>ACCTGTATGACGAAACCGTG</td>
       <td>KIF3C</td>
       <td>0</td>
-      <td>-0.068042</td>
+      <td>0.142931</td>
       <td>M1</td>
     </tr>
     <tr>
@@ -2344,7 +2346,7 @@ ceres_ppc_df.head()
       <td>ACTCTGTTCCTTCATCTCCG</td>
       <td>ZSWIM8</td>
       <td>0</td>
-      <td>-0.386413</td>
+      <td>0.115612</td>
       <td>M1</td>
     </tr>
   </tbody>
@@ -2394,12 +2396,28 @@ ceres_ppc_df.head()
 1. Update the Goal at the top indicating that the spline is unlikely to be viable.
 2. Compare to the actual "gene effect" values reported by DepMap. This may require additional processing of the values in order to be comparable, so try to turn these into functions to be imported elsewhere, too.
 
+---
+
+```python
+notebook_toc = time()
+print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
+```
+
+    execution time: 10.63 minutes
+
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    last updated: 2020-11-20 
+    plotnine 0.7.1
+    pandas   1.1.3
+    seaborn  0.11.0
+    re       2.2.1
+    numpy    1.19.2
+    pymc3    3.9.3
+    arviz    0.10.0
+    last updated: 2020-12-17 
     
     CPython 3.8.5
     IPython 7.18.1
@@ -2409,11 +2427,7 @@ ceres_ppc_df.head()
     release    : 3.10.0-1062.el7.x86_64
     machine    : x86_64
     processor  : x86_64
-    CPU cores  : 28
+    CPU cores  : 32
     interpreter: 64bit
-    host name  : compute-e-16-231.o2.rc.hms.harvard.edu
+    host name  : compute-a-16-78.o2.rc.hms.harvard.edu
     Git branch : subset-data
-
-```python
-
-```

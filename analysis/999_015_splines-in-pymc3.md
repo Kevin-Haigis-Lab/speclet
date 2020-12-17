@@ -8,6 +8,7 @@
 import string
 import warnings
 from pathlib import Path
+from time import time
 
 import arviz as az
 import matplotlib.colors as mcolors
@@ -21,9 +22,11 @@ import seaborn as sns
 from patsy import dmatrix
 from theano import tensor as tt
 
+notebook_tic = time()
 warnings.simplefilter(action="ignore", category=UserWarning)
 
 gg.theme_set(gg.theme_minimal())
+%config InlineBackend.figure_format = 'retina'
 
 RANDOM_SEED = 847
 np.random.seed(RANDOM_SEED)
@@ -2201,6 +2204,13 @@ az_cn_multi = az.from_pymc3(
     posterior_predictive=post_pc_m_cn_multi,
     prior=prior_pc_m_cn_multi,
 )
+```
+
+---
+
+```python
+notebook_toc = time()
+print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
 ```python

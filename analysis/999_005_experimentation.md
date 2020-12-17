@@ -2,7 +2,9 @@
 
 ```python
 import string
+import warnings
 from itertools import product
+from time import time
 
 import arviz as az
 import matplotlib.pyplot as plt
@@ -12,20 +14,27 @@ import plotnine as gg
 import pymc3 as pm
 import seaborn as sns
 from numpy.random import exponential, normal
-```
 
-```python
-import warnings
-
+notebook_tic = time()
 warnings.simplefilter(action="ignore", category=UserWarning)
-```
 
-```python
 gg.theme_set(gg.theme_minimal())
+
+%config InlineBackend.figure_format = 'retina'
+
+RANDOM_SEED = 103
 ```
 
 ```python
-RANDOM_SEED = 103
+
+```
+
+```python
+
+```
+
+```python
+
 ```
 
 ### Experimental design
@@ -116,7 +125,7 @@ print(data.head(10).to_markdown())
 
 ![png](999_005_experimentation_files/999_005_experimentation_8_0.png)
 
-    <ggplot: (8786276810051)>
+    <ggplot: (8738798753573)>
 
 ```python
 (
@@ -133,7 +142,7 @@ print(data.head(10).to_markdown())
 
 ![png](999_005_experimentation_files/999_005_experimentation_9_0.png)
 
-    <ggplot: (8786279778687)>
+    <ggplot: (8738798799812)>
 
 ```python
 cell_line_idx = data["cell_line"].values
@@ -207,7 +216,7 @@ with pm.Model() as model:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:08<00:00]
+  100.00% [8000/8000 00:10<00:00]
 </div>
 
 ```python
@@ -376,7 +385,7 @@ post_data["row_i"] = list(range(len(post_data)))
 
 ![png](999_005_experimentation_files/999_005_experimentation_16_0.png)
 
-    <ggplot: (8786277693555)>
+    <ggplot: (8738796867076)>
 
 ```python
 col_names = ["gene_" + str(i) for i in range(num_genes)]
@@ -401,20 +410,29 @@ d = pd.DataFrame({"alpha_g": alpha_g_post, "beta_a": beta_a_post})
 
 ![png](999_005_experimentation_files/999_005_experimentation_17_0.png)
 
-    <ggplot: (8786277693648)>
+    <ggplot: (8738798157044)>
+
+---
+
+```python
+notebook_toc = time()
+print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
+```
+
+    execution time: 4.63 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    plotnine 0.7.1
-    pymc3    3.9.3
-    pandas   1.1.3
-    seaborn  0.11.0
     numpy    1.19.2
+    plotnine 0.7.1
+    seaborn  0.11.0
+    pymc3    3.9.3
     arviz    0.10.0
-    last updated: 2020-10-26 
+    pandas   1.1.3
+    last updated: 2020-12-17 
     
     CPython 3.8.5
     IPython 7.18.1
@@ -424,10 +442,10 @@ d = pd.DataFrame({"alpha_g": alpha_g_post, "beta_a": beta_a_post})
     release    : 3.10.0-1062.el7.x86_64
     machine    : x86_64
     processor  : x86_64
-    CPU cores  : 28
+    CPU cores  : 32
     interpreter: 64bit
-    host name  : compute-e-16-237.o2.rc.hms.harvard.edu
-    Git branch : models
+    host name  : compute-a-16-78.o2.rc.hms.harvard.edu
+    Git branch : subset-data
 
 ```python
 

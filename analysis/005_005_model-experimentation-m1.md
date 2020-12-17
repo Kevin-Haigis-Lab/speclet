@@ -1,6 +1,8 @@
 ```python
 import string
+import warnings
 from itertools import product
+from time import time
 
 import arviz as az
 import matplotlib.pyplot as plt
@@ -10,19 +12,14 @@ import plotnine as gg
 import pymc3 as pm
 import seaborn as sns
 from numpy.random import exponential, normal
-```
 
-```python
-import warnings
+notebook_tic = time()
 
 warnings.simplefilter(action="ignore", category=UserWarning)
-```
 
-```python
 gg.theme_set(gg.theme_minimal())
-```
+%config InlineBackend.figure_format = 'retina'
 
-```python
 RANDOM_SEED = 103
 ```
 
@@ -67,9 +64,9 @@ data = pd.DataFrame({"rna": rna, "logfc": logfc})
 )
 ```
 
-![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_5_0.png)
+![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_2_0.png)
 
-    <ggplot: (8742305370609)>
+    <ggplot: (8789582763710)>
 
 ```python
 with pm.Model() as model1:
@@ -88,6 +85,9 @@ with pm.Model() as model1:
     )
 ```
 
+    WARNING (theano.gof.cmodule): ModuleCache.refresh() Found key without dll in cache, deleting it. /home/jc604/.theano/compiledir_Linux-3.10-el7.x86_64-x86_64-with-glibc2.10-x86_64-3.8.5-64/tmpdk0b6k2n/key.pkl
+    INFO (theano.gof.compilelock): Waiting for existing lock by process '29372' (I am process '24256')
+    INFO (theano.gof.compilelock): To manually release the lock, delete /home/jc604/.theano/compiledir_Linux-3.10-el7.x86_64-x86_64-with-glibc2.10-x86_64-3.8.5-64/lock_dir
     Auto-assigning NUTS sampler...
     Initializing NUTS using jitter+adapt_diag...
     Multiprocess sampling (4 chains in 4 jobs)
@@ -126,14 +126,14 @@ with pm.Model() as model1:
         }
     </style>
   <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 00:04<00:00]
+  100.00% [4000/4000 00:05<00:00]
 </div>
 
 ```python
 pm.model_to_graphviz(model1)
 ```
 
-![svg](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_7_0.svg)
+![svg](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_4_0.svg)
 
 ```python
 az_model1 = az.from_pymc3(
@@ -232,14 +232,14 @@ az.plot_trace(az_model1, var_names=var_names)
 plt.show()
 ```
 
-![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_10_0.png)
+![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_7_0.png)
 
 ```python
 az.plot_posterior(az_model1, var_names=var_names)
 plt.show()
 ```
 
-![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_11_0.png)
+![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_8_0.png)
 
 ```python
 prior_pred = (
@@ -271,9 +271,9 @@ model1_preds["pred"] = pd.Categorical(
 )
 ```
 
-![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_12_0.png)
+![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_9_0.png)
 
-    <ggplot: (8742303034631)>
+    <ggplot: (8789580662797)>
 
 ```python
 post = az_model1.posterior.to_dataframe()
@@ -305,9 +305,9 @@ post_summary = pd.DataFrame(
 )
 ```
 
-![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_13_0.png)
+![png](005_005_model-experimentation-m1_files/005_005_model-experimentation-m1_10_0.png)
 
-    <ggplot: (8742302978422)>
+    <ggplot: (8789580436074)>
 
 ### Conclusions and final thoughts
 
@@ -317,17 +317,24 @@ Ready to move onto more complex models with more variables and levels.
 ---
 
 ```python
+notebook_toc = time()
+print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
+```
+
+    execution time: 2.81 minutes
+
+```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    pandas   1.1.3
-    numpy    1.19.2
     arviz    0.10.0
+    plotnine 0.7.1
+    pandas   1.1.3
     pymc3    3.9.3
     seaborn  0.11.0
-    plotnine 0.7.1
-    last updated: 2020-10-26 
+    numpy    1.19.2
+    last updated: 2020-12-17 
     
     CPython 3.8.5
     IPython 7.18.1
@@ -337,7 +344,7 @@ Ready to move onto more complex models with more variables and levels.
     release    : 3.10.0-1062.el7.x86_64
     machine    : x86_64
     processor  : x86_64
-    CPU cores  : 28
+    CPU cores  : 32
     interpreter: 64bit
-    host name  : compute-e-16-237.o2.rc.hms.harvard.edu
-    Git branch : models
+    host name  : compute-a-16-78.o2.rc.hms.harvard.edu
+    Git branch : subset-data

@@ -1,6 +1,8 @@
 ```python
 import string
+import warnings
 from itertools import product
+from time import time
 
 import arviz as az
 import matplotlib.pyplot as plt
@@ -11,19 +13,14 @@ import pymc3 as pm
 import seaborn as sns
 from numpy.random import exponential, normal, seed
 from theano import tensor as tt
-```
 
-```python
-import warnings
+notebook_tic = time()
 
 warnings.simplefilter(action="ignore", category=UserWarning)
-```
 
-```python
 gg.theme_set(gg.theme_minimal())
-```
+%config InlineBackend.figure_format = 'retina'
 
-```python
 RANDOM_SEED = 103
 ```
 
@@ -250,9 +247,9 @@ data.head()
 )
 ```
 
-![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_8_0.png)
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_5_0.png)
 
-    <ggplot: (8764417680023)>
+    <ggplot: (8777277769177)>
 
 ```python
 (
@@ -268,9 +265,9 @@ data.head()
 )
 ```
 
-![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_9_0.png)
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_6_0.png)
 
-    <ggplot: (8764417161439)>
+    <ggplot: (8777228861275)>
 
 ```python
 (
@@ -282,9 +279,9 @@ data.head()
 )
 ```
 
-![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_10_0.png)
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_7_0.png)
 
-    <ggplot: (8764417741032)>
+    <ggplot: (8777229148919)>
 
 ```python
 sgrna_idx = data["sgRNA"].cat.codes.to_list()
@@ -353,10 +350,10 @@ with pm.Model() as model6:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 00:20<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [16000/16000 00:22<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 21 seconds.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 23 seconds.
 
 <div>
     <style>
@@ -372,14 +369,14 @@ with pm.Model() as model6:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:09<00:00]
+  100.00% [8000/8000 00:10<00:00]
 </div>
 
 ```python
 pm.model_to_graphviz(model6)
 ```
 
-![svg](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_12_0.svg)
+![svg](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_9_0.svg)
 
 ```python
 az_model6 = az.from_pymc3(
@@ -400,9 +397,9 @@ az_model6 = az.from_pymc3(
 )
 ```
 
-![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_14_0.png)
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_11_0.png)
 
-    <ggplot: (8764411309812)>
+    <ggplot: (8777222099161)>
 
 ```python
 az.summary(az_model6, var_names=["gamma_g"]).assign(real_value=real_params["gamma_g"])
@@ -525,7 +522,7 @@ az.plot_trace(az_model6, var_names=["gamma_g"])
 plt.show()
 ```
 
-![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_16_0.png)
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_13_0.png)
 
 ```python
 var_names = ["mu_gamma", "sigma_gamma", "gamma_g", "alpha_s"]
@@ -537,7 +534,7 @@ az.plot_forest(
 plt.show()
 ```
 
-![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_17_0.png)
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_14_0.png)
 
 ```python
 var_names = ["mu_delta", "sigma_delta", "delta_g", "beta_s"]
@@ -545,7 +542,7 @@ az.plot_forest(az_model6, var_names=var_names, combined=True)
 plt.show()
 ```
 
-![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_18_0.png)
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_15_0.png)
 
 ```python
 az.summary(az_model6, var_names="gamma_g").assign(real_value=real_params["gamma_g"])
@@ -860,10 +857,10 @@ with pm.Model() as model6_2:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 05:39<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [8000/8000 05:42<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 339 seconds.
+    Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 342 seconds.
     The chain reached the maximum tree depth. Increase max_treedepth, increase target_accept or reparameterize.
     The estimated number of effective samples is smaller than 200 for some parameters.
 
@@ -881,14 +878,14 @@ with pm.Model() as model6_2:
         }
     </style>
   <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 00:04<00:00]
+  100.00% [4000/4000 00:05<00:00]
 </div>
 
 ```python
 pm.model_to_graphviz(model6_2)
 ```
 
-![svg](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_23_0.svg)
+![svg](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_20_0.svg)
 
 ```python
 az_model6_2 = az.from_pymc3(
@@ -909,9 +906,9 @@ az_model6_2 = az.from_pymc3(
 )
 ```
 
-![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_25_0.png)
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_22_0.png)
 
-    <ggplot: (8764408965491)>
+    <ggplot: (8777229097220)>
 
 ```python
 az.summary(az_model6_2, var_names=["gamma_g"]).assign(real_value=real_params["gamma_g"])
@@ -1034,7 +1031,7 @@ az.plot_trace(az_model6_2, var_names=["gamma_g"])
 plt.show()
 ```
 
-![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_27_0.png)
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_24_0.png)
 
 ```python
 var_names = ["mu_gamma", "sigma_gamma", "gamma_g", "alpha_s"]
@@ -1046,7 +1043,7 @@ az.plot_forest(
 plt.show()
 ```
 
-![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_28_0.png)
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_25_0.png)
 
 ```python
 var_names = ["mu_delta", "sigma_delta", "delta_g", "beta_s"]
@@ -1054,7 +1051,7 @@ az.plot_forest(az_model6_2, var_names=var_names, combined=True)
 plt.show()
 ```
 
-![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_29_0.png)
+![png](005_015_model-experimentation-m6_files/005_015_model-experimentation-m6_26_0.png)
 
 ```python
 az.summary(az_model6_2, var_names="gamma_g").assign(real_value=real_params["gamma_g"])
@@ -1384,17 +1381,24 @@ if False:
 ---
 
 ```python
+notebook_toc = time()
+print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
+```
+
+    execution time: 7.15 minutes
+
+```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    numpy    1.19.2
-    seaborn  0.11.0
-    plotnine 0.7.1
-    arviz    0.10.0
     pandas   1.1.3
+    arviz    0.10.0
+    numpy    1.19.2
+    plotnine 0.7.1
     pymc3    3.9.3
-    last updated: 2020-11-07 
+    seaborn  0.11.0
+    last updated: 2020-12-17 
     
     CPython 3.8.5
     IPython 7.18.1
@@ -1404,7 +1408,7 @@ if False:
     release    : 3.10.0-1062.el7.x86_64
     machine    : x86_64
     processor  : x86_64
-    CPU cores  : 28
+    CPU cores  : 32
     interpreter: 64bit
-    host name  : compute-e-16-229.o2.rc.hms.harvard.edu
-    Git branch : models
+    host name  : compute-a-16-78.o2.rc.hms.harvard.edu
+    Git branch : subset-data

@@ -4,6 +4,7 @@
 import string
 import warnings
 from pathlib import Path
+from time import time
 
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
@@ -12,9 +13,11 @@ import pandas as pd
 import plotnine as gg
 import seaborn as sns
 
+notebook_tic = time()
 warnings.simplefilter(action="ignore", category=UserWarning)
 
 gg.theme_set(gg.theme_minimal())
+%config InlineBackend.figure_format = 'retina'
 
 RANDOM_SEED = 927
 np.random.seed(RANDOM_SEED)
@@ -372,7 +375,7 @@ data.columns
 
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_7_0.png)
 
-    <ggplot: (8759140016336)>
+    <ggplot: (8794489551610)>
 
 ```python
 faceting_theme_dict = {
@@ -392,7 +395,7 @@ faceting_theme_dict = {
 
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_8_0.png)
 
-    <ggplot: (8759138899080)>
+    <ggplot: (8794488465872)>
 
 ```python
 (
@@ -409,7 +412,7 @@ faceting_theme_dict = {
 
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_9_0.png)
 
-    <ggplot: (8759129715788)>
+    <ggplot: (8794487263726)>
 
 ```python
 (
@@ -426,7 +429,7 @@ faceting_theme_dict = {
 
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_10_0.png)
 
-    <ggplot: (8759130055159)>
+    <ggplot: (8794487952842)>
 
 ```python
 (
@@ -444,7 +447,7 @@ faceting_theme_dict = {
 
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_11_0.png)
 
-    <ggplot: (8759122620064)>
+    <ggplot: (8794489551445)>
 
 ```python
 def plot_highlight_muts(df, x, y="lfc", x_label=None, y_label="logFC", title=""):
@@ -482,7 +485,7 @@ plot_highlight_muts(
 
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_13_0.png)
 
-    <ggplot: (8759129289265)>
+    <ggplot: (8794488927850)>
 
 ```python
 plot_highlight_muts(
@@ -495,7 +498,7 @@ plot_highlight_muts(
 
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_14_0.png)
 
-    <ggplot: (8759129860214)>
+    <ggplot: (8794487348815)>
 
 ```python
 (
@@ -509,7 +512,7 @@ plot_highlight_muts(
 
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_15_0.png)
 
-    <ggplot: (8759120401592)>
+    <ggplot: (8794488675732)>
 
 ```python
 (
@@ -529,7 +532,7 @@ plot_highlight_muts(
 
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_16_0.png)
 
-    <ggplot: (8759129264731)>
+    <ggplot: (8794487450450)>
 
 ```python
 data["sgrna_idx"] = data["sgrna"].cat.codes
@@ -549,7 +552,7 @@ data["sgrna_idx"] = data["sgrna"].cat.codes
 
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_17_0.png)
 
-    <ggplot: (8759120455705)>
+    <ggplot: (8794478084602)>
 
 ```python
 (
@@ -566,8 +569,37 @@ data["sgrna_idx"] = data["sgrna"].cat.codes
 
 ![png](010_005_exploratory-data-analysis_files/010_005_exploratory-data-analysis_18_0.png)
 
-    <ggplot: (8759122259188)>
+    <ggplot: (8794475796767)>
+
+---
 
 ```python
-
+notebook_toc = time()
+print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
+
+    execution time: 3.25 minutes
+
+```python
+%load_ext watermark
+%watermark -d -u -v -iv -b -h -m
+```
+
+    plotnine 0.7.1
+    seaborn  0.11.0
+    pandas   1.1.3
+    numpy    1.19.2
+    last updated: 2020-12-17 
+    
+    CPython 3.8.5
+    IPython 7.18.1
+    
+    compiler   : GCC 7.3.0
+    system     : Linux
+    release    : 3.10.0-1062.el7.x86_64
+    machine    : x86_64
+    processor  : x86_64
+    CPU cores  : 32
+    interpreter: 64bit
+    host name  : compute-a-16-78.o2.rc.hms.harvard.edu
+    Git branch : subset-data

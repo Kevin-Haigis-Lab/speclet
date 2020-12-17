@@ -4,6 +4,7 @@
 import pickle
 import warnings
 from pathlib import Path
+from time import time
 
 import arviz as az
 import matplotlib.pyplot as plt
@@ -12,7 +13,11 @@ import pandas as pd
 import pymc3 as pm
 from plotnine.data import diamonds
 
+notebook_tic = time()
+
 warnings.simplefilter(action="ignore", category=UserWarning)
+
+%config InlineBackend.figure_format = 'retina'
 
 RANDOM_SEED = 123
 ```
@@ -238,6 +243,14 @@ plt.show()
 
 ![png](999_010_saving-and-loading-models_files/999_010_saving-and-loading-models_8_0.png)
 
-```python
+---
 
+```python
+notebook_toc = time()
+print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
+```
+
+```python
+%load_ext watermark
+%watermark -d -u -v -iv -b -h -m
 ```

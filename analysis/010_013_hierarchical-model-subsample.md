@@ -10,6 +10,7 @@ import re
 import string
 import warnings
 from pathlib import Path
+from time import time
 
 import arviz as az
 import matplotlib.colors as mcolors
@@ -23,6 +24,8 @@ import seaborn as sns
 from common_data_processing import get_indices, make_cat, zscale_cna_by_group
 from theano import tensor as tt
 
+notebook_tic = time()
+
 warnings.simplefilter(action="ignore", category=UserWarning)
 
 gg.theme_set(gg.theme_minimal())
@@ -34,20 +37,6 @@ np.random.seed(RANDOM_SEED)
 
 pymc3_cache_dir = Path("pymc3_model_cache")
 ```
-
-    ---------------------------------------------------------------------------
-
-    ImportError                               Traceback (most recent call last)
-
-    <ipython-input-6-5bd178753278> in <module>
-          5 
-          6 import arviz as az
-    ----> 7 from common_data_processing import zscale_cna_by_group, make_cat, get_indices
-          8 import matplotlib.colors as mcolors
-          9 import matplotlib.pyplot as plt
-
-
-    ImportError: cannot import name 'make_cat' from 'common_data_processing' (/n/data2/dfci/cancerbio/haigis/Cook/speclet/analysis/common_data_processing.py)
 
 ## Data preparation
 
@@ -308,19 +297,28 @@ data = zscale_cna_by_group(data, cn_max=10)
 
 ```
 
+---
+
+```python
+notebook_toc = time()
+print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
+```
+
+    execution time: 0.02 minutes
+
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
+    re       2.2.1
+    numpy    1.19.2
     arviz    0.10.0
     seaborn  0.11.0
-    re       2.2.1
-    plotnine 0.7.1
-    numpy    1.19.2
     pandas   1.1.3
+    plotnine 0.7.1
     pymc3    3.9.3
-    last updated: 2020-11-20 
+    last updated: 2020-12-17 
     
     CPython 3.8.5
     IPython 7.18.1
@@ -330,9 +328,9 @@ data = zscale_cna_by_group(data, cn_max=10)
     release    : 3.10.0-1062.el7.x86_64
     machine    : x86_64
     processor  : x86_64
-    CPU cores  : 28
+    CPU cores  : 32
     interpreter: 64bit
-    host name  : compute-e-16-231.o2.rc.hms.harvard.edu
+    host name  : compute-a-16-78.o2.rc.hms.harvard.edu
     Git branch : subset-data
 
 ```python

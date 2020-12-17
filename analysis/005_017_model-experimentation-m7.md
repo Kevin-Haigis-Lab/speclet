@@ -2,6 +2,7 @@
 import string
 import warnings
 from itertools import product
+from time import time
 
 import arviz as az
 import matplotlib.pyplot as plt
@@ -18,9 +19,12 @@ warnings.simplefilter(action="ignore", category=UserWarning)
 
 # Default theme for Plotnine.
 gg.theme_set(gg.theme_minimal())
+%config InlineBackend.figure_format = 'retina'
 
 # A value to use in all random seed setting instances.
 RANDOM_SEED = 103
+
+notebook_tic = time()
 ```
 
 ---
@@ -259,7 +263,7 @@ real_gene_vals = pd.DataFrame({"gene": genes, "log_fc": RP["gamma_g"]})
 
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_6_0.png)
 
-    <ggplot: (8735955646561)>
+    <ggplot: (8746977751107)>
 
 ```python
 real_cellline_vals = pd.DataFrame({"cell_line": cell_lines, "log_fc": RP["beta_c"]})
@@ -280,7 +284,7 @@ real_cellline_vals = pd.DataFrame({"cell_line": cell_lines, "log_fc": RP["beta_c
 
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_7_0.png)
 
-    <ggplot: (8735954978220)>
+    <ggplot: (8746928591996)>
 
 ```python
 real_cellline_vals = pd.DataFrame({"cell_line": cell_lines, "log_fc": RP["beta_c"]})
@@ -302,7 +306,7 @@ real_cellline_vals = pd.DataFrame({"cell_line": cell_lines, "log_fc": RP["beta_c
 
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_8_0.png)
 
-    <ggplot: (8735953394243)>
+    <ggplot: (8746930190740)>
 
 ## Model 7a. A 2-Dimensional varying intercept.
 
@@ -367,10 +371,10 @@ with pm.Model() as m7a:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 00:24<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [16000/16000 00:27<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 25 seconds.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 28 seconds.
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 <div>
@@ -387,7 +391,7 @@ with pm.Model() as m7a:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:08<00:00]
+  100.00% [8000/8000 00:11<00:00]
 </div>
 
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
@@ -675,7 +679,7 @@ m7a_post.head(n=10)
 
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_14_0.png)
 
-    <ggplot: (8735931206548)>
+    <ggplot: (8746929095491)>
 
 ```python
 real_gene_vals = pd.DataFrame({"gene": genes, "log_fc": RP["gamma_g"]})
@@ -700,7 +704,7 @@ gene_posteriors = m7a_post[["gene", "mean"]].groupby("gene").mean().reset_index(
 
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_15_0.png)
 
-    <ggplot: (8735931079608)>
+    <ggplot: (8746929056756)>
 
 The cell line effect is exaggerated and the gene effect is well estimated.
 This is probably because most of the effect is comming from the genes, but the varying intercept only has one value per gene-cell line pair.
@@ -732,7 +736,7 @@ cell_line_posteriors = (
 
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_17_0.png)
 
-    <ggplot: (8735931201199)>
+    <ggplot: (8746929041911)>
 
 A model with complete pooling of the data to compare with the hierarhical model to highlight the effects of partial pooling.
 
@@ -783,10 +787,10 @@ with pm.Model() as m7a_pool:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 00:24<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [16000/16000 00:26<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 25 seconds.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 26 seconds.
 
 <div>
     <style>
@@ -802,7 +806,7 @@ with pm.Model() as m7a_pool:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:08<00:00]
+  100.00% [8000/8000 00:11<00:00]
 </div>
 
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
@@ -1102,7 +1106,7 @@ for col in ["gene", "cell_line"]:
 
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_24_0.png)
 
-    <ggplot: (8735946388505)>
+    <ggplot: (8746929010357)>
 
 ```python
 (
@@ -1120,7 +1124,7 @@ for col in ["gene", "cell_line"]:
 
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_25_0.png)
 
-    <ggplot: (8736005771472)>
+    <ggplot: (8746929105902)>
 
 ```python
 az.summary(az_m7a, var_names=["mu_alpha_gc", "sigma_alpha"])
@@ -1270,10 +1274,10 @@ with pm.Model() as m7b:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 01:46<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [16000/16000 01:55<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 107 seconds.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 116 seconds.
     The acceptance probability does not match the target. It is 0.9023624303207955, but should be close to 0.95. Try to increase the number of tuning steps.
     The rhat statistic is larger than 1.05 for some parameters. This indicates slight problems during sampling.
     The estimated number of effective samples is smaller than 200 for some parameters.
@@ -1292,7 +1296,7 @@ with pm.Model() as m7b:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:08<00:00]
+  100.00% [8000/8000 00:11<00:00]
 </div>
 
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
@@ -1361,10 +1365,10 @@ with pm.Model() as m7b_pool:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 01:05<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [16000/16000 01:13<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 66 seconds.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 73 seconds.
     The acceptance probability does not match the target. It is 0.9012349306269171, but should be close to 0.95. Try to increase the number of tuning steps.
     The acceptance probability does not match the target. It is 0.8568385429631933, but should be close to 0.95. Try to increase the number of tuning steps.
     The rhat statistic is larger than 1.4 for some parameters. The sampler did not converge.
@@ -1384,7 +1388,7 @@ with pm.Model() as m7b_pool:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:09<00:00]
+  100.00% [8000/8000 00:10<00:00]
 </div>
 
     /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
@@ -1739,7 +1743,7 @@ m7b_post.head(n=10)
 
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_37_0.png)
 
-    <ggplot: (8735899365735)>
+    <ggplot: (8746921603831)>
 
 ```python
 var_names = ["gene", "cell_line", "mean"]
@@ -1774,7 +1778,7 @@ for col in ["gene", "cell_line", "pool"]:
 
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_38_0.png)
 
-    <ggplot: (8735899367268)>
+    <ggplot: (8746921527158)>
 
 ```python
 def parse_alpha_sc(az_obj):
@@ -1823,7 +1827,7 @@ gene_posteriors = m7b_alpha_sc[["gene", "mean"]].groupby("gene").mean().reset_in
 
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_40_0.png)
 
-    <ggplot: (8735899367364)>
+    <ggplot: (8746929166035)>
 
 ```python
 compare_alpha_sc = pd.concat(
@@ -1841,7 +1845,7 @@ compare_alpha_sc = pd.concat(
 
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_41_0.png)
 
-    <ggplot: (8735931064480)>
+    <ggplot: (8746929028280)>
 
 One issue is still that the cell line and gene effects are muddled and inseparable.
 Therefore, drawing useful conclusions about the impact of knocking out a gene using a specific guide is very difficult, potentially impossible.
@@ -2453,10 +2457,10 @@ with pm.Model() as m7c:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 00:54<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [16000/16000 01:01<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 54 seconds.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 62 seconds.
     The acceptance probability does not match the target. It is 0.8963706202106828, but should be close to 0.95. Try to increase the number of tuning steps.
     The number of effective samples is smaller than 10% for some parameters.
 
@@ -2474,7 +2478,7 @@ with pm.Model() as m7c:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:09<00:00]
+  100.00% [8000/8000 00:11<00:00]
 </div>
 
 ```python
@@ -2622,26 +2626,42 @@ m7c_alpha_g_post = (
     )
 )
 
-nudge_x = 0.3
+nudge_x = 0.2
+red_color = "#F84E4C"
+purple_color = "#A13786"
 
 (
     gg.ggplot(m7c_alpha_g_post, gg.aes(x="gene"))
-    + gg.geom_linerange(gg.aes(ymin="hdi_3%", ymax="hdi_97%"), color="blue", size=0.8)
-    + gg.geom_point(gg.aes(y="mean"), color="blue", size=2)
+    + gg.geom_hline(yintercept=0, size=0.7, color="lightgray")
+    + gg.geom_linerange(
+        gg.aes(ymin="hdi_3%", ymax="hdi_97%"),
+        color=red_color,
+        size=0.8,
+        position=gg.position_nudge(x=nudge_x),
+    )
+    + gg.geom_point(
+        gg.aes(y="mean"), color=red_color, size=3, position=gg.position_nudge(x=nudge_x)
+    )
     + gg.geom_point(
         gg.aes(y="log_fc"),
         data=real_gene_vals,
-        color="black",
+        color=purple_color,
         shape="^",
-        size=2,
+        size=4,
         alpha=0.7,
+        position=gg.position_nudge(x=-nudge_x),
+    )
+    + gg.labs(
+        x="gene",
+        y="mean effect",
+        title="Comparison of real (purple) and estimated (red) effect of gene",
     )
 )
 ```
 
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_52_0.png)
 
-    <ggplot: (8735811091423)>
+    <ggplot: (8746788908126)>
 
 ```python
 m7c_beta_c_post = (
@@ -2655,26 +2675,41 @@ m7c_beta_c_post = (
     )
 )
 
-nudge_x = 0.3
+nudge_x = 0.13
 
 (
     gg.ggplot(m7c_beta_c_post, gg.aes(x="cell_line"))
-    + gg.geom_linerange(gg.aes(ymin="hdi_3%", ymax="hdi_97%"), color="blue", size=0.8)
-    + gg.geom_point(gg.aes(y="mean"), color="blue", size=2)
+    + gg.geom_hline(yintercept=0, size=0.7, color="lightgray")
+    + gg.geom_linerange(
+        gg.aes(ymin="hdi_3%", ymax="hdi_97%"),
+        color=red_color,
+        size=0.8,
+        position=gg.position_nudge(x=nudge_x),
+    )
+    + gg.geom_point(
+        gg.aes(y="mean"), color=red_color, size=2, position=gg.position_nudge(x=nudge_x)
+    )
     + gg.geom_point(
         gg.aes(y="log_fc"),
         data=real_cellline_vals,
-        color="black",
+        color=purple_color,
         shape="^",
-        size=2,
+        size=3,
         alpha=0.7,
+        position=gg.position_nudge(x=-nudge_x),
+    )
+    + gg.theme(figure_size=(10, 5), axis_text_x=gg.element_text(angle=20))
+    + gg.labs(
+        x="cell line",
+        y="mean effect",
+        title="Comparison of real (purple) and estimated (red) cell line effect",
     )
 )
 ```
 
 ![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_53_0.png)
 
-    <ggplot: (8735811000953)>
+    <ggplot: (8746788909635)>
 
 ### Conclusions and final thoughts
 
@@ -2685,17 +2720,24 @@ A hierarchical version of `m7c` should be the focus of further analysis.
 ---
 
 ```python
+notebook_toc = time()
+print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
+```
+
+    execution time: 8.90 minutes
+
+```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    pymc3    3.9.3
-    numpy    1.19.2
     plotnine 0.7.1
-    arviz    0.10.0
-    pandas   1.1.3
+    pymc3    3.9.3
     seaborn  0.11.0
-    last updated: 2020-11-10 
+    pandas   1.1.3
+    arviz    0.10.0
+    numpy    1.19.2
+    last updated: 2020-12-17 
     
     CPython 3.8.5
     IPython 7.18.1
@@ -2705,7 +2747,7 @@ A hierarchical version of `m7c` should be the focus of further analysis.
     release    : 3.10.0-1062.el7.x86_64
     machine    : x86_64
     processor  : x86_64
-    CPU cores  : 28
+    CPU cores  : 32
     interpreter: 64bit
-    host name  : compute-e-16-233.o2.rc.hms.harvard.edu
-    Git branch : models
+    host name  : compute-a-16-78.o2.rc.hms.harvard.edu
+    Git branch : subset-data
