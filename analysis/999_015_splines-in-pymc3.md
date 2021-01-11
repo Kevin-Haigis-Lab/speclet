@@ -26,7 +26,9 @@ notebook_tic = time()
 warnings.simplefilter(action="ignore", category=UserWarning)
 
 gg.theme_set(gg.theme_minimal())
+%matplotlib inline
 %config InlineBackend.figure_format = 'retina'
+
 
 RANDOM_SEED = 847
 np.random.seed(RANDOM_SEED)
@@ -250,7 +252,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_8_0.png)
 
-    <ggplot: (8774371095890)>
+    <ggplot: (8777839850749)>
 
 ```python
 (
@@ -264,7 +266,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_9_0.png)
 
-    <ggplot: (8774319905612)>
+    <ggplot: (8777932894356)>
 
 ```python
 (
@@ -279,7 +281,7 @@ knot_list
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_10_0.png)
 
-    <ggplot: (8774320505483)>
+    <ggplot: (8777838407099)>
 
 ```python
 d2["knot_group"] = [np.where(a <= knot_list)[0][0] for a in d2.year]
@@ -301,7 +303,7 @@ d2["knot_group"] = pd.Categorical(d2["knot_group"], ordered=True)
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_12_0.png)
 
-    <ggplot: (8774318281744)>
+    <ggplot: (8777838412334)>
 
 ```python
 B = dmatrix(
@@ -352,7 +354,7 @@ spline_df = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_14_0.png)
 
-    <ggplot: (8774318305711)>
+    <ggplot: (8777839720439)>
 
 ```python
 with pm.Model() as m4_7:
@@ -398,8 +400,7 @@ with m4_7:
   100.00% [8000/8000 00:12<00:00 Sampling 2 chains, 0 divergences]
 </div>
 
-    Sampling 2 chains for 2_000 tune and 2_000 draw iterations (4_000 + 4_000 draws total) took 13 seconds.
-    The acceptance probability does not match the target. It is 0.70487961130992, but should be close to 0.8. Try to increase the number of tuning steps.
+    Sampling 2 chains for 2_000 tune and 2_000 draw iterations (4_000 + 4_000 draws total) took 12 seconds.
 
 <div>
     <style>
@@ -462,268 +463,268 @@ az.summary(az_m4_7, var_names=["a", "w", "sigma"])
   <tbody>
     <tr>
       <th>a</th>
-      <td>103.620</td>
-      <td>0.764</td>
-      <td>102.131</td>
-      <td>105.028</td>
-      <td>0.019</td>
+      <td>103.633</td>
+      <td>0.795</td>
+      <td>102.191</td>
+      <td>105.114</td>
+      <td>0.020</td>
       <td>0.014</td>
-      <td>1552.0</td>
-      <td>1552.0</td>
-      <td>1557.0</td>
-      <td>1786.0</td>
+      <td>1530.0</td>
+      <td>1530.0</td>
+      <td>1538.0</td>
+      <td>1765.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[0]</th>
-      <td>-1.783</td>
-      <td>2.233</td>
-      <td>-5.919</td>
-      <td>2.496</td>
-      <td>0.041</td>
-      <td>0.035</td>
-      <td>2905.0</td>
-      <td>2071.0</td>
-      <td>2925.0</td>
-      <td>2491.0</td>
+      <td>-1.832</td>
+      <td>2.191</td>
+      <td>-5.989</td>
+      <td>2.275</td>
+      <td>0.033</td>
+      <td>0.029</td>
+      <td>4472.0</td>
+      <td>2939.0</td>
+      <td>4487.0</td>
+      <td>3054.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[1]</th>
-      <td>-1.563</td>
-      <td>2.099</td>
-      <td>-5.652</td>
-      <td>2.242</td>
-      <td>0.040</td>
-      <td>0.029</td>
-      <td>2704.0</td>
-      <td>2588.0</td>
-      <td>2699.0</td>
-      <td>2649.0</td>
+      <td>-1.628</td>
+      <td>2.074</td>
+      <td>-5.728</td>
+      <td>1.970</td>
+      <td>0.037</td>
+      <td>0.027</td>
+      <td>3062.0</td>
+      <td>2858.0</td>
+      <td>3071.0</td>
+      <td>2872.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[2]</th>
-      <td>-0.269</td>
-      <td>1.898</td>
-      <td>-3.956</td>
-      <td>3.179</td>
-      <td>0.040</td>
-      <td>0.032</td>
-      <td>2252.0</td>
-      <td>1747.0</td>
-      <td>2254.0</td>
-      <td>2232.0</td>
+      <td>-0.214</td>
+      <td>1.915</td>
+      <td>-3.885</td>
+      <td>3.329</td>
+      <td>0.036</td>
+      <td>0.027</td>
+      <td>2812.0</td>
+      <td>2557.0</td>
+      <td>2828.0</td>
+      <td>2824.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[3]</th>
-      <td>3.412</td>
-      <td>1.483</td>
-      <td>0.622</td>
-      <td>6.140</td>
-      <td>0.033</td>
-      <td>0.024</td>
-      <td>2017.0</td>
-      <td>1903.0</td>
-      <td>2017.0</td>
-      <td>2268.0</td>
+      <td>3.353</td>
+      <td>1.477</td>
+      <td>0.692</td>
+      <td>6.166</td>
+      <td>0.030</td>
+      <td>0.021</td>
+      <td>2487.0</td>
+      <td>2487.0</td>
+      <td>2490.0</td>
+      <td>2722.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[4]</th>
-      <td>0.182</td>
-      <td>1.498</td>
-      <td>-2.734</td>
-      <td>2.939</td>
-      <td>0.032</td>
+      <td>0.184</td>
+      <td>1.549</td>
+      <td>-2.702</td>
+      <td>3.046</td>
+      <td>0.029</td>
       <td>0.022</td>
-      <td>2246.0</td>
-      <td>2246.0</td>
-      <td>2256.0</td>
-      <td>2508.0</td>
+      <td>2888.0</td>
+      <td>2458.0</td>
+      <td>2886.0</td>
+      <td>2788.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[5]</th>
-      <td>2.147</td>
-      <td>1.598</td>
-      <td>-0.934</td>
-      <td>5.068</td>
-      <td>0.031</td>
-      <td>0.023</td>
-      <td>2723.0</td>
-      <td>2364.0</td>
-      <td>2721.0</td>
-      <td>2360.0</td>
+      <td>2.125</td>
+      <td>1.584</td>
+      <td>-0.773</td>
+      <td>5.195</td>
+      <td>0.029</td>
+      <td>0.021</td>
+      <td>2977.0</td>
+      <td>2977.0</td>
+      <td>2991.0</td>
+      <td>3014.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[6]</th>
       <td>-3.533</td>
-      <td>1.484</td>
-      <td>-6.309</td>
-      <td>-0.774</td>
-      <td>0.030</td>
+      <td>1.482</td>
+      <td>-6.422</td>
+      <td>-0.793</td>
+      <td>0.029</td>
       <td>0.021</td>
-      <td>2517.0</td>
-      <td>2393.0</td>
-      <td>2513.0</td>
-      <td>2494.0</td>
+      <td>2535.0</td>
+      <td>2381.0</td>
+      <td>2530.0</td>
+      <td>2475.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[7]</th>
-      <td>5.566</td>
-      <td>1.504</td>
-      <td>2.722</td>
-      <td>8.346</td>
-      <td>0.031</td>
-      <td>0.022</td>
-      <td>2416.0</td>
-      <td>2382.0</td>
-      <td>2415.0</td>
-      <td>2594.0</td>
+      <td>5.510</td>
+      <td>1.498</td>
+      <td>2.748</td>
+      <td>8.278</td>
+      <td>0.029</td>
+      <td>0.021</td>
+      <td>2687.0</td>
+      <td>2628.0</td>
+      <td>2685.0</td>
+      <td>2716.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[8]</th>
-      <td>-0.014</td>
-      <td>1.575</td>
-      <td>-2.908</td>
-      <td>3.064</td>
-      <td>0.030</td>
+      <td>-0.037</td>
+      <td>1.600</td>
+      <td>-3.129</td>
+      <td>2.864</td>
+      <td>0.031</td>
       <td>0.023</td>
-      <td>2681.0</td>
-      <td>2333.0</td>
-      <td>2678.0</td>
-      <td>2782.0</td>
+      <td>2692.0</td>
+      <td>2479.0</td>
+      <td>2696.0</td>
+      <td>2576.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[9]</th>
-      <td>2.246</td>
-      <td>1.609</td>
-      <td>-0.682</td>
-      <td>5.345</td>
+      <td>2.237</td>
+      <td>1.608</td>
+      <td>-0.735</td>
+      <td>5.307</td>
       <td>0.032</td>
       <td>0.023</td>
-      <td>2512.0</td>
-      <td>2487.0</td>
-      <td>2513.0</td>
-      <td>2540.0</td>
+      <td>2607.0</td>
+      <td>2467.0</td>
+      <td>2600.0</td>
+      <td>2825.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[10]</th>
-      <td>3.811</td>
-      <td>1.527</td>
-      <td>1.143</td>
-      <td>6.786</td>
-      <td>0.031</td>
-      <td>0.022</td>
-      <td>2414.0</td>
-      <td>2307.0</td>
-      <td>2408.0</td>
-      <td>2615.0</td>
+      <td>3.792</td>
+      <td>1.597</td>
+      <td>0.767</td>
+      <td>6.737</td>
+      <td>0.030</td>
+      <td>0.021</td>
+      <td>2823.0</td>
+      <td>2795.0</td>
+      <td>2818.0</td>
+      <td>2689.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[11]</th>
-      <td>0.394</td>
-      <td>1.568</td>
-      <td>-2.575</td>
-      <td>3.282</td>
-      <td>0.032</td>
-      <td>0.025</td>
-      <td>2342.0</td>
-      <td>1984.0</td>
-      <td>2343.0</td>
-      <td>2373.0</td>
+      <td>0.340</td>
+      <td>1.547</td>
+      <td>-2.595</td>
+      <td>3.070</td>
+      <td>0.031</td>
+      <td>0.022</td>
+      <td>2546.0</td>
+      <td>2546.0</td>
+      <td>2548.0</td>
+      <td>2880.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[12]</th>
-      <td>4.146</td>
-      <td>1.505</td>
-      <td>1.349</td>
-      <td>7.029</td>
-      <td>0.030</td>
+      <td>4.178</td>
+      <td>1.531</td>
+      <td>1.215</td>
+      <td>7.000</td>
+      <td>0.029</td>
       <td>0.021</td>
-      <td>2591.0</td>
-      <td>2591.0</td>
-      <td>2587.0</td>
-      <td>2394.0</td>
+      <td>2741.0</td>
+      <td>2725.0</td>
+      <td>2737.0</td>
+      <td>3336.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[13]</th>
-      <td>1.100</td>
-      <td>1.637</td>
-      <td>-1.962</td>
-      <td>4.157</td>
-      <td>0.033</td>
+      <td>1.083</td>
+      <td>1.655</td>
+      <td>-2.053</td>
+      <td>4.110</td>
+      <td>0.035</td>
       <td>0.025</td>
-      <td>2430.0</td>
-      <td>2192.0</td>
-      <td>2439.0</td>
-      <td>2261.0</td>
+      <td>2211.0</td>
+      <td>2176.0</td>
+      <td>2215.0</td>
+      <td>2557.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[14]</th>
-      <td>-1.781</td>
-      <td>1.860</td>
-      <td>-5.288</td>
-      <td>1.657</td>
-      <td>0.037</td>
-      <td>0.028</td>
-      <td>2498.0</td>
-      <td>2247.0</td>
-      <td>2508.0</td>
-      <td>2446.0</td>
+      <td>-1.821</td>
+      <td>1.850</td>
+      <td>-5.324</td>
+      <td>1.564</td>
+      <td>0.035</td>
+      <td>0.027</td>
+      <td>2762.0</td>
+      <td>2372.0</td>
+      <td>2762.0</td>
+      <td>2961.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[15]</th>
-      <td>-5.955</td>
-      <td>1.922</td>
-      <td>-9.663</td>
-      <td>-2.402</td>
-      <td>0.037</td>
-      <td>0.026</td>
-      <td>2664.0</td>
-      <td>2639.0</td>
-      <td>2671.0</td>
-      <td>2651.0</td>
+      <td>-5.956</td>
+      <td>1.943</td>
+      <td>-9.580</td>
+      <td>-2.308</td>
+      <td>0.036</td>
+      <td>0.025</td>
+      <td>2942.0</td>
+      <td>2942.0</td>
+      <td>2959.0</td>
+      <td>3004.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[16]</th>
-      <td>-6.198</td>
-      <td>1.842</td>
-      <td>-9.718</td>
-      <td>-2.806</td>
-      <td>0.033</td>
-      <td>0.024</td>
-      <td>3043.0</td>
-      <td>2889.0</td>
-      <td>3053.0</td>
-      <td>2499.0</td>
+      <td>-6.212</td>
+      <td>1.861</td>
+      <td>-9.654</td>
+      <td>-2.668</td>
+      <td>0.030</td>
+      <td>0.021</td>
+      <td>3913.0</td>
+      <td>3787.0</td>
+      <td>3909.0</td>
+      <td>3005.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>sigma</th>
-      <td>5.951</td>
-      <td>0.148</td>
-      <td>5.668</td>
-      <td>6.233</td>
-      <td>0.003</td>
+      <td>5.953</td>
+      <td>0.151</td>
+      <td>5.675</td>
+      <td>6.238</td>
       <td>0.002</td>
-      <td>2617.0</td>
-      <td>2617.0</td>
-      <td>2577.0</td>
-      <td>1628.0</td>
+      <td>0.002</td>
+      <td>4036.0</td>
+      <td>4036.0</td>
+      <td>4007.0</td>
+      <td>2844.0</td>
       <td>1.0</td>
     </tr>
   </tbody>
@@ -761,7 +762,7 @@ spline_df_merged = (
 
 (
     gg.ggplot(spline_df, gg.aes(x="year", y="value"))
-    + gg.geom_vline(xintercept=knot_list, color="gray", alpha=0.5)
+    + gg.geom_vline(xintercept=knot_list, color="#0C73B4", alpha=0.5)
     + gg.geom_line(data=spline_df_merged, linetype="-", color="blue", size=2, alpha=0.7)
     + gg.geom_line(gg.aes(group="spline_i", color="spline_i"), alpha=0.7, size=1)
     + gg.scale_color_discrete(guide=gg.guide_legend(ncol=2), color_space="husl")
@@ -772,7 +773,7 @@ spline_df_merged = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_22_0.png)
 
-    <ggplot: (8774268181245)>
+    <ggplot: (8777839838212)>
 
 ```python
 post_pred = az.summary(az_m4_7, var_names=["mu"]).reset_index(drop=True)
@@ -802,7 +803,7 @@ d2_post["pred_hdi_upper"] = post_pred["hdi_97%"]
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_24_0.png)
 
-    <ggplot: (8774268267511)>
+    <ggplot: (8777789467965)>
 
 ## Example with gene CN data of a single gene
 
@@ -1043,7 +1044,7 @@ ptk2_data = modeling_data[modeling_data.hugo_symbol == "PTK2"]
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_28_0.png)
 
-    <ggplot: (8774268187007)>
+    <ggplot: (8777789352340)>
 
 ```python
 ptk2_data.shape[0]
@@ -1082,7 +1083,7 @@ ptk2_spline_df = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_31_0.png)
 
-    <ggplot: (8774268187329)>
+    <ggplot: (8777789347675)>
 
 ```python
 with pm.Model() as m_ptk2:
@@ -1125,11 +1126,10 @@ with m_ptk2:
         }
     </style>
   <progress value='10000' class='' max='10000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [10000/10000 00:53<00:00 Sampling 2 chains, 163 divergences]
+  100.00% [10000/10000 00:56<00:00 Sampling 2 chains, 0 divergences]
 </div>
 
-    Sampling 2 chains for 2_000 tune and 3_000 draw iterations (4_000 + 6_000 draws total) took 53 seconds.
-    There were 163 divergences after tuning. Increase `target_accept` or reparameterize.
+    Sampling 2 chains for 2_000 tune and 3_000 draw iterations (4_000 + 6_000 draws total) took 56 seconds.
     The number of effective samples is smaller than 25% for some parameters.
 
 <div>
@@ -1226,7 +1226,7 @@ ptk2_post.head()
       <td>NaN</td>
       <td>False</td>
       <td>5.878235</td>
-      <td>-0.645</td>
+      <td>-0.646</td>
       <td>-0.685</td>
       <td>-0.605</td>
     </tr>
@@ -1250,7 +1250,7 @@ ptk2_post.head()
       <td>NaN</td>
       <td>False</td>
       <td>5.878235</td>
-      <td>-0.645</td>
+      <td>-0.646</td>
       <td>-0.685</td>
       <td>-0.605</td>
     </tr>
@@ -1274,7 +1274,7 @@ ptk2_post.head()
       <td>NaN</td>
       <td>False</td>
       <td>5.878235</td>
-      <td>-0.645</td>
+      <td>-0.646</td>
       <td>-0.685</td>
       <td>-0.605</td>
     </tr>
@@ -1298,7 +1298,7 @@ ptk2_post.head()
       <td>NaN</td>
       <td>False</td>
       <td>5.878235</td>
-      <td>-0.645</td>
+      <td>-0.646</td>
       <td>-0.685</td>
       <td>-0.605</td>
     </tr>
@@ -1322,7 +1322,7 @@ ptk2_post.head()
       <td>NaN</td>
       <td>False</td>
       <td>5.878235</td>
-      <td>-0.645</td>
+      <td>-0.646</td>
       <td>-0.685</td>
       <td>-0.605</td>
     </tr>
@@ -1351,7 +1351,7 @@ ptk2_post.head()
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_37_0.png)
 
-    <ggplot: (8774317650180)>
+    <ggplot: (8777820522557)>
 
 ### A "misbehaved" gene: *MDM2*
 
@@ -1374,7 +1374,7 @@ mdm2_data["log_gene_cn"] = np.log10(mdm2_data.gene_cn.values)
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_39_0.png)
 
-    <ggplot: (8774317649017)>
+    <ggplot: (8777789211787)>
 
 ```python
 mdm2_data.shape[0]
@@ -1419,7 +1419,7 @@ mdm2_spline_df = (
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_42_0.png)
 
-    <ggplot: (8774317649044)>
+    <ggplot: (8777815498807)>
 
 ```python
 with pm.Model() as m_mdm2:
@@ -1439,12 +1439,39 @@ pm.model_to_graphviz(m_mdm2)
 ```python
 with m_mdm2:
     prior_pc = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
-    trace_m_mdm2 = pm.sample(3000, tune=3000, chains=2, random_seed=RANDOM_SEED)
+    trace_m_mdm2 = pm.sample(
+        draws=3000,
+        init="advi+adapt_diag",
+        n_init=40000,
+        tune=3000,
+        chains=2,
+        random_seed=RANDOM_SEED,
+    )
     post_pc = pm.sample_posterior_predictive(trace_m_mdm2, random_seed=RANDOM_SEED)
 ```
 
     Auto-assigning NUTS sampler...
-    Initializing NUTS using jitter+adapt_diag...
+    Initializing NUTS using advi+adapt_diag...
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='22786' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  56.97% [22786/40000 00:03<00:02 Average Loss = 2,294.6]
+</div>
+
+    Convergence achieved at 24000
+    Interrupted at 23,999 [59%]: Average Loss = 2,958.4
     Multiprocess sampling (2 chains in 4 jobs)
     NUTS: [sigma, w, a]
 
@@ -1462,11 +1489,12 @@ with m_mdm2:
         }
     </style>
   <progress value='12000' class='' max='12000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [12000/12000 01:21<00:00 Sampling 2 chains, 15 divergences]
+  100.00% [12000/12000 01:16<00:00 Sampling 2 chains, 193 divergences]
 </div>
 
-    Sampling 2 chains for 3_000 tune and 3_000 draw iterations (6_000 + 6_000 draws total) took 81 seconds.
-    There were 15 divergences after tuning. Increase `target_accept` or reparameterize.
+    Sampling 2 chains for 3_000 tune and 3_000 draw iterations (6_000 + 6_000 draws total) took 76 seconds.
+    There were 193 divergences after tuning. Increase `target_accept` or reparameterize.
+    The acceptance probability does not match the target. It is 0.8835722513348439, but should be close to 0.8. Try to increase the number of tuning steps.
     The number of effective samples is smaller than 25% for some parameters.
 
 <div>
@@ -1570,9 +1598,9 @@ mdm2_post.head()
       <td>False</td>
       <td>3.701549</td>
       <td>0.143784</td>
-      <td>0.003</td>
-      <td>-0.053</td>
-      <td>0.058</td>
+      <td>0.002</td>
+      <td>-0.054</td>
+      <td>0.056</td>
     </tr>
     <tr>
       <th>1</th>
@@ -1594,9 +1622,9 @@ mdm2_post.head()
       <td>False</td>
       <td>3.701549</td>
       <td>0.143784</td>
-      <td>0.003</td>
-      <td>-0.053</td>
-      <td>0.058</td>
+      <td>0.002</td>
+      <td>-0.054</td>
+      <td>0.056</td>
     </tr>
     <tr>
       <th>2</th>
@@ -1618,9 +1646,9 @@ mdm2_post.head()
       <td>False</td>
       <td>3.701549</td>
       <td>0.143784</td>
-      <td>0.003</td>
-      <td>-0.053</td>
-      <td>0.058</td>
+      <td>0.002</td>
+      <td>-0.054</td>
+      <td>0.056</td>
     </tr>
     <tr>
       <th>3</th>
@@ -1642,9 +1670,9 @@ mdm2_post.head()
       <td>False</td>
       <td>3.701549</td>
       <td>0.143784</td>
-      <td>0.003</td>
-      <td>-0.053</td>
-      <td>0.058</td>
+      <td>0.002</td>
+      <td>-0.054</td>
+      <td>0.056</td>
     </tr>
     <tr>
       <th>4</th>
@@ -1666,9 +1694,9 @@ mdm2_post.head()
       <td>False</td>
       <td>3.701549</td>
       <td>0.143784</td>
-      <td>0.003</td>
-      <td>-0.053</td>
-      <td>0.058</td>
+      <td>0.002</td>
+      <td>-0.054</td>
+      <td>0.056</td>
     </tr>
   </tbody>
 </table>
@@ -1676,7 +1704,7 @@ mdm2_post.head()
 </div>
 
 ```python
-(
+p = (
     gg.ggplot(mdm2_post, gg.aes(x="gene_cn"))
     + gg.geom_point(gg.aes(y="lfc"), color="black", alpha=0.4, size=1.3)
     + gg.geom_vline(xintercept=cn_knot_list, color="gray", alpha=0.8)
@@ -1692,34 +1720,24 @@ mdm2_post.head()
         title="Posterior predictions with MDM2 gene copy number data",
     )
 )
+p
 ```
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_49_0.png)
 
-    <ggplot: (8774317817941)>
+    <ggplot: (8777789206848)>
 
 ```python
 (
-    gg.ggplot(mdm2_post, gg.aes(x="gene_cn"))
-    + gg.geom_point(gg.aes(y="lfc"), color="black", alpha=0.4, size=1.3)
-    + gg.geom_vline(xintercept=cn_knot_list, color="gray", alpha=0.8)
-    + gg.geom_ribbon(
-        gg.aes(ymin="pred_hdi_lower", ymax="pred_hdi_upper"), alpha=0.3, fill="tomato"
-    )
-    + gg.geom_line(gg.aes(y="pred_mean"), color="firebrick", alpha=1, size=2)
-    + gg.theme(figure_size=(10, 5))
+    p
     + gg.scale_x_continuous(limits=(0.5, 3.4))
-    + gg.labs(
-        x="gene copy number",
-        y="logFC",
-        title="Posterior predictions with MDM2 gene copy number data (zoomed)",
-    )
+    + gg.labs(title="Posterior predictions with MDM2 gene copy number data (zoomed)")
 )
 ```
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_50_0.png)
 
-    <ggplot: (8774317901572)>
+    <ggplot: (8777797987338)>
 
 ### Multi-level
 
@@ -1983,7 +2001,7 @@ d["gene_cn_max"] = [np.min((10.0, x)) for x in d.gene_cn]
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_55_0.png)
 
-    <ggplot: (8774238814980)>
+    <ggplot: (8777797987452)>
 
 ```python
 (
@@ -1998,7 +2016,7 @@ d["gene_cn_max"] = [np.min((10.0, x)) for x in d.gene_cn]
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_56_0.png)
 
-    <ggplot: (8774238815552)>
+    <ggplot: (8777907651970)>
 
 ```python
 d = modeling_data2.copy()
@@ -2015,7 +2033,7 @@ d["gene_cn_log"] = np.log2(d.gene_cn.values + 1)
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_57_0.png)
 
-    <ggplot: (8774203228139)>
+    <ggplot: (8777718326004)>
 
 ```python
 (
@@ -2031,7 +2049,7 @@ d["gene_cn_log"] = np.log2(d.gene_cn.values + 1)
 
 ![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_58_0.png)
 
-    <ggplot: (8774268071539)>
+    <ggplot: (8777836371920)>
 
 $
 D_j \sim \mathcal{N}(\mu, \sigma) \\
@@ -2114,23 +2132,31 @@ with pm.Model() as m_cn_multi:
     w = pm.Normal("w", -0.5, 1, shape=w_shape)
 
     # Linear model
+    # mu = pm.Deterministic(
+    #     "mu", a + pm.math.dot(B_cn_array[cell_line_idx, :, :], w[:, cell_line_idx])
+    # )
     mu = pm.Deterministic(
-        #         "mu", a + pm.math.dot(B_cn_array[cell_line_idx, :, :], w[:, cell_line_idx])
         "mu",
         a
-        + tt.sum(
-            B_cn_array[cell_line_idx, :, :].transpose((2, 0, 1))
-            * w[:, cell_line_idx, None],
-            axis=-1,
+        + tt.batched_dot(
+            B_cn_array[cell_line_idx, :, :].transpose((2, 1, 0)),
+            w[:, cell_line_idx, None],
         ),
     )
+    # mu = pm.Deterministic(
+    #     "mu",
+    #     a
+    #     + tt.sum(
+    #         B_cn_array[cell_line_idx, :, :].transpose((2, 0, 1))
+    #         * w[:, cell_line_idx, None],
+    #         axis=-1,
+    #     ),
+    # )
     sigma = pm.Exponential("sigma", 1)
 
     # Likelihood
     D = pm.Normal("D", mu, sigma, observed=modeling_data2.lfc)
 ```
-
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 ```python
 pm.model_to_graphviz(m_cn_multi)
@@ -2139,71 +2165,29 @@ pm.model_to_graphviz(m_cn_multi)
 ![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_67_0.svg)
 
 ```python
-raise Exception("Block - need to figure out issue with sampling... (try less data)")
-```
+# > Fails after taking more than 100 GB of RAM (that's the most I have tried).
 
-    ---------------------------------------------------------------------------
-
-    Exception                                 Traceback (most recent call last)
-
-    <ipython-input-60-f7b683f5e470> in <module>
-    ----> 1 raise Exception("Block - need to figure out issue with sampling... (try less data)")
-    
-
-    Exception: Block - need to figure out issue with sampling... (try less data)
-
-```python
-with m_cn_multi:
-    prior_pc_m_cn_multi = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
-    trace_m_cn_multi = pm.sample(
-        3000,
-        tune=3000,
-        chains=2,
-        cores=1,
-        # init="advi",
-        # n_init=200000,
-        random_seed=RANDOM_SEED,
-    )
-    post_pc_m_cn_multi = pm.sample_posterior_predictive(
-        trace_m_cn_multi, random_seed=RANDOM_SEED
-    )
-```
-
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    Auto-assigning NUTS sampler...
-    Initializing NUTS using jitter+adapt_diag...
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    Sequential sampling (2 chains in 1 job)
-    NUTS: [sigma, w, a]
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='343' class='' max='6000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  5.72% [343/6000 17:43<4:52:18 Sampling chain 0, 0 divergences]
-</div>
-
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3372: RuntimeWarning: Mean of empty slice.
-    Sampling 1 chain for 343 tune and 0 draw iterations (343 + 0 draws total) took 1065 seconds.
-    No posterior samples. Unable to run convergence checks
-
-```python
-az_cn_multi = az.from_pymc3(
-    model=m_cn_multi,
-    trace=trace_m_cn_multi,
-    posterior_predictive=post_pc_m_cn_multi,
-    prior=prior_pc_m_cn_multi,
-)
+# with m_cn_multi:
+#     prior_pc_m_cn_multi = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
+#     trace_m_cn_multi = pm.sample(
+#         draws=3000,
+#         tune=3000,
+#         chains=2,
+#         cores=1,
+#         init="advi",
+#         n_init=600000,
+#         random_seed=RANDOM_SEED,
+#     )
+#     post_pc_m_cn_multi = pm.sample_posterior_predictive(
+#         trace_m_cn_multi, random_seed=RANDOM_SEED
+#     )
+#
+# az_cn_multi = az.from_pymc3(
+#     model=m_cn_multi,
+#     trace=trace_m_cn_multi,
+#     posterior_predictive=post_pc_m_cn_multi,
+#     prior=prior_pc_m_cn_multi,
+# )
 ```
 
 ---
@@ -2213,32 +2197,36 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
+    execution time: 4.61 minutes
+
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    seaborn  0.11.0
-    pandas   1.1.3
-    plotnine 0.7.1
-    numpy    1.19.2
-    arviz    0.10.0
-    pymc3    3.9.3
-    last updated: 2020-11-20 
+    Last updated: 2021-01-11
     
-    CPython 3.8.5
-    IPython 7.18.1
+    Python implementation: CPython
+    Python version       : 3.8.6
+    IPython version      : 7.19.0
     
-    compiler   : GCC 7.3.0
-    system     : Linux
-    release    : 3.10.0-1062.el7.x86_64
-    machine    : x86_64
-    processor  : x86_64
-    CPU cores  : 28
-    interpreter: 64bit
-    host name  : compute-e-16-231.o2.rc.hms.harvard.edu
-    Git branch : subset-data
-
-```python
-
-```
+    Compiler    : GCC 9.3.0
+    OS          : Linux
+    Release     : 3.10.0-1062.el7.x86_64
+    Machine     : x86_64
+    Processor   : x86_64
+    CPU cores   : 28
+    Architecture: 64bit
+    
+    Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
+    
+    Git branch: subset-data
+    
+    seaborn   : 0.11.1
+    pandas    : 1.2.0
+    plotnine  : 0.7.1
+    pymc3     : 3.9.3
+    arviz     : 0.10.0
+    matplotlib: 3.3.3
+    numpy     : 1.19.5
+    theano    : 1.0.5
