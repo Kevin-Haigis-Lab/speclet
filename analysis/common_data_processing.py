@@ -38,7 +38,7 @@ def zscale_cna_by_group(
     return df
 
 
-def make_cat(df, col, ordered=True):
+def make_cat(df, col, ordered=True, sort_cats=False):
     """
     Make a column of a data frame into categorical.
 
@@ -50,12 +50,17 @@ def make_cat(df, col, ordered=True):
         The column to turn into Categorical
     ordered: bool
         Should the column be ordered? (see `?pandas.Categorical`)
+    sort_cats: bool
+        Should the list of unique categories be sorted?
 
     Returns
     -------
     pandas DataFrame
     """
-    df[col] = pd.Categorical(df[col], categories=df[col].unique(), ordered=ordered)
+    categories = df[col].unique().tolist()
+    if sort_cats:
+        categories.sort()
+    df[col] = pd.Categorical(df[col], categories=categories, ordered=ordered)
     return df
 
 
