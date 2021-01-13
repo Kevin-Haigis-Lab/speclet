@@ -20,6 +20,7 @@ Modeling construction and fitting.
 
 1. [Exploratory data analysis.](010_005_exploratory-data-analysis.md) Exploration of the subset of data.
 2. [Mimic CERES.](010_010_ceres-replicate.md) Replicate the results of the CERES model by recreating the model using PyMC3.
+3. [Hierarchical modeling.](010_013_hierarchical-model-subsample.md) Building various *speclet* models with a subset of the DepMap data.
 
 ## Miscellaneous experimentation
 
