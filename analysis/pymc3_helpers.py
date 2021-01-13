@@ -48,7 +48,7 @@ def pymc3_sampling_procedure(
     random_seed=1234,
     cache_dir=None,
     force=False,
-    sample_kwags={},
+    sample_kwargs={},
 ):
     """
     Run the standard PyMC3 sampling procedure.
@@ -98,12 +98,12 @@ def pymc3_sampling_procedure(
                 prior_check_samples, random_seed=random_seed
             )
             trace = pm.sample(
-                num_mcmc,
+                draws=num_mcmc,
                 tune=tune,
                 chains=chains,
                 cores=cores,
                 random_seed=random_seed,
-                **sample_kwags
+                **sample_kwargs
             )
             post_check = pm.sample_posterior_predictive(
                 trace, samples=ppc_samples, random_seed=random_seed
