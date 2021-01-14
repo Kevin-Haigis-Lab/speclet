@@ -1,30 +1,25 @@
 ```python
-import pandas as pd
+import string
+import warnings
+from itertools import product
+from time import time
+
+import arviz as az
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import plotnine as gg
 import pymc3 as pm
-import arviz as az
 import seaborn as sns
-import matplotlib.pyplot as plt
-import string
-from itertools import product
-from numpy.random import normal, exponential
-```
-
-
-```python
-import warnings
+from numpy.random import exponential, normal
 
 warnings.simplefilter(action="ignore", category=UserWarning)
-```
 
+notebook_tic = time()
 
-```python
 gg.theme_set(gg.theme_minimal())
-```
+%config InlineBackend.figure_format = 'retina'
 
-
-```python
 RANDOM_SEED = 103
 ```
 
@@ -53,7 +48,6 @@ Simulated values:
 - $\mu_\beta = -1$, $\sigma_\beta = 2$
 - $\sigma = 0.3$
 
-
 ```python
 np.random.seed(RANDOM_SEED)
 
@@ -78,7 +72,6 @@ logfc = (
 logfc = logfc.T
 ```
 
-
 ```python
 rna_flat = rna.flatten()
 logfc_flat = logfc.flatten()
@@ -87,7 +80,6 @@ gene_idx = np.repeat(range(num_genes), num_cell_lines)
 
 The following plot shows that each gene has a different y-intercept and slope with RNA expression.
 These varying effects should be discovered by the model.
-
 
 ```python
 tidy_data = pd.DataFrame(
@@ -111,19 +103,9 @@ tidy_real_data = pd.DataFrame({"alpha": real_alpha, "beta": real_beta, "gene": g
 )
 ```
 
+![png](005_007_model-experimentation-m2_files/005_007_model-experimentation-m2_5_0.png)
 
-    
-![png](005_007_model-experimentation-m2_files/005_007_model-experimentation-m2_8_0.png)
-    
-
-
-
-
-
-    <ggplot: (8780250500407)>
-
-
-
+    <ggplot: (8730080151974)>
 
 ```python
 with pm.Model() as model2:
@@ -155,16 +137,13 @@ with pm.Model() as model2:
     Multiprocess sampling (4 chains in 4 jobs)
     NUTS: [sigma, beta, alpha, sigma_beta, mu_beta, sigma_alpha, mu_alpha]
 
-
-
-
 <div>
     <style>
-        /* Turns off some styling */
+        /*Turns off some styling*/
         progress {
-            /* gets rid of default border in Firefox and Opera. */
+            /*gets rid of default border in Firefox and Opera.*/
             border: none;
-            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
             background-size: auto;
         }
         .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
@@ -172,26 +151,21 @@ with pm.Model() as model2:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 00:08<00:00 Sampling 4 chains, 11 divergences]
+  100.00% [16000/16000 00:09<00:00 Sampling 4 chains, 11 divergences]
 </div>
 
-
-
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 8 seconds.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 10 seconds.
     There were 5 divergences after tuning. Increase `target_accept` or reparameterize.
     There was 1 divergence after tuning. Increase `target_accept` or reparameterize.
     There were 5 divergences after tuning. Increase `target_accept` or reparameterize.
 
-
-
-
 <div>
     <style>
-        /* Turns off some styling */
+        /*Turns off some styling*/
         progress {
-            /* gets rid of default border in Firefox and Opera. */
+            /*gets rid of default border in Firefox and Opera.*/
             border: none;
-            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
             background-size: auto;
         }
         .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
@@ -199,35 +173,24 @@ with pm.Model() as model2:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:07<00:00]
+  100.00% [8000/8000 00:10<00:00]
 </div>
-
-
-
 
 ```python
 pm.model_to_graphviz(model2)
 ```
 
-
-
-
-    
-![svg](005_007_model-experimentation-m2_files/005_007_model-experimentation-m2_10_0.svg)
-    
-
-
-
+![svg](005_007_model-experimentation-m2_files/005_007_model-experimentation-m2_7_0.svg)
 
 ```python
 az_model2 = az.from_pymc3(
-    trace=model2_trace, prior=model2_prior_check, posterior_predictive=model2_post_check, model=model2
+    trace=model2_trace,
+    prior=model2_prior_check,
+    posterior_predictive=model2_post_check,
+    model=model2,
 )
 az.summary(az_model2, var_names=["alpha", "beta", "sigma"])
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -419,16 +382,10 @@ az.summary(az_model2, var_names=["alpha", "beta", "sigma"])
 </table>
 </div>
 
-
-
-
 ```python
 # Real values
 pd.DataFrame({"real alpha": real_alpha, "real beta": real_beta})
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -482,35 +439,22 @@ pd.DataFrame({"real alpha": real_alpha, "real beta": real_beta})
 </table>
 </div>
 
-
-
-
 ```python
 var_names = ["alpha", "beta", "sigma"]
 az.plot_trace(az_model2, var_names=var_names)
 plt.show()
 ```
 
-
-    
-![png](005_007_model-experimentation-m2_files/005_007_model-experimentation-m2_13_0.png)
-    
-
+![png](005_007_model-experimentation-m2_files/005_007_model-experimentation-m2_10_0.png)
 
 The varying effects were captured *very* well.
-
 
 ```python
 az.plot_forest(az_model2, var_names=var_names, combined=True)
 plt.show()
 ```
 
-
-    
-![png](005_007_model-experimentation-m2_files/005_007_model-experimentation-m2_15_0.png)
-    
-
-
+![png](005_007_model-experimentation-m2_files/005_007_model-experimentation-m2_12_0.png)
 
 ```python
 post = (
@@ -523,13 +467,9 @@ post = (
 )
 ```
 
-
 ```python
 post.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -649,9 +589,6 @@ post.head()
 </table>
 </div>
 
-
-
-
 ```python
 post["gene"] = [genes[i] for i in post.alpha_dim_0]
 
@@ -671,18 +608,9 @@ post["gene"] = [genes[i] for i in post.alpha_dim_0]
 )
 ```
 
+![png](005_007_model-experimentation-m2_files/005_007_model-experimentation-m2_15_0.png)
 
-    
-![png](005_007_model-experimentation-m2_files/005_007_model-experimentation-m2_18_0.png)
-    
-
-
-
-
-
-    <ggplot: (8780242567735)>
-
-
+    <ggplot: (8730079422937)>
 
 ### Conclusions and final thoughts
 
@@ -690,19 +618,25 @@ This hierharchcial model fit very well and the results were interpretable.
 
 ---
 
+```python
+notebook_toc = time()
+print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
+```
+
+    execution time: 1.22 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
+    arviz    0.10.0
+    numpy    1.19.2
     pandas   1.1.3
     plotnine 0.7.1
-    arviz    0.10.0
     seaborn  0.11.0
     pymc3    3.9.3
-    numpy    1.19.2
-    last updated: 2020-10-26 
+    last updated: 2020-12-17 
     
     CPython 3.8.5
     IPython 7.18.1
@@ -712,8 +646,7 @@ This hierharchcial model fit very well and the results were interpretable.
     release    : 3.10.0-1062.el7.x86_64
     machine    : x86_64
     processor  : x86_64
-    CPU cores  : 28
+    CPU cores  : 32
     interpreter: 64bit
-    host name  : compute-e-16-237.o2.rc.hms.harvard.edu
-    Git branch : models
-
+    host name  : compute-a-16-78.o2.rc.hms.harvard.edu
+    Git branch : subset-data

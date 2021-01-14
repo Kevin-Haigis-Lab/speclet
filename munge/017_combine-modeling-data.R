@@ -4,7 +4,9 @@
 
 library(tidyverse)
 
-if (basename(getwd()) == "munge") { setwd("..") }
+if (basename(getwd()) == "munge") {
+  setwd("..")
+}
 
 
 input_files <- unlist(snakemake@input["input_files"])

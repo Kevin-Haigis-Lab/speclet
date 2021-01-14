@@ -1,30 +1,25 @@
 ```python
-import pandas as pd
+import string
+import warnings
+from itertools import product
+from time import time
+
+import arviz as az
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import plotnine as gg
 import pymc3 as pm
-import arviz as az
 import seaborn as sns
-import matplotlib.pyplot as plt
-import string
-from itertools import product
-from numpy.random import normal, exponential
-```
+from numpy.random import exponential, normal
 
-
-```python
-import warnings
+notebook_tic = time()
 
 warnings.simplefilter(action="ignore", category=UserWarning)
-```
 
-
-```python
 gg.theme_set(gg.theme_minimal())
-```
+%config InlineBackend.figure_format = 'retina'
 
-
-```python
 RANDOM_SEED = 103
 ```
 
@@ -61,7 +56,6 @@ Simulated real values:
 - $\sigma_\delta = 1$
 - $\sigma_g = 0.4$
 - $\sigma = 0.3$
-
 
 ```python
 np.random.seed(RANDOM_SEED)
@@ -119,9 +113,6 @@ for i in range(len(logfc_data)):
 
 logfc_data
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -230,9 +221,6 @@ logfc_data
 <p>300 rows × 4 columns</p>
 </div>
 
-
-
-
 ```python
 known_logfc_values_df = pd.DataFrame(
     {"gene": genes, "logfc": real_alpha_g, "sd": real_sigma_alpha}
@@ -258,19 +246,9 @@ pos = gg.position_nudge(x=0.1)
 )
 ```
 
+![png](005_009_model-experimentation-m3_files/005_009_model-experimentation-m3_4_0.png)
 
-    
-![png](005_009_model-experimentation-m3_files/005_009_model-experimentation-m3_7_0.png)
-    
-
-
-
-
-
-    <ggplot: (8737775755237)>
-
-
-
+    <ggplot: (8732169556550)>
 
 ```python
 merged_data = pd.merge(logfc_data, rna_data, how="inner", on=["gene", "cell_line"])
@@ -281,18 +259,9 @@ merged_data = pd.merge(logfc_data, rna_data, how="inner", on=["gene", "cell_line
 )
 ```
 
+![png](005_009_model-experimentation-m3_files/005_009_model-experimentation-m3_5_0.png)
 
-    
-![png](005_009_model-experimentation-m3_files/005_009_model-experimentation-m3_8_0.png)
-    
-
-
-
-
-
-    <ggplot: (8737725598501)>
-
-
+    <ggplot: (8732123102733)>
 
 ### Conclusions and final thoughts
 
@@ -301,19 +270,25 @@ Though it is not the right model the purposes of this project, I'll leave it her
 
 ---
 
+```python
+notebook_toc = time()
+print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
+```
+
+    execution time: 0.03 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    seaborn  0.11.0
-    numpy    1.19.2
-    pandas   1.1.3
-    pymc3    3.9.3
-    arviz    0.10.0
     plotnine 0.7.1
-    last updated: 2020-10-26 
+    pymc3    3.9.3
+    pandas   1.1.3
+    seaborn  0.11.0
+    arviz    0.10.0
+    numpy    1.19.2
+    last updated: 2020-12-17 
     
     CPython 3.8.5
     IPython 7.18.1
@@ -323,8 +298,7 @@ Though it is not the right model the purposes of this project, I'll leave it her
     release    : 3.10.0-1062.el7.x86_64
     machine    : x86_64
     processor  : x86_64
-    CPU cores  : 28
+    CPU cores  : 32
     interpreter: 64bit
-    host name  : compute-e-16-237.o2.rc.hms.harvard.edu
-    Git branch : models
-
+    host name  : compute-a-16-78.o2.rc.hms.harvard.edu
+    Git branch : subset-data

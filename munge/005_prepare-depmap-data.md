@@ -1,24 +1,27 @@
 # Prepare DepMap data
 
-
 ```python
-import pandas as pd
-import numpy as np
-from matplotlib import pyplot as plt
-import seaborn as sns
-import janitor
-from pathlib import Path
 import re
+from pathlib import Path
+
+import janitor
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from matplotlib import pyplot as plt
 ```
 
-
 ```python
-data_dir = Path("../data")
+data_dir = Path("../data/depmap_20q3")
 save_dir = Path("../modeling_data")
+
+if not data_dir.exists():
+    raise Exception(
+        "Data directory does not exist. Make sure to download the DepMap data."
+    )
 ```
 
 ## 'sample_info.csv'
-
 
 ```python
 sample_info_columns = [
@@ -39,9 +42,6 @@ sample_info = pd.read_csv(data_dir / "sample_info.csv").clean_names()[
 ]
 sample_info.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -119,7 +119,7 @@ sample_info.head()
       <td>HEL</td>
       <td>HEL_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE</td>
       <td>Male</td>
-      <td>47.6</td>
+      <td>52.4</td>
       <td>NaN</td>
       <td>Leukemia</td>
       <td>Acute Myelogenous Leukemia (AML), M6 (Erythrol...</td>
@@ -132,7 +132,7 @@ sample_info.head()
       <td>HEL9217</td>
       <td>HEL9217_HAEMATOPOIETIC_AND_LYMPHOID_TISSUE</td>
       <td>Male</td>
-      <td>13.4</td>
+      <td>86.6</td>
       <td>NaN</td>
       <td>Leukemia</td>
       <td>Acute Myelogenous Leukemia (AML), M6 (Erythrol...</td>
@@ -143,15 +143,11 @@ sample_info.head()
 </table>
 </div>
 
-
-
-
 ```python
 sample_info.to_csv(save_dir / "sample_info.csv", index=False)
 ```
 
 ## 'Achilles_guide_map.csv'
-
 
 ```python
 achilles_guide_map = (
@@ -163,9 +159,6 @@ achilles_guide_map = (
 
 achilles_guide_map.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -231,10 +224,7 @@ achilles_guide_map.head()
 </table>
 </div>
 
-
-
 ## 'Achilles_dropped_guides.csv'
-
 
 ```python
 achilles_dropped_guides = (
@@ -245,9 +235,6 @@ achilles_dropped_guides = (
 
 achilles_dropped_guides.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -319,20 +306,11 @@ achilles_dropped_guides.head()
 </table>
 </div>
 
-
-
-
 ```python
 len(np.unique(achilles_dropped_guides.sgrna))
 ```
 
-
-
-
     2554
-
-
-
 
 ```python
 achilles_guide_map = achilles_guide_map[
@@ -341,13 +319,11 @@ achilles_guide_map = achilles_guide_map[
 achilles_guide_map = achilles_guide_map.reset_index(drop=True)
 ```
 
-
 ```python
 achilles_guide_map.to_csv(save_dir / "achilles_guide_map.csv", index=False)
 ```
 
 ## 'Achilles_replicate_map.csv'
-
 
 ```python
 achilles_replicate_map = (
@@ -357,9 +333,6 @@ achilles_replicate_map = (
 )
 achilles_replicate_map.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -388,36 +361,36 @@ achilles_replicate_map.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>pacadd188-311cas9_repb_p6_batch3</td>
-      <td>ACH-001382</td>
-      <td>3</td>
+      <td>pe_ca-pj-34clone c12-311cas9_repb_p5_batch2</td>
+      <td>ACH-000606</td>
+      <td>2</td>
       <td>True</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>kmrc20-311cas9_repa_p6_batch3</td>
-      <td>ACH-000250</td>
+      <td>nci-h1944-311cas9 rep c p5_batch3</td>
+      <td>ACH-000414</td>
       <td>3</td>
       <td>True</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>253j-311cas9_repa_p5_batch3</td>
-      <td>ACH-000011</td>
-      <td>3</td>
+      <td>mdamb231-311cas9_repb_p5_batch2</td>
+      <td>ACH-000768</td>
+      <td>2</td>
       <td>True</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>ocug1-311cas9-repb-p6_batch3</td>
-      <td>ACH-001619</td>
+      <td>skrc20-311cas9_repa_p6_batch3</td>
+      <td>ACH-000385</td>
       <td>3</td>
       <td>True</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>raji-311cas9_repb_p6_batch3</td>
-      <td>ACH-000654</td>
+      <td>skpndw-311cas9_repb_p6_batch3</td>
+      <td>ACH-001193</td>
       <td>3</td>
       <td>True</td>
     </tr>
@@ -425,51 +398,29 @@ achilles_replicate_map.head()
 </table>
 </div>
 
-
-
-
 ```python
 np.max(achilles_replicate_map.pdna_batch)
 ```
 
-
-
-
     4
-
-
-
 
 ```python
 len(np.unique(achilles_replicate_map.replicate_id))
 ```
 
-
-
-
-    1638
-
-
-
+    1759
 
 ```python
 np.round(np.mean(achilles_replicate_map.passes_qc), 3)
 ```
 
-
-
-
-    0.996
-
-
-
+    0.948
 
 ```python
 achilles_replicate_map.to_csv(save_dir / "achilles_replicate_map.csv", index=False)
 ```
 
 ## 'Achilles_logfold_change.csv'
-
 
 ```python
 achilles_logfold_change = (
@@ -485,9 +436,6 @@ achilles_logfold_change = (
 
 achilles_logfold_change.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -565,39 +513,27 @@ achilles_logfold_change.head()
 </table>
 </div>
 
-
-
-
 ```python
 if achilles_logfold_change.depmap_id.isnull().values.any():
     raise Exception("Some data points are missing cell line assignments.")
 ```
-
 
 ```python
 if not np.all(achilles_logfold_change.passes_qc):
     raise Exception("Some data does not pass QC.")
 ```
 
-
 ```python
 achilles_logfold_change.shape
 ```
 
-
-
-
-    (121067627, 6)
-
-
-
+    (123756359, 6)
 
 ```python
 achilles_logfold_change.to_csv(save_dir / "achilles_logfold_change.csv", index=False)
 ```
 
 ## 'CCLE_mutations.csv'
-
 
 ```python
 ccle_mutations_columns = [
@@ -624,9 +560,6 @@ ccle_mutations = pd.read_csv(
 
 ccle_mutations.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -758,15 +691,11 @@ ccle_mutations.head()
 </table>
 </div>
 
-
-
-
 ```python
 ccle_mutations.to_csv(save_dir / "ccle_mutations.csv", index=False)
 ```
 
 ### *KRAS* mutations
-
 
 ```python
 kras_mutations_columns = [
@@ -789,7 +718,7 @@ kras_mutations = (
     .assign(
         variant_classification=lambda x: x.variant_classification.str.lower(),
         variant_type=lambda x: x.variant_type.str.lower(),
-        codon=lambda x: [re.sub("\D", "", a) for a in x.protein_change],
+        codon=lambda x: [re.sub(r"\D", "", a) for a in x.protein_change],
         is_kras_hotspot=lambda x: x.codon.isin(kras_hotspot_codons),
     )
     .pipe(lambda x: x[x.variant_classification != "silent"])
@@ -812,9 +741,6 @@ kras_mutations = (
 
 kras_mutations.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -928,9 +854,6 @@ kras_mutations.head()
 </table>
 </div>
 
-
-
-
 ```python
 kras_mutation_counts = (
     kras_mutations[["kras_mutation", "depmap_id"]]
@@ -946,9 +869,6 @@ kras_others = (
 
 kras_mutation_counts
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -1088,9 +1008,6 @@ kras_mutation_counts
 </table>
 </div>
 
-
-
-
 ```python
 # Assign rare KRAS mutations to "other" group.
 kras_mutations = kras_mutations.assign(
@@ -1099,7 +1016,6 @@ kras_mutations = kras_mutations.assign(
     ]
 )
 ```
-
 
 ```python
 mult_kras_mutations = (
@@ -1113,9 +1029,6 @@ mult_kras_mutations = (
 
 mult_kras_mutations
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -1194,9 +1107,6 @@ mult_kras_mutations
 </table>
 </div>
 
-
-
-
 ```python
 kras_mult_mutations_fix = (
     kras_mutations[kras_mutations.depmap_id.isin(mult_kras_mutations.depmap_id)]
@@ -1208,9 +1118,6 @@ kras_mult_mutations_fix = (
 
 kras_mult_mutations_fix
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -1504,9 +1411,6 @@ kras_mult_mutations_fix
 </table>
 </div>
 
-
-
-
 ```python
 # Cell lines to ignore because they have multiple KRAS mutations that are
 # not easily resolved.
@@ -1520,9 +1424,6 @@ true_kras_double_muts = ["ACH-000718", "ACH-000314", "ACH-001378", "ACH-001857"]
     .reset_index(drop=False)
 )
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -1601,9 +1502,6 @@ true_kras_double_muts = ["ACH-000718", "ACH-000314", "ACH-001378", "ACH-001857"]
 </table>
 </div>
 
-
-
-
 ```python
 kras_mult_mutations_fix = (
     kras_mult_mutations_fix.assign(
@@ -1618,9 +1516,6 @@ kras_mult_mutations_fix = (
 )
 kras_mult_mutations_fix
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -1809,9 +1704,6 @@ kras_mult_mutations_fix
 </table>
 </div>
 
-
-
-
 ```python
 kras_mutations = kras_mutations.pipe(
     lambda x: x[~x.depmap_id.isin(kras_mult_mutations_fix.depmap_id)]
@@ -1819,7 +1711,6 @@ kras_mutations = kras_mutations.pipe(
 
 kras_mutations = pd.concat([kras_mutations, kras_mult_mutations_fix])
 ```
-
 
 ```python
 mult_kras_mutations = (
@@ -1836,14 +1727,11 @@ print(f"Number of cell lines with multiple KRAS mutations: {len(mult_kras_mutati
 
     Number of cell lines with multiple KRAS mutations: 0
 
-
-
 ```python
 kras_mutations.to_csv(save_dir / "kras_mutations.csv", index=False)
 ```
 
 ## 'CCLE_segment_cn.csv'
-
 
 ```python
 ccle_segment_cn = (
@@ -1853,9 +1741,6 @@ ccle_segment_cn = (
 )
 ccle_segment_cn.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -1945,15 +1830,11 @@ ccle_segment_cn.head()
 </table>
 </div>
 
-
-
-
 ```python
 ccle_segment_cn.to_csv(save_dir / "ccle_semgent_cn.csv", index=False)
 ```
 
 ## 'CCLE_gene_cn.csv'
-
 
 ```python
 ccle_gene_cn = (
@@ -1968,9 +1849,6 @@ ccle_gene_cn = (
 
 ccle_gene_cn.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -2036,9 +1914,6 @@ ccle_gene_cn.head()
 </table>
 </div>
 
-
-
-
 ```python
 fig = plt.figure(figsize=(12, 8))
 x = [np.min([a, 6]) for a in ccle_gene_cn.copy_number.sample(n=1000)]
@@ -2046,14 +1921,13 @@ sns.histplot(x, kde=False)
 plt.show()
 ```
 
-
-    
 ![png](005_prepare-depmap-data_files/005_prepare-depmap-data_44_0.png)
-    
 
+```python
+ccle_gene_cn.to_csv(save_dir / "ccle_gene_cn.csv", index=False)
+```
 
 ## 'CCLE_fusions.csv'
-
 
 ```python
 ccle_fusions = (
@@ -2080,9 +1954,6 @@ ccle_fusions = (
 )
 ccle_fusions.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -2226,19 +2097,15 @@ ccle_fusions.head()
 </table>
 </div>
 
-
-
-
 ```python
 ccle_fusions.to_csv(save_dir / "ccle_fusions.csv", index=False)
 ```
 
 ## 'CCLE_expression_full_v2.csv'
 
-
 ```python
 ccle_expression = (
-    pd.read_csv(data_dir / "CCLE_expression_full_v2.csv")
+    pd.read_csv(data_dir / "CCLE_expression_full.csv")
     .rename({"Unnamed: 0": "depmap_id"}, axis=1)
     .melt(id_vars="depmap_id", var_name="hugo_symbol", value_name="rna_expr")
     .assign(hugo_symbol=lambda x: [a.split(" ")[0] for a in x.hugo_symbol])
@@ -2246,9 +2113,6 @@ ccle_expression = (
 
 ccle_expression.head()
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -2308,9 +2172,109 @@ ccle_expression.head()
 </table>
 </div>
 
-
-
-
 ```python
 ccle_expression.to_csv(save_dir / "ccle_expression.csv", index=False)
+```
+
+## 'Achilles_gene_effect.csv' & 'Achilles_gene_effect_unscaled.csv'
+
+```python
+def prep_gene_effect_data(fpath, col_name):
+    d = (
+        pd.read_csv(fpath)
+        .rename({"DepMap_ID": "depmap_id"}, axis=1)
+        .melt(id_vars="depmap_id", var_name="hugo_symbol", value_name=col_name)
+        .assign(hugo_symbol=lambda x: [a.split(" ")[0] for a in x.hugo_symbol])
+    )
+    return d
+
+
+gene_effect_scaled = prep_gene_effect_data(
+    data_dir / "Achilles_gene_effect.csv", "gene_effect"
+)
+gene_effect_unscaled = prep_gene_effect_data(
+    data_dir / "Achilles_gene_effect_unscaled.csv", "gene_effect_unscaled"
+)
+
+# Check that the two data frames are the same shape.
+if not gene_effect_scaled.shape == gene_effect_unscaled.shape:
+    raise Exception("Gene effect data frames are not the same shape as expected.")
+
+gene_effect = pd.merge(
+    gene_effect_scaled, gene_effect_unscaled, on=["depmap_id", "hugo_symbol"]
+)
+
+gene_effect.head()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>depmap_id</th>
+      <th>hugo_symbol</th>
+      <th>gene_effect</th>
+      <th>gene_effect_unscaled</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACH-000004</td>
+      <td>A1BG</td>
+      <td>0.181037</td>
+      <td>0.542787</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ACH-000005</td>
+      <td>A1BG</td>
+      <td>-0.090250</td>
+      <td>0.440018</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-000007</td>
+      <td>A1BG</td>
+      <td>0.071568</td>
+      <td>0.104889</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-000009</td>
+      <td>A1BG</td>
+      <td>0.110311</td>
+      <td>0.478258</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-000011</td>
+      <td>A1BG</td>
+      <td>0.275160</td>
+      <td>0.589944</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+gene_effect.to_csv(save_dir / "achilles_gene_effect.csv", index=False)
+```
+
+```python
+
 ```

@@ -1,30 +1,25 @@
 ```python
-import pandas as pd
+import string
+import warnings
+from itertools import product
+from time import time
+
+import arviz as az
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import plotnine as gg
 import pymc3 as pm
-import arviz as az
 import seaborn as sns
-import matplotlib.pyplot as plt
-import string
-from itertools import product
-from numpy.random import normal, exponential
-```
+from numpy.random import exponential, normal
 
-
-```python
-import warnings
+notebook_tic = time()
 
 warnings.simplefilter(action="ignore", category=UserWarning)
-```
 
-
-```python
 gg.theme_set(gg.theme_minimal())
-```
+%config InlineBackend.figure_format = 'retina'
 
-
-```python
 RANDOM_SEED = 103
 ```
 
@@ -48,7 +43,6 @@ logFC_{g,c} \sim Normal(\mu_{g,c}, \sigma) \\
 \quad \sigma \sim \text{Exp}(1)
 $
 
-
 Simulated values:
 
 - number of cell lines: 20
@@ -58,7 +52,6 @@ Simulated values:
 - $\mu_\gamma = 0$, $\sigma_\gamma = 3$
 - $\mu_\beta = -1$, $\sigma_\beta = 2$
 - $\sigma = 0.3$
-
 
 ```python
 N = 5000
@@ -81,19 +74,9 @@ sigma_dists = pd.DataFrame(
 )
 ```
 
+![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_2_0.png)
 
-    
-![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_5_0.png)
-    
-
-
-
-
-
-    <ggplot: (8741728299240)>
-
-
-
+    <ggplot: (8775666828743)>
 
 ```python
 np.random.seed(RANDOM_SEED)
@@ -149,9 +132,6 @@ for i in range(len(logfc_data)):
 
 logfc_data
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -272,9 +252,6 @@ logfc_data
 <p>300 rows × 5 columns</p>
 </div>
 
-
-
-
 ```python
 (
     gg.ggplot(logfc_data, gg.aes(x="rna", y="logfc", color="gene"))
@@ -284,19 +261,9 @@ logfc_data
 )
 ```
 
+![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_4_0.png)
 
-    
-![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_7_0.png)
-    
-
-
-
-
-
-    <ggplot: (8741728299123)>
-
-
-
+    <ggplot: (8775666852717)>
 
 ```python
 (
@@ -309,19 +276,9 @@ logfc_data
 )
 ```
 
+![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_5_0.png)
 
-    
-![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_8_0.png)
-    
-
-
-
-
-
-    <ggplot: (8741725996894)>
-
-
-
+    <ggplot: (8775613956328)>
 
 ```python
 (
@@ -337,19 +294,9 @@ logfc_data
 )
 ```
 
+![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_6_0.png)
 
-    
-![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_9_0.png)
-    
-
-
-
-
-
-    <ggplot: (8741724230611)>
-
-
-
+    <ggplot: (8775613796208)>
 
 ```python
 gene_idx = logfc_data["gene"].cat.codes.to_list()
@@ -390,16 +337,13 @@ with pm.Model() as model4:
     Multiprocess sampling (4 chains in 4 jobs)
     NUTS: [sigma, beta_g, gamma_c, alpha_g, sigma_beta, mu_beta, sigma_gamma, mu_gamma, sigma_alpha, mu_alpha]
 
-
-
-
 <div>
     <style>
-        /* Turns off some styling */
+        /*Turns off some styling*/
         progress {
-            /* gets rid of default border in Firefox and Opera. */
+            /*gets rid of default border in Firefox and Opera.*/
             border: none;
-            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
             background-size: auto;
         }
         .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
@@ -407,24 +351,19 @@ with pm.Model() as model4:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 02:13<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [16000/16000 02:24<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-
-
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 134 seconds.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 145 seconds.
     The number of effective samples is smaller than 10% for some parameters.
-
-
-
 
 <div>
     <style>
-        /* Turns off some styling */
+        /*Turns off some styling*/
         progress {
-            /* gets rid of default border in Firefox and Opera. */
+            /*gets rid of default border in Firefox and Opera.*/
             border: none;
-            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
             background-size: auto;
         }
         .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
@@ -432,25 +371,14 @@ with pm.Model() as model4:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:08<00:00]
+  100.00% [8000/8000 00:11<00:00]
 </div>
-
-
-
 
 ```python
 pm.model_to_graphviz(model4)
 ```
 
-
-
-
-    
-![svg](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_11_0.svg)
-    
-
-
-
+![svg](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_8_0.svg)
 
 ```python
 az_model4 = az.from_pymc3(
@@ -461,7 +389,6 @@ az_model4 = az.from_pymc3(
 )
 ```
 
-
 ```python
 var_names1 = ["mu_" + a for a in ["alpha", "gamma", "beta"]]
 var_names2 = ["sigma_" + a for a in ["alpha", "gamma", "beta"]]
@@ -469,12 +396,7 @@ az.plot_trace(az_model4, var_names=var_names1 + var_names2 + ["sigma"])
 plt.show()
 ```
 
-
-    
-![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_13_0.png)
-    
-
-
+![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_10_0.png)
 
 ```python
 s = az.summary(az_model4, var_names=var_names1 + var_names2)
@@ -488,9 +410,6 @@ s["real_values"] = [
 ]
 s
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -619,18 +538,12 @@ s
 </table>
 </div>
 
-
-
 I believe that the $\alpha_g$ values were poorly estimated because they do not add much information to the model.
 The other parameters fit well, but these have very wide posterior distributions.
-
 
 ```python
 az.summary(az_model4, var_names=["alpha_g"]).assign(real_values=real_alpha_g)
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -744,27 +657,16 @@ az.summary(az_model4, var_names=["alpha_g"]).assign(real_values=real_alpha_g)
 </table>
 </div>
 
-
-
-
 ```python
 az.plot_forest(az_model4, var_names=["alpha_g"], combined=True)
 plt.show()
 ```
 
-
-    
-![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_17_0.png)
-    
-
-
+![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_14_0.png)
 
 ```python
 az.summary(az_model4, var_names=["beta_g"]).assign(real_values=real_beta_g)
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -878,27 +780,16 @@ az.summary(az_model4, var_names=["beta_g"]).assign(real_values=real_beta_g)
 </table>
 </div>
 
-
-
-
 ```python
 az.plot_forest(az_model4, var_names=["beta_g"], combined=True)
 plt.show()
 ```
 
-
-    
-![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_19_0.png)
-    
-
-
+![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_16_0.png)
 
 ```python
 az.summary(az_model4, var_names=["gamma_c"]).assign(real_values=real_gamma_c)
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -1237,20 +1128,12 @@ az.summary(az_model4, var_names=["gamma_c"]).assign(real_values=real_gamma_c)
 </table>
 </div>
 
-
-
-
 ```python
 az.plot_forest(az_model4, var_names=["gamma_c"], combined=True)
 plt.show()
 ```
 
-
-    
-![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_21_0.png)
-    
-
-
+![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_18_0.png)
 
 ```python
 post_alpha_g = model4_trace.get_values(varname="alpha_g")
@@ -1267,9 +1150,6 @@ logfc_post_df["hpi_lower"] = [x[0] for x in post_mu_hdi]
 logfc_post_df["hpi_upper"] = [x[1] for x in post_mu_hdi]
 logfc_post_df
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -1426,9 +1306,6 @@ logfc_post_df
 <p>300 rows × 8 columns</p>
 </div>
 
-
-
-
 ```python
 (
     gg.ggplot(logfc_post_df, gg.aes(x="cell_line"))
@@ -1444,40 +1321,37 @@ logfc_post_df
 )
 ```
 
+![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_20_0.png)
 
-    
-![png](005_011_model-experimentation-m4_files/005_011_model-experimentation-m4_23_0.png)
-    
-
-
-
-
-
-    <ggplot: (8741716503269)>
-
-
+    <ggplot: (8775613657995)>
 
 ### Conclusions and final thoughts
 
 The model fit well, as demonstrated by the final plot of the posterior predictions.
 However, many of the variables' posterior distributions were very wide.
-This indicates that there is multicolinearity between the predictors. 
+This indicates that there is multicolinearity between the predictors.
 
 ---
 
+```python
+notebook_toc = time()
+print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
+```
+
+    execution time: 3.36 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
+    pandas   1.1.3
+    arviz    0.10.0
     numpy    1.19.2
     seaborn  0.11.0
-    arviz    0.10.0
-    pymc3    3.9.3
     plotnine 0.7.1
-    pandas   1.1.3
-    last updated: 2020-10-26 
+    pymc3    3.9.3
+    last updated: 2020-12-17 
     
     CPython 3.8.5
     IPython 7.18.1
@@ -1487,8 +1361,7 @@ This indicates that there is multicolinearity between the predictors.
     release    : 3.10.0-1062.el7.x86_64
     machine    : x86_64
     processor  : x86_64
-    CPU cores  : 28
+    CPU cores  : 32
     interpreter: 64bit
-    host name  : compute-e-16-237.o2.rc.hms.harvard.edu
-    Git branch : models
-
+    host name  : compute-a-16-78.o2.rc.hms.harvard.edu
+    Git branch : subset-data

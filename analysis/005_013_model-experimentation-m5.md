@@ -1,30 +1,25 @@
 ```python
-import pandas as pd
+import string
+import warnings
+from itertools import product
+from time import time
+
+import arviz as az
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import plotnine as gg
 import pymc3 as pm
-import arviz as az
 import seaborn as sns
-import matplotlib.pyplot as plt
-import string
-from itertools import product
-from numpy.random import normal, exponential
-```
+from numpy.random import exponential, normal
 
-
-```python
-import warnings
+notebook_tic = time()
 
 warnings.simplefilter(action="ignore", category=UserWarning)
-```
 
-
-```python
 gg.theme_set(gg.theme_minimal())
-```
+%config InlineBackend.figure_format = 'retina'
 
-
-```python
 RANDOM_SEED = 103
 ```
 
@@ -58,7 +53,6 @@ Simulated values:
 - $\sigma_\alpha = 0.1$
 - $\mu_\beta = 0$, $\sigma_\beta = 1$
 - $\sigma = 0.05$
-
 
 ```python
 np.random.seed(RANDOM_SEED)
@@ -144,9 +138,6 @@ for i in range(len(data)):
 
 data.head(10)
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -247,9 +238,6 @@ data.head(10)
 </table>
 </div>
 
-
-
-
 ```python
 print(real_params["epsilon_g"])
 print(real_params["alpha_s"])
@@ -265,8 +253,6 @@ print(real_params["beta_c"])
      -0.94776417 -1.84338194  0.81058919 -0.75225658 -0.43646901  0.04727664
      -0.25082764  0.16708739]
 
-
-
 ```python
 (
     gg.ggplot(data, gg.aes(x="gene", y="logfc"))
@@ -277,19 +263,9 @@ print(real_params["beta_c"])
 )
 ```
 
+![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_5_0.png)
 
-    
-![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_8_0.png)
-    
-
-
-
-
-
-    <ggplot: (8754076262154)>
-
-
-
+    <ggplot: (8777511451862)>
 
 ```python
 (
@@ -303,19 +279,9 @@ print(real_params["beta_c"])
 )
 ```
 
+![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_6_0.png)
 
-    
-![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_9_0.png)
-    
-
-
-
-
-
-    <ggplot: (8754075597894)>
-
-
-
+    <ggplot: (8777509850338)>
 
 ```python
 (
@@ -328,19 +294,9 @@ print(real_params["beta_c"])
 )
 ```
 
+![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_7_0.png)
 
-    
-![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_10_0.png)
-    
-
-
-
-
-
-    <ggplot: (8754069720558)>
-
-
-
+    <ggplot: (8777510767083)>
 
 ```python
 # Data with the cell line effect removed.
@@ -354,7 +310,6 @@ mod_data = data.copy()
 mod_data["logfc_no_cell"] = rm_cell_line_effect
 ```
 
-
 ```python
 (
     gg.ggplot(mod_data, gg.aes(x="cell_line", y="logfc_no_cell"))
@@ -366,19 +321,9 @@ mod_data["logfc_no_cell"] = rm_cell_line_effect
 )
 ```
 
+![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_9_0.png)
 
-    
-![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_12_0.png)
-    
-
-
-
-
-
-    <ggplot: (8754069728814)>
-
-
-
+    <ggplot: (8777510802071)>
 
 ```python
 (
@@ -390,19 +335,9 @@ mod_data["logfc_no_cell"] = rm_cell_line_effect
 )
 ```
 
+![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_10_0.png)
 
-    
-![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_13_0.png)
-    
-
-
-
-
-
-    <ggplot: (8754069614044)>
-
-
-
+    <ggplot: (8777510623407)>
 
 ```python
 cell_line_idx = data["cell_line"].cat.codes.to_list()
@@ -445,16 +380,13 @@ with pm.Model() as model5:
     Multiprocess sampling (4 chains in 4 jobs)
     NUTS: [sigma, beta_c, sigma_beta, mu_beta, alpha_s, sigma_alpha, epsilon_g, sigma_epsilon, mu_epsilon]
 
-
-
-
 <div>
     <style>
-        /* Turns off some styling */
+        /*Turns off some styling*/
         progress {
-            /* gets rid of default border in Firefox and Opera. */
+            /*gets rid of default border in Firefox and Opera.*/
             border: none;
-            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
             background-size: auto;
         }
         .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
@@ -462,12 +394,10 @@ with pm.Model() as model5:
         }
     </style>
   <progress value='20000' class='' max='20000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [20000/20000 08:46<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [20000/20000 09:30<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-
-
-    Sampling 4 chains for 1_000 tune and 4_000 draw iterations (4_000 + 16_000 draws total) took 527 seconds.
+    Sampling 4 chains for 1_000 tune and 4_000 draw iterations (4_000 + 16_000 draws total) took 571 seconds.
     The chain reached the maximum tree depth. Increase max_treedepth, increase target_accept or reparameterize.
     The chain reached the maximum tree depth. Increase max_treedepth, increase target_accept or reparameterize.
     The chain reached the maximum tree depth. Increase max_treedepth, increase target_accept or reparameterize.
@@ -475,16 +405,13 @@ with pm.Model() as model5:
     The chain reached the maximum tree depth. Increase max_treedepth, increase target_accept or reparameterize.
     The number of effective samples is smaller than 10% for some parameters.
 
-
-
-
 <div>
     <style>
-        /* Turns off some styling */
+        /*Turns off some styling*/
         progress {
-            /* gets rid of default border in Firefox and Opera. */
+            /*gets rid of default border in Firefox and Opera.*/
             border: none;
-            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
             background-size: auto;
         }
         .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
@@ -492,31 +419,21 @@ with pm.Model() as model5:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 00:17<00:00]
+  100.00% [16000/16000 00:21<00:00]
 </div>
-
-
-
 
 ```python
 pm.model_to_graphviz(model5)
 ```
 
-
-
-
-    
-![svg](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_15_0.svg)
-    
-
-
-
+![svg](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_12_0.svg)
 
 ```python
 def plot_variable_prior(prior_check, var):
     prior_df = prior_check[var]
     prior_df = pd.DataFrame(
-        prior_df, columns=[f"{var}[" + str(i) + "]" for i in range(prior_df.shape[1])],
+        prior_df,
+        columns=[f"{var}[" + str(i) + "]" for i in range(prior_df.shape[1])],
     ).melt()
 
     return (
@@ -526,60 +443,29 @@ def plot_variable_prior(prior_check, var):
     )
 ```
 
-
 ```python
 plot_variable_prior(model5_prior_check, "epsilon_g")
 ```
 
+![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_14_0.png)
 
-    
-![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_17_0.png)
-    
-
-
-
-
-
-    <ggplot: (8754069623447)>
-
-
-
+    <ggplot: (8777510742203)>
 
 ```python
 plot_variable_prior(model5_prior_check, "alpha_s")
 ```
 
+![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_15_0.png)
 
-    
-![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_18_0.png)
-    
-
-
-
-
-
-    <ggplot: (8754067062947)>
-
-
-
+    <ggplot: (8777510638517)>
 
 ```python
 plot_variable_prior(model5_prior_check, "beta_c") + gg.theme(legend_position="none")
 ```
 
+![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_16_0.png)
 
-    
-![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_19_0.png)
-    
-
-
-
-
-
-    <ggplot: (8754067540866)>
-
-
-
+    <ggplot: (8777510802071)>
 
 ```python
 logfc_priors = pd.DataFrame({"logfc": model5_prior_check["logfc"].flatten()[::100]})
@@ -591,19 +477,9 @@ logfc_priors = pd.DataFrame({"logfc": model5_prior_check["logfc"].flatten()[::10
 )
 ```
 
+![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_17_0.png)
 
-    
-![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_20_0.png)
-    
-
-
-
-
-
-    <ggplot: (8754068147779)>
-
-
-
+    <ggplot: (8777510638583)>
 
 ```python
 az_model5 = az.from_pymc3(
@@ -614,15 +490,11 @@ az_model5 = az.from_pymc3(
 )
 ```
 
-
 ```python
 az.summary(az_model5, var_names=["mu_epsilon"]).assign(
     real_values=real_params["mu_epsilon"]
 )
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -676,17 +548,11 @@ az.summary(az_model5, var_names=["mu_epsilon"]).assign(
 </table>
 </div>
 
-
-
-
 ```python
 az.summary(az_model5, var_names=["epsilon_g"]).assign(
     real_values=real_params["epsilon_g"]
 )
 ```
-
-
-
 
 <div>
 <style scoped>
@@ -800,62 +666,34 @@ az.summary(az_model5, var_names=["epsilon_g"]).assign(
 </table>
 </div>
 
-
-
-
 ```python
 az.plot_trace(az_model5, var_names=["epsilon_g"])
 plt.show()
 ```
 
-
-    
-![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_24_0.png)
-    
-
-
+![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_21_0.png)
 
 ```python
 az.plot_forest(az_model5, var_names=["epsilon_g"], combined=True)
 plt.show()
 ```
 
-
-    
-![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_25_0.png)
-    
-
-
+![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_22_0.png)
 
 ```python
 az.plot_forest(az_model5, var_names=["alpha_s"], combined=True)
 plt.show()
 ```
 
-
-    
-![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_26_0.png)
-    
-
-
+![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_23_0.png)
 
 ```python
 az.plot_forest(az_model5, var_names="beta_c", combined=True)
 ```
 
-
-
-
     array([<AxesSubplot:title={'center':'94.0% HDI'}>], dtype=object)
 
-
-
-
-    
-![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_27_1.png)
-    
-
-
+![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_24_1.png)
 
 ```python
 model5_mu_post = model5_trace.get_values("mu_sgc")
@@ -885,18 +723,9 @@ pos_shift = 0.15
 )
 ```
 
+![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_25_0.png)
 
-    
-![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_28_0.png)
-    
-
-
-
-
-
-    <ggplot: (8754058941425)>
-
-
+    <ggplot: (8777502303817)>
 
 ### Conclusions and final thoughts
 
@@ -904,11 +733,10 @@ The model fits well, as shown by the very tight posterior predictions of each da
 Reassuringly, there is also visible shrinkage in the predictions.
 
 The posterior distributions of the parameters of $\alpha_s$, $\epsilon_g$, and $\beta_c$ are *very* wide, though the mean/MAP values are very accurate.
-To me, this suggests that there is a lot of correlation between the posterior values. 
+To me, this suggests that there is a lot of correlation between the posterior values.
 This would lead to greater play in the posteriors while maintaining very high accuracy in posterior predictions.
 
 This is proven with the following plot. 🤦🏻‍♂️
-
 
 ```python
 d = pd.DataFrame(
@@ -925,34 +753,31 @@ d = pd.DataFrame(
 )
 ```
 
+![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_27_0.png)
 
-    
-![png](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_30_0.png)
-    
-
-
-
-
-
-    <ggplot: (8754075590379)>
-
-
+    <ggplot: (8777502293324)>
 
 ---
 
+```python
+notebook_toc = time()
+print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
+```
+
+    execution time: 10.67 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    pymc3    3.9.3
-    plotnine 0.7.1
     seaborn  0.11.0
-    pandas   1.1.3
-    arviz    0.10.0
     numpy    1.19.2
-    last updated: 2020-10-26 
+    plotnine 0.7.1
+    pymc3    3.9.3
+    arviz    0.10.0
+    pandas   1.1.3
+    last updated: 2020-12-17 
     
     CPython 3.8.5
     IPython 7.18.1
@@ -962,8 +787,7 @@ d = pd.DataFrame(
     release    : 3.10.0-1062.el7.x86_64
     machine    : x86_64
     processor  : x86_64
-    CPU cores  : 28
+    CPU cores  : 32
     interpreter: 64bit
-    host name  : compute-e-16-237.o2.rc.hms.harvard.edu
-    Git branch : models
-
+    host name  : compute-a-16-78.o2.rc.hms.harvard.edu
+    Git branch : subset-data

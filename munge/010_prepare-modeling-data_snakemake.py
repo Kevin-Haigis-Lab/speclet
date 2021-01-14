@@ -1,6 +1,7 @@
 import os
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 
 temp_dir = Path("/n/scratch3/users/j/jc604/speclet/modeling-data-processing")
 save_dir = Path('modeling_data')
@@ -24,12 +25,22 @@ rule prep_sampleinfo:
         "014_make-achilles-sample-info.R"
 
 
-# Split CNA data by DepMapID.
-rule split_cna:
+# Split segment mean CN data by DepMapID.
+rule split_segmentcn:
     input:
         data_file = (input_data_dir / "ccle_semgent_cn.csv").as_posix()
     output:
-        out_files = expand((temp_dir / "cna_{depmapid}.qs").as_posix(), depmapid=all_depmapids)
+        out_files = expand((temp_dir / "segmentcn_{depmapid}.qs").as_posix(), depmapid=all_depmapids)
+    script:
+        "015_split-modeling-data.R"
+
+
+# Split CNA data by DepMapID.
+rule split_genecn:
+    input:
+        data_file = (input_data_dir / "ccle_gene_cn.csv").as_posix()
+    output:
+        out_files = expand((temp_dir / "genecn_{depmapid}.qs").as_posix(), depmapid=all_depmapids)
     script:
         "015_split-modeling-data.R"
 
@@ -68,7 +79,8 @@ rule split_rna:
 # Merge all data for a DepMapID.
 rule merge_data:
     input:
-        cna_file = (temp_dir / "cna_{depmapid}.qs").as_posix(),
+        segmentcn_file = (temp_dir / "segmentcn_{depmapid}.qs").as_posix(),
+        genecn_file = (temp_dir / "genecn_{depmapid}.qs").as_posix(),
         mut_file = (temp_dir / "mut_{depmapid}.qs").as_posix(),
         logfc_file = (temp_dir / "logfc_{depmapid}.qs").as_posix(),
         rna_file = (temp_dir / "rna_{depmapid}.qs").as_posix(),
