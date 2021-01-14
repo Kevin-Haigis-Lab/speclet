@@ -1,6 +1,7 @@
 import os
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 
 temp_dir = Path("/n/scratch3/users/j/jc604/speclet/modeling-data-processing")
 save_dir = Path('modeling_data')
