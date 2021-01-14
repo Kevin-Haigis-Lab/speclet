@@ -1,10 +1,16 @@
+from typing import List, Optional
+
 import numpy as np
 import pandas as pd
 
 
 def zscale_cna_by_group(
-    df, gene_cn_col="gene_cn", new_col="gene_cn_z", groupby=["hugo_symbol"], cn_max=None
-):
+    df: pd.DataFrame,
+    gene_cn_col: str = "gene_cn",
+    new_col: str = "gene_cn_z",
+    groupby: List[str] = ["hugo_symbol"],
+    cn_max: Optional[float] = None,
+) -> pd.DataFrame:
     """
     Z-scale the copy number values.
 
@@ -38,7 +44,9 @@ def zscale_cna_by_group(
     return df
 
 
-def make_cat(df, col, ordered=True, sort_cats=False):
+def make_cat(
+    df: pd.DataFrame, col: str, ordered: bool = True, sort_cats: bool = False
+) -> pd.DataFrame:
     """
     Make a column of a data frame into categorical.
 
@@ -64,7 +72,7 @@ def make_cat(df, col, ordered=True, sort_cats=False):
     return df
 
 
-def get_indices(df, col):
+def get_indices(df: pd.DataFrame, col: str) -> np.ndarray:
     """
     Get a list of the indices for a categorical column.
 

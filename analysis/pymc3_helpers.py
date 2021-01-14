@@ -1,5 +1,6 @@
 import pickle
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 import arviz as az
 import numpy as np
@@ -7,7 +8,7 @@ import pandas as pd
 import pymc3 as pm
 
 
-def write_pickle(x, fp):
+def write_pickle(x: Any, fp: Path) -> None:
     """
     Write `x` to disk as a pickle file.
 
@@ -23,7 +24,7 @@ def write_pickle(x, fp):
     return None
 
 
-def get_pickle(fp):
+def get_pickle(fp: Path) -> Any:
     """
     Read a pickled file into Python.
 
@@ -38,18 +39,18 @@ def get_pickle(fp):
 
 
 def pymc3_sampling_procedure(
-    model,
-    num_mcmc=1000,
-    tune=1000,
-    chains=2,
-    cores=None,
-    prior_check_samples=1000,
-    ppc_samples=1000,
-    random_seed=1234,
-    cache_dir=None,
-    force=False,
-    sample_kwargs={},
-):
+    model: pm.Model,
+    num_mcmc: int = 1000,
+    tune: int = 1000,
+    chains: int = 2,
+    cores: Optional[int] = None,
+    prior_check_samples: int = 1000,
+    ppc_samples: int = 1000,
+    random_seed: int = 1234,
+    cache_dir: Optional[Path] = None,
+    force: bool = False,
+    sample_kwargs: Dict[str, Any] = {},
+) -> Dict[str, Any]:
     """
     Run the standard PyMC3 sampling procedure.
 
@@ -120,7 +121,7 @@ def pymc3_sampling_procedure(
     }
 
 
-def samples_to_arviz(model, res):
+def samples_to_arviz(model: pm.Model, res: Dict[str, Any]) -> az.InferenceData:
     """
     Turn the results of `pymc3_sampling_procedure()` into a standard ArviZ object.
 

@@ -1,9 +1,10 @@
 # Common string handling functions.
 
 import textwrap
+from typing import Iterable
 
 
-def str_wrap(strings, width=80):
+def str_wrap(strings: Iterable[str], width: int = 80) -> Iterable[str]:
     """
     Wrap long strings to multiple lines. (vectorized)
 
@@ -21,7 +22,9 @@ def str_wrap(strings, width=80):
     return ["\n".join(textwrap.wrap(x, width=width)) for x in strings]
 
 
-def str_replace(strings, pattern, replace_with=" "):
+def str_replace(
+    strings: Iterable[str], pattern: str, replace_with: str = " "
+) -> Iterable[str]:
     """
     Replace patterns in strings. (vectorized)
 

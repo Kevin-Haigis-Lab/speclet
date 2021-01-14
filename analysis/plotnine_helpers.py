@@ -1,7 +1,11 @@
 # Common functions to help with 'plotnine'.
 
+from typing import Any, Dict
 
-def margin(t=0, b=0, l=0, r=0, units="pt"):
+
+def margin(
+    t: int = 0, b: int = 0, l: int = 0, r: int = 0, units: str = "pt"
+) -> Dict[str, Any]:
     """
     Return a dictionary of margin data.
 
