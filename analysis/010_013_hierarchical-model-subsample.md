@@ -760,11 +760,11 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
     Last updated: 2021-01-13
-    
+
     Python implementation: CPython
     Python version       : 3.8.6
     IPython version      : 7.19.0
-    
+
     Compiler    : GCC 9.3.0
     OS          : Linux
     Release     : 3.10.0-1062.el7.x86_64
@@ -772,11 +772,11 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Processor   : x86_64
     CPU cores   : 32
     Architecture: 64bit
-    
+
     Hostname: compute-a-16-171.o2.rc.hms.harvard.edu
-    
+
     Git branch: subset-data
-    
+
     re        : 2.2.1
     matplotlib: 3.3.3
     pymc3     : 3.9.3

@@ -1,7 +1,7 @@
 # Common string handling functions.
 
 import textwrap
-from typing import Iterable
+from typing import Iterable, List
 
 
 def str_wrap(strings: Iterable[str], width: int = 80) -> Iterable[str]:
@@ -42,3 +42,23 @@ def str_replace(
     [str]
     """
     return [s.replace(pattern, replace_with) for s in strings]
+
+
+def prefixed_count(prefix: str, n: int, plus: float = 0.0) -> List[str]:
+    """
+    Make an array of 1-n with the number and some prefix.
+
+    Parameters
+    ----------
+    prefix: str
+        A prefix for each number.
+    n: int
+        The number of values.
+    plus: float
+        An optional additional value to add to each number.
+
+    Returns
+    -------
+    list of strings
+    """
+    return [prefix + str(i + plus) for i in range(n)]

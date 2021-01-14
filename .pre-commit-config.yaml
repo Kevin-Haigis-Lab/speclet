@@ -10,10 +10,8 @@ repos:
     rev: v3.4.0
     hooks:
     -   id: trailing-whitespace
-        exclude_types: [markdown]
         exclude: "presentations/"
     -   id: end-of-file-fixer
-        exclude_types: [markdown]
         exclude: "presentations/"
     -   id: check-yaml
     -   id: check-added-large-files
@@ -23,6 +21,11 @@ repos:
     hooks:
     - id: isort
       types: [python]
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.790
+    hooks:
+    -   id: mypy
+        exclude: ".snakemake."
 -   repo: https://github.com/psf/black
     rev: 20.8b1
     hooks:
@@ -46,4 +49,8 @@ repos:
         exclude: "munge/019_prepare-data-subsample.ipynb"
     -   id: nbqa-pyupgrade
         args: [--nbqa-mutate]
+        exclude: "munge/019_prepare-data-subsample.ipynb"
+    -   id: nbqa-mypy
+        args: [--nbqa-mutate]
+        types: [jupyter]
         exclude: "munge/019_prepare-data-subsample.ipynb"

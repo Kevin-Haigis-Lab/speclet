@@ -1398,11 +1398,11 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     plotnine 0.7.1
     pymc3    3.9.3
     seaborn  0.11.0
-    last updated: 2020-12-17 
-    
+    last updated: 2020-12-17
+
     CPython 3.8.5
     IPython 7.18.1
-    
+
     compiler   : GCC 7.3.0
     system     : Linux
     release    : 3.10.0-1062.el7.x86_64
