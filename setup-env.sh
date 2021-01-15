@@ -10,7 +10,7 @@ conda install -c conda-forge --yes pre-commit
 conda install -c conda-forge --yes jupyterlab_code_formatter
 conda install -c conda-forge --yes pymc3
 conda install -c conda-forge --yes matplotlib seaborn plotnine
-conda install -c conda-forge --yes arviz graphviz
+conda install -c conda-forge --yes arviz graphviz python-graphviz
 conda install -c conda-forge --yes black isort mypy nbqa watermark
 
 pre-commit install

@@ -23,7 +23,6 @@ import pymc3_helpers as pmhelp
 import seaborn as sns
 import string_functions as stringr
 from common_data_processing import get_indices, make_cat, zscale_cna_by_group
-from pymc3_helpers import pymc3_sampling_procedure, samples_to_arviz
 from theano import tensor as tt
 
 notebook_tic = time()
@@ -40,11 +39,21 @@ np.random.seed(RANDOM_SEED)
 pymc3_cache_dir = Path("pymc3_model_cache")
 ```
 
+    WARNING (theano.configdefaults): install mkl with `conda install mkl-service`: No module named 'mkl'
+
 ## Data preparation
 
 ```python
 data_path = Path("../modeling_data/depmap_modeling_dataframe_subsample.csv")
 data = pd.read_csv(data_path)
+
+data = data.sort_values(["hugo_symbol", "sgrna"]).reset_index(drop=True)
+for col in ("hugo_symbol", "depmap_id", "sgrna"):
+    data = make_cat(data, col, ordered=True, sort_cats=False)
+
+
+data = zscale_cna_by_group(data, cn_max=10)
+
 data.head(n=7)
 ```
 
@@ -77,7 +86,6 @@ data.head(n=7)
       <th>lineage_subtype</th>
       <th>kras_mutation</th>
       <th>...</th>
-      <th>log2_gene_cn_p1</th>
       <th>gene_cn</th>
       <th>n_muts</th>
       <th>any_deleterious</th>
@@ -87,14 +95,15 @@ data.head(n=7)
       <th>is_cosmic_hotspot</th>
       <th>mutated_at_guide_location</th>
       <th>rna_expr</th>
+      <th>gene_cn_z</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>AAGAGGCCGGTCAAATTCAG</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
       <td>42-mg-ba-311cas9_repa_p6_batch3</td>
-      <td>-0.405499</td>
+      <td>-0.005539</td>
       <td>3</td>
       <td>True</td>
       <td>ACH-000323</td>
@@ -103,8 +112,7 @@ data.head(n=7)
       <td>glioma</td>
       <td>WT</td>
       <td>...</td>
-      <td>0.845287</td>
-      <td>1.328646</td>
+      <td>1.192006</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -112,13 +120,14 @@ data.head(n=7)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>1.263034</td>
+      <td>0.310340</td>
+      <td>-1.139430</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>AATCAACCCACAGCTGCACA</td>
-      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
-      <td>-0.133541</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>42-mg-ba-311cas9_repb_p6_batch3</td>
+      <td>0.011213</td>
       <td>3</td>
       <td>True</td>
       <td>ACH-000323</td>
@@ -127,32 +136,31 @@ data.head(n=7)
       <td>glioma</td>
       <td>WT</td>
       <td>...</td>
-      <td>0.827398</td>
-      <td>1.287359</td>
-      <td>2</td>
+      <td>1.192006</td>
+      <td>0</td>
       <td>False</td>
-      <td>missense_mutation;missense_mutation</td>
-      <td>FALSE;FALSE</td>
-      <td>TRUE;TRUE</td>
-      <td>TRUE;TRUE</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
       <td>False</td>
-      <td>5.220330</td>
+      <td>0.310340</td>
+      <td>-1.139430</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>AATTACTACTTGCTTCCTGT</td>
-      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
-      <td>-0.491495</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>8-mg-ba-311cas9_repa_p5_batch3</td>
+      <td>-0.267030</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-000323</td>
+      <td>ACH-000137</td>
       <td>Primary</td>
       <td>central_nervous_system</td>
       <td>glioma</td>
       <td>WT</td>
       <td>...</td>
-      <td>0.879280</td>
-      <td>1.409165</td>
+      <td>1.653166</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -160,23 +168,23 @@ data.head(n=7)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>3.008989</td>
+      <td>1.891419</td>
+      <td>-0.252396</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>ACCTGTATGACGAAACCGTG</td>
-      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
-      <td>-0.015850</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>8-mg-ba-311cas9_repb_p5_batch3</td>
+      <td>0.340474</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-000323</td>
+      <td>ACH-000137</td>
       <td>Primary</td>
       <td>central_nervous_system</td>
       <td>glioma</td>
       <td>WT</td>
       <td>...</td>
-      <td>0.818549</td>
-      <td>1.267208</td>
+      <td>1.653166</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -184,23 +192,23 @@ data.head(n=7)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>4.083213</td>
+      <td>1.891419</td>
+      <td>-0.252396</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>ACTCTGTTCCTTCATCTCCG</td>
-      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
-      <td>-0.530277</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>9505bik-311cas9-repa-p6_batch3</td>
+      <td>0.584099</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-000323</td>
-      <td>Primary</td>
-      <td>central_nervous_system</td>
-      <td>glioma</td>
-      <td>WT</td>
+      <td>ACH-001999</td>
+      <td>NaN</td>
+      <td>pancreas</td>
+      <td>exocrine</td>
+      <td>G12V</td>
       <td>...</td>
-      <td>0.990378</td>
-      <td>1.692253</td>
+      <td>1.128780</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -208,59 +216,60 @@ data.head(n=7)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>5.822730</td>
+      <td>0.985500</td>
+      <td>-1.261044</td>
     </tr>
     <tr>
       <th>5</th>
-      <td>ACTGCTGCGGGAATTCCAAG</td>
-      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
-      <td>0.778827</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>a427-311cas9 rep a p4_batch3</td>
+      <td>0.042829</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-000323</td>
-      <td>Primary</td>
-      <td>central_nervous_system</td>
-      <td>glioma</td>
-      <td>WT</td>
+      <td>ACH-000757</td>
+      <td>NaN</td>
+      <td>lung</td>
+      <td>NSCLC</td>
+      <td>G12D</td>
       <td>...</td>
-      <td>0.818549</td>
-      <td>1.267208</td>
-      <td>0</td>
+      <td>1.145699</td>
+      <td>1</td>
       <td>False</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
+      <td>silent</td>
+      <td>FALSE</td>
+      <td>FALSE</td>
+      <td>FALSE</td>
       <td>False</td>
-      <td>4.083213</td>
+      <td>1.555816</td>
+      <td>-1.228501</td>
     </tr>
     <tr>
       <th>6</th>
-      <td>AGACACTTATACTATGAAAG</td>
-      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
-      <td>0.035950</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>a427-311cas9 rep b p4_batch3</td>
+      <td>0.114719</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-000323</td>
-      <td>Primary</td>
-      <td>central_nervous_system</td>
-      <td>glioma</td>
-      <td>WT</td>
+      <td>ACH-000757</td>
+      <td>NaN</td>
+      <td>lung</td>
+      <td>NSCLC</td>
+      <td>G12D</td>
       <td>...</td>
-      <td>0.872323</td>
-      <td>1.392463</td>
-      <td>0</td>
+      <td>1.145699</td>
+      <td>1</td>
       <td>False</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
+      <td>silent</td>
+      <td>FALSE</td>
+      <td>FALSE</td>
+      <td>FALSE</td>
       <td>False</td>
-      <td>3.701549</td>
+      <td>1.555816</td>
+      <td>-1.228501</td>
     </tr>
   </tbody>
 </table>
-<p>7 rows × 27 columns</p>
+<p>7 rows × 28 columns</p>
 </div>
 
 ```python
@@ -296,6 +305,7 @@ data.describe()
       <th>gene_cn</th>
       <th>n_muts</th>
       <th>rna_expr</th>
+      <th>gene_cn_z</th>
     </tr>
   </thead>
   <tbody>
@@ -312,6 +322,7 @@ data.describe()
       <td>6.004900e+04</td>
       <td>60049.000000</td>
       <td>60049.000000</td>
+      <td>6.004900e+04</td>
     </tr>
     <tr>
       <th>mean</th>
@@ -326,6 +337,7 @@ data.describe()
       <td>1.894709e+00</td>
       <td>0.097654</td>
       <td>2.957374</td>
+      <td>1.272609e-16</td>
     </tr>
     <tr>
       <th>std</th>
@@ -340,6 +352,7 @@ data.describe()
       <td>4.336833e+00</td>
       <td>0.354338</td>
       <td>2.292989</td>
+      <td>1.000008e+00</td>
     </tr>
     <tr>
       <th>min</th>
@@ -354,6 +367,7 @@ data.describe()
       <td>5.506197e-09</td>
       <td>0.000000</td>
       <td>0.000000</td>
+      <td>-3.065984e+00</td>
     </tr>
     <tr>
       <th>25%</th>
@@ -368,6 +382,7 @@ data.describe()
       <td>1.435176e+00</td>
       <td>0.000000</td>
       <td>0.790772</td>
+      <td>-5.710118e-01</td>
     </tr>
     <tr>
       <th>50%</th>
@@ -382,6 +397,7 @@ data.describe()
       <td>1.729965e+00</td>
       <td>0.000000</td>
       <td>2.895303</td>
+      <td>-1.340551e-01</td>
     </tr>
     <tr>
       <th>75%</th>
@@ -396,6 +412,7 @@ data.describe()
       <td>2.026700e+00</td>
       <td>0.000000</td>
       <td>4.698218</td>
+      <td>4.430254e-01</td>
     </tr>
     <tr>
       <th>max</th>
@@ -410,25 +427,17 @@ data.describe()
       <td>3.283930e+02</td>
       <td>8.000000</td>
       <td>11.496005</td>
+      <td>1.055240e+01</td>
     </tr>
   </tbody>
 </table>
 </div>
 
 ```python
-for col in ("hugo_symbol", "depmap_id"):
-    data = make_cat(data, col, ordered=True, sort_cats=True)
-```
-
-```python
 data.shape
 ```
 
-    (60049, 27)
-
-```python
-data = zscale_cna_by_group(data, cn_max=10)
-```
+    (60049, 28)
 
 ## EDA
 
@@ -448,15 +457,15 @@ data.columns
 ```python
 (
     gg.ggplot(data, gg.aes(x="hugo_symbol", y="lfc"))
-    + gg.geom_boxplot(outlier_alpha=0.3)
+    + gg.geom_boxplot(outlier_alpha=0.3, outlier_size=0.5)
     + gg.theme(axis_text_x=gg.element_text(angle=90, hjust=0.5, vjust=1))
     + gg.labs(x=None, y="log fold change")
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_12_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_10_0.png)
 
-    <ggplot: (8730623702851)>
+    <ggplot: (8727579323573)>
 
 ```python
 p = (
@@ -476,9 +485,9 @@ p = (
 p
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_13_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_11_0.png)
 
-    <ggplot: (8730613971318)>
+    <ggplot: (8727487816701)>
 
 ```python
 (
@@ -493,9 +502,9 @@ p
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_14_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_12_0.png)
 
-    <ggplot: (8730613967008)>
+    <ggplot: (8727496995482)>
 
 ```python
 d = data.groupby(["lineage", "hugo_symbol"]).mean().reset_index(drop=False)
@@ -510,9 +519,180 @@ d["lineage"] = stringr.str_wrap(d["lineage"], width=10)
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_15_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_13_0.png)
 
-    <ggplot: (8730612358867)>
+    <ggplot: (8727486981852)>
+
+```python
+data.head()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>sgrna</th>
+      <th>replicate_id</th>
+      <th>lfc</th>
+      <th>pdna_batch</th>
+      <th>passes_qc</th>
+      <th>depmap_id</th>
+      <th>primary_or_metastasis</th>
+      <th>lineage</th>
+      <th>lineage_subtype</th>
+      <th>kras_mutation</th>
+      <th>...</th>
+      <th>gene_cn</th>
+      <th>n_muts</th>
+      <th>any_deleterious</th>
+      <th>variant_classification</th>
+      <th>is_deleterious</th>
+      <th>is_tcga_hotspot</th>
+      <th>is_cosmic_hotspot</th>
+      <th>mutated_at_guide_location</th>
+      <th>rna_expr</th>
+      <th>gene_cn_z</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>42-mg-ba-311cas9_repa_p6_batch3</td>
+      <td>-0.005539</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000323</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
+      <td>...</td>
+      <td>1.192006</td>
+      <td>0</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>0.310340</td>
+      <td>-1.139430</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>42-mg-ba-311cas9_repb_p6_batch3</td>
+      <td>0.011213</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000323</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
+      <td>...</td>
+      <td>1.192006</td>
+      <td>0</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>0.310340</td>
+      <td>-1.139430</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>8-mg-ba-311cas9_repa_p5_batch3</td>
+      <td>-0.267030</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000137</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
+      <td>...</td>
+      <td>1.653166</td>
+      <td>0</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>1.891419</td>
+      <td>-0.252396</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>8-mg-ba-311cas9_repb_p5_batch3</td>
+      <td>0.340474</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000137</td>
+      <td>Primary</td>
+      <td>central_nervous_system</td>
+      <td>glioma</td>
+      <td>WT</td>
+      <td>...</td>
+      <td>1.653166</td>
+      <td>0</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>1.891419</td>
+      <td>-0.252396</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>9505bik-311cas9-repa-p6_batch3</td>
+      <td>0.584099</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-001999</td>
+      <td>NaN</td>
+      <td>pancreas</td>
+      <td>exocrine</td>
+      <td>G12V</td>
+      <td>...</td>
+      <td>1.128780</td>
+      <td>0</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>0.985500</td>
+      <td>-1.261044</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 28 columns</p>
+</div>
 
 ## Modeling
 
@@ -545,12 +725,12 @@ with pm.Model() as m1:
 pm.model_to_graphviz(m1)
 ```
 
-![svg](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_18_0.svg)
+![svg](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_17_0.svg)
 
 ```python
 m1_cache_dir = pymc3_cache_dir / "subset_speclet_m1"
 
-m1_sampling_results = pymc3_sampling_procedure(
+m1_sampling_results = pmhelp.pymc3_sampling_procedure(
     model=m1,
     num_mcmc=1000,
     tune=1000,
@@ -565,7 +745,7 @@ m1_sampling_results = pymc3_sampling_procedure(
     Loading cached trace and posterior sample...
 
 ```python
-m1_az = samples_to_arviz(model=m1, res=m1_sampling_results)
+m1_az = pmhelp.samples_to_arviz(model=m1, res=m1_sampling_results)
 ```
 
     arviz.data.io_pymc3 - WARNING - posterior predictive variable y's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
@@ -575,38 +755,52 @@ az.plot_trace(m1_az, var_names="α_g", compact=True)
 plt.show()
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_21_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_20_0.png)
 
-### Model 2. Hierarchical model with a varying intercept per gene and a varying intercept per cell line
+### Model 2. Add a layer for gene above sgRNA
 
 $
 y \sim \mathcal{N}(\mu, \sigma) \\
-\mu = \alpha_{g} + \beta_{l}\\
-\alpha_g \sim \mathcal{N}(\mu_\alpha, \sigma_\alpha) \\
-\mu_\alpha \sim \mathcal{N}(0, 2) \quad \sigma_\alpha \sim \text{HalfNormal}(0, 5) \\
-\beta_c \sim \mathcal{N}(\mu_\beta, \sigma_\beta) \\
-\mu_\beta \sim \mathcal{N}(0, 2) \quad \sigma_\beta \sim \text{HalfNormal}(0, 5) \\
-\sigma \sim \text{HalfNormal}(0, 5)
+\mu = \alpha_s \\
+\quad \alpha_s \sim \mathcal{N}(\mu_\alpha, \sigma_\alpha) \\
+\qquad \mu_\alpha = g_\alpha \\
+\qquad \quad g_\alpha \sim \mathcal{N}(\mu_{g_\alpha}, \sigma_{g_\alpha}) \\
+\qquad \qquad \mu_{g_\alpha} \sim \mathcal{N}(0, 5) \\
+\qquad \qquad \sigma_{g_\alpha} \sim \text{Exp}(1) \\
+\qquad \sigma_\alpha \sim \text{Exp}(\sigma_{\sigma_\alpha}) \\
+\qquad \quad \sigma_{\sigma_\alpha} \sim \text{Exp}(1) \\
+\sigma \sim \text{HalfNormal}(3)
 $
 
 ```python
-gene_idx = get_indices(data, "hugo_symbol")
-cellline_idx = get_indices(data, "depmap_id")
+num_sgrnas = data["sgrna"].nunique()
 num_genes = data["hugo_symbol"].nunique()
-num_celllines = data["depmap_id"].nunique()
+print(f"{num_sgrnas} sgRNAs from {num_genes} genes")
 
+sgrna_idx = get_indices(data, "sgrna")
+
+sgrna_to_gene_map = data[["sgrna", "hugo_symbol"]].drop_duplicates()
+gene_idx = get_indices(sgrna_to_gene_map, "hugo_symbol")
+```
+
+    103 sgRNAs from 26 genes
+
+```python
 with pm.Model() as m2:
-    μ_α = pm.Normal("μ_α", -0.5, 1.0)
-    σ_α = pm.HalfNormal("σ_α", 2.0)
-    μ_β = pm.Normal("μ_β", 0, 1.0)
-    σ_β = pm.HalfNormal("σ_β", 2.0)
+    μ_g = pm.Normal("μ_g", 0, 5)
+    σ_g = pm.Exponential("σ_g", 1)
 
-    α_g = pm.Normal("α_g", μ_α, σ_α, shape=num_genes)
-    β_c = pm.Normal("β_c", μ_β, σ_β, shape=num_celllines)
-    μ = pm.Deterministic("μ", α_g[gene_idx] + β_c[cellline_idx])
-    σ = pm.HalfNormal("σ", 2.0)
+    g_s = pm.Normal("g_s", μ_g, σ_g, shape=num_genes)
 
-    y = pm.Normal("y", mu=μ, sigma=σ, observed=data.lfc)
+    μ_α_s = pm.Deterministic("μ_α_s", g_s[gene_idx])
+    σ_α_s = pm.Exponential("σ_α_s", 1)
+
+    α_s = pm.Normal("α_s", μ_α_s, σ_α_s, shape=num_sgrnas)
+
+    μ = pm.Deterministic("μ", α_s[sgrna_idx])
+    σ = pm.HalfNormal("σ", 5)
+
+    y = pm.Normal("y", μ, σ, observed=data.lfc)
 ```
 
 ```python
@@ -618,132 +812,389 @@ pm.model_to_graphviz(m2)
 ```python
 m2_cache_dir = pymc3_cache_dir / "subset_speclet_m2"
 
-m2_sampling_results = pymc3_sampling_procedure(
+m2_sampling_results = pmhelp.pymc3_sampling_procedure(
     model=m2,
-    num_mcmc=1000,
-    tune=1000,
+    num_mcmc=2000,
+    tune=4000,
     chains=2,
     cores=2,
     random_seed=RANDOM_SEED,
     cache_dir=pymc3_cache_dir / m2_cache_dir,
-    force=True,
-    sample_kwargs={"init": "advi+adapt_diag", "n_init": 40000},
+    force=False,
+    sample_kwargs={"init": "advi+adapt_diag", "n_init": 40000, "target_accept": 0.9},
 )
 ```
 
-    Auto-assigning NUTS sampler...
-    Initializing NUTS using advi+adapt_diag...
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='28462' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  71.16% [28462/40000 01:09<00:28 Average Loss = 44,654]
-</div>
-
-    Convergence achieved at 28500
-    Interrupted at 28,499 [71%]: Average Loss = 56,428
-    Multiprocess sampling (2 chains in 2 jobs)
-    NUTS: [σ, β_c, α_g, σ_β, μ_β, σ_α, μ_α]
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 01:11<00:00 Sampling 2 chains, 0 divergences]
-</div>
-
-    Sampling 2 chains for 1_000 tune and 1_000 draw iterations (2_000 + 2_000 draws total) took 72 seconds.
-    The rhat statistic is larger than 1.4 for some parameters. The sampler did not converge.
-    The estimated number of effective samples is smaller than 200 for some parameters.
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='1000' class='' max='1000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [1000/1000 00:05<00:00]
-</div>
-
-    Caching trace and posterior sample...
+    Loading cached trace and posterior sample...
 
 ```python
-m2_az = samples_to_arviz(model=m2, res=m2_sampling_results)
+m2_az = pmhelp.samples_to_arviz(model=m2, res=m2_sampling_results)
 ```
 
     arviz.data.io_pymc3 - WARNING - posterior predictive variable y's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
 
 ```python
-az.plot_trace(m2_az, var_names=["α_g", "β_c"], compact=True)
+az.plot_trace(m2_az, var_names=["μ_g", "σ_g", "g_s", "α_s"], compact=True)
 plt.show()
 ```
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_27_0.png)
 
 ```python
-
+az.summary(m2_az, var_names=["μ_g", "σ_g", "σ_α_s"])
 ```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>μ_g</th>
+      <td>-0.109</td>
+      <td>0.049</td>
+      <td>-0.203</td>
+      <td>-0.020</td>
+      <td>0.001</td>
+      <td>0.0</td>
+      <td>6430.0</td>
+      <td>5641.0</td>
+      <td>6415.0</td>
+      <td>3021.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>σ_g</th>
+      <td>0.221</td>
+      <td>0.043</td>
+      <td>0.145</td>
+      <td>0.302</td>
+      <td>0.001</td>
+      <td>0.0</td>
+      <td>4227.0</td>
+      <td>4212.0</td>
+      <td>4158.0</td>
+      <td>3118.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>σ_α_s</th>
+      <td>0.228</td>
+      <td>0.019</td>
+      <td>0.194</td>
+      <td>0.264</td>
+      <td>0.000</td>
+      <td>0.0</td>
+      <td>5461.0</td>
+      <td>5341.0</td>
+      <td>5560.0</td>
+      <td>3564.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ```python
+g_alpha_post = pd.DataFrame(np.asarray(m2_az.posterior["g_s"]).reshape(-1, num_genes))
+ordered_genes = (
+    sgrna_to_gene_map.sort_values("hugo_symbol").hugo_symbol.drop_duplicates().to_list()
+)
+g_alpha_post.columns = ordered_genes
+g_alpha_post = g_alpha_post.melt(var_name="hugo_symbol", value_name="value")
 
+g_alpha_summary = az.summary(m2_az, var_names="g_s", kind="stats", hdi_prob=0.89)
+g_alpha_summary["hugo_symbol"] = ordered_genes
+
+point_color = "#FA6A48"
+(
+    gg.ggplot(g_alpha_post.sample(frac=0.25), gg.aes(x="hugo_symbol", y="value"))
+    + gg.geom_violin(color=None, fill="grey", alpha=0.5)
+    + gg.geom_linerange(
+        gg.aes(x="hugo_symbol", y="mean", ymin="hdi_5.5%", ymax="hdi_94.5%"),
+        data=g_alpha_summary,
+        color=point_color,
+    )
+    + gg.geom_point(
+        gg.aes(x="hugo_symbol", y="mean"), data=g_alpha_summary, color="black"
+    )
+    + gg.scale_y_continuous(expand=(0.02, 0, 0.02, 0))
+    + gg.theme(axis_text_x=gg.element_text(angle=90))
+    + gg.labs(x=None, y=r"$g_\alpha$", title="Posterior estimates for gene value")
+)
 ```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_29_0.png)
+
+    <ggplot: (8727265671349)>
 
 ```python
+alpha_s_summary = az.summary(m2_az, var_names="α_s", kind="stats", hdi_prob=0.89)
+alpha_s_summary["sgrna"] = sgrna_to_gene_map.sgrna.to_list()
+alpha_s_summary["hugo_symbol"] = sgrna_to_gene_map.hugo_symbol.to_list()
 
+(
+    gg.ggplot(alpha_s_summary, gg.aes(x="hugo_symbol"))
+    + gg.geom_hline(yintercept=0, color="black", alpha=0.3)
+    + gg.geom_linerange(gg.aes(ymin="hdi_5.5%", ymax="hdi_94.5%", color="sgrna"))
+    + gg.geom_point(gg.aes(y="mean", color="sgrna"), size=2.5, alpha=0.8)
+    + gg.geom_point(
+        gg.aes(x="hugo_symbol", y="mean"),
+        data=g_alpha_summary,
+        color="black",
+        shape="+",
+        size=3,
+    )
+    + gg.scale_color_discrete(guide=None)
+    + gg.theme(figure_size=(10, 5), axis_text_x=gg.element_text(angle=90))
+    + gg.labs(x=None, y=r"$\alpha_s$", title="Posterior estimates for sgRNA values")
+)
 ```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_30_0.png)
+
+    <ggplot: (8727264812704)>
 
 ```python
-
+ppc_m2_arry = np.asarray(m2_az.posterior_predictive["y"]).reshape(-1, data.shape[0])
+ppc_m2_summary = pd.DataFrame(
+    az.hdi(ppc_m2_arry, hdi_prob=0.89), columns=("hdi_5.5%", "hdi_94.5%")
+)
+ppc_m2_summary["mean"] = np.mean(ppc_m2_arry, axis=0)
+ppc_m2_summary = ppc_m2_summary.reset_index(drop=True).merge(
+    data[["sgrna", "hugo_symbol", "lfc"]], left_index=True, right_index=True
+)
 ```
+
+    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/arviz/stats/stats.py:484: FutureWarning: hdi currently interprets 2d data as (draw, shape) but this will change in a future release to (chain, draw) for coherence with other functions
 
 ```python
-
+(
+    gg.ggplot(ppc_m2_summary, gg.aes(x="sgrna"))
+    + gg.facet_wrap("hugo_symbol", scales="free", ncol=4)
+    + gg.geom_boxplot(gg.aes(y="mean"), outlier_alpha=0)
+    + gg.theme(
+        axis_text_x=gg.element_blank(),
+        figure_size=(8, 10),
+        subplots_adjust={"hspace": 0.4, "wspace": 0.6},
+        strip_text=gg.element_text(weight="bold"),
+    )
+    + gg.labs(x="sgRNA", y="mean posterior prediction", title="Posteior predictions")
+)
 ```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_32_0.png)
+
+    <ggplot: (8727486895336)>
 
 ```python
-
+ppc_m2_summary = ppc_m2_summary.assign(error=lambda d: d["lfc"] - d["mean"])
+(
+    gg.ggplot(ppc_m2_summary, gg.aes(x="hugo_symbol", y="error"))
+    + gg.geom_hline(yintercept=0)
+    + gg.geom_jitter(
+        gg.aes(color="abs(error)"), width=0.35, height=0, size=0.5, alpha=0.3
+    )
+    + gg.scale_color_distiller(type="seq", palette="RdPu", direction=1)
+    + gg.theme(axis_text_x=gg.element_text(rotation=90))
+    + gg.labs(
+        x=None,
+        y="true - predicted LFC",
+        title="Posterior prediction error",
+        color="error",
+    )
+)
 ```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_33_0.png)
+
+    <ggplot: (8727262118843)>
 
 ```python
+genes_with_large_error = ["KRAS", "MDM2", "PTK2", "TP53"]
 
+for col in ["n_muts", "any_deleterious", "kras_mutation"]:
+    ppc_m2_summary[col] = data[col].values
+
+ppc2_m2_summary_mutations = ppc_m2_summary[
+    ppc_m2_summary.hugo_symbol.isin(genes_with_large_error)
+].reset_index()
+ppc2_m2_summary_mutations["is_mutated"] = ppc2_m2_summary_mutations["n_muts"].values > 0
+ppc2_m2_summary_mutations["sgrna_idx"] = get_indices(ppc2_m2_summary_mutations, "sgrna")
+ppc2_m2_summary_mutations.head(5)
 ```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>index</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mean</th>
+      <th>sgrna</th>
+      <th>hugo_symbol</th>
+      <th>lfc</th>
+      <th>error</th>
+      <th>n_muts</th>
+      <th>any_deleterious</th>
+      <th>kras_mutation</th>
+      <th>is_mutated</th>
+      <th>sgrna_idx</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>22737</td>
+      <td>-1.706223</td>
+      <td>-0.146976</td>
+      <td>-0.945101</td>
+      <td>AATTACTACTTGCTTCCTGT</td>
+      <td>KRAS</td>
+      <td>-0.491495</td>
+      <td>0.453606</td>
+      <td>0</td>
+      <td>False</td>
+      <td>WT</td>
+      <td>False</td>
+      <td>39</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>22738</td>
+      <td>-1.661466</td>
+      <td>-0.151136</td>
+      <td>-0.947104</td>
+      <td>AATTACTACTTGCTTCCTGT</td>
+      <td>KRAS</td>
+      <td>-0.183915</td>
+      <td>0.763189</td>
+      <td>0</td>
+      <td>False</td>
+      <td>WT</td>
+      <td>False</td>
+      <td>39</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>22739</td>
+      <td>-1.660307</td>
+      <td>-0.164863</td>
+      <td>-0.936319</td>
+      <td>AATTACTACTTGCTTCCTGT</td>
+      <td>KRAS</td>
+      <td>-0.044223</td>
+      <td>0.892096</td>
+      <td>0</td>
+      <td>False</td>
+      <td>WT</td>
+      <td>False</td>
+      <td>39</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>22740</td>
+      <td>-1.634877</td>
+      <td>-0.131291</td>
+      <td>-0.927895</td>
+      <td>AATTACTACTTGCTTCCTGT</td>
+      <td>KRAS</td>
+      <td>-0.371057</td>
+      <td>0.556838</td>
+      <td>0</td>
+      <td>False</td>
+      <td>WT</td>
+      <td>False</td>
+      <td>39</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>22741</td>
+      <td>-1.722477</td>
+      <td>-0.186996</td>
+      <td>-0.927978</td>
+      <td>AATTACTACTTGCTTCCTGT</td>
+      <td>KRAS</td>
+      <td>-2.635973</td>
+      <td>-1.707994</td>
+      <td>1</td>
+      <td>False</td>
+      <td>G12V</td>
+      <td>True</td>
+      <td>39</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ```python
-
+(
+    gg.ggplot(ppc2_m2_summary_mutations, gg.aes(x="sgrna_idx", y="error"))
+    + gg.facet_wrap("hugo_symbol", scales="free")
+    + gg.geom_jitter(gg.aes(color="is_mutated", alpha="is_mutated"), size=0.5)
+    + gg.scale_color_manual(values=["#429DD6", "#B93174"])
+    + gg.scale_alpha_manual(
+        values=[0.5, 0.8], guide=gg.guide_legend(override_aes={"size": 2, "alpha": 1})
+    )
+    + gg.theme(
+        subplots_adjust={"hspace": 0.4, "wspace": 0.6},
+        strip_text=gg.element_text(weight="bold"),
+    )
+    + gg.labs(
+        x="sgRNA ID",
+        y="prediction error",
+        title="Errors associated with mutations",
+        color="gene is\nmutated",
+        alpha="gene is\nmutated",
+    )
+)
 ```
 
-```python
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_35_0.png)
 
-```
+    <ggplot: (8727263750666)>
 
 ---
 
@@ -752,14 +1203,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 4.11 minutes
+    execution time: 1.55 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-01-13
+    Last updated: 2021-01-15
 
     Python implementation: CPython
     Python version       : 3.8.6
@@ -773,20 +1224,16 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-a-16-171.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-162.o2.rc.hms.harvard.edu
 
-    Git branch: subset-data
+    Git branch: data-subset-model
 
     re        : 2.2.1
-    matplotlib: 3.3.3
     pymc3     : 3.9.3
-    plotnine  : 0.7.1
-    pandas    : 1.2.0
     seaborn   : 0.11.1
+    pandas    : 1.2.0
     theano    : 1.0.5
     arviz     : 0.10.0
+    matplotlib: 3.3.3
+    plotnine  : 0.7.1
     numpy     : 1.19.5
-
-```python
-
-```
