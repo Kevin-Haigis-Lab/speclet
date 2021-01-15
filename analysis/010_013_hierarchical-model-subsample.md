@@ -465,7 +465,7 @@ data.columns
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_10_0.png)
 
-    <ggplot: (8727579323573)>
+    <ggplot: (8734358194339)>
 
 ```python
 p = (
@@ -487,7 +487,7 @@ p
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_11_0.png)
 
-    <ggplot: (8727487816701)>
+    <ggplot: (8734358194279)>
 
 ```python
 (
@@ -504,7 +504,7 @@ p
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_12_0.png)
 
-    <ggplot: (8727496995482)>
+    <ggplot: (8734343327413)>
 
 ```python
 d = data.groupby(["lineage", "hugo_symbol"]).mean().reset_index(drop=False)
@@ -521,7 +521,7 @@ d["lineage"] = stringr.str_wrap(d["lineage"], width=10)
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_13_0.png)
 
-    <ggplot: (8727486981852)>
+    <ggplot: (8734343362473)>
 
 ```python
 data.head()
@@ -694,6 +694,8 @@ data.head()
 <p>5 rows × 28 columns</p>
 </div>
 
+---
+
 ## Modeling
 
 ### Model 1. Hierarchical model by gene with no other variables
@@ -757,19 +759,19 @@ plt.show()
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_20_0.png)
 
+---
+
 ### Model 2. Add a layer for gene above sgRNA
 
 $
 y \sim \mathcal{N}(\mu, \sigma) \\
 \mu = \alpha_s \\
-\quad \alpha_s \sim \mathcal{N}(\mu_\alpha, \sigma_\alpha) \\
-\qquad \mu_\alpha = g_\alpha \\
-\qquad \quad g_\alpha \sim \mathcal{N}(\mu_{g_\alpha}, \sigma_{g_\alpha}) \\
-\qquad \qquad \mu_{g_\alpha} \sim \mathcal{N}(0, 5) \\
-\qquad \qquad \sigma_{g_\alpha} \sim \text{Exp}(1) \\
-\qquad \sigma_\alpha \sim \text{Exp}(\sigma_{\sigma_\alpha}) \\
-\qquad \quad \sigma_{\sigma_\alpha} \sim \text{Exp}(1) \\
-\sigma \sim \text{HalfNormal}(3)
+\quad \alpha_s \sim \mathcal{N}(\mu_{\alpha_s}, \sigma_{\alpha_s}) \\
+\qquad \mu_{\alpha_s} = g_s \\
+\qquad \quad g_s \sim \mathcal{N}(\mu_g, \sigma_g) \\
+\qquad \qquad \mu_g \sim \mathcal{N}(0, 5) \quad \sigma_g \sim \text{Exp}(1) \\
+\qquad \sigma_\alpha \sim \text{Exp}(1) \\
+\sigma \sim \text{HalfNormal}(5)
 $
 
 ```python
@@ -953,7 +955,7 @@ point_color = "#FA6A48"
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_29_0.png)
 
-    <ggplot: (8727265671349)>
+    <ggplot: (8734358256927)>
 
 ```python
 alpha_s_summary = az.summary(m2_az, var_names="α_s", kind="stats", hdi_prob=0.89)
@@ -980,7 +982,7 @@ alpha_s_summary["hugo_symbol"] = sgrna_to_gene_map.hugo_symbol.to_list()
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_30_0.png)
 
-    <ggplot: (8727264812704)>
+    <ggplot: (8734358769532)>
 
 ```python
 ppc_m2_arry = np.asarray(m2_az.posterior_predictive["y"]).reshape(-1, data.shape[0])
@@ -1012,7 +1014,7 @@ ppc_m2_summary = ppc_m2_summary.reset_index(drop=True).merge(
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_32_0.png)
 
-    <ggplot: (8727486895336)>
+    <ggplot: (8734125331803)>
 
 ```python
 ppc_m2_summary = ppc_m2_summary.assign(error=lambda d: d["lfc"] - d["mean"])
@@ -1035,7 +1037,7 @@ ppc_m2_summary = ppc_m2_summary.assign(error=lambda d: d["lfc"] - d["mean"])
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_33_0.png)
 
-    <ggplot: (8727262118843)>
+    <ggplot: (8734125550514)>
 
 ```python
 genes_with_large_error = ["KRAS", "MDM2", "PTK2", "TP53"]
@@ -1194,7 +1196,114 @@ ppc2_m2_summary_mutations.head(5)
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_35_0.png)
 
-    <ggplot: (8727263750666)>
+    <ggplot: (8734127378092)>
+
+---
+
+### Model 3. Add cell line varying intercept to Model 2
+
+$
+y \sim \mathcal{N}(\mu, \sigma) \\
+\mu = \alpha_s + \beta_c\\
+\quad \alpha_s \sim \mathcal{N}(\mu_{\alpha_s}, \sigma_{\alpha_s}) \\
+\qquad \mu_{\alpha_s} = g_s \\
+\qquad \quad g_s \sim \mathcal{N}(\mu_g, \sigma_g) \\
+\qquad \qquad \mu_g \sim \mathcal{N}(0, 5) \quad \sigma_g \sim \text{Exp}(1) \\
+\qquad \sigma_\alpha \sim \text{Exp}(1) \\
+\quad \beta_c \sim \mathcal{N}(\mu_{\beta_c}, \sigma_{\beta_c}) \\
+\qquad \mu_{\beta_c} \sim \mathcal{N}(0, 5) \quad \sigma_{\beta_c} \sim \text{Exp}(1) \\
+\sigma \sim \text{HalfNormal}(5)
+$
+
+```python
+cell_line_idx = get_indices(data, "depmap_id")
+num_cell_lines = data.depmap_id.nunique()
+print(f"{num_cell_lines} cell lines")
+```
+
+    258 cell lines
+
+```python
+with pm.Model() as m3:
+    μ_g = pm.Normal("μ_g", 0, 2)
+    σ_g = pm.Exponential("σ_g", 1)
+
+    g_s = pm.Normal("g_s", μ_g, σ_g, shape=num_genes)
+
+    μ_β_c = pm.Normal("μ_β_c", 0, 1)
+    σ_β_c = pm.Exponential("σ_β_c", 0.5)
+    μ_α_s = pm.Deterministic("μ_α_s", g_s[gene_idx])
+    σ_α_s = pm.Exponential("σ_α_s", 1)
+
+    β_c = pm.Normal("β_c", μ_β_c, σ_β_c, shape=num_cell_lines)
+    α_s = pm.Normal("α_s", μ_α_s, σ_α_s, shape=num_sgrnas)
+
+    μ = pm.Deterministic("μ", α_s[sgrna_idx] + β_c[cell_line_idx])
+    σ = pm.HalfNormal("σ", 5)
+
+    y = pm.Normal("y", μ, σ, observed=data.lfc)
+```
+
+```python
+pm.model_to_graphviz(m3)
+```
+
+![svg](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_39_0.svg)
+
+```python
+m3_cache_dir = pymc3_cache_dir / "subset_speclet_m3"
+
+m3_sampling_results = pmhelp.pymc3_sampling_procedure(
+    model=m3,
+    num_mcmc=2000,
+    tune=4000,
+    chains=2,
+    cores=2,
+    random_seed=RANDOM_SEED,
+    cache_dir=pymc3_cache_dir / m3_cache_dir,
+    force=False,
+    sample_kwargs={"init": "advi+adapt_diag", "n_init": 40000, "target_accept": 0.9},
+)
+```
+
+    Loading cached trace and posterior sample...
+
+```python
+m3_az = pmhelp.samples_to_arviz(model=m3, res=m3_sampling_results)
+```
+
+    arviz.data.io_pymc3 - WARNING - posterior predictive variable y's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
+
+```python
+az.plot_trace(m3_az, var_names=["α_s", "β_c"], compact=True)
+plt.show()
+```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_42_0.png)
+
+> This model is currently not sampling properly.
+> This is most likely due to non-identifiability with the two varying intercepts.
+> I will revist trying to add in cell line in later models.
+
+---
+
+### Model 4. Add mutation covariate to Model 2
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
 
 ---
 
@@ -1203,7 +1312,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 1.55 minutes
+    execution time: 2.21 minutes
 
 ```python
 %load_ext watermark
@@ -1228,12 +1337,12 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Git branch: data-subset-model
 
-    re        : 2.2.1
-    pymc3     : 3.9.3
-    seaborn   : 0.11.1
-    pandas    : 1.2.0
-    theano    : 1.0.5
-    arviz     : 0.10.0
-    matplotlib: 3.3.3
     plotnine  : 0.7.1
     numpy     : 1.19.5
+    pymc3     : 3.9.3
+    arviz     : 0.10.0
+    matplotlib: 3.3.3
+    theano    : 1.0.5
+    pandas    : 1.2.0
+    seaborn   : 0.11.1
+    re        : 2.2.1
