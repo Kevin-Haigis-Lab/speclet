@@ -33,7 +33,7 @@
 <text text-anchor="middle" x="57.98" y="-393.64" font-family="Times,serif" font-size="14.00">Exponential</text>
 </g>
 <!-- α_s -->
-<g id="node6" class="node">
+<g id="node7" class="node">
 <title>α_s</title>
 <ellipse fill="none" stroke="black" cx="176.98" cy="-301.38" rx="41.94" ry="37.45"/>
 <text text-anchor="middle" x="176.98" y="-312.68" font-family="Times,serif" font-size="14.00">α_s</text>
@@ -41,7 +41,7 @@
 <text text-anchor="middle" x="176.98" y="-282.68" font-family="Times,serif" font-size="14.00">Normal</text>
 </g>
 <!-- σ_α_s&#45;&gt;α_s -->
-<g id="edge4" class="edge">
+<g id="edge5" class="edge">
 <title>σ_α_s&#45;&gt;α_s</title>
 <path fill="none" stroke="black" d="M90.82,-381.28C106.3,-367.09 124.83,-350.13 140.74,-335.57"/>
 <polygon fill="black" stroke="black" points="143.29,-337.97 148.31,-328.64 138.57,-332.81 143.29,-337.97"/>
@@ -105,7 +105,7 @@
 <polygon fill="black" stroke="black" points="217.66,-107.86 207.9,-103.73 212.95,-113.05 217.66,-107.86"/>
 </g>
 <!-- μ_α_s -->
-<g id="node7" class="node">
+<g id="node6" class="node">
 <title>μ_α_s</title>
 <polygon fill="none" stroke="black" points="224.48,-438.84 133.48,-438.84 133.48,-385.84 224.48,-385.84 224.48,-438.84"/>
 <text text-anchor="middle" x="178.98" y="-423.64" font-family="Times,serif" font-size="14.00">μ_α_s</text>
@@ -117,6 +117,12 @@
 <title>g_s&#45;&gt;μ_α_s</title>
 <path fill="none" stroke="black" d="M178.98,-488.63C178.98,-475.98 178.98,-461.82 178.98,-449.23"/>
 <polygon fill="black" stroke="black" points="182.48,-449.09 178.98,-439.09 175.48,-449.09 182.48,-449.09"/>
+</g>
+<!-- μ_α_s&#45;&gt;α_s -->
+<g id="edge4" class="edge">
+<title>μ_α_s&#45;&gt;α_s</title>
+<path fill="none" stroke="black" d="M178.51,-385.79C178.31,-374.88 178.07,-361.79 177.84,-349.25"/>
+<polygon fill="black" stroke="black" points="181.34,-348.84 177.65,-338.91 174.34,-348.97 181.34,-348.84"/>
 </g>
 <!-- μ -->
 <g id="node8" class="node">
@@ -131,12 +137,6 @@
 <title>α_s&#45;&gt;μ</title>
 <path fill="none" stroke="black" d="M176.98,-263.73C176.98,-251.07 176.98,-236.92 176.98,-224.32"/>
 <polygon fill="black" stroke="black" points="180.48,-224.18 176.98,-214.18 173.48,-224.18 180.48,-224.18"/>
-</g>
-<!-- μ_α_s&#45;&gt;α_s -->
-<g id="edge5" class="edge">
-<title>μ_α_s&#45;&gt;α_s</title>
-<path fill="none" stroke="black" d="M178.51,-385.79C178.31,-374.88 178.07,-361.79 177.84,-349.25"/>
-<polygon fill="black" stroke="black" points="181.34,-348.84 177.65,-338.91 174.34,-348.97 181.34,-348.84"/>
 </g>
 <!-- μ&#45;&gt;y -->
 <g id="edge7" class="edge">

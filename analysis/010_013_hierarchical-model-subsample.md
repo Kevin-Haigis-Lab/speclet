@@ -39,8 +39,6 @@ np.random.seed(RANDOM_SEED)
 pymc3_cache_dir = Path("pymc3_model_cache")
 ```
 
-    WARNING (theano.configdefaults): install mkl with `conda install mkl-service`: No module named 'mkl'
-
 ## Data preparation
 
 ```python
@@ -455,7 +453,7 @@ data.columns
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_10_0.png)
 
-    <ggplot: (8779517303712)>
+    <ggplot: (8742749110821)>
 
 ```python
 p = (
@@ -477,7 +475,7 @@ p
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_11_0.png)
 
-    <ggplot: (8779434195824)>
+    <ggplot: (8742740092525)>
 
 The general trend is that gene CN is negatively correlated with logFC, but there is substantial variability per gene.
 
@@ -496,7 +494,7 @@ The general trend is that gene CN is negatively correlated with logFC, but there
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_13_0.png)
 
-    <ggplot: (8779434208449)>
+    <ggplot: (8742740092666)>
 
 The varying effects per gene are more striking than the varying efferects per lineage.
 The effect of lineage/cell line may need to be regulated with relatively strict priors.
@@ -516,7 +514,7 @@ d["lineage"] = stringr.str_wrap(d["lineage"], width=10)
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_15_0.png)
 
-    <ggplot: (8779423167287)>
+    <ggplot: (8742738033252)>
 
 ```python
 data.head()
@@ -746,7 +744,7 @@ m1_sampling_results = pmhelp.pymc3_sampling_procedure(
 m1_az = pmhelp.samples_to_arviz(model=m1, res=m1_sampling_results)
 ```
 
-    arviz.data.io_pymc3 - WARNING - posterior predictive variable y's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
+    posterior predictive variable y's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
 
 It looks like the effects of the genes are confidently estimated with most of the posterior distributions lying far from 0.
 
@@ -1199,7 +1197,7 @@ ppc_m1_summary = logfc_model_ppc_dataframe(
 ppc_m1_summary.head()
 ```
 
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/arviz/stats/stats.py:484: FutureWarning: hdi currently interprets 2d data as (draw, shape) but this will change in a future release to (chain, draw) for coherence with other functions
+    /home/jc604/.conda/envs/speclet/lib/python3.9/site-packages/arviz/stats/stats.py:493: FutureWarning: hdi currently interprets 2d data as (draw, shape) but this will change in a future release to (chain, draw) for coherence with other functions
 
 <div>
 <style scoped>
@@ -1307,7 +1305,7 @@ p
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_28_0.png)
 
-    <ggplot: (8779201247428)>
+    <ggplot: (8742516726179)>
 
 But we can see there is actually a lot of error, and some genes have far greater prediction error than others.
 This is not unexpected as there are still many factors to add to the model.
@@ -1318,7 +1316,7 @@ This is not unexpected as there are still many factors to add to the model.
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_30_0.png)
 
-    <ggplot: (8779201776788)>
+    <ggplot: (8742516695312)>
 
 Importantly, we can see that there are differing levels of error per sgRNA for many genes.
 
@@ -1348,7 +1346,7 @@ Importantly, we can see that there are differing levels of error per sgRNA for m
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_32_0.png)
 
-    <ggplot: (8779201086118)>
+    <ggplot: (8742515709838)>
 
 ```python
 (
@@ -1364,7 +1362,7 @@ Importantly, we can see that there are differing levels of error per sgRNA for m
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_33_0.png)
 
-    <ggplot: (8779489965526)>
+    <ggplot: (8742517253584)>
 
 ---
 
@@ -1444,7 +1442,7 @@ m2_sampling_results = pmhelp.pymc3_sampling_procedure(
 m2_az = pmhelp.samples_to_arviz(model=m2, res=m2_sampling_results)
 ```
 
-    arviz.data.io_pymc3 - WARNING - posterior predictive variable y's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
+    posterior predictive variable y's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
 
 The distributions for the genes are much wider, now, but this is probably a more accurate representation of the truth by taking into account per-sgRNA variability.
 
@@ -1568,7 +1566,7 @@ point_color = "#FA6A48"
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_43_0.png)
 
-    <ggplot: (8779433427556)>
+    <ggplot: (8742516454440)>
 
 We see that the gene averages ("x") lie close to the middle of the estimated averages for their sgRNAs (dots), though there is regularization towards the mean of the genes $\mu_g$ (blue line with 89% HDI in the dashed line).
 
@@ -1612,7 +1610,7 @@ mu_g_avg = az.summary(m2_az, var_names=["μ_g"], hdi_prob=0.89)
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_45_0.png)
 
-    <ggplot: (8779201475458)>
+    <ggplot: (8742733065855)>
 
 ```python
 ppc_m2_summary = logfc_model_ppc_dataframe(
@@ -1621,7 +1619,7 @@ ppc_m2_summary = logfc_model_ppc_dataframe(
 ppc_m2_summary.head()
 ```
 
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/arviz/stats/stats.py:484: FutureWarning: hdi currently interprets 2d data as (draw, shape) but this will change in a future release to (chain, draw) for coherence with other functions
+    /home/jc604/.conda/envs/speclet/lib/python3.9/site-packages/arviz/stats/stats.py:493: FutureWarning: hdi currently interprets 2d data as (draw, shape) but this will change in a future release to (chain, draw) for coherence with other functions
 
 <div>
 <style scoped>
@@ -1737,7 +1735,7 @@ ppc_m2_summary.head()
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_47_0.png)
 
-    <ggplot: (8779197922320)>
+    <ggplot: (8742737619709)>
 
 The prediction error is still quite substantial, particularly around genes that are frequently mutated suchs as *KRAS* and *TP53*.
 
@@ -1761,7 +1759,7 @@ The prediction error is still quite substantial, particularly around genes that 
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_49_0.png)
 
-    <ggplot: (8779433614439)>
+    <ggplot: (8742733039303)>
 
 Since we modeled the sgRNA variability, the errors for each sgRNA are now normally distributed.
 The plot below specifically focuses on 4 genes that had a high degree of difference in error distributions among its sgRNAs.
@@ -1786,7 +1784,7 @@ plot_data = ppc_m2_summary[ppc_m2_summary.hugo_symbol.isin(genes_with_sgrna_erro
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_51_0.png)
 
-    <ggplot: (8779198054873)>
+    <ggplot: (8742732962311)>
 
 And, as noted above, some genes that are frequently mutated seem to show a correlation between the error and which data points had a mutation in those genes.
 
@@ -1826,7 +1824,7 @@ ppc2_m2_summary_mutations["sgrna_idx"] = get_indices(ppc2_m2_summary_mutations, 
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_53_0.png)
 
-    <ggplot: (8779198259194)>
+    <ggplot: (8742732960302)>
 
 ---
 
@@ -1900,76 +1898,13 @@ m3_sampling_results = pmhelp.pymc3_sampling_procedure(
 )
 ```
 
-    Auto-assigning NUTS sampler...
-    Initializing NUTS using advi+adapt_diag...
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='30979' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  77.45% [30979/40000 00:58<00:16 Average Loss = 40,088]
-</div>
-
-    Convergence achieved at 31000
-    Interrupted at 30,999 [77%]: Average Loss = 55,102
-    Multiprocess sampling (2 chains in 2 jobs)
-    NUTS: [σ, α_s, β_c, σ_α_s, σ_β_c, μ_β_c, g_s, σ_g, μ_g]
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='12000' class='' max='12000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [12000/12000 03:02<00:00 Sampling 2 chains, 0 divergences]
-</div>
-
-    Sampling 2 chains for 4_000 tune and 2_000 draw iterations (8_000 + 4_000 draws total) took 183 seconds.
-    The rhat statistic is larger than 1.4 for some parameters. The sampler did not converge.
-    The estimated number of effective samples is smaller than 200 for some parameters.
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='1000' class='' max='1000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [1000/1000 00:04<00:00]
-</div>
-
-    Caching trace and posterior sample...
+    Loading cached trace and posterior sample...
 
 ```python
 m3_az = pmhelp.samples_to_arviz(model=m3, res=m3_sampling_results)
 ```
 
-    arviz.data.io_pymc3 - WARNING - posterior predictive variable y's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
+    posterior predictive variable y's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
 
 ```python
 az.plot_trace(m3_az, var_names=["g_s", "α_s", "β_c"], compact=True)
@@ -2009,7 +1944,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 2.61 minutes
+    execution time: 3.28 minutes
 
 ```python
 %load_ext watermark
@@ -2019,7 +1954,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Last updated: 2021-01-18
 
     Python implementation: CPython
-    Python version       : 3.8.6
+    Python version       : 3.9.1
     IPython version      : 7.19.0
 
     Compiler    : GCC 9.3.0
@@ -2034,12 +1969,12 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Git branch: data-subset-model
 
-    arviz     : 0.10.0
-    pymc3     : 3.9.3
-    plotnine  : 0.7.1
-    pandas    : 1.2.0
     seaborn   : 0.11.1
-    numpy     : 1.19.5
+    pymc3     : 3.9.3
+    arviz     : 0.11.0
     re        : 2.2.1
-    theano    : 1.0.5
     matplotlib: 3.3.3
+    pandas    : 1.2.0
+    theano    : 1.0.5
+    numpy     : 1.19.5
+    plotnine  : 0.7.1
