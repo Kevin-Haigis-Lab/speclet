@@ -20,6 +20,7 @@
 ### [Analysis](analysis/)
 
 1. [Experiment with model designs](analysis/)
+2. [Hierarchical modeling.](analysis/010_013_hierarchical-model-subsample.md)
 
 ---
 

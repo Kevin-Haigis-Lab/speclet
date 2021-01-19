@@ -16,7 +16,7 @@ def zscale_cna_by_group(
 
     Parameters
     ----------
-    df: pandas DataFrame
+    df: pandas.DataFrame
         The data
     gene_cn_col: str
         Column name of copy number data
@@ -29,7 +29,7 @@ def zscale_cna_by_group(
 
     Returns
     -------
-    pandas DataFrame
+    pandas.DataFrame
     """
 
     if not cn_max is None and cn_max > 0:
@@ -52,7 +52,7 @@ def make_cat(
 
     Parameters
     ----------
-    df: pandas DataFrame
+    df: pandas.DataFrame
         The data
     col: str
         The column to turn into Categorical
@@ -63,7 +63,7 @@ def make_cat(
 
     Returns
     -------
-    pandas DataFrame
+    pandas.DataFrame
     """
     categories = df[col].unique().tolist()
     if sort_cats:
@@ -78,13 +78,29 @@ def get_indices(df: pd.DataFrame, col: str) -> np.ndarray:
 
     Parameters
     ----------
-    df: pandas DataFrame
+    df: pandas.DataFrame
         The data
     col: str
         The column to get indices from
 
     Returns
     -------
-    pandas DataFrame
+    pandas.DataFrame
     """
     return df[col].cat.codes.to_numpy()
+
+
+def nmutations_to_binary_array(m: pd.Series) -> np.ndarray:
+    """
+    Turn a column of a DataFrame into a binary array of 0's and 1's.
+
+    Parameters
+    ----------
+    df: pandas.Series
+        A column of values to be turned into values of 0 and 1.
+
+    Returns
+    -------
+    numpy.array
+    """
+    return m.to_numpy().flatten().astype(bool).astyle(int)
