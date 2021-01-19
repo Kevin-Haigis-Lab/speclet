@@ -2246,7 +2246,7 @@ sgrna_summaries
 
 $
 y \sim \mathcal{N}(\mu, \sigma) \\
-\mu = \alpha_s + \gamma M \\
+\mu = \alpha_s + \gamma_g M \\
 \quad \alpha_s \sim \mathcal{N}(\mu_{\alpha_s}, \sigma_{\alpha_s}) \\
 \qquad \mu_{\alpha_s} = g_s \\
 \qquad \quad g_s \sim \mathcal{N}(\mu_g, \sigma_g) \\
@@ -2278,13 +2278,13 @@ with pm.Model() as m5:
 
     μ_α_s = pm.Deterministic("μ_α_s", g_s[sgrna_to_gene_idx])
     σ_α_s = pm.Exponential("σ_α_s", 1)
-    μ_γ_s = pm.Normal("μ_γ_s", 0, 2)
-    σ_γ_s = pm.HalfNormal("σ_γ_s", 2)
+    μ_γ_g = pm.Normal("μ_γ_g", 0, 2)
+    σ_γ_g = pm.HalfNormal("σ_γ_g", 2)
 
     α_s = pm.Normal("α_s", μ_α_s, σ_α_s, shape=num_sgrnas)
-    γ_s = pm.Normal("γ_s", μ_γ_s, σ_γ_s, shape=num_genes)
+    γ_g = pm.Normal("γ_g", μ_γ_g, σ_γ_g, shape=num_genes)
 
-    μ = pm.Deterministic("μ", α_s[sgrna_idx] + γ_s[gene_idx] * is_mutated)
+    μ = pm.Deterministic("μ", α_s[sgrna_idx] + γ_g[gene_idx] * is_mutated)
     σ = pm.HalfNormal("σ", 5)
 
     y = pm.Normal("y", μ, σ, observed=data.lfc)
@@ -2314,20 +2314,81 @@ m5_sampling_results = pmhelp.pymc3_sampling_procedure(
 m5_az = pmhelp.samples_to_arviz(model=m5, res=m5_sampling_results)
 ```
 
-    Loading cached trace and posterior sample...
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using advi+adapt_diag...
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='31163' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  77.91% [31163/40000 01:02<00:17 Average Loss = 37,968]
+</div>
+
+    Convergence achieved at 31200
+    Interrupted at 31,199 [77%]: Average Loss = 51,937
+    Multiprocess sampling (2 chains in 2 jobs)
+    NUTS: [σ, γ_g, α_s, σ_γ_g, μ_γ_g, σ_α_s, g_s, σ_g, μ_g]
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='12000' class='' max='12000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [12000/12000 01:52<00:00 Sampling 2 chains, 0 divergences]
+</div>
+
+    Sampling 2 chains for 4_000 tune and 2_000 draw iterations (8_000 + 4_000 draws total) took 114 seconds.
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='1000' class='' max='1000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [1000/1000 00:04<00:00]
+</div>
+
+    Caching trace and posterior sample...
 
 
     posterior predictive variable y's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
 
 ```python
-az.plot_trace(m5_az, var_names=["μ_g", "σ_g", "g_s", "α_s", "γ_s"], compact=True)
+az.plot_trace(m5_az, var_names=["μ_g", "σ_g", "g_s", "α_s", "γ_g"], compact=True)
 plt.show()
 ```
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_78_0.png)
 
 ```python
-az.summary(m5_az, var_names=["μ_g", "σ_g", "σ_α_s", "μ_γ_s", "σ_γ_s", "σ"])
+az.summary(m5_az, var_names=["μ_g", "σ_g", "σ_α_s", "μ_γ_g", "σ_γ_g", "σ"])
 ```
 
 <div>
@@ -2365,71 +2426,71 @@ az.summary(m5_az, var_names=["μ_g", "σ_g", "σ_α_s", "μ_γ_s", "σ_γ_s", "�
     <tr>
       <th>μ_g</th>
       <td>-0.059</td>
-      <td>0.060</td>
-      <td>-0.173</td>
-      <td>0.049</td>
+      <td>0.058</td>
+      <td>-0.165</td>
+      <td>0.059</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>3060.0</td>
-      <td>2175.0</td>
-      <td>3078.0</td>
-      <td>2237.0</td>
+      <td>3785.0</td>
+      <td>2822.0</td>
+      <td>3813.0</td>
+      <td>2913.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>σ_g</th>
-      <td>0.266</td>
+      <td>0.264</td>
       <td>0.047</td>
-      <td>0.183</td>
-      <td>0.354</td>
+      <td>0.184</td>
+      <td>0.356</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>2578.0</td>
-      <td>2578.0</td>
-      <td>2511.0</td>
-      <td>2978.0</td>
+      <td>3279.0</td>
+      <td>3228.0</td>
+      <td>3289.0</td>
+      <td>3047.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>σ_α_s</th>
       <td>0.228</td>
       <td>0.019</td>
-      <td>0.196</td>
-      <td>0.264</td>
+      <td>0.195</td>
+      <td>0.263</td>
       <td>0.000</td>
       <td>0.000</td>
-      <td>3253.0</td>
-      <td>3201.0</td>
-      <td>3324.0</td>
-      <td>2841.0</td>
+      <td>3254.0</td>
+      <td>3205.0</td>
+      <td>3336.0</td>
+      <td>3289.0</td>
       <td>1.0</td>
     </tr>
     <tr>
-      <th>μ_γ_s</th>
-      <td>-0.108</td>
-      <td>0.066</td>
-      <td>-0.235</td>
-      <td>0.013</td>
+      <th>μ_γ_g</th>
+      <td>-0.111</td>
+      <td>0.067</td>
+      <td>-0.236</td>
+      <td>0.019</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>3511.0</td>
-      <td>3511.0</td>
-      <td>3528.0</td>
-      <td>2483.0</td>
+      <td>6062.0</td>
+      <td>4280.0</td>
+      <td>6108.0</td>
+      <td>2390.0</td>
       <td>1.0</td>
     </tr>
     <tr>
-      <th>σ_γ_s</th>
-      <td>0.327</td>
-      <td>0.051</td>
-      <td>0.241</td>
+      <th>σ_γ_g</th>
+      <td>0.328</td>
+      <td>0.049</td>
+      <td>0.246</td>
       <td>0.421</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>3763.0</td>
-      <td>3310.0</td>
-      <td>4455.0</td>
-      <td>2140.0</td>
+      <td>3186.0</td>
+      <td>2984.0</td>
+      <td>3427.0</td>
+      <td>2857.0</td>
       <td>1.0</td>
     </tr>
     <tr>
@@ -2440,10 +2501,10 @@ az.summary(m5_az, var_names=["μ_g", "σ_g", "σ_α_s", "μ_γ_s", "σ_γ_s", "�
       <td>0.455</td>
       <td>0.000</td>
       <td>0.000</td>
-      <td>4543.0</td>
-      <td>4543.0</td>
-      <td>4554.0</td>
-      <td>2461.0</td>
+      <td>5793.0</td>
+      <td>5793.0</td>
+      <td>5796.0</td>
+      <td>2611.0</td>
       <td>1.0</td>
     </tr>
   </tbody>
@@ -2466,11 +2527,11 @@ plot_ppc_error_against_mutation(
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_81_0.png)
 
-    <ggplot: (8733797922786)>
+    <ggplot: (8745641343356)>
 
 ```python
 m5_gamma_post = pd.DataFrame(
-    m5_sampling_results["trace"]["γ_s"][:250, :], columns=ordered_genes
+    m5_sampling_results["trace"]["γ_g"][:250, :], columns=ordered_genes
 ).melt(var_name="hugo_symbol")
 
 (
@@ -2489,11 +2550,11 @@ m5_gamma_post = pd.DataFrame(
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_82_0.png)
 
-    <ggplot: (8734032144186)>
+    <ggplot: (8745639404529)>
 
 ```python
 m5_gamma_summary = az.summary(
-    m5_az, var_names=["γ_s"], hdi_prob=0.89, kind="stats"
+    m5_az, var_names=["γ_g"], hdi_prob=0.89, kind="stats"
 ).assign(hugo_symbol=ordered_genes)
 
 p = (
@@ -2520,7 +2581,7 @@ p
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_83_0.png)
 
-    <ggplot: (8733797645867)>
+    <ggplot: (8745641863202)>
 
 ```python
 m4_gamma_summary = az.summary(
@@ -2538,9 +2599,498 @@ m4_gamma_hdi = m4_gamma_summary.iloc[0, 3:].to_numpy().astype(float)
 
 ![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_84_0.png)
 
-    <ggplot: (8734031596451)>
+    <ggplot: (8745639399015)>
 
 ---
+
+### Model 6. Introduce to model 5 a covariate multiplied against CN that varies per gene
+
+In the original CERES model, the covariate that multiplies against copy number varies per cell line.
+I think it is worth comparing the results of varying per cell line, varying per gene, and varying on both.
+To focus on the magnitude of the copy number, I will $\log_2$ scale it before z-scaling.
+
+$
+y \sim \mathcal{N}(\mu, \sigma) \\
+\mu = \alpha_s + \gamma_g M + \delta_g \log_2 C \\
+\quad \alpha_s \sim \mathcal{N}(\mu_{\alpha_s}, \sigma_{\alpha_s}) \\
+\qquad \mu_{\alpha_s} = g_s \\
+\qquad \quad g_s \sim \mathcal{N}(\mu_g, \sigma_g) \\
+\qquad \qquad \mu_g \sim \mathcal{N}(0, 5) \quad \sigma_g \sim \text{Exp}(1) \\
+\qquad \sigma_\alpha \sim \text{Exp}(1) \\
+\
+\quad \gamma_g \sim \mathcal{N}(\mu_{\gamma_g}\, \sigma_{\gamma_g}) \\
+\qquad \mu_{\gamma_g} \sim \mathcal{N}(0, 2) \\
+\qquad \sigma_{\gamma_g} \sim \text{HalfNormal}(2) \\
+\
+\quad \delta_g \sim \mathcal{N}(\mu_{\delta_g}\, \sigma_{\delta_g}) \\
+\qquad \mu_{\delta_g} \sim \mathcal{N}(-0.2, 2) \\
+\qquad \sigma_{\delta_g} \sim \text{HalfNormal}(2) \\
+\
+\sigma \sim \text{HalfNormal}(5)
+$
+
+```python
+data["log2_cn"] = np.log2(data["gene_cn"].to_numpy())
+scaled_log2_cn = dphelp.zscale_cna_by_group(
+    data, gene_cn_col="log2_cn", new_col="z_log2_cn"
+).z_log2_cn.to_numpy()
+data["scaled_log2_cn"] = scaled_log2_cn
+```
+
+```python
+with pm.Model() as m6:
+    μ_g = pm.Normal("μ_g", 0, 5)
+    σ_g = pm.Exponential("σ_g", 1)
+
+    g_s = pm.Normal("g_s", μ_g, σ_g, shape=num_genes)
+
+    μ_α_s = pm.Deterministic("μ_α_s", g_s[sgrna_to_gene_idx])
+    σ_α_s = pm.Exponential("σ_α_s", 1)
+    μ_γ_g = pm.Normal("μ_γ_g", 0, 2)
+    σ_γ_g = pm.HalfNormal("σ_γ_g", 2)
+    μ_δ_g = pm.Normal("μ_δ_g", 0, 2)
+    σ_δ_g = pm.HalfNormal("σ_δ_g", 2)
+
+    α_s = pm.Normal("α_s", μ_α_s, σ_α_s, shape=num_sgrnas)
+    γ_g = pm.Normal("γ_g", μ_γ_g, σ_γ_g, shape=num_genes)
+    δ_g = pm.Normal("δ_g", μ_δ_g, σ_δ_g, shape=num_genes)
+
+    μ = pm.Deterministic(
+        "μ",
+        α_s[sgrna_idx] + γ_g[gene_idx] * is_mutated + δ_g[gene_idx] * scaled_log2_cn,
+    )
+    σ = pm.HalfNormal("σ", 5)
+
+    y = pm.Normal("y", μ, σ, observed=data.lfc)
+```
+
+```python
+pm.model_to_graphviz(m6)
+```
+
+![svg](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_88_0.svg)
+
+```python
+m6_cache_dir = pymc3_cache_dir / "subset_speclet_m6"
+
+m6_sampling_results = pmhelp.pymc3_sampling_procedure(
+    model=m6,
+    num_mcmc=2000,
+    tune=4000,
+    chains=2,
+    cores=2,
+    random_seed=RANDOM_SEED,
+    cache_dir=pymc3_cache_dir / m6_cache_dir,
+    force=False,
+    sample_kwargs={"init": "advi+adapt_diag", "n_init": 40000},
+)
+
+m6_az = pmhelp.samples_to_arviz(model=m6, res=m6_sampling_results)
+```
+
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using advi+adapt_diag...
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='30667' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  76.67% [30667/40000 01:32<00:28 Average Loss = 37,221]
+</div>
+
+    Convergence achieved at 30700
+    Interrupted at 30,699 [76%]: Average Loss = 53,399
+    Multiprocess sampling (2 chains in 2 jobs)
+    NUTS: [σ, δ_g, γ_g, α_s, σ_δ_g, μ_δ_g, σ_γ_g, μ_γ_g, σ_α_s, g_s, σ_g, μ_g]
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='12000' class='' max='12000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [12000/12000 03:01<00:00 Sampling 2 chains, 0 divergences]
+</div>
+
+    Sampling 2 chains for 4_000 tune and 2_000 draw iterations (8_000 + 4_000 draws total) took 183 seconds.
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='1000' class='' max='1000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [1000/1000 00:04<00:00]
+</div>
+
+    Caching trace and posterior sample...
+
+
+    posterior predictive variable y's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
+
+```python
+az.plot_trace(m6_az, var_names=["μ_g", "σ_g", "g_s", "α_s", "γ_g", "δ_g"], compact=True)
+plt.show()
+```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_90_0.png)
+
+```python
+az.summary(
+    m6_az,
+    var_names=["μ_g", "σ_g", "σ_α_s", "μ_γ_g", "σ_γ_g", "μ_δ_g", "σ_δ_g", "σ"],
+    hdi_prob=0.89,
+)
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>μ_g</th>
+      <td>-0.060</td>
+      <td>0.061</td>
+      <td>-0.155</td>
+      <td>0.036</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3456.0</td>
+      <td>3004.0</td>
+      <td>3442.0</td>
+      <td>2815.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>σ_g</th>
+      <td>0.272</td>
+      <td>0.047</td>
+      <td>0.198</td>
+      <td>0.344</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2935.0</td>
+      <td>2935.0</td>
+      <td>2843.0</td>
+      <td>2759.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>σ_α_s</th>
+      <td>0.228</td>
+      <td>0.019</td>
+      <td>0.198</td>
+      <td>0.256</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>2958.0</td>
+      <td>2917.0</td>
+      <td>3013.0</td>
+      <td>2920.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>μ_γ_g</th>
+      <td>-0.108</td>
+      <td>0.065</td>
+      <td>-0.204</td>
+      <td>-0.002</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3964.0</td>
+      <td>3163.0</td>
+      <td>3939.0</td>
+      <td>2719.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>σ_γ_g</th>
+      <td>0.320</td>
+      <td>0.050</td>
+      <td>0.237</td>
+      <td>0.389</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>4527.0</td>
+      <td>4281.0</td>
+      <td>4848.0</td>
+      <td>2997.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>μ_δ_g</th>
+      <td>-0.048</td>
+      <td>0.012</td>
+      <td>-0.068</td>
+      <td>-0.030</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>4940.0</td>
+      <td>4515.0</td>
+      <td>4945.0</td>
+      <td>2528.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>σ_δ_g</th>
+      <td>0.061</td>
+      <td>0.010</td>
+      <td>0.046</td>
+      <td>0.075</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>3856.0</td>
+      <td>3481.0</td>
+      <td>4300.0</td>
+      <td>2127.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>σ</th>
+      <td>0.447</td>
+      <td>0.001</td>
+      <td>0.444</td>
+      <td>0.449</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>4806.0</td>
+      <td>4806.0</td>
+      <td>4794.0</td>
+      <td>2174.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+m6_delta_g = az.summary(m6_az, var_names=["δ_g"], hdi_prob=0.89, kind="stats")
+m6_delta_g["hugo_symbol"] = ordered_genes
+
+(
+    gg.ggplot(m6_delta_g, gg.aes(x="hugo_symbol", y="mean"))
+    + gg.geom_hline(yintercept=0, alpha=0.5)
+    + gg.geom_linerange(gg.aes(ymin="hdi_5.5%", ymax="hdi_94.5%"))
+    + gg.geom_point()
+    + gg.theme(axis_text_x=gg.element_text(angle=90))
+    + gg.labs(x=None, y="posterior mean", title="Posteriors of CN covariate")
+)
+```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_92_0.png)
+
+    <ggplot: (8745641786067)>
+
+```python
+ppc_m6_summary = logfc_model_ppc_dataframe(
+    m6_az,
+    data.lfc,
+    data[["hugo_symbol", "sgrna", "depmap_id", "n_muts", "scaled_log2_cn"]],
+)
+```
+
+    /home/jc604/.conda/envs/speclet/lib/python3.9/site-packages/arviz/stats/stats.py:493: FutureWarning: hdi currently interprets 2d data as (draw, shape) but this will change in a future release to (chain, draw) for coherence with other functions
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mean</th>
+      <th>real_value</th>
+      <th>error</th>
+      <th>hugo_symbol</th>
+      <th>sgrna</th>
+      <th>depmap_id</th>
+      <th>n_muts</th>
+      <th>scaled_log2_cn</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>-0.701864</td>
+      <td>0.724681</td>
+      <td>0.021038</td>
+      <td>0.029491</td>
+      <td>-0.008453</td>
+      <td>ADAMTS13</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>ACH-000007</td>
+      <td>0</td>
+      <td>1.629046</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>-0.697730</td>
+      <td>0.745014</td>
+      <td>0.001887</td>
+      <td>0.426017</td>
+      <td>-0.424130</td>
+      <td>ADAMTS13</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>ACH-000007</td>
+      <td>0</td>
+      <td>1.629046</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-0.694342</td>
+      <td>0.750535</td>
+      <td>0.058896</td>
+      <td>0.008626</td>
+      <td>0.050269</td>
+      <td>ADAMTS13</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>ACH-000009</td>
+      <td>0</td>
+      <td>-0.297705</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-0.637275</td>
+      <td>0.805798</td>
+      <td>0.094484</td>
+      <td>0.280821</td>
+      <td>-0.186337</td>
+      <td>ADAMTS13</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>ACH-000009</td>
+      <td>0</td>
+      <td>-0.297705</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-0.653500</td>
+      <td>0.789379</td>
+      <td>0.093116</td>
+      <td>0.239815</td>
+      <td>-0.146699</td>
+      <td>ADAMTS13</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>ACH-000009</td>
+      <td>0</td>
+      <td>-0.297705</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+TODO:
+
+- get the averages for components of $\mu$ and ad two lines to each plot below, one with the gene mutated and one with the gene WT
+- make predictions for each gene, mutated and WT, along all CN values and plot that against the real values
+
+```python
+ppc_m6_summary["is_mutated"] = ppc_m6_summary.n_muts.astype(bool)
+
+(
+    gg.ggplot(ppc_m6_summary, gg.aes(x="scaled_log2_cn"))
+    + gg.facet_wrap("hugo_symbol", scales="free", ncol=3)
+    + gg.geom_point(gg.aes(y="real_value", color="is_mutated"), size=0.2, alpha=0.3)
+    + gg.geom_point(gg.aes(y="mean"), size=0.2, alpha=0.2, color="blue")
+    + gg.scale_color_manual(values=["black", "red"])
+    + gg.theme(figure_size=(8, 20))
+    + gg.labs(x="cpoy number (z-scaled, log2)", y="LFC", title="Posterior predictions")
+)
+```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_95_0.png)
+
+    <ggplot: (8745641638789)>
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
 
 ```python
 
