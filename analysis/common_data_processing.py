@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -85,9 +85,43 @@ def get_indices(df: pd.DataFrame, col: str) -> np.ndarray:
 
     Returns
     -------
-    pandas.DataFrame
+    numpy.ndarray
     """
     return df[col].cat.codes.to_numpy()
+
+
+def get_indices_and_count(df: pd.DataFrame, col: str) -> Tuple[np.ndarray, int]:
+    """
+    Get a list of the indices and number of unique values for a categorical column.
+
+    Parameters
+    ----------
+    df: pandas.DataFrame
+        The data
+    col: str
+        The column to get indices from
+
+    Returns
+    -------
+    Tuple[numpy.ndarray, int]
+    """
+    return get_indices(df=df, col=col), df[col].nunique()
+
+
+def extract_flat_ary(s: pd.Series) -> np.ndarray:
+    """
+    Turn a column of a DataFrame into a flat array.
+
+    Parameters
+    ----------
+    df: pandas.Series
+        Data to be flattened.
+
+    Returns
+    -------
+    numpy.ndarray
+    """
+    return s.to_numpy().flatten()
 
 
 def nmutations_to_binary_array(m: pd.Series) -> np.ndarray:
@@ -101,6 +135,6 @@ def nmutations_to_binary_array(m: pd.Series) -> np.ndarray:
 
     Returns
     -------
-    numpy.array
+    numpy.ndarray
     """
-    return m.to_numpy().flatten().astype(bool).astyle(int)
+    return extract_flat_ary(m).astype(bool).astype(int)
