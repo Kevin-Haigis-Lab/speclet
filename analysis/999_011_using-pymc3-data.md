@@ -155,7 +155,7 @@ with pm.Model(coords=coords) as model:
   100.00% [16000/16000 00:14<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 15 seconds.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 16 seconds.
     The number of effective samples is smaller than 25% for some parameters.
 
 ```python
@@ -269,7 +269,7 @@ post_df = pd.DataFrame(
 
 ![png](999_011_using-pymc3-data_files/999_011_using-pymc3-data_12_0.png)
 
-    <ggplot: (8767793637250)>
+    <ggplot: (8776007919879)>
 
 ## Example with hierarhcical model
 
@@ -569,7 +569,6 @@ with model:
     pm.set_data(
         {
             "x_shared": extract_data(new_data.x),
-            "y_shared": extract_data(new_data.y),
             "group_idx": extract_data(new_data.group_idx).astype(int),
         }
     )
@@ -593,7 +592,7 @@ with model:
         }
     </style>
   <progress value='500' class='' max='500' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [500/500 00:03<00:00]
+  100.00% [500/500 00:04<00:00]
 </div>
 
 ```python
@@ -612,7 +611,7 @@ new_data = dphelp.make_cat(new_data, "index", ordered=True)
 
 ![png](999_011_using-pymc3-data_files/999_011_using-pymc3-data_18_0.png)
 
-    <ggplot: (8767783807684)>
+    <ggplot: (8775976930205)>
 
 ---
 
@@ -621,7 +620,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.78 minutes
+    execution time: 0.80 minutes
 
 ```python
 %load_ext watermark
@@ -648,7 +647,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     matplotlib: 3.3.3
     plotnine  : 0.7.1
-    numpy     : 1.19.5
-    pandas    : 1.2.0
-    arviz     : 0.11.0
     pymc3     : 3.9.3
+    pandas    : 1.2.0
+    numpy     : 1.19.5
+    arviz     : 0.11.0

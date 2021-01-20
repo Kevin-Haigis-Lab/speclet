@@ -21,16 +21,12 @@ notebook_tic = time()
 warnings.simplefilter(action="ignore", category=UserWarning)
 
 gg.theme_set(gg.theme_minimal())
-%config InlineBackend.figure_format = 'retina'
+%config InlineBackend.figure_format = "retina"
 
 RANDOM_SEED = 847
 np.random.seed(RANDOM_SEED)
 
 pymc3_cache_dir = Path("pymc3_model_cache")
-```
-
-```python
-
 ```
 
 ```python
