@@ -43,6 +43,10 @@ pymc3_cache_dir = Path("pymc3_model_cache")
 mut_pal = {"False": "#429DD6", "True": "#B93174"}
 ```
 
+```python
+KEYNOTE_FIG_SIZE = (10, 5)
+```
+
 ## Data preparation
 
 ```python
@@ -450,14 +454,17 @@ data.columns
 (
     gg.ggplot(data, gg.aes(x="hugo_symbol", y="lfc"))
     + gg.geom_boxplot(outlier_alpha=0.3, outlier_size=0.5)
-    + gg.theme(axis_text_x=gg.element_text(angle=90, hjust=0.5, vjust=1))
+    + gg.theme(
+        axis_text_x=gg.element_text(angle=90, hjust=0.5, vjust=1),
+        figure_size=KEYNOTE_FIG_SIZE,
+    )
     + gg.labs(x=None, y="log fold change")
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_11_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_12_0.png)
 
-    <ggplot: (8771926491986)>
+    <ggplot: (8742905118260)>
 
 ```python
 p = (
@@ -477,9 +484,9 @@ p = (
 p
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_12_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_13_0.png)
 
-    <ggplot: (8772018675559)>
+    <ggplot: (8742906719723)>
 
 The general trend is that gene CN is negatively correlated with logFC, but there is substantial variability per gene.
 
@@ -496,9 +503,9 @@ The general trend is that gene CN is negatively correlated with logFC, but there
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_14_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_15_0.png)
 
-    <ggplot: (8772018121698)>
+    <ggplot: (8742816599227)>
 
 The varying effects per gene are more striking than the varying efferects per lineage.
 The effect of lineage/cell line may need to be regulated with relatively strict priors.
@@ -516,9 +523,9 @@ d["lineage"] = stringr.str_wrap(d["lineage"], width=10)
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_16_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_17_0.png)
 
-    <ggplot: (8771915270337)>
+    <ggplot: (8742807176939)>
 
 ```python
 data.head()
@@ -724,7 +731,7 @@ with pm.Model() as m1:
 pm.model_to_graphviz(m1)
 ```
 
-![svg](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_20_0.svg)
+![svg](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_21_0.svg)
 
 ```python
 m1_cache_dir = pymc3_cache_dir / "subset_speclet_m1"
@@ -757,7 +764,7 @@ az.plot_trace(m1_az, var_names="α_g", compact=True)
 plt.show()
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_24_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_25_0.png)
 
 ```python
 az.summary(m1_az, var_names=["α_g"])
@@ -1294,63 +1301,257 @@ ppc_m1_summary.head()
 The predictions are also tightly bunched, further indicating the model's confidence.
 
 ```python
-p = (
-    gg.ggplot(ppc_m1_summary, gg.aes(y="hugo_symbol"))
-    + gg.geom_jitter(
-        gg.aes(x="mean", color="sgrna"), width=0, height=0.35, alpha=0.3, size=0.3
+m1_alpha_post = pd.DataFrame(
+    m1_sampling_results["trace"]["α_g"], columns=data.hugo_symbol.unique()
+).melt(var_name="hugo_symbol")
+```
+
+```python
+(
+    gg.ggplot(m1_alpha_post, gg.aes(x="hugo_symbol", y="value"))
+    + gg.geom_hline(yintercept=0, alpha=0.5)
+    + gg.geom_boxplot(outlier_alpha=0)
+    + gg.theme(figure_size=KEYNOTE_FIG_SIZE, axis_text_x=gg.element_text(angle=90))
+    + gg.labs(x=None, y=r"$\alpha_g$ posterior")
+)
+```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_31_0.png)
+
+    <ggplot: (8742804498180)>
+
+```python
+(
+    gg.ggplot(m1_alpha_post, gg.aes(x="value"))
+    + gg.geom_density(gg.aes(color="hugo_symbol", fill="hugo_symbol"), alpha=0.1)
+    + gg.geom_vline(xintercept=0, alpha=0.5, size=1)
+    + gg.theme(figure_size=(KEYNOTE_FIG_SIZE[0], 2), legend_position="none")
+    + gg.labs(x=None, y=r"$\alpha_g$ posterior")
+)
+```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_32_0.png)
+
+    <ggplot: (8742806701466)>
+
+```python
+(
+    gg.ggplot(
+        m1_alpha_post.groupby("hugo_symbol").mean().reset_index().assign(y=1),
+        gg.aes(x="value", y="y"),
     )
+    + gg.geom_text(
+        gg.aes(label="hugo_symbol"),
+        angle=90,
+        ha="center",
+        va="center",
+        alpha=0.8,
+        size=8,
+    )
+    + gg.theme(
+        figure_size=(KEYNOTE_FIG_SIZE[0], 0.7),
+        panel_grid_major_y=gg.element_blank(),
+        axis_text_y=gg.element_blank(),
+        axis_title_y=gg.element_blank(),
+    )
+    + gg.labs(x=None, y=None)
+)
+```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_33_0.png)
+
+    <ggplot: (8742584467661)>
+
+```python
+m1_alpha_post_summary = (
+    az.summary(m1_az, var_names=["μ_α", "σ_α"], hdi_prob=0.89, kind="stats")
+    .reset_index()
+    .rename(columns={"index": "variable"})
+)
+m1_alpha_post_summary
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>variable</th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>μ_α</td>
+      <td>-0.109</td>
+      <td>0.050</td>
+      <td>-0.188</td>
+      <td>-0.033</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>σ_α</td>
+      <td>0.251</td>
+      <td>0.036</td>
+      <td>0.194</td>
+      <td>0.300</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+m1_alpha_post = pd.merge(
+    pd.DataFrame(m1_sampling_results["trace"]["μ_α"].T, columns=["μ_α"]),
+    pd.DataFrame(m1_sampling_results["trace"]["σ_α"].T, columns=["σ_α"]),
+    left_index=True,
+    right_index=True,
+).melt()
+
+(
+    gg.ggplot(m1_alpha_post, gg.aes(x="value"))
+    + gg.facet_wrap("variable", nrow=1, scales="free")
+    + gg.geom_density(color="grey", fill="grey", alpha=0.1)
+    + gg.geom_vline(
+        gg.aes(xintercept="hdi_5.5%"), data=m1_alpha_post_summary, linetype="--"
+    )
+    + gg.geom_vline(
+        gg.aes(xintercept="hdi_94.5%"), data=m1_alpha_post_summary, linetype="--"
+    )
+    + gg.geom_vline(gg.aes(xintercept="mean"), data=m1_alpha_post_summary)
+    + gg.theme(figure_size=(KEYNOTE_FIG_SIZE[0] - 2, 2))
+)
+```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_35_0.png)
+
+    <ggplot: (8742804501616)>
+
+```python
+p = (
+    gg.ggplot(ppc_m1_summary, gg.aes(x="hugo_symbol", y="mean"))
+    + gg.geom_boxplot(outlier_alpha=0)
     + gg.scale_color_discrete(guide=None)
-    + gg.theme(figure_size=(5, 6))
-    + gg.labs(x="mean", y=None, title="Posterior predictions of gene effects")
+    + gg.theme(figure_size=KEYNOTE_FIG_SIZE, axis_text_x=gg.element_text(angle=90))
+    + gg.labs(x="mean", y="LFC", title="Posterior predictions of LFC")
 )
 
 p
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_29_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_36_0.png)
 
-    <ggplot: (8771905084046)>
+    <ggplot: (8742799840904)>
 
 But we can see there is actually a lot of error, and some genes have far greater prediction error than others.
 This is not unexpected as there are still many factors to add to the model.
 
 ```python
-(p + gg.geom_jitter(gg.aes(x="real_value"), alpha=0.2, size=0.1, height=0.1, width=0))
+(
+    p
+    + gg.geom_jitter(
+        gg.aes(y="real_value"),
+        alpha=0.1,
+        size=0.1,
+        height=0,
+        width=0.2,
+        color="#0D72B4",
+    )
+)
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_31_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_38_0.png)
 
-    <ggplot: (8771912916294)>
+    <ggplot: (8742584100991)>
 
 Importantly, we can see that there are differing levels of error per sgRNA for many genes.
 
 ```python
 (
-    gg.ggplot(ppc_m1_summary, gg.aes(y="error", x="hugo_symbol"))
+    gg.ggplot(
+        ppc_m1_summary,
+        gg.aes(x="hugo_symbol", y="error", color="hugo_symbol", group="sgrna"),
+    )
     + gg.geom_point(
-        gg.aes(color="sgrna"),
         position=gg.position_jitterdodge(
             jitter_width=0.2, jitter_height=0, dodge_width=0.8, random_state=RANDOM_SEED
         ),
-        alpha=0.5,
-        size=0.3,
+        alpha=0.1,
+        size=0.1,
     )
+    + gg.geom_hline(yintercept=0, alpha=0.5)
     + gg.geom_boxplot(
-        gg.aes(color="sgrna"),
+        gg.aes(),
         position=gg.position_dodge(width=0.8),
         outlier_alpha=0,
         alpha=0.5,
         fill="white",
     )
     + gg.scale_color_discrete(guide=None)
-    + gg.theme(figure_size=(10, 7), axis_text_x=gg.element_text(angle=90))
-    + gg.labs(x=None, y="density", title="Distribution of prediction error")
+    + gg.scale_y_continuous(limits=(-2, 3))
+    + gg.theme(figure_size=KEYNOTE_FIG_SIZE, axis_text_x=gg.element_text(angle=90))
+    + gg.labs(
+        x=None, y="error (predicted - real)", title="Distribution of prediction error"
+    )
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_33_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_40_0.png)
 
-    <ggplot: (8771926513324)>
+    <ggplot: (8742583801585)>
+
+```python
+genes_with_sgrna_error = ["ADAMTS13", "LGALS7B", "PHACTR3", "PIK3CA", "UQCRC1"]
+
+
+def plot_gene_with_sgrna_error(
+    ppc_summary: pd.DataFrame, genes: List[str] = genes_with_sgrna_error
+) -> gg.ggplot:
+    plot_data = ppc_summary[ppc_summary.hugo_symbol.isin(genes)]
+    return (
+        gg.ggplot(plot_data, gg.aes(x="hugo_symbol", y="error"))
+        + gg.geom_hline(yintercept=0, alpha=0.5)
+        + gg.geom_boxplot(
+            gg.aes(color="hugo_symbol", fill="hugo_symbol", group="sgrna"),
+            position=gg.position_dodge(width=0.8),
+            outlier_alpha=0,
+            alpha=0.1,
+        )
+        + gg.scale_color_discrete(guide=None)
+        + gg.scale_fill_discrete(guide=None)
+        + gg.scale_y_continuous(limits=(-1.5, 1.5))
+        + gg.theme(figure_size=KEYNOTE_FIG_SIZE)
+        + gg.labs(
+            x=None,
+            y="error",
+            title="Prediction error of genes\nwith high variability of sgRNA effects",
+        )
+    )
+
+
+plot_gene_with_sgrna_error(ppc_m1_summary)
+```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_41_0.png)
+
+    <ggplot: (8742583995576)>
 
 ```python
 (
@@ -1364,9 +1565,9 @@ Importantly, we can see that there are differing levels of error per sgRNA for m
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_34_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_42_0.png)
 
-    <ggplot: (8771912888980)>
+    <ggplot: (8742583995426)>
 
 ---
 
@@ -1422,7 +1623,7 @@ with pm.Model() as m2:
 pm.model_to_graphviz(m2)
 ```
 
-![svg](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_38_0.svg)
+![svg](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_46_0.svg)
 
 ```python
 m2_cache_dir = pymc3_cache_dir / "subset_speclet_m2"
@@ -1455,7 +1656,7 @@ az.plot_trace(m2_az, var_names=["μ_g", "σ_g", "g_s", "α_s"], compact=True)
 plt.show()
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_42_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_50_0.png)
 
 ```python
 az.summary(m2_az, var_names=["μ_g", "σ_g", "σ_α_s"])
@@ -1568,11 +1769,50 @@ point_color = "#FA6A48"
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_44_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_52_0.png)
 
-    <ggplot: (8771694867472)>
+    <ggplot: (8742583801908)>
 
 We see that the gene averages ("x") lie close to the middle of the estimated averages for their sgRNAs (dots), though there is regularization towards the mean of the genes $\mu_g$ (blue line with 89% HDI in the dashed line).
+
+```python
+m2_g_alpha_post = pd.DataFrame(
+    m2_sampling_results["trace"]["g_s"][:250, :],
+    columns=sgrna_to_gene_map.hugo_symbol.unique(),
+).melt(var_name="hugo_symbol")
+
+m2_alpha_s_post = pd.DataFrame(
+    m2_sampling_results["trace"]["α_s"][:250, :], columns=sgrna_to_gene_map.sgrna
+).melt(var_name="sgrna")
+m2_alpha_s_post = m2_alpha_s_post.merge(sgrna_to_gene_map, on="sgrna")
+m2_alpha_s_post.head()
+
+(
+    gg.ggplot(m2_alpha_s_post, gg.aes("value"))
+    + gg.facet_wrap("hugo_symbol", scales="free", ncol=3)
+    + gg.geom_density(
+        gg.aes(y="stat(scaled)"),
+        data=m2_g_alpha_post,
+        color=None,
+        fill="grey",
+        alpha=0.2,
+    )
+    + gg.geom_density(
+        gg.aes(group="sgrna", y="stat(scaled)"),
+        stat=gg.stat_density(gg.aes(y="stat(scaled)")),
+    )
+    + gg.scale_y_continuous(expand=(0, 0.02))
+    + gg.theme(
+        figure_size=(KEYNOTE_FIG_SIZE[0], 20),
+        subplots_adjust={"hspace": 0.5, "wspace": 0.4},
+    )
+    + gg.labs(x="value", y="density")
+)
+```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_54_0.png)
+
+    <ggplot: (8742583052195)>
 
 ```python
 alpha_s_summary = az.summary(m2_az, var_names="α_s", kind="stats", hdi_prob=0.89)
@@ -1583,19 +1823,19 @@ mu_g_avg = az.summary(m2_az, var_names=["μ_g"], hdi_prob=0.89)
 
 (
     gg.ggplot(alpha_s_summary, gg.aes(x="hugo_symbol"))
-    + gg.geom_hline(yintercept=0, color="black", alpha=0.3)
-    + gg.geom_rect(
-        xmin=-np.inf,
-        xmax=np.inf,
-        ymin=mu_g_avg["hdi_5.5%"].values[0],
-        ymax=mu_g_avg["hdi_94.5%"].values[0],
+    + gg.geom_hline(yintercept=0, color="black", alpha=0.5)
+    + gg.geom_hline(
+        yintercept=(mu_g_avg["hdi_5.5%"].values[0], mu_g_avg["hdi_94.5%"].values[0]),
         color="#0D72B4",
-        fill=None,
         linetype="--",
         size=0.3,
     )
     + gg.geom_hline(
-        yintercept=mu_g_avg["mean"].values[0], color="#0D72B4", linetype="-", size=0.8
+        yintercept=mu_g_avg["mean"].values[0],
+        color="#0D72B4",
+        linetype="-",
+        size=0.8,
+        alpha=0.5,
     )
     + gg.geom_linerange(gg.aes(ymin="hdi_5.5%", ymax="hdi_94.5%", color="sgrna"))
     + gg.geom_point(gg.aes(y="mean", color="sgrna"), size=2.5, alpha=0.8)
@@ -1607,14 +1847,14 @@ mu_g_avg = az.summary(m2_az, var_names=["μ_g"], hdi_prob=0.89)
         size=3,
     )
     + gg.scale_color_discrete(guide=None)
-    + gg.theme(figure_size=(10, 5), axis_text_x=gg.element_text(angle=90))
+    + gg.theme(figure_size=KEYNOTE_FIG_SIZE, axis_text_x=gg.element_text(angle=90))
     + gg.labs(x=None, y="mean", title="Posterior estimates for sgRNA and gene values")
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_46_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_55_0.png)
 
-    <ggplot: (8771926572632)>
+    <ggplot: (8742797761726)>
 
 ```python
 ppc_m2_summary = logfc_model_ppc_dataframe(
@@ -1648,9 +1888,9 @@ ppc_m2_summary = logfc_model_ppc_dataframe(
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_48_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_57_0.png)
 
-    <ggplot: (8771690408506)>
+    <ggplot: (8742581939956)>
 
 The prediction error is still quite substantial, particularly around genes that are frequently mutated suchs as *KRAS* and *TP53*.
 
@@ -1672,41 +1912,32 @@ The prediction error is still quite substantial, particularly around genes that 
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_50_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_59_0.png)
 
-    <ggplot: (8771914135197)>
+    <ggplot: (8742798977467)>
 
 Since we modeled the sgRNA variability, the errors for each sgRNA are now normally distributed.
 The plot below specifically focuses on 4 genes that had a high degree of difference in error distributions among its sgRNAs.
 
 ```python
-genes_with_sgrna_error = ["ADAMTS13", "LGALS7B", "PHACTR3", "PIK3CA", "UQCRC1"]
-plot_data = ppc_m2_summary[ppc_m2_summary.hugo_symbol.isin(genes_with_sgrna_error)]
-(
-    gg.ggplot(plot_data, gg.aes(x="hugo_symbol", y="error"))
-    + gg.geom_boxplot(
-        gg.aes(color="sgrna"), position=gg.position_dodge(width=0.8), outlier_alpha=0
-    )
-    + gg.scale_color_discrete(guide=None)
-    + gg.scale_y_continuous(limits=(-1.5, 1.5))
-    + gg.labs(
-        x=None,
-        y="error",
-        title="Prediction error of genes\nwith high variability of sgRNA effects",
-    )
-)
+plot_gene_with_sgrna_error(ppc_m2_summary)
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_52_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_61_0.png)
 
-    <ggplot: (8769922610466)>
+    <ggplot: (8742583044877)>
 
 And, as noted above, some genes that are frequently mutated seem to show a correlation between the error and which data points had a mutation in those genes.
 
 ```python
-def plot_ppc_error_against_mutation(
-    ppc_summary: pd.DataFrame, num_muts: pd.Series, genes: Optional[List[str]] = None
+def plot_ppc_against_mutation(
+    ppc_summary: pd.DataFrame,
+    num_muts: pd.Series,
+    genes: Optional[List[str]] = None,
+    y: str = "mean",
+    facet_scales: str = "free",
 ) -> gg.ggplot:
+
     ppc_summary_mutations = ppc_summary.copy()
     ppc_summary_mutations["is_mutated"] = num_muts > 0
 
@@ -1717,42 +1948,65 @@ def plot_ppc_error_against_mutation(
         ppc_summary_mutations["sgrna_idx"] = dphelp.get_indices(
             ppc_summary_mutations, "sgrna"
         )
+    dodge_width = 0.8
+    jd_pos = gg.position_jitterdodge(
+        jitter_width=0.35, jitter_height=0, dodge_width=dodge_width
+    )
+    d_post = gg.position_dodge(width=dodge_width)
+
+    labels_dict = {
+        "mean": {"y": "LFC", "title": "Posterior predictions by mutation status"},
+        "error": {"y": "error", "title": "Prediction error by with mutation status"},
+    }
 
     return (
-        gg.ggplot(ppc_summary_mutations, gg.aes(x="sgrna_idx", y="error"))
-        + gg.facet_wrap("hugo_symbol", scales="free")
-        + gg.geom_jitter(gg.aes(color="is_mutated", alpha="is_mutated"), size=0.5)
+        gg.ggplot(
+            ppc_summary_mutations,
+            gg.aes(x="factor(sgrna_idx)", y=y, color="is_mutated"),
+        )
+        + gg.facet_wrap("hugo_symbol", scales=facet_scales)
+        + gg.geom_hline(yintercept=0, alpha=0.5, linetype="--")
+        + gg.geom_point(alpha=0.25, size=0.3, position=jd_pos)
+        + gg.geom_boxplot(alpha=0.6, fill="white", position=d_post, outlier_alpha=0)
         + gg.scale_color_manual(
             values=list(mut_pal.values()),
+            labels=("WT", "mutant"),
             guide=gg.guide_legend(override_aes={"size": 2, "alpha": 1}),
         )
-        + gg.scale_alpha_manual(
-            values=[0.3, 0.7],
-            guide=None,
-        )
         + gg.theme(
-            subplots_adjust={"hspace": 0.4, "wspace": 0.6},
+            figure_size=(KEYNOTE_FIG_SIZE[0] / 2, KEYNOTE_FIG_SIZE[1]),
+            subplots_adjust={"hspace": 0.4, "wspace": 0.4},
             strip_text=gg.element_text(weight="bold"),
+            legend_title=gg.element_blank(),
         )
         + gg.labs(
             x="sgRNA ID",
-            y="prediction error",
-            title="Error associated with mutation status",
-            color="gene is\nmutated",
-            alpha="gene is\nmutated",
+            y=labels_dict[y]["y"],
+            title=labels_dict[y]["title"],
         )
     )
+```
 
-
+```python
 genes_with_mutation_error = ["KRAS", "MDM2", "PTK2", "TP53"]
-plot_ppc_error_against_mutation(
+plot_ppc_against_mutation(
     ppc_m2_summary, num_muts=data.n_muts, genes=genes_with_mutation_error
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_54_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_64_0.png)
 
-    <ggplot: (8771690716612)>
+    <ggplot: (8742807314884)>
+
+```python
+plot_ppc_against_mutation(
+    ppc_m2_summary, num_muts=data.n_muts, genes=genes_with_mutation_error, y="error"
+)
+```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_65_0.png)
+
+    <ggplot: (8742584246673)>
 
 ---
 
@@ -1808,7 +2062,7 @@ with pm.Model() as m3:
 pm.model_to_graphviz(m3)
 ```
 
-![svg](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_58_0.svg)
+![svg](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_69_0.svg)
 
 ```python
 m3_cache_dir = pymc3_cache_dir / "subset_speclet_m3"
@@ -1839,7 +2093,7 @@ az.plot_trace(m3_az, var_names=["g_s", "α_s", "β_c"], compact=True)
 plt.show()
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_61_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_72_0.png)
 
 > This model is currently not sampling properly.
 > This is most likely due to non-identifiability with the two varying intercepts.
@@ -1890,7 +2144,7 @@ with pm.Model() as m4:
 pm.model_to_graphviz(m4)
 ```
 
-![svg](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_65_0.svg)
+![svg](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_76_0.svg)
 
 ```python
 m4_cache_dir = pymc3_cache_dir / "subset_speclet_m4"
@@ -1920,7 +2174,7 @@ az.plot_trace(m4_az, var_names=["μ_g", "σ_g", "g_s", "α_s", "γ"], compact=Tr
 plt.show()
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_67_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_78_0.png)
 
 ```python
 az.summary(m4_az, var_names=["μ_g", "σ_g", "σ_α_s", "γ"])
@@ -2027,14 +2281,33 @@ ppc_m4_summary = logfc_model_ppc_dataframe(
     /home/jc604/.conda/envs/speclet/lib/python3.9/site-packages/arviz/stats/stats.py:493: FutureWarning: hdi currently interprets 2d data as (draw, shape) but this will change in a future release to (chain, draw) for coherence with other functions
 
 ```python
-plot_ppc_error_against_mutation(
-    ppc_m4_summary, num_muts=data.n_muts, genes=genes_with_mutation_error
+for facet_scales in ("free", "free_x"):
+    p = plot_ppc_against_mutation(
+        ppc_m4_summary,
+        num_muts=data.n_muts,
+        genes=genes_with_mutation_error,
+        facet_scales=facet_scales,
+    )
+    print(p)
+```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_81_0.png)
+
+    <ggplot: (8742807177722)>
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_81_2.png)
+
+    <ggplot: (8742584100762)>
+
+```python
+plot_ppc_against_mutation(
+    ppc_m4_summary, num_muts=data.n_muts, genes=genes_with_mutation_error, y="error"
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_70_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_82_0.png)
 
-    <ggplot: (8771925678999)>
+    <ggplot: (8742882092355)>
 
 ```python
 def get_concatenated_summaries(
@@ -2080,9 +2353,9 @@ pos = gg.position_dodge(width=0.75)
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_72_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_84_0.png)
 
-    <ggplot: (8771905088799)>
+    <ggplot: (8742583082509)>
 
 ```python
 sgrna_summaries = get_concatenated_summaries(
@@ -2240,13 +2513,13 @@ sgrna_summaries
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_74_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_86_0.png)
 
-    <ggplot: (8771914953286)>
+    <ggplot: (8742583094565)>
 
 ---
 
-### Model 5. Modify model 4 to make the mutation covariate very with gene
+### Model 5. Modify model 4 to make the mutation covariate vary with gene
 
 $
 y \sim \mathcal{N}(\mu, \sigma) \\
@@ -2298,7 +2571,7 @@ with pm.Model() as m5:
 pm.model_to_graphviz(m5)
 ```
 
-![svg](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_77_0.svg)
+![svg](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_89_0.svg)
 
 ```python
 m5_cache_dir = pymc3_cache_dir / "subset_speclet_m5"
@@ -2328,7 +2601,7 @@ az.plot_trace(m5_az, var_names=["μ_g", "σ_g", "g_s", "α_s", "γ_g"], compact=
 plt.show()
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_79_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_91_0.png)
 
 ```python
 az.summary(m5_az, var_names=["μ_g", "σ_g", "σ_α_s", "μ_γ_g", "σ_γ_g", "σ"])
@@ -2463,14 +2736,77 @@ ppc_m5_summary = logfc_model_ppc_dataframe(
     /home/jc604/.conda/envs/speclet/lib/python3.9/site-packages/arviz/stats/stats.py:493: FutureWarning: hdi currently interprets 2d data as (draw, shape) but this will change in a future release to (chain, draw) for coherence with other functions
 
 ```python
-plot_ppc_error_against_mutation(
-    ppc_m5_summary, num_muts=data.n_muts, genes=genes_with_mutation_error
+for facet_scales in ("free", "free_x"):
+    p = plot_ppc_against_mutation(
+        ppc_m5_summary,
+        num_muts=data.n_muts,
+        genes=genes_with_mutation_error,
+        facet_scales=facet_scales,
+    )
+    print(p)
+```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_94_0.png)
+
+    <ggplot: (8742582742914)>
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_94_2.png)
+
+    <ggplot: (8742582753636)>
+
+```python
+plot_ppc_against_mutation(
+    ppc_m5_summary, num_muts=data.n_muts, genes=genes_with_mutation_error, y="error"
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_82_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_95_0.png)
 
-    <ggplot: (8771914532855)>
+    <ggplot: (8742582338570)>
+
+```python
+type(m5_sampling_results["trace"])
+```
+
+    pymc3.backends.base.MultiTrace
+
+```python
+def trace_to_labeled_dataframe(
+    t: pm.backends.base.MultiTrace,
+    var: str,
+    label: Optional[str] = None,
+    subsample: Optional[int] = 1000,
+) -> pd.DataFrame:
+
+    if label is None:
+        label = var
+    a = t[var]
+    if subsample is not None:
+        a = a[:subsample]
+    return pd.DataFrame(a, columns=["value"]).assign(label=label)
+
+
+m5_mutation_post = pd.concat(
+    [
+        trace_to_labeled_dataframe(m5_sampling_results["trace"], "μ_γ_g"),
+        trace_to_labeled_dataframe(m5_sampling_results["trace"], "σ_γ_g"),
+    ]
+)
+
+(
+    gg.ggplot(m5_mutation_post, gg.aes("value"))
+    + gg.facet_wrap("label", nrow=2, scales="free")
+    + gg.geom_density(color="grey", fill="grey", alpha=0.1)
+    + gg.theme(
+        figure_size=(KEYNOTE_FIG_SIZE[0] / 3, KEYNOTE_FIG_SIZE[1]),
+        subplots_adjust={"hspace": 0.4},
+    )
+)
+```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_97_0.png)
+
+    <ggplot: (8742584254949)>
 
 ```python
 m5_gamma_post = pd.DataFrame(
@@ -2483,6 +2819,10 @@ m5_gamma_post = pd.DataFrame(
     + gg.geom_density(
         gg.aes(color="hugo_symbol", fill="hugo_symbol"), size=0.7, alpha=0.1
     )
+    + gg.theme(
+        figure_size=(KEYNOTE_FIG_SIZE[0] * 2 / 3, KEYNOTE_FIG_SIZE[1]),
+        legend_title=gg.element_blank(),
+    )
     + gg.labs(
         x="posterior",
         y="density",
@@ -2491,9 +2831,9 @@ m5_gamma_post = pd.DataFrame(
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_83_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_98_0.png)
 
-    <ggplot: (8771914557910)>
+    <ggplot: (8742584144731)>
 
 ```python
 m5_gamma_summary = az.summary(
@@ -2513,6 +2853,7 @@ p = (
     + gg.scale_color_discrete(guide=None)
     + gg.scale_alpha_continuous(guide=None)
     + gg.coord_flip()
+    + gg.theme(figure_size=KEYNOTE_FIG_SIZE)
     + gg.labs(
         x=None,
         y="posterior",
@@ -2522,16 +2863,43 @@ p = (
 p
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_84_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_99_0.png)
 
-    <ggplot: (8771914919054)>
+    <ggplot: (8742582538701)>
 
 ```python
-m4_gamma_summary = az.summary(
-    m4_az, var_names=["γ"], hdi_prob=0.89, kind="stats"
-).reset_index()
-m4_gamma_mean = m4_gamma_summary.loc[0, "mean"]
-m4_gamma_hdi = m4_gamma_summary.iloc[0, 3:].to_numpy().astype(float)
+def single_var_summaries(
+    az_obj: az.InferenceData, var_name: str
+) -> Tuple[float, np.ndarray]:
+    d = az.summary(
+        az_obj, var_names=[var_name], hdi_prob=0.89, kind="stats"
+    ).reset_index()
+    var_mean = d.loc[0, "mean"]
+    var_hdi = d.iloc[0, 3:].to_numpy().astype(float)
+    return var_mean, var_hdi
+```
+
+The blue range below indicates the posterior distribution for the $\mu_{\gamma_g}$ covariate.
+
+```python
+m5_gamma_mean, m5_gamma_hdi = single_var_summaries(m5_az, "μ_γ_g")
+
+(
+    p
+    + gg.geom_hline(yintercept=m5_gamma_mean, color="blue")
+    + gg.geom_hline(yintercept=m5_gamma_hdi, color="blue", linetype="--", alpha=0.5)
+    + gg.theme(figure_size=(KEYNOTE_FIG_SIZE[0] * 4 / 5, KEYNOTE_FIG_SIZE[1]))
+)
+```
+
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_102_0.png)
+
+    <ggplot: (8742584145222)>
+
+The blue range below indicates the posterior distribution for the $\gamma$ covariate in the previous model where the mutation covariate dit *not* vary by gene.
+
+```python
+m4_gamma_mean, m4_gamma_hdi = single_var_summaries(m4_az, "γ")
 
 (
     p
@@ -2540,9 +2908,9 @@ m4_gamma_hdi = m4_gamma_summary.iloc[0, 3:].to_numpy().astype(float)
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_85_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_104_0.png)
 
-    <ggplot: (8771914757178)>
+    <ggplot: (8742583998570)>
 
 ---
 
@@ -2623,7 +2991,7 @@ with pm.Model() as m6:
 pm.model_to_graphviz(m6)
 ```
 
-![svg](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_89_0.svg)
+![svg](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_108_0.svg)
 
 ```python
 m6_cache_dir = pymc3_cache_dir / "subset_speclet_m6"
@@ -2643,68 +3011,7 @@ m6_sampling_results = pmhelp.pymc3_sampling_procedure(
 m6_az = pmhelp.samples_to_arviz(model=m6, res=m6_sampling_results)
 ```
 
-    Auto-assigning NUTS sampler...
-    Initializing NUTS using advi+adapt_diag...
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='30668' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  76.67% [30668/40000 01:23<00:25 Average Loss = 37,207]
-</div>
-
-    Convergence achieved at 30700
-    Interrupted at 30,699 [76%]: Average Loss = 53,122
-    Multiprocess sampling (2 chains in 2 jobs)
-    NUTS: [σ, δ_g, γ_g, α_s, σ_δ_g, μ_δ_g, σ_γ_g, μ_γ_g, σ_α_s, g_s, σ_g, μ_g]
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='12000' class='' max='12000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [12000/12000 02:54<00:00 Sampling 2 chains, 0 divergences]
-</div>
-
-    Sampling 2 chains for 4_000 tune and 2_000 draw iterations (8_000 + 4_000 draws total) took 177 seconds.
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='1000' class='' max='1000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [1000/1000 00:11<00:00]
-</div>
-
-    Caching trace and posterior sample...
+    Loading cached trace and posterior sample...
 
 
     posterior predictive variable y's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
@@ -2714,7 +3021,7 @@ az.plot_trace(m6_az, var_names=["μ_g", "σ_g", "g_s", "α_s", "γ_g", "δ_g"], 
 plt.show()
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_91_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_110_0.png)
 
 ```python
 az.summary(
@@ -2886,9 +3193,9 @@ m6_delta_g["hugo_symbol"] = ordered_genes
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_93_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_112_0.png)
 
-    <ggplot: (8771694068387)>
+    <ggplot: (8742806677366)>
 
 ```python
 ppc_m6_summary = logfc_model_ppc_dataframe(
@@ -3121,10 +3428,10 @@ new_pred_data.head()
       <td>-2.820652</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>0</td>
-      <td>0.159735</td>
+      <td>0.173406</td>
       <td>0_CCACCCACAGACGCTCAGCA</td>
-      <td>-0.577399</td>
-      <td>0.823857</td>
+      <td>-0.549859</td>
+      <td>0.916569</td>
     </tr>
     <tr>
       <th>0</th>
@@ -3132,10 +3439,10 @@ new_pred_data.head()
       <td>-2.820652</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>1</td>
-      <td>0.164041</td>
+      <td>0.165270</td>
       <td>1_CCACCCACAGACGCTCAGCA</td>
-      <td>-0.577399</td>
-      <td>0.823857</td>
+      <td>-0.549859</td>
+      <td>0.916569</td>
     </tr>
     <tr>
       <th>1</th>
@@ -3143,10 +3450,10 @@ new_pred_data.head()
       <td>-2.820652</td>
       <td>CCTACTTCCAGCCTAAGCCA</td>
       <td>0</td>
-      <td>0.131140</td>
+      <td>0.091859</td>
       <td>0_CCTACTTCCAGCCTAAGCCA</td>
-      <td>-0.535059</td>
-      <td>0.863401</td>
+      <td>-0.653874</td>
+      <td>0.795603</td>
     </tr>
     <tr>
       <th>1</th>
@@ -3154,10 +3461,10 @@ new_pred_data.head()
       <td>-2.820652</td>
       <td>CCTACTTCCAGCCTAAGCCA</td>
       <td>1</td>
-      <td>0.120027</td>
+      <td>0.107284</td>
       <td>1_CCTACTTCCAGCCTAAGCCA</td>
-      <td>-0.535059</td>
-      <td>0.863401</td>
+      <td>-0.653874</td>
+      <td>0.795603</td>
     </tr>
     <tr>
       <th>2</th>
@@ -3165,10 +3472,10 @@ new_pred_data.head()
       <td>-2.820652</td>
       <td>GTACAGAGTGGCCCTCACCG</td>
       <td>0</td>
-      <td>-0.325785</td>
+      <td>-0.323371</td>
       <td>0_GTACAGAGTGGCCCTCACCG</td>
-      <td>-0.971105</td>
-      <td>0.442466</td>
+      <td>-1.043481</td>
+      <td>0.385511</td>
     </tr>
   </tbody>
 </table>
@@ -3373,9 +3680,9 @@ data.head()
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_99_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_118_0.png)
 
-    <ggplot: (8769919732902)>
+    <ggplot: (8742584527111)>
 
 TODO:
 
@@ -3413,9 +3720,9 @@ models_gene_posts = pd.concat([get_gene_summary_df(a, v, m) for a, v, m in zippe
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_101_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_120_0.png)
 
-    <ggplot: (8771665915257)>
+    <ggplot: (8742584238785)>
 
 ---
 
@@ -3582,9 +3889,9 @@ plot_data = (
 )
 ```
 
-![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_115_0.png)
+![png](010_013_hierarchical-model-subsample_files/010_013_hierarchical-model-subsample_134_0.png)
 
-    <ggplot: (8769918478626)>
+    <ggplot: (8742581538184)>
 
 ---
 
@@ -3593,7 +3900,37 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
+    execution time: 21.47 minutes
+
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
+
+    Last updated: 2021-01-24
+
+    Python implementation: CPython
+    Python version       : 3.9.1
+    IPython version      : 7.19.0
+
+    Compiler    : GCC 9.3.0
+    OS          : Linux
+    Release     : 3.10.0-1062.el7.x86_64
+    Machine     : x86_64
+    Processor   : x86_64
+    CPU cores   : 28
+    Architecture: 64bit
+
+    Hostname: compute-e-16-229.o2.rc.hms.harvard.edu
+
+    Git branch: data-subset-model
+
+    pandas    : 1.2.0
+    numpy     : 1.19.5
+    seaborn   : 0.11.1
+    pymc3     : 3.9.3
+    theano    : 1.0.5
+    arviz     : 0.11.0
+    matplotlib: 3.3.3
+    re        : 2.2.1
+    plotnine  : 0.7.1
