@@ -4,7 +4,7 @@ import string
 import warnings
 from pathlib import Path
 from time import time
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import arviz as az
 import common_data_processing as dphelp
@@ -17,6 +17,7 @@ import pymc3 as pm
 import pymc3_helpers as pmhelp
 import seaborn as sns
 import string_functions as stringr
+from custom_pymc3_callbacks import DivergenceFractionCallback
 from plotnine_helpers import margin
 from theano import tensor as tt
 
@@ -130,7 +131,7 @@ with pm.Model() as m7:
     lfc_shared = pm.Data("lfc_shared", dphelp.extract_flat_ary(data.lfc))
 
     μ_g = pm.Normal("μ_g", 0, 1)
-    σ_g = pm.HalfNormal("σ_g", 2)
+    σ_g = pm.HalfNormal("σ_g", 1)
 
     g_s = pm.Normal("g_s", μ_g, σ_g, shape=num_genes)
 
@@ -174,9 +175,16 @@ with m7:
 ```
 
 ```python
-plot_vars = ["g_s", "γ_g", "δ_g", "ϵ_gk", "μ", "y"]
-fig, axes = plt.subplots(2, 3, figsize=(10, 6))
-for var, ax in zip(plot_vars, axes.flatten()):
+m7_vars: List[str] = []
+for x in m7_prior_predictive.keys():
+    if not "log__" in x:
+        m7_vars.append(x)
+
+m7_vars.sort()
+m7_vars.sort(key=lambda x: -len(x))
+
+fig, axes = plt.subplots(6, 3, figsize=(10, 12))
+for var, ax in zip(m7_vars, axes.flatten()):
     sns.kdeplot(x=np.random.choice(m7_prior_predictive[var].flatten(), 1000), ax=ax)
     ax.set_title(f"{var} prior distribution")
 
@@ -187,45 +195,60 @@ plt.show()
 ![png](010_014_hierarchical-model-subsample_files/010_014_hierarchical-model-subsample_9_0.png)
 
 ```python
+class DivergenceCountingCallback:
+    def __init__(self, max_divergences: int = 50) -> None:
+        self.max_divergences = max_divergences
+        self.divergence_count: int = 0
+        self.draw_dict: Dict[int, pm.parallel_sampling.Draw] = {}
+        self.trace_dict: Dict[int, pm.backends.ndarray.NDArray] = {}
+
+    def __call__(
+        self, trace: pm.backends.ndarray.NDArray, draw: pm.parallel_sampling.Draw
+    ) -> None:
+        if draw.tuning:
+            return
+
+        if len(trace) > 40:
+            self.draw_dict[draw.chain] = draw
+            self.trace_dict[draw.chain] = trace
+            if len(self.draw_dict.keys()) > 2:
+                raise KeyboardInterrupt("JHC")
+
+
+#         if draw.stats[0]["diverging"]:
+#             self.divergence_count += 1
+#             if self.divergence_count >= self.max_divergences:
+#                 raise KeyboardInterrupt(f"Too many divergences: {self.divergence_count} - stopping early")
+```
+
+```python
 m7_cache_dir = pymc3_cache_dir / "subset_speclet_m7"
+
+N_TUNE_STEPS = 1000
+
+# divergence_callback = DivergenceCountingCallback(50)
+divergence_callback = DivergenceFractionCallback(
+    n_tune_steps=N_TUNE_STEPS, max_frac=0.02, min_samples=100
+)
 
 m7_sampling_results = pmhelp.pymc3_sampling_procedure(
     model=m7,
     num_mcmc=2000,
-    tune=4000,
+    tune=N_TUNE_STEPS,
     chains=3,
     cores=3,
     random_seed=RANDOM_SEED,
     cache_dir=pymc3_cache_dir / m7_cache_dir,
     force=True,
-    sample_kwargs={"init": "advi+adapt_diag", "n_init": 40000},
+    sample_kwargs={"callback": divergence_callback},
+    #     sample_kwargs={"init": "advi+adapt_diag", "n_init": 40000, "callback": divergence_callback},
 )
 
 m7_az = pmhelp.samples_to_arviz(model=m7, res=m7_sampling_results)
 ```
 
     Auto-assigning NUTS sampler...
-    Initializing NUTS using advi+adapt_diag...
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='29290' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  73.22% [29290/40000 03:29<01:16 Average Loss = 37,083]
-</div>
-
-    Convergence achieved at 29300
-    Interrupted at 29,299 [73%]: Average Loss = 56,152
+    Initializing NUTS using jitter+adapt_diag...
     Multiprocess sampling (3 chains in 3 jobs)
     NUTS: [σ, ϵ_gk, δ_g, γ_g, α_s, σ_ϵ_g, μ_ϵ_g, σ_δ_g, μ_δ_g, σ_γ_g, μ_γ_g, σ_α_s, g_s, σ_g, μ_g]
 
@@ -242,17 +265,13 @@ m7_az = pmhelp.samples_to_arviz(model=m7, res=m7_sampling_results)
             background: #F44336;
         }
     </style>
-  <progress value='18000' class='' max='18000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [18000/18000 45:15<00:00 Sampling 3 chains, 3,999 divergences]
+  <progress value='3021' class='' max='9000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  33.57% [3021/9000 12:16<24:18 Sampling 3 chains, 87 divergences]
 </div>
 
-    Sampling 3 chains for 4_000 tune and 2_000 draw iterations (12_000 + 6_000 draws total) took 2717 seconds.
-    The chain contains only diverging samples. The model is probably misspecified.
-    The acceptance probability does not match the target. It is 0.0596229373504105, but should be close to 0.8. Try to increase the number of tuning steps.
-    There were 1999 divergences after tuning. Increase `target_accept` or reparameterize.
-    The acceptance probability does not match the target. It is 0.20772974594025437, but should be close to 0.8. Try to increase the number of tuning steps.
+    Sampling 2 chains for 1_000 tune and 84 draw iterations (2_000 + 168 draws total) took 738 seconds.
     The rhat statistic is larger than 1.4 for some parameters. The sampler did not converge.
-    The estimated number of effective samples is smaller than 200 for some parameters.
+    The number of effective samples is smaller than 10% for some parameters.
 
 <div>
     <style>
@@ -275,6 +294,26 @@ m7_az = pmhelp.samples_to_arviz(model=m7, res=m7_sampling_results)
 
 
     posterior predictive variable y's shape not compatible with number of chains and draws. This can mean that some draws or even whole chains are not represented.
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
 
 The only two high-level parameters with Rhat > 1.00 and very small ESS were `μ_g` and `μ_ϵ_g`.
 This is likely because there is too much non-identifiability between the two covariates $\alpha_s$ and $\epsilon_{gk}$.
@@ -321,129 +360,129 @@ az.summary(
   <tbody>
     <tr>
       <th>σ</th>
-      <td>0.443</td>
+      <td>0.444</td>
       <td>0.001</td>
-      <td>0.441</td>
-      <td>0.445</td>
+      <td>0.442</td>
+      <td>0.446</td>
+      <td>0.001</td>
       <td>0.000</td>
-      <td>0.000</td>
-      <td>4264.0</td>
-      <td>4264.0</td>
-      <td>4261.0</td>
-      <td>2909.0</td>
-      <td>1.00</td>
+      <td>5.0</td>
+      <td>5.0</td>
+      <td>4.0</td>
+      <td>16.0</td>
+      <td>1.43</td>
     </tr>
     <tr>
       <th>μ_g</th>
-      <td>-0.131</td>
-      <td>0.160</td>
-      <td>-0.380</td>
-      <td>0.099</td>
-      <td>0.040</td>
-      <td>0.032</td>
-      <td>16.0</td>
-      <td>13.0</td>
+      <td>-0.119</td>
+      <td>0.081</td>
+      <td>-0.240</td>
+      <td>0.005</td>
+      <td>0.045</td>
+      <td>0.035</td>
+      <td>3.0</td>
+      <td>3.0</td>
+      <td>3.0</td>
       <td>15.0</td>
-      <td>62.0</td>
-      <td>1.12</td>
+      <td>1.77</td>
     </tr>
     <tr>
       <th>σ_g</th>
-      <td>0.275</td>
-      <td>0.049</td>
-      <td>0.198</td>
-      <td>0.346</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>2764.0</td>
-      <td>2764.0</td>
-      <td>2672.0</td>
-      <td>3022.0</td>
-      <td>1.00</td>
+      <td>0.256</td>
+      <td>0.042</td>
+      <td>0.208</td>
+      <td>0.317</td>
+      <td>0.007</td>
+      <td>0.005</td>
+      <td>38.0</td>
+      <td>38.0</td>
+      <td>38.0</td>
+      <td>109.0</td>
+      <td>1.03</td>
     </tr>
     <tr>
       <th>μ_γ_g</th>
-      <td>-0.087</td>
-      <td>0.057</td>
-      <td>-0.181</td>
-      <td>0.002</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>4046.0</td>
-      <td>3018.0</td>
-      <td>4063.0</td>
-      <td>2349.0</td>
-      <td>1.00</td>
+      <td>-0.084</td>
+      <td>0.050</td>
+      <td>-0.185</td>
+      <td>-0.019</td>
+      <td>0.004</td>
+      <td>0.006</td>
+      <td>148.0</td>
+      <td>33.0</td>
+      <td>72.0</td>
+      <td>108.0</td>
+      <td>1.26</td>
     </tr>
     <tr>
       <th>σ_γ_g</th>
-      <td>0.288</td>
-      <td>0.046</td>
-      <td>0.223</td>
-      <td>0.359</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>3805.0</td>
-      <td>3527.0</td>
-      <td>4177.0</td>
-      <td>2838.0</td>
-      <td>1.00</td>
+      <td>0.262</td>
+      <td>0.055</td>
+      <td>0.199</td>
+      <td>0.331</td>
+      <td>0.029</td>
+      <td>0.022</td>
+      <td>4.0</td>
+      <td>4.0</td>
+      <td>3.0</td>
+      <td>17.0</td>
+      <td>1.69</td>
     </tr>
     <tr>
       <th>μ_δ_g</th>
-      <td>-0.051</td>
-      <td>0.012</td>
-      <td>-0.070</td>
+      <td>-0.048</td>
+      <td>0.011</td>
+      <td>-0.067</td>
       <td>-0.032</td>
-      <td>0.000</td>
-      <td>0.000</td>
-      <td>3912.0</td>
-      <td>3523.0</td>
-      <td>3933.0</td>
-      <td>2799.0</td>
-      <td>1.00</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>84.0</td>
+      <td>52.0</td>
+      <td>80.0</td>
+      <td>78.0</td>
+      <td>1.23</td>
     </tr>
     <tr>
       <th>σ_δ_g</th>
-      <td>0.061</td>
-      <td>0.009</td>
-      <td>0.047</td>
-      <td>0.076</td>
-      <td>0.000</td>
-      <td>0.000</td>
-      <td>3553.0</td>
-      <td>3302.0</td>
-      <td>3856.0</td>
-      <td>2666.0</td>
-      <td>1.00</td>
+      <td>0.056</td>
+      <td>0.007</td>
+      <td>0.046</td>
+      <td>0.065</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>19.0</td>
+      <td>19.0</td>
+      <td>18.0</td>
+      <td>105.0</td>
+      <td>1.18</td>
     </tr>
     <tr>
       <th>μ_ϵ_g</th>
-      <td>0.065</td>
-      <td>0.148</td>
-      <td>-0.104</td>
-      <td>0.321</td>
-      <td>0.038</td>
-      <td>0.028</td>
-      <td>15.0</td>
-      <td>15.0</td>
-      <td>15.0</td>
-      <td>47.0</td>
-      <td>1.22</td>
+      <td>0.066</td>
+      <td>0.059</td>
+      <td>-0.000</td>
+      <td>0.168</td>
+      <td>0.037</td>
+      <td>0.030</td>
+      <td>3.0</td>
+      <td>3.0</td>
+      <td>3.0</td>
+      <td>13.0</td>
+      <td>2.11</td>
     </tr>
     <tr>
       <th>σ_ϵ_g</th>
-      <td>0.098</td>
-      <td>0.006</td>
-      <td>0.089</td>
-      <td>0.108</td>
-      <td>0.000</td>
-      <td>0.000</td>
-      <td>1977.0</td>
-      <td>1973.0</td>
-      <td>1982.0</td>
-      <td>2828.0</td>
-      <td>1.00</td>
+      <td>0.067</td>
+      <td>0.005</td>
+      <td>0.060</td>
+      <td>0.077</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>16.0</td>
+      <td>16.0</td>
+      <td>14.0</td>
+      <td>108.0</td>
+      <td>1.23</td>
     </tr>
   </tbody>
 </table>
@@ -623,7 +662,7 @@ m7_epsilon_summary.head()
 )
 ```
 
-![png](010_014_hierarchical-model-subsample_files/010_014_hierarchical-model-subsample_15_0.png)
+![png](010_014_hierarchical-model-subsample_files/010_014_hierarchical-model-subsample_21_0.png)
 
     <ggplot: (8769626831041)>
 
@@ -639,7 +678,7 @@ m7_epsilon_summary.head()
 )
 ```
 
-![png](010_014_hierarchical-model-subsample_files/010_014_hierarchical-model-subsample_16_0.png)
+![png](010_014_hierarchical-model-subsample_files/010_014_hierarchical-model-subsample_22_0.png)
 
     <ggplot: (8769616517464)>
 
@@ -663,7 +702,7 @@ def make_tidy_epsilon_gk(
     return tidy_df
 ```
 
-![png](010_014_hierarchical-model-subsample_files/010_014_hierarchical-model-subsample_17_0.png)
+![png](010_014_hierarchical-model-subsample_files/010_014_hierarchical-model-subsample_23_0.png)
 
     <ggplot: (8770084454897)>
 
@@ -694,7 +733,7 @@ m7_epslion_tidy = make_tidy_epsilon_gk(m7_epsilon_post, data)
 )
 ```
 
-![png](010_014_hierarchical-model-subsample_files/010_014_hierarchical-model-subsample_19_0.png)
+![png](010_014_hierarchical-model-subsample_files/010_014_hierarchical-model-subsample_25_0.png)
 
     <ggplot: (8770114265995)>
 
@@ -717,7 +756,7 @@ kras_epslion["kras_g_s"] = np.tile(kras_g_s, kras_epslion.kras_mutation.nunique(
 )
 ```
 
-![png](010_014_hierarchical-model-subsample_files/010_014_hierarchical-model-subsample_21_0.png)
+![png](010_014_hierarchical-model-subsample_files/010_014_hierarchical-model-subsample_27_0.png)
 
     <ggplot: (8769638892710)>
 
