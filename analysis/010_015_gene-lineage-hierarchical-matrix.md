@@ -50,7 +50,7 @@ final_dataset_path = (
     data_path / "subsample_covariate-matrix_depmap-modeling-dataframe.csv"
 )
 
-if final_dataset_path.exists() and False:
+if final_dataset_path.exists():
     # Read in data set that has already been created.
     print("Reading in existing file.")
     modeling_data = pd.read_csv(final_dataset_path)
@@ -81,13 +81,34 @@ print(modeling_data.hugo_symbol.unique().tolist())
 print("-" * 60)
 print("Lineages:")
 print(modeling_data.lineage.unique().tolist())
+
+print("-" * 60)
+print(f"number of cell lines: {modeling_data.depmap_id.nunique()}")
 ```
 
     Genes:
-    ['C18orf54', 'ARG1', 'DHDH', 'RGPD6', 'H3F3A', 'STRC', 'GIPR', 'FAM206A', 'YPEL5', 'GTF2E1', 'AAED1', 'LGI3', 'ZNF175', 'ARHGAP26', 'IL17B', 'HERC1', 'PLEKHH3', 'NACC2', 'PRKAR1A', 'CT47A7']
+    ['AAED1', 'ARG1', 'ARHGAP26', 'C18orf54', 'CT47A7', 'DHDH', 'FAM206A', 'GIPR', 'GTF2E1', 'H3F3A', 'HERC1', 'IL17B', 'LGI3', 'NACC2', 'PLEKHH3', 'PRKAR1A', 'RGPD6', 'STRC', 'YPEL5', 'ZNF175']
     ------------------------------------------------------------
     Lineages:
-    ['blood', 'upper_aerodigestive', 'colorectal', 'liver']
+    ['blood', 'colorectal', 'liver', 'upper_aerodigestive']
+    ------------------------------------------------------------
+    number of cell lines: 132
+
+```python
+modeling_data = modeling_data.sort_values(
+    ["hugo_symbol", "sgrna", "lineage", "depmap_id"]
+).reset_index(drop=True)
+
+for col in [
+    "sgrna",
+    "pdna_batch",
+    "depmap_id",
+    "lineage",
+    "kras_mutation",
+    "hugo_symbol",
+]:
+    modeling_data = dphelp.make_cat(modeling_data, col, ordered=True, sort_cats=True)
+```
 
 ```python
 modeling_data.shape
@@ -143,19 +164,19 @@ modeling_data.head(5)
   <tbody>
     <tr>
       <th>0</th>
-      <td>AAGAAAAACAAGAAATGCCG</td>
-      <td>697-311cas9_repa_p6_batch3</td>
-      <td>-0.317445</td>
+      <td>CACCCGCACGAACACCACCA</td>
+      <td>hel-311cas9_repa_p4_batch3</td>
+      <td>0.619938</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-000070</td>
-      <td>Primary</td>
+      <td>ACH-000004</td>
+      <td>NaN</td>
       <td>blood</td>
-      <td>ALL</td>
+      <td>AML</td>
       <td>WT</td>
       <td>...</td>
-      <td>0.985476</td>
-      <td>1.679088</td>
+      <td>NaN</td>
+      <td>NaN</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -163,23 +184,23 @@ modeling_data.head(5)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>2.629939</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>AAGCATCTCTGGCCATGCCA</td>
-      <td>697-311cas9_repa_p6_batch3</td>
-      <td>0.216901</td>
+      <td>CACCCGCACGAACACCACCA</td>
+      <td>hel-311cas9_repb_p4_batch3</td>
+      <td>0.780068</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-000070</td>
-      <td>Primary</td>
+      <td>ACH-000004</td>
+      <td>NaN</td>
       <td>blood</td>
-      <td>ALL</td>
+      <td>AML</td>
       <td>WT</td>
       <td>...</td>
-      <td>0.971533</td>
-      <td>1.641990</td>
+      <td>NaN</td>
+      <td>NaN</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -187,23 +208,23 @@ modeling_data.head(5)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>0.000000</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>ACAGAAACACGACATCCCCA</td>
-      <td>697-311cas9_repa_p6_batch3</td>
-      <td>0.014907</td>
+      <td>CACCCGCACGAACACCACCA</td>
+      <td>hel9217-311cas9_repa_p6_batch3</td>
+      <td>0.176848</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-000070</td>
-      <td>Primary</td>
+      <td>ACH-000005</td>
+      <td>NaN</td>
       <td>blood</td>
-      <td>ALL</td>
+      <td>AML</td>
       <td>WT</td>
       <td>...</td>
-      <td>1.009784</td>
-      <td>1.745008</td>
+      <td>NaN</td>
+      <td>NaN</td>
       <td>0</td>
       <td>False</td>
       <td>NaN</td>
@@ -211,19 +232,19 @@ modeling_data.head(5)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>0.056584</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>ACTCACCTGTCGAGGCGACG</td>
-      <td>697-311cas9_repa_p6_batch3</td>
-      <td>-0.987370</td>
+      <td>CACCCGCACGAACACCACCA</td>
+      <td>hel9217-311cas9_repb_p6_batch3</td>
+      <td>0.295670</td>
       <td>3</td>
       <td>True</td>
-      <td>ACH-000070</td>
-      <td>Primary</td>
+      <td>ACH-000005</td>
+      <td>NaN</td>
       <td>blood</td>
-      <td>ALL</td>
+      <td>AML</td>
       <td>WT</td>
       <td>...</td>
       <td>NaN</td>
@@ -235,48 +256,36 @@ modeling_data.head(5)
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>0.454176</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>ACTGCCCGCAAATCGACCGG</td>
-      <td>697-311cas9_repa_p6_batch3</td>
-      <td>-0.712884</td>
-      <td>3</td>
+      <td>CACCCGCACGAACACCACCA</td>
+      <td>mv4;11-311cas9_repa_p6_batch2</td>
+      <td>0.564909</td>
+      <td>2</td>
       <td>True</td>
-      <td>ACH-000070</td>
+      <td>ACH-000045</td>
       <td>Primary</td>
       <td>blood</td>
-      <td>ALL</td>
+      <td>AML</td>
       <td>WT</td>
       <td>...</td>
-      <td>1.300406</td>
-      <td>2.670787</td>
-      <td>1</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>0</td>
       <td>False</td>
-      <td>missense_mutation</td>
-      <td>FALSE</td>
-      <td>FALSE</td>
-      <td>TRUE</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
       <td>False</td>
-      <td>10.285865</td>
+      <td>NaN</td>
     </tr>
   </tbody>
 </table>
 <p>5 rows × 27 columns</p>
 </div>
-
-```python
-for col in [
-    "sgrna",
-    "pdna_batch",
-    "depmap_id",
-    "lineage",
-    "kras_mutation",
-    "hugo_symbol",
-]:
-    modeling_data = dphelp.make_cat(modeling_data, col, ordered=True, sort_cats=True)
-```
 
 ## Data visualization
 
@@ -301,7 +310,7 @@ plot_data = (
 
 ![png](010_015_gene-lineage-hierarchical-matrix_files/010_015_gene-lineage-hierarchical-matrix_9_0.png)
 
-    <ggplot: (8765464161009)>
+    <ggplot: (8770218525257)>
 
 ```python
 plot_data = (
@@ -321,7 +330,7 @@ plot_data = (
 
 ![png](010_015_gene-lineage-hierarchical-matrix_files/010_015_gene-lineage-hierarchical-matrix_10_0.png)
 
-    <ggplot: (8765464171945)>
+    <ggplot: (8770218525326)>
 
 ```python
 (
@@ -343,7 +352,637 @@ plot_data = (
 
 ![png](010_015_gene-lineage-hierarchical-matrix_files/010_015_gene-lineage-hierarchical-matrix_11_0.png)
 
-    <ggplot: (8765464034314)>
+    <ggplot: (8770213835424)>
+
+## Modeling
+
+```python
+gene_idx, num_genes = dphelp.get_indices_and_count(modeling_data, "hugo_symbol")
+
+cellline_idx, num_celllines = dphelp.get_indices_and_count(modeling_data, "depmap_id")
+
+cellline_to_lineage_map = (
+    modeling_data[["lineage", "depmap_id"]].drop_duplicates().reset_index(drop=True)
+)
+cellline_to_lineage_idx, num_lineages = dphelp.get_indices_and_count(
+    cellline_to_lineage_map, "lineage"
+)
+```
+
+```python
+with pm.Model() as m1:
+
+    # Indexing arrays
+    gene_idx_shared = pm.Data("gene_idx", gene_idx)
+    cellline_idx_shared = pm.Data("cellline_idx", cellline_idx)
+    cellline_to_lineage_idx_shared = pm.Data(
+        "cellline_to_lineage_idx", cellline_to_lineage_idx
+    )
+
+    # Data
+    lfc_shared = pm.Data("lfc", modeling_data.lfc.to_numpy())
+
+    # Model parameters
+    μ_μ_μ_γ = pm.Normal("μ_μ_μ_γ", 3)
+    σ_μ_μ_γ = pm.HalfNormal("σ_μ_μ_γ", 3)
+
+    μ_μ_γ = pm.Normal("μ_μ_γ", μ_μ_μ_γ, σ_μ_μ_γ, shape=(num_genes, 1))
+    σ_μ_γ = pm.HalfNormal("σ_μ_γ", 3)
+
+    μ_γ = pm.Normal("μ_γ", μ_μ_γ, σ_μ_γ, shape=(num_genes, num_lineages))
+    σ_γ = pm.HalfNormal("σ_γ", 3)
+
+    γ = pm.Normal(
+        "γ",
+        μ_γ[:, cellline_to_lineage_idx_shared],
+        σ_γ,
+        shape=(num_genes, num_celllines),
+    )
+
+    μ = pm.Deterministic("μ", γ[gene_idx_shared, cellline_idx_shared])
+    σ = pm.HalfNormal("σ", 3)
+
+    # Likelihood
+    y = pm.Normal("y", μ, σ, observed=lfc_shared)
+```
+
+```python
+pm.model_to_graphviz(m1)
+```
+
+![svg](010_015_gene-lineage-hierarchical-matrix_files/010_015_gene-lineage-hierarchical-matrix_15_0.svg)
+
+```python
+m1_cache_dir = pymc3_cache_dir / "gene-lineage-model_m1"
+
+m1_sampling_results = pmhelp.pymc3_sampling_procedure(
+    model=m1,
+    num_mcmc=3000,
+    tune=4000,
+    chains=4,
+    cores=4,
+    random_seed=RANDOM_SEED,
+    cache_dir=m1_cache_dir,
+    force=False,
+    sample_kwargs={"init": "advi+adapt_diag", "n_init": 500000},
+)
+
+m1_az = pmhelp.samples_to_arviz(model=m1, res=m1_sampling_results)
+```
+
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using advi+adapt_diag...
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='2702' class='' max='500000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  0.54% [2702/500000 00:07<23:38 Average Loss = 66,610]
+</div>
+
+    Interrupted at 2,737 [0%]: Average Loss = 80,093
+
+
+
+    ---------------------------------------------------------------------------
+
+    KeyboardInterrupt                         Traceback (most recent call last)
+
+    <ipython-input-119-e0ea2501b2aa> in <module>
+          1 m1_cache_dir = pymc3_cache_dir / "gene-lineage-model_m1"
+          2
+    ----> 3 m1_sampling_results = pmhelp.pymc3_sampling_procedure(
+          4     model=m1,
+          5     num_mcmc=3000,
+
+
+    /n/data2/dfci/cancerbio/haigis/Cook/speclet/analysis/pymc3_helpers.py in pymc3_sampling_procedure(model, num_mcmc, tune, chains, cores, prior_check_samples, ppc_samples, random_seed, cache_dir, force, sample_kwargs)
+         99                 prior_check_samples, random_seed=random_seed
+        100             )
+    --> 101             trace = pm.sample(
+        102                 draws=num_mcmc,
+        103                 tune=tune,
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/sampling.py in sample(draws, step, init, n_init, start, trace, chain_idx, chains, cores, tune, progressbar, model, random_seed, discard_tuned_samples, compute_convergence_checks, callback, return_inferencedata, idata_kwargs, mp_ctx, pickle_backend, **kwargs)
+        479             # By default, try to use NUTS
+        480             _log.info("Auto-assigning NUTS sampler...")
+    --> 481             start_, step = init_nuts(
+        482                 init=init,
+        483                 chains=chains,
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/sampling.py in init_nuts(init, chains, n_init, model, random_seed, progressbar, **kwargs)
+       2168         raise ValueError("Unknown initializer: {}.".format(init))
+       2169
+    -> 2170     step = pm.NUTS(potential=potential, model=model, **kwargs)
+       2171
+       2172     return start, step
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/step_methods/hmc/nuts.py in __init__(self, vars, max_treedepth, early_max_treedepth, **kwargs)
+        166         `pm.sample` to the desired number of tuning steps.
+        167         """
+    --> 168         super().__init__(vars, **kwargs)
+        169
+        170         self.max_treedepth = max_treedepth
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/step_methods/hmc/base_hmc.py in __init__(self, vars, scaling, step_scale, is_cov, model, blocked, potential, dtype, Emax, target_accept, gamma, k, t0, adapt_step_size, step_rand, **theano_kwargs)
+         91         vars = inputvars(vars)
+         92
+    ---> 93         super().__init__(vars, blocked=blocked, model=model, dtype=dtype, **theano_kwargs)
+         94
+         95         self.adapt_step_size = adapt_step_size
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/step_methods/arraystep.py in __init__(self, vars, model, blocked, dtype, **theano_kwargs)
+        241         self.blocked = blocked
+        242
+    --> 243         func = model.logp_dlogp_function(
+        244             vars, dtype=dtype, **theano_kwargs)
+        245
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/model.py in logp_dlogp_function(self, grad_vars, **kwargs)
+        933         varnames = [var.name for var in grad_vars]
+        934         extra_vars = [var for var in self.free_RVs if var.name not in varnames]
+    --> 935         return ValueGradFunction(self.logpt, grad_vars, extra_vars, **kwargs)
+        936
+        937     @property
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/model.py in __init__(self, cost, grad_vars, extra_vars, dtype, casting, **kwargs)
+        647         )
+        648
+    --> 649         grad = tt.grad(self._cost_joined, self._vars_joined)
+        650         grad.name = "__grad"
+        651
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gradient.py in grad(cost, wrt, consider_constant, disconnected_inputs, add_names, known_grads, return_disconnected, null_gradients)
+        602             assert g.type.dtype in tensor.float_dtypes
+        603
+    --> 604     rval = _populate_grad_dict(var_to_app_to_idx,
+        605                                grad_dict, wrt, cost_name)
+        606
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gradient.py in _populate_grad_dict(var_to_app_to_idx, grad_dict, wrt, cost_name)
+       1369         return grad_dict[var]
+       1370
+    -> 1371     rval = [access_grad_cache(elem) for elem in wrt]
+       1372
+       1373     return rval
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gradient.py in <listcomp>(.0)
+       1369         return grad_dict[var]
+       1370
+    -> 1371     rval = [access_grad_cache(elem) for elem in wrt]
+       1372
+       1373     return rval
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gradient.py in access_grad_cache(var)
+       1324                     for idx in node_to_idx[node]:
+       1325
+    -> 1326                         term = access_term_cache(node)[idx]
+       1327
+       1328                         if not isinstance(term, gof.Variable):
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gradient.py in access_term_cache(node)
+       1019             inputs = node.inputs
+       1020
+    -> 1021             output_grads = [access_grad_cache(var) for var in node.outputs]
+       1022
+       1023             # list of bools indicating if each output is connected to the cost
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gradient.py in <listcomp>(.0)
+       1019             inputs = node.inputs
+       1020
+    -> 1021             output_grads = [access_grad_cache(var) for var in node.outputs]
+       1022
+       1023             # list of bools indicating if each output is connected to the cost
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gradient.py in access_grad_cache(var)
+       1324                     for idx in node_to_idx[node]:
+       1325
+    -> 1326                         term = access_term_cache(node)[idx]
+       1327
+       1328                         if not isinstance(term, gof.Variable):
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gradient.py in access_term_cache(node)
+       1226                 # Check that the gradient term for this input
+       1227                 # has the right shape
+    -> 1228                 if hasattr(term, 'shape'):
+       1229                     orig_ipt = inputs[i]
+       1230                     for orig_ipt_v, term_v in get_debug_values(orig_ipt, term):
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/tensor/var.py in <lambda>(self)
+        285             return theano.tensor.basic.transpose(self, axes)
+        286
+    --> 287     shape = property(lambda self: theano.tensor.basic.shape(self))
+        288
+        289     size = property(lambda self: self.shape[0] if self.ndim == 1 else
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gof/op.py in __call__(self, *inputs, **kwargs)
+        667
+        668                 # compute output value once with test inputs to validate graph
+    --> 669                 thunk = node.op.make_thunk(node, storage_map, compute_map,
+        670                                            no_recycling=[])
+        671                 thunk.inputs = [storage_map[v] for v in node.inputs]
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gof/op.py in make_thunk(self, node, storage_map, compute_map, no_recycling, impl)
+        952                               compute_map=compute_map, impl='c')
+        953             try:
+    --> 954                 return self.make_c_thunk(node, storage_map, compute_map,
+        955                                          no_recycling)
+        956             except (NotImplementedError, utils.MethodNotDefined):
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gof/op.py in make_c_thunk(self, node, storage_map, compute_map, no_recycling)
+        831         node_output_storage = [storage_map[r] for r in node.outputs]
+        832
+    --> 833         e = FunctionGraph(node.inputs, node.outputs)
+        834         e_no_recycling = [new_o
+        835                           for (new_o, old_o) in zip(e.outputs, node.outputs)
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gof/fg.py in __init__(self, inputs, outputs, features, clone, update_mapping)
+        135
+        136         if clone:
+    --> 137             inputs, outputs = graph.clone(inputs, outputs)
+        138
+        139         self.execute_callbacks_time = 0
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gof/graph.py in clone(i, o, copy_inputs, copy_orphans)
+        860     if copy_orphans is None:
+        861         copy_orphans = copy_inputs
+    --> 862     equiv = clone_get_equiv(i, o, copy_inputs, copy_orphans)
+        863     return [equiv[input] for input in i], [equiv[output] for output in o]
+        864
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gof/graph.py in clone_get_equiv(inputs, outputs, copy_inputs, copy_orphans, memo)
+        897     for input in inputs:
+        898         if copy_inputs:
+    --> 899             cpy = input.clone()
+        900             cpy.owner = None
+        901             cpy.index = None
+
+
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gof/graph.py in clone(self)
+        452         # return copy(self)
+        453         cp = self.__class__(self.type, None, None, self.name)
+    --> 454         cp.tag = copy(self.tag)
+        455         return cp
+        456
+
+
+    ~/.conda/envs/speclet/lib/python3.9/copy.py in copy(x)
+         84         return copier(x)
+         85
+    ---> 86     reductor = dispatch_table.get(cls)
+         87     if reductor is not None:
+         88         rv = reductor(x)
+
+
+    KeyboardInterrupt:
+
+```python
+az.summary(m1_az, var_names=["σ_μ_μ_γ", "μ_μ_μ_γ"], hdi_prob=0.89)
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_mean</th>
+      <th>ess_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>σ_μ_μ_γ</th>
+      <td>0.540</td>
+      <td>0.097</td>
+      <td>0.394</td>
+      <td>0.681</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>10071.0</td>
+      <td>8590.0</td>
+      <td>12290.0</td>
+      <td>6218.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>μ_μ_μ_γ</th>
+      <td>-0.135</td>
+      <td>0.125</td>
+      <td>-0.328</td>
+      <td>0.067</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>8478.0</td>
+      <td>7397.0</td>
+      <td>8896.0</td>
+      <td>5171.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+az.plot_trace(m1_az, var_names=["μ_μ_μ_γ", "σ_μ_μ_γ"], combined=True)
+plt.show()
+```
+
+![png](010_015_gene-lineage-hierarchical-matrix_files/010_015_gene-lineage-hierarchical-matrix_18_0.png)
+
+```python
+gamma_post_summary = az.summary(m1_az, var_names="γ", hdi_prob=0.89, kind="stats")
+```
+
+```python
+gamma_post_summary.head()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>γ[0,0]</th>
+      <td>0.191</td>
+      <td>0.144</td>
+      <td>-0.038</td>
+      <td>0.422</td>
+    </tr>
+    <tr>
+      <th>γ[0,1]</th>
+      <td>0.072</td>
+      <td>0.145</td>
+      <td>-0.156</td>
+      <td>0.310</td>
+    </tr>
+    <tr>
+      <th>γ[0,2]</th>
+      <td>-0.067</td>
+      <td>0.142</td>
+      <td>-0.298</td>
+      <td>0.156</td>
+    </tr>
+    <tr>
+      <th>γ[0,3]</th>
+      <td>-0.252</td>
+      <td>0.122</td>
+      <td>-0.436</td>
+      <td>-0.045</td>
+    </tr>
+    <tr>
+      <th>γ[0,4]</th>
+      <td>0.128</td>
+      <td>0.146</td>
+      <td>-0.103</td>
+      <td>0.358</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+def extract_matrix_variable_indices(
+    d: pd.DataFrame,
+    col: str,
+    idx1: np.ndarray,
+    idx2: np.ndarray,
+    idx1name: str,
+    idx2name: str,
+) -> pd.DataFrame:
+    indices_list = [
+        [int(x) for x in re.findall("[0-9]+", s)] for s in d[[col]].to_numpy().flatten()
+    ]
+    indices_array = np.asarray(indices_list)
+    d[idx1name] = idx1[indices_array[:, 0]]
+    d[idx2name] = idx2[indices_array[:, 1]]
+    return d
+
+
+gamma_post_summary = (
+    gamma_post_summary.reset_index()
+    .rename(columns={"index": "variable"})
+    .pipe(
+        extract_matrix_variable_indices,
+        col="variable",
+        idx1=modeling_data.hugo_symbol.unique(),
+        idx2=modeling_data.depmap_id.unique(),
+        idx1name="hugo_symbol",
+        idx2name="depmap_id",
+    )
+)
+```
+
+```python
+gamma_post_summary = gamma_post_summary.merge(
+    cellline_to_lineage_map, on="depmap_id", left_index=False, right_index=False
+)
+```
+
+```python
+gamma_post_summary.head()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>variable</th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>hugo_symbol</th>
+      <th>depmap_id</th>
+      <th>lineage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>γ[0,0]</td>
+      <td>0.191</td>
+      <td>0.144</td>
+      <td>-0.038</td>
+      <td>0.422</td>
+      <td>AAED1</td>
+      <td>ACH-000004</td>
+      <td>blood</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>γ[1,0]</td>
+      <td>0.247</td>
+      <td>0.143</td>
+      <td>0.020</td>
+      <td>0.477</td>
+      <td>ARG1</td>
+      <td>ACH-000004</td>
+      <td>blood</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>γ[2,0]</td>
+      <td>0.121</td>
+      <td>0.142</td>
+      <td>-0.110</td>
+      <td>0.340</td>
+      <td>ARHGAP26</td>
+      <td>ACH-000004</td>
+      <td>blood</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>γ[3,0]</td>
+      <td>0.084</td>
+      <td>0.147</td>
+      <td>-0.165</td>
+      <td>0.306</td>
+      <td>C18orf54</td>
+      <td>ACH-000004</td>
+      <td>blood</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>γ[4,0]</td>
+      <td>0.001</td>
+      <td>0.133</td>
+      <td>-0.210</td>
+      <td>0.213</td>
+      <td>CT47A7</td>
+      <td>ACH-000004</td>
+      <td>blood</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+(
+    gg.ggplot(gamma_post_summary, gg.aes(x="depmap_id", y="hugo_symbol"))
+    + gg.geom_tile(gg.aes(fill="mean"))
+    + gg.theme(axis_text_x=gg.element_blank())
+)
+```
+
+![png](010_015_gene-lineage-hierarchical-matrix_files/010_015_gene-lineage-hierarchical-matrix_24_0.png)
+
+    <ggplot: (8770121041577)>
+
+```python
+(
+    gg.ggplot(gamma_post_summary, gg.aes(x="hugo_symbol", y="mean"))
+    + gg.geom_boxplot(
+        gg.aes(color="lineage", fill="lineage"),
+        alpha=0.4,
+        outlier_alpha=0.4,
+        outlier_size=0.4,
+    )
+    + gg.theme(
+        figure_size=(10, 5),
+        axis_text_x=gg.element_text(angle=90),
+        legend_position=(0.22, 0.25),
+    )
+    + gg.labs(
+        x="gene",
+        y="posterior mean",
+        fill="lineage",
+        title="Posterior distributions for γ",
+    )
+)
+```
+
+![png](010_015_gene-lineage-hierarchical-matrix_files/010_015_gene-lineage-hierarchical-matrix_25_0.png)
+
+    <ggplot: (8770120674392)>
 
 ```python
 
@@ -355,6 +994,142 @@ plot_data = (
 
 ```python
 
+```
+
+## Modeling
+
+This is a model with the following features:
+
+- the primary level is $\mu = \alpha_s + \beta_c + \gamma_{gc}$
+- $\alpha_s$ is a varying intercept by sgRNA which comes from a distribution for the target gene: $\mathcal{N}(\mu_\alpha, \sigma_\alpha)$
+- $\beta_c$ is a varying intercept by cell line which comes from a distribution for the lineage: $\mathcal{N}(\mu_\beta, \sigma_\beta)$
+- $\gamma_{gc}$ is a  2-dimensional varying intercept - one for the gene and one for the cell line
+    - the mean of the distribution for $\gamma_{gc}$ is $\mu_\gamma = \eta_g + \theta_c$ so it is linked the gene and cell line
+    - the standard deviation for this distribution $\sigma_\gamma$ varying by gene as the lineage specificity can vary to differing degrees per gene
+    - $\eta_g$ comes from a distribution of genes and $\theta_c$ comes from a distribution of cell lines which has an additional level for the lineages of the cell lines
+
+---
+
+$
+lfc \sim \mathcal{N}(\mu, \sigma) \\
+\mu = \alpha_s + \beta_c + \gamma_{gc} \\
+\
+\quad \alpha_s \sim \mathcal{N}(\mu_{\alpha}, \sigma_{\alpha}) \\
+\qquad \mu_{\alpha} \sim \mathcal{N}(\mu_{\mu_{\alpha}}, \sigma_{\mu_{\alpha}}) \\
+\qquad \quad \mu_{\mu_{\alpha}} \sim \mathcal{N}(0, 3) \\
+\qquad \quad \sigma_{\mu_{\alpha}} \sim \text{HalfNormal}(3) \\
+\qquad \sigma_{\alpha} \sim \text{HalfNormal}(\sigma_{\sigma_{\alpha}}) \\
+\qquad \quad \sigma_{\sigma_{\alpha}} \sim \text{HalfNormal}(3) \\
+\
+\quad \beta_c \sim \mathcal{N}(\mu_{\beta}, \sigma_{\beta}) \\
+\qquad \mu_{\beta} \sim \mathcal{N}(\mu_{\mu_{\beta}}, \sigma_{\mu_{\beta}}) \\
+\qquad \quad \mu_{\mu_{\beta}} \sim \mathcal{N}(0, 3) \\
+\qquad \quad \sigma_{\mu_{\beta}} \sim \text{HalfNormal}(3) \\
+\qquad \sigma_{\beta} \sim \text{HalfNormal}(\sigma_{\sigma_{\beta}}) \\
+\qquad \quad \sigma_{\sigma_{\beta}} \sim \text{HalfNormal}(3) \\
+\
+\quad \gamma_{gc} \sim \mathcal{N}(\mu_{\gamma}, \sigma_{\gamma}) \\
+\qquad \mu_{\gamma} = \eta_g + \theta_c \\
+\qquad \quad \eta_g \sim \mathcal{N}(\mu_{\eta}, \sigma_{\eta}) \\
+\qquad \qquad \mu_{\eta} \sim \mathcal{N}(0, 3) \\
+\qquad \qquad \sigma_{\eta} \sim \text{HalfNormal}(0, 3) \\
+\
+\qquad \quad \theta_c \sim \mathcal{N}(\mu_{\theta}, \sigma_{\theta}) \\
+\qquad \qquad \mu_{\theta} \sim \mathcal{N}(\mu_{\mu_\theta}, \sigma_{\mu_\theta}) \\
+\qquad \qquad \quad \mu_{\mu_\theta} \sim \mathcal{N}(0, 3) \\
+\qquad \qquad \quad \sigma_{\mu_\theta} \sim \text{HalfNormal}(3) \\
+\qquad \qquad \sigma_{\theta} \sim \text{HalfNormal}(\sigma_{\sigma_\theta}) \\
+\qquad \qquad \quad \sigma_{\sigma_\theta} \sim \text{HalfNormal}(3) \\
+\
+\qquad \sigma_{\gamma} \sim \text{HalfNormal}(\sigma_{\sigma_{\gamma}}) \\
+\qquad \quad \sigma_{\sigma_{\gamma}} \sim \text{HalfNormal}(1) \\
+\
+\sigma \sim \text{HalfNormal}(3)
+$
+
+```python
+# Index sgRNAs and genes for full data.
+sgrna_idx, num_sgrnas = dphelp.get_indices_and_count(modeling_data, "sgrna")
+gene_idx, num_genes = dphelp.get_indices_and_count(modeling_data, "hugo_symbol")
+
+# Index genes for sgRNAs.
+sgrna_gene_mapping_df = (
+    modeling_data[["hugo_symbol", "sgrna"]].drop_duplicates().reset_index(drop=True)
+)
+sgrna_gene_idx = dphelp.get_indices(sgrna_gene_mapping_df, "hugo_symbol")
+
+# Index of genes for γ.
+γ_gene_idx = dphelp.get_indices(
+    modeling_data[["hugo_symbol"]].drop_duplicates().reset_index(drop=True),
+    "hugo_symbol",
+)
+
+
+# Index cell lines for full data set.
+cellline_idx, num_celllines = dphelp.get_indices_and_count(modeling_data, "depmap_id")
+_, num_lineages = dphelp.get_indices_and_count(modeling_data, "lineage")
+
+# Index lineages for cell lines.
+cellline_lineage_mapping_df = (
+    modeling_data[["lineage", "depmap_id"]].drop_duplicates().reset_index(drop=True)
+)
+cellline_lineage_idx = dphelp.get_indices(cellline_lineage_mapping_df, "lineage")
+```
+
+```python
+with pm.Model() as m8:
+
+    # Indexing arrays
+    sgrna_idx_shared = pm.Data("sgrna_idx", sgrna_idx)
+    gene_idx_shared = pm.Data("gene_idx", gene_idx)
+    sgrna_gene_idx_shared = pm.Data("sgrna_gene_idx", sgrna_gene_idx)
+    cellline_idx_shared = pm.Data("cellline_idx", cellline_idx)
+    cellline_lineage_idx_shared = pm.Data("cellline_lineage_idx", cellline_lineage_idx)
+
+    # Data
+    lfc_shared = pm.Data("lfc", modeling_data.lfc.to_numpy())
+
+    μ_μ_α = pm.Normal("μ_μ_α", 0, 3)
+    σ_μ_α = pm.HalfNormal("σ_μ_α", 3)
+    σ_σ_α = pm.HalfNormal("σ_σ_α", 3)
+    μ_α = pm.Normal("μ_α", μ_μ_α, σ_μ_α, shape=num_genes)
+    σ_α = pm.HalfNormal("σ_α", σ_σ_α, shape=num_genes)
+
+    μ_μ_β = pm.Normal("μ_μ_β", 0, 3)
+    σ_μ_β = pm.HalfNormal("σ_μ_β", 3)
+    σ_σ_β = pm.HalfNormal("σ_σ_β", 3)
+    μ_β = pm.Normal("μ_β", μ_μ_β, σ_μ_β, shape=num_lineages)
+    σ_β = pm.HalfNormal("σ_β", σ_σ_β, shape=num_lineages)
+
+    σ_σ_γ = pm.HalfNormal("σ_σ_γ", 1)
+    #     μ_γ = pm.Deterministic("μ_γ", η[gene_idx_shared] + θ[cellline_idx_shared])
+    μ_γ = pm.Normal("μ_γ", 0, 5)
+    σ_γ = pm.HalfNormal("σ_γ", σ_σ_γ, shape=(num_genes))
+
+    α = pm.Normal(
+        "α", μ_α[sgrna_gene_idx_shared], σ_α[sgrna_gene_idx_shared], shape=num_sgrnas
+    )
+    β = pm.Normal(
+        "β",
+        μ_β[cellline_lineage_idx_shared],
+        σ_β[cellline_lineage_idx_shared],
+        shape=num_celllines,
+    )
+    γ = pm.Normal("γ", μ_γ, σ_γ, shape=(num_genes, num_celllines))
+
+    μ = pm.Deterministic(
+        "μ",
+        α[sgrna_idx_shared]
+        + β[cellline_idx_shared]
+        + γ[gene_idx_shared, cellline_idx_shared],
+    )
+    σ = pm.HalfNormal("σ", 3)
+
+    y = pm.Normal("y", μ, σ, observed=lfc_shared)
+```
+
+```python
+pm.model_to_graphviz(m8)
 ```
 
 ---
