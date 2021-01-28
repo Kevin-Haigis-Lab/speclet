@@ -72,7 +72,7 @@ else:
     del full_modeling_data
 ```
 
-    Subsampling 20 genes and 5 lineages from full dataset.
+    Reading in existing file.
 
 ```python
 print("Genes:")
@@ -87,10 +87,10 @@ print(f"number of cell lines: {modeling_data.depmap_id.nunique()}")
 ```
 
     Genes:
-    ['AAED1', 'ARG1', 'ARHGAP26', 'C18orf54', 'CT47A7', 'DHDH', 'FAM206A', 'GIPR', 'GTF2E1', 'H3F3A', 'HERC1', 'IL17B', 'LGI3', 'NACC2', 'PLEKHH3', 'PRKAR1A', 'RGPD6', 'STRC', 'YPEL5', 'ZNF175']
+    ['C18orf54', 'ARG1', 'DHDH', 'RGPD6', 'H3F3A', 'STRC', 'GIPR', 'FAM206A', 'YPEL5', 'GTF2E1', 'AAED1', 'LGI3', 'ZNF175', 'ARHGAP26', 'IL17B', 'HERC1', 'PLEKHH3', 'NACC2', 'PRKAR1A', 'CT47A7']
     ------------------------------------------------------------
     Lineages:
-    ['blood', 'colorectal', 'liver', 'upper_aerodigestive']
+    ['blood', 'upper_aerodigestive', 'colorectal', 'liver']
     ------------------------------------------------------------
     number of cell lines: 132
 
@@ -114,7 +114,7 @@ for col in [
 modeling_data.shape
 ```
 
-    (22960, 27)
+    (22960, 28)
 
 ```python
 modeling_data.head(5)
@@ -138,6 +138,7 @@ modeling_data.head(5)
   <thead>
     <tr style="text-align: right;">
       <th></th>
+      <th>Unnamed: 0</th>
       <th>sgrna</th>
       <th>replicate_id</th>
       <th>lfc</th>
@@ -147,7 +148,6 @@ modeling_data.head(5)
       <th>primary_or_metastasis</th>
       <th>lineage</th>
       <th>lineage_subtype</th>
-      <th>kras_mutation</th>
       <th>...</th>
       <th>log2_gene_cn_p1</th>
       <th>gene_cn</th>
@@ -164,6 +164,7 @@ modeling_data.head(5)
   <tbody>
     <tr>
       <th>0</th>
+      <td>6249</td>
       <td>CACCCGCACGAACACCACCA</td>
       <td>hel-311cas9_repa_p4_batch3</td>
       <td>0.619938</td>
@@ -173,7 +174,6 @@ modeling_data.head(5)
       <td>NaN</td>
       <td>blood</td>
       <td>AML</td>
-      <td>WT</td>
       <td>...</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -188,6 +188,7 @@ modeling_data.head(5)
     </tr>
     <tr>
       <th>1</th>
+      <td>6331</td>
       <td>CACCCGCACGAACACCACCA</td>
       <td>hel-311cas9_repb_p4_batch3</td>
       <td>0.780068</td>
@@ -197,7 +198,6 @@ modeling_data.head(5)
       <td>NaN</td>
       <td>blood</td>
       <td>AML</td>
-      <td>WT</td>
       <td>...</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -212,6 +212,7 @@ modeling_data.head(5)
     </tr>
     <tr>
       <th>2</th>
+      <td>6413</td>
       <td>CACCCGCACGAACACCACCA</td>
       <td>hel9217-311cas9_repa_p6_batch3</td>
       <td>0.176848</td>
@@ -221,7 +222,6 @@ modeling_data.head(5)
       <td>NaN</td>
       <td>blood</td>
       <td>AML</td>
-      <td>WT</td>
       <td>...</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -236,6 +236,7 @@ modeling_data.head(5)
     </tr>
     <tr>
       <th>3</th>
+      <td>6495</td>
       <td>CACCCGCACGAACACCACCA</td>
       <td>hel9217-311cas9_repb_p6_batch3</td>
       <td>0.295670</td>
@@ -245,7 +246,6 @@ modeling_data.head(5)
       <td>NaN</td>
       <td>blood</td>
       <td>AML</td>
-      <td>WT</td>
       <td>...</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -260,6 +260,7 @@ modeling_data.head(5)
     </tr>
     <tr>
       <th>4</th>
+      <td>12809</td>
       <td>CACCCGCACGAACACCACCA</td>
       <td>mv4;11-311cas9_repa_p6_batch2</td>
       <td>0.564909</td>
@@ -269,7 +270,6 @@ modeling_data.head(5)
       <td>Primary</td>
       <td>blood</td>
       <td>AML</td>
-      <td>WT</td>
       <td>...</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -284,7 +284,7 @@ modeling_data.head(5)
     </tr>
   </tbody>
 </table>
-<p>5 rows × 27 columns</p>
+<p>5 rows × 28 columns</p>
 </div>
 
 ## Data visualization
@@ -310,7 +310,7 @@ plot_data = (
 
 ![png](010_015_gene-lineage-hierarchical-matrix_files/010_015_gene-lineage-hierarchical-matrix_9_0.png)
 
-    <ggplot: (8770218525257)>
+    <ggplot: (8754894691816)>
 
 ```python
 plot_data = (
@@ -330,7 +330,7 @@ plot_data = (
 
 ![png](010_015_gene-lineage-hierarchical-matrix_files/010_015_gene-lineage-hierarchical-matrix_10_0.png)
 
-    <ggplot: (8770218525326)>
+    <ggplot: (8754885703554)>
 
 ```python
 (
@@ -352,7 +352,7 @@ plot_data = (
 
 ![png](010_015_gene-lineage-hierarchical-matrix_files/010_015_gene-lineage-hierarchical-matrix_11_0.png)
 
-    <ggplot: (8770213835424)>
+    <ggplot: (8754885644141)>
 
 ## Modeling
 
@@ -387,15 +387,17 @@ with pm.Model() as m1:
     σ_μ_μ_γ = pm.HalfNormal("σ_μ_μ_γ", 3)
 
     μ_μ_γ = pm.Normal("μ_μ_γ", μ_μ_μ_γ, σ_μ_μ_γ, shape=(num_genes, 1))
-    σ_μ_γ = pm.HalfNormal("σ_μ_γ", 3)
+    σ_σ_μ_γ = pm.HalfNormal("σ_σ_μ_γ", 3)
+    σ_μ_γ = pm.HalfNormal("σ_μ_γ", σ_σ_μ_γ, shape=(num_genes, 1))
 
     μ_γ = pm.Normal("μ_γ", μ_μ_γ, σ_μ_γ, shape=(num_genes, num_lineages))
-    σ_γ = pm.HalfNormal("σ_γ", 3)
+    σ_σ_γ = pm.HalfNormal("σ_σ_γ", 3)
+    σ_γ = pm.HalfNormal("σ_γ", σ_σ_γ, shape=num_lineages)
 
     γ = pm.Normal(
         "γ",
         μ_γ[:, cellline_to_lineage_idx_shared],
-        σ_γ,
+        σ_γ[cellline_to_lineage_idx_shared],
         shape=(num_genes, num_celllines),
     )
 
@@ -412,6 +414,11 @@ pm.model_to_graphviz(m1)
 
 ![svg](010_015_gene-lineage-hierarchical-matrix_files/010_015_gene-lineage-hierarchical-matrix_15_0.svg)
 
+TODO:
+
+- do prior predictive checks to modify prior distributions to help with sampling
+- there are some divergences in the sampling, but it is not extreme
+
 ```python
 m1_cache_dir = pymc3_cache_dir / "gene-lineage-model_m1"
 
@@ -424,14 +431,14 @@ m1_sampling_results = pmhelp.pymc3_sampling_procedure(
     random_seed=RANDOM_SEED,
     cache_dir=m1_cache_dir,
     force=False,
-    sample_kwargs={"init": "advi+adapt_diag", "n_init": 500000},
+    sample_kwargs={"init": "advi", "n_init": 200000, "target_accept": 0.9},
 )
 
 m1_az = pmhelp.samples_to_arviz(model=m1, res=m1_sampling_results)
 ```
 
     Auto-assigning NUTS sampler...
-    Initializing NUTS using advi+adapt_diag...
+    Initializing NUTS using advi...
 
 <div>
     <style>
@@ -446,19 +453,36 @@ m1_az = pmhelp.samples_to_arviz(model=m1, res=m1_sampling_results)
             background: #F44336;
         }
     </style>
-  <progress value='2702' class='' max='500000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  0.54% [2702/500000 00:07<23:38 Average Loss = 66,610]
+  <progress value='285631' class='' max='500000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  57.13% [285631/500000 13:53<10:25 Average Loss = 17,363]
 </div>
 
-    Interrupted at 2,737 [0%]: Average Loss = 80,093
+    Interrupted at 285,676 [57%]: Average Loss = 19,225
+    Multiprocess sampling (4 chains in 4 jobs)
+    NUTS: [σ, γ, σ_γ, σ_σ_γ, μ_γ, σ_μ_γ, σ_σ_μ_γ, μ_μ_γ, σ_μ_μ_γ, μ_μ_μ_γ]
 
-
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='15933' class='' max='28000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  56.90% [15933/28000 23:26<17:45 Sampling 4 chains, 52 divergences]
+</div>
 
     ---------------------------------------------------------------------------
 
-    KeyboardInterrupt                         Traceback (most recent call last)
+    KeyError                                  Traceback (most recent call last)
 
-    <ipython-input-119-e0ea2501b2aa> in <module>
+    <ipython-input-28-7308b85c789e> in <module>
           1 m1_cache_dir = pymc3_cache_dir / "gene-lineage-model_m1"
           2
     ----> 3 m1_sampling_results = pmhelp.pymc3_sampling_procedure(
@@ -475,198 +499,30 @@ m1_az = pmhelp.samples_to_arviz(model=m1, res=m1_sampling_results)
 
 
     ~/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/sampling.py in sample(draws, step, init, n_init, start, trace, chain_idx, chains, cores, tune, progressbar, model, random_seed, discard_tuned_samples, compute_convergence_checks, callback, return_inferencedata, idata_kwargs, mp_ctx, pickle_backend, **kwargs)
-        479             # By default, try to use NUTS
-        480             _log.info("Auto-assigning NUTS sampler...")
-    --> 481             start_, step = init_nuts(
-        482                 init=init,
-        483                 chains=chains,
+        590     # ideally via the "tune" statistic, but not all samplers record it!
+        591     if "tune" in trace.stat_names:
+    --> 592         stat = trace.get_sampler_stats("tune", chains=0)
+        593         # when CompoundStep is used, the stat is 2 dimensional!
+        594         if len(stat.shape) == 2:
 
 
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/sampling.py in init_nuts(init, chains, n_init, model, random_seed, progressbar, **kwargs)
-       2168         raise ValueError("Unknown initializer: {}.".format(init))
-       2169
-    -> 2170     step = pm.NUTS(potential=potential, model=model, **kwargs)
-       2171
-       2172     return start, step
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/backends/base.py in get_sampler_stats(self, stat_name, burn, thin, combine, chains, squeeze)
+        520             chains = [chains]
+        521
+    --> 522         results = [self._straces[chain].get_sampler_stats(stat_name, None, burn, thin)
+        523                    for chain in chains]
+        524         return _squeeze_cat(results, combine, squeeze)
 
 
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/step_methods/hmc/nuts.py in __init__(self, vars, max_treedepth, early_max_treedepth, **kwargs)
-        166         `pm.sample` to the desired number of tuning steps.
-        167         """
-    --> 168         super().__init__(vars, **kwargs)
-        169
-        170         self.max_treedepth = max_treedepth
+    ~/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/backends/base.py in <listcomp>(.0)
+        520             chains = [chains]
+        521
+    --> 522         results = [self._straces[chain].get_sampler_stats(stat_name, None, burn, thin)
+        523                    for chain in chains]
+        524         return _squeeze_cat(results, combine, squeeze)
 
 
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/step_methods/hmc/base_hmc.py in __init__(self, vars, scaling, step_scale, is_cov, model, blocked, potential, dtype, Emax, target_accept, gamma, k, t0, adapt_step_size, step_rand, **theano_kwargs)
-         91         vars = inputvars(vars)
-         92
-    ---> 93         super().__init__(vars, blocked=blocked, model=model, dtype=dtype, **theano_kwargs)
-         94
-         95         self.adapt_step_size = adapt_step_size
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/step_methods/arraystep.py in __init__(self, vars, model, blocked, dtype, **theano_kwargs)
-        241         self.blocked = blocked
-        242
-    --> 243         func = model.logp_dlogp_function(
-        244             vars, dtype=dtype, **theano_kwargs)
-        245
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/model.py in logp_dlogp_function(self, grad_vars, **kwargs)
-        933         varnames = [var.name for var in grad_vars]
-        934         extra_vars = [var for var in self.free_RVs if var.name not in varnames]
-    --> 935         return ValueGradFunction(self.logpt, grad_vars, extra_vars, **kwargs)
-        936
-        937     @property
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/model.py in __init__(self, cost, grad_vars, extra_vars, dtype, casting, **kwargs)
-        647         )
-        648
-    --> 649         grad = tt.grad(self._cost_joined, self._vars_joined)
-        650         grad.name = "__grad"
-        651
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gradient.py in grad(cost, wrt, consider_constant, disconnected_inputs, add_names, known_grads, return_disconnected, null_gradients)
-        602             assert g.type.dtype in tensor.float_dtypes
-        603
-    --> 604     rval = _populate_grad_dict(var_to_app_to_idx,
-        605                                grad_dict, wrt, cost_name)
-        606
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gradient.py in _populate_grad_dict(var_to_app_to_idx, grad_dict, wrt, cost_name)
-       1369         return grad_dict[var]
-       1370
-    -> 1371     rval = [access_grad_cache(elem) for elem in wrt]
-       1372
-       1373     return rval
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gradient.py in <listcomp>(.0)
-       1369         return grad_dict[var]
-       1370
-    -> 1371     rval = [access_grad_cache(elem) for elem in wrt]
-       1372
-       1373     return rval
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gradient.py in access_grad_cache(var)
-       1324                     for idx in node_to_idx[node]:
-       1325
-    -> 1326                         term = access_term_cache(node)[idx]
-       1327
-       1328                         if not isinstance(term, gof.Variable):
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gradient.py in access_term_cache(node)
-       1019             inputs = node.inputs
-       1020
-    -> 1021             output_grads = [access_grad_cache(var) for var in node.outputs]
-       1022
-       1023             # list of bools indicating if each output is connected to the cost
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gradient.py in <listcomp>(.0)
-       1019             inputs = node.inputs
-       1020
-    -> 1021             output_grads = [access_grad_cache(var) for var in node.outputs]
-       1022
-       1023             # list of bools indicating if each output is connected to the cost
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gradient.py in access_grad_cache(var)
-       1324                     for idx in node_to_idx[node]:
-       1325
-    -> 1326                         term = access_term_cache(node)[idx]
-       1327
-       1328                         if not isinstance(term, gof.Variable):
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gradient.py in access_term_cache(node)
-       1226                 # Check that the gradient term for this input
-       1227                 # has the right shape
-    -> 1228                 if hasattr(term, 'shape'):
-       1229                     orig_ipt = inputs[i]
-       1230                     for orig_ipt_v, term_v in get_debug_values(orig_ipt, term):
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/tensor/var.py in <lambda>(self)
-        285             return theano.tensor.basic.transpose(self, axes)
-        286
-    --> 287     shape = property(lambda self: theano.tensor.basic.shape(self))
-        288
-        289     size = property(lambda self: self.shape[0] if self.ndim == 1 else
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gof/op.py in __call__(self, *inputs, **kwargs)
-        667
-        668                 # compute output value once with test inputs to validate graph
-    --> 669                 thunk = node.op.make_thunk(node, storage_map, compute_map,
-        670                                            no_recycling=[])
-        671                 thunk.inputs = [storage_map[v] for v in node.inputs]
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gof/op.py in make_thunk(self, node, storage_map, compute_map, no_recycling, impl)
-        952                               compute_map=compute_map, impl='c')
-        953             try:
-    --> 954                 return self.make_c_thunk(node, storage_map, compute_map,
-        955                                          no_recycling)
-        956             except (NotImplementedError, utils.MethodNotDefined):
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gof/op.py in make_c_thunk(self, node, storage_map, compute_map, no_recycling)
-        831         node_output_storage = [storage_map[r] for r in node.outputs]
-        832
-    --> 833         e = FunctionGraph(node.inputs, node.outputs)
-        834         e_no_recycling = [new_o
-        835                           for (new_o, old_o) in zip(e.outputs, node.outputs)
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gof/fg.py in __init__(self, inputs, outputs, features, clone, update_mapping)
-        135
-        136         if clone:
-    --> 137             inputs, outputs = graph.clone(inputs, outputs)
-        138
-        139         self.execute_callbacks_time = 0
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gof/graph.py in clone(i, o, copy_inputs, copy_orphans)
-        860     if copy_orphans is None:
-        861         copy_orphans = copy_inputs
-    --> 862     equiv = clone_get_equiv(i, o, copy_inputs, copy_orphans)
-        863     return [equiv[input] for input in i], [equiv[output] for output in o]
-        864
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gof/graph.py in clone_get_equiv(inputs, outputs, copy_inputs, copy_orphans, memo)
-        897     for input in inputs:
-        898         if copy_inputs:
-    --> 899             cpy = input.clone()
-        900             cpy.owner = None
-        901             cpy.index = None
-
-
-    ~/.conda/envs/speclet/lib/python3.9/site-packages/theano/gof/graph.py in clone(self)
-        452         # return copy(self)
-        453         cp = self.__class__(self.type, None, None, self.name)
-    --> 454         cp.tag = copy(self.tag)
-        455         return cp
-        456
-
-
-    ~/.conda/envs/speclet/lib/python3.9/copy.py in copy(x)
-         84         return copier(x)
-         85
-    ---> 86     reductor = dispatch_table.get(cls)
-         87     if reductor is not None:
-         88         rv = reductor(x)
-
-
-    KeyboardInterrupt:
+    KeyError: 0
 
 ```python
 az.summary(m1_az, var_names=["σ_μ_μ_γ", "μ_μ_μ_γ"], hdi_prob=0.89)
@@ -741,7 +597,7 @@ az.plot_trace(m1_az, var_names=["μ_μ_μ_γ", "σ_μ_μ_γ"], combined=True)
 plt.show()
 ```
 
-![png](010_015_gene-lineage-hierarchical-matrix_files/010_015_gene-lineage-hierarchical-matrix_18_0.png)
+![png](010_015_gene-lineage-hierarchical-matrix_files/010_015_gene-lineage-hierarchical-matrix_19_0.png)
 
 ```python
 gamma_post_summary = az.summary(m1_az, var_names="γ", hdi_prob=0.89, kind="stats")
@@ -953,7 +809,7 @@ gamma_post_summary.head()
 )
 ```
 
-![png](010_015_gene-lineage-hierarchical-matrix_files/010_015_gene-lineage-hierarchical-matrix_24_0.png)
+![png](010_015_gene-lineage-hierarchical-matrix_files/010_015_gene-lineage-hierarchical-matrix_25_0.png)
 
     <ggplot: (8770121041577)>
 
@@ -980,7 +836,7 @@ gamma_post_summary.head()
 )
 ```
 
-![png](010_015_gene-lineage-hierarchical-matrix_files/010_015_gene-lineage-hierarchical-matrix_25_0.png)
+![png](010_015_gene-lineage-hierarchical-matrix_files/010_015_gene-lineage-hierarchical-matrix_26_0.png)
 
     <ggplot: (8770120674392)>
 
