@@ -1,8 +1,10 @@
+import re
 from typing import Dict, List, Optional, Tuple
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import pymc3 as pm
 import seaborn as sns
 
@@ -29,3 +31,20 @@ def plot_all_priors(
 
     fig.tight_layout()
     return fig, axes
+
+
+def extract_matrix_variable_indices(
+    d: pd.DataFrame,
+    col: str,
+    idx1: np.ndarray,
+    idx2: np.ndarray,
+    idx1name: str,
+    idx2name: str,
+) -> pd.DataFrame:
+    indices_list = [
+        [int(x) for x in re.findall("[0-9]+", s)] for s in d[[col]].to_numpy().flatten()
+    ]
+    indices_array = np.asarray(indices_list)
+    d[idx1name] = idx1[indices_array[:, 0]]
+    d[idx2name] = idx2[indices_array[:, 1]]
+    return d
