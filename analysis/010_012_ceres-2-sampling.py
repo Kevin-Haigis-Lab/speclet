@@ -12,7 +12,6 @@ from colorama import Fore, init
 
 #### ---- Argument parsing ---- ####
 
-# Argument parsing
 parser = argparse.ArgumentParser()
 
 parser.add_argument(
@@ -92,8 +91,8 @@ if "ceres-m1" in args.models:
     ceres_m1_cache = pymc3_cache_dir / "mimic-ceres-m1"
     _ = pmhelp.pymc3_sampling_procedure(
         model=ceres_m1,
-        num_mcmc=100,
-        tune=100,
+        num_mcmc=1000,
+        tune=1000,
         chains=2,
         cores=2,
         random_seed=RANDOM_SEED,
@@ -125,8 +124,8 @@ if "ceres-m2" in args.models:
     ceres_m2_cache = pymc3_cache_dir / "mimic-ceres-m2"
     _ = pmhelp.pymc3_sampling_procedure(
         model=ceres_m2,
-        num_mcmc=100,
-        tune=100,
+        num_mcmc=1000,
+        tune=1000,
         chains=2,
         cores=2,
         random_seed=RANDOM_SEED,
@@ -134,7 +133,7 @@ if "ceres-m2" in args.models:
         force=args.force_sample,
         sample_kwargs={
             "init": "advi+adapt_diag",
-            "n_init": 50000,
+            "n_init": 100000,
             "target_accept": 0.9,
         },
     )
