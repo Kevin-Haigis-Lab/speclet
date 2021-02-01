@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -138,3 +139,36 @@ def nmutations_to_binary_array(m: pd.Series) -> np.ndarray:
     numpy.ndarray
     """
     return extract_flat_ary(m).astype(bool).astype(int)
+
+
+def set_achilles_categorical_columns(
+    data: pd.DataFrame,
+    cols: List[str] = ["hugo_symbol", "depmap_id", "sgrna", "lineage", "chromosome"],
+    ordered: bool = True,
+    sort_cats: bool = False,
+) -> pd.DataFrame:
+    for col in cols:
+        data = make_cat(data, col, ordered=ordered, sort_cats=sort_cats)
+    return data
+
+
+def read_achilles_data(data_path: Path) -> pd.DataFrame:
+    data = pd.read_csv(data_path)
+
+    data = data.sort_values(
+        ["hugo_symbol", "sgrna", "lineage", "depmap_id"]
+    ).reset_index(drop=True)
+
+    data = set_achilles_categorical_columns(data)
+
+    data["log2_cn"] = np.log2(data.gene_cn + 1)
+    data = zscale_cna_by_group(
+        data,
+        gene_cn_col="log2_cn",
+        new_col="z_log2_cn",
+        groupby=["depmap_id"],
+        cn_max=np.log2(10),
+    )
+    data["is_mutated"] = nmutations_to_binary_array(data.n_muts)
+
+    return data

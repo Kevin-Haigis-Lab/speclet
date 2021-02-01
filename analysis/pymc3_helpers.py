@@ -1,11 +1,13 @@
 import pickle
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 import arviz as az
 import numpy as np
 import pandas as pd
 import pymc3 as pm
+
+default_cache_dir = Path("pymc3_model_cache")
 
 
 def write_pickle(x: Any, fp: Path) -> None:
@@ -36,6 +38,31 @@ def get_pickle(fp: Path) -> Any:
     with open(fp, "rb") as f:
         d = pickle.load(f)
     return d
+
+
+def cache_file_names(cache_dir: Path) -> Tuple[Path, Path]:
+    post_file_path = cache_dir / "posterior-predictive-check.pkl"
+    prior_file_path = cache_dir / "prior-predictive-check.pkl"
+    return prior_file_path, post_file_path
+
+
+def package_cached_sampling_data(trace, post_check, prior_check) -> Dict[str, Any]:
+    return {
+        "trace": trace,
+        "posterior_predictive": post_check,
+        "prior_predictive": prior_check,
+    }
+
+
+def read_cached_sampling(cache_dir: Path, model: pm.Model) -> Dict[str, Any]:
+    print("Loading cached trace and posterior sample...")
+    prior_file_path, post_file_path = cache_file_names(cache_dir)
+
+    trace = pm.load_trace(cache_dir.as_posix(), model=model)
+    post_check = get_pickle(post_file_path)
+    prior_check = get_pickle(prior_file_path)
+
+    return package_cached_sampling_data(trace, post_check, prior_check)
 
 
 def pymc3_sampling_procedure(
@@ -85,14 +112,10 @@ def pymc3_sampling_procedure(
         Contains the "trace", "posterior_predictive", and "prior_predictive"
     """
     if cache_dir is not None:
-        post_file_path = cache_dir / "posterior-predictive-check.pkl"
-        prior_file_path = cache_dir / "prior-predictive-check.pkl"
+        prior_file_path, post_file_path = cache_file_names(cache_dir)
 
     if not force and cache_dir is not None and cache_dir.exists():
-        print("Loading cached trace and posterior sample...")
-        trace = pm.load_trace(cache_dir.as_posix(), model=model)
-        post_check = get_pickle(post_file_path)
-        prior_check = get_pickle(prior_file_path)
+        return read_cached_sampling(cache_dir, model=model)
     else:
         with model:
             prior_check = pm.sample_prior_predictive(
@@ -114,11 +137,8 @@ def pymc3_sampling_procedure(
             pm.save_trace(trace, directory=cache_dir.as_posix(), overwrite=True)
             write_pickle(post_check, post_file_path)
             write_pickle(prior_check, prior_file_path)
-    return {
-        "trace": trace,
-        "posterior_predictive": post_check,
-        "prior_predictive": prior_check,
-    }
+
+    return package_cached_sampling_data(trace, post_check, prior_check)
 
 
 def samples_to_arviz(model: pm.Model, res: Dict[str, Any]) -> az.InferenceData:
