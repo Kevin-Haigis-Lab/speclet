@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 from time import time
 
@@ -8,6 +9,32 @@ import pandas as pd
 import pymc3 as pm
 import pymc3_helpers as pmhelp
 from colorama import Fore, init
+
+#### ---- Argument parsing ---- ####
+
+# Argument parsing
+parser = argparse.ArgumentParser()
+
+parser.add_argument(
+    "-m",
+    "--models",
+    help="model(s) to sample from",
+    nargs="+",
+    type=str,
+    choices=["ceres-m1", "ceres-m2"],
+)
+parser.add_argument(
+    "--force-sample",
+    help="ignore cached results and sample from model",
+    action="store_true",
+    default=False,
+)
+parser.add_argument(
+    "-d", "--debug", help="debug mode", action="store_true", default=False
+)
+
+args = parser.parse_args()
+
 
 #### ---- Setup ---- ####
 
@@ -20,8 +47,7 @@ np.random.seed(RANDOM_SEED)
 
 pymc3_cache_dir = Path("analysis") / pmhelp.default_cache_dir
 
-DEBUG = True
-
+DEBUG = args.debug
 if DEBUG:
     print(Fore.RED + "(debug mode)")
 
@@ -51,59 +77,69 @@ cell_idx = dphelp.get_indices(data, "depmap_id")
 
 
 ## CERES Model 1
-print(Fore.BLUE + "CERES Model 1")
+if "ceres-m1" in args.models:
+    print(Fore.BLUE + "CERES Model 1")
 
-# Construct model
-ceres_m1 = ceres_models.construct_ceres_m1(
-    sgrna_idx=sgrna_idx,
-    gene_idx=gene_idx,
-    cell_idx=cell_idx,
-    cn_data=data.z_log2_cn.to_numpy(),
-    lfc_data=data.lfc.to_numpy(),
-)
+    # Construct model
+    ceres_m1 = ceres_models.construct_ceres_m1(
+        sgrna_idx=sgrna_idx,
+        gene_idx=gene_idx,
+        cell_idx=cell_idx,
+        cn_data=data.z_log2_cn.to_numpy(),
+        lfc_data=data.lfc.to_numpy(),
+    )
 
-ceres_m1_cache = pymc3_cache_dir / "mimic-ceres-m1"
-_ = pmhelp.pymc3_sampling_procedure(
-    model=ceres_m1,
-    num_mcmc=1000,
-    tune=1000,
-    chains=2,
-    cores=2,
-    random_seed=RANDOM_SEED,
-    cache_dir=ceres_m1_cache,
-    force=True,
-    sample_kwargs={"init": "advi+adapt_diag", "n_init": 200000, "target_accept": 0.9},
-)
+    ceres_m1_cache = pymc3_cache_dir / "mimic-ceres-m1"
+    _ = pmhelp.pymc3_sampling_procedure(
+        model=ceres_m1,
+        num_mcmc=100,
+        tune=100,
+        chains=2,
+        cores=2,
+        random_seed=RANDOM_SEED,
+        cache_dir=ceres_m1_cache,
+        force=args.force_sample,
+        sample_kwargs={
+            "init": "advi+adapt_diag",
+            "n_init": 50000,
+            "target_accept": 0.9,
+        },
+    )
 
-print(Fore.GREEN + "Done")
+    print(Fore.GREEN + "Done")
 
 
 ## CERES Model 2
-print(Fore.BLUE + "CERES Model 2")
+if "ceres-m2" in args.models:
+    print(Fore.BLUE + "CERES Model 2")
 
-# Construct model
-ceres_m2 = ceres_models.construct_ceres_m2(
-    sgrna_idx=sgrna_idx,
-    gene_idx=gene_idx,
-    cell_idx=cell_idx,
-    cn_data=data.z_log2_cn.to_numpy(),
-    lfc_data=data.lfc.to_numpy(),
-)
+    # Construct model
+    ceres_m2 = ceres_models.construct_ceres_m2(
+        sgrna_idx=sgrna_idx,
+        gene_idx=gene_idx,
+        cell_idx=cell_idx,
+        cn_data=data.z_log2_cn.to_numpy(),
+        lfc_data=data.lfc.to_numpy(),
+    )
 
-ceres_m2_cache = pymc3_cache_dir / "mimic-ceres-m2"
-_ = pmhelp.pymc3_sampling_procedure(
-    model=ceres_m2,
-    num_mcmc=1000,
-    tune=1000,
-    chains=2,
-    cores=2,
-    random_seed=RANDOM_SEED,
-    cache_dir=ceres_m2_cache,
-    force=True,
-    sample_kwargs={"init": "advi+adapt_diag", "n_init": 200000, "target_accept": 0.9},
-)
+    ceres_m2_cache = pymc3_cache_dir / "mimic-ceres-m2"
+    _ = pmhelp.pymc3_sampling_procedure(
+        model=ceres_m2,
+        num_mcmc=100,
+        tune=100,
+        chains=2,
+        cores=2,
+        random_seed=RANDOM_SEED,
+        cache_dir=ceres_m2_cache,
+        force=args.force_sample,
+        sample_kwargs={
+            "init": "advi+adapt_diag",
+            "n_init": 50000,
+            "target_accept": 0.9,
+        },
+    )
 
-print(Fore.GREEN + "Done")
+    print(Fore.GREEN + "Done")
 
 
 #### ---- Finish ---- ####
