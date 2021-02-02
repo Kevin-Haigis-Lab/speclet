@@ -8,8 +8,9 @@
 #SBATCH -e logs/modeling-data-prep/snakemake_%A.log
 
 module load gcc conda2 slurm-drmaa/1.1.1
-source activate speclet_smakemake
 
+source /home/jc604/.bashrc
+conda activate speclet_smakemake
 
 snakemake \
   --snakefile munge/010_prepare-modeling-data_snakemake.py \
@@ -19,7 +20,7 @@ snakemake \
   --latency-wait 120 \
   --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}"
 
-
+conda deactivate
 ## Use the following to unlock snakemake after failed runs.
 # snakemake \
 #   --snakefile munge/010_prepare-modeling-data_snakemake.py \
