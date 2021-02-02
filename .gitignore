@@ -261,5 +261,5 @@ modeling_data/*
 
 # Specific files to except from the rules above
 !modeling_data/depmap_modeling_dataframe_subsample.csv
-!modeling_data/depmap_modeling_dataframe_subsample2.csv
+!modeling_data/depmap_modeling_dataframe_subsample-medium.csv
 !data/download-depmap-data.sh
