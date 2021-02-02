@@ -107,7 +107,7 @@ if "ceres-m2" in args.models:
     # Data
     print("Loading data...")
     if DEBUG:
-        data_path = Path("modeling_data/depmap_modeling_dataframe_subsample-medium.csv")
+        data_path = Path("modeling_data/depmap_modeling_dataframe_subsample_medium.csv")
     else:
         data_path = Path("modeling_data/depmap_modeling_dataframe.csv")
 
