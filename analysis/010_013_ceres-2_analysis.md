@@ -127,76 +127,76 @@ h_post_summary.head()
   <tbody>
     <tr>
       <th>h[0]</th>
-      <td>-0.606</td>
-      <td>2.136</td>
-      <td>-4.511</td>
-      <td>2.526</td>
-      <td>1.184</td>
-      <td>0.926</td>
-      <td>3.0</td>
-      <td>3.0</td>
-      <td>3.0</td>
-      <td>58.0</td>
-      <td>1.71</td>
+      <td>-0.153</td>
+      <td>1.893</td>
+      <td>-3.032</td>
+      <td>3.011</td>
+      <td>0.110</td>
+      <td>0.078</td>
+      <td>296.0</td>
+      <td>296.0</td>
+      <td>297.0</td>
+      <td>548.0</td>
+      <td>1.00</td>
       <td>ADAMTS13</td>
     </tr>
     <tr>
       <th>h[1]</th>
-      <td>0.554</td>
-      <td>1.504</td>
-      <td>-1.364</td>
-      <td>3.040</td>
-      <td>0.504</td>
-      <td>0.369</td>
-      <td>9.0</td>
-      <td>9.0</td>
-      <td>10.0</td>
-      <td>67.0</td>
-      <td>1.17</td>
+      <td>-0.180</td>
+      <td>1.696</td>
+      <td>-2.862</td>
+      <td>2.564</td>
+      <td>0.093</td>
+      <td>0.066</td>
+      <td>330.0</td>
+      <td>330.0</td>
+      <td>330.0</td>
+      <td>588.0</td>
+      <td>1.00</td>
       <td>BRAF</td>
     </tr>
     <tr>
       <th>h[2]</th>
-      <td>-1.322</td>
-      <td>1.840</td>
-      <td>-4.579</td>
-      <td>1.273</td>
-      <td>0.824</td>
-      <td>0.620</td>
-      <td>5.0</td>
-      <td>5.0</td>
-      <td>5.0</td>
-      <td>50.0</td>
-      <td>1.36</td>
+      <td>-0.289</td>
+      <td>1.921</td>
+      <td>-3.770</td>
+      <td>2.412</td>
+      <td>0.104</td>
+      <td>0.074</td>
+      <td>341.0</td>
+      <td>341.0</td>
+      <td>345.0</td>
+      <td>587.0</td>
+      <td>1.00</td>
       <td>CXCL2</td>
     </tr>
     <tr>
       <th>h[3]</th>
-      <td>-0.067</td>
-      <td>1.867</td>
-      <td>-2.303</td>
-      <td>3.454</td>
-      <td>0.376</td>
-      <td>0.269</td>
-      <td>25.0</td>
-      <td>25.0</td>
-      <td>24.0</td>
-      <td>33.0</td>
-      <td>1.08</td>
+      <td>-0.048</td>
+      <td>1.941</td>
+      <td>-3.206</td>
+      <td>3.022</td>
+      <td>0.096</td>
+      <td>0.068</td>
+      <td>405.0</td>
+      <td>405.0</td>
+      <td>407.0</td>
+      <td>632.0</td>
+      <td>1.00</td>
       <td>DISP1</td>
     </tr>
     <tr>
       <th>h[4]</th>
-      <td>0.364</td>
-      <td>1.881</td>
-      <td>-2.568</td>
-      <td>3.297</td>
-      <td>0.367</td>
-      <td>0.262</td>
-      <td>26.0</td>
-      <td>26.0</td>
-      <td>27.0</td>
-      <td>28.0</td>
+      <td>-0.083</td>
+      <td>1.909</td>
+      <td>-3.216</td>
+      <td>2.915</td>
+      <td>0.106</td>
+      <td>0.075</td>
+      <td>323.0</td>
+      <td>323.0</td>
+      <td>323.0</td>
+      <td>517.0</td>
       <td>1.01</td>
       <td>DPH7</td>
     </tr>
@@ -215,7 +215,7 @@ h_post_summary.head()
 
 ![png](010_013_ceres-2_analysis_files/010_013_ceres-2_analysis_10_0.png)
 
-    <ggplot: (8773829100270)>
+    <ggplot: (8756483074690)>
 
 ```python
 g_post_summary = (
@@ -267,50 +267,50 @@ g_post_summary.head()
     <tr>
       <th>0</th>
       <td>g[0,0]</td>
-      <td>-0.030</td>
-      <td>1.182</td>
-      <td>-2.191</td>
-      <td>1.532</td>
+      <td>0.029</td>
+      <td>1.367</td>
+      <td>-2.423</td>
+      <td>1.991</td>
       <td>ADAMTS13</td>
       <td>ACH-000025</td>
     </tr>
     <tr>
       <th>1</th>
       <td>g[0,1]</td>
-      <td>0.410</td>
-      <td>1.454</td>
-      <td>-1.869</td>
-      <td>2.580</td>
+      <td>0.401</td>
+      <td>1.318</td>
+      <td>-1.519</td>
+      <td>2.785</td>
       <td>ADAMTS13</td>
       <td>ACH-000036</td>
     </tr>
     <tr>
       <th>2</th>
       <td>g[0,2]</td>
-      <td>0.682</td>
-      <td>1.146</td>
-      <td>-1.033</td>
-      <td>2.536</td>
+      <td>0.613</td>
+      <td>1.392</td>
+      <td>-1.683</td>
+      <td>2.768</td>
       <td>ADAMTS13</td>
       <td>ACH-000040</td>
     </tr>
     <tr>
       <th>3</th>
       <td>g[0,3]</td>
-      <td>-2.769</td>
-      <td>1.214</td>
-      <td>-4.366</td>
-      <td>-0.810</td>
+      <td>-2.703</td>
+      <td>1.209</td>
+      <td>-4.530</td>
+      <td>-0.728</td>
       <td>ADAMTS13</td>
       <td>ACH-000055</td>
     </tr>
     <tr>
       <th>4</th>
       <td>g[0,4]</td>
-      <td>0.318</td>
-      <td>1.298</td>
-      <td>-1.821</td>
-      <td>2.025</td>
+      <td>0.269</td>
+      <td>1.320</td>
+      <td>-1.763</td>
+      <td>2.393</td>
       <td>ADAMTS13</td>
       <td>ACH-000067</td>
     </tr>
@@ -328,7 +328,7 @@ g_post_summary.head()
 
 ![png](010_013_ceres-2_analysis_files/010_013_ceres-2_analysis_12_0.png)
 
-    <ggplot: (8773828476790)>
+    <ggplot: (8756721656965)>
 
 ```python
 pos = gg.position_dodge(width=0.7)
@@ -367,7 +367,7 @@ plot_data = (
 
 ![png](010_013_ceres-2_analysis_files/010_013_ceres-2_analysis_13_0.png)
 
-    <ggplot: (8773933061139)>
+    <ggplot: (8756483856327)>
 
 ```python
 beta_post_summary = az.summary(ceres_m1_az, var_names="β", hdi_prob=0.89, kind="stats")
@@ -403,42 +403,42 @@ beta_post_summary.head()
   <tbody>
     <tr>
       <th>β[0]</th>
-      <td>-0.024</td>
+      <td>-0.025</td>
       <td>0.031</td>
-      <td>-0.070</td>
-      <td>0.026</td>
+      <td>-0.074</td>
+      <td>0.025</td>
       <td>ACH-000025</td>
     </tr>
     <tr>
       <th>β[1]</th>
-      <td>0.050</td>
-      <td>0.046</td>
-      <td>-0.030</td>
-      <td>0.116</td>
+      <td>0.044</td>
+      <td>0.045</td>
+      <td>-0.027</td>
+      <td>0.112</td>
       <td>ACH-000036</td>
     </tr>
     <tr>
       <th>β[2]</th>
-      <td>-0.015</td>
-      <td>0.027</td>
-      <td>-0.056</td>
-      <td>0.029</td>
+      <td>-0.014</td>
+      <td>0.031</td>
+      <td>-0.062</td>
+      <td>0.036</td>
       <td>ACH-000040</td>
     </tr>
     <tr>
       <th>β[3]</th>
-      <td>-0.021</td>
-      <td>0.043</td>
-      <td>-0.093</td>
+      <td>-0.019</td>
       <td>0.041</td>
+      <td>-0.086</td>
+      <td>0.043</td>
       <td>ACH-000055</td>
     </tr>
     <tr>
       <th>β[4]</th>
-      <td>-0.016</td>
-      <td>0.046</td>
-      <td>-0.085</td>
-      <td>0.049</td>
+      <td>-0.013</td>
+      <td>0.042</td>
+      <td>-0.081</td>
+      <td>0.056</td>
       <td>ACH-000067</td>
     </tr>
   </tbody>
@@ -482,7 +482,7 @@ ppc_df = pd.DataFrame(
 
 ![png](010_013_ceres-2_analysis_files/010_013_ceres-2_analysis_15_1.png)
 
-    <ggplot: (8773809234080)>
+    <ggplot: (8756471817469)>
 
 ---
 
@@ -571,14 +571,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 5.81 minutes
+    execution time: 1.43 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-02-01
+    Last updated: 2021-02-02
 
     Python implementation: CPython
     Python version       : 3.9.1
@@ -592,16 +592,16 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-e-16-231.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-229.o2.rc.hms.harvard.edu
 
     Git branch: data-subset-model
 
-    numpy     : 1.19.5
-    plotnine  : 0.7.1
-    pymc3     : 3.9.3
-    matplotlib: 3.3.3
-    pandas    : 1.2.0
-    seaborn   : 0.11.1
-    theano    : 1.0.5
     re        : 2.2.1
+    seaborn   : 0.11.1
+    numpy     : 1.19.5
     arviz     : 0.11.0
+    matplotlib: 3.3.3
+    theano    : 1.0.5
+    pandas    : 1.2.0
+    pymc3     : 3.9.3
+    plotnine  : 0.7.1
