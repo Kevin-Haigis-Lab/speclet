@@ -51,33 +51,24 @@ if DEBUG:
     print(Fore.RED + "(debug mode)")
 
 
-#### ---- Data prepration ---- ####
+#### ---- CERES Model 1 ---- ####
 
+if "ceres-m1" in args.models:
+    print(Fore.BLUE + "CERES Model 1")
 
-def get_data(debug: bool) -> pd.DataFrame:
-    if debug:
+    # Data
+    print("Loading data...")
+    if DEBUG:
         data_path = Path("modeling_data/depmap_modeling_dataframe_subsample.csv")
     else:
         data_path = Path("modeling_data/depmap_modeling_dataframe.csv")
 
-    return dphelp.read_achilles_data(data_path)
+    data = dphelp.read_achilles_data(data_path)
 
-
-#### ---- Sampling models ---- ####
-
-# Data
-print("Loading data...")
-data = get_data(debug=DEBUG)
-
-# Indices
-sgrna_idx = dphelp.get_indices(data, "sgrna")
-gene_idx = dphelp.get_indices(data, "hugo_symbol")
-cell_idx = dphelp.get_indices(data, "depmap_id")
-
-
-## CERES Model 1
-if "ceres-m1" in args.models:
-    print(Fore.BLUE + "CERES Model 1")
+    # Indices
+    sgrna_idx = dphelp.get_indices(data, "sgrna")
+    gene_idx = dphelp.get_indices(data, "hugo_symbol")
+    cell_idx = dphelp.get_indices(data, "depmap_id")
 
     # Construct model
     ceres_m1 = ceres_models.construct_ceres_m1(
@@ -108,9 +99,24 @@ if "ceres-m1" in args.models:
     print(Fore.GREEN + "Done")
 
 
-## CERES Model 2
+#### ---- CERES Model 2 ---- ####
+
 if "ceres-m2" in args.models:
     print(Fore.BLUE + "CERES Model 2")
+
+    # Data
+    print("Loading data...")
+    if DEBUG:
+        data_path = Path("modeling_data/depmap_modeling_dataframe_subsample-medium.csv")
+    else:
+        data_path = Path("modeling_data/depmap_modeling_dataframe.csv")
+
+    data = dphelp.read_achilles_data(data_path)
+
+    # Indices
+    sgrna_idx = dphelp.get_indices(data, "sgrna")
+    gene_idx = dphelp.get_indices(data, "hugo_symbol")
+    cell_idx = dphelp.get_indices(data, "depmap_id")
 
     # Construct model
     ceres_m2 = ceres_models.construct_ceres_m2(

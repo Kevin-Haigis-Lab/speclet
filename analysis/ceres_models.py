@@ -21,10 +21,10 @@ def construct_ceres_m1(
     lfc_data: np.ndarray,
 ) -> pm.model.Model:
     """
-    CERES Model (2)
+    CERES Model 1
 
-    Mostly the same as the original model, but now there is partial pooling
-    of information for each covariate.
+    The same model as originally described but without a spline for CN.
+    (No pooling of information.)
     """
 
     num_sgrnas = len(np.unique(sgrna_idx))
@@ -76,7 +76,7 @@ def construct_ceres_m2(
     lfc_data: np.ndarray,
 ) -> pm.model.Model:
     """
-    CERES Model (2)
+    CERES Model 2
 
     Mostly the same as the original model, but now there is partial pooling
     of information for each covariate.
@@ -98,10 +98,10 @@ def construct_ceres_m2(
         lfc_shared = pm.Data("lfc", lfc_data)
 
         # Hyper-priors
-        a_q = pm.Exponential("q_a", 2)
-        b_q = pm.Exponential("q_b", 1)
+        a_q = pm.Exponential("q_a", 3)
+        b_q = pm.Exponential("q_b", 3)
 
-        μ_h = pm.Normal("μ_h", 0, 0.5)
+        μ_h = pm.Normal("μ_h", -0.5, 0.5)
         σ_h = pm.HalfNormal("σ_h", 1)
 
         μ_g = pm.Normal("μ_g", 0, 0.5)

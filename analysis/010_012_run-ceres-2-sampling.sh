@@ -3,8 +3,8 @@
 #SBATCH -c 3
 #SBATCH -n 1
 #SBATCH -p short
-#SBATCH -t 0-05:00
-#SBATCH --mem 50G
+#SBATCH -t 0-03:00
+#SBATCH --mem 20G
 #SBATCH -o logs/ceres-models/subsample-ceres-%A.log
 #SBATCH -e logs/ceres-models/subsample-ceres-%A.log
 
