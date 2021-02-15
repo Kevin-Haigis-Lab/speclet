@@ -2,8 +2,8 @@
 
 #SBATCH -c 3
 #SBATCH -p priority
-#SBATCH -t 2-00:00
-#SBATCH --mem 70G
+#SBATCH -t 4-00:00
+#SBATCH --mem 200G
 #SBATCH -o logs/ceres-models/subsample-ceres-%A.log
 #SBATCH -e logs/ceres-models/subsample-ceres-%A.log
 
