@@ -1,0 +1,12 @@
+# Directories ignored by 'renv' looking for dependencies.
+
+cache/
+data/
+logs/
+modeling_data/
+models/
+presentations/
+temp/
+
+*/.ipynb_checkpoints/*
+.snakemake/*
