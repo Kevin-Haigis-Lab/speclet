@@ -47,6 +47,8 @@ The purpose of this series is to experiment with various ways of modeling the CR
 Various models will be designed, fit, and compared.
 The results will also be compared to those from the CERES model produced by DepMap and the results of using the CERES dependency scores for modeling.
 
+1. [Exploratory data analysis.](015_005_exploratory-data-analysis.md) Exploration of the CRC cell line data.
+
 ## Miscellaneous experimentation
 
 > Notebook series `999`
