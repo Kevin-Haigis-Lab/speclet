@@ -1,5 +1,8 @@
 #!/bin/sh
 
+source /home/jc604/.bashrc
+conda activate speclet
+
 DIR=""
 
 if [ $# -eq 0 ]
