@@ -13,20 +13,9 @@
 
 ### [Data preparation](munge/)
 
-1. [Prepare DepMap data](munge/005_prepare-depmap-data.md)
-2. [Prepare modeling data](munge/010_prepare-modeling-data.md)
-3. [Subsample the modeling data](munge/019_prepare-data-subsample.md)
+All of the preparation of source data was conducted in the [Munge](munge/) directory. See the README in that directory for further datials.
 
 ### [Analysis](analysis/)
 
-1. [Experiment with model designs](analysis/)
-2. [Hierarchical modeling.](analysis/010_013_hierarchical-model-subsample.md)
-
----
-
-## To-Do
-
-- design increasingly complex models
-- design a processing workflow for the models
-    - should be consistent yet customizable to the needs of different models
-    - decide on diagnositic values and plots to collect and a system of documentation
+All of the analysis was conducted in the [Analysis](analysis/) directory.
+See the README in that directory for further details.
