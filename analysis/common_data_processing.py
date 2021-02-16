@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Any, Iterable, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -172,3 +172,7 @@ def read_achilles_data(data_path: Path) -> pd.DataFrame:
     data["is_mutated"] = nmutations_to_binary_array(data.n_muts)
 
     return data
+
+
+def nunique(x: Iterable[Any]) -> int:
+    return len(np.unique(x))

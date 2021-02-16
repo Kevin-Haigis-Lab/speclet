@@ -6,6 +6,7 @@ from pathlib import Path
 from time import time
 
 import arviz as az
+import common_data_processing as dphelp
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
@@ -44,31 +45,37 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 10.63 minutes
+    execution time: 0.00 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    plotnine 0.7.1
-    pandas   1.1.3
-    seaborn  0.11.0
-    re       2.2.1
-    numpy    1.19.2
-    pymc3    3.9.3
-    arviz    0.10.0
-    last updated: 2020-12-17
+    Last updated: 2021-02-01
 
-    CPython 3.8.5
-    IPython 7.18.1
+    Python implementation: CPython
+    Python version       : 3.9.1
+    IPython version      : 7.19.0
 
-    compiler   : GCC 7.3.0
-    system     : Linux
-    release    : 3.10.0-1062.el7.x86_64
-    machine    : x86_64
-    processor  : x86_64
-    CPU cores  : 32
-    interpreter: 64bit
-    host name  : compute-a-16-78.o2.rc.hms.harvard.edu
-    Git branch : subset-data
+    Compiler    : GCC 9.3.0
+    OS          : Linux
+    Release     : 3.10.0-1062.el7.x86_64
+    Machine     : x86_64
+    Processor   : x86_64
+    CPU cores   : 32
+    Architecture: 64bit
+
+    Hostname: compute-a-16-171.o2.rc.hms.harvard.edu
+
+    Git branch: data-subset-model
+
+    re        : 2.2.1
+    matplotlib: 3.3.3
+    theano    : 1.0.5
+    plotnine  : 0.7.1
+    pymc3     : 3.9.3
+    pandas    : 1.2.0
+    arviz     : 0.11.0
+    numpy     : 1.19.5
+    seaborn   : 0.11.1
