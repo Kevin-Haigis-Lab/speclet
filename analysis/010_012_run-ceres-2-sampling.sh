@@ -13,8 +13,8 @@ module load gcc conda2
 source /home/jc604/.bashrc
 conda activate speclet
 
-#python3 analysis/010_012_ceres-2-sampling.py -m "ceres-m1" --force-sample -d
-python3 analysis/010_012_ceres-2-sampling.py -m "ceres-m2" --force-sample -d
+#python3 analysis/sampling_pymc3_models.py -m "ceres-m1" --force-sample -d
+python3 analysis/sampling_pymc3_models.py -m "ceres-m2" --force-sample -d
 
 conda deactivate
 

@@ -2,13 +2,13 @@ import argparse
 from pathlib import Path
 from time import time
 
-import ceres_models
 import common_data_processing as dphelp
 import numpy as np
 import pandas as pd
 import pymc3 as pm
 import pymc3_helpers as pmhelp
 from colorama import Fore, init
+from pymc3_models import ceres_models, crc_models
 
 #### ---- Argument parsing ---- ####
 
