@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 import plotnine as gg
 import pymc3 as pm
-import pymc3_helpers as pmhelp
+import pymc3_sampling_api
 import seaborn as sns
 from theano import tensor as tt
 
