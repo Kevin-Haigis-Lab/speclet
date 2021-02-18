@@ -17,10 +17,10 @@ def model_1(
     with pm.Model() as model:
 
         # Indicies
-        gene_idx_shared = pm.Data("gene_idx", gene_idx_batch)
+        # gene_idx_shared = pm.Data("gene_idx", gene_idx_batch)
 
         # Shared data
-        lfc_observed = pm.Data("lfc_observed", lfc_data_batch)
+        # lfc_observed = pm.Data("lfc_observed", lfc_data_batch)
 
         # Hyper-priors
         μ_α = pm.Normal("μ_α", 0, 5)
@@ -29,7 +29,7 @@ def model_1(
         # Priors
         α_g = pm.Normal("α_g", μ_α, σ_α, shape=n_genes)
 
-        μ = pm.Deterministic("μ", α_g[gene_idx_shared])
+        μ = pm.Deterministic("μ", α_g[gene_idx_batch])
         σ = pm.HalfNormal("σ", 5)
 
         lfc = pm.Normal("lfc", μ, σ, observed=lfc_data_batch, total_size=len(lfc_data))

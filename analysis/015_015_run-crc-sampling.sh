@@ -13,7 +13,11 @@ module load gcc conda2
 source /home/jc604/.bashrc
 conda activate speclet
 
-python3 analysis/sampling_pymc3_models.py --models "crc-m1" --force-sample --debug
+python3 analysis/sampling_pymc3_models.py \
+    --model "crc-m1" \
+    --name "CRC_test_model1" \
+    --force-sample \
+    --debug
 
 conda deactivate
 exit 0

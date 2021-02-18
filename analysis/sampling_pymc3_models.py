@@ -1,6 +1,7 @@
 #!/bin/env python3
 
 import argparse
+import string
 import warnings
 from pathlib import Path
 from time import time
@@ -27,6 +28,7 @@ DEPMAP_MODELING_DATA = MODELING_DATA_DIR / "depmap_modeling_dataframe.csv"
 DEPMAP_SUBSAMPLE_DATA = MODELING_DATA_DIR / "depmap_modeling_dataframe_subsample.csv"
 
 CRC_MODELING_DATA = MODELING_DATA_DIR / "depmap_CRC_data.csv"
+CRC_SUBSAMPLING_DATA = MODELING_DATA_DIR / "depmap_CRC_data_subsample.csv"
 
 
 #### ---- General ---- ####
@@ -170,12 +172,7 @@ def crc_model1(
     info("Loading data...")
     data = pd.DataFrame()
     if debug:
-        data = dphelp.read_achilles_data(
-            CRC_MODELING_DATA, low_memory=False, set_categorical_cols=False
-        )
-        info("Subsampling data...")
-        data = dphelp.subsample_achilles_data(data)
-        data = dphelp.set_achilles_categorical_columns(data)
+        data = dphelp.read_achilles_data(CRC_SUBSAMPLING_DATA, low_memory=False)
     else:
         data = dphelp.read_achilles_data(CRC_MODELING_DATA, low_memory=False)
 
@@ -196,20 +193,15 @@ def crc_model1(
     # Sample and cache
     crc_m1_cache = PYMC3_CACHE_DIR / name
 
-    _ = pymc3_sampling_api.pymc3_sampling_procedure(
+    _ = pymc3_sampling_api.pymc3_advi_approximation_procedure(
         model=crc_m1,
-        num_mcmc=2000,
-        tune=2000,
-        chains=2,
-        cores=2,
+        n_iterations=100000,
+        callbacks=[
+            pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
+        ],
         random_seed=random_seed,
         cache_dir=crc_m1_cache,
         force=force_sampling,
-        sample_kwargs={
-            "init": "advi+adapt_diag",
-            "n_init": 200000,
-            "target_accept": 0.9,
-        },
     )
 
     done()
@@ -248,6 +240,10 @@ def parse_cli_arguments(parser: argparse.ArgumentParser) -> argparse.Namespace:
     return parser.parse_args()
 
 
+def clean_model_names(n: str) -> str:
+    return n.replace(" ", "-")
+
+
 def main() -> None:
     # Parse CLI arguments
     parser = argparse.ArgumentParser()
@@ -260,23 +256,25 @@ def main() -> None:
     if args.debug:
         print(Fore.RED + "(🪲 debug mode)")
 
+    model_name = clean_model_names(args.name)
+
     if args.model == "ceres-m1":
         ceres_model1(
-            name=args.name,
+            name=model_name,
             debug=args.debug,
             force_sampling=args.force_sample,
             random_seed=args.random_seed,
         )
     elif args.model == "ceres-m2":
         ceres_model2(
-            name=args.name,
+            name=model_name,
             debug=args.debug,
             force_sampling=args.force_sample,
             random_seed=args.random_seed,
         )
     elif args.model == "crc-m1":
         crc_model1(
-            name=args.name,
+            name=model_name,
             debug=args.debug,
             force_sampling=args.force_sample,
             random_seed=args.random_seed,
