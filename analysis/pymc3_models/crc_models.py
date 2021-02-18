@@ -5,17 +5,22 @@ import pymc3 as pm
 #### ---- Model 1 ---- ####
 
 
-def model_1(gene_idx: np.ndarray, lfc_data: np.ndarray) -> pm.model.Model:
+def model_1(
+    gene_idx: np.ndarray, lfc_data: np.ndarray, batch_size: int
+) -> pm.model.Model:
 
     n_genes = len(np.unique(gene_idx))
+
+    gene_idx_batch = pm.Minibatch(gene_idx, batch_size=batch_size)
+    lfc_data_batch = pm.Minibatch(lfc_data, batch_size=batch_size)
 
     with pm.Model() as model:
 
         # Indicies
-        gene_idx_shared = pm.Data("gene_idx", gene_idx)
+        gene_idx_shared = pm.Data("gene_idx", gene_idx_batch)
 
         # Shared data
-        lfc_observed = pm.Data("lfc_observed", lfc_data)
+        lfc_observed = pm.Data("lfc_observed", lfc_data_batch)
 
         # Hyper-priors
         μ_α = pm.Normal("μ_α", 0, 5)
@@ -27,7 +32,7 @@ def model_1(gene_idx: np.ndarray, lfc_data: np.ndarray) -> pm.model.Model:
         μ = pm.Deterministic("μ", α_g[gene_idx_shared])
         σ = pm.HalfNormal("σ", 5)
 
-        lfc = pm.Normal("lfc", μ, σ, observed=lfc_observed)
+        lfc = pm.Normal("lfc", μ, σ, observed=lfc_data_batch, total_size=len(lfc_data))
 
     return model
 

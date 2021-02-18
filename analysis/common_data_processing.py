@@ -3,6 +3,7 @@ from typing import Any, Iterable, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+import pretty_errors
 
 
 def zscale_cna_by_group(
@@ -152,14 +153,17 @@ def set_achilles_categorical_columns(
     return data
 
 
-def read_achilles_data(data_path: Path) -> pd.DataFrame:
-    data = pd.read_csv(data_path)
+def read_achilles_data(
+    data_path: Path, low_memory: bool = True, set_categorical_cols: bool = True
+) -> pd.DataFrame:
+    data = pd.read_csv(data_path, low_memory=low_memory)
 
     data = data.sort_values(
         ["hugo_symbol", "sgrna", "lineage", "depmap_id"]
     ).reset_index(drop=True)
 
-    data = set_achilles_categorical_columns(data)
+    if set_categorical_cols:
+        data = set_achilles_categorical_columns(data)
 
     data["log2_cn"] = np.log2(data.gene_cn + 1)
     data = zscale_cna_by_group(
@@ -172,6 +176,24 @@ def read_achilles_data(data_path: Path) -> pd.DataFrame:
     data["is_mutated"] = nmutations_to_binary_array(data.n_muts)
 
     return data
+
+
+def subsample_achilles_data(
+    df: pd.DataFrame, n_genes: Optional[int] = 100, n_cell_lines: Optional[int] = None
+) -> pd.DataFrame:
+    genes = df.hugo_symbol.values
+    cell_lines = df.depmap_id.values
+
+    if not n_genes is None:
+        genes = np.random.choice(genes, n_genes)
+
+    if not n_cell_lines is None:
+        cell_lines = np.random.choice(cell_lines, n_cell_lines)
+
+    sub_df = df.copy()
+    sub_df = sub_df[sub_df.hugo_symbol.isin(genes)]
+    sub_df = sub_df[sub_df.depmap_id.isin(cell_lines)]
+    return sub_df
 
 
 def nunique(x: Iterable[Any]) -> int:

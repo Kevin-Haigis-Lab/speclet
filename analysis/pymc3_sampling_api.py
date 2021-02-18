@@ -73,7 +73,7 @@ def pymc3_sampling_procedure(
     cores: Optional[int] = None,
     prior_check_samples: int = 1000,
     ppc_samples: int = 1000,
-    random_seed: int = 1234,
+    random_seed: Optional[int] = None,
     cache_dir: Optional[Path] = None,
     force: bool = False,
     sample_kwargs: Dict[str, Any] = {},
