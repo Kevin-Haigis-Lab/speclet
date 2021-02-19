@@ -168,6 +168,34 @@ def ceres_model2(
     return
 
 
+#### ---- CRC Model Helpers ---- ####
+
+
+def load_crc_data(debug: bool) -> pd.DataFrame:
+    if debug:
+        f = CRC_SUBSAMPLING_DATA
+    else:
+        f = CRC_MODELING_DATA
+    return dphelp.read_achilles_data(f, low_memory=False)
+
+
+def crc_batch_size(debug: bool) -> int:
+    if debug:
+        return 1000
+    else:
+        return 10000
+
+
+def make_sgrna_to_gene_mapping_df(data: pd.DataFrame) -> pd.DataFrame:
+    return (
+        data[["sgrna", "hugo_symbol"]]
+        .drop_duplicates()
+        .reset_index(drop=True)
+        .sort_values("sgrna")
+        .reset_index(drop=True)
+    )
+
+
 #### ---- CRC Model 1 ---- ####
 
 
@@ -181,17 +209,9 @@ def crc_model1(
 
     # Data
     info("Loading data...")
-    data = pd.DataFrame()
-    if debug:
-        data = dphelp.read_achilles_data(CRC_SUBSAMPLING_DATA, low_memory=False)
-    else:
-        data = dphelp.read_achilles_data(CRC_MODELING_DATA, low_memory=False)
+    data = load_crc_data(debug)
 
-    batch_size = -1
-    if debug:
-        batch_size = 1000
-    else:
-        batch_size = 10000
+    batch_size = crc_batch_size(debug)
 
     # Indices
     gene_idx = dphelp.get_indices(data, "hugo_symbol")
@@ -242,27 +262,13 @@ def crc_model2(
 
     # Data
     info("Loading data...")
-    data = pd.DataFrame()
-    if debug:
-        data = dphelp.read_achilles_data(CRC_SUBSAMPLING_DATA, low_memory=False)
-    else:
-        data = dphelp.read_achilles_data(CRC_MODELING_DATA, low_memory=False)
+    data = load_crc_data(debug)
 
-    batch_size = -1
-    if debug:
-        batch_size = 1000
-    else:
-        batch_size = 10000
+    batch_size = crc_batch_size(debug)
 
     # Indices
     sgrna_idx = dphelp.get_indices(data, "sgrna")
-    sgrna_to_gene_map = (
-        data[["sgrna", "hugo_symbol"]]
-        .drop_duplicates()
-        .reset_index(drop=True)
-        .sort_values("sgrna")
-        .reset_index(drop=True)
-    )
+    sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(data)
     sgrna_to_gene_idx = dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol")
 
     # Batched data
