@@ -306,6 +306,66 @@ def crc_model2(
     return
 
 
+#### ---- CRC Model 3 ---- ####
+
+
+def crc_model3(
+    name: str,
+    debug: bool = False,
+    force_sampling: bool = False,
+    random_seed: Optional[int] = None,
+) -> None:
+    print_model("CRC Model 3")
+
+    # Data
+    info("Loading data...")
+    data = load_crc_data(debug)
+
+    batch_size = crc_batch_size(debug)
+
+    # Indices
+    sgrna_idx = dphelp.get_indices(data, "sgrna")
+    sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(data)
+    sgrna_to_gene_idx = dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol")
+    cell_idx = dphelp.get_indices(data, "depmap_id")
+
+    # Batched data
+    sgrna_idx_batch = pm.Minibatch(sgrna_idx, batch_size=batch_size)
+    cell_idx_batch = pm.Minibatch(cell_idx, batch_size=batch_size)
+    lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
+
+    # Construct model
+    crc_m3, shared_vars = crc_models.model_3(
+        sgrna_idx=sgrna_idx,
+        sgrna_to_gene_idx=sgrna_to_gene_idx,
+        cell_idx=cell_idx,
+        lfc_data=data.lfc.values,
+    )
+
+    # Sample and cache
+    crc_m3_cache = PYMC3_CACHE_DIR / name
+
+    _ = pymc3_sampling_api.pymc3_advi_approximation_procedure(
+        model=crc_m3,
+        callbacks=[
+            pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
+        ],
+        random_seed=random_seed,
+        cache_dir=crc_m3_cache,
+        force=force_sampling,
+        fit_kwargs={
+            "more_replacements": {
+                shared_vars["sgrna_idx_shared"]: sgrna_idx_batch,
+                shared_vars["cell_idx_shared"]: cell_idx_batch,
+                shared_vars["lfc_shared"]: lfc_data_batch,
+            }
+        },
+    )
+
+    done()
+    return
+
+
 #### ---- Finish ---- ####
 
 
@@ -315,7 +375,7 @@ def parse_cli_arguments(parser: argparse.ArgumentParser) -> argparse.Namespace:
         "--model",
         help="model to sample from",
         type=str,
-        choices=["ceres-m1", "ceres-m2", "crc-m1", "crc-m2"],
+        choices=["ceres-m1", "ceres-m2", "crc-m1", "crc-m2", "crc-m3"],
     )
     parser.add_argument("-n", "--name", help="model name", type=str)
     parser.add_argument(
@@ -380,6 +440,13 @@ def main() -> None:
         )
     elif args.model == "crc-m2":
         crc_model2(
+            name=model_name,
+            debug=args.debug,
+            force_sampling=args.force_sample,
+            random_seed=args.random_seed,
+        )
+    elif args.model == "crc-m3":
+        crc_model3(
             name=model_name,
             debug=args.debug,
             force_sampling=args.force_sample,

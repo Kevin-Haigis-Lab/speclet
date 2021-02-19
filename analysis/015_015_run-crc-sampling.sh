@@ -19,11 +19,19 @@ conda activate speclet
 #     --force-sample \
 #     --debug
 
+# python3 analysis/sampling_pymc3_models.py \
+#     --model "crc-m2" \
+#     --name "CRC_test_model2" \
+#     --force-sample \
+#     --debug
+
 python3 analysis/sampling_pymc3_models.py \
-    --model "crc-m2" \
-    --name "CRC_test_model2" \
+    --model "crc-m3" \
+    --name "CRC_test_model3" \
     --force-sample \
     --debug
+
+
 
 conda deactivate
 exit 0
