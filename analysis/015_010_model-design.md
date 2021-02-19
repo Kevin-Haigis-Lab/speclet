@@ -8,6 +8,7 @@ from pathlib import Path
 from time import time
 
 import arviz as az
+import color_pal as pal
 import common_data_processing as dphelp
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
@@ -15,10 +16,10 @@ import numpy as np
 import pandas as pd
 import plotnine as gg
 import pymc3 as pm
-import pymc3_helpers as pmhelp
+import pymc3_sampling_api
 import seaborn as sns
+import theano
 from pymc3_models import crc_models
-from theano import tensor as tt
 
 notebook_tic = time()
 
@@ -36,21 +37,9 @@ pymc3_cache_dir = Path("pymc3_model_cache")
 ## Data
 
 ```python
-data = pd.read_csv(Path("..", "modeling_data", "depmap_CRC_data.csv"), low_memory=False)
-
-N_GENES = 100
-random_genes = np.random.choice(data.hugo_symbol.unique(), N_GENES)
-
-data = (
-    data[data.hugo_symbol.isin(random_genes)]
-    .sort_values(["depmap_id", "hugo_symbol", "sgrna"])
-    .reset_index(drop=True)
+data = dphelp.read_achilles_data(
+    Path("..", "modeling_data", "depmap_CRC_data_subsample.csv"), low_memory=False
 )
-
-cat_cols = ["sgrna", "depmap_id", "hugo_symbol"]
-for col in cat_cols:
-    data = dphelp.make_cat(data, col, ordered=True, sort_cats=False)
-
 data.head()
 ```
 
@@ -83,9 +72,6 @@ data.head()
       <th>lineage_subtype</th>
       <th>kras_mutation</th>
       <th>...</th>
-      <th>log2_gene_cn_p1</th>
-      <th>gene_cn</th>
-      <th>n_muts</th>
       <th>any_deleterious</th>
       <th>variant_classification</th>
       <th>is_deleterious</th>
@@ -93,14 +79,17 @@ data.head()
       <th>is_cosmic_hotspot</th>
       <th>mutated_at_guide_location</th>
       <th>rna_expr</th>
+      <th>log2_cn</th>
+      <th>z_log2_cn</th>
+      <th>is_mutated</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>ATTGGTAGAACTTAGTCCAG</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
       <td>ls513-311cas9_repa_p6_batch2</td>
-      <td>-0.328006</td>
+      <td>0.029491</td>
       <td>2</td>
       <td>True</td>
       <td>ACH-000007</td>
@@ -109,22 +98,22 @@ data.head()
       <td>colorectal_adenocarcinoma</td>
       <td>G12D</td>
       <td>...</td>
-      <td>0.976114</td>
-      <td>1.654121</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>1.480265</td>
+      <td>1.861144</td>
+      <td>1.386218</td>
       <td>0</td>
-      <td>False</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>False</td>
-      <td>5.14527</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>ATTGGTAGAACTTAGTCCAG</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
       <td>ls513-311cas9_repb_p6_batch2</td>
-      <td>-0.233740</td>
+      <td>0.426017</td>
       <td>2</td>
       <td>True</td>
       <td>ACH-000007</td>
@@ -133,183 +122,99 @@ data.head()
       <td>colorectal_adenocarcinoma</td>
       <td>G12D</td>
       <td>...</td>
-      <td>0.976114</td>
-      <td>1.654121</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>1.480265</td>
+      <td>1.861144</td>
+      <td>1.386218</td>
       <td>0</td>
-      <td>False</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>False</td>
-      <td>5.14527</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>GATCTGCTGACCCAATGCTA</td>
-      <td>ls513-311cas9_repa_p6_batch2</td>
-      <td>-0.125088</td>
-      <td>2</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>c2bbe1-311cas9 rep a p5_batch3</td>
+      <td>0.008626</td>
+      <td>3</td>
       <td>True</td>
-      <td>ACH-000007</td>
+      <td>ACH-000009</td>
       <td>Primary</td>
       <td>colorectal</td>
       <td>colorectal_adenocarcinoma</td>
-      <td>G12D</td>
+      <td>WT</td>
       <td>...</td>
-      <td>0.976114</td>
-      <td>1.654121</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>0.695994</td>
+      <td>1.375470</td>
+      <td>-0.234394</td>
       <td>0</td>
-      <td>False</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>False</td>
-      <td>5.14527</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>GATCTGCTGACCCAATGCTA</td>
-      <td>ls513-311cas9_repb_p6_batch2</td>
-      <td>-0.084501</td>
-      <td>2</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>c2bbe1-311cas9 rep b p5_batch3</td>
+      <td>0.280821</td>
+      <td>3</td>
       <td>True</td>
-      <td>ACH-000007</td>
+      <td>ACH-000009</td>
       <td>Primary</td>
       <td>colorectal</td>
       <td>colorectal_adenocarcinoma</td>
-      <td>G12D</td>
+      <td>WT</td>
       <td>...</td>
-      <td>0.976114</td>
-      <td>1.654121</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>0.695994</td>
+      <td>1.375470</td>
+      <td>-0.234394</td>
       <td>0</td>
-      <td>False</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>False</td>
-      <td>5.14527</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>GATGACTTCCCAGAATCTAC</td>
-      <td>ls513-311cas9_repa_p6_batch2</td>
-      <td>0.306206</td>
-      <td>2</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>c2bbe1-311cas9 rep c p5_batch3</td>
+      <td>0.239815</td>
+      <td>3</td>
       <td>True</td>
-      <td>ACH-000007</td>
+      <td>ACH-000009</td>
       <td>Primary</td>
       <td>colorectal</td>
       <td>colorectal_adenocarcinoma</td>
-      <td>G12D</td>
+      <td>WT</td>
       <td>...</td>
-      <td>0.976114</td>
-      <td>1.654121</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>0.695994</td>
+      <td>1.375470</td>
+      <td>-0.234394</td>
       <td>0</td>
-      <td>False</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>False</td>
-      <td>5.14527</td>
     </tr>
   </tbody>
 </table>
-<p>5 rows × 27 columns</p>
+<p>5 rows × 30 columns</p>
 </div>
 
-## Models
-
-### Model 1
-
-$
-lfc \sim N(\mu, \sigma) \\
-\mu = \alpha_g \\
-\quad \alpha_g \sim N(\mu_\alpha, \sigma_\alpha) \\
-\qquad \mu_\alpha \sim N(0, 5) \quad \sigma_\alpha \sim \text{Exp}(2) \\
-\sigma \sim HN(5)
-$
+## Model Experimentation
 
 ```python
-gene_idx = dphelp.get_indices(data, "hugo_symbol")
-m1 = crc_models.model_1(gene_idx=gene_idx, lfc_data=data.lfc.values)
-
-pm.model_to_graphviz(m1)
-```
-
-![svg](015_010_model-design_files/015_010_model-design_6_0.svg)
-
-```python
-with m1:
-    trace = pm.sample(
-        draws=1000,
-        init="advi",
-        n_init=200000,
-        tune=1000,
-        random_seed=RANDOM_SEED,
-        return_inferencedata=True,
-    )
-```
-
-    Auto-assigning NUTS sampler...
-    Initializing NUTS using advi...
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='29035' class='' max='200000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  14.52% [29035/200000 00:22<02:13 Average Loss = 28,204]
-</div>
-
-    Convergence achieved at 29100
-    Interrupted at 29,099 [14%]: Average Loss = 35,555
-    Multiprocess sampling (4 chains in 4 jobs)
-    NUTS: [σ, α_g, σ_α, μ_α]
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:14<00:00 Sampling 4 chains, 0 divergences]
-</div>
-
-    Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 14 seconds.
-
-### Model 2
-
-$
-lfc \sim N(\mu, \sigma) \\
-\mu = \alpha_s \\
-\quad \alpha_s \sim N(\mu_\alpha, \sigma_\alpha) \\
-\qquad \mu_\alpha \sim N(\mu_g, \sigma_g) \quad \sigma_\alpha \sim \text{Exp}(2) \\
-\qquad \quad \mu_g \sim N(0, 5) \quad \sigma_g \sim \text{Exp}(2) \\
-\sigma \sim HN(5)
-$
-
-```python
+total_size = len(data.lfc.values)
+sgrna_idx, n_sgrnas = dphelp.get_indices_and_count(data, "sgrna")
 sgrna_to_gene_map = (
     data[["sgrna", "hugo_symbol"]]
     .drop_duplicates()
@@ -317,74 +222,263 @@ sgrna_to_gene_map = (
     .sort_values("sgrna")
     .reset_index(drop=True)
 )
-
-sgrna_to_gene_idx = dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol")
-sgrna_idx = dphelp.get_indices(data, "sgrna")
-
-m2 = crc_models.model_2(
-    sgrna_idx=sgrna_idx, sgrna_to_gene_idx=sgrna_to_gene_idx, lfc_data=data.lfc.values
+sgrna_to_gene_idx, n_genes = dphelp.get_indices_and_count(
+    sgrna_to_gene_map, "hugo_symbol"
 )
-
-pm.model_to_graphviz(m2)
 ```
 
-![svg](015_010_model-design_files/015_010_model-design_9_0.svg)
+```python
+sgrna_idx_shared = theano.shared(sgrna_idx)
+sgrna_to_gene_idx_shared = theano.shared(sgrna_to_gene_idx)
+lfc_shared = theano.shared(data.lfc.values)
+```
 
 ```python
-with m2:
-    trace = pm.sample(
-        draws=1000,
-        init="advi",
-        n_init=200000,
-        tune=1000,
-        random_seed=RANDOM_SEED,
-        return_inferencedata=True,
+with pm.Model() as model2:
+
+    μ_g = pm.Normal("μ_g", 0, 5)
+    σ_g = pm.HalfNormal("σ_g", 2)
+    σ_σ_α = pm.HalfNormal("σ_σ_α", 2)
+
+    μ_α = pm.Normal("μ_α", μ_g, σ_g, shape=n_genes)
+    σ_α = pm.HalfNormal("σ_α", σ_σ_α, shape=n_genes)
+
+    α_s = pm.Normal(
+        "α_s",
+        μ_α[sgrna_to_gene_idx_shared],
+        σ_α[sgrna_to_gene_idx_shared],
+        shape=n_sgrnas,
+    )
+
+    μ = α_s[sgrna_idx_shared]
+    σ = pm.HalfNormal("σ", 5)
+
+    lfc = pm.Normal("lfc", μ, σ, observed=lfc_shared, total_size=total_size)
+```
+
+```python
+pm.model_to_graphviz(model2)
+```
+
+![svg](015_010_model-design_files/015_010_model-design_8_0.svg)
+
+```python
+batch_size = 1000
+
+sgnra_idx_batch = pm.Minibatch(sgrna_idx, batch_size=batch_size)
+lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
+```
+
+    /home/jc604/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    /home/jc604/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+
+```python
+m1_meanfield = pymc3_sampling_api.pymc3_advi_approximation_procedure(
+    model=model2,
+    method="advi",
+    callbacks=[
+        pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
+    ],
+    fit_kwargs={
+        "more_replacements": {
+            sgrna_idx_shared: sgnra_idx_batch,
+            lfc_shared: lfc_data_batch,
+        }
+    },
+)
+```
+
+    Sampling from prior distributions.
+    Running ADVI approximation.
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='25379' class='' max='100000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  25.38% [25379/100000 00:14<00:41 Average Loss = 672.08]
+</div>
+
+    Convergence achieved at 25700
+    Interrupted at 25,699 [25%]: Average Loss = 965.71
+
+
+    Sampling from posterior.
+    Posterior predicitons.
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='1000' class='' max='1000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [1000/1000 00:11<00:00]
+</div>
+
+```python
+m1_fullrank = pymc3_sampling_api.pymc3_advi_approximation_procedure(
+    model=model2,
+    method="advi",
+    n_iterations=22000,
+    callbacks=[
+        pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
+    ],
+    fit_kwargs={
+        "more_replacements": {
+            sgrna_idx_shared: sgnra_idx_batch,
+            lfc_shared: lfc_data_batch,
+        }
+    },
+)
+```
+
+    Sampling from prior distributions.
+    Running ADVI approximation.
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='22000' class='' max='22000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [22000/22000 00:12<00:00 Average Loss = 678.29]
+</div>
+
+    Finished [100%]: Average Loss = 678.47
+
+
+    Sampling from posterior.
+    Posterior predicitons.
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='1000' class='' max='1000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [1000/1000 00:13<00:00]
+</div>
+
+### Biref inspection
+
+```python
+def plot_approximation_history(hist: np.ndarray) -> gg.ggplot:
+    d = pd.DataFrame({"loss": hist}).reset_index(drop=False)
+    return (
+        gg.ggplot(d, gg.aes(x="index", y="loss"))
+        + gg.geom_line(size=0.7, alpha=0.8, color=pal.sns_blue)
+        + gg.scale_x_continuous(expand=(0.02, 0, 0.02, 0))
+        + gg.labs(x="step", y="loss")
     )
 ```
 
-    Auto-assigning NUTS sampler...
-    Initializing NUTS using advi...
+```python
+plot_approximation_history(m1_meanfield["approximation"].hist) + gg.labs(
+    title="Mean-Field"
+)
+```
 
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='30080' class='' max='200000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  15.04% [30080/200000 00:27<02:34 Average Loss = 24,329]
-</div>
+![png](015_010_model-design_files/015_010_model-design_14_0.png)
 
-    Convergence achieved at 30200
-    Interrupted at 30,199 [15%]: Average Loss = 32,432
-    Multiprocess sampling (4 chains in 4 jobs)
-    NUTS: [σ, α_g, σ_α, μ_α, σ_g, μ_g]
+    <ggplot: (8776798429106)>
 
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:25<00:00 Sampling 4 chains, 0 divergences]
-</div>
+```python
+plot_approximation_history(m1_fullrank["approximation"].hist) + gg.labs(
+    title="Full-Rank"
+)
+```
 
-    Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 26 seconds.
+![png](015_010_model-design_files/015_010_model-design_15_0.png)
+
+    <ggplot: (8776863064221)>
+
+```python
+gene_posteriors = pd.concat(
+    [
+        az.summary(
+            pymc3_sampling_api.samples_to_arviz(model2, m1_fullrank),
+            var_names="μ_α",
+            hdi_prob=0.89,
+        ).assign(advi="fullrank"),
+        az.summary(
+            pymc3_sampling_api.samples_to_arviz(model2, m1_meanfield),
+            var_names="μ_α",
+            hdi_prob=0.89,
+        ).assign(advi="mean-field"),
+    ]
+)
+```
+
+    arviz - WARNING - Shape validation failed: input_shape: (1, 1000), minimum_shape: (chains=2, draws=4)
+    arviz - WARNING - Shape validation failed: input_shape: (1, 1000), minimum_shape: (chains=2, draws=4)
+
+```python
+pos = gg.position_dodge(width=0.75)
+(
+    gg.ggplot(gene_posteriors.reset_index(drop=False), gg.aes(x="index"))
+    + gg.geom_hline(yintercept=0, linetype="--", alpha=0.5)
+    + gg.geom_linerange(
+        gg.aes(ymin="hdi_5.5%", ymax="hdi_94.5%", color="advi"), position=pos, size=0.2
+    )
+    + gg.geom_point(gg.aes(y="mean", color="advi"), position=pos, size=0.5)
+    + gg.scale_color_brewer(type="qual", palette="Set1")
+    + gg.theme(axis_text_x=gg.element_text(angle=90, size=6), figure_size=(12, 5))
+    + gg.labs(x="gene (model paramter label)", y="posterior", color="ADVI")
+)
+```
+
+![png](015_010_model-design_files/015_010_model-design_17_0.png)
+
+    <ggplot: (8776863898618)>
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
 
 ---
 

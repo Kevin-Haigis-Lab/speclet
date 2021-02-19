@@ -197,6 +197,7 @@ def pymc3_sampling_procedure(
 
 def pymc3_advi_approximation_procedure(
     model: pm.Model,
+    method: str = "advi",
     n_iterations: int = 100000,
     draws: int = 1000,
     prior_check_samples: int = 1000,
@@ -219,7 +220,7 @@ def pymc3_advi_approximation_procedure(
             prior_check_samples, random_seed=random_seed
         )
         info("Running ADVI approximation.")
-        approx = pm.fit(n_iterations, method="advi", callbacks=callbacks, **fit_kwargs)
+        approx = pm.fit(n_iterations, method=method, callbacks=callbacks, **fit_kwargs)
         info("Sampling from posterior.")
         advi_trace = approx.sample(draws)
         info("Posterior predicitons.")
