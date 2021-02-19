@@ -110,6 +110,7 @@ def ceres_model1(
     )
 
     done()
+    return
 
 
 #### ---- CERES Model 2 ---- ####
@@ -164,6 +165,7 @@ def ceres_model2(
     )
 
     done()
+    return
 
 
 #### ---- CRC Model 1 ---- ####
@@ -224,6 +226,78 @@ def crc_model1(
     )
 
     done()
+    return
+
+
+#### ---- CRC Model 2 ---- ####
+
+
+def crc_model2(
+    name: str,
+    debug: bool = False,
+    force_sampling: bool = False,
+    random_seed: Optional[int] = None,
+) -> None:
+    print_model("CRC Model 2")
+
+    # Data
+    info("Loading data...")
+    data = pd.DataFrame()
+    if debug:
+        data = dphelp.read_achilles_data(CRC_SUBSAMPLING_DATA, low_memory=False)
+    else:
+        data = dphelp.read_achilles_data(CRC_MODELING_DATA, low_memory=False)
+
+    batch_size = -1
+    if debug:
+        batch_size = 1000
+    else:
+        batch_size = 10000
+
+    # Indices
+    sgrna_idx = dphelp.get_indices(data, "sgrna")
+    sgrna_to_gene_map = (
+        data[["sgrna", "hugo_symbol"]]
+        .drop_duplicates()
+        .reset_index(drop=True)
+        .sort_values("sgrna")
+        .reset_index(drop=True)
+    )
+    sgrna_to_gene_idx = dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol")
+
+    # Batched data
+    sgrna_idx_batch = pm.Minibatch(sgrna_idx, batch_size=batch_size)
+    lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
+
+    # Construct model
+    crc_m2, sgrna_idx_shared, _, lfc_data_shared = crc_models.model_2(
+        sgrna_idx=sgrna_idx,
+        sgrna_to_gene_idx=sgrna_to_gene_idx,
+        lfc_data=data.lfc.values,
+    )
+
+    # Sample and cache
+    crc_m2_cache = PYMC3_CACHE_DIR / name
+
+    _ = pymc3_sampling_api.pymc3_advi_approximation_procedure(
+        model=crc_m2,
+        n_iterations=100000,
+        callbacks=[
+            pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
+        ],
+        random_seed=random_seed,
+        cache_dir=crc_m2_cache,
+        force=force_sampling,
+        fit_kwargs={
+            "more_replacements": {
+                sgrna_idx_shared: sgrna_idx_batch,
+                lfc_data_shared: lfc_data_batch,
+            }
+        },
+    )
+
+    done()
+    return
 
 
 #### ---- Finish ---- ####
@@ -299,7 +373,12 @@ def main() -> None:
             random_seed=args.random_seed,
         )
     elif args.model == "crc-m2":
-        warnings.warn("CRC model 2 is not yet implemented 😥")
+        crc_model2(
+            name=model_name,
+            debug=args.debug,
+            force_sampling=args.force_sample,
+            random_seed=args.random_seed,
+        )
     else:
         warnings.warn("Unrecognized model 🤷🏻‍♂️")
 
