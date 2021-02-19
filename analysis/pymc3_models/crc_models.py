@@ -1,26 +1,26 @@
+from typing import Optional, Tuple, Union
+
 import numpy as np
 import pandas as pd
+import pretty_errors
 import pymc3 as pm
+import theano
+from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 #### ---- Model 1 ---- ####
 
 
 def model_1(
-    gene_idx: np.ndarray, lfc_data: np.ndarray, batch_size: int
-) -> pm.model.Model:
+    gene_idx: np.ndarray, lfc_data: np.ndarray
+) -> Tuple[pm.model.Model, TTShared, TTShared]:
 
     n_genes = len(np.unique(gene_idx))
 
-    gene_idx_batch = pm.Minibatch(gene_idx, batch_size=batch_size)
-    lfc_data_batch = pm.Minibatch(lfc_data, batch_size=batch_size)
+    # Shared Theano variables.
+    gene_idx_shared = theano.shared(gene_idx)
+    lfc_shared = theano.shared(lfc_data)
 
     with pm.Model() as model:
-
-        # Indicies
-        # gene_idx_shared = pm.Data("gene_idx", gene_idx_batch)
-
-        # Shared data
-        # lfc_observed = pm.Data("lfc_observed", lfc_data_batch)
 
         # Hyper-priors
         μ_α = pm.Normal("μ_α", 0, 5)
@@ -29,12 +29,12 @@ def model_1(
         # Priors
         α_g = pm.Normal("α_g", μ_α, σ_α, shape=n_genes)
 
-        μ = pm.Deterministic("μ", α_g[gene_idx_batch])
+        μ = pm.Deterministic("μ", α_g[gene_idx_shared])
         σ = pm.HalfNormal("σ", 5)
 
-        lfc = pm.Normal("lfc", μ, σ, observed=lfc_data_batch, total_size=len(lfc_data))
+        lfc = pm.Normal("lfc", μ, σ, observed=lfc_shared, total_size=len(lfc_data))
 
-    return model
+    return model, gene_idx_shared, lfc_shared
 
 
 #### ---- Model 2 ---- ####

@@ -13,10 +13,19 @@ import pandas as pd
 import pretty_errors
 import pymc3 as pm
 import pymc3_sampling_api
+import theano
 from colorama import Back, Fore, Style, init
 from pymc3_models import ceres_models, crc_models
 
 init(autoreset=True)
+
+pretty_errors.configure(
+    filename_color=pretty_errors.BLUE,
+    code_color=pretty_errors.BLACK,
+    exception_color=pretty_errors.BRIGHT_RED,
+    exception_arg_color=pretty_errors.RED,
+    line_color=pretty_errors.BRIGHT_BLACK,
+)
 
 #### ---- Data Paths ---- ####
 
@@ -185,9 +194,13 @@ def crc_model1(
     # Indices
     gene_idx = dphelp.get_indices(data, "hugo_symbol")
 
+    # Batched data
+    gene_idx_batch = pm.Minibatch(gene_idx, batch_size=batch_size)
+    lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
+
     # Construct model
-    crc_m1 = crc_models.model_1(
-        gene_idx=gene_idx, lfc_data=data.lfc.values, batch_size=batch_size
+    crc_m1, gene_idx_shared, lfc_data_shared = crc_models.model_1(
+        gene_idx=gene_idx, lfc_data=data.lfc.values
     )
 
     # Sample and cache
@@ -202,6 +215,12 @@ def crc_model1(
         random_seed=random_seed,
         cache_dir=crc_m1_cache,
         force=force_sampling,
+        fit_kwargs={
+            "more_replacements": {
+                gene_idx_shared: gene_idx_batch,
+                lfc_data_shared: lfc_data_batch,
+            }
+        },
     )
 
     done()

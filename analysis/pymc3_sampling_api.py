@@ -5,6 +5,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import arviz as az
 import numpy as np
 import pandas as pd
+import pretty_errors
 import pymc3 as pm
 from colorama import Back, Fore, Style, init
 
@@ -204,6 +205,7 @@ def pymc3_advi_approximation_procedure(
     random_seed: Optional[int] = None,
     cache_dir: Optional[Path] = None,
     force: bool = False,
+    fit_kwargs: Dict[Any, Any] = {},
 ) -> Dict[str, Any]:
     if cache_dir is not None:
         prior_file_path, post_file_path, approx_file_path = cache_file_names(cache_dir)
@@ -217,7 +219,7 @@ def pymc3_advi_approximation_procedure(
             prior_check_samples, random_seed=random_seed
         )
         info("Running ADVI approximation.")
-        approx = pm.fit(n_iterations, method="advi", callbacks=callbacks)
+        approx = pm.fit(n_iterations, method="advi", callbacks=callbacks, **fit_kwargs)
         info("Sampling from posterior.")
         advi_trace = approx.sample(draws)
         info("Posterior predicitons.")
