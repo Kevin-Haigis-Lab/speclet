@@ -1,6 +1,7 @@
 import re
 from typing import Dict, List, Optional, Tuple
 
+import arviz as az
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -47,4 +48,25 @@ def extract_matrix_variable_indices(
     indices_array = np.asarray(indices_list)
     d[idx1name] = idx1[indices_array[:, 0]]
     d[idx2name] = idx2[indices_array[:, 1]]
+    return d
+
+
+def summarize_posterior_predictions(
+    a: np.ndarray, hdi_prob: float = 0.89, merge_with: Optional[pd.DataFrame] = None
+) -> pd.DataFrame:
+    hdi = az.hdi(a, hdi_prob=hdi_prob)
+
+    d = pd.DataFrame(
+        {
+            "pred_mean": a.mean(axis=0),
+            "pred_hdi_low": hdi[:, 0],
+            "pred_hdi_high": hdi[:, 1],
+        }
+    )
+
+    if not merge_with is None:
+        d = pd.merge(
+            d, merge_with.reset_index(drop=True), left_index=True, right_index=True
+        )
+
     return d
