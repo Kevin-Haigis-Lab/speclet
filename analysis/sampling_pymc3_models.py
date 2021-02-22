@@ -58,6 +58,19 @@ def done():
     return None
 
 
+#### ---- File IO ---- ####
+
+
+def make_cache_name(name: str) -> Path:
+    return PYMC3_CACHE_DIR / name
+
+
+def touch(n: str) -> None:
+    p = make_cache_name(n) / (n + ".txt")
+    p.touch()
+    return None
+
+
 #### ---- CERES Model 1 ---- ####
 
 
@@ -92,7 +105,7 @@ def ceres_model1(
         lfc_data=data.lfc.to_numpy(),
     )
 
-    ceres_m1_cache = PYMC3_CACHE_DIR / name
+    ceres_m1_cache = make_cache_name(name)
     _ = pymc3_sampling_api.pymc3_sampling_procedure(
         model=ceres_m1,
         num_mcmc=1000,
@@ -147,7 +160,7 @@ def ceres_model2(
         lfc_data=data.lfc.to_numpy(),
     )
 
-    ceres_m2_cache = PYMC3_CACHE_DIR / name
+    ceres_m2_cache = make_cache_name(name)
     _ = pymc3_sampling_api.pymc3_sampling_procedure(
         model=ceres_m2,
         num_mcmc=1000,
@@ -226,7 +239,7 @@ def crc_model1(
     )
 
     # Sample and cache
-    crc_m1_cache = PYMC3_CACHE_DIR / name
+    crc_m1_cache = make_cache_name(name)
 
     _ = pymc3_sampling_api.pymc3_advi_approximation_procedure(
         model=crc_m1,
@@ -276,14 +289,14 @@ def crc_model2(
     lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
     # Construct model
-    crc_m2, sgrna_idx_shared, _, lfc_data_shared = crc_models.model_2(
+    crc_m2, shared_vars = crc_models.model_2(
         sgrna_idx=sgrna_idx,
         sgrna_to_gene_idx=sgrna_to_gene_idx,
         lfc_data=data.lfc.values,
     )
 
     # Sample and cache
-    crc_m2_cache = PYMC3_CACHE_DIR / name
+    crc_m2_cache = make_cache_name(name)
 
     _ = pymc3_sampling_api.pymc3_advi_approximation_procedure(
         model=crc_m2,
@@ -296,8 +309,8 @@ def crc_model2(
         force=force_sampling,
         fit_kwargs={
             "more_replacements": {
-                sgrna_idx_shared: sgrna_idx_batch,
-                lfc_data_shared: lfc_data_batch,
+                shared_vars["sgrna_idx_shared"]: sgrna_idx_batch,
+                shared_vars["lfc_shared"]: lfc_data_batch,
             }
         },
     )
@@ -343,7 +356,7 @@ def crc_model3(
     )
 
     # Sample and cache
-    crc_m3_cache = PYMC3_CACHE_DIR / name
+    crc_m3_cache = make_cache_name(name)
 
     _ = pymc3_sampling_api.pymc3_advi_approximation_procedure(
         model=crc_m3,
@@ -366,7 +379,9 @@ def crc_model3(
     return
 
 
-#### ---- Finish ---- ####
+#### ---- MAIN ---- ####
+
+MODELS = ["ceres-m1", "ceres-m2", "crc-m1", "crc-m2", "crc-m3"]
 
 
 def parse_cli_arguments(parser: argparse.ArgumentParser) -> argparse.Namespace:
@@ -375,7 +390,7 @@ def parse_cli_arguments(parser: argparse.ArgumentParser) -> argparse.Namespace:
         "--model",
         help="model to sample from",
         type=str,
-        choices=["ceres-m1", "ceres-m2", "crc-m1", "crc-m2", "crc-m3"],
+        choices=MODELS,
     )
     parser.add_argument("-n", "--name", help="model name", type=str)
     parser.add_argument(
@@ -394,6 +409,12 @@ def parse_cli_arguments(parser: argparse.ArgumentParser) -> argparse.Namespace:
         type=int,
         nargs="?",
         default=None,
+    )
+    parser.add_argument(
+        "--touch",
+        help="touch a file with the name of the model when sampling has finished",
+        action="store_true",
+        default=False,
     )
 
     return parser.parse_args()
@@ -453,7 +474,11 @@ def main() -> None:
             random_seed=args.random_seed,
         )
     else:
-        warnings.warn("Unrecognized model 🤷🏻‍♂️")
+        raise Exception("Unrecognized model 🤷🏻‍♂️")
+
+    if args.touch and args.model in MODELS:
+        info("Touching output file.")
+        touch(args.model)
 
     toc = time()
     info(f"execution time: {(toc - tic) / 60:.2f} minutes")
