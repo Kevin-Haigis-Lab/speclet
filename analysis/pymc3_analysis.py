@@ -6,6 +6,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import plotnine as gg
 import pymc3 as pm
 import seaborn as sns
 
@@ -70,3 +71,11 @@ def summarize_posterior_predictions(
         )
 
     return d
+
+
+def plot_vi_hist(approx: pm.variational.Approximation) -> gg.ggplot:
+    d = pd.DataFrame({"loss": approx.hist}).assign(step=lambda d: np.arange(d.shape[0]))
+
+    return gg.ggplot(d, gg.aes(x="step", y="loss")) + gg.geom_line(
+        size=0.5, alpha=0.75, color="black"
+    )

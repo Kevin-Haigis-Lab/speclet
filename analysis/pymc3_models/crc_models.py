@@ -47,7 +47,7 @@ def model_1(
 
 def model_2(
     sgrna_idx: np.ndarray, sgrna_to_gene_idx: np.ndarray, lfc_data: np.ndarray
-) -> Tuple[pm.model.Model, TTShared, TTShared, TTShared]:
+) -> Tuple[pm.model.Model, Dict[str, TTShared]]:
 
     total_size = len(lfc_data)
     n_sgrnas = nunique(sgrna_idx)
@@ -83,7 +83,12 @@ def model_2(
         # Likelihood
         lfc = pm.Normal("lfc", μ, σ, observed=lfc_shared, total_size=total_size)
 
-    return model, sgrna_idx_shared, sgrna_to_gene_idx_shared, lfc_shared
+    shared_vars = {
+        "sgrna_idx_shared": sgrna_idx_shared,
+        "sgrna_to_gene_idx_shared": sgrna_to_gene_idx_shared,
+        "lfc_shared": lfc_shared,
+    }
+    return model, shared_vars
 
 
 #### ---- Model 3 ---- ####
