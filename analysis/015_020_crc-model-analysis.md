@@ -1202,7 +1202,7 @@ az.compare(
 1. Address the change above to fix an issue with PPC sampling. <span style="color:green">✔︎</span>
 2. Make sure I can replace the shared data with new data for predictions on unseen data. <span style="color:green">✔︎</span>
 3. Run and analyze more simple models. <span style="color:green">✔︎</span>
-4. Create a Snakemake workflow to run all in parallel and then run the analysis.
+4. Create a Snakemake workflow to run all in parallel and then run the analysis. <span style="color:green">✔︎</span>
 
 ---
 

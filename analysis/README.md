@@ -41,13 +41,14 @@ Series `015` is the second generation and is under active development.
 
 > Notebook series `015`
 
-<span style="color: green">*These notebooks are under current development.*</span>
-
 The purpose of this series is to experiment with various ways of modeling the CRC data using PyMC3 models.
 Various models will be designed, fit, and compared.
 The results will also be compared to those from the CERES model produced by DepMap and the results of using the CERES dependency scores for modeling.
 
 1. [Exploratory data analysis.](015_005_exploratory-data-analysis.md) Exploration of the CRC cell line data.
+2. [Designing models.](015_010_model-design.md) A scratch-pad for experimenting with model design.
+3. [Workflow to fit CRC models.](015_017_run-crc-sampling-snakemake.py) A [Snakemake](https://snakemake.readthedocs.io/en/stable/) workflow for fitting CRC models, caching the results, and running the analysis notebook.
+4. [Model analysis.](015_020_crc-model-analysis.md) Analyzing the posterior distributions of the fit CRC models.
 
 ## Miscellaneous experimentation
 
