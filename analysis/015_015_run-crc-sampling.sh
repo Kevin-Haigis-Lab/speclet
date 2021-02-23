@@ -34,22 +34,3 @@ snakemake \
 
 conda deactivate
 exit 0
-
-
-# python3 analysis/sampling_pymc3_models.py \
-#     --model "crc-m1" \
-#     --name "CRC_test_model1" \
-#     --force-sample \
-#     --debug
-
-# python3 analysis/sampling_pymc3_models.py \
-#     --model "crc-m2" \
-#     --name "CRC_test_model2" \
-#     --force-sample \
-#     --debug
-
-# python3 analysis/sampling_pymc3_models.py \
-#     --model "crc-m3" \
-#     --name "CRC_test_model3" \
-#     --force-sample \
-#     --debug
