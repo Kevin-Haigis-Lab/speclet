@@ -1,10 +1,12 @@
 import re
 from typing import Dict, List, Optional, Tuple
 
+import arviz as az
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import plotnine as gg
 import pymc3 as pm
 import seaborn as sns
 
@@ -48,3 +50,32 @@ def extract_matrix_variable_indices(
     d[idx1name] = idx1[indices_array[:, 0]]
     d[idx2name] = idx2[indices_array[:, 1]]
     return d
+
+
+def summarize_posterior_predictions(
+    a: np.ndarray, hdi_prob: float = 0.89, merge_with: Optional[pd.DataFrame] = None
+) -> pd.DataFrame:
+    hdi = az.hdi(a, hdi_prob=hdi_prob)
+
+    d = pd.DataFrame(
+        {
+            "pred_mean": a.mean(axis=0),
+            "pred_hdi_low": hdi[:, 0],
+            "pred_hdi_high": hdi[:, 1],
+        }
+    )
+
+    if not merge_with is None:
+        d = pd.merge(
+            d, merge_with.reset_index(drop=True), left_index=True, right_index=True
+        )
+
+    return d
+
+
+def plot_vi_hist(approx: pm.variational.Approximation) -> gg.ggplot:
+    d = pd.DataFrame({"loss": approx.hist}).assign(step=lambda d: np.arange(d.shape[0]))
+
+    return gg.ggplot(d, gg.aes(x="step", y="loss")) + gg.geom_line(
+        size=0.5, alpha=0.75, color="black"
+    )
