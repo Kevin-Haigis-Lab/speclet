@@ -91,6 +91,7 @@ dependencies:
   - idna=2.10=pyh9f0ad1d_0
   - importlib-metadata=3.4.0=py39hf3d152e_0
   - importlib_metadata=3.4.0=hd8ed1ab_0
+  - iniconfig=1.1.1=pyh9f0ad1d_0
   - intel-openmp=2020.2=254
   - ipykernel=5.4.2=py39hef51801_0
   - ipython=7.20.0=py39hef51801_2
@@ -167,6 +168,7 @@ dependencies:
   - mizani=0.7.2=pyhd8ed1ab_0
   - mkl=2020.4=h726a3e6_304
   - mkl-service=2.3.0=py39h07f9747_2
+  - more-itertools=8.7.0=pyhd8ed1ab_0
   - mypy=0.800=pyhd8ed1ab_0
   - mypy_extensions=0.4.3=py39hf3d152e_3
   - mysql-common=8.0.22=ha770c72_1
@@ -187,7 +189,7 @@ dependencies:
   - nss=3.61=hb5efdd6_0
   - numpy=1.20.1=py39hdbf815f_0
   - olefile=0.46=pyh9f0ad1d_1
-  - openssl=1.1.1i=h7f98852_0
+  - openssl=1.1.1j=h7f98852_0
   - opt_einsum=3.3.0=py_0
   - packaging=20.9=pyh44b312d_0
   - palettable=3.3.0=py_0
@@ -213,6 +215,7 @@ dependencies:
   - psutil=5.8.0=py39h3811e60_1
   - pthread-stubs=0.4=h36c2ea0_1001
   - ptyprocess=0.7.0=pyhd3deb0d_0
+  - py=1.10.0=pyhd3deb0d_0
   - pycodestyle=2.6.0=pyh9f0ad1d_0
   - pycparser=2.20=pyh9f0ad1d_2
   - pydocstyle=5.1.1=py_0
@@ -230,6 +233,7 @@ dependencies:
   - pyqtwebengine=5.12.1=py39h0fcd23e_7
   - pyrsistent=0.17.3=py39h3811e60_2
   - pysocks=1.7.1=py39hf3d152e_3
+  - pytest=6.2.2=py39hf3d152e_0
   - python=3.9.1=hffdb5ce_5_cpython
   - python-dateutil=2.8.1=py_0
   - python-flatbuffers=1.12=pyhd8ed1ab_0
@@ -301,4 +305,8 @@ dependencies:
   - zipp=3.4.0=py_0
   - zlib=1.2.11=h516909a_1010
   - zstd=1.4.8=ha95c52a_1
+  - pip:
+    - asttokens==2.0.4
+    - executing==0.5.4
+    - icecream==2.1.0
 prefix: /home/jc604/.conda/envs/speclet
