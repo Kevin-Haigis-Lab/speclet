@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source /home/jc604/.bashrc
+bash ~/.bashrc
 
 conda create -n speclet_snakemake -f snakemake_environment.yml
 

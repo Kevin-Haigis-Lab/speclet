@@ -16,6 +16,6 @@ ZIP_NAME="${DEPMAP_NAME}.zip"
 
 ## Download data
 mkdir $DEPMAP_NAME
-cd $DEPMAP_NAME
+cd $DEPMAP_NAME || exit
 curl -o $ZIP_NAME $URL
 unzip $ZIP_NAME

@@ -10,10 +10,11 @@
 module unload python
 module load gcc conda2
 
+bash ~/.bashrc
 conda activate speclet
 
-jupyter nbconvert --to notebook --inplace --execute $1
-jupyter nbconvert --to markdown $1
+jupyter nbconvert --to notebook --inplace --execute "$1"
+jupyter nbconvert --to markdown "$1"
 
 conda deactivate
 
