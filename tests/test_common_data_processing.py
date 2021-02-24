@@ -4,10 +4,10 @@ from pathlib import Path
 from string import ascii_uppercase as LETTERS
 
 import numpy as np
-from numpy.random import uniform
 import pandas as pd
-from pandas.core.algorithms import mode
 import pytest
+from numpy.random import uniform
+from pandas.core.algorithms import mode
 
 from analysis import common_data_processing as dphelp
 
