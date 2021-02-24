@@ -36,7 +36,7 @@ def make_cat(
     """
     Make a column of a data frame into categorical.
     """
-    categories = df[col].unique().tolist()
+    categories: List[Any] = df[col].unique().tolist()
     if sort_cats:
         categories.sort()
     df[col] = pd.Categorical(df[col], categories=categories, ordered=ordered)
@@ -62,13 +62,15 @@ def extract_flat_ary(s: pd.Series) -> np.ndarray:
     Turn a column of a DataFrame into a flat array.
     """
     warnings.warn("Use `df.values` instead of `extract_flat_ary()` 🤦🏻‍♂️", UserWarning)
-    return s.to_numpy().flatten()
+    return s.values
 
 
 def nmutations_to_binary_array(m: pd.Series) -> np.ndarray:
     """
     Turn a column of a DataFrame into a binary array of 0's and 1's.
     """
+    if len(m) == 0:
+        return np.array([], dtype=int)
     return m.values.astype(bool).astype(int)
 
 
@@ -120,14 +122,20 @@ def subsample_achilles_data(
     """
     Subsample an Achilles data set to a number of genes and/or cell lines.
     """
-    genes = df.hugo_symbol.values
-    cell_lines = df.depmap_id.values
+
+    if not n_genes is None and n_genes <= 0:
+        raise ValueError("Number of genes must be positive.")
+    if not n_cell_lines is None and n_cell_lines <= 0:
+        raise Exception("Number of genes must be positive.", ValueError)
+
+    genes: List[str] = df.hugo_symbol.values
+    cell_lines: List[str] = df.depmap_id.values
 
     if not n_genes is None:
-        genes = np.random.choice(genes, n_genes)
+        genes = np.random.choice(genes, n_genes, replace=False)
 
     if not n_cell_lines is None:
-        cell_lines = np.random.choice(cell_lines, n_cell_lines)
+        cell_lines = np.random.choice(cell_lines, n_cell_lines, replace=False)
 
     sub_df = df.copy()
     sub_df = sub_df[sub_df.hugo_symbol.isin(genes)]
