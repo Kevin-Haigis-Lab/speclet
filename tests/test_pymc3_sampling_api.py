@@ -185,7 +185,6 @@ class TestADVISampling(TestPyMC3SamplingAPI):
 
         assert isinstance(sampling_res["approximation"], pm.FullRank)
 
-    @pytest.mark.DEV
     def test_cache_results(self, data: pd.DataFrame, model: pm.Model, tmp_path: Path):
 
         cache_dir = tmp_path / "pymc3_advi_cache"
