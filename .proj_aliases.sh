@@ -18,3 +18,4 @@ alias pcr="pre-commit run"
 
 # Testing
 alias pyt="python3 -m pytest"
+alias pyt2="python3 -m pytest --disable-warnings --cov=analysis tests"
