@@ -16,7 +16,6 @@ jobs:
           key:
             ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
       - name: Install conda
-        shell: bash -l {0}
         uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: speclet
@@ -24,9 +23,16 @@ jobs:
           channel-priority: strict
           environment-file: environment.yml
           use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
-      - run: conda activate speclet
-      - run: python3 --version
-      - run: which python3
-      - run: conda env list
-      - run: conda list
-      - run: python3 -m pytest --disable-warnings tests/
+      - name: Activate conda environment
+        shell: bash -l {0}
+        run: conda activate speclet
+      - name: Describe virtual environment
+        shell: bash -l {0}
+        run: |
+          python3 --version
+          which python3
+          conda env list
+          conda list
+      - name: Run tests
+        shell: bash -l {0}
+        run: python3 -m pytest --disable-warnings tests/
