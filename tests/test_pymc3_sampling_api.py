@@ -19,16 +19,7 @@ class TestPyMC3SamplingAPI:
     sigma = 1
     beta = [1, 2.5]
 
-    def setup(self):
-        # self.alpha = 1
-        # self.sigma = 1
-        # self.beta = [1, 2.5]
-        return
-
-    def teardown(self):
-        return
-
-    @pytest.fixture
+    @pytest.fixture(scope="class")
     def data(self) -> pd.DataFrame:
         np.random.seed(1027)
         size = 1000
@@ -44,7 +35,7 @@ class TestPyMC3SamplingAPI:
 
         return pd.DataFrame({"x1": x1, "x2": x2, "y": y})
 
-    @pytest.fixture
+    @pytest.fixture(scope="class")
     def model(self, data: pd.DataFrame) -> pm.Model:
         # y = alpha + beta_1 * x1 + beta_2 * x2 + noise
         with pm.Model() as m:
