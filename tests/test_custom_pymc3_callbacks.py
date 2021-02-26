@@ -10,7 +10,7 @@ import analysis.custom_pymc3_callbacks as pymc3calls
 
 
 class TestDivergenceFractionCallback:
-    @pytest.fixture
+    @pytest.fixture(scope="class")
     def mock_model(self) -> pm.Model:
         np.random.seed(1)
         a, b = 1, 2

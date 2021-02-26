@@ -1,23 +1,22 @@
 # Common functions to help with 'plotnine'.
 
-from typing import Any, Dict
+from typing import Any, Dict, List
+
+PLOTNINE_UNITS = ["pt", "lines", "in"]
+
+
+def get_possible_units() -> List[str]:
+    return PLOTNINE_UNITS
 
 
 def margin(
-    t: int = 0, b: int = 0, l: int = 0, r: int = 0, units: str = "pt"
+    t: float = 0, b: float = 0, l: float = 0, r: float = 0, units: str = "pt"
 ) -> Dict[str, Any]:
     """
     Return a dictionary of margin data.
-
-    Parameters
-    ----------
-    t, b, l, r: num
-        The margins for the top, bottom, left, and right.
-    units: str
-        The units to use for the margin. Options are "pt", "lines", and "in".
-
-    Returns
-    -------
-    dict
     """
+
+    if not units in PLOTNINE_UNITS:
+        raise ValueError(f"Unit of type {units} is not available.")
+
     return {"t": t, "b": b, "l": l, "r": r, "units": units}
