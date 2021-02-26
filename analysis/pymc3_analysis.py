@@ -75,7 +75,6 @@ def summarize_posterior_predictions(
 
 def plot_vi_hist(approx: pm.variational.Approximation) -> gg.ggplot:
     d = pd.DataFrame({"loss": approx.hist}).assign(step=lambda d: np.arange(d.shape[0]))
-
     return gg.ggplot(d, gg.aes(x="step", y="loss")) + gg.geom_line(
         size=0.5, alpha=0.75, color="black"
     )

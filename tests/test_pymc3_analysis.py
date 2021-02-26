@@ -7,10 +7,12 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import plotnine as gg
 import pymc3 as pm
 import pytest
 
 from analysis import pymc3_analysis as pmanal
+from analysis.common_data_processing import get_indices_and_count
 
 MCMCResults = Tuple[pm.backends.base.MultiTrace, Dict[str, np.ndarray]]
 ADVIResults = Tuple[
@@ -37,8 +39,6 @@ class PyMC3AnalysisTesting:
 
         return model
 
-
-class TestSummarizePosteriorPredictions(PyMC3AnalysisTesting):
     @pytest.fixture(scope="class")
     def mock_mcmc(self, mock_model: pm.Model) -> MCMCResults:
         with mock_model:
@@ -60,6 +60,8 @@ class TestSummarizePosteriorPredictions(PyMC3AnalysisTesting):
             )
         return trace, post_pred, approx
 
+
+class TestSummarizePosteriorPredictions(PyMC3AnalysisTesting):
     def test_columnnames(self, mock_mcmc: MCMCResults):
         _, post_pred = mock_mcmc
         ppc_df = pmanal.summarize_posterior_predictions(post_pred["y_pred"])
@@ -107,3 +109,16 @@ class TestSummarizePosteriorPredictions(PyMC3AnalysisTesting):
         np.testing.assert_allclose(
             mock_data.y.values, ppc_df["pred_mean"].values, atol=1
         )
+
+
+class TestPlotVIHistory(PyMC3AnalysisTesting):
+    def test_returns_plot(self, mock_advi: ADVIResults):
+        _, _, approx = mock_advi
+        hist_plot = pmanal.plot_vi_hist(approx)
+        assert isinstance(hist_plot, gg.ggplot)
+
+    def test_plot_data_has_correct_columns(self, mock_advi: ADVIResults):
+        _, _, approx = mock_advi
+        hist_plot = pmanal.plot_vi_hist(approx)
+        for colname in ["loss", "step"]:
+            assert colname in hist_plot.data.columns
