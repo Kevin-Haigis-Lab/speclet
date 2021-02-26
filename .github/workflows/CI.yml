@@ -1,8 +1,15 @@
-on: [push, pull_request]
-name: Python testing CI
+on:
+  push:
+    branches:
+      - master
+      - test-crc  # for developing the Action
+  pull_request:
+    branches:
+      - master
+name: pytest
 jobs:
   pytest:
-    name: Python test suite
+    name: pytest suite
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v2
