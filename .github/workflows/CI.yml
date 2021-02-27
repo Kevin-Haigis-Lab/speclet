@@ -47,5 +47,4 @@ jobs:
             --disable-warnings \
             --cov="analysis" \
             --force-sugar \
-            -m "DEV" \
-            tests/test_custom_pymc3_callbacks.py
+            tests/
