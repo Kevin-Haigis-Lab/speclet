@@ -42,4 +42,10 @@ jobs:
           conda list
       - name: Run tests
         shell: bash -l {0}
-        run: python3 -m pytest --disable-warnings  -m "DEV" tests/test_custom_pymc3_callbacks.py
+        run: |
+          python3 -m pytest \
+            --disable-warnings \
+            --cov="analysis" \
+            --force-sugar \
+            -m "DEV" \
+            tests/test_custom_pymc3_callbacks.py

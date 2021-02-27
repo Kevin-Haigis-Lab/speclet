@@ -31,7 +31,7 @@ class TestDivergenceFractionCallback:
     def test_divergences(self, mock_model: pm.Model):
         n_tune_steps = 200
         cb = pymc3calls.DivergenceFractionCallback(
-            n_tune_steps=n_tune_steps, max_frac=0.001
+            n_tune_steps=n_tune_steps, max_frac=0.01
         )
         with pytest.raises(pymc3calls.TooManyDivergences):
             with mock_model:
