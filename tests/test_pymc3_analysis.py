@@ -122,3 +122,25 @@ class TestPlotVIHistory(PyMC3AnalysisTesting):
         hist_plot = pmanal.plot_vi_hist(approx)
         for colname in ["loss", "step"]:
             assert colname in hist_plot.data.columns
+
+
+# class TestExtractMatrixVariableIndices:
+#     @pytest.fixture(scope="class")
+#     def mock_data(self) -> pd.DataFrame:
+#         # TODO: create mock data with two varying intercepts.
+#         return pd.DataFrame({})
+
+#     @pytest.fixture(scope="class")
+#     def mock_model(self, mock_data: pd.DataFrame) -> pm.Model:
+
+#         i_idx, num_i = get_indices_and_count(mock_data, "i")
+#         j_idx, num_j = get_indices_and_count(mock_data, "j")
+
+#         with pm.Model() as model:
+#             mu_a = pm.Normal("mu_a", 0, 1)
+#             sigma_a = pm.HalfNormal("sigma_a", 1)
+#             a = pm.Normal("a", mu_a, sigma_a, shape=(num_i, num_j))
+#             mu = a[i_idx, j_idx]
+#             sigma = pm.HalfNormal("sigma", 1)
+#             y = pm.Normal("y", mu, sigma, observed=y_obs)
+#         return model
