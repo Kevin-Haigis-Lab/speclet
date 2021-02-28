@@ -1,5 +1,6 @@
 #!/bin/env python3
 
+from string import ascii_lowercase, ascii_uppercase
 from typing import Dict, Tuple
 
 import arviz as az
@@ -12,7 +13,7 @@ import pymc3 as pm
 import pytest
 
 from analysis import pymc3_analysis as pmanal
-from analysis.common_data_processing import get_indices_and_count
+from analysis.common_data_processing import get_indices, get_indices_and_count
 
 MCMCResults = Tuple[pm.backends.base.MultiTrace, Dict[str, np.ndarray]]
 ADVIResults = Tuple[
@@ -124,23 +125,68 @@ class TestPlotVIHistory(PyMC3AnalysisTesting):
             assert colname in hist_plot.data.columns
 
 
-# class TestExtractMatrixVariableIndices:
-#     @pytest.fixture(scope="class")
-#     def mock_data(self) -> pd.DataFrame:
-#         # TODO: create mock data with two varying intercepts.
-#         return pd.DataFrame({})
+class TestExtractMatrixVariableIndices:
+    @pytest.fixture(scope="class")
+    def mock_data(self) -> pd.DataFrame:
+        np.random.seed(0)
+        n_measures = 10
+        i_groups = list(ascii_lowercase[:5])
+        j_groups = list(ascii_uppercase[:3])
+        i = np.repeat(i_groups, n_measures * len(j_groups))
+        j = np.tile(j_groups, n_measures * len(i_groups))
 
-#     @pytest.fixture(scope="class")
-#     def mock_model(self, mock_data: pd.DataFrame) -> pm.Model:
+        i_effect = np.random.randn(len(i_groups))
+        j_effect = np.random.randn(len(j_groups))
 
-#         i_idx, num_i = get_indices_and_count(mock_data, "i")
-#         j_idx, num_j = get_indices_and_count(mock_data, "j")
+        d = pd.DataFrame({"i": i, "j": j}, dtype="category")
+        d["y"] = (
+            i_effect[get_indices(d, "i")]
+            + j_effect[get_indices(d, "j")]
+            + np.random.normal(0, 0.1)
+        )
+        return d
 
-#         with pm.Model() as model:
-#             mu_a = pm.Normal("mu_a", 0, 1)
-#             sigma_a = pm.HalfNormal("sigma_a", 1)
-#             a = pm.Normal("a", mu_a, sigma_a, shape=(num_i, num_j))
-#             mu = a[i_idx, j_idx]
-#             sigma = pm.HalfNormal("sigma", 1)
-#             y = pm.Normal("y", mu, sigma, observed=y_obs)
-#         return model
+    @pytest.fixture(scope="class")
+    def mock_model(self, mock_data: pd.DataFrame) -> pm.Model:
+
+        i_idx, num_i = get_indices_and_count(mock_data, "i")
+        j_idx, num_j = get_indices_and_count(mock_data, "j")
+
+        with pm.Model() as model:
+            mu_a = pm.Normal("mu_a", 0, 1)
+            sigma_a = pm.HalfNormal("sigma_a", 1)
+            a = pm.Normal("a", mu_a, sigma_a, shape=(num_i, num_j))
+            mu = a[i_idx, j_idx]
+            sigma = pm.HalfNormal("sigma", 1)
+            y = pm.Normal("y", mu, sigma, observed=mock_data.y.values)
+        return model
+
+    def test_extract_matrix_variable_indices(
+        self, mock_model: pm.Model, mock_data: pd.DataFrame
+    ):
+        with mock_model:
+            trace = pm.sample(100, tune=100, chains=2, cores=2, random_seed=123)
+
+        i_groups = mock_data["i"].values.unique()
+        j_groups = mock_data["j"].values.unique()
+
+        model_az = az.from_pymc3(trace=trace, model=mock_model)
+        summary = az.summary(model_az, var_names="a").reset_index()
+        summary = pmanal.extract_matrix_variable_indices(
+            summary,
+            col="index",
+            idx1=i_groups,
+            idx2=j_groups,
+            idx1name="i",
+            idx2name="j",
+        )
+
+        np.testing.assert_equal(
+            summary["i"].values.astype(str),
+            np.repeat(i_groups, int(len(summary) / len(i_groups))).astype(str),
+        )
+
+        np.testing.assert_equal(
+            summary["j"].values.astype(str),
+            np.tile(j_groups, int(len(summary) / len(j_groups))).astype(str),
+        )
