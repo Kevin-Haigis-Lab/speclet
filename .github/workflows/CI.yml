@@ -2,7 +2,6 @@ on:
   push:
     branches:
       - master
-      - test-crc  # for developing the Action
   pull_request:
     branches:
       - master
