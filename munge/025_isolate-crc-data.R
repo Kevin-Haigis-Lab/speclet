@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 # Isolate the DepMap data for CRC cell lines.
 
 library(nakedpipe)

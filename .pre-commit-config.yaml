@@ -1,5 +1,6 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
+exclude: "renv/library/.*"
 repos:
 -   repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.26.0
@@ -16,13 +17,17 @@ repos:
     -   id: check-yaml
     -   id: check-added-large-files
         args: ["--maxkb=80000"]
+-   repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.7.1.1
+    hooks:
+    - id: shellcheck
 -   repo: https://github.com/pycqa/isort
     rev: 5.7.0
     hooks:
     - id: isort
       types: [python]
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.790
+    rev: v0.812
     hooks:
     -   id: mypy
         exclude: ".snakemake."
@@ -36,10 +41,11 @@ repos:
     hooks:
     -   id: style-files
         args: [--style_pkg=styler, --style_fun=tidyverse_style]
+        exclude: "renv/library/.*"
     -   id: parsable-R
     -   id: no-browser-statement
 -   repo: https://github.com/nbQA-dev/nbQA
-    rev: 0.5.6
+    rev: 0.5.9
     hooks:
     -   id: nbqa-isort
         args: [--nbqa-mutate]

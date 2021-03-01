@@ -15,3 +15,7 @@ alias speclet_snakemake_env="conda activate speclet_smakemake && bash .proj_alia
 alias tmd="jupyter nbconvert --to markdown"
 alias nbexec="jupyter nbconvert --to notebook --inplace --execute"
 alias pcr="pre-commit run"
+
+# Testing
+alias pyt="python3 -m pytest"
+alias pyt2="python3 -m pytest --disable-warnings --cov=analysis tests"

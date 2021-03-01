@@ -1,4 +1,4 @@
-#!/bin/env Rscript
+#!/usr/bin/env Rscript
 
 .libPaths("/home/jc604/R-4.0/library")
 

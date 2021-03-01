@@ -1,6 +1,16 @@
+#!/usr/bin/env python3
+
 from typing import Dict
 
 import pymc3 as pm
+
+
+class TooManyDivergences(Exception):
+    """
+    Raised when there have been too many divergences during MCMC sampling.
+    """
+
+    pass
 
 
 class DivergenceFractionCallback:
@@ -21,6 +31,7 @@ class DivergenceFractionCallback:
             return
 
         # Count divergences.
+        current_count = 0
         if draw.stats[0]["diverging"]:
             try:
                 current_count = self.divergence_counts[draw.chain] + 1
@@ -34,6 +45,6 @@ class DivergenceFractionCallback:
 
         # Check fraction of steps that were diverenges.
         if current_count / trace.draw_idx >= self.max_frac:
-            raise Exception(
-                f"Too many diverengeces: {current_count} of {trace.draw_idx} steps ({current_count / trace.draw_idx} %). Stopping early."
+            raise TooManyDivergences(
+                f"Too many divergences: {current_count} of {trace.draw_idx} steps ({current_count / trace.draw_idx} %). Stopping early."
             )

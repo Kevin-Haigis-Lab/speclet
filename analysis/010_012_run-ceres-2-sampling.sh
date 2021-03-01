@@ -10,7 +10,7 @@
 module unload python
 module load gcc conda2
 
-source /home/jc604/.bashrc
+bash ~/.bashrc
 conda activate speclet
 
 #python3 analysis/sampling_pymc3_models.py -m "ceres-m1" --force-sample -d

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Colors
 
 sns_orange = "#ED854A"

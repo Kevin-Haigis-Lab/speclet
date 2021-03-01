@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import pickle
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
