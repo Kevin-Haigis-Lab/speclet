@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Common functions to help with 'plotnine'.
 
 from typing import Any, Dict, List

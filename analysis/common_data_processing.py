@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import warnings
 from pathlib import Path
 from typing import Any, Iterable, List, Optional, Tuple

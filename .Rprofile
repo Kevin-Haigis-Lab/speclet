@@ -1,7 +1,17 @@
+#!/bin/env python3
 
 source("renv/activate.R")
 
-HOME_RPROFILE <- file.path("~", ".Rprofile")
-if (file.exists(HOME_RPROFILE)) {
-    source(HOME_RPROFILE)
-}
+try(
+    options(prompt = glue::glue("{clisymbols::symbol$pointer} ")),
+    silent = TRUE
+)
+
+try(
+    options(continue = glue::glue("{clisymbols::symbol$dot} ")),
+    silent = TRUE
+)
+
+options(max.print = 100)
+
+qq <- function(save="no") { q(save=save)}

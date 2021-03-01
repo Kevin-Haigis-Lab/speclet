@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 
 from pathlib import Path
 from string import ascii_uppercase as LETTERS

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from typing import Dict, Optional, Tuple, Union
 
 import numpy as np

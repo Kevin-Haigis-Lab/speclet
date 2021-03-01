@@ -1,4 +1,4 @@
-#!/bin/env R
+#!/usr/bin/env Rscript
 
 # Prepare data to use is tests.
 

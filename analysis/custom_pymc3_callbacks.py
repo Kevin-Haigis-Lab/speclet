@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from typing import Dict
 
 import pymc3 as pm

@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 
 from string import ascii_lowercase, ascii_uppercase
 from typing import Dict, Tuple
