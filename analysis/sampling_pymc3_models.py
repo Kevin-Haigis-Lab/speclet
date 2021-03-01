@@ -13,7 +13,7 @@ import pretty_errors
 import pymc3 as pm
 import pymc3_sampling_api
 from colorama import Back, Fore, Style, init
-from pymc3_models import ceres_models, crc_models
+from pymc3_models import crc_models
 
 init(autoreset=True)
 
@@ -67,116 +67,6 @@ def touch(n: str) -> None:
     p = make_cache_name(n) / (n + ".txt")
     p.touch()
     return None
-
-
-#### ---- CERES Model 1 ---- ####
-
-
-def ceres_model1(
-    name: str,
-    debug: bool = False,
-    force_sampling: bool = False,
-    random_seed: Optional[int] = None,
-) -> None:
-    print_model("CERES Model 1")
-
-    # Data
-    info("Loading data...")
-    if debug:
-        data_path = DEPMAP_SUBSAMPLE_DATA
-    else:
-        data_path = DEPMAP_MODELING_DATA
-
-    data = dphelp.read_achilles_data(data_path)
-
-    # Indices
-    sgrna_idx = dphelp.get_indices(data, "sgrna")
-    gene_idx = dphelp.get_indices(data, "hugo_symbol")
-    cell_idx = dphelp.get_indices(data, "depmap_id")
-
-    # Construct model
-    ceres_m1 = ceres_models.construct_ceres_m1(
-        sgrna_idx=sgrna_idx,
-        gene_idx=gene_idx,
-        cell_idx=cell_idx,
-        cn_data=data.z_log2_cn.to_numpy(),
-        lfc_data=data.lfc.to_numpy(),
-    )
-
-    ceres_m1_cache = make_cache_name(name)
-    _ = pymc3_sampling_api.pymc3_sampling_procedure(
-        model=ceres_m1,
-        num_mcmc=1000,
-        tune=1000,
-        chains=2,
-        cores=2,
-        random_seed=random_seed,
-        cache_dir=ceres_m1_cache,
-        force=force_sampling,
-        sample_kwargs={
-            "init": "advi+adapt_diag",
-            "n_init": 50000,
-            "target_accept": 0.9,
-        },
-    )
-
-    done()
-    return
-
-
-#### ---- CERES Model 2 ---- ####
-
-
-def ceres_model2(
-    name: str,
-    debug: bool = False,
-    force_sampling: bool = False,
-    random_seed: Optional[int] = None,
-) -> None:
-    print_model("CERES Model 2")
-
-    # Data
-    info("Loading data...")
-    if debug:
-        data_path = DEPMAP_SUBSAMPLE_DATA
-    else:
-        data_path = DEPMAP_MODELING_DATA
-
-    data = dphelp.read_achilles_data(data_path)
-
-    # Indices
-    sgrna_idx = dphelp.get_indices(data, "sgrna")
-    gene_idx = dphelp.get_indices(data, "hugo_symbol")
-    cell_idx = dphelp.get_indices(data, "depmap_id")
-
-    # Construct model
-    ceres_m2 = ceres_models.construct_ceres_m2(
-        sgrna_idx=sgrna_idx,
-        gene_idx=gene_idx,
-        cell_idx=cell_idx,
-        cn_data=data.z_log2_cn.to_numpy(),
-        lfc_data=data.lfc.to_numpy(),
-    )
-
-    ceres_m2_cache = make_cache_name(name)
-    _ = pymc3_sampling_api.pymc3_sampling_procedure(
-        model=ceres_m2,
-        num_mcmc=1000,
-        tune=1000,
-        chains=2,
-        cores=2,
-        random_seed=random_seed,
-        cache_dir=ceres_m2_cache,
-        force=force_sampling,
-        sample_kwargs={
-            "init": "advi+adapt_diag",
-            "n_init": 100000,
-            "target_accept": 0.9,
-        },
-    )
-
-    done()
-    return
 
 
 #### ---- CRC Model Helpers ---- ####
@@ -381,7 +271,7 @@ def crc_model3(
 
 #### ---- MAIN ---- ####
 
-MODELS = ["ceres-m1", "ceres-m2", "crc-m1", "crc-m2", "crc-m3"]
+MODELS = ["crc-m1", "crc-m2", "crc-m3"]
 
 
 def parse_cli_arguments(
@@ -445,21 +335,7 @@ def main() -> None:
 
     model_name = clean_model_names(args.name)
 
-    if args.model == "ceres-m1":
-        ceres_model1(
-            name=model_name,
-            debug=args.debug,
-            force_sampling=args.force_sample,
-            random_seed=args.random_seed,
-        )
-    elif args.model == "ceres-m2":
-        ceres_model2(
-            name=model_name,
-            debug=args.debug,
-            force_sampling=args.force_sample,
-            random_seed=args.random_seed,
-        )
-    elif args.model == "crc-m1":
+    if args.model == "crc-m1":
         crc_model1(
             name=model_name,
             debug=args.debug,
