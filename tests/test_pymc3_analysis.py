@@ -19,6 +19,7 @@ MCMCResults = Tuple[pm.backends.base.MultiTrace, Dict[str, np.ndarray]]
 ADVIResults = Tuple[
     pm.backends.base.MultiTrace, Dict[str, np.ndarray], pm.Approximation
 ]
+PriorPrediction = Dict[str, np.ndarray]
 
 
 class PyMC3AnalysisTesting:
@@ -190,3 +191,44 @@ class TestExtractMatrixVariableIndices:
             summary["j"].values.astype(str),
             np.tile(j_groups, int(len(summary) / len(j_groups))).astype(str),
         )
+
+
+class TestPlottingOfPriors(PyMC3AnalysisTesting):
+
+    draws = 500
+
+    @pytest.fixture(scope="class")
+    def prior_pred(self, mock_model: pm.Model) -> PriorPrediction:
+        with mock_model:
+            prior_pred = pm.sample_prior_predictive(self.draws, random_seed=123)
+        return prior_pred
+
+    def test_prior_predictive_shape(
+        self, prior_pred: PriorPrediction, mock_data: pd.DataFrame
+    ):
+        for k in ["alpha", "beta"]:
+            assert len(prior_pred[k]) == self.draws
+        assert prior_pred["y_pred"].shape == (self.draws, mock_data.shape[0])
+
+    def test_returns_fig_and_axes(self, prior_pred: PriorPrediction):
+        axes_shape = (2, 2)
+        fig, axes = pmanal.plot_all_priors(prior_pred, axes_shape, (5, 5), samples=100)
+        assert isinstance(fig, matplotlib.figure.Figure)
+        assert axes.shape == axes_shape
+
+    def test_plots_correct_data(self, prior_pred: PriorPrediction):
+        axes_shape = (2, 2)
+        n_samples = 100
+        _, axes = pmanal.plot_all_priors(
+            prior_pred, axes_shape, (5, 5), samples=n_samples
+        )
+
+        for ax in axes.flatten():
+            assert ax.lines[0].get_xdata().shape[0] == n_samples * 2
+            assert ax.lines[0].get_ydata().shape[0] == n_samples * 2
+
+    def test_subplots_have_titles(self, prior_pred: PriorPrediction):
+        _, axes = pmanal.plot_all_priors(prior_pred, (2, 2), (5, 5), samples=100)
+        axes_titles = [ax.get_title() for ax in axes.flatten()]
+        for ax_title in axes_titles:
+            assert ax_title in prior_pred.keys()
