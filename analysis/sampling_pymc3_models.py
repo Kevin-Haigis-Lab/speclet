@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 import argparse
+import sys
 from pathlib import Path
 from time import time
-from typing import Optional
+from typing import Any, List, Optional
 
 import common_data_processing as dphelp
 import numpy as np
@@ -383,15 +384,22 @@ def crc_model3(
 MODELS = ["ceres-m1", "ceres-m2", "crc-m1", "crc-m2", "crc-m3"]
 
 
-def parse_cli_arguments(parser: argparse.ArgumentParser) -> argparse.Namespace:
+def parse_cli_arguments(
+    parser: argparse.ArgumentParser, args: Optional[List[Any]] = None
+) -> argparse.Namespace:
+
+    if args is None:
+        args = sys.argv[1:]
+
     parser.add_argument(
         "-m",
         "--model",
         help="model to sample from",
         type=str,
         choices=MODELS,
+        required=True,
     )
-    parser.add_argument("-n", "--name", help="model name", type=str)
+    parser.add_argument("-n", "--name", help="model name", type=str, required=True)
     parser.add_argument(
         "--force-sample",
         help="ignore cached results and sample from model",
@@ -416,7 +424,7 @@ def parse_cli_arguments(parser: argparse.ArgumentParser) -> argparse.Namespace:
         default=False,
     )
 
-    return parser.parse_args()
+    return parser.parse_args(args)
 
 
 def clean_model_names(n: str) -> str:
