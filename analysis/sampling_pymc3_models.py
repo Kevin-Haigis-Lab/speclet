@@ -1,8 +1,6 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 
 import argparse
-import string
-import warnings
 from pathlib import Path
 from time import time
 from typing import Optional
@@ -13,7 +11,6 @@ import pandas as pd
 import pretty_errors
 import pymc3 as pm
 import pymc3_sampling_api
-import theano
 from colorama import Back, Fore, Style, init
 from pymc3_models import ceres_models, crc_models
 
@@ -199,12 +196,14 @@ def crc_batch_size(debug: bool) -> int:
         return 10000
 
 
-def make_sgrna_to_gene_mapping_df(data: pd.DataFrame) -> pd.DataFrame:
+def make_sgrna_to_gene_mapping_df(
+    data: pd.DataFrame, sgrna_col: str = "sgrna", gene_col: str = "hugo_symbol"
+) -> pd.DataFrame:
     return (
-        data[["sgrna", "hugo_symbol"]]
+        data[[sgrna_col, gene_col]]
         .drop_duplicates()
         .reset_index(drop=True)
-        .sort_values("sgrna")
+        .sort_values(sgrna_col)
         .reset_index(drop=True)
     )
 

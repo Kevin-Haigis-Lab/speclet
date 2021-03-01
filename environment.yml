@@ -313,4 +313,5 @@ dependencies:
     - asttokens==2.0.4
     - executing==0.5.4
     - icecream==2.1.0
+    - pytest-pythonpath==0.7.3
 prefix: /home/jc604/.conda/envs/speclet
