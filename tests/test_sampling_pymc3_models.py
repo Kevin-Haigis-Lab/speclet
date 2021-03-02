@@ -67,13 +67,6 @@ def make_mock_sgrna(of_length: int = 20) -> str:
     return "".join(np.random.choice(list(ascii_lowercase), of_length, replace=True))
 
 
-def test_generation_of_mock_sgrna():
-    for i in np.random.randint(1, 100, 100):
-        sgrna = make_mock_sgrna(i)
-        assert isinstance(sgrna, str)
-        assert len(sgrna) == i
-
-
 @pytest.fixture
 def mock_gene_data() -> pd.DataFrame:
     genes = list(ascii_uppercase[:5])
@@ -92,7 +85,7 @@ def mock_gene_data() -> pd.DataFrame:
 
 
 @pytest.fixture(scope="module")
-def mock_achilles_data():
+def example_achilles_data():
     return read_achilles_data(Path("tests", "depmap_test_data.csv"))
 
 
@@ -128,30 +121,30 @@ def test_different_colnames(mock_gene_data: pd.DataFrame):
         )
 
 
-def test_common_idx_key_names(mock_achilles_data: pd.DataFrame):
-    indices = sampling.common_indices(mock_achilles_data.sample(frac=1.0))
+def test_common_idx_key_names(example_achilles_data: pd.DataFrame):
+    indices = sampling.common_indices(example_achilles_data.sample(frac=1.0))
     for k in indices.keys():
         assert "idx" in k or "map" in k
 
 
-def test_common_idx_sgrna_to_gene_map(mock_achilles_data: pd.DataFrame):
-    indices = sampling.common_indices(mock_achilles_data.sample(frac=1.0))
-    for sgrna in mock_achilles_data.sgrna.values:
+def test_common_idx_sgrna_to_gene_map(example_achilles_data: pd.DataFrame):
+    indices = sampling.common_indices(example_achilles_data.sample(frac=1.0))
+    for sgrna in example_achilles_data.sgrna.values:
         assert sgrna in indices["sgrna_to_gene_map"].sgrna.values
-    for gene in mock_achilles_data.hugo_symbol.values:
+    for gene in example_achilles_data.hugo_symbol.values:
         assert gene in indices["sgrna_to_gene_map"].hugo_symbol.values
 
 
-def test_common_idx_depmap(mock_achilles_data: pd.DataFrame):
-    indices = sampling.common_indices(mock_achilles_data.sample(frac=1.0))
-    assert nunique(mock_achilles_data.depmap_id.values) == nunique(
+def test_common_idx_depmap(example_achilles_data: pd.DataFrame):
+    indices = sampling.common_indices(example_achilles_data.sample(frac=1.0))
+    assert nunique(example_achilles_data.depmap_id.values) == nunique(
         indices["cellline_idx"]
     )
 
 
-def test_common_idx_pdna_batch(mock_achilles_data: pd.DataFrame):
-    indices = sampling.common_indices(mock_achilles_data.sample(frac=1.0))
-    assert nunique(mock_achilles_data.pdna_batch.values) == nunique(
+def test_common_idx_pdna_batch(example_achilles_data: pd.DataFrame):
+    indices = sampling.common_indices(example_achilles_data.sample(frac=1.0))
+    assert nunique(example_achilles_data.pdna_batch.values) == nunique(
         indices["batch_idx"]
     )
 

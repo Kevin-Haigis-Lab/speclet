@@ -102,18 +102,13 @@ def make_sgrna_to_gene_mapping_df(
 def common_indices(
     achilles_df: pd.DataFrame,
 ) -> Dict[str, Union[np.ndarray, pd.DataFrame]]:
-    sgrna_idx = dphelp.get_indices(achilles_df, "sgrna")
     sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(achilles_df)
-    sgrna_to_gene_idx = dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol")
-    cellline_idx = dphelp.get_indices(achilles_df, "depmap_id")
-    batch_idx = dphelp.get_indices(achilles_df, "pdna_batch")
-
     return {
-        "sgrna_idx": sgrna_idx,
+        "sgrna_idx": dphelp.get_indices(achilles_df, "sgrna"),
         "sgrna_to_gene_map": sgrna_to_gene_map,
-        "sgrna_to_gene_idx": sgrna_to_gene_idx,
-        "cellline_idx": cellline_idx,
-        "batch_idx": batch_idx,
+        "sgrna_to_gene_idx": dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol"),
+        "cellline_idx": dphelp.get_indices(achilles_df, "depmap_id"),
+        "batch_idx": dphelp.get_indices(achilles_df, "pdna_batch"),
     }
 
 
