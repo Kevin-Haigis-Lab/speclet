@@ -21,6 +21,8 @@ They primarily use synthetic data and test whether the known values can be recov
 
 > Notebook series `010`
 
+<span style="color:#93152E">This series of notebooks was removed in commit [(put commit SHA here)]().</span>
+
 This series of notebooks were the first attempt at modeling the data using PyMC3.
 They are no longer under development nor testing, but exist primarily for reference.
 There is a good chance that they are no longer reproducible and will likely be removed in the future.
