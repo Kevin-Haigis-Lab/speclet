@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 import plotnine as gg
 import pymc3 as pm
+import pymc3_analysis as pmanal
 import pymc3_sampling_api
 import seaborn as sns
 import theano
@@ -38,7 +39,7 @@ pymc3_cache_dir = Path("pymc3_model_cache")
 
 ```python
 data = dphelp.read_achilles_data(
-    Path("..", "modeling_data", "depmap_CRC_data_subsample.csv"), low_memory=False
+    Path("..", "modeling_data", "depmap_CRC_data_subsample.csv")
 )
 data.head()
 ```
@@ -226,39 +227,49 @@ sgrna_to_gene_idx, n_genes = dphelp.get_indices_and_count(
     sgrna_to_gene_map, "hugo_symbol"
 )
 cellline_idx, n_celllines = dphelp.get_indices_and_count(data, "depmap_id")
+batch_idx, n_batches = dphelp.get_indices_and_count(data, "pdna_batch")
 ```
 
 ```python
 sgrna_idx_shared = theano.shared(sgrna_idx)
 sgrna_to_gene_idx_shared = theano.shared(sgrna_to_gene_idx)
 cellline_idx_shared = theano.shared(cellline_idx)
+batch_idx_shared = theano.shared(batch_idx)
 lfc_shared = theano.shared(data.lfc.values)
 ```
 
 ```python
 with pm.Model() as model:
 
-    μ_g = pm.Normal("μ_g", -0.1, 3)
-    σ_g = pm.HalfNormal("σ_g", 2)
-    σ_σ_α = pm.HalfNormal("σ_σ_α", 2)
+    mu_g = pm.Normal("mu_g", data.lfc.values.mean(), 1)
+    sigma_g = pm.HalfNormal("sigma_g", 2)
+    sigma_sigma_alpha = pm.HalfNormal("sigma_sigma_alpha", 1)
 
-    μ_α = pm.Normal("μ_α", μ_g, σ_g, shape=n_genes)
-    σ_α = pm.HalfNormal("σ_α", σ_σ_α, shape=n_genes)
-    μ_β = pm.Normal("μ_β", 0, 0.5)
-    σ_β = pm.HalfNormal("σ_β", 1)
+    mu_alpha = pm.Normal("mu_alpha", mu_g, sigma_g, shape=n_genes)
+    sigma_alpha = pm.HalfNormal("sigma_alpha", sigma_sigma_alpha, shape=n_genes)
+    mu_beta = pm.Normal("mu_beta", 0, 0.2)
+    sigma_beta = pm.HalfNormal("sigma_beta", 1)
+    mu_eta = pm.Normal("mu_eta", 0, 0.2)
+    sigma_eta = pm.HalfNormal("sigma_eta", 1)
 
-    β_c = pm.Normal("β_c", μ_β, σ_β, shape=n_celllines)
-    α_s = pm.Normal(
-        "α_s",
-        μ_α[sgrna_to_gene_idx_shared],
-        σ_α[sgrna_to_gene_idx_shared],
+    alpha_s = pm.Normal(
+        "alpha_s",
+        mu_alpha[sgrna_to_gene_idx_shared],
+        sigma_alpha[sgrna_to_gene_idx_shared],
         shape=n_sgrnas,
     )
+    beta_l = pm.Normal("beta_l", mu_beta, sigma_beta, shape=n_celllines)
+    eta_b = pm.Normal("eta_b", mu_eta, sigma_eta, shape=n_batches)
 
-    μ = pm.Deterministic("μ", α_s[sgrna_idx_shared] + β_c[cellline_idx_shared])
-    σ = pm.HalfNormal("σ", 2)
+    mu = pm.Deterministic(
+        "mu",
+        alpha_s[sgrna_idx_shared]
+        + beta_l[cellline_idx_shared]
+        + eta_b[batch_idx_shared],
+    )
+    sigma = pm.HalfNormal("sigma", 2)
 
-    lfc = pm.Normal("lfc", μ, σ, observed=lfc_shared, total_size=total_size)
+    lfc = pm.Normal("lfc", mu, sigma, observed=lfc_shared, total_size=total_size)
 ```
 
 ```python
@@ -268,15 +279,24 @@ pm.model_to_graphviz(model)
 ![svg](015_010_model-design_files/015_010_model-design_8_0.svg)
 
 ```python
+with model:
+    prior_pred = pm.sample_prior_predictive(samples=1000, random_seed=RANDOM_SEED)
+```
+
+```python
+pmanal.plot_all_priors(prior_pred, subplots=(5, 3), figsize=(10, 8), samples=500);
+```
+
+![png](015_010_model-design_files/015_010_model-design_10_0.png)
+
+```python
 batch_size = 1000
 
 sgnra_idx_batch = pm.Minibatch(sgrna_idx, batch_size=batch_size)
 cellline_idx_batch = pm.Minibatch(cellline_idx, batch_size=batch_size)
+batch_idx_batch = pm.Minibatch(batch_idx, batch_size=batch_size)
 lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 ```
-
-    /home/jc604/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    /home/jc604/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 ```python
 meanfield = pymc3_sampling_api.pymc3_advi_approximation_procedure(
@@ -289,6 +309,7 @@ meanfield = pymc3_sampling_api.pymc3_advi_approximation_procedure(
         "more_replacements": {
             sgrna_idx_shared: sgnra_idx_batch,
             cellline_idx_shared: cellline_idx_batch,
+            batch_idx_shared: batch_idx_batch,
             lfc_shared: lfc_data_batch,
         }
     },
@@ -311,14 +332,12 @@ meanfield = pymc3_sampling_api.pymc3_advi_approximation_procedure(
             background: #F44336;
         }
     </style>
-  <progress value='28056' class='' max='100000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  28.06% [28056/100000 00:18<00:48 Average Loss = 660.42]
+  <progress value='0' class='' max='100000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+
 </div>
 
-    Convergence achieved at 28100
-    Interrupted at 28,099 [28%]: Average Loss = 900.78
-
-
+    Convergence achieved at 27600
+    Interrupted at 27,599 [27%]: Average Loss = 967.8
     Sampling from posterior.
     Posterior predicitons.
 
@@ -336,27 +355,20 @@ meanfield = pymc3_sampling_api.pymc3_advi_approximation_procedure(
         }
     </style>
   <progress value='1000' class='' max='1000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [1000/1000 00:13<00:00]
+  100.00% [1000/1000 01:11<00:00]
 </div>
 
 ```python
-def plot_approximation_history(hist: np.ndarray) -> gg.ggplot:
-    d = pd.DataFrame({"loss": hist}).reset_index(drop=False)
-    return (
-        gg.ggplot(d, gg.aes(x="index", y="loss"))
-        + gg.geom_line(size=0.7, alpha=0.8, color=pal.sns_blue)
-        + gg.scale_x_continuous(expand=(0.02, 0, 0.02, 0))
-        + gg.labs(x="step", y="loss")
-    )
+az_model = pymc3_sampling_api.samples_to_arviz(model, meanfield)
 ```
 
 ```python
-plot_approximation_history(meanfield["approximation"].hist)
+pmanal.plot_vi_hist(meanfield["approximation"])
 ```
 
-![png](015_010_model-design_files/015_010_model-design_12_0.png)
+![png](015_010_model-design_files/015_010_model-design_14_0.png)
 
-    <ggplot: (8752244370008)>
+    <ggplot: (351612685)>
 
 ```python
 def plot_az_summary(df: pd.DataFrame, x="index") -> gg.ggplot:
@@ -371,9 +383,20 @@ def plot_az_summary(df: pd.DataFrame, x="index") -> gg.ggplot:
 ```
 
 ```python
+batch_posteriors = az.summary(az_model, var_names="eta_b", hdi_prob=0.89)
+plot_az_summary(batch_posteriors.reset_index(drop=False))
+```
+
+    arviz - WARNING - Shape validation failed: input_shape: (1, 1000), minimum_shape: (chains=2, draws=4)
+
+![png](015_010_model-design_files/015_010_model-design_16_1.png)
+
+    <ggplot: (348681807)>
+
+```python
 gene_posteriors = az.summary(
-    pymc3_sampling_api.samples_to_arviz(model, meanfield),
-    var_names="μ_α",
+    az_model,
+    var_names="mu_alpha",
     hdi_prob=0.89,
 )
 
@@ -382,15 +405,15 @@ plot_az_summary(gene_posteriors.reset_index(drop=False)) + gg.theme(figure_size=
 
     arviz - WARNING - Shape validation failed: input_shape: (1, 1000), minimum_shape: (chains=2, draws=4)
 
-![png](015_010_model-design_files/015_010_model-design_14_1.png)
+![png](015_010_model-design_files/015_010_model-design_17_1.png)
 
-    <ggplot: (8752270135004)>
+    <ggplot: (349306646)>
 
 ```python
 sgrna_post = (
     az.summary(
-        pymc3_sampling_api.samples_to_arviz(model, meanfield),
-        var_names="α_s",
+        az_model,
+        var_names="alpha_s",
         hdi_prob=0.89,
         kind="stats",
     )
@@ -417,14 +440,14 @@ sgrna_post["hugo_symbol"] = sgrna_to_gene_map.hugo_symbol
 )
 ```
 
-![png](015_010_model-design_files/015_010_model-design_15_0.png)
+![png](015_010_model-design_files/015_010_model-design_18_0.png)
 
-    <ggplot: (8752244471896)>
+    <ggplot: (351348363)>
 
 ```python
 cells_posteriors = az.summary(
-    pymc3_sampling_api.samples_to_arviz(model, meanfield),
-    var_names="β_c",
+    az_model,
+    var_names="beta_l",
     hdi_prob=0.89,
 )
 
@@ -433,9 +456,9 @@ plot_az_summary(cells_posteriors.reset_index(drop=False)) + gg.theme(figure_size
 
     arviz - WARNING - Shape validation failed: input_shape: (1, 1000), minimum_shape: (chains=2, draws=4)
 
-![png](015_010_model-design_files/015_010_model-design_16_1.png)
+![png](015_010_model-design_files/015_010_model-design_19_1.png)
 
-    <ggplot: (8752226973925)>
+    <ggplot: (352243444)>
 
 ---
 
@@ -444,37 +467,39 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 2.52 minutes
+    execution time: 5.31 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-02-19
+    Last updated: 2021-03-02
 
     Python implementation: CPython
     Python version       : 3.9.1
     IPython version      : 7.20.0
 
-    Compiler    : GCC 9.3.0
-    OS          : Linux
-    Release     : 3.10.0-1062.el7.x86_64
+    Compiler    : Clang 11.0.1
+    OS          : Darwin
+    Release     : 20.3.0
     Machine     : x86_64
-    Processor   : x86_64
-    CPU cores   : 32
+    Processor   : i386
+    CPU cores   : 4
     Architecture: 64bit
 
-    Hostname: compute-a-16-86.o2.rc.hms.harvard.edu
+    Hostname: JHCookMac
 
-    Git branch: crc
+    Git branch: crc-m1
 
-    theano    : 1.0.5
-    seaborn   : 0.11.1
-    arviz     : 0.11.1
-    matplotlib: 3.3.4
-    pandas    : 1.2.2
     pymc3     : 3.11.1
-    re        : 2.2.1
+    sys       : 3.9.1 | packaged by conda-forge | (default, Jan 26 2021, 01:32:59)
+    [Clang 11.0.1 ]
     numpy     : 1.20.1
+    re        : 2.2.1
+    matplotlib: 3.3.4
     plotnine  : 0.7.1
+    arviz     : 0.11.1
+    seaborn   : 0.11.1
+    theano    : 1.0.5
+    pandas    : 1.2.2

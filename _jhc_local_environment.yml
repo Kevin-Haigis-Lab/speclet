@@ -47,4 +47,5 @@ dependencies:
   - pytest-sugar
   - pytest-cov
   - python-graphviz
+  - jupyter_contrib_nbextensions
 prefix: /usr/local/Caskroom/miniconda/base/envs/speclet

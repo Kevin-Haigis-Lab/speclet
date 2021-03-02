@@ -78,7 +78,14 @@ def nmutations_to_binary_array(m: pd.Series) -> np.ndarray:
 
 def set_achilles_categorical_columns(
     data: pd.DataFrame,
-    cols: List[str] = ["hugo_symbol", "depmap_id", "sgrna", "lineage", "chromosome"],
+    cols: List[str] = [
+        "hugo_symbol",
+        "depmap_id",
+        "sgrna",
+        "lineage",
+        "chromosome",
+        "pdna_batch",
+    ],
     ordered: bool = True,
     sort_cats: bool = False,
 ) -> pd.DataFrame:
