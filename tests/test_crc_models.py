@@ -121,7 +121,7 @@ class TestCRCModel1:
             nunique(mock_data.hugo_symbol),
         )
         assert trace["α_s"].shape == (n_draws * n_chains, nunique(mock_data.sgrna))
-        assert trace["μ_β"].shape == (n_draws * n_chains, nunique(mock_data.depmap_id))
+        assert trace["β_l"].shape == (n_draws * n_chains, nunique(mock_data.depmap_id))
 
     @pytest.mark.slow
     def test_advi_sampling(self, mock_data: pd.DataFrame):
