@@ -116,7 +116,7 @@ class TestModifyingAchillesData:
         data = dphelp.read_achilles_data(self.data_path, set_categorical_cols=False)
         assert not "category" in data.dtypes
         data = dphelp.set_achilles_categorical_columns(data=data)
-        assert sum(data.dtypes == "category") == 5
+        assert sum(data.dtypes == "category") == 6
 
     def test_custom_achilles_categorical_columns(self):
         data = dphelp.read_achilles_data(self.data_path, set_categorical_cols=False)
