@@ -8,11 +8,10 @@ from typing import List
 import numpy as np
 import pandas as pd
 import pretty_errors
-import pymc3 as pm
 import pytest
 
 from analysis import sampling_pymc3_models as sampling
-from analysis.common_data_processing import make_cat
+from analysis.common_data_processing import nunique, read_achilles_data
 
 #### ---- User Messages ---- ####
 
@@ -92,6 +91,11 @@ def mock_gene_data() -> pd.DataFrame:
     return df
 
 
+@pytest.fixture(scope="module")
+def mock_achilles_data():
+    return read_achilles_data(Path("tests", "depmap_test_data.csv"))
+
+
 def test_sgrna_to_gene_mapping_df_is_smaller(mock_gene_data: pd.DataFrame):
     sgrna_map = sampling.make_sgrna_to_gene_mapping_df(mock_gene_data)
     assert len(sgrna_map) < len(mock_gene_data)
@@ -122,6 +126,34 @@ def test_different_colnames(mock_gene_data: pd.DataFrame):
             sgrna_map_new.iloc[:, col_i].values,
             sgrna_map_original.iloc[:, col_i].values,
         )
+
+
+def test_common_idx_key_names(mock_achilles_data: pd.DataFrame):
+    indices = sampling.common_indices(mock_achilles_data.sample(frac=1.0))
+    for k in indices.keys():
+        assert "idx" in k or "map" in k
+
+
+def test_common_idx_sgrna_to_gene_map(mock_achilles_data: pd.DataFrame):
+    indices = sampling.common_indices(mock_achilles_data.sample(frac=1.0))
+    for sgrna in mock_achilles_data.sgrna.values:
+        assert sgrna in indices["sgrna_to_gene_map"].sgrna.values
+    for gene in mock_achilles_data.hugo_symbol.values:
+        assert gene in indices["sgrna_to_gene_map"].hugo_symbol.values
+
+
+def test_common_idx_depmap(mock_achilles_data: pd.DataFrame):
+    indices = sampling.common_indices(mock_achilles_data.sample(frac=1.0))
+    assert nunique(mock_achilles_data.depmap_id.values) == nunique(
+        indices["cellline_idx"]
+    )
+
+
+def test_common_idx_pdna_batch(mock_achilles_data: pd.DataFrame):
+    indices = sampling.common_indices(mock_achilles_data.sample(frac=1.0))
+    assert nunique(mock_achilles_data.pdna_batch.values) == nunique(
+        indices["batch_idx"]
+    )
 
 
 class TestCLI:

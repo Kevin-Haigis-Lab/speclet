@@ -4,7 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 from time import time
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import common_data_processing as dphelp
 import numpy as np
@@ -99,6 +99,24 @@ def make_sgrna_to_gene_mapping_df(
     )
 
 
+def common_indices(
+    achilles_df: pd.DataFrame,
+) -> Dict[str, Union[np.ndarray, pd.DataFrame]]:
+    sgrna_idx = dphelp.get_indices(achilles_df, "sgrna")
+    sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(achilles_df)
+    sgrna_to_gene_idx = dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol")
+    cellline_idx = dphelp.get_indices(achilles_df, "depmap_id")
+    batch_idx = dphelp.get_indices(achilles_df, "pdna_batch")
+
+    return {
+        "sgrna_idx": sgrna_idx,
+        "sgrna_to_gene_map": sgrna_to_gene_map,
+        "sgrna_to_gene_idx": sgrna_to_gene_idx,
+        "cellline_idx": cellline_idx,
+        "batch_idx": batch_idx,
+    }
+
+
 #### ---- CRC Model 1 ---- ####
 
 
@@ -117,15 +135,23 @@ def crc_model1(
     batch_size = crc_batch_size(debug)
 
     # Indices
-    gene_idx = dphelp.get_indices(data, "hugo_symbol")
+    indices_dict = common_indices(data)
 
     # Batched data
-    gene_idx_batch = pm.Minibatch(gene_idx, batch_size=batch_size)
+    sgrna_idx_batch = pm.Minibatch(indices_dict["sgrna_idx"], batch_size=batch_size)
+    cellline_idx_batch = pm.Minibatch(
+        indices_dict["cellline_idx"], batch_size=batch_size
+    )
+    batch_idx_batch = pm.Minibatch(indices_dict["batch_idx"], batch_size=batch_size)
     lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
     # Construct model
-    crc_m1, gene_idx_shared, lfc_data_shared = crc_models.model_1(
-        gene_idx=gene_idx, lfc_data=data.lfc.values
+    crc_m1, shared_vars = crc_models.model_1(
+        sgrna_idx=indices_dict["sgrna_idx"],
+        sgrna_to_gene_idx=indices_dict["sgrna_to_gene_idx"],
+        cellline_idx=indices_dict["cellline_idx"],
+        batch_idx=indices_dict["batch_idx"],
+        lfc_data=data.lfc.values,
     )
 
     # Sample and cache
@@ -142,124 +168,9 @@ def crc_model1(
         force=force_sampling,
         fit_kwargs={
             "more_replacements": {
-                gene_idx_shared: gene_idx_batch,
-                lfc_data_shared: lfc_data_batch,
-            }
-        },
-    )
-
-    done()
-    return
-
-
-#### ---- CRC Model 2 ---- ####
-
-
-def crc_model2(
-    name: str,
-    debug: bool = False,
-    force_sampling: bool = False,
-    random_seed: Optional[int] = None,
-) -> None:
-    print_model("CRC Model 2")
-
-    # Data
-    info("Loading data...")
-    data = load_crc_data(debug)
-
-    batch_size = crc_batch_size(debug)
-
-    # Indices
-    sgrna_idx = dphelp.get_indices(data, "sgrna")
-    sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(data)
-    sgrna_to_gene_idx = dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol")
-
-    # Batched data
-    sgrna_idx_batch = pm.Minibatch(sgrna_idx, batch_size=batch_size)
-    lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
-
-    # Construct model
-    crc_m2, shared_vars = crc_models.model_2(
-        sgrna_idx=sgrna_idx,
-        sgrna_to_gene_idx=sgrna_to_gene_idx,
-        lfc_data=data.lfc.values,
-    )
-
-    # Sample and cache
-    crc_m2_cache = make_cache_name(name)
-
-    _ = pymc3_sampling_api.pymc3_advi_approximation_procedure(
-        model=crc_m2,
-        n_iterations=100000,
-        callbacks=[
-            pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
-        ],
-        random_seed=random_seed,
-        cache_dir=crc_m2_cache,
-        force=force_sampling,
-        fit_kwargs={
-            "more_replacements": {
                 shared_vars["sgrna_idx_shared"]: sgrna_idx_batch,
-                shared_vars["lfc_shared"]: lfc_data_batch,
-            }
-        },
-    )
-
-    done()
-    return
-
-
-#### ---- CRC Model 3 ---- ####
-
-
-def crc_model3(
-    name: str,
-    debug: bool = False,
-    force_sampling: bool = False,
-    random_seed: Optional[int] = None,
-) -> None:
-    print_model("CRC Model 3")
-
-    # Data
-    info("Loading data...")
-    data = load_crc_data(debug)
-
-    batch_size = crc_batch_size(debug)
-
-    # Indices
-    sgrna_idx = dphelp.get_indices(data, "sgrna")
-    sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(data)
-    sgrna_to_gene_idx = dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol")
-    cell_idx = dphelp.get_indices(data, "depmap_id")
-
-    # Batched data
-    sgrna_idx_batch = pm.Minibatch(sgrna_idx, batch_size=batch_size)
-    cell_idx_batch = pm.Minibatch(cell_idx, batch_size=batch_size)
-    lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
-
-    # Construct model
-    crc_m3, shared_vars = crc_models.model_3(
-        sgrna_idx=sgrna_idx,
-        sgrna_to_gene_idx=sgrna_to_gene_idx,
-        cell_idx=cell_idx,
-        lfc_data=data.lfc.values,
-    )
-
-    # Sample and cache
-    crc_m3_cache = make_cache_name(name)
-
-    _ = pymc3_sampling_api.pymc3_advi_approximation_procedure(
-        model=crc_m3,
-        callbacks=[
-            pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
-        ],
-        random_seed=random_seed,
-        cache_dir=crc_m3_cache,
-        force=force_sampling,
-        fit_kwargs={
-            "more_replacements": {
-                shared_vars["sgrna_idx_shared"]: sgrna_idx_batch,
-                shared_vars["cell_idx_shared"]: cell_idx_batch,
+                shared_vars["cellline_idx_shared"]: cellline_idx_batch,
+                shared_vars["batch_idx_shared"]: batch_idx_batch,
                 shared_vars["lfc_shared"]: lfc_data_batch,
             }
         },
@@ -271,7 +182,7 @@ def crc_model3(
 
 #### ---- MAIN ---- ####
 
-MODELS = ["crc-m1", "crc-m2", "crc-m3"]
+MODELS = ["crc-m1"]
 
 
 def parse_cli_arguments(
@@ -337,20 +248,6 @@ def main() -> None:
 
     if args.model == "crc-m1":
         crc_model1(
-            name=model_name,
-            debug=args.debug,
-            force_sampling=args.force_sample,
-            random_seed=args.random_seed,
-        )
-    elif args.model == "crc-m2":
-        crc_model2(
-            name=model_name,
-            debug=args.debug,
-            force_sampling=args.force_sample,
-            random_seed=args.random_seed,
-        )
-    elif args.model == "crc-m3":
-        crc_model3(
             name=model_name,
             debug=args.debug,
             force_sampling=args.force_sample,
