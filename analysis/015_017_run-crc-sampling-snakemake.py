@@ -8,14 +8,15 @@ PYMC3_MODEL_CACHE_DIR = "analysis/pymc3_model_cache/"
 REPORTS_DIR = "reports/"
 
 model_names = {
-    "crc-m1": "CRC_model1",
+    "crc-m1": "CRC-model1",
 }
 
 rule all:
     input:
         expand(
-            REPORTS_DIR + "{model}.md",
+            REPORTS_DIR + "{model}_{model_name}.md",
             model=list(model_names.keys()),
+            model_name=list(model_names.values())
         )
 
 rule sample_models:
@@ -32,9 +33,9 @@ rule report:
     input:
         model = PYMC3_MODEL_CACHE_DIR + "{model}/{model}.txt"
     output:
-         ouput_notebook = REPORTS_DIR + "{model}.md"
+         ouput_notebook = REPORTS_DIR + "{model}_{model_name}.md"
     conda:
         "../environment.yml"
     shell:
-        "jupyter nbconvert --to notebook --inplace --execute " + REPORTS_DIR  + "{wildcards.model}.ipynb && "
-        "jupyter nbconvert --to markdown " + REPORTS_DIR + "{wildcards.model}.ipynb"
+        "jupyter nbconvert --to notebook --inplace --execute " + REPORTS_DIR  + "{wildcards.model}_{wildcards.model_name}.ipynb && "
+        "jupyter nbconvert --to markdown " + REPORTS_DIR + "{wildcards.model}_{wildcards.model_name}.ipynb"
