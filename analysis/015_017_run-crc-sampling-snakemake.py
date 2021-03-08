@@ -27,7 +27,7 @@ rule report:
     params:
         model_name = lambda w: model_names[w.model]
     output:
-         ouput_notebook = lambda w: REPORTS_DIR + "/" + model_names[w.model] + ".md"
+         ouput_notebook = lambda w: REPORTS_DIR + "/{wildwards.model_name}.md"
     conda:
         "../environment.yml"
     shell:
