@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pretty_errors
 
-PYMC3_MODEL_CACHE_DIR = Path("analysis", "pymc3_model_cache").as_posix()
-REPORTS_DIR = Path("reports").as_posix()
+PYMC3_MODEL_CACHE_DIR = "analysis/pymc3_model_cache/"
+REPORTS_DIR = "reports/"
 
 model_names = {
     "crc-m1": "CRC_model1",
@@ -13,11 +13,14 @@ model_names = {
 
 rule all:
     input:
-        expand(REPORTS_DIR + "/" + "{model_name}.md", model_name=list(model_names.values()))
+        expand(
+            REPORTS_DIR + "{model}.md",
+            model=list(model_names.keys()),
+        )
 
 rule sample_models:
     output:
-        PYMC3_MODEL_CACHE_DIR + "/{model}/{model}.txt"
+        PYMC3_MODEL_CACHE_DIR + "{model}/{model}.txt"
     params:
         model_name = lambda w: model_names[w.model]
     conda:
@@ -27,13 +30,11 @@ rule sample_models:
 
 rule report:
     input:
-        model = PYMC3_MODEL_CACHE_DIR + "/{model}/{model}.txt"
-    params:
-        model_name = lambda w: model_names[w.model]
+        model = PYMC3_MODEL_CACHE_DIR + "{model}/{model}.txt"
     output:
-         ouput_notebook = REPORTS_DIR + "/{params.model_name}.md"
+         ouput_notebook = REPORTS_DIR + "{model}.md"
     conda:
         "../environment.yml"
     shell:
-        "jupyter nbconvert --to notebook --inplace --execute " + REPORTS_DIR  + "/{params.model_name}.ipynb && "
-        "jupyter nbconvert --to markdown " + REPORTS_DIR + "/{params.model_name}.ipynb"
+        "jupyter nbconvert --to notebook --inplace --execute " + REPORTS_DIR  + "{model}.ipynb && "
+        "jupyter nbconvert --to markdown " + REPORTS_DIR + "{model}.ipynb"
