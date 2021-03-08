@@ -27,7 +27,7 @@ rule report:
     params:
         model_name = lambda w: model_names[w.model]
     output:
-         ouput_notebook = REPORTS_DIR + "/{wildwards.model_name}.md"
+         ouput_notebook = REPORTS_DIR + "/{params.model_name}.md"
     conda:
         "../environment.yml"
     shell:
@@ -36,4 +36,4 @@ rule report:
 
 rule all:
     input:
-        expand(REPORTS_DIR + "/" + "{model}.md", model=list(model_names.keys()))
+        expand(REPORTS_DIR + "/" + "{model_name}.md", model_name=list(model_names.values()))
