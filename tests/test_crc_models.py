@@ -2,7 +2,7 @@
 
 from itertools import product
 from string import ascii_lowercase, ascii_uppercase
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict
 
 import numpy as np
 import pandas as pd

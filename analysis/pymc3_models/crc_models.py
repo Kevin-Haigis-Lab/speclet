@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, Tuple
 
 import numpy as np
-import pandas as pd
 import pretty_errors
 import pymc3 as pm
 import theano
