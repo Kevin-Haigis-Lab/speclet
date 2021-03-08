@@ -11,6 +11,10 @@ model_names = {
     "crc-m1": "CRC_model1",
 }
 
+rule all:
+    input:
+        expand(REPORTS_DIR + "/" + "{model_name}.md", model_name=list(model_names.values()))
+
 rule sample_models:
     output:
         PYMC3_MODEL_CACHE_DIR + "/{model}/{model}.txt"
@@ -33,7 +37,3 @@ rule report:
     shell:
         "jupyter nbconvert --to notebook --inplace --execute " + REPORTS_DIR  + "/{params.model_name}.ipynb && "
         "jupyter nbconvert --to markdown " + REPORTS_DIR + "/{params.model_name}.ipynb"
-
-rule all:
-    input:
-        expand(REPORTS_DIR + "/" + "{model_name}.md", model_name=list(model_names.values()))
