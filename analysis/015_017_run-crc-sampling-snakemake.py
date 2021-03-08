@@ -24,13 +24,15 @@ rule sample_models:
 rule report:
     input:
         model = PYMC3_MODEL_CACHE_DIR + "/{model}/{model}.txt"
+    params:
+        model_name = lambda w: model_names[w.model]
     output:
          REPORTS_DIR + "/" + model_name + ".md"
     conda:
         "../environment.yml"
     shell:
-        "jupyter nbconvert --to notebook --inplace --execute " + REPORTS_DIR + model +  ".ipynb && "
-        "jupyter nbconvert --to markdown " + REPORTS_DIR + "/" + model + ".ipynb"
+        "jupyter nbconvert --to notebook --inplace --execute " + REPORTS_DIR + params.model_name + ".ipynb && "
+        "jupyter nbconvert --to markdown " + REPORTS_DIR + "/" + params.model_name + ".ipynb"
 
 rule all:
     input:
