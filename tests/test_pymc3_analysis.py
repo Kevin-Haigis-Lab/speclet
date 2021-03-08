@@ -113,6 +113,7 @@ class TestSummarizePosteriorPredictions(PyMC3AnalysisTesting):
         )
 
 
+@pytest.mark.plots
 class TestPlotVIHistory(PyMC3AnalysisTesting):
     def test_returns_plot(self, mock_advi: ADVIResults):
         _, _, approx = mock_advi
@@ -193,6 +194,7 @@ class TestExtractMatrixVariableIndices:
         )
 
 
+@pytest.mark.plots
 class TestPlottingOfPriors(PyMC3AnalysisTesting):
 
     draws = 500
