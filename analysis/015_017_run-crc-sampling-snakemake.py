@@ -36,5 +36,5 @@ rule report:
     conda:
         "../environment.yml"
     shell:
-        "jupyter nbconvert --to notebook --inplace --execute " + REPORTS_DIR  + "{model}.ipynb && "
-        "jupyter nbconvert --to markdown " + REPORTS_DIR + "{model}.ipynb"
+        "jupyter nbconvert --to notebook --inplace --execute " + REPORTS_DIR  + "{wildcards.model}.ipynb && "
+        "jupyter nbconvert --to markdown " + REPORTS_DIR + "{wildcards.model}.ipynb"
