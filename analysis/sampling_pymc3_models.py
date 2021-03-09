@@ -6,6 +6,7 @@ from pathlib import Path
 from time import time
 from typing import Any, Dict, List, Optional, Union
 
+import common_achilles_processing as achelp
 import common_data_processing as dphelp
 import numpy as np
 import pandas as pd
@@ -77,7 +78,7 @@ def load_crc_data(debug: bool) -> pd.DataFrame:
         f = CRC_SUBSAMPLING_DATA
     else:
         f = CRC_MODELING_DATA
-    return dphelp.read_achilles_data(f, low_memory=False)
+    return achelp.read_achilles_data(f, low_memory=False)
 
 
 def crc_batch_size(debug: bool) -> int:
@@ -85,31 +86,6 @@ def crc_batch_size(debug: bool) -> int:
         return 1000
     else:
         return 10000
-
-
-def make_sgrna_to_gene_mapping_df(
-    data: pd.DataFrame, sgrna_col: str = "sgrna", gene_col: str = "hugo_symbol"
-) -> pd.DataFrame:
-    return (
-        data[[sgrna_col, gene_col]]
-        .drop_duplicates()
-        .reset_index(drop=True)
-        .sort_values(sgrna_col)
-        .reset_index(drop=True)
-    )
-
-
-def common_indices(
-    achilles_df: pd.DataFrame,
-) -> Dict[str, Union[np.ndarray, pd.DataFrame]]:
-    sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(achilles_df)
-    return {
-        "sgrna_idx": dphelp.get_indices(achilles_df, "sgrna"),
-        "sgrna_to_gene_map": sgrna_to_gene_map,
-        "sgrna_to_gene_idx": dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol"),
-        "cellline_idx": dphelp.get_indices(achilles_df, "depmap_id"),
-        "batch_idx": dphelp.get_indices(achilles_df, "pdna_batch"),
-    }
 
 
 #### ---- CRC Model 1 ---- ####
@@ -130,7 +106,7 @@ def crc_model1(
     batch_size = crc_batch_size(debug)
 
     # Indices
-    indices_dict = common_indices(data)
+    indices_dict = achelp.common_indices(data)
 
     # Batched data
     sgrna_idx_batch = pm.Minibatch(indices_dict["sgrna_idx"], batch_size=batch_size)
@@ -253,7 +229,7 @@ def main() -> None:
 
     if args.touch and args.model in MODELS:
         info("Touching output file.")
-        touch(args.model)
+        touch(args.model_name)
 
     toc = time()
     info(f"execution time: {(toc - tic) / 60:.2f} minutes")

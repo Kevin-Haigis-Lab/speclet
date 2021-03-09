@@ -10,9 +10,9 @@ import pretty_errors
 import pymc3 as pm
 import pytest
 
+from analysis.common_achilles_processing import make_sgrna_to_gene_mapping_df
 from analysis.common_data_processing import get_indices, make_cat, nunique
 from analysis.pymc3_models import crc_models
-from analysis.sampling_pymc3_models import make_sgrna_to_gene_mapping_df
 
 #### ---- Helper functions ---- ####
 
