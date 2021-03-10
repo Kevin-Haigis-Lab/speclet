@@ -11,8 +11,7 @@ import pretty_errors
 import pytest
 
 from analysis import sampling_pymc3_models as sampling
-from analysis.common_achilles_processing import read_achilles_data
-from analysis.common_data_processing import nunique
+from analysis.common_data_processing import nunique, read_achilles_data
 
 #### ---- User Messages ---- ####
 

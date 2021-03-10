@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 from itertools import product
-from string import ascii_lowercase, ascii_uppercase
+from string import ascii_lowercase as letters
+from string import ascii_uppercase as LETTERS
 from typing import Dict
 
 import numpy as np
@@ -10,8 +11,7 @@ import pretty_errors
 import pymc3 as pm
 import pytest
 
-from analysis.common_achilles_processing import make_sgrna_to_gene_mapping_df
-from analysis.common_data_processing import get_indices, make_cat, nunique
+from analysis import common_data_processing as dphelp
 from analysis.pymc3_models import crc_models
 
 #### ---- Helper functions ---- ####
@@ -36,12 +36,12 @@ def test_nunique_str():
 
 
 def make_mock_sgrna(of_length: int = 20) -> str:
-    return "".join(np.random.choice(list(ascii_lowercase), of_length, replace=True))
+    return "".join(np.random.choice(list(letters), of_length, replace=True))
 
 
 @pytest.fixture
 def mock_data() -> pd.DataFrame:
-    genes = np.random.choice(list(ascii_uppercase), 10, replace=False)
+    genes = np.random.choice(list(LETTERS), 10, replace=False)
     sgrna_to_gene_map: Dict[str, str] = {}
     for gene in genes:
         for _ in range(np.random.randint(3, 10)):
@@ -57,20 +57,20 @@ def mock_data() -> pd.DataFrame:
 
     df.sort_values(["hugo_symbol", "sgrna"])
     for col in df.columns:
-        df = make_cat(df, col)
+        df = dphelp.make_cat(df, col)
 
     df["lfc"] = np.random.randn(len(df))
     return df
 
 
 class TestCRCModel1:
-    def make_indices(self, d: pd.DataFrame) -> Dict[str, np.array]:
-        sgrna_map = make_sgrna_to_gene_mapping_df(d)
+    def make_indices(self, d: pd.DataFrame) -> Dict[str, np.ndarray]:
+        sgrna_map = dphelp.make_sgrna_to_gene_mapping_df(d)
         return {
-            "sgrna_idx": get_indices(d, "sgrna"),
-            "sgrna_to_gene_idx": get_indices(sgrna_map, "hugo_symbol"),
-            "cellline_idx": get_indices(d, "depmap_id"),
-            "batch_idx": get_indices(d, "pdna_batch"),
+            "sgrna_idx": dphelp.get_indices(d, "sgrna"),
+            "sgrna_to_gene_idx": dphelp.get_indices(sgrna_map, "hugo_symbol"),
+            "cellline_idx": dphelp.get_indices(d, "depmap_id"),
+            "batch_idx": dphelp.get_indices(d, "pdna_batch"),
         }
 
     @pytest.mark.slow
@@ -118,10 +118,16 @@ class TestCRCModel1:
         assert trace["μ_g"].shape == (n_draws * n_chains,)
         assert trace["μ_α"].shape == (
             n_draws * n_chains,
-            nunique(mock_data.hugo_symbol),
+            dphelp.nunique(mock_data.hugo_symbol),
         )
-        assert trace["α_s"].shape == (n_draws * n_chains, nunique(mock_data.sgrna))
-        assert trace["β_l"].shape == (n_draws * n_chains, nunique(mock_data.depmap_id))
+        assert trace["α_s"].shape == (
+            n_draws * n_chains,
+            dphelp.nunique(mock_data.sgrna),
+        )
+        assert trace["β_l"].shape == (
+            n_draws * n_chains,
+            dphelp.nunique(mock_data.depmap_id),
+        )
 
     @pytest.mark.slow
     def test_advi_sampling(self, mock_data: pd.DataFrame):
@@ -147,6 +153,6 @@ class TestCRCModel1:
         assert len(meanfield.hist) == n_fit
         assert isinstance(trace, pm.backends.base.MultiTrace)
         assert trace["μ_g"].shape == (n_draws,)
-        assert trace["μ_α"].shape == (n_draws, nunique(mock_data.hugo_symbol))
-        assert trace["α_s"].shape == (n_draws, nunique(mock_data.sgrna.values))
-        assert trace["β_l"].shape == (n_draws, nunique(mock_data.depmap_id))
+        assert trace["μ_α"].shape == (n_draws, dphelp.nunique(mock_data.hugo_symbol))
+        assert trace["α_s"].shape == (n_draws, dphelp.nunique(mock_data.sgrna.values))
+        assert trace["β_l"].shape == (n_draws, dphelp.nunique(mock_data.depmap_id))

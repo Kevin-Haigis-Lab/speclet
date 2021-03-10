@@ -6,7 +6,6 @@ from pathlib import Path
 from time import time
 from typing import Any, Dict, List, Optional, Union
 
-import common_achilles_processing as achelp
 import common_data_processing as dphelp
 import numpy as np
 import pandas as pd
@@ -78,7 +77,7 @@ def load_crc_data(debug: bool) -> pd.DataFrame:
         f = CRC_SUBSAMPLING_DATA
     else:
         f = CRC_MODELING_DATA
-    return achelp.read_achilles_data(f, low_memory=False)
+    return dphelp.read_achilles_data(f, low_memory=False)
 
 
 def crc_batch_size(debug: bool) -> int:
@@ -106,7 +105,7 @@ def crc_model1(
     batch_size = crc_batch_size(debug)
 
     # Indices
-    indices_dict = achelp.common_indices(data)
+    indices_dict = dphelp.common_indices(data)
 
     # Batched data
     sgrna_idx_batch = pm.Minibatch(indices_dict["sgrna_idx"], batch_size=batch_size)
