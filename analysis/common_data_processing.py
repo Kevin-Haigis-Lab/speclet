@@ -2,34 +2,11 @@
 
 import warnings
 from pathlib import Path
-from typing import Any, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
 import pretty_errors
-
-
-def zscale_cna_by_group(
-    df: pd.DataFrame,
-    gene_cn_col: str = "gene_cn",
-    new_col: str = "gene_cn_z",
-    groupby: List[str] = ["hugo_symbol"],
-    cn_max: Optional[float] = None,
-) -> pd.DataFrame:
-    """
-    Z-scale the copy number values.
-    """
-
-    if not cn_max is None and cn_max > 0:
-        df[new_col] = df[gene_cn_col].apply(lambda x: np.min((x, cn_max)))
-    else:
-        df[new_col] = df[gene_cn_col]
-
-    df[new_col] = df.groupby(groupby)[new_col].apply(
-        lambda x: (x - np.mean(x)) / np.std(x)
-    )
-
-    return df
 
 
 def make_cat(
@@ -76,9 +53,89 @@ def nmutations_to_binary_array(m: pd.Series) -> np.ndarray:
     return m.values.astype(bool).astype(int)
 
 
+def nunique(x: Iterable[Any]) -> int:
+    """
+    Number of unique values in an iterable object.
+    """
+    if isinstance(x, dict):
+        raise TypeError("Cannot count the number of unique values in a dict.")
+    return len(np.unique(x))
+
+
+####################################################################
+##########                                                ##########
+##########  FOR ACHILLES DATA PROCESSING AND MANIPULATION ##########
+##########                                                ##########
+####################################################################
+
+
+#### ---- Data manipulation ---- ####
+
+
+def zscale_cna_by_group(
+    df: pd.DataFrame,
+    gene_cn_col: str = "gene_cn",
+    new_col: str = "gene_cn_z",
+    groupby: List[str] = ["hugo_symbol"],
+    cn_max: Optional[float] = None,
+) -> pd.DataFrame:
+    """
+    Z-scale the copy number values.
+    """
+
+    if not cn_max is None and cn_max > 0:
+        df[new_col] = df[gene_cn_col].apply(lambda x: np.min((x, cn_max)))
+    else:
+        df[new_col] = df[gene_cn_col]
+
+    df[new_col] = df.groupby(groupby)[new_col].apply(
+        lambda x: (x - np.mean(x)) / np.std(x)
+    )
+
+    return df
+
+
+#### ---- Indices ---- ####
+
+
+def make_sgrna_to_gene_mapping_df(
+    data: pd.DataFrame, sgrna_col: str = "sgrna", gene_col: str = "hugo_symbol"
+) -> pd.DataFrame:
+    return (
+        data[[sgrna_col, gene_col]]
+        .drop_duplicates()
+        .reset_index(drop=True)
+        .sort_values(sgrna_col)
+        .reset_index(drop=True)
+    )
+
+
+def common_indices(
+    achilles_df: pd.DataFrame,
+) -> Dict[str, Union[np.ndarray, pd.DataFrame]]:
+    sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(achilles_df)
+    return {
+        "sgrna_idx": get_indices(achilles_df, "sgrna"),
+        "sgrna_to_gene_map": sgrna_to_gene_map,
+        "sgrna_to_gene_idx": get_indices(sgrna_to_gene_map, "hugo_symbol"),
+        "cellline_idx": get_indices(achilles_df, "depmap_id"),
+        "batch_idx": get_indices(achilles_df, "pdna_batch"),
+    }
+
+
+#### ---- Data frames ---- ####
+
+
 def set_achilles_categorical_columns(
     data: pd.DataFrame,
-    cols: List[str] = ["hugo_symbol", "depmap_id", "sgrna", "lineage", "chromosome"],
+    cols: List[str] = [
+        "hugo_symbol",
+        "depmap_id",
+        "sgrna",
+        "lineage",
+        "chromosome",
+        "pdna_batch",
+    ],
     ordered: bool = True,
     sort_cats: bool = False,
 ) -> pd.DataFrame:
@@ -143,12 +200,3 @@ def subsample_achilles_data(
     sub_df = sub_df[sub_df.hugo_symbol.isin(genes)]
     sub_df = sub_df[sub_df.depmap_id.isin(cell_lines)]
     return sub_df
-
-
-def nunique(x: Iterable[Any]) -> int:
-    """
-    Number of unique values in an iterable object.
-    """
-    if isinstance(x, dict):
-        raise TypeError("Cannot count the number of unique values in a dict.")
-    return len(np.unique(x))

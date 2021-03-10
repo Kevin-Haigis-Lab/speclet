@@ -4,23 +4,24 @@ from pathlib import Path
 
 import pretty_errors
 
-PYMC3_MODEL_CACHE_DIR = "analysis/pymc3_model_cache"
+PYMC3_MODEL_CACHE_DIR = "analysis/pymc3_model_cache/"
+REPORTS_DIR = "reports/"
 
 model_names = {
-    "crc-m1": "CRC_model1",
-    "crc-m2": "CRC_model2",
-    "crc-m3": "CRC_model3",
+    "crc-m1": "CRC-model1",
 }
-
-final_notebook = "analysis/015_020_crc-model-analysis"
 
 rule all:
     input:
-        final_notebook + ".md"
+        expand(
+            REPORTS_DIR + "{model}_{model_name}.md",
+            model=list(model_names.keys()),
+            model_name=list(model_names.values())
+        )
 
 rule sample_models:
     output:
-        PYMC3_MODEL_CACHE_DIR + "/{model}/{model}.txt"
+        PYMC3_MODEL_CACHE_DIR + "{model}/{model}.txt"
     params:
         model_name = lambda w: model_names[w.model]
     conda:
@@ -28,13 +29,13 @@ rule sample_models:
     shell:
         'python3 analysis/sampling_pymc3_models.py --model "{wildcards.model}" --name "{params.model_name}" --debug --touch'
 
-rule execute_analysis:
+rule report:
     input:
-        models=expand(PYMC3_MODEL_CACHE_DIR + "/{model}/{model}.txt", model=list(model_names.keys()))
+        model = PYMC3_MODEL_CACHE_DIR + "{model}/{model}.txt"
     output:
-        final_notebook + ".md"
+         ouput_notebook = REPORTS_DIR + "{model}_{model_name}.md"
     conda:
         "../environment.yml"
     shell:
-        "jupyter nbconvert --to notebook --inplace --execute " +  final_notebook +  ".ipynb && "
-        "jupyter nbconvert --to markdown "+ final_notebook + ".ipynb"
+        "jupyter nbconvert --to notebook --inplace --execute " + REPORTS_DIR  + "{wildcards.model}_{wildcards.model_name}.ipynb && "
+        "jupyter nbconvert --to markdown " + REPORTS_DIR + "{wildcards.model}_{wildcards.model_name}.ipynb"

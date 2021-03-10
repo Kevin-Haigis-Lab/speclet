@@ -10,7 +10,8 @@
 module unload python
 module load gcc conda2 slurm-drmaa/1.1.1
 
-bash ~/.bashrc
+# shellcheck source=/dev/null
+source "$HOME/.bashrc"
 conda activate speclet_smakemake
 
 SNAKEFILE="analysis/015_017_run-crc-sampling-snakemake.py"

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+from string import ascii_lowercase as letters
 from string import ascii_uppercase as LETTERS
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -64,6 +66,47 @@ def test_extract_flat_ary():
         )
 
 
+#### ---- DataFrame Helpers ---- ####
+
+
+class TestIndexingFunctions:
+    @pytest.fixture
+    def data(self) -> pd.DataFrame:
+        return pd.DataFrame(
+            {
+                "a": pd.Series(["a", "b", "c", "a", "c"], dtype="category"),
+                "b": pd.Series([1, 2, 3, 1, 3], dtype="category"),
+                "c": [1, 2, 3, 1, 3],
+                "d": [3, 2, 1, 3, 2],
+            }
+        )
+
+    def test_get_indices(self, data: pd.DataFrame):
+        assert data["a"].dtype == "category" and data["b"].dtype == "category"
+        expected_order = [0, 1, 2, 0, 2]
+        np.testing.assert_equal(dphelp.get_indices(data, "a"), expected_order)
+        np.testing.assert_equal(dphelp.get_indices(data, "b"), expected_order)
+
+    def test_getting_index_on_not_cat(self, data: pd.DataFrame):
+        assert data["c"].dtype == np.dtype("int64")
+        with pytest.raises(AttributeError):
+            _ = dphelp.get_indices(data, "c")
+
+    def test_index_and_count(self, data: pd.DataFrame):
+        idx, ct = dphelp.get_indices_and_count(data, "a")
+        np.testing.assert_equal(idx, [0, 1, 2, 0, 2])
+        assert ct == 3
+
+    def test_making_categorical(self, data: pd.DataFrame):
+        assert data["c"].dtype == np.dtype("int64")
+        assert dphelp.make_cat(data, "c")["c"].dtype == "category"
+
+    def test_make_cat_with_specific_order(self, data: pd.DataFrame):
+        assert data["d"].dtype == np.dtype("int64")
+        data = dphelp.make_cat(data.copy(), "d", ordered=True, sort_cats=False)
+        np.testing.assert_equal(dphelp.get_indices(data, "d"), [0, 1, 2, 0, 1])
+
+
 #### ---- Reading and modifying Achilles data ---- ####
 
 
@@ -116,7 +159,7 @@ class TestModifyingAchillesData:
         data = dphelp.read_achilles_data(self.data_path, set_categorical_cols=False)
         assert not "category" in data.dtypes
         data = dphelp.set_achilles_categorical_columns(data=data)
-        assert sum(data.dtypes == "category") == 5
+        assert sum(data.dtypes == "category") == 6
 
     def test_custom_achilles_categorical_columns(self):
         data = dphelp.read_achilles_data(self.data_path, set_categorical_cols=False)
@@ -182,42 +225,90 @@ class TestModifyingAchillesData:
         assert (z_vals <= z_max_vals).all()
 
 
-#### ---- DataFrame Helpers ---- ####
+#### ---- Index helpers ---- ####
 
 
-class TestIndexingFunctions:
-    @pytest.fixture
-    def data(self) -> pd.DataFrame:
-        return pd.DataFrame(
-            {
-                "a": pd.Series(["a", "b", "c", "a", "c"], dtype="category"),
-                "b": pd.Series([1, 2, 3, 1, 3], dtype="category"),
-                "c": [1, 2, 3, 1, 3],
-                "d": [3, 2, 1, 3, 2],
-            }
+def make_mock_sgrna(of_length: int = 20) -> str:
+    return "".join(np.random.choice(list(letters), of_length, replace=True))
+
+
+@pytest.fixture
+def mock_gene_data() -> pd.DataFrame:
+    genes = list(LETTERS[:5])
+    gene_list: List[str] = []
+    sgrna_list: List[str] = []
+    for gene in genes:
+        for _ in range(np.random.randint(5, 10)):
+            gene_list.append(gene)
+            sgrna_list.append(make_mock_sgrna(20))
+
+    df = pd.DataFrame({"hugo_symbol": gene_list, "sgrna": sgrna_list}, dtype="category")
+    df = pd.concat([df] + [df.sample(frac=0.75) for _ in range(10)])
+    df = df.sample(frac=1.0)
+    df["y"] = np.random.randn(len(df))
+    return df
+
+
+@pytest.fixture(scope="module")
+def example_achilles_data():
+    return dphelp.read_achilles_data(Path("tests", "depmap_test_data.csv"))
+
+
+def test_sgrna_to_gene_mapping_df_is_smaller(mock_gene_data: pd.DataFrame):
+    sgrna_map = dphelp.make_sgrna_to_gene_mapping_df(mock_gene_data)
+    assert len(sgrna_map) < len(mock_gene_data)
+    assert sgrna_map["hugo_symbol"].dtype == "category"
+
+
+def test_sgrna_to_gene_map_preserves_categories(mock_gene_data: pd.DataFrame):
+    sgrna_map = dphelp.make_sgrna_to_gene_mapping_df(mock_gene_data)
+    for col in sgrna_map.columns:
+        assert sgrna_map[col].dtype == "category"
+
+
+def test_sgrna_are_unique(mock_gene_data: pd.DataFrame):
+    sgrna_map = dphelp.make_sgrna_to_gene_mapping_df(mock_gene_data)
+    assert len(sgrna_map["sgrna"].values) == len(sgrna_map["sgrna"].values.unique())
+
+
+def test_different_colnames(mock_gene_data: pd.DataFrame):
+    df = mock_gene_data.rename(columns={"sgrna": "a", "hugo_symbol": "b"})
+    sgrna_map_original = dphelp.make_sgrna_to_gene_mapping_df(mock_gene_data)
+    sgrna_map_new = dphelp.make_sgrna_to_gene_mapping_df(
+        df, sgrna_col="a", gene_col="b"
+    )
+    for col in ["a", "b"]:
+        assert col in sgrna_map_new.columns
+    for col_i in range(sgrna_map_new.shape[1]):
+        np.testing.assert_array_equal(
+            sgrna_map_new.iloc[:, col_i].values,
+            sgrna_map_original.iloc[:, col_i].values,
         )
 
-    def test_get_indices(self, data: pd.DataFrame):
-        assert data["a"].dtype == "category" and data["b"].dtype == "category"
-        expected_order = [0, 1, 2, 0, 2]
-        np.testing.assert_equal(dphelp.get_indices(data, "a"), expected_order)
-        np.testing.assert_equal(dphelp.get_indices(data, "b"), expected_order)
 
-    def test_getting_index_on_not_cat(self, data: pd.DataFrame):
-        assert data["c"].dtype == np.dtype("int64")
-        with pytest.raises(AttributeError):
-            _ = dphelp.get_indices(data, "c")
+def test_common_idx_key_names(example_achilles_data: pd.DataFrame):
+    indices = dphelp.common_indices(example_achilles_data.sample(frac=1.0))
+    for k in indices.keys():
+        assert "idx" in k or "map" in k
 
-    def test_index_and_count(self, data: pd.DataFrame):
-        idx, ct = dphelp.get_indices_and_count(data, "a")
-        np.testing.assert_equal(idx, [0, 1, 2, 0, 2])
-        assert ct == 3
 
-    def test_making_categorical(self, data: pd.DataFrame):
-        assert data["c"].dtype == np.dtype("int64")
-        assert dphelp.make_cat(data, "c")["c"].dtype == "category"
+def test_common_idx_sgrna_to_gene_map(example_achilles_data: pd.DataFrame):
+    indices = dphelp.common_indices(example_achilles_data.sample(frac=1.0))
+    for sgrna in example_achilles_data.sgrna.values:
+        assert sgrna in indices["sgrna_to_gene_map"].sgrna.values
+    for gene in example_achilles_data.hugo_symbol.values:
+        assert gene in indices["sgrna_to_gene_map"].hugo_symbol.values
 
-    def test_make_cat_with_specific_order(self, data: pd.DataFrame):
-        assert data["d"].dtype == np.dtype("int64")
-        data = dphelp.make_cat(data.copy(), "d", ordered=True, sort_cats=False)
-        np.testing.assert_equal(dphelp.get_indices(data, "d"), [0, 1, 2, 0, 1])
+
+def test_common_idx_depmap(example_achilles_data: pd.DataFrame):
+    indices = dphelp.common_indices(example_achilles_data.sample(frac=1.0))
+    assert dphelp.nunique(example_achilles_data.depmap_id.values) == dphelp.nunique(
+        indices["cellline_idx"]
+    )
+
+
+def test_common_idx_pdna_batch(example_achilles_data: pd.DataFrame):
+    indices = dphelp.common_indices(example_achilles_data.sample(frac=1.0))
+    assert dphelp.nunique(example_achilles_data.pdna_batch.values) == dphelp.nunique(
+        indices["batch_idx"]
+    )
