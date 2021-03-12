@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import papermill
 import pretty_errors
 
 PYMC3_MODEL_CACHE_DIR = "analysis/pymc3_model_cache/"
@@ -21,21 +22,39 @@ rule all:
 
 rule sample_models:
     output:
-        PYMC3_MODEL_CACHE_DIR + "{model}/{model}.txt"
+        PYMC3_MODEL_CACHE_DIR + "{model_name}/{model_name}.txt"
     params:
         model_name = lambda w: model_names[w.model]
     conda:
         "../environment.yml"
     shell:
-        'python3 analysis/sampling_pymc3_models.py --model "{wildcards.model}" --name "{params.model_name}" --debug --touch'
+        'python3 analysis/sampling_pymc3_models.py "{wildcards.model}" "{params.model_name}" --debug --random-seed 123 --touch'
+
+rule papermill_report:
+    input:
+        model = PYMC3_MODEL_CACHE_DIR + "{model_name}/{model_name}.txt"
+    output:
+         notebook = REPORTS_DIR + "{model}_{model_name}.ipynb"
+    run:
+        papermill.execute_notebook(
+            REPORTS_DIR + "model-report-template.ipynb",
+            output.notebook,
+            parameters = {
+                "MODEL": wildcards.model,
+                "MODEL_NAME": wildcards.model_name,
+                "DEBUG": True
+            },
+            prepare_only = True
+        )
+
 
 rule report:
     input:
-        model = PYMC3_MODEL_CACHE_DIR + "{model}/{model}.txt"
+        notebook = REPORTS_DIR + "{model}_{model_name}.ipynb"
     output:
-         ouput_notebook = REPORTS_DIR + "{model}_{model_name}.md"
+         markdown = REPORTS_DIR + "{model}_{model_name}.md"
     conda:
         "../environment.yml"
     shell:
-        "jupyter nbconvert --to notebook --inplace --execute " + REPORTS_DIR  + "{wildcards.model}_{wildcards.model_name}.ipynb && "
-        "jupyter nbconvert --to markdown " + REPORTS_DIR + "{wildcards.model}_{wildcards.model_name}.ipynb"
+        "jupyter nbconvert --to notebook --inplace --execute " + "{input.notebook} && "
+        "jupyter nbconvert --to markdown {input.notebook}"

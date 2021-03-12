@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 
-from argparse import ArgumentParser as AP
 from pathlib import Path
-from string import ascii_lowercase, ascii_uppercase
-from typing import List
+from typing import Any, Dict
 
-import numpy as np
 import pandas as pd
 import pretty_errors
+import pymc3 as pm
 import pytest
 
 from analysis import sampling_pymc3_models as sampling
-from analysis.common_data_processing import nunique, read_achilles_data
+from analysis.sampling_pymc3_models import SamplingArguments
 
 #### ---- User Messages ---- ####
 
@@ -60,65 +58,111 @@ def test_crc_batch_sizes_are_logical():
     assert sampling.crc_batch_size(debug=True) < sampling.crc_batch_size(debug=False)
 
 
-#### ---- CLI ---- ####
+#### ---- SamplingArguments class ---- ####
 
 
-class TestCLI:
+class TestSamplingArguments:
     @pytest.fixture
-    def parser(self) -> AP:
-        return AP(conflict_handler="resolve", exit_on_error=False, allow_abbrev=False)
+    def mock_info(self) -> Dict[str, Any]:
+        return {
+            "name": "model name",
+            "sample": False,
+            "ignore_cache": True,
+            "cache_dir": Path("fake_path/to_nowhere"),
+            "debug": False,
+            "random_seed": 123,
+        }
 
-    @pytest.fixture
-    def default_args(self) -> List[str]:
-        return ["--model", "crc-m1", "--name", "mock_model"]
-
-    def test_get_model_and_name(self, parser: AP, default_args: List[str]):
-        args = sampling.parse_cli_arguments(parser, default_args)
-        assert args.name == "mock_model"
-        assert args.model == "crc-m1"
-
-    def test_error_model_not_available(self, parser: AP):
-        with pytest.raises(Exception):
-            _ = sampling.parse_cli_arguments(
-                parser, ["--model", "not-real-model", "--name", "mock_model"]
-            )
-
-    def test_error_no_model(self, parser: AP):
-        with pytest.raises(SystemExit):
-            _ = sampling.parse_cli_arguments(parser, ["--name", "mock_model"])
-
-    def test_error_no_name(self, parser: AP):
-        with pytest.raises(SystemExit):
-            _ = sampling.parse_cli_arguments(parser, ["--model", "crc-m1"])
-
-    def test_force_sample(self, parser: AP, default_args: List[str]):
-        args = sampling.parse_cli_arguments(parser, default_args)
-        assert args.force_sample is False
-        args = sampling.parse_cli_arguments(parser, default_args + ["--force-sample"])
-        assert args.force_sample is True
-
-    def test_debug(self, parser: AP, default_args: List[str]):
-        args = sampling.parse_cli_arguments(parser, default_args)
-        assert args.debug is False
-        args = sampling.parse_cli_arguments(parser, default_args + ["--debug"])
-        assert args.debug is True
-        args = sampling.parse_cli_arguments(parser, default_args + ["-d"])
-        assert args.debug is True
-
-    def test_touch(self, parser: AP, default_args: List[str]):
-        args = sampling.parse_cli_arguments(parser, default_args)
-        assert args.touch is False
-        args = sampling.parse_cli_arguments(parser, default_args + ["--touch"])
-        assert args.touch is True
-
-    def test_seed(self, parser: AP, default_args: List[str]):
-        args = sampling.parse_cli_arguments(parser, default_args)
-        assert args.random_seed is None
-        args = sampling.parse_cli_arguments(parser, default_args + ["--random-seed"])
-        assert args.random_seed is None
-        args = sampling.parse_cli_arguments(
-            parser, default_args + ["--random-seed", "123"]
+    def test_manual_creation(self, mock_info: Dict[str, Any]):
+        args = SamplingArguments(
+            name=mock_info["name"],
+            sample=mock_info["sample"],
+            ignore_cache=mock_info["ignore_cache"],
+            cache_dir=mock_info["cache_dir"],
+            debug=mock_info["debug"],
+            random_seed=mock_info["random_seed"],
         )
-        assert args.random_seed == 123
-        args = sampling.parse_cli_arguments(parser, default_args + ["-s", "123"])
-        assert args.random_seed == 123
+        assert isinstance(args, SamplingArguments)
+        assert args.name == mock_info["name"]
+        assert args.sample == mock_info["sample"]
+        assert args.ignore_cache == mock_info["ignore_cache"]
+        assert args.cache_dir == mock_info["cache_dir"]
+        assert args.debug == mock_info["debug"]
+        assert args.random_seed == mock_info["random_seed"]
+
+    def test_creation_from_dict(self, mock_info: Dict[str, Any]):
+        args = SamplingArguments(**mock_info)
+        assert isinstance(args, SamplingArguments)
+        assert args.name == mock_info["name"]
+        assert args.sample == mock_info["sample"]
+        assert args.ignore_cache == mock_info["ignore_cache"]
+        assert args.cache_dir == mock_info["cache_dir"]
+        assert args.debug == mock_info["debug"]
+        assert args.random_seed == mock_info["random_seed"]
+
+    def test_optional_params(self, mock_info: Dict[str, Any]):
+        _ = mock_info.pop("random_seed", None)
+        args = SamplingArguments(**mock_info)
+        assert args.random_seed is None
+
+    def test_string_to_path(self, mock_info: Dict[str, Any]):
+        mock_info["cache_dir"] = "another_path/but/written/as/a/string"
+        args = SamplingArguments(**mock_info)
+        assert args.cache_dir == Path(mock_info["cache_dir"])
+
+    def test_extra_keyvalues_in_dict(self, mock_info: Dict[str, Any]):
+        mock_info["A"] = "B"
+        mock_info["123"] = "fieorj"
+        mock_info["0"] = 980
+        mock_info["12.34"] = ["some", "list"]
+
+        args = SamplingArguments(**mock_info)
+
+        assert isinstance(args, SamplingArguments)
+        assert args.name == mock_info["name"]
+        assert args.sample == mock_info["sample"]
+        assert args.ignore_cache == mock_info["ignore_cache"]
+        assert args.cache_dir == mock_info["cache_dir"]
+        assert args.debug == mock_info["debug"]
+        assert args.random_seed == mock_info["random_seed"]
+
+    def test_missing_keys_raise_error(self, mock_info: Dict[str, Any]):
+        _ = mock_info.pop("name", None)
+        with pytest.raises(Exception):
+            _ = SamplingArguments(**mock_info)
+
+    def test_keys_must_be_strings(self, mock_info: Dict[Any, Any]):
+        mock_info[123] = "ABC"
+        with pytest.raises(TypeError):
+            _ = SamplingArguments(**mock_info)
+
+
+#### ---- Build CRC model 1 ---- ####
+
+
+class TestCrcModel1:
+    @pytest.fixture(scope="class")
+    def sampling_args(self) -> SamplingArguments:
+        return SamplingArguments(
+            name="test model",
+            sample=False,
+            ignore_cache=False,
+            cache_dir="fake/dir",
+            debug=True,
+            random_seed=123,
+        )
+
+    @pytest.mark.slow
+    def test_model_builds(self, sampling_args: SamplingArguments):
+        model, shared_vars, data = sampling.crc_model1(sampling_args)
+        assert isinstance(model, pm.Model)
+        assert len(shared_vars.keys()) > 0
+        assert isinstance(data, pd.DataFrame)
+
+        expected_columns = ["lfc", "hugo_symbol", "depmap_id", "sgrna"]
+        for col in expected_columns:
+            assert col in data.columns
+
+
+# TODO: test typer CLI
+#   https://typer.tiangolo.com/tutorial/testing/

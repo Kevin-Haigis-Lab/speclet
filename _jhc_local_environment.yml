@@ -48,4 +48,7 @@ dependencies:
   - pytest-cov
   - python-graphviz
   - jupyter_contrib_nbextensions
+  - papermill
+  - pydantic
+  - typer
 prefix: /usr/local/Caskroom/miniconda/base/envs/speclet
