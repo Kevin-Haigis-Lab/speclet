@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-import argparse
-import sys
+from enum import Enum
 from pathlib import Path
 from time import time
 from typing import Any, Dict, List, Optional, Union
@@ -12,12 +11,14 @@ import pandas as pd
 import pretty_errors
 import pymc3 as pm
 import pymc3_sampling_api
+import typer
 from colorama import Back, Fore, Style, init
 from pydantic import BaseModel
 from pymc3_models import crc_models
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 init(autoreset=True)
+
 
 pretty_errors.configure(
     filename_color=pretty_errors.BLUE,
@@ -28,6 +29,7 @@ pretty_errors.configure(
 )
 
 #### ---- Data Paths ---- ####
+
 
 PYMC3_CACHE_DIR = Path("analysis") / pymc3_sampling_api.default_cache_dir
 
@@ -65,7 +67,7 @@ def make_cache_name(name: str) -> Path:
     return PYMC3_CACHE_DIR / name
 
 
-def touch(n: str) -> None:
+def touch_file(n: str) -> None:
     p = make_cache_name(n) / (n + ".txt")
     p.touch()
     return None
@@ -165,83 +167,46 @@ def crc_model1(
 
 #### ---- MAIN ---- ####
 
-MODELS = ["crc-m1"]
 
-
-def parse_cli_arguments(
-    parser: argparse.ArgumentParser, args: Optional[List[Any]] = None
-) -> argparse.Namespace:
-
-    if args is None:
-        args = sys.argv[1:]
-
-    parser.add_argument(
-        "-m",
-        "--model",
-        help="model to sample from",
-        type=str,
-        choices=MODELS,
-        required=True,
-    )
-    parser.add_argument("-n", "--name", help="model name", type=str, required=True)
-    parser.add_argument(
-        "--force-sample",
-        help="ignore cached results and sample from model",
-        action="store_true",
-        default=False,
-    )
-    parser.add_argument(
-        "-d", "--debug", help="debug mode", action="store_true", default=False
-    )
-    parser.add_argument(
-        "-s",
-        "--random-seed",
-        help="random seed for all processes",
-        type=int,
-        nargs="?",
-        default=None,
-    )
-    parser.add_argument(
-        "--touch",
-        help="touch a file with the name of the model when sampling has finished",
-        action="store_true",
-        default=False,
-    )
-
-    return parser.parse_args(args)
+class ModelOption(str, Enum):
+    crc_m1 = "crc-m1"
 
 
 def clean_model_names(n: str) -> str:
     return n.replace(" ", "-")
 
 
-def main() -> None:
-    # Parse CLI arguments
-    parser = argparse.ArgumentParser()
-    args = parse_cli_arguments(parser)
-
+def main(
+    model: ModelOption,
+    name: str,
+    force_sample: bool = False,
+    debug: bool = False,
+    random_seed: Optional[int] = None,
+    touch: bool = False,
+):
     tic = time()
 
-    np.random.seed(args.random_seed)
+    if random_seed:
+        np.random.seed(random_seed)
 
-    if args.debug:
+    if debug:
         print(Fore.RED + "(🪲 debug mode)")
 
-    model_name = clean_model_names(args.name)
+    model_name = clean_model_names(name)
 
-    if args.model == "crc-m1":
+    if model == "crc-m1":
         crc_model1(
             name=model_name,
-            debug=args.debug,
-            force_sampling=args.force_sample,
-            random_seed=args.random_seed,
+            debug=debug,
+            force_sampling=force_sample,
+            random_seed=random_seed,
         )
     else:
         raise Exception("Unrecognized model 🤷🏻‍♂️")
 
-    if args.touch and args.model in MODELS:
+    if touch:
         info("Touching output file.")
-        touch(args.model_name)
+        touch_file(model_name)
 
     toc = time()
     info(f"execution time: {(toc - tic) / 60:.2f} minutes")
@@ -249,4 +214,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    typer.run(main)
