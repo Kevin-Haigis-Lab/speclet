@@ -8,7 +8,7 @@ import pandas as pd
 import pymc3 as pm
 import pytest
 
-from analysis import pymc3_sampling_api as pmsample
+from src import pymc3_sampling_api as pmsample
 
 #### ---- MCMC Sampling ---- ####
 

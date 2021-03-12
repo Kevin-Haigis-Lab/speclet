@@ -12,8 +12,8 @@ import plotnine as gg
 import pymc3 as pm
 import pytest
 
-from analysis import pymc3_analysis as pmanal
-from analysis.common_data_processing import get_indices, get_indices_and_count
+from src import pymc3_analysis as pmanal
+from src.common_data_processing import get_indices, get_indices_and_count
 
 MCMCResults = Tuple[pm.backends.base.MultiTrace, Dict[str, np.ndarray]]
 ADVIResults = Tuple[

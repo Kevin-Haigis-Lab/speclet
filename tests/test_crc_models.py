@@ -11,8 +11,8 @@ import pretty_errors
 import pymc3 as pm
 import pytest
 
-from analysis import common_data_processing as dphelp
-from analysis.pymc3_models import crc_models
+from src import common_data_processing as dphelp
+from src import crc_models
 
 #### ---- Helper functions ---- ####
 

@@ -11,7 +11,7 @@ import pytest
 from numpy.random import uniform
 from pandas.core.algorithms import mode
 
-from analysis import common_data_processing as dphelp
+import src.common_data_processing as dphelp
 
 DATA_PATH = Path("tests", "depmap_test_data.csv")
 
