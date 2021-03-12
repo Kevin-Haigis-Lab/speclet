@@ -105,19 +105,14 @@ class SamplingArguments(BaseModel):
 #### ---- CRC Model 1 ---- ####
 
 
-def crc_model1(
-    name: str,
-    debug: bool = False,
-    force_sampling: bool = False,
-    random_seed: Optional[int] = None,
-) -> None:
+def crc_model1(sampling_args: SamplingArguments) -> None:
     print_model("CRC Model 1")
 
     # Data
     info("Loading data...")
-    data = load_crc_data(debug)
+    data = load_crc_data(sampling_args.debug)
 
-    batch_size = crc_batch_size(debug)
+    batch_size = crc_batch_size(sampling_args.debug)
 
     # Indices
     indices_dict = dphelp.common_indices(data)
@@ -139,18 +134,15 @@ def crc_model1(
         lfc_data=data.lfc.values,
     )
 
-    # Sample and cache
-    crc_m1_cache = make_cache_name(name)
-
     _ = pymc3_sampling_api.pymc3_advi_approximation_procedure(
         model=crc_m1,
         n_iterations=100000,
         callbacks=[
             pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
         ],
-        random_seed=random_seed,
-        cache_dir=crc_m1_cache,
-        force=force_sampling,
+        random_seed=sampling_args.random_seed,
+        cache_dir=sampling_args.cache_dir,
+        force=sampling_args.force_sampling,
         fit_kwargs={
             "more_replacements": {
                 shared_vars["sgrna_idx_shared"]: sgrna_idx_batch,
@@ -186,27 +178,30 @@ def main(
 ):
     tic = time()
 
+    name = clean_model_names(name)
+    cache_dir = make_cache_name(name)
+    sampling_args = SamplingArguments(
+        name=name,
+        force_sample=force_sample,
+        debug=debug,
+        random_seed=random_seed,
+        cache_dir=cache_dir,
+    )
+
     if random_seed:
         np.random.seed(random_seed)
 
     if debug:
         print(Fore.RED + "(🪲 debug mode)")
 
-    model_name = clean_model_names(name)
-
-    if model == "crc-m1":
-        crc_model1(
-            name=model_name,
-            debug=debug,
-            force_sampling=force_sample,
-            random_seed=random_seed,
-        )
+    if model == ModelOption.crc_m1:
+        crc_model1(sampling_args=sampling_args)
     else:
         raise Exception("Unrecognized model 🤷🏻‍♂️")
 
     if touch:
         info("Touching output file.")
-        touch_file(model_name)
+        touch_file(name)
 
     toc = time()
     info(f"execution time: {(toc - tic) / 60:.2f} minutes")
