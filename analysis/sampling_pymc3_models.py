@@ -104,8 +104,26 @@ class SamplingArguments(BaseModel):
 
 #### ---- CRC Model 1 ---- ####
 
+ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
-def crc_model1(sampling_args: SamplingArguments) -> None:
+
+def sample_crc_model1(
+    model: pm.Model, args: SamplingArguments, replacements: ReplacementsDict
+):
+    _ = pymc3_sampling_api.pymc3_advi_approximation_procedure(
+        model=model,
+        n_iterations=100000,
+        callbacks=[
+            pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
+        ],
+        random_seed=args.random_seed,
+        cache_dir=args.cache_dir,
+        force=args.force_sampling,
+        fit_kwargs={"more_replacements": replacements},
+    )
+
+
+def crc_model1(sampling_args: SamplingArguments, sample: bool = True) -> None:
     print_model("CRC Model 1")
 
     # Data
@@ -134,24 +152,17 @@ def crc_model1(sampling_args: SamplingArguments) -> None:
         lfc_data=data.lfc.values,
     )
 
-    _ = pymc3_sampling_api.pymc3_advi_approximation_procedure(
-        model=crc_m1,
-        n_iterations=100000,
-        callbacks=[
-            pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
-        ],
-        random_seed=sampling_args.random_seed,
-        cache_dir=sampling_args.cache_dir,
-        force=sampling_args.force_sampling,
-        fit_kwargs={
-            "more_replacements": {
-                shared_vars["sgrna_idx_shared"]: sgrna_idx_batch,
-                shared_vars["cellline_idx_shared"]: cellline_idx_batch,
-                shared_vars["batch_idx_shared"]: batch_idx_batch,
-                shared_vars["lfc_shared"]: lfc_data_batch,
-            }
-        },
-    )
+    data_replacements: ReplacementsDict = {
+        shared_vars["sgrna_idx_shared"]: sgrna_idx_batch,
+        shared_vars["cellline_idx_shared"]: cellline_idx_batch,
+        shared_vars["batch_idx_shared"]: batch_idx_batch,
+        shared_vars["lfc_shared"]: lfc_data_batch,
+    }
+
+    if sample:
+        sample_crc_model1(
+            model=crc_m1, args=sampling_args, replacements=data_replacements
+        )
 
     done()
     return
