@@ -13,7 +13,9 @@ import pretty_errors
 import pymc3 as pm
 import pymc3_sampling_api
 from colorama import Back, Fore, Style, init
+from pydantic import BaseModel
 from pymc3_models import crc_models
+from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 init(autoreset=True)
 
@@ -85,6 +87,17 @@ def crc_batch_size(debug: bool) -> int:
         return 1000
     else:
         return 10000
+
+
+#### ---- Common sampling arguments model ---- ####
+
+
+class SamplingArguments(BaseModel):
+    name: str
+    force_sampling: bool
+    cache_dir: Path
+    debug: bool
+    random_seed: Optional[int]
 
 
 #### ---- CRC Model 1 ---- ####
