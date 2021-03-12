@@ -66,7 +66,8 @@ class TestSamplingArguments:
     def mock_info(self) -> Dict[str, Any]:
         return {
             "name": "model name",
-            "force_sampling": True,
+            "sample": False,
+            "ignore_cache": True,
             "cache_dir": Path("fake_path/to_nowhere"),
             "debug": False,
             "random_seed": 123,
@@ -75,14 +76,16 @@ class TestSamplingArguments:
     def test_manual_creation(self, mock_info: Dict[str, Any]):
         args = SamplingArguments(
             name=mock_info["name"],
-            force_sampling=mock_info["force_sampling"],
+            sample=mock_info["sample"],
+            ignore_cache=mock_info["ignore_cache"],
             cache_dir=mock_info["cache_dir"],
             debug=mock_info["debug"],
             random_seed=mock_info["random_seed"],
         )
         assert isinstance(args, SamplingArguments)
         assert args.name == mock_info["name"]
-        assert args.force_sampling == mock_info["force_sampling"]
+        assert args.sample == mock_info["sample"]
+        assert args.ignore_cache == mock_info["ignore_cache"]
         assert args.cache_dir == mock_info["cache_dir"]
         assert args.debug == mock_info["debug"]
         assert args.random_seed == mock_info["random_seed"]
@@ -91,7 +94,8 @@ class TestSamplingArguments:
         args = SamplingArguments(**mock_info)
         assert isinstance(args, SamplingArguments)
         assert args.name == mock_info["name"]
-        assert args.force_sampling == mock_info["force_sampling"]
+        assert args.sample == mock_info["sample"]
+        assert args.ignore_cache == mock_info["ignore_cache"]
         assert args.cache_dir == mock_info["cache_dir"]
         assert args.debug == mock_info["debug"]
         assert args.random_seed == mock_info["random_seed"]
@@ -116,7 +120,8 @@ class TestSamplingArguments:
 
         assert isinstance(args, SamplingArguments)
         assert args.name == mock_info["name"]
-        assert args.force_sampling == mock_info["force_sampling"]
+        assert args.sample == mock_info["sample"]
+        assert args.ignore_cache == mock_info["ignore_cache"]
         assert args.cache_dir == mock_info["cache_dir"]
         assert args.debug == mock_info["debug"]
         assert args.random_seed == mock_info["random_seed"]
@@ -140,7 +145,8 @@ class TestCrcModel1:
     def sampling_args(self) -> SamplingArguments:
         return SamplingArguments(
             name="test model",
-            force_sampling=False,
+            sample=False,
+            ignore_cache=False,
             cache_dir="fake/dir",
             debug=True,
             random_seed=123,
@@ -148,7 +154,7 @@ class TestCrcModel1:
 
     @pytest.mark.slow
     def test_model_builds(self, sampling_args: SamplingArguments):
-        model, shared_vars, data = sampling.crc_model1(sampling_args, sample=False)
+        model, shared_vars, data = sampling.crc_model1(sampling_args)
         assert isinstance(model, pm.Model)
         assert len(shared_vars.keys()) > 0
         assert isinstance(data, pd.DataFrame)
@@ -156,3 +162,7 @@ class TestCrcModel1:
         expected_columns = ["lfc", "hugo_symbol", "depmap_id", "sgrna"]
         for col in expected_columns:
             assert col in data.columns
+
+
+# TODO: test typer CLI
+#   https://typer.tiangolo.com/tutorial/testing/

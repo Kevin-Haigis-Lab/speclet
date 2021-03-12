@@ -5,17 +5,24 @@ from pathlib import Path
 from time import time
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import common_data_processing as dphelp
 import numpy as np
 import pandas as pd
 import pretty_errors
 import pymc3 as pm
-import pymc3_sampling_api
 import typer
 from colorama import Back, Fore, Style, init
 from pydantic import BaseModel
-from pymc3_models import crc_models
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
+
+try:
+    import common_data_processing as dphelp  # type: ignore
+    import pymc3_sampling_api  # type: ignore
+    from pymc3_models import crc_models  # type: ignore
+except:
+    from analysis import common_data_processing as dphelp  # type: ignore
+    from analysis import pymc3_sampling_api  # type: ignore
+    from analysis.pymc3_models import crc_models  # type: ignore
+
 
 init(autoreset=True)
 
@@ -96,7 +103,8 @@ def crc_batch_size(debug: bool) -> int:
 
 class SamplingArguments(BaseModel):
     name: str
-    force_sampling: bool
+    sample: bool = True
+    ignore_cache: bool = False
     cache_dir: Path
     debug: bool
     random_seed: Optional[int]
@@ -118,13 +126,13 @@ def sample_crc_model1(
         ],
         random_seed=args.random_seed,
         cache_dir=args.cache_dir,
-        force=args.force_sampling,
+        force=args.ignore_cache,
         fit_kwargs={"more_replacements": replacements},
     )
 
 
 def crc_model1(
-    sampling_args: SamplingArguments, sample: bool = True
+    sampling_args: SamplingArguments,
 ) -> Tuple[pm.Model, Dict[str, TTShared], pd.DataFrame]:
     print_model("CRC Model 1")
 
@@ -161,7 +169,7 @@ def crc_model1(
         shared_vars["lfc_shared"]: lfc_data_batch,
     }
 
-    if sample:
+    if sampling_args.sample:
         sample_crc_model1(
             model=crc_m1, args=sampling_args, replacements=data_replacements
         )
@@ -184,7 +192,8 @@ def clean_model_names(n: str) -> str:
 def main(
     model: ModelOption,
     name: str,
-    force_sample: bool = False,
+    sample: bool = True,
+    ignore_cache: bool = False,
     debug: bool = False,
     random_seed: Optional[int] = None,
     touch: bool = False,
@@ -195,7 +204,8 @@ def main(
     cache_dir = make_cache_name(name)
     sampling_args = SamplingArguments(
         name=name,
-        force_sample=force_sample,
+        sample=sample,
+        ignore_cache=ignore_cache,
         debug=debug,
         random_seed=random_seed,
         cache_dir=cache_dir,
@@ -208,7 +218,7 @@ def main(
         print(Fore.RED + "(🪲 debug mode)")
 
     if model == ModelOption.crc_m1:
-        _ = crc_model1(sampling_args=sampling_args)
+        res = crc_model1(sampling_args=sampling_args)
     else:
         raise Exception("Unrecognized model 🤷🏻‍♂️")
 
@@ -218,7 +228,7 @@ def main(
 
     toc = time()
     info(f"execution time: {(toc - tic) / 60:.2f} minutes")
-    return None
+    return res
 
 
 if __name__ == "__main__":
