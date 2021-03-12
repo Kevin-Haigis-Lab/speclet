@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
-from argparse import ArgumentParser as AP
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import pandas as pd
 import pretty_errors
+import pymc3 as pm
 import pytest
 
 from analysis import sampling_pymc3_models as sampling
+from analysis.sampling_pymc3_models import SamplingArguments
 
 #### ---- User Messages ---- ####
 
@@ -72,14 +73,14 @@ class TestSamplingArguments:
         }
 
     def test_manual_creation(self, mock_info: Dict[str, Any]):
-        args = sampling.SamplingArguments(
+        args = SamplingArguments(
             name=mock_info["name"],
             force_sampling=mock_info["force_sampling"],
             cache_dir=mock_info["cache_dir"],
             debug=mock_info["debug"],
             random_seed=mock_info["random_seed"],
         )
-        assert isinstance(args, sampling.SamplingArguments)
+        assert isinstance(args, SamplingArguments)
         assert args.name == mock_info["name"]
         assert args.force_sampling == mock_info["force_sampling"]
         assert args.cache_dir == mock_info["cache_dir"]
@@ -87,8 +88,8 @@ class TestSamplingArguments:
         assert args.random_seed == mock_info["random_seed"]
 
     def test_creation_from_dict(self, mock_info: Dict[str, Any]):
-        args = sampling.SamplingArguments(**mock_info)
-        assert isinstance(args, sampling.SamplingArguments)
+        args = SamplingArguments(**mock_info)
+        assert isinstance(args, SamplingArguments)
         assert args.name == mock_info["name"]
         assert args.force_sampling == mock_info["force_sampling"]
         assert args.cache_dir == mock_info["cache_dir"]
@@ -97,12 +98,12 @@ class TestSamplingArguments:
 
     def test_optional_params(self, mock_info: Dict[str, Any]):
         _ = mock_info.pop("random_seed", None)
-        args = sampling.SamplingArguments(**mock_info)
+        args = SamplingArguments(**mock_info)
         assert args.random_seed is None
 
     def test_string_to_path(self, mock_info: Dict[str, Any]):
         mock_info["cache_dir"] = "another_path/but/written/as/a/string"
-        args = sampling.SamplingArguments(**mock_info)
+        args = SamplingArguments(**mock_info)
         assert args.cache_dir == Path(mock_info["cache_dir"])
 
     def test_extra_keyvalues_in_dict(self, mock_info: Dict[str, Any]):
@@ -111,9 +112,9 @@ class TestSamplingArguments:
         mock_info["0"] = 980
         mock_info["12.34"] = ["some", "list"]
 
-        args = sampling.SamplingArguments(**mock_info)
+        args = SamplingArguments(**mock_info)
 
-        assert isinstance(args, sampling.SamplingArguments)
+        assert isinstance(args, SamplingArguments)
         assert args.name == mock_info["name"]
         assert args.force_sampling == mock_info["force_sampling"]
         assert args.cache_dir == mock_info["cache_dir"]
@@ -123,9 +124,35 @@ class TestSamplingArguments:
     def test_missing_keys_raise_error(self, mock_info: Dict[str, Any]):
         _ = mock_info.pop("name", None)
         with pytest.raises(Exception):
-            _ = sampling.SamplingArguments(**mock_info)
+            _ = SamplingArguments(**mock_info)
 
     def test_keys_must_be_strings(self, mock_info: Dict[Any, Any]):
         mock_info[123] = "ABC"
         with pytest.raises(TypeError):
-            _ = sampling.SamplingArguments(**mock_info)
+            _ = SamplingArguments(**mock_info)
+
+
+#### ---- Build CRC model 1 ---- ####
+
+
+class TestCrcModel1:
+    @pytest.fixture(scope="class")
+    def sampling_args(self) -> SamplingArguments:
+        return SamplingArguments(
+            name="test model",
+            force_sampling=False,
+            cache_dir="fake/dir",
+            debug=True,
+            random_seed=123,
+        )
+
+    @pytest.mark.slow
+    def test_model_builds(self, sampling_args: SamplingArguments):
+        model, shared_vars, data = sampling.crc_model1(sampling_args, sample=False)
+        assert isinstance(model, pm.Model)
+        assert len(shared_vars.keys()) > 0
+        assert isinstance(data, pd.DataFrame)
+
+        expected_columns = ["lfc", "hugo_symbol", "depmap_id", "sgrna"]
+        for col in expected_columns:
+            assert col in data.columns

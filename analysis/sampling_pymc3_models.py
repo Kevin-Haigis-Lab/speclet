@@ -3,7 +3,7 @@
 from enum import Enum
 from pathlib import Path
 from time import time
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import common_data_processing as dphelp
 import numpy as np
@@ -123,7 +123,9 @@ def sample_crc_model1(
     )
 
 
-def crc_model1(sampling_args: SamplingArguments, sample: bool = True) -> None:
+def crc_model1(
+    sampling_args: SamplingArguments, sample: bool = True
+) -> Tuple[pm.Model, Dict[str, TTShared], pd.DataFrame]:
     print_model("CRC Model 1")
 
     # Data
@@ -165,7 +167,7 @@ def crc_model1(sampling_args: SamplingArguments, sample: bool = True) -> None:
         )
 
     done()
-    return
+    return crc_m1, shared_vars, data
 
 
 #### ---- MAIN ---- ####
@@ -206,7 +208,7 @@ def main(
         print(Fore.RED + "(🪲 debug mode)")
 
     if model == ModelOption.crc_m1:
-        crc_model1(sampling_args=sampling_args)
+        _ = crc_model1(sampling_args=sampling_args)
     else:
         raise Exception("Unrecognized model 🤷🏻‍♂️")
 

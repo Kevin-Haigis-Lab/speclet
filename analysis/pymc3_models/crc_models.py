@@ -22,7 +22,7 @@ def model_1(
     cellline_idx: np.ndarray,
     batch_idx: np.ndarray,
     lfc_data: np.ndarray,
-) -> Tuple[pm.model.Model, Dict[str, TTShared]]:
+) -> Tuple[pm.Model, Dict[str, TTShared]]:
 
     total_size = len(lfc_data)
     n_sgrnas = nunique(sgrna_idx)
