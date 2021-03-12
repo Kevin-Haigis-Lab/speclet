@@ -15,5 +15,6 @@ dependencies:
   - pip
   - pretty_errors
   - pytest
+  - papermill
   - python=3.8.8
   - snakemake=5.32.2

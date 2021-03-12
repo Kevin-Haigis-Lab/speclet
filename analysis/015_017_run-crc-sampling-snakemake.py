@@ -22,23 +22,23 @@ rule all:
 
 rule sample_models:
     output:
-        PYMC3_MODEL_CACHE_DIR + "{model}/{model}.txt"
+        PYMC3_MODEL_CACHE_DIR + "{model_name}/{model_name}.txt"
     params:
         model_name = lambda w: model_names[w.model]
     conda:
         "../environment.yml"
     shell:
-        'python3 analysis/sampling_pymc3_models.py --model "{wildcards.model}" --name "{params.model_name}" --debug --touch'
+        'python3 analysis/sampling_pymc3_models.py "{wildcards.model}" "{params.model_name}" --debug --random-seed 123 --touch'
 
 rule papermill_report:
     input:
-        model = PYMC3_MODEL_CACHE_DIR + "{model}/{model}.txt"
+        model = PYMC3_MODEL_CACHE_DIR + "{model_name}/{model_name}.txt"
     output:
-         ouput_notebook = REPORTS_DIR + "{wildcards.model}_{wildcards.model_name}.ipynb
+         notebook = REPORTS_DIR + "{model}_{model_name}.ipynb"
     run:
-        papermill.execute(
+        papermill.execute_notebook(
             REPORTS_DIR + "model-report-template.ipynb",
-            output.output_notebook,
+            output.notebook,
             parameters = {
                 "MODEL": wildcards.model,
                 "MODEL_NAME": wildcards.model_name,
@@ -47,22 +47,12 @@ rule papermill_report:
             prepare_only = True
         )
 
-rule convert_report:
-    input:
-        notebook = REPORTS_DIR + "{model}_{model_name}.ipynb"
-    output:
-         ouput_notebook = REPORTS_DIR + "{model}_{model_name}.md"
-    conda:
-        "../environment.yml"
-    shell:
-        "jupyter nbconvert --to markdown {input.notebook}"
-
 
 rule report:
     input:
         notebook = REPORTS_DIR + "{model}_{model_name}.ipynb"
     output:
-         ouput_notebook = REPORTS_DIR + "{model}_{model_name}.md"
+         markdown = REPORTS_DIR + "{model}_{model_name}.md"
     conda:
         "../environment.yml"
     shell:

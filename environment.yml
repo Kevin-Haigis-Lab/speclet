@@ -43,6 +43,7 @@ dependencies:
   - pytest-cov
   - pytest-sugar
   - python=3.9.2
+  - python-graphviz
   - requests
   - scikit-learn
   - scipy
