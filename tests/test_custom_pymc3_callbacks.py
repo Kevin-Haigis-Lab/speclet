@@ -13,20 +13,19 @@ class TestDivergenceFractionCallback:
     @pytest.fixture(scope="class")
     def mock_model(self) -> pm.Model:
         np.random.seed(1)
-        a, b = 1, 2
-        x = np.random.uniform(0, 10, 100)
-        y = a + b * x + np.random.randn(len(x))
+        X = np.ones(5)
+        y = X * 2 + np.random.randn(len(X))
 
         with pm.Model() as m:
-            alpha = pm.Normal("alpha", 0, 200)
-            gamma = pm.Normal("gamma", 0, 200)  # non-identifiable
-            beta = pm.Normal("beta", 0, 200)
-            mu = alpha + beta * x + gamma
-            sigma = pm.HalfNormal("sigma", 100)
-            y_pred = pm.Normal("y_pred", mu, sigma, observed=y)
+            a = pm.Normal("a", 50, 100)
+            b = pm.Normal("b", 50, 100)
+            mu = a + b * X
+            sigma = pm.HalfCauchy("error", 1)
+            obs = pm.Normal("obs", mu, sigma, observed=y)
 
         return m
 
+    @pytest.mark.DEV
     def test_divergences(self, mock_model: pm.Model):
         n_tune_steps = 200
         cb = pymc3calls.DivergenceFractionCallback(
@@ -40,7 +39,7 @@ class TestDivergenceFractionCallback:
                     chains=1,
                     cores=1,
                     callback=cb,
-                    random_seed=123,
+                    random_seed=404,
                 )
 
     def test_min_samples_param(self, mock_model: pm.Model):
@@ -58,7 +57,7 @@ class TestDivergenceFractionCallback:
                 random_seed=123,
             )
 
-        assert trace["alpha"].shape[0] == 1000
+        assert trace["a"].shape[0] == 1000
 
     def test_max_frac_param(self, mock_model: pm.Model):
         n_tune_steps = 200
@@ -75,4 +74,4 @@ class TestDivergenceFractionCallback:
                 random_seed=123,
             )
 
-        assert trace["alpha"].shape[0] == 1000
+        assert trace["a"].shape[0] == 1000
