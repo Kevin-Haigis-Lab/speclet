@@ -2,7 +2,7 @@
 
 from string import ascii_lowercase
 
-from analysis import string_functions
+from src import string_functions
 
 #### ---- str_replace ---- ####
 
