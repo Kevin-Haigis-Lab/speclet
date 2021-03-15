@@ -3,10 +3,12 @@
 **Using Bayesian statistics to model CRISPR-Cas9 genetic screen data to identify, with measurable uncertainty, synthetic lethal interactions that are specific to the individual *KRAS* mutations.**
 
 [![python](https://img.shields.io/badge/Python-3.9.1-3776AB.svg?style=flat&logo=python)](https://www.python.org)
-[![jupyerlab](https://img.shields.io/badge/Jupyter-Lab-F37626.svg?style=flat&logo=jupyter)](https://jupyter.org)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit) <br>
+[![jupyerlab](https://img.shields.io/badge/Jupyter-Lab-F37626.svg?style=flat&logo=jupyter)](https://jupyter.org) <br>
 [![pytest](https://github.com/Kevin-Haigis-Lab/speclet/actions/workflows/CI.yml/badge.svg)](https://github.com/Kevin-Haigis-Lab/speclet/actions/workflows/CI.yml)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/) <br>
+[![License: GPLv3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ---
 
