@@ -22,17 +22,15 @@ rule all:
 
 rule sample_models:
     output:
-        PYMC3_MODEL_CACHE_DIR + "{model_name}/{model_name}.txt"
-    params:
-        model_name = lambda w: model_names[w.model]
+        PYMC3_MODEL_CACHE_DIR + "{model_name}/{model}_{model_name}.txt"
     conda:
         "../environment.yml"
     shell:
-        'python3 src/modeling/sampling_pymc3_models.py "{wildcards.model}" "{params.model_name}" --debug --random-seed 7414 --touch'
+        'python3 src/modeling/sampling_pymc3_models.py "{wildcards.model}" "{wildcards.model_name}" --debug --random-seed 7414 --touch'
 
 rule papermill_report:
     input:
-        model = PYMC3_MODEL_CACHE_DIR + "{model_name}/{model_name}.txt"
+        model_touch = PYMC3_MODEL_CACHE_DIR + "{model_name}/{model}_{model_name}.txt"
     output:
          notebook = REPORTS_DIR + "{model}_{model_name}.ipynb"
     run:
