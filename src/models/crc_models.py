@@ -8,10 +8,7 @@ import pymc3 as pm
 import theano
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
-
-def nunique(a: np.ndarray) -> int:
-    return len(np.unique(a))
-
+from src.data_processing.common import nunique
 
 #### ---- Model 1 ---- ####
 

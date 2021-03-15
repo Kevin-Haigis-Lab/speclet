@@ -6,7 +6,7 @@ import pymc3 as pm
 import pytest
 from numpy.testing import assert_equal
 
-import src.custom_pymc3_callbacks as pymc3calls
+from src.modeling import custom_pymc3_callbacks as pymc3calls
 
 
 class TestDivergenceFractionCallback:

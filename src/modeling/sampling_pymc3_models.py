@@ -3,7 +3,7 @@
 from enum import Enum
 from pathlib import Path
 from time import time
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -14,8 +14,9 @@ from colorama import Back, Fore, Style, init
 from pydantic import BaseModel
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
-from . import common_data_processing as dphelp
-from . import crc_models, pymc3_sampling_api
+from src.data_processing import achilles as achelp
+from src.modeling import pymc3_sampling_api
+from src.models import crc_models
 
 init(autoreset=True)
 
@@ -81,7 +82,7 @@ def load_crc_data(debug: bool) -> pd.DataFrame:
         f = CRC_SUBSAMPLING_DATA
     else:
         f = CRC_MODELING_DATA
-    return dphelp.read_achilles_data(f, low_memory=False)
+    return achelp.read_achilles_data(f, low_memory=False)
 
 
 def crc_batch_size(debug: bool) -> int:
@@ -136,7 +137,7 @@ def crc_model1(
     batch_size = crc_batch_size(sampling_args.debug)
 
     # Indices
-    indices_dict = dphelp.common_indices(data)
+    indices_dict = achelp.common_indices(data)
 
     # Batched data
     sgrna_idx_batch = pm.Minibatch(indices_dict["sgrna_idx"], batch_size=batch_size)

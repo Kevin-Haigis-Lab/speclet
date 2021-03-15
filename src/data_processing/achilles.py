@@ -1,77 +1,13 @@
 #!/usr/bin/env python3
 
-import warnings
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
 import pretty_errors
 
-
-def foo():
-    print("hey there")
-
-
-def make_cat(
-    df: pd.DataFrame, col: str, ordered: bool = True, sort_cats: bool = False
-) -> pd.DataFrame:
-    """
-    Make a column of a data frame into categorical.
-    """
-    categories: List[Any] = df[col].unique().tolist()
-    if sort_cats:
-        categories.sort()
-    df[col] = pd.Categorical(df[col], categories=categories, ordered=ordered)
-    return df
-
-
-def get_indices(df: pd.DataFrame, col: str) -> np.ndarray:
-    """
-    Get a list of the indices for a categorical column.
-    """
-    return df[col].cat.codes.to_numpy()
-
-
-def get_indices_and_count(df: pd.DataFrame, col: str) -> Tuple[np.ndarray, int]:
-    """
-    Get a list of the indices and number of unique values for a categorical column.
-    """
-    return get_indices(df=df, col=col), df[col].nunique()
-
-
-def extract_flat_ary(s: pd.Series) -> np.ndarray:
-    """
-    Turn a column of a DataFrame into a flat array.
-    """
-    warnings.warn("Use `df.values` instead of `extract_flat_ary()` 🤦🏻‍♂️", UserWarning)
-    return s.values
-
-
-def nmutations_to_binary_array(m: pd.Series) -> np.ndarray:
-    """
-    Turn a column of a DataFrame into a binary array of 0's and 1's.
-    """
-    if len(m) == 0:
-        return np.array([], dtype=int)
-    return m.values.astype(bool).astype(int)
-
-
-def nunique(x: Iterable[Any]) -> int:
-    """
-    Number of unique values in an iterable object.
-    """
-    if isinstance(x, dict):
-        raise TypeError("Cannot count the number of unique values in a dict.")
-    return len(np.unique(x))
-
-
-####################################################################
-##########                                                ##########
-##########  FOR ACHILLES DATA PROCESSING AND MANIPULATION ##########
-##########                                                ##########
-####################################################################
-
+from src.data_processing import common as dphelp
 
 #### ---- Data manipulation ---- ####
 
@@ -119,11 +55,11 @@ def common_indices(
 ) -> Dict[str, Union[np.ndarray, pd.DataFrame]]:
     sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(achilles_df)
     return {
-        "sgrna_idx": get_indices(achilles_df, "sgrna"),
+        "sgrna_idx": dphelp.get_indices(achilles_df, "sgrna"),
         "sgrna_to_gene_map": sgrna_to_gene_map,
-        "sgrna_to_gene_idx": get_indices(sgrna_to_gene_map, "hugo_symbol"),
-        "cellline_idx": get_indices(achilles_df, "depmap_id"),
-        "batch_idx": get_indices(achilles_df, "pdna_batch"),
+        "sgrna_to_gene_idx": dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol"),
+        "cellline_idx": dphelp.get_indices(achilles_df, "depmap_id"),
+        "batch_idx": dphelp.get_indices(achilles_df, "pdna_batch"),
     }
 
 
@@ -144,10 +80,10 @@ def set_achilles_categorical_columns(
     sort_cats: bool = False,
 ) -> pd.DataFrame:
     """
-    Set the appropriate columns of the Achilees data as factors.
+    Set the appropriate columns of the Achilles data as factors.
     """
     for col in cols:
-        data = make_cat(data, col, ordered=ordered, sort_cats=sort_cats)
+        data = dphelp.make_cat(data, col, ordered=ordered, sort_cats=sort_cats)
     return data
 
 
@@ -174,7 +110,7 @@ def read_achilles_data(
         groupby=["depmap_id"],
         cn_max=np.log2(10),
     )
-    data["is_mutated"] = nmutations_to_binary_array(data.n_muts)
+    data["is_mutated"] = dphelp.nmutations_to_binary_array(data.n_muts)
 
     return data
 

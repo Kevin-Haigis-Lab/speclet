@@ -5,15 +5,14 @@ from typing import Dict, Tuple
 
 import arviz as az
 import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotnine as gg
 import pymc3 as pm
 import pytest
 
-from src import pymc3_analysis as pmanal
-from src.common_data_processing import get_indices, get_indices_and_count
+from src.data_processing.common import get_indices, get_indices_and_count
+from src.modeling import pymc3_analysis as pmanal
 
 MCMCResults = Tuple[pm.backends.base.MultiTrace, Dict[str, np.ndarray]]
 ADVIResults = Tuple[

@@ -2,7 +2,7 @@
 
 import pytest
 
-from src import plotnine_helpers
+from src.plot import plotnine_helpers
 
 
 def test_margin_format():

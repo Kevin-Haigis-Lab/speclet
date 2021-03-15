@@ -10,8 +10,8 @@ import pytest
 import typer
 from typer.testing import CliRunner
 
-from src import sampling_pymc3_models as sampling
-from src.sampling_pymc3_models import SamplingArguments
+from src.modeling import sampling_pymc3_models as sampling
+from src.modeling.sampling_pymc3_models import SamplingArguments
 
 #### ---- User Messages ---- ####
 

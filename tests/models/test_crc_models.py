@@ -11,8 +11,9 @@ import pretty_errors
 import pymc3 as pm
 import pytest
 
-from src import common_data_processing as dphelp
-from src import crc_models
+from src.data_processing import achilles as achelp
+from src.data_processing import common as dphelp
+from src.models import crc_models
 
 #### ---- Helper functions ---- ####
 
@@ -65,7 +66,7 @@ def mock_data() -> pd.DataFrame:
 
 class TestCRCModel1:
     def make_indices(self, d: pd.DataFrame) -> Dict[str, np.ndarray]:
-        sgrna_map = dphelp.make_sgrna_to_gene_mapping_df(d)
+        sgrna_map = achelp.make_sgrna_to_gene_mapping_df(d)
         return {
             "sgrna_idx": dphelp.get_indices(d, "sgrna"),
             "sgrna_to_gene_idx": dphelp.get_indices(sgrna_map, "hugo_symbol"),
