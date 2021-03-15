@@ -8,6 +8,8 @@ import pretty_errors
 PYMC3_MODEL_CACHE_DIR = "models/model_cache/pymc3_model_cache/"
 REPORTS_DIR = "reports/"
 
+ENVIRONMENT_YAML = Path("010_014_environment.yml").as_posix()
+
 model_names = {
     "crc-m1": "CRC-model1",
 }
@@ -24,7 +26,7 @@ rule sample_models:
     output:
         PYMC3_MODEL_CACHE_DIR + "{model_name}/{model}_{model_name}.txt"
     conda:
-        "../environment.yml"
+        ENVIRONMENT_YAML
     shell:
         'python3 src/modeling/sampling_pymc3_models.py "{wildcards.model}" "{wildcards.model_name}" --debug --random-seed 7414 --touch'
 
@@ -52,7 +54,7 @@ rule report:
     output:
          markdown = REPORTS_DIR + "{model}_{model_name}.md"
     conda:
-        "../environment.yml"
+        ENVIRONMENT_YAML
     shell:
         "jupyter nbconvert --to notebook --inplace --execute " + "{input.notebook} && "
         "jupyter nbconvert --to markdown {input.notebook}"

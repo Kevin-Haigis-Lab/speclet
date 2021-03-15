@@ -16,6 +16,12 @@ conda activate speclet_smakemake
 
 SNAKEFILE="pipelines/010_010_run-crc-sampling-snakemake.py"
 
+# Copy original env file and ammend import of speclet project modules
+ENV_PATH="pipelines/010_014_environment.yml"
+cp environment.yml $ENV_PATH
+sed -i "s/\\- \\-e ./\\- \\-e  $(pwd)/" $ENV_PATH
+
+
 snakemake \
     --snakefile $SNAKEFILE \
     --jobs 1 \
