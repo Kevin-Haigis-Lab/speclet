@@ -5,7 +5,7 @@ from pathlib import Path
 import papermill
 import pretty_errors
 
-PYMC3_MODEL_CACHE_DIR = "cache/pymc3_model_cache/"
+PYMC3_MODEL_CACHE_DIR = "models/model_cache/pymc3_model_cache/"
 REPORTS_DIR = "reports/"
 
 model_names = {
@@ -28,7 +28,7 @@ rule sample_models:
     conda:
         "../environment.yml"
     shell:
-        'python3 analysis/sampling_pymc3_models.py "{wildcards.model}" "{params.model_name}" --debug --random-seed 123 --touch'
+        'python3 src/modeling/sampling_pymc3_models.py "{wildcards.model}" "{params.model_name}" --debug --random-seed 7414 --touch'
 
 rule papermill_report:
     input:
