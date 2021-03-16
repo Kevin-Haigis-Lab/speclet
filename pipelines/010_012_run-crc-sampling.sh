@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#SBATCH -c 3
+#SBATCH -c 2
 #SBATCH -p priority
 #SBATCH -t 2-00:00
-#SBATCH --mem 200G
+#SBATCH --mem 5G
 #SBATCH -o logs/crc-model-sampling/subsample-ceres-%A.log
 #SBATCH -e logs/crc-model-sampling/subsample-ceres-%A.log
 
@@ -14,7 +14,12 @@ module load gcc conda2 slurm-drmaa/1.1.1
 source "$HOME/.bashrc"
 conda activate speclet_smakemake
 
-SNAKEFILE="analysis/015_017_run-crc-sampling-snakemake.py"
+SNAKEFILE="pipelines/010_010_run-crc-sampling-snakemake.py"
+
+# Copy original env file and ammend import of speclet project modules
+ENV_PATH="pipelines/010_014_environment.yml"
+cp environment.yml $ENV_PATH
+sed -i "s|-e .|-e $(pwd)/|" $ENV_PATH
 
 snakemake \
     --snakefile $SNAKEFILE \
@@ -24,7 +29,7 @@ snakemake \
     --use-conda
 #     --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}"
 
-# --cluster-config config/default_snakemake_config.json \
+# --cluster-config pipelines/default_snakemake_config.json \
 
 # to make a dag
 # snakemake \

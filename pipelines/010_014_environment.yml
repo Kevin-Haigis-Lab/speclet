@@ -56,4 +56,4 @@ dependencies:
   - watermark
   - pip:
     - pytest-pythonpath
-    - -e .  # install the source directory as a package (keep as last)
+    - -e /n/data2/dfci/cancerbio/haigis/Cook/speclet/  # install the source directory as a package (keep as last)

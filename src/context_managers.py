@@ -1,11 +1,12 @@
 import os
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Union
 
 
 # source: https://thomaseckert.dev/posts/changing-directory-with-a-python-context-manager
 @contextmanager
-def set_directory(path: Path):
+def set_directory(path: Union[Path, str]):
     """Sets the cwd within the context
 
     Args:
@@ -14,6 +15,9 @@ def set_directory(path: Path):
     Yields:
         None
     """
+
+    if isinstance(path, str):
+        path = Path(path)
 
     origin = Path().absolute()
     try:

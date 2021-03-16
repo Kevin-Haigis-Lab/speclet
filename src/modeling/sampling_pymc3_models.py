@@ -32,7 +32,7 @@ pretty_errors.configure(
 #### ---- Data Paths ---- ####
 
 
-PYMC3_CACHE_DIR = Path("analysis") / pymc3_sampling_api.default_cache_dir
+PYMC3_CACHE_DIR = Path("models", "model_cache") / pymc3_sampling_api.default_cache_dir
 
 MODELING_DATA_DIR = Path("modeling_data")
 
@@ -68,8 +68,8 @@ def make_cache_name(name: str) -> Path:
     return PYMC3_CACHE_DIR / name
 
 
-def touch_file(n: str) -> None:
-    p = make_cache_name(n) / (n + ".txt")
+def touch_file(model: str, name: str) -> None:
+    p = make_cache_name(name) / (model + "_" + name + ".txt")
     p.touch()
     return None
 
@@ -218,7 +218,7 @@ def main(
 
     if touch:
         info("Touching output file.")
-        touch_file(name)
+        touch_file(model, name)
 
     toc = time()
     info(f"execution time: {(toc - tic) / 60:.2f} minutes")

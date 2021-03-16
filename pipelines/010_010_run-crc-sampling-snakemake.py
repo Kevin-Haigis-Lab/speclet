@@ -5,8 +5,10 @@ from pathlib import Path
 import papermill
 import pretty_errors
 
-PYMC3_MODEL_CACHE_DIR = "cache/pymc3_model_cache/"
+PYMC3_MODEL_CACHE_DIR = "models/model_cache/pymc3_model_cache/"
 REPORTS_DIR = "reports/"
+
+ENVIRONMENT_YAML = Path("010_014_environment.yml").as_posix()
 
 model_names = {
     "crc-m1": "CRC-model1",
@@ -22,17 +24,15 @@ rule all:
 
 rule sample_models:
     output:
-        PYMC3_MODEL_CACHE_DIR + "{model_name}/{model_name}.txt"
-    params:
-        model_name = lambda w: model_names[w.model]
+        PYMC3_MODEL_CACHE_DIR + "{model_name}/{model}_{model_name}.txt"
     conda:
-        "../environment.yml"
+        ENVIRONMENT_YAML
     shell:
-        'python3 analysis/sampling_pymc3_models.py "{wildcards.model}" "{params.model_name}" --debug --random-seed 123 --touch'
+        'python3 src/modeling/sampling_pymc3_models.py "{wildcards.model}" "{wildcards.model_name}" --debug --random-seed 7414 --touch'
 
 rule papermill_report:
     input:
-        model = PYMC3_MODEL_CACHE_DIR + "{model_name}/{model_name}.txt"
+        model_touch = PYMC3_MODEL_CACHE_DIR + "{model_name}/{model}_{model_name}.txt"
     output:
          notebook = REPORTS_DIR + "{model}_{model_name}.ipynb"
     run:
@@ -54,7 +54,7 @@ rule report:
     output:
          markdown = REPORTS_DIR + "{model}_{model_name}.md"
     conda:
-        "../environment.yml"
+        ENVIRONMENT_YAML
     shell:
         "jupyter nbconvert --to notebook --inplace --execute " + "{input.notebook} && "
         "jupyter nbconvert --to markdown {input.notebook}"

@@ -5,8 +5,8 @@
 from enum import Enum
 
 
-class SeabornColors(str, Enum):
-    sns_orange = "#ED854A"
-    sns_blue = "#4878D0"
-    sns_green = "#6BCC64"
-    sns_red = "#D65F5F"
+class SeabornColor(str, Enum):
+    orange = "#ED854A"
+    blue = "#4878D0"
+    green = "#6BCC64"
+    red = "#D65F5F"

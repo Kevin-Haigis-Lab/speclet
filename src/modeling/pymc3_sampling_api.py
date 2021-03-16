@@ -182,7 +182,7 @@ def pymc3_sampling_procedure(
             chains=chains,
             cores=cores,
             random_seed=random_seed,
-            **sample_kwargs
+            **sample_kwargs,
         )
         info("Posterior predicitons.")
         post_check = pm.sample_posterior_predictive(
@@ -214,7 +214,12 @@ def pymc3_advi_approximation_procedure(
         prior_file_path, post_file_path, approx_file_path = cache_file_names(cache_dir)
 
     if not force and cache_dir is not None and cache_dir.exists():
-        return read_cached_vi(cache_dir)
+        try:
+            return read_cached_vi(cache_dir)
+        except Exception as err:
+            info("Unable to read from cache.")
+            info(f"  ERROR: {err}")
+            info("Automatically resampling")
 
     with model:
         info("Sampling from prior distributions.")

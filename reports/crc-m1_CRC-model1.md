@@ -11,13 +11,13 @@ import numpy as np
 import pandas as pd
 import plotnine as gg
 import pymc3 as pm
-from analysis import color_pal as pal
-from analysis import common_data_processing as dphelp
-from analysis import pymc3_analysis as pmanal
-from analysis import pymc3_sampling_api as pmapi
-from analysis import sampling_pymc3_models as sampling
-from analysis.context_managers import set_directory
-from analysis.pymc3_models import crc_models
+from src.context_managers import set_directory
+from src.data_processing import common as dphelp
+from src.modeling import pymc3_analysis as pmanal
+from src.modeling import pymc3_sampling_api as pmapi
+from src.modeling import sampling_pymc3_models as sampling
+from src.models import crc_models
+from src.plot.color_pal import SeabornColor
 
 notebook_tic = time()
 
@@ -29,7 +29,7 @@ gg.theme_set(gg.theme_classic())
 RANDOM_SEED = 847
 np.random.seed(RANDOM_SEED)
 
-pymc3_cache_dir = Path("pymc3_model_cache")
+pymc3_cache_dir = Path("..", "models", "modeling_cache", "pymc3_model_cache")
 ```
 
 Parameters for papermill:
@@ -57,7 +57,7 @@ DEBUG = True
 ```
 
 ```python
-model_cache_dir = sampling.make_cache_name(MODEL_NAME)
+model_cache_dir = ".." / sampling.make_cache_name(MODEL_NAME)
 ```
 
 ```python
@@ -72,12 +72,12 @@ with set_directory(".."):
     Loading data...
 
 
-    /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/635332a6/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/635332a6/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 
     Done
-    execution time: 0.17 minutes
+    execution time: 0.23 minutes
 
 ### Data
 
@@ -281,7 +281,7 @@ pmanal.plot_vi_hist(model_res["approximation"])
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_15_0.png)
 
-    <ggplot: (8790230441689)>
+    <ggplot: (8746285773541)>
 
 ## Model parameters
 
@@ -325,7 +325,7 @@ def variable_distribution_plot(var, trace: np.ndarray, max_plot=20000) -> gg.ggp
         + gg.labs(x="posterior", y="density", title=f"Posterior distirbution of {var}")
     )
 
-    c = pal.sns_blue
+    c = SeabornColor.blue
 
     if len(d_summaries) > 1:
         p = p + gg.geom_rug(
@@ -352,55 +352,55 @@ for var in vars_to_inspect:
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_0.png)
 
-    <ggplot: (8790129279236)>
+    <ggplot: (8746231746844)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_2.png)
 
-    <ggplot: (8790230490567)>
+    <ggplot: (8746128961061)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_4.png)
 
-    <ggplot: (8790129245940)>
+    <ggplot: (8746130159734)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_6.png)
 
-    <ggplot: (8790129103613)>
+    <ggplot: (8746128943541)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_8.png)
 
-    <ggplot: (8790129279467)>
+    <ggplot: (8746129103556)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_10.png)
 
-    <ggplot: (8790129183648)>
+    <ggplot: (8746130534970)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_12.png)
 
-    <ggplot: (8790129187874)>
+    <ggplot: (8746129093202)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_14.png)
 
-    <ggplot: (8790128065374)>
+    <ggplot: (8746130258423)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_16.png)
 
-    <ggplot: (8790127868305)>
+    <ggplot: (8746130072381)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_18.png)
 
-    <ggplot: (8790128071593)>
+    <ggplot: (8746129180654)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_20.png)
 
-    <ggplot: (8790128273634)>
+    <ggplot: (8746129265134)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_22.png)
 
-    <ggplot: (8790127919339)>
+    <ggplot: (8746129466450)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_24.png)
 
-    <ggplot: (8790129279395)>
+    <ggplot: (8746129564688)>
 
 ## Model predicitons
 
@@ -414,7 +414,7 @@ pred_summary["error"] = pred_summary.lfc - pred_summary.pred_mean
 pred_summary.head()
 ```
 
-    /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/635332a6/lib/python3.9/site-packages/arviz/stats/stats.py:456: FutureWarning: hdi currently interprets 2d data as (draw, shape) but this will change in a future release to (chain, draw) for coherence with other functions
+    /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/arviz/stats/stats.py:456: FutureWarning: hdi currently interprets 2d data as (draw, shape) but this will change in a future release to (chain, draw) for coherence with other functions
 
 <div>
 <style scoped>
@@ -448,63 +448,63 @@ pred_summary.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.116332</td>
-      <td>-0.892644</td>
-      <td>0.627259</td>
+      <td>-0.178218</td>
+      <td>-0.897320</td>
+      <td>0.547094</td>
       <td>0.029491</td>
       <td>ACH-000007</td>
       <td>ADAMTS13</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>1.861144</td>
-      <td>0.145823</td>
+      <td>0.207709</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.143943</td>
-      <td>-0.799058</td>
-      <td>0.639015</td>
+      <td>-0.135541</td>
+      <td>-0.901338</td>
+      <td>0.600710</td>
       <td>0.426017</td>
       <td>ACH-000007</td>
       <td>ADAMTS13</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>1.861144</td>
-      <td>0.569960</td>
+      <td>0.561558</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.059316</td>
-      <td>-0.820641</td>
-      <td>0.637699</td>
+      <td>-0.081253</td>
+      <td>-0.876622</td>
+      <td>0.571168</td>
       <td>0.008626</td>
       <td>ACH-000009</td>
       <td>ADAMTS13</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>1.375470</td>
-      <td>0.067942</td>
+      <td>0.089879</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.063522</td>
-      <td>-0.838232</td>
-      <td>0.638793</td>
+      <td>-0.047154</td>
+      <td>-0.811400</td>
+      <td>0.690816</td>
       <td>0.280821</td>
       <td>ACH-000009</td>
       <td>ADAMTS13</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>1.375470</td>
-      <td>0.344344</td>
+      <td>0.327976</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.045586</td>
-      <td>-0.821382</td>
-      <td>0.715843</td>
+      <td>-0.058682</td>
+      <td>-0.776751</td>
+      <td>0.657707</td>
       <td>0.239815</td>
       <td>ACH-000009</td>
       <td>ADAMTS13</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>1.375470</td>
-      <td>0.285402</td>
+      <td>0.298497</td>
     </tr>
   </tbody>
 </table>
@@ -525,14 +525,14 @@ az.plot_loo_pit(model_az, y="lfc");
     + gg.geom_vline(xintercept=0, size=0.5, alpha=0.7)
     + gg.geom_point(size=0.1, alpha=0.2)
     + gg.geom_abline(slope=1, intercept=0, size=1, alpha=0.7, color="grey")
-    + gg.geom_smooth(method="glm", color=pal.sns_red, size=1, alpha=0.7, se=False)
+    + gg.geom_smooth(method="glm", color=SeabornColor.red, size=1, alpha=0.7, se=False)
     + gg.labs(x="observed LFC", y="prediticed LFC (posterior avg.)")
 )
 ```
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_22_0.png)
 
-    <ggplot: (8790129360526)>
+    <ggplot: (8746129068026)>
 
 ```python
 (
@@ -546,7 +546,7 @@ az.plot_loo_pit(model_az, y="lfc");
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_23_0.png)
 
-    <ggplot: (8790128602064)>
+    <ggplot: (8746129069578)>
 
 ```python
 gene_error = (
@@ -579,7 +579,7 @@ n_genes = 15
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_24_0.png)
 
-    <ggplot: (8790128592592)>
+    <ggplot: (8746129069719)>
 
 ```python
 (
@@ -593,7 +593,7 @@ n_genes = 15
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_25_0.png)
 
-    <ggplot: (8790127999877)>
+    <ggplot: (8746230375744)>
 
 ---
 
@@ -602,14 +602,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 2.77 minutes
+    execution time: 2.48 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-03-12
+    Last updated: 2021-03-16
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -620,16 +620,16 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-a-16-104.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-237.o2.rc.hms.harvard.edu
 
-    Git branch: papermill
+    Git branch: reorg-pipeline
 
-    pandas    : 1.2.3
-    arviz     : 0.11.2
-    numpy     : 1.20.1
-    pymc3     : 3.11.1
     plotnine  : 0.7.1
     matplotlib: 3.3.4
+    arviz     : 0.11.2
+    pymc3     : 3.11.1
+    numpy     : 1.20.1
+    pandas    : 1.2.3
