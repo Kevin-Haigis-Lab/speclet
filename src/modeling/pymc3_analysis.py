@@ -18,11 +18,12 @@ def plot_all_priors(
     subplots: Tuple[int, int],
     figsize: Tuple[float, float],
     samples: int = 1000,
+    rm_var_regex: str = "log__|logodds_",
 ) -> Tuple[matplotlib.figure.Figure, np.ndarray]:
 
     model_vars: List[str] = []
     for x in prior_predictive.keys():
-        if not "log__" in x:
+        if not re.search(rm_var_regex, x):
             model_vars.append(x)
 
     model_vars.sort()

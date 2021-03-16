@@ -58,6 +58,7 @@ def common_indices(
         "sgrna_idx": dphelp.get_indices(achilles_df, "sgrna"),
         "sgrna_to_gene_map": sgrna_to_gene_map,
         "sgrna_to_gene_idx": dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol"),
+        "gene_idx": dphelp.get_indices(achilles_df, "hugo_symbol"),
         "cellline_idx": dphelp.get_indices(achilles_df, "depmap_id"),
         "batch_idx": dphelp.get_indices(achilles_df, "pdna_batch"),
     }

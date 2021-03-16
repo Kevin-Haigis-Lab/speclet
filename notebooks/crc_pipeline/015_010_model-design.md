@@ -1,6 +1,11 @@
 # Designing models for CRC cell lines
 
 ```python
+%load_ext autoreload
+%autoreload 2
+```
+
+```python
 import re
 import string
 import warnings
@@ -8,20 +13,26 @@ from pathlib import Path
 from time import time
 
 import arviz as az
-import color_pal as pal
-import common_data_processing as dphelp
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotnine as gg
 import pymc3 as pm
-import pymc3_analysis as pmanal
-import pymc3_sampling_api
 import seaborn as sns
 import theano
-from pymc3_models import crc_models
+```
 
+```python
+from src.data_processing import achilles as achelp
+from src.data_processing import common as dphelp
+from src.modeling import pymc3_analysis as pmanal
+from src.modeling import pymc3_sampling_api as sampling
+from src.models import crc_models
+from src.plot.color_pal import SeabornColor
+```
+
+```python
 notebook_tic = time()
 
 warnings.simplefilter(action="ignore", category=UserWarning)
@@ -38,8 +49,8 @@ pymc3_cache_dir = Path("pymc3_model_cache")
 ## Data
 
 ```python
-data = dphelp.read_achilles_data(
-    Path("..", "modeling_data", "depmap_CRC_data_subsample.csv")
+data = achelp.read_achilles_data(
+    Path("..", "..", "modeling_data", "depmap_CRC_data_subsample.csv")
 )
 data.head()
 ```
@@ -213,70 +224,102 @@ data.head()
 
 ## Model Experimentation
 
-```python
-total_size = len(data.lfc.values)
-sgrna_idx, n_sgrnas = dphelp.get_indices_and_count(data, "sgrna")
-sgrna_to_gene_map = (
-    data[["sgrna", "hugo_symbol"]]
-    .drop_duplicates()
-    .reset_index(drop=True)
-    .sort_values("sgrna")
-    .reset_index(drop=True)
-)
-sgrna_to_gene_idx, n_genes = dphelp.get_indices_and_count(
-    sgrna_to_gene_map, "hugo_symbol"
-)
-cellline_idx, n_celllines = dphelp.get_indices_and_count(data, "depmap_id")
-batch_idx, n_batches = dphelp.get_indices_and_count(data, "pdna_batch")
-```
+### sgRNA Activity prior distributions
 
 ```python
+with pm.Model() as exprt_model:
+    a_prior = pm.HalfNormal("a_prior", 5, shape=2)
+    a = pm.HalfNormal("a", a_prior, shape=2)
+    beta = pm.Beta("beta", alpha=a[0] + 5, beta=a[1] + 1)
+
+    prior = pm.sample_prior_predictive(3000, random_seed=RANDOM_SEED)
+
+vars = ["a_prior", "a", "beta"]
+for v in vars:
+    sns.displot(prior[v], kde=True, height=3, aspect=2, bins=50)
+    plt.title(v)
+```
+
+![png](015_010_model-design_files/015_010_model-design_9_0.png)
+
+![png](015_010_model-design_files/015_010_model-design_9_1.png)
+
+![png](015_010_model-design_files/015_010_model-design_9_2.png)
+
+### Model design
+
+```python
+indices = achelp.common_indices(data)
+indices.keys()
+```
+
+    dict_keys(['sgrna_idx', 'sgrna_to_gene_map', 'sgrna_to_gene_idx', 'gene_idx', 'cellline_idx', 'batch_idx'])
+
+```python
+lfc_data = data.lfc.values
+total_size = len(data.lfc.values)
+
+sgrna_idx = indices["sgrna_idx"]
+sgrna_to_gene_idx = indices["sgrna_to_gene_idx"]
+gene_idx = indices["gene_idx"]
+cellline_idx = indices["cellline_idx"]
+batch_idx = indices["batch_idx"]
+
+n_sgrnas = dphelp.nunique(sgrna_idx)
+n_genes = dphelp.nunique(gene_idx)
+n_celllines = dphelp.nunique(cellline_idx)
+n_batches = dphelp.nunique(batch_idx)
+
 sgrna_idx_shared = theano.shared(sgrna_idx)
 sgrna_to_gene_idx_shared = theano.shared(sgrna_to_gene_idx)
+gene_idx_shared = theano.shared(gene_idx)
 cellline_idx_shared = theano.shared(cellline_idx)
 batch_idx_shared = theano.shared(batch_idx)
-lfc_shared = theano.shared(data.lfc.values)
-```
+lfc_shared = theano.shared(lfc_data)
 
-```python
 with pm.Model() as model:
 
-    mu_g = pm.Normal("mu_g", data.lfc.values.mean(), 1)
-    sigma_g = pm.HalfNormal("sigma_g", 2)
-    sigma_sigma_alpha = pm.HalfNormal("sigma_sigma_alpha", 1)
+    # Hyper-priors
+    σ_a = pm.HalfNormal("σ_a", 5)
+    a = pm.HalfNormal("a", σ_a, shape=(n_genes, 2))
 
-    mu_alpha = pm.Normal("mu_alpha", mu_g, sigma_g, shape=n_genes)
-    sigma_alpha = pm.HalfNormal("sigma_alpha", sigma_sigma_alpha, shape=n_genes)
-    mu_beta = pm.Normal("mu_beta", 0, 0.2)
-    sigma_beta = pm.HalfNormal("sigma_beta", 1)
-    mu_eta = pm.Normal("mu_eta", 0, 0.2)
-    sigma_eta = pm.HalfNormal("sigma_eta", 1)
+    μ_h = pm.Normal("μ_h", np.mean(lfc_data), 1)
+    σ_h = pm.HalfNormal("σ_h", 1)
 
-    alpha_s = pm.Normal(
-        "alpha_s",
-        mu_alpha[sgrna_to_gene_idx_shared],
-        sigma_alpha[sgrna_to_gene_idx_shared],
+    μ_d = pm.Normal("μ_d", 0, 0.2)
+    σ_d = pm.HalfNormal("σ_d", 0.5)
+
+    μ_η = pm.Normal("μ_η", 0, 0.2)
+    σ_η = pm.HalfNormal("σ_η", 0.5)
+
+    # Main parameter priors
+    q = pm.Beta(
+        "q",
+        alpha=a[sgrna_to_gene_idx_shared, 0] + 5,
+        beta=a[sgrna_to_gene_idx_shared, 1] + 1,
         shape=n_sgrnas,
     )
-    beta_l = pm.Normal("beta_l", mu_beta, sigma_beta, shape=n_celllines)
-    eta_b = pm.Normal("eta_b", mu_eta, sigma_eta, shape=n_batches)
+    h = pm.Normal("h", μ_h, σ_h, shape=n_genes)
+    d = pm.Normal("d", μ_d, σ_d, shape=(n_genes, n_celllines))
+    η = pm.Normal("η", μ_η, σ_η, shape=n_batches)
 
-    mu = pm.Deterministic(
-        "mu",
-        alpha_s[sgrna_idx_shared]
-        + beta_l[cellline_idx_shared]
-        + eta_b[batch_idx_shared],
+    μ = pm.Deterministic(
+        "μ",
+        q[sgrna_idx_shared]
+        * (h[gene_idx_shared] + d[gene_idx_shared, cellline_idx_shared])
+        + η[batch_idx_shared],
     )
-    sigma = pm.HalfNormal("sigma", 2)
+    σ = pm.HalfNormal("σ", 2)
 
-    lfc = pm.Normal("lfc", mu, sigma, observed=lfc_shared, total_size=total_size)
+    # Likelihood
+    lfc = pm.Normal("lfc", μ, σ, observed=lfc_shared, total_size=total_size)
 ```
 
 ```python
 pm.model_to_graphviz(model)
 ```
 
-![svg](015_010_model-design_files/015_010_model-design_8_0.svg)
+![svg](015_010_model-design_files/015_010_model-design_13_0.svg)
 
 ```python
 with model:
@@ -284,22 +327,28 @@ with model:
 ```
 
 ```python
-pmanal.plot_all_priors(prior_pred, subplots=(5, 3), figsize=(10, 8), samples=500);
+pmanal.plot_all_priors(prior_pred, subplots=(5, 3), figsize=(10, 9), samples=500);
 ```
 
-![png](015_010_model-design_files/015_010_model-design_10_0.png)
+![png](015_010_model-design_files/015_010_model-design_15_0.png)
+
+## ADVI
 
 ```python
 batch_size = 1000
 
 sgnra_idx_batch = pm.Minibatch(sgrna_idx, batch_size=batch_size)
+gene_idx_batch = pm.Minibatch(gene_idx, batch_size=batch_size)
 cellline_idx_batch = pm.Minibatch(cellline_idx, batch_size=batch_size)
 batch_idx_batch = pm.Minibatch(batch_idx, batch_size=batch_size)
 lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 ```
 
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+
 ```python
-meanfield = pymc3_sampling_api.pymc3_advi_approximation_procedure(
+meanfield = sampling.pymc3_advi_approximation_procedure(
     model=model,
     method="advi",
     callbacks=[
@@ -308,6 +357,7 @@ meanfield = pymc3_sampling_api.pymc3_advi_approximation_procedure(
     fit_kwargs={
         "more_replacements": {
             sgrna_idx_shared: sgnra_idx_batch,
+            gene_idx_shared: gene_idx_batch,
             cellline_idx_shared: cellline_idx_batch,
             batch_idx_shared: batch_idx_batch,
             lfc_shared: lfc_data_batch,
@@ -332,12 +382,14 @@ meanfield = pymc3_sampling_api.pymc3_advi_approximation_procedure(
             background: #F44336;
         }
     </style>
-  <progress value='0' class='' max='100000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-
+  <progress value='30979' class='' max='100000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  30.98% [30979/100000 01:05<02:24 Average Loss = 641.19]
 </div>
 
-    Convergence achieved at 27600
-    Interrupted at 27,599 [27%]: Average Loss = 967.8
+    Convergence achieved at 31000
+    Interrupted at 30,999 [30%]: Average Loss = 911.31
+
+
     Sampling from posterior.
     Posterior predicitons.
 
@@ -355,48 +407,50 @@ meanfield = pymc3_sampling_api.pymc3_advi_approximation_procedure(
         }
     </style>
   <progress value='1000' class='' max='1000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [1000/1000 01:11<00:00]
+  100.00% [1000/1000 00:17<00:00]
 </div>
 
 ```python
-az_model = pymc3_sampling_api.samples_to_arviz(model, meanfield)
+az_model = sampling.samples_to_arviz(model, meanfield)
 ```
 
 ```python
 pmanal.plot_vi_hist(meanfield["approximation"])
 ```
 
-![png](015_010_model-design_files/015_010_model-design_14_0.png)
+![png](015_010_model-design_files/015_010_model-design_20_0.png)
 
-    <ggplot: (351612685)>
+    <ggplot: (343040711)>
 
 ```python
-def plot_az_summary(df: pd.DataFrame, x="index") -> gg.ggplot:
+def plot_az_summary(df: pd.DataFrame, x="index", aes_kwargs={}) -> gg.ggplot:
     return (
         gg.ggplot(df, gg.aes(x=x))
         + gg.geom_hline(yintercept=0, linetype="--", alpha=0.5)
-        + gg.geom_linerange(gg.aes(ymin="hdi_5.5%", ymax="hdi_94.5%"), size=0.2)
-        + gg.geom_point(gg.aes(y="mean"), size=0.5)
+        + gg.geom_linerange(
+            gg.aes(ymin="hdi_5.5%", ymax="hdi_94.5%", **aes_kwargs), size=0.2
+        )
+        + gg.geom_point(gg.aes(y="mean", **aes_kwargs), size=0.5)
         + gg.theme(axis_text_x=gg.element_text(angle=90, size=6))
         + gg.labs(x="model parameter", y="posterior")
     )
 ```
 
 ```python
-batch_posteriors = az.summary(az_model, var_names="eta_b", hdi_prob=0.89)
+batch_posteriors = az.summary(az_model, var_names="η", hdi_prob=0.89)
 plot_az_summary(batch_posteriors.reset_index(drop=False))
 ```
 
     arviz - WARNING - Shape validation failed: input_shape: (1, 1000), minimum_shape: (chains=2, draws=4)
 
-![png](015_010_model-design_files/015_010_model-design_16_1.png)
+![png](015_010_model-design_files/015_010_model-design_22_1.png)
 
-    <ggplot: (348681807)>
+    <ggplot: (346008417)>
 
 ```python
 gene_posteriors = az.summary(
     az_model,
-    var_names="mu_alpha",
+    var_names="h",
     hdi_prob=0.89,
 )
 
@@ -405,30 +459,276 @@ plot_az_summary(gene_posteriors.reset_index(drop=False)) + gg.theme(figure_size=
 
     arviz - WARNING - Shape validation failed: input_shape: (1, 1000), minimum_shape: (chains=2, draws=4)
 
-![png](015_010_model-design_files/015_010_model-design_17_1.png)
+![png](015_010_model-design_files/015_010_model-design_23_1.png)
 
-    <ggplot: (349306646)>
+    <ggplot: (345627889)>
 
 ```python
-sgrna_post = (
+np.array(["alpha", "beta"])
+```
+
+    array(['alpha', 'beta'], dtype='<U5')
+
+```python
+genes = data.hugo_symbol.cat.categories.values
+
+sgrna_activity_params = pmanal.extract_matrix_variable_indices(
     az.summary(
         az_model,
-        var_names="alpha_s",
+        var_names="a",
+        hdi_prob=0.89,
+    ).reset_index(drop=False),
+    col="index",
+    idx1=genes,
+    idx2=np.array(["alpha", "beta"]),
+    idx1name="hugo_symbol",
+    idx2name="beta_param",
+)
+
+sgrna_activity_params.head()
+```
+
+    arviz - WARNING - Shape validation failed: input_shape: (1, 1000), minimum_shape: (chains=2, draws=4)
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>index</th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>hugo_symbol</th>
+      <th>beta_param</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>a[0,0]</td>
+      <td>1.460</td>
+      <td>1.151</td>
+      <td>0.185</td>
+      <td>2.802</td>
+      <td>0.035</td>
+      <td>0.025</td>
+      <td>946.0</td>
+      <td>1069.0</td>
+      <td>NaN</td>
+      <td>ADAMTS13</td>
+      <td>alpha</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>a[0,1]</td>
+      <td>17.336</td>
+      <td>4.278</td>
+      <td>10.502</td>
+      <td>23.370</td>
+      <td>0.130</td>
+      <td>0.092</td>
+      <td>1092.0</td>
+      <td>955.0</td>
+      <td>NaN</td>
+      <td>ADAMTS13</td>
+      <td>beta</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>a[1,0]</td>
+      <td>1.004</td>
+      <td>0.815</td>
+      <td>0.109</td>
+      <td>1.827</td>
+      <td>0.025</td>
+      <td>0.018</td>
+      <td>1042.0</td>
+      <td>915.0</td>
+      <td>NaN</td>
+      <td>ADGRA3</td>
+      <td>alpha</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>a[1,1]</td>
+      <td>17.358</td>
+      <td>4.137</td>
+      <td>10.270</td>
+      <td>23.042</td>
+      <td>0.131</td>
+      <td>0.093</td>
+      <td>969.0</td>
+      <td>868.0</td>
+      <td>NaN</td>
+      <td>ADGRA3</td>
+      <td>beta</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>a[2,0]</td>
+      <td>3.370</td>
+      <td>3.049</td>
+      <td>0.273</td>
+      <td>6.331</td>
+      <td>0.100</td>
+      <td>0.070</td>
+      <td>921.0</td>
+      <td>755.0</td>
+      <td>NaN</td>
+      <td>AKR7L</td>
+      <td>alpha</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+plot_az_summary(
+    sgrna_activity_params, x="hugo_symbol", aes_kwargs={"color": "beta_param"}
+) + gg.scale_color_brewer(type="qual", palette="Set1") + gg.theme(figure_size=(10, 5))
+```
+
+![png](015_010_model-design_files/015_010_model-design_26_0.png)
+
+    <ggplot: (345385063)>
+
+```python
+sgrna_activity_post = (
+    az.summary(
+        az_model,
+        var_names="q",
         hdi_prob=0.89,
         kind="stats",
     )
     .reset_index(drop=False)
-    .rename(columns={"index": "param"})
+    .assign(sgrna=data.sgrna.cat.categories.values)
+    .merge(indices["sgrna_to_gene_map"])
 )
-sgrna_post["sgrna"] = sgrna_to_gene_map.sgrna
-sgrna_post["hugo_symbol"] = sgrna_to_gene_map.hugo_symbol
+
+sgrna_activity_post.head()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>index</th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>sgrna</th>
+      <th>hugo_symbol</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>q[0]</td>
+      <td>0.222</td>
+      <td>0.060</td>
+      <td>0.130</td>
+      <td>0.312</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>ADAMTS13</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>q[1]</td>
+      <td>0.173</td>
+      <td>0.052</td>
+      <td>0.093</td>
+      <td>0.246</td>
+      <td>CCTACTTCCAGCCTAAGCCA</td>
+      <td>ADAMTS13</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>q[2]</td>
+      <td>0.399</td>
+      <td>0.077</td>
+      <td>0.280</td>
+      <td>0.528</td>
+      <td>GTACAGAGTGGCCCTCACCG</td>
+      <td>ADAMTS13</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>q[3]</td>
+      <td>0.182</td>
+      <td>0.053</td>
+      <td>0.101</td>
+      <td>0.265</td>
+      <td>TTTGACCTGGAGTTGCCTGA</td>
+      <td>ADAMTS13</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>q[4]</td>
+      <td>0.146</td>
+      <td>0.042</td>
+      <td>0.087</td>
+      <td>0.216</td>
+      <td>AGATACTCTGCCCAACCGCA</td>
+      <td>ADGRA3</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+sgrna_activity_post = (
+    az.summary(
+        az_model,
+        var_names="q",
+        hdi_prob=0.89,
+        kind="stats",
+    )
+    .reset_index(drop=False)
+    .assign(sgrna=data.sgrna.cat.categories.values)
+    .merge(indices["sgrna_to_gene_map"])
+)
 
 (
-    gg.ggplot(sgrna_post, gg.aes(x="param"))
+    gg.ggplot(sgrna_activity_post, gg.aes(x="index"))
     + gg.facet_wrap("hugo_symbol", scales="free", ncol=5)
-    + gg.geom_hline(yintercept=0, alpha=0.5, linetype="--")
     + gg.geom_linerange(gg.aes(ymin="hdi_5.5%", ymax="hdi_94.5%"), size=0.2)
     + gg.geom_point(gg.aes(y="mean"), size=0.6)
+    + gg.scale_y_continuous(limits=(0, 1), expand=(0, 0))
     + gg.theme(
         axis_text_x=gg.element_blank(),
         figure_size=(8, 20),
@@ -440,25 +740,344 @@ sgrna_post["hugo_symbol"] = sgrna_to_gene_map.hugo_symbol
 )
 ```
 
-![png](015_010_model-design_files/015_010_model-design_18_0.png)
+![png](015_010_model-design_files/015_010_model-design_28_0.png)
 
-    <ggplot: (351348363)>
+    <ggplot: (343372201)>
 
 ```python
-cells_posteriors = az.summary(
-    az_model,
-    var_names="beta_l",
-    hdi_prob=0.89,
+gene_cells_post = az.summary(
+    az_model, var_names="d", hdi_prob=0.89, kind="stats"
+).reset_index(drop=False)
+gene_cells_post = pmanal.extract_matrix_variable_indices(
+    gene_cells_post,
+    col="index",
+    idx1=data.hugo_symbol.cat.categories.values,
+    idx2=data.depmap_id.cat.categories.values,
+    idx1name="hugo_symbol",
+    idx2name="depmap_id",
 )
-
-plot_az_summary(cells_posteriors.reset_index(drop=False)) + gg.theme(figure_size=(8, 3))
+gene_cells_post.head()
 ```
 
-    arviz - WARNING - Shape validation failed: input_shape: (1, 1000), minimum_shape: (chains=2, draws=4)
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
 
-![png](015_010_model-design_files/015_010_model-design_19_1.png)
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
 
-    <ggplot: (352243444)>
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>index</th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>hugo_symbol</th>
+      <th>depmap_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>d[0,0]</td>
+      <td>0.409</td>
+      <td>0.497</td>
+      <td>-0.317</td>
+      <td>1.263</td>
+      <td>ADAMTS13</td>
+      <td>ACH-000007</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>d[0,1]</td>
+      <td>0.027</td>
+      <td>0.420</td>
+      <td>-0.619</td>
+      <td>0.678</td>
+      <td>ADAMTS13</td>
+      <td>ACH-000009</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>d[0,2]</td>
+      <td>0.358</td>
+      <td>0.422</td>
+      <td>-0.295</td>
+      <td>1.036</td>
+      <td>ADAMTS13</td>
+      <td>ACH-000202</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>d[0,3]</td>
+      <td>-0.257</td>
+      <td>0.552</td>
+      <td>-1.137</td>
+      <td>0.599</td>
+      <td>ADAMTS13</td>
+      <td>ACH-000249</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>d[0,4]</td>
+      <td>0.083</td>
+      <td>0.459</td>
+      <td>-0.591</td>
+      <td>0.873</td>
+      <td>ADAMTS13</td>
+      <td>ACH-000253</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+(
+    gg.ggplot(gene_cells_post, gg.aes(x="depmap_id", y="hugo_symbol"))
+    + gg.geom_point(gg.aes(size="sd", color="mean"))
+    + gg.scale_color_gradient2()
+    + gg.scale_size_continuous(range=(5, 0.5))
+    + gg.theme(
+        figure_size=(8, 12),
+        axis_text_x=gg.element_text(angle=90, size=7),
+        axis_text_y=gg.element_text(size=7),
+        axis_ticks=gg.element_blank(),
+    )
+    + gg.labs(
+        x="cell lines",
+        y="gene",
+        color="post. avg.",
+        size="post. s.d.",
+        title="Posterior of gene x cell lines matrix",
+    )
+)
+```
+
+![png](015_010_model-design_files/015_010_model-design_30_0.png)
+
+    <ggplot: (344764603)>
+
+```python
+model_ppc = pmanal.summarize_posterior_predictions(
+    meanfield["posterior_predictive"]["lfc"],
+    merge_with=data[
+        ["lfc", "hugo_symbol", "depmap_id", "sgrna", "pdna_batch", "gene_cn"]
+    ],
+)
+
+model_ppc = model_ppc.assign(
+    hdi_range=lambda d: np.abs(d.pred_hdi_high - d.pred_hdi_low)
+)
+
+
+model_ppc["error"] = model_ppc.lfc - model_ppc.pred_mean
+
+
+model_ppc.head()
+```
+
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/arviz/stats/stats.py:456: FutureWarning: hdi currently interprets 2d data as (draw, shape) but this will change in a future release to (chain, draw) for coherence with other functions
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>pred_mean</th>
+      <th>pred_hdi_low</th>
+      <th>pred_hdi_high</th>
+      <th>lfc</th>
+      <th>hugo_symbol</th>
+      <th>depmap_id</th>
+      <th>sgrna</th>
+      <th>pdna_batch</th>
+      <th>gene_cn</th>
+      <th>hdi_range</th>
+      <th>error</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>-0.025623</td>
+      <td>-0.835671</td>
+      <td>0.615977</td>
+      <td>0.029491</td>
+      <td>ADAMTS13</td>
+      <td>ACH-000007</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>2</td>
+      <td>2.632957</td>
+      <td>1.451647</td>
+      <td>0.055115</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>-0.052668</td>
+      <td>-0.790799</td>
+      <td>0.661606</td>
+      <td>0.426017</td>
+      <td>ADAMTS13</td>
+      <td>ACH-000007</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>2</td>
+      <td>2.632957</td>
+      <td>1.452405</td>
+      <td>0.478685</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-0.124430</td>
+      <td>-0.903922</td>
+      <td>0.534026</td>
+      <td>0.008626</td>
+      <td>ADAMTS13</td>
+      <td>ACH-000009</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>3</td>
+      <td>1.594524</td>
+      <td>1.437948</td>
+      <td>0.133057</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-0.164276</td>
+      <td>-0.897890</td>
+      <td>0.561791</td>
+      <td>0.280821</td>
+      <td>ADAMTS13</td>
+      <td>ACH-000009</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>3</td>
+      <td>1.594524</td>
+      <td>1.459681</td>
+      <td>0.445098</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-0.121399</td>
+      <td>-0.820375</td>
+      <td>0.615257</td>
+      <td>0.239815</td>
+      <td>ADAMTS13</td>
+      <td>ACH-000009</td>
+      <td>CCACCCACAGACGCTCAGCA</td>
+      <td>3</td>
+      <td>1.594524</td>
+      <td>1.435631</td>
+      <td>0.361215</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+(
+    gg.ggplot(model_ppc, gg.aes(x="lfc", y="pred_mean"))
+    + gg.geom_point(gg.aes(color="pdna_batch"), alpha=0.3)
+    + gg.geom_abline(slope=1, intercept=0, alpha=0.9, linetype="--")
+    + gg.scale_color_brewer(
+        type="qual", palette="Dark2", guide=gg.guide_legend(override_aes={"alpha": 1})
+    )
+)
+```
+
+![png](015_010_model-design_files/015_010_model-design_32_0.png)
+
+    <ggplot: (350494669)>
+
+```python
+(
+    gg.ggplot(model_ppc, gg.aes(x="error", y="hdi_range"))
+    + gg.geom_point(alpha=0.2, color=SeabornColor.blue)
+    + gg.labs(x="prediction error", y="HDI size")
+)
+```
+
+![png](015_010_model-design_files/015_010_model-design_33_0.png)
+
+    <ggplot: (343015346)>
+
+```python
+(
+    gg.ggplot(model_ppc, gg.aes(x="pred_mean", y="hdi_range"))
+    + gg.geom_point(alpha=0.2, color=SeabornColor.blue)
+    + gg.labs(x="prediction mean", y="HDI size")
+)
+```
+
+![png](015_010_model-design_files/015_010_model-design_34_0.png)
+
+    <ggplot: (346141989)>
+
+```python
+(
+    gg.ggplot(model_ppc, gg.aes(x="np.log2(gene_cn)", y="error"))
+    + gg.geom_point(alpha=0.2, color=SeabornColor.blue)
+    + gg.labs(x="gene CN", y="prediction error")
+)
+```
+
+![png](015_010_model-design_files/015_010_model-design_35_0.png)
+
+    <ggplot: (347737712)>
+
+```python
+model_ppc_with_qpost = model_ppc.merge(
+    sgrna_activity_post[["mean", "sgrna", "hugo_symbol"]].rename(
+        columns={"mean": "q_post_mean"}
+    )
+)
+```
+
+```python
+(
+    gg.ggplot(model_ppc_with_qpost, gg.aes(x="lfc", y="pred_mean"))
+    + gg.geom_point(gg.aes(color="q_post_mean"), alpha=0.5)
+    + gg.geom_abline(slope=1, intercept=0, linetype="--")
+    + gg.labs(x="observed LFC", y="prediction mean", color="post. avg of $q_s$")
+)
+```
+
+![png](015_010_model-design_files/015_010_model-design_37_0.png)
+
+    <ggplot: (347776299)>
+
+```python
+(
+    gg.ggplot(model_ppc_with_qpost, gg.aes(x="q_post_mean", y="error"))
+    + gg.geom_point(alpha=0.1, color=SeabornColor.blue)
+    + gg.geom_hline(yintercept=0, linetype="--")
+    + gg.labs(x="post. avg of $q_s$", y="prediction error")
+)
+```
+
+![png](015_010_model-design_files/015_010_model-design_38_0.png)
+
+    <ggplot: (347733348)>
 
 ---
 
@@ -467,18 +1086,18 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 5.31 minutes
+    execution time: 3.14 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-03-02
+    Last updated: 2021-03-16
 
     Python implementation: CPython
-    Python version       : 3.9.1
-    IPython version      : 7.20.0
+    Python version       : 3.9.2
+    IPython version      : 7.21.0
 
     Compiler    : Clang 11.0.1
     OS          : Darwin
@@ -490,16 +1109,14 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Hostname: JHCookMac
 
-    Git branch: crc-m1
+    Git branch: master
 
-    pymc3     : 3.11.1
-    sys       : 3.9.1 | packaged by conda-forge | (default, Jan 26 2021, 01:32:59)
-    [Clang 11.0.1 ]
     numpy     : 1.20.1
     re        : 2.2.1
-    matplotlib: 3.3.4
     plotnine  : 0.7.1
-    arviz     : 0.11.1
     seaborn   : 0.11.1
+    matplotlib: 3.3.4
+    pandas    : 1.2.3
+    pymc3     : 3.11.1
     theano    : 1.0.5
-    pandas    : 1.2.2
+    arviz     : 0.11.2

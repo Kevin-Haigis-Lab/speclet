@@ -19,6 +19,7 @@ dependencies:
   - jupyterlab=3.0.10
   - jupyterlab-git
   - jupyterlab_code_formatter
+  - jupyter_contrib_nbextensions
   - matplotlib
   - mkl
   - mypy
