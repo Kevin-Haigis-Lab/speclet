@@ -60,3 +60,9 @@ repos:
         args: [--nbqa-mutate]
         types: [jupyter]
         exclude: "munge/019_prepare-data-subsample.ipynb"
+-   repo: https://github.com/PyCQA/pydocstyle
+    rev: 5.1.1
+    hooks:
+    -   id: pydocstyle
+        types: [python]
+        exclude: ".snakemake."

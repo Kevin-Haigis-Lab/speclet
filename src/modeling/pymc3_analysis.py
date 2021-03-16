@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""Functions to aid in the analysis of PyMC3 models."""
+
 import re
 from typing import Dict, List, Optional, Tuple
 
@@ -32,7 +34,6 @@ def plot_all_priors(
     Returns:
         Tuple[matplotlib.figure.Figure, np.ndarray]: The matplotlib figure and array of axes.
     """
-
     model_vars: List[str] = []
     for x in prior_predictive.keys():
         if not re.search(rm_var_regex, x):
@@ -58,7 +59,7 @@ def extract_matrix_variable_indices(
     idx1name: str,
     idx2name: str,
 ) -> pd.DataFrame:
-    """A helper for extracting and annotating matrix (2D only) indices.
+    """Extract and annotating matrix (2D only) indices.
 
     Args:
         d (pd.DataFrame): The data frame produced by summarizing the posteriors of a PyMC3 model.
@@ -83,7 +84,7 @@ def extract_matrix_variable_indices(
 def summarize_posterior_predictions(
     a: np.ndarray, hdi_prob: float = 0.89, merge_with: Optional[pd.DataFrame] = None
 ) -> pd.DataFrame:
-    """A helper function for summarizing PyMC3 PPC
+    """Summarizing PyMC3 PPCs.
 
     Args:
         a (np.ndarray): The posterior predictions.
@@ -112,7 +113,7 @@ def summarize_posterior_predictions(
 
 
 def plot_vi_hist(approx: pm.variational.Approximation) -> gg.ggplot:
-    """Plot the history of fitting using Variational Inference
+    """Plot the history of fitting using Variational Inference.
 
     Args:
         approx (pm.variational.Approximation): The approximation attribute from the VI object.
