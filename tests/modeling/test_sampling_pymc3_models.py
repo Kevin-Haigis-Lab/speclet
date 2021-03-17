@@ -18,20 +18,20 @@ from src.modeling.sampling_pymc3_models import SamplingArguments
 
 def test_print_model(capsys: pytest.CaptureFixture):
     name = "SOME MODEL NAME"
-    sampling.print_model(name)
+    sampling._print_model(name)
     captured = capsys.readouterr()
     assert name in captured.out
 
 
 def test_print_info(capsys: pytest.CaptureFixture):
     msg = "here is some info"
-    sampling.info(msg)
+    sampling._info(msg)
     captured = capsys.readouterr()
     assert msg in captured.out
 
 
 def test_print_done(capsys: pytest.CaptureFixture):
-    sampling.done()
+    sampling._done()
     captured = capsys.readouterr()
     assert "Done" in captured.out
 

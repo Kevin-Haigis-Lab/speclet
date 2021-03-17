@@ -33,4 +33,6 @@ def margin(
     Returns:
         Dict[str, Any]: A dictionary for use as margin data in plotnine plots.
     """
+    if isinstance(units, str):
+        units = PlotnineUnits(units)
     return {"t": t, "b": b, "l": l, "r": r, "units": units}

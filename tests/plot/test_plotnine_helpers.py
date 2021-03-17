@@ -7,7 +7,6 @@ from src.plot import plotnine_helpers
 
 def test_margin_format():
     m = plotnine_helpers.margin()
-
     for key in ["t", "l", "b", "r", "units"]:
         assert key in m.keys()
 
@@ -19,6 +18,13 @@ def test_margin_values():
         assert m[key] == val
 
 
+def test_margin_unit_enum():
+    values = [1, 2, 3, 4, plotnine_helpers.PlotnineUnits.inches]
+    m = plotnine_helpers.margin(*values)
+    for key, val in zip(["t", "b", "l", "r", "units"], values):
+        assert m[key] == val
+
+
 def test_error_for_bad_unit():
-    with pytest.raises(ValueError):
+    with pytest.raises(Exception):
         _ = plotnine_helpers.margin(units="bad-unit")
