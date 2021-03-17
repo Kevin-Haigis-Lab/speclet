@@ -4,6 +4,7 @@
 
 
 import logging
+import logging.config
 from enum import Enum
 from time import time
 from typing import Optional
@@ -29,26 +30,8 @@ pretty_errors.configure(
 
 #### ---- Logger ---- ####
 
-
-# Standard out logging.
-c_handler = logging.StreamHandler()
-c_handler.setLevel(logging.INFO)
-c_fmt = logging.Formatter("%(levelname)s | %(message)s")
-c_handler.setFormatter(c_fmt)
-
-# File logging.
-f_handler = logging.FileHandler("logs/sample_pymc3_models.log")
-f_handler.setLevel(logging.DEBUG)
-f_fmt = logging.Formatter(
-    "%(asctime)s [%(levelname)s] | %(message)s", "%Y-%m-%d %H:%M:%S"
-)
-f_handler.setFormatter(f_fmt)
-
-# Custom logger.
-logger = logging.getLogger("sampling-pymc3")
-logger.setLevel(logging.DEBUG)
-logger.addHandler(c_handler)
-logger.addHandler(f_handler)
+logging.config.fileConfig(fname="loggers.conf")
+logger = logging.getLogger("specletLogger")
 
 
 #### ---- Main ---- ####
