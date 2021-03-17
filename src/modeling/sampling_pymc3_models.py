@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""CLI for sampling from predefined PyMC3 models."""
+
 from enum import Enum
 from pathlib import Path
 from time import time
@@ -46,17 +48,17 @@ CRC_SUBSAMPLING_DATA = MODELING_DATA_DIR / "depmap_CRC_data_subsample.csv"
 #### ---- General ---- ####
 
 
-def print_model(n: str):
+def _print_model(n: str):
     print(Fore.WHITE + Back.BLUE + " " + n + " ")
     return None
 
 
-def info(m: str):
+def _info(m: str):
     print(Fore.BLACK + Style.DIM + m)
     return None
 
 
-def done():
+def _done():
     print(Fore.GREEN + Style.BRIGHT + "Done")
     return None
 
@@ -65,10 +67,24 @@ def done():
 
 
 def make_cache_name(name: str) -> Path:
+    """Make a cache path.
+
+    Args:
+        name (str): Name of the model.
+
+    Returns:
+        Path: The path for the cache.
+    """
     return PYMC3_CACHE_DIR / name
 
 
 def touch_file(model: str, name: str) -> None:
+    """Touch a file.
+
+    Args:
+        model (str): The model.
+        name (str): The custom name of the model.
+    """
     p = make_cache_name(name) / (model + "_" + name + ".txt")
     p.touch()
     return None
@@ -78,6 +94,14 @@ def touch_file(model: str, name: str) -> None:
 
 
 def load_crc_data(debug: bool) -> pd.DataFrame:
+    """Load CRC data.
+
+    Args:
+        debug (bool): In debug mode?
+
+    Returns:
+        pd.DataFrame: CRC Achilles data.
+    """
     if debug:
         f = CRC_SUBSAMPLING_DATA
     else:
@@ -86,6 +110,14 @@ def load_crc_data(debug: bool) -> pd.DataFrame:
 
 
 def crc_batch_size(debug: bool) -> int:
+    """Decide on the minibatch size for a CRC data set.
+
+    Args:
+        debug (bool): In debug mode?
+
+    Returns:
+        int: Batch size.
+    """
     if debug:
         return 1000
     else:
@@ -96,6 +128,8 @@ def crc_batch_size(debug: bool) -> int:
 
 
 class SamplingArguments(BaseModel):
+    """Organize arguments/parameters often used for sampling."""
+
     name: str
     sample: bool = True
     ignore_cache: bool = False
@@ -111,7 +145,14 @@ ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
 def sample_crc_model1(
     model: pm.Model, args: SamplingArguments, replacements: ReplacementsDict
-):
+) -> None:
+    """Sample CRC Model 1.
+
+    Args:
+        model (pm.Model): CRC Model 1.
+        args (SamplingArguments): Arguments for the sampling method.
+        replacements (ReplacementsDict): Variable replacements for sampling.
+    """
     _ = pymc3_sampling_api.pymc3_advi_approximation_procedure(
         model=model,
         n_iterations=100000,
@@ -128,10 +169,18 @@ def sample_crc_model1(
 def crc_model1(
     sampling_args: SamplingArguments,
 ) -> Tuple[pm.Model, Dict[str, TTShared], pd.DataFrame]:
-    print_model("CRC Model 1")
+    """Build CRC Model 1.
+
+    Args:
+        sampling_args (SamplingArguments): Arguments to use for sampling.
+
+    Returns:
+        Tuple[pm.Model, Dict[str, TTShared], pd.DataFrame]: A collection of the generated model, shared variables, and the CRC Achilles data.
+    """
+    _print_model("CRC Model 1")
 
     # Data
-    info("Loading data...")
+    _info("Loading data...")
     data = load_crc_data(sampling_args.debug)
 
     batch_size = crc_batch_size(sampling_args.debug)
@@ -168,7 +217,7 @@ def crc_model1(
             model=crc_m1, args=sampling_args, replacements=data_replacements
         )
 
-    done()
+    _done()
     return crc_m1, shared_vars, data
 
 
@@ -176,10 +225,20 @@ def crc_model1(
 
 
 class ModelOption(str, Enum):
+    """Models that are available for sampling."""
+
     crc_m1 = "crc-m1"
 
 
 def clean_model_names(n: str) -> str:
+    """Clean a custom model name.
+
+    Args:
+        n (str): Custom model name.
+
+    Returns:
+        str: Cleaned model name.
+    """
     return n.replace(" ", "-")
 
 
@@ -191,7 +250,24 @@ def main(
     debug: bool = False,
     random_seed: Optional[int] = None,
     touch: bool = False,
-):
+) -> None:
+    """Fit and sample from a variety of predefined PyMC3 models.
+
+    Args:
+        model (ModelOption): The name of the model.
+        name (str): Custom name for the model. This is useful for creating multiple caches of the same model.
+        sample (bool, optional): Should the model be sampled? Defaults to True.
+        ignore_cache (bool, optional): Should the cache be ignored? Defaults to False.
+        debug (bool, optional): In debug mode? Defaults to False.
+        random_seed (Optional[int], optional): Random seed. Defaults to None.
+        touch (bool, optional): Should there be a file touched to indicate that the sampling process is complete? This is helpful for telling pipelines/workflows that this step is complete. Defaults to False.
+
+    Raises:
+        Exception: The model from the user is not recognized.
+
+    Returns:
+        [None]: None
+    """
     tic = time()
 
     name = clean_model_names(name)
@@ -212,17 +288,17 @@ def main(
         print(Fore.RED + "(🪲 debug mode)")
 
     if model == ModelOption.crc_m1:
-        res = crc_model1(sampling_args=sampling_args)
+        _ = crc_model1(sampling_args=sampling_args)
     else:
         raise Exception("Unrecognized model 🤷🏻‍♂️")
 
     if touch:
-        info("Touching output file.")
+        _info("Touching output file.")
         touch_file(model, name)
 
     toc = time()
-    info(f"execution time: {(toc - tic) / 60:.2f} minutes")
-    return res
+    _info(f"execution time: {(toc - tic) / 60:.2f} minutes")
+    return None
 
 
 if __name__ == "__main__":
