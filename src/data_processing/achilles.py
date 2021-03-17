@@ -171,7 +171,7 @@ def subsample_achilles_data(
         n_cell_lines (Optional[int], optional): Number of cell lines to subsample. Defaults to None.
 
     Raises:
-        ValueError: If the number of genes or cell lines is not positive
+        ValueError: If the number of genes or cell lines is not positive.
 
     Returns:
         pd.DataFrame: The Achilles data set.
