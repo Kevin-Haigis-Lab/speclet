@@ -2,12 +2,13 @@
 
 **Using Bayesian statistics to model CRISPR-Cas9 genetic screen data to identify, with measurable uncertainty, synthetic lethal interactions that are specific to the individual *KRAS* mutations.**
 
-[![python](https://img.shields.io/badge/Python-3.9.1-3776AB.svg?style=flat&logo=python)](https://www.python.org)
+[![python](https://img.shields.io/badge/Python-3.9-3776AB.svg?style=flat&logo=python)](https://www.python.org)
 [![jupyerlab](https://img.shields.io/badge/Jupyter-Lab-F37626.svg?style=flat&logo=jupyter)](https://jupyter.org) <br>
 [![pytest](https://github.com/Kevin-Haigis-Lab/speclet/actions/workflows/CI.yml/badge.svg)](https://github.com/Kevin-Haigis-Lab/speclet/actions/workflows/CI.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
-[![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/) <br>
+[![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
+[![pydocstyle](https://img.shields.io/badge/pydocstyle-enabled-AD4CD3)](http://www.pydocstyle.org/en/stable/) <br>
 [![License: GPLv3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ---
@@ -18,23 +19,55 @@
 
 All of the preparation of source data was conducted in the [Munge](munge/) directory. See the README in that directory for further details.
 
-### [Analysis](analysis/)
+### [Notebooks](notebooks/)
 
-All of the analysis was conducted in the [Analysis](analysis/) directory.
+Exploratory and small-scale analyses are conducted in the "notebooks/" directory.
+Subdirectories divide related notebooks.
 See the README in that directory for further details.
+
+### [Python Modules](src/)
+
+All shared Python code is contained in the "src/" directory.
+The installed of this directory as an editable module should be done automatically when the conda environment is created.
+If this failed, the modules can be installed using the following command.
+
+```python
+# Run only if the module was not automatically installed by conda.
+pip install -e .
+```
+
+The modules are tested using ['pytest'](https://docs.pytest.org/en/stable/); see below for how to run the tests.
+They also conform to the ['black'](https://github.com/psf/black) formatter and make heavy use of Python's type-hinting system checked by ['mypy'](http://mypy-lang.org/).
+The functions are well documented using the Google documentation style and are checked by ['pydocstyle'](http://www.pydocstyle.org/en/stable/).
+
+### [Pipelines](pipelines/)
+
+All pipelines and associated files (e.g. configurations and runners) are in the "pipelines/" directory.
+Each pipeline should contain an associated bash script that can be used to run the pipeline.
+
+### [Reports](reports/)
+
+Standardized reports are available in the "reports/" directory.
+Currently, there is only one pipeline making use of this directory, but if more are added, subdirectories should be used to separate groups of reports.
+
+### [Presentations](presentations/)
+
+Presentations that involved this project are stored in the "presentations/" directory.
 
 ### [Testing](tests/)
 
-Tests have been written against the modules in `analysis/`.
+Tests have been written against the modules in `src/` using ['pytest'](https://docs.pytest.org/en/stable/).
 They can be run using the following command.
 
 ```python
-python3 -m pytest --disable-warnings tests/
+pytest
 ```
 
-The coverage report can be shown by adding the `--cov="analysis"` parameter.
+The coverage report can be shown by adding the `--cov="src"` parameter.
 Some tests are slow because they involve the creation of PyMC3 models or sampling/fitting them.
 These can be skipped using the `-m "not slow"` argument.
+Some tests require the ability to construct plots (using the 'matplotlib' library), but not all platforms (notably the HMS research computing cluster) provide this ability.
+These tests can be skipped using the `-m "not plots"` argument.
 
 These tests are automatically run on GitHub Actions on pushes or PRs with the `master` git branch.
 The most recent results can be seen [here](https://github.com/Kevin-Haigis-Lab/speclet/actions).
