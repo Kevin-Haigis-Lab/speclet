@@ -13,29 +13,6 @@ from typer.testing import CliRunner
 from src.modeling import sampling_pymc3_models as sampling
 from src.modeling.sampling_pymc3_models import SamplingArguments
 
-#### ---- User Messages ---- ####
-
-
-def test_print_model(capsys: pytest.CaptureFixture):
-    name = "SOME MODEL NAME"
-    sampling._print_model(name)
-    captured = capsys.readouterr()
-    assert name in captured.out
-
-
-def test_print_info(capsys: pytest.CaptureFixture):
-    msg = "here is some info"
-    sampling._info(msg)
-    captured = capsys.readouterr()
-    assert msg in captured.out
-
-
-def test_print_done(capsys: pytest.CaptureFixture):
-    sampling._done()
-    captured = capsys.readouterr()
-    assert "Done" in captured.out
-
-
 #### ---- File IO ---- ####
 
 
@@ -164,37 +141,3 @@ class TestCrcModel1:
         expected_columns = ["lfc", "hugo_symbol", "depmap_id", "sgrna"]
         for col in expected_columns:
             assert col in data.columns
-
-
-class TestTyperCLI:
-    @pytest.fixture(scope="class")
-    def app(self) -> typer.Typer:
-        app = typer.Typer()
-        app.command()(sampling.main)
-        return app
-
-    @pytest.fixture(scope="class")
-    def runner(self) -> CliRunner:
-        return CliRunner()
-
-    def test_show_help(self, app: typer.Typer, runner: CliRunner):
-        result = runner.invoke(app, ["--help"])
-        assert result.exit_code == 0
-        assert "Usage:" in result.output
-        assert "Arguments:" in result.output
-        assert "Options:" in result.output
-
-    def test_no_input_error(self, app: typer.Typer, runner: CliRunner):
-        result = runner.invoke(app, [])
-        assert "Error: Missing argument" in result.output
-        assert result.exit_code > 0
-
-    def test_not_real_model_error(self, app: typer.Typer, runner: CliRunner):
-        result = runner.invoke(app, ["fake-model"])
-        assert "Error: Invalid value" in result.output
-        assert result.exit_code > 0
-
-    def test_no_name_error(self, app: typer.Typer, runner: CliRunner):
-        result = runner.invoke(app, [sampling.ModelOption.crc_m1])
-        assert "Error: Missing argument" in result.output
-        assert result.exit_code > 0
