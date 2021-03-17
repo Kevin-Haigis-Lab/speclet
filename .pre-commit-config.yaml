@@ -10,6 +10,8 @@ repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.4.0
     hooks:
+    -   id: no-commit-to-branch
+        args: [--branch, master, --branch, main]
     -   id: trailing-whitespace
         exclude: "presentations/"
     -   id: end-of-file-fixer
