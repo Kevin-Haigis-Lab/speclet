@@ -111,6 +111,49 @@ class TestSummarizePosteriorPredictions(PyMC3AnalysisTesting):
             mock_data.y.values, ppc_df["pred_mean"].values, atol=1
         )
 
+    @pytest.mark.DEV
+    def test_calc_error(self, mock_mcmc: MCMCResults, mock_data: pd.DataFrame):
+        _, post_pred = mock_mcmc
+
+        ppc_df = pmanal.summarize_posterior_predictions(post_pred["y_pred"])
+        assert "error" not in ppc_df.columns
+
+        ppc_df = pmanal.summarize_posterior_predictions(
+            post_pred["y_pred"], calc_error=True
+        )
+        assert "error" not in ppc_df.columns
+
+        ppc_df = pmanal.summarize_posterior_predictions(
+            post_pred["y_pred"], calc_error=True, observed_y="y_pred"
+        )
+        assert "error" not in ppc_df.columns
+
+        ppc_df = pmanal.summarize_posterior_predictions(
+            post_pred["y_pred"], merge_with=mock_data
+        )
+        assert "error" not in ppc_df.columns
+
+        ppc_df = pmanal.summarize_posterior_predictions(
+            post_pred["y_pred"], merge_with=mock_data, calc_error=True
+        )
+        assert "error" not in ppc_df.columns
+
+        with pytest.raises(TypeError):
+            ppc_df = pmanal.summarize_posterior_predictions(
+                post_pred["y_pred"],
+                merge_with=mock_data,
+                calc_error=True,
+                observed_y="Not a real column",
+            )
+
+        ppc_df = pmanal.summarize_posterior_predictions(
+            post_pred["y_pred"],
+            merge_with=mock_data,
+            calc_error=True,
+            observed_y="y",
+        )
+        assert "error" in ppc_df.columns
+
 
 @pytest.mark.plots
 class TestPlotVIHistory(PyMC3AnalysisTesting):

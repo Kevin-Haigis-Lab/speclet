@@ -20,8 +20,8 @@ from src.models import crc_models
 
 #### ---- Logging ---- ####
 
-logging.config.fileConfig(fname="loggers.conf")
-logger = logging.getLogger("specletLogger")
+# logging.config.fileConfig(fname="loggers.conf")
+# logger = logging.getLogger("specletLogger")
 
 
 #### ---- Data Paths ---- ####
@@ -123,9 +123,9 @@ class SamplingArguments(BaseModel):
     name: str
     sample: bool = True
     ignore_cache: bool = False
-    cache_dir: Path
-    debug: bool
-    random_seed: Optional[int]
+    cache_dir: Optional[Path] = None
+    debug: bool = False
+    random_seed: Optional[int] = None
 
 
 #### ---- CRC Model 1 ---- ####
@@ -143,7 +143,7 @@ def sample_crc_model1(
         args (SamplingArguments): Arguments for the sampling method.
         replacements (ReplacementsDict): Variable replacements for sampling.
     """
-    logger.info("Fitting and sampling 'crc-m1'.")
+    #     logger.info("Fitting and sampling 'crc-m1'.")
     _ = pymc3_sampling_api.pymc3_advi_approximation_procedure(
         model=model,
         n_iterations=100000,
@@ -169,11 +169,11 @@ def crc_model1(
         Tuple[pm.Model, Dict[str, TTShared], pd.DataFrame]: A collection of the generated model, shared variables, and the CRC Achilles data.
     """
     # Data
-    logger.info("Loading CRC data.")
+    #     logger.info("Loading CRC data.")
     data = load_crc_data(sampling_args.debug)
 
     batch_size = crc_batch_size(sampling_args.debug)
-    logger.debug(f"Using batch size {batch_size}")
+    #     logger.debug(f"Using batch size {batch_size}")
 
     # Indices
     indices_dict = achelp.common_indices(data)
@@ -187,7 +187,7 @@ def crc_model1(
     lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
     # Construct model
-    logger.info("Building 'crc-m1' and shared variables.")
+    #     logger.info("Building 'crc-m1' and shared variables.")
     crc_m1, shared_vars = crc_models.model_1(
         sgrna_idx=indices_dict["sgrna_idx"],
         sgrna_to_gene_idx=indices_dict["sgrna_to_gene_idx"],
@@ -208,5 +208,5 @@ def crc_model1(
             model=crc_m1, args=sampling_args, replacements=data_replacements
         )
 
-    logger.info("Finished building and sampling 'crc-m1'.")
+    #     logger.info("Finished building and sampling 'crc-m1'.")
     return crc_m1, shared_vars, data

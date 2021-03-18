@@ -30,8 +30,8 @@ pretty_errors.configure(
 
 #### ---- Logger ---- ####
 
-logging.config.fileConfig(fname="loggers.conf")
-logger = logging.getLogger("specletLogger")
+# logging.config.fileConfig(fname="loggers.conf")
+# logger = logging.getLogger("specletLogger")
 
 
 #### ---- Main ---- ####
@@ -82,27 +82,27 @@ def main(
         cache_dir=cache_dir,
     )
 
-    logger.debug(f"Cache directory: {cache_dir.as_posix()}")
+    #     logger.debug(f"Cache directory: {cache_dir.as_posix()}")
 
     if random_seed:
         np.random.seed(random_seed)
 
-    if debug:
-        logger.debug("Sampling in debug mode.")
+    #     if debug:
+    #         logger.debug("Sampling in debug mode.")
 
     if model == ModelOption.crc_m1:
-        logger.info(f"Sampling '{model}' with custom name '{name}'")
+        #         logger.info(f"Sampling '{model}' with custom name '{name}'")
         _ = sampling.crc_model1(sampling_args=sampling_args)
     else:
-        logger.error("Unknown model: '{model}'")
+        #         logger.error("Unknown model: '{model}'")
         raise Exception("Unrecognized model 🤷🏻‍♂️")
 
     if touch:
-        logger.info("Touching output file.")
+        #         logger.info("Touching output file.")
         sampling.touch_file(model, name)
 
     toc = time()
-    logger.info(f"finished; execution time: {(toc - tic) / 60:.2f} minutes")
+    #     logger.info(f"finished; execution time: {(toc - tic) / 60:.2f} minutes")
     return None
 
 

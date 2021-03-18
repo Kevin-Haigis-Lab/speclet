@@ -11,11 +11,14 @@ import numpy as np
 import pandas as pd
 import plotnine as gg
 import pymc3 as pm
+import seaborn as sns
+
 from src.context_managers import set_directory
 from src.data_processing import common as dphelp
 from src.modeling import pymc3_analysis as pmanal
 from src.modeling import pymc3_sampling_api as pmapi
 from src.modeling import sampling_pymc3_models as sampling
+from src.modeling.sampling_pymc3_models import SamplingArguments
 from src.models import crc_models
 from src.plot.color_pal import SeabornColor
 
@@ -61,23 +64,17 @@ model_cache_dir = ".." / sampling.make_cache_name(MODEL_NAME)
 ```
 
 ```python
+sampling_args = SamplingArguments(
+    name=MODEL_NAME, sample=False, debug=DEBUG, random_seed=RANDOM_SEED
+)
+
 with set_directory(".."):
-    model, _, data = sampling.main(
-        model=MODEL, name=MODEL_NAME, sample=False, debug=DEBUG, random_seed=RANDOM_SEED
-    )
+    if MODEL == "crc-m1":
+        model, _, data = sampling.crc_model1(sampling_args)
 ```
 
-    (🪲 debug mode)
-     CRC Model 1
-    Loading data...
-
-
     /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-
-
-    Done
-    execution time: 0.23 minutes
 
 ### Data
 
@@ -281,7 +278,7 @@ pmanal.plot_vi_hist(model_res["approximation"])
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_15_0.png)
 
-    <ggplot: (8746285773541)>
+    <ggplot: (8775563548124)>
 
 ## Model parameters
 
@@ -352,55 +349,55 @@ for var in vars_to_inspect:
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_0.png)
 
-    <ggplot: (8746231746844)>
+    <ggplot: (8775463838952)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_2.png)
 
-    <ggplot: (8746128961061)>
+    <ggplot: (8775462227423)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_4.png)
 
-    <ggplot: (8746130159734)>
+    <ggplot: (8775462407458)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_6.png)
 
-    <ggplot: (8746128943541)>
+    <ggplot: (8775462593148)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_8.png)
 
-    <ggplot: (8746129103556)>
+    <ggplot: (8775462565084)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_10.png)
 
-    <ggplot: (8746130534970)>
+    <ggplot: (8775462504120)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_12.png)
 
-    <ggplot: (8746129093202)>
+    <ggplot: (8775463811901)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_14.png)
 
-    <ggplot: (8746130258423)>
+    <ggplot: (8775462625907)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_16.png)
 
-    <ggplot: (8746130072381)>
+    <ggplot: (8775462215958)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_18.png)
 
-    <ggplot: (8746129180654)>
+    <ggplot: (8775462209049)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_20.png)
 
-    <ggplot: (8746129265134)>
+    <ggplot: (8775462343979)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_22.png)
 
-    <ggplot: (8746129466450)>
+    <ggplot: (8775462345454)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_24.png)
 
-    <ggplot: (8746129564688)>
+    <ggplot: (8775463695339)>
 
 ## Model predicitons
 
@@ -408,9 +405,10 @@ for var in vars_to_inspect:
 predictions = model_res["posterior_predictive"]
 pred_summary = pmanal.summarize_posterior_predictions(
     predictions["lfc"],
-    merge_with=data[["lfc", "depmap_id", "hugo_symbol", "sgrna", "log2_cn"]],
+    merge_with=data,
+    calc_error=True,
+    observed_y="lfc",
 )
-pred_summary["error"] = pred_summary.lfc - pred_summary.pred_mean
 pred_summary.head()
 ```
 
@@ -437,11 +435,23 @@ pred_summary.head()
       <th>pred_mean</th>
       <th>pred_hdi_low</th>
       <th>pred_hdi_high</th>
-      <th>lfc</th>
-      <th>depmap_id</th>
-      <th>hugo_symbol</th>
       <th>sgrna</th>
+      <th>replicate_id</th>
+      <th>lfc</th>
+      <th>pdna_batch</th>
+      <th>passes_qc</th>
+      <th>depmap_id</th>
+      <th>primary_or_metastasis</th>
+      <th>...</th>
+      <th>variant_classification</th>
+      <th>is_deleterious</th>
+      <th>is_tcga_hotspot</th>
+      <th>is_cosmic_hotspot</th>
+      <th>mutated_at_guide_location</th>
+      <th>rna_expr</th>
       <th>log2_cn</th>
+      <th>z_log2_cn</th>
+      <th>is_mutated</th>
       <th>error</th>
     </tr>
   </thead>
@@ -451,11 +461,23 @@ pred_summary.head()
       <td>-0.178218</td>
       <td>-0.897320</td>
       <td>0.547094</td>
-      <td>0.029491</td>
-      <td>ACH-000007</td>
-      <td>ADAMTS13</td>
       <td>CCACCCACAGACGCTCAGCA</td>
+      <td>ls513-311cas9_repa_p6_batch2</td>
+      <td>0.029491</td>
+      <td>2</td>
+      <td>True</td>
+      <td>ACH-000007</td>
+      <td>Primary</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>1.480265</td>
       <td>1.861144</td>
+      <td>1.386218</td>
+      <td>0</td>
       <td>0.207709</td>
     </tr>
     <tr>
@@ -463,11 +485,23 @@ pred_summary.head()
       <td>-0.135541</td>
       <td>-0.901338</td>
       <td>0.600710</td>
-      <td>0.426017</td>
-      <td>ACH-000007</td>
-      <td>ADAMTS13</td>
       <td>CCACCCACAGACGCTCAGCA</td>
+      <td>ls513-311cas9_repb_p6_batch2</td>
+      <td>0.426017</td>
+      <td>2</td>
+      <td>True</td>
+      <td>ACH-000007</td>
+      <td>Primary</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>1.480265</td>
       <td>1.861144</td>
+      <td>1.386218</td>
+      <td>0</td>
       <td>0.561558</td>
     </tr>
     <tr>
@@ -475,11 +509,23 @@ pred_summary.head()
       <td>-0.081253</td>
       <td>-0.876622</td>
       <td>0.571168</td>
-      <td>0.008626</td>
-      <td>ACH-000009</td>
-      <td>ADAMTS13</td>
       <td>CCACCCACAGACGCTCAGCA</td>
+      <td>c2bbe1-311cas9 rep a p5_batch3</td>
+      <td>0.008626</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000009</td>
+      <td>Primary</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>0.695994</td>
       <td>1.375470</td>
+      <td>-0.234394</td>
+      <td>0</td>
       <td>0.089879</td>
     </tr>
     <tr>
@@ -487,11 +533,23 @@ pred_summary.head()
       <td>-0.047154</td>
       <td>-0.811400</td>
       <td>0.690816</td>
-      <td>0.280821</td>
-      <td>ACH-000009</td>
-      <td>ADAMTS13</td>
       <td>CCACCCACAGACGCTCAGCA</td>
+      <td>c2bbe1-311cas9 rep b p5_batch3</td>
+      <td>0.280821</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000009</td>
+      <td>Primary</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>0.695994</td>
       <td>1.375470</td>
+      <td>-0.234394</td>
+      <td>0</td>
       <td>0.327976</td>
     </tr>
     <tr>
@@ -499,15 +557,28 @@ pred_summary.head()
       <td>-0.058682</td>
       <td>-0.776751</td>
       <td>0.657707</td>
-      <td>0.239815</td>
-      <td>ACH-000009</td>
-      <td>ADAMTS13</td>
       <td>CCACCCACAGACGCTCAGCA</td>
+      <td>c2bbe1-311cas9 rep c p5_batch3</td>
+      <td>0.239815</td>
+      <td>3</td>
+      <td>True</td>
+      <td>ACH-000009</td>
+      <td>Primary</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>0.695994</td>
       <td>1.375470</td>
+      <td>-0.234394</td>
+      <td>0</td>
       <td>0.298497</td>
     </tr>
   </tbody>
 </table>
+<p>5 rows × 34 columns</p>
 </div>
 
 ```python
@@ -517,6 +588,45 @@ az.plot_loo_pit(model_az, y="lfc");
     <AxesSubplot:>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_21_1.png)
+
+```python
+model_loo = az.loo(model_az, pointwise=True)
+print(model_loo)
+```
+
+    Computed from 1000 by 34760 log-likelihood matrix
+
+             Estimate       SE
+    elpd_loo -22806.11   205.65
+    p_loo     1067.75        -
+
+    There has been a warning during the calculation. Please check the results.
+    ------
+
+    Pareto k diagnostic values:
+                             Count   Pct.
+    (-Inf, 0.5]   (good)     34736   99.9%
+     (0.5, 0.7]   (ok)          23    0.1%
+       (0.7, 1]   (bad)          1    0.0%
+       (1, Inf)   (very bad)     0    0.0%
+
+```python
+sns.distplot(model_loo.loo_i.values);
+```
+
+    /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/seaborn/distributions.py:2557: FutureWarning: `distplot` is a deprecated function and will be removed in a future version. Please adapt your code to use either `displot` (a figure-level function with similar flexibility) or `histplot` (an axes-level function for histograms).
+
+
+
+
+
+    <AxesSubplot:ylabel='Density'>
+
+![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_23_2.png)
+
+```python
+pred_summary["loo"] = model_loo.loo_i.values
+```
 
 ```python
 (
@@ -530,9 +640,35 @@ az.plot_loo_pit(model_az, y="lfc");
 )
 ```
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_22_0.png)
+![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_25_0.png)
 
-    <ggplot: (8746129068026)>
+    <ggplot: (8775463794285)>
+
+```python
+(
+    gg.ggplot(pred_summary, gg.aes(x="lfc", y="loo"))
+    + gg.geom_point(gg.aes(color="np.abs(error)"), alpha=0.5)
+    + gg.scale_color_gradient(low="grey", high="red")
+    + gg.theme()
+    + gg.labs(x="observed LFC", y="LOO", color="abs(error)")
+)
+```
+
+![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_26_0.png)
+
+    <ggplot: (8775462799231)>
+
+```python
+(
+    gg.ggplot(pred_summary, gg.aes(x="np.abs(error)", y="loo"))
+    + gg.geom_point(gg.aes(color="lfc"), alpha=0.5)
+    + gg.labs(x="abs(error)", y="loo", color="LFC")
+)
+```
+
+![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_27_0.png)
+
+    <ggplot: (8775463373168)>
 
 ```python
 (
@@ -544,9 +680,58 @@ az.plot_loo_pit(model_az, y="lfc");
 )
 ```
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_23_0.png)
+![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_28_0.png)
 
-    <ggplot: (8746129069578)>
+    <ggplot: (8775463373081)>
+
+```python
+(
+    gg.ggplot(pred_summary, gg.aes(x="hugo_symbol", y="loo"))
+    + gg.geom_point(alpha=0.2, size=0.7)
+    + gg.geom_boxplot(outlier_alpha=0, alpha=0.4)
+    + gg.theme(axis_text_x=gg.element_blank(), axis_ticks_major_x=gg.element_blank())
+    + gg.labs(x="genes", y="LOO")
+)
+```
+
+![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_29_0.png)
+
+    <ggplot: (8775463040359)>
+
+```python
+(
+    gg.ggplot(pred_summary, gg.aes(x="depmap_id", y="loo"))
+    + gg.geom_jitter(width=0.2, alpha=0.3, size=0.7)
+    + gg.geom_boxplot(outlier_alpha=0, alpha=0.4)
+    + gg.theme(
+        axis_text_x=gg.element_text(angle=90, size=8),
+    )
+    + gg.labs(x="cell lines", y="LOO")
+)
+```
+
+![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_30_0.png)
+
+    <ggplot: (8775463373918)>
+
+```python
+# Remove samples without gene CN data.
+ppc_df_no_missing = pred_summary.copy()[~pred_summary.gene_cn.isna()]
+ppc_df_no_missing["binned_gene_cn"] = [
+    np.min([round(x), 10]) for x in ppc_df_no_missing.gene_cn
+]
+
+(
+    gg.ggplot(ppc_df_no_missing, gg.aes(x="factor(binned_gene_cn)", y="loo"))
+    + gg.geom_jitter(size=0.6, alpha=0.5, width=0.3)
+    + gg.geom_boxplot(outlier_alpha=0, alpha=0.8)
+    + gg.labs(x="gene copy number (max. 10)", y="LOO")
+)
+```
+
+![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_31_0.png)
+
+    <ggplot: (8775462798318)>
 
 ```python
 gene_error = (
@@ -577,9 +762,9 @@ n_genes = 15
 )
 ```
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_24_0.png)
+![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_32_0.png)
 
-    <ggplot: (8746129069719)>
+    <ggplot: (8775463033164)>
 
 ```python
 (
@@ -591,9 +776,9 @@ n_genes = 15
 )
 ```
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_25_0.png)
+![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_33_0.png)
 
-    <ggplot: (8746230375744)>
+    <ggplot: (8775459799507)>
 
 ---
 
@@ -602,14 +787,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 2.48 minutes
+    execution time: 3.56 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-03-16
+    Last updated: 2021-03-18
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -623,13 +808,14 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-e-16-237.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
 
-    Git branch: reorg-pipeline
+    Git branch: ppc-loocv
 
-    plotnine  : 0.7.1
-    matplotlib: 3.3.4
     arviz     : 0.11.2
-    pymc3     : 3.11.1
-    numpy     : 1.20.1
     pandas    : 1.2.3
+    plotnine  : 0.7.1
+    seaborn   : 0.11.1
+    pymc3     : 3.11.1
+    matplotlib: 3.3.4
+    numpy     : 1.20.1

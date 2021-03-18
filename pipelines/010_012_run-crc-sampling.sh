@@ -20,6 +20,7 @@ SNAKEFILE="pipelines/010_010_run-crc-sampling-snakemake.py"
 ENV_PATH="pipelines/010_014_environment.yml"
 cp environment.yml $ENV_PATH
 sed -i "s|-e .|-e $(pwd)/|" $ENV_PATH
+sed -i '/jupyter_contrib_nbextensions/d' $ENV_PATH
 
 snakemake \
     --snakefile $SNAKEFILE \
@@ -30,6 +31,7 @@ snakemake \
 #     --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}"
 
 # --cluster-config pipelines/default_snakemake_config.json \
+# --conda-cleanup-envs  # use to clean up old conda envs
 
 # to make a dag
 # snakemake \
