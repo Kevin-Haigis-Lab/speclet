@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""Builders for CRC PyMC3 models."""
+
 from typing import Dict, Tuple
 
 import numpy as np
@@ -20,7 +22,18 @@ def model_1(
     batch_idx: np.ndarray,
     lfc_data: np.ndarray,
 ) -> Tuple[pm.Model, Dict[str, TTShared]]:
+    """Build CRC Model 1.
 
+    Args:
+        sgrna_idx (np.ndarray): sgRNA index.
+        sgrna_to_gene_idx (np.ndarray): sgRNA to gene index.
+        cellline_idx (np.ndarray): Cell line index.
+        batch_idx (np.ndarray): pDNA batch index.
+        lfc_data (np.ndarray): Log-fold change (LFC) data.
+
+    Returns:
+        Tuple[pm.Model, Dict[str, TTShared]]: A collection of the model and shared variables.
+    """
     total_size = len(lfc_data)
     n_sgrnas = nunique(sgrna_idx)
     n_genes = nunique(sgrna_to_gene_idx)

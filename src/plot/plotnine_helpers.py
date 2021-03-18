@@ -1,24 +1,38 @@
 #!/usr/bin/env python3
 
-# Common functions to help with 'plotnine'.
+"""Common functions to help with 'plotnine'."""
 
-from typing import Any, Dict, List
+from enum import Enum
+from typing import Dict, Union
 
-PLOTNINE_UNITS = ["pt", "lines", "in"]
 
+class PlotnineUnits(str, Enum):
+    """Units used in Plotnine."""
 
-def get_possible_units() -> List[str]:
-    return PLOTNINE_UNITS
+    pt = "pt"
+    lines = "lines"
+    inches = "in"
 
 
 def margin(
-    t: float = 0, b: float = 0, l: float = 0, r: float = 0, units: str = "pt"
-) -> Dict[str, Any]:
-    """
-    Return a dictionary of margin data.
-    """
+    t: float = 0,
+    b: float = 0,
+    l: float = 0,
+    r: float = 0,
+    units: PlotnineUnits = PlotnineUnits.pt,
+) -> Dict[str, Union[float, str]]:
+    """Return a dictionary of margin data.
 
-    if not units in PLOTNINE_UNITS:
-        raise ValueError(f"Unit of type {units} is not available.")
+    Args:
+        t (float, optional): Top marginn. Defaults to 0.
+        b (float, optional): Bottom margin. Defaults to 0.
+        l (float, optional): Left margin. Defaults to 0.
+        r (float, optional): Right margin. Defaults to 0.
+        units (str, optional): Units for the margin. Defaults to "pt".
 
+    Returns:
+        Dict[str, Any]: A dictionary for use as margin data in plotnine plots.
+    """
+    if isinstance(units, str):
+        units = PlotnineUnits(units)
     return {"t": t, "b": b, "l": l, "r": r, "units": units}

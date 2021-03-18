@@ -23,7 +23,7 @@ class TestNunique:
 
     def test_nunique_dict(self):
         d = {"a": 1, "b": 2, "c": 3}
-        with pytest.raises(TypeError):
+        with pytest.raises(ValueError):
             dphelp.nunique(d)
 
 

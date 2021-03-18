@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""Functions to aid in the analysis of PyMC3 models."""
+
 import re
 from typing import Dict, List, Optional, Tuple
 
@@ -20,7 +22,18 @@ def plot_all_priors(
     samples: int = 1000,
     rm_var_regex: str = "log__|logodds_",
 ) -> Tuple[matplotlib.figure.Figure, np.ndarray]:
+    """Plot all priors of a PyMC3 model.
 
+    Args:
+        prior_predictive (Dict[str, np.ndarray]): The results of sampling from the priors of a PyMC3 model.
+        subplots (Tuple[int, int]): How many subplots to create.
+        figsize (Tuple[float, float]): The size of the final figure.
+        samples (int, optional): The number of samples from the distributions to use. This can help the performance of the plotting if there are many samples. Defaults to 1000.
+        rm_var_regex (str, optional): A regular expression for variables to remove. Defaults to "log__|logodds_".
+
+    Returns:
+        Tuple[matplotlib.figure.Figure, np.ndarray]: The matplotlib figure and array of axes.
+    """
     model_vars: List[str] = []
     for x in prior_predictive.keys():
         if not re.search(rm_var_regex, x):
@@ -46,6 +59,19 @@ def extract_matrix_variable_indices(
     idx1name: str,
     idx2name: str,
 ) -> pd.DataFrame:
+    """Extract and annotating matrix (2D only) indices.
+
+    Args:
+        d (pd.DataFrame): The data frame produced by summarizing the posteriors of a PyMC3 model.
+        col (str): The column with the 2D indices.
+        idx1 (np.ndarray): The values to use for the first index.
+        idx2 (np.ndarray): The values to use for the second index.
+        idx1name (str): The name to give the first index.
+        idx2name (str): The name to give the second index.
+
+    Returns:
+        pd.DataFrame: The modified data frame.
+    """
     indices_list = [
         [int(x) for x in re.findall("[0-9]+", s)] for s in d[[col]].to_numpy().flatten()
     ]
@@ -58,6 +84,16 @@ def extract_matrix_variable_indices(
 def summarize_posterior_predictions(
     a: np.ndarray, hdi_prob: float = 0.89, merge_with: Optional[pd.DataFrame] = None
 ) -> pd.DataFrame:
+    """Summarizing PyMC3 PPCs.
+
+    Args:
+        a (np.ndarray): The posterior predictions.
+        hdi_prob (float, optional): The HDI probability to use. Defaults to 0.89.
+        merge_with (Optional[pd.DataFrame], optional): The original data to merge with the predictions. Defaults to None.
+
+    Returns:
+        pd.DataFrame: A data frame with one row per data point and columns describing the posterior predictions.
+    """
     hdi = az.hdi(a, hdi_prob=hdi_prob)
 
     d = pd.DataFrame(
@@ -77,6 +113,14 @@ def summarize_posterior_predictions(
 
 
 def plot_vi_hist(approx: pm.variational.Approximation) -> gg.ggplot:
+    """Plot the history of fitting using Variational Inference.
+
+    Args:
+        approx (pm.variational.Approximation): The approximation attribute from the VI object.
+
+    Returns:
+        gg.ggplot: A plot showing the fitting history.
+    """
     d = pd.DataFrame({"loss": approx.hist}).assign(step=lambda d: np.arange(d.shape[0]))
     return (
         gg.ggplot(d, gg.aes(x="step", y="loss"))

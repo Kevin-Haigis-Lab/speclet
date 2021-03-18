@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
+"""Standardization of the interactions with PyMC3 sampling."""
+
 import pickle
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import arviz as az
-import numpy as np
-import pandas as pd
 import pretty_errors
 import pymc3 as pm
 from colorama import Back, Fore, Style, init
@@ -19,7 +19,12 @@ default_cache_dir = Path("pymc3_model_cache")
 #### ---- Dialogue ---- ####
 
 
-def info(m: str):
+def info(m: str) -> None:
+    """Print info for the user.
+
+    Args:
+        m (str): Message to display.
+    """
     print(Fore.BLACK + Style.DIM + m)
     return None
 
@@ -28,15 +33,14 @@ def info(m: str):
 
 
 def write_pickle(x: Any, fp: Path) -> None:
-    """
-    Write `x` to disk as a pickle file.
+    """Write `x` to disk as a pickle file.
 
-    Parameters
-    ----------
-    x: obj
-        Object to be pickled
-    fp: pathlib.Path
-        Path for where to write the pickle
+    Args:
+        x (Any): The object to pickle.
+        fp (Path): File path of the pickle.
+
+    Returns:
+        [None]: None
     """
     with open(fp, "wb") as f:
         pickle.dump(x, f)
@@ -44,20 +48,31 @@ def write_pickle(x: Any, fp: Path) -> None:
 
 
 def get_pickle(fp: Path) -> Any:
-    """
-    Read a pickled file into Python.
+    """Read a pickled file into Python.
 
-    Parameters
-    ----------
-    fp: pathlib.Path
-        Path for where to get the pickle
+    Args:
+        fp (Path): The pickle file path.
+
+    Returns:
+        Any: The pickled object.
     """
     with open(fp, "rb") as f:
         d = pickle.load(f)
     return d
 
 
+# TODO: I should create a class to hold these data. --> ArviZ.InferenceData?
+
+
 def cache_file_names(cache_dir: Path) -> Tuple[Path, Path, Path]:
+    """Generate standard caching file names.
+
+    Args:
+        cache_dir (Path): The cache directory.
+
+    Returns:
+        Tuple[Path, Path, Path]: A tuple of file paths.
+    """
     post_file_path = cache_dir / "posterior-predictive-check.pkl"
     prior_file_path = cache_dir / "prior-predictive-check.pkl"
     approx_file_path = cache_dir / "vi-approximation.pkl"
@@ -69,6 +84,16 @@ def package_cached_sampling_data(
     post_check: Dict[str, Any],
     prior_check: Dict[str, Any],
 ) -> Dict[str, Any]:
+    """Organize the results of sampling for caching.
+
+    Args:
+        trace (pm.backends.base.MultiTrace): PyMC3 sampling trace.
+        post_check (Dict[str, Any]): PyMC3 posterior predictions.
+        prior_check (Dict[str, Any]): PyMC3 prior predictions.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the results of sampling in PyMC3.
+    """
     return {
         "trace": trace,
         "posterior_predictive": post_check,
@@ -82,6 +107,17 @@ def package_cached_vi_data(
     post_check: Dict[str, Any],
     prior_check: Dict[str, Any],
 ) -> Dict[str, Any]:
+    """Organize the results of VI for caching.
+
+    Args:
+        approx (pm.MeanField): PyMC3 VI approximation.
+        trace (pm.backends.base.MultiTrace): PyMC3 sampling trace.
+        post_check (Dict[str, Any]): PyMC3 posterior predictions.
+        prior_check (Dict[str, Any]): PyMC3 prior predictions.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the results of sampling in PyMC3.
+    """
     return {
         "approximation": approx,
         "trace": trace,
@@ -91,6 +127,15 @@ def package_cached_vi_data(
 
 
 def read_cached_sampling(cache_dir: Path, model: pm.Model) -> Dict[str, Any]:
+    """Read sampling from cache.
+
+    Args:
+        cache_dir (Path): The cache directory.
+        model (pm.Model): The model corresponding to the cached sampling.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the cached results.
+    """
     info("Loading cached trace and posterior sample...")
     prior_file_path, post_file_path, _ = cache_file_names(cache_dir)
 
@@ -102,6 +147,15 @@ def read_cached_sampling(cache_dir: Path, model: pm.Model) -> Dict[str, Any]:
 
 
 def read_cached_vi(cache_dir: Path, draws: int = 1000) -> Dict[str, Any]:
+    """Read VI from cache.
+
+    Args:
+        cache_dir (Path): The cache directory.
+        model (pm.Model): The model corresponding to the cached VI.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the cached results.
+    """
     info("Loading cached trace and posterior sample...")
     prior_file_path, post_file_path, approx_file_path = cache_file_names(cache_dir)
 
@@ -131,38 +185,23 @@ def pymc3_sampling_procedure(
     force: bool = False,
     sample_kwargs: Dict[str, Any] = {},
 ) -> Dict[str, Any]:
-    """
-    Run the standard PyMC3 sampling procedure.
+    """Run a standard PyMC3 sampling procedure.
 
-    Parameters
-    ----------
-    model: pymc3.Model
-        A model from PyMC3
-    num_mcmc: int
-        Number of MCMC samples
-    tune: int
-        Number of MCMC tuning steps
-    chains: int
-        Number of of MCMC chains
-    cores: int
-        Number of cores for MCMC
-    prior_check_samples: int
-        Number of prior predictive samples to take
-    ppc_samples: int
-        Number of posterior predictive samples to take
-    random_seed: int
-        Random seed to use in all sampling processes
-    cache_dir: pathlib.Path
-        The directory to cache the output (leave as `None` to skip caching)
-    force: bool
-        Ignore cached results and compute trace and predictive checks,
-    sample_kwags: dict
-        Keyword arguments passed to `pm.sample()`.
+    Args:
+        model (pm.Model): PyMC3 model.
+        num_mcmc (int, optional): Number of MCMC draws. Defaults to 1000.
+        tune (int, optional): Number of tuning steps. Defaults to 1000.
+        chains (int, optional): Number of chains. Defaults to 2.
+        cores (Optional[int], optional): Number of cores. Defaults to None.
+        prior_check_samples (int, optional): Number of samples from the prior distributions. Defaults to 1000.
+        ppc_samples (int, optional): Number of samples for posterior predictions. Defaults to 1000.
+        random_seed (Optional[int], optional): The random seed for sampling. Defaults to None.
+        cache_dir (Optional[Path], optional): A directory to cache results. Defaults to None.
+        force (bool, optional): Should the model be fit even if there is an existing cache? Defaults to False.
+        sample_kwargs (Dict[str, Any], optional): Kwargs for the sampling method. Defaults to {}.
 
-    Returns
-    -------
-    dict
-        Contains the "trace", "posterior_predictive", and "prior_predictive"
+    Returns:
+        Dict[str, Any]: A dictionary containing the sampling results.
     """
     if cache_dir is not None:
         prior_file_path, post_file_path, _ = cache_file_names(cache_dir)
@@ -210,6 +249,24 @@ def pymc3_advi_approximation_procedure(
     force: bool = False,
     fit_kwargs: Dict[Any, Any] = {},
 ) -> Dict[str, Any]:
+    """Run a standard PyMC3 ADVI fitting procedure.
+
+    Args:
+        model (pm.Model): PyMC3 model.
+        method (str): VI method to use. Defaults to "advi".
+        n_iterations (int): Maximum number of fitting steps. Defaults to 100000.
+        draws (int, optional): Number of MCMC samples to draw from the fit model. Defaults to 1000.
+        prior_check_samples (int, optional): Number of samples from the prior distributions. Defaults to 1000.
+        post_check_samples (int, optional): Number of samples for posterior predictions. Defaults to 1000.
+        callbacks (List[Callable], optional): List of fitting callbacks. Default is None.
+        random_seed (Optional[int], optional): The random seed for sampling. Defaults to None.
+        cache_dir (Optional[Path], optional): A directory to cache results. Defaults to None.
+        force (bool, optional): Should the model be fit even if there is an existing cache? Defaults to False.
+        fit_kwargs (Dict[str, Any], optional): Kwargs for the fitting method. Defaults to {}.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the fitting and sampling results.
+    """
     if cache_dir is not None:
         prior_file_path, post_file_path, approx_file_path = cache_file_names(cache_dir)
 
@@ -248,19 +305,14 @@ def pymc3_advi_approximation_procedure(
 
 
 def samples_to_arviz(model: pm.Model, res: Dict[str, Any]) -> az.InferenceData:
-    """
-    Turn the results of `pymc3_sampling_procedure()` into a standard ArviZ object.
+    """Turn the results of `pymc3_sampling_procedure()` into a standard ArviZ object.
 
-    Parameters
-    ----------
-    model: pymc3.Model
-        The model
-    res: dict
-        The sampling results from `pymc3_sampling_procedure()`
+    Args:
+        model (pm.Model): The model used for the
+        res (Dict[str, Any]): The results of the fitting process.
 
-    Returns
-    -------
-    arviz.InferenceData
+    Returns:
+        az.InferenceData: A standard ArviZ data object.
     """
     return az.from_pymc3(
         trace=res["trace"],
