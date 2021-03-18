@@ -12,7 +12,6 @@ import pandas as pd
 import plotnine as gg
 import pymc3 as pm
 import seaborn as sns
-
 from src.context_managers import set_directory
 from src.data_processing import common as dphelp
 from src.modeling import pymc3_analysis as pmanal
@@ -73,8 +72,12 @@ with set_directory(".."):
         model, _, data = sampling.crc_model1(sampling_args)
 ```
 
+    (INFO) Loading CRC data.
+    (DEBUG) Using batch size 1000
     /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    (INFO) Building 'crc-m1' and shared variables.
+    (INFO) Finished building and sampling 'crc-m1'.
 
 ### Data
 
@@ -278,7 +281,7 @@ pmanal.plot_vi_hist(model_res["approximation"])
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_15_0.png)
 
-    <ggplot: (8775563548124)>
+    <ggplot: (8765071908503)>
 
 ## Model parameters
 
@@ -349,55 +352,55 @@ for var in vars_to_inspect:
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_0.png)
 
-    <ggplot: (8775463838952)>
+    <ggplot: (8765063488503)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_2.png)
 
-    <ggplot: (8775462227423)>
+    <ggplot: (8765061908188)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_4.png)
 
-    <ggplot: (8775462407458)>
+    <ggplot: (8765063421715)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_6.png)
 
-    <ggplot: (8775462593148)>
+    <ggplot: (8765062322601)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_8.png)
 
-    <ggplot: (8775462565084)>
+    <ggplot: (8765061984491)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_10.png)
 
-    <ggplot: (8775462504120)>
+    <ggplot: (8765062037282)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_12.png)
 
-    <ggplot: (8775463811901)>
+    <ggplot: (8765063458645)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_14.png)
 
-    <ggplot: (8775462625907)>
+    <ggplot: (8765061984350)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_16.png)
 
-    <ggplot: (8775462215958)>
+    <ggplot: (8765063098935)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_18.png)
 
-    <ggplot: (8775462209049)>
+    <ggplot: (8765063421838)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_20.png)
 
-    <ggplot: (8775462343979)>
+    <ggplot: (8765062005914)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_22.png)
 
-    <ggplot: (8775462345454)>
+    <ggplot: (8765062114073)>
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_24.png)
 
-    <ggplot: (8775463695339)>
+    <ggplot: (8765062217084)>
 
 ## Model predicitons
 
@@ -458,9 +461,9 @@ pred_summary.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.178218</td>
-      <td>-0.897320</td>
-      <td>0.547094</td>
+      <td>-0.171402</td>
+      <td>-0.821367</td>
+      <td>0.647317</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>ls513-311cas9_repa_p6_batch2</td>
       <td>0.029491</td>
@@ -478,13 +481,13 @@ pred_summary.head()
       <td>1.861144</td>
       <td>1.386218</td>
       <td>0</td>
-      <td>0.207709</td>
+      <td>0.200893</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.135541</td>
-      <td>-0.901338</td>
-      <td>0.600710</td>
+      <td>-0.128760</td>
+      <td>-0.869308</td>
+      <td>0.626891</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>ls513-311cas9_repb_p6_batch2</td>
       <td>0.426017</td>
@@ -502,13 +505,13 @@ pred_summary.head()
       <td>1.861144</td>
       <td>1.386218</td>
       <td>0</td>
-      <td>0.561558</td>
+      <td>0.554777</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.081253</td>
-      <td>-0.876622</td>
-      <td>0.571168</td>
+      <td>-0.070312</td>
+      <td>-0.833395</td>
+      <td>0.627037</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>c2bbe1-311cas9 rep a p5_batch3</td>
       <td>0.008626</td>
@@ -526,13 +529,13 @@ pred_summary.head()
       <td>1.375470</td>
       <td>-0.234394</td>
       <td>0</td>
-      <td>0.089879</td>
+      <td>0.078938</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.047154</td>
-      <td>-0.811400</td>
-      <td>0.690816</td>
+      <td>-0.035944</td>
+      <td>-0.798957</td>
+      <td>0.685948</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>c2bbe1-311cas9 rep b p5_batch3</td>
       <td>0.280821</td>
@@ -550,13 +553,13 @@ pred_summary.head()
       <td>1.375470</td>
       <td>-0.234394</td>
       <td>0</td>
-      <td>0.327976</td>
+      <td>0.316766</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.058682</td>
-      <td>-0.776751</td>
-      <td>0.657707</td>
+      <td>-0.047492</td>
+      <td>-0.724838</td>
+      <td>0.724399</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>c2bbe1-311cas9 rep c p5_batch3</td>
       <td>0.239815</td>
@@ -574,7 +577,7 @@ pred_summary.head()
       <td>1.375470</td>
       <td>-0.234394</td>
       <td>0</td>
-      <td>0.298497</td>
+      <td>0.287308</td>
     </tr>
   </tbody>
 </table>
@@ -597,17 +600,15 @@ print(model_loo)
     Computed from 1000 by 34760 log-likelihood matrix
 
              Estimate       SE
-    elpd_loo -22806.11   205.65
-    p_loo     1067.75        -
-
-    There has been a warning during the calculation. Please check the results.
+    elpd_loo -22839.98   208.09
+    p_loo     1111.38        -
     ------
 
     Pareto k diagnostic values:
                              Count   Pct.
     (-Inf, 0.5]   (good)     34736   99.9%
-     (0.5, 0.7]   (ok)          23    0.1%
-       (0.7, 1]   (bad)          1    0.0%
+     (0.5, 0.7]   (ok)          24    0.1%
+       (0.7, 1]   (bad)          0    0.0%
        (1, Inf)   (very bad)     0    0.0%
 
 ```python
@@ -642,7 +643,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_25_0.png)
 
-    <ggplot: (8775463794285)>
+    <ggplot: (8765063251866)>
 
 ```python
 (
@@ -656,7 +657,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_26_0.png)
 
-    <ggplot: (8775462799231)>
+    <ggplot: (8765063092971)>
 
 ```python
 (
@@ -668,7 +669,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_27_0.png)
 
-    <ggplot: (8775463373168)>
+    <ggplot: (8765063368801)>
 
 ```python
 (
@@ -682,7 +683,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_28_0.png)
 
-    <ggplot: (8775463373081)>
+    <ggplot: (8765060016773)>
 
 ```python
 (
@@ -696,7 +697,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_29_0.png)
 
-    <ggplot: (8775463040359)>
+    <ggplot: (8765062024461)>
 
 ```python
 (
@@ -712,7 +713,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_30_0.png)
 
-    <ggplot: (8775463373918)>
+    <ggplot: (8765071909386)>
 
 ```python
 # Remove samples without gene CN data.
@@ -731,7 +732,7 @@ ppc_df_no_missing["binned_gene_cn"] = [
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_31_0.png)
 
-    <ggplot: (8775462798318)>
+    <ggplot: (8765063370087)>
 
 ```python
 gene_error = (
@@ -764,7 +765,7 @@ n_genes = 15
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_32_0.png)
 
-    <ggplot: (8775463033164)>
+    <ggplot: (8765062687368)>
 
 ```python
 (
@@ -778,7 +779,7 @@ n_genes = 15
 
 ![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_33_0.png)
 
-    <ggplot: (8775459799507)>
+    <ggplot: (8765063148683)>
 
 ---
 
@@ -787,7 +788,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 3.56 minutes
+    execution time: 3.38 minutes
 
 ```python
 %load_ext watermark
@@ -810,12 +811,12 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
 
-    Git branch: ppc-loocv
+    Git branch: logging
 
-    arviz     : 0.11.2
     pandas    : 1.2.3
-    plotnine  : 0.7.1
+    matplotlib: 3.3.4
+    arviz     : 0.11.2
     seaborn   : 0.11.1
     pymc3     : 3.11.1
-    matplotlib: 3.3.4
     numpy     : 1.20.1
+    plotnine  : 0.7.1
