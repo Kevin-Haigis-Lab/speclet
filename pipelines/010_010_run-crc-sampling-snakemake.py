@@ -28,7 +28,7 @@ rule sample_models:
     conda:
         ENVIRONMENT_YAML
     shell:
-        'python3 src/modeling/sampling_pymc3_models.py "{wildcards.model}" "{wildcards.model_name}" --debug --random-seed 7414 --touch'
+        'python3 src/modeling/sampling_pymc3_models_cli.py "{wildcards.model}" "{wildcards.model_name}" --debug --random-seed 7414 --touch'
 
 rule papermill_report:
     input:
