@@ -82,7 +82,11 @@ def extract_matrix_variable_indices(
 
 
 def summarize_posterior_predictions(
-    a: np.ndarray, hdi_prob: float = 0.89, merge_with: Optional[pd.DataFrame] = None
+    a: np.ndarray,
+    hdi_prob: float = 0.89,
+    merge_with: Optional[pd.DataFrame] = None,
+    calc_error: bool = False,
+    observed_y: Optional[str] = None,
 ) -> pd.DataFrame:
     """Summarizing PyMC3 PPCs.
 
@@ -90,6 +94,8 @@ def summarize_posterior_predictions(
         a (np.ndarray): The posterior predictions.
         hdi_prob (float, optional): The HDI probability to use. Defaults to 0.89.
         merge_with (Optional[pd.DataFrame], optional): The original data to merge with the predictions. Defaults to None.
+        calc_error (bool): Should the error (real - predicted) be calculated? This is only used if `merge_with` is not None. Default to false.
+        observed_y: (Optional[str], optional): The column with the observed data. This is only used if `merge_with` is not None and `calc_error` is true. Default to None.
 
     Returns:
         pd.DataFrame: A data frame with one row per data point and columns describing the posterior predictions.
@@ -108,6 +114,10 @@ def summarize_posterior_predictions(
         d = pd.merge(
             d, merge_with.reset_index(drop=True), left_index=True, right_index=True
         )
+        if calc_error and observed_y is not None:
+            if observed_y not in d.columns:
+                raise TypeError(f"Column '{observed_y}' is not in data.")
+            d["error"] = d[observed_y].values - d["pred_mean"].values
 
     return d
 
