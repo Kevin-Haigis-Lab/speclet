@@ -16,7 +16,10 @@ def _get_console_handler() -> logging.Handler:
 
 
 def _get_log_file() -> pathlib.Path:
-    return pathlib.Path(__file__).parent.parent.absolute() / "logs" / "speclet.log"
+    dir = pathlib.Path(__file__).parent.parent.absolute() / "logs"
+    if not dir.exists():
+        dir.mkdir()
+    return dir / "speclet.log"
 
 
 def _get_file_handler() -> logging.Handler:
