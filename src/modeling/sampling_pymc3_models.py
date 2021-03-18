@@ -14,9 +14,11 @@ from pydantic import BaseModel
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 from src.data_processing import achilles as achelp
-from src.logging.loggers import logger
+from src.loggers import get_logger
 from src.modeling import pymc3_sampling_api
 from src.models import crc_models
+
+logger = get_logger()
 
 #### ---- Data Paths ---- ####
 

@@ -11,9 +11,11 @@ import numpy as np
 import pretty_errors
 import typer
 
-from src.logging.loggers import logger
+from src.loggers import get_logger
 from src.modeling import sampling_pymc3_models as sampling
 from src.modeling.sampling_pymc3_models import SamplingArguments
+
+logger = get_logger()
 
 #### ---- Pretty Errors ---- ####
 
