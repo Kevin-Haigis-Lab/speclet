@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 import pretty_errors
+from pydantic import BaseModel, Field
 
 from src.data_processing import common as dphelp
 
@@ -70,10 +71,37 @@ def make_sgrna_to_gene_mapping_df(
     )
 
 
-# ? should this be changed to a data object?
+class CommonIndices(BaseModel):
+    """Object to hold common indicies used for modeling Achilles data."""
+
+    sgrna_idx: np.ndarray
+    n_sgrnas: int = 0
+    sgrna_to_gene_map: pd.DataFrame
+    sgrna_to_gene_idx: np.ndarray
+    gene_idx: np.ndarray
+    n_genes: int = 0
+    cellline_idx: np.ndarray
+    n_celllines: int = 0
+    batch_idx: np.ndarray
+    n_batches: int = 0
+
+    def __init__(self, **data):
+        """Object to hold common indicies used for modeling Achilles data."""
+        super().__init__(**data)
+        self.n_sgrnas = dphelp.nunique(self.sgrna_idx)
+        self.n_genes = dphelp.nunique(self.gene_idx)
+        self.n_celllines = dphelp.nunique(self.cellline_idx)
+        self.n_batches = dphelp.nunique(self.batch_idx)
+
+    class Config:
+        """Configuration for pydantic validation."""
+
+        arbitrary_types_allowed = True
+
+
 def common_indices(
     achilles_df: pd.DataFrame,
-) -> Dict[str, Union[np.ndarray, pd.DataFrame]]:
+) -> CommonIndices:
     """Generate a collection of indices frequently used when modeling the Achilles data.
 
     Args:
@@ -83,14 +111,14 @@ def common_indices(
         Dict[str, Union[np.ndarray, pd.DataFrame]]: A dictionary with a collection of indices.
     """
     sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(achilles_df)
-    return {
-        "sgrna_idx": dphelp.get_indices(achilles_df, "sgrna"),
-        "sgrna_to_gene_map": sgrna_to_gene_map,
-        "sgrna_to_gene_idx": dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol"),
-        "gene_idx": dphelp.get_indices(achilles_df, "hugo_symbol"),
-        "cellline_idx": dphelp.get_indices(achilles_df, "depmap_id"),
-        "batch_idx": dphelp.get_indices(achilles_df, "pdna_batch"),
-    }
+    return CommonIndices(
+        sgrna_idx=dphelp.get_indices(achilles_df, "sgrna"),
+        sgrna_to_gene_map=sgrna_to_gene_map,
+        sgrna_to_gene_idx=dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol"),
+        gene_idx=dphelp.get_indices(achilles_df, "hugo_symbol"),
+        cellline_idx=dphelp.get_indices(achilles_df, "depmap_id"),
+        batch_idx=dphelp.get_indices(achilles_df, "pdna_batch"),
+    )
 
 
 #### ---- Data frames ---- ####
