@@ -60,7 +60,7 @@ class DivergenceFractionCallback:
         if trace.draw_idx - self.n_tune_steps < self.min_samples:
             return
 
-        # Check fraction of steps that were diverenges.
+        # Check fraction of steps that were divergences.
         if current_count / trace.draw_idx >= self.max_frac:
             raise TooManyDivergences(
                 f"Too many divergences: {current_count} of {trace.draw_idx} steps ({current_count / trace.draw_idx} %). Stopping early."

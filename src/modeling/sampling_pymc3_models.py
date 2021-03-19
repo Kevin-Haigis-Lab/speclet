@@ -88,10 +88,7 @@ def load_crc_data(debug: bool) -> pd.DataFrame:
     Returns:
         pd.DataFrame: CRC Achilles data.
     """
-    if debug:
-        f = CRC_SUBSAMPLING_DATA
-    else:
-        f = CRC_MODELING_DATA
+    f = CRC_SUBSAMPLING_DATA if debug else CRC_MODELING_DATA
     return achelp.read_achilles_data(f, low_memory=False)
 
 

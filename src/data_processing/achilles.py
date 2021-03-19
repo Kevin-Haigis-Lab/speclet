@@ -33,7 +33,7 @@ def zscale_cna_by_group(
     Returns:
         pd.DataFrame: The modified DataFrame.
     """
-    if not cn_max is None and cn_max > 0:
+    if cn_max is not None and cn_max > 0:
         df[new_col] = df[gene_cn_col].apply(lambda x: np.min((x, cn_max)))
     else:
         df[new_col] = df[gene_cn_col]

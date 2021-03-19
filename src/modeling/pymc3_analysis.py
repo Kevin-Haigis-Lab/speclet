@@ -35,7 +35,7 @@ def plot_all_priors(
         Tuple[matplotlib.figure.Figure, np.ndarray]: The matplotlib figure and array of axes.
     """
     model_vars: List[str] = []
-    for x in prior_predictive.keys():
+    for x in prior_predictive:
         if not re.search(rm_var_regex, x):
             model_vars.append(x)
 
@@ -110,7 +110,7 @@ def summarize_posterior_predictions(
         }
     )
 
-    if not merge_with is None:
+    if merge_with is not None:
         d = pd.merge(
             d, merge_with.reset_index(drop=True), left_index=True, right_index=True
         )

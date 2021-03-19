@@ -18,6 +18,8 @@ default_cache_dir = Path("pymc3_model_cache")
 
 #### ---- Dialogue ---- ####
 
+# TODO: replace these info statements with calls to logger.
+
 
 def info(m: str) -> None:
     """Print info for the user.
@@ -223,7 +225,7 @@ def pymc3_sampling_procedure(
             random_seed=random_seed,
             **sample_kwargs,
         )
-        info("Posterior predicitons.")
+        info("Posterior predictions.")
         post_check = pm.sample_posterior_predictive(
             trace, samples=ppc_samples, random_seed=random_seed
         )
