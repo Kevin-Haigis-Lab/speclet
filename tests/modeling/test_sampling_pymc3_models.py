@@ -7,8 +7,6 @@ import pandas as pd
 import pretty_errors
 import pymc3 as pm
 import pytest
-import typer
-from typer.testing import CliRunner
 
 from src.modeling import sampling_pymc3_models as sampling
 from src.modeling.sampling_pymc3_models import SamplingArguments

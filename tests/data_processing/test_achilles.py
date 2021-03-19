@@ -32,7 +32,7 @@ class TestHandlingAchillesData:
         test_data = achelp.read_achilles_data(
             self.file_path, low_memory=True, set_categorical_cols=False
         )
-        assert not "category" in test_data.dtypes
+        assert "category" not in test_data.dtypes
 
 
 class TestModifyingAchillesData:
@@ -65,7 +65,7 @@ class TestModifyingAchillesData:
 
     def test_setting_achilles_categorical_columns(self):
         data = achelp.read_achilles_data(self.data_path, set_categorical_cols=False)
-        assert not "category" in data.dtypes
+        assert "category" not in data.dtypes
         data = achelp.set_achilles_categorical_columns(data=data)
         assert sum(data.dtypes == "category") == 6
 

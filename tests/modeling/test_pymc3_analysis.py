@@ -111,7 +111,6 @@ class TestSummarizePosteriorPredictions(PyMC3AnalysisTesting):
             mock_data.y.values, ppc_df["pred_mean"].values, atol=1
         )
 
-    @pytest.mark.DEV
     def test_calc_error(self, mock_mcmc: MCMCResults, mock_data: pd.DataFrame):
         _, post_pred = mock_mcmc
 

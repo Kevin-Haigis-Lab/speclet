@@ -22,8 +22,8 @@ class TestNunique:
         assert dphelp.nunique((1, 2, 3, 1, 3)) == 3
 
     def test_nunique_dict(self):
-        d = {"a": 1, "b": 2, "c": 3}
         with pytest.raises(ValueError):
+            d = {"a": 1, "b": 2, "c": 3}
             dphelp.nunique(d)
 
 
