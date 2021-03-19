@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from itertools import product
+from pathlib import Path
 from string import ascii_lowercase as letters
 from string import ascii_uppercase as LETTERS
 from typing import Dict
@@ -13,7 +14,7 @@ import pytest
 
 from src.data_processing import achilles as achelp
 from src.data_processing import common as dphelp
-from src.models import crc_models
+from src.models import crc_models, speclet_model
 
 #### ---- Helper functions ---- ####
 
@@ -157,3 +158,34 @@ class TestCRCModel1:
         assert trace["μ_α"].shape == (n_draws, dphelp.nunique(mock_data.hugo_symbol))
         assert trace["α_s"].shape == (n_draws, dphelp.nunique(mock_data.sgrna.values))
         assert trace["β_l"].shape == (n_draws, dphelp.nunique(mock_data.depmap_id))
+
+
+#### ---- Test CrcModel ---- ####
+
+
+@pytest.mark.DEV
+class TestCrcModel:
+    def test_inheritance(self, tmp_path: Path):
+        model = crc_models.CrcModel(cache_dir=tmp_path, debug=True)
+        assert isinstance(model.get_cache_file_names(), speclet_model.ModelCachePaths)
+        assert model.cache_dir == tmp_path
+
+    def test_batch_size(self):
+        model = crc_models.CrcModel()
+        not_debug_batch_size = model.get_batch_size()
+        model.debug = True
+        debug_batch_size = model.get_batch_size()
+        assert debug_batch_size < not_debug_batch_size
+
+    def test_data_paths(self):
+        model = crc_models.CrcModel(debug=True)
+        assert model.get_data_path().exists and model.get_data_path().is_file()
+
+    def test_get_data(self):
+        model = crc_models.CrcModel(debug=True)
+        assert model.data is None
+        data = model.get_data()
+        assert model.data is not None
+        assert model.data.shape[0] > model.data.shape[1]
+        assert model.data.shape[0] == data.shape[0]
+        assert model.data.shape[1] == data.shape[1]

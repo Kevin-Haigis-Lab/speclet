@@ -2,15 +2,80 @@
 
 """Builders for CRC PyMC3 models."""
 
-from typing import Dict, Tuple
+from enum import Enum
+from pathlib import Path
+from typing import Dict, Optional, Tuple
 
 import numpy as np
+import pandas as pd
 import pretty_errors
 import pymc3 as pm
 import theano
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
+from src.data_processing import achilles as achelp
 from src.data_processing.common import nunique
+from src.models.speclet_model import SpecletModel
+
+
+class CrcModel(SpecletModel):
+    """Base model for CRC modeling.
+
+    Args:
+        SpecletModel ([type]): Subclassed from a SpecletModel.
+    """
+
+    debug: bool
+    data: Optional[pd.DataFrame] = None
+    data_dir: Path = Path("modeling_data")
+
+    def __init__(self, cache_dir: Optional[Path] = None, debug: bool = False):
+        """Create a CrcModel object.
+
+        Args:
+            cache_dir (Optional[Path], optional): The directory for caching sampling/fitting results. Defaults to None.
+            debug (bool, optional): Are you in debug mode? Defaults to False.
+        """
+        super().__init__(cache_dir=cache_dir)
+        self.debug = debug
+
+    def get_data_path(self) -> Path:
+        """Get the path for the data set to use.
+
+        Returns:
+            Path: Path to the data.
+        """
+        f = (
+            "depmap_modeling_dataframe_subsample.csv"
+            if self.debug
+            else "depmap_modeling_dataframe.csv"
+        )
+        return self.data_dir / f
+
+    def get_batch_size(self) -> int:
+        """Decide on the minibatch size for modeling CRC data.
+
+        Returns:
+            int: Batch size.
+        """
+        if self.debug:
+            return 1000
+        else:
+            return 10000
+
+    def _load_data(self) -> pd.DataFrame:
+        """Load CRC data."""
+        return achelp.read_achilles_data(self.get_data_path(), low_memory=False)
+
+    def get_data(self) -> pd.DataFrame:
+        """Get the data for modeling.
+
+        If the data is not already loaded, it is first read from disk.
+        """
+        if self.data is None:
+            self.data = self._load_data()
+        return self.data
+
 
 #### ---- Model 1 ---- ####
 
