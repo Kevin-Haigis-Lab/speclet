@@ -16,21 +16,6 @@ init(autoreset=True)
 default_cache_dir = Path("pymc3_model_cache")
 
 
-#### ---- Dialogue ---- ####
-
-# TODO: replace these info statements with calls to logger.
-
-
-def info(m: str) -> None:
-    """Print info for the user.
-
-    Args:
-        m (str): Message to display.
-    """
-    print(Fore.BLACK + Style.DIM + m)
-    return None
-
-
 #### ---- Cache management  ----- ####
 
 
@@ -138,7 +123,6 @@ def read_cached_sampling(cache_dir: Path, model: pm.Model) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: A dictionary containing the cached results.
     """
-    info("Loading cached trace and posterior sample...")
     prior_file_path, post_file_path, _ = cache_file_names(cache_dir)
 
     trace = pm.load_trace(cache_dir.as_posix(), model=model)
@@ -158,7 +142,6 @@ def read_cached_vi(cache_dir: Path, draws: int = 1000) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: A dictionary containing the cached results.
     """
-    info("Loading cached trace and posterior sample...")
     prior_file_path, post_file_path, approx_file_path = cache_file_names(cache_dir)
 
     post_check = get_pickle(post_file_path)
@@ -212,11 +195,9 @@ def pymc3_sampling_procedure(
         return read_cached_sampling(cache_dir, model=model)
 
     with model:
-        info("Sampling from prior distributions.")
         prior_check = pm.sample_prior_predictive(
             prior_check_samples, random_seed=random_seed
         )
-        info("Sampling from posterior.")
         trace = pm.sample(
             draws=num_mcmc,
             tune=tune,
@@ -225,12 +206,10 @@ def pymc3_sampling_procedure(
             random_seed=random_seed,
             **sample_kwargs,
         )
-        info("Posterior predictions.")
         post_check = pm.sample_posterior_predictive(
             trace, samples=ppc_samples, random_seed=random_seed
         )
     if cache_dir is not None:
-        info("Caching trace and posterior sample...")
         pm.save_trace(trace, directory=cache_dir.as_posix(), overwrite=True)
         write_pickle(post_check, post_file_path)
         write_pickle(prior_check, prior_file_path)
@@ -276,26 +255,19 @@ def pymc3_advi_approximation_procedure(
         try:
             return read_cached_vi(cache_dir)
         except Exception as err:
-            info("Unable to read from cache.")
-            info(f"  ERROR: {err}")
-            info("Automatically resampling")
+            print(f"ERROR: {err}")
 
     with model:
-        info("Sampling from prior distributions.")
         prior_check = pm.sample_prior_predictive(
             prior_check_samples, random_seed=random_seed
         )
-        info("Running ADVI approximation.")
         approx = pm.fit(n_iterations, method=method, callbacks=callbacks, **fit_kwargs)
-        info("Sampling from posterior.")
         advi_trace = approx.sample(draws)
-        info("Posterior predicitons.")
         post_check = pm.sample_posterior_predictive(
             trace=advi_trace, samples=post_check_samples, random_seed=random_seed
         )
 
     if cache_dir is not None:
-        info("Caching trace and posterior sample...")
         pm.save_trace(advi_trace, directory=cache_dir.as_posix(), overwrite=True)
         write_pickle(post_check, post_file_path)
         write_pickle(prior_check, prior_file_path)
