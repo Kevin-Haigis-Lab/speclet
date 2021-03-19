@@ -3,8 +3,6 @@
 """CLI for sampling from predefined PyMC3 models."""
 
 
-import logging
-import logging.config
 from enum import Enum
 from time import time
 from typing import Optional
@@ -13,8 +11,11 @@ import numpy as np
 import pretty_errors
 import typer
 
+from src.loggers import get_logger
 from src.modeling import sampling_pymc3_models as sampling
 from src.modeling.sampling_pymc3_models import SamplingArguments
+
+logger = get_logger()
 
 #### ---- Pretty Errors ---- ####
 
@@ -26,12 +27,6 @@ pretty_errors.configure(
     exception_arg_color=pretty_errors.RED,
     line_color=pretty_errors.BRIGHT_BLACK,
 )
-
-
-#### ---- Logger ---- ####
-
-# logging.config.fileConfig(fname="loggers.conf")
-# logger = logging.getLogger("specletLogger")
 
 
 #### ---- Main ---- ####
@@ -82,27 +77,27 @@ def main(
         cache_dir=cache_dir,
     )
 
-    #     logger.debug(f"Cache directory: {cache_dir.as_posix()}")
+    logger.debug(f"Cache directory: {cache_dir.as_posix()}")
 
     if random_seed:
         np.random.seed(random_seed)
 
-    #     if debug:
-    #         logger.debug("Sampling in debug mode.")
+        if debug:
+            logger.debug("Sampling in debug mode.")
 
     if model == ModelOption.crc_m1:
-        #         logger.info(f"Sampling '{model}' with custom name '{name}'")
+        logger.info(f"Sampling '{model}' with custom name '{name}'")
         _ = sampling.crc_model1(sampling_args=sampling_args)
     else:
-        #         logger.error("Unknown model: '{model}'")
+        logger.error("Unknown model: '{model}'")
         raise Exception("Unrecognized model 🤷🏻‍♂️")
 
     if touch:
-        #         logger.info("Touching output file.")
+        logger.info("Touching output file.")
         sampling.touch_file(model, name)
 
     toc = time()
-    #     logger.info(f"finished; execution time: {(toc - tic) / 60:.2f} minutes")
+    logger.info(f"finished; execution time: {(toc - tic) / 60:.2f} minutes")
     return None
 
 
