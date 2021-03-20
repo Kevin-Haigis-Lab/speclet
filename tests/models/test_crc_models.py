@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import time
 from itertools import product
 from pathlib import Path
 from string import ascii_lowercase as letters
@@ -81,8 +82,6 @@ class TestCrcModel:
 
 #### ---- Test CrcModelOne ---- ####
 
-# TODO: test errors for bad timing
-
 
 class TestCRCModel1:
     def test_init(self):
@@ -113,6 +112,15 @@ class TestCRCModel1:
         return SamplingArguments(
             name="MOCK_MODEL", cores=2, ignore_cache=True, debug=True, random_seed=123
         )
+
+    def test_error_for_sampling_without_building(
+        self, sampling_args: SamplingArguments
+    ):
+        model = crc_models.CrcModelOne()
+        with pytest.raises(AttributeError):
+            _ = model.mcmc_sample_model(sampling_args)
+        with pytest.raises(AttributeError):
+            _ = model.advi_sample_model(sampling_args)
 
     @pytest.mark.slow
     def test_manual_mcmc_sampling(self, mock_data: pd.DataFrame):
@@ -219,3 +227,43 @@ class TestCRCModel1:
         assert trace["μ_α"].shape == (n_draws, dphelp.nunique(mock_data.hugo_symbol))
         assert trace["α_s"].shape == (n_draws, dphelp.nunique(mock_data.sgrna.values))
         assert trace["β_l"].shape == (n_draws, dphelp.nunique(mock_data.depmap_id))
+
+    @pytest.mark.DEV
+    def test_not_rerun_mcmc_sampling(
+        self, mock_data: pd.DataFrame, sampling_args: SamplingArguments
+    ):
+        model = crc_models.CrcModelOne()
+        model.data = mock_data  # inject mock data
+        model.build_model()
+        results_1 = model.mcmc_sample_model(sampling_args=sampling_args)
+        a = time.time()
+        results_2 = model.mcmc_sample_model(sampling_args=sampling_args)
+        b = time.time()
+
+        assert b - a < 2  # should be very quick
+
+        for p in ["μ_g", "μ_α", "α_s", "β_l"]:
+            np.testing.assert_array_equal(results_1.trace[p], results_2.trace[p])
+
+    @pytest.mark.DEV
+    def test_not_rerun_advi_sampling(
+        self, mock_data: pd.DataFrame, sampling_args: SamplingArguments
+    ):
+        model = crc_models.CrcModelOne()
+        model.data = mock_data  # inject mock data
+        model.build_model()
+        results_1 = model.advi_sample_model(sampling_args=sampling_args)
+        a = time.time()
+        results_2 = model.advi_sample_model(sampling_args=sampling_args)
+        b = time.time()
+
+        assert b - a < 2  # should be very quick
+
+        np.testing.assert_array_equal(
+            results_1.approximation.hist, results_2.approximation.hist
+        )
+
+        for p in ["μ_g", "μ_α", "α_s", "β_l"]:
+            np.testing.assert_array_equal(
+                results_1.prior_predictive[p], results_2.prior_predictive[p]
+            )

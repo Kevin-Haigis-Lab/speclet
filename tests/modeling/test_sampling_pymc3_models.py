@@ -19,14 +19,10 @@ def test_make_cache_name():
     assert p.name == name
 
 
-def test_touch_file():
-    # TODO
-    a = 1
-
-
 def test_clean_model_names():
-    # TODO
-    a = 1
+    assert sampling.clean_model_names("model_name") == "model_name"
+    assert sampling.clean_model_names("model name") == "model-name"
+    assert sampling.clean_model_names("model name Jerry") == "model-named-Jerry"
 
 
 #### ---- SamplingArguments class ---- ####
