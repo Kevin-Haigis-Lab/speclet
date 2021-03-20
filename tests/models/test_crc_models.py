@@ -19,7 +19,7 @@ from src.data_processing import common as dphelp
 from src.modeling.sampling_pymc3_models import SamplingArguments
 from src.models import crc_models, speclet_model
 
-#### ---- Models ---- ####
+#### ---- Mock data ---- ####
 
 
 def make_mock_sgrna(of_length: int = 20) -> str:
@@ -55,23 +55,28 @@ def mock_data() -> pd.DataFrame:
 
 class TestCrcModel:
     def test_inheritance(self, tmp_path: Path):
-        model = crc_models.CrcModel(cache_dir=tmp_path, debug=True)
-        assert isinstance(model.get_cache_file_names(), speclet_model.ModelCachePaths)
-        assert model.cache_dir == tmp_path
+        model = crc_models.CrcModel(
+            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
+        )
+        assert isinstance(model, speclet_model.SpecletModel)
 
-    def test_batch_size(self):
-        model = crc_models.CrcModel()
+    def test_batch_size(self, tmp_path: Path):
+        model = crc_models.CrcModel(name="TEST-MODEL", root_cache_dir=tmp_path)
         not_debug_batch_size = model.get_batch_size()
         model.debug = True
         debug_batch_size = model.get_batch_size()
         assert debug_batch_size < not_debug_batch_size
 
-    def test_data_paths(self):
-        model = crc_models.CrcModel(debug=True)
+    def test_data_paths(self, tmp_path: Path):
+        model = crc_models.CrcModel(
+            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
+        )
         assert model.get_data_path().exists and model.get_data_path().is_file()
 
-    def test_get_data(self):
-        model = crc_models.CrcModel(debug=True)
+    def test_get_data(self, tmp_path: Path):
+        model = crc_models.CrcModel(
+            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
+        )
         assert model.data is None
         data = model.get_data()
         assert model.data is not None
@@ -84,15 +89,18 @@ class TestCrcModel:
 
 
 class TestCRCModel1:
-    def test_init(self):
-        model = crc_models.CrcModelOne()
+    def test_init(self, tmp_path: Path):
+        model = crc_models.CrcModelOne(
+            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
+        )
         assert isinstance(model, crc_models.CrcModelOne)
-        assert model.cache_dir is None
-        assert model.debug == False
+        assert isinstance(model, crc_models.CrcModel)
 
     @pytest.mark.slow
-    def test_build_model(self):
-        model = crc_models.CrcModelOne(debug=True)
+    def test_build_model(self, tmp_path: Path):
+        model = crc_models.CrcModelOne(
+            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
+        )
         assert model.data is None
         assert model.model is None
         assert model.shared_vars is None
@@ -114,17 +122,21 @@ class TestCRCModel1:
         )
 
     def test_error_for_sampling_without_building(
-        self, sampling_args: SamplingArguments
+        self, sampling_args: SamplingArguments, tmp_path: Path
     ):
-        model = crc_models.CrcModelOne()
+        model = crc_models.CrcModelOne(
+            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
+        )
         with pytest.raises(AttributeError):
             _ = model.mcmc_sample_model(sampling_args)
         with pytest.raises(AttributeError):
             _ = model.advi_sample_model(sampling_args)
 
     @pytest.mark.slow
-    def test_manual_mcmc_sampling(self, mock_data: pd.DataFrame):
-        model = crc_models.CrcModelOne()
+    def test_manual_mcmc_sampling(self, mock_data: pd.DataFrame, tmp_path: Path):
+        model = crc_models.CrcModelOne(
+            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
+        )
         model.data = mock_data  # inject mock data
         model.build_model()
 
@@ -157,16 +169,20 @@ class TestCRCModel1:
 
     @pytest.mark.slow
     def test_mcmc_sampling_method(
-        self, mock_data: pd.DataFrame, sampling_args: SamplingArguments
+        self, mock_data: pd.DataFrame, sampling_args: SamplingArguments, tmp_path: Path
     ):
-        model = crc_models.CrcModelOne()
+        model = crc_models.CrcModelOne(
+            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
+        )
         model.data = mock_data  # inject mock data
         model.build_model()
 
-        n_chains = 3
-        n_draws = 1000
+        n_chains = 2
+        n_draws = 100
 
-        mcmc_results = model.mcmc_sample_model(sampling_args=sampling_args)
+        mcmc_results = model.mcmc_sample_model(
+            mcmc_draws=n_draws, tune=100, chains=n_chains, sampling_args=sampling_args
+        )
 
         trace = mcmc_results.trace
         assert isinstance(trace, pm.backends.base.MultiTrace)
@@ -185,8 +201,10 @@ class TestCRCModel1:
         )
 
     @pytest.mark.slow
-    def test_manual_advi_sampling(self, mock_data: pd.DataFrame):
-        model = crc_models.CrcModelOne()
+    def test_manual_advi_sampling(self, mock_data: pd.DataFrame, tmp_path: Path):
+        model = crc_models.CrcModelOne(
+            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
+        )
         model.data = mock_data  # inject mock data
         model.build_model()
 
@@ -207,16 +225,20 @@ class TestCRCModel1:
 
     @pytest.mark.slow
     def test_advi_sampling_method(
-        self, mock_data: pd.DataFrame, sampling_args: SamplingArguments
+        self, mock_data: pd.DataFrame, sampling_args: SamplingArguments, tmp_path: Path
     ):
-        model = crc_models.CrcModelOne()
+        model = crc_models.CrcModelOne(
+            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
+        )
         model.data = mock_data  # inject mock data
         model.build_model()
 
-        n_fit = 100000
-        n_draws = 1000
+        n_fit = 1000
+        n_draws = 100
 
-        advi_results = model.advi_sample_model(sampling_args=sampling_args)
+        advi_results = model.advi_sample_model(
+            n_iterations=n_fit, draws=n_draws, sampling_args=sampling_args
+        )
         approx = advi_results.approximation
         trace = advi_results.trace
 
@@ -228,14 +250,18 @@ class TestCRCModel1:
         assert trace["α_s"].shape == (n_draws, dphelp.nunique(mock_data.sgrna.values))
         assert trace["β_l"].shape == (n_draws, dphelp.nunique(mock_data.depmap_id))
 
-    @pytest.mark.DEV
+    @pytest.mark.slow
     def test_not_rerun_mcmc_sampling(
-        self, mock_data: pd.DataFrame, sampling_args: SamplingArguments
+        self, mock_data: pd.DataFrame, sampling_args: SamplingArguments, tmp_path: Path
     ):
-        model = crc_models.CrcModelOne()
+        model = crc_models.CrcModelOne(
+            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
+        )
         model.data = mock_data  # inject mock data
         model.build_model()
-        results_1 = model.mcmc_sample_model(sampling_args=sampling_args)
+        results_1 = model.mcmc_sample_model(
+            mcmc_draws=100, tune=100, chains=2, sampling_args=sampling_args
+        )
         a = time.time()
         results_2 = model.mcmc_sample_model(sampling_args=sampling_args)
         b = time.time()
@@ -245,14 +271,18 @@ class TestCRCModel1:
         for p in ["μ_g", "μ_α", "α_s", "β_l"]:
             np.testing.assert_array_equal(results_1.trace[p], results_2.trace[p])
 
-    @pytest.mark.DEV
+    @pytest.mark.slow
     def test_not_rerun_advi_sampling(
-        self, mock_data: pd.DataFrame, sampling_args: SamplingArguments
+        self, mock_data: pd.DataFrame, sampling_args: SamplingArguments, tmp_path: Path
     ):
-        model = crc_models.CrcModelOne()
+        model = crc_models.CrcModelOne(
+            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
+        )
         model.data = mock_data  # inject mock data
         model.build_model()
-        results_1 = model.advi_sample_model(sampling_args=sampling_args)
+        results_1 = model.advi_sample_model(
+            n_iterations=1000, draws=100, sampling_args=sampling_args
+        )
         a = time.time()
         results_2 = model.advi_sample_model(sampling_args=sampling_args)
         b = time.time()

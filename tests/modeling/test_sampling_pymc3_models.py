@@ -22,7 +22,7 @@ def test_make_cache_name():
 def test_clean_model_names():
     assert sampling.clean_model_names("model_name") == "model_name"
     assert sampling.clean_model_names("model name") == "model-name"
-    assert sampling.clean_model_names("model name Jerry") == "model-named-Jerry"
+    assert sampling.clean_model_names("model named Jerry") == "model-named-Jerry"
 
 
 #### ---- SamplingArguments class ---- ####

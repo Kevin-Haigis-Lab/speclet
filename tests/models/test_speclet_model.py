@@ -13,39 +13,6 @@ from src.models import speclet_model
 
 
 class TestSpecletModel:
-    def test_writing_pickle(self, tmp_path: Path):
-        model = speclet_model.SpecletModel(cache_dir=tmp_path)
-        fp = tmp_path / "my-pickle.pkl"
-        p = "pickle"
-        model._write_pickle(p, fp)
-        assert fp.exists()
-
-    def test_reading_pickle(self, tmp_path: Path):
-        model = speclet_model.SpecletModel(cache_dir=tmp_path)
-        fp = tmp_path / "my-pickle.pkl"
-        p = "pickle"
-        model._write_pickle(p, fp)
-        assert fp.exists()
-        new_p = model._get_pickle(fp)
-        assert new_p == p
-
-    def test_error_generation_of_cache_paths(self):
-        with pytest.raises(ValueError):
-            model = speclet_model.SpecletModel(cache_dir=None)
-            _ = model.get_cache_file_names()
-
-    def test_generation_of_cache_paths(self, tmp_path: Path):
-        model = speclet_model.SpecletModel(cache_dir=tmp_path)
-        cache_paths = model.get_cache_file_names()
-
-        for path in cache_paths.dict().values():
-            assert tmp_path == path.parent
-
-        assert "prior" in cache_paths.prior_predictive_path.name
-        assert "posterior" in cache_paths.posterior_predictive_path.name
-        assert "trace" in cache_paths.trace_path.name
-        assert "approx" in cache_paths.approximation_path.name
-
     @pytest.fixture(scope="class")
     def data(self) -> pd.DataFrame:
         real_a = 1
@@ -112,12 +79,15 @@ class TestSpecletModel:
     def test_writing_mcmc_cache(
         self, mcmc_results: pmapi.MCMCSamplingResults, tmp_path: Path
     ):
-        model = speclet_model.SpecletModel(cache_dir=tmp_path)
         assert len(list(tmp_path.iterdir())) == 0
-        model.cache_sampling_results(mcmc_results)
-        assert len(list(tmp_path.iterdir())) > 0
+        model = speclet_model.SpecletModel(
+            name="test-mcmc-model", root_cache_dir=tmp_path
+        )
+        assert len(list(tmp_path.iterdir())) == 1
+        assert len(list(model.cache_dir.iterdir())) == 2
+        model.write_mcmc_cache(res=mcmc_results)
 
-        cache_paths = model.get_cache_file_names()
+        cache_paths = model.mcmc_cache_delegate.get_cache_file_names()
         assert (
             cache_paths.prior_predictive_path.is_file()
             and cache_paths.prior_predictive_path.exists()
@@ -138,11 +108,12 @@ class TestSpecletModel:
         mcmc_results: pmapi.MCMCSamplingResults,
         tmp_path: Path,
     ):
-        model = speclet_model.SpecletModel(cache_dir=tmp_path)
         assert len(list(tmp_path.iterdir())) == 0
-        model.cache_sampling_results(mcmc_results)
-        assert len(list(tmp_path.iterdir())) > 0
-        new_res = model.read_cached_sampling(model=pm_model)
+        model = speclet_model.SpecletModel(
+            name="test-mcmc-model2", root_cache_dir=tmp_path
+        )
+        model.write_mcmc_cache(mcmc_results)
+        new_res = model.get_mcmc_cache(model=pm_model)
 
         for param in ["a", "b", "sigma"]:
             np.testing.assert_almost_equal(
@@ -167,12 +138,15 @@ class TestSpecletModel:
     def test_writing_advi_cache(
         self, advi_results: pmapi.ApproximationSamplingResults, tmp_path: Path
     ):
-        model = speclet_model.SpecletModel(cache_dir=tmp_path)
         assert len(list(tmp_path.iterdir())) == 0
-        model.cache_sampling_results(advi_results)
-        assert len(list(tmp_path.iterdir())) > 0
+        model = speclet_model.SpecletModel(
+            name="test-advi-model", root_cache_dir=tmp_path
+        )
+        assert len(list(tmp_path.iterdir())) == 1
+        assert len(list(model.cache_dir.iterdir())) == 2
+        model.write_advi_cache(advi_results)
 
-        cache_paths = model.get_cache_file_names()
+        cache_paths = model.advi_cache_delegate.get_cache_file_names()
         assert (
             cache_paths.prior_predictive_path.is_file()
             and cache_paths.prior_predictive_path.exists()
@@ -185,17 +159,18 @@ class TestSpecletModel:
             cache_paths.approximation_path.is_file()
             and cache_paths.approximation_path.exists()
         )
-        assert cache_paths.trace_path.is_dir() and cache_paths.trace_path.exists()
+        assert not cache_paths.trace_path.exists()
 
     @pytest.mark.slow
     def test_reading_advi_cache(
         self, advi_results: pmapi.ApproximationSamplingResults, tmp_path: Path
     ):
-        model = speclet_model.SpecletModel(cache_dir=tmp_path)
         assert len(list(tmp_path.iterdir())) == 0
-        model.cache_sampling_results(advi_results)
-        assert len(list(tmp_path.iterdir())) > 0
-        new_res = model.read_cached_approximation()
+        model = speclet_model.SpecletModel(
+            name="test-advi-model2", root_cache_dir=tmp_path
+        )
+        model.write_advi_cache(advi_results)
+        new_res = model.get_advi_cache()
 
         for param in ["a", "b", "sigma"]:
             np.testing.assert_almost_equal(

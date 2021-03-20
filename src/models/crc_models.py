@@ -30,14 +30,17 @@ class CrcModel(SpecletModel):
     debug: bool
     data: Optional[pd.DataFrame] = None
 
-    def __init__(self, cache_dir: Optional[Path] = None, debug: bool = False):
+    def __init__(
+        self, name: str, root_cache_dir: Optional[Path] = None, debug: bool = False
+    ):
         """Create a CrcModel object.
 
         Args:
-            cache_dir (Optional[Path], optional): The directory for caching sampling/fitting results. Defaults to None.
+            name (str): A unique identifier for this instance of CrcModel. (Used for cache management.)
+            root_cache_dir (Optional[Path], optional): The directory for caching sampling/fitting results. Defaults to None to use the speclet default.
             debug (bool, optional): Are you in debug mode? Defaults to False.
         """
-        super().__init__(cache_dir=cache_dir)
+        super().__init__(name="crc_" + name, root_cache_dir=root_cache_dir)
         self.debug = debug
 
     def get_data_path(self) -> Path:
@@ -88,14 +91,17 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
 
     ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
-    def __init__(self, cache_dir: Optional[Path] = None, debug: bool = False):
+    def __init__(
+        self, name: str, root_cache_dir: Optional[Path] = None, debug: bool = False
+    ):
         """Create a CrcModelOne object.
 
         Args:
-            cache_dir (Optional[Path], optional): The directory for caching sampling/fitting results. Defaults to None.
+            name (str): A unique identifier for this instance of CrcModelOne. (Used for cache management.)
+            root_cache_dir (Optional[Path], optional): The directory for caching sampling/fitting results. Defaults to None.
             debug (bool, optional): Are you in debug mode? Defaults to False.
         """
-        super().__init__(cache_dir=cache_dir, debug=debug)
+        super().__init__(name="m1_" + name, root_cache_dir=root_cache_dir, debug=debug)
 
     def _get_indices_collection(self, data: pd.DataFrame) -> achelp.CommonIndices:
         return achelp.common_indices(data)
@@ -188,7 +194,11 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         }
 
     def mcmc_sample_model(
-        self, sampling_args: SamplingArguments
+        self,
+        sampling_args: SamplingArguments,
+        mcmc_draws: int = 10000,
+        tune: int = 1000,
+        chains: int = 3,
     ) -> pmapi.MCMCSamplingResults:
         """Fit the model with MCMC.
 
@@ -207,22 +217,26 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         if self.mcmc_results is not None:
             return self.mcmc_results
 
-        if (
-            not sampling_args.ignore_cache
-            and self.cache_dir is not None
-            and self.cache_exists(method="mcmc")
-        ):
-            return self.read_cached_approximation()
+        if not sampling_args.ignore_cache and self.mcmc_cache_exists():
+            self.mcmc_results = self.get_mcmc_cache(model=self.model)
+            return self.mcmc_results
 
         self.mcmc_results = pmapi.pymc3_sampling_procedure(
             model=self.model,
+            mcmc_draws=mcmc_draws,
+            tune=tune,
+            chains=chains,
             cores=sampling_args.cores,
             random_seed=sampling_args.random_seed,
         )
+        self.write_mcmc_cache(self.mcmc_results)
         return self.mcmc_results
 
     def advi_sample_model(
-        self, sampling_args: SamplingArguments
+        self,
+        sampling_args: SamplingArguments,
+        n_iterations: int = 100000,
+        draws: int = 1000,
     ) -> pmapi.ApproximationSamplingResults:
         """Fit the model with ADVI.
 
@@ -244,21 +258,21 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         if self.advi_results is not None:
             return self.advi_results
 
-        if (
-            not sampling_args.ignore_cache
-            and self.cache_dir is not None
-            and self.cache_exists(method="advi")
-        ):
-            return self.read_cached_approximation()
+        if not sampling_args.ignore_cache and self.advi_cache_exists():
+            self.advi_results = self.get_advi_cache()
+            return self.advi_results
 
         self.advi_results = pmapi.pymc3_advi_approximation_procedure(
             model=self.model,
+            n_iterations=n_iterations,
+            draws=draws,
             callbacks=[
                 pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
             ],
             random_seed=sampling_args.random_seed,
             fit_kwargs={"more_replacements": replacements},
         )
+        self.write_advi_cache(self.advi_results)
         return self.advi_results
 
     def run_simulation_based_calibration(self):
