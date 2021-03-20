@@ -2,9 +2,8 @@
 
 """Builders for CRC PyMC3 models."""
 
-from enum import Enum
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -15,8 +14,9 @@ from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 from src.data_processing import achilles as achelp
 from src.data_processing import common as dphelp
-from src.data_processing.common import nunique
 from src.io import data_io
+from src.modeling import pymc3_sampling_api as pmapi
+from src.modeling.sampling_pymc3_models import SamplingArguments
 from src.models.protocols import SelfSufficientModel
 from src.models.speclet_model import SpecletModel
 
@@ -84,6 +84,10 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
 
     shared_vars: Optional[Dict[str, TTShared]] = None
     model: Optional[pm.Model] = None
+    advi_results: Optional[pmapi.ApproximationSamplingResults] = None
+    mcmc_results: Optional[pmapi.MCMCSamplingResults] = None
+
+    ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
     def __init__(self, cache_dir: Optional[Path] = None, debug: bool = False):
         """Create a CrcModelOne object.
@@ -94,12 +98,15 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         """
         super().__init__(cache_dir=cache_dir, debug=debug)
 
+    def _get_indices_collection(self, data: pd.DataFrame) -> achelp.CommonIndices:
+        return achelp.common_indices(data)
+
     def build_model(self) -> None:
         """Build CRC Model One."""
         data = self.get_data()
 
         total_size = data.shape[0]
-        indices_collection = achelp.common_indices(data)
+        indices_collection = self._get_indices_collection(data)
 
         # Shared Theano variables
         sgrna_idx_shared = theano.shared(indices_collection.sgrna_idx)
@@ -156,10 +163,99 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         self.shared_vars = shared_vars
         return None
 
-    def sample_model(self):
-        """Sample from the model."""
-        print("sampling...")
+    def _get_replacement_parameters(self) -> ReplacementsDict:
+        if self.data is None:
+            raise AttributeError(
+                "Cannot create replacement parameters before data has been loaded."
+            )
+        if self.shared_vars is None:
+            raise AttributeError(
+                "No shared variables - cannot create replacement parameters.."
+            )
+
+        batch_size = self.get_batch_size()
+        indices = self._get_indices_collection(self.data)
+
+        sgrna_idx_batch = pm.Minibatch(indices.sgrna_idx, batch_size=batch_size)
+        cellline_idx_batch = pm.Minibatch(indices.cellline_idx, batch_size=batch_size)
+        batch_idx_batch = pm.Minibatch(indices.batch_idx, batch_size=batch_size)
+        lfc_data_batch = pm.Minibatch(self.data.lfc.values, batch_size=batch_size)
+
+        return {
+            self.shared_vars["sgrna_idx_shared"]: sgrna_idx_batch,
+            self.shared_vars["cellline_idx_shared"]: cellline_idx_batch,
+            self.shared_vars["batch_idx_shared"]: batch_idx_batch,
+            self.shared_vars["lfc_shared"]: lfc_data_batch,
+        }
+
+    def mcmc_sample_model(
+        self, sampling_args: SamplingArguments
+    ) -> pmapi.MCMCSamplingResults:
+        """Fit the model with MCMC.
+
+        Args:
+            sampling_args (SamplingArguments): Arguments for the sampling procedure.
+        """
+        if self.model is None:
+            raise AttributeError(
+                "Cannot sample: model is 'None'. Make sure to run `model.build_model()` first."
+            )
+        if self.shared_vars is None:
+            raise AttributeError("Cannot sample: cannot find shared variables.")
+
+        replacements = self._get_replacement_parameters()
+
+        if self.mcmc_results is not None:
+            return self.mcmc_results
+
+        if self.cache_exists(method="mcmc") and not sampling_args.ignore_cache:
+            return self.read_cached_approximation()
+
+        self.mcmc_results = pmapi.pymc3_sampling_procedure(
+            model=self.model,
+            cores=sampling_args.cores,
+            random_seed=sampling_args.random_seed,
+            sample_kwargs={"more_replacements": replacements},
+        )
+        return self.mcmc_results
+
+    def advi_sample_model(
+        self, sampling_args: SamplingArguments
+    ) -> pmapi.ApproximationSamplingResults:
+        """Fit the model with ADVI.
+
+        Args:
+            sampling_args (SamplingArguments): Arguments for the sampling procedure.
+
+        Returns:
+            ApproximationSamplingResults: The results of fitting the model with ADVI.
+        """
+        if self.model is None:
+            raise AttributeError(
+                "Cannot sample: model is 'None'. Make sure to run `model.build_model()` first."
+            )
+        if self.shared_vars is None:
+            raise AttributeError("Cannot sample: cannot find shared variables.")
+
+        replacements = self._get_replacement_parameters()
+
+        if self.advi_results is not None:
+            return self.advi_results
+
+        if self.cache_exists(method="advi") and not sampling_args.ignore_cache:
+            return self.read_cached_approximation()
+
+        self.advi_results = pmapi.pymc3_advi_approximation_procedure(
+            model=self.model,
+            callbacks=[
+                pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
+            ],
+            random_seed=sampling_args.random_seed,
+            fit_kwargs={"more_replacements": replacements},
+        )
+        return self.advi_results
 
     def run_simulation_based_calibration(self):
         """Run a round of simulation-based calibration."""
+        # TODO
         print("Running SBC...")

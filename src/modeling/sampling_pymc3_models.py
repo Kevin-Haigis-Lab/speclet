@@ -13,7 +13,7 @@ from src.modeling import pymc3_sampling_api
 
 #### ---- Data Paths ---- ####
 
-# ! Move this to 'io/' module.
+# TODO: Move this responsibility to 'io/' module.
 PYMC3_CACHE_DIR = Path("models", "model_cache") / pymc3_sampling_api.default_cache_dir
 
 
@@ -66,6 +66,7 @@ class SamplingArguments(BaseModel):
     """Organize arguments/parameters often used for sampling."""
 
     name: str
+    cores: int = 1
     sample: bool = True
     ignore_cache: bool = False
     cache_dir: Optional[Path] = None

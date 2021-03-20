@@ -8,6 +8,7 @@ import pandas as pd
 import pymc3 as pm
 import pytest
 
+from src.modeling import pymc3_sampling_api as pmapi
 from src.models import speclet_model
 
 
@@ -67,7 +68,7 @@ class TestSpecletModel:
     @pytest.fixture(scope="class")
     def mcmc_results(
         self, data: pd.DataFrame, pm_model: pm.Model
-    ) -> speclet_model.MCMCSamplingResults:
+    ) -> pmapi.MCMCSamplingResults:
         with pm_model:
             prior = pm.sample_prior_predictive(samples=100, random_seed=123)
             trace = pm.sample(
@@ -81,14 +82,14 @@ class TestSpecletModel:
             post = pm.sample_posterior_predictive(
                 trace=trace, samples=100, random_seed=123
             )
-        return speclet_model.MCMCSamplingResults(
+        return pmapi.MCMCSamplingResults(
             trace=trace, prior_predictive=prior, posterior_predictive=post
         )
 
     @pytest.fixture(scope="class")
     def advi_results(
         self, data: pd.DataFrame, pm_model: pm.Model
-    ) -> speclet_model.ApproximationSamplingResults:
+    ) -> pmapi.ApproximationSamplingResults:
         with pm_model:
             prior = pm.sample_prior_predictive(samples=100, random_seed=123)
             approx = pm.fit(
@@ -100,7 +101,7 @@ class TestSpecletModel:
             post = pm.sample_posterior_predictive(
                 trace=trace, samples=100, random_seed=123
             )
-        return speclet_model.ApproximationSamplingResults(
+        return pmapi.ApproximationSamplingResults(
             trace=trace,
             prior_predictive=prior,
             posterior_predictive=post,
@@ -109,7 +110,7 @@ class TestSpecletModel:
 
     @pytest.mark.slow
     def test_writing_mcmc_cache(
-        self, mcmc_results: speclet_model.MCMCSamplingResults, tmp_path: Path
+        self, mcmc_results: pmapi.MCMCSamplingResults, tmp_path: Path
     ):
         model = speclet_model.SpecletModel(cache_dir=tmp_path)
         assert len(list(tmp_path.iterdir())) == 0
@@ -134,7 +135,7 @@ class TestSpecletModel:
     def test_reading_mcmc_cache(
         self,
         pm_model: pm.Model,
-        mcmc_results: speclet_model.MCMCSamplingResults,
+        mcmc_results: pmapi.MCMCSamplingResults,
         tmp_path: Path,
     ):
         model = speclet_model.SpecletModel(cache_dir=tmp_path)
@@ -164,7 +165,7 @@ class TestSpecletModel:
 
     @pytest.mark.slow
     def test_writing_advi_cache(
-        self, advi_results: speclet_model.ApproximationSamplingResults, tmp_path: Path
+        self, advi_results: pmapi.ApproximationSamplingResults, tmp_path: Path
     ):
         model = speclet_model.SpecletModel(cache_dir=tmp_path)
         assert len(list(tmp_path.iterdir())) == 0
@@ -188,7 +189,7 @@ class TestSpecletModel:
 
     @pytest.mark.slow
     def test_reading_advi_cache(
-        self, advi_results: speclet_model.ApproximationSamplingResults, tmp_path: Path
+        self, advi_results: pmapi.ApproximationSamplingResults, tmp_path: Path
     ):
         model = speclet_model.SpecletModel(cache_dir=tmp_path)
         assert len(list(tmp_path.iterdir())) == 0
@@ -223,9 +224,7 @@ class TestSpecletModel:
 
     @pytest.mark.slow
     def test_convert_to_arviz(
-        self, pm_model: pm.Model, mcmc_results: speclet_model.MCMCSamplingResults
+        self, pm_model: pm.Model, mcmc_results: pmapi.MCMCSamplingResults
     ):
-        az_obj = speclet_model.convert_samples_to_arviz(
-            model=pm_model, res=mcmc_results
-        )
+        az_obj = pmapi.convert_samples_to_arviz(model=pm_model, res=mcmc_results)
         assert isinstance(az_obj, az.InferenceData)

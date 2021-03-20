@@ -6,11 +6,11 @@ import pickle
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
-import arviz as az
-import numpy as np
 import pretty_errors
 import pymc3 as pm
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
+
+from src.modeling import pymc3_sampling_api as pmapi
 
 
 class ModelCachePaths(BaseModel):
@@ -20,68 +20,6 @@ class ModelCachePaths(BaseModel):
     prior_predictive_path: Path
     posterior_predictive_path: Path
     approximation_path: Path
-
-
-class MCMCSamplingResults(BaseModel):
-    """The results of MCMC sampling."""
-
-    trace: pm.backends.base.MultiTrace
-    prior_predictive: Dict[str, np.ndarray]
-    posterior_predictive: Dict[str, np.ndarray]
-
-    class Config:
-        """Configuration for pydantic validation."""
-
-        arbitrary_types_allowed = True
-
-    @validator("trace")
-    def validate_trace(cls, trace):
-        """Validate a PyMC3 MultiTrace object.
-
-        Args:
-            trace ([type]): MultiTrace object.
-
-        Raises:
-            ValueError: If the object does not satisfy pre-determined requirements.
-
-        Returns:
-            [type]: The original object (if valid).
-        """
-        trace_methods = dir(trace)
-        expected_methods = ["get_values"]
-        for method in expected_methods:
-            if method not in trace_methods:
-                raise ValueError(
-                    f"Object passed for trace does not have the method '{method}'."
-                )
-        return trace
-
-
-class ApproximationSamplingResults(MCMCSamplingResults):
-    """The results of ADVI fitting and sampling."""
-
-    approximation: pm.Approximation
-
-
-def convert_samples_to_arviz(
-    model: pm.Model,
-    res: Union[MCMCSamplingResults, ApproximationSamplingResults],
-) -> az.InferenceData:
-    """Turn the results from a sampling procedure into a standard ArviZ object.
-
-    Args:
-        model (pm.Model): The PyMC3 model.
-        res (Union[MCMCSamplingResults, ApproximationSamplingResults]): The results of the sampling/fitting process.
-
-    Returns:
-        az.InferenceData: A standard ArviZ data object.
-    """
-    return az.from_pymc3(
-        trace=res.trace,
-        model=model,
-        prior=res.prior_predictive,
-        posterior_predictive=res.posterior_predictive,
-    )
 
 
 class SpecletModel:
@@ -121,14 +59,14 @@ class SpecletModel:
             approximation_path=approx_file_path,
         )
 
-    def read_cached_sampling(self, model: pm.Model) -> MCMCSamplingResults:
+    def read_cached_sampling(self, model: pm.Model) -> pmapi.MCMCSamplingResults:
         """Read sampling from cache.
 
         Args:
             model (pm.Model): The model corresponding to the cached sampling.
 
         Returns:
-            MCMCSamplingResults: The cached data.
+            pmapi.MCMCSamplingResults: The cached data.
         """
         cache_paths = self.get_cache_file_names()
 
@@ -136,20 +74,20 @@ class SpecletModel:
         post_check = self._get_pickle(cache_paths.posterior_predictive_path)
         prior_check = self._get_pickle(cache_paths.prior_predictive_path)
 
-        return MCMCSamplingResults(
+        return pmapi.MCMCSamplingResults(
             trace=trace, prior_predictive=prior_check, posterior_predictive=post_check
         )
 
     def read_cached_approximation(
         self, draws: int = 1000
-    ) -> ApproximationSamplingResults:
+    ) -> pmapi.ApproximationSamplingResults:
         """Read VI Approximation results from cache.
 
         Args:
             model (pm.Model): The model corresponding to the cached VI.
 
         Returns:
-            ApproximationSamplingResults: The cached data.
+            pmapi.ApproximationSamplingResults: The cached data.
         """
         cache_paths = self.get_cache_file_names()
 
@@ -158,7 +96,7 @@ class SpecletModel:
         approx = self._get_pickle(cache_paths.approximation_path)
         trace = approx.sample(draws)
 
-        return ApproximationSamplingResults(
+        return pmapi.ApproximationSamplingResults(
             trace=trace,
             prior_predictive=prior_check,
             posterior_predictive=post_check,
@@ -166,27 +104,55 @@ class SpecletModel:
         )
 
     def cache_sampling_results(
-        self, res: Union[MCMCSamplingResults, ApproximationSamplingResults]
+        self, res: Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]
     ) -> None:
         """Cache sampling results to disk.
 
         Args:
-            res (Union[MCMCSamplingResults, ApproximationSamplingResults]): The results to cache.
+            res (Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]): The results to cache.
         """
         cache_paths = self.get_cache_file_names()
         self._write_pickle(
             res.posterior_predictive, cache_paths.posterior_predictive_path
         )
         self._write_pickle(res.prior_predictive, cache_paths.prior_predictive_path)
-        if isinstance(res, ApproximationSamplingResults):
+        if isinstance(res, pmapi.ApproximationSamplingResults):
             pm.save_trace(
                 res.trace, directory=cache_paths.trace_path.as_posix(), overwrite=True
             )
             self._write_pickle(res.approximation, cache_paths.approximation_path)
-        elif isinstance(res, MCMCSamplingResults):
+        elif isinstance(res, pmapi.MCMCSamplingResults):
             pm.save_trace(
                 res.trace, directory=cache_paths.trace_path.as_posix(), overwrite=True
             )
+
+    def cache_exists(self, method: str) -> bool:
+        """Confirm that the cached sampling/fitting results exist.
+
+        This method checks for each pickle file and the trace directory (if applicable).
+
+        Args:
+            method (str): Which cache to look for (either "mcmc" or "advi").
+
+        Returns:
+            bool: Does the cache exist?
+
+        Raises:
+            ValueError: If the passed method is not an acceptable option.
+        """
+        cache_paths = self.get_cache_file_names()
+        if (
+            not cache_paths.prior_predictive_path.exists()
+            or not cache_paths.posterior_predictive_path
+        ):
+            return False
+
+        if method == "mcmc":
+            return cache_paths.trace_path.exists()
+        elif method == "advi":
+            return cache_paths.approximation_path.exists()
+        else:
+            raise ValueError(f"Unknown method '{method}'.")
 
     def _write_pickle(self, x: Any, fp: Path) -> None:
         with open(fp, "wb") as f:
