@@ -11,28 +11,12 @@ import pandas as pd
 import pretty_errors
 import pymc3 as pm
 import pytest
+import theano.tensor as tt
 
 from src.data_processing import achilles as achelp
 from src.data_processing import common as dphelp
+from src.modeling.sampling_pymc3_models import SamplingArguments
 from src.models import crc_models, speclet_model
-
-#### ---- Helper functions ---- ####
-
-
-def test_nunique_empty():
-    assert crc_models.nunique(np.array([])) == 0
-
-
-def test_nunique_int():
-    assert crc_models.nunique(np.array([1])) == 1
-    assert crc_models.nunique(np.array([1, 1])) == 1
-    assert crc_models.nunique(np.array([1, 2])) == 2
-
-
-def test_nunique_str():
-    assert crc_models.nunique(np.array(["a", "a"])) == 1
-    assert crc_models.nunique(np.array(["a", "b"])) == 2
-
 
 #### ---- Models ---- ####
 
@@ -65,105 +49,9 @@ def mock_data() -> pd.DataFrame:
     return df
 
 
-class TestCRCModel1:
-    def make_indices(self, d: pd.DataFrame) -> Dict[str, np.ndarray]:
-        sgrna_map = achelp.make_sgrna_to_gene_mapping_df(d)
-        return {
-            "sgrna_idx": dphelp.get_indices(d, "sgrna"),
-            "sgrna_to_gene_idx": dphelp.get_indices(sgrna_map, "hugo_symbol"),
-            "cellline_idx": dphelp.get_indices(d, "depmap_id"),
-            "batch_idx": dphelp.get_indices(d, "pdna_batch"),
-        }
-
-    @pytest.mark.slow
-    def test_return_variables(self, mock_data: pd.DataFrame):
-        indices = self.make_indices(mock_data)
-        lfc_data = mock_data.lfc.values
-
-        model, shared_vars = crc_models.model_1(
-            sgrna_idx=indices["sgrna_idx"],
-            sgrna_to_gene_idx=indices["sgrna_to_gene_idx"],
-            cellline_idx=indices["cellline_idx"],
-            batch_idx=indices["batch_idx"],
-            lfc_data=lfc_data,
-        )
-
-        assert isinstance(model, pm.Model)
-        assert len(shared_vars.keys()) == 5
-
-    @pytest.mark.slow
-    def test_mcmc_sampling(self, mock_data: pd.DataFrame):
-        indices = self.make_indices(mock_data)
-        lfc_data = mock_data.lfc.values
-
-        model, _ = crc_models.model_1(
-            sgrna_idx=indices["sgrna_idx"],
-            sgrna_to_gene_idx=indices["sgrna_to_gene_idx"],
-            cellline_idx=indices["cellline_idx"],
-            batch_idx=indices["batch_idx"],
-            lfc_data=lfc_data,
-        )
-
-        n_chains = 2
-        n_draws = 100
-
-        with model:
-            trace = pm.sample(
-                draws=n_draws,
-                tune=100,
-                cores=n_chains,
-                chains=n_chains,
-                return_inferencedata=False,
-            )
-
-        assert isinstance(trace, pm.backends.base.MultiTrace)
-        assert trace["μ_g"].shape == (n_draws * n_chains,)
-        assert trace["μ_α"].shape == (
-            n_draws * n_chains,
-            dphelp.nunique(mock_data.hugo_symbol),
-        )
-        assert trace["α_s"].shape == (
-            n_draws * n_chains,
-            dphelp.nunique(mock_data.sgrna),
-        )
-        assert trace["β_l"].shape == (
-            n_draws * n_chains,
-            dphelp.nunique(mock_data.depmap_id),
-        )
-
-    @pytest.mark.slow
-    def test_advi_sampling(self, mock_data: pd.DataFrame):
-        indices = self.make_indices(mock_data)
-        lfc_data = mock_data.lfc.values
-
-        model, _ = crc_models.model_1(
-            sgrna_idx=indices["sgrna_idx"],
-            sgrna_to_gene_idx=indices["sgrna_to_gene_idx"],
-            cellline_idx=indices["cellline_idx"],
-            batch_idx=indices["batch_idx"],
-            lfc_data=lfc_data,
-        )
-
-        n_fit = 100
-        n_draws = 100
-
-        with model:
-            meanfield = pm.fit(n=n_fit)
-            trace = meanfield.sample(draws=n_draws)
-
-        assert isinstance(meanfield, pm.Approximation)
-        assert len(meanfield.hist) == n_fit
-        assert isinstance(trace, pm.backends.base.MultiTrace)
-        assert trace["μ_g"].shape == (n_draws,)
-        assert trace["μ_α"].shape == (n_draws, dphelp.nunique(mock_data.hugo_symbol))
-        assert trace["α_s"].shape == (n_draws, dphelp.nunique(mock_data.sgrna.values))
-        assert trace["β_l"].shape == (n_draws, dphelp.nunique(mock_data.depmap_id))
-
-
 #### ---- Test CrcModel ---- ####
 
 
-@pytest.mark.DEV
 class TestCrcModel:
     def test_inheritance(self, tmp_path: Path):
         model = crc_models.CrcModel(cache_dir=tmp_path, debug=True)
@@ -189,3 +77,145 @@ class TestCrcModel:
         assert model.data.shape[0] > model.data.shape[1]
         assert model.data.shape[0] == data.shape[0]
         assert model.data.shape[1] == data.shape[1]
+
+
+#### ---- Test CrcModelOne ---- ####
+
+# TODO: test errors for bad timing
+
+
+class TestCRCModel1:
+    def test_init(self):
+        model = crc_models.CrcModelOne()
+        assert isinstance(model, crc_models.CrcModelOne)
+        assert model.cache_dir is None
+        assert model.debug == False
+
+    @pytest.mark.slow
+    def test_build_model(self):
+        model = crc_models.CrcModelOne(debug=True)
+        assert model.data is None
+        assert model.model is None
+        assert model.shared_vars is None
+        model.build_model()
+        assert model.data is not None
+        assert isinstance(model.data, pd.DataFrame)
+        assert model.model is not None
+        assert isinstance(model.model, pm.Model)
+        assert model.shared_vars is not None
+        assert len(model.shared_vars.keys()) == 5
+        for key, value in model.shared_vars.items():
+            assert isinstance(key, str)
+            assert isinstance(value, tt.sharedvar.TensorSharedVariable)
+
+    @pytest.fixture
+    def sampling_args(self) -> SamplingArguments:
+        return SamplingArguments(
+            name="MOCK_MODEL", cores=2, ignore_cache=True, debug=True, random_seed=123
+        )
+
+    @pytest.mark.slow
+    def test_manual_mcmc_sampling(self, mock_data: pd.DataFrame):
+        model = crc_models.CrcModelOne()
+        model.data = mock_data  # inject mock data
+        model.build_model()
+
+        n_chains = 2
+        n_draws = 100
+
+        with model.model:
+            trace = pm.sample(
+                draws=n_draws,
+                tune=100,
+                cores=n_chains,
+                chains=n_chains,
+                return_inferencedata=False,
+            )
+
+        assert isinstance(trace, pm.backends.base.MultiTrace)
+        assert trace["μ_g"].shape == (n_draws * n_chains,)
+        assert trace["μ_α"].shape == (
+            n_draws * n_chains,
+            dphelp.nunique(mock_data.hugo_symbol),
+        )
+        assert trace["α_s"].shape == (
+            n_draws * n_chains,
+            dphelp.nunique(mock_data.sgrna),
+        )
+        assert trace["β_l"].shape == (
+            n_draws * n_chains,
+            dphelp.nunique(mock_data.depmap_id),
+        )
+
+    @pytest.mark.slow
+    def test_mcmc_sampling_method(
+        self, mock_data: pd.DataFrame, sampling_args: SamplingArguments
+    ):
+        model = crc_models.CrcModelOne()
+        model.data = mock_data  # inject mock data
+        model.build_model()
+
+        n_chains = 3
+        n_draws = 1000
+
+        mcmc_results = model.mcmc_sample_model(sampling_args=sampling_args)
+
+        trace = mcmc_results.trace
+        assert isinstance(trace, pm.backends.base.MultiTrace)
+        assert trace["μ_g"].shape == (n_draws * n_chains,)
+        assert trace["μ_α"].shape == (
+            n_draws * n_chains,
+            dphelp.nunique(mock_data.hugo_symbol),
+        )
+        assert trace["α_s"].shape == (
+            n_draws * n_chains,
+            dphelp.nunique(mock_data.sgrna),
+        )
+        assert trace["β_l"].shape == (
+            n_draws * n_chains,
+            dphelp.nunique(mock_data.depmap_id),
+        )
+
+    @pytest.mark.slow
+    def test_manual_advi_sampling(self, mock_data: pd.DataFrame):
+        model = crc_models.CrcModelOne()
+        model.data = mock_data  # inject mock data
+        model.build_model()
+
+        n_fit: int = np.random.randint(100, 200)
+        n_draws: int = np.random.randint(100, 200)
+
+        with model.model:
+            approx = pm.fit(n=n_fit)
+            trace = approx.sample(draws=n_draws)
+
+        assert isinstance(approx, pm.Approximation)
+        assert len(approx.hist) <= n_fit
+        assert isinstance(trace, pm.backends.base.MultiTrace)
+        assert trace["μ_g"].shape == (n_draws,)
+        assert trace["μ_α"].shape == (n_draws, dphelp.nunique(mock_data.hugo_symbol))
+        assert trace["α_s"].shape == (n_draws, dphelp.nunique(mock_data.sgrna.values))
+        assert trace["β_l"].shape == (n_draws, dphelp.nunique(mock_data.depmap_id))
+
+    @pytest.mark.slow
+    def test_advi_sampling_method(
+        self, mock_data: pd.DataFrame, sampling_args: SamplingArguments
+    ):
+        model = crc_models.CrcModelOne()
+        model.data = mock_data  # inject mock data
+        model.build_model()
+
+        n_fit = 100000
+        n_draws = 1000
+
+        advi_results = model.advi_sample_model(sampling_args=sampling_args)
+        approx = advi_results.approximation
+        trace = advi_results.trace
+
+        assert isinstance(approx, pm.Approximation)
+        assert len(approx.hist) <= n_fit
+        assert isinstance(trace, pm.backends.base.MultiTrace)
+        assert trace["μ_g"].shape == (n_draws,)
+        assert trace["μ_α"].shape == (n_draws, dphelp.nunique(mock_data.hugo_symbol))
+        assert trace["α_s"].shape == (n_draws, dphelp.nunique(mock_data.sgrna.values))
+        assert trace["β_l"].shape == (n_draws, dphelp.nunique(mock_data.depmap_id))

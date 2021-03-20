@@ -9,12 +9,12 @@ from typing import Optional
 import pretty_errors
 from pydantic import BaseModel
 
-from src.modeling import pymc3_sampling_api
+from src.io import cache_io
 
 #### ---- Data Paths ---- ####
 
 # TODO: Move this responsibility to 'io/' module.
-PYMC3_CACHE_DIR = Path("models", "model_cache") / pymc3_sampling_api.default_cache_dir
+PYMC3_CACHE_DIR = cache_io.default_cache_dir()
 
 
 #### ---- General ---- ####

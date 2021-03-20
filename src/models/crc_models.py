@@ -208,14 +208,17 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         if self.mcmc_results is not None:
             return self.mcmc_results
 
-        if self.cache_exists(method="mcmc") and not sampling_args.ignore_cache:
+        if (
+            not sampling_args.ignore_cache
+            and self.cache_dir is not None
+            and self.cache_exists(method="mcmc")
+        ):
             return self.read_cached_approximation()
 
         self.mcmc_results = pmapi.pymc3_sampling_procedure(
             model=self.model,
             cores=sampling_args.cores,
             random_seed=sampling_args.random_seed,
-            sample_kwargs={"more_replacements": replacements},
         )
         return self.mcmc_results
 
@@ -242,7 +245,11 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         if self.advi_results is not None:
             return self.advi_results
 
-        if self.cache_exists(method="advi") and not sampling_args.ignore_cache:
+        if (
+            not sampling_args.ignore_cache
+            and self.cache_dir is not None
+            and self.cache_exists(method="advi")
+        ):
             return self.read_cached_approximation()
 
         self.advi_results = pmapi.pymc3_advi_approximation_procedure(
