@@ -143,7 +143,7 @@ def sample_speclet_model(
         speclet_model.build_model()
         logger.debug("Running ADVI fitting method.")
         _ = speclet_model.advi_sample_model(sampling_args=sampling_args)
-    if model == ModelOption.crc_ceres_mimic_1:
+    elif model == ModelOption.crc_ceres_mimic_1:
         logger.info(f"Sampling '{model}' with custom name '{name}'")
         speclet_model = CrcCeresMimicOne(
             name=name, root_cache_dir=cache_dir, debug=debug

@@ -19,6 +19,7 @@ rule all:
     input:
         expand(
             REPORTS_DIR + "{model}_{model_name}.md",
+            zip,
             model=list(model_names.keys()),
             model_name=list(model_names.values())
         )

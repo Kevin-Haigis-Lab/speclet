@@ -53,8 +53,8 @@ DEBUG = True
 
 ```python
 # Parameters
-MODEL = "crc_m1"
-MODEL_NAME = "CRC-model1"
+MODEL = "crc_ceres-mimic-1"
+MODEL_NAME = "CERES-mimic1"
 DEBUG = True
 
 ```
@@ -65,14 +65,14 @@ speclet_model = sampling.sample_speclet_model(
 )
 ```
 
-    (DEBUG) Cache directory: /n/data2/dfci/cancerbio/haigis/Cook/speclet/models/model_cache/pymc3_model_cache/CRC-model1
+    (DEBUG) Cache directory: /n/data2/dfci/cancerbio/haigis/Cook/speclet/models/model_cache/pymc3_model_cache/CERES-mimic1
     (DEBUG) Sampling in debug mode.
-    (INFO) Sampling 'crc_m1' with custom name 'CRC-model1'
+    (INFO) Sampling 'crc_ceres-mimic-1' with custom name 'CERES-mimic1'
     (DEBUG) Running model build method.
     (DEBUG) Running ADVI fitting method.
     /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    (INFO) finished; execution time: 0.24 minutes
+    (INFO) finished; execution time: 0.27 minutes
 
 ```python
 model_res = speclet_model.advi_results
@@ -264,7 +264,7 @@ model_az = pmapi.convert_samples_to_arviz(
 pm.model_to_graphviz(speclet_model.model)
 ```
 
-![svg](crc_m1_CRC-model1_files/crc_m1_CRC-model1_13_0.svg)
+![svg](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_13_0.svg)
 
 ## Fit diagnostics
 
@@ -272,9 +272,9 @@ pm.model_to_graphviz(speclet_model.model)
 pmanal.plot_vi_hist(model_res.approximation)
 ```
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_15_0.png)
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_15_0.png)
 
-    <ggplot: (8754024334300)>
+    <ggplot: (8739512683430)>
 
 ## Model parameters
 
@@ -347,57 +347,54 @@ for var in vars_to_inspect:
         print(err)
 ```
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_0.png)
+    Skipping variable 'a'.
+    Must pass 2-d input. shape=(1000, 100, 2)
+    Skipping variable 'd'.
+    Must pass 2-d input. shape=(1000, 100, 36)
 
-    <ggplot: (8753876010150)>
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_18_1.png)
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_2.png)
+    <ggplot: (8739515527409)>
 
-    <ggplot: (8753866307672)>
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_18_3.png)
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_4.png)
+    <ggplot: (8739515527533)>
 
-    <ggplot: (8753866107658)>
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_18_5.png)
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_6.png)
+    <ggplot: (8739586053714)>
 
-    <ggplot: (8753866634506)>
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_18_7.png)
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_8.png)
+    <ggplot: (8739515528436)>
 
-    <ggplot: (8753866595476)>
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_18_9.png)
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_10.png)
+    <ggplot: (8739513306402)>
 
-    <ggplot: (8753867320333)>
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_18_11.png)
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_12.png)
+    <ggplot: (8739515949005)>
 
-    <ggplot: (8753865970448)>
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_18_13.png)
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_14.png)
+    <ggplot: (8739515528801)>
 
-    <ggplot: (8753867318423)>
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_18_15.png)
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_16.png)
+    <ggplot: (8739515968284)>
 
-    <ggplot: (8753866075323)>
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_18_17.png)
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_18.png)
+    <ggplot: (8739515606953)>
 
-    <ggplot: (8753866141648)>
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_18_19.png)
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_20.png)
+    <ggplot: (8739515925733)>
 
-    <ggplot: (8753866052946)>
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_18_21.png)
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_22.png)
-
-    <ggplot: (8753867318495)>
-
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_24.png)
-
-    <ggplot: (8753867391678)>
+    <ggplot: (8739515604809)>
 
 ## Model predicitons
 
@@ -458,9 +455,9 @@ pred_summary.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.169181</td>
-      <td>-0.951598</td>
-      <td>0.519127</td>
+      <td>-0.080866</td>
+      <td>-0.740415</td>
+      <td>0.634981</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>ls513-311cas9_repa_p6_batch2</td>
       <td>0.029491</td>
@@ -478,13 +475,13 @@ pred_summary.head()
       <td>1.861144</td>
       <td>1.386218</td>
       <td>0</td>
-      <td>0.198672</td>
+      <td>0.110357</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.126428</td>
-      <td>-0.771096</td>
-      <td>0.736245</td>
+      <td>-0.041298</td>
+      <td>-0.759291</td>
+      <td>0.654715</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>ls513-311cas9_repb_p6_batch2</td>
       <td>0.426017</td>
@@ -502,13 +499,13 @@ pred_summary.head()
       <td>1.861144</td>
       <td>1.386218</td>
       <td>0</td>
-      <td>0.552445</td>
+      <td>0.467315</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.078039</td>
-      <td>-0.798078</td>
-      <td>0.683158</td>
+      <td>-0.158427</td>
+      <td>-0.824778</td>
+      <td>0.580278</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>c2bbe1-311cas9 rep a p5_batch3</td>
       <td>0.008626</td>
@@ -526,13 +523,13 @@ pred_summary.head()
       <td>1.375470</td>
       <td>-0.234394</td>
       <td>0</td>
-      <td>0.086666</td>
+      <td>0.167054</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.043758</td>
-      <td>-0.727314</td>
-      <td>0.778995</td>
+      <td>-0.126520</td>
+      <td>-0.807168</td>
+      <td>0.621363</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>c2bbe1-311cas9 rep b p5_batch3</td>
       <td>0.280821</td>
@@ -550,13 +547,13 @@ pred_summary.head()
       <td>1.375470</td>
       <td>-0.234394</td>
       <td>0</td>
-      <td>0.324580</td>
+      <td>0.407342</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.055123</td>
-      <td>-0.819895</td>
-      <td>0.636027</td>
+      <td>-0.137220</td>
+      <td>-0.865754</td>
+      <td>0.504380</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>c2bbe1-311cas9 rep c p5_batch3</td>
       <td>0.239815</td>
@@ -574,7 +571,7 @@ pred_summary.head()
       <td>1.375470</td>
       <td>-0.234394</td>
       <td>0</td>
-      <td>0.294938</td>
+      <td>0.377035</td>
     </tr>
   </tbody>
 </table>
@@ -587,7 +584,7 @@ az.plot_loo_pit(model_az, y="lfc");
 
     <AxesSubplot:>
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_21_1.png)
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_21_1.png)
 
 ```python
 model_loo = az.loo(model_az, pointwise=True)
@@ -597,18 +594,18 @@ print(model_loo)
     Computed from 1000 by 34760 log-likelihood matrix
 
              Estimate       SE
-    elpd_loo -22769.18   207.82
-    p_loo     1039.39        -
+    elpd_loo -22014.91   222.88
+    p_loo     3618.00        -
 
     There has been a warning during the calculation. Please check the results.
     ------
 
     Pareto k diagnostic values:
                              Count   Pct.
-    (-Inf, 0.5]   (good)     34729   99.9%
-     (0.5, 0.7]   (ok)          28    0.1%
-       (0.7, 1]   (bad)          3    0.0%
-       (1, Inf)   (very bad)     0    0.0%
+    (-Inf, 0.5]   (good)     31587   90.9%
+     (0.5, 0.7]   (ok)        2588    7.4%
+       (0.7, 1]   (bad)        471    1.4%
+       (1, Inf)   (very bad)   114    0.3%
 
 ```python
 sns.distplot(model_loo.loo_i.values);
@@ -622,7 +619,7 @@ sns.distplot(model_loo.loo_i.values);
 
     <AxesSubplot:ylabel='Density'>
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_23_2.png)
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_23_2.png)
 
 ```python
 pred_summary["loo"] = model_loo.loo_i.values
@@ -640,9 +637,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_25_0.png)
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_25_0.png)
 
-    <ggplot: (8753973157533)>
+    <ggplot: (8739512930205)>
 
 ```python
 (
@@ -654,9 +651,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_26_0.png)
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_26_0.png)
 
-    <ggplot: (8753876019956)>
+    <ggplot: (8739512801449)>
 
 ```python
 (
@@ -666,9 +663,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_27_0.png)
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_27_0.png)
 
-    <ggplot: (8753866717579)>
+    <ggplot: (8739515908172)>
 
 ```python
 (
@@ -680,9 +677,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_28_0.png)
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_28_0.png)
 
-    <ggplot: (8753866717609)>
+    <ggplot: (8739513558263)>
 
 ```python
 (
@@ -694,9 +691,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_29_0.png)
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_29_0.png)
 
-    <ggplot: (8753867043597)>
+    <ggplot: (8739512787577)>
 
 ```python
 (
@@ -710,9 +707,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_30_0.png)
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_30_0.png)
 
-    <ggplot: (8753866714432)>
+    <ggplot: (8739513758847)>
 
 ```python
 # Remove samples without gene CN data.
@@ -729,9 +726,9 @@ ppc_df_no_missing["binned_gene_cn"] = [
 )
 ```
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_31_0.png)
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_31_0.png)
 
-    <ggplot: (8753866717579)>
+    <ggplot: (8739512683463)>
 
 ```python
 gene_error = (
@@ -762,9 +759,9 @@ n_genes = 15
 )
 ```
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_32_0.png)
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_32_0.png)
 
-    <ggplot: (8753876614903)>
+    <ggplot: (8739512804081)>
 
 ```python
 (
@@ -776,9 +773,9 @@ n_genes = 15
 )
 ```
 
-![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_33_0.png)
+![png](crc_ceres-mimic-1_CERES-mimic1_files/crc_ceres-mimic-1_CERES-mimic1_33_0.png)
 
-    <ggplot: (8753866203152)>
+    <ggplot: (8739513759395)>
 
 ---
 
@@ -787,7 +784,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 3.13 minutes
+    execution time: 2.57 minutes
 
 ```python
 %load_ext watermark
@@ -812,10 +809,10 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Git branch: ceres-mimic
 
-    arviz     : 0.11.2
-    pandas    : 1.2.3
+    plotnine  : 0.7.1
+    numpy     : 1.20.1
+    seaborn   : 0.11.1
     pymc3     : 3.11.1
     matplotlib: 3.3.4
-    plotnine  : 0.7.1
-    seaborn   : 0.11.1
-    numpy     : 1.20.1
+    pandas    : 1.2.3
+    arviz     : 0.11.2
