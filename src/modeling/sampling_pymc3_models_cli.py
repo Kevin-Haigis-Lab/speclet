@@ -41,6 +41,7 @@ class ModelOption(str, Enum):
 def main(
     model: ModelOption,
     name: str,
+    cores: int = 1,
     sample: bool = True,
     ignore_cache: bool = False,
     debug: bool = False,
@@ -70,6 +71,7 @@ def main(
     cache_dir = sampling.make_cache_name(name)
     sampling_args = SamplingArguments(
         name=name,
+        cores=cores,
         sample=sample,
         ignore_cache=ignore_cache,
         debug=debug,

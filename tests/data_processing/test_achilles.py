@@ -194,29 +194,36 @@ def test_different_colnames(mock_gene_data: pd.DataFrame):
         )
 
 
-def test_common_idx_key_names(example_achilles_data: pd.DataFrame):
+def test_common_idx_creation(example_achilles_data: pd.DataFrame):
     indices = achelp.common_indices(example_achilles_data.sample(frac=1.0))
-    for k in indices.keys():
-        assert "idx" in k or "map" in k
+    isinstance(indices, achelp.CommonIndices)
+
+
+def test_common_idx_counters(example_achilles_data: pd.DataFrame):
+    indices = achelp.common_indices(example_achilles_data)
+    assert indices.n_sgrnas == dphelp.nunique(indices.sgrna_idx)
+    assert indices.n_genes == dphelp.nunique(indices.gene_idx)
+    assert indices.n_celllines == dphelp.nunique(indices.cellline_idx)
+    assert indices.n_batches == dphelp.nunique(indices.batch_idx)
 
 
 def test_common_idx_sgrna_to_gene_map(example_achilles_data: pd.DataFrame):
     indices = achelp.common_indices(example_achilles_data.sample(frac=1.0))
     for sgrna in example_achilles_data.sgrna.values:
-        assert sgrna in indices["sgrna_to_gene_map"].sgrna.values
+        assert sgrna in indices.sgrna_to_gene_map.sgrna.values
     for gene in example_achilles_data.hugo_symbol.values:
-        assert gene in indices["sgrna_to_gene_map"].hugo_symbol.values
+        assert gene in indices.sgrna_to_gene_map.hugo_symbol.values
 
 
 def test_common_idx_depmap(example_achilles_data: pd.DataFrame):
     indices = achelp.common_indices(example_achilles_data.sample(frac=1.0))
     assert dphelp.nunique(example_achilles_data.depmap_id.values) == dphelp.nunique(
-        indices["cellline_idx"]
+        indices.cellline_idx
     )
 
 
 def test_common_idx_pdna_batch(example_achilles_data: pd.DataFrame):
     indices = achelp.common_indices(example_achilles_data.sample(frac=1.0))
     assert dphelp.nunique(example_achilles_data.pdna_batch.values) == dphelp.nunique(
-        indices["batch_idx"]
+        indices.batch_idx
     )

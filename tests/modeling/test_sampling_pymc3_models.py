@@ -3,9 +3,7 @@
 from pathlib import Path
 from typing import Any, Dict
 
-import pandas as pd
 import pretty_errors
-import pymc3 as pm
 import pytest
 
 from src.modeling import sampling_pymc3_models as sampling
@@ -21,18 +19,10 @@ def test_make_cache_name():
     assert p.name == name
 
 
-def test_loading_of_crc_data():
-    df = sampling.load_crc_data(debug=True)
-    assert isinstance(df, pd.DataFrame)
-    for col in ["sgrna", "hugo_symbol", "depmap_id", "gene_cn"]:
-        assert col in df.columns
-
-
-#### ---- Misc. ---- ####
-
-
-def test_crc_batch_sizes_are_logical():
-    assert sampling.crc_batch_size(debug=True) < sampling.crc_batch_size(debug=False)
+def test_clean_model_names():
+    assert sampling.clean_model_names("model_name") == "model_name"
+    assert sampling.clean_model_names("model name") == "model-name"
+    assert sampling.clean_model_names("model named Jerry") == "model-named-Jerry"
 
 
 #### ---- SamplingArguments class ---- ####
@@ -112,30 +102,3 @@ class TestSamplingArguments:
         mock_info[123] = "ABC"
         with pytest.raises(TypeError):
             _ = SamplingArguments(**mock_info)
-
-
-#### ---- Build CRC model 1 ---- ####
-
-
-class TestCrcModel1:
-    @pytest.fixture(scope="class")
-    def sampling_args(self) -> SamplingArguments:
-        return SamplingArguments(
-            name="test model",
-            sample=False,
-            ignore_cache=False,
-            cache_dir="fake/dir",
-            debug=True,
-            random_seed=123,
-        )
-
-    @pytest.mark.slow
-    def test_model_builds(self, sampling_args: SamplingArguments):
-        model, shared_vars, data = sampling.crc_model1(sampling_args)
-        assert isinstance(model, pm.Model)
-        assert len(shared_vars.keys()) > 0
-        assert isinstance(data, pd.DataFrame)
-
-        expected_columns = ["lfc", "hugo_symbol", "depmap_id", "sgrna"]
-        for col in expected_columns:
-            assert col in data.columns
