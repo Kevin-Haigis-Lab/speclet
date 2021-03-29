@@ -5,7 +5,7 @@
 from typing import Protocol
 
 from src.modeling import pymc3_sampling_api as pmapi
-from src.modeling.sampling_pymc3_models import SamplingArguments
+from src.modeling.sampling_metadata_models import SamplingArguments
 
 
 class SelfSufficientModel(Protocol):

@@ -52,36 +52,35 @@ DEBUG = True
 
 ```python
 # Parameters
-MODEL = "crc-m1"
+MODEL = "crc_m1"
 MODEL_NAME = "CRC-model1"
 DEBUG = True
 
 ```
 
 ```python
-model_cache_dir = ".." / sampling.make_cache_name(MODEL_NAME)
+speclet_model = sampling.sample_speclet_model(
+    MODEL, name=MODEL_NAME, debug=DEBUG, random_seed=RANDOM_SEED, touch=False
+)
 ```
+
+    (DEBUG) Cache directory: /n/data2/dfci/cancerbio/haigis/Cook/speclet/models/model_cache/pymc3_model_cache/CRC-model1
+    (DEBUG) Sampling in debug mode.
+    (INFO) Sampling 'crc_m1' with custom name 'CRC-model1'
+    (DEBUG) Running model build method.
+    (DEBUG) Running ADVI fitting method.
+    /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    (INFO) finished; execution time: 0.29 minutes
 
 ```python
-sampling_args = SamplingArguments(
-    name=MODEL_NAME, sample=False, debug=DEBUG, random_seed=RANDOM_SEED
-)
-
-with set_directory(".."):
-    if MODEL == "crc-m1":
-        model, _, data = sampling.crc_model1(sampling_args)
+model_res = speclet_model.advi_results
 ```
-
-    (INFO) Loading CRC data.
-    (DEBUG) Using batch size 1000
-    /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    (INFO) Building 'crc-m1' and shared variables.
-    (INFO) Finished building and sampling 'crc-m1'.
 
 ### Data
 
 ```python
+data = speclet_model.get_data()
 data.head()
 ```
 
@@ -255,33 +254,26 @@ data.head()
 ### Cached model fit
 
 ```python
-model_res = pmapi.read_cached_vi(model_cache_dir)
-
-model_az = az.from_pymc3(
-    trace=model_res["trace"],
-    model=model,
-    posterior_predictive=model_res["posterior_predictive"],
-    prior=model_res["prior_predictive"],
+model_az = pmapi.convert_samples_to_arviz(
+    model=speclet_model.model, res=speclet_model.advi_results
 )
 ```
 
-    Loading cached trace and posterior sample...
-
 ```python
-pm.model_to_graphviz(model)
+pm.model_to_graphviz(speclet_model.model)
 ```
 
-![svg](crc-m1_CRC-model1_files/crc-m1_CRC-model1_13_0.svg)
+![svg](crc_m1_CRC-model1_files/crc_m1_CRC-model1_13_0.svg)
 
 ## Fit diagnostics
 
 ```python
-pmanal.plot_vi_hist(model_res["approximation"])
+pmanal.plot_vi_hist(model_res.approximation)
 ```
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_15_0.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_15_0.png)
 
-    <ggplot: (8765071908503)>
+    <ggplot: (8747983258332)>
 
 ## Model parameters
 
@@ -338,74 +330,74 @@ def variable_distribution_plot(var, trace: np.ndarray, max_plot=20000) -> gg.ggp
 ```
 
 ```python
-vars_to_inspect = model_res["trace"].varnames
+vars_to_inspect = model_res.trace.varnames
 vars_to_inspect = [v for v in vars_to_inspect if not "log" in v]
 vars_to_inspect.sort()
 
 for var in vars_to_inspect:
-    trace = model_res["trace"][var]
+    trace = model_res.trace[var]
     if len(trace.shape) > 1 and trace.shape[1] == data.shape[0]:
         # Do not plot the final deterministic mean (usually "μ").
         continue
-    print(variable_distribution_plot(var, model_res["trace"][var]))
+    print(variable_distribution_plot(var, model_res.trace[var]))
 ```
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_0.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_0.png)
 
-    <ggplot: (8765063488503)>
+    <ggplot: (8747983258311)>
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_2.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_2.png)
 
-    <ggplot: (8765061908188)>
+    <ggplot: (8747973332520)>
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_4.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_4.png)
 
-    <ggplot: (8765063421715)>
+    <ggplot: (8748021839421)>
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_6.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_6.png)
 
-    <ggplot: (8765062322601)>
+    <ggplot: (8747973239658)>
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_8.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_8.png)
 
-    <ggplot: (8765061984491)>
+    <ggplot: (8748077992798)>
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_10.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_10.png)
 
-    <ggplot: (8765062037282)>
+    <ggplot: (8748076523018)>
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_12.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_12.png)
 
-    <ggplot: (8765063458645)>
+    <ggplot: (8748001257189)>
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_14.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_14.png)
 
-    <ggplot: (8765061984350)>
+    <ggplot: (8748074583053)>
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_16.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_16.png)
 
-    <ggplot: (8765063098935)>
+    <ggplot: (8748076753044)>
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_18.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_18.png)
 
-    <ggplot: (8765063421838)>
+    <ggplot: (8748076477501)>
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_20.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_20.png)
 
-    <ggplot: (8765062005914)>
+    <ggplot: (8748076678822)>
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_22.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_22.png)
 
-    <ggplot: (8765062114073)>
+    <ggplot: (8748080482750)>
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_18_24.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_24.png)
 
-    <ggplot: (8765062217084)>
+    <ggplot: (8748076678873)>
 
 ## Model predicitons
 
 ```python
-predictions = model_res["posterior_predictive"]
+predictions = model_res.posterior_predictive
 pred_summary = pmanal.summarize_posterior_predictions(
     predictions["lfc"],
     merge_with=data,
@@ -461,9 +453,9 @@ pred_summary.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.171402</td>
-      <td>-0.821367</td>
-      <td>0.647317</td>
+      <td>-0.175549</td>
+      <td>-0.913568</td>
+      <td>0.553641</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>ls513-311cas9_repa_p6_batch2</td>
       <td>0.029491</td>
@@ -481,13 +473,13 @@ pred_summary.head()
       <td>1.861144</td>
       <td>1.386218</td>
       <td>0</td>
-      <td>0.200893</td>
+      <td>0.205040</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.128760</td>
-      <td>-0.869308</td>
-      <td>0.626891</td>
+      <td>-0.132681</td>
+      <td>-0.880239</td>
+      <td>0.604651</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>ls513-311cas9_repb_p6_batch2</td>
       <td>0.426017</td>
@@ -505,13 +497,13 @@ pred_summary.head()
       <td>1.861144</td>
       <td>1.386218</td>
       <td>0</td>
-      <td>0.554777</td>
+      <td>0.558698</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.070312</td>
-      <td>-0.833395</td>
-      <td>0.627037</td>
+      <td>-0.080412</td>
+      <td>-0.834633</td>
+      <td>0.669882</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>c2bbe1-311cas9 rep a p5_batch3</td>
       <td>0.008626</td>
@@ -529,13 +521,13 @@ pred_summary.head()
       <td>1.375470</td>
       <td>-0.234394</td>
       <td>0</td>
-      <td>0.078938</td>
+      <td>0.089038</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.035944</td>
-      <td>-0.798957</td>
-      <td>0.685948</td>
+      <td>-0.046392</td>
+      <td>-0.774636</td>
+      <td>0.693864</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>c2bbe1-311cas9 rep b p5_batch3</td>
       <td>0.280821</td>
@@ -553,13 +545,13 @@ pred_summary.head()
       <td>1.375470</td>
       <td>-0.234394</td>
       <td>0</td>
-      <td>0.316766</td>
+      <td>0.327213</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.047492</td>
-      <td>-0.724838</td>
-      <td>0.724399</td>
+      <td>-0.057493</td>
+      <td>-0.799966</td>
+      <td>0.621729</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>c2bbe1-311cas9 rep c p5_batch3</td>
       <td>0.239815</td>
@@ -577,7 +569,7 @@ pred_summary.head()
       <td>1.375470</td>
       <td>-0.234394</td>
       <td>0</td>
-      <td>0.287308</td>
+      <td>0.297308</td>
     </tr>
   </tbody>
 </table>
@@ -590,7 +582,7 @@ az.plot_loo_pit(model_az, y="lfc");
 
     <AxesSubplot:>
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_21_1.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_21_1.png)
 
 ```python
 model_loo = az.loo(model_az, pointwise=True)
@@ -600,14 +592,14 @@ print(model_loo)
     Computed from 1000 by 34760 log-likelihood matrix
 
              Estimate       SE
-    elpd_loo -22839.98   208.09
-    p_loo     1111.38        -
+    elpd_loo -22851.25   208.52
+    p_loo     1125.60        -
     ------
 
     Pareto k diagnostic values:
                              Count   Pct.
-    (-Inf, 0.5]   (good)     34736   99.9%
-     (0.5, 0.7]   (ok)          24    0.1%
+    (-Inf, 0.5]   (good)     34737   99.9%
+     (0.5, 0.7]   (ok)          23    0.1%
        (0.7, 1]   (bad)          0    0.0%
        (1, Inf)   (very bad)     0    0.0%
 
@@ -623,7 +615,7 @@ sns.distplot(model_loo.loo_i.values);
 
     <AxesSubplot:ylabel='Density'>
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_23_2.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_23_2.png)
 
 ```python
 pred_summary["loo"] = model_loo.loo_i.values
@@ -641,9 +633,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_25_0.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_25_0.png)
 
-    <ggplot: (8765063251866)>
+    <ggplot: (8747973430327)>
 
 ```python
 (
@@ -655,9 +647,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_26_0.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_26_0.png)
 
-    <ggplot: (8765063092971)>
+    <ggplot: (8748074585082)>
 
 ```python
 (
@@ -667,9 +659,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_27_0.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_27_0.png)
 
-    <ggplot: (8765063368801)>
+    <ggplot: (8747973607132)>
 
 ```python
 (
@@ -681,9 +673,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_28_0.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_28_0.png)
 
-    <ggplot: (8765060016773)>
+    <ggplot: (8747974532919)>
 
 ```python
 (
@@ -695,9 +687,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_29_0.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_29_0.png)
 
-    <ggplot: (8765062024461)>
+    <ggplot: (8747973608807)>
 
 ```python
 (
@@ -711,9 +703,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_30_0.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_30_0.png)
 
-    <ggplot: (8765071909386)>
+    <ggplot: (8747973533034)>
 
 ```python
 # Remove samples without gene CN data.
@@ -730,9 +722,9 @@ ppc_df_no_missing["binned_gene_cn"] = [
 )
 ```
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_31_0.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_31_0.png)
 
-    <ggplot: (8765063370087)>
+    <ggplot: (8747973975303)>
 
 ```python
 gene_error = (
@@ -763,9 +755,9 @@ n_genes = 15
 )
 ```
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_32_0.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_32_0.png)
 
-    <ggplot: (8765062687368)>
+    <ggplot: (8747974784708)>
 
 ```python
 (
@@ -777,9 +769,9 @@ n_genes = 15
 )
 ```
 
-![png](crc-m1_CRC-model1_files/crc-m1_CRC-model1_33_0.png)
+![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_33_0.png)
 
-    <ggplot: (8765063148683)>
+    <ggplot: (8747970473671)>
 
 ---
 
@@ -788,14 +780,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 3.38 minutes
+    execution time: 3.19 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-03-18
+    Last updated: 2021-03-29
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -809,14 +801,14 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-235.o2.rc.hms.harvard.edu
 
-    Git branch: logging
+    Git branch: update-pipeline
 
-    pandas    : 1.2.3
-    matplotlib: 3.3.4
-    arviz     : 0.11.2
     seaborn   : 0.11.1
-    pymc3     : 3.11.1
-    numpy     : 1.20.1
     plotnine  : 0.7.1
+    numpy     : 1.20.1
+    matplotlib: 3.3.4
+    pymc3     : 3.11.1
+    arviz     : 0.11.2
+    pandas    : 1.2.3
