@@ -11,7 +11,7 @@ REPORTS_DIR = "reports/"
 ENVIRONMENT_YAML = Path("010_014_environment.yml").as_posix()
 
 model_names = {
-    "crc-m1": "CRC-model1",
+    "crc_m1": "CRC-model1",
 }
 
 rule all:
@@ -22,13 +22,20 @@ rule all:
             model_name=list(model_names.values())
         )
 
+
 rule sample_models:
     output:
         PYMC3_MODEL_CACHE_DIR + "{model_name}/{model}_{model_name}.txt"
     conda:
         ENVIRONMENT_YAML
     shell:
-        'python3 src/modeling/sampling_pymc3_models_cli.py "{wildcards.model}" "{wildcards.model_name}" --debug --random-seed 7414 --touch'
+        'python3 src/modeling/sampling_pymc3_models.py '
+        '  "{wildcards.model}" '
+        '  "{wildcards.model_name}" '
+        '  --debug '
+        '  --random-seed 7414 '
+        '  --touch'
+
 
 rule papermill_report:
     input:
