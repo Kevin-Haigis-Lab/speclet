@@ -12,6 +12,7 @@ ENVIRONMENT_YAML = Path("010_014_environment.yml").as_posix()
 
 model_names = {
     "crc_m1": "CRC-model1",
+    "crc_ceres-mimic-1": "CERES-mimic1",
 }
 
 rule all:
