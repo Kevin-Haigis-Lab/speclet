@@ -16,7 +16,7 @@ from src.modeling.sampling_pymc3_models import SamplingArguments
 
 def test_make_cache_name():
     name = "MOCK_MOCK_NAME"
-    p = sampling.make_cache_name(name)
+    p = sampling.make_cache_name(Path("to", "some", "directory"), name)
     assert isinstance(p, Path)
     assert p.name == name
 
@@ -47,7 +47,6 @@ class TestSamplingArguments:
             name=mock_info["name"],
             sample=mock_info["sample"],
             ignore_cache=mock_info["ignore_cache"],
-            cache_dir=mock_info["cache_dir"],
             debug=mock_info["debug"],
             random_seed=mock_info["random_seed"],
         )
@@ -55,7 +54,6 @@ class TestSamplingArguments:
         assert args.name == mock_info["name"]
         assert args.sample == mock_info["sample"]
         assert args.ignore_cache == mock_info["ignore_cache"]
-        assert args.cache_dir == mock_info["cache_dir"]
         assert args.debug == mock_info["debug"]
         assert args.random_seed == mock_info["random_seed"]
 
@@ -65,7 +63,6 @@ class TestSamplingArguments:
         assert args.name == mock_info["name"]
         assert args.sample == mock_info["sample"]
         assert args.ignore_cache == mock_info["ignore_cache"]
-        assert args.cache_dir == mock_info["cache_dir"]
         assert args.debug == mock_info["debug"]
         assert args.random_seed == mock_info["random_seed"]
 
@@ -73,11 +70,6 @@ class TestSamplingArguments:
         _ = mock_info.pop("random_seed", None)
         args = SamplingArguments(**mock_info)
         assert args.random_seed is None
-
-    def test_string_to_path(self, mock_info: Dict[str, Any]):
-        mock_info["cache_dir"] = "another_path/but/written/as/a/string"
-        args = SamplingArguments(**mock_info)
-        assert args.cache_dir == Path(mock_info["cache_dir"])
 
     def test_extra_keyvalues_in_dict(self, mock_info: Dict[str, Any]):
         mock_info["A"] = "B"
@@ -91,7 +83,6 @@ class TestSamplingArguments:
         assert args.name == mock_info["name"]
         assert args.sample == mock_info["sample"]
         assert args.ignore_cache == mock_info["ignore_cache"]
-        assert args.cache_dir == mock_info["cache_dir"]
         assert args.debug == mock_info["debug"]
         assert args.random_seed == mock_info["random_seed"]
 
