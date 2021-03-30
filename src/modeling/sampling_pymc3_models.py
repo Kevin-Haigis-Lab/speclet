@@ -16,7 +16,8 @@ from pydantic import BaseModel
 from src.io import cache_io
 from src.loggers import get_logger
 from src.modeling.sampling_metadata_models import SamplingArguments
-from src.models.crc_models import CrcCeresMimicOne, CrcModelOne
+from src.models.crc_ceres_mimic_one import CrcCeresMimicOne
+from src.models.crc_model_one import CrcModelOne
 from src.models.speclet_model import SpecletModel
 
 logger = get_logger()
