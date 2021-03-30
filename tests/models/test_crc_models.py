@@ -299,44 +299,66 @@ class TestCrcModelOne(CrcModelSubclassesTests):
         assert isinstance(trace, pm.backends.base.MultiTrace)
         total_samples = n_draws * n_chains
         assert trace["μ_g"].shape == (total_samples,)
-        assert trace["μ_α"].shape == (
-            total_samples,
-            dphelp.nunique(data.hugo_symbol),
-        )
-        assert trace["α_s"].shape == (
-            total_samples,
-            dphelp.nunique(data.sgrna),
-        )
-        assert trace["β_l"].shape == (
-            total_samples,
-            dphelp.nunique(data.depmap_id),
-        )
-
-    def check_mcmc_results(
-        self,
-        res: pmapi.MCMCSamplingResults,
-        n_draws: int,
-        n_chains: int,
-        data: pd.DataFrame,
-    ):
-        self.check_trace_shape(res.trace, n_draws=n_draws, n_chains=n_chains, data=data)
+        assert trace["μ_α"].shape == (total_samples, dphelp.nunique(data.hugo_symbol))
+        assert trace["α_s"].shape == (total_samples, dphelp.nunique(data.sgrna))
+        assert trace["β_l"].shape == (total_samples, dphelp.nunique(data.depmap_id))
 
     def check_approx_fit(self, approx: pm.Approximation, n_fit: int):
         assert isinstance(approx, pm.Approximation)
         assert len(approx.hist) <= n_fit
 
-    def check_advi_results(
-        self,
-        res: pmapi.ApproximationSamplingResults,
-        n_draws: int,
-        n_fit: int,
-        data: pd.DataFrame,
-    ):
-        self.check_approx_fit(approx=res.approximation, n_fit=n_fit)
-        self.check_trace_shape(res.trace, n_draws=n_draws, n_chains=1, data=data)
-
     def compare_two_results(
         self, trace_1: pm.backends.base.MultiTrace, trace_2: pm.backends.base.MultiTrace
     ):
         for p in ["μ_g", "μ_α", "α_s", "β_l"]:
+            np.testing.assert_array_equal(trace_1[p], trace_2[p])
+
+
+@pytest.mark.DEV
+class TestCrcCeresMimicOne(CrcModelSubclassesTests):
+
+    Model = crc_models.CrcCeresMimicOne
+
+    def check_trace_shape(
+        self,
+        trace: pm.backends.base.MultiTrace,
+        n_draws: int,
+        n_chains: int,
+        data: pd.DataFrame,
+    ):
+        assert isinstance(trace, pm.backends.base.MultiTrace)
+        total_samples = n_draws * n_chains
+        assert trace["μ_h"].shape == (total_samples,)
+        assert trace["h"].shape == (total_samples, dphelp.nunique(data.hugo_symbol))
+        assert trace["d"].shape == (
+            total_samples,
+            dphelp.nunique(data.hugo_symbol),
+            dphelp.nunique(data.depmap_id),
+        )
+        assert trace["σ_a"].shape == (total_samples, 2)
+
+    def check_approx_fit(self, approx: pm.Approximation, n_fit: int):
+        assert isinstance(approx, pm.Approximation)
+        assert len(approx.hist) <= n_fit
+
+    def compare_two_results(
+        self, trace_1: pm.backends.base.MultiTrace, trace_2: pm.backends.base.MultiTrace
+    ):
+        assert 1 == 1
+        for p in [
+            "σ_a",
+            "a",
+            "μ_h",
+            "σ_h",
+            "μ_d",
+            "σ_d",
+            "μ_η",
+            "σ_η",
+            "q",
+            "h",
+            "d",
+            "η",
+            "μ",
+            "σ",
+        ]:
             np.testing.assert_array_equal(trace_1[p], trace_2[p])
