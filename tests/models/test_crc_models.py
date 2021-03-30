@@ -6,7 +6,7 @@ from itertools import product
 from pathlib import Path
 from string import ascii_lowercase as letters
 from string import ascii_uppercase as LETTERS
-from typing import Any, Callable, Dict, Type, Union
+from typing import Dict, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -15,12 +15,10 @@ import pymc3 as pm
 import pytest
 import theano.tensor as tt
 
-from src.data_processing import achilles as achelp
 from src.data_processing import common as dphelp
 from src.modeling import pymc3_sampling_api as pmapi
 from src.modeling.sampling_pymc3_models import SamplingArguments
 from src.models import crc_models, speclet_model
-from src.models.protocols import SelfSufficientModel
 
 #### ---- Mock data ---- ####
 
@@ -314,7 +312,6 @@ class TestCrcModelOne(CrcModelSubclassesTests):
             np.testing.assert_array_equal(trace_1[p], trace_2[p])
 
 
-@pytest.mark.DEV
 class TestCrcCeresMimicOne(CrcModelSubclassesTests):
 
     Model = crc_models.CrcCeresMimicOne
