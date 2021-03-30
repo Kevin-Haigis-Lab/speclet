@@ -12,12 +12,14 @@ ENVIRONMENT_YAML = Path("010_014_environment.yml").as_posix()
 
 model_names = {
     "crc_m1": "CRC-model1",
+    "crc_ceres-mimic-1": "CERES-mimic1",
 }
 
 rule all:
     input:
         expand(
             REPORTS_DIR + "{model}_{model_name}.md",
+            zip,
             model=list(model_names.keys()),
             model_name=list(model_names.values())
         )

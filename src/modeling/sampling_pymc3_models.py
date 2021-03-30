@@ -16,7 +16,7 @@ from pydantic import BaseModel
 from src.io import cache_io
 from src.loggers import get_logger
 from src.modeling.sampling_metadata_models import SamplingArguments
-from src.models.crc_models import CrcModelOne
+from src.models.crc_models import CrcCeresMimicOne, CrcModelOne
 from src.models.speclet_model import SpecletModel
 
 logger = get_logger()
@@ -84,6 +84,7 @@ class ModelOption(str, Enum):
     """Models that are available for sampling."""
 
     crc_m1 = "crc_m1"
+    crc_ceres_mimic_1 = "crc_ceres-mimic-1"
 
 
 def sample_speclet_model(
@@ -138,6 +139,15 @@ def sample_speclet_model(
     if model == ModelOption.crc_m1:
         logger.info(f"Sampling '{model}' with custom name '{name}'")
         speclet_model = CrcModelOne(name=name, root_cache_dir=cache_dir, debug=debug)
+        logger.debug("Running model build method.")
+        speclet_model.build_model()
+        logger.debug("Running ADVI fitting method.")
+        _ = speclet_model.advi_sample_model(sampling_args=sampling_args)
+    elif model == ModelOption.crc_ceres_mimic_1:
+        logger.info(f"Sampling '{model}' with custom name '{name}'")
+        speclet_model = CrcCeresMimicOne(
+            name=name, root_cache_dir=cache_dir, debug=debug
+        )
         logger.debug("Running model build method.")
         speclet_model.build_model()
         logger.debug("Running ADVI fitting method.")

@@ -12,6 +12,7 @@ import pandas as pd
 import plotnine as gg
 import pymc3 as pm
 import seaborn as sns
+
 from src.context_managers import set_directory
 from src.data_processing import common as dphelp
 from src.modeling import pymc3_analysis as pmanal
@@ -71,7 +72,7 @@ speclet_model = sampling.sample_speclet_model(
     (DEBUG) Running ADVI fitting method.
     /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    (INFO) finished; execution time: 0.29 minutes
+    (INFO) finished; execution time: 0.24 minutes
 
 ```python
 model_res = speclet_model.advi_results
@@ -273,7 +274,7 @@ pmanal.plot_vi_hist(model_res.approximation)
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_15_0.png)
 
-    <ggplot: (8747983258332)>
+    <ggplot: (8754024334300)>
 
 ## Model parameters
 
@@ -339,60 +340,64 @@ for var in vars_to_inspect:
     if len(trace.shape) > 1 and trace.shape[1] == data.shape[0]:
         # Do not plot the final deterministic mean (usually "μ").
         continue
-    print(variable_distribution_plot(var, model_res.trace[var]))
+    try:
+        print(variable_distribution_plot(var, model_res.trace[var]))
+    except Exception as err:
+        print(f"Skipping variable '{var}'.")
+        print(err)
 ```
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_0.png)
 
-    <ggplot: (8747983258311)>
+    <ggplot: (8753876010150)>
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_2.png)
 
-    <ggplot: (8747973332520)>
+    <ggplot: (8753866307672)>
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_4.png)
 
-    <ggplot: (8748021839421)>
+    <ggplot: (8753866107658)>
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_6.png)
 
-    <ggplot: (8747973239658)>
+    <ggplot: (8753866634506)>
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_8.png)
 
-    <ggplot: (8748077992798)>
+    <ggplot: (8753866595476)>
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_10.png)
 
-    <ggplot: (8748076523018)>
+    <ggplot: (8753867320333)>
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_12.png)
 
-    <ggplot: (8748001257189)>
+    <ggplot: (8753865970448)>
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_14.png)
 
-    <ggplot: (8748074583053)>
+    <ggplot: (8753867318423)>
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_16.png)
 
-    <ggplot: (8748076753044)>
+    <ggplot: (8753866075323)>
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_18.png)
 
-    <ggplot: (8748076477501)>
+    <ggplot: (8753866141648)>
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_20.png)
 
-    <ggplot: (8748076678822)>
+    <ggplot: (8753866052946)>
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_22.png)
 
-    <ggplot: (8748080482750)>
+    <ggplot: (8753867318495)>
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_18_24.png)
 
-    <ggplot: (8748076678873)>
+    <ggplot: (8753867391678)>
 
 ## Model predicitons
 
@@ -453,9 +458,9 @@ pred_summary.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.175549</td>
-      <td>-0.913568</td>
-      <td>0.553641</td>
+      <td>-0.169181</td>
+      <td>-0.951598</td>
+      <td>0.519127</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>ls513-311cas9_repa_p6_batch2</td>
       <td>0.029491</td>
@@ -473,13 +478,13 @@ pred_summary.head()
       <td>1.861144</td>
       <td>1.386218</td>
       <td>0</td>
-      <td>0.205040</td>
+      <td>0.198672</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.132681</td>
-      <td>-0.880239</td>
-      <td>0.604651</td>
+      <td>-0.126428</td>
+      <td>-0.771096</td>
+      <td>0.736245</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>ls513-311cas9_repb_p6_batch2</td>
       <td>0.426017</td>
@@ -497,13 +502,13 @@ pred_summary.head()
       <td>1.861144</td>
       <td>1.386218</td>
       <td>0</td>
-      <td>0.558698</td>
+      <td>0.552445</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.080412</td>
-      <td>-0.834633</td>
-      <td>0.669882</td>
+      <td>-0.078039</td>
+      <td>-0.798078</td>
+      <td>0.683158</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>c2bbe1-311cas9 rep a p5_batch3</td>
       <td>0.008626</td>
@@ -521,13 +526,13 @@ pred_summary.head()
       <td>1.375470</td>
       <td>-0.234394</td>
       <td>0</td>
-      <td>0.089038</td>
+      <td>0.086666</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.046392</td>
-      <td>-0.774636</td>
-      <td>0.693864</td>
+      <td>-0.043758</td>
+      <td>-0.727314</td>
+      <td>0.778995</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>c2bbe1-311cas9 rep b p5_batch3</td>
       <td>0.280821</td>
@@ -545,13 +550,13 @@ pred_summary.head()
       <td>1.375470</td>
       <td>-0.234394</td>
       <td>0</td>
-      <td>0.327213</td>
+      <td>0.324580</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.057493</td>
-      <td>-0.799966</td>
-      <td>0.621729</td>
+      <td>-0.055123</td>
+      <td>-0.819895</td>
+      <td>0.636027</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>c2bbe1-311cas9 rep c p5_batch3</td>
       <td>0.239815</td>
@@ -569,7 +574,7 @@ pred_summary.head()
       <td>1.375470</td>
       <td>-0.234394</td>
       <td>0</td>
-      <td>0.297308</td>
+      <td>0.294938</td>
     </tr>
   </tbody>
 </table>
@@ -592,15 +597,17 @@ print(model_loo)
     Computed from 1000 by 34760 log-likelihood matrix
 
              Estimate       SE
-    elpd_loo -22851.25   208.52
-    p_loo     1125.60        -
+    elpd_loo -22769.18   207.82
+    p_loo     1039.39        -
+
+    There has been a warning during the calculation. Please check the results.
     ------
 
     Pareto k diagnostic values:
                              Count   Pct.
-    (-Inf, 0.5]   (good)     34737   99.9%
-     (0.5, 0.7]   (ok)          23    0.1%
-       (0.7, 1]   (bad)          0    0.0%
+    (-Inf, 0.5]   (good)     34729   99.9%
+     (0.5, 0.7]   (ok)          28    0.1%
+       (0.7, 1]   (bad)          3    0.0%
        (1, Inf)   (very bad)     0    0.0%
 
 ```python
@@ -635,7 +642,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_25_0.png)
 
-    <ggplot: (8747973430327)>
+    <ggplot: (8753973157533)>
 
 ```python
 (
@@ -649,7 +656,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_26_0.png)
 
-    <ggplot: (8748074585082)>
+    <ggplot: (8753876019956)>
 
 ```python
 (
@@ -661,7 +668,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_27_0.png)
 
-    <ggplot: (8747973607132)>
+    <ggplot: (8753866717579)>
 
 ```python
 (
@@ -675,7 +682,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_28_0.png)
 
-    <ggplot: (8747974532919)>
+    <ggplot: (8753866717609)>
 
 ```python
 (
@@ -689,7 +696,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_29_0.png)
 
-    <ggplot: (8747973608807)>
+    <ggplot: (8753867043597)>
 
 ```python
 (
@@ -705,7 +712,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_30_0.png)
 
-    <ggplot: (8747973533034)>
+    <ggplot: (8753866714432)>
 
 ```python
 # Remove samples without gene CN data.
@@ -724,7 +731,7 @@ ppc_df_no_missing["binned_gene_cn"] = [
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_31_0.png)
 
-    <ggplot: (8747973975303)>
+    <ggplot: (8753866717579)>
 
 ```python
 gene_error = (
@@ -757,7 +764,7 @@ n_genes = 15
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_32_0.png)
 
-    <ggplot: (8747974784708)>
+    <ggplot: (8753876614903)>
 
 ```python
 (
@@ -771,7 +778,7 @@ n_genes = 15
 
 ![png](crc_m1_CRC-model1_files/crc_m1_CRC-model1_33_0.png)
 
-    <ggplot: (8747970473671)>
+    <ggplot: (8753866203152)>
 
 ---
 
@@ -780,7 +787,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 3.19 minutes
+    execution time: 3.13 minutes
 
 ```python
 %load_ext watermark
@@ -803,12 +810,12 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Hostname: compute-e-16-235.o2.rc.hms.harvard.edu
 
-    Git branch: update-pipeline
+    Git branch: ceres-mimic
 
-    seaborn   : 0.11.1
-    plotnine  : 0.7.1
-    numpy     : 1.20.1
-    matplotlib: 3.3.4
-    pymc3     : 3.11.1
     arviz     : 0.11.2
     pandas    : 1.2.3
+    pymc3     : 3.11.1
+    matplotlib: 3.3.4
+    plotnine  : 0.7.1
+    seaborn   : 0.11.1
+    numpy     : 1.20.1

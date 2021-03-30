@@ -279,3 +279,223 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         """Run a round of simulation-based calibration."""
         # TODO
         print("Running SBC...")
+
+
+#### ---- CRC CERES Mimic One ---- ####
+
+
+class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
+    """CRC CERES Mimic One.
+
+    This model is just the part of the CERES model that includes the sgRNA "activity score" (q)
+    and the per-gene (h) and per-gene-per-cell-line (d) covariates. In addition, I have included
+    a parameter for pDNA batch.
+    """
+
+    shared_vars: Optional[Dict[str, TTShared]] = None
+    model: Optional[pm.Model] = None
+    advi_results: Optional[pmapi.ApproximationSamplingResults] = None
+    mcmc_results: Optional[pmapi.MCMCSamplingResults] = None
+
+    ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
+
+    def __init__(
+        self, name: str, root_cache_dir: Optional[Path] = None, debug: bool = False
+    ):
+        """Create a CrcCeresMimicOne object.
+
+        Args:
+            name (str): A unique identifier for this instance of CrcModelOne. (Used for cache management.)
+            root_cache_dir (Optional[Path], optional): The directory for caching sampling/fitting results. Defaults to None.
+            debug (bool, optional): Are you in debug mode? Defaults to False.
+        """
+        super().__init__(
+            name="ceres-mimic-1_" + name, root_cache_dir=root_cache_dir, debug=debug
+        )
+
+    def _get_indices_collection(self, data: pd.DataFrame) -> achelp.CommonIndices:
+        return achelp.common_indices(data)
+
+    def build_model(self) -> None:
+        """Build CRC CERES Mimic One."""
+        data = self.get_data()
+
+        total_size = data.shape[0]
+        indices_collection = self._get_indices_collection(data)
+
+        # Shared Theano variables
+        sgrna_idx_shared = theano.shared(indices_collection.sgrna_idx)
+        sgrna_to_gene_idx_shared = theano.shared(indices_collection.sgrna_to_gene_idx)
+        gene_idx_shared = theano.shared(indices_collection.gene_idx)
+        cellline_idx_shared = theano.shared(indices_collection.cellline_idx)
+        batch_idx_shared = theano.shared(indices_collection.batch_idx)
+        lfc_shared = theano.shared(data.lfc.values)
+
+        with pm.Model() as model:
+
+            # Hyper-priors
+            σ_a = pm.HalfNormal("σ_a", np.array([0.1, 0.5]), shape=2)
+            a = pm.Exponential("a", σ_a, shape=(indices_collection.n_genes, 2))
+
+            μ_h = pm.Normal("μ_h", np.mean(data.lfc.values), 1)
+            σ_h = pm.HalfNormal("σ_h", 1)
+
+            μ_d = pm.Normal("μ_d", 0, 0.2)
+            σ_d = pm.HalfNormal("σ_d", 0.5)
+
+            μ_η = pm.Normal("μ_η", 0, 0.2)
+            σ_η = pm.HalfNormal("σ_η", 0.5)
+
+            # Main parameter priors
+            q = pm.Beta(
+                "q",
+                alpha=a[sgrna_to_gene_idx_shared, 0],
+                beta=a[sgrna_to_gene_idx_shared, 1],
+                shape=indices_collection.n_sgrnas,
+            )
+            h = pm.Normal("h", μ_h, σ_h, shape=indices_collection.n_genes)
+            d = pm.Normal(
+                "d",
+                μ_d,
+                σ_d,
+                shape=(indices_collection.n_genes, indices_collection.n_celllines),
+            )
+            η = pm.Normal("η", μ_η, σ_η, shape=indices_collection.n_batches)
+
+            μ = pm.Deterministic(
+                "μ",
+                q[sgrna_idx_shared]
+                * (h[gene_idx_shared] + d[gene_idx_shared, cellline_idx_shared])
+                + η[batch_idx_shared],
+            )
+            σ = pm.HalfNormal("σ", 2)
+
+            # Likelihood
+            lfc = pm.Normal("lfc", μ, σ, observed=lfc_shared, total_size=total_size)
+
+        shared_vars = {
+            "sgrna_idx_shared": sgrna_idx_shared,
+            "sgrna_to_gene_idx_shared": sgrna_to_gene_idx_shared,
+            "gene_idx_shared": gene_idx_shared,
+            "cellline_idx_shared": cellline_idx_shared,
+            "batch_idx_shared": batch_idx_shared,
+            "lfc_shared": lfc_shared,
+        }
+
+        self.model = model
+        self.shared_vars = shared_vars
+        return None
+
+    def _get_replacement_parameters(self) -> ReplacementsDict:
+        if self.data is None:
+            raise AttributeError(
+                "Cannot create replacement parameters before data has been loaded."
+            )
+        if self.shared_vars is None:
+            raise AttributeError(
+                "No shared variables - cannot create replacement parameters.."
+            )
+
+        batch_size = self.get_batch_size()
+        indices = self._get_indices_collection(self.data)
+
+        sgrna_idx_batch = pm.Minibatch(indices.sgrna_idx, batch_size=batch_size)
+        gene_idx_batch = pm.Minibatch(indices.gene_idx, batch_size=batch_size)
+        cellline_idx_batch = pm.Minibatch(indices.cellline_idx, batch_size=batch_size)
+        batch_idx_batch = pm.Minibatch(indices.batch_idx, batch_size=batch_size)
+        lfc_data_batch = pm.Minibatch(self.data.lfc.values, batch_size=batch_size)
+
+        return {
+            self.shared_vars["sgrna_idx_shared"]: sgrna_idx_batch,
+            self.shared_vars["gene_idx_shared"]: gene_idx_batch,
+            self.shared_vars["cellline_idx_shared"]: cellline_idx_batch,
+            self.shared_vars["batch_idx_shared"]: batch_idx_batch,
+            self.shared_vars["lfc_shared"]: lfc_data_batch,
+        }
+
+    def mcmc_sample_model(
+        self,
+        sampling_args: SamplingArguments,
+        mcmc_draws: int = 10000,
+        tune: int = 1000,
+        chains: int = 3,
+    ) -> pmapi.MCMCSamplingResults:
+        """Fit the model with MCMC.
+
+        Args:
+            sampling_args (SamplingArguments): Arguments for the sampling procedure.
+        """
+        if self.model is None:
+            raise AttributeError(
+                "Cannot sample: model is 'None'. Make sure to run `model.build_model()` first."
+            )
+        if self.shared_vars is None:
+            raise AttributeError("Cannot sample: cannot find shared variables.")
+
+        replacements = self._get_replacement_parameters()
+
+        if self.mcmc_results is not None:
+            return self.mcmc_results
+
+        if not sampling_args.ignore_cache and self.mcmc_cache_exists():
+            self.mcmc_results = self.get_mcmc_cache(model=self.model)
+            return self.mcmc_results
+
+        self.mcmc_results = pmapi.pymc3_sampling_procedure(
+            model=self.model,
+            mcmc_draws=mcmc_draws,
+            tune=tune,
+            chains=chains,
+            cores=sampling_args.cores,
+            random_seed=sampling_args.random_seed,
+        )
+        self.write_mcmc_cache(self.mcmc_results)
+        return self.mcmc_results
+
+    def advi_sample_model(
+        self,
+        sampling_args: SamplingArguments,
+        n_iterations: int = 100000,
+        draws: int = 1000,
+    ) -> pmapi.ApproximationSamplingResults:
+        """Fit the model with ADVI.
+
+        Args:
+            sampling_args (SamplingArguments): Arguments for the sampling procedure.
+
+        Returns:
+            ApproximationSamplingResults: The results of fitting the model with ADVI.
+        """
+        if self.model is None:
+            raise AttributeError(
+                "Cannot sample: model is 'None'. Make sure to run `model.build_model()` first."
+            )
+        if self.shared_vars is None:
+            raise AttributeError("Cannot sample: cannot find shared variables.")
+
+        replacements = self._get_replacement_parameters()
+
+        if self.advi_results is not None:
+            return self.advi_results
+
+        if not sampling_args.ignore_cache and self.advi_cache_exists():
+            self.advi_results = self.get_advi_cache()
+            return self.advi_results
+
+        self.advi_results = pmapi.pymc3_advi_approximation_procedure(
+            model=self.model,
+            n_iterations=n_iterations,
+            draws=draws,
+            callbacks=[
+                pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
+            ],
+            random_seed=sampling_args.random_seed,
+            fit_kwargs={"more_replacements": replacements},
+        )
+        self.write_advi_cache(self.advi_results)
+        return self.advi_results
+
+    def run_simulation_based_calibration(self):
+        """Run a round of simulation-based calibration."""
+        # TODO
+        print("Running SBC...")
