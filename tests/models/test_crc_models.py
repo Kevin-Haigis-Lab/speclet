@@ -5,7 +5,7 @@ from itertools import product
 from pathlib import Path
 from string import ascii_lowercase as letters
 from string import ascii_uppercase as LETTERS
-from typing import Dict
+from typing import Any, Dict, Type
 
 import numpy as np
 import pandas as pd
@@ -16,6 +16,7 @@ import theano.tensor as tt
 
 from src.data_processing import achilles as achelp
 from src.data_processing import common as dphelp
+from src.modeling import pymc3_sampling_api as pmapi
 from src.modeling.sampling_pymc3_models import SamplingArguments
 from src.models import crc_models, speclet_model
 
@@ -88,7 +89,7 @@ class TestCrcModel:
 #### ---- Test CrcModelOne ---- ####
 
 
-class TestCRCModel1:
+class TestCrcModelOne:  # CrcModelSubclassesTests:
     def test_init(self, tmp_path: Path):
         model = crc_models.CrcModelOne(
             name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
@@ -110,7 +111,6 @@ class TestCRCModel1:
         assert model.model is not None
         assert isinstance(model.model, pm.Model)
         assert model.shared_vars is not None
-        assert len(model.shared_vars.keys()) == 5
         for key, value in model.shared_vars.items():
             assert isinstance(key, str)
             assert isinstance(value, tt.sharedvar.TensorSharedVariable)
@@ -132,6 +132,52 @@ class TestCRCModel1:
         with pytest.raises(AttributeError):
             _ = model.advi_sample_model(sampling_args)
 
+    def check_trace_shape(
+        self,
+        trace: pm.backends.base.MultiTrace,
+        n_draws: int,
+        n_chains: int,
+        data: pd.DataFrame,
+    ):
+        assert isinstance(trace, pm.backends.base.MultiTrace)
+        total_samples = n_draws * n_chains
+        assert trace["μ_g"].shape == (total_samples,)
+        assert trace["μ_α"].shape == (
+            total_samples,
+            dphelp.nunique(data.hugo_symbol),
+        )
+        assert trace["α_s"].shape == (
+            total_samples,
+            dphelp.nunique(data.sgrna),
+        )
+        assert trace["β_l"].shape == (
+            total_samples,
+            dphelp.nunique(data.depmap_id),
+        )
+
+    def check_mcmc_results(
+        self,
+        res: pmapi.MCMCSamplingResults,
+        n_draws: int,
+        n_chains: int,
+        data: pd.DataFrame,
+    ):
+        self.check_trace_shape(res.trace, n_draws=n_draws, n_chains=n_chains, data=data)
+
+    def check_approx_fit(self, approx: pm.Approximation, n_fit: int):
+        assert isinstance(approx, pm.Approximation)
+        assert len(approx.hist) <= n_fit
+
+    def check_advi_results(
+        self,
+        res: pmapi.ApproximationSamplingResults,
+        n_draws: int,
+        n_fit: int,
+        data: pd.DataFrame,
+    ):
+        self.check_approx_fit(approx=res.approximation, n_fit=n_fit)
+        self.check_trace_shape(res.trace, n_draws=n_draws, n_chains=1, data=data)
+
     @pytest.mark.slow
     def test_manual_mcmc_sampling(self, mock_data: pd.DataFrame, tmp_path: Path):
         model = crc_models.CrcModelOne(
@@ -152,19 +198,8 @@ class TestCRCModel1:
                 return_inferencedata=False,
             )
 
-        assert isinstance(trace, pm.backends.base.MultiTrace)
-        assert trace["μ_g"].shape == (n_draws * n_chains,)
-        assert trace["μ_α"].shape == (
-            n_draws * n_chains,
-            dphelp.nunique(mock_data.hugo_symbol),
-        )
-        assert trace["α_s"].shape == (
-            n_draws * n_chains,
-            dphelp.nunique(mock_data.sgrna),
-        )
-        assert trace["β_l"].shape == (
-            n_draws * n_chains,
-            dphelp.nunique(mock_data.depmap_id),
+        self.check_trace_shape(
+            trace=trace, n_draws=n_draws, n_chains=n_chains, data=mock_data
         )
 
     @pytest.mark.slow
@@ -185,19 +220,8 @@ class TestCRCModel1:
         )
 
         trace = mcmc_results.trace
-        assert isinstance(trace, pm.backends.base.MultiTrace)
-        assert trace["μ_g"].shape == (n_draws * n_chains,)
-        assert trace["μ_α"].shape == (
-            n_draws * n_chains,
-            dphelp.nunique(mock_data.hugo_symbol),
-        )
-        assert trace["α_s"].shape == (
-            n_draws * n_chains,
-            dphelp.nunique(mock_data.sgrna),
-        )
-        assert trace["β_l"].shape == (
-            n_draws * n_chains,
-            dphelp.nunique(mock_data.depmap_id),
+        self.check_mcmc_results(
+            mcmc_results, n_draws=n_draws, n_chains=n_chains, data=mock_data
         )
 
     @pytest.mark.slow
@@ -215,13 +239,8 @@ class TestCRCModel1:
             approx = pm.fit(n=n_fit)
             trace = approx.sample(draws=n_draws)
 
-        assert isinstance(approx, pm.Approximation)
-        assert len(approx.hist) <= n_fit
-        assert isinstance(trace, pm.backends.base.MultiTrace)
-        assert trace["μ_g"].shape == (n_draws,)
-        assert trace["μ_α"].shape == (n_draws, dphelp.nunique(mock_data.hugo_symbol))
-        assert trace["α_s"].shape == (n_draws, dphelp.nunique(mock_data.sgrna.values))
-        assert trace["β_l"].shape == (n_draws, dphelp.nunique(mock_data.depmap_id))
+        self.check_approx_fit(approx, n_fit=n_fit)
+        self.check_trace_shape(trace=trace, n_draws=n_draws, n_chains=1, data=mock_data)
 
     @pytest.mark.slow
     def test_advi_sampling_method(
@@ -239,16 +258,15 @@ class TestCRCModel1:
         advi_results = model.advi_sample_model(
             n_iterations=n_fit, draws=n_draws, sampling_args=sampling_args
         )
-        approx = advi_results.approximation
-        trace = advi_results.trace
+        self.check_advi_results(
+            advi_results, n_draws=n_draws, n_fit=n_fit, data=mock_data
+        )
 
-        assert isinstance(approx, pm.Approximation)
-        assert len(approx.hist) <= n_fit
-        assert isinstance(trace, pm.backends.base.MultiTrace)
-        assert trace["μ_g"].shape == (n_draws,)
-        assert trace["μ_α"].shape == (n_draws, dphelp.nunique(mock_data.hugo_symbol))
-        assert trace["α_s"].shape == (n_draws, dphelp.nunique(mock_data.sgrna.values))
-        assert trace["β_l"].shape == (n_draws, dphelp.nunique(mock_data.depmap_id))
+    def compare_two_results(
+        self, trace_1: pm.backends.base.MultiTrace, trace_2: pm.backends.base.MultiTrace
+    ):
+        for p in ["μ_g", "μ_α", "α_s", "β_l"]:
+            np.testing.assert_array_equal(trace_1[p], trace_2[p])
 
     @pytest.mark.slow
     def test_not_rerun_mcmc_sampling(
@@ -267,9 +285,7 @@ class TestCRCModel1:
         b = time.time()
 
         assert b - a < 2  # should be very quick
-
-        for p in ["μ_g", "μ_α", "α_s", "β_l"]:
-            np.testing.assert_array_equal(results_1.trace[p], results_2.trace[p])
+        self.compare_two_results(results_1.trace, results_2.trace)
 
     @pytest.mark.slow
     def test_not_rerun_advi_sampling(
@@ -292,8 +308,4 @@ class TestCRCModel1:
         np.testing.assert_array_equal(
             results_1.approximation.hist, results_2.approximation.hist
         )
-
-        for p in ["μ_g", "μ_α", "α_s", "β_l"]:
-            np.testing.assert_array_equal(
-                results_1.prior_predictive[p], results_2.prior_predictive[p]
-            )
+        self.compare_two_results(results_1.trace, results_2.trace)
