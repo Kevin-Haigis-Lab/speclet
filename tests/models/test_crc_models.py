@@ -6,7 +6,7 @@ from itertools import product
 from pathlib import Path
 from string import ascii_lowercase as letters
 from string import ascii_uppercase as LETTERS
-from typing import Any, Dict, Type
+from typing import Any, Callable, Dict, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -20,6 +20,7 @@ from src.data_processing import common as dphelp
 from src.modeling import pymc3_sampling_api as pmapi
 from src.modeling.sampling_pymc3_models import SamplingArguments
 from src.models import crc_models, speclet_model
+from src.models.protocols import SelfSufficientModel
 
 #### ---- Mock data ---- ####
 
@@ -91,6 +92,9 @@ class TestCrcModel:
 
 
 class CrcModelSubclassesTests:
+
+    Model: Type[Union[crc_models.CrcModelOne, crc_models.CrcCeresMimicOne]]
+
     @abc.abstractmethod
     def check_trace_shape(
         self,
@@ -131,17 +135,13 @@ class CrcModelSubclassesTests:
         self.check_trace_shape(res.trace, n_draws=n_draws, n_chains=1, data=data)
 
     def test_init(self, tmp_path: Path):
-        model = crc_models.CrcModelOne(
-            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
-        )
-        assert isinstance(model, crc_models.CrcModelOne)
+        model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        assert issubclass(self.Model, crc_models.CrcModel)
         assert isinstance(model, crc_models.CrcModel)
 
     @pytest.mark.slow
     def test_build_model(self, tmp_path: Path):
-        model = crc_models.CrcModelOne(
-            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
-        )
+        model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
         assert model.data is None
         assert model.model is None
         assert model.shared_vars is None
@@ -164,9 +164,7 @@ class CrcModelSubclassesTests:
     def test_error_for_sampling_without_building(
         self, sampling_args: SamplingArguments, tmp_path: Path
     ):
-        model = crc_models.CrcModelOne(
-            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
-        )
+        model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
         with pytest.raises(AttributeError):
             _ = model.mcmc_sample_model(sampling_args)
         with pytest.raises(AttributeError):
@@ -174,9 +172,7 @@ class CrcModelSubclassesTests:
 
     @pytest.mark.slow
     def test_manual_mcmc_sampling(self, mock_data: pd.DataFrame, tmp_path: Path):
-        model = crc_models.CrcModelOne(
-            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
-        )
+        model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
         model.data = mock_data  # inject mock data
         model.build_model()
 
@@ -200,9 +196,7 @@ class CrcModelSubclassesTests:
     def test_mcmc_sampling_method(
         self, mock_data: pd.DataFrame, sampling_args: SamplingArguments, tmp_path: Path
     ):
-        model = crc_models.CrcModelOne(
-            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
-        )
+        model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
         model.data = mock_data  # inject mock data
         model.build_model()
 
@@ -220,9 +214,7 @@ class CrcModelSubclassesTests:
 
     @pytest.mark.slow
     def test_manual_advi_sampling(self, mock_data: pd.DataFrame, tmp_path: Path):
-        model = crc_models.CrcModelOne(
-            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
-        )
+        model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
         model.data = mock_data  # inject mock data
         model.build_model()
 
@@ -240,9 +232,7 @@ class CrcModelSubclassesTests:
     def test_advi_sampling_method(
         self, mock_data: pd.DataFrame, sampling_args: SamplingArguments, tmp_path: Path
     ):
-        model = crc_models.CrcModelOne(
-            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
-        )
+        model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
         model.data = mock_data  # inject mock data
         model.build_model()
 
@@ -260,9 +250,7 @@ class CrcModelSubclassesTests:
     def test_not_rerun_mcmc_sampling(
         self, mock_data: pd.DataFrame, sampling_args: SamplingArguments, tmp_path: Path
     ):
-        model = crc_models.CrcModelOne(
-            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
-        )
+        model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
         model.data = mock_data  # inject mock data
         model.build_model()
         results_1 = model.mcmc_sample_model(
@@ -279,9 +267,7 @@ class CrcModelSubclassesTests:
     def test_not_rerun_advi_sampling(
         self, mock_data: pd.DataFrame, sampling_args: SamplingArguments, tmp_path: Path
     ):
-        model = crc_models.CrcModelOne(
-            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
-        )
+        model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
         model.data = mock_data  # inject mock data
         model.build_model()
         results_1 = model.advi_sample_model(
@@ -300,6 +286,9 @@ class CrcModelSubclassesTests:
 
 
 class TestCrcModelOne(CrcModelSubclassesTests):
+
+    Model = crc_models.CrcModelOne
+
     def check_trace_shape(
         self,
         trace: pm.backends.base.MultiTrace,
