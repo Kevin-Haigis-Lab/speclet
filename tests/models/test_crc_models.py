@@ -321,10 +321,6 @@ class TestCrcModelOne(CrcModelSubclassesTests):
 class TestCrcCeresMimicOne(CrcModelSubclassesTests):
     Model = CrcCeresMimicOne
 
-    def test_sbc_standard(self, tmp_path: Path):
-        # ! SBC not built for this model, yet.
-        assert 1 == 1
-
     def check_trace_shape(
         self,
         trace: pm.backends.base.MultiTrace,

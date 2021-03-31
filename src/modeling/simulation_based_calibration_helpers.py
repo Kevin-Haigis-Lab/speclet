@@ -7,6 +7,9 @@ import arviz as az
 import numpy as np
 import pandas as pd
 
+from src.data_processing import achilles as achelp
+from src.string_functions import prefixed_count
+
 
 class SBCResults:
     """Results from a single round of SBC."""
@@ -121,3 +124,51 @@ class SBCFileManager:
             if not p.exists():
                 return False
         return True
+
+
+def generate_mock_achilles_data(
+    n_genes: int, n_sgrnas_per_gene: int, n_cell_lines: int, n_batches: int
+) -> pd.DataFrame:
+    """Generate mock Achilles data.
+
+    Each sgRNA maps to a single gene. Each cell lines only recieved on pDNA batch.
+    Each cell line / sgRNA combination occurs exactly once.
+
+    Args:
+        n_genes (int): Number of genes.
+        n_sgrnas_per_gene (int): Number of sgRNAs per gene.
+        n_cell_lines (int): Number of cell lines.
+        n_batches (int): Number of pDNA batchs.
+
+    Returns:
+        pd.DataFrame: A pandas data frame the resembles the Achilles data.
+    """
+    cell_lines = prefixed_count("cellline", n=n_cell_lines)
+    batches = prefixed_count("batch", n=n_batches)
+    batch_map = pd.DataFrame(
+        dict(depmap_id=cell_lines, pdna_batch=np.random.choice(batches, n_cell_lines))
+    )
+
+    genes = prefixed_count("gene", n=n_genes)
+    sgrnas = [prefixed_count(gene + "_sgrna", n=n_sgrnas_per_gene) for gene in genes]
+    sgnra_map = pd.DataFrame(
+        dict(
+            hugo_symbol=np.repeat(genes, n_sgrnas_per_gene),
+            sgrna=np.array(sgrnas).flatten(),
+        )
+    )
+
+    df = (
+        pd.DataFrame(
+            dict(
+                depmap_id=np.repeat(cell_lines, n_genes),
+                hugo_symbol=np.tile(genes, n_cell_lines),
+            )
+        )
+        .merge(batch_map, on="depmap_id")
+        .merge(sgnra_map, on="hugo_symbol")
+        .reset_index(drop=True)
+    )
+    df = achelp.set_achilles_categorical_columns(df, cols=df.columns.tolist())
+    df["lfc"] = np.random.normal(0, 2, df.shape[0])
+    return df

@@ -5,6 +5,7 @@
 from pathlib import Path
 from typing import Dict, Optional, Union
 
+import arviz as az
 import numpy as np
 import pandas as pd
 import pretty_errors
@@ -12,6 +13,7 @@ import pymc3 as pm
 import theano
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
+import src.modeling.simulation_based_calibration_helpers as sbc
 from src.data_processing import achilles as achelp
 from src.modeling import pymc3_sampling_api as pmapi
 from src.modeling.sampling_metadata_models import SamplingArguments
@@ -53,9 +55,18 @@ class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
     def _get_indices_collection(self, data: pd.DataFrame) -> achelp.CommonIndices:
         return achelp.common_indices(data)
 
-    def build_model(self) -> None:
-        """Build CRC CERES Mimic One."""
-        data = self.get_data()
+    def build_model(self, data: Optional[pd.DataFrame] = None) -> None:
+        """Build CRC CERES Mimic One.
+
+        Args:
+            data (Optional[pd.DataFrame], optional): Data to used to build the model around.
+              If None (default), then Achilles data is read in. Defaults to None.
+
+        Returns:
+            [type]: None
+        """
+        if data is None:
+            data = self.get_data()
 
         total_size = data.shape[0]
         indices_collection = self._get_indices_collection(data)
@@ -243,4 +254,43 @@ class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
             size (str, optional): Size of the data set to mock. Defaults to "large".
         """
         # TODO
-        print("Running SBC...")
+        if size == "large":
+            mock_data = sbc.generate_mock_achilles_data(
+                n_genes=100, n_sgrnas_per_gene=5, n_cell_lines=20, n_batches=3
+            )
+        elif size == "small":
+            mock_data = sbc.generate_mock_achilles_data(
+                n_genes=10, n_sgrnas_per_gene=3, n_cell_lines=5, n_batches=2
+            )
+        else:
+            raise Exception(
+                "Unknown value for `size` parameter - must be either 'small' or 'large' (default)."
+            )
+
+        self.build_model(data=mock_data)
+        assert self.model is not None
+        with self.model:
+            priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
+
+        mock_data["lfc"] = priors.get("lfc").flatten()
+        self.data = mock_data
+
+        sampling_args = SamplingArguments(
+            name=f"sbc-seed{random_seed}",
+            cores=1,
+            sample=True,
+            ignore_cache=False,
+            debug=False,
+            random_seed=random_seed,
+        )
+
+        res = self.advi_sample_model(sampling_args)
+        posterior_summary = az.summary(res.trace, fmt="wide")
+        assert isinstance(posterior_summary, pd.DataFrame)
+        az_results = pmapi.convert_samples_to_arviz(model=self.model, res=res)
+        results_manager = sbc.SBCFileManager(dir=results_path)
+        results_manager.save_sbc_results(
+            priors=priors,
+            inference_obj=az_results,
+            posterior_summary=posterior_summary,
+        )

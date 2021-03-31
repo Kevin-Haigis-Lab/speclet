@@ -16,10 +16,10 @@ import pymc3 as pm
 import theano
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
+import src.modeling.simulation_based_calibration_helpers as sbc
 from src.data_processing import achilles as achelp
 from src.modeling import pymc3_sampling_api as pmapi
 from src.modeling.sampling_metadata_models import SamplingArguments
-from src.modeling.simulation_based_calibration_helpers import SBCFileManager
 from src.models.crc_model import CrcModel
 from src.models.protocols import SelfSufficientModel
 from src.string_functions import prefixed_count
@@ -53,7 +53,15 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         return achelp.common_indices(data)
 
     def build_model(self, data: Optional[pd.DataFrame] = None) -> None:
-        """Build CRC Model One."""
+        """Build CRC Model One.
+
+        Args:
+            data (Optional[pd.DataFrame], optional): Data to used to build the model around.
+              If None (default), then Achilles data is read in. Defaults to None.
+
+        Returns:
+            [type]: None
+        """
         if data is None:
             data = self.get_data()
 
@@ -222,43 +230,6 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         self.write_advi_cache(self.advi_results)
         return self.advi_results
 
-    def _generate_mock_data(
-        self, n_genes: int, n_sgrnas_per_gene: int, n_cell_lines: int, n_batches: int
-    ) -> pd.DataFrame:
-        cell_lines = prefixed_count("cellline", n=n_cell_lines)
-        batches = prefixed_count("batch", n=n_batches)
-        batch_map = pd.DataFrame(
-            dict(
-                depmap_id=cell_lines, pdna_batch=np.random.choice(batches, n_cell_lines)
-            )
-        )
-
-        genes = prefixed_count("gene", n=n_genes)
-        sgrnas = [
-            prefixed_count(gene + "_sgrna", n=n_sgrnas_per_gene) for gene in genes
-        ]
-        sgnra_map = pd.DataFrame(
-            dict(
-                hugo_symbol=np.repeat(genes, n_sgrnas_per_gene),
-                sgrna=np.array(sgrnas).flatten(),
-            )
-        )
-
-        df = (
-            pd.DataFrame(
-                dict(
-                    depmap_id=np.repeat(cell_lines, n_genes),
-                    hugo_symbol=np.tile(genes, n_cell_lines),
-                )
-            )
-            .merge(batch_map, on="depmap_id")
-            .merge(sgnra_map, on="hugo_symbol")
-            .reset_index(drop=True)
-        )
-        df = achelp.set_achilles_categorical_columns(df, cols=df.columns.tolist())
-        df["lfc"] = np.random.normal(0, 2, df.shape[0])
-        return df
-
     def run_simulation_based_calibration(
         self, results_path: Path, random_seed: Optional[int] = None, size: str = "large"
     ) -> None:
@@ -270,11 +241,11 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
             size (str, optional): Size of the data set to mock. Defaults to "large".
         """
         if size == "large":
-            mock_data = self._generate_mock_data(
+            mock_data = sbc.generate_mock_achilles_data(
                 n_genes=100, n_sgrnas_per_gene=5, n_cell_lines=20, n_batches=3
             )
         elif size == "small":
-            mock_data = self._generate_mock_data(
+            mock_data = sbc.generate_mock_achilles_data(
                 n_genes=10, n_sgrnas_per_gene=3, n_cell_lines=5, n_batches=2
             )
         else:
@@ -303,7 +274,7 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         posterior_summary = az.summary(res.trace, fmt="wide")
         assert isinstance(posterior_summary, pd.DataFrame)
         az_results = pmapi.convert_samples_to_arviz(model=self.model, res=res)
-        results_manager = SBCFileManager(dir=results_path)
+        results_manager = sbc.SBCFileManager(dir=results_path)
         results_manager.save_sbc_results(
             priors=priors,
             inference_obj=az_results,
