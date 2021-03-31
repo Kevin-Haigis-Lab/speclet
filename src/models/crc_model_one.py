@@ -2,9 +2,13 @@
 
 """Builders for CRC PyMC3 models."""
 
+import json
 from pathlib import Path
-from typing import Dict, Optional, Union
+from string import ascii_lowercase as letters
+from string import ascii_uppercase as LETTERS
+from typing import Any, Dict, Optional, Union
 
+import arviz as az
 import numpy as np
 import pandas as pd
 import pretty_errors
@@ -15,8 +19,10 @@ from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 from src.data_processing import achilles as achelp
 from src.modeling import pymc3_sampling_api as pmapi
 from src.modeling.sampling_metadata_models import SamplingArguments
+from src.modeling.simulation_based_calibration_helpers import SBCFileManager
 from src.models.crc_model import CrcModel
 from src.models.protocols import SelfSufficientModel
+from src.string_functions import prefixed_count
 
 #### ---- Model 1 ---- ####
 
@@ -46,9 +52,10 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
     def _get_indices_collection(self, data: pd.DataFrame) -> achelp.CommonIndices:
         return achelp.common_indices(data)
 
-    def build_model(self) -> None:
+    def build_model(self, data: Optional[pd.DataFrame] = None) -> None:
         """Build CRC Model One."""
-        data = self.get_data()
+        if data is None:
+            data = self.get_data()
 
         total_size = data.shape[0]
         indices_collection = self._get_indices_collection(data)
@@ -136,7 +143,7 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
     def mcmc_sample_model(
         self,
         sampling_args: SamplingArguments,
-        mcmc_draws: int = 10000,
+        mcmc_draws: int = 1000,
         tune: int = 1000,
         chains: int = 3,
     ) -> pmapi.MCMCSamplingResults:
@@ -215,7 +222,77 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         self.write_advi_cache(self.advi_results)
         return self.advi_results
 
-    def run_simulation_based_calibration(self):
-        """Run a round of simulation-based calibration."""
-        # TODO
-        print("Running SBC...")
+    def _generate_mock_data(
+        self, n_genes: int, n_sgrnas_per_gene: int, n_cell_lines: int, n_batches: int
+    ) -> pd.DataFrame:
+        cell_lines = prefixed_count("cellline", n=n_cell_lines)
+        batches = prefixed_count("batch", n=n_batches)
+        batch_map = pd.DataFrame(
+            dict(
+                depmap_id=cell_lines, pdna_batch=np.random.choice(batches, n_cell_lines)
+            )
+        )
+
+        genes = prefixed_count("gene", n=n_genes)
+        sgrnas = [
+            prefixed_count(gene + "_sgrna", n=n_sgrnas_per_gene) for gene in genes
+        ]
+        sgnra_map = pd.DataFrame(
+            dict(
+                hugo_symbol=np.repeat(genes, n_sgrnas_per_gene),
+                sgrna=np.array(sgrnas).flatten(),
+            )
+        )
+
+        df = (
+            pd.DataFrame(
+                dict(
+                    depmap_id=np.repeat(cell_lines, n_genes),
+                    hugo_symbol=np.tile(genes, n_cell_lines),
+                )
+            )
+            .merge(batch_map, on="depmap_id")
+            .merge(sgnra_map, on="hugo_symbol")
+            .reset_index(drop=True)
+        )
+        df = achelp.set_achilles_categorical_columns(df, cols=df.columns.tolist())
+        df["lfc"] = np.random.normal(0, 2, df.shape[0])
+        return df
+
+    def run_simulation_based_calibration(
+        self, results_path: Path, random_seed: Optional[int] = None
+    ):
+        """Run a round of simulation-based calibration.
+
+        Args:
+            results_path (Path): Where to store the results.
+            random_seed (Optional[int], optional): Random seed (for reproducibility). Defaults to None.
+        """
+        mock_data = self._generate_mock_data(3, 3, 5, 2)
+        self.build_model(data=mock_data)
+        assert self.model is not None
+        with self.model:
+            priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
+
+        mock_data["lfc"] = priors.get("lfc").flatten()
+        self.data = mock_data
+
+        sampling_args = SamplingArguments(
+            name="TEST-MODEL",
+            cores=3,
+            sample=True,
+            ignore_cache=False,
+            debug=False,
+            random_seed=random_seed,
+        )
+
+        res = self.advi_sample_model(sampling_args)
+        posterior_summary = az.summary(res.trace, fmt="wide")
+        assert isinstance(posterior_summary, pd.DataFrame)
+        az_results = pmapi.convert_samples_to_arviz(model=self.model, res=res)
+        results_manager = SBCFileManager(dir=results_path)
+        results_manager.save_sbc_results(
+            priors=priors,
+            inference_obj=az_results,
+            posterior_summary=posterior_summary,
+        )
