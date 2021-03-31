@@ -260,15 +260,28 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         return df
 
     def run_simulation_based_calibration(
-        self, results_path: Path, random_seed: Optional[int] = None
-    ):
+        self, results_path: Path, random_seed: Optional[int] = None, size: str = "large"
+    ) -> None:
         """Run a round of simulation-based calibration.
 
         Args:
             results_path (Path): Where to store the results.
             random_seed (Optional[int], optional): Random seed (for reproducibility). Defaults to None.
+            size (str, optional): Size of the data set to mock. Defaults to "large".
         """
-        mock_data = self._generate_mock_data(3, 3, 5, 2)
+        if size == "large":
+            mock_data = self._generate_mock_data(
+                n_genes=100, n_sgrnas_per_gene=5, n_cell_lines=20, n_batches=3
+            )
+        elif size == "small":
+            mock_data = self._generate_mock_data(
+                n_genes=10, n_sgrnas_per_gene=3, n_cell_lines=5, n_batches=2
+            )
+        else:
+            raise Exception(
+                "Unknown value for `size` parameter - must be either 'small' or 'large' (default)."
+            )
+
         self.build_model(data=mock_data)
         assert self.model is not None
         with self.model:
@@ -278,8 +291,8 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         self.data = mock_data
 
         sampling_args = SamplingArguments(
-            name="TEST-MODEL",
-            cores=3,
+            name=f"sbc-seed{random_seed}",
+            cores=1,
             sample=True,
             ignore_cache=False,
             debug=False,

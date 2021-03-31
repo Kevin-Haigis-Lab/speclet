@@ -232,7 +232,15 @@ class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
         self.write_advi_cache(self.advi_results)
         return self.advi_results
 
-    def run_simulation_based_calibration(self):
-        """Run a round of simulation-based calibration."""
+    def run_simulation_based_calibration(
+        self, results_path: Path, random_seed: Optional[int] = None, size: str = "large"
+    ) -> None:
+        """Run a round of simulation-based calibration.
+
+        Args:
+            results_path (Path): Where to store the results.
+            random_seed (Optional[int], optional): Random seed (for reproducibility). Defaults to None.
+            size (str, optional): Size of the data set to mock. Defaults to "large".
+        """
         # TODO
         print("Running SBC...")

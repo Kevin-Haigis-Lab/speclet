@@ -2,7 +2,8 @@
 
 """Model protocols."""
 
-from typing import Protocol
+from pathlib import Path
+from typing import Optional, Protocol
 
 from src.modeling import pymc3_sampling_api as pmapi
 from src.modeling.sampling_metadata_models import SamplingArguments
@@ -35,6 +36,8 @@ class SelfSufficientModel(Protocol):
         """
         ...
 
-    def run_simulation_based_calibration(self) -> None:
+    def run_simulation_based_calibration(
+        self, results_path: Path, random_seed: Optional[int] = None, size: str = "large"
+    ) -> None:
         """Run a round of simulation-based calibration."""
         ...

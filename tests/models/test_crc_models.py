@@ -15,6 +15,7 @@ import pymc3 as pm
 import pytest
 import theano.tensor as tt
 
+import src.modeling.simulation_based_calibration_helpers as sbc
 from src.data_processing import common as dphelp
 from src.modeling import pymc3_sampling_api as pmapi
 from src.modeling.sampling_pymc3_models import SamplingArguments
@@ -279,6 +280,14 @@ class CrcModelSubclassesTests:
         )
         self.compare_two_results(results_1.trace, results_2.trace)
 
+    def test_sbc_standard(self, tmp_path: Path):
+        model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        model.run_simulation_based_calibration(results_path=tmp_path, size="small")
+        fm = sbc.SBCFileManager(dir=tmp_path)
+        assert fm.all_data_exists()
+        res = fm.get_sbc_results()
+        assert isinstance(res, sbc.SBCResults)
+
 
 class TestCrcModelOne(CrcModelSubclassesTests):
 
@@ -311,6 +320,10 @@ class TestCrcModelOne(CrcModelSubclassesTests):
 
 class TestCrcCeresMimicOne(CrcModelSubclassesTests):
     Model = CrcCeresMimicOne
+
+    def test_sbc_standard(self, tmp_path: Path):
+        # ! SBC not built for this model, yet.
+        assert 1 == 1
 
     def check_trace_shape(
         self,
