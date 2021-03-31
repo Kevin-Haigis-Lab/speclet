@@ -38,7 +38,8 @@ class SBCFileManager:
 
     dir: Path
     inference_data_path: Path
-    priors_path: Path
+    priors_path_set: Path
+    priors_path_get: Path
     posterior_summary_path: Path
 
     sbc_results: Optional[SBCResults] = None
@@ -51,7 +52,8 @@ class SBCFileManager:
         """
         self.dir = dir
         self.inference_data_path = dir / "inference-data.netcdf"
-        self.priors_path = dir / "priors"
+        self.priors_path_set = dir / "priors"
+        self.priors_path_get = dir / "priors.npz"
         self.posterior_summary_path = dir / "posterior-summary.csv"
 
     def save_sbc_results(
@@ -68,7 +70,7 @@ class SBCFileManager:
             posterior_summary (pd.DataFrame): A summary of the posteriors.
         """
         inference_obj.to_netcdf(self.inference_data_path.as_posix())
-        np.savez(self.priors_path.as_posix(), **priors)
+        np.savez(self.priors_path_set.as_posix(), **priors)
         posterior_summary.to_csv(
             self.posterior_summary_path.as_posix(), index_label="parameter"
         )
@@ -92,7 +94,7 @@ class SBCFileManager:
             return self.sbc_results
 
         inference_obj = az.from_netcdf(self.inference_data_path)
-        priors_files = np.load(self.priors_path.as_posix() + ".npz")
+        priors_files = np.load(self.priors_path_get.as_posix())
         priors = self._tidy_numy_files(priors_files)
         posterior_summary = pd.read_csv(
             self.posterior_summary_path, index_col="parameter"
@@ -104,3 +106,18 @@ class SBCFileManager:
             posterior_summary=posterior_summary,
         )
         return self.sbc_results
+
+    def all_data_exists(self) -> bool:
+        """Confirm that all data exists.
+
+        Returns:
+            bool: True if all of the data exists, else false.
+        """
+        for p in [
+            self.priors_path_get,
+            self.posterior_summary_path,
+            self.inference_data_path,
+        ]:
+            if not p.exists():
+                return False
+        return True
