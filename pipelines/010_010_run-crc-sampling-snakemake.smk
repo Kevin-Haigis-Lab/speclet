@@ -8,7 +8,7 @@ import pretty_errors
 PYMC3_MODEL_CACHE_DIR = "models/model_cache/pymc3_model_cache/"
 REPORTS_DIR = "reports/crc_model_sampling_reports/"
 
-ENVIRONMENT_YAML = Path("010_014_environment.yml").as_posix()
+ENVIRONMENT_YAML = Path("default_environment.yml").as_posix()
 
 model_names = {
     "crc_m1": "CRC-model1",

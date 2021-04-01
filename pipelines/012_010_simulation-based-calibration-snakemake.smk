@@ -6,9 +6,9 @@ import papermill
 
 N_PERMUTATIONS = 5
 
-REPORTS_DIR = Path("reports/crc_sbc_reports/").as_posix()
-ENVIRONMENT_YAML = Path("010_014_environment.yml").as_posix()
-ROOT_PERMUTATION_DIR = Path("temp/").as_posix()
+REPORTS_DIR = "reports/crc_sbc_reports/"
+ENVIRONMENT_YAML = "default_environment.yml"
+ROOT_PERMUTATION_DIR = "temp/"
 
 
 model_names = ["crc_model_one", "crc_ceres_mimic_one"]
@@ -22,27 +22,27 @@ rule all:
 rule run_sbc:
     output:
         netcdf_file=(
-            ROOT_PERMUTATION_DIR + "{model}/sbc-perm{perm_num}/inference-data.netcdf"
+            ROOT_PERMUTATION_DIR + "{model_name}/sbc-perm{perm_num}/inference-data.netcdf"
         ),
         posterior_file=(
-            ROOT_PERMUTATION_DIR + "{model}/sbc-perm{perm_num}/posterior-summary.csv"
+            ROOT_PERMUTATION_DIR + "{model_name}/sbc-perm{perm_num}/posterior-summary.csv"
         ),
-        priors_file=ROOT_PERMUTATION_DIR + "{model}/sbc-perm{perm_num}/priors.npz",
+        priors_file=ROOT_PERMUTATION_DIR + "{model_name}/sbc-perm{perm_num}/priors.npz",
+    conda:
+        ENVIRONMENT_YAML
     shell:
-        "pipelines/012_015_run-sbc.py run_sbc "
-        "  {wildcards.model} "
-        "  " + ROOT_PERMUTATION_DIR + "{model}/sbc-perm{perm_num} "
-        "  perm_number={wildcards.perm_num}"
+        "pipelines/012_015_run-sbc.py "
+        "  {wildcards.model_name} "
+        "  " + ROOT_PERMUTATION_DIR + "{wildcards.model_name}/sbc-perm{wildcards.perm_num} "
+        "  {wildcards.perm_num}"
 
 
 rule papermill_report:
-    input:
-        template_notebook=REPORTS_DIR + "sbc-results-template.ipynb",
     output:
         notebook=REPORTS_DIR + "{model_name}_sbc-results.ipynb",
     run:
         papermill.execute_notebook(
-            input.template_notebook,
+            REPORTS_DIR + "sbc-results-template.ipynb",
             output.notebook,
             parameters={"MODEL": wildcards.model_name},
             prepare_only=True,
@@ -52,13 +52,13 @@ rule papermill_report:
 rule execute_report:
     input:
         sbc_results=expand(
-            ROOT_PERMUTATION_DIR + "{model}/sbc-perm{perm_num}/posterior-summary.csv",
+            ROOT_PERMUTATION_DIR + "{model_name}/sbc-perm{perm_num}/posterior-summary.csv",
             perm_num=list(range(N_PERMUTATIONS)),
             allow_missing=True,
         ),
         notebook=REPORTS_DIR + "{model_name}_sbc-results.ipynb",
     output:
-        markdown=REPORTS_DIR + "{model}_{model_name}.md",
+        markdown=REPORTS_DIR + "{model_name}_sbc-results.md",
     conda:
         ENVIRONMENT_YAML
     shell:

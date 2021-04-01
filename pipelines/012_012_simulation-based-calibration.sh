@@ -14,7 +14,7 @@ module load gcc conda2 slurm-drmaa/1.1.1
 source "$HOME/.bashrc"
 conda activate speclet_smakemake
 
-SNAKEFILE="pipelines/010_010_run-crc-sampling-snakemake.smk"
+SNAKEFILE="pipelines/012_010_simulation-based-calibration-snakemake.smk"
 
 # Copy original env file and ammend import of speclet project modules
 ENV_PATH="pipelines/default_environment.yml"
@@ -23,8 +23,6 @@ if [ ! -f "$ENV_PATH" ]; then
     sed -i "s|-e .|-e $(pwd)/|" $ENV_PATH
     sed -i '/jupyter_contrib_nbextensions/d' $ENV_PATH
 fi
-
-
 
 snakemake \
     --snakefile $SNAKEFILE \
