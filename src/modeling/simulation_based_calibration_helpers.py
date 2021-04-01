@@ -78,7 +78,7 @@ class SBCFileManager:
             self.posterior_summary_path.as_posix(), index_label="parameter"
         )
 
-    def _tidy_numy_files(self, files: Any) -> Dict[str, np.ndarray]:
+    def _tidy_numpy_files(self, files: Any) -> Dict[str, np.ndarray]:
         d: Dict[str, np.ndarray] = {}
         for k in files.files:
             d[k] = files[k]
@@ -98,7 +98,7 @@ class SBCFileManager:
 
         inference_obj = az.from_netcdf(self.inference_data_path)
         priors_files = np.load(self.priors_path_get.as_posix())
-        priors = self._tidy_numy_files(priors_files)
+        priors = self._tidy_numpy_files(priors_files)
         posterior_summary = pd.read_csv(
             self.posterior_summary_path, index_col="parameter"
         )
