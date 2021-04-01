@@ -4,6 +4,8 @@ from pathlib import Path
 
 import papermill
 
+N_PERMUTATIONS = 5
+
 REPORTS_DIR = Path("reports/crc_sbc_reports/").as_posix()
 ENVIRONMENT_YAML = Path("010_014_environment.yml").as_posix()
 ROOT_PERMUTATION_DIR = Path("temp/").as_posix()
@@ -49,7 +51,11 @@ rule papermill_report:
 
 rule execute_report:
     input:
-        sbc_results,
+        sbc_results=expand(
+            ROOT_PERMUTATION_DIR + "{model}/sbc-perm{perm_num}/posterior-summary.csv",
+            perm_num=list(range(N_PERMUTATIONS)),
+            allow_missing=True,
+        ),
         notebook=REPORTS_DIR + "{model_name}_sbc-results.ipynb",
     output:
         markdown=REPORTS_DIR + "{model}_{model_name}.md",
