@@ -258,6 +258,7 @@ temp/
 modeling_data/*
 .snakemake/
 .virtual_documents/
+.vscode/settings.json
 
 # Specific files to except from the rules above
 !modeling_data/depmap_modeling_dataframe_subsample.csv
