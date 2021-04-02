@@ -1,9 +1,11 @@
 # Model Report
 
 ```python
+import re
 import warnings
 from pathlib import Path
 from time import time
+from typing import Dict, List
 
 import arviz as az
 import matplotlib.pyplot as plt
@@ -56,7 +58,7 @@ NUM_SIMULATIONS = -1
 # Parameters
 MODEL = "crc_ceres_mimic_one"
 SBC_RESULTS_DIR = "temp/crc_ceres_mimic_one"
-NUM_SIMULATIONS = 5
+NUM_SIMULATIONS = 20
 
 ```
 
@@ -85,207 +87,85 @@ assert NUM_SIMULATIONS > 0
 ## Read in all results
 
 ```python
+def split_parameter(p: str) -> List[str]:
+    return [a for a in re.split("\\[|,|\\]", p) if a != ""]
+
+
+def get_prior_value_using_index_list(ary: np.ndarray, idx: List[int]) -> float:
+    if len(idx) == 0:
+        return ary
+
+    assert len(idx) == len(ary.shape)
+    value = ary
+    for i in idx:
+        value = value[i]
+    return value
+
+
+def make_priors_dataframe(
+    priors: Dict[str, np.ndarray], parameters: List[str]
+) -> pd.DataFrame:
+    df = pd.DataFrame({"parameter": parameters, "true_value": 0}).set_index("parameter")
+    for parameter in parameters:
+        split_p = split_parameter(parameter)
+        param = split_p[0]
+        idx = [int(i) for i in split_p[1:]]
+        value = get_prior_value_using_index_list(priors[param][0], idx)
+        df.loc[parameter] = value
+    return df
+```
+
+```python
+simulation_posteriors = []
+
 for sbc_dir in sbc_results_dir.iterdir():
     sbc_fm = SBCFileManager(sbc_dir)
     if not sbc_fm.all_data_exists():
         raise Exception(f"Not all output from '{sbc_fm.dir.name}' exist.")
     res = sbc_fm.get_sbc_results()
+    true_values = make_priors_dataframe(
+        res.priors, parameters=res.posterior_summary.index.values
+    )
+    posterior_summary = res.posterior_summary.merge(
+        true_values, left_index=True, right_index=True
+    )
+    simulation_posteriors.append(posterior_summary)
 ```
 
 ```python
-res.posterior_summary
+if len(simulation_posteriors) == NUM_SIMULATIONS:
+    print("Collected all simulations.")
+else:
+    print(
+        f"The number of simluations ({NUM_SIMULATIONS}) does not match the number collected ({len(simulation_posteriors)})."
+    )
 ```
 
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
+    Collected all simulations.
 
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>mean</th>
-      <th>sd</th>
-      <th>hdi_3%</th>
-      <th>hdi_97%</th>
-      <th>mcse_mean</th>
-      <th>mcse_sd</th>
-      <th>ess_bulk</th>
-      <th>ess_tail</th>
-      <th>r_hat</th>
-    </tr>
-    <tr>
-      <th>parameter</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>μ_h</th>
-      <td>0.404</td>
-      <td>0.338</td>
-      <td>-0.198</td>
-      <td>1.046</td>
-      <td>0.010</td>
-      <td>0.007</td>
-      <td>1102.0</td>
-      <td>877.0</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>μ_d</th>
-      <td>0.112</td>
-      <td>0.118</td>
-      <td>-0.112</td>
-      <td>0.329</td>
-      <td>0.004</td>
-      <td>0.003</td>
-      <td>875.0</td>
-      <td>981.0</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>μ_η</th>
-      <td>0.133</td>
-      <td>0.205</td>
-      <td>-0.285</td>
-      <td>0.482</td>
-      <td>0.007</td>
-      <td>0.005</td>
-      <td>990.0</td>
-      <td>1013.0</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>h[0]</th>
-      <td>0.750</td>
-      <td>0.691</td>
-      <td>-0.406</td>
-      <td>2.187</td>
-      <td>0.022</td>
-      <td>0.016</td>
-      <td>989.0</td>
-      <td>934.0</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>h[1]</th>
-      <td>0.250</td>
-      <td>0.714</td>
-      <td>-1.015</td>
-      <td>1.602</td>
-      <td>0.023</td>
-      <td>0.017</td>
-      <td>972.0</td>
-      <td>983.0</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>μ[146]</th>
-      <td>0.964</td>
-      <td>0.881</td>
-      <td>-0.618</td>
-      <td>2.598</td>
-      <td>0.028</td>
-      <td>0.020</td>
-      <td>966.0</td>
-      <td>992.0</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>μ[147]</th>
-      <td>1.583</td>
-      <td>0.920</td>
-      <td>-0.241</td>
-      <td>3.234</td>
-      <td>0.028</td>
-      <td>0.020</td>
-      <td>1096.0</td>
-      <td>980.0</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>μ[148]</th>
-      <td>1.578</td>
-      <td>0.923</td>
-      <td>-0.028</td>
-      <td>3.520</td>
-      <td>0.029</td>
-      <td>0.021</td>
-      <td>1002.0</td>
-      <td>941.0</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>μ[149]</th>
-      <td>1.562</td>
-      <td>0.887</td>
-      <td>-0.040</td>
-      <td>3.361</td>
-      <td>0.027</td>
-      <td>0.020</td>
-      <td>1060.0</td>
-      <td>977.0</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>σ</th>
-      <td>2.567</td>
-      <td>0.196</td>
-      <td>2.260</td>
-      <td>2.997</td>
-      <td>0.007</td>
-      <td>0.005</td>
-      <td>854.0</td>
-      <td>856.0</td>
-      <td>NaN</td>
-    </tr>
-  </tbody>
-</table>
-<p>271 rows × 9 columns</p>
-</div>
+## Analysis
 
 ```python
-
+def measure_posterior_accuracy(post) -> float:
+    hdi_lower = post.iloc[:, 2].values.flatten()
+    hdi_upper = post.iloc[:, 3].values.flatten()
+    trues = post["true_value"].values.flatten()
+    return np.mean((hdi_lower < trues).astype(int) * (trues < hdi_upper).astype(int))
 ```
 
 ```python
-
+hdi_acc = [measure_posterior_accuracy(p) for p in simulation_posteriors]
 ```
 
 ```python
-
+sns.set_theme()
+ax = sns.histplot(hdi_acc)
+ax.set_xlabel("HDI accuracy");
 ```
+
+    Text(0.5, 0, 'HDI accuracy')
+
+![png](crc_ceres_mimic_one_sbc-results_files/crc_ceres_mimic_one_sbc-results_21_1.png)
 
 ---
 
@@ -294,14 +174,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.03 minutes
+    execution time: 0.17 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-04-01
+    Last updated: 2021-04-02
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -312,17 +192,18 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-a-16-163.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
 
     Git branch: simulation-based-calibration
 
-    pymc3     : 3.11.1
-    arviz     : 0.11.2
     plotnine  : 0.7.1
-    matplotlib: 3.3.4
-    numpy     : 1.20.1
     pandas    : 1.2.3
+    matplotlib: 3.3.4
+    re        : 2.2.1
+    numpy     : 1.20.1
     seaborn   : 0.11.1
+    arviz     : 0.11.2
+    pymc3     : 3.11.1

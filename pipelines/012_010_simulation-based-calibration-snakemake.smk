@@ -4,7 +4,7 @@ from pathlib import Path
 
 import papermill
 
-NUM_SIMULATIONS = 5
+NUM_SIMULATIONS = 20
 
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yml"
