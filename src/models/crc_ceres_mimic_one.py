@@ -285,7 +285,7 @@ class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
         )
 
         res = self.advi_sample_model(sampling_args)
-        posterior_summary = az.summary(res.trace, fmt="wide")
+        posterior_summary = az.summary(res.trace, fmt="wide", hdi_prob=0.89)
         assert isinstance(posterior_summary, pd.DataFrame)
         az_results = pmapi.convert_samples_to_arviz(model=self.model, res=res)
         results_manager = sbc.SBCFileManager(dir=results_path)
