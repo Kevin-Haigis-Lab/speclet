@@ -4,7 +4,7 @@ from pathlib import Path
 
 import papermill
 
-N_PERMUTATIONS = 5
+NUM_SIMULATIONS = 5
 
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yml"
@@ -31,10 +31,11 @@ rule run_sbc:
     conda:
         ENVIRONMENT_YAML
     shell:
-        "pipelines/012_015_run-sbc.py "
+        "src/command_line_interfaces/simulation_based_calibration_cli.py "
         "  {wildcards.model_name} "
         "  " + ROOT_PERMUTATION_DIR + "{wildcards.model_name}/sbc-perm{wildcards.perm_num} "
         "  {wildcards.perm_num}"
+        "  small"
 
 
 rule papermill_report:
@@ -44,7 +45,11 @@ rule papermill_report:
         papermill.execute_notebook(
             REPORTS_DIR + "sbc-results-template.ipynb",
             output.notebook,
-            parameters={"MODEL": wildcards.model_name},
+            parameters={
+                "MODEL": wildcards.model_name,
+                "SBC_RESULTS_DIR": ROOT_PERMUTATION_DIR + wildcards.model_name,
+                "NUM_SIMULATIONS": NUM_SIMULATIONS
+            },
             prepare_only=True,
         )
 
@@ -53,7 +58,7 @@ rule execute_report:
     input:
         sbc_results=expand(
             ROOT_PERMUTATION_DIR + "{model_name}/sbc-perm{perm_num}/posterior-summary.csv",
-            perm_num=list(range(N_PERMUTATIONS)),
+            perm_num=list(range(NUM_SIMULATIONS)),
             allow_missing=True,
         ),
         notebook=REPORTS_DIR + "{model_name}_sbc-results.ipynb",
@@ -64,7 +69,3 @@ rule execute_report:
     shell:
         "jupyter nbconvert --to notebook --inplace --execute " + "{input.notebook} && "
         "jupyter nbconvert --to markdown {input.notebook}"
-
-
-# TODO: how to pass list of permutation files...
-# maybe just pass directory of where to look and use `expand()` to list them as an input to the rule.
