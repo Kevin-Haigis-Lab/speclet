@@ -15,7 +15,7 @@
         "partition" : "short",
         "cores"     : 2,
         "mem"       : "3000",
-        "time"      : "00:15:00",
+        "time"      : "00:25:00",
         "J"         : "run-sbc"
     },
     "papermill_report" :
@@ -31,7 +31,7 @@
         "partition" : "short",
         "cores"     : 2,
         "mem"       : "16000",
-        "time"      : "00:15:00",
+        "time"      : "01:00:00",
         "J"         : "report"
     }
 }

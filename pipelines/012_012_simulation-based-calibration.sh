@@ -2,7 +2,7 @@
 
 #SBATCH -c 2
 #SBATCH -p priority
-#SBATCH -t 2-00:00
+#SBATCH -t 4-00:00
 #SBATCH --mem 5G
 #SBATCH -o logs/sbc-snakemake-%A.log
 #SBATCH -e logs/sbc-snakemake-%A.log
@@ -26,13 +26,12 @@ fi
 
 snakemake \
     --snakefile $SNAKEFILE \
-    --jobs 9900 \
-    --restart-times 2 \
+    --jobs 20 \
+    --restart-times 1 \
     --latency-wait 120 \
     --use-conda \
     --cluster-config pipelines/012_011_smk-config.json \
     --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}"
-
 
 # --conda-cleanup-envs  # use to clean up old conda envs
 
