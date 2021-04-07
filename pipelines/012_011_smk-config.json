@@ -30,7 +30,7 @@
     {
         "partition" : "short",
         "cores"     : 1,
-        "mem"       : "4000",
+        "mem"       : "8000",
         "time"      : "00:30:00",
         "J"         : "report"
     }

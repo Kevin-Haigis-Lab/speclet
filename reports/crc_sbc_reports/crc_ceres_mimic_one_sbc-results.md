@@ -5,7 +5,7 @@ import re
 import warnings
 from pathlib import Path
 from time import time
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import arviz as az
 import matplotlib.pyplot as plt
@@ -14,6 +14,7 @@ import pandas as pd
 import plotnine as gg
 import pymc3 as pm
 import seaborn as sns
+
 from src.command_line_interfaces import simulation_based_calibration_cli as sbc_cli
 from src.context_managers import set_directory
 from src.data_processing import common as dphelp
@@ -145,11 +146,34 @@ else:
 ## Analysis
 
 ```python
-def measure_posterior_accuracy(post) -> float:
-    hdi_lower = post.iloc[:, 2].values.flatten()
-    hdi_upper = post.iloc[:, 3].values.flatten()
-    trues = post["true_value"].values.flatten()
-    return np.mean((hdi_lower < trues).astype(int) * (trues < hdi_upper).astype(int))
+def get_hdi_colnames_from_az_summary(df: pd.DataFrame) -> Tuple[str, str]:
+    cols: List[str] = [c for c in df.columns if "hdi_" in c]
+    cols = [c for c in cols if "%" in c]
+    assert len(cols) == 2
+    return cols
+
+
+def is_true_value_within_hdi(
+    low_hdi: pd.Series, true_vals: pd.Series, high_hdi: pd.Series
+) -> np.ndarray:
+    return (
+        (low_hdi.values < true_vals.values).astype(int)
+        * (true_vals.values < high_hdi.values).astype(int)
+    ).astype(bool)
+
+
+def assign_column_for_within_hdi(
+    df: pd.DataFrame, true_value_col: str = "true_value"
+) -> pd.DataFrame:
+    hdi_low, hdi_high = get_hdi_colnames_from_az_summary(df)
+    df["within_hdi"] = is_true_value_within_hdi(
+        df[hdi_low], df["true_value"], df[hdi_high]
+    )
+    return df
+
+
+def measure_posterior_accuracy(df: pd.DataFrame) -> float:
+    return assign_column_for_within_hdi(df)["within_hdi"].mean()
 ```
 
 ```python
@@ -158,13 +182,236 @@ hdi_acc = [measure_posterior_accuracy(p) for p in simulation_posteriors]
 
 ```python
 sns.set_theme()
-ax = sns.histplot(hdi_acc)
-ax.set_xlabel("HDI accuracy");
+fig, ax = plt.subplots(figsize=(8, 5))
+sns.histplot(hdi_acc, ax=ax)
+ax.set_xlabel("HDI accuracy")
+plt.show()
 ```
 
-    Text(0.5, 0, 'HDI accuracy')
+![png](crc_ceres_mimic_one_sbc-results_files/crc_ceres_mimic_one_sbc-results_21_0.png)
 
-![png](crc_ceres_mimic_one_sbc-results_files/crc_ceres_mimic_one_sbc-results_21_1.png)
+```python
+simulation_posteriors_df = pd.concat(
+    [
+        d.assign(simulation_id=f"sim_id_{str(i).rjust(4, '0')}")
+        for i, d in enumerate(simulation_posteriors)
+    ]
+)
+simulation_posteriors_df["parameter_name"] = [
+    x.split("[")[0] for x in simulation_posteriors_df.index.values
+]
+simulation_posteriors_df = simulation_posteriors_df.set_index(
+    "parameter_name", append=True
+).pipe(assign_column_for_within_hdi)
+
+simulation_posteriors_df.head()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>true_value</th>
+      <th>within_hdi</th>
+      <th>simulation_id</th>
+    </tr>
+    <tr>
+      <th>parameter</th>
+      <th>parameter_name</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>μ_h</th>
+      <th>μ_h</th>
+      <td>0.757</td>
+      <td>0.062</td>
+      <td>0.667</td>
+      <td>0.861</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>905.0</td>
+      <td>1068.0</td>
+      <td>NaN</td>
+      <td>1.762968</td>
+      <td>False</td>
+      <td>sim_id_0000</td>
+    </tr>
+    <tr>
+      <th>μ_d</th>
+      <th>μ_d</th>
+      <td>0.159</td>
+      <td>0.019</td>
+      <td>0.130</td>
+      <td>0.191</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>751.0</td>
+      <td>897.0</td>
+      <td>NaN</td>
+      <td>-0.254097</td>
+      <td>False</td>
+      <td>sim_id_0000</td>
+    </tr>
+    <tr>
+      <th>μ_η</th>
+      <th>μ_η</th>
+      <td>0.199</td>
+      <td>0.187</td>
+      <td>-0.084</td>
+      <td>0.519</td>
+      <td>0.006</td>
+      <td>0.004</td>
+      <td>973.0</td>
+      <td>908.0</td>
+      <td>NaN</td>
+      <td>0.302328</td>
+      <td>True</td>
+      <td>sim_id_0000</td>
+    </tr>
+    <tr>
+      <th>h[0]</th>
+      <th>h</th>
+      <td>1.218</td>
+      <td>0.218</td>
+      <td>0.864</td>
+      <td>1.540</td>
+      <td>0.007</td>
+      <td>0.005</td>
+      <td>1003.0</td>
+      <td>901.0</td>
+      <td>NaN</td>
+      <td>2.154618</td>
+      <td>False</td>
+      <td>sim_id_0000</td>
+    </tr>
+    <tr>
+      <th>h[1]</th>
+      <th>h</th>
+      <td>1.849</td>
+      <td>0.205</td>
+      <td>1.519</td>
+      <td>2.168</td>
+      <td>0.007</td>
+      <td>0.005</td>
+      <td>986.0</td>
+      <td>743.0</td>
+      <td>NaN</td>
+      <td>2.659678</td>
+      <td>False</td>
+      <td>sim_id_0000</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+accuracy_per_parameter = (
+    simulation_posteriors_df.copy()
+    .groupby(["parameter_name"])["within_hdi"]
+    .mean()
+    .reset_index(drop=False)
+    .sort_values("within_hdi", ascending=False)
+    .reset_index(drop=True)
+)
+
+accuracy_per_parameter["parameter_name"] = pd.Categorical(
+    accuracy_per_parameter["parameter_name"],
+    categories=accuracy_per_parameter["parameter_name"].values,
+)
+
+(
+    gg.ggplot(accuracy_per_parameter, gg.aes(x="parameter_name", y="within_hdi"))
+    + gg.geom_col()
+    + gg.scale_y_continuous(expand=(0, 0, 0.02, 0))
+    + gg.labs(
+        x="parameter",
+        y="freq. of true value in 89% HDI",
+        title="Average accuracy of each parameter",
+    )
+    + gg.theme(axis_ticks_major_x=gg.element_blank(), figure_size=(6, 4))
+)
+```
+
+![png](crc_ceres_mimic_one_sbc-results_files/crc_ceres_mimic_one_sbc-results_23_0.png)
+
+    <ggplot: (2939517452939)>
+
+```python
+hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
+
+(
+    gg.ggplot(
+        simulation_posteriors_df.reset_index(drop=False).query("parameter_name != 'μ'"),
+        gg.aes(x="true_value", y="mean", color="within_hdi"),
+    )
+    + gg.facet_wrap("~ parameter_name", ncol=3, scales="free")
+    + gg.geom_linerange(gg.aes(ymin=hdi_low, ymax=hdi_high), alpha=0.2, size=0.2)
+    + gg.geom_point(size=0.3, alpha=0.3)
+    + gg.geom_abline(slope=1, intercept=0, linetype="--")
+    + gg.scale_color_brewer(
+        type="qual",
+        palette="Set1",
+        labels=("outside", "inside"),
+        guide=gg.guide_legend(
+            title="within HDI",
+            override_aes={"alpha": 1, "size": 1},
+        ),
+    )
+    + gg.theme(
+        figure_size=(10, 20),
+        strip_background=gg.element_blank(),
+        strip_text=gg.element_text(face="bold"),
+        panel_spacing=0.25,
+    )
+    + gg.labs(
+        x="true value",
+        y="mean of posterior",
+    )
+)
+```
+
+    /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/mizani/bounds.py:456: RuntimeWarning: overflow encountered in double_scalars
+
+![png](crc_ceres_mimic_one_sbc-results_files/crc_ceres_mimic_one_sbc-results_24_1.png)
+
+    <ggplot: (2939498779959)>
 
 ---
 
@@ -173,14 +420,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 21.70 minutes
+    execution time: 15.68 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-04-06
+    Last updated: 2021-04-07
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -191,18 +438,18 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-a-16-167.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-193.o2.rc.hms.harvard.edu
 
     Git branch: simulation-based-calibration
 
-    plotnine  : 0.7.1
-    re        : 2.2.1
-    numpy     : 1.20.1
+    matplotlib: 3.3.4
     seaborn   : 0.11.1
     arviz     : 0.11.2
+    re        : 2.2.1
+    plotnine  : 0.7.1
+    numpy     : 1.20.1
     pandas    : 1.2.3
     pymc3     : 3.11.1
-    matplotlib: 3.3.4
