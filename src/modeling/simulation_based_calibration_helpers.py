@@ -88,7 +88,8 @@ class SBCFileManager:
         """Retrieve results of a round of SBC.
 
         Args:
-            re_read (bool, optional): Should the results be re-read from file? Defaults to False.
+            re_read (bool, optional): Should the results be re-read from file?
+              Defaults to False.
 
         Returns:
             SBCResults: The results from the round of SBC.

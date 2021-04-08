@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Optional
 
 import pandas as pd
-import pretty_errors
 
 from src.data_processing import achilles as achelp
 from src.io import data_io
@@ -29,8 +28,10 @@ class CrcModel(SpecletModel):
         """Create a CrcModel object.
 
         Args:
-            name (str): A unique identifier for this instance of CrcModel. (Used for cache management.)
-            root_cache_dir (Optional[Path], optional): The directory for caching sampling/fitting results. Defaults to None to use the speclet default.
+            name (str): A unique identifier for this instance of CrcModel.
+              (Used for cache management.)
+            root_cache_dir (Optional[Path], optional): The directory for caching
+              sampling/fitting results. Defaults to None to use the speclet default.
             debug (bool, optional): Are you in debug mode? Defaults to False.
         """
         super().__init__(name="crc_" + name, root_cache_dir=root_cache_dir)

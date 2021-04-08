@@ -2,16 +2,12 @@
 
 """Builders for CRC PyMC3 models."""
 
-import json
 from pathlib import Path
-from string import ascii_lowercase as letters
-from string import ascii_uppercase as LETTERS
-from typing import Any, Dict, Optional, Union
+from typing import Dict, Optional, Union
 
 import arviz as az
 import numpy as np
 import pandas as pd
-import pretty_errors
 import pymc3 as pm
 import theano
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
@@ -22,7 +18,6 @@ from src.modeling import pymc3_sampling_api as pmapi
 from src.modeling.sampling_metadata_models import SamplingArguments
 from src.models.crc_model import CrcModel
 from src.models.protocols import SelfSufficientModel
-from src.string_functions import prefixed_count
 
 #### ---- Model 1 ---- ####
 
@@ -43,8 +38,10 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         """Create a CrcModelOne object.
 
         Args:
-            name (str): A unique identifier for this instance of CrcModelOne. (Used for cache management.)
-            root_cache_dir (Optional[Path], optional): The directory for caching sampling/fitting results. Defaults to None.
+            name (str): A unique identifier for this instance of CrcModelOne.
+              (Used for cache management.)
+            root_cache_dir (Optional[Path], optional): The directory for caching
+              sampling/fitting results. Defaults to None.
             debug (bool, optional): Are you in debug mode? Defaults to False.
         """
         super().__init__(name="m1_" + name, root_cache_dir=root_cache_dir, debug=debug)
@@ -56,8 +53,9 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         """Build CRC Model One.
 
         Args:
-            data (Optional[pd.DataFrame], optional): Data to used to build the model around.
-              If None (default), then Achilles data is read in. Defaults to None.
+            data (Optional[pd.DataFrame], optional): Data to used to build the model
+              around. If None (default), then Achilles data is read in.
+              Defaults to None.
 
         Returns:
             [type]: None
@@ -109,7 +107,9 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
             σ = pm.HalfNormal("σ", 2)
 
             # Likelihood
-            lfc = pm.Normal("lfc", μ, σ, observed=lfc_shared, total_size=total_size)
+            lfc = pm.Normal(  # noqa: F841
+                "lfc", μ, σ, observed=lfc_shared, total_size=total_size
+            )
 
         shared_vars = {
             "sgrna_idx_shared": sgrna_idx_shared,
@@ -162,12 +162,10 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         """
         if self.model is None:
             raise AttributeError(
-                "Cannot sample: model is 'None'. Make sure to run `model.build_model()` first."
+                "Cannot sample: model is 'None' -> run `model.build_model()` first."
             )
         if self.shared_vars is None:
             raise AttributeError("Cannot sample: cannot find shared variables.")
-
-        replacements = self._get_replacement_parameters()
 
         if self.mcmc_results is not None:
             return self.mcmc_results
@@ -203,7 +201,7 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
         """
         if self.model is None:
             raise AttributeError(
-                "Cannot sample: model is 'None'. Make sure to run `model.build_model()` first."
+                "Cannot sample: model is 'None' -> run `model.build_model()` first."
             )
         if self.shared_vars is None:
             raise AttributeError("Cannot sample: cannot find shared variables.")
@@ -237,7 +235,8 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
 
         Args:
             results_path (Path): Where to store the results.
-            random_seed (Optional[int], optional): Random seed (for reproducibility). Defaults to None.
+            random_seed (Optional[int], optional): Random seed (for reproducibility).
+              Defaults to None.
             size (str, optional): Size of the data set to mock. Defaults to "large".
         """
         if size == "large":
@@ -249,9 +248,7 @@ class CrcModelOne(CrcModel, SelfSufficientModel):
                 n_genes=10, n_sgrnas_per_gene=3, n_cell_lines=5, n_batches=2
             )
         else:
-            raise Exception(
-                "Unknown value for `size` parameter - must be either 'small' or 'large' (default)."
-            )
+            raise Exception("Unknown value for `size` parameter.")
 
         self.build_model(data=mock_data)
         assert self.model is not None

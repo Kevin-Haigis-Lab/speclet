@@ -7,8 +7,10 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Union
 
+# source:
+#   https://thomaseckert.dev/posts/changing-directory-with-a-python-context-manager
 
-# source: https://thomaseckert.dev/posts/changing-directory-with-a-python-context-manager
+
 @contextmanager
 def set_directory(path: Union[Path, str]):
     """Set the current working directory within the context.

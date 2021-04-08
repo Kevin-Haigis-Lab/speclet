@@ -8,7 +8,6 @@ from typing import Dict, Optional, Union
 import arviz as az
 import numpy as np
 import pandas as pd
-import pretty_errors
 import pymc3 as pm
 import theano
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
@@ -26,9 +25,9 @@ from src.models.protocols import SelfSufficientModel
 class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
     """CRC CERES Mimic One.
 
-    This model is just the part of the CERES model that includes the sgRNA "activity score" (q)
-    and the per-gene (h) and per-gene-per-cell-line (d) covariates. In addition, I have included
-    a parameter for pDNA batch.
+    This model is just the part of the CERES model that includes the sgRNA
+    "activity score" (q) and the per-gene (h) and per-gene-per-cell-line (d) covariates.
+    In addition, I have included a parameter for pDNA batch.
     """
 
     shared_vars: Optional[Dict[str, TTShared]] = None
@@ -44,8 +43,10 @@ class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
         """Create a CrcCeresMimicOne object.
 
         Args:
-            name (str): A unique identifier for this instance of CrcModelOne. (Used for cache management.)
-            root_cache_dir (Optional[Path], optional): The directory for caching sampling/fitting results. Defaults to None.
+            name (str): A unique identifier for this instance of CrcModelOne. (Used for
+              cache management.)
+            root_cache_dir (Optional[Path], optional): The directory for caching
+              sampling/fitting results. Defaults to None.
             debug (bool, optional): Are you in debug mode? Defaults to False.
         """
         super().__init__(
@@ -59,8 +60,9 @@ class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
         """Build CRC CERES Mimic One.
 
         Args:
-            data (Optional[pd.DataFrame], optional): Data to used to build the model around.
-              If None (default), then Achilles data is read in. Defaults to None.
+            data (Optional[pd.DataFrame], optional): Data to used to build the model
+              around. If None (default), then Achilles data is read in. Defaults to
+              None.
 
         Returns:
             [type]: None
@@ -119,7 +121,9 @@ class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
             σ = pm.HalfNormal("σ", 2)
 
             # Likelihood
-            lfc = pm.Normal("lfc", μ, σ, observed=lfc_shared, total_size=total_size)
+            lfc = pm.Normal(  # noqa: F841
+                "lfc", μ, σ, observed=lfc_shared, total_size=total_size
+            )
 
         shared_vars = {
             "sgrna_idx_shared": sgrna_idx_shared,
@@ -175,12 +179,11 @@ class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
         """
         if self.model is None:
             raise AttributeError(
-                "Cannot sample: model is 'None'. Make sure to run `model.build_model()` first."
+                "Cannot sample: model is 'None'. "
+                + "Make sure to run `model.build_model()` first."
             )
         if self.shared_vars is None:
             raise AttributeError("Cannot sample: cannot find shared variables.")
-
-        replacements = self._get_replacement_parameters()
 
         if self.mcmc_results is not None:
             return self.mcmc_results
@@ -216,7 +219,8 @@ class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
         """
         if self.model is None:
             raise AttributeError(
-                "Cannot sample: model is 'None'. Make sure to run `model.build_model()` first."
+                "Cannot sample: model is 'None'. "
+                + "Make sure to run `model.build_model()` first."
             )
         if self.shared_vars is None:
             raise AttributeError("Cannot sample: cannot find shared variables.")
@@ -250,7 +254,8 @@ class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
 
         Args:
             results_path (Path): Where to store the results.
-            random_seed (Optional[int], optional): Random seed (for reproducibility). Defaults to None.
+            random_seed (Optional[int], optional): Random seed (for reproducibility).
+              Defaults to None.
             size (str, optional): Size of the data set to mock. Defaults to "large".
         """
         # TODO
@@ -263,9 +268,7 @@ class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
                 n_genes=10, n_sgrnas_per_gene=3, n_cell_lines=5, n_batches=2
             )
         else:
-            raise Exception(
-                "Unknown value for `size` parameter - must be either 'small' or 'large' (default)."
-            )
+            raise Exception("Unknown value for `size` parameter.")
 
         self.build_model(data=mock_data)
         assert self.model is not None

@@ -7,7 +7,6 @@ from typing import Any, Iterable, List, Tuple
 
 import numpy as np
 import pandas as pd
-import pretty_errors
 
 
 def make_cat(
@@ -19,7 +18,8 @@ def make_cat(
         df (pd.DataFrame): DataFrame to modify.
         col (str): Column to make categorical.
         ordered (bool, optional): Are the categories ordered? Defaults to True.
-        sort_cats (bool, optional): Should the categories be sorted first? Defaults to False.
+        sort_cats (bool, optional): Should the categories be sorted first?
+          Defaults to False.
 
     Returns:
         pd.DataFrame: The modified DataFrame.
@@ -52,7 +52,8 @@ def get_indices_and_count(df: pd.DataFrame, col: str) -> Tuple[np.ndarray, int]:
         col (str): The column containing the index.
 
     Returns:
-        Tuple[np.ndarray, int]: Both the index and number of unique values in the column.
+        Tuple[np.ndarray, int]: Both the index and number of unique
+          values in the column.
     """
     return get_indices(df=df, col=col), df[col].nunique()
 
@@ -74,7 +75,8 @@ def nmutations_to_binary_array(m: pd.Series) -> np.ndarray:
     """Turn a column of a DataFrame into a binary array of 0's and 1's.
 
     Args:
-        m (pd.Series): A pandas Series with mutation information that only needs to be binary (is mutated/is not mutated).
+        m (pd.Series): A pandas Series with mutation information that only
+          needs to be binary (is mutated/is not mutated).
 
     Returns:
         np.ndarray: A logical array.

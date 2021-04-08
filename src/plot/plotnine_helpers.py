@@ -17,7 +17,7 @@ class PlotnineUnits(str, Enum):
 def margin(
     t: float = 0,
     b: float = 0,
-    l: float = 0,
+    l: float = 0,  # noqa: E741
     r: float = 0,
     units: PlotnineUnits = PlotnineUnits.pt,
 ) -> Dict[str, Union[float, str]]:
