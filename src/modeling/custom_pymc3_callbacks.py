@@ -52,7 +52,7 @@ class DivergenceFractionCallback:
         # Count divergences.
         current_count = 0
         if draw.stats[0]["diverging"]:
-            current_count = self.divergence_counts.get(draw.chain, default=0) + 1
+            current_count = self.divergence_counts.get(draw.chain, 0) + 1
             self.divergence_counts[draw.chain] = current_count
 
         # Leave if not enough steps to check.
