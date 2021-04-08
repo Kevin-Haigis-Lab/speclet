@@ -10,7 +10,6 @@ from typing import Dict, Type, Union
 
 import numpy as np
 import pandas as pd
-import pretty_errors
 import pymc3 as pm
 import pytest
 import theano.tensor as tt
@@ -203,7 +202,6 @@ class CrcModelSubclassesTests:
             mcmc_draws=n_draws, tune=100, chains=n_chains, sampling_args=sampling_args
         )
 
-        trace = mcmc_results.trace
         self.check_mcmc_results(
             mcmc_results, n_draws=n_draws, n_chains=n_chains, data=mock_data
         )

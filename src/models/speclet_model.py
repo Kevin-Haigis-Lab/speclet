@@ -2,12 +2,9 @@
 
 """Foundational model object and related functions for the Speclet project."""
 
-import pickle
-from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Optional
 
-import pretty_errors
 import pymc3 as pm
 from pydantic import BaseModel
 
@@ -38,7 +35,8 @@ class SpecletModel:
 
         Args:
             name
-            cache_dir (Optional[Path], optional): The directory for caching sampling/fitting results. Defaults to None.
+            cache_dir (Optional[Path], optional): The directory for caching
+              sampling/fitting results. Defaults to None.
         """
         self.name = name
 

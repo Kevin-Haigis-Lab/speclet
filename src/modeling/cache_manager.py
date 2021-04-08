@@ -4,9 +4,8 @@
 
 import pickle
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Union
 
-import pretty_errors
 import pymc3 as pm
 from pydantic import BaseModel
 
@@ -31,7 +30,8 @@ class Pymc3CacheManager:
         """Instantiate a new SpecletModel object.
 
         Args:
-            cache_dir (Path): The directory for caching sampling/fitting results. Defaults to None.
+            cache_dir (Path): The directory for caching sampling/fitting results.
+              Defaults to None.
         """
         self.cache_dir = cache_dir
         self._mkdir()
@@ -47,7 +47,8 @@ class Pymc3CacheManager:
             ValueError: Thrown if `self.cache_dir` is None.
 
         Returns:
-            ModelCachePaths: Object containing the paths to use for caching various results from fitting a model.
+            ModelCachePaths: Object containing the paths to use for caching
+              various results from fitting a model.
         """
         if self.cache_dir is None:
             raise ValueError(
@@ -114,7 +115,8 @@ class Pymc3CacheManager:
         """Cache sampling results to disk.
 
         Args:
-            res (Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]): The results to cache.
+            res (Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]):
+              The results to cache.
         """
         cache_paths = self.get_cache_file_names()
         self._write_pickle(

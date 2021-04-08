@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
 import numpy as np
-import pandas as pd
 import pymc3 as pm
 import pytest
-from numpy.testing import assert_equal
 
 from src.modeling import custom_pymc3_callbacks as pymc3calls
 
@@ -21,7 +19,7 @@ class TestDivergenceFractionCallback:
             b = pm.Normal("b", 50, 100)
             mu = a + b * X
             sigma = pm.HalfCauchy("error", 1)
-            obs = pm.Normal("obs", mu, sigma, observed=y)
+            obs = pm.Normal("obs", mu, sigma, observed=y)  # noqa: F841
 
         return m
 

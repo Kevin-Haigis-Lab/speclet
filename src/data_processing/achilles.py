@@ -3,12 +3,11 @@
 """Funnctions for handling common modifications and processing of the Achilles data."""
 
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-import pretty_errors
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from src.data_processing import common as dphelp
 
@@ -19,17 +18,21 @@ def zscale_cna_by_group(
     df: pd.DataFrame,
     gene_cn_col: str = "gene_cn",
     new_col: str = "gene_cn_z",
-    groupby: List[str] = ["hugo_symbol"],
+    groupby_cols: Union[List[str], Tuple[str, ...]] = ("hugo_symbol",),
     cn_max: Optional[float] = None,
 ) -> pd.DataFrame:
     """Z-scale the copy number values.
 
     Args:
         df (pd.DataFrame): The DataFrame to modify.
-        gene_cn_col (str, optional): Column with the gene copy number values. Defaults to "gene_cn".
-        new_col (str, optional): The name of the column to store the calculated values. Defaults to "gene_cn_z".
-        groupby (List[str], optional): A list of columns to group the DataFrame by. Defaults to ["hugo_symbol"].
-        cn_max (Optional[float], optional): The maximum copy number to use. Defaults to None.
+        gene_cn_col (str, optional): Column with the gene copy number values.
+          Defaults to "gene_cn".
+        new_col (str, optional): The name of the column to store the calculated values.
+          Defaults to "gene_cn_z".
+        groupby_cols (Union[List[str], Tuple[str, ...]], optional): A list or tuple of
+          columns to group the DataFrame by. Defaults to ("hugo_symbol").
+        cn_max (Optional[float], optional): The maximum copy number to use.
+          Defaults to None.
 
     Returns:
         pd.DataFrame: The modified DataFrame.
@@ -39,7 +42,7 @@ def zscale_cna_by_group(
     else:
         df[new_col] = df[gene_cn_col]
 
-    df[new_col] = df.groupby(groupby)[new_col].apply(
+    df[new_col] = df.groupby(list(groupby_cols))[new_col].apply(
         lambda x: (x - np.mean(x)) / np.std(x)
     )
 
@@ -56,8 +59,10 @@ def make_sgrna_to_gene_mapping_df(
 
     Args:
         data (pd.DataFrame): The data set.
-        sgrna_col (str, optional): The name of the column with sgRNA data. Defaults to "sgrna".
-        gene_col (str, optional): The name of the column with gene names. Defaults to "hugo_symbol".
+        sgrna_col (str, optional): The name of the column with sgRNA data.
+          Defaults to "sgrna".
+        gene_col (str, optional): The name of the column with gene names.
+          Defaults to "hugo_symbol".
 
     Returns:
         pd.DataFrame: A DataFrame mapping sgRNAs to genes.
@@ -108,7 +113,7 @@ def common_indices(
         achilles_df (pd.DataFrame): The DataFrame with Achilles data.
 
     Returns:
-        Dict[str, Union[np.ndarray, pd.DataFrame]]: A dictionary with a collection of indices.
+        Dict[str, Union[np.ndarray, pd.DataFrame]]: A dict with a collection of indices.
     """
     sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(achilles_df)
     return CommonIndices(
@@ -126,14 +131,14 @@ def common_indices(
 
 def set_achilles_categorical_columns(
     data: pd.DataFrame,
-    cols: List[str] = [
+    cols: Union[List[str], Tuple[str, ...]] = (
         "hugo_symbol",
         "depmap_id",
         "sgrna",
         "lineage",
         "chromosome",
         "pdna_batch",
-    ],
+    ),
     ordered: bool = True,
     sort_cats: bool = False,
 ) -> pd.DataFrame:
@@ -141,9 +146,13 @@ def set_achilles_categorical_columns(
 
     Args:
         data (pd.DataFrame): Achilles DataFrame.
-        cols (List[str], optional): The names of the columns to make categorical. Defaults to [ "hugo_symbol", "depmap_id", "sgrna", "lineage", "chromosome", "pdna_batch", ].
-        ordered (bool, optional): Should the categorical columns be ordered? Defaults to True.
-        sort_cats (bool, optional): Should the categorical columns be sorted? Defaults to False.
+        cols (Union[List[str], Tuple[str, ...]], optional): The names of the columns to
+          make categorical. Defaults to [ "hugo_symbol", "depmap_id", "sgrna",
+          "lineage", "chromosome", "pdna_batch", ].
+        ordered (bool, optional): Should the categorical columns be ordered?
+          Defaults to True.
+        sort_cats (bool, optional): Should the categorical columns be sorted?
+          Defaults to False.
 
     Returns:
         pd.DataFrame: The modified DataFrame.
@@ -160,8 +169,10 @@ def read_achilles_data(
 
     Args:
         data_path (Path): The path to the data set.
-        low_memory (bool, optional): Should pandas be informed of memory constraints? Defaults to True.
-        set_categorical_cols (bool, optional): Should the default categorical columns be set? Defaults to True.
+        low_memory (bool, optional): Should pandas be informed of memory constraints?
+          Defaults to True.
+        set_categorical_cols (bool, optional): Should the default categorical columns
+          be set? Defaults to True.
 
     Returns:
         pd.DataFrame: The Achilles data set.
@@ -180,7 +191,7 @@ def read_achilles_data(
         data,
         gene_cn_col="log2_cn",
         new_col="z_log2_cn",
-        groupby=["depmap_id"],
+        groupby_cols=["depmap_id"],
         cn_max=np.log2(10),
     )
     data["is_mutated"] = dphelp.nmutations_to_binary_array(data.n_muts)
@@ -195,8 +206,10 @@ def subsample_achilles_data(
 
     Args:
         df (pd.DataFrame): Achilles data.
-        n_genes (Optional[int], optional): Number of genes to subsample. Defaults to 100.
-        n_cell_lines (Optional[int], optional): Number of cell lines to subsample. Defaults to None.
+        n_genes (Optional[int], optional): Number of genes to subsample.
+          Defaults to 100.
+        n_cell_lines (Optional[int], optional): Number of cell lines to subsample.
+          Defaults to None.
 
     Raises:
         ValueError: If the number of genes or cell lines is not positive.
@@ -212,10 +225,10 @@ def subsample_achilles_data(
     genes: List[str] = df.hugo_symbol.values
     cell_lines: List[str] = df.depmap_id.values
 
-    if not n_genes is None:
+    if n_genes is not None:
         genes = np.random.choice(genes, n_genes, replace=False)
 
-    if not n_cell_lines is None:
+    if n_cell_lines is not None:
         cell_lines = np.random.choice(cell_lines, n_cell_lines, replace=False)
 
     sub_df: pd.DataFrame = df.copy()

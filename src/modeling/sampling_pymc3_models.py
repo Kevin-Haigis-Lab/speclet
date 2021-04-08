@@ -11,7 +11,6 @@ from typing import Optional, Type
 import numpy as np
 import pretty_errors
 import typer
-from pydantic import BaseModel
 
 from src.io import cache_io
 from src.loggers import get_logger
@@ -102,13 +101,16 @@ def sample_speclet_model(
 
     Args:
         model (ModelOption): The name of the model.
-        name (str): Custom name for the model. This is useful for creating multiple caches of the same model.
+        name (str): Custom name for the model. This is useful for creating multiple
+          caches of the same model.
         cores (int, optional): Number of compute cores. Defaults to 1.
         sample (bool, optional): Should the model be sampled? Defaults to True.
         ignore_cache (bool, optional): Should the cache be ignored? Defaults to False.
         debug (bool, optional): In debug mode? Defaults to False.
         random_seed (Optional[int], optional): Random seed. Defaults to None.
-        touch (bool, optional): Should there be a file touched to indicate that the sampling process is complete? This is helpful for telling pipelines/workflows that this step is complete. Defaults to False.
+        touch (bool, optional): Should there be a file touched to indicate that the
+          sampling process is complete? This is helpful for telling pipelines/workflows
+          that this step is complete. Defaults to False.
 
     Raises:
         Exception: The model from the user is not recognized.

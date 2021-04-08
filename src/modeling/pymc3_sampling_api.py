@@ -2,19 +2,12 @@
 
 """Standardization of the interactions with PyMC3 sampling."""
 
-import pickle
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import arviz as az
 import numpy as np
-import pretty_errors
 import pymc3 as pm
-from colorama import Back, Fore, Style, init
 from pydantic import BaseModel, validator
-
-init(autoreset=True)
-
 
 #### ---- Result Types ---- ####
 
@@ -68,7 +61,8 @@ def convert_samples_to_arviz(
 
     Args:
         model (pm.Model): The PyMC3 model.
-        res (Union[MCMCSamplingResults, ApproximationSamplingResults]): The results of the sampling/fitting process.
+        res (Union[MCMCSamplingResults, ApproximationSamplingResults]): The results of
+          the sampling/fitting process.
 
     Returns:
         az.InferenceData: A standard ArviZ data object.
@@ -93,7 +87,7 @@ def pymc3_sampling_procedure(
     prior_pred_samples: int = 1000,
     post_pred_samples: int = 1000,
     random_seed: Optional[int] = None,
-    sample_kwargs: Dict[str, Any] = {},
+    sample_kwargs: Optional[Dict[str, Any]] = None,
 ) -> MCMCSamplingResults:
     """Run a standard PyMC3 sampling procedure.
 
@@ -103,14 +97,21 @@ def pymc3_sampling_procedure(
         tune (int, optional): Number of tuning steps. Defaults to 1000.
         chains (int, optional): Number of chains. Defaults to 3.
         cores (Optional[int], optional): Number of cores. Defaults to None.
-        prior_pred_samples (int, optional): Number of samples from the prior distributions. Defaults to 1000.
-        post_pred_samples (int, optional): Number of samples for posterior predictions. Defaults to 1000.
-        random_seed (Optional[int], optional): The random seed for sampling. Defaults to None.
-        sample_kwargs (Dict[str, Any], optional): Kwargs for the sampling method. Defaults to {}.
+        prior_pred_samples (int, optional): Number of samples from the prior
+          distributions. Defaults to 1000.
+        post_pred_samples (int, optional): Number of samples for posterior predictions.
+          Defaults to 1000.
+        random_seed (Optional[int], optional): The random seed for sampling.
+          Defaults to None.
+        sample_kwargs (Dict[str, Any], optional): Kwargs for the sampling method.
+          Defaults to {}.
 
     Returns:
         MCMCSamplingResults: A collection of the fitting and sampling results.
     """
+    if sample_kwargs is None:
+        sample_kwargs = {}
+
     with model:
         prior_pred = pm.sample_prior_predictive(
             prior_pred_samples, random_seed=random_seed
@@ -143,7 +144,7 @@ def pymc3_advi_approximation_procedure(
     post_pred_samples: int = 1000,
     callbacks: Optional[List[Callable]] = None,
     random_seed: Optional[int] = None,
-    fit_kwargs: Dict[Any, Any] = {},
+    fit_kwargs: Optional[Dict[Any, Any]] = None,
 ) -> ApproximationSamplingResults:
     """Run a standard PyMC3 ADVI fitting procedure.
 
@@ -151,16 +152,25 @@ def pymc3_advi_approximation_procedure(
         model (pm.Model): PyMC3 model.
         method (str): VI method to use. Defaults to "advi".
         n_iterations (int): Maximum number of fitting steps. Defaults to 100000.
-        draws (int, optional): Number of MCMC samples to draw from the fit model. Defaults to 1000.
-        prior_pred_samples (int, optional): Number of samples from the prior distributions. Defaults to 1000.
-        post_pred_samples (int, optional): Number of samples for posterior predictions. Defaults to 1000.
-        callbacks (List[Callable], optional): List of fitting callbacks. Default is None.
-        random_seed (Optional[int], optional): The random seed for sampling. Defaults to None.
-        fit_kwargs (Dict[str, Any], optional): Kwargs for the fitting method. Defaults to {}.
+        draws (int, optional): Number of MCMC samples to draw from the fit model.
+          Defaults to 1000.
+        prior_pred_samples (int, optional): Number of samples from the prior
+          distributions. Defaults to 1000.
+        post_pred_samples (int, optional): Number of samples for posterior predictions.
+          Defaults to 1000.
+        callbacks (List[Callable], optional): List of fitting callbacks.
+          Default is None.
+        random_seed (Optional[int], optional): The random seed for sampling.
+          Defaults to None.
+        fit_kwargs (Dict[str, Any], optional): Kwargs for the fitting method.
+          Defaults to {}.
 
     Returns:
         ApproximationSamplingResults: A collection of the fitting and sampling results.
     """
+    if fit_kwargs is None:
+        fit_kwargs = {}
+
     with model:
         prior_pred = pm.sample_prior_predictive(
             prior_pred_samples, random_seed=random_seed

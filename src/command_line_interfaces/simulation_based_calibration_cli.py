@@ -48,13 +48,18 @@ def run_sbc(
         model_name (ModelOption): Name of the model to use.
         cache_dir (Path): Where to store the results.
         sim_number (int): Simulation number.
-        data_size (str): Which data size to use. See the actual methods for details and options.
+        data_size (str): Which data size to use. See the actual methods
+          for details and options.
 
     Returns:
         [type]: [description]
     """
     ModelClass = get_model_class(model_opt=model_name)
-    model = ModelClass(f"sbc{sim_number}", root_cache_dir=cache_dir, debug=True)
+    model = ModelClass(
+        f"sbc{sim_number}",
+        root_cache_dir=cache_dir,
+        debug=True,
+    )
     model.run_simulation_based_calibration(
         cache_dir, random_seed=sim_number, size=data_size
     )

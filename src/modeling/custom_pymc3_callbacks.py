@@ -23,8 +23,10 @@ class DivergenceFractionCallback:
 
         Args:
             n_tune_steps (int): The number of tuning steps during sampling.
-            max_frac (float, optional): The maximum proportion of divergences to allow. Defaults to 0.02.
-            min_samples (int, optional): The minimum number of sampling steps before interrupting. Defaults to 100.
+            max_frac (float, optional): The maximum proportion of divergences to allow.
+              Defaults to 0.02.
+            min_samples (int, optional): The minimum number of sampling steps before
+              interrupting. Defaults to 100.
         """
         self.n_tune_steps = n_tune_steps
         self.max_frac = max_frac
@@ -50,10 +52,7 @@ class DivergenceFractionCallback:
         # Count divergences.
         current_count = 0
         if draw.stats[0]["diverging"]:
-            try:
-                current_count = self.divergence_counts[draw.chain] + 1
-            except:
-                current_count = 1
+            current_count = self.divergence_counts.get(draw.chain, 0) + 1
             self.divergence_counts[draw.chain] = current_count
 
         # Leave if not enough steps to check.
@@ -62,6 +61,6 @@ class DivergenceFractionCallback:
 
         # Check fraction of steps that were divergences.
         if current_count / trace.draw_idx >= self.max_frac:
-            raise TooManyDivergences(
-                f"Too many divergences: {current_count} of {trace.draw_idx} steps ({current_count / trace.draw_idx} %). Stopping early."
-            )
+            msg = f"Too many divergences: {current_count} of {trace.draw_idx} "
+            msg += f"steps ({current_count / trace.draw_idx} %). Stopping early."
+            raise TooManyDivergences(msg)

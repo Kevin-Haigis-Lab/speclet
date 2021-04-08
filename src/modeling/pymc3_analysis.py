@@ -25,14 +25,19 @@ def plot_all_priors(
     """Plot all priors of a PyMC3 model.
 
     Args:
-        prior_predictive (Dict[str, np.ndarray]): The results of sampling from the priors of a PyMC3 model.
+        prior_predictive (Dict[str, np.ndarray]): The results of sampling from the
+          priors of a PyMC3 model.
         subplots (Tuple[int, int]): How many subplots to create.
         figsize (Tuple[float, float]): The size of the final figure.
-        samples (int, optional): The number of samples from the distributions to use. This can help the performance of the plotting if there are many samples. Defaults to 1000.
-        rm_var_regex (str, optional): A regular expression for variables to remove. Defaults to "log__|logodds_".
+        samples (int, optional): The number of samples from the distributions to use.
+          This can help the performance of the plotting if there are many samples.
+          Defaults to 1000.
+        rm_var_regex (str, optional): A regular expression for variables to remove.
+          Defaults to "log__|logodds_".
 
     Returns:
-        Tuple[matplotlib.figure.Figure, np.ndarray]: The matplotlib figure and array of axes.
+        Tuple[matplotlib.figure.Figure, np.ndarray]: The matplotlib figure and array
+          of axes.
     """
     model_vars: List[str] = []
     for x in prior_predictive:
@@ -62,7 +67,8 @@ def extract_matrix_variable_indices(
     """Extract and annotating matrix (2D only) indices.
 
     Args:
-        d (pd.DataFrame): The data frame produced by summarizing the posteriors of a PyMC3 model.
+        d (pd.DataFrame): The data frame produced by summarizing the posteriors of a
+          PyMC3 model.
         col (str): The column with the 2D indices.
         idx1 (np.ndarray): The values to use for the first index.
         idx2 (np.ndarray): The values to use for the second index.
@@ -93,12 +99,17 @@ def summarize_posterior_predictions(
     Args:
         a (np.ndarray): The posterior predictions.
         hdi_prob (float, optional): The HDI probability to use. Defaults to 0.89.
-        merge_with (Optional[pd.DataFrame], optional): The original data to merge with the predictions. Defaults to None.
-        calc_error (bool): Should the error (real - predicted) be calculated? This is only used if `merge_with` is not None. Default to false.
-        observed_y: (Optional[str], optional): The column with the observed data. This is only used if `merge_with` is not None and `calc_error` is true. Default to None.
+        merge_with (Optional[pd.DataFrame], optional): The original data to merge with
+          the predictions. Defaults to None.
+        calc_error (bool): Should the error (real - predicted) be calculated? This is
+          only used if `merge_with` is not None. Default to false.
+        observed_y: (Optional[str], optional): The column with the observed data. This
+          is only used if `merge_with` is not None and `calc_error` is true. Default
+          to None.
 
     Returns:
-        pd.DataFrame: A data frame with one row per data point and columns describing the posterior predictions.
+        pd.DataFrame: A data frame with one row per data point and columns describing
+          the posterior predictions.
     """
     hdi = az.hdi(a, hdi_prob=hdi_prob)
 
@@ -126,7 +137,8 @@ def plot_vi_hist(approx: pm.variational.Approximation) -> gg.ggplot:
     """Plot the history of fitting using Variational Inference.
 
     Args:
-        approx (pm.variational.Approximation): The approximation attribute from the VI object.
+        approx (pm.variational.Approximation): The approximation attribute from the
+          VI object.
 
     Returns:
         gg.ggplot: A plot showing the fitting history.

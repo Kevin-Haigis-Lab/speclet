@@ -2,7 +2,6 @@
 
 """Cache directory management for the speclet project."""
 
-from enum import Enum
 from pathlib import Path
 
 from src.io.data_io import project_root_dir
