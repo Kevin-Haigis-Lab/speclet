@@ -15,10 +15,14 @@ import pymc3 as pm
 import pytest
 import theano.tensor as tt
 
+import src.modeling.simulation_based_calibration_helpers as sbc
 from src.data_processing import common as dphelp
 from src.modeling import pymc3_sampling_api as pmapi
 from src.modeling.sampling_pymc3_models import SamplingArguments
-from src.models import crc_models, speclet_model
+from src.models.crc_ceres_mimic_one import CrcCeresMimicOne
+from src.models.crc_model import CrcModel
+from src.models.crc_model_one import CrcModelOne
+from src.models.speclet_model import SpecletModel
 
 #### ---- Mock data ---- ####
 
@@ -56,28 +60,22 @@ def mock_data() -> pd.DataFrame:
 
 class TestCrcModel:
     def test_inheritance(self, tmp_path: Path):
-        model = crc_models.CrcModel(
-            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
-        )
-        assert isinstance(model, speclet_model.SpecletModel)
+        model = CrcModel(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        assert isinstance(model, SpecletModel)
 
     def test_batch_size(self, tmp_path: Path):
-        model = crc_models.CrcModel(name="TEST-MODEL", root_cache_dir=tmp_path)
+        model = CrcModel(name="TEST-MODEL", root_cache_dir=tmp_path)
         not_debug_batch_size = model.get_batch_size()
         model.debug = True
         debug_batch_size = model.get_batch_size()
         assert debug_batch_size < not_debug_batch_size
 
     def test_data_paths(self, tmp_path: Path):
-        model = crc_models.CrcModel(
-            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
-        )
+        model = CrcModel(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
         assert model.get_data_path().exists and model.get_data_path().is_file()
 
     def test_get_data(self, tmp_path: Path):
-        model = crc_models.CrcModel(
-            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
-        )
+        model = CrcModel(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
         assert model.data is None
         data = model.get_data()
         assert model.data is not None
@@ -91,7 +89,7 @@ class TestCrcModel:
 
 class CrcModelSubclassesTests:
 
-    Model: Type[Union[crc_models.CrcModelOne, crc_models.CrcCeresMimicOne]]
+    Model: Type[Union[CrcModelOne, CrcCeresMimicOne]]
 
     @abc.abstractmethod
     def check_trace_shape(
@@ -134,8 +132,8 @@ class CrcModelSubclassesTests:
 
     def test_init(self, tmp_path: Path):
         model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
-        assert issubclass(self.Model, crc_models.CrcModel)
-        assert isinstance(model, crc_models.CrcModel)
+        assert issubclass(self.Model, CrcModel)
+        assert isinstance(model, CrcModel)
 
     @pytest.mark.slow
     def test_build_model(self, tmp_path: Path):
@@ -282,10 +280,18 @@ class CrcModelSubclassesTests:
         )
         self.compare_two_results(results_1.trace, results_2.trace)
 
+    def test_sbc_standard(self, tmp_path: Path):
+        model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        model.run_simulation_based_calibration(results_path=tmp_path, size="small")
+        fm = sbc.SBCFileManager(dir=tmp_path)
+        assert fm.all_data_exists()
+        res = fm.get_sbc_results()
+        assert isinstance(res, sbc.SBCResults)
+
 
 class TestCrcModelOne(CrcModelSubclassesTests):
 
-    Model = crc_models.CrcModelOne
+    Model = CrcModelOne
 
     def check_trace_shape(
         self,
@@ -313,8 +319,7 @@ class TestCrcModelOne(CrcModelSubclassesTests):
 
 
 class TestCrcCeresMimicOne(CrcModelSubclassesTests):
-
-    Model = crc_models.CrcCeresMimicOne
+    Model = CrcCeresMimicOne
 
     def check_trace_shape(
         self,

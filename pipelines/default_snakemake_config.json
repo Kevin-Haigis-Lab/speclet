@@ -1,0 +1,13 @@
+{
+    "__default__" :
+    {
+        "partition" : "short",
+        "cores"     : 1,
+        "mem"       : "1000",
+        "time"      : "00:10:00",
+        "out"       : "logs/%j_{rule}.log",
+        "err"       : "logs/%j_{rule}.log",
+        "mail"      : "NONE",
+        "J"         : "snakejob"
+    }
+}

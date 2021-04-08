@@ -1,0 +1,37 @@
+{
+    "__default__" :
+    {
+        "partition" : "short",
+        "cores"     : 1,
+        "mem"       : "1000",
+        "time"      : "00:10:00",
+        "out"       : "logs/%j_{rule}.log",
+        "err"       : "logs/%j_{rule}.log",
+        "mail"      : "NONE",
+        "J"         : "snakejob"
+    },
+    "run_sbc" :
+    {
+        "partition" : "short",
+        "cores"     : 2,
+        "mem"       : "3000",
+        "time"      : "00:25:00",
+        "J"         : "run-sbc"
+    },
+    "papermill_report" :
+    {
+        "partition" : "short",
+        "cores"     : 1,
+        "mem"       : "1000",
+        "time"      : "00:01:00",
+        "J"         : "papermill"
+    },
+    "execute_report" :
+    {
+        "partition" : "short",
+        "cores"     : 1,
+        "mem"       : "8000",
+        "time"      : "00:30:00",
+        "J"         : "report"
+    }
+}
