@@ -3,7 +3,6 @@
 from pathlib import Path
 from typing import Any, Dict
 
-import pretty_errors
 import pytest
 import typer
 from typer.testing import CliRunner

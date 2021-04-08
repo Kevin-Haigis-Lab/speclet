@@ -29,7 +29,7 @@ class TestSpecletModel:
             b = pm.Normal("b", 0, 1)
             mu = a + b * data.x.values
             sigma = pm.HalfNormal("sigma", 1)
-            y = pm.Normal("y", mu, sigma, observed=data.y_obs.values)
+            y = pm.Normal("y", mu, sigma, observed=data.y_obs.values)  # noqa: F841
         return model
 
     @pytest.fixture(scope="class")

@@ -28,13 +28,11 @@ class TestPymc3CacheManager:
             b = pm.Normal("b", 0, 1)
             mu = a + b * data.x.values
             sigma = pm.HalfNormal("sigma", 1)
-            y = pm.Normal("y", mu, sigma, observed=data.y_obs.values)
+            y = pm.Normal("y", mu, sigma, observed=data.y_obs.values)  # noqa: F841
         return model
 
     @pytest.fixture(scope="class")
-    def mcmc_results(
-        self, data: pd.DataFrame, pm_model: pm.Model
-    ) -> pmapi.MCMCSamplingResults:
+    def mcmc_results(self, pm_model: pm.Model) -> pmapi.MCMCSamplingResults:
         with pm_model:
             prior = pm.sample_prior_predictive(samples=100, random_seed=123)
             trace = pm.sample(
@@ -53,9 +51,7 @@ class TestPymc3CacheManager:
         )
 
     @pytest.fixture(scope="class")
-    def advi_results(
-        self, data: pd.DataFrame, pm_model: pm.Model
-    ) -> pmapi.ApproximationSamplingResults:
+    def advi_results(self, pm_model: pm.Model) -> pmapi.ApproximationSamplingResults:
         with pm_model:
             prior = pm.sample_prior_predictive(samples=100, random_seed=123)
             approx = pm.fit(
@@ -77,7 +73,7 @@ class TestPymc3CacheManager:
     def test_cache_dir_is_made(self, tmp_path: Path):
         cache_dir = tmp_path / "pymc3-cache-dir"
         assert not cache_dir.exists()
-        cm = cache_manager.Pymc3CacheManager(cache_dir=tmp_path / cache_dir)
+        _ = cache_manager.Pymc3CacheManager(cache_dir=tmp_path / cache_dir)
         assert cache_dir.exists()
 
     def test_writing_pickle(self, tmp_path: Path):

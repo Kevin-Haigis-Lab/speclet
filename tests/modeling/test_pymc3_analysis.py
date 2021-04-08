@@ -36,7 +36,9 @@ class PyMC3AnalysisTesting:
             beta = pm.Normal("beta", self.b, 2)
             mu = alpha + beta * mock_data.x.values
             sigma = pm.HalfNormal("sigma", 2)
-            y_pred = pm.Normal("y_pred", mu, sigma, observed=mock_data.y.values)
+            y_pred = pm.Normal(  # noqa: F841
+                "y_pred", mu, sigma, observed=mock_data.y.values
+            )
 
         return model
 
@@ -201,7 +203,7 @@ class TestExtractMatrixVariableIndices:
             a = pm.Normal("a", mu_a, sigma_a, shape=(num_i, num_j))
             mu = a[i_idx, j_idx]
             sigma = pm.HalfNormal("sigma", 1)
-            y = pm.Normal("y", mu, sigma, observed=mock_data.y.values)
+            y = pm.Normal("y", mu, sigma, observed=mock_data.y.values)  # noqa: F841
         return model
 
     def test_extract_matrix_variable_indices(

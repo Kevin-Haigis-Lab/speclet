@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
-
 import arviz as az
 import numpy as np
 import pandas as pd
@@ -43,7 +41,9 @@ class TestPyMC3SamplingAPI:
             beta = pm.Normal("beta", 0, 10, shape=2)
             sigma = pm.HalfNormal("sigma", 1)
             mu = alpha + beta[0] * data["x1"].values + beta[1] * data["x2"].values
-            y_obs = pm.Normal("y_obs", mu=mu, sigma=sigma, observed=data["y"].values)
+            y_obs = pm.Normal(  # noqa: F841
+                "y_obs", mu=mu, sigma=sigma, observed=data["y"].values
+            )
 
         return m
 

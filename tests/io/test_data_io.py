@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from enum import Enum
 from pathlib import Path
 
 from src.io import data_io
