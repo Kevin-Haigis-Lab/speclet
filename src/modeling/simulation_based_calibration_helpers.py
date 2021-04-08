@@ -147,24 +147,24 @@ def generate_mock_achilles_data(
     cell_lines = prefixed_count("cellline", n=n_cell_lines)
     batches = prefixed_count("batch", n=n_batches)
     batch_map = pd.DataFrame(
-        dict(depmap_id=cell_lines, pdna_batch=np.random.choice(batches, n_cell_lines))
+        {"depmap_id": cell_lines, "pdna_batch": np.random.choice(batches, n_cell_lines)}
     )
 
     genes = prefixed_count("gene", n=n_genes)
     sgrnas = [prefixed_count(gene + "_sgrna", n=n_sgrnas_per_gene) for gene in genes]
     sgnra_map = pd.DataFrame(
-        dict(
-            hugo_symbol=np.repeat(genes, n_sgrnas_per_gene),
-            sgrna=np.array(sgrnas).flatten(),
-        )
+        {
+            "hugo_symbol": np.repeat(genes, n_sgrnas_per_gene),
+            "sgrna": np.array(sgrnas).flatten(),
+        }
     )
 
     df = (
         pd.DataFrame(
-            dict(
-                depmap_id=np.repeat(cell_lines, n_genes),
-                hugo_symbol=np.tile(genes, n_cell_lines),
-            )
+            {
+                "depmap_id": np.repeat(cell_lines, n_genes),
+                "hugo_symbol": np.tile(genes, n_cell_lines),
+            }
         )
         .merge(batch_map, on="depmap_id")
         .merge(sgnra_map, on="hugo_symbol")

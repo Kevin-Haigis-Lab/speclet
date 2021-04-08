@@ -18,7 +18,7 @@ def zscale_cna_by_group(
     df: pd.DataFrame,
     gene_cn_col: str = "gene_cn",
     new_col: str = "gene_cn_z",
-    groupby_cols: Union[List[str], Tuple[str, ...]] = tuple("hugo_symbol"),
+    groupby_cols: Union[List[str], Tuple[str, ...]] = ("hugo_symbol",),
     cn_max: Optional[float] = None,
 ) -> pd.DataFrame:
     """Z-scale the copy number values.
@@ -131,15 +131,13 @@ def common_indices(
 
 def set_achilles_categorical_columns(
     data: pd.DataFrame,
-    cols: Union[List[str], Tuple[str, ...]] = tuple(
-        [
-            "hugo_symbol",
-            "depmap_id",
-            "sgrna",
-            "lineage",
-            "chromosome",
-            "pdna_batch",
-        ]
+    cols: Union[List[str], Tuple[str, ...]] = (
+        "hugo_symbol",
+        "depmap_id",
+        "sgrna",
+        "lineage",
+        "chromosome",
+        "pdna_batch",
     ),
     ordered: bool = True,
     sort_cats: bool = False,

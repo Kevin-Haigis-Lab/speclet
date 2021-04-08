@@ -15,6 +15,7 @@ dependencies:
   - flake8
   - flake8-bugbear
   - flake8-builtins
+  - flake8-comprehensions
   - graphviz
   - ipython
   - isort
