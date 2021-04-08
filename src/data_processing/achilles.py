@@ -3,7 +3,7 @@
 """Funnctions for handling common modifications and processing of the Achilles data."""
 
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -18,7 +18,7 @@ def zscale_cna_by_group(
     df: pd.DataFrame,
     gene_cn_col: str = "gene_cn",
     new_col: str = "gene_cn_z",
-    groupby: List[str] = ["hugo_symbol"],
+    groupby_cols: Union[List[str], Tuple[str, ...]] = tuple("hugo_symbol"),
     cn_max: Optional[float] = None,
 ) -> pd.DataFrame:
     """Z-scale the copy number values.
@@ -29,8 +29,8 @@ def zscale_cna_by_group(
           Defaults to "gene_cn".
         new_col (str, optional): The name of the column to store the calculated values.
           Defaults to "gene_cn_z".
-        groupby (List[str], optional): A list of columns to group the DataFrame by.
-          Defaults to ["hugo_symbol"].
+        groupby_cols (Union[List[str], Tuple[str, ...]], optional): A list or tuple of
+          columns to group the DataFrame by. Defaults to ("hugo_symbol").
         cn_max (Optional[float], optional): The maximum copy number to use.
           Defaults to None.
 
@@ -42,7 +42,7 @@ def zscale_cna_by_group(
     else:
         df[new_col] = df[gene_cn_col]
 
-    df[new_col] = df.groupby(groupby)[new_col].apply(
+    df[new_col] = df.groupby(list(groupby_cols))[new_col].apply(
         lambda x: (x - np.mean(x)) / np.std(x)
     )
 
@@ -131,14 +131,16 @@ def common_indices(
 
 def set_achilles_categorical_columns(
     data: pd.DataFrame,
-    cols: List[str] = [
-        "hugo_symbol",
-        "depmap_id",
-        "sgrna",
-        "lineage",
-        "chromosome",
-        "pdna_batch",
-    ],
+    cols: Union[List[str], Tuple[str, ...]] = tuple(
+        [
+            "hugo_symbol",
+            "depmap_id",
+            "sgrna",
+            "lineage",
+            "chromosome",
+            "pdna_batch",
+        ]
+    ),
     ordered: bool = True,
     sort_cats: bool = False,
 ) -> pd.DataFrame:
@@ -146,9 +148,9 @@ def set_achilles_categorical_columns(
 
     Args:
         data (pd.DataFrame): Achilles DataFrame.
-        cols (List[str], optional): The names of the columns to make categorical.
-          Defaults to [ "hugo_symbol", "depmap_id", "sgrna", "lineage", "chromosome",
-          "pdna_batch", ].
+        cols (Union[List[str], Tuple[str, ...]], optional): The names of the columns to
+          make categorical. Defaults to [ "hugo_symbol", "depmap_id", "sgrna",
+          "lineage", "chromosome", "pdna_batch", ].
         ordered (bool, optional): Should the categorical columns be ordered?
           Defaults to True.
         sort_cats (bool, optional): Should the categorical columns be sorted?
@@ -191,7 +193,7 @@ def read_achilles_data(
         data,
         gene_cn_col="log2_cn",
         new_col="z_log2_cn",
-        groupby=["depmap_id"],
+        groupby_cols=["depmap_id"],
         cn_max=np.log2(10),
     )
     data["is_mutated"] = dphelp.nmutations_to_binary_array(data.n_muts)
