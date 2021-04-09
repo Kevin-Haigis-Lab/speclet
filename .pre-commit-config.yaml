@@ -75,6 +75,6 @@ repos:
         exclude: "munge/019_prepare-data-subsample.ipynb"
     -   id: nbqa-mypy
         args: [--nbqa-mutate]
-        additional_dependencies: [pydantic]
+        additional_dependencies: [pydantic, mypy]
         types: [jupyter]
         exclude: "munge/019_prepare-data-subsample.ipynb"
