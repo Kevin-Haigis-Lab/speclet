@@ -37,8 +37,14 @@ class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
 
     ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
+    _copynumber_cov: bool
+
     def __init__(
-        self, name: str, root_cache_dir: Optional[Path] = None, debug: bool = False
+        self,
+        name: str,
+        root_cache_dir: Optional[Path] = None,
+        debug: bool = False,
+        copynumber_cov: bool = False,
     ):
         """Create a CrcCeresMimicOne object.
 
@@ -48,10 +54,39 @@ class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
             debug (bool, optional): Are you in debug mode? Defaults to False.
+            copynumber_cov (bool, optional): Should the gene copy number covariate be
+              included in the model? Default to False.
         """
         super().__init__(
             name="ceres-mimic-1_" + name, root_cache_dir=root_cache_dir, debug=debug
         )
+        self._copynumber_cov = copynumber_cov
+
+    @property
+    def copynumber_cov(self) -> bool:
+        """Get the current value of `copynumber_cov` attribute.
+
+        Returns:
+            bool: Whether or not the copy number covariate is included in the model.
+        """
+        return self._copynumber_cov
+
+    @copynumber_cov.setter
+    def copynumber_cov(self, new_value: bool):
+        """Set the value for the `copynumber_cov` attribute.
+
+        If the value changes, then the `model` attribute and model results attributes
+        `advi_results` and `mcmc_results` are all reset to None.
+
+        Args:
+            new_value (bool): Whether or not the copy number covariate should be
+              included in the model.
+        """
+        if new_value != self.copynumber_cov:
+            self.model = None
+            self.advi_results = None
+            self.mcmc_results = None
+            self._copynumber_cov = new_value
 
     def _get_indices_collection(self, data: pd.DataFrame) -> achelp.CommonIndices:
         return achelp.common_indices(data)
@@ -80,6 +115,7 @@ class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
         cellline_idx_shared = theano.shared(indices_collection.cellline_idx)
         batch_idx_shared = theano.shared(indices_collection.batch_idx)
         lfc_shared = theano.shared(data.lfc.values)
+        copynumber_shared = theano.shared(data.z_log2_cn.values)
 
         with pm.Model() as model:
 
@@ -118,6 +154,13 @@ class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
                 * (h[gene_idx_shared] + d[gene_idx_shared, cellline_idx_shared])
                 + η[batch_idx_shared],
             )
+
+            if self._copynumber_cov:
+                μ_β = pm.Normal("μ_β", 0, 0.1)
+                σ_β = pm.HalfNormal("σ_β", 0.5)
+                β = pm.Normal("β", μ_β, σ_β, shape=indices_collection.n_celllines)
+                μ = μ + β[cellline_idx_shared] * copynumber_shared
+
             σ = pm.HalfNormal("σ", 2)
 
             # Likelihood
@@ -258,7 +301,6 @@ class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
               Defaults to None.
             size (str, optional): Size of the data set to mock. Defaults to "large".
         """
-        # TODO
         if size == "large":
             mock_data = sbc.generate_mock_achilles_data(
                 n_genes=100, n_sgrnas_per_gene=5, n_cell_lines=20, n_batches=3

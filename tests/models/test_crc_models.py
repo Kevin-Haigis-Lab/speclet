@@ -16,6 +16,7 @@ import theano.tensor as tt
 
 import src.modeling.simulation_based_calibration_helpers as sbc
 from src.data_processing import common as dphelp
+from src.data_processing.achilles import zscale_cna_by_group
 from src.modeling import pymc3_sampling_api as pmapi
 from src.modeling.sampling_pymc3_models import SamplingArguments
 from src.models.crc_ceres_mimic_one import CrcCeresMimicOne
@@ -50,6 +51,15 @@ def mock_data() -> pd.DataFrame:
     for col in df.columns:
         df = dphelp.make_cat(df, col)
 
+    df["gene_cn"] = np.abs(np.random.normal(2, 0.1, len(df)))
+    df["log2_cn"] = np.log2(df.gene_cn + 1)
+    df = zscale_cna_by_group(
+        df,
+        gene_cn_col="log2_cn",
+        new_col="z_log2_cn",
+        groupby_cols=["depmap_id"],
+        cn_max=np.log2(10),
+    )
     df["lfc"] = np.random.randn(len(df))
     return df
 
@@ -362,3 +372,24 @@ class TestCrcCeresMimicOne(CrcModelSubclassesTests):
             "σ",
         ]:
             np.testing.assert_array_equal(trace_1[p], trace_2[p])
+
+    def test_gene_covariate_setter(self, tmp_path: Path):
+        ceres_model = CrcCeresMimicOne(
+            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
+        )
+        assert not ceres_model.copynumber_cov
+        assert ceres_model.model is None
+
+        ceres_model.build_model()
+        assert ceres_model.model is not None
+        assert isinstance(ceres_model.model, pm.Model)
+        assert "β" not in [param.name for param in ceres_model.model.free_RVs]
+
+        ceres_model.copynumber_cov = True
+        assert ceres_model.copynumber_cov
+        assert ceres_model.model is None
+
+        ceres_model.build_model()
+        assert ceres_model.model is not None
+        assert isinstance(ceres_model.model, pm.Model)
+        assert "β" in [param.name for param in ceres_model.model.free_RVs]
