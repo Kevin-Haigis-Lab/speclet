@@ -11,7 +11,7 @@ ENVIRONMENT_YAML = "default_environment.yml"
 ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
 
 
-model_names = ["crc_model_one", "crc_ceres_mimic_one"]
+model_names = ["crc_model_one", "crc_ceres_mimic"]
 
 
 rule all:
@@ -22,12 +22,16 @@ rule all:
 rule run_sbc:
     output:
         netcdf_file=(
-            ROOT_PERMUTATION_DIR + "{model_name}/sbc-perm{perm_num}/inference-data.netcdf"
+            ROOT_PERMUTATION_DIR
+            + "{model_name}/sbc-perm{perm_num}/inference-data.netcdf"
         ),
         posterior_file=(
-            ROOT_PERMUTATION_DIR + "{model_name}/sbc-perm{perm_num}/posterior-summary.csv"
+            ROOT_PERMUTATION_DIR
+            + "{model_name}/sbc-perm{perm_num}/posterior-summary.csv"
         ),
-        priors_file=ROOT_PERMUTATION_DIR + "{model_name}/sbc-perm{perm_num}/priors.npz",
+        priors_file=(
+            ROOT_PERMUTATION_DIR + "{model_name}/sbc-perm{perm_num}/priors.npz"
+        ),
     conda:
         ENVIRONMENT_YAML
     shell:
@@ -48,7 +52,7 @@ rule papermill_report:
             parameters={
                 "MODEL": wildcards.model_name,
                 "SBC_RESULTS_DIR": ROOT_PERMUTATION_DIR + wildcards.model_name,
-                "NUM_SIMULATIONS": NUM_SIMULATIONS
+                "NUM_SIMULATIONS": NUM_SIMULATIONS,
             },
             prepare_only=True,
         )
@@ -57,7 +61,8 @@ rule papermill_report:
 rule execute_report:
     input:
         sbc_results=expand(
-            ROOT_PERMUTATION_DIR + "{model_name}/sbc-perm{perm_num}/posterior-summary.csv",
+            ROOT_PERMUTATION_DIR
+            + "{model_name}/sbc-perm{perm_num}/posterior-summary.csv",
             perm_num=list(range(NUM_SIMULATIONS)),
             allow_missing=True,
         ),

@@ -18,8 +18,8 @@ import src.modeling.simulation_based_calibration_helpers as sbc
 from src.data_processing import common as dphelp
 from src.data_processing.achilles import zscale_cna_by_group
 from src.modeling import pymc3_sampling_api as pmapi
-from src.modeling.sampling_pymc3_models import SamplingArguments
-from src.models.crc_ceres_mimic_one import CrcCeresMimic
+from src.modeling.sampling_metadata_models import SamplingArguments
+from src.models.crc_ceres_mimic import CrcCeresMimic
 from src.models.crc_model import CrcModel
 from src.models.crc_model_one import CrcModelOne
 from src.models.speclet_model import SpecletModel

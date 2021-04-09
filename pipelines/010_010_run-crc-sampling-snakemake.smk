@@ -12,7 +12,8 @@ ENVIRONMENT_YAML = Path("default_environment.yml").as_posix()
 
 model_names = {
     "crc_m1": "CRC-model1",
-    "crc_ceres-mimic-1": "CERES-mimic1",
+    "crc_ceres-mimic": "CERES-base",
+    "crc_ceres-mimic": "CERES-copynumber",
 }
 
 
@@ -32,7 +33,7 @@ rule sample_models:
     conda:
         ENVIRONMENT_YAML
     shell:
-        "python3 src/modeling/sampling_pymc3_models.py "
+        "python3 src/command_line_interfaces/sampling_pymc3_models_cli.py "
         '  "{wildcards.model}" '
         '  "{wildcards.model_name}" '
         "  --debug "

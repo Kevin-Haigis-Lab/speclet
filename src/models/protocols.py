@@ -3,12 +3,13 @@
 """Model protocols."""
 
 from pathlib import Path
-from typing import Optional, Protocol
+from typing import Optional, Protocol, runtime_checkable
 
 from src.modeling import pymc3_sampling_api as pmapi
 from src.modeling.sampling_metadata_models import SamplingArguments
 
 
+@runtime_checkable
 class SelfSufficientModel(Protocol):
     """Protocol for class with PyMC3 models that can build and sample on their own."""
 
