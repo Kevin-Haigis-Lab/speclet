@@ -19,7 +19,7 @@ from src.data_processing import common as dphelp
 from src.data_processing.achilles import zscale_cna_by_group
 from src.modeling import pymc3_sampling_api as pmapi
 from src.modeling.sampling_pymc3_models import SamplingArguments
-from src.models.crc_ceres_mimic_one import CrcCeresMimicOne
+from src.models.crc_ceres_mimic_one import CrcCeresMimic
 from src.models.crc_model import CrcModel
 from src.models.crc_model_one import CrcModelOne
 from src.models.speclet_model import SpecletModel
@@ -98,7 +98,7 @@ class TestCrcModel:
 
 class CrcModelSubclassesTests:
 
-    Model: Type[Union[CrcModelOne, CrcCeresMimicOne]]
+    Model: Type[Union[CrcModelOne, CrcCeresMimic]]
 
     @abc.abstractmethod
     def check_trace_shape(
@@ -327,7 +327,7 @@ class TestCrcModelOne(CrcModelSubclassesTests):
 
 
 class TestCrcCeresMimicOne(CrcModelSubclassesTests):
-    Model = CrcCeresMimicOne
+    Model = CrcCeresMimic
 
     def check_trace_shape(
         self,
@@ -374,7 +374,7 @@ class TestCrcCeresMimicOne(CrcModelSubclassesTests):
             np.testing.assert_array_equal(trace_1[p], trace_2[p])
 
     def test_gene_covariate_setter(self, tmp_path: Path):
-        ceres_model = CrcCeresMimicOne(
+        ceres_model = CrcCeresMimic(
             name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
         )
         assert not ceres_model.copynumber_cov

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Builders for CRC PyMC3 models."""
+"""Builders for CRereC CERES Mimic model."""
 
 from pathlib import Path
 from typing import Dict, Optional, Union
@@ -19,11 +19,11 @@ from src.modeling.sampling_metadata_models import SamplingArguments
 from src.models.crc_model import CrcModel
 from src.models.protocols import SelfSufficientModel
 
-#### ---- CRC CERES Mimic One ---- ####
+#### ---- CRC CERES Mimic ---- ####
 
 
-class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
-    """CRC CERES Mimic One.
+class CrcCeresMimic(CrcModel, SelfSufficientModel):
+    """CRC CERES Mimic.
 
     This model is just the part of the CERES model that includes the sgRNA
     "activity score" (q) and the per-gene (h) and per-gene-per-cell-line (d) covariates.
@@ -46,11 +46,11 @@ class CrcCeresMimicOne(CrcModel, SelfSufficientModel):
         debug: bool = False,
         copynumber_cov: bool = False,
     ):
-        """Create a CrcCeresMimicOne object.
+        """Create a CrcCeresMimic object.
 
         Args:
-            name (str): A unique identifier for this instance of CrcModelOne. (Used for
-              cache management.)
+            name (str): A unique identifier for this instance of CrcCeresMimic. (Used
+              for cache management.)
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
             debug (bool, optional): Are you in debug mode? Defaults to False.

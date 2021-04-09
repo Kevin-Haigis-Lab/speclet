@@ -8,7 +8,7 @@ from typing import Dict, Type
 
 import typer
 
-from src.models.crc_ceres_mimic_one import CrcCeresMimicOne
+from src.models.crc_ceres_mimic_one import CrcCeresMimic
 from src.models.crc_model_one import CrcModelOne
 from src.models.speclet_model import SpecletModel
 
@@ -19,7 +19,7 @@ class ModelOption(str, Enum):
     """Model options."""
 
     crc_model_one = "crc_model_one"
-    crc_ceres_mimic_one = "crc_ceres_mimic_one"
+    crc_ceres_mimic = "crc_ceres_mimic"
 
 
 def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
@@ -33,7 +33,7 @@ def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
     """
     model_option_map: Dict[ModelOption, Type[SpecletModel]] = {
         ModelOption.crc_model_one: CrcModelOne,
-        ModelOption.crc_ceres_mimic_one: CrcCeresMimicOne,
+        ModelOption.crc_ceres_mimic: CrcCeresMimic,
     }
     return model_option_map[model_opt]
 
