@@ -10,12 +10,14 @@ REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yml"
 ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
 
+model_names = (
+    ("crc_model_one",   "CRC-model1"),
+    ("crc_ceres_mimic", "CERES-base"),
+    ("crc_ceres_mimic", "CERES-copynumber"),
+)
 
-model_names = {
-    "crc_m1": "CRC-model1",
-    "crc_ceres-mimic": "CERES-base",
-    "crc_ceres-mimic": "CERES-copynumber",
-}
+models = [m for m, _ in model_names]
+model_names = [n for _, n in model_names]
 
 
 rule all:
@@ -23,8 +25,8 @@ rule all:
         expand(
             REPORTS_DIR + "{model}_{model_name}_sbc-results.md",
             zip,
-            model=list(model_names.keys()),
-            model_name=list(model_names.values()),
+            model=models,
+            model_name=model_names,
         ),
 
 
@@ -49,7 +51,7 @@ rule run_sbc:
         "  {wildcards.model_name} "
         "  " + ROOT_PERMUTATION_DIR + "{wildcards.model}_{wildcards.model_name}/sbc-perm{wildcards.perm_num} "
         "  {wildcards.perm_num} "
-        "  large"
+        "  small"
 
 
 rule papermill_report:
