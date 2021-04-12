@@ -175,6 +175,7 @@ class CrcCeresMimic(CrcModel, SelfSufficientModel):
             "cellline_idx_shared": cellline_idx_shared,
             "batch_idx_shared": batch_idx_shared,
             "lfc_shared": lfc_shared,
+            "copynumber_shared": copynumber_shared,
         }
 
         self.model = model
@@ -199,6 +200,9 @@ class CrcCeresMimic(CrcModel, SelfSufficientModel):
         cellline_idx_batch = pm.Minibatch(indices.cellline_idx, batch_size=batch_size)
         batch_idx_batch = pm.Minibatch(indices.batch_idx, batch_size=batch_size)
         lfc_data_batch = pm.Minibatch(self.data.lfc.values, batch_size=batch_size)
+        copynumber_data_batch = pm.Minibatch(
+            self.data.z_log2_cn.values, batch_size=batch_size
+        )
 
         return {
             self.shared_vars["sgrna_idx_shared"]: sgrna_idx_batch,
@@ -206,6 +210,7 @@ class CrcCeresMimic(CrcModel, SelfSufficientModel):
             self.shared_vars["cellline_idx_shared"]: cellline_idx_batch,
             self.shared_vars["batch_idx_shared"]: batch_idx_batch,
             self.shared_vars["lfc_shared"]: lfc_data_batch,
+            self.shared_vars["copynumber_shared"]: copynumber_data_batch,
         }
 
     def mcmc_sample_model(
