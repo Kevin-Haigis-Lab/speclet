@@ -51,7 +51,7 @@ rule run_sbc:
         "  {wildcards.model_name} "
         "  " + ROOT_PERMUTATION_DIR + "{wildcards.model}_{wildcards.model_name}/sbc-perm{wildcards.perm_num} "
         "  {wildcards.perm_num} "
-        "  small"
+        "  large"
 
 
 rule papermill_report:
