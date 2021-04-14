@@ -4,7 +4,8 @@
 
 
 from enum import Enum
-from typing import Dict, Type
+from logging import Logger
+from typing import Dict, Optional, Type
 
 import pretty_errors
 
@@ -62,3 +63,26 @@ def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
         ModelOption.crc_ceres_mimic: CrcCeresMimic,
     }
     return model_option_map[model_opt]
+
+
+#### ---- Modifying models ---- ####
+
+
+def modify_ceres_model_by_name(
+    model: CrcCeresMimic, name: str, logger: Optional[Logger] = None
+) -> None:
+    """Modify a CrcCeresMimic object based on the user-provided input name.
+
+    Args:
+        model (CrcCeresMimic): The CrcCeresMimic model.
+        name (str): User-provided name.
+        logger (Optional[Logger], optional): A logger object. Defaults to None.
+    """
+    if "copynumber" in name:
+        if logger is not None:
+            logger.info("Including gene copy number covariate in CERES model.")
+        model.copynumber_cov = True
+    if "sgrnaint" in name:
+        if logger is not None:
+            logger.info("Including sgRNA|gene varying intercept in CERES model.")
+        model.sgrna_intercept_cov = True

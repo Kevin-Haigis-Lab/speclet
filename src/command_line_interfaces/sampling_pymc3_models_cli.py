@@ -16,7 +16,7 @@ from src.io import cache_io
 from src.loggers import get_logger
 from src.modeling.sampling_metadata_models import SamplingArguments
 from src.models.crc_ceres_mimic import CrcCeresMimic
-from src.models.crc_model_one import CrcModelOne
+from src.models.protocols import SelfSufficientModel
 from src.models.speclet_model import SpecletModel
 
 logger = get_logger()
@@ -81,9 +81,6 @@ def sample_speclet_model(
           sampling process is complete? This is helpful for telling pipelines/workflows
           that this step is complete. Defaults to False.
 
-    Raises:
-        Exception: The model from the user is not recognized.
-
     Returns:
         Type[SpecletModel]: An instance of the requested model with the PyMC3 model
           built and fit.
@@ -101,34 +98,27 @@ def sample_speclet_model(
         random_seed=random_seed,
     )
 
-    logger.debug(f"Cache directory: {cache_dir.as_posix()}")
+    logger.info(f"Cache directory: {cache_dir.as_posix()}")
 
     if random_seed:
         np.random.seed(random_seed)
+    if debug:
+        logger.info("Sampling in debug mode.")
 
-        if debug:
-            logger.debug("Sampling in debug mode.")
+    logger.info(f"Sampling '{model}' with custom name '{name}'")
+    ModelClass = cli_helpers.get_model_class(model_opt=model)
+    speclet_model = ModelClass(name=name, root_cache_dir=cache_dir, debug=debug)
 
-    if model == ModelOption.crc_m1:
-        logger.info(f"Sampling '{model}' with custom name '{name}'")
-        speclet_model = CrcModelOne(name=name, root_cache_dir=cache_dir, debug=debug)
-        logger.debug("Running model build method.")
-        speclet_model.build_model()
-        logger.debug("Running ADVI fitting method.")
-        _ = speclet_model.advi_sample_model(sampling_args=sampling_args)
-    elif model == ModelOption.crc_ceres_mimic:
-        logger.info(f"Sampling '{model}' with custom name '{name}'")
-        speclet_model = CrcCeresMimic(name=name, root_cache_dir=cache_dir, debug=debug)
-        if "copynumber" in name:
-            logger.info("Including gene copy number covariate in CERES model.")
-            speclet_model.copynumber_cov = True
-        logger.debug("Running model build method.")
-        speclet_model.build_model()
-        logger.debug("Running ADVI fitting method.")
-        _ = speclet_model.advi_sample_model(sampling_args=sampling_args)
-    else:
-        logger.error("Unknown model: '{model}'")
-        raise Exception("Unrecognized model 🤷🏻‍♂️")
+    assert isinstance(speclet_model, SelfSufficientModel)
+
+    logger.info("Running model build method.")
+    speclet_model.build_model()
+
+    if model == ModelOption.crc_ceres_mimic and isinstance(model, CrcCeresMimic):
+        cli_helpers.modify_ceres_model_by_name(model=model, name=name, logger=logger)
+
+    logger.info("Running ADVI fitting method.")
+    _ = speclet_model.advi_sample_model(sampling_args=sampling_args)
 
     if touch:
         logger.info("Touching output file.")

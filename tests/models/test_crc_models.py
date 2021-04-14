@@ -417,7 +417,6 @@ class TestCrcCeresMimicCopyNumber(CrcModelSubclassesTests):
         assert "β" in [param.name for param in ceres_model.model.free_RVs]
 
 
-@pytest.mark.DEV
 class TestCrcCeresMimicSgrna(CrcModelSubclassesTests):
     Model = CrcCeresMimic
 

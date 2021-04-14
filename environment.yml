@@ -6,10 +6,7 @@ channels:
   - defaults
 dependencies:
   - arviz=0.11.2
-  - autopep8
   - black
-  - bleach
-  - click
   - colorama
   - coverage
   - flake8
