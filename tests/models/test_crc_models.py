@@ -335,7 +335,7 @@ class TestCrcModelOne(CrcModelSubclassesTests):
         assert len(approx.hist) <= n_fit
 
 
-class TestCrcCeresMimicOne(CrcModelSubclassesTests):
+class TestCrcCeresMimic(CrcModelSubclassesTests):
     Model = CrcCeresMimic
 
     def check_trace_shape(
@@ -364,10 +364,11 @@ class TestCrcCeresMimicOne(CrcModelSubclassesTests):
         self, trace_1: pm.backends.base.MultiTrace, trace_2: pm.backends.base.MultiTrace
     ):
         super().compare_two_results(trace_1, trace_2)
-        assert "β" not in trace_1.varnames
+        for optional_param in ["β", "o"]:
+            assert optional_param not in trace_1.varnames
 
 
-class TestCrcCeresMimicOneCopyNumber(CrcModelSubclassesTests):
+class TestCrcCeresMimicCopyNumber(CrcModelSubclassesTests):
     Model = CrcCeresMimic
 
     def model_init_callback(self, model: AnyModel):
@@ -381,17 +382,18 @@ class TestCrcCeresMimicOneCopyNumber(CrcModelSubclassesTests):
         n_chains: int,
         data: pd.DataFrame,
     ):
-        TestCrcCeresMimicOne().check_trace_shape(trace, n_draws, n_chains, data)
+        TestCrcCeresMimic().check_trace_shape(trace, n_draws, n_chains, data)
         assert trace["β"].shape == (n_draws * n_chains, dphelp.nunique(data.depmap_id))
 
     def compare_two_results(
         self, trace_1: pm.backends.base.MultiTrace, trace_2: pm.backends.base.MultiTrace
     ):
         super().compare_two_results(trace_1, trace_2)
-        assert "β" in trace_1.varnames
+        for new_param in ["μ_β", "σ_β", "β"]:
+            assert new_param in trace_1.varnames
 
     def check_approx_fit(self, approx: pm.Approximation, n_fit: int):
-        TestCrcCeresMimicOne().check_approx_fit(approx, n_fit)
+        TestCrcCeresMimic().check_approx_fit(approx, n_fit)
 
     def test_gene_covariate_setter(self, tmp_path: Path):
         ceres_model = CrcCeresMimic(
@@ -413,3 +415,56 @@ class TestCrcCeresMimicOneCopyNumber(CrcModelSubclassesTests):
         assert ceres_model.model is not None
         assert isinstance(ceres_model.model, pm.Model)
         assert "β" in [param.name for param in ceres_model.model.free_RVs]
+
+
+@pytest.mark.DEV
+class TestCrcCeresMimicSgrna(CrcModelSubclassesTests):
+    Model = CrcCeresMimic
+
+    def model_init_callback(self, model: AnyModel):
+        assert isinstance(model, CrcCeresMimic)
+        model.sgrna_intercept_cov = True
+
+    def check_trace_shape(
+        self,
+        trace: pm.backends.base.MultiTrace,
+        n_draws: int,
+        n_chains: int,
+        data: pd.DataFrame,
+    ):
+        TestCrcCeresMimic().check_trace_shape(trace, n_draws, n_chains, data)
+        assert trace["o"].shape == (
+            n_draws * n_chains,
+            dphelp.nunique(data.sgrna),
+        )
+
+    def compare_two_results(
+        self, trace_1: pm.backends.base.MultiTrace, trace_2: pm.backends.base.MultiTrace
+    ):
+        super().compare_two_results(trace_1, trace_2)
+        for new_param in ["o", "σ_o", "μ_o"]:
+            assert new_param in trace_1.varnames
+
+    def check_approx_fit(self, approx: pm.Approximation, n_fit: int):
+        TestCrcCeresMimic().check_approx_fit(approx, n_fit)
+
+    def test_gene_covariate_setter(self, tmp_path: Path):
+        ceres_model = CrcCeresMimic(
+            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
+        )
+        assert not ceres_model.sgrna_intercept_cov
+        assert ceres_model.model is None
+
+        ceres_model.build_model()
+        assert ceres_model.model is not None
+        assert isinstance(ceres_model.model, pm.Model)
+        assert "o" not in [param.name for param in ceres_model.model.free_RVs]
+
+        ceres_model.sgrna_intercept_cov = True
+        assert ceres_model.sgrna_intercept_cov
+        assert ceres_model.model is None
+
+        ceres_model.build_model()
+        assert ceres_model.model is not None
+        assert isinstance(ceres_model.model, pm.Model)
+        assert "o" in [param.name for param in ceres_model.model.free_RVs]

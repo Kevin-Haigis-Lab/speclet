@@ -195,6 +195,22 @@ class CrcCeresMimic(CrcModel, SelfSufficientModel):
                 β = pm.Normal("β", μ_β, σ_β, shape=indices_collection.n_celllines)
                 μ = μ + β[cellline_idx_shared] * copynumber_shared
 
+            if self._sgrna_intercept_cov:
+                # Hyper priors for sgRNA|gene varying intercept.
+                μ_og = pm.Normal("μ_og", 0, 0.1)
+                σ_og = pm.HalfNormal("σ_og", 0.5)
+                # Priors for sgRNA|gene varying intercept.
+                μ_o = pm.Normal("μ_o", μ_og, σ_og, shape=indices_collection.n_genes)
+                σ_o = pm.HalfNormal("σ_o", 0.5)
+                # sgRNA|gene varying intercept.
+                o = pm.Normal(
+                    "o",
+                    μ_o[sgrna_to_gene_idx_shared],
+                    σ_o,
+                    shape=indices_collection.n_sgrnas,
+                )
+                μ = μ + o[sgrna_idx_shared]
+
             σ = pm.HalfNormal("σ", 2)
 
             # Likelihood
