@@ -1,68 +1,67 @@
 #!/usr/bin/env python3
 
-"""A helpful copmmand line interface for simulation-based calibration."""
+"""A helpful command line interface for simulation-based calibration."""
 
-from enum import Enum
 from pathlib import Path
-from typing import Dict, Type
 
 import typer
 
-from src.models.crc_ceres_mimic_one import CrcCeresMimicOne
-from src.models.crc_model_one import CrcModelOne
-from src.models.speclet_model import SpecletModel
+from src.command_line_interfaces import cli_helpers
+from src.command_line_interfaces.cli_helpers import ModelOption
+from src.loggers import get_logger
+from src.models.crc_ceres_mimic import CrcCeresMimic
+from src.models.protocols import SelfSufficientModel
 
 app = typer.Typer()
-
-
-class ModelOption(str, Enum):
-    """Model options."""
-
-    crc_model_one = "crc_model_one"
-    crc_ceres_mimic_one = "crc_ceres_mimic_one"
-
-
-def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
-    """Get the model class from its string identifier.
-
-    Args:
-        model_opt (ModelOption): The string identifier for the model.
-
-    Returns:
-        Type[SpecletModel]: The corresponding model class.
-    """
-    model_option_map: Dict[ModelOption, Type[SpecletModel]] = {
-        ModelOption.crc_model_one: CrcModelOne,
-        ModelOption.crc_ceres_mimic_one: CrcCeresMimicOne,
-    }
-    return model_option_map[model_opt]
+logger = get_logger()
+cli_helpers.configure_pretty()
 
 
 @app.command()
 def run_sbc(
-    model_name: ModelOption, cache_dir: Path, sim_number: int, data_size: str
+    model_class: ModelOption,
+    name: str,
+    cache_dir: Path,
+    sim_number: int,
+    data_size: str,
 ) -> None:
     """CLI for running a round of simulation-based calibration for a model.
 
     Args:
-        model_name (ModelOption): Name of the model to use.
+        model_class (ModelOption): Name of the model to use.
+        name (str): Unique identifiable name for the model.
         cache_dir (Path): Where to store the results.
         sim_number (int): Simulation number.
         data_size (str): Which data size to use. See the actual methods
           for details and options.
 
     Returns:
-        [type]: [description]
+        None: None
     """
-    ModelClass = get_model_class(model_opt=model_name)
+    logger.info(f"Running SBC for model '{model_class.value}' named '{name}'.")
+    name = cli_helpers.clean_model_names(name)
+    ModelClass = cli_helpers.get_model_class(model_opt=model_class)
     model = ModelClass(
-        f"sbc{sim_number}",
+        f"{name}-sbc{sim_number}",
         root_cache_dir=cache_dir,
         debug=True,
     )
+
+    # Confirm that this is true so can use specified methods.
+    assert isinstance(model, SelfSufficientModel)
+
+    if (
+        model_class == ModelOption.crc_ceres_mimic
+        and isinstance(model, CrcCeresMimic)
+        and "copynumber" in name
+    ):
+        logger.info("Including gene copy number covariate in CERES model.")
+        model.copynumber_cov = True
+
     model.run_simulation_based_calibration(
         cache_dir, random_seed=sim_number, size=data_size
     )
+    logger.info("SBC finished.")
     return None
 
 

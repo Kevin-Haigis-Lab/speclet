@@ -16,9 +16,10 @@ import theano.tensor as tt
 
 import src.modeling.simulation_based_calibration_helpers as sbc
 from src.data_processing import common as dphelp
+from src.data_processing.achilles import zscale_cna_by_group
 from src.modeling import pymc3_sampling_api as pmapi
-from src.modeling.sampling_pymc3_models import SamplingArguments
-from src.models.crc_ceres_mimic_one import CrcCeresMimicOne
+from src.modeling.sampling_metadata_models import SamplingArguments
+from src.models.crc_ceres_mimic import CrcCeresMimic
 from src.models.crc_model import CrcModel
 from src.models.crc_model_one import CrcModelOne
 from src.models.speclet_model import SpecletModel
@@ -50,6 +51,15 @@ def mock_data() -> pd.DataFrame:
     for col in df.columns:
         df = dphelp.make_cat(df, col)
 
+    df["gene_cn"] = np.abs(np.random.normal(2, 0.1, len(df)))
+    df["log2_cn"] = np.log2(df.gene_cn + 1)
+    df = zscale_cna_by_group(
+        df,
+        gene_cn_col="log2_cn",
+        new_col="z_log2_cn",
+        groupby_cols=["depmap_id"],
+        cn_max=np.log2(10),
+    )
     df["lfc"] = np.random.randn(len(df))
     return df
 
@@ -85,10 +95,12 @@ class TestCrcModel:
 
 #### ---- Test CrcModelOne ---- ####
 
+AnyModel = Type[Union[CrcModelOne, CrcCeresMimic]]
+
 
 class CrcModelSubclassesTests:
 
-    Model: Type[Union[CrcModelOne, CrcCeresMimicOne]]
+    Model: AnyModel
 
     @abc.abstractmethod
     def check_trace_shape(
@@ -104,11 +116,15 @@ class CrcModelSubclassesTests:
     def check_approx_fit(self, approx: pm.Approximation, n_fit: int):
         raise Exception("The `check_approx_fit()` method needs to be implemented.")
 
-    @abc.abstractmethod
     def compare_two_results(
         self, trace_1: pm.backends.base.MultiTrace, trace_2: pm.backends.base.MultiTrace
     ):
-        raise Exception("The `compare_two_results()` method needs to be implemented.")
+        assert set(trace_1.varnames) == set(trace_2.varnames)
+        for p in trace_1.varnames:
+            np.testing.assert_array_equal(trace_1[p], trace_2[p])
+
+    def model_init_callback(self, model: AnyModel):
+        pass
 
     def check_mcmc_results(
         self,
@@ -137,6 +153,7 @@ class CrcModelSubclassesTests:
     @pytest.mark.slow
     def test_build_model(self, tmp_path: Path):
         model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        self.model_init_callback(model)
         assert model.data is None
         assert model.model is None
         assert model.shared_vars is None
@@ -160,6 +177,7 @@ class CrcModelSubclassesTests:
         self, sampling_args: SamplingArguments, tmp_path: Path
     ):
         model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        self.model_init_callback(model)
         with pytest.raises(AttributeError):
             _ = model.mcmc_sample_model(sampling_args)
         with pytest.raises(AttributeError):
@@ -168,6 +186,7 @@ class CrcModelSubclassesTests:
     @pytest.mark.slow
     def test_manual_mcmc_sampling(self, mock_data: pd.DataFrame, tmp_path: Path):
         model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        self.model_init_callback(model)
         model.data = mock_data  # inject mock data
         model.build_model()
 
@@ -192,6 +211,7 @@ class CrcModelSubclassesTests:
         self, mock_data: pd.DataFrame, sampling_args: SamplingArguments, tmp_path: Path
     ):
         model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        self.model_init_callback(model)
         model.data = mock_data  # inject mock data
         model.build_model()
 
@@ -209,6 +229,7 @@ class CrcModelSubclassesTests:
     @pytest.mark.slow
     def test_manual_advi_sampling(self, mock_data: pd.DataFrame, tmp_path: Path):
         model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        self.model_init_callback(model)
         model.data = mock_data  # inject mock data
         model.build_model()
 
@@ -227,6 +248,7 @@ class CrcModelSubclassesTests:
         self, mock_data: pd.DataFrame, sampling_args: SamplingArguments, tmp_path: Path
     ):
         model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        self.model_init_callback(model)
         model.data = mock_data  # inject mock data
         model.build_model()
 
@@ -245,6 +267,7 @@ class CrcModelSubclassesTests:
         self, mock_data: pd.DataFrame, sampling_args: SamplingArguments, tmp_path: Path
     ):
         model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        self.model_init_callback(model)
         model.data = mock_data  # inject mock data
         model.build_model()
         results_1 = model.mcmc_sample_model(
@@ -262,6 +285,7 @@ class CrcModelSubclassesTests:
         self, mock_data: pd.DataFrame, sampling_args: SamplingArguments, tmp_path: Path
     ):
         model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        self.model_init_callback(model)
         model.data = mock_data  # inject mock data
         model.build_model()
         results_1 = model.advi_sample_model(
@@ -280,6 +304,7 @@ class CrcModelSubclassesTests:
 
     def test_sbc_standard(self, tmp_path: Path):
         model = self.Model(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        self.model_init_callback(model)
         model.run_simulation_based_calibration(results_path=tmp_path, size="small")
         fm = sbc.SBCFileManager(dir=tmp_path)
         assert fm.all_data_exists()
@@ -309,15 +334,9 @@ class TestCrcModelOne(CrcModelSubclassesTests):
         assert isinstance(approx, pm.Approximation)
         assert len(approx.hist) <= n_fit
 
-    def compare_two_results(
-        self, trace_1: pm.backends.base.MultiTrace, trace_2: pm.backends.base.MultiTrace
-    ):
-        for p in ["μ_g", "μ_α", "α_s", "β_l"]:
-            np.testing.assert_array_equal(trace_1[p], trace_2[p])
-
 
 class TestCrcCeresMimicOne(CrcModelSubclassesTests):
-    Model = CrcCeresMimicOne
+    Model = CrcCeresMimic
 
     def check_trace_shape(
         self,
@@ -344,21 +363,53 @@ class TestCrcCeresMimicOne(CrcModelSubclassesTests):
     def compare_two_results(
         self, trace_1: pm.backends.base.MultiTrace, trace_2: pm.backends.base.MultiTrace
     ):
-        assert 1 == 1
-        for p in [
-            "σ_a",
-            "a",
-            "μ_h",
-            "σ_h",
-            "μ_d",
-            "σ_d",
-            "μ_η",
-            "σ_η",
-            "q",
-            "h",
-            "d",
-            "η",
-            "μ",
-            "σ",
-        ]:
-            np.testing.assert_array_equal(trace_1[p], trace_2[p])
+        super().compare_two_results(trace_1, trace_2)
+        assert "β" not in trace_1.varnames
+
+
+class TestCrcCeresMimicOneCopyNumber(CrcModelSubclassesTests):
+    Model = CrcCeresMimic
+
+    def model_init_callback(self, model: AnyModel):
+        assert isinstance(model, CrcCeresMimic)
+        model.copynumber_cov = True
+
+    def check_trace_shape(
+        self,
+        trace: pm.backends.base.MultiTrace,
+        n_draws: int,
+        n_chains: int,
+        data: pd.DataFrame,
+    ):
+        TestCrcCeresMimicOne().check_trace_shape(trace, n_draws, n_chains, data)
+        assert trace["β"].shape == (n_draws * n_chains, dphelp.nunique(data.depmap_id))
+
+    def compare_two_results(
+        self, trace_1: pm.backends.base.MultiTrace, trace_2: pm.backends.base.MultiTrace
+    ):
+        super().compare_two_results(trace_1, trace_2)
+        assert "β" in trace_1.varnames
+
+    def check_approx_fit(self, approx: pm.Approximation, n_fit: int):
+        TestCrcCeresMimicOne().check_approx_fit(approx, n_fit)
+
+    def test_gene_covariate_setter(self, tmp_path: Path):
+        ceres_model = CrcCeresMimic(
+            name="TEST-MODEL", root_cache_dir=tmp_path, debug=True
+        )
+        assert not ceres_model.copynumber_cov
+        assert ceres_model.model is None
+
+        ceres_model.build_model()
+        assert ceres_model.model is not None
+        assert isinstance(ceres_model.model, pm.Model)
+        assert "β" not in [param.name for param in ceres_model.model.free_RVs]
+
+        ceres_model.copynumber_cov = True
+        assert ceres_model.copynumber_cov
+        assert ceres_model.model is None
+
+        ceres_model.build_model()
+        assert ceres_model.model is not None
+        assert isinstance(ceres_model.model, pm.Model)
+        assert "β" in [param.name for param in ceres_model.model.free_RVs]
