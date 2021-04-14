@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Builders for CRereC CERES Mimic model."""
+"""Builders for CRC CERES Mimic model."""
 
 from pathlib import Path
 from typing import Dict, Optional, Union
