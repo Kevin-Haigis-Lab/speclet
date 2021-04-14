@@ -38,6 +38,7 @@ class CrcCeresMimic(CrcModel, SelfSufficientModel):
     ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
     _copynumber_cov: bool
+    _sgrna_intercept_cov: bool
 
     def __init__(
         self,
@@ -45,6 +46,7 @@ class CrcCeresMimic(CrcModel, SelfSufficientModel):
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         copynumber_cov: bool = False,
+        sgrna_intercept_cov: bool = False,
     ):
         """Create a CrcCeresMimic object.
 
@@ -56,11 +58,20 @@ class CrcCeresMimic(CrcModel, SelfSufficientModel):
             debug (bool, optional): Are you in debug mode? Defaults to False.
             copynumber_cov (bool, optional): Should the gene copy number covariate be
               included in the model? Default to False.
+            sgrna_intercept_cov (bool, optional): Should a varying intercept for
+              `sgRNA|gene` be included in the model? Default to False.
         """
         super().__init__(
             name="ceres-mimic-1_" + name, root_cache_dir=root_cache_dir, debug=debug
         )
         self._copynumber_cov = copynumber_cov
+        self._sgrna_intercept_cov = sgrna_intercept_cov
+
+    def _reset_model_afer_change_to_optional_covariate(self) -> None:
+        """Reset some attributes after the PyMC3 model has changed."""
+        self.model = None
+        self.advi_results = None
+        self.mcmc_results = None
 
     @property
     def copynumber_cov(self) -> bool:
@@ -82,11 +93,34 @@ class CrcCeresMimic(CrcModel, SelfSufficientModel):
             new_value (bool): Whether or not the copy number covariate should be
               included in the model.
         """
-        if new_value != self.copynumber_cov:
-            self.model = None
-            self.advi_results = None
-            self.mcmc_results = None
+        if new_value != self._copynumber_cov:
+            self._reset_model_afer_change_to_optional_covariate()
             self._copynumber_cov = new_value
+
+    @property
+    def sgrna_intercept_cov(self) -> bool:
+        """Get the current value of `sgrna_intercept_cov` attribute.
+
+        Returns:
+            bool: Whether or not the `sgRNA|gene` varying intercept covariate is
+              included in the model.
+        """
+        return self._sgrna_intercept_cov
+
+    @sgrna_intercept_cov.setter
+    def sgrna_intercept_cov(self, new_value: bool):
+        """Set the value for the `sgrna_intercept_cov` attribute.
+
+        If the value changes, then the `model` attribute and model results attributes
+        `advi_results` and `mcmc_results` are all reset to None.
+
+        Args:
+            new_value (bool): Whether or not the `sgRNA|gene` varying intercept
+              covariate is included in the model.
+        """
+        if new_value != self._sgrna_intercept_cov:
+            self._reset_model_afer_change_to_optional_covariate()
+            self._sgrna_intercept_cov = new_value
 
     def _get_indices_collection(self, data: pd.DataFrame) -> achelp.CommonIndices:
         return achelp.common_indices(data)
