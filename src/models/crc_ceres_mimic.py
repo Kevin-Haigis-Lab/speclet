@@ -154,17 +154,17 @@ class CrcCeresMimic(CrcModel, SelfSufficientModel):
         with pm.Model() as model:
 
             # Hyper-priors
-            σ_a = pm.HalfNormal("σ_a", np.array([0.1, 0.5]), shape=2)
+            σ_a = pm.HalfNormal("σ_a", np.array([0.1, 0.9]), shape=2)
             a = pm.Exponential("a", σ_a, shape=(indices_collection.n_genes, 2))
 
             μ_h = pm.Normal("μ_h", np.mean(data.lfc.values), 1)
             σ_h = pm.HalfNormal("σ_h", 1)
 
-            μ_d = pm.Normal("μ_d", 0, 0.2)
-            σ_d = pm.HalfNormal("σ_d", 0.5)
+            μ_d = pm.Normal("μ_d", 0, 0.1)
+            σ_d = pm.HalfNormal("σ_d", 0.2)
 
-            μ_η = pm.Normal("μ_η", 0, 0.2)
-            σ_η = pm.HalfNormal("σ_η", 0.5)
+            μ_η = pm.Normal("μ_η", 0, 0.1)
+            σ_η = pm.HalfNormal("σ_η", 0.2)
 
             # Main parameter priors
             q = pm.Beta(
@@ -182,20 +182,20 @@ class CrcCeresMimic(CrcModel, SelfSufficientModel):
             )
             η = pm.Normal("η", μ_η, σ_η, shape=indices_collection.n_batches)
 
-            μ = pm.Deterministic(
-                "μ",
-                q[sgrna_idx_shared]
-                * (h[gene_idx_shared] + d[gene_idx_shared, cellline_idx_shared])
-                + η[batch_idx_shared],
-            )
+            gene_comp = h[gene_idx_shared] + d[gene_idx_shared, cellline_idx_shared]
 
-            if self._copynumber_cov:
+            if self.copynumber_cov:
+                # Add varying slope with copy number.
                 μ_β = pm.Normal("μ_β", 0, 0.1)
                 σ_β = pm.HalfNormal("σ_β", 0.5)
                 β = pm.Normal("β", μ_β, σ_β, shape=indices_collection.n_celllines)
-                μ = μ + β[cellline_idx_shared] * copynumber_shared
+                gene_comp += β[cellline_idx_shared] * copynumber_shared
 
-            if self._sgrna_intercept_cov:
+            μ = pm.Deterministic(
+                "μ", q[sgrna_idx_shared] * gene_comp + η[batch_idx_shared]
+            )
+
+            if self.sgrna_intercept_cov:
                 # Hyper priors for sgRNA|gene varying intercept.
                 μ_og = pm.Normal("μ_og", 0, 0.1)
                 σ_og = pm.HalfNormal("σ_og", 0.5)

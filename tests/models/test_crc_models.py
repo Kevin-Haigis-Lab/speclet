@@ -36,7 +36,7 @@ def mock_data() -> pd.DataFrame:
     genes = np.random.choice(list(LETTERS), 10, replace=False)
     sgrna_to_gene_map: Dict[str, str] = {}
     for gene in genes:
-        for _ in range(np.random.randint(3, 10)):
+        for _ in range(np.random.randint(3, 6)):
             sgrna_to_gene_map[make_mock_sgrna()] = gene
 
     cell_lines = ["line" + str(i) for i in range(5)]
