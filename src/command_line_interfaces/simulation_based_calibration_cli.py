@@ -27,6 +27,14 @@ def run_sbc(
 ) -> None:
     """CLI for running a round of simulation-based calibration for a model.
 
+    The `name` argument can contain model specification information. These are
+    documented below.
+
+    [model: CERES Mimic]
+    - If the name contains "copynumber" then the copynumber covariate will be included.
+    - If the name contains "sgrnaint" then the sgRNA|gene varying intercept will be
+      included.
+
     Args:
         model_class (ModelOption): Name of the model to use.
         name (str): Unique identifiable name for the model.
@@ -50,13 +58,8 @@ def run_sbc(
     # Confirm that this is true so can use specified methods.
     assert isinstance(model, SelfSufficientModel)
 
-    if (
-        model_class == ModelOption.crc_ceres_mimic
-        and isinstance(model, CrcCeresMimic)
-        and "copynumber" in name
-    ):
-        logger.info("Including gene copy number covariate in CERES model.")
-        model.copynumber_cov = True
+    if model_class == ModelOption.crc_ceres_mimic and isinstance(model, CrcCeresMimic):
+        cli_helpers.modify_ceres_model_by_name(model=model, name=name, logger=logger)
 
     model.run_simulation_based_calibration(
         cache_dir, random_seed=sim_number, size=data_size

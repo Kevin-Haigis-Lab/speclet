@@ -14,6 +14,7 @@ model_names = {
     "crc_m1": "CRC-model1",
     "crc_ceres-mimic": "CERES-base",
     "crc_ceres-mimic": "CERES-copynumber",
+    "crc_ceres_mimic": "CERES-copynumber-sgrnaint",
 }
 
 
