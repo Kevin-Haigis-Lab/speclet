@@ -27,8 +27,8 @@
     "execute_report": {
         "partition": "short",
         "cores": 1,
-        "mem": "5000",
-        "time": "00:30:00",
+        "mem": "13000",
+        "time": "00:08:00",
         "mail": "NONE",
         "J": "report"
     }
