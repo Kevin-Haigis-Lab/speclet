@@ -3,9 +3,9 @@
 #SBATCH -c 2
 #SBATCH -p priority
 #SBATCH -t 2-00:00
-#SBATCH --mem 5G
-#SBATCH -o logs/crc-model-sampling/subsample-ceres-%A.log
-#SBATCH -e logs/crc-model-sampling/subsample-ceres-%A.log
+#SBATCH --mem 2G
+#SBATCH -o logs/crc-model-sampling/%j_sample-ceres.log
+#SBATCH -e logs/crc-model-sampling/%j_sample-ceres.log
 
 module unload python
 module load gcc conda2 slurm-drmaa/1.1.1
@@ -31,10 +31,10 @@ snakemake \
     --jobs 1 \
     --restart-times 0 \
     --latency-wait 120 \
-    --use-conda
-#     --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}"
+    --use-conda \
+    --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
+    --cluster-config pipelines/010_011_smk-config.json
 
-# --cluster-config pipelines/default_snakemake_config.json \
 # --conda-cleanup-envs  # use to clean up old conda envs
 
 # to make a dag
@@ -42,7 +42,6 @@ snakemake \
 #   --snakefile $SNAKEFILE \
 #   --dag |  \
 #   dot -Tpdf > analysis/015_snakemake-dag.pdf
-
 
 conda deactivate
 exit 0
