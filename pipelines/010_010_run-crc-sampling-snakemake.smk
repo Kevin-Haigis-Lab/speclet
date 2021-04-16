@@ -12,8 +12,8 @@ ENVIRONMENT_YAML = Path("default_environment.yml").as_posix()
 
 model_names = {
     "crc_m1": "CRC-model1",
-    "crc_ceres-mimic": "CERES-base",
-    "crc_ceres-mimic": "CERES-copynumber",
+    "crc_ceres_mimic": "CERES-base",
+    "crc_ceres_mimic": "CERES-copynumber",
     "crc_ceres_mimic": "CERES-copynumber-sgrnaint",
 }
 

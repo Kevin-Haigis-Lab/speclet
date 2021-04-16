@@ -4,8 +4,8 @@
 #SBATCH -p priority
 #SBATCH -t 2-00:00
 #SBATCH --mem 2G
-#SBATCH -o logs/crc-model-sampling/%j_sample-ceres.log
-#SBATCH -e logs/crc-model-sampling/%j_sample-ceres.log
+#SBATCH -o logs/%j_sample-ceres.log
+#SBATCH -e logs/%j_sample-ceres.log
 
 module unload python
 module load gcc conda2 slurm-drmaa/1.1.1
@@ -24,11 +24,9 @@ if [ ! -f "$ENV_PATH" ]; then
     sed -i '/jupyter_contrib_nbextensions/d' $ENV_PATH
 fi
 
-
-
 snakemake \
     --snakefile $SNAKEFILE \
-    --jobs 1 \
+    --jobs 100 \
     --restart-times 0 \
     --latency-wait 120 \
     --use-conda \
