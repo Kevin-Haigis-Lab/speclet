@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #SBATCH -c 2
-#SBATCH -p priority
-#SBATCH -t 2-00:00
-#SBATCH --mem 2G
+#SBATCH -p short
+#SBATCH -t 0-12:00
+#SBATCH --mem 1G
 #SBATCH -o logs/%j_sample-ceres.log
 #SBATCH -e logs/%j_sample-ceres.log
 

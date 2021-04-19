@@ -11,10 +11,9 @@
     },
     "sample_models": {
         "partition": "short",
-        "cores": 2,
-        "mem": "20000",
-        "time": "01:00:00",
-        "mail": "NONE",
+        "cores": 1,
+        "mem": "23000",
+        "time": "00:55:00",
         "J": "sample"
     },
     "papermill_report": {
@@ -27,9 +26,8 @@
     "execute_report": {
         "partition": "short",
         "cores": 1,
-        "mem": "13000",
-        "time": "00:08:00",
-        "mail": "NONE",
+        "mem": "64000",
+        "time": "00:30:00",
         "J": "report"
     }
 }
