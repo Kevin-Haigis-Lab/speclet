@@ -12,3 +12,10 @@ class SeabornColor(str, Enum):
     blue = "#4878D0"
     green = "#6BCC64"
     red = "#D65F5F"
+
+
+class ModelColors(str, Enum):
+    """Colors for specific models."""
+
+    CERES = "#417BB1"
+    CERES_mimic = "#853FA2"
