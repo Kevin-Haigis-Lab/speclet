@@ -5,6 +5,7 @@
 from pathlib import Path
 from typing import Optional
 
+import numpy as np
 import pandas as pd
 
 from src.data_processing import achilles as achelp
@@ -58,9 +59,32 @@ class CrcModel(SpecletModel):
         else:
             return 10000
 
+    def _get_sgrnas_that_map_to_multiple_genes(self, df: pd.DataFrame) -> np.ndarray:
+        return (
+            achelp.make_sgrna_to_gene_mapping_df(df)
+            .groupby(["sgrna"])["hugo_symbol"]
+            .count()
+            .reset_index()
+            .query("hugo_symbol > 1")["sgrna"]
+            .unique()
+        )
+
+    def _drop_sgrnas_that_map_to_multiple_genes(self, df: pd.DataFrame) -> pd.DataFrame:
+        sgrnas_to_remove = self._get_sgrnas_that_map_to_multiple_genes(df)
+        df_new = df.copy()[~df["sgrna"].isin(sgrnas_to_remove)]
+        return df_new
+
+    def _drop_missing_copynumber(self, df: pd.DataFrame) -> pd.DataFrame:
+        df_new = df.copy()[~df["gene_cn"].isna()]
+        return df_new
+
     def _load_data(self) -> pd.DataFrame:
         """Load CRC data."""
-        return achelp.read_achilles_data(self.get_data_path(), low_memory=False)
+        df = achelp.read_achilles_data(self.get_data_path(), low_memory=False)
+        df = self._drop_sgrnas_that_map_to_multiple_genes(df)
+        df = self._drop_missing_copynumber(df)
+        df = achelp.set_achilles_categorical_columns(df)
+        return df
 
     def get_data(self) -> pd.DataFrame:
         """Get the data for modeling.
