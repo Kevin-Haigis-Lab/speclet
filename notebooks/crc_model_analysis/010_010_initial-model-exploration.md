@@ -21,6 +21,7 @@ import numpy as np
 import pandas as pd
 import plotnine as gg
 import pymc3 as pm
+import scipy.stats
 import seaborn as sns
 from theano import tensor as tt
 ```
@@ -210,7 +211,7 @@ for m, n in model_info:
     (INFO) Running ADVI fitting method.
     /home/jc604/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     /home/jc604/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    (INFO) finished; execution time: 1.37 minutes
+    (INFO) finished; execution time: 2.46 minutes
     (INFO) Cache directory: /n/data2/dfci/cancerbio/haigis/Cook/speclet/models/model_cache/pymc3_model_cache/CERES-copynumber-sgrnaint
     (INFO) Sampling 'crc_ceres_mimic' with custom name 'CERES-copynumber-sgrnaint'
     (INFO) Including gene copy number covariate in CERES model.
@@ -518,35 +519,36 @@ merged_gene_effect.head()
 </div>
 
 ```python
-(
-    gg.ggplot(merged_gene_effect, gg.aes(x="mean", y="gene_effect"))
-    + gg.geom_point(size=1, alpha=0.05)
-    + gg.geom_abline(intercept=0, slope=1, color=SeabornColor.orange, linetype="--")
-    + gg.geom_smooth(method="lm", color=SeabornColor.blue)
-)
+for gene_effect_col in ("gene_effect", "gene_effect_unscaled"):
+    print(
+        gg.ggplot(merged_gene_effect, gg.aes(x="mean", y=gene_effect_col))
+        + gg.geom_point(size=1, alpha=0.05)
+        + gg.geom_abline(intercept=0, slope=1, color=SeabornColor.orange, linetype="--")
+        + gg.geom_smooth(method="lm", color=SeabornColor.blue)
+        + gg.labs(
+            x="CERES-mimic posterior average",
+            y=f"CERES {gene_effect_col.replace('_', ' ')}",
+        )
+    )
+
+    gene_effect_corr = scipy.stats.pearsonr(
+        merged_gene_effect[gene_effect_col], merged_gene_effect["mean"]
+    )
+    print(f"correlation: {gene_effect_corr[0]:.3f}")
+    print(f"    p-value: {gene_effect_corr[1]:.2e}")
 ```
 
 ![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_17_0.png)
 
-    <ggplot: (8727116748831)>
-
-```python
-import scipy.stats
-
-gene_effect_corr = scipy.stats.pearsonr(
-    merged_gene_effect["gene_effect"], merged_gene_effect["mean"]
-)
-print(f"correlation: {gene_effect_corr[0]:.3f}")
-print(f"    p-value: {gene_effect_corr[1]:.2e}")
-```
-
     correlation: 0.285
         p-value: 0.00e+00
 
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_17_2.png)
+
+    correlation: 0.391
+        p-value: 0.00e+00
+
 ```python
-from typing import List, Union
-
-
 def extract_param_name(params: Union[np.ndarray, pd.Series, List]) -> List[str]:
     return [re.split(r"\[", p)[0] for p in params]
 
@@ -572,6 +574,7 @@ guide_efficacy_params = (
     )
 )
 
+guide_efficacy_params["sgrna"] = ceres_mimic.data.sgrna.cat.categories
 guide_efficacy_params.head()
 ```
 
@@ -600,6 +603,7 @@ guide_efficacy_params.head()
       <th>o_hdi_5.5%</th>
       <th>q_hdi_94.5%</th>
       <th>o_hdi_94.5%</th>
+      <th>sgrna</th>
     </tr>
   </thead>
   <tbody>
@@ -612,6 +616,7 @@ guide_efficacy_params.head()
       <td>0.476</td>
       <td>0.240</td>
       <td>0.626</td>
+      <td>ACAAACCTCTCTACACCCCA</td>
     </tr>
     <tr>
       <th>1</th>
@@ -622,6 +627,7 @@ guide_efficacy_params.head()
       <td>0.359</td>
       <td>0.256</td>
       <td>0.509</td>
+      <td>AGTGCTGCCGAAGTTTAAGG</td>
     </tr>
     <tr>
       <th>2</th>
@@ -632,6 +638,7 @@ guide_efficacy_params.head()
       <td>0.168</td>
       <td>0.224</td>
       <td>0.317</td>
+      <td>ATAGCAACAGGATTGCACAG</td>
     </tr>
     <tr>
       <th>3</th>
@@ -642,6 +649,7 @@ guide_efficacy_params.head()
       <td>0.316</td>
       <td>0.223</td>
       <td>0.463</td>
+      <td>GCAGACAGTTACTCACAGAG</td>
     </tr>
     <tr>
       <th>4</th>
@@ -652,33 +660,47 @@ guide_efficacy_params.head()
       <td>0.451</td>
       <td>0.156</td>
       <td>0.606</td>
+      <td>CTATGGGGTGGACCCCTCCA</td>
     </tr>
   </tbody>
 </table>
 </div>
 
 ```python
-(
+def apply_q_o_plot_theme(p: gg.ggplot) -> gg.ggplot:
+    return p + gg.theme(figure_size=(4, 4), axis_ticks_major=gg.element_blank())
+
+
+p = (
     gg.ggplot(guide_efficacy_params, gg.aes(x="q_mean", y="o_mean"))
     + gg.geom_point(size=1, alpha=0.2)
-    + gg.labs(x="avg. posterior of $q$", y="avg. posterior of $o$")
+    + gg.labs(x="avg. posterior of $q$", y="avg. posterior of $o$", title="CERES-mimic")
 )
+
+apply_q_o_plot_theme(p)
+```
+
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_20_0.png)
+
+    <ggplot: (8775427642531)>
+
+```python
+dm_guide_efficacy_filt = dm_guide_efficacy.copy().filter_column_isin(
+    "sgRNA", guide_efficacy_params.sgrna
+)
+
+p = (
+    gg.ggplot(dm_guide_efficacy_filt, gg.aes(x="efficacy", y="offset"))
+    + gg.geom_point(size=1, alpha=0.05)
+    + gg.labs(title="CERES")
+)
+
+apply_q_o_plot_theme(p)
 ```
 
 ![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_21_0.png)
 
-    <ggplot: (8727116723800)>
-
-```python
-(
-    gg.ggplot(dm_guide_efficacy, gg.aes(x="efficacy", y="offset"))
-    + gg.geom_point(size=1, alpha=0.05)
-)
-```
-
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_22_0.png)
-
-    <ggplot: (8727112498713)>
+    <ggplot: (8775408891453)>
 
 ```python
 merged_gene_effect_long = (
@@ -693,7 +715,7 @@ merged_gene_effect_long = (
 ```python
 pal = {"CERES": ModelColors.CERES, "CERES-mimic": ModelColors.CERES_mimic}
 
-essential_labeller = lambda x: "Essential" if x else "Non-essential"
+essential_labeller = lambda x: "Essential" if x == "True" else "Non-essential"
 
 
 (
@@ -722,9 +744,9 @@ essential_labeller = lambda x: "Essential" if x else "Non-essential"
 )
 ```
 
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_24_0.png)
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_23_0.png)
 
-    <ggplot: (8727112920643)>
+    <ggplot: (8775405912058)>
 
 ```python
 def merge_with_kras_mut(df: pd.DataFrame, full_data: pd.DataFrame) -> pd.DataFrame:
@@ -758,9 +780,9 @@ kras_dep_long = merge_with_kras_mut(
 )
 ```
 
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_25_0.png)
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_24_0.png)
 
-    <ggplot: (8727116753972)>
+    <ggplot: (8776164819384)>
 
 ```python
 kras_dep = (
@@ -785,9 +807,89 @@ kras_dep = (
 )
 ```
 
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_26_0.png)
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_25_0.png)
 
-    <ggplot: (8727872050195)>
+    <ggplot: (8775405188349)>
+
+```python
+kras_dep_long.head()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>depmap_id</th>
+      <th>hugo_symbol</th>
+      <th>model</th>
+      <th>gene_effect</th>
+      <th>kras_mutation</th>
+      <th>KRAS</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACH-000007</td>
+      <td>KRAS</td>
+      <td>CERES</td>
+      <td>-1.984256</td>
+      <td>G12D</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ACH-000007</td>
+      <td>KRAS</td>
+      <td>CERES-mimic</td>
+      <td>-0.365000</td>
+      <td>G12D</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-000009</td>
+      <td>KRAS</td>
+      <td>CERES</td>
+      <td>-2.211471</td>
+      <td>WT</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-000009</td>
+      <td>KRAS</td>
+      <td>CERES-mimic</td>
+      <td>-0.271000</td>
+      <td>WT</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-000202</td>
+      <td>KRAS</td>
+      <td>CERES</td>
+      <td>-0.678425</td>
+      <td>WT</td>
+      <td>False</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ```python
 kras_idx = np.where(ceres_mimic.data.hugo_symbol.cat.categories.values == "KRAS")[0][0]
@@ -819,11 +921,16 @@ def filter_for_tp53(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-ccle_mutation_df = pd.read_csv(
-    data_io.data_path(data_io.DataFile.ccle_mutations), nrows=None, low_memory=False
-).pipe(filter_for_tp53)
+tp53_mutation_df = (
+    pd.read_csv(
+        data_io.data_path(data_io.DataFile.ccle_mutations), nrows=None, low_memory=False
+    )
+    .pipe(filter_for_tp53)
+    .assign(TP53=lambda d: d.variant_classification != "WT")[["depmap_id", "TP53"]]
+    .drop_duplicates()
+)
 
-ccle_mutation_df.head()
+tp53_mutation_df.head()
 ```
 
 <div>
@@ -845,111 +952,33 @@ ccle_mutation_df.head()
     <tr style="text-align: right;">
       <th></th>
       <th>depmap_id</th>
-      <th>hugo_symbol</th>
-      <th>chromosome</th>
-      <th>start_position</th>
-      <th>end_position</th>
-      <th>variant_classification</th>
-      <th>variant_type</th>
-      <th>reference_allele</th>
-      <th>tumor_seq_allele1</th>
-      <th>cdna_change</th>
-      <th>codon_change</th>
-      <th>protein_change</th>
-      <th>isdeleterious</th>
-      <th>istcgahotspot</th>
-      <th>iscosmichotspot</th>
+      <th>TP53</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
       <td>ACH-001460</td>
-      <td>TP53</td>
-      <td>17</td>
-      <td>7574003</td>
-      <td>7574003</td>
-      <td>Nonsense_Mutation</td>
-      <td>SNP</td>
-      <td>G</td>
-      <td>A</td>
-      <td>c.1024C&gt;T</td>
-      <td>c.(1024-1026)Cga&gt;Tga</td>
-      <td>p.R342*</td>
-      <td>True</td>
-      <td>True</td>
       <td>True</td>
     </tr>
     <tr>
       <th>1</th>
       <td>ACH-000651</td>
-      <td>TP53</td>
-      <td>17</td>
-      <td>7576921</td>
-      <td>7576921</td>
-      <td>Missense_Mutation</td>
-      <td>SNP</td>
-      <td>G</td>
-      <td>A</td>
-      <td>c.925C&gt;T</td>
-      <td>c.(925-927)Ccc&gt;Tcc</td>
-      <td>p.P309S</td>
-      <td>False</td>
-      <td>False</td>
       <td>True</td>
     </tr>
     <tr>
       <th>2</th>
       <td>ACH-000963</td>
-      <td>TP53</td>
-      <td>17</td>
-      <td>7577105</td>
-      <td>7577105</td>
-      <td>Missense_Mutation</td>
-      <td>SNP</td>
-      <td>G</td>
-      <td>T</td>
-      <td>c.833C&gt;A</td>
-      <td>c.(832-834)cCt&gt;cAt</td>
-      <td>p.P278H</td>
-      <td>False</td>
-      <td>True</td>
       <td>True</td>
     </tr>
     <tr>
       <th>3</th>
       <td>ACH-000683</td>
-      <td>TP53</td>
-      <td>17</td>
-      <td>7577120</td>
-      <td>7577120</td>
-      <td>Missense_Mutation</td>
-      <td>SNP</td>
-      <td>C</td>
-      <td>A</td>
-      <td>c.818G&gt;T</td>
-      <td>c.(817-819)cGt&gt;cTt</td>
-      <td>p.R273L</td>
-      <td>False</td>
-      <td>True</td>
       <td>True</td>
     </tr>
     <tr>
       <th>4</th>
       <td>ACH-000552</td>
-      <td>TP53</td>
-      <td>17</td>
-      <td>7577120</td>
-      <td>7577120</td>
-      <td>Missense_Mutation</td>
-      <td>SNP</td>
-      <td>C</td>
-      <td>T</td>
-      <td>c.818G&gt;A</td>
-      <td>c.(817-819)cGt&gt;cAt</td>
-      <td>p.R273H</td>
-      <td>False</td>
-      <td>True</td>
       <td>True</td>
     </tr>
   </tbody>
@@ -1060,13 +1089,8 @@ copynumber_effect = (
     )
     .merge(depmap_id_map, left_on="depmap_idx", right_on="idx")
     .assign(depmap_id=lambda d: d.depmap_id.values)
-    .merge(
-        ccle_mutation_df[["depmap_id", "variant_classification"]],
-        how="left",
-        on="depmap_id",
-    )
+    .merge(tp53_mutation_df, how="left", on="depmap_id")
     .merge(ccle_copynumber_df[["depmap_id", "TP53_cn"]], how="left", on="depmap_id")
-    .rename(columns={"variant_classification": "TP53"})
     .fillna({"TP53": "WT", "TP53_cn": 2})
 )
 copynumber_effect.head()
@@ -1129,7 +1153,7 @@ copynumber_effect.head()
       <td>1</td>
       <td>ACH-000009</td>
       <td>1</td>
-      <td>Nonsense_Mutation</td>
+      <td>True</td>
       <td>1.0</td>
     </tr>
     <tr>
@@ -1143,7 +1167,7 @@ copynumber_effect.head()
       <td>2</td>
       <td>ACH-000202</td>
       <td>2</td>
-      <td>Missense_Mutation</td>
+      <td>True</td>
       <td>1.0</td>
     </tr>
     <tr>
@@ -1157,7 +1181,7 @@ copynumber_effect.head()
       <td>3</td>
       <td>ACH-000249</td>
       <td>3</td>
-      <td>Missense_Mutation</td>
+      <td>True</td>
       <td>1.0</td>
     </tr>
     <tr>
@@ -1182,7 +1206,7 @@ copynumber_effect.head()
 copynumber_effect_plot = copynumber_effect.copy().sort_values("mean")
 copynumber_effect_plot = dphelp.make_cat(
     copynumber_effect_plot, col="depmap_id"
-).assign(TP53=lambda d: d.TP53 == "WT")
+).assign(TP53=lambda d: d.TP53 != "WT")
 
 (
     gg.ggplot(copynumber_effect_plot, gg.aes(x="depmap_id", y="mean", color="TP53"))
@@ -1202,7 +1226,43 @@ copynumber_effect_plot = dphelp.make_cat(
 
 ![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_32_0.png)
 
-    <ggplot: (8727113194984)>
+    <ggplot: (8775428507097)>
+
+```python
+copynumber_effect_full_posterior = (
+    pd.DataFrame(
+        ceres_mimic.advi_results.trace.get_values("β"),
+        columns=copynumber_effect.depmap_id.values,
+    )
+    .melt(var_name="depmap_id", value_name="beta_post")
+    .merge(tp53_mutation_df, how="left", on="depmap_id")
+    .fillna(value={"TP53": False}, axis=0)
+)
+
+color_kwargs = {"values": ("black", "red"), "labels": ("WT", "mutant")}
+
+(
+    gg.ggplot(copynumber_effect_full_posterior, gg.aes(x="beta_post"))
+    + gg.geom_density(
+        gg.aes(color="TP53", fill="TP53", group="depmap_id"), alpha=0.2, size=0.2
+    )
+    + gg.scale_y_continuous(expand=(0, 0, 0.02, 0))
+    + gg.scale_color_manual(**color_kwargs)
+    + gg.scale_fill_manual(**color_kwargs)
+    + gg.theme(
+        figure_size=(8, 3),
+        legend_position=(0.23, 0.8),
+        legend_background=gg.element_blank(),
+        legend_direction="horizontal",
+        axis_ticks_major=gg.element_blank(),
+    )
+    + gg.labs(x="β posterior", y="density")
+)
+```
+
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_33_0.png)
+
+    <ggplot: (8775427541649)>
 
 ```python
 ceres_mimic_predictions = pmanal.summarize_posterior_predictions(
@@ -1321,21 +1381,33 @@ ceres_mimic_predictions.head()
 </div>
 
 ```python
+cn_facet_labeller = lambda x: f"CN = {float(x):.0f}"
+
 (
-    gg.ggplot(ceres_mimic_predictions, gg.aes(x="pred_mean", y="lfc"))
-    + gg.geom_point(gg.aes(color="np.round(gene_cn)"), size=1, alpha=0.1)
+    gg.ggplot(
+        ceres_mimic_predictions.assign(
+            gene_cn_rnd=lambda d: [np.min([np.round(x), 4]) for x in d.gene_cn]
+        ),
+        gg.aes(x="pred_mean", y="lfc"),
+    )
+    + gg.facet_wrap("~ gene_cn_rnd", nrow=1, labeller=cn_facet_labeller)
+    + gg.geom_point(gg.aes(color="gene_cn"), size=1, alpha=0.2)
     + gg.geom_abline(intercept=0, slope=1, color=SeabornColor.orange, linetype="--")
-    + gg.geom_smooth(method="lm", color=SeabornColor.blue)
+    + gg.geom_smooth(method="lm", color="black")
     + gg.scale_color_gradient2(
         limits=(0, 4),
         expand=(0, 0),
         midpoint=2,
         low="#2c7bb6",
-        mid="#ffffbf",
+        mid="#d8d847",
         high="#d7191c",
         guide=gg.guide_colorbar(barwidth=8, ticks=False),
     )
-    + gg.theme(figure_size=(8, 5))
+    + gg.theme(
+        strip_background=gg.element_blank(),
+        axis_ticks_major=gg.element_blank(),
+        figure_size=(10, 3),
+    )
     + gg.labs(
         x="average of posterior prediction",
         y="measured log fold change",
@@ -1344,9 +1416,9 @@ ceres_mimic_predictions.head()
 )
 ```
 
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_34_0.png)
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_35_0.png)
 
-    <ggplot: (8727116783077)>
+    <ggplot: (8775976764070)>
 
 ```python
 pred_corr = scipy.stats.pearsonr(
@@ -1357,6 +1429,68 @@ print(f"correlation: {pred_corr[0]:.3f}")
 
     correlation: 0.729
 
+```python
+bins = np.linspace(0, 1, 5)
+groups = np.array([f"{bins[i]}-{bins[i+1]}" for i in range(len(bins) - 1)])
+
+q_posteriors = az.summary(
+    az_ceres_mimic, var_names="q", hdi_prob=HDI_PROB, kind="stats"
+)
+q_posteriors["sgrna"] = ceres_mimic.data["sgrna"].cat.categories
+
+plot_df = ceres_mimic_predictions.merge(
+    q_posteriors.rename(columns={"mean": "q_post_mean"})[["sgrna", "q_post_mean"]],
+    on="sgrna",
+).assign(grp=lambda d: np.digitize(d.q_post_mean, [0, 0.25, 0.5, 0.75]) / 4)
+
+(
+    gg.ggplot(plot_df, gg.aes(x="lfc", y="error"))
+    + gg.geom_point(gg.aes(color="q_post_mean"), size=1, alpha=0.2)
+    + gg.geom_smooth(gg.aes(group="grp", color="grp"), method="lm", show_legend=False)
+    + gg.labs(x="measure log fold change", y="prediciton error", color="$q$ posterior")
+)
+```
+
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_37_0.png)
+
+    <ggplot: (8775976797118)>
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
+```python
+
+```
+
 ---
 
 ```python
@@ -1364,14 +1498,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 4.53 minutes
+    execution time: 5.63 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-04-19
+    Last updated: 2021-04-20
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -1385,18 +1519,18 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-e-16-235.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-236.o2.rc.hms.harvard.edu
 
     Git branch: pipelines
 
-    theano    : 1.0.5
-    numpy     : 1.20.2
-    pymc3     : 3.11.2
-    matplotlib: 3.4.1
-    scipy     : 1.6.2
+    seaborn   : 0.11.1
     plotnine  : 0.8.0
     arviz     : 0.11.2
-    pandas    : 1.2.3
-    seaborn   : 0.11.1
+    theano    : 1.0.5
     re        : 2.2.1
     janitor   : 0.20.14
+    matplotlib: 3.4.1
+    numpy     : 1.20.2
+    pymc3     : 3.11.2
+    scipy     : 1.6.2
+    pandas    : 1.2.3
