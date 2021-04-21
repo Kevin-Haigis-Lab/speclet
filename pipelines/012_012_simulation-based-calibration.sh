@@ -1,11 +1,11 @@
 #!/bin/bash
 
 #SBATCH -c 2
-#SBATCH -p priority
-#SBATCH -t 4-00:00
-#SBATCH --mem 5G
-#SBATCH -o logs/sbc-snakemake-%A.log
-#SBATCH -e logs/sbc-snakemake-%A.log
+#SBATCH -p medium
+#SBATCH -t 2-00:00
+#SBATCH --mem 4G
+#SBATCH -o logs/%j-sbc-snakemake.log
+#SBATCH -e logs/%j-sbc-snakemake.log
 
 module unload python
 module load gcc conda2 slurm-drmaa/1.1.1
@@ -27,7 +27,7 @@ fi
 snakemake \
     --snakefile $SNAKEFILE \
     --jobs 20 \
-    --restart-times 1 \
+    --restart-times 3 \
     --latency-wait 120 \
     --use-conda \
     --cluster-config pipelines/012_011_smk-config.json \

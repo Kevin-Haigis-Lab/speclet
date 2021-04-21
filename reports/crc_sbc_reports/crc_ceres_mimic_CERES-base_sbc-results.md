@@ -255,80 +255,80 @@ simulation_posteriors_df.head()
     <tr>
       <th>μ_h</th>
       <th>μ_h</th>
-      <td>0.726</td>
-      <td>0.060</td>
-      <td>0.628</td>
-      <td>0.816</td>
+      <td>0.679</td>
+      <td>0.062</td>
+      <td>0.576</td>
+      <td>0.772</td>
       <td>0.002</td>
       <td>0.001</td>
-      <td>990.0</td>
-      <td>714.0</td>
+      <td>1002.0</td>
+      <td>983.0</td>
       <td>NaN</td>
-      <td>1.772765</td>
+      <td>1.767854</td>
       <td>False</td>
       <td>sim_id_0000</td>
     </tr>
     <tr>
       <th>μ_d</th>
       <th>μ_d</th>
-      <td>0.154</td>
-      <td>0.016</td>
-      <td>0.131</td>
-      <td>0.181</td>
+      <td>0.048</td>
+      <td>0.017</td>
+      <td>0.021</td>
+      <td>0.073</td>
+      <td>0.001</td>
       <td>0.000</td>
-      <td>0.000</td>
-      <td>1053.0</td>
-      <td>916.0</td>
+      <td>1082.0</td>
+      <td>857.0</td>
       <td>NaN</td>
-      <td>-0.254097</td>
+      <td>-0.127048</td>
       <td>False</td>
       <td>sim_id_0000</td>
     </tr>
     <tr>
       <th>μ_η</th>
       <th>μ_η</th>
-      <td>0.187</td>
-      <td>0.192</td>
-      <td>-0.116</td>
-      <td>0.485</td>
-      <td>0.006</td>
-      <td>0.004</td>
-      <td>1058.0</td>
-      <td>875.0</td>
+      <td>0.099</td>
+      <td>0.100</td>
+      <td>-0.047</td>
+      <td>0.265</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>1023.0</td>
+      <td>803.0</td>
       <td>NaN</td>
-      <td>0.302328</td>
+      <td>0.096940</td>
       <td>True</td>
       <td>sim_id_0000</td>
     </tr>
     <tr>
       <th>h[0]</th>
       <th>h</th>
-      <td>1.202</td>
-      <td>0.195</td>
-      <td>0.882</td>
-      <td>1.496</td>
-      <td>0.006</td>
-      <td>0.004</td>
-      <td>1003.0</td>
-      <td>906.0</td>
+      <td>1.123</td>
+      <td>0.290</td>
+      <td>0.720</td>
+      <td>1.626</td>
+      <td>0.009</td>
+      <td>0.007</td>
+      <td>962.0</td>
+      <td>908.0</td>
       <td>NaN</td>
-      <td>2.164414</td>
+      <td>2.159503</td>
       <td>False</td>
       <td>sim_id_0000</td>
     </tr>
     <tr>
       <th>h[1]</th>
       <th>h</th>
-      <td>1.807</td>
-      <td>0.190</td>
-      <td>1.469</td>
-      <td>2.083</td>
+      <td>1.785</td>
+      <td>0.275</td>
+      <td>1.362</td>
+      <td>2.234</td>
+      <td>0.009</td>
       <td>0.006</td>
-      <td>0.004</td>
-      <td>1082.0</td>
-      <td>981.0</td>
+      <td>982.0</td>
+      <td>841.0</td>
       <td>NaN</td>
-      <td>2.669474</td>
+      <td>2.664564</td>
       <td>False</td>
       <td>sim_id_0000</td>
     </tr>
@@ -366,7 +366,7 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 
 ![png](crc_ceres_mimic_CERES-base_sbc-results_files/crc_ceres_mimic_CERES-base_sbc-results_23_0.png)
 
-    <ggplot: (2957494990659)>
+    <ggplot: (2988183322317)>
 
 ```python
 hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -406,7 +406,7 @@ hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
 
 ![png](crc_ceres_mimic_CERES-base_sbc-results_files/crc_ceres_mimic_CERES-base_sbc-results_24_1.png)
 
-    <ggplot: (2957482772604)>
+    <ggplot: (2988180796971)>
 
 ---
 
@@ -415,14 +415,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 23.92 minutes
+    execution time: 20.15 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-04-13
+    Last updated: 2021-04-19
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -433,18 +433,18 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 20
     Architecture: 64bit
 
-    Hostname: compute-a-17-130.o2.rc.hms.harvard.edu
+    Hostname: compute-f-17-09.o2.rc.hms.harvard.edu
 
-    Git branch: ceres-cn-covariate
+    Git branch: pipelines
 
-    seaborn   : 0.11.1
-    pandas    : 1.2.3
+    arviz     : 0.11.2
     pymc3     : 3.11.1
+    plotnine  : 0.7.1
     numpy     : 1.20.1
+    pandas    : 1.2.3
+    seaborn   : 0.11.1
     re        : 2.2.1
     matplotlib: 3.3.4
-    plotnine  : 0.7.1
-    arviz     : 0.11.2

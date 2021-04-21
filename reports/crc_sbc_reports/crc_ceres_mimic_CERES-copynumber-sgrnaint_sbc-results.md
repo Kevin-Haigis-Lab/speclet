@@ -51,9 +51,9 @@ NUM_SIMULATIONS = -1
 ```python
 # Parameters
 MODEL = "crc_ceres_mimic"
-MODEL_NAME = "CERES-copynumber"
+MODEL_NAME = "CERES-copynumber-sgrnaint"
 SBC_RESULTS_DIR = (
-    "/n/scratch3/users/j/jc604/speclet-sbc/crc_ceres_mimic_CERES-copynumber"
+    "/n/scratch3/users/j/jc604/speclet-sbc/crc_ceres_mimic_CERES-copynumber-sgrnaint"
 )
 NUM_SIMULATIONS = 500
 
@@ -185,7 +185,7 @@ ax.set_xlabel("HDI accuracy")
 plt.show()
 ```
 
-![png](crc_ceres_mimic_CERES-copynumber_sbc-results_files/crc_ceres_mimic_CERES-copynumber_sbc-results_21_0.png)
+![png](crc_ceres_mimic_CERES-copynumber-sgrnaint_sbc-results_files/crc_ceres_mimic_CERES-copynumber-sgrnaint_sbc-results_21_0.png)
 
 ```python
 simulation_posteriors_df = pd.concat(
@@ -257,80 +257,80 @@ simulation_posteriors_df.head()
     <tr>
       <th>μ_h</th>
       <th>μ_h</th>
-      <td>0.606</td>
-      <td>0.056</td>
-      <td>0.510</td>
-      <td>0.690</td>
-      <td>0.002</td>
-      <td>0.001</td>
-      <td>906.0</td>
-      <td>996.0</td>
-      <td>NaN</td>
-      <td>1.757625</td>
-      <td>False</td>
-      <td>sim_id_0000</td>
-    </tr>
-    <tr>
-      <th>μ_d</th>
-      <th>μ_d</th>
-      <td>0.039</td>
-      <td>0.015</td>
-      <td>0.018</td>
-      <td>0.066</td>
-      <td>0.000</td>
-      <td>0.000</td>
-      <td>1001.0</td>
-      <td>787.0</td>
-      <td>NaN</td>
-      <td>-0.127048</td>
-      <td>False</td>
-      <td>sim_id_0000</td>
-    </tr>
-    <tr>
-      <th>μ_η</th>
-      <th>μ_η</th>
-      <td>0.099</td>
-      <td>0.100</td>
-      <td>-0.057</td>
-      <td>0.255</td>
+      <td>0.057</td>
+      <td>0.093</td>
+      <td>-0.081</td>
+      <td>0.205</td>
       <td>0.003</td>
       <td>0.002</td>
-      <td>1001.0</td>
-      <td>880.0</td>
+      <td>903.0</td>
+      <td>942.0</td>
+      <td>NaN</td>
+      <td>0.403190</td>
+      <td>False</td>
+      <td>sim_id_0000</td>
+    </tr>
+    <tr>
+      <th>μ_d</th>
+      <th>μ_d</th>
+      <td>0.010</td>
+      <td>0.007</td>
+      <td>-0.001</td>
+      <td>0.021</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>900.0</td>
+      <td>992.0</td>
+      <td>NaN</td>
+      <td>0.096940</td>
+      <td>False</td>
+      <td>sim_id_0000</td>
+    </tr>
+    <tr>
+      <th>μ_η</th>
+      <th>μ_η</th>
+      <td>0.104</td>
+      <td>0.020</td>
+      <td>0.070</td>
+      <td>0.135</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>1086.0</td>
+      <td>944.0</td>
       <td>NaN</td>
       <td>-0.020091</td>
-      <td>True</td>
+      <td>False</td>
       <td>sim_id_0000</td>
     </tr>
     <tr>
       <th>h[0]</th>
       <th>h</th>
-      <td>0.777</td>
-      <td>0.270</td>
-      <td>0.283</td>
-      <td>1.157</td>
-      <td>0.009</td>
-      <td>0.006</td>
-      <td>954.0</td>
-      <td>846.0</td>
+      <td>1.093</td>
+      <td>0.086</td>
+      <td>0.964</td>
+      <td>1.242</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>878.0</td>
+      <td>943.0</td>
       <td>NaN</td>
-      <td>2.149274</td>
+      <td>2.596437</td>
       <td>False</td>
       <td>sim_id_0000</td>
     </tr>
     <tr>
       <th>h[1]</th>
       <th>h</th>
-      <td>1.351</td>
-      <td>0.266</td>
-      <td>0.954</td>
-      <td>1.789</td>
-      <td>0.008</td>
-      <td>0.006</td>
-      <td>1044.0</td>
-      <td>1026.0</td>
+      <td>1.374</td>
+      <td>0.072</td>
+      <td>1.266</td>
+      <td>1.489</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>1022.0</td>
+      <td>841.0</td>
       <td>NaN</td>
-      <td>2.654335</td>
+      <td>2.231040</td>
       <td>False</td>
       <td>sim_id_0000</td>
     </tr>
@@ -366,9 +366,9 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 )
 ```
 
-![png](crc_ceres_mimic_CERES-copynumber_sbc-results_files/crc_ceres_mimic_CERES-copynumber_sbc-results_23_0.png)
+![png](crc_ceres_mimic_CERES-copynumber-sgrnaint_sbc-results_files/crc_ceres_mimic_CERES-copynumber-sgrnaint_sbc-results_23_0.png)
 
-    <ggplot: (2953610760467)>
+    <ggplot: (2998937477497)>
 
 ```python
 hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -406,9 +406,9 @@ hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
 
     /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/mizani/bounds.py:456: RuntimeWarning: overflow encountered in double_scalars
 
-![png](crc_ceres_mimic_CERES-copynumber_sbc-results_files/crc_ceres_mimic_CERES-copynumber_sbc-results_24_1.png)
+![png](crc_ceres_mimic_CERES-copynumber-sgrnaint_sbc-results_files/crc_ceres_mimic_CERES-copynumber-sgrnaint_sbc-results_24_1.png)
 
-    <ggplot: (2953598074182)>
+    <ggplot: (2998915423699)>
 
 ---
 
@@ -417,7 +417,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 17.34 minutes
+    execution time: 23.28 minutes
 
 ```python
 %load_ext watermark
@@ -435,18 +435,18 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 20
     Architecture: 64bit
 
-    Hostname: compute-e-16-243.o2.rc.hms.harvard.edu
+    Hostname: compute-f-17-09.o2.rc.hms.harvard.edu
 
     Git branch: pipelines
 
-    plotnine  : 0.7.1
-    re        : 2.2.1
-    numpy     : 1.20.1
-    pandas    : 1.2.3
-    arviz     : 0.11.2
-    pymc3     : 3.11.1
     matplotlib: 3.3.4
+    numpy     : 1.20.1
+    arviz     : 0.11.2
     seaborn   : 0.11.1
+    pandas    : 1.2.3
+    pymc3     : 3.11.1
+    re        : 2.2.1
+    plotnine  : 0.7.1

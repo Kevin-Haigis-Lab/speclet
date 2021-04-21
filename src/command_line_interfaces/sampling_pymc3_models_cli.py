@@ -111,14 +111,19 @@ def sample_speclet_model(
 
     assert isinstance(speclet_model, SelfSufficientModel)
 
+    if model == ModelOption.crc_ceres_mimic and isinstance(
+        speclet_model, CrcCeresMimic
+    ):
+        cli_helpers.modify_ceres_model_by_name(
+            model=speclet_model, name=name, logger=logger
+        )
+
     logger.info("Running model build method.")
     speclet_model.build_model()
 
-    if model == ModelOption.crc_ceres_mimic and isinstance(model, CrcCeresMimic):
-        cli_helpers.modify_ceres_model_by_name(model=model, name=name, logger=logger)
-
-    logger.info("Running ADVI fitting method.")
-    _ = speclet_model.advi_sample_model(sampling_args=sampling_args)
+    if sample:
+        logger.info("Running ADVI fitting method.")
+        _ = speclet_model.advi_sample_model(sampling_args=sampling_args)
 
     if touch:
         logger.info("Touching output file.")

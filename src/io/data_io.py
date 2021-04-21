@@ -11,10 +11,15 @@ from pathlib import Path
 class DataFile(str, Enum):
     """Data file names."""
 
-    crc_data = "depmap_CRC_data.csv"
+    # crc_data = "depmap_CRC_data.csv"
+    crc_data = "depmap_CRC_data_largesubsample.csv"
     crc_subsample = "depmap_CRC_data_subsample.csv"
     achilles_data = "depmap_modeling_dataframe.csv"
     achilles_subsample = "depmap_modeling_dataframe_subsample.csv"
+    achilles_guide_efficacy = "achilles_guide_efficacy.csv"
+    achilles_essentials = "achilles_essential_genes.csv"
+    ccle_mutations = "ccle_mutations.csv"
+    ccle_copynumber = "ccle_gene_cn.csv"
 
 
 #### ---- Basics ---- ####

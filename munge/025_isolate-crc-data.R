@@ -2,7 +2,6 @@
 
 # Isolate the DepMap data for CRC cell lines.
 
-library(nakedpipe)
 library(magrittr)
 library(tidyverse)
 
@@ -33,3 +32,25 @@ GENES <- sample(unique(crc_data$hugo_symbol), 100)
 crc_data %>%
   filter(hugo_symbol %in% !!GENES) %>%
   write_csv(file.path(data_dir, "depmap_CRC_data_subsample.csv"))
+
+
+
+#### ---- Create a larger sub-sample for testing ---- ####
+
+set.seed(1)
+GENES <- c(
+  sample(unique(crc_data$hugo_symbol), 1000),
+  "KRAS", "BRAF", "PIK3CA", "TP53", "JAK2", "RCL1", "MYCN",
+  "TRPS1", "ESR1", "FOXA1", "GATA3", "GRHL2", "TFAP2C", "SPDEF", "ZNF652"
+)
+GENES <- unique(unlist(GENES))
+
+large_crc_subsample <- crc_data %>%
+  filter(hugo_symbol %in% !!GENES) %T>%
+  write_csv(file.path(data_dir, "depmap_CRC_data_largesubsample.csv"))
+
+gene_check_idx <- GENES %in% large_crc_subsample$hugo_symbol
+if (!all(gene_check_idx)) {
+  print("Not all expected genes in large data subsample.")
+  print(GENES[!gene_check_idx])
+}

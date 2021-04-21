@@ -9,24 +9,24 @@
         "mail": "NONE",
         "J": "snakejob"
     },
-    "run_sbc": {
+    "sample_models": {
         "partition": "short",
-        "cores": 2,
-        "mem": "8000",
-        "time": "00:35:00",
-        "J": "run-sbc"
+        "cores": 1,
+        "mem": "23000",
+        "time": "00:55:00",
+        "J": "sample"
     },
     "papermill_report": {
         "partition": "short",
         "cores": 1,
-        "mem": "1000",
+        "mem": "500",
         "time": "00:01:00",
         "J": "papermill"
     },
     "execute_report": {
         "partition": "short",
         "cores": 1,
-        "mem": "8000",
+        "mem": "64000",
         "time": "00:30:00",
         "J": "report"
     }

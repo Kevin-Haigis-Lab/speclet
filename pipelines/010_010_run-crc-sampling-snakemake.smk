@@ -10,12 +10,16 @@ REPORTS_DIR = "reports/crc_model_sampling_reports/"
 
 ENVIRONMENT_YAML = Path("default_environment.yml").as_posix()
 
-model_names = {
-    "crc_m1": "CRC-model1",
-    "crc_ceres-mimic": "CERES-base",
-    "crc_ceres-mimic": "CERES-copynumber",
-    "crc_ceres_mimic": "CERES-copynumber-sgrnaint",
-}
+model_names = (
+    ("crc_model_one", "CRC-m1"),
+    ("crc_ceres_mimic", "CERES-base"),
+    ("crc_ceres_mimic", "CERES-copynumber"),
+    ("crc_ceres_mimic", "CERES-sgrnaint"),
+    ("crc_ceres_mimic", "CERES-copynumber-sgrnaint"),
+)
+
+models = [m for m, _ in model_names]
+model_names = [n for _, n in model_names]
 
 
 rule all:
@@ -23,8 +27,8 @@ rule all:
         expand(
             REPORTS_DIR + "{model}_{model_name}.md",
             zip,
-            model=list(model_names.keys()),
-            model_name=list(model_names.values()),
+            model=models,
+            model_name=model_names,
         ),
 
 
@@ -37,7 +41,6 @@ rule sample_models:
         "python3 src/command_line_interfaces/sampling_pymc3_models_cli.py "
         '  "{wildcards.model}" '
         '  "{wildcards.model_name}" '
-        "  --debug "
         "  --random-seed 7414 "
         "  --touch"
 
