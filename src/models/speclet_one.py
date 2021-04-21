@@ -96,6 +96,11 @@ class SpecletOne(CrcModel, SelfSufficientModel):
         lfc_shared = theano.shared(data.lfc.values)
         copynumber_shared = theano.shared(data.z_log2_cn.values)
 
+        print(f"size of data: {total_size}")
+        print(f"num genes: {ic.n_genes}")
+        print(f"num sgRNAs: {ic.n_sgrnas}")
+        print(f"num cell lines: {ic.n_celllines}")
+
         with pm.Model() as model:
             # sgRNA|gene varying intercept.
             μ_μ_h = pm.Normal("μ_μ_h", 0, 5)
@@ -103,18 +108,23 @@ class SpecletOne(CrcModel, SelfSufficientModel):
             μ_h = pm.Normal("μ_h", μ_μ_h, σ_μ_h, shape=ic.n_genes)
             σ_σ_h = pm.HalfNormal("σ_σ_h", 5)
             σ_h = pm.HalfNormal("σ_h", σ_σ_h, shape=ic.n_genes)
-            h = pm.Normal("h", μ_h, σ_h, shape=ic.n_sgrnas)
+            h = pm.Normal(
+                "h",
+                μ_h[ic.sgrna_to_gene_idx],
+                σ_h[ic.sgrna_to_gene_idx],
+                shape=ic.n_sgrnas,
+            )
 
             # [sgRNA|gene, cell line] varying intercept.
             μ_μ_d = pm.Normal("μ_μ_d", 0, 1)
             σ_μ_d = pm.Normal("σ_μ_d", 1)
-            μ_d = pm.HalfNormal("μ_d", μ_μ_d, σ_μ_d, shape=(ic.n_genes, ic.n_celllines))
-            σ_σ_d = pm.HalfNormal("σ_σ_d", 1)
-            σ_d = pm.HalfNormal("σ_d", σ_σ_d, shape=ic.n_celllines)
+            μ_d = pm.Normal("μ_d", μ_μ_d, σ_μ_d, shape=(ic.n_genes, ic.n_celllines))
+            σ_σ_d = pm.HalfNormal("σ_σ_d", 0.2)
+            σ_d = pm.HalfNormal("σ_d", σ_σ_d, shape=(ic.n_genes, ic.n_celllines))
             d = pm.Normal(
                 "d",
-                μ_d[sgrna_to_gene_idx_shared, cellline_idx_shared],
-                σ_d[cellline_idx_shared],
+                μ_d[sgrna_to_gene_idx_shared, :],
+                σ_d[sgrna_to_gene_idx_shared, :],
                 shape=(ic.n_sgrnas, ic.n_celllines),
             )
 
