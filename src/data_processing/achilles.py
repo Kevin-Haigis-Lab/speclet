@@ -18,7 +18,7 @@ def zscale_cna_by_group(
     df: pd.DataFrame,
     gene_cn_col: str = "gene_cn",
     new_col: str = "gene_cn_z",
-    groupby_cols: Union[List[str], Tuple[str, ...]] = ("hugo_symbol",),
+    groupby_cols: Optional[Union[List[str], Tuple[str, ...]]] = ("hugo_symbol",),
     cn_max: Optional[float] = None,
 ) -> pd.DataFrame:
     """Z-scale the copy number values.
@@ -29,8 +29,9 @@ def zscale_cna_by_group(
           Defaults to "gene_cn".
         new_col (str, optional): The name of the column to store the calculated values.
           Defaults to "gene_cn_z".
-        groupby_cols (Union[List[str], Tuple[str, ...]], optional): A list or tuple of
-          columns to group the DataFrame by. Defaults to ("hugo_symbol").
+        groupby_cols (Optional[Union[List[str], Tuple[str, ...]]], optional): A list or
+          tuple of columns to group the DataFrame by. If None, the rows are not grouped.
+          Defaults to ("hugo_symbol").
         cn_max (Optional[float], optional): The maximum copy number to use.
           Defaults to None.
 
@@ -42,9 +43,13 @@ def zscale_cna_by_group(
     else:
         df[new_col] = df[gene_cn_col]
 
-    df[new_col] = df.groupby(list(groupby_cols))[new_col].apply(
-        lambda x: (x - np.mean(x)) / np.std(x)
-    )
+    def z_scale(x: pd.Series) -> pd.Series:
+        return (x - np.mean(x)) / np.std(x)
+
+    if groupby_cols is not None:
+        df[new_col] = df.groupby(list(groupby_cols))[new_col].apply(z_scale)
+    else:
+        df[new_col] = df[new_col].apply(z_scale)
 
     return df
 

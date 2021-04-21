@@ -48,6 +48,25 @@ class SpecletOne(CrcModel, SelfSufficientModel):
             name="speclet-one_" + name, root_cache_dir=root_cache_dir, debug=debug
         )
 
+    # def get_data(self) -> pd.DataFrame:
+    #     """Get the data for modeling.
+
+    #     This method overrides the `get_data()` in CrcModel so that the `z_log2_cn` is
+    #     not scaled per cell line.
+
+    #     Returns:
+    #         pd.DataFrame: The Achilles data for modeling.
+    #     """
+    #     df = super().get_data()
+    #     df = achelp.zscale_cna_by_group(
+    #         df=df,
+    #         gene_cn_col="log2_cn",
+    #         new_col="z_log2_cn",
+    #         groupby_cols=None,
+    #         cn_max=np.log2(10),
+    #     )
+    #     return df
+
     def _get_indices_collection(self, data: pd.DataFrame) -> achelp.CommonIndices:
         return achelp.common_indices(data)
 
