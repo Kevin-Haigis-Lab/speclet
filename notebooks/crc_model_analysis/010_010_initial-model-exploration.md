@@ -187,31 +187,17 @@ dm_essentials.head()
 </table>
 </div>
 
-```python
-
-```
-
 ## Load models
 
 ```python
 fit_models: Dict[str, CrcModel] = {}
 
-model_info = (
-    (ModelOption.crc_model_one, "CRC-m1"),
-    (ModelOption.crc_ceres_mimic, "CERES-copynumber-sgrnaint"),
-)
+model_info = ((ModelOption.crc_ceres_mimic, "CERES-copynumber-sgrnaint"),)
 
 for m, n in model_info:
     fit_models[n] = sampling.sample_speclet_model(m, n, debug=False)
 ```
 
-    (INFO) Cache directory: /n/data2/dfci/cancerbio/haigis/Cook/speclet/models/model_cache/pymc3_model_cache/CRC-m1
-    (INFO) Sampling 'crc_model_one' with custom name 'CRC-m1'
-    (INFO) Running model build method.
-    (INFO) Running ADVI fitting method.
-    /home/jc604/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    /home/jc604/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    (INFO) finished; execution time: 2.46 minutes
     (INFO) Cache directory: /n/data2/dfci/cancerbio/haigis/Cook/speclet/models/model_cache/pymc3_model_cache/CERES-copynumber-sgrnaint
     (INFO) Sampling 'crc_ceres_mimic' with custom name 'CERES-copynumber-sgrnaint'
     (INFO) Including gene copy number covariate in CERES model.
@@ -219,7 +205,8 @@ for m, n in model_info:
     (INFO) Running model build method.
     (INFO) Running ADVI fitting method.
     /home/jc604/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    (INFO) finished; execution time: 0.42 minutes
+    /home/jc604/.conda/envs/speclet/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    (INFO) finished; execution time: 1.38 minutes
 
 ```python
 for name, model in fit_models.items():
@@ -234,9 +221,7 @@ for name, model in fit_models.items():
     print(p)
 ```
 
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_11_0.png)
-
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_11_2.png)
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_10_0.png)
 
 ```python
 ceres_mimic = fit_models["CERES-copynumber-sgrnaint"]
@@ -246,6 +231,152 @@ az_ceres_mimic = pmapi.convert_samples_to_arviz(
     ceres_mimic.model, ceres_mimic.advi_results
 )
 ```
+
+```python
+sns.histplot(
+    ceres_mimic.advi_results.prior_predictive.get("q").flatten()[:1000], kde=True
+);
+```
+
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_12_0.png)
+
+```python
+gene_consistent_effect = (
+    az.summary(az_ceres_mimic, var_names="h", kind="stats", hdi_prob=HDI_PROB)
+    .reset_index(drop=False)
+    .rename(columns={"index": "param_idx"})
+    .assign(hugo_symbol=ceres_mimic.data.hugo_symbol.cat.categories)
+)
+
+gene_consistent_effect.head()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>param_idx</th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>hugo_symbol</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>h[0]</td>
+      <td>-0.205</td>
+      <td>0.044</td>
+      <td>-0.277</td>
+      <td>-0.137</td>
+      <td>A2ML1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>h[1]</td>
+      <td>-0.202</td>
+      <td>0.042</td>
+      <td>-0.272</td>
+      <td>-0.138</td>
+      <td>AADACL4</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>h[2]</td>
+      <td>-0.207</td>
+      <td>0.042</td>
+      <td>-0.274</td>
+      <td>-0.142</td>
+      <td>ABHD3</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>h[3]</td>
+      <td>-0.206</td>
+      <td>0.043</td>
+      <td>-0.272</td>
+      <td>-0.138</td>
+      <td>ABI2</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>h[4]</td>
+      <td>-0.205</td>
+      <td>0.044</td>
+      <td>-0.275</td>
+      <td>-0.135</td>
+      <td>ACAD10</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+plot_df = (
+    gene_consistent_effect.sort_values("mean")
+    .reset_index(drop=True)
+    .assign(
+        hugo_symbol=lambda d: dphelp.make_cat(
+            d, "hugo_symbol", ordered=True
+        ).hugo_symbol,
+    )
+)
+
+(
+    gg.ggplot(plot_df, gg.aes(x="hugo_symbol", y="mean"))
+    + gg.geom_linerange(gg.aes(ymin="hdi_5.5%", ymax="hdi_94.5%"), size=0.05, alpha=0.5)
+    + gg.geom_point(size=0.1)
+    + gg.theme(
+        axis_ticks_major=gg.element_blank(),
+        axis_text_x=gg.element_blank(),
+        panel_grid_major_x=gg.element_blank(),
+        figure_size=(10, 3),
+    )
+    + gg.labs(x="gene", y="$h$ posterior (mean & 89% HDI)")
+)
+```
+
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_14_0.png)
+
+    <ggplot: (8787483387450)>
+
+```python
+for d, x_lbl in zip((plot_df.head(20), plot_df.tail(20)), ("lowest", "highest")):
+    print(
+        gg.ggplot(d, gg.aes(x="hugo_symbol", y="mean"))
+        + gg.geom_linerange(
+            gg.aes(ymin="hdi_5.5%", ymax="hdi_94.5%"), size=0.5, alpha=0.8
+        )
+        + gg.geom_point(size=1)
+        + gg.theme(
+            axis_ticks_major=gg.element_blank(),
+            axis_text_x=gg.element_text(angle=90, size=7),
+            panel_grid_major_x=gg.element_blank(),
+            figure_size=(5, 3),
+        )
+        + gg.labs(x=f"{x_lbl} 20 genes", y="$h$ posterior (mean & 89% HDI)")
+    )
+```
+
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_15_0.png)
+
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_15_2.png)
 
 ```python
 mimic_gene_effect = (
@@ -424,11 +555,21 @@ dm_gene_effect.head()
 </div>
 
 ```python
-merged_gene_effect = pd.merge(
-    dm_gene_effect,
-    mimic_gene_effect[["hugo_symbol", "depmap_id", "mean", "hdi_5.5%", "hdi_94.5%"]],
-    how="inner",
-    on=["depmap_id", "hugo_symbol"],
+merged_gene_effect = (
+    pd.merge(
+        dm_gene_effect,
+        mimic_gene_effect[
+            ["hugo_symbol", "depmap_id", "mean", "hdi_5.5%", "hdi_94.5%"]
+        ],
+        how="inner",
+        on=["depmap_id", "hugo_symbol"],
+    )
+    .merge(
+        gene_consistent_effect[["hugo_symbol", "mean", "hdi_5.5%", "hdi_94.5%"]],
+        on="hugo_symbol",
+        suffixes=["_dep", "_consistent"],
+    )
+    .assign(mean_dep_consistent=lambda d: d["mean_dep"] + d["mean_consistent"])
 )
 ```
 
@@ -458,9 +599,13 @@ merged_gene_effect.head()
       <th>hugo_symbol</th>
       <th>gene_effect</th>
       <th>gene_effect_unscaled</th>
-      <th>mean</th>
-      <th>hdi_5.5%</th>
-      <th>hdi_94.5%</th>
+      <th>mean_dep</th>
+      <th>hdi_5.5%_dep</th>
+      <th>hdi_94.5%_dep</th>
+      <th>mean_consistent</th>
+      <th>hdi_5.5%_consistent</th>
+      <th>hdi_94.5%_consistent</th>
+      <th>mean_dep_consistent</th>
     </tr>
   </thead>
   <tbody>
@@ -473,6 +618,10 @@ merged_gene_effect.head()
       <td>0.122</td>
       <td>-0.446</td>
       <td>0.717</td>
+      <td>-0.205</td>
+      <td>-0.277</td>
+      <td>-0.137</td>
+      <td>-0.083</td>
     </tr>
     <tr>
       <th>1</th>
@@ -483,6 +632,10 @@ merged_gene_effect.head()
       <td>0.096</td>
       <td>-0.430</td>
       <td>0.696</td>
+      <td>-0.205</td>
+      <td>-0.277</td>
+      <td>-0.137</td>
+      <td>-0.109</td>
     </tr>
     <tr>
       <th>2</th>
@@ -493,6 +646,10 @@ merged_gene_effect.head()
       <td>0.020</td>
       <td>-0.551</td>
       <td>0.611</td>
+      <td>-0.205</td>
+      <td>-0.277</td>
+      <td>-0.137</td>
+      <td>-0.185</td>
     </tr>
     <tr>
       <th>3</th>
@@ -503,6 +660,10 @@ merged_gene_effect.head()
       <td>0.141</td>
       <td>-0.478</td>
       <td>0.723</td>
+      <td>-0.205</td>
+      <td>-0.277</td>
+      <td>-0.137</td>
+      <td>-0.064</td>
     </tr>
     <tr>
       <th>4</th>
@@ -513,39 +674,49 @@ merged_gene_effect.head()
       <td>0.251</td>
       <td>-0.353</td>
       <td>0.867</td>
+      <td>-0.205</td>
+      <td>-0.277</td>
+      <td>-0.137</td>
+      <td>0.046</td>
     </tr>
   </tbody>
 </table>
 </div>
 
 ```python
-for gene_effect_col in ("gene_effect", "gene_effect_unscaled"):
+from itertools import product
+
+for mimic_col in ("mean_dep", "mean_dep_consistent"):
+    print(mimic_col)
     print(
-        gg.ggplot(merged_gene_effect, gg.aes(x="mean", y=gene_effect_col))
+        gg.ggplot(merged_gene_effect, gg.aes(x=mimic_col, y="gene_effect_unscaled"))
         + gg.geom_point(size=1, alpha=0.05)
         + gg.geom_abline(intercept=0, slope=1, color=SeabornColor.orange, linetype="--")
         + gg.geom_smooth(method="lm", color=SeabornColor.blue)
         + gg.labs(
             x="CERES-mimic posterior average",
-            y=f"CERES {gene_effect_col.replace('_', ' ')}",
+            y=f"CERES gene effect (unscaled)",
         )
     )
 
     gene_effect_corr = scipy.stats.pearsonr(
-        merged_gene_effect[gene_effect_col], merged_gene_effect["mean"]
+        merged_gene_effect["gene_effect_unscaled"], merged_gene_effect[mimic_col]
     )
     print(f"correlation: {gene_effect_corr[0]:.3f}")
     print(f"    p-value: {gene_effect_corr[1]:.2e}")
 ```
 
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_17_0.png)
+    mean_dep
 
-    correlation: 0.285
-        p-value: 0.00e+00
-
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_17_2.png)
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_20_1.png)
 
     correlation: 0.391
+        p-value: 0.00e+00
+    mean_dep_consistent
+
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_20_3.png)
+
+    correlation: 0.412
         p-value: 0.00e+00
 
 ```python
@@ -680,9 +851,9 @@ p = (
 apply_q_o_plot_theme(p)
 ```
 
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_20_0.png)
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_23_0.png)
 
-    <ggplot: (8775427642531)>
+    <ggplot: (8787505116139)>
 
 ```python
 dm_guide_efficacy_filt = dm_guide_efficacy.copy().filter_column_isin(
@@ -698,14 +869,14 @@ p = (
 apply_q_o_plot_theme(p)
 ```
 
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_21_0.png)
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_24_0.png)
 
-    <ggplot: (8775408891453)>
+    <ggplot: (8788054655136)>
 
 ```python
 merged_gene_effect_long = (
-    merged_gene_effect[["depmap_id", "hugo_symbol", "gene_effect_unscaled", "mean"]]
-    .rename(columns={"gene_effect_unscaled": "CERES", "mean": "CERES-mimic"})
+    merged_gene_effect[["depmap_id", "hugo_symbol", "gene_effect_unscaled", "mean_dep"]]
+    .rename(columns={"gene_effect_unscaled": "CERES", "mean_dep": "CERES-mimic"})
     .pivot_longer(
         column_names=["CERES", "CERES-mimic"], names_to="model", values_to="gene_effect"
     )
@@ -744,9 +915,9 @@ essential_labeller = lambda x: "Essential" if x == "True" else "Non-essential"
 )
 ```
 
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_23_0.png)
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_26_0.png)
 
-    <ggplot: (8775405912058)>
+    <ggplot: (8787501978218)>
 
 ```python
 def merge_with_kras_mut(df: pd.DataFrame, full_data: pd.DataFrame) -> pd.DataFrame:
@@ -780,23 +951,23 @@ kras_dep_long = merge_with_kras_mut(
 )
 ```
 
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_24_0.png)
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_27_0.png)
 
-    <ggplot: (8776164819384)>
+    <ggplot: (8787505764136)>
 
 ```python
 kras_dep = (
     merge_with_kras_mut(
         merged_gene_effect.query("hugo_symbol == 'KRAS'"), ceres_mimic.data
     )
-    .sort_values("mean", ascending=False)
+    .sort_values("mean_dep", ascending=False)
     .pipe(dphelp.make_cat, col="depmap_id")
 )
 
 (
-    gg.ggplot(kras_dep, gg.aes(x="depmap_id", y="mean", color="KRAS"))
+    gg.ggplot(kras_dep, gg.aes(x="depmap_id", y="mean_dep", color="KRAS"))
     + gg.geom_point()
-    + gg.geom_linerange(gg.aes(ymin="hdi_5.5%", ymax="hdi_94.5%"))
+    + gg.geom_linerange(gg.aes(ymin="hdi_5.5%_dep", ymax="hdi_94.5%_dep"))
     + gg.scale_color_manual(values=("black", "red"), labels=("WT", "mut."))
     + gg.theme(
         axis_text_x=gg.element_blank(),
@@ -807,89 +978,9 @@ kras_dep = (
 )
 ```
 
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_25_0.png)
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_28_0.png)
 
-    <ggplot: (8775405188349)>
-
-```python
-kras_dep_long.head()
-```
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>depmap_id</th>
-      <th>hugo_symbol</th>
-      <th>model</th>
-      <th>gene_effect</th>
-      <th>kras_mutation</th>
-      <th>KRAS</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>ACH-000007</td>
-      <td>KRAS</td>
-      <td>CERES</td>
-      <td>-1.984256</td>
-      <td>G12D</td>
-      <td>True</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>ACH-000007</td>
-      <td>KRAS</td>
-      <td>CERES-mimic</td>
-      <td>-0.365000</td>
-      <td>G12D</td>
-      <td>True</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>ACH-000009</td>
-      <td>KRAS</td>
-      <td>CERES</td>
-      <td>-2.211471</td>
-      <td>WT</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>ACH-000009</td>
-      <td>KRAS</td>
-      <td>CERES-mimic</td>
-      <td>-0.271000</td>
-      <td>WT</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>ACH-000202</td>
-      <td>KRAS</td>
-      <td>CERES</td>
-      <td>-0.678425</td>
-      <td>WT</td>
-      <td>False</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+    <ggplot: (8787502021699)>
 
 ```python
 kras_idx = np.where(ceres_mimic.data.hugo_symbol.cat.categories.values == "KRAS")[0][0]
@@ -1224,9 +1315,9 @@ copynumber_effect_plot = dphelp.make_cat(
 )
 ```
 
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_32_0.png)
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_34_0.png)
 
-    <ggplot: (8775428507097)>
+    <ggplot: (8788065122012)>
 
 ```python
 copynumber_effect_full_posterior = (
@@ -1260,9 +1351,9 @@ color_kwargs = {"values": ("black", "red"), "labels": ("WT", "mutant")}
 )
 ```
 
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_33_0.png)
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_35_0.png)
 
-    <ggplot: (8775427541649)>
+    <ggplot: (8788060245083)>
 
 ```python
 ceres_mimic_predictions = pmanal.summarize_posterior_predictions(
@@ -1416,9 +1507,9 @@ cn_facet_labeller = lambda x: f"CN = {float(x):.0f}"
 )
 ```
 
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_35_0.png)
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_37_0.png)
 
-    <ggplot: (8775976764070)>
+    <ggplot: (8788065978122)>
 
 ```python
 pred_corr = scipy.stats.pearsonr(
@@ -1451,45 +1542,9 @@ plot_df = ceres_mimic_predictions.merge(
 )
 ```
 
-![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_37_0.png)
+![png](010_010_initial-model-exploration_files/010_010_initial-model-exploration_39_0.png)
 
-    <ggplot: (8775976797118)>
-
-```python
-
-```
-
-```python
-
-```
-
-```python
-
-```
-
-```python
-
-```
-
-```python
-
-```
-
-```python
-
-```
-
-```python
-
-```
-
-```python
-
-```
-
-```python
-
-```
+    <ggplot: (8788060272532)>
 
 ---
 
@@ -1498,14 +1553,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 5.63 minutes
+    execution time: 4.76 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-04-20
+    Last updated: 2021-04-21
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -1519,18 +1574,18 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-e-16-236.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-237.o2.rc.hms.harvard.edu
 
-    Git branch: pipelines
+    Git branch: speclet-one
 
-    seaborn   : 0.11.1
-    plotnine  : 0.8.0
-    arviz     : 0.11.2
-    theano    : 1.0.5
-    re        : 2.2.1
-    janitor   : 0.20.14
     matplotlib: 3.4.1
+    seaborn   : 0.11.1
+    re        : 2.2.1
+    arviz     : 0.11.2
+    janitor   : 0.20.14
     numpy     : 1.20.2
-    pymc3     : 3.11.2
+    plotnine  : 0.8.0
     scipy     : 1.6.2
     pandas    : 1.2.3
+    pymc3     : 3.11.2
+    theano    : 1.0.5
