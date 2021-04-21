@@ -12,6 +12,7 @@ import pretty_errors
 from src.models.crc_ceres_mimic import CrcCeresMimic
 from src.models.crc_model_one import CrcModelOne
 from src.models.speclet_model import SpecletModel
+from src.models.speclet_one import SpecletOne
 
 #### ---- Pretty Errors ---- ####
 
@@ -47,6 +48,7 @@ class ModelOption(str, Enum):
 
     crc_model_one = "crc_model_one"
     crc_ceres_mimic = "crc_ceres_mimic"
+    speclet_one = "speclet_one"
 
 
 def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
@@ -61,6 +63,7 @@ def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
     model_option_map: Dict[ModelOption, Type[SpecletModel]] = {
         ModelOption.crc_model_one: CrcModelOne,
         ModelOption.crc_ceres_mimic: CrcCeresMimic,
+        ModelOption.speclet_one: SpecletOne,
     }
     return model_option_map[model_opt]
 
