@@ -9,10 +9,10 @@ import pymc3 as pm
 import pytest
 
 from src.modeling import pymc3_sampling_api as pmapi
-from src.models import speclet_model
+from src.modeling.model_cache_managers import Pymc3ModelCacheManager
 
 
-class TestSpecletModel:
+class TestPymc3ModelCacheManager:
     @pytest.fixture(scope="class")
     def data(self) -> pd.DataFrame:
         real_a = 1
@@ -80,9 +80,7 @@ class TestSpecletModel:
         self, mcmc_results: pmapi.MCMCSamplingResults, tmp_path: Path
     ):
         assert len(list(tmp_path.iterdir())) == 0
-        model = speclet_model.SpecletModel(
-            name="test-mcmc-model", root_cache_dir=tmp_path
-        )
+        model = Pymc3ModelCacheManager(name="test-mcmc-model", root_cache_dir=tmp_path)
         assert len(list(tmp_path.iterdir())) == 1
         assert len(list(model.cache_dir.iterdir())) == 2
         model.write_mcmc_cache(res=mcmc_results)
@@ -109,9 +107,7 @@ class TestSpecletModel:
         tmp_path: Path,
     ):
         assert len(list(tmp_path.iterdir())) == 0
-        model = speclet_model.SpecletModel(
-            name="test-mcmc-model2", root_cache_dir=tmp_path
-        )
+        model = Pymc3ModelCacheManager(name="test-mcmc-model2", root_cache_dir=tmp_path)
         model.write_mcmc_cache(mcmc_results)
         new_res = model.get_mcmc_cache(model=pm_model)
 
@@ -139,9 +135,7 @@ class TestSpecletModel:
         self, advi_results: pmapi.ApproximationSamplingResults, tmp_path: Path
     ):
         assert len(list(tmp_path.iterdir())) == 0
-        model = speclet_model.SpecletModel(
-            name="test-advi-model", root_cache_dir=tmp_path
-        )
+        model = Pymc3ModelCacheManager(name="test-advi-model", root_cache_dir=tmp_path)
         assert len(list(tmp_path.iterdir())) == 1
         assert len(list(model.cache_dir.iterdir())) == 2
         model.write_advi_cache(advi_results)
@@ -166,9 +160,7 @@ class TestSpecletModel:
         self, advi_results: pmapi.ApproximationSamplingResults, tmp_path: Path
     ):
         assert len(list(tmp_path.iterdir())) == 0
-        model = speclet_model.SpecletModel(
-            name="test-advi-model2", root_cache_dir=tmp_path
-        )
+        model = Pymc3ModelCacheManager(name="test-advi-model2", root_cache_dir=tmp_path)
         model.write_advi_cache(advi_results)
         new_res = model.get_advi_cache()
 

@@ -10,7 +10,7 @@ from pydantic import BaseModel
 
 from src.io import cache_io
 from src.modeling import pymc3_sampling_api as pmapi
-from src.modeling.cache_manager import Pymc3CacheManager
+from src.modeling.cache_managers import Pymc3CacheManager
 
 
 class ModelCachePaths(BaseModel):
@@ -22,8 +22,8 @@ class ModelCachePaths(BaseModel):
     approximation_path: Path
 
 
-class SpecletModel:
-    """Foundational model object in the Speclet project."""
+class Pymc3ModelCacheManager:
+    """Object for managing the caches of the results of fitting PyMC3 models."""
 
     name: str
     cache_dir: Path
