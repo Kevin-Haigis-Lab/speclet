@@ -9,8 +9,8 @@ import pymc3 as pm
 from pydantic import BaseModel
 
 from src.io import cache_io
+from src.managers.cache_managers import Pymc3CacheManager
 from src.modeling import pymc3_sampling_api as pmapi
-from src.modeling.cache_managers import Pymc3CacheManager
 
 
 class ModelCachePaths(BaseModel):

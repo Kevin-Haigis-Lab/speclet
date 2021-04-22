@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Builders for CRC PyMC3 models."""
+"""Managers of model data."""
 
 from pathlib import Path
 from typing import Optional
@@ -10,32 +10,20 @@ import pandas as pd
 
 from src.data_processing import achilles as achelp
 from src.io import data_io
-from src.models.speclet_model import SpecletModel
 
 
-class CrcModel(SpecletModel):
-    """Base model for CRC modeling.
-
-    Args:
-        SpecletModel ([type]): Subclassed from a SpecletModel.
-    """
+class CrcDataManager:
+    """Manager for CRC modeling data."""
 
     debug: bool
     data: Optional[pd.DataFrame] = None
 
-    def __init__(
-        self, name: str, root_cache_dir: Optional[Path] = None, debug: bool = False
-    ):
-        """Create a CrcModel object.
+    def __init__(self, debug: bool = False):
+        """Create a CRC data manager.
 
         Args:
-            name (str): A unique identifier for this instance of CrcModel.
-              (Used for cache management.)
-            root_cache_dir (Optional[Path], optional): The directory for caching
-              sampling/fitting results. Defaults to None to use the speclet default.
             debug (bool, optional): Are you in debug mode? Defaults to False.
         """
-        super().__init__(name="crc_" + name, root_cache_dir=root_cache_dir)
         self.debug = debug
 
     def get_data_path(self) -> Path:

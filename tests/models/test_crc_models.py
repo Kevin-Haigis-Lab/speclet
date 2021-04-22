@@ -22,7 +22,6 @@ from src.modeling.sampling_metadata_models import SamplingArguments
 from src.models.crc_ceres_mimic import CrcCeresMimic
 from src.models.crc_model import CrcModel
 from src.models.crc_model_one import CrcModelOne
-from src.models.speclet_model import SpecletModel
 from src.models.speclet_one import SpecletOne
 
 #### ---- Mock data ---- ####
@@ -63,35 +62,6 @@ def mock_data() -> pd.DataFrame:
     )
     df["lfc"] = np.random.randn(len(df))
     return df
-
-
-#### ---- Test CrcModel ---- ####
-
-
-class TestCrcModel:
-    def test_inheritance(self, tmp_path: Path):
-        model = CrcModel(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
-        assert isinstance(model, SpecletModel)
-
-    def test_batch_size(self, tmp_path: Path):
-        model = CrcModel(name="TEST-MODEL", root_cache_dir=tmp_path)
-        not_debug_batch_size = model.get_batch_size()
-        model.debug = True
-        debug_batch_size = model.get_batch_size()
-        assert debug_batch_size < not_debug_batch_size
-
-    def test_data_paths(self, tmp_path: Path):
-        model = CrcModel(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
-        assert model.get_data_path().exists and model.get_data_path().is_file()
-
-    def test_get_data(self, tmp_path: Path):
-        model = CrcModel(name="TEST-MODEL", root_cache_dir=tmp_path, debug=True)
-        assert model.data is None
-        data = model.get_data()
-        assert model.data is not None
-        assert model.data.shape[0] > model.data.shape[1]
-        assert model.data.shape[0] == data.shape[0]
-        assert model.data.shape[1] == data.shape[1]
 
 
 #### ---- Test CrcModelOne ---- ####

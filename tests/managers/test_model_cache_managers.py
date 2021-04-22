@@ -8,8 +8,8 @@ import pandas as pd
 import pymc3 as pm
 import pytest
 
+from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.modeling import pymc3_sampling_api as pmapi
-from src.modeling.model_cache_managers import Pymc3ModelCacheManager
 
 
 class TestPymc3ModelCacheManager:
