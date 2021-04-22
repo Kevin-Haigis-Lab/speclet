@@ -96,11 +96,6 @@ class SpecletOne(CrcModel, SelfSufficientModel):
         lfc_shared = theano.shared(data.lfc.values)
         copynumber_shared = theano.shared(data.z_log2_cn.values)
 
-        print(f"size of data: {total_size}")
-        print(f"num genes: {ic.n_genes}")
-        print(f"num sgRNAs: {ic.n_sgrnas}")
-        print(f"num cell lines: {ic.n_celllines}")
-
         with pm.Model() as model:
             # sgRNA|gene varying intercept.
             μ_μ_h = pm.Normal("μ_μ_h", 0, 5)

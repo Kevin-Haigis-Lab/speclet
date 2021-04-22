@@ -19,3 +19,4 @@ class ModelColors(str, Enum):
 
     CERES = "#417BB1"
     CERES_mimic = "#853FA2"
+    speclet_one = "#009C77"

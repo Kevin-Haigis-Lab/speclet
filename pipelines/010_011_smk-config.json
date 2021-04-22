@@ -12,8 +12,8 @@
     "sample_models": {
         "partition": "short",
         "cores": 1,
-        "mem": "23000",
-        "time": "00:55:00",
+        "mem": "64000",
+        "time": "06:00:00",
         "J": "sample"
     },
     "papermill_report": {
