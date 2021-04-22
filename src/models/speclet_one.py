@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-"""Builders for CRC CERES Mimic model."""
+"""First new model for the speclet project."""
 
 from pathlib import Path
 from typing import Dict, Optional, Union
@@ -19,15 +17,12 @@ from src.modeling.sampling_metadata_models import SamplingArguments
 from src.models.crc_model import CrcModel
 from src.models.protocols import SelfSufficientModel
 
-#### ---- CRC CERES Mimic ---- ####
 
+class SpecletOne(CrcModel, SelfSufficientModel):
+    """SpecletOne Model.
 
-class CrcCeresMimic(CrcModel, SelfSufficientModel):
-    """CRC CERES Mimic.
-
-    This model is just the part of the CERES model that includes the sgRNA
-    "activity score" (q) and the per-gene (h) and per-gene-per-cell-line (d) covariates.
-    In addition, I have included a parameter for pDNA batch.
+    This model is based on the CERES model, but removes the multiplicative sgRNA
+    "activity" score due to issues of non-identifiability.
     """
 
     shared_vars: Optional[Dict[str, TTShared]] = None
@@ -37,18 +32,10 @@ class CrcCeresMimic(CrcModel, SelfSufficientModel):
 
     ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
-    _copynumber_cov: bool
-    _sgrna_intercept_cov: bool
-
     def __init__(
-        self,
-        name: str,
-        root_cache_dir: Optional[Path] = None,
-        debug: bool = False,
-        copynumber_cov: bool = False,
-        sgrna_intercept_cov: bool = False,
+        self, name: str, root_cache_dir: Optional[Path] = None, debug: bool = False
     ):
-        """Create a CrcCeresMimic object.
+        """Instantiate a SpecletOne model.
 
         Args:
             name (str): A unique identifier for this instance of CrcCeresMimic. (Used
@@ -56,77 +43,35 @@ class CrcCeresMimic(CrcModel, SelfSufficientModel):
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
             debug (bool, optional): Are you in debug mode? Defaults to False.
-            copynumber_cov (bool, optional): Should the gene copy number covariate be
-              included in the model? Default to False.
-            sgrna_intercept_cov (bool, optional): Should a varying intercept for
-              `sgRNA|gene` be included in the model? Default to False.
         """
         super().__init__(
-            name="ceres-mimic-1_" + name, root_cache_dir=root_cache_dir, debug=debug
+            name="speclet-one_" + name, root_cache_dir=root_cache_dir, debug=debug
         )
-        self._copynumber_cov = copynumber_cov
-        self._sgrna_intercept_cov = sgrna_intercept_cov
 
-    def _reset_model_afer_change_to_optional_covariate(self) -> None:
-        """Reset some attributes after the PyMC3 model has changed."""
-        self.model = None
-        self.advi_results = None
-        self.mcmc_results = None
+    # def get_data(self) -> pd.DataFrame:
+    #     """Get the data for modeling.
 
-    @property
-    def copynumber_cov(self) -> bool:
-        """Get the current value of `copynumber_cov` attribute.
+    #     This method overrides the `get_data()` in CrcModel so that the `z_log2_cn` is
+    #     not scaled per cell line.
 
-        Returns:
-            bool: Whether or not the copy number covariate is included in the model.
-        """
-        return self._copynumber_cov
-
-    @copynumber_cov.setter
-    def copynumber_cov(self, new_value: bool):
-        """Set the value for the `copynumber_cov` attribute.
-
-        If the value changes, then the `model` attribute and model results attributes
-        `advi_results` and `mcmc_results` are all reset to None.
-
-        Args:
-            new_value (bool): Whether or not the copy number covariate should be
-              included in the model.
-        """
-        if new_value != self._copynumber_cov:
-            self._reset_model_afer_change_to_optional_covariate()
-            self._copynumber_cov = new_value
-
-    @property
-    def sgrna_intercept_cov(self) -> bool:
-        """Get the current value of `sgrna_intercept_cov` attribute.
-
-        Returns:
-            bool: Whether or not the `sgRNA|gene` varying intercept covariate is
-              included in the model.
-        """
-        return self._sgrna_intercept_cov
-
-    @sgrna_intercept_cov.setter
-    def sgrna_intercept_cov(self, new_value: bool):
-        """Set the value for the `sgrna_intercept_cov` attribute.
-
-        If the value changes, then the `model` attribute and model results attributes
-        `advi_results` and `mcmc_results` are all reset to None.
-
-        Args:
-            new_value (bool): Whether or not the `sgRNA|gene` varying intercept
-              covariate is included in the model.
-        """
-        if new_value != self._sgrna_intercept_cov:
-            self._reset_model_afer_change_to_optional_covariate()
-            self._sgrna_intercept_cov = new_value
+    #     Returns:
+    #         pd.DataFrame: The Achilles data for modeling.
+    #     """
+    #     df = super().get_data()
+    #     df = achelp.zscale_cna_by_group(
+    #         df=df,
+    #         gene_cn_col="log2_cn",
+    #         new_col="z_log2_cn",
+    #         groupby_cols=None,
+    #         cn_max=np.log2(10),
+    #     )
+    #     return df
 
     def _get_indices_collection(self, data: pd.DataFrame) -> achelp.CommonIndices:
         return achelp.common_indices(data)
 
     def build_model(self, data: Optional[pd.DataFrame] = None) -> None:
-        """Build CRC CERES Mimic One.
+        """Build SpecletOne model.
 
         Args:
             data (Optional[pd.DataFrame], optional): Data to used to build the model
@@ -140,76 +85,61 @@ class CrcCeresMimic(CrcModel, SelfSufficientModel):
             data = self.get_data()
 
         total_size = data.shape[0]
-        indices_collection = self._get_indices_collection(data)
+        ic = self._get_indices_collection(data)
 
         # Shared Theano variables
-        sgrna_idx_shared = theano.shared(indices_collection.sgrna_idx)
-        sgrna_to_gene_idx_shared = theano.shared(indices_collection.sgrna_to_gene_idx)
-        gene_idx_shared = theano.shared(indices_collection.gene_idx)
-        cellline_idx_shared = theano.shared(indices_collection.cellline_idx)
-        batch_idx_shared = theano.shared(indices_collection.batch_idx)
+        sgrna_idx_shared = theano.shared(ic.sgrna_idx)
+        sgrna_to_gene_idx_shared = theano.shared(ic.sgrna_to_gene_idx)
+        gene_idx_shared = theano.shared(ic.gene_idx)
+        cellline_idx_shared = theano.shared(ic.cellline_idx)
+        batch_idx_shared = theano.shared(ic.batch_idx)
         lfc_shared = theano.shared(data.lfc.values)
         copynumber_shared = theano.shared(data.z_log2_cn.values)
 
         with pm.Model() as model:
-
-            # Hyper-priors
-            σ_a = pm.HalfNormal("σ_a", np.array([0.1, 2]), shape=2)
-            a = pm.Exponential("a", σ_a, shape=(indices_collection.n_genes, 2))
-
-            μ_h = pm.Normal("μ_h", 0, 0.2)
-            σ_h = pm.HalfNormal("σ_h", 1)
-
-            μ_d = pm.Normal("μ_d", 0, 0.2)
-            σ_d = pm.HalfNormal("σ_d", 1)
-
-            μ_η = pm.Normal("μ_η", 0, 0.1)
-            σ_η = pm.HalfNormal("σ_η", 0.1)
-
-            # Main parameter priors
-            q = pm.Beta(
-                "q",
-                alpha=a[sgrna_to_gene_idx_shared, 0],
-                beta=a[sgrna_to_gene_idx_shared, 1],
-                shape=indices_collection.n_sgrnas,
+            # sgRNA|gene varying intercept.
+            μ_μ_h = pm.Normal("μ_μ_h", 0, 5)
+            σ_μ_h = pm.HalfNormal("σ_μ_h", 5)
+            μ_h = pm.Normal("μ_h", μ_μ_h, σ_μ_h, shape=ic.n_genes)
+            σ_σ_h = pm.HalfNormal("σ_σ_h", 5)
+            σ_h = pm.HalfNormal("σ_h", σ_σ_h, shape=ic.n_genes)
+            h = pm.Normal(
+                "h",
+                μ_h[ic.sgrna_to_gene_idx],
+                σ_h[ic.sgrna_to_gene_idx],
+                shape=ic.n_sgrnas,
             )
-            h = pm.Normal("h", μ_h, σ_h, shape=indices_collection.n_genes)
+
+            # [sgRNA|gene, cell line] varying intercept.
+            μ_μ_d = pm.Normal("μ_μ_d", 0, 1)
+            σ_μ_d = pm.Normal("σ_μ_d", 1)
+            μ_d = pm.Normal("μ_d", μ_μ_d, σ_μ_d, shape=(ic.n_genes, ic.n_celllines))
+            σ_σ_d = pm.HalfNormal("σ_σ_d", 0.2)
+            σ_d = pm.HalfNormal("σ_d", σ_σ_d, shape=(ic.n_genes, ic.n_celllines))
             d = pm.Normal(
                 "d",
-                μ_d,
-                σ_d,
-                shape=(indices_collection.n_genes, indices_collection.n_celllines),
+                μ_d[sgrna_to_gene_idx_shared, :],
+                σ_d[sgrna_to_gene_idx_shared, :],
+                shape=(ic.n_sgrnas, ic.n_celllines),
             )
-            η = pm.Normal("η", μ_η, σ_η, shape=indices_collection.n_batches)
 
-            gene_comp = h[gene_idx_shared] + d[gene_idx_shared, cellline_idx_shared]
+            # Varying slope per cell line for CN.
+            μ_β = pm.Normal("μ_β", -1, 2)
+            σ_β = pm.HalfNormal("σ_β", 1)
+            β = pm.Normal("β", μ_β, σ_β, shape=ic.n_celllines)
 
-            if self.copynumber_cov:
-                # Add varying slope with copy number.
-                μ_β = pm.Normal("μ_β", 0, 0.1)
-                σ_β = pm.HalfNormal("σ_β", 0.5)
-                β = pm.Normal("β", μ_β, σ_β, shape=indices_collection.n_celllines)
-                gene_comp += β[cellline_idx_shared] * copynumber_shared
+            # Batch effect varying intercept.
+            μ_η = pm.Normal("μ_η", 0, 0.1)
+            σ_η = pm.HalfNormal("σ_η", 0.1)
+            η = pm.Normal("η", μ_η, σ_η, shape=ic.n_batches)
 
             μ = pm.Deterministic(
-                "μ", q[sgrna_idx_shared] * gene_comp + η[batch_idx_shared]
+                "μ",
+                h[sgrna_idx_shared]
+                + d[sgrna_idx_shared, cellline_idx_shared]
+                + β[cellline_idx_shared]
+                + η[batch_idx_shared],
             )
-
-            if self.sgrna_intercept_cov:
-                # Hyper priors for sgRNA|gene varying intercept.
-                μ_og = pm.Normal("μ_og", 0, 0.1)
-                σ_og = pm.HalfNormal("σ_og", 0.2)
-                # Priors for sgRNA|gene varying intercept.
-                μ_o = pm.Normal("μ_o", μ_og, σ_og, shape=indices_collection.n_genes)
-                σ_o = pm.HalfNormal("σ_o", 0.2)
-                # sgRNA|gene varying intercept.
-                o = pm.Normal(
-                    "o",
-                    μ_o[sgrna_to_gene_idx_shared],
-                    σ_o,
-                    shape=indices_collection.n_sgrnas,
-                )
-                μ = μ + o[sgrna_idx_shared]
 
             σ = pm.HalfNormal("σ", 2)
 
@@ -266,8 +196,8 @@ class CrcCeresMimic(CrcModel, SelfSufficientModel):
     def mcmc_sample_model(
         self,
         sampling_args: SamplingArguments,
-        mcmc_draws: int = 1000,
-        tune: int = 1000,
+        mcmc_draws: int = 2000,
+        tune: int = 2000,
         chains: int = 3,
     ) -> pmapi.MCMCSamplingResults:
         """Fit the model with MCMC.
