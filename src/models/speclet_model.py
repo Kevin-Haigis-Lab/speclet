@@ -2,7 +2,7 @@
 
 from abc import abstractmethod
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 import pymc3 as pm
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
@@ -81,9 +81,72 @@ class SpecletModel:
 
         return None
 
-    # def mcmc_sample_model(self) -> pmapi.MCMCSamplingResults:
-    #     # TODO
-    #     return None
+    def mcmc_sample_model(
+        self,
+        mcmc_draws: int = 1000,
+        tune: int = 1000,
+        chains: int = 3,
+        cores: Optional[int] = None,
+        prior_pred_samples: int = 1000,
+        post_pred_samples: int = 1000,
+        random_seed: Optional[int] = None,
+        sample_kwargs: Optional[Dict[str, Any]] = None,
+        ignore_cache: bool = False,
+    ) -> pmapi.MCMCSamplingResults:
+        """MCMC sample the model.
+
+        This method primarily wraps the `pymc3_sampling_api.pymc3_sampling_procedure()`
+        function.
+
+        Args:
+            mcmc_draws (int, optional): Number of MCMC draws. Defaults to 1000.
+            tune (int, optional): Number of tuning steps. Defaults to 1000.
+            chains (int, optional): Number of chains. Defaults to 3.
+            cores (Optional[int], optional): Number of cores. Defaults to None.
+            prior_pred_samples (int, optional): Number of samples from the prior
+            distributions. Defaults to 1000.
+            post_pred_samples (int, optional): Number of samples for posterior
+              predictions.
+            Defaults to 1000.
+            random_seed (Optional[int], optional): The random seed for sampling.
+            Defaults to None.
+            sample_kwargs (Dict[str, Any], optional): Kwargs for the sampling method.
+            Defaults to {}.
+            ignore_cache (bool, optional): Should any cahced results be ignored?
+              Defaults to False.
+
+        Raises:
+            AttributeError: Raised if the PyMC3 model does not yet exist.
+
+        Returns:
+            pmapi.MCMCSamplingResults: The results of MCMC sampling.
+        """
+        if self.model is None:
+            raise AttributeError(
+                "Cannot sample: model is 'None'. "
+                + "Make sure to run `model.build_model()` first."
+            )
+
+        if self.mcmc_results is not None:
+            return self.mcmc_results
+
+        if not ignore_cache and self.cache_manager.mcmc_cache_exists():
+            self.mcmc_results = self.cache_manager.get_mcmc_cache(model=self.model)
+            return self.mcmc_results
+
+        self.mcmc_results = pmapi.pymc3_sampling_procedure(
+            model=self.model,
+            mcmc_draws=mcmc_draws,
+            tune=tune,
+            chains=chains,
+            cores=cores,
+            prior_pred_samples=prior_pred_samples,
+            post_pred_samples=post_pred_samples,
+            random_seed=random_seed,
+            sample_kwargs=sample_kwargs,
+        )
+        self.cache_manager.write_mcmc_cache(self.mcmc_results)
+        return self.mcmc_results
 
     # def advi_sample_model(self) -> pmapi.ApproximationSamplingResults:
     #     # TODO
