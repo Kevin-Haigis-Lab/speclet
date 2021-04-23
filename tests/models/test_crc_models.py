@@ -22,7 +22,6 @@ from src.modeling.sampling_metadata_models import SamplingArguments
 from src.models.crc_ceres_mimic import CrcCeresMimic
 from src.models.crc_model import CrcModel
 from src.models.crc_model_one import CrcModelOne
-from src.models.speclet_one import SpecletOne
 
 #### ---- Mock data ---- ####
 
@@ -438,22 +437,3 @@ class TestCrcCeresMimicSgrna(CrcModelSubclassesTests):
         assert ceres_model.model is not None
         assert isinstance(ceres_model.model, pm.Model)
         assert "o" in [param.name for param in ceres_model.model.free_RVs]
-
-
-@pytest.mark.DEV
-class TestSpecletOne(CrcModelSubclassesTests):
-
-    Model = SpecletOne
-
-    def check_trace_shape(
-        self,
-        trace: pm.backends.base.MultiTrace,
-        n_draws: int,
-        n_chains: int,
-        data: pd.DataFrame,
-    ):
-        assert isinstance(trace, pm.backends.base.MultiTrace)
-
-    def check_approx_fit(self, approx: pm.Approximation, n_fit: int):
-        assert isinstance(approx, pm.Approximation)
-        assert len(approx.hist) <= n_fit

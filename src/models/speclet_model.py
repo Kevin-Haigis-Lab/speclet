@@ -22,7 +22,7 @@ class SpecletModel:
     """Base class to contain a PyMC3 model."""
 
     name: str
-    debug: bool
+    _debug: bool
     cache_manager: Pymc3ModelCacheManager
     data_manager: Optional[DataManager] = None
 
@@ -51,24 +51,52 @@ class SpecletModel:
               data. Defaults to None.
         """
         self.name = name
-        self.debug = debug
+        self._debug = debug
         self.cache_manager = Pymc3ModelCacheManager(
             name=name, root_cache_dir=root_cache_dir
         )
         if data_manager is not None:
             self.data_manager = data_manager
-            self.data_manager.debug = self.debug
+            self.data_manager.debug = self._debug
+
+    @property
+    def debug(self) -> bool:
+        """Whether or not to use debug mode.
+
+        Returns:
+            bool: The current value for debug mode.
+        """
+        return self._debug
+
+    @debug.setter
+    def debug(self, new_value: bool) -> None:
+        """Set the value for debug mode.
+
+        This also changes the debug mode for the data manager. Changes are only made if
+        the new value is different from the current value.
+
+        Args:
+            new_value (bool): New value for `debug`.
+        """
+        print(f"current value of self._debug: {self._debug}")
+        if new_value == self._debug:
+            return
+        self._debug = new_value
+        if self.data_manager is not None:
+            self.data_manager.debug = new_value
 
     @abstractmethod
     def model_specification(self) -> Tuple[pm.Model, str]:
         """Define the PyMC3 model.
+
+        This model must be overridden by an subclass to define the desired PyMC3 model.
 
         Returns:
             pm.Model: The PyMC3 model.
             str: Name of the target variable in the model.
         """
         raise Exception(
-            "The `model_specification()` method must be over-riden by subclasses."
+            "The `model_specification()` method must be overridden by subclasses."
         )
 
     def build_model(self) -> None:

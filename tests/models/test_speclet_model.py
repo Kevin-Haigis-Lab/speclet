@@ -12,9 +12,6 @@ from src.models import speclet_model
 
 
 class MockSpecletModelClass(speclet_model.SpecletModel):
-
-    data_manager = MockDataManager()
-
     def model_specification(self) -> Tuple[pm.Model, str]:
         data = self.data_manager.get_data()
         with pm.Model() as model:
@@ -38,9 +35,13 @@ class TestSpecletModel:
         with pytest.raises(AttributeError, match="Cannot sample: model is 'None'"):
             sp.mcmc_sample_model()
 
+    @pytest.mark.slow
     def test_build_model(self, tmp_path: Path):
         sp = MockSpecletModelClass(
-            name="test-model", root_cache_dir=tmp_path, debug=True
+            name="test-model",
+            root_cache_dir=tmp_path,
+            debug=True,
+            data_manager=MockDataManager(),
         )
         assert sp.model is None
         sp.build_model()
@@ -49,7 +50,9 @@ class TestSpecletModel:
 
     @pytest.mark.slow
     def test_mcmc_sample_model(self, tmp_path: Path):
-        sp = MockSpecletModelClass("test-model", root_cache_dir=tmp_path)
+        sp = MockSpecletModelClass(
+            "test-model", root_cache_dir=tmp_path, data_manager=MockDataManager()
+        )
         sp.build_model()
         mcmc_res = sp.mcmc_sample_model(
             mcmc_draws=100,
@@ -90,7 +93,9 @@ class TestSpecletModel:
 
     @pytest.mark.slow
     def test_advi_sample_model(self, tmp_path: Path):
-        sp = MockSpecletModelClass("test-model", root_cache_dir=tmp_path)
+        sp = MockSpecletModelClass(
+            "test-model", root_cache_dir=tmp_path, data_manager=MockDataManager()
+        )
         sp.build_model()
         advi_res = sp.advi_sample_model(
             n_iterations=100,
@@ -122,7 +127,9 @@ class TestSpecletModel:
 
     @pytest.mark.slow
     def test_run_simulation_based_calibration(self, tmp_path: Path):
-        sp = MockSpecletModelClass("test-model", root_cache_dir=tmp_path)
+        sp = MockSpecletModelClass(
+            "test-model", root_cache_dir=tmp_path, data_manager=MockDataManager()
+        )
         assert sp.model is None
         sp.run_simulation_based_calibration(
             results_path=tmp_path,
@@ -136,3 +143,15 @@ class TestSpecletModel:
         )
         assert sp.model is not None
         assert (tmp_path / "inference-data.netcdf").exists()
+
+    def test_changing_debug_status(self, tmp_path: Path):
+        sp = MockSpecletModelClass(
+            "test-model",
+            root_cache_dir=tmp_path,
+            debug=False,
+            data_manager=MockDataManager(debug=False),
+        )
+        assert sp.data_manager is not None
+        assert not sp.debug and not sp.data_manager.debug
+        sp.debug = True
+        assert sp.debug and sp.data_manager.debug
