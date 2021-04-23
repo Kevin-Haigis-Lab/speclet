@@ -2,6 +2,7 @@
 
 """Managers of model data."""
 
+import abc
 from pathlib import Path
 from typing import Optional
 
@@ -12,7 +13,53 @@ from src.data_processing import achilles as achelp
 from src.io import data_io
 
 
-class CrcDataManager:
+class DataManager(abc.ABC):
+    """Abstract base class for the data managers."""
+
+    debug: bool
+    data: Optional[pd.DataFrame] = None
+
+    @abc.abstractmethod
+    def __init__(self, debug: bool = False) -> None:
+        """Initialize the data manager.
+
+        Args:
+            debug (bool, optional): Should the debugging data be used? Defaults to
+              False.
+        """
+        pass
+
+    @abc.abstractmethod
+    def get_data_path(self) -> Path:
+        """Location of the data.
+
+        Returns:
+            Path: Path to data.
+        """
+        pass
+
+    @abc.abstractmethod
+    def get_batch_size(self) -> int:
+        """Batch size for ADVI depending on debug mode and data set size.
+
+        Returns:
+            int: The batch size for fitting with ADVI.
+        """
+        pass
+
+    @abc.abstractmethod
+    def get_data(self) -> pd.DataFrame:
+        """Return the intended data object.
+
+        Make sure to account for debug.
+
+        Returns:
+            pd.DataFrame: The data frame for modeling.
+        """
+        pass
+
+
+class CrcDataManager(DataManager):
     """Manager for CRC modeling data."""
 
     debug: bool
@@ -82,3 +129,47 @@ class CrcDataManager:
         if self.data is None:
             self.data = self._load_data()
         return self.data
+
+
+class MockDataManager(DataManager):
+    """A data manager with mock data (primarily for testing)."""
+
+    def __init__(self, debug: bool = False) -> None:
+        """Initialize a MockDataManager.
+
+        This DataManager makes a small data set for testing and demo purpose.
+
+        Args:
+            debug (bool, optional): Should the debugging data be used? Defaults to
+              False.
+        """
+        self.debug = debug
+
+    def get_data_path(self) -> Path:
+        """Location of the data.
+
+        Returns:
+            Path: Path to data.
+        """
+        return Path("/dev/null")
+
+    def get_batch_size(self) -> int:
+        """Batch size for ADVI depending on debug mode and data set size.
+
+        Returns:
+            int: The batch size for fitting with ADVI.
+        """
+        return 10 if self.debug else 20
+
+    def get_data(self) -> pd.DataFrame:
+        """Return the intended data object.
+
+        Make sure to account for debug.
+
+        Returns:
+            pd.DataFrame: The data frame for modeling.
+        """
+        n_data_points = 50 if self.debug else 100
+        x = np.random.uniform(-1, 1, n_data_points)
+        y = -1 + 2 * x + (np.random.randn(n_data_points) / 2.0)
+        return pd.DataFrame({"x": x, "y": y})
