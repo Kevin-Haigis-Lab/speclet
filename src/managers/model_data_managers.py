@@ -4,11 +4,12 @@
 
 import abc
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
 
+import src.modeling.simulation_based_calibration_helpers as sbc
 from src.data_processing import achilles as achelp
 from src.io import data_io
 
@@ -55,6 +56,21 @@ class DataManager(abc.ABC):
 
         Returns:
             pd.DataFrame: The data frame for modeling.
+        """
+        pass
+
+    @abc.abstractmethod
+    def generate_mock_data(
+        self, size: Union[sbc.MockDataSizes, str], random_seed: Optional[int] = None
+    ) -> pd.DataFrame:
+        """Generate mock data to be used for testing or SBC.
+
+        Args:
+            size (Union[MockDataSizes, str]): Size of the final mock dataset.
+            random_seed (Optional[int], optional): Random seed. Defaults to None.
+
+        Returns:
+            pd.DataFrame: Mock data.
         """
         pass
 
@@ -130,6 +146,31 @@ class CrcDataManager(DataManager):
             self.data = self._load_data()
         return self.data
 
+    def generate_mock_data(
+        self, size: Union[sbc.MockDataSizes, str], random_seed: Optional[int] = None
+    ) -> pd.DataFrame:
+        """Generate mock data to be used for testing or SBC.
+
+        Args:
+            size (Union[MockDataSizes, str]): Size of the final mock dataset.
+            random_seed (Optional[int], optional): Random seed. Defaults to None.
+
+        Returns:
+            pd.DataFrame: Mock data.
+        """
+        if isinstance(size, str):
+            size = sbc.MockDataSizes(size)
+
+        if size == sbc.MockDataSizes.small:
+            self.data = sbc.generate_mock_achilles_data(
+                n_genes=10, n_sgrnas_per_gene=3, n_cell_lines=5, n_batches=2
+            )
+        else:
+            self.data = sbc.generate_mock_achilles_data(
+                n_genes=100, n_sgrnas_per_gene=5, n_cell_lines=20, n_batches=3
+            )
+        return self.data
+
 
 class MockDataManager(DataManager):
     """A data manager with mock data (primarily for testing)."""
@@ -173,3 +214,24 @@ class MockDataManager(DataManager):
         x = np.random.uniform(-1, 1, n_data_points)
         y = -1 + 2 * x + (np.random.randn(n_data_points) / 2.0)
         return pd.DataFrame({"x": x, "y": y})
+
+    def generate_mock_data(
+        self, size: Union[sbc.MockDataSizes, str], random_seed: Optional[int] = None
+    ) -> pd.DataFrame:
+        """Generate mock data to be used for testing or SBC.
+
+        Args:
+            size (Union[MockDataSizes, str]): Size of the final mock dataset.
+            random_seed (Optional[int], optional): Random seed. Defaults to None.
+
+        Returns:
+            pd.DataFrame: Mock data.
+        """
+        if isinstance(size, str):
+            size = sbc.MockDataSizes(size)
+
+        if size == sbc.MockDataSizes.small:
+            self.debug = True
+        else:
+            self.debug = False
+        return self.get_data()

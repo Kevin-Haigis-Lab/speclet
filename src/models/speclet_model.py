@@ -2,12 +2,15 @@
 
 from abc import abstractmethod
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Tuple, Union
 
+import arviz as az
 import numpy as np
+import pandas as pd
 import pymc3 as pm
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
+import src.modeling.simulation_based_calibration_helpers as sbc
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.managers.model_data_managers import DataManager
 from src.modeling import pymc3_sampling_api as pmapi
@@ -24,6 +27,7 @@ class SpecletModel:
     data_manager: Optional[DataManager] = None
 
     model: Optional[pm.Model] = None
+    observed_var_name: Optional[str] = None
     shared_vars: Optional[Dict[str, TTShared]] = None
     advi_results: Optional[pmapi.ApproximationSamplingResults] = None
     mcmc_results: Optional[pmapi.MCMCSamplingResults] = None
@@ -56,13 +60,16 @@ class SpecletModel:
             self.data_manager.debug = self.debug
 
     @abstractmethod
-    def model_specification(self) -> pm.Model:
+    def model_specification(self) -> Tuple[pm.Model, str]:
         """Define the PyMC3 model.
 
         Returns:
             pm.Model: The PyMC3 model.
+            str: Name of the target variable in the model.
         """
-        pass
+        raise Exception(
+            "The `model_specification()` method must be over-riden by subclasses."
+        )
 
     def build_model(self) -> None:
         """Build the PyMC3 model.
@@ -71,14 +78,21 @@ class SpecletModel:
             AttributeError: Raised if there is no data manager.
             AttributeError: Raised the `model` attribute is still None after calling
               `self.model_specification()`
+            AttributeError: Raised the `observed_var_name` attribute is still None
+              after calling `self.model_specification()`
         """
         if self.data_manager is None:
             raise AttributeError("Cannot build a model without a data manager.")
 
-        self.model = self.model_specification()
+        self.model, self.observed_var_name = self.model_specification()
 
         if self.model is None:
             m = "The `model` attribute cannot be None at the end of the "
+            m += "`build_model()` method."
+            raise AttributeError(m)
+
+        if self.observed_var_name is None:
+            m = "The `observed_var_name` attribute cannot be None at the end of the "
             m += "`build_model()` method."
             raise AttributeError(m)
 
@@ -155,7 +169,8 @@ class SpecletModel:
         """Create a dictionary of PyMC3 variables to replace for ADVI fitting.
 
         This method is useful if you can take advantage of creating MiniBatch
-        variables and replaced them using SharedVariables in the model.
+        variables and replaced them using SharedVariables in the model. If not changed,
+        this method returns None and has no effect on ADVI.
 
         Returns:
             Optional[ReplacementsDict]: Dictionary of variable replacements.
@@ -233,9 +248,46 @@ class SpecletModel:
         self.cache_manager.write_advi_cache(self.advi_results)
         return self.advi_results
 
-    # def run_simulation_based_calibration(
-    #     self, results_path: Path, random_seed: Optional[int] = None,
-    # size: str = "large"
-    # ) -> None:
-    #     # TODO
-    #     return None
+    def run_simulation_based_calibration(
+        self,
+        results_path: Path,
+        random_seed: Optional[int] = None,
+        size: str = "large",
+        fit_kwargs: Dict[Any, Any] = {},
+    ) -> None:
+        """Run a round of simulation-based calibration.
+
+        Args:
+            results_path (Path): Where to store the results.
+            random_seed (Optional[int], optional): Random seed (for reproducibility).
+              Defaults to None.
+            size (str, optional): Size of the data set to mock. Defaults to "large".
+            fit_kwargs (Dict[Any, Any], optional): Keyword arguments to be passed to the
+              fitting method. Default is an empty dictionary.
+        """
+        assert self.data_manager is not None
+        mock_data = self.data_manager.generate_mock_data(
+            size=size, random_seed=random_seed
+        )
+
+        self.build_model()
+        assert self.model is not None
+        assert self.observed_var_name is not None
+
+        with self.model:
+            priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
+
+        mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
+        self.data = mock_data
+
+        res = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
+        posterior_summary = az.summary(res.trace, fmt="wide", hdi_prob=0.89)
+        assert isinstance(posterior_summary, pd.DataFrame)
+        assert isinstance(posterior_summary, pd.DataFrame)
+        az_results = pmapi.convert_samples_to_arviz(model=self.model, res=res)
+        results_manager = sbc.SBCFileManager(dir=results_path)
+        results_manager.save_sbc_results(
+            priors=priors,
+            inference_obj=az_results,
+            posterior_summary=posterior_summary,
+        )
