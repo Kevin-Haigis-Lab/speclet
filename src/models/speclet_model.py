@@ -2,14 +2,17 @@
 
 from abc import abstractmethod
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
+import numpy as np
 import pymc3 as pm
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.managers.model_data_managers import DataManager
 from src.modeling import pymc3_sampling_api as pmapi
+
+ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
 
 class SpecletModel:
@@ -148,9 +151,87 @@ class SpecletModel:
         self.cache_manager.write_mcmc_cache(self.mcmc_results)
         return self.mcmc_results
 
-    # def advi_sample_model(self) -> pmapi.ApproximationSamplingResults:
-    #     # TODO
-    #     return None
+    def get_replacement_parameters(self) -> Optional[ReplacementsDict]:
+        """Create a dictionary of PyMC3 variables to replace for ADVI fitting.
+
+        This method is useful if you can take advantage of creating MiniBatch
+        variables and replaced them using SharedVariables in the model.
+
+        Returns:
+            Optional[ReplacementsDict]: Dictionary of variable replacements.
+        """
+        return None
+
+    def advi_sample_model(
+        self,
+        method: str = "advi",
+        n_iterations: int = 100000,
+        draws: int = 1000,
+        prior_pred_samples: int = 1000,
+        post_pred_samples: int = 1000,
+        random_seed: Optional[int] = None,
+        ignore_cache: bool = False,
+    ) -> pmapi.ApproximationSamplingResults:
+        """ADVI fit the model.
+
+        Args:
+            model (pm.Model): PyMC3 model.
+            method (str): VI method to use. Defaults to "advi".
+            n_iterations (int): Maximum number of fitting steps. Defaults to 100000.
+            draws (int, optional): Number of MCMC samples to draw from the fit model.
+            Defaults to 1000.
+            prior_pred_samples (int, optional): Number of samples from the prior
+            distributions. Defaults to 1000.
+            post_pred_samples (int, optional): Number of samples for posterior
+              predictions.
+            Defaults to 1000.
+            callbacks (List[Callable], optional): List of fitting callbacks.
+            Default is None.
+            random_seed (Optional[int], optional): The random seed for sampling.
+            Defaults to None.
+            fit_kwargs (Dict[str, Any], optional): Kwargs for the fitting method.
+            Defaults to {}.
+
+        Raises:
+            AttributeError: Raised if the model does not yet exist.
+
+        Returns:
+            ApproximationSamplingResults: A collection of the fitting and sampling
+              results.
+        """
+        if self.model is None:
+            raise AttributeError(
+                "Cannot sample: model is 'None'. "
+                + "Make sure to run `model.build_model()` first."
+            )
+
+        fit_kwargs: Dict[str, Any] = {}
+        replacements = self.get_replacement_parameters()
+        if replacements is not None:
+            fit_kwargs["more_replacements"] = replacements
+
+        if self.advi_results is not None:
+            return self.advi_results
+
+        if not ignore_cache and self.cache_manager.advi_cache_exists():
+            self.advi_results = self.cache_manager.get_advi_cache()
+            return self.advi_results
+
+        self.advi_results = pmapi.pymc3_advi_approximation_procedure(
+            model=self.model,
+            method=method,
+            n_iterations=n_iterations,
+            draws=draws,
+            prior_pred_samples=prior_pred_samples,
+            post_pred_samples=post_pred_samples,
+            callbacks=[
+                pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
+            ],
+            random_seed=random_seed,
+            fit_kwargs=fit_kwargs,
+        )
+        self.cache_manager.write_advi_cache(self.advi_results)
+        return self.advi_results
 
     # def run_simulation_based_calibration(
     #     self, results_path: Path, random_seed: Optional[int] = None,

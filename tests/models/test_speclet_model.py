@@ -68,6 +68,8 @@ class TestSpecletModel:
         for p in ["a", "b", "sigma"]:
             assert mcmc_res.trace[p].shape == (100 * 2,)
 
+        assert sp.mcmc_results is not None
+
         tic = time()
         mcmc_res_2 = sp.mcmc_sample_model(
             mcmc_draws=100,
@@ -79,6 +81,45 @@ class TestSpecletModel:
             random_seed=1,
         )
         toc = time()
+
+        assert mcmc_res is mcmc_res_2
         assert toc - tic < 1
         for p in ["a", "b", "sigma"]:
             np.testing.assert_array_equal(mcmc_res.trace[p], mcmc_res_2.trace[p])
+
+    def test_advi_sample_model_fails_without_model(self, tmp_path: Path):
+        sp = speclet_model.SpecletModel("test-model", root_cache_dir=tmp_path)
+        with pytest.raises(AttributeError, match="model is 'None'"):
+            sp.advi_sample_model()
+
+    @pytest.mark.slow
+    def test_advi_sample_model(self, tmp_path: Path):
+        sp = MockSpecletModelClass("test-model", root_cache_dir=tmp_path)
+        sp.build_model()
+        advi_res = sp.advi_sample_model(
+            n_iterations=100,
+            draws=100,
+            prior_pred_samples=100,
+            post_pred_samples=10,
+            random_seed=1,
+        )
+        assert isinstance(advi_res, pmapi.ApproximationSamplingResults)
+        for p in ["a", "b", "sigma"]:
+            assert advi_res.trace[p].shape == (100,)
+
+        assert sp.advi_results is not None
+
+        tic = time()
+        advi_res_2 = sp.advi_sample_model(
+            n_iterations=100,
+            draws=100,
+            prior_pred_samples=100,
+            post_pred_samples=10,
+            random_seed=1,
+        )
+        toc = time()
+
+        assert advi_res is advi_res_2
+        assert toc - tic < 1
+        for p in ["a", "b", "sigma"]:
+            np.testing.assert_array_equal(advi_res.trace[p], advi_res_2.trace[p])
