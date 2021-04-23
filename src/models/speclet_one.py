@@ -146,16 +146,17 @@ class SpecletOne(SpecletModel):
                 "No shared variables - cannot create replacement parameters.."
             )
 
+        data = self.data_manager.get_data()
         batch_size = self.data_manager.get_batch_size()
-        indices = achelp.common_indices(self.data_manager.get_data())
+        indices = achelp.common_indices(data)
 
         sgrna_idx_batch = pm.Minibatch(indices.sgrna_idx, batch_size=batch_size)
         gene_idx_batch = pm.Minibatch(indices.gene_idx, batch_size=batch_size)
         cellline_idx_batch = pm.Minibatch(indices.cellline_idx, batch_size=batch_size)
         batch_idx_batch = pm.Minibatch(indices.batch_idx, batch_size=batch_size)
-        lfc_data_batch = pm.Minibatch(self.data.lfc.values, batch_size=batch_size)
+        lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
         copynumber_data_batch = pm.Minibatch(
-            self.data.z_log2_cn.values, batch_size=batch_size
+            data.z_log2_cn.values, batch_size=batch_size
         )
 
         return {
