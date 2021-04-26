@@ -36,6 +36,8 @@ rule all:
 rule sample_models:
     output:
         PYMC3_MODEL_CACHE_DIR + "{model_name}/{model}_{model_name}.txt",
+    params:
+        debug=lambda w: "debug" if "debug" in w.model_name else "no-debug",
     conda:
         ENVIRONMENT_YAML
     shell:
@@ -43,7 +45,12 @@ rule sample_models:
         '  "{wildcards.model}" '
         '  "{wildcards.model_name}" '
         "  --random-seed 7414 "
+        "  --{params.debug}"
         "  --touch"
+
+
+def is_debug(name: str) -> bool:
+    return "debug" in name
 
 
 rule papermill_report:
@@ -58,7 +65,7 @@ rule papermill_report:
             parameters={
                 "MODEL": wildcards.model,
                 "MODEL_NAME": wildcards.model_name,
-                "DEBUG": False,
+                "DEBUG": is_debug(wildcards.model_name),
             },
             prepare_only=True,
         )
