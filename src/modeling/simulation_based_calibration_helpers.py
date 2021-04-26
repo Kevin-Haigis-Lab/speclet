@@ -1,5 +1,6 @@
 """Helpers for organizing simualtaion-based calibrations."""
 
+from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -9,6 +10,14 @@ import pandas as pd
 
 from src.data_processing import achilles as achelp
 from src.string_functions import prefixed_count
+
+
+class MockDataSizes(str, Enum):
+    """Options for dataset seizes when generating mock data."""
+
+    small = "small"
+    medium = "medium"
+    large = "large"
 
 
 class SBCResults:

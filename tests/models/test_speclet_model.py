@@ -1,205 +1,157 @@
-#!/usr/bin/env python3
-
 from pathlib import Path
+from time import time
+from typing import Tuple
 
-import arviz as az
 import numpy as np
-import pandas as pd
 import pymc3 as pm
 import pytest
 
+from src.managers.model_data_managers import MockDataManager
 from src.modeling import pymc3_sampling_api as pmapi
 from src.models import speclet_model
 
 
-class TestSpecletModel:
-    @pytest.fixture(scope="class")
-    def data(self) -> pd.DataFrame:
-        real_a = 1
-        real_b = 2
-        x = np.random.uniform(-10, 10, 100)
-        real_sigma = 0.1
-        y = real_a + real_b * x + np.random.normal(0, real_sigma, len(x))
-        return pd.DataFrame({"x": x, "y_obs": y})
-
-    @pytest.fixture(scope="class")
-    def pm_model(self, data: pd.DataFrame) -> pm.Model:
+class MockSpecletModelClass(speclet_model.SpecletModel):
+    def model_specification(self) -> Tuple[pm.Model, str]:
+        data = self.data_manager.get_data()
         with pm.Model() as model:
-            a = pm.Normal("a", 0, 5)
-            b = pm.Normal("b", 0, 1)
-            mu = a + b * data.x.values
-            sigma = pm.HalfNormal("sigma", 1)
-            y = pm.Normal("y", mu, sigma, observed=data.y_obs.values)  # noqa: F841
-        return model
+            b = pm.Normal("b", 0, 10)
+            a = pm.Normal("a", 0, 10)
+            sigma = pm.HalfNormal("sigma", 10)
+            y = pm.Normal(  # noqa: F841
+                "y", a + b * data["x"].values, sigma, observed=data["y"].values
+            )
+        return model, "y"
 
-    @pytest.fixture(scope="class")
-    def mcmc_results(
-        self, data: pd.DataFrame, pm_model: pm.Model
-    ) -> pmapi.MCMCSamplingResults:
-        with pm_model:
-            prior = pm.sample_prior_predictive(samples=100, random_seed=123)
-            trace = pm.sample(
-                1000,
-                tune=1000,
-                cores=2,
-                chains=2,
-                random_seed=123,
-                return_inferencedata=False,
-            )
-            post = pm.sample_posterior_predictive(
-                trace=trace, samples=100, random_seed=123
-            )
-        return pmapi.MCMCSamplingResults(
-            trace=trace, prior_predictive=prior, posterior_predictive=post
-        )
 
-    @pytest.fixture(scope="class")
-    def advi_results(
-        self, data: pd.DataFrame, pm_model: pm.Model
-    ) -> pmapi.ApproximationSamplingResults:
-        with pm_model:
-            prior = pm.sample_prior_predictive(samples=100, random_seed=123)
-            approx = pm.fit(
-                100000,
-                callbacks=[pm.callbacks.CheckParametersConvergence(tolerance=1e-4)],
-                random_seed=123,
-            )
-            trace = approx.sample(draws=1000)
-            post = pm.sample_posterior_predictive(
-                trace=trace, samples=100, random_seed=123
-            )
-        return pmapi.ApproximationSamplingResults(
-            trace=trace,
-            prior_predictive=prior,
-            posterior_predictive=post,
-            approximation=approx,
-        )
+class TestSpecletModel:
+    def test_build_model_fails_without_data_manager(self, tmp_path: Path):
+        sp = speclet_model.SpecletModel("test-model", root_cache_dir=tmp_path)
+        with pytest.raises(AttributeError, match="without a data manager"):
+            sp.build_model()
+
+    def test_mcmc_sample_model_fails_without_overriding(self, tmp_path: Path):
+        sp = speclet_model.SpecletModel("test-model", root_cache_dir=tmp_path)
+        with pytest.raises(AttributeError, match="Cannot sample: model is 'None'"):
+            sp.mcmc_sample_model()
 
     @pytest.mark.slow
-    def test_writing_mcmc_cache(
-        self, mcmc_results: pmapi.MCMCSamplingResults, tmp_path: Path
-    ):
-        assert len(list(tmp_path.iterdir())) == 0
-        model = speclet_model.SpecletModel(
-            name="test-mcmc-model", root_cache_dir=tmp_path
+    def test_build_model(self, tmp_path: Path):
+        sp = MockSpecletModelClass(
+            name="test-model",
+            root_cache_dir=tmp_path,
+            debug=True,
+            data_manager=MockDataManager(),
         )
-        assert len(list(tmp_path.iterdir())) == 1
-        assert len(list(model.cache_dir.iterdir())) == 2
-        model.write_mcmc_cache(res=mcmc_results)
-
-        cache_paths = model.mcmc_cache_delegate.get_cache_file_names()
-        assert (
-            cache_paths.prior_predictive_path.is_file()
-            and cache_paths.prior_predictive_path.exists()
-        )
-        assert (
-            cache_paths.posterior_predictive_path.is_file()
-            and cache_paths.posterior_predictive_path.exists()
-        )
-        assert cache_paths.trace_path.is_dir() and cache_paths.trace_path.exists()
-        pickled_trace_dirs = [x.name for x in cache_paths.trace_path.iterdir()]
-        for i in ["0", "1"]:
-            assert i in pickled_trace_dirs
+        assert sp.model is None
+        sp.build_model()
+        assert sp.model is not None
+        assert isinstance(sp.model, pm.Model)
 
     @pytest.mark.slow
-    def test_reading_mcmc_cache(
-        self,
-        pm_model: pm.Model,
-        mcmc_results: pmapi.MCMCSamplingResults,
-        tmp_path: Path,
-    ):
-        assert len(list(tmp_path.iterdir())) == 0
-        model = speclet_model.SpecletModel(
-            name="test-mcmc-model2", root_cache_dir=tmp_path
+    def test_mcmc_sample_model(self, tmp_path: Path):
+        sp = MockSpecletModelClass(
+            "test-model", root_cache_dir=tmp_path, data_manager=MockDataManager()
         )
-        model.write_mcmc_cache(mcmc_results)
-        new_res = model.get_mcmc_cache(model=pm_model)
+        sp.build_model()
+        mcmc_res = sp.mcmc_sample_model(
+            mcmc_draws=100,
+            tune=100,
+            chains=2,
+            cores=2,
+            prior_pred_samples=100,
+            post_pred_samples=10,
+            random_seed=1,
+        )
+        assert isinstance(mcmc_res, pmapi.MCMCSamplingResults)
+        for p in ["a", "b", "sigma"]:
+            assert mcmc_res.trace[p].shape == (100 * 2,)
 
-        for param in ["a", "b", "sigma"]:
-            np.testing.assert_almost_equal(
-                mcmc_results.prior_predictive[param],
-                new_res.prior_predictive[param],
-                decimal=5,
-            )
-            np.testing.assert_almost_equal(
-                mcmc_results.trace[param], new_res.trace[param], decimal=5
-            )
+        assert sp.mcmc_results is not None
 
-        np.testing.assert_almost_equal(
-            mcmc_results.prior_predictive["y"], new_res.prior_predictive["y"], decimal=5
+        tic = time()
+        mcmc_res_2 = sp.mcmc_sample_model(
+            mcmc_draws=100,
+            tune=100,
+            chains=2,
+            cores=2,
+            prior_pred_samples=100,
+            post_pred_samples=10,
+            random_seed=1,
         )
-        np.testing.assert_almost_equal(
-            mcmc_results.posterior_predictive["y"],
-            new_res.posterior_predictive["y"],
-            decimal=5,
-        )
+        toc = time()
 
-    @pytest.mark.slow
-    def test_writing_advi_cache(
-        self, advi_results: pmapi.ApproximationSamplingResults, tmp_path: Path
-    ):
-        assert len(list(tmp_path.iterdir())) == 0
-        model = speclet_model.SpecletModel(
-            name="test-advi-model", root_cache_dir=tmp_path
-        )
-        assert len(list(tmp_path.iterdir())) == 1
-        assert len(list(model.cache_dir.iterdir())) == 2
-        model.write_advi_cache(advi_results)
+        assert mcmc_res is mcmc_res_2
+        assert toc - tic < 1
+        for p in ["a", "b", "sigma"]:
+            np.testing.assert_array_equal(mcmc_res.trace[p], mcmc_res_2.trace[p])
 
-        cache_paths = model.advi_cache_delegate.get_cache_file_names()
-        assert (
-            cache_paths.prior_predictive_path.is_file()
-            and cache_paths.prior_predictive_path.exists()
-        )
-        assert (
-            cache_paths.posterior_predictive_path.is_file()
-            and cache_paths.posterior_predictive_path.exists()
-        )
-        assert (
-            cache_paths.approximation_path.is_file()
-            and cache_paths.approximation_path.exists()
-        )
-        assert not cache_paths.trace_path.exists()
+    def test_advi_sample_model_fails_without_model(self, tmp_path: Path):
+        sp = speclet_model.SpecletModel("test-model", root_cache_dir=tmp_path)
+        with pytest.raises(AttributeError, match="model is 'None'"):
+            sp.advi_sample_model()
 
     @pytest.mark.slow
-    def test_reading_advi_cache(
-        self, advi_results: pmapi.ApproximationSamplingResults, tmp_path: Path
-    ):
-        assert len(list(tmp_path.iterdir())) == 0
-        model = speclet_model.SpecletModel(
-            name="test-advi-model2", root_cache_dir=tmp_path
+    def test_advi_sample_model(self, tmp_path: Path):
+        sp = MockSpecletModelClass(
+            "test-model", root_cache_dir=tmp_path, data_manager=MockDataManager()
         )
-        model.write_advi_cache(advi_results)
-        new_res = model.get_advi_cache()
+        sp.build_model()
+        advi_res = sp.advi_sample_model(
+            n_iterations=100,
+            draws=100,
+            prior_pred_samples=100,
+            post_pred_samples=10,
+            random_seed=1,
+        )
+        assert isinstance(advi_res, pmapi.ApproximationSamplingResults)
+        for p in ["a", "b", "sigma"]:
+            assert advi_res.trace[p].shape == (100,)
 
-        for param in ["a", "b", "sigma"]:
-            np.testing.assert_almost_equal(
-                advi_results.prior_predictive[param],
-                new_res.prior_predictive[param],
-                decimal=5,
-            )
-            assert pytest.approx(
-                np.mean(advi_results.trace[param]), abs=0.1
-            ) == np.mean(new_res.trace[param])
-            assert pytest.approx(np.std(advi_results.trace[param]), abs=0.1) == np.std(
-                new_res.trace[param]
-            )
+        assert sp.advi_results is not None
 
-        np.testing.assert_almost_equal(
-            advi_results.prior_predictive["y"], new_res.prior_predictive["y"], decimal=5
+        tic = time()
+        advi_res_2 = sp.advi_sample_model(
+            n_iterations=100,
+            draws=100,
+            prior_pred_samples=100,
+            post_pred_samples=10,
+            random_seed=1,
         )
-        np.testing.assert_almost_equal(
-            advi_results.posterior_predictive["y"],
-            new_res.posterior_predictive["y"],
-            decimal=5,
-        )
-        np.testing.assert_almost_equal(
-            advi_results.approximation.hist, new_res.approximation.hist, decimal=3
-        )
+        toc = time()
+
+        assert advi_res is advi_res_2
+        assert toc - tic < 1
+        for p in ["a", "b", "sigma"]:
+            np.testing.assert_array_equal(advi_res.trace[p], advi_res_2.trace[p])
 
     @pytest.mark.slow
-    def test_convert_to_arviz(
-        self, pm_model: pm.Model, mcmc_results: pmapi.MCMCSamplingResults
-    ):
-        az_obj = pmapi.convert_samples_to_arviz(model=pm_model, res=mcmc_results)
-        assert isinstance(az_obj, az.InferenceData)
+    def test_run_simulation_based_calibration(self, tmp_path: Path):
+        sp = MockSpecletModelClass(
+            "test-model", root_cache_dir=tmp_path, data_manager=MockDataManager()
+        )
+        assert sp.model is None
+        sp.run_simulation_based_calibration(
+            results_path=tmp_path,
+            size="small",
+            fit_kwargs={
+                "n_iterations": 100,
+                "draws": 10,
+                "prior_pred_samples": 10,
+                "post_pred_samples": 10,
+            },
+        )
+        assert sp.model is not None
+        assert (tmp_path / "inference-data.netcdf").exists()
+
+    def test_changing_debug_status(self, tmp_path: Path):
+        sp = MockSpecletModelClass(
+            "test-model",
+            root_cache_dir=tmp_path,
+            debug=False,
+            data_manager=MockDataManager(debug=False),
+        )
+        assert sp.data_manager is not None
+        assert not sp.debug and not sp.data_manager.debug
+        sp.debug = True
+        assert sp.debug and sp.data_manager.debug

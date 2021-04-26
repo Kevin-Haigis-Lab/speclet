@@ -9,8 +9,7 @@ from typing import Dict, Optional, Type
 
 import pretty_errors
 
-from src.models.crc_ceres_mimic import CrcCeresMimic
-from src.models.crc_model_one import CrcModelOne
+from src.models.ceres_mimic import CeresMimic
 from src.models.speclet_model import SpecletModel
 from src.models.speclet_one import SpecletOne
 
@@ -46,7 +45,6 @@ def clean_model_names(n: str) -> str:
 class ModelOption(str, Enum):
     """Model options."""
 
-    crc_model_one = "crc_model_one"
     crc_ceres_mimic = "crc_ceres_mimic"
     speclet_one = "speclet_one"
 
@@ -61,8 +59,7 @@ def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
         Type[SpecletModel]: The corresponding model class.
     """
     model_option_map: Dict[ModelOption, Type[SpecletModel]] = {
-        ModelOption.crc_model_one: CrcModelOne,
-        ModelOption.crc_ceres_mimic: CrcCeresMimic,
+        ModelOption.crc_ceres_mimic: CeresMimic,
         ModelOption.speclet_one: SpecletOne,
     }
     return model_option_map[model_opt]
@@ -72,12 +69,12 @@ def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
 
 
 def modify_ceres_model_by_name(
-    model: CrcCeresMimic, name: str, logger: Optional[Logger] = None
+    model: CeresMimic, name: str, logger: Optional[Logger] = None
 ) -> None:
-    """Modify a CrcCeresMimic object based on the user-provided input name.
+    """Modify a CeresMimic object based on the user-provided input name.
 
     Args:
-        model (CrcCeresMimic): The CrcCeresMimic model.
+        model (CeresMimic): The CeresMimic model.
         name (str): User-provided name.
         logger (Optional[Logger], optional): A logger object. Defaults to None.
     """

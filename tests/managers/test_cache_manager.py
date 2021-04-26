@@ -7,7 +7,7 @@ import pandas as pd
 import pymc3 as pm
 import pytest
 
-from src.modeling import cache_manager
+from src.managers.cache_managers import Pymc3CacheManager
 from src.modeling import pymc3_sampling_api as pmapi
 
 
@@ -73,18 +73,18 @@ class TestPymc3CacheManager:
     def test_cache_dir_is_made(self, tmp_path: Path):
         cache_dir = tmp_path / "pymc3-cache-dir"
         assert not cache_dir.exists()
-        _ = cache_manager.Pymc3CacheManager(cache_dir=tmp_path / cache_dir)
+        _ = Pymc3CacheManager(cache_dir=tmp_path / cache_dir)
         assert cache_dir.exists()
 
     def test_writing_pickle(self, tmp_path: Path):
-        cm = cache_manager.Pymc3CacheManager(cache_dir=tmp_path)
+        cm = Pymc3CacheManager(cache_dir=tmp_path)
         fp = tmp_path / "my-pickle.pkl"
         p = "pickle"
         cm._write_pickle(p, fp)
         assert fp.exists()
 
     def test_reading_pickle(self, tmp_path: Path):
-        cm = cache_manager.Pymc3CacheManager(cache_dir=tmp_path)
+        cm = Pymc3CacheManager(cache_dir=tmp_path)
         fp = tmp_path / "my-pickle.pkl"
         p = "pickle"
         cm._write_pickle(p, fp)
@@ -93,7 +93,7 @@ class TestPymc3CacheManager:
         assert new_p == p
 
     def test_generation_of_cache_paths(self, tmp_path: Path):
-        cm = cache_manager.Pymc3CacheManager(cache_dir=tmp_path)
+        cm = Pymc3CacheManager(cache_dir=tmp_path)
         cache_paths = cm.get_cache_file_names()
 
         for path in cache_paths.dict().values():
@@ -108,7 +108,7 @@ class TestPymc3CacheManager:
     def test_caching_mcmc(
         self, tmp_path: Path, mcmc_results: pmapi.MCMCSamplingResults
     ):
-        cm = cache_manager.Pymc3CacheManager(cache_dir=tmp_path)
+        cm = Pymc3CacheManager(cache_dir=tmp_path)
         cm.cache_sampling_results(res=mcmc_results)
         cache_paths = cm.get_cache_file_names()
         assert (
@@ -126,7 +126,7 @@ class TestPymc3CacheManager:
     def test_caching_advi(
         self, tmp_path: Path, advi_results: pmapi.ApproximationSamplingResults
     ):
-        cm = cache_manager.Pymc3CacheManager(cache_dir=tmp_path)
+        cm = Pymc3CacheManager(cache_dir=tmp_path)
         cm.cache_sampling_results(res=advi_results)
         cache_paths = cm.get_cache_file_names()
         assert (
@@ -150,7 +150,7 @@ class TestPymc3CacheManager:
         pm_model: pm.Model,
         mcmc_results: pmapi.MCMCSamplingResults,
     ):
-        cm = cache_manager.Pymc3CacheManager(cache_dir=tmp_path)
+        cm = Pymc3CacheManager(cache_dir=tmp_path)
         cm.cache_sampling_results(res=mcmc_results)
         cached_res = cm.read_cached_sampling(model=pm_model)
         assert isinstance(cached_res, pmapi.MCMCSamplingResults)
@@ -171,7 +171,7 @@ class TestPymc3CacheManager:
     def test_read_advi_cache(
         self, tmp_path: Path, advi_results: pmapi.ApproximationSamplingResults
     ):
-        cm = cache_manager.Pymc3CacheManager(cache_dir=tmp_path)
+        cm = Pymc3CacheManager(cache_dir=tmp_path)
         cm.cache_sampling_results(res=advi_results)
         cached_res = cm.read_cached_approximation(draws=1000)
         assert isinstance(cached_res, pmapi.ApproximationSamplingResults)

@@ -51,6 +51,6 @@ class TestTyperCLI:
         assert result.exit_code > 0
 
     def test_no_name_error(self, app: typer.Typer, runner: CliRunner):
-        result = runner.invoke(app, [cli_helpers.ModelOption.crc_model_one])
+        result = runner.invoke(app, [cli_helpers.ModelOption.speclet_one])
         assert "Error: Missing argument" in result.output
         assert result.exit_code > 0

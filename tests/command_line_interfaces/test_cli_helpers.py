@@ -6,8 +6,7 @@ from typing import List
 import pytest
 
 from src.command_line_interfaces import cli_helpers
-from src.models.crc_ceres_mimic import CrcCeresMimic
-from src.models.crc_model_one import CrcModelOne
+from src.models.ceres_mimic import CeresMimic
 
 #### ---- Models ---- ####
 
@@ -19,19 +18,17 @@ def test_clean_model_names():
 
 
 def test_get_model_class():
-    m1 = cli_helpers.get_model_class(cli_helpers.ModelOption.crc_model_one)
-    assert m1 == CrcModelOne
 
     m2 = cli_helpers.get_model_class(cli_helpers.ModelOption.crc_ceres_mimic)
-    assert m2 == CrcCeresMimic
+    assert m2 == CeresMimic
 
 
 #### ---- Modifying models ---- ####
 
 
 @pytest.fixture
-def ceres_model(tmp_path: Path) -> CrcCeresMimic:
-    return CrcCeresMimic(name="TEST-MODEL", root_cache_dir=Path(tmp_path), debug=True)
+def ceres_model(tmp_path: Path) -> CeresMimic:
+    return CeresMimic(name="TEST-MODEL", root_cache_dir=Path(tmp_path), debug=True)
 
 
 @pytest.fixture
@@ -40,7 +37,7 @@ def model_names() -> List[str]:
 
 
 def test_modify_ceres_model_by_name_nochange(
-    ceres_model: CrcCeresMimic, model_names: List[str]
+    ceres_model: CeresMimic, model_names: List[str]
 ):
     for name in model_names:
         cli_helpers.modify_ceres_model_by_name(ceres_model, name)
@@ -49,7 +46,7 @@ def test_modify_ceres_model_by_name_nochange(
 
 
 def test_modify_ceres_model_by_name_sgrna(
-    ceres_model: CrcCeresMimic, model_names: List[str]
+    ceres_model: CeresMimic, model_names: List[str]
 ):
     model_names_a = [n + "_sgrnaint" for n in model_names]
     for name in model_names_a:
@@ -59,7 +56,7 @@ def test_modify_ceres_model_by_name_sgrna(
 
 
 def test_modify_ceres_model_by_name_copynumber(
-    ceres_model: CrcCeresMimic, model_names: List[str]
+    ceres_model: CeresMimic, model_names: List[str]
 ):
     model_names_a = [n + "_copynumber" for n in model_names]
     for name in model_names_a:
@@ -69,7 +66,7 @@ def test_modify_ceres_model_by_name_copynumber(
 
 
 def test_modify_ceres_model_by_name_copynumber_sgrna(
-    ceres_model: CrcCeresMimic, model_names: List[str]
+    ceres_model: CeresMimic, model_names: List[str]
 ):
     model_names_a = [n + "_copynumber-sgrnaint" for n in model_names]
     for name in model_names_a:
