@@ -11,7 +11,6 @@ ENVIRONMENT_YAML = "default_environment.yml"
 ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
 
 model_names = (
-    ("crc_model_one", "CRC-model1"),
     ("crc_ceres_mimic", "CERES-base"),
     ("crc_ceres_mimic", "CERES-copynumber"),
     ("crc_ceres_mimic", "CERES-copynumber-sgrnaint"),
