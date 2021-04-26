@@ -14,9 +14,7 @@ from src.command_line_interfaces import cli_helpers
 from src.command_line_interfaces.cli_helpers import ModelOption
 from src.io import cache_io
 from src.loggers import get_logger
-from src.modeling.sampling_metadata_models import SamplingArguments
-from src.models.crc_ceres_mimic import CrcCeresMimic
-from src.models.protocols import SelfSufficientModel
+from src.models.ceres_mimic import CeresMimic
 from src.models.speclet_model import SpecletModel
 
 logger = get_logger()
@@ -89,15 +87,6 @@ def sample_speclet_model(
 
     name = cli_helpers.clean_model_names(name)
     cache_dir = make_cache_name(root_cache_dir=PYMC3_CACHE_DIR, name=name)
-    sampling_args = SamplingArguments(
-        name=name,
-        cores=cores,
-        sample=sample,
-        ignore_cache=ignore_cache,
-        debug=debug,
-        random_seed=random_seed,
-    )
-
     logger.info(f"Cache directory: {cache_dir.as_posix()}")
 
     if random_seed:
@@ -109,11 +98,9 @@ def sample_speclet_model(
     ModelClass = cli_helpers.get_model_class(model_opt=model)
     speclet_model = ModelClass(name=name, root_cache_dir=cache_dir, debug=debug)
 
-    assert isinstance(speclet_model, SelfSufficientModel)
+    assert isinstance(speclet_model, SpecletModel)
 
-    if model == ModelOption.crc_ceres_mimic and isinstance(
-        speclet_model, CrcCeresMimic
-    ):
+    if model == ModelOption.crc_ceres_mimic and isinstance(speclet_model, CeresMimic):
         cli_helpers.modify_ceres_model_by_name(
             model=speclet_model, name=name, logger=logger
         )
@@ -123,7 +110,7 @@ def sample_speclet_model(
 
     if sample:
         logger.info("Running ADVI fitting method.")
-        _ = speclet_model.advi_sample_model(sampling_args=sampling_args)
+        _ = speclet_model.advi_sample_model(random_seed=random_seed)
 
     if touch:
         logger.info("Touching output file.")
