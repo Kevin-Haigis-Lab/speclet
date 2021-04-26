@@ -58,12 +58,6 @@ class CeresMimic(SpecletModel):
         self._copynumber_cov = copynumber_cov
         self._sgrna_intercept_cov = sgrna_intercept_cov
 
-    def _reset_model_afer_change_to_optional_covariate(self) -> None:
-        """Reset some attributes after the PyMC3 model has changed."""
-        self.model = None
-        self.advi_results = None
-        self.mcmc_results = None
-
     @property
     def copynumber_cov(self) -> bool:
         """Get the current value of `copynumber_cov` attribute.
@@ -85,7 +79,7 @@ class CeresMimic(SpecletModel):
               included in the model.
         """
         if new_value != self._copynumber_cov:
-            self._reset_model_afer_change_to_optional_covariate()
+            self._reset_model_and_results()
             self._copynumber_cov = new_value
 
     @property
@@ -110,7 +104,7 @@ class CeresMimic(SpecletModel):
               covariate is included in the model.
         """
         if new_value != self._sgrna_intercept_cov:
-            self._reset_model_afer_change_to_optional_covariate()
+            self._reset_model_and_results()
             self._sgrna_intercept_cov = new_value
 
     def model_specification(self) -> Tuple[pm.Model, str]:

@@ -18,12 +18,15 @@ class SpecletTwo(SpecletModel):
     and batch.
     """
 
+    _kras_cov: bool
+
     def __init__(
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = CrcDataManager(),
+        kras_cov: bool = False,
     ):
         """Instantiate a SpecletTwo model.
 
@@ -35,6 +38,8 @@ class SpecletTwo(SpecletModel):
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. Defaults to None.
+            kras_cov (bool, optional): Should the KRAS allele covariate be included in
+              the model? Default to False.
         """
         super().__init__(
             name="speclet-two_" + name,
@@ -42,6 +47,22 @@ class SpecletTwo(SpecletModel):
             debug=debug,
             data_manager=data_manager,
         )
+        self._kras_cov = kras_cov
+
+    @property
+    def kras_cov(self) -> bool:
+        """Value of `kras_cov` attribute."""
+        return self._kras_cov
+
+    @kras_cov.setter
+    def kras_cov(self, new_value: bool) -> None:
+        """Set the value of `kras_cov` attribute.
+
+        If the new value is different, all model and sampling results are reset.
+        """
+        if new_value != self._kras_cov:
+            self._kras_cov = new_value
+            self._reset_model_and_results()
 
     def model_specification(self) -> Tuple[pm.Model, str]:
         """Build SpecletTwo model.
