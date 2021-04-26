@@ -14,8 +14,8 @@ from src.models.speclet_model import ReplacementsDict, SpecletModel
 class SpecletTwo(SpecletModel):
     """SpecletTwo Model.
 
-    This model is based on the CERES model, but removes the multiplicative sgRNA
-    "activity" score due to issues of non-identifiability.
+    This is a simple model with varying intercepts for [gene, cell line], KRAS allele,
+    and batch.
     """
 
     def __init__(
