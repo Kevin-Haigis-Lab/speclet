@@ -15,7 +15,7 @@ model_names = (
     ("crc_ceres_mimic", "CERES-copynumber"),
     ("crc_ceres_mimic", "CERES-sgrnaint"),
     ("crc_ceres_mimic", "CERES-copynumber-sgrnaint"),
-    ("speclet_one", "SpecletOne"),
+    # ("speclet_one", "SpecletOne"),
 )
 
 models = [m for m, _ in model_names]
@@ -57,7 +57,7 @@ rule papermill_report:
             parameters={
                 "MODEL": wildcards.model,
                 "MODEL_NAME": wildcards.model_name,
-                "DEBUG": True,
+                "DEBUG": False,
             },
             prepare_only=True,
         )
