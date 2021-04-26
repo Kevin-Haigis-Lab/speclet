@@ -92,6 +92,8 @@ class CommonIndices(BaseModel):
     n_genes: int = 0
     cellline_idx: np.ndarray
     n_celllines: int = 0
+    kras_mutation_idx: np.ndarray
+    n_kras_mutations: int = 0
     batch_idx: np.ndarray
     n_batches: int = 0
 
@@ -101,6 +103,7 @@ class CommonIndices(BaseModel):
         self.n_sgrnas = dphelp.nunique(self.sgrna_idx)
         self.n_genes = dphelp.nunique(self.gene_idx)
         self.n_celllines = dphelp.nunique(self.cellline_idx)
+        self.n_kras_mutations = dphelp.nunique(self.kras_mutation_idx)
         self.n_batches = dphelp.nunique(self.batch_idx)
 
     class Config:
@@ -127,6 +130,7 @@ def common_indices(
         sgrna_to_gene_idx=dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol"),
         gene_idx=dphelp.get_indices(achilles_df, "hugo_symbol"),
         cellline_idx=dphelp.get_indices(achilles_df, "depmap_id"),
+        kras_mutation_idx=dphelp.get_indices(achilles_df, "kras_mutation"),
         batch_idx=dphelp.get_indices(achilles_df, "pdna_batch"),
     )
 
@@ -143,6 +147,7 @@ def set_achilles_categorical_columns(
         "lineage",
         "chromosome",
         "pdna_batch",
+        "kras_mutation",
     ),
     ordered: bool = True,
     sort_cats: bool = False,
