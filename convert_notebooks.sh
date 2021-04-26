@@ -1,8 +1,5 @@
 #!/bin/sh
 
-bash ~/.bashrc
-conda activate speclet
-
 DIR=""
 
 if [ $# -eq 0 ]
