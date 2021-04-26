@@ -67,7 +67,7 @@ class TestModifyingAchillesData:
         data = achelp.read_achilles_data(self.data_path, set_categorical_cols=False)
         assert "category" not in data.dtypes
         data = achelp.set_achilles_categorical_columns(data=data)
-        assert sum(data.dtypes == "category") == 6
+        assert sum(data.dtypes == "category") == 7
 
     def test_custom_achilles_categorical_columns(self):
         data = achelp.read_achilles_data(self.data_path, set_categorical_cols=False)
@@ -219,6 +219,13 @@ def test_common_idx_depmap(example_achilles_data: pd.DataFrame):
     indices = achelp.common_indices(example_achilles_data.sample(frac=1.0))
     assert dphelp.nunique(example_achilles_data.depmap_id.values) == dphelp.nunique(
         indices.cellline_idx
+    )
+
+
+def test_common_idx_kras_mutation(example_achilles_data: pd.DataFrame):
+    indices = achelp.common_indices(example_achilles_data.sample(frac=1.0))
+    assert dphelp.nunique(example_achilles_data.kras_mutation.values) == dphelp.nunique(
+        indices.kras_mutation_idx
     )
 
 
