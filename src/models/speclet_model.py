@@ -2,7 +2,7 @@
 
 from abc import abstractmethod
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import arviz as az
 import numpy as np
@@ -205,6 +205,19 @@ class SpecletModel:
         """
         return None
 
+    def get_advi_callbacks(self) -> List[Any]:
+        """Prepare a list of callbacks for ADVI fitting.
+
+        This can be overriden by subclasses to apply custom callbacks or change the
+        parameters of the CheckParametersConvergence callback.
+
+        Returns:
+            List[Any]: List of callbacks.
+        """
+        return [
+            pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
+        ]
+
     def advi_sample_model(
         self,
         method: str = "advi",
@@ -267,9 +280,7 @@ class SpecletModel:
             draws=draws,
             prior_pred_samples=prior_pred_samples,
             post_pred_samples=post_pred_samples,
-            callbacks=[
-                pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
-            ],
+            callbacks=self.get_advi_callbacks(),
             random_seed=random_seed,
             fit_kwargs=fit_kwargs,
         )
