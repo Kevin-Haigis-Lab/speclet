@@ -85,6 +85,12 @@ class SpecletModel:
         if self.data_manager is not None:
             self.data_manager.debug = new_value
 
+    def _reset_model_and_results(self):
+        self.model = None
+        self.mcmc_results = None
+        self.advi_results = None
+        self.cache_manager.clear_all_caches()
+
     @abstractmethod
     def model_specification(self) -> Tuple[pm.Model, str]:
         """Define the PyMC3 model.

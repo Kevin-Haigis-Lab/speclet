@@ -99,3 +99,16 @@ class Pymc3ModelCacheManager:
             bool: Does the cache exist?
         """
         return self.advi_cache_delegate.cache_exists(method="approx")
+
+    def clear_mcmc_cache(self) -> None:
+        """Clear the MCMC cache."""
+        self.mcmc_cache_delegate.clear_cache()
+
+    def clear_advi_cache(self) -> None:
+        """Clear the ADVI cache."""
+        self.advi_cache_delegate.clear_cache()
+
+    def clear_all_caches(self) -> None:
+        """Clear both the MCMC and ADVI cache."""
+        self.clear_mcmc_cache()
+        self.clear_advi_cache()
