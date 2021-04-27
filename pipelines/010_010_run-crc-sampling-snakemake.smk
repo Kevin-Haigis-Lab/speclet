@@ -17,6 +17,7 @@ model_names = (
     ("crc_ceres_mimic", "CERES-copynumber-sgrnaint"),
     ("speclet_one", "SpecletOne"),
     ("speclet_two", "SpecletTwo"),
+    ("speclet_two", "SpecletTwo-debug"),
 )
 
 models = [m for m, _ in model_names]

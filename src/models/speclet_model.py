@@ -214,7 +214,7 @@ class SpecletModel:
     def get_advi_callbacks(self) -> List[Any]:
         """Prepare a list of callbacks for ADVI fitting.
 
-        This can be overriden by subclasses to apply custom callbacks or change the
+        This can be overridden by subclasses to apply custom callbacks or change the
         parameters of the CheckParametersConvergence callback.
 
         Returns:
