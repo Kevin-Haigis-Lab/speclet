@@ -1,7 +1,7 @@
 """First new model for the speclet project."""
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 import pymc3 as pm
 import theano
@@ -166,3 +166,14 @@ class SpecletTwo(SpecletModel):
             self.shared_vars["batch_idx_shared"]: batch_idx_batch,
             self.shared_vars["lfc_shared"]: lfc_data_batch,
         }
+
+    def get_advi_callbacks(self) -> List[Any]:
+        """Prepare a list of callbacks for ADVI fitting.
+
+        This can be overridden by subclasses to apply custom callbacks or change the
+        parameters of the CheckParametersConvergence callback.
+
+        Returns:
+            List[Any]: List of callbacks.
+        """
+        return [pm.callbacks.CheckParametersConvergence(tolerance=100, diff="relative")]
