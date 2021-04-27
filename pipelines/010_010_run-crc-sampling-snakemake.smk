@@ -6,7 +6,6 @@ from pathlib import Path
 import papermill
 import pretty_errors
 from pydantic import BaseModel
-from src.command_line_interfaces.cli_helpers import ModelOption, ModelFitMethod
 
 PYMC3_MODEL_CACHE_DIR = "models/model_cache/pymc3_model_cache/"
 REPORTS_DIR = "reports/crc_model_sampling_reports/"
@@ -14,15 +13,37 @@ REPORTS_DIR = "reports/crc_model_sampling_reports/"
 ENVIRONMENT_YAML = Path("default_environment.yml").as_posix()
 
 
+class ModelOption(str, Enum):
+    """Model options."""
+
+    crc_ceres_mimic = "crc_ceres_mimic"
+    speclet_one = "speclet_one"
+    speclet_two = "speclet_two"
+
+
+class ModelFitMethod(str, Enum):
+    """Available fit methods."""
+
+    advi = "ADVI"
+    mcmc = "MCMC"
+
 class ModelConfig(BaseModel):
+    """Model configuration format."""
+
     name: str
     model: ModelOption
     fit_method: ModelFitMethod = ModelFitMethod.advi
 
 
 models_configurations = [
+    ModelConfig(name="CERES-base-debug", model="crc_ceres_mimic", fit_method="ADVI"),
+    ModelConfig(name="CERES-base-debug", model="crc_ceres_mimic", fit_method="MCMC"),
     ModelConfig(name="SpecletTwo-debug", model="speclet_two", fit_method="ADVI"),
     ModelConfig(name="SpecletTwo-debug", model="speclet_two", fit_method="MCMC"),
+    ModelConfig(name="SpecletTwo-kras-debug", model="speclet_two", fit_method="ADVI"),
+    ModelConfig(name="SpecletTwo-kras-debug", model="speclet_two", fit_method="MCMC"),
+    ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="ADVI"),
+    ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="ADVI"),
 ]
 
 # model_names = (
@@ -36,6 +57,7 @@ models_configurations = [
 #     ("speclet_two", "SpecletTwo-debug", "ADVI"),
 # )
 
+# Separate information in model configuration for `all` step to create wildcards.
 models = [m.model.value for m in models_configurations]
 model_names = [m.name for m in models_configurations]
 fit_methods = [m.fit_method.value for m in models_configurations]
@@ -53,33 +75,62 @@ rule all:
 
 
 # RAM required for each configuration (in GB -> mult by 1000).
+#   key: [model][debug][fit_method]
 sample_models_memory_lookup = {
-    "speclet_two": {True: {"ADVI": 5, "MCMC": 5}, False: {"ADVI": 20, "MCMC": 20}}
+    "crc_ceres_mimic": {
+        True: {"ADVI": 15, "MCMC": 12},
+        False: {"ADVI": 20, "MCMC": 40}
+    },
+    "speclet_two": {
+        True: {"ADVI": 7, "MCMC": 10},
+        False: {"ADVI": 20, "MCMC": 40}
+    },
 }
 
 # Time required for each configuration.
+#   key: [model][debug][fit_method]
 sample_models_time_lookup = {
+    "crc_ceres_mimic": {
+        True: {"ADVI": "00:30:00", "MCMC": "00:30:00"},
+        False: {"ADVI": "03:00:00", "MCMC": "06:00:00"},
+    },
     "speclet_two": {
-        True: {"ADVI": "00:12:00", "MCMC": "00:30:00"},
+        True: {"ADVI": "00:07:00", "MCMC": "00:42:00"},
         False: {"ADVI": "06:00:00", "MCMC": "06:00:00"},
-    }
+    },
 }
 
 
 def is_debug(name: str) -> bool:
+    """Determine the debug status of model name."""
     return "debug" in name
 
 
-def get_from_lookup(w, lookup_dict) -> Any:
+def get_from_lookup(w, lookup_dict):
+    """Generic dictionary lookup for the params in the `sample_models` step."""
     return lookup_dict[w.model][is_debug(w.model_name)][w.fit_method]
 
 
-def get_sample_models_memory(w):
-    return get_from_lookup(w, sample_models_memory_lookup)
+def get_sample_models_memory(w) -> float:
+    """Memory required for the `sample_models` step."""
+    try:
+        return get_from_lookup(w, sample_models_memory_lookup) * 1000
+    except:
+        if is_debug(w.model_name):
+            return 7 * 1000
+        else:
+            return 20 * 1000
 
 
-def get_sample_models_time(w):
-    return get_from_lookup(w, sample_models_time_lookup)
+def get_sample_models_time(w) -> str:
+    """Time required for the `sample_models` step."""
+    try:
+        return get_from_lookup(w, sample_models_time_lookup)
+    except:
+        if is_debug(w.model_name):
+            return "00:30:00"
+        else:
+            return "01:00:00"
 
 
 rule sample_models:
@@ -134,5 +185,6 @@ rule execute_report:
         ENVIRONMENT_YAML
     shell:
         "jupyter nbconvert --to notebook --inplace --execute {input.notebook} && "
-        "nbqa black {input.notebook} && nbqa isort {input.notebook} && "
+        "nbqa black {input.notebook} --nbqa-mutate && "
+        "nbqa isort {input.notebook} --nbqa-mutate && "
         "jupyter nbconvert --to markdown {input.notebook}"
