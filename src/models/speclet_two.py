@@ -50,6 +50,7 @@ class SpecletTwo(SpecletModel):
         self._kras_cov = kras_cov
         self.mcmc_sampling_params.draws = 2000
         self.mcmc_sampling_params.tune = 2000
+        self.mcmc_sampling_params.target_accept = 0.99
 
     @property
     def kras_cov(self) -> bool:
@@ -87,8 +88,8 @@ class SpecletTwo(SpecletModel):
 
         with pm.Model() as model:
             # [gene, cell line] varying intercept.
-            μ_ɑ = pm.Normal("μ_ɑ", 0, 5)
-            σ_ɑ = pm.HalfNormal("σ_ɑ", 5)
+            μ_ɑ = pm.Normal("μ_ɑ", 0, 0.5)
+            σ_ɑ = pm.HalfNormal("σ_ɑ", 1)
             ɑ = pm.Normal("ɑ", μ_ɑ, σ_ɑ, shape=(ic.n_genes, ic.n_celllines))
 
             # Batch effect varying intercept.
@@ -100,14 +101,14 @@ class SpecletTwo(SpecletModel):
 
             if self.kras_cov:
                 # Varying effect for KRAS mutation.
-                μ_β = pm.Normal("μ_β", 0, 1)
+                μ_β = pm.Normal("μ_β", 0, 0.5)
                 σ_β = pm.HalfNormal("σ_β", 1)
                 β = pm.Normal("β", μ_β, σ_β, shape=ic.n_kras_mutations)
                 _mu += β[kras_idx_shared]
 
             μ = pm.Deterministic("μ", _mu)
 
-            σ_σ = pm.HalfNormal("σ_σ", 1)
+            σ_σ = pm.HalfNormal("σ_σ", 0.5)
             σ = pm.HalfNormal("σ", σ_σ, shape=ic.n_sgrnas)
 
             # Likelihood
@@ -177,4 +178,4 @@ class SpecletTwo(SpecletModel):
         Returns:
             List[Any]: List of callbacks.
         """
-        return [pm.callbacks.CheckParametersConvergence(tolerance=100, diff="relative")]
+        return [pm.callbacks.CheckParametersConvergence(tolerance=0.1, diff="absolute")]

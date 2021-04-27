@@ -35,6 +35,7 @@ class MCMCSamplingParameters(PyMC3SamplingParameters):
     chains: int = 4
     init: str = "auto"
     n_init: int = 200000
+    target_accept: float = 0.9
 
 
 class VISamplingParameters(PyMC3SamplingParameters):
@@ -167,6 +168,7 @@ class SpecletModel:
         tune: Optional[int] = None,
         chains: Optional[int] = None,
         cores: Optional[int] = None,
+        target_accept: Optional[float] = None,
         prior_pred_samples: Optional[int] = None,
         post_pred_samples: Optional[int] = None,
         random_seed: Optional[int] = None,
@@ -186,8 +188,10 @@ class SpecletModel:
               None.
             tune (Optional[int], optional): Number of tuning steps. Defaults to None.
             chains (Optional[int], optional): Number of chains. Defaults to 3.
-            cores (Optional[Optional[int]], optional): Number of cores. Defaults to
+            cores (Optional[int], optional): Number of cores. Defaults to
               None.
+            target_accept (Optional[float], optional): MCMC target acceptance. Defaults
+              to None.
             prior_pred_samples (Optional[int], optional): Number of samples from the
               prior distributions. Defaults to None.
             post_pred_samples (Optional[int], optional): Number of samples for posterior
@@ -214,6 +218,8 @@ class SpecletModel:
             chains = self.mcmc_sampling_params.chains
         if cores is None:
             cores = self.mcmc_sampling_params.cores
+        if target_accept is None:
+            target_accept = self.mcmc_sampling_params.target_accept
         if prior_pred_samples is None:
             prior_pred_samples = self.mcmc_sampling_params.prior_pred_samples
         if post_pred_samples is None:
@@ -231,6 +237,10 @@ class SpecletModel:
         if not ignore_cache and self.cache_manager.mcmc_cache_exists():
             self.mcmc_results = self.cache_manager.get_mcmc_cache(model=self.model)
             return self.mcmc_results
+
+        if sample_kwargs is None:
+            sample_kwargs = {}
+        sample_kwargs["target_accept"] = target_accept
 
         self.mcmc_results = pmapi.pymc3_sampling_procedure(
             model=self.model,

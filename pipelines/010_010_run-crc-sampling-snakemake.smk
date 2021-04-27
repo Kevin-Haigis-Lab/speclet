@@ -69,7 +69,7 @@ rule all:
 #   key: [model][debug][fit_method]
 sample_models_memory_lookup = {
     "crc_ceres_mimic": {
-        True: {"ADVI": 15, "MCMC": 12},
+        True: {"ADVI": 15, "MCMC": 20},
         False: {"ADVI": 20, "MCMC": 40}
     },
     "speclet_two": {
@@ -86,8 +86,8 @@ sample_models_time_lookup = {
         False: {"ADVI": "03:00:00", "MCMC": "06:00:00"},
     },
     "speclet_two": {
-        True: {"ADVI": "00:20:00", "MCMC": "02:00:00"},
-        False: {"ADVI": "06:00:00", "MCMC": "06:00:00"},
+        True: {"ADVI": "00:20:00", "MCMC": "03:00:00"},
+        False: {"ADVI": "06:00:00", "MCMC": "12:00:00"},
     },
 }
 
