@@ -155,3 +155,38 @@ class TestSpecletModel:
         assert not sp.debug and not sp.data_manager.debug
         sp.debug = True
         assert sp.debug and sp.data_manager.debug
+
+    def test_changing_mcmc_sampling_params(self, tmp_path: Path):
+        sp = MockSpecletModelClass(
+            "test-model",
+            root_cache_dir=tmp_path,
+            debug=False,
+            data_manager=MockDataManager(debug=False),
+        )
+        sp.mcmc_sampling_params.draws = 12
+        sp.mcmc_sampling_params.chains = 2
+        sp.mcmc_sampling_params.cores = 2
+        sp.mcmc_sampling_params.tune = 13
+        sp.mcmc_sampling_params.prior_pred_samples = 14
+        sp.build_model()
+        mcmc_res = sp.mcmc_sample_model()
+        assert mcmc_res.trace["a"].shape == (2 * 12,)
+        assert mcmc_res.posterior_predictive["y"].shape == (2, 12, 100)
+        assert mcmc_res.prior_predictive["a"].shape == (14,)
+
+    def test_changing_advi_sampling_params(self, tmp_path: Path):
+        sp = MockSpecletModelClass(
+            "test-model",
+            root_cache_dir=tmp_path,
+            debug=False,
+            data_manager=MockDataManager(debug=False),
+        )
+        sp.advi_sampling_params.draws = 17
+        sp.advi_sampling_params.n_iterations = 103
+        sp.advi_sampling_params.prior_pred_samples = 14
+        sp.build_model()
+        advi_res = sp.advi_sample_model()
+        assert len(advi_res.approximation.hist) == 103
+        assert advi_res.trace["a"].shape == (17,)
+        assert advi_res.posterior_predictive["y"].shape == (17, 100)
+        assert advi_res.prior_predictive["a"].shape == (14,)
