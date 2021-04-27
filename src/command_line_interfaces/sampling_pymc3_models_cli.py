@@ -11,7 +11,7 @@ import numpy as np
 import typer
 
 from src.command_line_interfaces import cli_helpers
-from src.command_line_interfaces.cli_helpers import ModelOption
+from src.command_line_interfaces.cli_helpers import ModelFitMethod, ModelOption
 from src.io import cache_io
 from src.loggers import get_logger
 from src.models.speclet_model import SpecletModel
@@ -36,14 +36,16 @@ def make_cache_name(root_cache_dir: Path, name: str) -> Path:
     return root_cache_dir / name
 
 
-def touch_file(cache_dir: Path, model: str, name: str) -> None:
+def touch_file(
+    cache_dir: Path, model: str, name: str, fit_method: ModelFitMethod
+) -> None:
     """Touch a file.
 
     Args:
         model (str): The model.
         name (str): The custom name of the model.
     """
-    p = cache_dir / (model + "_" + name + ".txt")
+    p = cache_dir / (model + "_" + name + "_" + fit_method.value + ".txt")
     p.touch()
     return None
 
@@ -56,7 +58,9 @@ PYMC3_CACHE_DIR = cache_io.default_cache_dir() / "pymc3_model_cache"
 def sample_speclet_model(
     model: ModelOption,
     name: str,
-    cores: int = 1,
+    fit_method: ModelFitMethod = ModelFitMethod.advi,
+    mcmc_chains: int = 4,
+    mcmc_cores: int = 4,
     sample: bool = True,
     ignore_cache: bool = False,
     debug: bool = False,
@@ -105,12 +109,21 @@ def sample_speclet_model(
     speclet_model.build_model()
 
     if sample:
-        logger.info("Running ADVI fitting method.")
-        _ = speclet_model.advi_sample_model(random_seed=random_seed)
+        if fit_method == ModelFitMethod.advi:
+            logger.info("Running ADVI fitting method.")
+            _ = speclet_model.advi_sample_model(random_seed=random_seed)
+
+        elif fit_method == ModelFitMethod.mcmc:
+            logger.info("Running MCMC fitting method.")
+            _ = speclet_model.mcmc_sample_model(
+                chains=mcmc_chains, cores=mcmc_cores, random_seed=random_seed
+            )
+        else:
+            raise Exception(f"Unknown fit method '{fit_method.value}'.")
 
     if touch:
         logger.info("Touching output file.")
-        touch_file(cache_dir=cache_dir, model=model, name=name)
+        touch_file(cache_dir=cache_dir, model=model, name=name, fit_method=fit_method)
 
     toc = time()
     logger.info(f"finished; execution time: {(toc - tic) / 60:.2f} minutes")

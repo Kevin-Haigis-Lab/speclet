@@ -68,6 +68,13 @@ def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
     return model_option_map[model_opt]
 
 
+class ModelFitMethod(str, Enum):
+    """Available fit methods."""
+
+    advi = "ADVI"
+    mcmc = "MCMC"
+
+
 #### ---- Modifying models ---- ####
 
 
