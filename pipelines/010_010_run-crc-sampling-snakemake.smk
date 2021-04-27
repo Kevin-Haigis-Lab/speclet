@@ -36,26 +36,17 @@ class ModelConfig(BaseModel):
 
 
 models_configurations = [
-    ModelConfig(name="CERES-base-debug", model="crc_ceres_mimic", fit_method="ADVI"),
-    ModelConfig(name="CERES-base-debug", model="crc_ceres_mimic", fit_method="MCMC"),
+    # ModelConfig(name="CERES-base-debug", model="crc_ceres_mimic", fit_method="ADVI"),
+    # ModelConfig(name="CERES-base-debug", model="crc_ceres_mimic", fit_method="MCMC"),
     ModelConfig(name="SpecletTwo-debug", model="speclet_two", fit_method="ADVI"),
     ModelConfig(name="SpecletTwo-debug", model="speclet_two", fit_method="MCMC"),
     ModelConfig(name="SpecletTwo-kras-debug", model="speclet_two", fit_method="ADVI"),
     ModelConfig(name="SpecletTwo-kras-debug", model="speclet_two", fit_method="MCMC"),
     ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="ADVI"),
+    ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="MCMC"),
     ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="ADVI"),
+    ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="MCMC"),
 ]
-
-# model_names = (
-#     ("crc_ceres_mimic", "CERES-base"),
-#     ("crc_ceres_mimic", "CERES-copynumber"),
-#     ("crc_ceres_mimic", "CERES-sgrnaint"),
-#     ("crc_ceres_mimic", "CERES-copynumber-sgrnaint"),
-#     ("speclet_one", "SpecletOne"),
-#     ("speclet_two", "SpecletTwo"),
-#     ("speclet_two", "SpecletTwo-debug", "MCMC"),
-#     ("speclet_two", "SpecletTwo-debug", "ADVI"),
-# )
 
 # Separate information in model configuration for `all` step to create wildcards.
 models = [m.model.value for m in models_configurations]
@@ -82,8 +73,8 @@ sample_models_memory_lookup = {
         False: {"ADVI": 20, "MCMC": 40}
     },
     "speclet_two": {
-        True: {"ADVI": 7, "MCMC": 10},
-        False: {"ADVI": 20, "MCMC": 40}
+        True: {"ADVI": 7, "MCMC": 20},
+        False: {"ADVI": 30, "MCMC": 150}
     },
 }
 
@@ -95,7 +86,7 @@ sample_models_time_lookup = {
         False: {"ADVI": "03:00:00", "MCMC": "06:00:00"},
     },
     "speclet_two": {
-        True: {"ADVI": "00:07:00", "MCMC": "00:42:00"},
+        True: {"ADVI": "00:20:00", "MCMC": "02:00:00"},
         False: {"ADVI": "06:00:00", "MCMC": "06:00:00"},
     },
 }
