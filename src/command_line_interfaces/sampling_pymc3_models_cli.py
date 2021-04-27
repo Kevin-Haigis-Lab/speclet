@@ -14,7 +14,6 @@ from src.command_line_interfaces import cli_helpers
 from src.command_line_interfaces.cli_helpers import ModelOption
 from src.io import cache_io
 from src.loggers import get_logger
-from src.models.ceres_mimic import CeresMimic
 from src.models.speclet_model import SpecletModel
 
 logger = get_logger()
@@ -100,10 +99,7 @@ def sample_speclet_model(
 
     assert isinstance(speclet_model, SpecletModel)
 
-    if model == ModelOption.crc_ceres_mimic and isinstance(speclet_model, CeresMimic):
-        cli_helpers.modify_ceres_model_by_name(
-            model=speclet_model, name=name, logger=logger
-        )
+    cli_helpers.modify_model_by_name(model=speclet_model, name=name, logger=logger)
 
     logger.info("Running model build method.")
     speclet_model.build_model()
