@@ -48,6 +48,8 @@ class SpecletTwo(SpecletModel):
             data_manager=data_manager,
         )
         self._kras_cov = kras_cov
+        self.mcmc_sampling_params.draws = 2000
+        self.mcmc_sampling_params.tune = 2000
 
     @property
     def kras_cov(self) -> bool:
@@ -84,27 +86,26 @@ class SpecletTwo(SpecletModel):
         lfc_shared = theano.shared(data.lfc.values)
 
         with pm.Model() as model:
-            # [sgRNA|gene, cell line] varying intercept.
+            # [gene, cell line] varying intercept.
             μ_ɑ = pm.Normal("μ_ɑ", 0, 5)
             σ_ɑ = pm.HalfNormal("σ_ɑ", 5)
             ɑ = pm.Normal("ɑ", μ_ɑ, σ_ɑ, shape=(ic.n_genes, ic.n_celllines))
-
-            # Varying slope per cell line for CN.
-            μ_β = pm.Normal("μ_β", 0, 1)
-            σ_β = pm.HalfNormal("σ_β", 1)
-            β = pm.Normal("β", μ_β, σ_β, shape=ic.n_kras_mutations)
 
             # Batch effect varying intercept.
             μ_η = pm.Normal("μ_η", 0, 0.1)
             σ_η = pm.HalfNormal("σ_η", 0.1)
             η = pm.Normal("η", μ_η, σ_η, shape=ic.n_batches)
 
-            μ = pm.Deterministic(
-                "μ",
-                ɑ[gene_idx_shared, cellline_idx_shared]
-                + β[kras_idx_shared]
-                + η[batch_idx_shared],
-            )
+            _mu = ɑ[gene_idx_shared, cellline_idx_shared] + η[batch_idx_shared]
+
+            if self.kras_cov:
+                # Varying effect for KRAS mutation.
+                μ_β = pm.Normal("μ_β", 0, 1)
+                σ_β = pm.HalfNormal("σ_β", 1)
+                β = pm.Normal("β", μ_β, σ_β, shape=ic.n_kras_mutations)
+                _mu += β[kras_idx_shared]
+
+            μ = pm.Deterministic("μ", _mu)
 
             σ_σ = pm.HalfNormal("σ_σ", 1)
             σ = pm.HalfNormal("σ", σ_σ, shape=ic.n_sgrnas)

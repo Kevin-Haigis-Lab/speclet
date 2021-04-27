@@ -85,7 +85,7 @@ def pymc3_sampling_procedure(
     chains: int = 3,
     cores: Optional[int] = None,
     prior_pred_samples: int = 1000,
-    post_pred_samples: int = 1000,
+    post_pred_samples: Optional[int] = None,
     random_seed: Optional[int] = None,
     sample_kwargs: Optional[Dict[str, Any]] = None,
 ) -> MCMCSamplingResults:
@@ -99,8 +99,9 @@ def pymc3_sampling_procedure(
         cores (Optional[int], optional): Number of cores. Defaults to None.
         prior_pred_samples (int, optional): Number of samples from the prior
           distributions. Defaults to 1000.
-        post_pred_samples (int, optional): Number of samples for posterior predictions.
-          Defaults to 1000.
+        post_pred_samples (Optional[int], optional): Number of samples for posterior
+          predictions. The default behavior (None) to keep the same size as the MCMC
+          trace. Defaults to None.
         random_seed (Optional[int], optional): The random seed for sampling.
           Defaults to None.
         sample_kwargs (Dict[str, Any], optional): Kwargs for the sampling method.
@@ -111,6 +112,8 @@ def pymc3_sampling_procedure(
     """
     if sample_kwargs is None:
         sample_kwargs = {}
+
+    keep_size = True if post_pred_samples is None else None
 
     with model:
         prior_pred = pm.sample_prior_predictive(
@@ -124,8 +127,12 @@ def pymc3_sampling_procedure(
             random_seed=random_seed,
             **sample_kwargs,
         )
+
         post_pred = pm.sample_posterior_predictive(
-            trace, samples=post_pred_samples, random_seed=random_seed
+            trace,
+            samples=post_pred_samples,
+            keep_size=keep_size,
+            random_seed=random_seed,
         )
 
     return MCMCSamplingResults(
