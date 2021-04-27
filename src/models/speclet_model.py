@@ -275,9 +275,9 @@ class SpecletModel:
         self,
         method: Optional[str] = None,
         n_iterations: Optional[int] = None,
-        draws: int = 1000,
-        prior_pred_samples: int = 1000,
-        post_pred_samples: int = 1000,
+        draws: Optional[int] = None,
+        prior_pred_samples: Optional[int] = None,
+        post_pred_samples: Optional[int] = None,
         random_seed: Optional[int] = None,
         ignore_cache: bool = False,
     ) -> pmapi.ApproximationSamplingResults:
