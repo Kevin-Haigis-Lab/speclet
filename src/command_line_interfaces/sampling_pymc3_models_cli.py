@@ -43,7 +43,7 @@ def touch_file(
         model (str): The model.
         name (str): The custom name of the model.
     """
-    p = cache_dir / (model + "_" + name + "_" + fit_method.value + ".txt")
+    p = cache_dir / name / (model + "_" + name + "_" + fit_method.value + ".txt")
     p.touch()
     return None
 
@@ -87,8 +87,7 @@ def sample_speclet_model(
     tic = time()
 
     name = cli_helpers.clean_model_names(name)
-    cache_dir = make_cache_name(root_cache_dir=PYMC3_CACHE_DIR, name=name)
-    logger.info(f"Cache directory: {cache_dir.as_posix()}")
+    logger.info(f"Cache directory: {PYMC3_CACHE_DIR.as_posix()}")
 
     if random_seed:
         np.random.seed(random_seed)
@@ -97,7 +96,7 @@ def sample_speclet_model(
 
     logger.info(f"Sampling '{model}' with custom name '{name}'")
     ModelClass = cli_helpers.get_model_class(model_opt=model)
-    speclet_model = ModelClass(name=name, root_cache_dir=cache_dir, debug=debug)
+    speclet_model = ModelClass(name=name, root_cache_dir=PYMC3_CACHE_DIR, debug=debug)
 
     assert isinstance(speclet_model, SpecletModel)
 
@@ -121,7 +120,9 @@ def sample_speclet_model(
 
     if touch:
         logger.info("Touching output file.")
-        touch_file(cache_dir=cache_dir, model=model, name=name, fit_method=fit_method)
+        touch_file(
+            cache_dir=PYMC3_CACHE_DIR, model=model, name=name, fit_method=fit_method
+        )
 
     toc = time()
     logger.info(f"finished; execution time: {(toc - tic) / 60:.2f} minutes")

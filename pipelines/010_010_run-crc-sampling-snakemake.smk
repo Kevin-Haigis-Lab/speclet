@@ -39,13 +39,13 @@ models_configurations = [
     # ModelConfig(name="CERES-base-debug", model="crc_ceres_mimic", fit_method="ADVI"),
     # ModelConfig(name="CERES-base-debug", model="crc_ceres_mimic", fit_method="MCMC"),
     ModelConfig(name="SpecletTwo-debug", model="speclet_two", fit_method="ADVI"),
-    # ModelConfig(name="SpecletTwo-debug", model="speclet_two", fit_method="MCMC"),
-    # ModelConfig(name="SpecletTwo-kras-debug", model="speclet_two", fit_method="ADVI"),
-    # ModelConfig(name="SpecletTwo-kras-debug", model="speclet_two", fit_method="MCMC"),
-    # ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="ADVI"),
-    # ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="MCMC"),
-    # ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="ADVI"),
-    # ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="MCMC"),
+    ModelConfig(name="SpecletTwo-debug", model="speclet_two", fit_method="MCMC"),
+    ModelConfig(name="SpecletTwo-kras-debug", model="speclet_two", fit_method="ADVI"),
+    ModelConfig(name="SpecletTwo-kras-debug", model="speclet_two", fit_method="MCMC"),
+    ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="ADVI"),
+    ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="MCMC"),
+    ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="ADVI"),
+    ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="MCMC"),
 ]
 
 # Separate information in model configuration for `all` step to create wildcards.
@@ -77,6 +77,7 @@ sample_models_memory_lookup = {
         False: {"ADVI": 30, "MCMC": 150}
     },
 }
+
 
 # Time required for each configuration.
 #   key: [model][debug][fit_method]
