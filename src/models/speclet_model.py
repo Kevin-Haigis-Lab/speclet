@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 import src.modeling.simulation_based_calibration_helpers as sbc
+from src.loggers import logger
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.managers.model_data_managers import DataManager
 from src.modeling import pymc3_sampling_api as pmapi
@@ -108,18 +109,19 @@ class SpecletModel:
         Args:
             new_value (bool): New value for `debug`.
         """
-        print(f"current value of self._debug: {self._debug}")
         if new_value == self._debug:
             return
+        logger.info(f"Changing value of debug to '{new_value}'.")
         self._debug = new_value
         if self.data_manager is not None:
             self.data_manager.debug = new_value
 
     def _reset_model_and_results(self):
+        logger.warning("Reseting all model and results.")
         self.model = None
         self.mcmc_results = None
         self.advi_results = None
-        self.cache_manager.clear_all_caches()
+        # self.cache_manager.clear_all_caches()
 
     @abstractmethod
     def model_specification(self) -> Tuple[pm.Model, str]:
@@ -145,21 +147,30 @@ class SpecletModel:
             AttributeError: Raised the `observed_var_name` attribute is still None
               after calling `self.model_specification()`
         """
+        logger.debug("Building PyMC3 model.")
         if self.data_manager is None:
+            logger.error("Cannot build a model without a data manager.")
             raise AttributeError("Cannot build a model without a data manager.")
 
+        logger.info("Calling `model_specification()` method.")
         self.model, self.observed_var_name = self.model_specification()
 
         if self.model is None:
             m = "The `model` attribute cannot be None at the end of the "
             m += "`build_model()` method."
+            logger.error(m)
             raise AttributeError(m)
 
         if self.observed_var_name is None:
             m = "The `observed_var_name` attribute cannot be None at the end of the "
             m += "`build_model()` method."
+            logger.error(m)
             raise AttributeError(m)
 
+        return None
+
+    def update_mcmc_sampling_parameters(self) -> None:
+        """Override if MCMC sampling parameters need to be adjusted."""
         return None
 
     def mcmc_sample_model(
@@ -210,6 +221,8 @@ class SpecletModel:
         Returns:
             pmapi.MCMCSamplingResults: The results of MCMC sampling.
         """
+        logger.debug("Beginning MCMC sampling method.")
+        self.update_mcmc_sampling_parameters()
         if mcmc_draws is None:
             mcmc_draws = self.mcmc_sampling_params.draws
         if tune is None:
@@ -232,9 +245,11 @@ class SpecletModel:
             )
 
         if self.mcmc_results is not None:
+            logger.info("Returning results from stored `mcmc_results` attribute.")
             return self.mcmc_results
 
         if not ignore_cache and self.cache_manager.mcmc_cache_exists():
+            logger.info("Returning results from cache.")
             self.mcmc_results = self.cache_manager.get_mcmc_cache(model=self.model)
             return self.mcmc_results
 
@@ -242,6 +257,7 @@ class SpecletModel:
             sample_kwargs = {}
         sample_kwargs["target_accept"] = target_accept
 
+        logger.info("Beginning MCMC sampling.")
         self.mcmc_results = pmapi.pymc3_sampling_procedure(
             model=self.model,
             mcmc_draws=mcmc_draws,
@@ -253,6 +269,7 @@ class SpecletModel:
             random_seed=random_seed,
             sample_kwargs=sample_kwargs,
         )
+        logger.info("Finished MCMC sampling - caching results.")
         self.cache_manager.write_mcmc_cache(self.mcmc_results)
         return self.mcmc_results
 
@@ -280,6 +297,10 @@ class SpecletModel:
         return [
             pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
         ]
+
+    def update_advi_sampling_parameters(self) -> None:
+        """Override if ADVI fitting parameters need to be adjusted."""
+        return None
 
     def advi_sample_model(
         self,
@@ -324,6 +345,8 @@ class SpecletModel:
             ApproximationSamplingResults: A collection of the fitting and sampling
               results.
         """
+        logger.debug("Beginning ADVI fitting method.")
+        self.update_advi_sampling_parameters()
         if method is None:
             method = self.advi_sampling_params.method
         if n_iterations is None:
@@ -347,12 +370,15 @@ class SpecletModel:
             fit_kwargs["more_replacements"] = replacements
 
         if self.advi_results is not None:
+            logger.info("Returning results from stored `advi_results` attribute.")
             return self.advi_results
 
         if not ignore_cache and self.cache_manager.advi_cache_exists():
+            logger.info("Returning results from cache.")
             self.advi_results = self.cache_manager.get_advi_cache()
             return self.advi_results
 
+        logger.info("Beginning ADVI fitting.")
         self.advi_results = pmapi.pymc3_advi_approximation_procedure(
             model=self.model,
             method=method,
@@ -364,6 +390,7 @@ class SpecletModel:
             random_seed=random_seed,
             fit_kwargs=fit_kwargs,
         )
+        logger.info("Finished ADVI fitting - caching results.")
         self.cache_manager.write_advi_cache(self.advi_results)
         return self.advi_results
 

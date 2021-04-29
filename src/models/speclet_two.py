@@ -7,6 +7,7 @@ import pymc3 as pm
 import theano
 
 from src.data_processing import achilles as achelp
+from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
 from src.models.speclet_model import ReplacementsDict, SpecletModel
 
@@ -48,9 +49,6 @@ class SpecletTwo(SpecletModel):
             data_manager=data_manager,
         )
         self._kras_cov = kras_cov
-        self.mcmc_sampling_params.draws = 2000
-        self.mcmc_sampling_params.tune = 2000
-        self.mcmc_sampling_params.target_accept = 0.99
 
     @property
     def kras_cov(self) -> bool:
@@ -64,6 +62,7 @@ class SpecletTwo(SpecletModel):
         If the new value is different, all model and sampling results are reset.
         """
         if new_value != self._kras_cov:
+            logger.info(f"Changing `kras_cov` attribute to '{new_value}'.")
             self._kras_cov = new_value
             self._reset_model_and_results()
 
@@ -73,12 +72,14 @@ class SpecletTwo(SpecletModel):
         Returns:
             Tuple[pm.Model, str]: The model and name of the observed variable.
         """
+        logger.info("Beginning PyMC3 model specification.")
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
         ic = achelp.common_indices(data)
 
         # Shared Theano variables
+        logger.info("Getting Theano shared variables.")
         sgrna_idx_shared = theano.shared(ic.sgrna_idx)
         gene_idx_shared = theano.shared(ic.gene_idx)
         cellline_idx_shared = theano.shared(ic.cellline_idx)
@@ -86,18 +87,19 @@ class SpecletTwo(SpecletModel):
         batch_idx_shared = theano.shared(ic.batch_idx)
         lfc_shared = theano.shared(data.lfc.values)
 
+        logger.info("Creating PyMC3 model.")
         with pm.Model() as model:
             # [gene, cell line] varying intercept.
-            μ_ɑ = pm.Normal("μ_ɑ", 0, 0.5)
-            σ_ɑ = pm.HalfNormal("σ_ɑ", 1)
-            ɑ = pm.Normal("ɑ", μ_ɑ, σ_ɑ, shape=(ic.n_genes, ic.n_celllines))
+            μ_α = pm.Normal("μ_α", 0, 0.5)
+            σ_α = pm.HalfNormal("σ_α", 1)
+            α = pm.Normal("α", μ_α, σ_α, shape=(ic.n_genes, ic.n_celllines))
 
             # Batch effect varying intercept.
             μ_η = pm.Normal("μ_η", 0, 0.1)
             σ_η = pm.HalfNormal("σ_η", 0.1)
             η = pm.Normal("η", μ_η, σ_η, shape=ic.n_batches)
 
-            _mu = ɑ[gene_idx_shared, cellline_idx_shared] + η[batch_idx_shared]
+            _mu = α[gene_idx_shared, cellline_idx_shared] + η[batch_idx_shared]
 
             if self.kras_cov:
                 # Varying effect for KRAS mutation.
@@ -120,6 +122,7 @@ class SpecletTwo(SpecletModel):
                 total_size=total_size,
             )
 
+        logger.debug("Finished building model.")
         self.shared_vars = {
             "sgrna_idx_shared": sgrna_idx_shared,
             "gene_idx_shared": gene_idx_shared,
@@ -178,4 +181,27 @@ class SpecletTwo(SpecletModel):
         Returns:
             List[Any]: List of callbacks.
         """
-        return [pm.callbacks.CheckParametersConvergence(tolerance=0.1, diff="absolute")]
+        logger.debug("Custom ADVI callbacks.")
+        return [
+            pm.callbacks.CheckParametersConvergence(
+                every=10, tolerance=0.01, diff="relative"
+            )
+        ]
+
+    def update_mcmc_sampling_parameters(self) -> None:
+        """Adjust the ADVI parameters depending on the state of the object."""
+        self.mcmc_sampling_params.draws = 4000
+        self.mcmc_sampling_params.tune = 2000
+        self.mcmc_sampling_params.target_accept = 0.99
+        return None
+
+    def update_advi_sampling_parameters(self) -> None:
+        """Adjust the ADVI parameters depending on the state of the object."""
+        parameter_adjustment_map = {
+            True: {True: 40000, False: 40000},
+            False: {True: 100000, False: 100000},
+        }
+        self.advi_sampling_params.n_iterations = parameter_adjustment_map[self.debug][
+            self.kras_cov
+        ]
+        return None

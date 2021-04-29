@@ -7,7 +7,7 @@ import papermill
 import pretty_errors
 from pydantic import BaseModel
 
-PYMC3_MODEL_CACHE_DIR = "models/model_cache/pymc3_model_cache/"
+PYMC3_MODEL_CACHE_DIR = "models/"
 REPORTS_DIR = "reports/crc_model_sampling_reports/"
 
 ENVIRONMENT_YAML = Path("default_environment.yml").as_posix()
@@ -39,13 +39,13 @@ models_configurations = [
     # ModelConfig(name="CERES-base-debug", model="crc_ceres_mimic", fit_method="ADVI"),
     # ModelConfig(name="CERES-base-debug", model="crc_ceres_mimic", fit_method="MCMC"),
     ModelConfig(name="SpecletTwo-debug", model="speclet_two", fit_method="ADVI"),
-    ModelConfig(name="SpecletTwo-debug", model="speclet_two", fit_method="MCMC"),
-    ModelConfig(name="SpecletTwo-kras-debug", model="speclet_two", fit_method="ADVI"),
-    ModelConfig(name="SpecletTwo-kras-debug", model="speclet_two", fit_method="MCMC"),
-    ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="ADVI"),
-    ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="MCMC"),
-    ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="ADVI"),
-    ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="MCMC"),
+    # ModelConfig(name="SpecletTwo-debug", model="speclet_two", fit_method="MCMC"),
+    # ModelConfig(name="SpecletTwo-kras-debug", model="speclet_two", fit_method="ADVI"),
+    # ModelConfig(name="SpecletTwo-kras-debug", model="speclet_two", fit_method="MCMC"),
+    # ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="ADVI"),
+    # ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="MCMC"),
+    # ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="ADVI"),
+    # ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="MCMC"),
 ]
 
 # Separate information in model configuration for `all` step to create wildcards.
@@ -69,12 +69,12 @@ rule all:
 #   key: [model][debug][fit_method]
 sample_models_memory_lookup = {
     "crc_ceres_mimic": {
-        True: {"ADVI": 15, "MCMC": 20},
+        True:  {"ADVI": 15, "MCMC": 20},
         False: {"ADVI": 20, "MCMC": 40}
     },
     "speclet_two": {
-        True: {"ADVI": 7, "MCMC": 16},
-        False: {"ADVI": 30, "MCMC": 120}
+        True:  {"ADVI": 7, "MCMC": 30},
+        False: {"ADVI": 30, "MCMC": 150}
     },
 }
 
@@ -82,12 +82,12 @@ sample_models_memory_lookup = {
 #   key: [model][debug][fit_method]
 sample_models_time_lookup = {
     "crc_ceres_mimic": {
-        True: {"ADVI": "00:30:00", "MCMC": "00:30:00"},
+        True:  {"ADVI": "00:30:00", "MCMC": "00:30:00"},
         False: {"ADVI": "03:00:00", "MCMC": "06:00:00"},
     },
     "speclet_two": {
-        True: {"ADVI": "00:20:00", "MCMC": "02:00:00"},
-        False: {"ADVI": "06:00:00", "MCMC": "12:00:00"},
+        True:  {"ADVI": "00:30:00", "MCMC": "12:00:00"},
+        False: {"ADVI": "10:00:00", "MCMC": "48:00:00"},
     },
 }
 
@@ -102,10 +102,11 @@ def get_from_lookup(w, lookup_dict):
     return lookup_dict[w.model][is_debug(w.model_name)][w.fit_method]
 
 
-def get_sample_models_memory(w) -> float:
+def get_sample_models_memory(w) -> int:
     """Memory required for the `sample_models` step."""
     try:
         return get_from_lookup(w, sample_models_memory_lookup) * 1000
+
     except:
         if is_debug(w.model_name):
             return 7 * 1000
@@ -124,6 +125,17 @@ def get_sample_models_time(w) -> str:
             return "01:00:00"
 
 
+def get_sample_models_partition(w) -> str:
+    t = [int(x) for x in get_sample_models_time(w).split(":")]
+    total_minutes = (t[0] * 60) + t[1]
+    if total_minutes < (12 * 60):
+        return "short"
+    elif total_minutes < (5 * 24 * 60):
+        return "medium"
+    else:
+        return "long"
+
+
 rule sample_models:
     output:
         PYMC3_MODEL_CACHE_DIR + "{model_name}/{model}_{model_name}_{fit_method}.txt",
@@ -132,6 +144,7 @@ rule sample_models:
         debug=lambda w: "debug" if "debug" in w.model_name else "no-debug",
         mem=get_sample_models_memory,
         time=get_sample_models_time,
+        partition=get_sample_models_partition,
     conda:
         ENVIRONMENT_YAML
     shell:

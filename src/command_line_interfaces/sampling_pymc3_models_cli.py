@@ -13,10 +13,8 @@ import typer
 from src.command_line_interfaces import cli_helpers
 from src.command_line_interfaces.cli_helpers import ModelFitMethod, ModelOption
 from src.io import cache_io
-from src.loggers import get_logger
+from src.loggers import logger
 from src.models.speclet_model import SpecletModel
-
-logger = get_logger()
 
 cli_helpers.configure_pretty()
 
@@ -52,7 +50,7 @@ def touch_file(
 
 #### ---- Main ---- ####
 
-PYMC3_CACHE_DIR = cache_io.default_cache_dir() / "pymc3_model_cache"
+PYMC3_CACHE_DIR = cache_io.default_cache_dir()
 
 
 def sample_speclet_model(
@@ -103,7 +101,7 @@ def sample_speclet_model(
 
     assert isinstance(speclet_model, SpecletModel)
 
-    cli_helpers.modify_model_by_name(model=speclet_model, name=name, logger=logger)
+    cli_helpers.modify_model_by_name(model=speclet_model, name=name)
 
     logger.info("Running model build method.")
     speclet_model.build_model()

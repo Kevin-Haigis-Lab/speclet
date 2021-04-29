@@ -10,7 +10,7 @@
         "J": "snakejob"
     },
     "sample_models": {
-        "partition": "short",
+        "partition": "{params.partition}",
         "cores": "{params.cores}",
         "mem": "{params.mem}",
         "time": "{params.time}",

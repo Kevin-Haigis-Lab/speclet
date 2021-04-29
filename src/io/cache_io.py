@@ -13,4 +13,4 @@ def default_cache_dir() -> Path:
     Returns:
         Path: Path to the default cache directory.
     """
-    return project_root_dir() / "models" / "model_cache"
+    return project_root_dir() / "models"

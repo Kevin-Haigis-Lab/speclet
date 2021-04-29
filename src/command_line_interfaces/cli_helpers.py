@@ -4,11 +4,11 @@
 
 
 from enum import Enum
-from logging import Logger
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, Type
 
 import pretty_errors
 
+from src.loggers import logger
 from src.models.ceres_mimic import CeresMimic
 from src.models.speclet_model import SpecletModel
 from src.models.speclet_one import SpecletOne
@@ -78,59 +78,46 @@ class ModelFitMethod(str, Enum):
 #### ---- Modifying models ---- ####
 
 
-def modify_model_by_name(
-    model: Any, name: str, logger: Optional[Logger] = None
-) -> None:
+def modify_model_by_name(model: Any, name: str) -> None:
     """Modify a model using keys in the name.
 
     Args:
         model (Any): Any model. If it is a type that has a modification method, then it
           will be sent through the method.
         name (str): Name of the model provided by the user.
-        logger (Optional[Logger], optional): A logger object called for each
-          modification. Defaults to None.
 
     Returns:
         [None]: None
     """
     if isinstance(model, CeresMimic):
-        modify_ceres_model_by_name(model, name, logger)
+        modify_ceres_model_by_name(model, name)
     elif isinstance(model, SpecletTwo):
-        modify_speclettwo_model_by_name(model, name, logger)
+        modify_speclettwo_model_by_name(model, name)
     return None
 
 
-def modify_ceres_model_by_name(
-    model: CeresMimic, name: str, logger: Optional[Logger] = None
-) -> None:
+def modify_ceres_model_by_name(model: CeresMimic, name: str) -> None:
     """Modify a CeresMimic object based on the user-provided input name.
 
     Args:
         model (CeresMimic): The CeresMimic model.
         name (str): User-provided name.
-        logger (Optional[Logger], optional): A logger object. Defaults to None.
     """
     if "copynumber" in name:
-        if logger is not None:
-            logger.info("Including gene copy number covariate in CERES model.")
+        logger.info("Including gene copy number covariate in CERES model.")
         model.copynumber_cov = True
     if "sgrnaint" in name:
-        if logger is not None:
-            logger.info("Including sgRNA|gene varying intercept in CERES model.")
+        logger.info("Including sgRNA|gene varying intercept in CERES model.")
         model.sgrna_intercept_cov = True
 
 
-def modify_speclettwo_model_by_name(
-    model: SpecletTwo, name: str, logger: Optional[Logger] = None
-) -> None:
+def modify_speclettwo_model_by_name(model: SpecletTwo, name: str) -> None:
     """Modify a SpecletTwo object based on the user-provided input name.
 
     Args:
         model (SpecletTwo): The SpecletTwo model.
         name (str): User-provided name.
-        logger (Optional[Logger], optional): A logger object. Defaults to None.
     """
     if "kras" in name:
-        if logger is not None:
-            logger.info("Including KRAS allele covariate in SpecletTwo model.")
+        logger.info("Including KRAS allele covariate in SpecletTwo model.")
         model.kras_cov = True
