@@ -234,3 +234,43 @@ def test_common_idx_pdna_batch(example_achilles_data: pd.DataFrame):
     assert dphelp.nunique(example_achilles_data.pdna_batch.values) == dphelp.nunique(
         indices.batch_idx
     )
+
+
+def test_make_kras_mutation_index_with_other():
+    df = pd.DataFrame(
+        {
+            "depmap_id": ["a", "a", "b", "b", "c", "d", "d", "d", "e"],
+            "kras_mutation": ["L", "L", "M", "M", "L", "N", "N", "N", "O"],
+        }
+    )
+    real_idx = np.array([0, 0, 1, 1, 0, 2, 2, 2, 3])
+    kras_idx = achelp.make_kras_mutation_index_with_other(df)
+    np.testing.assert_array_equal(kras_idx, real_idx)
+
+    real_idx = np.array([0, 0, 1, 1, 0, 1, 1, 1, 1])
+    kras_idx = achelp.make_kras_mutation_index_with_other(df, min=2)
+    np.testing.assert_array_equal(kras_idx, real_idx)
+
+
+def test_make_kras_mutation_index_with_other_colnames():
+    df = pd.DataFrame(
+        {
+            "cell_line": ["a", "a", "b", "b", "c", "d", "d", "d", "e"],
+            "kras_allele": ["L", "L", "M", "M", "L", "N", "N", "N", "O"],
+        }
+    )
+
+    with pytest.raises(ValueError):
+        kras_idx = achelp.make_kras_mutation_index_with_other(df)
+
+    real_idx = np.array([0, 0, 1, 1, 0, 2, 2, 2, 3])
+    kras_idx = achelp.make_kras_mutation_index_with_other(
+        df, kras_col="kras_allele", cl_col="cell_line"
+    )
+    np.testing.assert_array_equal(kras_idx, real_idx)
+
+    real_idx = np.array([0, 0, 1, 1, 0, 1, 1, 1, 1])
+    kras_idx = achelp.make_kras_mutation_index_with_other(
+        df, min=2, kras_col="kras_allele", cl_col="cell_line"
+    )
+    np.testing.assert_array_equal(kras_idx, real_idx)

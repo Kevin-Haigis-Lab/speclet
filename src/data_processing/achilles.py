@@ -81,6 +81,52 @@ def make_sgrna_to_gene_mapping_df(
     )
 
 
+def make_kras_mutation_index_with_other(
+    df: pd.DataFrame,
+    min: int = 0,
+    kras_col: str = "kras_mutation",
+    cl_col: str = "depmap_id",
+) -> np.ndarray:
+    """KRAS indexing with other for rare mutations.
+
+    Args:
+        df (pd.DataFrame): Data frame to make index for.
+        min (int, optional): Minimim number of cell lines with the mutation to keep it
+          as a separate group. Defaults to 0.
+        kras_col (str, optional): Column name with KRAS mutations. Defaults to
+          "kras_mutation".
+        cl_col (str, optional): Column name with cell line identifiers. Defaults to
+          "depmap_id".
+
+    Raises:
+        ValueError: Raised if the indicated columns do not exist.
+
+    Returns:
+        np.ndarray: Index for KRAS alleles.
+    """
+    for col in (kras_col, cl_col):
+        if col not in df.columns:
+            raise ValueError(f"Could not find column '{col}' in data frame.")
+    kg = "__kras_group"
+    mut_freq = (
+        df[[kras_col, cl_col]]
+        .drop_duplicates()
+        .groupby(kras_col)[[cl_col]]
+        .count()
+        .reset_index(drop=False)
+    )
+    mut_freq[kg] = [
+        k if n >= min else "__other__"
+        for k, n in zip(mut_freq[kras_col], mut_freq[cl_col])
+    ]
+    mut_freq = mut_freq[[kras_col, kg]]
+    return (
+        pd.merge(df.copy(), mut_freq, how="left", on=kras_col)
+        .pipe(dphelp.make_cat, col=kg)
+        .pipe(dphelp.get_indices, col=kg)
+    )
+
+
 class CommonIndices(BaseModel):
     """Object to hold common indicies used for modeling Achilles data."""
 
@@ -112,9 +158,7 @@ class CommonIndices(BaseModel):
         arbitrary_types_allowed = True
 
 
-def common_indices(
-    achilles_df: pd.DataFrame,
-) -> CommonIndices:
+def common_indices(achilles_df: pd.DataFrame, min_kras_muts: int = 0) -> CommonIndices:
     """Generate a collection of indices frequently used when modeling the Achilles data.
 
     Args:
@@ -124,13 +168,14 @@ def common_indices(
         Dict[str, Union[np.ndarray, pd.DataFrame]]: A dict with a collection of indices.
     """
     sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(achilles_df)
+    kras_idx = make_kras_mutation_index_with_other(achilles_df, min=min_kras_muts)
     return CommonIndices(
         sgrna_idx=dphelp.get_indices(achilles_df, "sgrna"),
         sgrna_to_gene_map=sgrna_to_gene_map,
         sgrna_to_gene_idx=dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol"),
         gene_idx=dphelp.get_indices(achilles_df, "hugo_symbol"),
         cellline_idx=dphelp.get_indices(achilles_df, "depmap_id"),
-        kras_mutation_idx=dphelp.get_indices(achilles_df, "kras_mutation"),
+        kras_mutation_idx=kras_idx,
         batch_idx=dphelp.get_indices(achilles_df, "pdna_batch"),
     )
 
