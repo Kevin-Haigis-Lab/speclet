@@ -27,6 +27,7 @@ class ModelFitMethod(str, Enum):
     advi = "ADVI"
     mcmc = "MCMC"
 
+
 class ModelConfig(BaseModel):
     """Model configuration format."""
 
@@ -42,10 +43,18 @@ models_configurations = [
     ModelConfig(name="SpecletTwo-debug", model="speclet_two", fit_method="MCMC"),
     ModelConfig(name="SpecletTwo-kras-debug", model="speclet_two", fit_method="ADVI"),
     ModelConfig(name="SpecletTwo-kras-debug", model="speclet_two", fit_method="MCMC"),
-    ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="ADVI"),
-    ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="MCMC"),
-    ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="ADVI"),
-    ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="MCMC"),
+    # ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="ADVI"),
+    # ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="MCMC"),
+    # ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="ADVI"),
+    # ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="MCMC"),
+    ModelConfig(name="SpecletThree-debug", model="speclet_three", fit_method="ADVI"),
+    ModelConfig(name="SpecletThree-debug", model="speclet_three", fit_method="MCMC"),
+    ModelConfig(
+        name="SpecletThree-kras-debug", model="speclet_three", fit_method="ADVI"
+    ),
+    ModelConfig(
+        name="SpecletThree-kras-debug", model="speclet_three", fit_method="MCMC"
+    ),
 ]
 
 # Separate information in model configuration for `all` step to create wildcards.
@@ -69,13 +78,10 @@ rule all:
 #   key: [model][debug][fit_method]
 sample_models_memory_lookup = {
     "crc_ceres_mimic": {
-        True:  {"ADVI": 15, "MCMC": 20},
-        False: {"ADVI": 20, "MCMC": 40}
+        True: {"ADVI": 15, "MCMC": 20},
+        False: {"ADVI": 20, "MCMC": 40},
     },
-    "speclet_two": {
-        True:  {"ADVI": 7, "MCMC": 30},
-        False: {"ADVI": 30, "MCMC": 150}
-    },
+    "speclet_two": {True: {"ADVI": 7, "MCMC": 30}, False: {"ADVI": 30, "MCMC": 150}},
 }
 
 
@@ -83,11 +89,11 @@ sample_models_memory_lookup = {
 #   key: [model][debug][fit_method]
 sample_models_time_lookup = {
     "crc_ceres_mimic": {
-        True:  {"ADVI": "00:30:00", "MCMC": "00:30:00"},
+        True: {"ADVI": "00:30:00", "MCMC": "00:30:00"},
         False: {"ADVI": "03:00:00", "MCMC": "06:00:00"},
     },
     "speclet_two": {
-        True:  {"ADVI": "00:30:00", "MCMC": "12:00:00"},
+        True: {"ADVI": "00:30:00", "MCMC": "12:00:00"},
         False: {"ADVI": "10:00:00", "MCMC": "48:00:00"},
     },
 }

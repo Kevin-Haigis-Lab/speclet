@@ -22,18 +22,6 @@ cli_helpers.configure_pretty()
 #### ---- File IO ---- ####
 
 
-def make_cache_name(root_cache_dir: Path, name: str) -> Path:
-    """Make a cache path.
-
-    Args:
-        name (str): Name of the model.
-
-    Returns:
-        Path: The path for the cache.
-    """
-    return root_cache_dir / name
-
-
 def touch_file(
     cache_dir: Path, model: str, name: str, fit_method: ModelFitMethod
 ) -> None:
