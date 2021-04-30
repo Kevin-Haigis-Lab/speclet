@@ -90,6 +90,17 @@ class SpecletModel:
             self.data_manager = data_manager
             self.data_manager.debug = self._debug
 
+    def __str__(self) -> str:
+        """Describe the object.
+
+        Returns:
+            str: String description of the object.
+        """
+        msg = f"Speclet Model: '{self.name}'"
+        if self.debug:
+            msg += " (debug)"
+        return msg
+
     @property
     def debug(self) -> bool:
         """Whether or not to use debug mode.

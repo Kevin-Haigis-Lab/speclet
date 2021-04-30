@@ -60,6 +60,17 @@ class SpecletThree(SpecletModel):
         self._kras_cov = kras_cov
         self._kras_mutation_minimum = kras_mutation_minimum
 
+    def __str__(self) -> str:
+        """Describe the object.
+
+        Returns:
+            str: String description of the object.
+        """
+        msg = super().__str__()
+        with_kras_msg = "with" if self.kras_cov else "no"
+        msg += f"\n  -> {with_kras_msg} KRAS cov."
+        return msg
+
     @property
     def kras_cov(self) -> bool:
         """Value of `kras_cov` attribute."""
@@ -189,7 +200,7 @@ class SpecletThree(SpecletModel):
 
         data = self.data_manager.get_data()
         batch_size = self.data_manager.get_batch_size()
-        ic = achelp.common_indices(data)
+        ic = achelp.common_indices(data, min_kras_muts=self.kras_mutation_minimum)
 
         sgrna_idx_batch = pm.Minibatch(ic.sgrna_idx, batch_size=batch_size)
         gene_idx_batch = pm.Minibatch(ic.gene_idx, batch_size=batch_size)
