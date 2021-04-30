@@ -85,12 +85,17 @@ class TestModifyingAchillesData:
 
     def test_subsample_data_correct_number_of_genes(self, data: pd.DataFrame):
         for n in np.random.randint(2, 20, 100):
-            sub_data = achelp.subsample_achilles_data(data, n_genes=n)
+            sub_data = achelp.subsample_achilles_data(
+                data, n_genes=n, n_cell_lines=None
+            )
             assert data.shape[0] > sub_data.shape[0] >= n
 
     def test_subsample_data_correct_number_of_cells(self, data: pd.DataFrame):
-        for n in np.random.randint(2, 20, 100):
-            sub_data = achelp.subsample_achilles_data(data, n_cell_lines=n)
+        for n in np.random.randint(2, 10, 100):
+            sub_data = achelp.subsample_achilles_data(
+                data, n_genes=None, n_cell_lines=n
+            )
+            assert n == len(sub_data["depmap_id"].unique())
             assert data.shape[0] > sub_data.shape[0] >= n
 
     def test_negative_subsamples(self, data: pd.DataFrame):
