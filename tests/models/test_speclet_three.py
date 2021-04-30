@@ -113,11 +113,11 @@ class TestSpecletThree:
         dm = CrcDataManager(debug=True)
         dm.data = (
             dm.get_data()
-            .pipe(achelp.subsample_achilles_data, n_genes=4, n_cell_lines=50)
+            .pipe(achelp.subsample_achilles_data, n_genes=4, n_cell_lines=25)
             .pipe(achelp.set_achilles_categorical_columns)
         )
-        assert dphelp.nunique(dm.data["hugo_symbol"]) <= 4
-        assert dphelp.nunique(dm.data["depmap_id"]) >= 20
+        assert dphelp.nunique(dm.data["hugo_symbol"]) == 4
+        assert dphelp.nunique(dm.data["depmap_id"]) == 25
 
         kras_alleles = ["A", "X", "T"]
         kras_cellline_map = pd.DataFrame({"depmap_id": dm.data["depmap_id"]})

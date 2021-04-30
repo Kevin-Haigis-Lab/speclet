@@ -31,8 +31,8 @@ class TestSpecletOne:
         sp_one.data_manager.data = achelp.subsample_achilles_data(
             d, n_genes=5, n_cell_lines=3
         ).pipe(achelp.set_achilles_categorical_columns)
-        assert dphelp.nunique(sp_one.data_manager.data["hugo_symbol"]) == 5
-        assert dphelp.nunique(sp_one.data_manager.data["depmap_id"]) == 3
+        assert dphelp.nunique(sp_one.data_manager.data["hugo_symbol"]) <= 5
+        assert dphelp.nunique(sp_one.data_manager.data["depmap_id"]) <= 3
         assert sp_one.model is None
         sp_one.build_model()
         assert sp_one.model is not None
@@ -56,8 +56,8 @@ class TestSpecletOne:
         sp_one.data_manager.data = achelp.subsample_achilles_data(
             d, n_genes=5, n_cell_lines=3
         ).pipe(achelp.set_achilles_categorical_columns)
-        assert dphelp.nunique(sp_one.data_manager.data["hugo_symbol"]) == 5
-        assert dphelp.nunique(sp_one.data_manager.data["depmap_id"]) == 3
+        assert dphelp.nunique(sp_one.data_manager.data["hugo_symbol"]) <= 5
+        assert dphelp.nunique(sp_one.data_manager.data["depmap_id"]) <= 3
         assert sp_one.model is None
         sp_one.build_model()
         assert sp_one.model is not None
