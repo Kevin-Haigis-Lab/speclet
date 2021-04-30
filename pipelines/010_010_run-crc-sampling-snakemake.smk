@@ -19,6 +19,8 @@ class ModelOption(str, Enum):
     crc_ceres_mimic = "crc_ceres_mimic"
     speclet_one = "speclet_one"
     speclet_two = "speclet_two"
+    speclet_three = "speclet_three"
+    speclet_four = "speclet_four"
 
 
 class ModelFitMethod(str, Enum):
