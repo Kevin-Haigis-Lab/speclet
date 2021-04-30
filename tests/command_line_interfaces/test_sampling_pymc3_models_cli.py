@@ -1,23 +1,9 @@
-#!/usr/bin/env python3
-
-from pathlib import Path
-
 import pytest
 import typer
 from typer.testing import CliRunner
 
 import src.command_line_interfaces.sampling_pymc3_models_cli as sampling
 from src.command_line_interfaces import cli_helpers
-
-#### ---- File IO ---- ####
-
-
-def test_make_cache_name():
-    name = "MOCK_MOCK_NAME"
-    p = sampling.make_cache_name(Path("to", "some", "directory"), name)
-    assert isinstance(p, Path)
-    assert p.name == name
-
 
 #### ---- CLI ---- ####
 

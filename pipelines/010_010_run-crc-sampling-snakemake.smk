@@ -7,10 +7,14 @@ import papermill
 import pretty_errors
 from pydantic import BaseModel
 
+import run_sampling_utils as utils
+
 PYMC3_MODEL_CACHE_DIR = "models/"
 REPORTS_DIR = "reports/crc_model_sampling_reports/"
-
 ENVIRONMENT_YAML = Path("default_environment.yml").as_posix()
+
+
+#### ---- Models ---- ####
 
 
 class ModelOption(str, Enum):
@@ -65,6 +69,9 @@ model_names = [m.name for m in models_configurations]
 fit_methods = [m.fit_method.value for m in models_configurations]
 
 
+#### ---- Rules ---- ####
+
+
 rule all:
     input:
         expand(
@@ -76,84 +83,15 @@ rule all:
         ),
 
 
-# RAM required for each configuration (in GB -> mult by 1000).
-#   key: [model][debug][fit_method]
-sample_models_memory_lookup = {
-    "crc_ceres_mimic": {
-        True: {"ADVI": 15, "MCMC": 20},
-        False: {"ADVI": 20, "MCMC": 40},
-    },
-    "speclet_two": {True: {"ADVI": 7, "MCMC": 30}, False: {"ADVI": 30, "MCMC": 150}},
-}
-
-
-# Time required for each configuration.
-#   key: [model][debug][fit_method]
-sample_models_time_lookup = {
-    "crc_ceres_mimic": {
-        True: {"ADVI": "00:30:00", "MCMC": "00:30:00"},
-        False: {"ADVI": "03:00:00", "MCMC": "06:00:00"},
-    },
-    "speclet_two": {
-        True: {"ADVI": "00:30:00", "MCMC": "12:00:00"},
-        False: {"ADVI": "10:00:00", "MCMC": "48:00:00"},
-    },
-}
-
-
-def is_debug(name: str) -> bool:
-    """Determine the debug status of model name."""
-    return "debug" in name
-
-
-def get_from_lookup(w, lookup_dict):
-    """Generic dictionary lookup for the params in the `sample_models` step."""
-    return lookup_dict[w.model][is_debug(w.model_name)][w.fit_method]
-
-
-def get_sample_models_memory(w) -> int:
-    """Memory required for the `sample_models` step."""
-    try:
-        return get_from_lookup(w, sample_models_memory_lookup) * 1000
-
-    except:
-        if is_debug(w.model_name):
-            return 7 * 1000
-        else:
-            return 20 * 1000
-
-
-def get_sample_models_time(w) -> str:
-    """Time required for the `sample_models` step."""
-    try:
-        return get_from_lookup(w, sample_models_time_lookup)
-    except:
-        if is_debug(w.model_name):
-            return "00:30:00"
-        else:
-            return "01:00:00"
-
-
-def get_sample_models_partition(w) -> str:
-    t = [int(x) for x in get_sample_models_time(w).split(":")]
-    total_minutes = (t[0] * 60) + t[1]
-    if total_minutes < (12 * 60):
-        return "short"
-    elif total_minutes < (5 * 24 * 60):
-        return "medium"
-    else:
-        return "long"
-
-
 rule sample_models:
     output:
-        PYMC3_MODEL_CACHE_DIR + "{model_name}/{model}_{model_name}_{fit_method}.txt",
+        PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_{fit_method}.txt",
     params:
         cores=lambda w: "4" if w.fit_method == "MCMC" else "1",
         debug=lambda w: "debug" if "debug" in w.model_name else "no-debug",
-        mem=get_sample_models_memory,
-        time=get_sample_models_time,
-        partition=get_sample_models_partition,
+        mem=utils.get_sample_models_memory,
+        time=utils.get_sample_models_time,
+        partition=utils.get_sample_models_partition,
     conda:
         ENVIRONMENT_YAML
     shell:
@@ -170,9 +108,7 @@ rule sample_models:
 
 rule papermill_report:
     input:
-        model_touch=(
-            PYMC3_MODEL_CACHE_DIR + "{model_name}/{model}_{model_name}_{fit_method}.txt"
-        ),
+        model_touch=PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_{fit_method}.txt",
     output:
         notebook=REPORTS_DIR + "{model}_{model_name}_{fit_method}.ipynb",
     run:
