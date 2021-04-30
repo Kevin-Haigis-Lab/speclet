@@ -5,6 +5,8 @@ channels:
   - r
   - defaults
 dependencies:
+  - python=3.8.8
+  - snakemake=5.32.2
   - colorama
   - drmaa=0.7.9
   - graphviz
@@ -16,5 +18,6 @@ dependencies:
   - pretty_errors
   - pytest
   - papermill
-  - python=3.8.8
-  - snakemake=5.32.2
+  - pydantic=1.8.1
+  - pip:
+    - -e .  # install the source directory as a package (keep as last)

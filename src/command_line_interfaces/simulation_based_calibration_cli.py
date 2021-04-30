@@ -8,12 +8,9 @@ import typer
 
 from src.command_line_interfaces import cli_helpers
 from src.command_line_interfaces.cli_helpers import ModelOption
-from src.loggers import get_logger
-from src.models.crc_ceres_mimic import CrcCeresMimic
-from src.models.protocols import SelfSufficientModel
+from src.loggers import logger
 
 app = typer.Typer()
-logger = get_logger()
 cli_helpers.configure_pretty()
 
 
@@ -54,13 +51,7 @@ def run_sbc(
         root_cache_dir=cache_dir,
         debug=True,
     )
-
-    # Confirm that this is true so can use specified methods.
-    assert isinstance(model, SelfSufficientModel)
-
-    if model_class == ModelOption.crc_ceres_mimic and isinstance(model, CrcCeresMimic):
-        cli_helpers.modify_ceres_model_by_name(model=model, name=name, logger=logger)
-
+    cli_helpers.modify_model_by_name(model=model, name=name)
     model.run_simulation_based_calibration(
         cache_dir, random_seed=sim_number, size=data_size
     )

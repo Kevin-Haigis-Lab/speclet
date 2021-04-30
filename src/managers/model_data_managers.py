@@ -12,6 +12,7 @@ import pandas as pd
 import src.modeling.simulation_based_calibration_helpers as sbc
 from src.data_processing import achilles as achelp
 from src.io import data_io
+from src.loggers import logger
 
 
 class DataManager(abc.ABC):
@@ -121,16 +122,19 @@ class CrcDataManager(DataManager):
         )
 
     def _drop_sgrnas_that_map_to_multiple_genes(self, df: pd.DataFrame) -> pd.DataFrame:
+        logger.warning("Dropping data points of sgRNA that map to multiple genes.")
         sgrnas_to_remove = self._get_sgrnas_that_map_to_multiple_genes(df)
         df_new = df.copy()[~df["sgrna"].isin(sgrnas_to_remove)]
         return df_new
 
     def _drop_missing_copynumber(self, df: pd.DataFrame) -> pd.DataFrame:
+        logger.warning("Dropping data points with missing copy number.")
         df_new = df.copy()[~df["gene_cn"].isna()]
         return df_new
 
     def _load_data(self) -> pd.DataFrame:
         """Load CRC data."""
+        logger.debug("Reading data from file.")
         df = achelp.read_achilles_data(self.get_data_path(), low_memory=False)
         df = self._drop_sgrnas_that_map_to_multiple_genes(df)
         df = self._drop_missing_copynumber(df)
@@ -142,6 +146,7 @@ class CrcDataManager(DataManager):
 
         If the data is not already loaded, it is first read from disk.
         """
+        logger.debug("Retrieving data.")
         if self.data is None:
             self.data = self._load_data()
         return self.data
@@ -158,6 +163,7 @@ class CrcDataManager(DataManager):
         Returns:
             pd.DataFrame: Mock data.
         """
+        logger.info(f"Generating mock data of size '{size}'.")
         if isinstance(size, str):
             size = sbc.MockDataSizes(size)
 
@@ -210,10 +216,13 @@ class MockDataManager(DataManager):
         Returns:
             pd.DataFrame: The data frame for modeling.
         """
-        n_data_points = 50 if self.debug else 100
-        x = np.random.uniform(-1, 1, n_data_points)
-        y = -1 + 2 * x + (np.random.randn(n_data_points) / 2.0)
-        return pd.DataFrame({"x": x, "y": y})
+        if self.data is None:
+            logger.info("Creating data for mock data manager.")
+            n_data_points = 50 if self.debug else 100
+            x = np.random.uniform(-1, 1, n_data_points)
+            y = -1 + 2 * x + (np.random.randn(n_data_points) / 2.0)
+            self.data = pd.DataFrame({"x": x, "y": y})
+        return self.data
 
     def generate_mock_data(
         self, size: Union[sbc.MockDataSizes, str], random_seed: Optional[int] = None
@@ -227,6 +236,8 @@ class MockDataManager(DataManager):
         Returns:
             pd.DataFrame: Mock data.
         """
+        logger.debug("Generating mock data.")
+        logger.info("This method just calls `self.get_data()` in the MockDataManager.")
         if isinstance(size, str):
             size = sbc.MockDataSizes(size)
 

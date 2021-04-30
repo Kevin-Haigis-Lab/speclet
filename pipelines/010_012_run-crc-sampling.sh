@@ -1,11 +1,11 @@
 #!/bin/bash
 
 #SBATCH -c 2
-#SBATCH -p short
-#SBATCH -t 0-12:00
+#SBATCH -p priority
+#SBATCH -t 3-00:00
 #SBATCH --mem 1G
-#SBATCH -o logs/%j_sample-ceres.log
-#SBATCH -e logs/%j_sample-ceres.log
+#SBATCH -o logs/%j_sample-pipeline.log
+#SBATCH -e logs/%j_sample-pipeline.log
 
 module unload python
 module load gcc conda2 slurm-drmaa/1.1.1

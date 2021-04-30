@@ -87,6 +87,11 @@ def extract_matrix_variable_indices(
     return d
 
 
+def _reshape_mcmc_chains_to_2d(a: np.ndarray) -> np.ndarray:
+    z = a.shape[2]
+    return a.reshape(1, -1, z).squeeze()
+
+
 def summarize_posterior_predictions(
     a: np.ndarray,
     hdi_prob: float = 0.89,
@@ -111,6 +116,8 @@ def summarize_posterior_predictions(
         pd.DataFrame: A data frame with one row per data point and columns describing
           the posterior predictions.
     """
+    if len(a.shape) == 3:
+        a = _reshape_mcmc_chains_to_2d(a)
     hdi = az.hdi(a, hdi_prob=hdi_prob)
 
     d = pd.DataFrame(

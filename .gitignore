@@ -254,6 +254,7 @@ Temporary Items
 data/*
 .mustashe/
 cache/
+models/*
 temp/
 modeling_data/*
 .snakemake/

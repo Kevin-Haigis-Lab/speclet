@@ -45,6 +45,7 @@ dependencies:
   - python=3.9.2
   - python-graphviz
   - requests
+  - rich=10.1.0
   - scikit-learn
   - scipy
   - seaborn

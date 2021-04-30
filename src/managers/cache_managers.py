@@ -2,6 +2,7 @@
 
 """PyMC3 model cache manager."""
 
+import os
 import pickle
 from pathlib import Path
 from typing import Any, Union
@@ -118,6 +119,7 @@ class Pymc3CacheManager:
             res (Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]):
               The results to cache.
         """
+        self._mkdir()
         cache_paths = self.get_cache_file_names()
         self._write_pickle(
             res.posterior_predictive, cache_paths.posterior_predictive_path
@@ -167,3 +169,15 @@ class Pymc3CacheManager:
         with open(fp, "rb") as f:
             d = pickle.load(f)
         return d
+
+    def clear_cache(self) -> bool:
+        """Remove the cache directory.
+
+        Returns:
+            bool: Whether the directory was removed or not. Returns False if the
+              directory did not exist.
+        """
+        if self.cache_dir.exists():
+            os.rmdir(self.cache_dir)
+            return True
+        return False

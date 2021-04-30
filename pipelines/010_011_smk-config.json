@@ -10,16 +10,16 @@
         "J": "snakejob"
     },
     "sample_models": {
-        "partition": "short",
-        "cores": 1,
-        "mem": "64000",
-        "time": "06:00:00",
+        "partition": "{params.partition}",
+        "cores": "{params.cores}",
+        "mem": "{params.mem}",
+        "time": "{params.time}",
         "J": "sample"
     },
     "papermill_report": {
         "partition": "short",
         "cores": 1,
-        "mem": "500",
+        "mem": "100",
         "time": "00:01:00",
         "J": "papermill"
     },
