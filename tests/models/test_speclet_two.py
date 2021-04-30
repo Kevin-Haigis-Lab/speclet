@@ -18,8 +18,8 @@ class TestSpecletTwo:
             .pipe(achelp.subsample_achilles_data, n_genes=5, n_cell_lines=3)
             .pipe(achelp.set_achilles_categorical_columns)
         )
-        assert dphelp.nunique(dm.data["hugo_symbol"] == 5)
-        assert dphelp.nunique(dm.data["depmap_id"] == 3)
+        assert dphelp.nunique(dm.data["hugo_symbol"]) == 5
+        assert dphelp.nunique(dm.data["depmap_id"]) == 3
         return dm
 
     def test_instantiation(self, tmp_path: Path):
@@ -55,6 +55,7 @@ class TestSpecletTwo:
         )
         assert sp_two.mcmc_results is not None
 
+    @pytest.mark.slow
     def test_advi_sampling(self, tmp_path: Path, data_manager: CrcDataManager):
         sp_two = SpecletTwo(
             "test-model", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
@@ -73,7 +74,6 @@ class TestSpecletTwo:
         )
         assert sp_two.advi_results is not None
 
-    @pytest.mark.DEV
     def test_optional_kras_cov(self, tmp_path: Path, data_manager: CrcDataManager):
         sp_two = SpecletTwo(
             "test-model",
