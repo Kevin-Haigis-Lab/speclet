@@ -8,8 +8,9 @@ sample_models_memory_lookup = {
         True: {"ADVI": 15, "MCMC": 20},
         False: {"ADVI": 20, "MCMC": 40},
     },
-    "speclet_two": {True: {"ADVI": 7, "MCMC": 30}, False: {"ADVI": 30, "MCMC": 150}},
-    "speclet_three": {True: {"ADVI": 7, "MCMC": 60}, False: {"ADVI": 30, "MCMC": 150}},
+    "speclet_two": {True: {"ADVI": 7, "MCMC": 30}, False: {"ADVI": 40, "MCMC": 150}},
+    "speclet_three": {True: {"ADVI": 7, "MCMC": 60}, False: {"ADVI": 40, "MCMC": 150}},
+    "speclet_four": {True: {"ADVI": 7, "MCMC": 60}, False: {"ADVI": 40, "MCMC": 150}},
 }
 
 
@@ -22,14 +23,14 @@ sample_models_time_lookup = {
     },
     "speclet_two": {
         True: {"ADVI": "00:30:00", "MCMC": "08:00:00"},
-        False: {"ADVI": "10:00:00", "MCMC": "48:00:00"},
+        False: {"ADVI": "12:00:00", "MCMC": "48:00:00"},
     },
     "speclet_three": {
         True: {"ADVI": "00:30:00", "MCMC": "24:00:00"},
         False: {"ADVI": "10:00:00", "MCMC": "48:00:00"},
     },
     "speclet_four": {
-        True: {"ADVI": "00:30:00", "MCMC": "12:00:00"},
+        True: {"ADVI": "03:00:00", "MCMC": "24:00:00"},
         False: {"ADVI": "10:00:00", "MCMC": "48:00:00"},
     },
 }

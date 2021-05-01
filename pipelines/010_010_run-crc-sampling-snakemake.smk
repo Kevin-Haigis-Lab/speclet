@@ -42,17 +42,22 @@ class ModelConfig(BaseModel):
     fit_method: ModelFitMethod = ModelFitMethod.advi
 
 
-models_configurations = [
+models_configurations = []
+models_configurations += [
     # ModelConfig(name="CERES-base-debug", model="crc_ceres_mimic", fit_method="ADVI"),
     # ModelConfig(name="CERES-base-debug", model="crc_ceres_mimic", fit_method="MCMC"),
+]
+models_configurations += [
     ModelConfig(name="SpecletTwo-debug", model="speclet_two", fit_method="ADVI"),
     ModelConfig(name="SpecletTwo-debug", model="speclet_two", fit_method="MCMC"),
     ModelConfig(name="SpecletTwo-kras-debug", model="speclet_two", fit_method="ADVI"),
     ModelConfig(name="SpecletTwo-kras-debug", model="speclet_two", fit_method="MCMC"),
-    # ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="ADVI"),
-    # ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="MCMC"),
-    # ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="ADVI"),
-    # ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="MCMC"),
+    ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="ADVI"),
+    ModelConfig(name="SpecletTwo", model="speclet_two", fit_method="MCMC"),
+    ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="ADVI"),
+    ModelConfig(name="SpecletTwo-kras", model="speclet_two", fit_method="MCMC"),
+]
+models_configurations += [
     ModelConfig(name="SpecletThree-debug", model="speclet_three", fit_method="ADVI"),
     ModelConfig(name="SpecletThree-debug", model="speclet_three", fit_method="MCMC"),
     ModelConfig(
@@ -61,6 +66,15 @@ models_configurations = [
     ModelConfig(
         name="SpecletThree-kras-debug", model="speclet_three", fit_method="MCMC"
     ),
+    ModelConfig(name="SpecletThree", model="speclet_three", fit_method="ADVI"),
+    ModelConfig(name="SpecletThree-kras", model="speclet_three", fit_method="ADVI"),
+    ModelConfig(name="SpecletThree", model="speclet_three", fit_method="MCMC"),
+    ModelConfig(name="SpecletThree-kras", model="speclet_three", fit_method="MCMC"),
+]
+models_configurations += [
+    # ModelConfig(name="SpecletFour-debug", model="speclet_four", fit_method="ADVI"),
+    ModelConfig(name="SpecletFour-debug", model="speclet_four", fit_method="MCMC"),
+    ModelConfig(name="SpecletFour", model="speclet_four", fit_method="MCMC"),
 ]
 
 # Separate information in model configuration for `all` step to create wildcards.
