@@ -128,7 +128,7 @@ def make_kras_mutation_index_with_other(
 
 
 class CommonIndices(BaseModel):
-    """Object to hold common indicies used for modeling Achilles data."""
+    """Object to hold common indices used for modeling Achilles data."""
 
     sgrna_idx: np.ndarray
     n_sgrnas: int = 0
@@ -144,7 +144,7 @@ class CommonIndices(BaseModel):
     n_batches: int = 0
 
     def __init__(self, **data):
-        """Object to hold common indicies used for modeling Achilles data."""
+        """Object to hold common indices used for modeling Achilles data."""
         super().__init__(**data)
         self.n_sgrnas = dphelp.nunique(self.sgrna_idx)
         self.n_genes = dphelp.nunique(self.gene_idx)
@@ -165,7 +165,7 @@ def common_indices(achilles_df: pd.DataFrame, min_kras_muts: int = 0) -> CommonI
         achilles_df (pd.DataFrame): The DataFrame with Achilles data.
 
     Returns:
-        Dict[str, Union[np.ndarray, pd.DataFrame]]: A dict with a collection of indices.
+        CommonIndices: A data model with a collection of indices.
     """
     sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(achilles_df)
     kras_idx = make_kras_mutation_index_with_other(achilles_df, min=min_kras_muts)
@@ -178,6 +178,43 @@ def common_indices(achilles_df: pd.DataFrame, min_kras_muts: int = 0) -> CommonI
         kras_mutation_idx=kras_idx,
         batch_idx=dphelp.get_indices(achilles_df, "pdna_batch"),
     )
+
+
+class UncommonIndices(BaseModel):
+    """Object to hold uncommon indices used for modeling Achilles data."""
+
+    cellline_to_kras_mutation_idx: np.ndarray
+    n_kras_mutations: int = 0
+
+    def __init__(self, **data):
+        """Object to hold common indices used for modeling Achilles data."""
+        super().__init__(**data)
+        self.n_kras_mutations = dphelp.nunique(self.cellline_to_kras_mutation_idx)
+
+    class Config:
+        """Configuration for pydantic validation."""
+
+        arbitrary_types_allowed = True
+
+
+def uncommon_indices(
+    achilles_df: pd.DataFrame, min_kras_muts: int = 0
+) -> UncommonIndices:
+    """Generate a collection of indices frequently used when modeling the Achilles data.
+
+    Args:
+        achilles_df (pd.DataFrame): The DataFrame with Achilles data.
+
+    Returns:
+        UncommonIndices: A data model with a collection of indices.
+    """
+    mod_df = achilles_df.copy()[["depmap_id", "kras_mutation"]]
+    mod_df["kras_idx"] = make_kras_mutation_index_with_other(
+        achilles_df, min=min_kras_muts
+    )
+    mod_df = mod_df.drop_duplicates().sort_values("depmap_id").reset_index(drop=True)
+    cl_to_kras_idx = mod_df["kras_idx"].values
+    return UncommonIndices(cellline_to_kras_mutation_idx=cl_to_kras_idx)
 
 
 #### ---- Data frames ---- ####

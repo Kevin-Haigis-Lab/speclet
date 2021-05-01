@@ -279,3 +279,17 @@ def test_make_kras_mutation_index_with_other_colnames():
         df, min=2, kras_col="kras_allele", cl_col="cell_line"
     )
     np.testing.assert_array_equal(kras_idx, real_idx)
+
+
+def test_uncommon_indices(example_achilles_data: pd.DataFrame):
+    idx = achelp.uncommon_indices(example_achilles_data)
+    assert idx.n_kras_mutations == len(example_achilles_data["kras_mutation"].unique())
+    assert len(idx.cellline_to_kras_mutation_idx) == len(
+        example_achilles_data["depmap_id"].unique()
+    )
+
+    idx = achelp.uncommon_indices(example_achilles_data, min_kras_muts=5)
+    assert idx.n_kras_mutations < len(example_achilles_data["kras_mutation"].unique())
+    assert len(idx.cellline_to_kras_mutation_idx) == len(
+        example_achilles_data["depmap_id"].unique()
+    )
