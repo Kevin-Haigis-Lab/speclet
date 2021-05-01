@@ -48,7 +48,7 @@ class SpecletFour(SpecletModel):
 
         """
         super().__init__(
-            name="speclet-two_" + name,
+            name="speclet-four_" + name,
             root_cache_dir=root_cache_dir,
             debug=debug,
             data_manager=data_manager,
