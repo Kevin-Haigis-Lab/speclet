@@ -51,6 +51,10 @@ class ModelOption(str, Enum):
     speclet_one = "speclet_one"
     speclet_two = "speclet_two"
     speclet_three = "speclet_three"
+    speclet_four = "speclet_four"
+    speclet_five = "speclet_five"
+    speclet_six = "speclet_six"
+    speclet_seven = "speclet_seven"
 
 
 def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
