@@ -130,5 +130,5 @@ def modify_speclettwo_and_three_model_by_name(
         name (str): User-provided name.
     """
     if "kras" in name:
-        logger.info("Including KRAS allele covariate in SpecletTwo model.")
+        logger.info("Including KRAS allele covariate in the  model.")
         model.kras_cov = True
