@@ -22,18 +22,6 @@ cli_helpers.configure_pretty()
 #### ---- File IO ---- ####
 
 
-def make_cache_name(root_cache_dir: Path, name: str) -> Path:
-    """Make a cache path.
-
-    Args:
-        name (str): Name of the model.
-
-    Returns:
-        Path: The path for the cache.
-    """
-    return root_cache_dir / name
-
-
 def touch_file(
     cache_dir: Path, model: str, name: str, fit_method: ModelFitMethod
 ) -> None:
@@ -43,7 +31,7 @@ def touch_file(
         model (str): The model.
         name (str): The custom name of the model.
     """
-    p = cache_dir / name / (model + "_" + name + "_" + fit_method.value + ".txt")
+    p = cache_dir / (f"_{model}_{name}_{fit_method.value}.txt")
     p.touch()
     return None
 
@@ -108,12 +96,18 @@ def sample_speclet_model(
     if sample:
         if fit_method == ModelFitMethod.advi:
             logger.info("Running ADVI fitting method.")
-            _ = speclet_model.advi_sample_model(random_seed=random_seed)
+            _ = speclet_model.advi_sample_model(
+                random_seed=random_seed,
+                ignore_cache=ignore_cache,
+            )
 
         elif fit_method == ModelFitMethod.mcmc:
             logger.info("Running MCMC fitting method.")
             _ = speclet_model.mcmc_sample_model(
-                chains=mcmc_chains, cores=mcmc_cores, random_seed=random_seed
+                chains=mcmc_chains,
+                cores=mcmc_cores,
+                random_seed=random_seed,
+                ignore_cache=ignore_cache,
             )
         else:
             raise Exception(f"Unknown fit method '{fit_method.value}'.")

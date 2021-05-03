@@ -4,14 +4,16 @@
 
 
 from enum import Enum
-from typing import Any, Dict, Type
+from typing import Any, Dict, Type, Union
 
 import pretty_errors
 
 from src.loggers import logger
 from src.models.ceres_mimic import CeresMimic
+from src.models.speclet_four import SpecletFour
 from src.models.speclet_model import SpecletModel
 from src.models.speclet_one import SpecletOne
+from src.models.speclet_three import SpecletThree
 from src.models.speclet_two import SpecletTwo
 
 #### ---- Pretty Errors ---- ####
@@ -49,6 +51,11 @@ class ModelOption(str, Enum):
     crc_ceres_mimic = "crc_ceres_mimic"
     speclet_one = "speclet_one"
     speclet_two = "speclet_two"
+    speclet_three = "speclet_three"
+    speclet_four = "speclet_four"
+    speclet_five = "speclet_five"
+    speclet_six = "speclet_six"
+    speclet_seven = "speclet_seven"
 
 
 def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
@@ -64,6 +71,8 @@ def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
         ModelOption.crc_ceres_mimic: CeresMimic,
         ModelOption.speclet_one: SpecletOne,
         ModelOption.speclet_two: SpecletTwo,
+        ModelOption.speclet_three: SpecletThree,
+        ModelOption.speclet_four: SpecletFour,
     }
     return model_option_map[model_opt]
 
@@ -91,8 +100,8 @@ def modify_model_by_name(model: Any, name: str) -> None:
     """
     if isinstance(model, CeresMimic):
         modify_ceres_model_by_name(model, name)
-    elif isinstance(model, SpecletTwo):
-        modify_speclettwo_model_by_name(model, name)
+    elif isinstance(model, SpecletTwo) or isinstance(model, SpecletThree):
+        modify_speclettwo_and_three_model_by_name(model, name)
     return None
 
 
@@ -111,13 +120,15 @@ def modify_ceres_model_by_name(model: CeresMimic, name: str) -> None:
         model.sgrna_intercept_cov = True
 
 
-def modify_speclettwo_model_by_name(model: SpecletTwo, name: str) -> None:
-    """Modify a SpecletTwo object based on the user-provided input name.
+def modify_speclettwo_and_three_model_by_name(
+    model: Union[SpecletTwo, SpecletThree], name: str
+) -> None:
+    """Modify a SpecletTwo/Three object based on the user-provided input name.
 
     Args:
-        model (SpecletTwo): The SpecletTwo model.
+        model (Union[SpecletTwo, SpecletThree]): The SpecletTwo or SpecletThree model.
         name (str): User-provided name.
     """
     if "kras" in name:
-        logger.info("Including KRAS allele covariate in SpecletTwo model.")
+        logger.info("Including KRAS allele covariate in the  model.")
         model.kras_cov = True

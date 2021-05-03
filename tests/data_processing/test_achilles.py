@@ -85,12 +85,17 @@ class TestModifyingAchillesData:
 
     def test_subsample_data_correct_number_of_genes(self, data: pd.DataFrame):
         for n in np.random.randint(2, 20, 100):
-            sub_data = achelp.subsample_achilles_data(data, n_genes=n)
+            sub_data = achelp.subsample_achilles_data(
+                data, n_genes=n, n_cell_lines=None
+            )
             assert data.shape[0] > sub_data.shape[0] >= n
 
     def test_subsample_data_correct_number_of_cells(self, data: pd.DataFrame):
-        for n in np.random.randint(2, 20, 100):
-            sub_data = achelp.subsample_achilles_data(data, n_cell_lines=n)
+        for n in np.random.randint(2, 10, 100):
+            sub_data = achelp.subsample_achilles_data(
+                data, n_genes=None, n_cell_lines=n
+            )
+            assert n == len(sub_data["depmap_id"].unique())
             assert data.shape[0] > sub_data.shape[0] >= n
 
     def test_negative_subsamples(self, data: pd.DataFrame):
@@ -233,4 +238,58 @@ def test_common_idx_pdna_batch(example_achilles_data: pd.DataFrame):
     indices = achelp.common_indices(example_achilles_data.sample(frac=1.0))
     assert dphelp.nunique(example_achilles_data.pdna_batch.values) == dphelp.nunique(
         indices.batch_idx
+    )
+
+
+def test_make_kras_mutation_index_with_other():
+    df = pd.DataFrame(
+        {
+            "depmap_id": ["a", "a", "b", "b", "c", "d", "d", "d", "e"],
+            "kras_mutation": ["L", "L", "M", "M", "L", "N", "N", "N", "O"],
+        }
+    )
+    real_idx = np.array([0, 0, 1, 1, 0, 2, 2, 2, 3])
+    kras_idx = achelp.make_kras_mutation_index_with_other(df)
+    np.testing.assert_array_equal(kras_idx, real_idx)
+
+    real_idx = np.array([0, 0, 1, 1, 0, 1, 1, 1, 1])
+    kras_idx = achelp.make_kras_mutation_index_with_other(df, min=2)
+    np.testing.assert_array_equal(kras_idx, real_idx)
+
+
+def test_make_kras_mutation_index_with_other_colnames():
+    df = pd.DataFrame(
+        {
+            "cell_line": ["a", "a", "b", "b", "c", "d", "d", "d", "e"],
+            "kras_allele": ["L", "L", "M", "M", "L", "N", "N", "N", "O"],
+        }
+    )
+
+    with pytest.raises(ValueError):
+        kras_idx = achelp.make_kras_mutation_index_with_other(df)
+
+    real_idx = np.array([0, 0, 1, 1, 0, 2, 2, 2, 3])
+    kras_idx = achelp.make_kras_mutation_index_with_other(
+        df, kras_col="kras_allele", cl_col="cell_line"
+    )
+    np.testing.assert_array_equal(kras_idx, real_idx)
+
+    real_idx = np.array([0, 0, 1, 1, 0, 1, 1, 1, 1])
+    kras_idx = achelp.make_kras_mutation_index_with_other(
+        df, min=2, kras_col="kras_allele", cl_col="cell_line"
+    )
+    np.testing.assert_array_equal(kras_idx, real_idx)
+
+
+def test_uncommon_indices(example_achilles_data: pd.DataFrame):
+    idx = achelp.uncommon_indices(example_achilles_data)
+    assert idx.n_kras_mutations == len(example_achilles_data["kras_mutation"].unique())
+    assert len(idx.cellline_to_kras_mutation_idx) == len(
+        example_achilles_data["depmap_id"].unique()
+    )
+
+    idx = achelp.uncommon_indices(example_achilles_data, min_kras_muts=5)
+    assert idx.n_kras_mutations < len(example_achilles_data["kras_mutation"].unique())
+    assert len(idx.cellline_to_kras_mutation_idx) == len(
+        example_achilles_data["depmap_id"].unique()
     )

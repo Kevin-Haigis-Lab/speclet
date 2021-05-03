@@ -42,4 +42,4 @@ snakemake \
 #   dot -Tpdf > analysis/015_snakemake-dag.pdf
 
 conda deactivate
-exit 0
+exit 4
