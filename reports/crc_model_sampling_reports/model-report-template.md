@@ -12,10 +12,12 @@ import pandas as pd
 import plotnine as gg
 import pymc3 as pm
 import seaborn as sns
+
 from src.command_line_interfaces import sampling_pymc3_models_cli as sampling
 from src.data_processing import common as dphelp
 from src.modeling import pymc3_analysis as pmanal
 from src.modeling import pymc3_sampling_api as pmapi
+from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.plot.color_pal import SeabornColor
 
 notebook_tic = time()
@@ -27,8 +29,6 @@ gg.theme_set(gg.theme_classic())
 
 RANDOM_SEED = 847
 np.random.seed(RANDOM_SEED)
-
-pymc3_cache_dir = Path("..", "models", "modeling_cache", "pymc3_model_cache")
 ```
 
 Parameters for papermill:
@@ -36,6 +36,7 @@ Parameters for papermill:
 - `MODEL`: which model was tested
 - `MODEL_NAME`: name of the model
 - `DEBUG`: if in debug mode or not
+- `FIT_METHOD`: method used to fit the model; either "ADVI" or "MCMC"
 
 ## Setup
 
@@ -45,16 +46,29 @@ Parameters for papermill:
 MODEL = ""
 MODEL_NAME = ""
 DEBUG = True
+FIT_METHOD = ""
+```
+
+```python
+assert FIT_METHOD in ["ADVI", "MCMC"]
 ```
 
 ```python
 speclet_model = sampling.sample_speclet_model(
-    MODEL, name=MODEL_NAME, debug=DEBUG, random_seed=RANDOM_SEED, touch=False
+    MODEL,
+    name=MODEL_NAME,
+    fit_method=FIT_METHOD,
+    debug=DEBUG,
+    random_seed=RANDOM_SEED,
+    touch=False,
 )
 ```
 
 ```python
-model_res = speclet_model.advi_results
+if FIT_METHOD == "ADVI":
+    model_az, advi_approx = speclet_model.advi_results
+else:
+    model_az = speclet_model.mcmc_results
 ```
 
 ### Data
@@ -67,19 +81,21 @@ data.head()
 ### Cached model fit
 
 ```python
-model_az = pmapi.convert_samples_to_arviz(
-    model=speclet_model.model, res=speclet_model.advi_results
-)
-```
-
-```python
 pm.model_to_graphviz(speclet_model.model)
 ```
 
 ## Fit diagnostics
 
 ```python
-pmanal.plot_vi_hist(model_res.approximation)
+if FIT_METHOD == "ADVI":
+    pmanal.plot_vi_hist(model_az.approximation)
+    plt.show()
+else:
+    print("R-HAT")
+    print(az.rhat(model_az))
+    print("=" * 60)
+    print("BFMI")
+    print(az.bfmi(model_az))
 ```
 
 ## Model parameters
@@ -137,26 +153,32 @@ def variable_distribution_plot(var, trace: np.ndarray, max_plot=20000) -> gg.ggp
 ```
 
 ```python
-vars_to_inspect = model_res.trace.varnames
+ignore_vars = "μ"
+vars_to_inspect = model_az.posterior.keys()
 vars_to_inspect = [v for v in vars_to_inspect if not "log" in v]
 vars_to_inspect.sort()
 
 for var in vars_to_inspect:
-    trace = model_res.trace[var]
-    if len(trace.shape) > 1 and trace.shape[1] == data.shape[0]:
+    trace = model_az.posterior[var]
+    if trace.shape[1] == data.shape[0]:
         # Do not plot the final deterministic mean (usually "μ").
         continue
     try:
-        print(variable_distribution_plot(var, model_res.trace[var]))
+        print(variable_distribution_plot(var, model_az.posterior[var].values.flatten()))
     except Exception as err:
         print(f"Skipping variable '{var}'.")
         print(err)
 ```
 
+```python
+if isinstance(speclet_model, SpecletTestModel):
+    raise KeyboardInterrupt()
+```
+
 ## Model predicitons
 
 ```python
-predictions = model_res.posterior_predictive
+predictions = model_az.posterior_predictive
 pred_summary = pmanal.summarize_posterior_predictions(
     predictions["lfc"],
     merge_with=data,
@@ -167,7 +189,10 @@ pred_summary.head()
 ```
 
 ```python
-az.plot_loo_pit(model_az, y="lfc");
+try:
+    az.plot_loo_pit(model_az, y="lfc")
+except Exception as e:
+    print(e)
 ```
 
 ```python
