@@ -9,12 +9,19 @@
         "mail": "NONE",
         "J": "snakejob"
     },
-    "sample_models": {
+    "sample_mcmc": {
         "partition": "{params.partition}",
-        "cores": "{params.cores}",
+        "cores": 1,
         "mem": "{params.mem}",
         "time": "{params.time}",
-        "J": "sample"
+        "J": "mcmc"
+    },
+    "sample_advi": {
+        "partition": "{params.partition}",
+        "cores": 1,
+        "mem": "{params.mem}",
+        "time": "{params.time}",
+        "J": "advi"
     },
     "papermill_report": {
         "partition": "short",

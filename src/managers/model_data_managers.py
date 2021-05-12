@@ -231,7 +231,7 @@ class MockDataManager(DataManager):
 
         Args:
             size (Union[MockDataSizes, str]): Size of the final mock dataset.
-            random_seed (Optional[int], optional): Random seed. Defaults to None.
+            random_seed (Optional[int], optional): Not used. Defaults to None.
 
         Returns:
             pd.DataFrame: Mock data.

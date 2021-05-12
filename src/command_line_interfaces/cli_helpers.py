@@ -13,6 +13,7 @@ from src.models.ceres_mimic import CeresMimic
 from src.models.speclet_four import SpecletFour
 from src.models.speclet_model import SpecletModel
 from src.models.speclet_one import SpecletOne
+from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.models.speclet_three import SpecletThree
 from src.models.speclet_two import SpecletTwo
 
@@ -48,14 +49,15 @@ def clean_model_names(n: str) -> str:
 class ModelOption(str, Enum):
     """Model options."""
 
-    crc_ceres_mimic = "crc_ceres_mimic"
-    speclet_one = "speclet_one"
-    speclet_two = "speclet_two"
-    speclet_three = "speclet_three"
-    speclet_four = "speclet_four"
-    speclet_five = "speclet_five"
-    speclet_six = "speclet_six"
-    speclet_seven = "speclet_seven"
+    speclet_test_model = "speclet-test-model"
+    crc_ceres_mimic = "crc-ceres-mimic"
+    speclet_one = "speclet-one"
+    speclet_two = "speclet-two"
+    speclet_three = "speclet-three"
+    speclet_four = "speclet-four"
+    speclet_five = "speclet-five"
+    speclet_six = "speclet-six"
+    speclet_seven = "speclet-seven"
 
 
 def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
@@ -68,6 +70,7 @@ def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
         Type[SpecletModel]: The corresponding model class.
     """
     model_option_map: Dict[ModelOption, Type[SpecletModel]] = {
+        ModelOption.speclet_test_model: SpecletTestModel,
         ModelOption.crc_ceres_mimic: CeresMimic,
         ModelOption.speclet_one: SpecletOne,
         ModelOption.speclet_two: SpecletTwo,

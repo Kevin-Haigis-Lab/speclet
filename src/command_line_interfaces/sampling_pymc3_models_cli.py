@@ -23,7 +23,11 @@ cli_helpers.configure_pretty()
 
 
 def touch_file(
-    cache_dir: Path, model: str, name: str, fit_method: ModelFitMethod
+    cache_dir: Path,
+    model: str,
+    name: str,
+    fit_method: ModelFitMethod,
+    touch_suffix: Optional[str] = None,
 ) -> None:
     """Touch a file.
 
@@ -31,7 +35,10 @@ def touch_file(
         model (str): The model.
         name (str): The custom name of the model.
     """
-    p = cache_dir / (f"_{model}_{name}_{fit_method.value}.txt")
+    if touch_suffix is None:
+        touch_suffix = ""
+    fn = f"_{model}_{name}_{fit_method.value}{touch_suffix}.txt"
+    p = cache_dir / fn
     p.touch()
     return None
 
@@ -67,6 +74,8 @@ def sample_speclet_model(
         touch (bool, optional): Should there be a file touched to indicate that the
           sampling process is complete? This is helpful for telling pipelines/workflows
           that this step is complete. Defaults to False.
+        touch_suffix (Optional[str], optional): Add a string as a suffix to the touch
+          file. Defaults to None.
 
     Returns:
         Type[SpecletModel]: An instance of the requested model with the PyMC3 model
@@ -115,7 +124,10 @@ def sample_speclet_model(
     if touch:
         logger.info("Touching output file.")
         touch_file(
-            cache_dir=PYMC3_CACHE_DIR, model=model, name=name, fit_method=fit_method
+            cache_dir=PYMC3_CACHE_DIR,
+            model=model.value,
+            name=name,
+            fit_method=fit_method,
         )
 
     toc = time()

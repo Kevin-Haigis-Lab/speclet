@@ -283,7 +283,7 @@ class SpecletModel:
         )
         self.mcmc_results = pmapi.convert_samples_to_arviz(self.model, _mcmc_results)
         logger.info("Finished MCMC sampling - caching results.")
-        self.cache_manager.write_mcmc_cache(self.mcmc_results)
+        self.write_mcmc_cache()
         return self.mcmc_results
 
     def get_replacement_parameters(self) -> Optional[ReplacementsDict]:
@@ -408,7 +408,7 @@ class SpecletModel:
             _advi_results.approximation,
         )
         logger.info("Finished ADVI fitting - caching results.")
-        self.cache_manager.write_advi_cache(self.advi_results[0], self.advi_results[1])
+        self.write_advi_cache()
         return self.advi_results
 
     def run_simulation_based_calibration(
@@ -453,3 +453,19 @@ class SpecletModel:
             inference_obj=res,
             posterior_summary=posterior_summary,
         )
+
+    def write_mcmc_cache(self) -> None:
+        """Cache the MCMC sampling results."""
+        if self.mcmc_results is not None:
+            self.cache_manager.write_mcmc_cache(self.mcmc_results)
+        else:
+            logger.warning("Did not cache MCMC samples because they do not exist.")
+
+    def write_advi_cache(self) -> None:
+        """Cache the ADVI sampling results."""
+        if self.advi_results is not None:
+            self.cache_manager.write_advi_cache(
+                self.advi_results[0], self.advi_results[1]
+            )
+        else:
+            logger.warning("Did not cache MCMC samples because they do not exist.")
