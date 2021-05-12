@@ -299,8 +299,6 @@ class ArvizCacheManager:
         if check_exists:
             if not self.cache_exists(method="mcmc"):
                 raise FileNotFoundError("Cannot locate cached data.")
-        print("CACHE PATH:")
-        print(cache_paths.inference_data_path.as_posix())
         return az.from_netcdf(cache_paths.inference_data_path.as_posix())
 
     def read_cached_approximation(

@@ -180,7 +180,6 @@ class TestPymc3CacheManager:
         assert cached_res.trace["a"].shape[0] == 583
 
 
-@pytest.mark.DEV
 class TestArvizCacheManager:
     @pytest.fixture(scope="class")
     def mcmc_inf_data(
