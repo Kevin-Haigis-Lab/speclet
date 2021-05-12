@@ -220,7 +220,7 @@ class ArvizCacheManager:
             raise ValueError(
                 "Cannot generate caching directory when `cache_dir` is None."
             )
-        inference_data_file_path = self.cache_dir / "inference-data.netcdf"
+        inference_data_file_path = self.cache_dir / "inference-data.nc"
         approx_file_path = self.cache_dir / "vi-approximation.pkl"
         return ArvizCachePaths(
             inference_data_path=inference_data_file_path,
@@ -299,7 +299,9 @@ class ArvizCacheManager:
         if check_exists:
             if not self.cache_exists(method="mcmc"):
                 raise FileNotFoundError("Cannot locate cached data.")
-        return az.InferenceData.from_netcdf(cache_paths.inference_data_path.as_posix())
+        print("CACHE PATH:")
+        print(cache_paths.inference_data_path.as_posix())
+        return az.from_netcdf(cache_paths.inference_data_path.as_posix())
 
     def read_cached_approximation(
         self, check_exists: bool = True
