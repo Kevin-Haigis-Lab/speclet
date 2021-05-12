@@ -57,6 +57,7 @@ dependencies:
   - theano-pymc=1.1.2
   - typer=0.3.2
   - watermark=2.2.0
+  - xarray=0.18.0
   - pip:
     - pytest-pythonpath==0.7.3
     - -e .  # install the source directory as a package (keep as last)
