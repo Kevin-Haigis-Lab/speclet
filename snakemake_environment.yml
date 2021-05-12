@@ -11,13 +11,13 @@ dependencies:
   - drmaa=0.7.9
   - graphviz
   - networkx
-  - numpy
-  - pandas
+  - numpy=1.20.1
+  - pandas=1.2.3
   - openssl
   - pip
   - pretty_errors
   - pytest
-  - papermill
+  - papermill=2.3.3
   - pydantic=1.8.1
   - pip:
     - -e .  # install the source directory as a package (keep as last)
