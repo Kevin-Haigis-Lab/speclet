@@ -1,7 +1,7 @@
 """Command line interface for merging MCMC chains for a single model."""
 
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import arviz as az
 import typer
@@ -21,7 +21,11 @@ def _get_model_names_for_separate_chains(name: str, n_chains: int) -> List[str]:
 
 @app.command()
 def combine_mcmc_chains(
-    model: ModelOption, name: str, chains: List[Path], debug: bool = False
+    model: ModelOption,
+    name: str,
+    chains: List[Path],
+    touch_file: Optional[Path] = None,
+    debug: bool = False,
 ) -> None:
     """Combine multiple MCMC chains for a single model.
 
@@ -75,6 +79,9 @@ def combine_mcmc_chains(
         raise TypeError("`combined_chains` was not of type 'arviz.InferenceData'.")
     combined_sp_model.write_mcmc_cache()
     logger.info(f"Finished combining chains for model '{combined_sp_model.name}'")
+    if touch_file is not None:
+        touch_file.touch()
+    return None
 
 
 if __name__ == "__main__":

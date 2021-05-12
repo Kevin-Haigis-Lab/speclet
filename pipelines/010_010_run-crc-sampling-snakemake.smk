@@ -83,7 +83,7 @@ rule all:
 
 rule sample_mcmc:
     output:
-        PYMC3_MODEL_CACHE_DIR + "{model}_{model_name}_chain{chain}_MCMC.txt",
+        PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_chain{chain}_MCMC.txt",
     params:
         debug=utils.cli_is_debug,
         mem=lambda w: utils.get_sample_models_memory(w, "MCMC"),
@@ -105,11 +105,11 @@ rule sample_mcmc:
 rule combine_mcmc:
     input:
         chains=expand(
-            PYMC3_MODEL_CACHE_DIR + "{{model}}_{{model_name}}_chain{chain}_MCMC.txt",
+            PYMC3_MODEL_CACHE_DIR + "_{{model}}_{{model_name}}_chain{chain}_MCMC.txt",
             chain=list(range(N_CHAINS))
         ),
     output:
-        PYMC3_MODEL_CACHE_DIR + "{model}_{model_name}_MCMC.txt",
+        touch_file=PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_MCMC.txt",
     params:
         debug=utils.cli_is_debug,
     conda:
@@ -119,12 +119,13 @@ rule combine_mcmc:
         "  {wildcards.model}"
         "  {wildcards.model_name}"
         "  {input.chains}"
+        "  --touch-file {output.touch_file}"
         "  {params.debug}"
 
 
 rule sample_advi:
     output:
-        PYMC3_MODEL_CACHE_DIR + "{model}_{model_name}_ADVI.txt",
+        PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_ADVI.txt",
     params:
         debug=utils.cli_is_debug,
         mem=lambda w: utils.get_sample_models_memory(w, "MCMC"),
@@ -144,7 +145,7 @@ rule sample_advi:
 
 rule papermill_report:
     input:
-        model_touch=PYMC3_MODEL_CACHE_DIR + "{model}_{model_name}_{fit_method}.txt",
+        model_touch=PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_{fit_method}.txt",
     output:
         notebook=REPORTS_DIR + "{model}_{model_name}_{fit_method}.ipynb",
     run:
@@ -154,7 +155,7 @@ rule papermill_report:
             parameters={
                 "MODEL": wildcards.model,
                 "MODEL_NAME": wildcards.model_name,
-                "DEBUG": is_debug(wildcards.model_name),
+                "DEBUG": utils.is_debug(wildcards.model_name),
                 "FIT_METHOD": wildcards.fit_method,
             },
             prepare_only=True,
