@@ -2,12 +2,12 @@ from pathlib import Path
 from time import time
 from typing import Tuple
 
+import arviz as az
 import numpy as np
 import pymc3 as pm
 import pytest
 
 from src.managers.model_data_managers import MockDataManager
-from src.modeling import pymc3_sampling_api as pmapi
 from src.models import speclet_model
 
 
@@ -63,9 +63,9 @@ class TestSpecletModel:
             post_pred_samples=10,
             random_seed=1,
         )
-        assert isinstance(mcmc_res, pmapi.MCMCSamplingResults)
+        assert isinstance(mcmc_res, az.InferenceData)
         for p in ["a", "b", "sigma"]:
-            assert mcmc_res.trace[p].shape == (100 * 2,)
+            assert mcmc_res.posterior[p].shape == (2, 100)
 
         assert sp.mcmc_results is not None
 
@@ -84,7 +84,9 @@ class TestSpecletModel:
         assert mcmc_res is mcmc_res_2
         assert toc - tic < 1
         for p in ["a", "b", "sigma"]:
-            np.testing.assert_array_equal(mcmc_res.trace[p], mcmc_res_2.trace[p])
+            np.testing.assert_array_equal(
+                mcmc_res.posterior[p], mcmc_res_2.posterior[p]
+            )
 
     def test_advi_sample_model_fails_without_model(self, tmp_path: Path):
         sp = speclet_model.SpecletModel("test-model", root_cache_dir=tmp_path)
@@ -97,21 +99,21 @@ class TestSpecletModel:
             "test-model", root_cache_dir=tmp_path, data_manager=MockDataManager()
         )
         sp.build_model()
-        advi_res = sp.advi_sample_model(
+        advi_res, advi_approx = sp.advi_sample_model(
             n_iterations=100,
             draws=100,
             prior_pred_samples=100,
             post_pred_samples=10,
             random_seed=1,
         )
-        assert isinstance(advi_res, pmapi.ApproximationSamplingResults)
+        assert isinstance(advi_res, az.InferenceData)
         for p in ["a", "b", "sigma"]:
-            assert advi_res.trace[p].shape == (100,)
+            assert advi_res.posterior[p].shape == (1, 100)
 
         assert sp.advi_results is not None
 
         tic = time()
-        advi_res_2 = sp.advi_sample_model(
+        advi_res_2, advi_approx_2 = sp.advi_sample_model(
             n_iterations=100,
             draws=100,
             prior_pred_samples=100,
@@ -121,9 +123,12 @@ class TestSpecletModel:
         toc = time()
 
         assert advi_res is advi_res_2
+        assert advi_approx is advi_approx_2
         assert toc - tic < 1
         for p in ["a", "b", "sigma"]:
-            np.testing.assert_array_equal(advi_res.trace[p], advi_res_2.trace[p])
+            np.testing.assert_array_equal(
+                advi_res.posterior[p], advi_res_2.posterior[p]
+            )
 
     @pytest.mark.slow
     def test_run_simulation_based_calibration(self, tmp_path: Path):
@@ -170,9 +175,9 @@ class TestSpecletModel:
         sp.mcmc_sampling_params.prior_pred_samples = 14
         sp.build_model()
         mcmc_res = sp.mcmc_sample_model()
-        assert mcmc_res.trace["a"].shape == (2 * 12,)
+        assert mcmc_res.posterior["a"].shape == (2, 12)
         assert mcmc_res.posterior_predictive["y"].shape == (2, 12, 100)
-        assert mcmc_res.prior_predictive["a"].shape == (14,)
+        assert mcmc_res.prior["a"].shape == (1, 14)
 
     def test_changing_advi_sampling_params(self, tmp_path: Path):
         sp = MockSpecletModelClass(
@@ -185,8 +190,8 @@ class TestSpecletModel:
         sp.advi_sampling_params.n_iterations = 103
         sp.advi_sampling_params.prior_pred_samples = 14
         sp.build_model()
-        advi_res = sp.advi_sample_model()
-        assert len(advi_res.approximation.hist) == 103
-        assert advi_res.trace["a"].shape == (17,)
-        assert advi_res.posterior_predictive["y"].shape == (17, 100)
-        assert advi_res.prior_predictive["a"].shape == (14,)
+        advi_res, approx = sp.advi_sample_model()
+        assert len(approx.hist) == 103
+        assert advi_res.posterior["a"].shape == (1, 17)
+        assert advi_res.posterior_predictive["y"].shape == (1, 17, 100)
+        assert advi_res.prior["a"].shape == (1, 14)

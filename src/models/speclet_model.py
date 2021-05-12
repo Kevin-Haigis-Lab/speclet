@@ -57,8 +57,8 @@ class SpecletModel:
     model: Optional[pm.Model] = None
     observed_var_name: Optional[str] = None
     shared_vars: Optional[Dict[str, TTShared]] = None
-    advi_results: Optional[pmapi.ApproximationSamplingResults] = None
-    mcmc_results: Optional[pmapi.MCMCSamplingResults] = None
+    advi_results: Optional[Tuple[az.InferenceData, pm.Approximation]] = None
+    mcmc_results: Optional[az.InferenceData] = None
 
     mcmc_sampling_params: MCMCSamplingParameters = MCMCSamplingParameters()
     advi_sampling_params: VISamplingParameters = VISamplingParameters()
@@ -132,6 +132,7 @@ class SpecletModel:
         self.model = None
         self.mcmc_results = None
         self.advi_results = None
+        logger.warning("Cache files not cleared (not yet implemented).")  # TODO
         # self.cache_manager.clear_all_caches()
 
     @abstractmethod
@@ -196,7 +197,7 @@ class SpecletModel:
         random_seed: Optional[int] = None,
         sample_kwargs: Optional[Dict[str, Any]] = None,
         ignore_cache: bool = False,
-    ) -> pmapi.MCMCSamplingResults:
+    ) -> az.InferenceData:
         """MCMC sample the model.
 
         This method primarily wraps the `pymc3_sampling_api.pymc3_sampling_procedure()`
@@ -230,7 +231,7 @@ class SpecletModel:
             AttributeError: Raised if the PyMC3 model does not yet exist.
 
         Returns:
-            pmapi.MCMCSamplingResults: The results of MCMC sampling.
+            az.InferenceData: The results of MCMC sampling.
         """
         logger.debug("Beginning MCMC sampling method.")
         self.update_mcmc_sampling_parameters()
@@ -261,7 +262,7 @@ class SpecletModel:
 
         if not ignore_cache and self.cache_manager.mcmc_cache_exists():
             logger.info("Returning results from cache.")
-            self.mcmc_results = self.cache_manager.get_mcmc_cache(model=self.model)
+            self.mcmc_results = self.cache_manager.get_mcmc_cache()
             return self.mcmc_results
 
         if sample_kwargs is None:
@@ -269,7 +270,7 @@ class SpecletModel:
         sample_kwargs["target_accept"] = target_accept
 
         logger.info("Beginning MCMC sampling.")
-        self.mcmc_results = pmapi.pymc3_sampling_procedure(
+        _mcmc_results = pmapi.pymc3_sampling_procedure(
             model=self.model,
             mcmc_draws=mcmc_draws,
             tune=tune,
@@ -280,6 +281,7 @@ class SpecletModel:
             random_seed=random_seed,
             sample_kwargs=sample_kwargs,
         )
+        self.mcmc_results = pmapi.convert_samples_to_arviz(self.model, _mcmc_results)
         logger.info("Finished MCMC sampling - caching results.")
         self.cache_manager.write_mcmc_cache(self.mcmc_results)
         return self.mcmc_results
@@ -322,7 +324,7 @@ class SpecletModel:
         post_pred_samples: Optional[int] = None,
         random_seed: Optional[int] = None,
         ignore_cache: bool = False,
-    ) -> pmapi.ApproximationSamplingResults:
+    ) -> Tuple[az.InferenceData, pm.Approximation]:
         """ADVI fit the model.
 
         This method primarily wraps the
@@ -353,8 +355,8 @@ class SpecletModel:
             AttributeError: Raised if the model does not yet exist.
 
         Returns:
-            ApproximationSamplingResults: A collection of the fitting and sampling
-              results.
+            Tuple[az.InferenceData, pm.Approximation]: The results of fitting the model
+              and the approximation object.
         """
         logger.debug("Beginning ADVI fitting method.")
         self.update_advi_sampling_parameters()
@@ -390,7 +392,7 @@ class SpecletModel:
             return self.advi_results
 
         logger.info("Beginning ADVI fitting.")
-        self.advi_results = pmapi.pymc3_advi_approximation_procedure(
+        _advi_results = pmapi.pymc3_advi_approximation_procedure(
             model=self.model,
             method=method,
             n_iterations=n_iterations,
@@ -401,8 +403,12 @@ class SpecletModel:
             random_seed=random_seed,
             fit_kwargs=fit_kwargs,
         )
+        self.advi_results = (
+            pmapi.convert_samples_to_arviz(self.model, _advi_results),
+            _advi_results.approximation,
+        )
         logger.info("Finished ADVI fitting - caching results.")
-        self.cache_manager.write_advi_cache(self.advi_results)
+        self.cache_manager.write_advi_cache(self.advi_results[0], self.advi_results[1])
         return self.advi_results
 
     def run_simulation_based_calibration(
@@ -437,14 +443,13 @@ class SpecletModel:
         mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
         self.data = mock_data
 
-        res = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
-        posterior_summary = az.summary(res.trace, fmt="wide", hdi_prob=0.89)
+        res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
+        posterior_summary = az.summary(res, fmt="wide", hdi_prob=0.89)
         assert isinstance(posterior_summary, pd.DataFrame)
         assert isinstance(posterior_summary, pd.DataFrame)
-        az_results = pmapi.convert_samples_to_arviz(model=self.model, res=res)
         results_manager = sbc.SBCFileManager(dir=results_path)
         results_manager.save_sbc_results(
             priors=priors,
-            inference_obj=az_results,
+            inference_obj=res,
             posterior_summary=posterior_summary,
         )
