@@ -13,7 +13,7 @@ PYMC3_MODEL_CACHE_DIR = "models/"
 REPORTS_DIR = "reports/crc_model_sampling_reports/"
 ENVIRONMENT_YAML = Path("default_environment.yml").as_posix()
 
-N_CHAINS = 2
+N_CHAINS = 4
 
 #### ---- Models ---- ####
 
@@ -45,14 +45,20 @@ class ModelConfig(BaseModel):
 
 
 models_configurations = []
-models_configurations += [
-    ModelConfig(name="SpecletTest-debug", model="speclet-test-model", fit_method="ADVI"),
-    ModelConfig(name="SpecletTest-debug", model="speclet-test-model", fit_method="MCMC"),
-]
 # models_configurations += [
-#     ModelConfig(name="SpecletThree-debug", model="speclet-three", fit_method="ADVI"),
-#     ModelConfig(name="SpecletThree-debug", model="speclet-three", fit_method="MCMC"),
+#     ModelConfig(name="SpecletTest-debug", model="speclet-test-model", fit_method="ADVI"),
+#     ModelConfig(name="SpecletTest-debug", model="speclet-test-model", fit_method="MCMC"),
 # ]
+models_configurations += [
+    ModelConfig(name="SpecletThree-debug", model="speclet-three", fit_method="ADVI"),
+    ModelConfig(name="SpecletThree-debug", model="speclet-three", fit_method="MCMC"),
+    ModelConfig(name="SpecletThree-kras-debug", model="speclet-three", fit_method="ADVI"),
+    ModelConfig(name="SpecletThree-kras-debug", model="speclet-three", fit_method="MCMC"),
+]
+models_configurations += [
+    ModelConfig(name="SpecletFour-debug", model="speclet-four", fit_method="ADVI"),
+    ModelConfig(name="SpecletFour-debug", model="speclet-four", fit_method="MCMC"),
+]
 
 # Separate information in model configuration for `all` step to create wildcards.
 models = [m.model.value for m in models_configurations]
