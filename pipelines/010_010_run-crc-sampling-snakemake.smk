@@ -56,7 +56,6 @@ models_configurations += [
     ModelConfig(name="SpecletThree-kras-debug", model="speclet-three", fit_method="MCMC"),
 ]
 models_configurations += [
-    ModelConfig(name="SpecletFour-debug", model="speclet-four", fit_method="ADVI"),
     ModelConfig(name="SpecletFour-debug", model="speclet-four", fit_method="MCMC"),
 ]
 

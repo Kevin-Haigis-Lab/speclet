@@ -16,6 +16,13 @@
         "time": "{params.time}",
         "J": "mcmc"
     },
+    "combine_mcmc": {
+        "partition": "short",
+        "cores": 1,
+        "mem": "32000",
+        "time": "00:15:00",
+        "J": "combine"
+    },
     "sample_advi": {
         "partition": "{params.partition}",
         "cores": 1,

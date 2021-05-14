@@ -31,7 +31,8 @@ snakemake \
     --latency-wait 120 \
     --use-conda \
     --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
-    --cluster-config pipelines/010_011_smk-config.json
+    --cluster-config pipelines/010_011_smk-config.json \
+    --keep-going
 
 # --conda-cleanup-envs  # use to clean up old conda envs
 
