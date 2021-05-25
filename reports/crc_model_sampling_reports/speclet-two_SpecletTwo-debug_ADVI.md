@@ -50,6 +50,14 @@ FIT_METHOD = ""
 ```
 
 ```python
+# Parameters
+MODEL = "speclet-two"
+MODEL_NAME = "SpecletTwo-debug"
+DEBUG = True
+FIT_METHOD = "ADVI"
+```
+
+```python
 assert FIT_METHOD in ["ADVI", "MCMC"]
 ```
 
