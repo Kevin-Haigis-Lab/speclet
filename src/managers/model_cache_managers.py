@@ -3,14 +3,14 @@
 """Foundational model object and related functions for the Speclet project."""
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
+import arviz as az
 import pymc3 as pm
 from pydantic import BaseModel
 
 from src.io import cache_io
-from src.managers.cache_managers import Pymc3CacheManager
-from src.modeling import pymc3_sampling_api as pmapi
+from src.managers.cache_managers import ArvizCacheManager
 
 
 class ModelCachePaths(BaseModel):
@@ -27,8 +27,8 @@ class Pymc3ModelCacheManager:
 
     name: str
     cache_dir: Path
-    mcmc_cache_delegate: Pymc3CacheManager
-    advi_cache_delegate: Pymc3CacheManager
+    mcmc_cache_delegate: ArvizCacheManager
+    advi_cache_delegate: ArvizCacheManager
 
     def __init__(self, name: str, root_cache_dir: Optional[Path] = None):
         """Instantiate a new SpecletModel object.
@@ -43,10 +43,10 @@ class Pymc3ModelCacheManager:
         if root_cache_dir is None:
             root_cache_dir = cache_io.default_cache_dir()
         self.cache_dir = root_cache_dir / self.name
-        self.mcmc_cache_delegate = Pymc3CacheManager(cache_dir=self.cache_dir / "mcmc")
-        self.advi_cache_delegate = Pymc3CacheManager(cache_dir=self.cache_dir / "advi")
+        self.mcmc_cache_delegate = ArvizCacheManager(cache_dir=self.cache_dir / "mcmc")
+        self.advi_cache_delegate = ArvizCacheManager(cache_dir=self.cache_dir / "advi")
 
-    def get_mcmc_cache(self, model: pm.Model) -> pmapi.MCMCSamplingResults:
+    def get_mcmc_cache(self) -> az.InferenceData:
         """Get MCMC sampling results from cache.
 
         Args:
@@ -55,9 +55,9 @@ class Pymc3ModelCacheManager:
         Returns:
             pmapi.MCMCSamplingResults: MCMC sampling results.
         """
-        return self.mcmc_cache_delegate.read_cached_sampling(model=model)
+        return self.mcmc_cache_delegate.read_cached_sampling()
 
-    def get_advi_cache(self, draws: int = 1000) -> pmapi.ApproximationSamplingResults:
+    def get_advi_cache(self) -> Tuple[az.InferenceData, pm.Approximation]:
         """Get ADVI fitting results from cache.
 
         Args:
@@ -66,23 +66,27 @@ class Pymc3ModelCacheManager:
         Returns:
             pmapi.ApproximationSamplingResults: ADVI fitting results.
         """
-        return self.advi_cache_delegate.read_cached_approximation(draws=draws)
+        return self.advi_cache_delegate.read_cached_approximation()
 
-    def write_mcmc_cache(self, res: pmapi.MCMCSamplingResults) -> None:
+    def write_mcmc_cache(self, inference_data: az.InferenceData) -> None:
         """Cache MCMC sampling results.
 
         Args:
             res (pmapi.MCMCSamplingResults): MCMC sampling results.
         """
-        self.mcmc_cache_delegate.cache_sampling_results(res=res)
+        self.mcmc_cache_delegate.cache_sampling_results(inference_data)
 
-    def write_advi_cache(self, res: pmapi.ApproximationSamplingResults) -> None:
+    def write_advi_cache(
+        self,
+        inference_data: az.InferenceData,
+        approx: pm.Approximation,
+    ) -> None:
         """Cache ADVI fitting results.
 
         Args:
             res (pmapi.ApproximationSamplingResults): ADVI fitting results.
         """
-        self.advi_cache_delegate.cache_sampling_results(res=res)
+        self.advi_cache_delegate.cache_sampling_results(inference_data, approx)
 
     def mcmc_cache_exists(self) -> bool:
         """Confirm that a cache of MCMC sampling results exists.

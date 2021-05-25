@@ -68,8 +68,8 @@ class TestCeresMimic:
     def test_mcmc_sampling_base(self, tmp_path: Path):
         cm = CeresMimic("test-model", root_cache_dir=tmp_path, debug=True)
         self.mcmc_sampling(cm)
-        assert "β" not in cm.mcmc_results.trace.varnames
-        assert "o" not in cm.mcmc_results.trace.varnames
+        assert "β" not in list(cm.mcmc_results.posterior.keys())
+        assert "o" not in list(cm.mcmc_results.posterior.keys())
 
     @pytest.mark.slow
     def test_mcmc_sampling_copynumber_cov(self, tmp_path: Path):
@@ -77,8 +77,8 @@ class TestCeresMimic:
             "test-model", root_cache_dir=tmp_path, debug=True, copynumber_cov=True
         )
         self.mcmc_sampling(cm)
-        assert "β" in cm.mcmc_results.trace.varnames
-        assert "o" not in cm.mcmc_results.trace.varnames
+        assert "β" in list(cm.mcmc_results.posterior.keys())
+        assert "o" not in list(cm.mcmc_results.posterior.keys())
 
     @pytest.mark.slow
     def test_mcmc_sampling_sgrna_intercept_cov(self, tmp_path: Path):
@@ -86,8 +86,8 @@ class TestCeresMimic:
             "test-model", root_cache_dir=tmp_path, debug=True, sgrna_intercept_cov=True
         )
         self.mcmc_sampling(cm)
-        assert "β" not in cm.mcmc_results.trace.varnames
-        assert "o" in cm.mcmc_results.trace.varnames
+        assert "β" not in list(cm.mcmc_results.posterior.keys())
+        assert "o" in list(cm.mcmc_results.posterior.keys())
 
     def advi_sampling(self, cm: CeresMimic):
         d = cm.data_manager.get_data()
@@ -114,8 +114,8 @@ class TestCeresMimic:
     def test_advi_sampling_base(self, tmp_path: Path):
         cm = CeresMimic("test-model", root_cache_dir=tmp_path, debug=True)
         self.advi_sampling(cm)
-        assert "β" not in cm.advi_results.trace.varnames
-        assert "o" not in cm.advi_results.trace.varnames
+        assert "β" not in list(cm.advi_results[0].posterior.keys())
+        assert "o" not in list(cm.advi_results[0].posterior.keys())
 
     @pytest.mark.slow
     def test_advi_sampling_copynumber_cov(self, tmp_path: Path):
@@ -123,8 +123,8 @@ class TestCeresMimic:
             "test-model", root_cache_dir=tmp_path, debug=True, copynumber_cov=True
         )
         self.advi_sampling(cm)
-        assert "β" in cm.advi_results.trace.varnames
-        assert "o" not in cm.advi_results.trace.varnames
+        assert "β" in list(cm.advi_results[0].posterior.keys())
+        assert "o" not in list(cm.advi_results[0].posterior.keys())
 
     @pytest.mark.slow
     def test_advi_sampling_sgrna_intercept_cov(self, tmp_path: Path):
@@ -132,5 +132,5 @@ class TestCeresMimic:
             "test-model", root_cache_dir=tmp_path, debug=True, sgrna_intercept_cov=True
         )
         self.advi_sampling(cm)
-        assert "β" not in cm.advi_results.trace.varnames
-        assert "o" in cm.advi_results.trace.varnames
+        assert "β" not in list(cm.advi_results[0].posterior.keys())
+        assert "o" in list(cm.advi_results[0].posterior.keys())

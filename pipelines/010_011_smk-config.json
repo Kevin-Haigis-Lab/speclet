@@ -9,12 +9,26 @@
         "mail": "NONE",
         "J": "snakejob"
     },
-    "sample_models": {
+    "sample_mcmc": {
         "partition": "{params.partition}",
-        "cores": "{params.cores}",
+        "cores": 1,
         "mem": "{params.mem}",
         "time": "{params.time}",
-        "J": "sample"
+        "J": "mcmc"
+    },
+    "combine_mcmc": {
+        "partition": "short",
+        "cores": 1,
+        "mem": "32000",
+        "time": "00:15:00",
+        "J": "combine"
+    },
+    "sample_advi": {
+        "partition": "{params.partition}",
+        "cores": 1,
+        "mem": "{params.mem}",
+        "time": "{params.time}",
+        "J": "advi"
     },
     "papermill_report": {
         "partition": "short",
@@ -26,8 +40,8 @@
     "execute_report": {
         "partition": "short",
         "cores": 1,
-        "mem": "64000",
-        "time": "00:30:00",
+        "mem": "100000",
+        "time": "01:30:00",
         "J": "report"
     }
 }
