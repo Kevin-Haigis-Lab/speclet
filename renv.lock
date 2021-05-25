@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.0.2",
+    "Version": "4.1.0",
     "Repositories": [
       {
         "Name": "https://cran.rstudio.com",
@@ -728,10 +728,10 @@
     },
     "tictoc": {
       "Package": "tictoc",
-      "Version": "1.0",
+      "Version": "1.0.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "f8cc5adf4671b013434bbe127f35b28c"
+      "Hash": "5acb66b0266ad1f0ebf7ffe1aa36ff4c"
     },
     "tidyr": {
       "Package": "tidyr",
