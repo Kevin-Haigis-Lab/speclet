@@ -2,8 +2,8 @@
 
 #SBATCH -c 2
 #SBATCH -p priority
-#SBATCH -t 3-00:00
-#SBATCH --mem 1G
+#SBATCH -t 1-00:00
+#SBATCH --mem 8G
 #SBATCH -o logs/%j_sample-pipeline.log
 #SBATCH -e logs/%j_sample-pipeline.log
 
