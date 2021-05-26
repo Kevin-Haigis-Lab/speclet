@@ -27,13 +27,13 @@ write_csv(crc_data, file.path(data_dir, "depmap_CRC_data.csv"))
 #### ---- Create a sub-sample for testing ---- ####
 
 set.seed(0)
-GENES <- sample(unique(crc_data$hugo_symbol), 6)
+GENES <- sample(unique(crc_data$hugo_symbol), 50)
 
 CELL_LINES <- crc_data %>%
   distinct(depmap_id, kras_mutation) %>%
-  filter(kras_mutation %in% c("WT", "G12D", "G13D")) %>%
-  group_by(kras_mutation) %>%
-  sample_n(3) %>%
+  filter(kras_mutation %in% c("WT", "G12D", "G13D", "G12V")) %>%
+  # group_by(kras_mutation) %>%
+  # sample_n(3) %>%
   pull(depmap_id) %>%
   unlist()
 
@@ -43,8 +43,8 @@ crc_subsample <- crc_data %>%
 
 SGRNAS <- crc_subsample %>%
   distinct(hugo_symbol, sgrna) %>%
-  group_by(hugo_symbol) %>%
-  sample_n(3) %>%
+  # group_by(hugo_symbol) %>%
+  # sample_n(3) %>%
   pull(sgrna) %>%
   unlist()
 
