@@ -94,6 +94,23 @@ def test_mock_data_has_correct_categories_sizes():
         assert n_batches >= dphelp.nunique(mock_data.pdna_batch)
 
 
+def test_mock_data_has_correct_kras_mutation_types():
+    for _ in range(20):
+        n_genes = np.random.randint(2, 20)
+        n_sgrnas_per_gene = np.random.randint(2, 20)
+        n_cell_lines = np.random.randint(4, 20)
+        n_batches = np.random.randint(1, n_cell_lines)
+        n_kras_types = np.random.randint(1, n_cell_lines // 2)
+        mock_data = sbc.generate_mock_achilles_data(
+            n_genes=n_genes,
+            n_sgrnas_per_gene=n_sgrnas_per_gene,
+            n_cell_lines=n_cell_lines,
+            n_batches=n_batches,
+            n_kras_types=n_kras_types,
+        )
+        assert n_kras_types >= dphelp.nunique(mock_data.kras_mutation)
+
+
 def test_sgrnas_uniquely_map_to_genes():
     for _ in range(20):
         mock_data = generate_data_with_random_params()

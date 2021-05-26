@@ -1,8 +1,9 @@
 """Helpers for organizing simualtaion-based calibrations."""
 
+import random
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import arviz as az
 import numpy as np
@@ -137,11 +138,15 @@ class SBCFileManager:
 
 
 def generate_mock_achilles_data(
-    n_genes: int, n_sgrnas_per_gene: int, n_cell_lines: int, n_batches: int
+    n_genes: int,
+    n_sgrnas_per_gene: int,
+    n_cell_lines: int,
+    n_batches: int,
+    n_kras_types: Optional[int] = None,
 ) -> pd.DataFrame:
     """Generate mock Achilles data.
 
-    Each sgRNA maps to a single gene. Each cell lines only recieved on pDNA batch.
+    Each sgRNA maps to a single gene. Each cell lines only received on pDNA batch.
     Each cell line / sgRNA combination occurs exactly once.
 
     Args:
@@ -149,6 +154,8 @@ def generate_mock_achilles_data(
         n_sgrnas_per_gene (int): Number of sgRNAs per gene.
         n_cell_lines (int): Number of cell lines.
         n_batches (int): Number of pDNA batchs.
+        n_kras_types (Optional[int], optional): Number of types of KRAS mutations to
+          include. Defaults to None which ignores this attribute altogether.
 
     Returns:
         pd.DataFrame: A pandas data frame the resembles the Achilles data.
@@ -179,6 +186,25 @@ def generate_mock_achilles_data(
         .merge(sgnra_map, on="hugo_symbol")
         .reset_index(drop=True)
     )
+
+    kras_types: List[str] = ["WT", "G12D", "G13D", "A146T", "Q61L", "G12C", "G12R"]
+    if n_kras_types is not None:
+        if n_kras_types > len(kras_types):
+            raise ValueError(
+                f"Please use less than {len(kras_types)} types of KRAS mutations."
+            )
+        elif n_kras_types <= 0:
+            raise ValueError("Number of KRAS types must be positive and non-zero.")
+
+        kras_types = kras_types[:n_kras_types]
+        kras_assignments = pd.DataFrame(
+            {
+                "depmap_id": cell_lines,
+                "kras_mutation": random.choices(kras_types, k=len(cell_lines)),
+            }
+        )
+        df = df.merge(kras_assignments, how="left", on="depmap_id")
+
     df = achelp.set_achilles_categorical_columns(df, cols=df.columns.tolist())
 
     # Mock values for gene copy number.
