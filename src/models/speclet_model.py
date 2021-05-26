@@ -132,8 +132,7 @@ class SpecletModel:
         self.model = None
         self.mcmc_results = None
         self.advi_results = None
-        logger.warning("Cache files not cleared (not yet implemented).")  # TODO
-        # self.cache_manager.clear_all_caches()
+        self.cache_manager.clear_all_caches()
 
     @abstractmethod
     def model_specification(self) -> Tuple[pm.Model, str]:

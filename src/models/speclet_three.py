@@ -5,6 +5,7 @@ from typing import Any, List, Optional, Tuple
 
 import pymc3 as pm
 import theano
+from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 from src.data_processing import achilles as achelp
 from src.loggers import logger
@@ -24,6 +25,7 @@ class SpecletThree(SpecletModel):
 
     _kras_cov: bool
     _kras_mutation_minimum: int
+    _noncentered_param: bool
 
     def __init__(
         self,
@@ -33,6 +35,7 @@ class SpecletThree(SpecletModel):
         data_manager: Optional[DataManager] = CrcDataManager(),
         kras_cov: bool = False,
         kras_mutation_minimum: int = 3,
+        noncentered_param: bool = True,
     ):
         """Instantiate a SpecletThree model.
 
@@ -59,6 +62,7 @@ class SpecletThree(SpecletModel):
         )
         self._kras_cov = kras_cov
         self._kras_mutation_minimum = kras_mutation_minimum
+        self._noncentered_param = noncentered_param
 
     def __str__(self) -> str:
         """Describe the object.
@@ -103,28 +107,33 @@ class SpecletThree(SpecletModel):
             self._kras_mutation_minimum = new_value
             self._reset_model_and_results()
 
-    def model_specification(self) -> Tuple[pm.Model, str]:
-        """Build SpecletThree model.
+    @property
+    def noncentered_param(self) -> bool:
+        """Value of `kras_cov` attribute."""
+        return self._noncentered_param
 
-        Returns:
-            Tuple[pm.Model, str]: The model and name of the observed variable.
+    @noncentered_param.setter
+    def noncentered_param(self, new_value: bool) -> None:
+        """Set the value of `noncentered_param` attribute.
+
+        If the new value is different, all model and sampling results are reset.
         """
-        logger.info("Beginning PyMC3 model specification.")
-        data = self.data_manager.get_data()
+        if new_value != self._kras_cov:
+            logger.info(f"Changing `_noncentered_param` attribute to '{new_value}'.")
+            self._noncentered_param = new_value
+            self._reset_model_and_results()
 
-        total_size = data.shape[0]
-        ic = achelp.common_indices(data, min_kras_muts=self.kras_mutation_minimum)
-
-        # Shared Theano variables
-        logger.info("Getting Theano shared variables.")
-        sgrna_idx_shared = theano.shared(ic.sgrna_idx)
-        gene_idx_shared = theano.shared(ic.gene_idx)
-        cellline_idx_shared = theano.shared(ic.cellline_idx)
-        kras_idx_shared = theano.shared(ic.kras_mutation_idx)
-        batch_idx_shared = theano.shared(ic.batch_idx)
-        lfc_shared = theano.shared(data.lfc.values)
-
-        logger.info("Creating PyMC3 model.")
+    def _model_centered_parameterization(
+        self,
+        ic: achelp.CommonIndices,
+        total_size: int,
+        sgrna_idx_shared: TTShared,
+        gene_idx_shared: TTShared,
+        cellline_idx_shared: TTShared,
+        kras_idx_shared: TTShared,
+        batch_idx_shared: TTShared,
+        lfc_shared: TTShared,
+    ) -> pm.Model:
         with pm.Model() as model:
             # Gene varying intercept.
             μ_h = pm.Normal("μ_h", 0, 1)
@@ -166,6 +175,114 @@ class SpecletThree(SpecletModel):
                 σ[sgrna_idx_shared],
                 observed=lfc_shared,
                 total_size=total_size,
+            )
+        return model
+
+    def _model_non_centered_parameterization(
+        self,
+        ic: achelp.CommonIndices,
+        total_size: int,
+        sgrna_idx_shared: TTShared,
+        gene_idx_shared: TTShared,
+        cellline_idx_shared: TTShared,
+        kras_idx_shared: TTShared,
+        batch_idx_shared: TTShared,
+        lfc_shared: TTShared,
+    ) -> pm.Model:
+        with pm.Model() as model:
+            # Gene varying intercept.
+            μ_h = pm.Normal("μ_h", 0, 1)
+            σ_h = pm.HalfNormal("σ_h", 1)
+            h_offset = pm.Normal("h_offset", 0, 1, shape=ic.n_genes)
+            h = pm.Deterministic("h", μ_h + h_offset * σ_h)
+
+            # [gene, cell line] varying intercept.
+            μ_g = pm.Normal("μ_g", 0, 0.2)
+            σ_g = pm.HalfNormal("σ_g", 1)
+            g_offset = pm.Normal("g_offset", 0, 1, shape=(ic.n_genes, ic.n_celllines))
+            g = pm.Deterministic("g", μ_g + g_offset * σ_g)
+
+            # Batch effect varying intercept.
+            μ_b = pm.Normal("μ_b", 0, 0.2)
+            σ_b = pm.HalfNormal("σ_b", 0.5)
+            b_offset = pm.Normal("b_offset", 0, 1, shape=ic.n_batches)
+            b = pm.Deterministic("b", μ_b + b_offset * σ_b)
+
+            _mu = (
+                h[gene_idx_shared]
+                + g[gene_idx_shared, cellline_idx_shared]
+                + b[batch_idx_shared]
+            )
+
+            if self.kras_cov:
+                # Varying effect for KRAS mutation.
+                μ_a = pm.Normal("μ_a", 0, 0.2)
+                σ_a = pm.HalfNormal("σ_a", 1)
+                a_offset = pm.Normal(
+                    "a_offset", 0, 1, shape=(ic.n_genes, ic.n_kras_mutations)
+                )
+                a = pm.Deterministic("a", μ_a + a_offset * σ_a)
+                _mu += a[gene_idx_shared, kras_idx_shared]
+
+            μ = pm.Deterministic("μ", _mu)
+
+            σ_σ = pm.HalfNormal("σ_σ", 0.5)
+            σ = pm.HalfNormal("σ", σ_σ, shape=ic.n_sgrnas)
+
+            # Likelihood
+            lfc = pm.Normal(  # noqa: F841
+                "lfc",
+                μ,
+                σ[sgrna_idx_shared],
+                observed=lfc_shared,
+                total_size=total_size,
+            )
+        return model
+
+    def model_specification(self) -> Tuple[pm.Model, str]:
+        """Build SpecletThree model.
+
+        Returns:
+            Tuple[pm.Model, str]: The model and name of the observed variable.
+        """
+        logger.info("Beginning PyMC3 model specification.")
+        data = self.data_manager.get_data()
+
+        total_size = data.shape[0]
+        ic = achelp.common_indices(data, min_kras_muts=self.kras_mutation_minimum)
+
+        # Shared Theano variables
+        logger.info("Getting Theano shared variables.")
+        sgrna_idx_shared = theano.shared(ic.sgrna_idx)
+        gene_idx_shared = theano.shared(ic.gene_idx)
+        cellline_idx_shared = theano.shared(ic.cellline_idx)
+        kras_idx_shared = theano.shared(ic.kras_mutation_idx)
+        batch_idx_shared = theano.shared(ic.batch_idx)
+        lfc_shared = theano.shared(data.lfc.values)
+
+        if self.noncentered_param:
+            logger.info("Creating PyMC3 model (non-centered parameterization).")
+            model = self._model_non_centered_parameterization(
+                ic=ic,
+                total_size=total_size,
+                sgrna_idx_shared=sgrna_idx_shared,
+                gene_idx_shared=gene_idx_shared,
+                cellline_idx_shared=cellline_idx_shared,
+                kras_idx_shared=kras_idx_shared,
+                batch_idx_shared=batch_idx_shared,
+                lfc_shared=lfc_shared,
+            )
+        else:
+            logger.info("Creating PyMC3 model (centered parameterization).")
+            model = self._model_centered_parameterization(
+                ic=ic,
+                total_size=total_size,
+                sgrna_idx_shared=sgrna_idx_shared,
+                gene_idx_shared=gene_idx_shared,
+                cellline_idx_shared=cellline_idx_shared,
+                kras_idx_shared=kras_idx_shared,
+                batch_idx_shared=batch_idx_shared,
+                lfc_shared=lfc_shared,
             )
 
         logger.debug("Finished building model.")
