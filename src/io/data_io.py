@@ -4,6 +4,7 @@
 
 from enum import Enum
 from pathlib import Path
+from typing import Union
 
 #### ---- Enums ---- ####
 
@@ -18,6 +19,7 @@ class DataFile(str, Enum):
     achilles_subsample = "depmap_modeling_dataframe_subsample.csv"
     achilles_guide_efficacy = "achilles_guide_efficacy.csv"
     achilles_essentials = "achilles_essential_genes.csv"
+    achilles_gene_effect = "achilles_gene_effect.csv"
     ccle_mutations = "ccle_mutations.csv"
     ccle_copynumber = "ccle_gene_cn.csv"
 
@@ -46,7 +48,7 @@ def modeling_data_dir() -> Path:
 #### ---- Getters ---- ####
 
 
-def data_path(to: DataFile) -> Path:
+def data_path(to: Union[str, DataFile]) -> Path:
     """Path a to a data file.
 
     Args:
@@ -55,4 +57,6 @@ def data_path(to: DataFile) -> Path:
     Returns:
         Path: Path to the file.
     """
+    if isinstance(to, str):
+        to = DataFile(to)
     return modeling_data_dir() / to.value
