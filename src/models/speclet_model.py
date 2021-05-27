@@ -127,11 +127,16 @@ class SpecletModel:
         if self.data_manager is not None:
             self.data_manager.debug = new_value
 
-    def _reset_model_and_results(self):
+    def _reset_model_and_results(self, clear_cache: bool = False):
         logger.warning("Reseting all model and results.")
         self.model = None
         self.mcmc_results = None
         self.advi_results = None
+        if clear_cache:
+            self.clear_cache()
+
+    def clear_cache(self):
+        """Clear all available caches for the model."""
         self.cache_manager.clear_all_caches()
 
     @abstractmethod
