@@ -100,7 +100,7 @@ def test_mock_data_has_correct_kras_mutation_types():
         n_sgrnas_per_gene = np.random.randint(2, 20)
         n_cell_lines = np.random.randint(4, 20)
         n_batches = np.random.randint(1, n_cell_lines)
-        n_kras_types = np.random.randint(1, n_cell_lines // 2)
+        n_kras_types = np.min([np.random.randint(1, n_cell_lines // 2), 7])
         mock_data = sbc.generate_mock_achilles_data(
             n_genes=n_genes,
             n_sgrnas_per_gene=n_sgrnas_per_gene,
