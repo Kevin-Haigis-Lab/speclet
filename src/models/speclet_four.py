@@ -133,12 +133,12 @@ class SpecletFour(SpecletModel):
                 "μ_g",
                 model["μ_μ_g"],
                 model["σ_μ_g"],
-                shape=unco_idx.n_kras_mutations,
+                shape=(co_idx.n_genes, unco_idx.n_kras_mutations),
             )
             σ_g = pm.HalfNormal("σ_g", 1)
             g = pm.Normal(
                 "g",
-                μ_g[cellline_to_kras_idx_shared],
+                μ_g[:, cellline_to_kras_idx_shared],
                 σ_g,
                 shape=(co_idx.n_genes, co_idx.n_celllines),
             )
@@ -182,13 +182,17 @@ class SpecletFour(SpecletModel):
             h = pm.Deterministic("h", model["μ_h"] + h_offset * model["σ_h"])
 
             # [gene, cell line] varying intercept.
-            μ_g_offset = pm.Normal("μ_g_offset", 0, 1, shape=unco_idx.n_kras_mutations)
+            μ_g_offset = pm.Normal(
+                "μ_g_offset", 0, 1, shape=(co_idx.n_genes, unco_idx.n_kras_mutations)
+            )
             μ_g = pm.Deterministic("μ_g", model["μ_μ_g"] + μ_g_offset * model["σ_μ_g"])
             σ_g = pm.HalfNormal("σ_g", 1)
             g_offset = pm.Normal(
                 "g_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
             )
-            g = pm.Deterministic("g", μ_g[cellline_to_kras_idx_shared] + g_offset * σ_g)
+            g = pm.Deterministic(
+                "g", μ_g[:, cellline_to_kras_idx_shared] + g_offset * σ_g
+            )
 
             # Batch effect varying intercept.
             b_offset = pm.Normal("b_offset", 0, 1, shape=co_idx.n_batches)

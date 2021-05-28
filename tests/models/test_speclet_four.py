@@ -62,12 +62,13 @@ class TestSpecletFour:
 
     def test_kras_indexing(self, tmp_path: Path):
         dm = CrcDataManager(debug=True)
+        n_genes = 4
         dm.data = (
             dm.get_data()
-            .pipe(achelp.subsample_achilles_data, n_genes=4, n_cell_lines=25)
+            .pipe(achelp.subsample_achilles_data, n_genes=n_genes, n_cell_lines=25)
             .pipe(achelp.set_achilles_categorical_columns)
         )
-        assert dphelp.nunique(dm.data["hugo_symbol"]) == 4
+        assert dphelp.nunique(dm.data["hugo_symbol"]) == n_genes
         assert dphelp.nunique(dm.data["depmap_id"]) == 25
 
         kras_alleles = ["A", "X", "T"]
@@ -100,7 +101,7 @@ class TestSpecletFour:
         else:
             a = sp_four.model["μ_g"]
         n_expected_kras_alleles = 5
-        assert a.dshape == (n_expected_kras_alleles,)
+        assert a.dshape == (n_genes, n_expected_kras_alleles)
 
         sp_four = SpecletFour(
             "test-model",
@@ -116,4 +117,29 @@ class TestSpecletFour:
         else:
             a = sp_four.model["μ_g"]
         n_expected_kras_alleles = 4
-        assert a.dshape == (n_expected_kras_alleles,)
+        assert a.dshape == (n_genes, n_expected_kras_alleles)
+
+    @pytest.mark.DEV
+    def test_switching_noncentered_parameterization(
+        self, tmp_path: Path, data_manager: CrcDataManager
+    ):
+        sp_four = SpecletFour(
+            "test-model",
+            root_cache_dir=tmp_path,
+            debug=True,
+            data_manager=data_manager,
+            kras_mutation_minimum=0,
+            noncentered_param=False,
+        )
+        assert sp_four.model is None
+        sp_four.build_model()
+        assert sp_four.model is not None
+        rv_names = [v.name for v in sp_four.model.free_RVs]
+        assert not any(["offset" in n for n in rv_names])
+
+        sp_four.noncentered_param = True
+        assert sp_four.model is None
+        sp_four.build_model()
+        assert sp_four.model is not None
+        rv_names = [v.name for v in sp_four.model.free_RVs]
+        assert any(["offset" in n for n in rv_names])
