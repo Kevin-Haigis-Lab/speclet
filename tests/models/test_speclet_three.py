@@ -108,6 +108,7 @@ class TestSpecletThree:
         assert isinstance(sp3.model, pm.Model)
         assert "a" in list(sp3.model.named_vars.keys())
 
+    @pytest.mark.skip(reason="using very small subsample of data")
     def test_kras_indexing(self, tmp_path: Path):
         dm = CrcDataManager(debug=True)
         dm.data = (
@@ -162,3 +163,25 @@ class TestSpecletThree:
         a = sp3.model["a"]
         n_expected_kras_alleles = 4
         assert a.dshape == (n_genes, n_expected_kras_alleles)
+
+    def test_switching_parameterization(self, tmp_path: Path):
+        dm = CrcDataManager(debug=True)
+        dm.data = dm.generate_mock_data("small")  # Use mock data.
+        sp3 = SpecletThree(
+            "test-model",
+            root_cache_dir=tmp_path,
+            debug=True,
+            data_manager=dm,
+            kras_cov=False,
+            noncentered_param=False,
+        )
+        sp3.build_model()
+        assert sp3.model is not None
+        rv_names = [v.name for v in sp3.model.free_RVs]
+        assert not any(["offset" in name for name in rv_names])
+        sp3.noncentered_param = True
+        assert sp3.model is None
+        sp3.build_model()
+        assert sp3.model is not None
+        rv_names = [v.name for v in sp3.model.free_RVs]
+        assert any(["offset" in name for name in rv_names])

@@ -83,6 +83,7 @@ class TestSpecletFour:
     #     )
     #     assert sp_four.advi_results is not None
 
+    @pytest.mark.skip(reason="using very small subsample of data")
     def test_kras_indexing(self, tmp_path: Path):
         dm = CrcDataManager(debug=True)
         dm.data = (

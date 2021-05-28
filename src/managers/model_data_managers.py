@@ -169,11 +169,27 @@ class CrcDataManager(DataManager):
 
         if size == sbc.MockDataSizes.small:
             self.data = sbc.generate_mock_achilles_data(
-                n_genes=10, n_sgrnas_per_gene=3, n_cell_lines=5, n_batches=2
+                n_genes=10,
+                n_sgrnas_per_gene=3,
+                n_cell_lines=5,
+                n_batches=2,
+                n_kras_types=2,
+            )
+        elif size == sbc.MockDataSizes.medium:
+            self.data = sbc.generate_mock_achilles_data(
+                n_genes=25,
+                n_sgrnas_per_gene=5,
+                n_cell_lines=12,
+                n_batches=3,
+                n_kras_types=3,
             )
         else:
             self.data = sbc.generate_mock_achilles_data(
-                n_genes=100, n_sgrnas_per_gene=5, n_cell_lines=20, n_batches=3
+                n_genes=100,
+                n_sgrnas_per_gene=5,
+                n_cell_lines=20,
+                n_batches=3,
+                n_kras_types=3,
             )
         return self.data
 

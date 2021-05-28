@@ -12,7 +12,6 @@ import pandas as pd
 import plotnine as gg
 import pymc3 as pm
 import seaborn as sns
-
 from src.command_line_interfaces import sampling_pymc3_models_cli as sampling
 from src.data_processing import common as dphelp
 from src.modeling import pymc3_analysis as pmanal
@@ -72,7 +71,7 @@ speclet_model = sampling.sample_speclet_model(
 )
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[05/25/21 13:09:24] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Cache directory: <span style="color: #800080; text-decoration-color: #800080">/n/data1/hms/db</span> <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/command_line_interfaces/sampling_pymc3_models_cli.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">sampling_pymc3_models_cli.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:87</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[05/27/21 06:56:18] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Cache directory: <span style="color: #800080; text-decoration-color: #800080">/n/data1/hms/db</span> <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/command_line_interfaces/sampling_pymc3_models_cli.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">sampling_pymc3_models_cli.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:87</span>
                              <span style="color: #800080; text-decoration-color: #800080">mi/park/Cook/speclet/</span><span style="color: #ff00ff; text-decoration-color: #ff00ff">models</span>
 </pre>
 
@@ -86,10 +85,10 @@ speclet_model = sampling.sample_speclet_model(
 <pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Running model build method.     <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/command_line_interfaces/sampling_pymc3_models_cli.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">sampling_pymc3_models_cli.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:102</span>
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Calling `model_specification<span style="font-weight: bold">()</span>` method.     <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/speclet_model.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_model.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:167</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Calling `model_specification<span style="font-weight: bold">()</span>` method.     <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/speclet_model.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_model.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:171</span>
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Beginning PyMC3 model specification.        <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/speclet_three.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_three.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:112</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Beginning PyMC3 model specification.        <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/speclet_three.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_three.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:261</span>
 </pre>
 
 <pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping data points of sgRNA that    <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:125</span>
@@ -100,28 +99,29 @@ speclet_model = sampling.sample_speclet_model(
                              copy number.
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Getting Theano shared variables.            <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/speclet_three.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_three.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:119</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Getting Theano shared variables.            <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/speclet_three.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_three.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:268</span>
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Creating PyMC3 model.                       <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/speclet_three.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_three.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:127</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Creating PyMC3 model <span style="font-weight: bold">(</span>non-centered          <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/speclet_three.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_three.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:277</span>
+                             parameterization<span style="font-weight: bold">)</span>.
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[05/25/21 13:09:43] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Running ADVI fitting method.    <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/command_line_interfaces/sampling_pymc3_models_cli.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">sampling_pymc3_models_cli.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:107</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[05/27/21 06:56:58] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Running ADVI fitting method.    <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/command_line_interfaces/sampling_pymc3_models_cli.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">sampling_pymc3_models_cli.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:107</span>
 </pre>
 
     /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/7988df32/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/7988df32/lib/python3.9/site-packages/pymc3/data.py:316: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[05/25/21 13:09:46] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> ArvizCacheManager: ADVI cache exists.      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/cache_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">cache_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:277</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[05/27/21 06:57:17] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> ArvizCacheManager: ADVI cache exists.      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/cache_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">cache_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:277</span>
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Returning results from cache.               <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/speclet_model.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_model.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:390</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Returning results from cache.               <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/speclet_model.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_model.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:394</span>
 </pre>
 
 <pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> ArvizCacheManager: ADVI cache exists.      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/cache_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">cache_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:277</span>
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[05/25/21 13:09:47] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> finished; execution time: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.38</span>  <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/command_line_interfaces/sampling_pymc3_models_cli.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">sampling_pymc3_models_cli.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:134</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[05/27/21 06:57:18] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> finished; execution time: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.00</span>  <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/command_line_interfaces/sampling_pymc3_models_cli.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">sampling_pymc3_models_cli.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:134</span>
                              minutes
 </pre>
 
@@ -202,7 +202,7 @@ data.head()
       <td>False</td>
       <td>1.480265</td>
       <td>1.861144</td>
-      <td>1.386218</td>
+      <td>1.584371</td>
       <td>0</td>
     </tr>
     <tr>
@@ -226,7 +226,7 @@ data.head()
       <td>False</td>
       <td>1.480265</td>
       <td>1.861144</td>
-      <td>1.386218</td>
+      <td>1.584371</td>
       <td>0</td>
     </tr>
     <tr>
@@ -250,7 +250,7 @@ data.head()
       <td>False</td>
       <td>0.695994</td>
       <td>1.375470</td>
-      <td>-0.234394</td>
+      <td>-0.053926</td>
       <td>0</td>
     </tr>
     <tr>
@@ -274,7 +274,7 @@ data.head()
       <td>False</td>
       <td>0.695994</td>
       <td>1.375470</td>
-      <td>-0.234394</td>
+      <td>-0.053926</td>
       <td>0</td>
     </tr>
     <tr>
@@ -298,7 +298,7 @@ data.head()
       <td>False</td>
       <td>0.695994</td>
       <td>1.375470</td>
-      <td>-0.234394</td>
+      <td>-0.053926</td>
       <td>0</td>
     </tr>
   </tbody>
@@ -314,21 +314,24 @@ print(speclet_model.model)
 
           μ_h ~ Normal
     σ_h_log__ ~ TransformedDistribution
-            h ~ Normal
           μ_g ~ Normal
     σ_g_log__ ~ TransformedDistribution
-            g ~ Normal
           μ_b ~ Normal
     σ_b_log__ ~ TransformedDistribution
-            b ~ Normal
     σ_σ_log__ ~ TransformedDistribution
       σ_log__ ~ TransformedDistribution
+     h_offset ~ Normal
+     g_offset ~ Normal
+     b_offset ~ Normal
           σ_h ~ HalfNormal
           σ_g ~ HalfNormal
           σ_b ~ HalfNormal
-            μ ~ Deterministic
           σ_σ ~ HalfNormal
             σ ~ HalfNormal
+            h ~ Deterministic
+            g ~ Deterministic
+            b ~ Deterministic
+            μ ~ Deterministic
           lfc ~ Normal
 
 ```python
@@ -427,51 +430,63 @@ for var in vars_to_inspect:
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_19_0.png)
 
-    <ggplot: (2982018023985)>
+    <ggplot: (2987859291489)>
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_19_2.png)
 
-    <ggplot: (2982017762295)>
+    <ggplot: (2987876812111)>
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_19_4.png)
 
-    <ggplot: (2982017738653)>
+    <ggplot: (2987860275604)>
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_19_6.png)
 
-    <ggplot: (2982018022810)>
+    <ggplot: (2987876812201)>
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_19_8.png)
 
-    <ggplot: (2982018023030)>
+    <ggplot: (2987859156938)>
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_19_10.png)
 
-    <ggplot: (2982017771150)>
+    <ggplot: (2987876812011)>
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_19_12.png)
 
-    <ggplot: (2982017770195)>
+    <ggplot: (2987859156968)>
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_19_14.png)
 
-    <ggplot: (2982018210052)>
+    <ggplot: (2987888627294)>
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_19_16.png)
 
-    <ggplot: (2982032029904)>
+    <ggplot: (2987885533904)>
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_19_18.png)
 
-    <ggplot: (2982018210142)>
+    <ggplot: (2987877281883)>
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_19_20.png)
 
-    <ggplot: (2982019166727)>
+    <ggplot: (2987888522355)>
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_19_22.png)
 
-    <ggplot: (2982284411886)>
+    <ggplot: (2987867667243)>
+
+![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_19_24.png)
+
+    <ggplot: (2987845866593)>
+
+![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_19_26.png)
+
+    <ggplot: (2987888522665)>
+
+![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_19_28.png)
+
+    <ggplot: (2987877301812)>
 
 ```python
 if isinstance(speclet_model, SpecletTestModel):
@@ -537,9 +552,9 @@ pred_summary.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.071920</td>
-      <td>-0.768171</td>
-      <td>0.888580</td>
+      <td>0.003435</td>
+      <td>-0.676818</td>
+      <td>0.753494</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>ls513-311cas9_repa_p6_batch2</td>
       <td>0.029491</td>
@@ -555,15 +570,15 @@ pred_summary.head()
       <td>False</td>
       <td>1.480265</td>
       <td>1.861144</td>
-      <td>1.386218</td>
+      <td>1.584371</td>
       <td>0</td>
-      <td>-0.042429</td>
+      <td>0.026057</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0.070405</td>
-      <td>-0.656841</td>
-      <td>0.902017</td>
+      <td>0.023367</td>
+      <td>-0.617149</td>
+      <td>0.821799</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>ls513-311cas9_repb_p6_batch2</td>
       <td>0.426017</td>
@@ -579,15 +594,15 @@ pred_summary.head()
       <td>False</td>
       <td>1.480265</td>
       <td>1.861144</td>
-      <td>1.386218</td>
+      <td>1.584371</td>
       <td>0</td>
-      <td>0.355612</td>
+      <td>0.402650</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.074273</td>
-      <td>-0.853794</td>
-      <td>0.723283</td>
+      <td>-0.034863</td>
+      <td>-0.780917</td>
+      <td>0.607338</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>c2bbe1-311cas9 rep a p5_batch3</td>
       <td>0.008626</td>
@@ -603,15 +618,15 @@ pred_summary.head()
       <td>False</td>
       <td>0.695994</td>
       <td>1.375470</td>
-      <td>-0.234394</td>
+      <td>-0.053926</td>
       <td>0</td>
-      <td>0.082899</td>
+      <td>0.043489</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.070488</td>
-      <td>-0.723700</td>
-      <td>0.782340</td>
+      <td>-0.043988</td>
+      <td>-0.804267</td>
+      <td>0.650453</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>c2bbe1-311cas9 rep b p5_batch3</td>
       <td>0.280821</td>
@@ -627,15 +642,15 @@ pred_summary.head()
       <td>False</td>
       <td>0.695994</td>
       <td>1.375470</td>
-      <td>-0.234394</td>
+      <td>-0.053926</td>
       <td>0</td>
-      <td>0.351310</td>
+      <td>0.324809</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.070105</td>
-      <td>-0.770387</td>
-      <td>0.711422</td>
+      <td>-0.078008</td>
+      <td>-0.775064</td>
+      <td>0.650276</td>
       <td>CCACCCACAGACGCTCAGCA</td>
       <td>c2bbe1-311cas9 rep c p5_batch3</td>
       <td>0.239815</td>
@@ -651,9 +666,9 @@ pred_summary.head()
       <td>False</td>
       <td>0.695994</td>
       <td>1.375470</td>
-      <td>-0.234394</td>
+      <td>-0.053926</td>
       <td>0</td>
-      <td>0.309921</td>
+      <td>0.317824</td>
     </tr>
   </tbody>
 </table>
@@ -674,21 +689,21 @@ model_loo = az.loo(model_az, pointwise=True)
 print(model_loo)
 ```
 
-    Computed from 1000 by 34408 log-likelihood matrix
+    Computed from 1000 by 14162 log-likelihood matrix
 
              Estimate       SE
-    elpd_loo -28433.39   301.24
-    p_loo     9787.26        -
+    elpd_loo -8529.41   131.05
+    p_loo     1386.75        -
 
     There has been a warning during the calculation. Please check the results.
     ------
 
     Pareto k diagnostic values:
                              Count   Pct.
-    (-Inf, 0.5]   (good)     28408   82.6%
-     (0.5, 0.7]   (ok)        3806   11.1%
-       (0.7, 1]   (bad)       1535    4.5%
-       (1, Inf)   (very bad)   659    1.9%
+    (-Inf, 0.5]   (good)     13684   96.6%
+     (0.5, 0.7]   (ok)         350    2.5%
+       (0.7, 1]   (bad)         92    0.6%
+       (1, Inf)   (very bad)    36    0.3%
 
 ```python
 sns.distplot(model_loo.loo_i.values);
@@ -722,7 +737,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_27_0.png)
 
-    <ggplot: (2982284198581)>
+    <ggplot: (2987877841538)>
 
 ```python
 (
@@ -736,7 +751,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_28_0.png)
 
-    <ggplot: (2982284213739)>
+    <ggplot: (2987993492158)>
 
 ```python
 (
@@ -748,7 +763,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_29_0.png)
 
-    <ggplot: (2982284176216)>
+    <ggplot: (2987857686519)>
 
 ```python
 (
@@ -762,7 +777,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_30_0.png)
 
-    <ggplot: (2982284234210)>
+    <ggplot: (2987993580819)>
 
 ```python
 (
@@ -776,7 +791,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_31_0.png)
 
-    <ggplot: (2982284155895)>
+    <ggplot: (2987877344452)>
 
 ```python
 (
@@ -792,7 +807,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_32_0.png)
 
-    <ggplot: (2982018555847)>
+    <ggplot: (2987877329062)>
 
 ```python
 # Remove samples without gene CN data.
@@ -811,7 +826,7 @@ ppc_df_no_missing["binned_gene_cn"] = [
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_33_0.png)
 
-    <ggplot: (2982018555745)>
+    <ggplot: (2987879449838)>
 
 ```python
 gene_error = (
@@ -844,7 +859,7 @@ n_genes = 15
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_34_0.png)
 
-    <ggplot: (2982021879540)>
+    <ggplot: (2987993612864)>
 
 ```python
 (
@@ -858,7 +873,7 @@ n_genes = 15
 
 ![png](speclet-three_SpecletThree-debug_ADVI_files/speclet-three_SpecletThree-debug_ADVI_35_0.png)
 
-    <ggplot: (2982018555778)>
+    <ggplot: (2987884330222)>
 
 ---
 
@@ -867,14 +882,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 4.31 minutes
+    execution time: 4.08 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-05-25
+    Last updated: 2021-05-27
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -885,17 +900,17 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-a-16-89.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-238.o2.rc.hms.harvard.edu
 
-    Git branch: separate-mcmc-chains
+    Git branch: noncentered-reparam
 
     pandas    : 1.2.3
     matplotlib: 3.3.4
+    plotnine  : 0.7.1
     numpy     : 1.20.1
     seaborn   : 0.11.1
-    plotnine  : 0.7.1
     arviz     : 0.11.2
     pymc3     : 3.11.1
