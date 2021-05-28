@@ -52,9 +52,6 @@ class SpecletThree(SpecletModel):
             kras_mutation_minimum (int, optional): The minimum number of cell lines with
               a KRAS allele for the allele to be included as a separate group. Defaults
               to 3.
-            noncentered_param (bool, optional): Should the model use a non-centered
-              parameterization? Default to True.
-
         """
         super().__init__(
             name="speclet-three_" + name,

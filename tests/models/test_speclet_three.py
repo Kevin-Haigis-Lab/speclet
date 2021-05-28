@@ -108,7 +108,6 @@ class TestSpecletThree:
         assert isinstance(sp3.model, pm.Model)
         assert "a" in list(sp3.model.named_vars.keys())
 
-    @pytest.mark.skip(reason="using very small subsample of data")
     def test_kras_indexing(self, tmp_path: Path):
         dm = CrcDataManager(debug=True)
         dm.data = (
