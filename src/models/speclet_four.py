@@ -233,6 +233,7 @@ class SpecletFour(SpecletModel):
             "gene_idx_shared": gene_idx_shared,
             "cellline_idx_shared": cellline_idx_shared,
             "batch_idx_shared": batch_idx_shared,
+            "cn_shared": cn_shared,
             "lfc_shared": lfc_shared,
         }
         return model, "lfc"
