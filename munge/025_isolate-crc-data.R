@@ -2,11 +2,20 @@
 
 # Isolate the DepMap data for CRC cell lines.
 
+if (basename(getwd()) == "munge") {
+  setwd("..")
+}
+
+source(".Rprofile")
+
 library(magrittr)
 library(tidyverse)
 
-data_dir <- here::here("modeling_data")
-data <- data.table::fread(file.path(data_dir, "depmap_modeling_dataframe.csv"), showProgress = FALSE)
+
+data <- data.table::fread(
+  snakemake@input[["depmap_modeling_data"]],
+  showProgress = FALSE
+)
 data <- as_tibble(data)
 
 cell_lines <- data %>%
@@ -21,7 +30,7 @@ CRC_LINEAGES <- "colorectal"
 crc_data <- data %>%
   filter(lineage %in% !!CRC_LINEAGES)
 
-write_csv(crc_data, file.path(data_dir, "depmap_CRC_data.csv"))
+write_csv(crc_data, snakemake@output[["depmap_CRC_data"]])
 
 
 #### ---- Create a sub-sample for testing ---- ####
@@ -50,7 +59,7 @@ SGRNAS <- crc_subsample %>%
 
 crc_subsample %>%
   filter(sgrna %in% SGRNAS) %>%
-  write_csv(file.path(data_dir, "depmap_CRC_data_subsample.csv"))
+  write_csv(snakemake@output[["depmap_CRC_data_subsample"]])
 
 
 
@@ -66,7 +75,7 @@ GENES <- unique(unlist(GENES))
 
 large_crc_subsample <- crc_data %>%
   filter(hugo_symbol %in% !!GENES) %T>%
-  write_csv(file.path(data_dir, "depmap_CRC_data_largesubsample.csv"))
+  write_csv(snakemake@output[["depmap_CRC_data_largesubsample"]])
 
 gene_check_idx <- GENES %in% large_crc_subsample$hugo_symbol
 if (!all(gene_check_idx)) {
