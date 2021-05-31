@@ -27,6 +27,7 @@ class ModelOption(str, Enum):
     speclet_two = "speclet-two"
     speclet_three = "speclet-three"
     speclet_four = "speclet-four"
+    speclet_five = "speclet-five"
 
 
 class ModelFitMethod(str, Enum):
