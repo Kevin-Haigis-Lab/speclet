@@ -291,6 +291,7 @@ class SpecletFour(SpecletModel):
             "cellline_idx_shared": cellline_idx_shared,
             "cellline_to_kras_idx_shared": cellline_to_kras_idx_shared,
             "batch_idx_shared": batch_idx_shared,
+            "cn_shared": cn_shared,
             "lfc_shared": lfc_shared,
         }
         return model, "lfc"
