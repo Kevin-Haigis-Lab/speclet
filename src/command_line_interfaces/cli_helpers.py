@@ -10,6 +10,7 @@ import pretty_errors
 
 from src.loggers import logger
 from src.models.ceres_mimic import CeresMimic
+from src.models.speclet_five import SpecletFive
 from src.models.speclet_four import SpecletFour
 from src.models.speclet_model import SpecletModel
 from src.models.speclet_one import SpecletOne
@@ -76,6 +77,7 @@ def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
         ModelOption.speclet_two: SpecletTwo,
         ModelOption.speclet_three: SpecletThree,
         ModelOption.speclet_four: SpecletFour,
+        ModelOption.speclet_five: SpecletFive,
     }
     return model_option_map[model_opt]
 
