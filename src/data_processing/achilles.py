@@ -57,6 +57,28 @@ def zscale_cna_by_group(
 #### ---- Indices ---- ####
 
 
+def make_mapping_df(data: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
+    """Generate a DataFrame mapping two columns.
+
+    Args:
+        data (pd.DataFrame): The data set.
+        col1 (str): The name of the column with the lower level group (group that will
+          have all values appear exactly once).
+        col2 (str): The name of the column with the higher level group (multiple values
+          in group 1 will map to a single value in group 2).
+
+    Returns:
+        pd.DataFrame: A DataFrame mapping the values in col1 and col2.
+    """
+    return (
+        data[[col1, col2]]
+        .drop_duplicates()
+        .reset_index(drop=True)
+        .sort_values(col1)
+        .reset_index(drop=True)
+    )
+
+
 def make_sgrna_to_gene_mapping_df(
     data: pd.DataFrame, sgrna_col: str = "sgrna", gene_col: str = "hugo_symbol"
 ) -> pd.DataFrame:
@@ -64,21 +86,33 @@ def make_sgrna_to_gene_mapping_df(
 
     Args:
         data (pd.DataFrame): The data set.
-        sgrna_col (str, optional): The name of the column with sgRNA data.
-          Defaults to "sgrna".
-        gene_col (str, optional): The name of the column with gene names.
-          Defaults to "hugo_symbol".
+        sgrna_col (str, optional): The name of the column with sgRNA data. Defaults to
+         "sgrna".
+        gene_col (str, optional): The name of the column with gene names. Defaults to
+          "hugo_symbol".
 
     Returns:
         pd.DataFrame: A DataFrame mapping sgRNAs to genes.
     """
-    return (
-        data[[sgrna_col, gene_col]]
-        .drop_duplicates()
-        .reset_index(drop=True)
-        .sort_values(sgrna_col)
-        .reset_index(drop=True)
-    )
+    return make_mapping_df(data, sgrna_col, gene_col)
+
+
+def make_cell_line_to_lineage_mapping_df(
+    data: pd.DataFrame, cell_line_col: str = "depmap_id", lineage_col: str = "lineage"
+) -> pd.DataFrame:
+    """Generate a DataFrame mapping cell lines to lineages.
+
+    Args:
+        data (pd.DataFrame): The data set.
+        cell_line_col (str, optional): The name of the column with cell line names.
+          Defaults to "depmap_id".
+        lineage_col (str, optional): The name of the column with lineages. Defaults to
+          "lineage".
+
+    Returns:
+        pd.DataFrame: A DataFrame mapping cell lines to lineages.
+    """
+    return make_mapping_df(data, cell_line_col, lineage_col)
 
 
 def make_kras_mutation_index_with_other(
@@ -138,6 +172,10 @@ class CommonIndices(BaseModel):
     n_genes: int = 0
     cellline_idx: np.ndarray
     n_celllines: int = 0
+    lineage_idx: np.ndarray
+    n_lineages: int = 0
+    cellline_to_lineage_map: pd.DataFrame
+    cellline_to_lineage_idx: np.ndarray
     batch_idx: np.ndarray
     n_batches: int = 0
 
@@ -147,6 +185,7 @@ class CommonIndices(BaseModel):
         self.n_sgrnas = dphelp.nunique(self.sgrna_idx)
         self.n_genes = dphelp.nunique(self.gene_idx)
         self.n_celllines = dphelp.nunique(self.cellline_idx)
+        self.n_lineages = dphelp.nunique(self.lineage_idx)
         self.n_batches = dphelp.nunique(self.batch_idx)
 
     class Config:
@@ -165,13 +204,17 @@ def common_indices(achilles_df: pd.DataFrame) -> CommonIndices:
         CommonIndices: A data model with a collection of indices.
     """
     sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(achilles_df)
+    cellline_to_lineage_map = make_cell_line_to_lineage_mapping_df(achilles_df)
     return CommonIndices(
         sgrna_idx=dphelp.get_indices(achilles_df, "sgrna"),
         sgrna_to_gene_map=sgrna_to_gene_map,
         sgrna_to_gene_idx=dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol"),
         gene_idx=dphelp.get_indices(achilles_df, "hugo_symbol"),
         cellline_idx=dphelp.get_indices(achilles_df, "depmap_id"),
-        batch_idx=dphelp.get_indices(achilles_df, "p_dna_batch"),
+        lineage_idx=dphelp.get_indices(achilles_df, "lineage"),
+        cellline_to_lineage_map=cellline_to_lineage_map,
+        cellline_to_lineage_idx=dphelp.get_indices(cellline_to_lineage_map, "lineage"),
+        batch_idx=dphelp.get_indices(achilles_df, "pdna_batch"),
     )
 
 
