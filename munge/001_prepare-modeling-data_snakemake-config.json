@@ -1,56 +1,67 @@
 {
-    "__default__" :
-    {
-        "partition" : "short",
-        "cores"     : 1,
-        "mem"       : "1000",
-        "time"      : "00:10:00",
-        "out"       : "logs/modeling-data-prep/%j_{rule}.log",
-        "err"       : "logs/modeling-data-prep/%j_{rule}.log",
-        "mail"      : "NONE",
-        "J"         : "snakejob"
-    },
-    "split_segmentcn" :
-    {
-        "cores" : 1,
-        "mem"   : "5000",
-        "time"  : "00:30:00"
-    },
-    "split_genecn" :
-    {
-        "cores" : 1,
-        "mem"   : "5000",
-        "time"  : "00:30:00"
-    },
-    "split_mut" :
-    {
-        "cores" : 1,
-        "mem"   : "5000",
-        "time"  : "00:30:00"
-    },
-    "split_logfc" :
-    {
-        "cores" : 1,
-        "mem"   : "80000",
-        "time"  : "03:00:00"
-    },
-    "split_rna" :
-    {
-        "cores" : 1,
-        "mem"   : "10000",
-        "time"  : "01:00:00"
-    },
-    "merge_data" :
-    {
-        "cores" : 1,
-        "mem"   : "2000",
-        "time"  : "00:45:00"
-    },
-    "combine_data" :
-    {
+    "__default__": {
         "partition": "short",
-        "cores" : 1,
-        "mem"   : "55000",
-        "time"  : "00:30:00"
+        "cores": 1,
+        "mem": "1000",
+        "time": "00:10:00",
+        "out": "logs/%j_{rule}.log",
+        "err": "logs/%j_{rule}.log",
+        "mail": "NONE",
+        "J": "snakejob"
+    },
+    "prepare_depmap_data": {
+        "mem": "10000",
+        "time": "00:30:00",
+        "J": "prep"
+    },
+    "split_segmentcn": {
+        "mem": "5000",
+        "time": "00:30:00",
+        "J": "s_seg"
+    },
+    "split_genecn": {
+        "mem": "5000",
+        "time": "00:30:00",
+        "J": "s_cn"
+    },
+    "split_mut": {
+        "mem": "5000",
+        "time": "00:30:00",
+        "J": "s_mut"
+    },
+    "split_logfc": {
+        "mem": "80000",
+        "time": "03:00:00",
+        "J": "s_logfc"
+    },
+    "split_rna": {
+        "mem": "10000",
+        "time": "01:00:00",
+        "J": "s_rna"
+    },
+    "merge_data": {
+        "mem": "2000",
+        "time": "00:45:00",
+        "J": "merge"
+    },
+    "combine_data": {
+        "mem": "55000",
+        "time": "00:30:00",
+        "J": "comb"
+    },
+    "auxillary_files": {
+        "mem": "5000",
+        "time": "00:10:00",
+        "J": "aux_fs"
+    },
+    "isolate_crc": {
+        "mem": "30000",
+        "time": "00:20:00",
+        "J": "crc"
+    },
+    "make_test_data": {
+        "mem": "30000",
+        "time": "00:20:00",
+        "J": "test_df"
     }
 }
