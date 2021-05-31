@@ -22,10 +22,10 @@ rule all:
         modeling_data = save_dir / "depmap_modeling_dataframe.csv",
         test_data = Path("tests", "depmap_test_data.csv"),
         guide_efficacy = save_dir / "achilles_guide_efficacy.csv",
-        achilles_essential_genes = save_dir / "achilles_essential_genes.csv"
+        achilles_essential_genes = save_dir / "achilles_essential_genes.csv",
         depmap_CRC_data = save_dir / "depmap_CRC_data.csv",
         depmap_CRC_data_subsample = save_dir / "depmap_CRC_data_subsample.csv",
-        depmap_CRC_data_largesubsample = save_dir / "depmap_CRC_data_largesubsample.csv"
+        depmap_CRC_data_largesubsample = save_dir / "depmap_CRC_data_largesubsample.csv",
 
 rule prepare_depmap_data:
     input:

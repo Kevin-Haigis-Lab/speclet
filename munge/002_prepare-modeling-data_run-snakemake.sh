@@ -2,7 +2,7 @@
 
 #SBATCH -c 1
 #SBATCH -p priority
-#SBATCH -t 2-00:00
+#SBATCH -t 0-12:00
 #SBATCH --mem 2G
 #SBATCH -o logs/%A_munge_smk.log
 #SBATCH -e logs/%A_munge_smk.log
