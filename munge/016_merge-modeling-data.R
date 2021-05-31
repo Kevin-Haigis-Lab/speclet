@@ -1,12 +1,12 @@
 #!/usr/bin/env Rscript
 
-.libPaths("/home/jc604/R-4.0/library")
-
-library(tidyverse)
-
 if (basename(getwd()) == "munge") {
   setwd("..")
 }
+
+source(".Rprofile")
+
+library(tidyverse)
 
 #### ---- Get snakemake variables ---- ####
 segmentcn_file <- snakemake@input[["segmentcn_file"]]

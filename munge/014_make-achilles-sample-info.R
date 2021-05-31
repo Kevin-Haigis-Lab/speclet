@@ -1,21 +1,23 @@
 #!/usr/bin/env Rscript
 
-.libPaths("/home/jc604/R-4.0/library")
-
-library(nakedpipe)
-library(tidyverse)
-
 if (basename(getwd()) == "munge") {
   setwd("..")
 }
+
+source(".Rprofile")
+
+library(nakedpipe)
+library(tidyverse)
 
 
 modeling_data_dir <- "modeling_data"
 
 
-
 mut_file_path <- file.path(modeling_data_dir, "ccle_mutations.csv")
-all_samples_with_mutation_data <- read_csv(mut_file_path, col_types = cols("chromosome" = col_character())) %>%
+all_samples_with_mutation_data <- read_csv(
+  mut_file_path,
+  col_types = cols("chromosome" = col_character())
+) %>%
   pull(depmap_id) %>%
   unlist() %>%
   unique()

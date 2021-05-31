@@ -5,6 +5,8 @@
 
 #### ---- Setup ---- ####
 
+source(".Rprofile")
+
 library(magrittr)
 library(tidyverse)
 
