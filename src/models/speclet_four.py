@@ -54,7 +54,7 @@ class SpecletFour(SpecletModel):
             kras_mutation_minimum (int, optional): The minimum number of cell lines with
               a KRAS allele for the allele to be included as a separate group. Defaults
               to 3.
-            copy_number_cov (bool, optional): Shoud the covariate for gene copy number
+            copy_number_cov (bool, optional): Should the covariate for gene copy number
               effect be included in the model? The covariate varies by cell line.
               Defaults to False.
             noncentered_param (bool, optional): Should the model use a non-centered
