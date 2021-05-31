@@ -155,3 +155,42 @@ rule combine_data:
         out_file = save_dir / "depmap_modeling_dataframe.csv"
     script:
         "017_combine-modeling-data.R"
+
+rule auxillary_files:
+    input:
+        guide_efficacy = raw_input_dir / "Achilles_guide_efficacy.csv",
+        common_essentials = raw_input_dir / "common_essentials.csv",
+        nonessentials = raw_input_dir / "nonessentials.csv",
+
+    output:
+        guide_efficacy = save_dir / "achilles_guide_efficacy.csv",
+        achilles_essential_genes = save_dir / "achilles_essential_genes.csv"
+    script:
+        "021_prepare-depmap-auxillary-files.R"
+
+rule isolate_crc:
+    input:
+        depmap_modeling_data = save_dir / "depmap_modeling_dataframe.csv"
+    output:
+        depmap_CRC_data = save_dir / "depmap_CRC_data.csv",
+        depmap_CRC_data_subsample = save_dir / "depmap_CRC_data_subsample.csv",
+        depmap_CRC_data_largesubsample = save_dir / "depmap_CRC_data_largesubsample.csv"
+
+    script:
+        "025_isolate-crc-data.R"
+
+rule make_test_data:
+    input:
+        depmap_modeling_df = save_dir / "depmap_modeling_dataframe.csv"
+    output:
+        output_dest = Path("tests", "depmap_test_data.csv")
+    script:
+        "030_test-data.R"
+
+rule list_depmapids:
+    input:
+        data_file = save_dir / "achilles_logfold_change.csv"
+    output:
+        out_file = save_dir / "all_achilles_depmapids.csv"
+    script:
+        "list_all_depmapids.R"
