@@ -7,11 +7,13 @@
 #SBATCH -o logs/%A_munge_smk.log
 #SBATCH -e logs/%A_munge_smk.log
 
-module load gcc conda2 slurm-drmaa/1.1.1
+module load gcc conda2 slurm-drmaa/1.1.1 R
 
 # shellcheck source=/dev/null
 source "$HOME/.bashrc"
 conda activate speclet_smakemake
+
+./_list_all_depmapids.py
 
 snakemake \
   --snakefile munge/000_prepare-modeling-data_snakemake.py \

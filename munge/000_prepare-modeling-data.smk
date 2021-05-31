@@ -10,6 +10,7 @@ input_data_dir = Path("modeling_data")
 
 # Get all DepMapIDs from the logFC data.
 # run `munge/list_all_depmapids.R` to update the file if data is updated.
+
 all_depmapids = pd.read_csv(input_data_dir / "all_achilles_depmapids.csv").depmap_id.to_list()
 
 
@@ -186,11 +187,3 @@ rule make_test_data:
         output_dest = Path("tests", "depmap_test_data.csv")
     script:
         "030_test-data.R"
-
-rule list_depmapids:
-    input:
-        data_file = save_dir / "achilles_logfold_change.csv"
-    output:
-        out_file = save_dir / "all_achilles_depmapids.csv"
-    script:
-        "list_all_depmapids.R"
