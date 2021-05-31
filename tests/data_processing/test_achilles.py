@@ -167,6 +167,41 @@ def example_achilles_data():
     return achelp.read_achilles_data(Path("tests", "depmap_test_data.csv"))
 
 
+def test_make_mapping_df():
+    df = pd.DataFrame({"g1": np.arange(9), "g2": np.repeat(["a", "b", "c"], 3)})
+    df_map = achelp.make_mapping_df(df, "g1", "g2")
+    for i1, i2 in zip(df.itertuples(), df_map.itertuples()):
+        assert i1.g1 == i2.g1
+        assert i1.g2 == i2.g2
+
+    df2 = pd.concat([df, df, df])
+    df_map2 = achelp.make_mapping_df(df2, "g1", "g2")
+    assert df.shape == df_map2.shape
+
+    df3 = df.copy()
+    df3["other_column"] = "X"
+    df_map3 = achelp.make_mapping_df(df3, "g1", "g2")
+    assert df.shape == df_map3.shape
+    for i1, i2 in zip(df.itertuples(), df_map3.itertuples()):
+        assert i1.g1 == i2.g1
+        assert i1.g2 == i2.g2
+    df_map3 = achelp.make_mapping_df(df3, "g1", "other_column")
+    for i1, i2 in zip(df.itertuples(), df_map3.itertuples()):
+        assert i1.g1 == i2.g1
+        assert i2.other_column == "X"
+
+
+def test_cell_line_to_lineage_map(example_achilles_data: pd.DataFrame):
+    df_map = achelp.make_cell_line_to_lineage_mapping_df(example_achilles_data)
+    assert "depmap_id" in df_map.columns
+    assert "lineage" in df_map.columns
+    assert len(df_map.depmap_id.unique()) == len(df_map)
+    assert len(df_map.depmap_id.unique()) == len(
+        example_achilles_data.depmap_id.unique()
+    )
+    assert len(df_map.lineage.unique()) == len(example_achilles_data.lineage.unique())
+
+
 def test_sgrna_to_gene_mapping_df_is_smaller(mock_gene_data: pd.DataFrame):
     sgrna_map = achelp.make_sgrna_to_gene_mapping_df(mock_gene_data)
     assert len(sgrna_map) < len(mock_gene_data)
