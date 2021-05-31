@@ -1843,7 +1843,7 @@ ccle_gene_cn = (
     .melt(id_vars="depmap_id", var_name="hugo_symbol", value_name="log2_cn_p1")
     .assign(
         hugo_symbol=lambda x: [a.split(" ")[0] for a in x.hugo_symbol],
-        copy_number=lambda x: np.exp(x.log2_cn_p1) - 1,
+        copy_number=lambda x: (2 ** x.log2_cn_p1) - 1,
     )
 )
 
@@ -1880,35 +1880,35 @@ ccle_gene_cn.head()
       <td>ACH-000001</td>
       <td>A1BG</td>
       <td>1.179621</td>
-      <td>2.253141</td>
+      <td>1.265172</td>
     </tr>
     <tr>
       <th>1</th>
       <td>ACH-000002</td>
       <td>A1BG</td>
       <td>1.009801</td>
-      <td>1.745055</td>
+      <td>1.013633</td>
     </tr>
     <tr>
       <th>2</th>
       <td>ACH-000003</td>
       <td>A1BG</td>
       <td>1.022828</td>
-      <td>1.781048</td>
+      <td>1.031898</td>
     </tr>
     <tr>
       <th>3</th>
       <td>ACH-000004</td>
       <td>A1BG</td>
       <td>1.232225</td>
-      <td>2.428849</td>
+      <td>1.349290</td>
     </tr>
     <tr>
       <th>4</th>
       <td>ACH-000005</td>
       <td>A1BG</td>
       <td>1.151880</td>
-      <td>2.164136</td>
+      <td>1.222033</td>
     </tr>
   </tbody>
 </table>

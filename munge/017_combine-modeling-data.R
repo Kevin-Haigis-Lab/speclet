@@ -1,13 +1,12 @@
 #!/usr/bin/env Rscript
 
-.libPaths("/home/jc604/R-4.0/library")
-
-library(tidyverse)
-
 if (basename(getwd()) == "munge") {
   setwd("..")
 }
 
+source(".Rprofile")
+
+library(tidyverse)
 
 input_files <- unlist(snakemake@input["input_files"])
 output_file <- snakemake@output[["out_file"]]

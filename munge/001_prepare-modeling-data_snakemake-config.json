@@ -1,0 +1,67 @@
+{
+    "__default__": {
+        "partition": "short",
+        "cores": 1,
+        "mem": "1000",
+        "time": "00:10:00",
+        "out": "logs/%j_{rule}.log",
+        "err": "logs/%j_{rule}.log",
+        "mail": "NONE",
+        "J": "snakejob"
+    },
+    "prepare_depmap_data": {
+        "mem": "45000",
+        "time": "00:30:00",
+        "J": "prep"
+    },
+    "split_segmentcn": {
+        "mem": "5000",
+        "time": "00:30:00",
+        "J": "s_seg"
+    },
+    "split_genecn": {
+        "mem": "5000",
+        "time": "00:30:00",
+        "J": "s_cn"
+    },
+    "split_mut": {
+        "mem": "5000",
+        "time": "00:30:00",
+        "J": "s_mut"
+    },
+    "split_logfc": {
+        "mem": "80000",
+        "time": "03:00:00",
+        "J": "s_logfc"
+    },
+    "split_rna": {
+        "mem": "10000",
+        "time": "01:00:00",
+        "J": "s_rna"
+    },
+    "merge_data": {
+        "mem": "2000",
+        "time": "00:45:00",
+        "J": "merge"
+    },
+    "combine_data": {
+        "mem": "120000",
+        "time": "01:00:00",
+        "J": "comb"
+    },
+    "auxillary_files": {
+        "mem": "5000",
+        "time": "00:10:00",
+        "J": "aux_fs"
+    },
+    "isolate_crc": {
+        "mem": "90000",
+        "time": "00:30:00",
+        "J": "crc"
+    },
+    "make_test_data": {
+        "mem": "30000",
+        "time": "00:20:00",
+        "J": "test_df"
+    }
+}

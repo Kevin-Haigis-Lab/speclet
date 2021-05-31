@@ -5,20 +5,19 @@
 
 #### ---- Setup ---- ####
 
+if (basename(getwd()) == "munge") {
+  setwd("..")
+}
+
+source(".Rprofile")
+
 library(magrittr)
 library(tidyverse)
 
 
-data_dir <- file.path("data", "depmap_20q3")
-destination_dir <- file.path("modeling_data")
-
 #### ---- guide efficacy --- ####
 
-
-prepare_guide_efficacy_data <- function() {
-  guide_efficacy_path <- file.path(data_dir, "Achilles_guide_efficacy.csv")
-  guide_efficacy_dest <- file.path(destination_dir, "achilles_guide_efficacy.csv")
-
+prepare_guide_efficacy_data <- function(guide_efficacy_path, guide_efficacy_dest) {
   if (!file.exists(guide_efficacy_path)) {
     stop("Guide efficacy file not found.")
   }
@@ -32,13 +31,13 @@ prepare_guide_efficacy_data <- function() {
 
 #### ---- Essentials and non-essential genes ---- ####
 
-prepare_essentials_and_nonessentials <- function() {
-  essentials_df <- read_csv(file.path(data_dir, "common_essentials.csv")) %>%
+prepare_essentials_and_nonessentials <- function(essentials_df_path, nonessentials_df_path, dest_path) {
+  essentials_df <- read_csv(essentials_df_path) %>%
     mutate(
       gene = unlist(stringr::str_split_fixed(gene, " ", 2)[, 1]),
       essential = TRUE
     )
-  nonessentials_df <- read_csv(file.path(data_dir, "nonessentials.csv")) %>%
+  nonessentials_df <- read_csv(nonessentials_df_path) %>%
     mutate(
       gene = unlist(stringr::str_split_fixed(gene, " ", 2)[, 1]),
       essential = FALSE
@@ -50,11 +49,19 @@ prepare_essentials_and_nonessentials <- function() {
   }
 
   bind_rows(essentials_df, nonessentials_df) %>%
-    write_csv(file.path(destination_dir, "achilles_essential_genes.csv"))
+    write_csv(dest_path)
 }
 
 
 #### ---- MAIN ---- ####
 
-prepare_guide_efficacy_data()
-prepare_essentials_and_nonessentials()
+prepare_guide_efficacy_data(
+  guide_efficacy_path = snakemake@input[["guide_efficacy"]],
+  guide_efficacy_dest = snakemake@output[["guide_efficacy"]]
+)
+
+prepare_essentials_and_nonessentials(
+  essentials_df_path = snakemake@input[["common_essentials"]],
+  nonessentials_df_path = snakemake@input[["nonessentials"]],
+  dest_path = snakemake@output[["achilles_essential_genes"]]
+)
