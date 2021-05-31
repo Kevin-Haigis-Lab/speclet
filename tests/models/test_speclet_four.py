@@ -1,6 +1,7 @@
 import random
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -60,38 +61,15 @@ class TestSpecletFour:
         )
         assert sp_four.mcmc_results is not None
 
-    # @pytest.mark.slow
-    # def test_advi_sampling(self, tmp_path: Path, data_manager: CrcDataManager):
-    #     sp_four = SpecletFour(
-    #         "test-model",
-    #         root_cache_dir=tmp_path,
-    #         debug=True,
-    #         data_manager=data_manager,
-    #         kras_mutation_minimum=0,
-    #     )
-    #     assert sp_four.model is None
-    #     sp_four.build_model()
-    #     assert sp_four.model is not None
-    #     assert sp_four.observed_var_name is not None
-    #     assert sp_four.advi_results is None
-    #     _ = sp_four.advi_sample_model(
-    #         n_iterations=100,
-    #         draws=10,
-    #         prior_pred_samples=10,
-    #         post_pred_samples=10,
-    #         random_seed=1,
-    #     )
-    #     assert sp_four.advi_results is not None
-
-    @pytest.mark.skip(reason="using very small subsample of data")
     def test_kras_indexing(self, tmp_path: Path):
         dm = CrcDataManager(debug=True)
+        n_genes = 4
         dm.data = (
             dm.get_data()
-            .pipe(achelp.subsample_achilles_data, n_genes=4, n_cell_lines=25)
+            .pipe(achelp.subsample_achilles_data, n_genes=n_genes, n_cell_lines=25)
             .pipe(achelp.set_achilles_categorical_columns)
         )
-        assert dphelp.nunique(dm.data["hugo_symbol"]) == 4
+        assert dphelp.nunique(dm.data["hugo_symbol"]) == n_genes
         assert dphelp.nunique(dm.data["depmap_id"]) == 25
 
         kras_alleles = ["A", "X", "T"]
@@ -119,9 +97,12 @@ class TestSpecletFour:
         )
         sp_four.build_model()
         assert sp_four.model is not None
-        a = sp_four.model["μ_g"]
+        if sp_four.noncentered_param:
+            a = sp_four.model["μ_g_offset"]
+        else:
+            a = sp_four.model["μ_g"]
         n_expected_kras_alleles = 5
-        assert a.dshape == (n_expected_kras_alleles,)
+        assert a.dshape == (n_genes, n_expected_kras_alleles)
 
         sp_four = SpecletFour(
             "test-model",
@@ -132,6 +113,65 @@ class TestSpecletFour:
         )
         sp_four.build_model()
         assert sp_four.model is not None
-        a = sp_four.model["μ_g"]
+        if sp_four.noncentered_param:
+            a = sp_four.model["μ_g_offset"]
+        else:
+            a = sp_four.model["μ_g"]
         n_expected_kras_alleles = 4
-        assert a.dshape == (n_expected_kras_alleles,)
+        assert a.dshape == (n_genes, n_expected_kras_alleles)
+
+    def test_switching_copynumber_covariate(
+        self, tmp_path: Path, data_manager: CrcDataManager
+    ):
+        sp_four = SpecletFour(
+            "test-model",
+            root_cache_dir=tmp_path,
+            debug=True,
+            data_manager=data_manager,
+            kras_mutation_minimum=0,
+            copy_number_cov=False,
+            noncentered_param=False,
+        )
+        assert sp_four.model is None
+        sp_four.build_model()
+        assert sp_four.model is not None
+        rv_names = [v.name for v in sp_four.model.free_RVs]
+        assert np.sum(np.array(rv_names) == "o") == 0
+
+        sp_four.copy_number_cov = True
+        assert sp_four.model is None
+        sp_four.build_model()
+        assert sp_four.model is not None
+        rv_names = [v.name for v in sp_four.model.free_RVs]
+        assert any([v == "o" for v in rv_names])
+
+        sp_four.noncentered_param = True
+        assert sp_four.model is None
+        sp_four.build_model()
+        assert sp_four.model is not None
+        rv_names = [v.name for v in sp_four.model.free_RVs]
+        assert any([v == "o_offset" for v in rv_names])
+
+    def test_switching_noncentered_parameterization(
+        self, tmp_path: Path, data_manager: CrcDataManager
+    ):
+        sp_four = SpecletFour(
+            "test-model",
+            root_cache_dir=tmp_path,
+            debug=True,
+            data_manager=data_manager,
+            kras_mutation_minimum=0,
+            noncentered_param=False,
+        )
+        assert sp_four.model is None
+        sp_four.build_model()
+        assert sp_four.model is not None
+        rv_names = [v.name for v in sp_four.model.free_RVs]
+        assert not any(["offset" in n for n in rv_names])
+
+        sp_four.noncentered_param = True
+        assert sp_four.model is None
+        sp_four.build_model()
+        assert sp_four.model is not None
+        rv_names = [v.name for v in sp_four.model.free_RVs]
+        assert any(["offset" in n for n in rv_names])

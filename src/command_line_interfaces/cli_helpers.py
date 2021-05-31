@@ -105,6 +105,8 @@ def modify_model_by_name(model: Any, name: str) -> None:
         modify_ceres_model_by_name(model, name)
     elif isinstance(model, SpecletTwo) or isinstance(model, SpecletThree):
         modify_speclettwo_and_three_model_by_name(model, name)
+    elif isinstance(model, SpecletFour):
+        modify_specletfour_model_by_name(model, name)
     return None
 
 
@@ -133,5 +135,17 @@ def modify_speclettwo_and_three_model_by_name(
         name (str): User-provided name.
     """
     if "kras" in name:
-        logger.info("Including KRAS allele covariate in the  model.")
+        logger.info("Including KRAS allele covariate in the model.")
         model.kras_cov = True
+
+
+def modify_specletfour_model_by_name(model: SpecletFour, name: str) -> None:
+    """Modify a SpecletFour object based on the user-provided input name.
+
+    Args:
+        model (SpecletFour): The SpecletFour model.
+        name (str): User-provided name.
+    """
+    if "copy-number" in name or "cn-cov" in name:
+        logger.info("Including copy number covariate in the Sp4 model.")
+        model.copy_number_cov = True

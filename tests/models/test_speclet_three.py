@@ -108,7 +108,6 @@ class TestSpecletThree:
         assert isinstance(sp3.model, pm.Model)
         assert "a" in list(sp3.model.named_vars.keys())
 
-    @pytest.mark.skip(reason="using very small subsample of data")
     def test_kras_indexing(self, tmp_path: Path):
         dm = CrcDataManager(debug=True)
         dm.data = (
@@ -145,7 +144,10 @@ class TestSpecletThree:
         )
         sp3.build_model()
         assert sp3.model is not None
-        a = sp3.model["a"]
+        if sp3.noncentered_param:
+            a = sp3.model["a_offset"]
+        else:
+            a = sp3.model["a"]
         n_genes = dphelp.nunique(dm.data["hugo_symbol"])
         n_expected_kras_alleles = 5
         assert a.dshape == (n_genes, n_expected_kras_alleles)
@@ -160,7 +162,10 @@ class TestSpecletThree:
         )
         sp3.build_model()
         assert sp3.model is not None
-        a = sp3.model["a"]
+        if sp3.noncentered_param:
+            a = sp3.model["a_offset"]
+        else:
+            a = sp3.model["a"]
         n_expected_kras_alleles = 4
         assert a.dshape == (n_genes, n_expected_kras_alleles)
 
