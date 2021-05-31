@@ -13,7 +13,7 @@ module load gcc conda2 slurm-drmaa/1.1.1 R
 source "$HOME/.bashrc"
 conda activate speclet_smakemake
 
-./_list_all_depmapids.py
+./munge/_list_all_depmapids.py
 
 snakemake \
   --snakefile munge/000_prepare-modeling-data.smk \
@@ -21,6 +21,7 @@ snakemake \
   --restart-times 0 \
   --cluster-config munge/001_prepare-modeling-data_snakemake-config.json \
   --latency-wait 120 \
+  --use-conda \
   --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}"
 
 conda deactivate
@@ -31,3 +32,5 @@ conda deactivate
 #   --dry-run \
 #   --quiet \
 #   --unlock
+
+exit 44

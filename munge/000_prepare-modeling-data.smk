@@ -8,6 +8,9 @@ save_dir = Path("modeling_data")
 raw_input_dir = Path("data/depmap_20q3")
 input_data_dir = Path("modeling_data")
 
+
+ENVIRONMENT_YAML = "munge_environment.yaml"
+
 # Get all DepMapIDs from the logFC data.
 # run `munge/list_all_depmapids.R` to update the file if data is updated.
 
@@ -29,7 +32,7 @@ rule prepare_depmap_data:
         ccle_segment_cn = raw_input_dir / "CCLE_segment_cn.csv",
         ccle_gene_cn = raw_input_dir / "CCLE_gene_cn.csv",
         ccle_fusions = raw_input_dir / "CCLE_fusions.csv",
-        ccle_expression = raw_input_dir / "CCLE_expression_full_v2.csv",
+        ccle_expression = raw_input_dir / "CCLE_expression_full.csv",
         gene_effect = raw_input_dir / "Achilles_gene_effect.csv",
         gene_effect_unscaled = raw_input_dir / "Achilles_gene_effect_unscaled.csv",
     output:
@@ -45,6 +48,8 @@ rule prepare_depmap_data:
         ccle_expression = save_dir / "ccle_expression.csv",
         achilles_gene_effect = save_dir / "achilles_gene_effect.csv",
         notebook_md = "munge/005_prepare-depmap-data.md"
+    conda:
+        ENVIRONMENT_YAML
     shell:
         "jupyter nbconvert --to notebook --inplace --execute munge/005_prepare-depmap-data.ipynb && "
         "nbqa black munge/005_prepare-depmap-data.ipynb --nbqa-mutate && "
