@@ -5,16 +5,18 @@ from pathlib import Path
 import pandas as pd
 
 
-def main() -> None:
-    df = Path("data", "depmap_20q3", "Achilles_replicate_map.csv")
+def main(in_path: Path, out_path: Path) -> None:
     _ = (
-        pd.read_csv(df)
+        pd.read_csv(in_path)
         .rename(columns={"DepMap_ID": "depmap_id"})
         .drop_duplicates()
         .reset_index()
-        .to_csv(index=False)
+        .to_csv(out_path, index=False)
     )
 
 
 if __name__ == "__main__":
-    main()
+    main(
+        in_path=Path("data", "depmap_20q3", "Achilles_replicate_map.csv"),
+        out_path=Path("modeling_data", "all_achilles_depmapids.csv"),
+    )
