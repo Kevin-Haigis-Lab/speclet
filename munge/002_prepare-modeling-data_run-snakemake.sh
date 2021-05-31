@@ -1,15 +1,16 @@
-#!/bin/sh
+#!/bin/bash
 
 #SBATCH -c 1
 #SBATCH -p priority
 #SBATCH -t 2-00:00
 #SBATCH --mem 2G
-#SBATCH -o logs/snakemake_%A.log
-#SBATCH -e logs/snakemake_%A.log
+#SBATCH -o logs/%A_munge_smk.log
+#SBATCH -e logs/%A_munge_smk.log
 
 module load gcc conda2 slurm-drmaa/1.1.1
 
-bash ~/.bashrc
+# shellcheck source=/dev/null
+source "$HOME/.bashrc"
 conda activate speclet_smakemake
 
 snakemake \
