@@ -16,7 +16,7 @@ conda activate speclet_smakemake
 ./_list_all_depmapids.py
 
 snakemake \
-  --snakefile munge/000_prepare-modeling-data_snakemake.py \
+  --snakefile munge/000_prepare-modeling-data.smk \
   --jobs 9950 \
   --restart-times 0 \
   --cluster-config munge/001_prepare-modeling-data_snakemake-config.json \
