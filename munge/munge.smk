@@ -19,22 +19,23 @@ all_depmap_ids = all_depmap_ids[:10] ### TESTING ###
 
 rule all:
     input:
-        # tidy_ccle
+        # Prep CCLE data
         rna_expr = MODELING_DATA_DIR / "ccle_expression.csv",
         segment_cn = MODELING_DATA_DIR / "ccle_segment_cn.csv",
         gene_cn = MODELING_DATA_DIR / "ccle_gene_cn.csv",
         gene_mutations = MODELING_DATA_DIR / "ccle_mutations.csv",
         sample_info = MODELING_DATA_DIR / "ccle_sample_info.csv",
         known_essentials = MODELING_DATA_DIR / "known_essentials.csv",
-        # tidy_depmap
+        # Prep DepMap data
         achilles_log_fold_change = MODELING_DATA_DIR / "achilles_log_fold_change_filtered.csv",
         achilles_gene_effect = MODELING_DATA_DIR / "achilles_gene_effect.csv",
         chronos_gene_effect = MODELING_DATA_DIR / "chronos_gene_effect.csv",
-        # tidy score
+        # Prep SCORE data.
         copy_number = MODELING_DATA_DIR / "score_segment_cn.csv",
         gene_effect = MODELING_DATA_DIR / "score_gene_effect.csv",
         log_fold_change = MODELING_DATA_DIR / "score_log_fold_change_filtered.csv",
-        # temporary for splitting
+        # Modeling data.
+        full_modeling_dataframe = MODELING_DATA_DIR / "depmap_modeling_dataframe.csv"
 
 
 
@@ -187,7 +188,8 @@ rule merge_data:
     output:
         out_file = TEMP_DIR / "merged_{depmapid}.qs"
     script:
-        "016_merge-modeling-data.R"
+        "013_merge-modeling-data.R"
+
 
 rule combine_data:
     input:
@@ -196,6 +198,6 @@ rule combine_data:
             depmapid=all_depmap_ids
         )
     output:
-        out_file = save_dir / "depmap_modeling_dataframe.csv"
+        out_file = MODELING_DATA_DIR / "depmap_modeling_dataframe.csv"
     script:
-        "017_combine-modeling-data.R"
+        "015_combine-modeling-data.R"
