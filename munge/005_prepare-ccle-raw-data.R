@@ -28,6 +28,28 @@ tidy_gene_copynumber <- function(file_in, file_out) {
     write_csv(file_out)
 }
 
+tidy_segment_copynumber <- function(file_in, file_out) {
+  read_csv(file_in, n_max = 1e3) %>%
+    janitor::clean_names() %>%
+    mutate(source = janitor::make_clean_names(source)) %>%
+    rename(
+      depmap_id = dep_map_id,
+      start_pos = start,
+      end_pos = end,
+      amplification_status = status
+    ) %>%
+    mutate(
+      amplification_status = case_when(
+        amplification_status == "+" ~ "amp",
+        amplification_status == "-" ~ "del",
+        amplification_status == "0" ~ "neutral",
+        amplification_status == "U" ~ "unk",
+        TRUE ~ NA_character_
+      )
+    ) %>%
+    write_csv(file_out)
+}
+
 
 tidy_gene_mutations <- function(file_in, file_out) {
   read_csv(file_in, n_max = 1e3) %>%
@@ -82,6 +104,12 @@ print("Tidying gene copynumber.")
 tidy_gene_copynumber(
   file_in = snakemake@input[["gene_cn"]],
   file_out = snakemake@output[["gene_cn"]]
+)
+
+print("Tidying segment copy number.")
+tidy_segment_copynumber(
+  file_in = snakemake@input[["segment_cn"]],
+  file_out = snakemake@output[["segment_cn"]]
 )
 
 print("Tidying gene mutations.")

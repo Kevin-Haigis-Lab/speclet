@@ -18,10 +18,11 @@ nested_d <- data.table::fread(data_file) %>%
   group_by(depmap_id) %>%
   nest()
 
+# Used if no data for DepMap ID.
 empty_data_df <- nested_d$data[[1]] %>% slice(0)
 
 
-a <- tibble(output_file = output_files) %>%
+tibble(output_file = output_files) %>%
   mutate(
     depmap_id = basename(output_file),
     depmap_id = tools::file_path_sans_ext(depmap_id),
