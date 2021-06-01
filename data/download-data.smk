@@ -43,7 +43,7 @@ score_downloads: Dict[str, str] = {
 ccle_downloads: Dict[str, str] = {
     "CCLE_expression.csv": "https://ndownloader.figshare.com/files/27902091",
     "CCLE_segment_cn.csv": "https://ndownloader.figshare.com/files/27902157",
-    "CCLE_gene_cn.csv": "https://ndownloader.figshare.com/files/27902109",
+    "CCLE_gene_cn.csv": "https://ndownloader.figshare.com/files/27902124",
     "CCLE_mutations.csv": "https://ndownloader.figshare.com/files/27902118",
     "CCLE_mutations_bool_hotspot.csv": "https://ndownloader.figshare.com/files/27902130",
     "CCLE_mutations_bool_damaging.csv": "https://ndownloader.figshare.com/files/27902127",
