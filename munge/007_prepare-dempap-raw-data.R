@@ -9,21 +9,10 @@ source(".Rprofile")
 
 library(tidyverse)
 
+source("munge/munge_functions.R")
+
 
 #### ---- Data tidying functions ---- ####
-
-extract_hugo_gene_name <- function(df, col = gene) {
-  df %>%
-    mutate({{ col }} := str_remove({{ col }}, " \\(.*"))
-}
-
-
-flatten_depmap_by_gene <- function(df, values_to) {
-  df %>%
-    rename(depmap_id = X1) %>%
-    pivot_longer(-depmap_id, names_to = "hugo_symbol", values_to = values_to) %>%
-    mutate(hugo_symbol = str_remove(hugo_symbol, " \\(.*$"))
-}
 
 
 make_known_essentials_and_nonessentials <- function(essentials_file,
@@ -89,10 +78,10 @@ tidy_log_fold_change <- function(lfc_file,
 
 tidy_achilles_gene_effect <- function(gene_effect_scaled, gene_effect_unscaled, out_file) {
   ge_scaled <- read_csv(gene_effect_scaled, n_max = 10) %>%
-    flatten_depmap_by_gene(values_to = "gene_effect")
+    flatten_wide_df_by_gene(values_to = "gene_effect")
   ge_unscaled <- read_csv(gene_effect_unscaled, n_max = 10) %>%
     rename(X1 = DepMap_ID) %>%
-    flatten_depmap_by_gene(values_to = "gene_effect_unscaled")
+    flatten_wide_df_by_gene(values_to = "gene_effect_unscaled")
   ge_combined <- inner_join(
     ge_scaled,
     ge_unscaled,
@@ -110,7 +99,7 @@ tidy_achilles_gene_effect <- function(gene_effect_scaled, gene_effect_unscaled, 
 tidy_chronos_gene_effect <- function(chronos_gene_effect, out_file) {
   read_csv(chronos_gene_effect, n_max = 10) %>%
     rename(X1 = DepMap_ID) %>%
-    flatten_depmap_by_gene(values_to = "chronos_gene_effect") %>%
+    flatten_wide_df_by_gene(values_to = "chronos_gene_effect") %>%
     write_csv(out_file)
 }
 

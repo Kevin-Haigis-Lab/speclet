@@ -38,6 +38,7 @@ score_downloads: Dict[str, str] = {
     "SCORE_replicate_map.csv": "https://ndownloader.figshare.com/files/16623896",
     "SCORE_guide_gene_map.csv": "https://ndownloader.figshare.com/files/16623902",
     "SCORE_guide_efficacy.csv": "https://ndownloader.figshare.com/files/16623905",
+    "SCORE_copy_number.csv": "https://ndownloader.figshare.com/files/16623893",
 }
 
 ccle_downloads: Dict[str, str] = {

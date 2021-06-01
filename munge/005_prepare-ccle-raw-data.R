@@ -7,23 +7,16 @@ if (basename(getwd()) == "munge") {
 }
 source(".Rprofile")
 
-library(magrittr)
 library(tidyverse)
+
+source("munge/munge_functions.R")
 
 
 #### ---- Data tidying functions ---- ####
 
-flatten_depmap_by_gene <- function(df, values_to) {
-  df %>%
-    rename(depmap_id = X1) %>%
-    pivot_longer(-depmap_id, names_to = "hugo_symbol", values_to = values_to) %>%
-    mutate(hugo_symbol = str_remove(hugo_symbol, " \\(.*$"))
-}
-
-
 tidy_rna_expression <- function(file_in, file_out) {
   read_csv(file_in, n_max = 10) %>%
-    flatten_depmap_by_gene(values_to = "rna_expr") %>%
+    flatten_wide_df_by_gene(values_to = "rna_expr") %>%
     filter(!is.na(rna_expr)) %>%
     write_csv(file_out)
 }
@@ -31,7 +24,7 @@ tidy_rna_expression <- function(file_in, file_out) {
 
 tidy_gene_copynumber <- function(file_in, file_out) {
   read_csv(file_in, n_max = 10) %>%
-    flatten_depmap_by_gene(values_to = "gene_cn") %>%
+    flatten_wide_df_by_gene(values_to = "gene_cn") %>%
     write_csv(file_out)
 }
 

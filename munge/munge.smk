@@ -21,6 +21,10 @@ rule all:
         achilles_log_fold_change = MODELING_DATA_DIR / "achilles_log_fold_change_filtered.csv",
         achilles_gene_effect = MODELING_DATA_DIR / "achilles_gene_effect.csv",
         chronos_gene_effect = MODELING_DATA_DIR / "chronos_gene_effect.csv",
+        # tidy score
+        copy_number = MODELING_DATA_DIR / "score_gene_cn.csv",
+        gene_effect = MODELING_DATA_DIR / "score_gene_effect.csv",
+        log_fold_change = MODELING_DATA_DIR / "score_log_fold_change_filtered.csv",
 
 
 rule tidy_ccle:
@@ -56,3 +60,18 @@ rule tidy_depmap:
         chronos_gene_effect = MODELING_DATA_DIR / "chronos_gene_effect.csv",
     script:
         "007_prepare-dempap-raw-data.R"
+
+rule tidy_score:
+    input:
+        copy_number = SCORE_DIR / "SCORE_copy_number.csv",
+        gene_effect = SCORE_DIR / "SCORE_gene_effect.csv",
+        gene_effect_unscaled = SCORE_DIR / "SCORE_gene_effect_unscaled.csv",
+        log_fold_change = SCORE_DIR / "SCORE_logfold_change.csv",
+        guide_map = SCORE_DIR / "SCORE_guide_gene_map.csv",
+        replicate_map = SCORE_DIR / "SCORE_replicate_map.csv",
+    output:
+        copy_number = MODELING_DATA_DIR / "score_gene_cn.csv",
+        gene_effect = MODELING_DATA_DIR / "score_gene_effect.csv",
+        log_fold_change = MODELING_DATA_DIR / "score_log_fold_change_filtered.csv",
+    script:
+        "009_prepare-score-raw-data.R"
