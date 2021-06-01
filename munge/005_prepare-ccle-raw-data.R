@@ -15,7 +15,7 @@ source("munge/munge_functions.R")
 #### ---- Data tidying functions ---- ####
 
 tidy_rna_expression <- function(file_in, file_out) {
-  read_csv(file_in, n_max = 10) %>%
+  read_csv(file_in) %>%
     flatten_wide_df_by_gene(values_to = "rna_expr") %>%
     filter(!is.na(rna_expr)) %>%
     write_csv(file_out)
@@ -23,13 +23,13 @@ tidy_rna_expression <- function(file_in, file_out) {
 
 
 tidy_gene_copynumber <- function(file_in, file_out) {
-  read_csv(file_in, n_max = 10) %>%
+  read_csv(file_in) %>%
     flatten_wide_df_by_gene(values_to = "gene_cn") %>%
     write_csv(file_out)
 }
 
 tidy_segment_copynumber <- function(file_in, file_out) {
-  read_csv(file_in, n_max = 1e3) %>%
+  read_csv(file_in) %>%
     janitor::clean_names() %>%
     mutate(source = janitor::make_clean_names(source)) %>%
     rename(
@@ -52,7 +52,7 @@ tidy_segment_copynumber <- function(file_in, file_out) {
 
 
 tidy_gene_mutations <- function(file_in, file_out) {
-  read_csv(file_in, n_max = 1e3) %>%
+  read_csv(file_in) %>%
     janitor::clean_names() %>%
     select(
       depmap_id = dep_map_id, hugo_symbol,

@@ -59,7 +59,7 @@ tidy_log_fold_change <- function(lfc_file,
     extract_hugo_gene_name() %>%
     rename(hugo_symbol = gene)
 
-  lfc_df <- read_csv(lfc_file, n_max = 10) %>%
+  lfc_df <- read_csv(lfc_file) %>%
     rename(sgrna = `Construct Barcode`) %>%
     filter(!sgrna %in% !!dropped_guides) %>%
     remove_columns(dropped_reps) %>%
@@ -77,9 +77,9 @@ tidy_log_fold_change <- function(lfc_file,
 
 
 tidy_achilles_gene_effect <- function(gene_effect_scaled, gene_effect_unscaled, out_file) {
-  ge_scaled <- read_csv(gene_effect_scaled, n_max = 10) %>%
+  ge_scaled <- read_csv(gene_effect_scaled) %>%
     flatten_wide_df_by_gene(values_to = "gene_effect")
-  ge_unscaled <- read_csv(gene_effect_unscaled, n_max = 10) %>%
+  ge_unscaled <- read_csv(gene_effect_unscaled) %>%
     rename(X1 = DepMap_ID) %>%
     flatten_wide_df_by_gene(values_to = "gene_effect_unscaled")
   ge_combined <- inner_join(
@@ -97,7 +97,7 @@ tidy_achilles_gene_effect <- function(gene_effect_scaled, gene_effect_unscaled, 
 
 
 tidy_chronos_gene_effect <- function(chronos_gene_effect, out_file) {
-  read_csv(chronos_gene_effect, n_max = 10) %>%
+  read_csv(chronos_gene_effect) %>%
     rename(X1 = DepMap_ID) %>%
     flatten_wide_df_by_gene(values_to = "chronos_gene_effect") %>%
     write_csv(out_file)

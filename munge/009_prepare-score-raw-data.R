@@ -15,7 +15,7 @@ source("munge/munge_functions.R")
 #### ---- Data tidying functions ---- ####
 
 tidy_gene_copynumber <- function(in_file, out_file) {
-  read_csv(in_file, n_max = 1e4, col_types = c("Chromosome" = "c")) %>%
+  read_csv(in_file, col_types = c("Chromosome" = "c")) %>%
     janitor::clean_names() %>%
     rename(depmap_id = dep_map_id, start_pos = start, end_pos = end) %>%
     write_csv(out_file)
@@ -23,9 +23,9 @@ tidy_gene_copynumber <- function(in_file, out_file) {
 
 
 tidy_gene_effect <- function(scaled_ge_file, unscaled_ge_file, out_file) {
-  scaled_ge <- read_csv(scaled_ge_file, n_max = 10) %>%
+  scaled_ge <- read_csv(scaled_ge_file) %>%
     flatten_wide_df_by_gene(values_to = "gene_effect")
-  unscaled_ge <- read_csv(unscaled_ge_file, n_max = 10) %>%
+  unscaled_ge <- read_csv(unscaled_ge_file) %>%
     flatten_wide_df_by_gene(values_to = "gene_effect_unscaled")
 
   combined_ge <- inner_join(
@@ -45,15 +45,15 @@ tidy_log_fold_change <- function(lfc_file,
                                  guide_map_file,
                                  replicate_map_file,
                                  out_file) {
-  replicate_map <- read_csv(replicate_map_file, n_max = 10) %>%
+  replicate_map <- read_csv(replicate_map_file) %>%
     janitor::clean_names() %>%
     rename(depmap_id = dep_map_id)
 
-  guide_map <- read_csv(guide_map_file, n_max = 10) %>%
+  guide_map <- read_csv(guide_map_file) %>%
     extract_hugo_gene_name(gene) %>%
     rename(hugo_symbol = gene)
 
-  read_csv(lfc_file, n_max = 10) %>%
+  read_csv(lfc_file) %>%
     flatten_wide_df_by_gene(values_to = "lfc") %>%
     rename(sgrna = depmap_id, replicate_id = hugo_symbol) %>%
     inner_join(replicate_map, by = "replicate_id") %>%
