@@ -25,14 +25,14 @@ sample_info_file <- snakemake@input[["sample_info"]]
 
 out_file <- snakemake@output[["out_file"]]
 
-ccle_rna_file <- "temp/ccle-rna_ACH-000009.qs"
-ccle_gene_cn_file <- "temp/ccle-genecn_ACH-000009.qs"
-ccle_segment_cn_file <- "temp/ccle-segmentcn_ACH-000009.qs"
-ccle_mut_file <- "temp/ccle-mut_ACH-000009.qs"
-achilles_lfc_file <- "temp/achilles-lfc_ACH-000009.qs"
-score_cn_file <- "temp/score-segmentcn_ACH-000009.qs"
-score_lfc_file <- "temp/score-lfc_ACH-000009.qs"
-sample_info_file <- "modeling_data/ccle_sample_info.csv"
+# ccle_rna_file <- "temp/ccle-rna_ACH-000009.qs"
+# ccle_gene_cn_file <- "temp/ccle-genecn_ACH-000009.qs"
+# ccle_segment_cn_file <- "temp/ccle-segmentcn_ACH-000009.qs"
+# ccle_mut_file <- "temp/ccle-mut_ACH-000009.qs"
+# achilles_lfc_file <- "temp/achilles-lfc_ACH-000009.qs"
+# score_cn_file <- "temp/score-segmentcn_ACH-000009.qs"
+# score_lfc_file <- "temp/score-lfc_ACH-000009.qs"
+# sample_info_file <- "modeling_data/ccle_sample_info.csv"
 
 
 #### ---- Data retrieval functions ---- ####
