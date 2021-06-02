@@ -25,13 +25,13 @@ sample_info_file <- snakemake@input[["sample_info"]]
 
 out_file <- snakemake@output[["out_file"]]
 
-# ccle_rna_file <- "temp/ccle-rna_ACH-000009.qs"
-# ccle_gene_cn_file <- "temp/ccle-genecn_ACH-000009.qs"
-# ccle_segment_cn_file <- "temp/ccle-segmentcn_ACH-000009.qs"
-# ccle_mut_file <- "temp/ccle-mut_ACH-000009.qs"
-# achilles_lfc_file <- "temp/achilles-lfc_ACH-000009.qs"
-# score_cn_file <- "temp/score-segmentcn_ACH-000009.qs"
-# score_lfc_file <- "temp/score-lfc_ACH-000009.qs"
+# ccle_rna_file <- "temp/ccle-rna_ACH-000001.qs"
+# ccle_gene_cn_file <- "temp/ccle-genecn_ACH-000001.qs"
+# ccle_segment_cn_file <- "temp/ccle-segmentcn_ACH-000001.qs"
+# ccle_mut_file <- "temp/ccle-mut_ACH-000001.qs"
+# achilles_lfc_file <- "temp/achilles-lfc_ACH-000001.qs"
+# score_cn_file <- "temp/score-segmentcn_ACH-000001.qs"
+# score_lfc_file <- "temp/score-lfc_ACH-000001.qs"
 # sample_info_file <- "modeling_data/ccle_sample_info.csv"
 
 
@@ -88,8 +88,8 @@ get_log_fold_change_data <- function(achilles_lfc_path, score_lfc_path) {
 
   if (nrow(achilles_lfc) == 0 && nrow(score_lfc) == 0) {
     msg <- "LFC data not found from either data source."
-    error(logger, msg)
-    stop(msg)
+    warn(logger, msg)
+    return(NULL)
   } else if (nrow(achilles_lfc) == 0) {
     info(logger, "Data found from Project SCORE.")
     return(score_lfc)
@@ -103,6 +103,10 @@ get_log_fold_change_data <- function(achilles_lfc_path, score_lfc_path) {
 }
 
 remove_sgrna_that_target_multiple_genes <- function(lfc_df) {
+  if (is.null(lfc_df)) {
+    return(lfc_df)
+  }
+
   target_counts <- lfc_df %>%
     distinct(sgrna, hugo_symbol) %>%
     count(sgrna) %>%
@@ -195,6 +199,12 @@ sample_info <- get_sample_info(sample_info_file, DEPMAP_ID)
 lfc_data <- get_log_fold_change_data(achilles_lfc_file, score_lfc_file) %>%
   remove_sgrna_that_target_multiple_genes()
 
+if (is.null(lfc_data)) {
+  warn(logger, "No LFC data -> exiting early.")
+  qs::qsave(tibble(), out_file)
+  quit(save = "no", status = 0)
+}
+
 lfc_genes <- unique(unlist(lfc_data$hugo_symbol))
 info(logger, glue("Found {length(lfc_genes)} genes in LFC data."))
 
@@ -251,7 +261,6 @@ join_with_gene_copy_number <- function(lfc_data, cn_data) {
   return(d)
 }
 
-
 get_copy_number_at_chromosome_location <- function(chr, pos, segment_cn_df) {
   cn <- segment_cn_data %>%
     filter(chromosome == chr) %>%
@@ -303,7 +312,6 @@ replace_missing_cn_using_segment_cn <- function(df, segment_cn_df) {
   return(mod_df)
 }
 
-
 fill_in_missing_copy_number <- function(lfc_data, segment_cn) {
   info(logger, "Filling in missing copy number with segment CN data.")
   missing_cn_data <- lfc_data %>%
@@ -316,6 +324,14 @@ fill_in_missing_copy_number <- function(lfc_data, segment_cn) {
   return(d)
 }
 
+join_with_sample_info <- function(lfc_data, sample_info) {
+  info(logger, "Joining LFC data and sample info.")
+  si <- sample_info %>%
+    select(lineage, primary_or_metastasis, is_male, age)
+  stopifnot(nrow(si) == 1)
+  return(bind_cols(lfc_data, si))
+}
+
 combined_data <- lfc_data %>%
   join_with_rna(rna_data = rna_data) %>%
   join_with_mutation(mut_data = mut_data) %>%
@@ -324,7 +340,8 @@ combined_data <- lfc_data %>%
   rename(
     sgrna_target_chr = chr,
     sgrna_target_pos = pos
-  )
+  ) %>%
+  join_with_sample_info(sample_info = sample_info)
 
 #### ---- Log information ---- ####
 
@@ -352,6 +369,12 @@ info(logger, glue("Number of rows missing CN data: {n_missing_cn}."))
 info(logger, glue("Mean (± s.d) copy number: {avg_cn} ± {sd_cn}."))
 info(logger, glue("Min and max copy number: {min_cn}, {max_cn}"))
 
+sample_info %>%
+  select(
+    depmap_id, sanger_model_id, cell_line_name,
+    sex, age, lineage, primary_or_metastasis
+  ) %>%
+  knitr::kable()
 
 #### ---- Write output ---- ####
 qs::qsave(combined_data, out_file)

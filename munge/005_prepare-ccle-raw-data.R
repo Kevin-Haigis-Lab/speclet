@@ -85,7 +85,12 @@ tidy_sample_info <- function(file_in, file_out) {
     ) %>%
     mutate(
       primary_or_metastasis = str_to_lower(primary_or_metastasis),
-      sex = str_to_lower(sex)
+      sex = str_to_lower(sex),
+      is_male = case_when(
+        sex == "male" ~ TRUE,
+        sex == "female" ~ FALSE,
+        sex == "unknown" ~ NA
+      )
     ) %>%
     remove_noncancerous_lineages() %>%
     write_csv(file_out)
