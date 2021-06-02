@@ -12,7 +12,7 @@ module load gcc conda2 slurm-drmaa/1.1.1
 
 # shellcheck source=/dev/null
 source "$HOME/.bashrc"
-conda activate speclet_smakemake
+conda activate speclet_snakemake
 
 # Make a list of all DepMap IDs for Snakemake.
 ./munge/_list_all_depmapids.R

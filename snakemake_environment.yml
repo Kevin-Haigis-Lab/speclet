@@ -1,4 +1,4 @@
-name: speclet_smakemake
+name: speclet_snakemake
 channels:
   - conda-forge
   - bioconda
