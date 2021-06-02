@@ -11,11 +11,12 @@ CCLE_DIR = DATA_DIR / "ccle_21q2"
 
 MODELING_DATA_DIR = Path("modeling_data")
 
-TEMP_DIR = Path("/n/scratch3/users/j/jc604/speclet/munge-intermediates")
-# TEMP_DIR = Path("temp")
+# TEMP_DIR = Path("/n/scratch3/users/j/jc604/speclet/munge-intermediates")
+TEMP_DIR = Path("temp")
 
 all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list()
-# all_depmap_ids = all_depmap_ids[:100] ### TESTING ###
+all_depmap_ids = all_depmap_ids[:10] ### TESTING ###
+all_depmap_ids += ["ACH-002227", "ACH-001738"]
 
 rule all:
     input:
