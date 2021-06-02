@@ -17,7 +17,7 @@ conda activate speclet_smakemake
 # Make a list of all DepMap IDs for Snakemake.
 ./munge/_list_all_depmapids.R
 
-SNAKEFILE="data/download-data.smk"
+SNAKEFILE="munge/munge.smk"
 
 snakemake \
     --snakefile $SNAKEFILE \
