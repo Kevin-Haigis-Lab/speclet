@@ -60,8 +60,8 @@
         "J": "score-lfc"
     },
     "merge_data": {
-        "mem": "4000",
-        "time": "00:30:00",
+        "mem": "2000",
+        "time": "00:20:00",
         "J": "merge"
     },
     "combine_data": {

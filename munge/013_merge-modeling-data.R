@@ -23,6 +23,9 @@ score_cn_file <- snakemake@input[["score_cn"]]
 score_lfc_file <- snakemake@input[["score_lfc"]]
 sample_info_file <- snakemake@input[["sample_info"]]
 
+DEPMAP_ID <- snakemake@wildcards[["depmapid"]]
+info(logger, glue("Merging data for cell line '{DEPMAP_ID}'."))
+
 out_file <- snakemake@output[["out_file"]]
 
 # ccle_rna_file <- "temp/ccle-rna_ACH-000001.qs"
@@ -263,7 +266,7 @@ if (is.null(lfc_data)) {
   )
 }
 
-DEPMAP_ID <- extract_depmap_id(ccle_rna_file)
+# DEPMAP_ID <- extract_depmap_id(ccle_rna_file)
 sample_info <- get_sample_info(sample_info_file, DEPMAP_ID)
 
 if (is.null(sample_info)) {
@@ -272,6 +275,8 @@ if (is.null(sample_info)) {
     out_file = out_file
   )
 }
+
+lfc_data$depmap_id <- DEPMAP_ID
 
 lfc_genes <- unique(unlist(lfc_data$hugo_symbol))
 info(logger, glue("Found {length(lfc_genes)} genes in LFC data."))
@@ -359,7 +364,7 @@ reconcile_multiple_segment_copy_numbers <- function(cn_df) {
   cn_vals <- unlist(cn_df$segment_mean)
   log4r::debug(logger, glue("Found {length(cn_vals)} copy number values."))
 
-  if (lenth(cn_vals) == 2) {
+  if (length(cn_vals) == 2) {
     if (cn_vals[[1]] - cn_vals[[2]] < 0.25) {
       log4r::debug(logger, "Returning mean of two values.")
       return(mean(cn_vals))
@@ -392,10 +397,11 @@ get_copy_number_at_chromosome_location <- function(chr, pos, segment_cn_df) {
   if (nrow(cn) == 0) {
     return(NA_real_)
   } else if (nrow(cn) > 1) {
-    print(cn)
+    # print(cn)
     warn(logger, glue("Found {nrow(cn)} CN segments for chr{chr}:{pos}."))
     cn_val <- reconcile_multiple_segment_copy_numbers(cn)
     warn(logger, glue("Reconciled multiple values to {round(cn_val, 3)}."))
+    return(cn_val)
   } else {
     return(cn$segment_mean[[1]])
   }
