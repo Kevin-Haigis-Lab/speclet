@@ -37,37 +37,6 @@ out_file <- snakemake@output[["out_file"]]
 
 #### ---- Data retrieval functions ---- ####
 
-extract_depmap_id <- function(rna_f) {
-  info(logger, glue("Extracting DepMap ID from '{rna_f}'"))
-  id <- basename(rna_f) %>%
-    tools::file_path_sans_ext() %>%
-    str_split("_") %>%
-    unlist()
-  id <- id[[2]]
-  info(logger, glue("Found '{id}'"))
-  return(id)
-}
-
-get_sample_info <- function(sample_info_path, depmap_id) {
-  info(logger, "Retrieving sample information.")
-  sample_info <- read_csv(sample_info_path) %>%
-    filter(depmap_id == !!depmap_id)
-
-  if (nrow(sample_info) == 0) {
-    msg <- glue("Did not find sample information for DepMap ID '{depmap_id}'.")
-    error(logger, msg)
-    stop(msg)
-  } else if (nrow(sample_info) > 1) {
-    print(sample_info)
-    msg <- glue("Found {nrow(sample_info)} samples with DepMap ID '{depmap_id}'.")
-    error(logger, msg)
-    stop(msg)
-  }
-
-  return(sample_info)
-}
-
-
 prepare_lfc_data <- function(lfc_df, screen_scoure) {
   lfc_df %>%
     add_column(screen = screen_scoure) %>%
@@ -100,6 +69,36 @@ get_log_fold_change_data <- function(achilles_lfc_path, score_lfc_path) {
     info(logger, "Data found from both projects.")
     return(bind_rows(achilles_lfc, score_lfc))
   }
+}
+
+extract_depmap_id <- function(rna_f) {
+  info(logger, glue("Extracting DepMap ID from '{rna_f}'"))
+  id <- basename(rna_f) %>%
+    tools::file_path_sans_ext() %>%
+    str_split("_") %>%
+    unlist()
+  id <- id[[2]]
+  info(logger, glue("Found '{id}'"))
+  return(id)
+}
+
+get_sample_info <- function(sample_info_path, depmap_id) {
+  info(logger, "Retrieving sample information.")
+  sample_info <- read_csv(sample_info_path) %>%
+    filter(depmap_id == !!depmap_id)
+
+  if (nrow(sample_info) == 0) {
+    msg <- glue("Did not find sample information for DepMap ID '{depmap_id}'.")
+    error(logger, msg)
+    stop(msg)
+  } else if (nrow(sample_info) > 1) {
+    print(sample_info)
+    msg <- glue("Found {nrow(sample_info)} samples with DepMap ID '{depmap_id}'.")
+    error(logger, msg)
+    stop(msg)
+  }
+
+  return(sample_info)
 }
 
 remove_sgrna_that_target_multiple_genes <- function(lfc_df) {
@@ -194,8 +193,6 @@ get_segment_copy_number_data <- function(ccle_segment_cn_path,
 }
 
 
-DEPMAP_ID <- extract_depmap_id(ccle_rna_file)
-sample_info <- get_sample_info(sample_info_file, DEPMAP_ID)
 lfc_data <- get_log_fold_change_data(achilles_lfc_file, score_lfc_file) %>%
   remove_sgrna_that_target_multiple_genes()
 
@@ -204,6 +201,10 @@ if (is.null(lfc_data)) {
   qs::qsave(tibble(), out_file)
   quit(save = "no", status = 0)
 }
+
+
+DEPMAP_ID <- extract_depmap_id(ccle_rna_file)
+sample_info <- get_sample_info(sample_info_file, DEPMAP_ID)
 
 lfc_genes <- unique(unlist(lfc_data$hugo_symbol))
 info(logger, glue("Found {length(lfc_genes)} genes in LFC data."))
