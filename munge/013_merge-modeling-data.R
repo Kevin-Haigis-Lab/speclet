@@ -119,6 +119,26 @@ remove_sgrna_that_target_multiple_genes <- function(lfc_df) {
   lfc_df %>% filter(!(sgrna %in% !!multi_target))
 }
 
+parse_genome_alignment <- function(df, col = genome_alignment) {
+  info(logger, "Parsing genome alignment of sgRNAs.")
+  if (is.null(df)) {
+    return(df)
+  }
+
+  ga <- df %>%
+    pull({{ col }}) %>%
+    unlist() %>%
+    str_split_fixed("_", 3) %>%
+    as.data.frame() %>%
+    as_tibble() %>%
+    select(chr = V1, pos = V2) %>%
+    mutate(
+      chr = str_remove(chr, "^chr"),
+      pos = as.integer(pos)
+    )
+  bind_cols(df, ga)
+}
+
 get_rna_expression_data <- function(rna_path, filter_genes = NULL) {
   info(logger, glue("Retrieving RNA expression data ({rna_path})."))
   rna <- qs::qread(rna_path) %>%
@@ -177,8 +197,8 @@ get_segment_copy_number_data <- function(ccle_segment_cn_path,
   sanger_cn <- qs::qread(sanger_segment_cn_path) %>% distinct()
   if (nrow(ccle_cn) == 0 && nrow(ccle_cn) == 0) {
     msg <- "Segment CN data not found from either CCLE nor Sanger."
-    erorr(logger, msg)
-    stop(msg)
+    warn(logger, msg)
+    return(NULL)
   } else if (nrow(ccle_cn) == 0) {
     info(logger, "Segment CN found from Sanger.")
     return(ccle_cn)
@@ -187,7 +207,7 @@ get_segment_copy_number_data <- function(ccle_segment_cn_path,
     return(ccle_cn)
   } else {
     info(logger, "Data found from both CCLE and Sanger.")
-    cn <- bind_rows(ccle_cn, ccle_cn) %>% distinct()
+    cn <- bind_rows(ccle_cn, sanger_cn) %>% distinct()
     return(cn)
   }
 }
@@ -200,7 +220,8 @@ quit_early <- function(reason, out_file) {
 
 
 lfc_data <- get_log_fold_change_data(achilles_lfc_file, score_lfc_file) %>%
-  remove_sgrna_that_target_multiple_genes()
+  remove_sgrna_that_target_multiple_genes() %>%
+  parse_genome_alignment()
 
 if (is.null(lfc_data)) {
   quit_early(
@@ -276,10 +297,10 @@ join_with_gene_copy_number <- function(lfc_data, cn_data) {
 }
 
 get_copy_number_at_chromosome_location <- function(chr, pos, segment_cn_df) {
-  cn <- segment_cn_data %>%
-    filter(chromosome == chr) %>%
-    filter(start_pos <= !!pos) %>%
-    filter(!!pos <= end_pos)
+  cn <- segment_cn_df %>%
+    dplyr::filter(chromosome == chr) %>%
+    dplyr::filter(start_pos <= !!pos) %>%
+    dplyr::filter(!!pos <= end_pos)
 
   if (nrow(cn) == 0) {
     return(NA_real_)
@@ -293,32 +314,17 @@ get_copy_number_at_chromosome_location <- function(chr, pos, segment_cn_df) {
   }
 }
 
-parse_genome_alignment <- function(df, col = genome_alignment) {
-  ga <- df %>%
-    pull({{ col }}) %>%
-    unlist() %>%
-    str_split_fixed("_", 3) %>%
-    as.data.frame() %>%
-    as_tibble() %>%
-    select(chr = V1, pos = V2) %>%
-    mutate(
-      chr = str_remove(chr, "^chr"),
-      pos = as.integer(pos)
-    )
-  bind_cols(df, ga)
-}
 
 replace_missing_cn_using_segment_cn <- function(df, segment_cn_df) {
   sgrna_cn_df <- df %>%
-    distinct(sgrna, genome_alignment) %>%
-    parse_genome_alignment() %>%
-    select(-genome_alignment) %>%
-    mutate(
-      copy_number = purrr::map2_dbl(
-        chr, pos,
-        get_copy_number_at_chromosome_location
-      )
-    )
+    distinct(sgrna, chr, pos) %>%
+    mutate(copy_number = purrr::map2_dbl(
+      chr,
+      pos,
+      get_copy_number_at_chromosome_location,
+      segment_cn_df = segment_cn_df
+    )) %>%
+    select(sgrna, copy_number)
 
   mod_df <- df %>%
     select(-copy_number) %>%
@@ -328,6 +334,12 @@ replace_missing_cn_using_segment_cn <- function(df, segment_cn_df) {
 
 fill_in_missing_copy_number <- function(lfc_data, segment_cn) {
   info(logger, "Filling in missing copy number with segment CN data.")
+
+  if (is.null(segment_cn)) {
+    warn(logger, "No segment CN data - returning early.")
+    return(lfc_data)
+  }
+
   missing_cn_data <- lfc_data %>%
     filter(is.na(copy_number)) %>%
     replace_missing_cn_using_segment_cn(segment_cn)
