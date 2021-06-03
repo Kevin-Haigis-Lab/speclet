@@ -37,6 +37,7 @@ out_file <- snakemake@output[["out_file"]]
 
 #### ---- Data retrieval functions ---- ####
 
+# Simple basic preparation steps for LFC data frame.
 prepare_lfc_data <- function(lfc_df, screen_scoure) {
   lfc_df %>%
     add_column(screen = screen_scoure) %>%
@@ -44,6 +45,9 @@ prepare_lfc_data <- function(lfc_df, screen_scoure) {
     distinct()
 }
 
+# Retrieve the LFC data from Achilles and Sanger.
+# If data is available from both sources, they are merged. If
+# neither data source is available, `NULL` is returned.
 get_log_fold_change_data <- function(achilles_lfc_path, score_lfc_path) {
   info(logger, glue("Retrieving LFC data ({achilles_lfc_path}, {score_lfc_path})."))
 
@@ -71,36 +75,8 @@ get_log_fold_change_data <- function(achilles_lfc_path, score_lfc_path) {
   }
 }
 
-extract_depmap_id <- function(rna_f) {
-  info(logger, glue("Extracting DepMap ID from '{rna_f}'"))
-  id <- basename(rna_f) %>%
-    tools::file_path_sans_ext() %>%
-    str_split("_") %>%
-    unlist()
-  id <- id[[2]]
-  info(logger, glue("Found '{id}'"))
-  return(id)
-}
-
-get_sample_info <- function(sample_info_path, depmap_id) {
-  info(logger, "Retrieving sample information.")
-  sample_info <- read_csv(sample_info_path) %>%
-    filter(depmap_id == !!depmap_id)
-
-  if (nrow(sample_info) == 0) {
-    msg <- glue("Did not find sample information for DepMap ID '{depmap_id}'.")
-    warn(logger, msg)
-    return(NULL)
-  } else if (nrow(sample_info) > 1) {
-    print(sample_info)
-    msg <- glue("Found {nrow(sample_info)} samples with DepMap ID '{depmap_id}'.")
-    error(logger, msg)
-    stop(msg)
-  }
-
-  return(sample_info)
-}
-
+# Filter out sgRNA with multiple targets.
+# Returns early if the input `lfc_df` is `NULL`.
 remove_sgrna_that_target_multiple_genes <- function(lfc_df) {
   if (is.null(lfc_df)) {
     return(lfc_df)
@@ -119,6 +95,9 @@ remove_sgrna_that_target_multiple_genes <- function(lfc_df) {
   lfc_df %>% filter(!(sgrna %in% !!multi_target))
 }
 
+# Parse the genome alignment for a sgRNA into
+# chromosome `chr` and position `pos`. Returns
+# early if the input `lfc_df` is `NULL`.
 parse_genome_alignment <- function(df, col = genome_alignment) {
   info(logger, "Parsing genome alignment of sgRNAs.")
   if (is.null(df)) {
@@ -139,6 +118,45 @@ parse_genome_alignment <- function(df, col = genome_alignment) {
   bind_cols(df, ga)
 }
 
+# Pull the DepMap ID from the RNA expression file name.
+extract_depmap_id <- function(rna_f) {
+  info(logger, glue("Extracting DepMap ID from '{rna_f}'"))
+  id <- basename(rna_f) %>%
+    tools::file_path_sans_ext() %>%
+    str_split("_") %>%
+    unlist()
+  id <- id[[2]]
+  info(logger, glue("Found '{id}'"))
+  return(id)
+}
+
+# Get the sample information for a cell line.
+# If no sample information is available, then `NULL`
+# is returned. This can happen if the cell line
+# was removed in an earlier munging step because it
+# was "engineered" or non-cancerous in origin.
+get_sample_info <- function(sample_info_path, depmap_id) {
+  info(logger, "Retrieving sample information.")
+  sample_info <- read_csv(sample_info_path) %>%
+    filter(depmap_id == !!depmap_id)
+
+  if (nrow(sample_info) == 0) {
+    msg <- glue("Did not find sample information for DepMap ID '{depmap_id}'.")
+    warn(logger, msg)
+    return(NULL)
+  } else if (nrow(sample_info) > 1) {
+    print(sample_info)
+    msg <- glue("Found {nrow(sample_info)} samples with DepMap ID '{depmap_id}'.")
+    error(logger, msg)
+    stop(msg)
+  }
+
+  return(sample_info)
+}
+
+# Retrieve RNA expression data.
+# If a list of genes is supplied in `filter_genes`, then
+# all other genes are removed from the data frame.
 get_rna_expression_data <- function(rna_path, filter_genes = NULL) {
   info(logger, glue("Retrieving RNA expression data ({rna_path})."))
   rna <- qs::qread(rna_path) %>%
@@ -152,6 +170,12 @@ get_rna_expression_data <- function(rna_path, filter_genes = NULL) {
   return(rna)
 }
 
+# Retrieve and summarize mutation data.
+# The data is adjusted so that each gene is only present
+# in a single row. If it has multiple mutations, these
+# are summarised. If a list of genes is supplied in
+# `filter_genes`, then all other genes are removed from
+# the data frame.
 get_mutation_data <- function(mut_path, filter_genes = NULL) {
   info(logger, glue("Retrieving mutation data ({mut_path})."))
   mut <- qs::qread(mut_path) %>%
@@ -174,6 +198,9 @@ get_mutation_data <- function(mut_path, filter_genes = NULL) {
   return(mut)
 }
 
+# Retrive gene copy number data from the CCLE.
+# If a list of genes is supplied in `filter_genes`, then
+# all other genes are removed from the data frame.
 get_gene_copy_number_data <- function(ccle_gene_cn_path, filter_genes = NULL) {
   info(logger, glue("Retrieving gene CN data ({ccle_gene_cn_path})."))
   cn <- qs::qread(ccle_gene_cn_path) %>%
@@ -187,6 +214,10 @@ get_gene_copy_number_data <- function(ccle_gene_cn_path, filter_genes = NULL) {
   return(cn)
 }
 
+# Retrieve segment copy number data from CCLE and Sanger.
+# If data from both sources is available, they are merged.
+# If neither source provided segment CN data, `NULL` is
+# returned.
 get_segment_copy_number_data <- function(ccle_segment_cn_path,
                                          sanger_segment_cn_path) {
   info(
@@ -212,6 +243,8 @@ get_segment_copy_number_data <- function(ccle_segment_cn_path,
   }
 }
 
+# Helper function to quit early (usually because no
+# LFC data or sample info).
 quit_early <- function(reason, out_file) {
   warn(logger, reason)
   qs::qsave(tibble::tibble(), out_file)
@@ -251,11 +284,15 @@ segment_cn_data <- get_segment_copy_number_data(ccle_segment_cn_file, score_cn_f
 
 sdim <- function(x) glue("{dim(x)[[1]]}, {dim(x)[[2]]}")
 
-info(logger, glue("Dimsions of LFC data: {sdim(lfc_data)}"))
-info(logger, glue("Dimsions of RNA data: {sdim(rna_data)}"))
-info(logger, glue("Dimsions of mutation data: {sdim(mut_data)}"))
-info(logger, glue("Dimsions of gene CN data: {sdim(gene_cn_data)}"))
-info(logger, glue("Dimsions of segment CN data: {sdim(segment_cn_data)}"))
+info(logger, glue("Dimensions of LFC data: {sdim(lfc_data)}"))
+info(logger, glue("Dimensions of RNA data: {sdim(rna_data)}"))
+info(logger, glue("Dimensions of mutation data: {sdim(mut_data)}"))
+info(logger, glue("Dimensions of gene CN data: {sdim(gene_cn_data)}"))
+if (!is.null(segment_cn_data)) {
+  info(logger, glue("Dimensions of segment CN data: {sdim(segment_cn_data)}"))
+} else {
+  info(logger, glue("No segment CN data."))
+}
 
 
 #### ---- Logical checks of the data ---- ####
@@ -271,6 +308,8 @@ stopifnot(!any(is.na(lfc_data$lfc)))
 
 #### ---- Joining data ---- ####
 
+# Merge LFC data with RNA expression data.
+# Genes with no RNA expression are assumed to be unexpressed.
 join_with_rna <- function(lfc_data, rna_data) {
   info(logger, "Joining LFC data and RNA expression.")
   d <- lfc_data %>%
@@ -279,16 +318,22 @@ join_with_rna <- function(lfc_data, rna_data) {
   return(d)
 }
 
+# Merge LFC data with mutation data.
+# The `num_mutations` and `is_mutated` columns are filled with
+# `0` and `FALSE`, respectively, but other columns are
+# left as `NA`.
 join_with_mutation <- function(lfc_data, mut_data) {
   info(logger, "Joining LFC data and mutation data.")
   d <- lfc_data %>%
     left_join(mut_data, by = "hugo_symbol") %>%
     mutate(
-      num_mutations = ifelse(is.na(num_mutations), 0, num_mutations)
+      num_mutations = ifelse(is.na(num_mutations), 0, num_mutations),
+      is_mutated = ifelse(is.na(is_mutated), FALSE, is_mutated)
     )
   return(d)
 }
 
+# Merge LFC data with gene copy number.
 join_with_gene_copy_number <- function(lfc_data, cn_data) {
   info(logger, "Joining LFC data and gene CN data.")
   d <- lfc_data %>%
@@ -296,6 +341,48 @@ join_with_gene_copy_number <- function(lfc_data, cn_data) {
   return(d)
 }
 
+# Reconcile cases with multiple segment mean values.
+# Below are the rules used:
+#  1. Remove any missing data and see if that reduces the data to a single point.
+#  2. If there are only two values:
+#   a. If the difference is small, return the mean.
+#   b. Else, return the CN with the most number of probes (taking the mean if there are still multiple values).
+#  3. If there are more than 2 values, return the median CN.
+reconcile_multiple_segment_copy_numbers <- function(cn_df) {
+  info(logger, "Reconciling multiple CN data for a single position.")
+
+  cn_df <- cn_df %>% dplyr::filter(!is.na(segment_mean))
+  if (nrow(cn_df) == 1) {
+    return(cn_df$segment_mean[[1]])
+  }
+
+  cn_vals <- unlist(cn_df$segment_mean)
+  log4r::debug(logger, glue("Found {length(cn_vals)} copy number values."))
+
+  if (lenth(cn_vals) == 2) {
+    if (cn_vals[[1]] - cn_vals[[2]] < 0.25) {
+      log4r::debug(logger, "Returning mean of two values.")
+      return(mean(cn_vals))
+    } else {
+      log4r::debug(logger, "Returning mean of CN values with most probes.")
+      cn <- cn_df %>%
+        filter(num_probes == max(num_probes)) %>%
+        pull(segment_mean) %>%
+        unlist() %>%
+        mean()
+      return(unlist(cn))
+    }
+  } else {
+    log4r::debug(logger, "Returning mean of >2 CN values.")
+    return(median(cn_vals))
+  }
+}
+
+# Get the copy number at a postion `pos` on a chromosome `chr`.
+# If the position is not included in `segment_cn_df`, then the
+# value of `NA` is returned.
+# Will throw an error if multiple CN values are found so
+# that that instance can be addressed if need be.
 get_copy_number_at_chromosome_location <- function(chr, pos, segment_cn_df) {
   cn <- segment_cn_df %>%
     dplyr::filter(chromosome == chr) %>%
@@ -306,15 +393,17 @@ get_copy_number_at_chromosome_location <- function(chr, pos, segment_cn_df) {
     return(NA_real_)
   } else if (nrow(cn) > 1) {
     print(cn)
-    msg <- glue("Found {nrow(cn)} CN segments for chr{chr}:{pos}.")
-    error(logger, msg)
-    stop(msg)
+    warn(logger, glue("Found {nrow(cn)} CN segments for chr{chr}:{pos}."))
+    cn_val <- reconcile_multiple_segment_copy_numbers(cn)
+    warn(logger, glue("Reconciled multiple values to {round(cn_val, 3)}."))
   } else {
     return(cn$segment_mean[[1]])
   }
 }
 
-
+# Replace missing CN data using segment CN data.
+# Requires that the data frame `df` have columns
+# for chromosome `chr` and position `pos`.
 replace_missing_cn_using_segment_cn <- function(df, segment_cn_df) {
   sgrna_cn_df <- df %>%
     distinct(sgrna, chr, pos) %>%
@@ -332,6 +421,9 @@ replace_missing_cn_using_segment_cn <- function(df, segment_cn_df) {
   return(mod_df)
 }
 
+# Fill in the missing CN data in the LFC data frame.
+# Rows with missing CN are passed to `replace_missing_cn_using_segment_cn()`
+# and those with CN data are left as is.
 fill_in_missing_copy_number <- function(lfc_data, segment_cn) {
   info(logger, "Filling in missing copy number with segment CN data.")
 
@@ -350,6 +442,7 @@ fill_in_missing_copy_number <- function(lfc_data, segment_cn) {
   return(d)
 }
 
+# Merge LFC data with sample information.
 join_with_sample_info <- function(lfc_data, sample_info) {
   info(logger, "Joining LFC data and sample info.")
   si <- sample_info %>%
