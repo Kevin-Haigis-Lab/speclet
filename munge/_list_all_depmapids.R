@@ -26,7 +26,7 @@ for (data_file in c(sample_info_path, score_replicate_path, depmap_replicate_pat
   all_depmap_ids <- c(all_depmap_ids, unique(unlist(df$DepMap_ID)))
 }
 
-all_depmap_ids <- unique(unlist(all_depmap_ids))
+all_depmap_ids <- sort(unique(unlist(all_depmap_ids)))
 print(paste("Number of unique IDs:", length(all_depmap_ids)))
 
 

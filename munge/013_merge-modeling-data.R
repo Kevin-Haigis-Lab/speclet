@@ -41,9 +41,9 @@ out_file <- snakemake@output[["out_file"]]
 #### ---- Data retrieval functions ---- ####
 
 # Simple basic preparation steps for LFC data frame.
-prepare_lfc_data <- function(lfc_df, screen_scoure) {
+prepare_lfc_data <- function(lfc_df, screen_source) {
   lfc_df %>%
-    add_column(screen = screen_scoure) %>%
+    add_column(screen = screen_source) %>%
     filter(!is.na(hugo_symbol)) %>%
     distinct()
 }
@@ -55,12 +55,12 @@ get_log_fold_change_data <- function(achilles_lfc_path, score_lfc_path) {
   info(logger, glue("Retrieving LFC data ({achilles_lfc_path}, {score_lfc_path})."))
 
   achilles_lfc <- qs::qread(achilles_lfc_path) %>%
-    prepare_lfc_data(screen_scoure = "broad") %>%
+    prepare_lfc_data(screen_source = "broad") %>%
     select(-n_sgrna_alignments) %>%
     mutate(p_dna_batch = as.character(p_dna_batch))
 
   score_lfc <- qs::qread(score_lfc_path) %>%
-    prepare_lfc_data(screen_scoure = "sanger")
+    prepare_lfc_data(screen_source = "sanger")
 
   if (nrow(achilles_lfc) == 0 && nrow(score_lfc) == 0) {
     msg <- "LFC data not found from either data source."
@@ -81,6 +81,7 @@ get_log_fold_change_data <- function(achilles_lfc_path, score_lfc_path) {
 # Filter out sgRNA with multiple targets.
 # Returns early if the input `lfc_df` is `NULL`.
 remove_sgrna_that_target_multiple_genes <- function(lfc_df) {
+  info(logger, "Removing sgRNA that target multiple genes.")
   if (is.null(lfc_df)) {
     return(lfc_df)
   }
@@ -96,6 +97,19 @@ remove_sgrna_that_target_multiple_genes <- function(lfc_df) {
     glue("Removing {length(multi_target)} sgRNAs with multiple targets.")
   )
   lfc_df %>% filter(!(sgrna %in% !!multi_target))
+}
+
+reconcile_sgrna_targeting_one_gene_in_mutliple_places <- function(lfc_df) {
+  info(logger, "Reconciling sgRNA that target the same gene multiple times.")
+  if (is.null(lfc_df)) {
+    return(lfc_df)
+  }
+
+  multi_sgrna <- lfc_df %>%
+    group_by(sgrna, hugo_symbol, genome_alignment) %>%
+    mutate(multiple_hits_on_gene = n() > 1) %>%
+    slice(1) %>%
+    ungroup()
 }
 
 # Parse the genome alignment for a sgRNA into
@@ -119,18 +133,6 @@ parse_genome_alignment <- function(df, col = genome_alignment) {
       pos = as.integer(pos)
     )
   bind_cols(df, ga)
-}
-
-# Pull the DepMap ID from the RNA expression file name.
-extract_depmap_id <- function(rna_f) {
-  info(logger, glue("Extracting DepMap ID from '{rna_f}'"))
-  id <- basename(rna_f) %>%
-    tools::file_path_sans_ext() %>%
-    str_split("_") %>%
-    unlist()
-  id <- id[[2]]
-  info(logger, glue("Found '{id}'"))
-  return(id)
 }
 
 # Get the sample information for a cell line.
@@ -257,6 +259,7 @@ quit_early <- function(reason, out_file) {
 
 lfc_data <- get_log_fold_change_data(achilles_lfc_file, score_lfc_file) %>%
   remove_sgrna_that_target_multiple_genes() %>%
+  reconcile_sgrna_targeting_one_gene_in_mutliple_places() %>%
   parse_genome_alignment()
 
 if (is.null(lfc_data)) {
@@ -266,7 +269,6 @@ if (is.null(lfc_data)) {
   )
 }
 
-# DEPMAP_ID <- extract_depmap_id(ccle_rna_file)
 sample_info <- get_sample_info(sample_info_file, DEPMAP_ID)
 
 if (is.null(sample_info)) {
