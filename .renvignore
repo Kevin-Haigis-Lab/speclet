@@ -10,3 +10,4 @@ temp/
 
 */.ipynb_checkpoints/*
 .snakemake/*
+docs/

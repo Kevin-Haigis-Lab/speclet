@@ -1,6 +1,10 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
-exclude: "renv/library/.*"
+exclude: >
+    (?x)^(
+    renv/library/.*|
+    docs/.*
+    )$
 repos:
 -   repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.27.1

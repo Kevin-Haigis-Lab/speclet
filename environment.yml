@@ -38,6 +38,7 @@ dependencies:
   - patsy=0.5.1
   - pip=21.0.1
   - plotnine=0.7.1
+  - pdoc=0.8.1
   - pre-commit=2.11.1
   - pretty_errors=1.2.19
   - pydantic=1.8.1

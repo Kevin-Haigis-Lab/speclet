@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>src.models.ceres_mimic API documentation</title>
+<meta name="description" content="Builders for CRC CERES Mimic model." />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>src.models.ceres_mimic</code></h1>
+</header>
+<section id="section-intro">
+<p>Builders for CRC CERES Mimic model.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#!/usr/bin/env python3
+
+&#34;&#34;&#34;Builders for CRC CERES Mimic model.&#34;&#34;&#34;
+
+from pathlib import Path
+from typing import Optional, Tuple
+
+import numpy as np
+import pymc3 as pm
+import theano
+
+from src.data_processing import achilles as achelp
+from src.managers.model_data_managers import CrcDataManager, DataManager
+from src.models.speclet_model import ReplacementsDict, SpecletModel
+
+#### ---- CERES Mimic ---- ####
+
+
+class CeresMimic(SpecletModel):
+    &#34;&#34;&#34;CERES Mimic.
+
+    This model is just the part of the CERES model that includes the sgRNA
+    &#34;activity score&#34; (q) and the per-gene (h) and per-gene-per-cell-line (d) covariates.
+    In addition, I have included a parameter for pDNA batch.
+    &#34;&#34;&#34;
+
+    _copynumber_cov: bool
+    _sgrna_intercept_cov: bool
+
+    def __init__(
+        self,
+        name: str,
+        root_cache_dir: Optional[Path] = None,
+        debug: bool = False,
+        data_manager: Optional[DataManager] = CrcDataManager(),
+        copynumber_cov: bool = False,
+        sgrna_intercept_cov: bool = False,
+    ):
+        &#34;&#34;&#34;Create a CeresMimic object.
+
+        Args:
+            name (str): A unique identifier for this instance of CeresMimic. (Used
+              for cache management.)
+            root_cache_dir (Optional[Path], optional): The directory for caching
+              sampling/fitting results. Defaults to None.
+            debug (bool, optional): Are you in debug mode? Defaults to False.
+            copynumber_cov (bool, optional): Should the gene copy number covariate be
+              included in the model? Default to False.
+            sgrna_intercept_cov (bool, optional): Should a varying intercept for
+              `sgRNA|gene` be included in the model? Default to False.
+        &#34;&#34;&#34;
+        super().__init__(
+            name=&#34;ceres-mimic-1_&#34; + name,
+            root_cache_dir=root_cache_dir,
+            debug=debug,
+            data_manager=data_manager,
+        )
+        self._copynumber_cov = copynumber_cov
+        self._sgrna_intercept_cov = sgrna_intercept_cov
+
+    @property
+    def copynumber_cov(self) -&gt; bool:
+        &#34;&#34;&#34;Get the current value of `copynumber_cov` attribute.
+
+        Returns:
+            bool: Whether or not the copy number covariate is included in the model.
+        &#34;&#34;&#34;
+        return self._copynumber_cov
+
+    @copynumber_cov.setter
+    def copynumber_cov(self, new_value: bool):
+        &#34;&#34;&#34;Set the value for the `copynumber_cov` attribute.
+
+        If the value changes, then the `model` attribute and model results attributes
+        `advi_results` and `mcmc_results` are all reset to None.
+
+        Args:
+            new_value (bool): Whether or not the copy number covariate should be
+              included in the model.
+        &#34;&#34;&#34;
+        if new_value != self._copynumber_cov:
+            self._reset_model_and_results()
+            self._copynumber_cov = new_value
+
+    @property
+    def sgrna_intercept_cov(self) -&gt; bool:
+        &#34;&#34;&#34;Get the current value of `sgrna_intercept_cov` attribute.
+
+        Returns:
+            bool: Whether or not the `sgRNA|gene` varying intercept covariate is
+              included in the model.
+        &#34;&#34;&#34;
+        return self._sgrna_intercept_cov
+
+    @sgrna_intercept_cov.setter
+    def sgrna_intercept_cov(self, new_value: bool):
+        &#34;&#34;&#34;Set the value for the `sgrna_intercept_cov` attribute.
+
+        If the value changes, then the `model` attribute and model results attributes
+        `advi_results` and `mcmc_results` are all reset to None.
+
+        Args:
+            new_value (bool): Whether or not the `sgRNA|gene` varying intercept
+              covariate is included in the model.
+        &#34;&#34;&#34;
+        if new_value != self._sgrna_intercept_cov:
+            self._reset_model_and_results()
+            self._sgrna_intercept_cov = new_value
+
+    def model_specification(self) -&gt; Tuple[pm.Model, str]:
+        &#34;&#34;&#34;Build CRC CERES Mimic One.
+
+        Returns:
+            [None]: None
+        &#34;&#34;&#34;
+        data = self.data_manager.get_data()
+
+        total_size = data.shape[0]
+        indices_collection = achelp.common_indices(data)
+
+        # Shared Theano variables
+        sgrna_idx_shared = theano.shared(indices_collection.sgrna_idx)
+        sgrna_to_gene_idx_shared = theano.shared(indices_collection.sgrna_to_gene_idx)
+        gene_idx_shared = theano.shared(indices_collection.gene_idx)
+        cellline_idx_shared = theano.shared(indices_collection.cellline_idx)
+        batch_idx_shared = theano.shared(indices_collection.batch_idx)
+        lfc_shared = theano.shared(data.lfc.values)
+        copynumber_shared = theano.shared(data.z_log2_cn.values)
+
+        with pm.Model() as model:
+
+            # Hyper-priors
+            σ_a = pm.HalfNormal(&#34;σ_a&#34;, np.array([0.1, 2]), shape=2)
+            a = pm.Exponential(&#34;a&#34;, σ_a, shape=(indices_collection.n_genes, 2))
+
+            μ_h = pm.Normal(&#34;μ_h&#34;, 0, 0.2)
+            σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)
+
+            μ_d = pm.Normal(&#34;μ_d&#34;, 0, 0.2)
+            σ_d = pm.HalfNormal(&#34;σ_d&#34;, 1)
+
+            μ_η = pm.Normal(&#34;μ_η&#34;, 0, 0.1)
+            σ_η = pm.HalfNormal(&#34;σ_η&#34;, 0.1)
+
+            # Main parameter priors
+            q = pm.Beta(
+                &#34;q&#34;,
+                alpha=a[sgrna_to_gene_idx_shared, 0],
+                beta=a[sgrna_to_gene_idx_shared, 1],
+                shape=indices_collection.n_sgrnas,
+            )
+            h = pm.Normal(&#34;h&#34;, μ_h, σ_h, shape=indices_collection.n_genes)
+            d = pm.Normal(
+                &#34;d&#34;,
+                μ_d,
+                σ_d,
+                shape=(indices_collection.n_genes, indices_collection.n_celllines),
+            )
+            η = pm.Normal(&#34;η&#34;, μ_η, σ_η, shape=indices_collection.n_batches)
+
+            gene_comp = h[gene_idx_shared] + d[gene_idx_shared, cellline_idx_shared]
+
+            if self.copynumber_cov:
+                # Add varying slope with copy number.
+                μ_β = pm.Normal(&#34;μ_β&#34;, 0, 0.1)
+                σ_β = pm.HalfNormal(&#34;σ_β&#34;, 0.5)
+                β = pm.Normal(&#34;β&#34;, μ_β, σ_β, shape=indices_collection.n_celllines)
+                gene_comp += β[cellline_idx_shared] * copynumber_shared
+
+            μ = pm.Deterministic(
+                &#34;μ&#34;, q[sgrna_idx_shared] * gene_comp + η[batch_idx_shared]
+            )
+
+            if self.sgrna_intercept_cov:
+                # Hyper priors for sgRNA|gene varying intercept.
+                μ_og = pm.Normal(&#34;μ_og&#34;, 0, 0.1)
+                σ_og = pm.HalfNormal(&#34;σ_og&#34;, 0.2)
+                # Priors for sgRNA|gene varying intercept.
+                μ_o = pm.Normal(&#34;μ_o&#34;, μ_og, σ_og, shape=indices_collection.n_genes)
+                σ_o = pm.HalfNormal(&#34;σ_o&#34;, 0.2)
+                # sgRNA|gene varying intercept.
+                o = pm.Normal(
+                    &#34;o&#34;,
+                    μ_o[sgrna_to_gene_idx_shared],
+                    σ_o,
+                    shape=indices_collection.n_sgrnas,
+                )
+                μ = μ + o[sgrna_idx_shared]
+
+            σ = pm.HalfNormal(&#34;σ&#34;, 2)
+
+            # Likelihood
+            lfc = pm.Normal(  # noqa: F841
+                &#34;lfc&#34;, μ, σ, observed=lfc_shared, total_size=total_size
+            )
+
+        shared_vars = {
+            &#34;sgrna_idx_shared&#34;: sgrna_idx_shared,
+            &#34;sgrna_to_gene_idx_shared&#34;: sgrna_to_gene_idx_shared,
+            &#34;gene_idx_shared&#34;: gene_idx_shared,
+            &#34;cellline_idx_shared&#34;: cellline_idx_shared,
+            &#34;batch_idx_shared&#34;: batch_idx_shared,
+            &#34;lfc_shared&#34;: lfc_shared,
+            &#34;copynumber_shared&#34;: copynumber_shared,
+        }
+
+        self.shared_vars = shared_vars
+        return model, &#34;lfc&#34;
+
+    def get_replacement_parameters(self) -&gt; ReplacementsDict:
+        &#34;&#34;&#34;Make a dictionary mapping the shared data variables to new data.
+
+        Raises:
+            AttributeError: Raised if there is no data manager.
+            AttributeError: Raised if there are no shared variables.
+
+        Returns:
+            ReplacementsDict: A dictionary mapping new data to shared variables.
+        &#34;&#34;&#34;
+        if self.data_manager is None:
+            raise AttributeError(
+                &#34;Cannot create replacement parameters without a DataManager.&#34;
+            )
+        if self.shared_vars is None:
+            raise AttributeError(
+                &#34;No shared variables - cannot create replacement parameters..&#34;
+            )
+
+        data = self.data_manager.get_data()
+        batch_size = self.data_manager.get_batch_size()
+        indices = achelp.common_indices(data)
+
+        sgrna_idx_batch = pm.Minibatch(indices.sgrna_idx, batch_size=batch_size)
+        gene_idx_batch = pm.Minibatch(indices.gene_idx, batch_size=batch_size)
+        cellline_idx_batch = pm.Minibatch(indices.cellline_idx, batch_size=batch_size)
+        batch_idx_batch = pm.Minibatch(indices.batch_idx, batch_size=batch_size)
+        lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
+        copynumber_data_batch = pm.Minibatch(
+            data.z_log2_cn.values, batch_size=batch_size
+        )
+
+        return {
+            self.shared_vars[&#34;sgrna_idx_shared&#34;]: sgrna_idx_batch,
+            self.shared_vars[&#34;gene_idx_shared&#34;]: gene_idx_batch,
+            self.shared_vars[&#34;cellline_idx_shared&#34;]: cellline_idx_batch,
+            self.shared_vars[&#34;batch_idx_shared&#34;]: batch_idx_batch,
+            self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
+            self.shared_vars[&#34;copynumber_shared&#34;]: copynumber_data_batch,
+        }</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="src.models.ceres_mimic.CeresMimic"><code class="flex name class">
+<span>class <span class="ident">CeresMimic</span></span>
+<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = &lt;src.managers.model_data_managers.CrcDataManager object&gt;, copynumber_cov: bool = False, sgrna_intercept_cov: bool = False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>CERES Mimic.</p>
+<p>This model is just the part of the CERES model that includes the sgRNA
+"activity score" (q) and the per-gene (h) and per-gene-per-cell-line (d) covariates.
+In addition, I have included a parameter for pDNA batch.</p>
+<p>Create a CeresMimic object.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>A unique identifier for this instance of CeresMimic. (Used
+for cache management.)</dd>
+<dt><strong><code>root_cache_dir</code></strong> :&ensp;<code>Optional[Path]</code>, optional</dt>
+<dd>The directory for caching
+sampling/fitting results. Defaults to None.</dd>
+<dt><strong><code>debug</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Are you in debug mode? Defaults to False.</dd>
+<dt><strong><code>copynumber_cov</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the gene copy number covariate be
+included in the model? Default to False.</dd>
+<dt><strong><code>sgrna_intercept_cov</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should a varying intercept for
+<code>sgRNA|gene</code> be included in the model? Default to False.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CeresMimic(SpecletModel):
+    &#34;&#34;&#34;CERES Mimic.
+
+    This model is just the part of the CERES model that includes the sgRNA
+    &#34;activity score&#34; (q) and the per-gene (h) and per-gene-per-cell-line (d) covariates.
+    In addition, I have included a parameter for pDNA batch.
+    &#34;&#34;&#34;
+
+    _copynumber_cov: bool
+    _sgrna_intercept_cov: bool
+
+    def __init__(
+        self,
+        name: str,
+        root_cache_dir: Optional[Path] = None,
+        debug: bool = False,
+        data_manager: Optional[DataManager] = CrcDataManager(),
+        copynumber_cov: bool = False,
+        sgrna_intercept_cov: bool = False,
+    ):
+        &#34;&#34;&#34;Create a CeresMimic object.
+
+        Args:
+            name (str): A unique identifier for this instance of CeresMimic. (Used
+              for cache management.)
+            root_cache_dir (Optional[Path], optional): The directory for caching
+              sampling/fitting results. Defaults to None.
+            debug (bool, optional): Are you in debug mode? Defaults to False.
+            copynumber_cov (bool, optional): Should the gene copy number covariate be
+              included in the model? Default to False.
+            sgrna_intercept_cov (bool, optional): Should a varying intercept for
+              `sgRNA|gene` be included in the model? Default to False.
+        &#34;&#34;&#34;
+        super().__init__(
+            name=&#34;ceres-mimic-1_&#34; + name,
+            root_cache_dir=root_cache_dir,
+            debug=debug,
+            data_manager=data_manager,
+        )
+        self._copynumber_cov = copynumber_cov
+        self._sgrna_intercept_cov = sgrna_intercept_cov
+
+    @property
+    def copynumber_cov(self) -&gt; bool:
+        &#34;&#34;&#34;Get the current value of `copynumber_cov` attribute.
+
+        Returns:
+            bool: Whether or not the copy number covariate is included in the model.
+        &#34;&#34;&#34;
+        return self._copynumber_cov
+
+    @copynumber_cov.setter
+    def copynumber_cov(self, new_value: bool):
+        &#34;&#34;&#34;Set the value for the `copynumber_cov` attribute.
+
+        If the value changes, then the `model` attribute and model results attributes
+        `advi_results` and `mcmc_results` are all reset to None.
+
+        Args:
+            new_value (bool): Whether or not the copy number covariate should be
+              included in the model.
+        &#34;&#34;&#34;
+        if new_value != self._copynumber_cov:
+            self._reset_model_and_results()
+            self._copynumber_cov = new_value
+
+    @property
+    def sgrna_intercept_cov(self) -&gt; bool:
+        &#34;&#34;&#34;Get the current value of `sgrna_intercept_cov` attribute.
+
+        Returns:
+            bool: Whether or not the `sgRNA|gene` varying intercept covariate is
+              included in the model.
+        &#34;&#34;&#34;
+        return self._sgrna_intercept_cov
+
+    @sgrna_intercept_cov.setter
+    def sgrna_intercept_cov(self, new_value: bool):
+        &#34;&#34;&#34;Set the value for the `sgrna_intercept_cov` attribute.
+
+        If the value changes, then the `model` attribute and model results attributes
+        `advi_results` and `mcmc_results` are all reset to None.
+
+        Args:
+            new_value (bool): Whether or not the `sgRNA|gene` varying intercept
+              covariate is included in the model.
+        &#34;&#34;&#34;
+        if new_value != self._sgrna_intercept_cov:
+            self._reset_model_and_results()
+            self._sgrna_intercept_cov = new_value
+
+    def model_specification(self) -&gt; Tuple[pm.Model, str]:
+        &#34;&#34;&#34;Build CRC CERES Mimic One.
+
+        Returns:
+            [None]: None
+        &#34;&#34;&#34;
+        data = self.data_manager.get_data()
+
+        total_size = data.shape[0]
+        indices_collection = achelp.common_indices(data)
+
+        # Shared Theano variables
+        sgrna_idx_shared = theano.shared(indices_collection.sgrna_idx)
+        sgrna_to_gene_idx_shared = theano.shared(indices_collection.sgrna_to_gene_idx)
+        gene_idx_shared = theano.shared(indices_collection.gene_idx)
+        cellline_idx_shared = theano.shared(indices_collection.cellline_idx)
+        batch_idx_shared = theano.shared(indices_collection.batch_idx)
+        lfc_shared = theano.shared(data.lfc.values)
+        copynumber_shared = theano.shared(data.z_log2_cn.values)
+
+        with pm.Model() as model:
+
+            # Hyper-priors
+            σ_a = pm.HalfNormal(&#34;σ_a&#34;, np.array([0.1, 2]), shape=2)
+            a = pm.Exponential(&#34;a&#34;, σ_a, shape=(indices_collection.n_genes, 2))
+
+            μ_h = pm.Normal(&#34;μ_h&#34;, 0, 0.2)
+            σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)
+
+            μ_d = pm.Normal(&#34;μ_d&#34;, 0, 0.2)
+            σ_d = pm.HalfNormal(&#34;σ_d&#34;, 1)
+
+            μ_η = pm.Normal(&#34;μ_η&#34;, 0, 0.1)
+            σ_η = pm.HalfNormal(&#34;σ_η&#34;, 0.1)
+
+            # Main parameter priors
+            q = pm.Beta(
+                &#34;q&#34;,
+                alpha=a[sgrna_to_gene_idx_shared, 0],
+                beta=a[sgrna_to_gene_idx_shared, 1],
+                shape=indices_collection.n_sgrnas,
+            )
+            h = pm.Normal(&#34;h&#34;, μ_h, σ_h, shape=indices_collection.n_genes)
+            d = pm.Normal(
+                &#34;d&#34;,
+                μ_d,
+                σ_d,
+                shape=(indices_collection.n_genes, indices_collection.n_celllines),
+            )
+            η = pm.Normal(&#34;η&#34;, μ_η, σ_η, shape=indices_collection.n_batches)
+
+            gene_comp = h[gene_idx_shared] + d[gene_idx_shared, cellline_idx_shared]
+
+            if self.copynumber_cov:
+                # Add varying slope with copy number.
+                μ_β = pm.Normal(&#34;μ_β&#34;, 0, 0.1)
+                σ_β = pm.HalfNormal(&#34;σ_β&#34;, 0.5)
+                β = pm.Normal(&#34;β&#34;, μ_β, σ_β, shape=indices_collection.n_celllines)
+                gene_comp += β[cellline_idx_shared] * copynumber_shared
+
+            μ = pm.Deterministic(
+                &#34;μ&#34;, q[sgrna_idx_shared] * gene_comp + η[batch_idx_shared]
+            )
+
+            if self.sgrna_intercept_cov:
+                # Hyper priors for sgRNA|gene varying intercept.
+                μ_og = pm.Normal(&#34;μ_og&#34;, 0, 0.1)
+                σ_og = pm.HalfNormal(&#34;σ_og&#34;, 0.2)
+                # Priors for sgRNA|gene varying intercept.
+                μ_o = pm.Normal(&#34;μ_o&#34;, μ_og, σ_og, shape=indices_collection.n_genes)
+                σ_o = pm.HalfNormal(&#34;σ_o&#34;, 0.2)
+                # sgRNA|gene varying intercept.
+                o = pm.Normal(
+                    &#34;o&#34;,
+                    μ_o[sgrna_to_gene_idx_shared],
+                    σ_o,
+                    shape=indices_collection.n_sgrnas,
+                )
+                μ = μ + o[sgrna_idx_shared]
+
+            σ = pm.HalfNormal(&#34;σ&#34;, 2)
+
+            # Likelihood
+            lfc = pm.Normal(  # noqa: F841
+                &#34;lfc&#34;, μ, σ, observed=lfc_shared, total_size=total_size
+            )
+
+        shared_vars = {
+            &#34;sgrna_idx_shared&#34;: sgrna_idx_shared,
+            &#34;sgrna_to_gene_idx_shared&#34;: sgrna_to_gene_idx_shared,
+            &#34;gene_idx_shared&#34;: gene_idx_shared,
+            &#34;cellline_idx_shared&#34;: cellline_idx_shared,
+            &#34;batch_idx_shared&#34;: batch_idx_shared,
+            &#34;lfc_shared&#34;: lfc_shared,
+            &#34;copynumber_shared&#34;: copynumber_shared,
+        }
+
+        self.shared_vars = shared_vars
+        return model, &#34;lfc&#34;
+
+    def get_replacement_parameters(self) -&gt; ReplacementsDict:
+        &#34;&#34;&#34;Make a dictionary mapping the shared data variables to new data.
+
+        Raises:
+            AttributeError: Raised if there is no data manager.
+            AttributeError: Raised if there are no shared variables.
+
+        Returns:
+            ReplacementsDict: A dictionary mapping new data to shared variables.
+        &#34;&#34;&#34;
+        if self.data_manager is None:
+            raise AttributeError(
+                &#34;Cannot create replacement parameters without a DataManager.&#34;
+            )
+        if self.shared_vars is None:
+            raise AttributeError(
+                &#34;No shared variables - cannot create replacement parameters..&#34;
+            )
+
+        data = self.data_manager.get_data()
+        batch_size = self.data_manager.get_batch_size()
+        indices = achelp.common_indices(data)
+
+        sgrna_idx_batch = pm.Minibatch(indices.sgrna_idx, batch_size=batch_size)
+        gene_idx_batch = pm.Minibatch(indices.gene_idx, batch_size=batch_size)
+        cellline_idx_batch = pm.Minibatch(indices.cellline_idx, batch_size=batch_size)
+        batch_idx_batch = pm.Minibatch(indices.batch_idx, batch_size=batch_size)
+        lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
+        copynumber_data_batch = pm.Minibatch(
+            data.z_log2_cn.values, batch_size=batch_size
+        )
+
+        return {
+            self.shared_vars[&#34;sgrna_idx_shared&#34;]: sgrna_idx_batch,
+            self.shared_vars[&#34;gene_idx_shared&#34;]: gene_idx_batch,
+            self.shared_vars[&#34;cellline_idx_shared&#34;]: cellline_idx_batch,
+            self.shared_vars[&#34;batch_idx_shared&#34;]: batch_idx_batch,
+            self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
+            self.shared_vars[&#34;copynumber_shared&#34;]: copynumber_data_batch,
+        }</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="src.models.speclet_model.SpecletModel" href="speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a></li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="src.models.ceres_mimic.CeresMimic.copynumber_cov"><code class="name">var <span class="ident">copynumber_cov</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>Get the current value of <code>copynumber_cov</code> attribute.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>Whether or not the copy number covariate is included in the model.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def copynumber_cov(self) -&gt; bool:
+    &#34;&#34;&#34;Get the current value of `copynumber_cov` attribute.
+
+    Returns:
+        bool: Whether or not the copy number covariate is included in the model.
+    &#34;&#34;&#34;
+    return self._copynumber_cov</code></pre>
+</details>
+</dd>
+<dt id="src.models.ceres_mimic.CeresMimic.sgrna_intercept_cov"><code class="name">var <span class="ident">sgrna_intercept_cov</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>Get the current value of <code>sgrna_intercept_cov</code> attribute.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>Whether or not the <code>sgRNA|gene</code> varying intercept covariate is
+included in the model.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def sgrna_intercept_cov(self) -&gt; bool:
+    &#34;&#34;&#34;Get the current value of `sgrna_intercept_cov` attribute.
+
+    Returns:
+        bool: Whether or not the `sgRNA|gene` varying intercept covariate is
+          included in the model.
+    &#34;&#34;&#34;
+    return self._sgrna_intercept_cov</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="src.models.ceres_mimic.CeresMimic.get_replacement_parameters"><code class="name flex">
+<span>def <span class="ident">get_replacement_parameters</span></span>(<span>self) -> Dict[theano.tensor.sharedvar.TensorSharedVariable, Union[pymc3.data.Minibatch, numpy.ndarray]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Make a dictionary mapping the shared data variables to new data.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>AttributeError</code></dt>
+<dd>Raised if there is no data manager.</dd>
+<dt><code>AttributeError</code></dt>
+<dd>Raised if there are no shared variables.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>ReplacementsDict</code></dt>
+<dd>A dictionary mapping new data to shared variables.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_replacement_parameters(self) -&gt; ReplacementsDict:
+    &#34;&#34;&#34;Make a dictionary mapping the shared data variables to new data.
+
+    Raises:
+        AttributeError: Raised if there is no data manager.
+        AttributeError: Raised if there are no shared variables.
+
+    Returns:
+        ReplacementsDict: A dictionary mapping new data to shared variables.
+    &#34;&#34;&#34;
+    if self.data_manager is None:
+        raise AttributeError(
+            &#34;Cannot create replacement parameters without a DataManager.&#34;
+        )
+    if self.shared_vars is None:
+        raise AttributeError(
+            &#34;No shared variables - cannot create replacement parameters..&#34;
+        )
+
+    data = self.data_manager.get_data()
+    batch_size = self.data_manager.get_batch_size()
+    indices = achelp.common_indices(data)
+
+    sgrna_idx_batch = pm.Minibatch(indices.sgrna_idx, batch_size=batch_size)
+    gene_idx_batch = pm.Minibatch(indices.gene_idx, batch_size=batch_size)
+    cellline_idx_batch = pm.Minibatch(indices.cellline_idx, batch_size=batch_size)
+    batch_idx_batch = pm.Minibatch(indices.batch_idx, batch_size=batch_size)
+    lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
+    copynumber_data_batch = pm.Minibatch(
+        data.z_log2_cn.values, batch_size=batch_size
+    )
+
+    return {
+        self.shared_vars[&#34;sgrna_idx_shared&#34;]: sgrna_idx_batch,
+        self.shared_vars[&#34;gene_idx_shared&#34;]: gene_idx_batch,
+        self.shared_vars[&#34;cellline_idx_shared&#34;]: cellline_idx_batch,
+        self.shared_vars[&#34;batch_idx_shared&#34;]: batch_idx_batch,
+        self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
+        self.shared_vars[&#34;copynumber_shared&#34;]: copynumber_data_batch,
+    }</code></pre>
+</details>
+</dd>
+<dt id="src.models.ceres_mimic.CeresMimic.model_specification"><code class="name flex">
+<span>def <span class="ident">model_specification</span></span>(<span>self) -> Tuple[pymc3.model.Model, str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Build CRC CERES Mimic One.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>[None]</code></dt>
+<dd>None</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def model_specification(self) -&gt; Tuple[pm.Model, str]:
+    &#34;&#34;&#34;Build CRC CERES Mimic One.
+
+    Returns:
+        [None]: None
+    &#34;&#34;&#34;
+    data = self.data_manager.get_data()
+
+    total_size = data.shape[0]
+    indices_collection = achelp.common_indices(data)
+
+    # Shared Theano variables
+    sgrna_idx_shared = theano.shared(indices_collection.sgrna_idx)
+    sgrna_to_gene_idx_shared = theano.shared(indices_collection.sgrna_to_gene_idx)
+    gene_idx_shared = theano.shared(indices_collection.gene_idx)
+    cellline_idx_shared = theano.shared(indices_collection.cellline_idx)
+    batch_idx_shared = theano.shared(indices_collection.batch_idx)
+    lfc_shared = theano.shared(data.lfc.values)
+    copynumber_shared = theano.shared(data.z_log2_cn.values)
+
+    with pm.Model() as model:
+
+        # Hyper-priors
+        σ_a = pm.HalfNormal(&#34;σ_a&#34;, np.array([0.1, 2]), shape=2)
+        a = pm.Exponential(&#34;a&#34;, σ_a, shape=(indices_collection.n_genes, 2))
+
+        μ_h = pm.Normal(&#34;μ_h&#34;, 0, 0.2)
+        σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)
+
+        μ_d = pm.Normal(&#34;μ_d&#34;, 0, 0.2)
+        σ_d = pm.HalfNormal(&#34;σ_d&#34;, 1)
+
+        μ_η = pm.Normal(&#34;μ_η&#34;, 0, 0.1)
+        σ_η = pm.HalfNormal(&#34;σ_η&#34;, 0.1)
+
+        # Main parameter priors
+        q = pm.Beta(
+            &#34;q&#34;,
+            alpha=a[sgrna_to_gene_idx_shared, 0],
+            beta=a[sgrna_to_gene_idx_shared, 1],
+            shape=indices_collection.n_sgrnas,
+        )
+        h = pm.Normal(&#34;h&#34;, μ_h, σ_h, shape=indices_collection.n_genes)
+        d = pm.Normal(
+            &#34;d&#34;,
+            μ_d,
+            σ_d,
+            shape=(indices_collection.n_genes, indices_collection.n_celllines),
+        )
+        η = pm.Normal(&#34;η&#34;, μ_η, σ_η, shape=indices_collection.n_batches)
+
+        gene_comp = h[gene_idx_shared] + d[gene_idx_shared, cellline_idx_shared]
+
+        if self.copynumber_cov:
+            # Add varying slope with copy number.
+            μ_β = pm.Normal(&#34;μ_β&#34;, 0, 0.1)
+            σ_β = pm.HalfNormal(&#34;σ_β&#34;, 0.5)
+            β = pm.Normal(&#34;β&#34;, μ_β, σ_β, shape=indices_collection.n_celllines)
+            gene_comp += β[cellline_idx_shared] * copynumber_shared
+
+        μ = pm.Deterministic(
+            &#34;μ&#34;, q[sgrna_idx_shared] * gene_comp + η[batch_idx_shared]
+        )
+
+        if self.sgrna_intercept_cov:
+            # Hyper priors for sgRNA|gene varying intercept.
+            μ_og = pm.Normal(&#34;μ_og&#34;, 0, 0.1)
+            σ_og = pm.HalfNormal(&#34;σ_og&#34;, 0.2)
+            # Priors for sgRNA|gene varying intercept.
+            μ_o = pm.Normal(&#34;μ_o&#34;, μ_og, σ_og, shape=indices_collection.n_genes)
+            σ_o = pm.HalfNormal(&#34;σ_o&#34;, 0.2)
+            # sgRNA|gene varying intercept.
+            o = pm.Normal(
+                &#34;o&#34;,
+                μ_o[sgrna_to_gene_idx_shared],
+                σ_o,
+                shape=indices_collection.n_sgrnas,
+            )
+            μ = μ + o[sgrna_idx_shared]
+
+        σ = pm.HalfNormal(&#34;σ&#34;, 2)
+
+        # Likelihood
+        lfc = pm.Normal(  # noqa: F841
+            &#34;lfc&#34;, μ, σ, observed=lfc_shared, total_size=total_size
+        )
+
+    shared_vars = {
+        &#34;sgrna_idx_shared&#34;: sgrna_idx_shared,
+        &#34;sgrna_to_gene_idx_shared&#34;: sgrna_to_gene_idx_shared,
+        &#34;gene_idx_shared&#34;: gene_idx_shared,
+        &#34;cellline_idx_shared&#34;: cellline_idx_shared,
+        &#34;batch_idx_shared&#34;: batch_idx_shared,
+        &#34;lfc_shared&#34;: lfc_shared,
+        &#34;copynumber_shared&#34;: copynumber_shared,
+    }
+
+    self.shared_vars = shared_vars
+    return model, &#34;lfc&#34;</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="src.models.speclet_model.SpecletModel" href="speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a></b></code>:
+<ul class="hlist">
+<li><code><a title="src.models.speclet_model.SpecletModel.advi_sample_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.advi_sample_model">advi_sample_model</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.build_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.build_model">build_model</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.clear_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.clear_cache">clear_cache</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.debug" href="speclet_model.html#src.models.speclet_model.SpecletModel.debug">debug</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.get_advi_callbacks" href="speclet_model.html#src.models.speclet_model.SpecletModel.get_advi_callbacks">get_advi_callbacks</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.mcmc_sample_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.mcmc_sample_model">mcmc_sample_model</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.run_simulation_based_calibration" href="speclet_model.html#src.models.speclet_model.SpecletModel.run_simulation_based_calibration">run_simulation_based_calibration</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.update_advi_sampling_parameters" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.update_mcmc_sampling_parameters" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_mcmc_sampling_parameters">update_mcmc_sampling_parameters</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.write_advi_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_advi_cache">write_advi_cache</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.write_mcmc_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_mcmc_cache">write_mcmc_cache</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="src.models" href="index.html">src.models</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="src.models.ceres_mimic.CeresMimic" href="#src.models.ceres_mimic.CeresMimic">CeresMimic</a></code></h4>
+<ul class="">
+<li><code><a title="src.models.ceres_mimic.CeresMimic.copynumber_cov" href="#src.models.ceres_mimic.CeresMimic.copynumber_cov">copynumber_cov</a></code></li>
+<li><code><a title="src.models.ceres_mimic.CeresMimic.get_replacement_parameters" href="#src.models.ceres_mimic.CeresMimic.get_replacement_parameters">get_replacement_parameters</a></code></li>
+<li><code><a title="src.models.ceres_mimic.CeresMimic.model_specification" href="#src.models.ceres_mimic.CeresMimic.model_specification">model_specification</a></code></li>
+<li><code><a title="src.models.ceres_mimic.CeresMimic.sgrna_intercept_cov" href="#src.models.ceres_mimic.CeresMimic.sgrna_intercept_cov">sgrna_intercept_cov</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

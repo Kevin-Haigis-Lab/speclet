@@ -260,6 +260,7 @@ modeling_data/*
 .snakemake/
 .virtual_documents/
 .vscode/settings.json
+docs/.docs-env
 
 # Specific files to except from the rules above
 !modeling_data/depmap_modeling_dataframe_crc-subsample.csv
