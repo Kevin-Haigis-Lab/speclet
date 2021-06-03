@@ -356,7 +356,7 @@ join_with_gene_copy_number <- function(lfc_data, cn_data) {
 #   b. Else, return the CN with the most number of probes (taking the mean if there are still multiple values).
 #  3. If there are more than 2 values, return the median CN.
 reconcile_multiple_segment_copy_numbers <- function(cn_df) {
-  info(logger, "Reconciling multiple CN data for a single position.")
+  log4r::debug(logger, "Reconciling multiple CN data for a single position.")
 
   cn_df <- cn_df %>% dplyr::filter(!is.na(segment_mean))
   if (nrow(cn_df) == 1) {

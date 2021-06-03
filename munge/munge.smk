@@ -15,7 +15,7 @@ TEMP_DIR = Path("/n/scratch3/users/j/jc604/speclet/munge-intermediates")
 # TEMP_DIR = Path("temp")
 
 all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list()
-# all_depmap_ids = all_depmap_ids[:2] ### TESTING ###
+all_depmap_ids = all_depmap_ids[:10] ### TESTING ###
 # all_depmap_ids += ["ACH-002227", "ACH-001738"]
 
 rule all:
@@ -36,7 +36,8 @@ rule all:
         gene_effect = MODELING_DATA_DIR / "score_gene_effect.csv",
         log_fold_change = MODELING_DATA_DIR / "score_log_fold_change_filtered.csv",
         # Modeling data.
-        full_modeling_dataframe = MODELING_DATA_DIR / "depmap_modeling_dataframe.csv"
+        full_modeling_dataframe = MODELING_DATA_DIR / "depmap_modeling_dataframe.csv",
+        check_notebook_md = "munge/017_check-depmap-modeling-data.md",
 
 
 
@@ -202,3 +203,15 @@ rule combine_data:
         out_file = MODELING_DATA_DIR / "depmap_modeling_dataframe.csv"
     script:
         "015_combine-modeling-data.R"
+
+rule check_depmap_modeling_data:
+    input:
+        modeling_df = MODELING_DATA_DIR / "depmap_modeling_dataframe.csv",
+        check_nb = "munge/017_check-depmap-modeling-data.ipynb",
+    output:
+        output_md = "munge/017_check-depmap-modeling-data.md"
+    shell:
+        "jupyter nbconvert --to notebook --inplace --execute {input.check_nb} && "
+        "nbqa black {input.check_nb} --nbqa-mutate && "
+        "nbqa isort {input.check_nb} --nbqa-mutate && "
+        "jupyter nbconvert --to markdown {input.check_nb}"
