@@ -10,8 +10,8 @@
         "J": "snakejob"
     },
     "tidy_ccle": {
-        "mem": "40000",
-        "time": "00:30:00",
+        "mem": "60000",
+        "time": "01:30:00",
         "J": "ccle"
     },
     "tidy_depmap": {
