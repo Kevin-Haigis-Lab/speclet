@@ -89,8 +89,8 @@ get_sample_info <- function(sample_info_path, depmap_id) {
 
   if (nrow(sample_info) == 0) {
     msg <- glue("Did not find sample information for DepMap ID '{depmap_id}'.")
-    error(logger, msg)
-    stop(msg)
+    warn(logger, msg)
+    return(NULL)
   } else if (nrow(sample_info) > 1) {
     print(sample_info)
     msg <- glue("Found {nrow(sample_info)} samples with DepMap ID '{depmap_id}'.")
@@ -192,19 +192,32 @@ get_segment_copy_number_data <- function(ccle_segment_cn_path,
   }
 }
 
+quit_early <- function(reason, out_file) {
+  warn(logger, reason)
+  qs::qsave(tibble::tibble(), out_file)
+  quit(save = "no", status = 0)
+}
+
 
 lfc_data <- get_log_fold_change_data(achilles_lfc_file, score_lfc_file) %>%
   remove_sgrna_that_target_multiple_genes()
 
 if (is.null(lfc_data)) {
-  warn(logger, "No LFC data -> exiting early.")
-  qs::qsave(tibble(), out_file)
-  quit(save = "no", status = 0)
+  quit_early(
+    reason = "No LFC data - exiting early.",
+    out_file = out_file
+  )
 }
-
 
 DEPMAP_ID <- extract_depmap_id(ccle_rna_file)
 sample_info <- get_sample_info(sample_info_file, DEPMAP_ID)
+
+if (is.null(sample_info)) {
+  quit_early(
+    reason = "No sample info - exiting early.",
+    out_file = out_file
+  )
+}
 
 lfc_genes <- unique(unlist(lfc_data$hugo_symbol))
 info(logger, glue("Found {length(lfc_genes)} genes in LFC data."))
