@@ -163,7 +163,10 @@ def generate_mock_achilles_data(
     cell_lines = prefixed_count("cellline", n=n_cell_lines)
     batches = prefixed_count("batch", n=n_batches)
     batch_map = pd.DataFrame(
-        {"depmap_id": cell_lines, "pdna_batch": np.random.choice(batches, n_cell_lines)}
+        {
+            "depmap_id": cell_lines,
+            "p_dna_batch": np.random.choice(batches, n_cell_lines),
+        }
     )
 
     genes = prefixed_count("gene", n=n_genes)
@@ -208,15 +211,15 @@ def generate_mock_achilles_data(
     df = achelp.set_achilles_categorical_columns(df, cols=df.columns.tolist())
 
     # Mock values for gene copy number.
-    df["gene_cn"] = 2 ** np.random.normal(1, 0.5, df.shape[0])
-    df["log2_cn"] = np.log2(df.gene_cn + 1)
-    df = achelp.zscale_cna_by_group(
-        df,
-        gene_cn_col="log2_cn",
-        new_col="z_log2_cn",
-        groupby_cols=["depmap_id"],
-        cn_max=np.log2(10),
-    )
+    df["copy_number"] = 2 ** np.random.normal(1, 0.5, df.shape[0])
+    # df["log2_cn"] = np.log2(df.gene_cn + 1)
+    # df = achelp.zscale_cna_by_group(
+    #     df,
+    #     gene_cn_col="log2_cn",
+    #     new_col="z_log2_cn",
+    #     groupby_cols=["depmap_id"],
+    #     cn_max=np.log2(10),
+    # )
 
     df["lfc"] = np.random.normal(0, 2, df.shape[0])
     return df

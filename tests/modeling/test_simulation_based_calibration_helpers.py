@@ -91,7 +91,7 @@ def test_mock_data_has_correct_categories_sizes():
         assert n_genes == dphelp.nunique(mock_data.hugo_symbol)
         assert n_genes * n_sgrnas_per_gene == dphelp.nunique(mock_data.sgrna)
         assert n_cell_lines == dphelp.nunique(mock_data.depmap_id)
-        assert n_batches >= dphelp.nunique(mock_data.pdna_batch)
+        assert n_batches >= dphelp.nunique(mock_data.p_dna_batch)
 
 
 def test_mock_data_has_correct_kras_mutation_types():
@@ -125,7 +125,7 @@ def test_cellline_in_one_batch():
     for _ in range(20):
         mock_data = generate_data_with_random_params()
         cellline_to_batch = (
-            mock_data[["depmap_id", "pdna_batch"]]
+            mock_data[["depmap_id", "p_dna_batch"]]
             .drop_duplicates()
             .reset_index(drop=True)
         )

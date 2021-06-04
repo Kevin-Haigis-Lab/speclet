@@ -16,8 +16,8 @@ from src.data_processing import common as dphelp
 
 def zscale_cna_by_group(
     df: pd.DataFrame,
-    gene_cn_col: str = "gene_cn",
-    new_col: str = "gene_cn_z",
+    cn_col: str = "copy_number",
+    new_col: str = "copy_number_z",
     groupby_cols: Optional[Union[List[str], Tuple[str, ...]]] = ("hugo_symbol",),
     cn_max: Optional[float] = None,
 ) -> pd.DataFrame:
@@ -25,10 +25,10 @@ def zscale_cna_by_group(
 
     Args:
         df (pd.DataFrame): The DataFrame to modify.
-        gene_cn_col (str, optional): Column with the gene copy number values.
-          Defaults to "gene_cn".
+        cn_col (str, optional): Column with the gene copy number values.
+          Defaults to "copy_number".
         new_col (str, optional): The name of the column to store the calculated values.
-          Defaults to "gene_cn_z".
+          Defaults to "copy_number_z".
         groupby_cols (Optional[Union[List[str], Tuple[str, ...]]], optional): A list or
           tuple of columns to group the DataFrame by. If None, the rows are not grouped.
           Defaults to ("hugo_symbol").
@@ -39,9 +39,9 @@ def zscale_cna_by_group(
         pd.DataFrame: The modified DataFrame.
     """
     if cn_max is not None and cn_max > 0:
-        df[new_col] = df[gene_cn_col].apply(lambda x: np.min((x, cn_max)))
+        df[new_col] = df[cn_col].apply(lambda x: np.min((x, cn_max)))
     else:
-        df[new_col] = df[gene_cn_col]
+        df[new_col] = df[cn_col]
 
     def z_scale(x: pd.Series) -> pd.Series:
         return (x - np.mean(x)) / np.std(x)
@@ -138,8 +138,6 @@ class CommonIndices(BaseModel):
     n_genes: int = 0
     cellline_idx: np.ndarray
     n_celllines: int = 0
-    kras_mutation_idx: np.ndarray
-    n_kras_mutations: int = 0
     batch_idx: np.ndarray
     n_batches: int = 0
 
@@ -149,7 +147,6 @@ class CommonIndices(BaseModel):
         self.n_sgrnas = dphelp.nunique(self.sgrna_idx)
         self.n_genes = dphelp.nunique(self.gene_idx)
         self.n_celllines = dphelp.nunique(self.cellline_idx)
-        self.n_kras_mutations = dphelp.nunique(self.kras_mutation_idx)
         self.n_batches = dphelp.nunique(self.batch_idx)
 
     class Config:
@@ -158,7 +155,7 @@ class CommonIndices(BaseModel):
         arbitrary_types_allowed = True
 
 
-def common_indices(achilles_df: pd.DataFrame, min_kras_muts: int = 0) -> CommonIndices:
+def common_indices(achilles_df: pd.DataFrame) -> CommonIndices:
     """Generate a collection of indices frequently used when modeling the Achilles data.
 
     Args:
@@ -168,53 +165,51 @@ def common_indices(achilles_df: pd.DataFrame, min_kras_muts: int = 0) -> CommonI
         CommonIndices: A data model with a collection of indices.
     """
     sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(achilles_df)
-    kras_idx = make_kras_mutation_index_with_other(achilles_df, min=min_kras_muts)
     return CommonIndices(
         sgrna_idx=dphelp.get_indices(achilles_df, "sgrna"),
         sgrna_to_gene_map=sgrna_to_gene_map,
         sgrna_to_gene_idx=dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol"),
         gene_idx=dphelp.get_indices(achilles_df, "hugo_symbol"),
         cellline_idx=dphelp.get_indices(achilles_df, "depmap_id"),
-        kras_mutation_idx=kras_idx,
-        batch_idx=dphelp.get_indices(achilles_df, "pdna_batch"),
+        batch_idx=dphelp.get_indices(achilles_df, "p_dna_batch"),
     )
 
 
-class UncommonIndices(BaseModel):
-    """Object to hold uncommon indices used for modeling Achilles data."""
+# class UncommonIndices(BaseModel):
+#     """Object to hold uncommon indices used for modeling Achilles data."""
 
-    cellline_to_kras_mutation_idx: np.ndarray
-    n_kras_mutations: int = 0
+#     cellline_to_kras_mutation_idx: np.ndarray
+#     n_kras_mutations: int = 0
 
-    def __init__(self, **data):
-        """Object to hold common indices used for modeling Achilles data."""
-        super().__init__(**data)
-        self.n_kras_mutations = dphelp.nunique(self.cellline_to_kras_mutation_idx)
+#     def __init__(self, **data):
+#         """Object to hold common indices used for modeling Achilles data."""
+#         super().__init__(**data)
+#         self.n_kras_mutations = dphelp.nunique(self.cellline_to_kras_mutation_idx)
 
-    class Config:
-        """Configuration for pydantic validation."""
+#     class Config:
+#         """Configuration for pydantic validation."""
 
-        arbitrary_types_allowed = True
+#         arbitrary_types_allowed = True
 
 
-def uncommon_indices(
-    achilles_df: pd.DataFrame, min_kras_muts: int = 0
-) -> UncommonIndices:
-    """Generate a collection of indices frequently used when modeling the Achilles data.
+# def uncommon_indices(
+#     achilles_df: pd.DataFrame, min_kras_muts: int = 0
+# ) -> UncommonIndices:
+#     """Generate a collection of indices frequently used for modeling Achilles data.
 
-    Args:
-        achilles_df (pd.DataFrame): The DataFrame with Achilles data.
+#     Args:
+#         achilles_df (pd.DataFrame): The DataFrame with Achilles data.
 
-    Returns:
-        UncommonIndices: A data model with a collection of indices.
-    """
-    mod_df = achilles_df.copy()[["depmap_id", "kras_mutation"]]
-    mod_df["kras_idx"] = make_kras_mutation_index_with_other(
-        achilles_df, min=min_kras_muts
-    )
-    mod_df = mod_df.drop_duplicates().sort_values("depmap_id").reset_index(drop=True)
-    cl_to_kras_idx = mod_df["kras_idx"].values
-    return UncommonIndices(cellline_to_kras_mutation_idx=cl_to_kras_idx)
+#     Returns:
+#         UncommonIndices: A data model with a collection of indices.
+#     """
+#     mod_df = achilles_df.copy()[["depmap_id", "kras_mutation"]]
+#     mod_df["kras_idx"] = make_kras_mutation_index_with_other(
+#         achilles_df, min=min_kras_muts
+#     )
+#     mod_df = mod_df.drop_duplicates().sort_values("depmap_id").reset_index(drop=True)
+#     cl_to_kras_idx = mod_df["kras_idx"].values
+#     return UncommonIndices(cellline_to_kras_mutation_idx=cl_to_kras_idx)
 
 
 #### ---- Data frames ---- ####
@@ -227,9 +222,8 @@ def set_achilles_categorical_columns(
         "depmap_id",
         "sgrna",
         "lineage",
-        "chromosome",
-        "pdna_batch",
-        "kras_mutation",
+        "sgrna_target_chr",
+        "p_dna_batch",
     ),
     ordered: bool = True,
     sort_cats: bool = False,
@@ -239,8 +233,8 @@ def set_achilles_categorical_columns(
     Args:
         data (pd.DataFrame): Achilles DataFrame.
         cols (Union[List[str], Tuple[str, ...]], optional): The names of the columns to
-          make categorical. Defaults to [ "hugo_symbol", "depmap_id", "sgrna",
-          "lineage", "chromosome", "pdna_batch", ].
+          make categorical. Defaults to ("hugo_symbol", "depmap_id", "sgrna",
+          "lineage", "sgrna_target_chr", "p_dna_batch").
         ordered (bool, optional): Should the categorical columns be ordered?
           Defaults to True.
         sort_cats (bool, optional): Should the categorical columns be sorted?
@@ -278,15 +272,14 @@ def read_achilles_data(
     if set_categorical_cols:
         data = set_achilles_categorical_columns(data)
 
-    data["log2_cn"] = np.log2(data.gene_cn + 1)
-    data = zscale_cna_by_group(
-        data,
-        gene_cn_col="log2_cn",
-        new_col="z_log2_cn",
-        groupby_cols=["depmap_id"],
-        cn_max=np.log2(10),
-    )
-    data["is_mutated"] = dphelp.nmutations_to_binary_array(data.n_muts)
+    # data["log2_cn"] = np.log2(data.copy_number + 1)
+    # data = zscale_cna_by_group(
+    #     data,
+    #     cn_col="log2_cn",
+    #     new_col="z_log2_cn",
+    #     groupby_cols=["depmap_id"],
+    #     cn_max=np.log2(10),
+    # )
 
     return data
 

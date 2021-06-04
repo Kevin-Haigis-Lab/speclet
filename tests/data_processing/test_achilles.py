@@ -24,7 +24,7 @@ class TestHandlingAchillesData:
 
     def test_reading_data(self):
         df = achelp.read_achilles_data(self.file_path, low_memory=True)
-        required_cols = ["sgrna", "depmap_id", "hugo_symbol", "lfc", "gene_cn"]
+        required_cols = ["sgrna", "depmap_id", "hugo_symbol", "lfc", "copy_number"]
         for col in required_cols:
             assert col in df.columns
 
@@ -51,7 +51,7 @@ class TestModifyingAchillesData:
         return pd.DataFrame(
             {
                 "hugo_symbol": np.repeat(genes, n_measures),
-                "gene_cn": np.random.uniform(0, 100, len(genes) * n_measures),
+                "copy_number": np.random.uniform(0, 100, len(genes) * n_measures),
             }
         )
 
@@ -67,7 +67,7 @@ class TestModifyingAchillesData:
         data = achelp.read_achilles_data(self.data_path, set_categorical_cols=False)
         assert "category" not in data.dtypes
         data = achelp.set_achilles_categorical_columns(data=data)
-        assert sum(data.dtypes == "category") == 7
+        assert sum(data.dtypes == "category") == 6
 
     def test_custom_achilles_categorical_columns(self):
         data = achelp.read_achilles_data(self.data_path, set_categorical_cols=False)
@@ -84,14 +84,14 @@ class TestModifyingAchillesData:
         )
 
     def test_subsample_data_correct_number_of_genes(self, data: pd.DataFrame):
-        for n in np.random.randint(2, 20, 100):
+        for n in np.random.randint(2, 10, 100):
             sub_data = achelp.subsample_achilles_data(
                 data, n_genes=n, n_cell_lines=None
             )
             assert data.shape[0] > sub_data.shape[0] >= n
 
     def test_subsample_data_correct_number_of_cells(self, data: pd.DataFrame):
-        for n in np.random.randint(2, 10, 100):
+        for n in np.random.randint(2, 6, 100):
             sub_data = achelp.subsample_achilles_data(
                 data, n_genes=None, n_cell_lines=n
             )
@@ -107,13 +107,15 @@ class TestModifyingAchillesData:
 
     def test_z_scaling_means(self, mock_data: pd.DataFrame):
         z_data = achelp.zscale_cna_by_group(mock_data)
-        gene_means = z_data.groupby(["hugo_symbol"])["gene_cn_z"].agg(np.mean).values
+        gene_means = (
+            z_data.groupby(["hugo_symbol"])["copy_number_z"].agg(np.mean).values
+        )
         expected_mean = np.zeros_like(gene_means)
         np.testing.assert_almost_equal(gene_means, expected_mean)
 
     def test_z_scaling_stddevs(self, mock_data: pd.DataFrame):
         z_data = achelp.zscale_cna_by_group(mock_data)
-        gene_sds = z_data.groupby(["hugo_symbol"])["gene_cn_z"].agg(np.std).values
+        gene_sds = z_data.groupby(["hugo_symbol"])["copy_number_z"].agg(np.std).values
         expected_sd = np.ones_like(gene_sds)
         np.testing.assert_almost_equal(gene_sds, expected_sd, decimal=2)
 
@@ -123,18 +125,20 @@ class TestModifyingAchillesData:
         z_data_max = achelp.zscale_cna_by_group(mock_data, cn_max=cn_max)
 
         gene_means = (
-            z_data_max.groupby(["hugo_symbol"])["gene_cn_z"].agg(np.mean).values
+            z_data_max.groupby(["hugo_symbol"])["copy_number_z"].agg(np.mean).values
         )
         expected_mean = np.zeros_like(gene_means)
         np.testing.assert_almost_equal(gene_means, expected_mean)
 
-        gene_sds = z_data_max.groupby(["hugo_symbol"])["gene_cn_z"].agg(np.std).values
+        gene_sds = (
+            z_data_max.groupby(["hugo_symbol"])["copy_number_z"].agg(np.std).values
+        )
         expected_sd = np.ones_like(gene_sds)
         np.testing.assert_almost_equal(gene_sds, expected_sd, decimal=2)
 
-        less_than_max_idx = np.where(mock_data["gene_cn"] < cn_max)
-        z_vals = z_data.loc[less_than_max_idx, "gene_cn_z"]
-        z_max_vals = z_data_max.loc[less_than_max_idx, "gene_cn_z"]
+        less_than_max_idx = np.where(mock_data["copy_number"] < cn_max)
+        z_vals = z_data.loc[less_than_max_idx, "copy_number_z"]
+        z_max_vals = z_data_max.loc[less_than_max_idx, "copy_number_z"]
         assert (z_vals <= z_max_vals).all()
 
 
@@ -227,16 +231,9 @@ def test_common_idx_depmap(example_achilles_data: pd.DataFrame):
     )
 
 
-def test_common_idx_kras_mutation(example_achilles_data: pd.DataFrame):
-    indices = achelp.common_indices(example_achilles_data.sample(frac=1.0))
-    assert dphelp.nunique(example_achilles_data.kras_mutation.values) == dphelp.nunique(
-        indices.kras_mutation_idx
-    )
-
-
 def test_common_idx_pdna_batch(example_achilles_data: pd.DataFrame):
     indices = achelp.common_indices(example_achilles_data.sample(frac=1.0))
-    assert dphelp.nunique(example_achilles_data.pdna_batch.values) == dphelp.nunique(
+    assert dphelp.nunique(example_achilles_data.p_dna_batch.values) == dphelp.nunique(
         indices.batch_idx
     )
 
@@ -281,15 +278,17 @@ def test_make_kras_mutation_index_with_other_colnames():
     np.testing.assert_array_equal(kras_idx, real_idx)
 
 
-def test_uncommon_indices(example_achilles_data: pd.DataFrame):
-    idx = achelp.uncommon_indices(example_achilles_data)
-    assert idx.n_kras_mutations == len(example_achilles_data["kras_mutation"].unique())
-    assert len(idx.cellline_to_kras_mutation_idx) == len(
-        example_achilles_data["depmap_id"].unique()
-    )
+# def test_uncommon_indices(example_achilles_data: pd.DataFrame):
+#     idx = achelp.uncommon_indices(example_achilles_data)
+#     assert idx.n_kras_mutations == len(
+#         example_achilles_data["kras_mutation"].unique()
+#     )
+#     assert len(idx.cellline_to_kras_mutation_idx) == len(
+#         example_achilles_data["depmap_id"].unique()
+#     )
 
-    idx = achelp.uncommon_indices(example_achilles_data, min_kras_muts=5)
-    assert idx.n_kras_mutations < len(example_achilles_data["kras_mutation"].unique())
-    assert len(idx.cellline_to_kras_mutation_idx) == len(
-        example_achilles_data["depmap_id"].unique()
-    )
+#     idx = achelp.uncommon_indices(example_achilles_data, min_kras_muts=5)
+#     assert idx.n_kras_mutations < len(example_achilles_data["kras_mutation"].unique())
+#     assert len(idx.cellline_to_kras_mutation_idx) == len(
+#         example_achilles_data["depmap_id"].unique()
+#     )

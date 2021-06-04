@@ -19,12 +19,9 @@ class SpecletThree(SpecletModel):
     Model with the following covariates:
     - h: consistent gene effect
     - g: cell line-specific gene effect [gene x cell line]
-    - a: KRAS allele-specific gene effect [gene x KRAS allele]
     - b: batch effect
     """
 
-    _kras_cov: bool
-    _kras_mutation_minimum: int
     _noncentered_param: bool
 
     def __init__(
@@ -33,8 +30,6 @@ class SpecletThree(SpecletModel):
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = CrcDataManager(),
-        kras_cov: bool = False,
-        kras_mutation_minimum: int = 3,
         noncentered_param: bool = True,
     ):
         """Instantiate a SpecletThree model.
@@ -47,11 +42,8 @@ class SpecletThree(SpecletModel):
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. Defaults to None.
-            kras_cov (bool, optional): Should the KRAS allele covariate be included in
-              the model? Default to False.
-            kras_mutation_minimum (int, optional): The minimum number of cell lines with
-              a KRAS allele for the allele to be included as a separate group. Defaults
-              to 3.
+            noncentered_param (bool, optional): Should the model use a non-centered
+              parameterization? Default to True.
         """
         super().__init__(
             name="speclet-three_" + name,
@@ -59,8 +51,6 @@ class SpecletThree(SpecletModel):
             debug=debug,
             data_manager=data_manager,
         )
-        self._kras_cov = kras_cov
-        self._kras_mutation_minimum = kras_mutation_minimum
         self._noncentered_param = noncentered_param
 
     def __str__(self) -> str:
@@ -70,45 +60,11 @@ class SpecletThree(SpecletModel):
             str: String description of the object.
         """
         msg = super().__str__()
-        with_kras_msg = "with" if self.kras_cov else "no"
-        msg += f"\n  -> {with_kras_msg} KRAS cov."
         return msg
 
     @property
-    def kras_cov(self) -> bool:
-        """Value of `kras_cov` attribute."""
-        return self._kras_cov
-
-    @kras_cov.setter
-    def kras_cov(self, new_value: bool) -> None:
-        """Set the value of `kras_cov` attribute.
-
-        If the new value is different, all model and sampling results are reset.
-        """
-        if new_value != self._kras_cov:
-            logger.info(f"Changing `kras_cov` attribute to '{new_value}'.")
-            self._kras_cov = new_value
-            self._reset_model_and_results()
-
-    @property
-    def kras_mutation_minimum(self) -> int:
-        """Value of `kras_mutation_minimum` attribute."""
-        return self._kras_mutation_minimum
-
-    @kras_mutation_minimum.setter
-    def kras_mutation_minimum(self, new_value: int) -> None:
-        """Set the value of `kras_mutation_minimum` attribute.
-
-        If the new value is different, all model and sampling results are reset.
-        """
-        if new_value != self._kras_mutation_minimum:
-            logger.info(f"Changing `kras_mutation_minimum` attribute to '{new_value}'.")
-            self._kras_mutation_minimum = new_value
-            self._reset_model_and_results()
-
-    @property
     def noncentered_param(self) -> bool:
-        """Value of `kras_cov` attribute."""
+        """Value of `noncentered_param` attribute."""
         return self._noncentered_param
 
     @noncentered_param.setter
@@ -138,11 +94,6 @@ class SpecletThree(SpecletModel):
             μ_b = pm.Normal("μ_b", 0, 0.2)  # noqa: F841
             σ_b = pm.HalfNormal("σ_b", 0.5)  # noqa: F841
 
-            if self.kras_cov:
-                # Varying effect for KRAS mutation.
-                μ_a = pm.Normal("μ_a", 0, 0.2)  # noqa: F841
-                σ_a = pm.HalfNormal("σ_a", 1)  # noqa: F841
-
             σ_σ = pm.HalfNormal("σ_σ", 0.5)
             σ = pm.HalfNormal("σ", σ_σ, shape=common_indices.n_sgrnas)  # noqa: F841
 
@@ -155,7 +106,6 @@ class SpecletThree(SpecletModel):
         sgrna_idx_shared: TTShared,
         gene_idx_shared: TTShared,
         cellline_idx_shared: TTShared,
-        kras_idx_shared: TTShared,
         batch_idx_shared: TTShared,
         lfc_shared: TTShared,
     ) -> pm.Model:
@@ -170,23 +120,12 @@ class SpecletThree(SpecletModel):
             # Batch effect varying intercept.
             b = pm.Normal("b", model["μ_b"], model["σ_b"], shape=idx.n_batches)
 
-            _mu = (
+            μ = pm.Deterministic(
+                "μ",
                 h[gene_idx_shared]
                 + g[gene_idx_shared, cellline_idx_shared]
-                + b[batch_idx_shared]
+                + b[batch_idx_shared],
             )
-
-            if self.kras_cov:
-                # Varying effect for KRAS mutation.
-                a = pm.Normal(
-                    "a",
-                    model["μ_a"],
-                    model["σ_a"],
-                    shape=(idx.n_genes, idx.n_kras_mutations),
-                )
-                _mu += a[gene_idx_shared, kras_idx_shared]
-
-            μ = pm.Deterministic("μ", _mu)
 
             # Likelihood
             lfc = pm.Normal(  # noqa: F841
@@ -205,7 +144,6 @@ class SpecletThree(SpecletModel):
         sgrna_idx_shared: TTShared,
         gene_idx_shared: TTShared,
         cellline_idx_shared: TTShared,
-        kras_idx_shared: TTShared,
         batch_idx_shared: TTShared,
         lfc_shared: TTShared,
     ) -> pm.Model:
@@ -223,21 +161,12 @@ class SpecletThree(SpecletModel):
             b_offset = pm.Normal("b_offset", 0, 1, shape=idx.n_batches)
             b = pm.Deterministic("b", model["μ_b"] + b_offset * model["σ_b"])
 
-            _mu = (
+            μ = pm.Deterministic(
+                "μ",
                 h[gene_idx_shared]
                 + g[gene_idx_shared, cellline_idx_shared]
-                + b[batch_idx_shared]
+                + b[batch_idx_shared],
             )
-
-            if self.kras_cov:
-                # Varying effect for KRAS mutation.
-                a_offset = pm.Normal(
-                    "a_offset", 0, 1, shape=(idx.n_genes, idx.n_kras_mutations)
-                )
-                a = pm.Deterministic("a", model["μ_a"] + a_offset * model["σ_a"])
-                _mu += a[gene_idx_shared, kras_idx_shared]
-
-            μ = pm.Deterministic("μ", _mu)
 
             # Likelihood
             lfc = pm.Normal(  # noqa: F841
@@ -259,14 +188,13 @@ class SpecletThree(SpecletModel):
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
-        idx = achelp.common_indices(data, min_kras_muts=self.kras_mutation_minimum)
+        idx = achelp.common_indices(data)
 
         # Shared Theano variables
         logger.info("Getting Theano shared variables.")
         sgrna_idx_shared = theano.shared(idx.sgrna_idx)
         gene_idx_shared = theano.shared(idx.gene_idx)
         cellline_idx_shared = theano.shared(idx.cellline_idx)
-        kras_idx_shared = theano.shared(idx.kras_mutation_idx)
         batch_idx_shared = theano.shared(idx.batch_idx)
         lfc_shared = theano.shared(data.lfc.values)
 
@@ -278,7 +206,6 @@ class SpecletThree(SpecletModel):
                 sgrna_idx_shared=sgrna_idx_shared,
                 gene_idx_shared=gene_idx_shared,
                 cellline_idx_shared=cellline_idx_shared,
-                kras_idx_shared=kras_idx_shared,
                 batch_idx_shared=batch_idx_shared,
                 lfc_shared=lfc_shared,
             )
@@ -290,7 +217,6 @@ class SpecletThree(SpecletModel):
                 sgrna_idx_shared=sgrna_idx_shared,
                 gene_idx_shared=gene_idx_shared,
                 cellline_idx_shared=cellline_idx_shared,
-                kras_idx_shared=kras_idx_shared,
                 batch_idx_shared=batch_idx_shared,
                 lfc_shared=lfc_shared,
             )
@@ -300,7 +226,6 @@ class SpecletThree(SpecletModel):
             "sgrna_idx_shared": sgrna_idx_shared,
             "gene_idx_shared": gene_idx_shared,
             "cellline_idx_shared": cellline_idx_shared,
-            "kras_idx_shared": kras_idx_shared,
             "batch_idx_shared": batch_idx_shared,
             "lfc_shared": lfc_shared,
         }
@@ -327,12 +252,11 @@ class SpecletThree(SpecletModel):
 
         data = self.data_manager.get_data()
         batch_size = self.data_manager.get_batch_size()
-        idx = achelp.common_indices(data, min_kras_muts=self.kras_mutation_minimum)
+        idx = achelp.common_indices(data)
 
         sgrna_idx_batch = pm.Minibatch(idx.sgrna_idx, batch_size=batch_size)
         gene_idx_batch = pm.Minibatch(idx.gene_idx, batch_size=batch_size)
         cellline_idx_batch = pm.Minibatch(idx.cellline_idx, batch_size=batch_size)
-        kras_idx_batch = pm.Minibatch(idx.kras_mutation_idx, batch_size=batch_size)
         batch_idx_batch = pm.Minibatch(idx.batch_idx, batch_size=batch_size)
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
@@ -340,7 +264,6 @@ class SpecletThree(SpecletModel):
             self.shared_vars["sgrna_idx_shared"]: sgrna_idx_batch,
             self.shared_vars["gene_idx_shared"]: gene_idx_batch,
             self.shared_vars["cellline_idx_shared"]: cellline_idx_batch,
-            self.shared_vars["kras_idx_shared"]: kras_idx_batch,
             self.shared_vars["batch_idx_shared"]: batch_idx_batch,
             self.shared_vars["lfc_shared"]: lfc_data_batch,
         }
@@ -371,10 +294,8 @@ class SpecletThree(SpecletModel):
     def update_advi_sampling_parameters(self) -> None:
         """Adjust the ADVI parameters depending on the state of the object."""
         parameter_adjustment_map = {
-            True: {True: 40000, False: 40000},
-            False: {True: 100000, False: 100000},
+            True: 40000,
+            False: 100000,
         }
-        self.advi_sampling_params.n_iterations = parameter_adjustment_map[self.debug][
-            self.kras_cov
-        ]
+        self.advi_sampling_params.n_iterations = parameter_adjustment_map[self.debug]
         return None
