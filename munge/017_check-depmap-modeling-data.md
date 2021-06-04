@@ -1,3 +1,5 @@
+# Check of modeling data
+
 ```python
 from pathlib import Path
 from time import time
@@ -10,13 +12,43 @@ import seaborn as sns
 ```
 
 ```python
+import dask.dataframe as dd
+from dask.distributed import Client, progress
+
+client = Client(n_workers=4, threads_per_worker=2, memory_limit="16GB")
+client
+```
+
+<table style="border: 2px solid white;">
+<tr>
+<td style="vertical-align: top; border: 0px solid white">
+<h3 style="text-align: left;">Client</h3>
+<ul style="text-align: left; list-style: none; margin: 0; padding: 0;">
+  <li><b>Scheduler: </b>tcp://127.0.0.1:36904</li>
+  <li><b>Dashboard: </b><a href='http://127.0.0.1:8787/status' target='_blank'>http://127.0.0.1:8787/status</a></li>
+</ul>
+</td>
+<td style="vertical-align: top; border: 0px solid white">
+<h3 style="text-align: left;">Cluster</h3>
+<ul style="text-align: left; list-style:none; margin: 0; padding: 0;">
+  <li><b>Workers: </b>4</li>
+  <li><b>Cores: </b>8</li>
+  <li><b>Memory: </b>59.60 GiB</li>
+</ul>
+</td>
+</tr>
+</table>
+
+```python
 depmap_modeling_df_path = Path("../modeling_data/depmap_modeling_dataframe.csv")
 if not depmap_modeling_df_path.exists():
     raise FileNotFoundError(f"Could not find '{depmap_modeling_df_path.as_posix()}'")
 ```
 
 ```python
-depmap_modeling_df = pd.read_csv(depmap_modeling_df_path, nrows=1e6, low_memory=False)
+depmap_modeling_df = dd.read_csv(
+    depmap_modeling_df_path, dtype={"age": "float64"}, low_memory=False
+)
 ```
 
 ```python
@@ -87,7 +119,7 @@ depmap_modeling_df.head()
       <td>ovary</td>
       <td>metastasis</td>
       <td>False</td>
-      <td>60</td>
+      <td>60.0</td>
     </tr>
     <tr>
       <th>1</th>
@@ -111,7 +143,7 @@ depmap_modeling_df.head()
       <td>ovary</td>
       <td>metastasis</td>
       <td>False</td>
-      <td>60</td>
+      <td>60.0</td>
     </tr>
     <tr>
       <th>2</th>
@@ -135,7 +167,7 @@ depmap_modeling_df.head()
       <td>ovary</td>
       <td>metastasis</td>
       <td>False</td>
-      <td>60</td>
+      <td>60.0</td>
     </tr>
     <tr>
       <th>3</th>
@@ -159,7 +191,7 @@ depmap_modeling_df.head()
       <td>ovary</td>
       <td>metastasis</td>
       <td>False</td>
-      <td>60</td>
+      <td>60.0</td>
     </tr>
     <tr>
       <th>4</th>
@@ -183,7 +215,7 @@ depmap_modeling_df.head()
       <td>ovary</td>
       <td>metastasis</td>
       <td>False</td>
-      <td>60</td>
+      <td>60.0</td>
     </tr>
   </tbody>
 </table>
@@ -194,7 +226,7 @@ depmap_modeling_df.head()
 depmap_modeling_df.shape
 ```
 
-    (1000000, 22)
+    (Delayed('int-adc0c546-7c6b-491a-97f1-4936de647e72'), 22)
 
 ```python
 depmap_modeling_df.columns
@@ -217,7 +249,7 @@ FAILED_CHECKS = 0
 Check that specific columns have no missing (`NA`) values.
 
 ```python
-for c in [
+cols_without_na = [
     "depmap_id",
     "sgrna",
     "hugo_symbol",
@@ -226,154 +258,51 @@ for c in [
     "num_mutations",
     "is_mutated",
     "lineage",
-    "is_male",
-    "age",
-]:
-    if any(depmap_modeling_df[[c]].isna().values):
-        print(f"Column '{c}' has missing values but should not.")
-        FAILED_CHECKS += 1
+]
+
+na_checks = depmap_modeling_df.isna()[cols_without_na].any().compute()
+num_missed_checks = na_checks.sum()
+
+if num_missed_checks > 0:
+    FAILED_CHECKS += num_missed_checks
+    print(na_checks[na_checks])
 ```
+
+```python
+na_checks
+```
+
+    depmap_id        False
+    sgrna            False
+    hugo_symbol      False
+    lfc              False
+    screen           False
+    num_mutations    False
+    is_mutated       False
+    lineage          False
+    dtype: bool
 
 Check that all combinations of cell line, sgRNA, and experimental replicate only appear once.
 
 ```python
 grp_cols = ["depmap_id", "sgrna", "replicate_id"]
 ct_df = (
-    depmap_modeling_df[grp_cols]
-    .assign(n=1)
+    depmap_modeling_df.assign(n=1)[grp_cols + ["n"]]
     .groupby(grp_cols)
     .count()
-    .reset_index(drop=False)
+    .query("n > 1")
+    .compute()
 )
 
-if not all(ct_df[["n"]].values == 1):
+if not ct_df.shape[0] == 0:
     print("There are some sgRNA with multiple targets.")
+    print(ct_df.head(20))
     FAILED_CHECKS += 1
 ```
 
 ```python
-depmap_modeling_df.query("sgrna == 'AACTGCGCACAGAAGGAGA' and depmap_id == 'ACH-000001'")
-```
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>sgrna</th>
-      <th>replicate_id</th>
-      <th>lfc</th>
-      <th>p_dna_batch</th>
-      <th>genome_alignment</th>
-      <th>hugo_symbol</th>
-      <th>screen</th>
-      <th>multiple_hits_on_gene</th>
-      <th>sgrna_target_chr</th>
-      <th>sgrna_target_pos</th>
-      <th>...</th>
-      <th>num_mutations</th>
-      <th>any_deleterious</th>
-      <th>any_tcga_hotspot</th>
-      <th>any_cosmic_hotspot</th>
-      <th>is_mutated</th>
-      <th>copy_number</th>
-      <th>lineage</th>
-      <th>primary_or_metastasis</th>
-      <th>is_male</th>
-      <th>age</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>2559</th>
-      <td>AACTGCGCACAGAAGGAGA</td>
-      <td>OVR3_c905R1</td>
-      <td>0.039557</td>
-      <td>CRISPR_C6596666.sample</td>
-      <td>chr16_72058351_+</td>
-      <td>HP</td>
-      <td>sanger</td>
-      <td>True</td>
-      <td>16</td>
-      <td>72058351</td>
-      <td>...</td>
-      <td>0</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>False</td>
-      <td>0.71174</td>
-      <td>ovary</td>
-      <td>metastasis</td>
-      <td>False</td>
-      <td>60</td>
-    </tr>
-  </tbody>
-</table>
-<p>1 rows × 22 columns</p>
-</div>
-
-```python
-ct_df.loc[ct_df["n"] > 1]
-```
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>depmap_id</th>
-      <th>sgrna</th>
-      <th>replicate_id</th>
-      <th>n</th>
-    </tr>
-  </thead>
-  <tbody>
-  </tbody>
-</table>
-</div>
-
-```python
 if FAILED_CHECKS > 0:
     raise Exception(f"There were {FAILED_CHECKS} failed checks.")
-```
-
-```python
-
-```
-
-```python
-
-```
-
-```python
-
 ```
 
 ---
@@ -383,7 +312,7 @@ if FAILED_CHECKS > 0:
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-06-03
+    Last updated: 2021-06-04
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -394,18 +323,19 @@ if FAILED_CHECKS > 0:
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-a-16-62.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-189.o2.rc.hms.harvard.edu
 
     Git branch: update-data
 
-    seaborn   : 0.11.1
-    pandas    : 1.2.3
     numpy     : 1.20.1
-    matplotlib: 3.3.4
+    seaborn   : 0.11.1
+    dask      : 2021.5.1
     plotnine  : 0.8.0
+    pandas    : 1.2.3
+    matplotlib: 3.3.4
 
 ```python
 

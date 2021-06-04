@@ -266,3 +266,6 @@ modeling_data/*
 !modeling_data/depmap_CRC_data_subsample.csv
 !data/download-data.sh
 !data/download-data.smk
+
+# Dask
+*/dask-worker-space/*

@@ -9,6 +9,7 @@ dependencies:
   - jupyterlab
   - black
   - colorama
+  - dask=2021.5.1
   - ipython
   - isort
   - jedi

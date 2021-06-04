@@ -68,5 +68,11 @@
         "mem": "8000",
         "time": "05:00:00",
         "J": "comb"
+    },
+    "check_depmap_modeling_data": {
+        "cores": 4,
+        "mem": "70000",
+        "time": "01:00:00",
+        "J": "data-check"
     }
 }
