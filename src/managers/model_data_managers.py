@@ -129,7 +129,7 @@ class CrcDataManager(DataManager):
 
     def _drop_missing_copynumber(self, df: pd.DataFrame) -> pd.DataFrame:
         logger.warning("Dropping data points with missing copy number.")
-        df_new = df.copy()[~df["gene_cn"].isna()]
+        df_new = df.copy()[~df["copy_number"].isna()]
         return df_new
 
     def _load_data(self) -> pd.DataFrame:

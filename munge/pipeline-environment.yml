@@ -1,0 +1,36 @@
+name: munge
+channels:
+  - conda-forge
+  - bioconda
+  - r
+  - defaults
+dependencies:
+  - python=3.9.2
+  - jupyterlab
+  - black
+  - colorama
+  - dask=2021.5.1
+  - ipython
+  - isort
+  - jedi
+  - matplotlib=3.3.4
+  - nbconvert
+  - nbdime
+  - nbformat
+  - nbqa
+  - numpy=1.20.1
+  - pandas=1.2.3
+  - pandoc
+  - papermill
+  - plotnine
+  - pretty_errors
+  - pydantic
+  - python-graphviz
+  - pyjanitor
+  - rich
+  - scikit-learn
+  - scipy
+  - seaborn
+  - statsmodels
+  - typer
+  - watermark

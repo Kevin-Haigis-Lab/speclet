@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pymc3 as pm
 import theano
-from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 from src.data_processing import achilles as achelp
 from src.loggers import logger
@@ -18,8 +17,7 @@ class SpecletFour(SpecletModel):
 
     Model with the following covariates:
     - h: consistent gene effect
-    - g: cell line-specific gene effect [gene x cell line] and the mean of the prior
-         varies by [gene x KRAS allele] of the cell line.
+    - g: cell line-specific gene effect [gene x cell line]
     - o: CN effect varying per cell line
     - b: batch effect
 
@@ -27,7 +25,6 @@ class SpecletFour(SpecletModel):
     the varying copy number effect will also act as a varying effect for the cell line.
     """
 
-    _kras_mutation_minimum: int
     _noncentered_param: bool
     _copy_number_cov: bool
 
@@ -37,7 +34,6 @@ class SpecletFour(SpecletModel):
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = CrcDataManager(),
-        kras_mutation_minimum: int = 3,
         copy_number_cov: bool = False,
         noncentered_param: bool = True,
     ):
@@ -51,9 +47,6 @@ class SpecletFour(SpecletModel):
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. Defaults to None.
-            kras_mutation_minimum (int, optional): The minimum number of cell lines with
-              a KRAS allele for the allele to be included as a separate group. Defaults
-              to 3.
             copy_number_cov (bool, optional): Should the covariate for gene copy number
               effect be included in the model? The covariate varies by cell line.
               Defaults to False.
@@ -66,25 +59,8 @@ class SpecletFour(SpecletModel):
             debug=debug,
             data_manager=data_manager,
         )
-        self._kras_mutation_minimum = kras_mutation_minimum
         self._noncentered_param = noncentered_param
         self._copy_number_cov = copy_number_cov
-
-    @property
-    def kras_mutation_minimum(self) -> int:
-        """Value of `kras_mutation_minimum` attribute."""
-        return self._kras_mutation_minimum
-
-    @kras_mutation_minimum.setter
-    def kras_mutation_minimum(self, new_value: int) -> None:
-        """Set the value of `kras_mutation_minimum` attribute.
-
-        If the new value is different, all model and sampling results are reset.
-        """
-        if new_value != self._kras_mutation_minimum:
-            logger.info(f"Changing `kras_mutation_minimum` attribute to '{new_value}'.")
-            self._kras_mutation_minimum = new_value
-            self._reset_model_and_results()
 
     @property
     def copy_number_cov(self) -> bool:
@@ -104,7 +80,7 @@ class SpecletFour(SpecletModel):
 
     @property
     def noncentered_param(self) -> bool:
-        """Value of `kras_cov` attribute."""
+        """Value of `noncentered_param` attribute."""
         return self._noncentered_param
 
     @noncentered_param.setter
@@ -124,10 +100,6 @@ class SpecletFour(SpecletModel):
             μ_h = pm.Normal("μ_h", 0, 1)  # noqa: F841
             σ_h = pm.HalfNormal("σ_h", 1)  # noqa: F841
 
-            # [gene, cell line] varying intercept.
-            μ_μ_g = pm.Normal("μ_μ_g", 0, 0.2)  # noqa: F841
-            σ_μ_g = pm.HalfNormal("σ_μ_g", 1)  # noqa: F841
-
             # Batch effect varying intercept.
             μ_b = pm.Normal("μ_b", 0, 0.2)  # noqa: F841
             σ_b = pm.HalfNormal("σ_b", 0.5)  # noqa: F841
@@ -138,11 +110,7 @@ class SpecletFour(SpecletModel):
         return model
 
     def _model_centered_parameterization(
-        self,
-        model: pm.Model,
-        co_idx: achelp.CommonIndices,
-        unco_idx: achelp.UncommonIndices,
-        cellline_to_kras_idx_shared: TTShared,
+        self, model: pm.Model, co_idx: achelp.CommonIndices
     ) -> pm.Model:
         with model:
             # Gene varying intercept.
@@ -151,16 +119,11 @@ class SpecletFour(SpecletModel):
             )
 
             # [gene, cell line] varying intercept.
-            μ_g = pm.Normal(
-                "μ_g",
-                model["μ_μ_g"],
-                model["σ_μ_g"],
-                shape=(co_idx.n_genes, unco_idx.n_kras_mutations),
-            )
+            μ_g = pm.Normal("μ_g", 0, 1)
             σ_g = pm.HalfNormal("σ_g", 1)
             g = pm.Normal(  # noqa: F841
                 "g",
-                μ_g[:, cellline_to_kras_idx_shared],
+                μ_g,
                 σ_g,
                 shape=(co_idx.n_genes, co_idx.n_celllines),
             )
@@ -177,11 +140,7 @@ class SpecletFour(SpecletModel):
         return model
 
     def _model_non_centered_parameterization(
-        self,
-        model: pm.Model,
-        co_idx: achelp.CommonIndices,
-        unco_idx: achelp.UncommonIndices,
-        cellline_to_kras_idx_shared: TTShared,
+        self, model: pm.Model, co_idx: achelp.CommonIndices
     ) -> pm.Model:
         with model:
             # Gene varying intercept.
@@ -191,17 +150,12 @@ class SpecletFour(SpecletModel):
             )
 
             # [gene, cell line] varying intercept.
-            μ_g_offset = pm.Normal(
-                "μ_g_offset", 0, 1, shape=(co_idx.n_genes, unco_idx.n_kras_mutations)
-            )
-            μ_g = pm.Deterministic("μ_g", model["μ_μ_g"] + μ_g_offset * model["σ_μ_g"])
+            μ_g = pm.Normal("μ_g", 0, 1)
             σ_g = pm.HalfNormal("σ_g", 1)
             g_offset = pm.Normal(
                 "g_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
             )
-            g = pm.Deterministic(  # noqa: F841
-                "g", μ_g[:, cellline_to_kras_idx_shared] + g_offset * σ_g
-            )
+            g = pm.Deterministic("g", μ_g + g_offset * σ_g)  # noqa: F841
 
             if self.copy_number_cov:
                 μ_o = pm.Normal("μ_o", -0.5, 1)
@@ -226,21 +180,15 @@ class SpecletFour(SpecletModel):
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
-        co_idx = achelp.common_indices(data, min_kras_muts=self.kras_mutation_minimum)
-        unco_idx = achelp.uncommon_indices(
-            data, min_kras_muts=self.kras_mutation_minimum
-        )
+        co_idx = achelp.common_indices(data)
 
         # Shared Theano variables
         logger.info("Getting Theano shared variables.")
         sgrna_idx_shared = theano.shared(co_idx.sgrna_idx)
         gene_idx_shared = theano.shared(co_idx.gene_idx)
         cellline_idx_shared = theano.shared(co_idx.cellline_idx)
-        cellline_to_kras_idx_shared = theano.shared(
-            unco_idx.cellline_to_kras_mutation_idx
-        )
         batch_idx_shared = theano.shared(co_idx.batch_idx)
-        cn_shared = theano.shared(data.gene_cn.values / 2.0)
+        cn_shared = theano.shared(data.copy_number.values / 2.0)
         lfc_shared = theano.shared(data.lfc.values)
 
         logger.info("Creating PyMC3 model.")
@@ -248,19 +196,11 @@ class SpecletFour(SpecletModel):
         if self.noncentered_param:
             logger.info("Using non-centered parameterization.")
             model = self._model_non_centered_parameterization(
-                model=model,
-                co_idx=co_idx,
-                unco_idx=unco_idx,
-                cellline_to_kras_idx_shared=cellline_to_kras_idx_shared,
+                model=model, co_idx=co_idx
             )
         else:
             logger.info("Using centered parameterization.")
-            model = self._model_centered_parameterization(
-                model=model,
-                co_idx=co_idx,
-                unco_idx=unco_idx,
-                cellline_to_kras_idx_shared=cellline_to_kras_idx_shared,
-            )
+            model = self._model_centered_parameterization(model=model, co_idx=co_idx)
 
         with model:
             _μ = (
@@ -289,7 +229,6 @@ class SpecletFour(SpecletModel):
             "sgrna_idx_shared": sgrna_idx_shared,
             "gene_idx_shared": gene_idx_shared,
             "cellline_idx_shared": cellline_idx_shared,
-            "cellline_to_kras_idx_shared": cellline_to_kras_idx_shared,
             "batch_idx_shared": batch_idx_shared,
             "lfc_shared": lfc_shared,
         }
@@ -316,22 +255,16 @@ class SpecletFour(SpecletModel):
 
         data = self.data_manager.get_data()
         batch_size = self.data_manager.get_batch_size()
-        ic = achelp.common_indices(data, min_kras_muts=self.kras_mutation_minimum)
+        ic = achelp.common_indices(data)
 
         gene_idx_batch = pm.Minibatch(ic.gene_idx, batch_size=batch_size)
         cellline_idx_batch = pm.Minibatch(ic.cellline_idx, batch_size=batch_size)
         batch_idx_batch = pm.Minibatch(ic.batch_idx, batch_size=batch_size)
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
-        uc = achelp.uncommon_indices(data, min_kras_muts=self.kras_mutation_minimum)
-        cellline_to_kras_idx = pm.Minibatch(
-            uc.cellline_to_kras_mutation_idx, batch_size=batch_size
-        )
-
         return {
             self.shared_vars["gene_idx_shared"]: gene_idx_batch,
             self.shared_vars["cellline_idx_shared"]: cellline_idx_batch,
-            self.shared_vars["cellline_to_kras_idx_shared"]: cellline_to_kras_idx,
             self.shared_vars["batch_idx_shared"]: batch_idx_batch,
             self.shared_vars["lfc_shared"]: lfc_data_batch,
         }

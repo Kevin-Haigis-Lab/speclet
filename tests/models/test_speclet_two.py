@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import pymc3 as pm
 import pytest
 
 from src.data_processing import achilles as achelp
@@ -73,35 +72,3 @@ class TestSpecletTwo:
             random_seed=1,
         )
         assert sp_two.advi_results is not None
-
-    def test_optional_kras_cov(self, tmp_path: Path, data_manager: CrcDataManager):
-        sp_two = SpecletTwo(
-            "test-model",
-            root_cache_dir=tmp_path,
-            debug=True,
-            data_manager=data_manager,
-            kras_cov=False,
-        )
-
-        assert sp_two.model is None
-        sp_two.build_model()
-        assert isinstance(sp_two.model, pm.Model)
-        assert "β" not in list(sp_two.model.named_vars.keys())
-
-        sp_two.kras_cov = True
-        assert sp_two.model is None
-        sp_two.build_model()
-        assert isinstance(sp_two.model, pm.Model)
-        assert "β" in list(sp_two.model.named_vars.keys())
-
-        sp_two = SpecletTwo(
-            "test-model",
-            root_cache_dir=tmp_path,
-            debug=True,
-            kras_cov=True,
-            data_manager=data_manager,
-        )
-        assert sp_two.model is None
-        sp_two.build_model()
-        assert isinstance(sp_two.model, pm.Model)
-        assert "β" in list(sp_two.model.named_vars.keys())

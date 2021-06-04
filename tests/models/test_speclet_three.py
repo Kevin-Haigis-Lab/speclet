@@ -1,8 +1,5 @@
-import random
 from pathlib import Path
 
-import pandas as pd
-import pymc3 as pm
 import pytest
 
 from src.data_processing import achilles as achelp
@@ -76,99 +73,6 @@ class TestSpecletThree:
         )
         assert sp3.advi_results is not None
 
-    def test_optional_kras_cov(self, tmp_path: Path, data_manager: CrcDataManager):
-        sp3 = SpecletThree(
-            "test-model",
-            root_cache_dir=tmp_path,
-            debug=True,
-            data_manager=data_manager,
-            kras_cov=False,
-        )
-
-        assert sp3.model is None
-        sp3.build_model()
-        assert isinstance(sp3.model, pm.Model)
-        assert "a" not in list(sp3.model.named_vars.keys())
-
-        sp3.kras_cov = True
-        assert sp3.model is None
-        sp3.build_model()
-        assert isinstance(sp3.model, pm.Model)
-        assert "a" in list(sp3.model.named_vars.keys())
-
-        sp3 = SpecletThree(
-            "test-model",
-            root_cache_dir=tmp_path,
-            debug=True,
-            kras_cov=True,
-            data_manager=data_manager,
-        )
-        assert sp3.model is None
-        sp3.build_model()
-        assert isinstance(sp3.model, pm.Model)
-        assert "a" in list(sp3.model.named_vars.keys())
-
-    def test_kras_indexing(self, tmp_path: Path):
-        dm = CrcDataManager(debug=True)
-        dm.data = (
-            dm.get_data()
-            .pipe(achelp.subsample_achilles_data, n_genes=4, n_cell_lines=25)
-            .pipe(achelp.set_achilles_categorical_columns)
-        )
-        assert dphelp.nunique(dm.data["hugo_symbol"]) == 4
-        assert dphelp.nunique(dm.data["depmap_id"]) == 25
-
-        kras_alleles = ["A", "X", "T"]
-        kras_cellline_map = pd.DataFrame({"depmap_id": dm.data["depmap_id"]})
-        kras_cellline_map = kras_cellline_map.drop_duplicates().reset_index(drop=True)
-        kras_muts = random.choices(kras_alleles, k=kras_cellline_map.shape[0])
-        kras_cellline_map["kras_mutation"] = kras_muts
-
-        for k in ["E", "F"]:
-            cl = random.choices(kras_cellline_map["depmap_id"].values, k=2)
-            kras_cellline_map.loc[
-                kras_cellline_map.depmap_id.isin(cl), "kras_mutation"
-            ] = k
-
-        dm.data = dm.data.drop(columns="kras_mutation").merge(
-            kras_cellline_map, on="depmap_id"
-        )
-
-        sp3 = SpecletThree(
-            "test-model",
-            root_cache_dir=tmp_path,
-            debug=True,
-            data_manager=dm,
-            kras_cov=True,
-            kras_mutation_minimum=0,
-        )
-        sp3.build_model()
-        assert sp3.model is not None
-        if sp3.noncentered_param:
-            a = sp3.model["a_offset"]
-        else:
-            a = sp3.model["a"]
-        n_genes = dphelp.nunique(dm.data["hugo_symbol"])
-        n_expected_kras_alleles = 5
-        assert a.dshape == (n_genes, n_expected_kras_alleles)
-
-        sp3 = SpecletThree(
-            "test-model",
-            root_cache_dir=tmp_path,
-            debug=True,
-            data_manager=dm,
-            kras_cov=True,
-            kras_mutation_minimum=3,
-        )
-        sp3.build_model()
-        assert sp3.model is not None
-        if sp3.noncentered_param:
-            a = sp3.model["a_offset"]
-        else:
-            a = sp3.model["a"]
-        n_expected_kras_alleles = 4
-        assert a.dshape == (n_genes, n_expected_kras_alleles)
-
     def test_switching_parameterization(self, tmp_path: Path):
         dm = CrcDataManager(debug=True)
         dm.data = dm.generate_mock_data("small")  # Use mock data.
@@ -177,7 +81,6 @@ class TestSpecletThree:
             root_cache_dir=tmp_path,
             debug=True,
             data_manager=dm,
-            kras_cov=False,
             noncentered_param=False,
         )
         sp3.build_model()

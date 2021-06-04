@@ -10,7 +10,6 @@ import pandas as pd
 import pytest
 
 from src.data_processing import common as dphelp
-from src.data_processing.achilles import zscale_cna_by_group
 from src.managers.model_data_managers import CrcDataManager
 
 #### ---- Mock data ---- ####
@@ -34,21 +33,21 @@ def mock_data() -> pd.DataFrame:
         product(sgrna_to_gene_map.keys(), cell_lines), columns=["sgrna", "depmap_id"]
     )
     df["hugo_symbol"] = [sgrna_to_gene_map[s] for s in df.sgrna.values]
-    df["pdna_batch"] = np.random.choice(pdna_batches, len(df), replace=True)
+    df["p_dna_batch"] = np.random.choice(pdna_batches, len(df), replace=True)
 
     df.sort_values(["hugo_symbol", "sgrna"])
     for col in df.columns:
         df = dphelp.make_cat(df, col)
 
-    df["gene_cn"] = np.abs(np.random.normal(2, 0.1, len(df)))
-    df["log2_cn"] = np.log2(df.gene_cn + 1)
-    df = zscale_cna_by_group(
-        df,
-        gene_cn_col="log2_cn",
-        new_col="z_log2_cn",
-        groupby_cols=["depmap_id"],
-        cn_max=np.log2(10),
-    )
+    df["copy_number"] = np.abs(np.random.normal(2, 0.1, len(df)))
+    # df["log2_cn"] = np.log2(df.gene_cn + 1)
+    # df = zscale_cna_by_group(
+    #     df,
+    #     gene_cn_col="log2_cn",
+    #     new_col="z_log2_cn",
+    #     groupby_cols=["depmap_id"],
+    #     cn_max=np.log2(10),
+    # )
     df["lfc"] = np.random.randn(len(df))
     return df
 

@@ -125,7 +125,7 @@ class CeresMimic(SpecletModel):
         cellline_idx_shared = theano.shared(indices_collection.cellline_idx)
         batch_idx_shared = theano.shared(indices_collection.batch_idx)
         lfc_shared = theano.shared(data.lfc.values)
-        copynumber_shared = theano.shared(data.z_log2_cn.values)
+        copynumber_shared = theano.shared(data.copy_number.values)
 
         with pm.Model() as model:
 
@@ -236,7 +236,7 @@ class CeresMimic(SpecletModel):
         batch_idx_batch = pm.Minibatch(indices.batch_idx, batch_size=batch_size)
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
         copynumber_data_batch = pm.Minibatch(
-            data.z_log2_cn.values, batch_size=batch_size
+            data.copy_number.values, batch_size=batch_size
         )
 
         return {
