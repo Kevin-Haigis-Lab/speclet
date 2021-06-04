@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Funnctions for handling common modifications and processing of the Achilles data."""
+"""Functions for handling common modifications and processing of the Achilles data."""
 
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
