@@ -74,5 +74,11 @@
         "mem": "70000",
         "time": "01:00:00",
         "J": "data-check"
+    },
+    "modeling_data_subsets": {
+        "cores": 4,
+        "mem": "70000",
+        "time": "00:30:00",
+        "J": "subsample"
     }
 }

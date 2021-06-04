@@ -262,8 +262,7 @@ modeling_data/*
 .vscode/settings.json
 
 # Specific files to except from the rules above
-!modeling_data/depmap_modeling_dataframe_subsample.csv
-!modeling_data/depmap_CRC_data_subsample.csv
+!modeling_data/depmap_modeling_dataframe_crc-subsample.csv
 !data/download-data.sh
 !data/download-data.smk
 

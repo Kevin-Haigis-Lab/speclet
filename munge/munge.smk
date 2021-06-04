@@ -10,6 +10,8 @@ SCORE_DIR = DATA_DIR / "score_21q2"
 CCLE_DIR = DATA_DIR / "ccle_21q2"
 
 MODELING_DATA_DIR = Path("modeling_data")
+MUNGE_DIR = Path("munge")
+TESTS_DIR = Path("tests")
 
 TEMP_DIR = Path("/n/scratch3/users/j/jc604/speclet/munge-intermediates")
 # TEMP_DIR = Path("temp")
@@ -39,7 +41,11 @@ rule all:
         log_fold_change = MODELING_DATA_DIR / "score_log_fold_change_filtered.csv",
         # Modeling data.
         full_modeling_dataframe = MODELING_DATA_DIR / "depmap_modeling_dataframe.csv",
-        check_notebook_md = "munge/017_check-depmap-modeling-data.md",
+        check_notebook_md = MUNGE_DIR / "017_check-depmap-modeling-data.md",
+        # modeling_data_subsets
+        crc_subset = MODELING_DATA_DIR / "depmap_modeling_dataframe_crc.csv",
+        crc_subsample = MODELING_DATA_DIR / "depmap_modeling_dataframe_crc-subsample.csv",
+        test_data = TESTS_DIR / "depmap_test_data.csv",
 
 
 
@@ -209,9 +215,9 @@ rule combine_data:
 rule check_depmap_modeling_data:
     input:
         modeling_df = MODELING_DATA_DIR / "depmap_modeling_dataframe.csv",
-        check_nb = "munge/017_check-depmap-modeling-data.ipynb",
+        check_nb = MUNGE_DIR / "017_check-depmap-modeling-data.ipynb",
     output:
-        output_md = "munge/017_check-depmap-modeling-data.md"
+        output_md = MUNGE_DIR / "017_check-depmap-modeling-data.md"
     conda:
         ENVIRONMENT_YAML
     shell:
@@ -219,3 +225,14 @@ rule check_depmap_modeling_data:
         "nbqa black {input.check_nb} --nbqa-mutate && "
         "nbqa isort {input.check_nb} --nbqa-mutate && "
         "jupyter nbconvert --to markdown {input.check_nb}"
+
+rule modeling_data_subsets:
+    input:
+        check_output = MUNGE_DIR / "017_check-depmap-modeling-data.md",
+        modeling_df = MODELING_DATA_DIR / "depmap_modeling_dataframe.csv",
+    output:
+        crc_subset = MODELING_DATA_DIR / "depmap_modeling_dataframe_crc.csv",
+        crc_subsample = MODELING_DATA_DIR / "depmap_modeling_dataframe_crc-subsample.csv",
+        test_data = TESTS_DIR / "depmap_test_data.csv",
+    script:
+        "019_depmap-subset-dataframes.R"
