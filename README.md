@@ -18,7 +18,15 @@
 
 ### [Data preparation](munge/)
 
-All of the preparation of source data was conducted in the [Munge](munge/) directory. See the README in that directory for further details.
+The data is downloaded to the ["data/"](data) directory and prepared in the ["munge/"](munge) directory.
+The prepared data is available in ["modeling_data/"](modeling_data).
+
+All of the data can be downloaded and prepared using the following command.
+
+```bash
+make download_data
+make munge # or `make munge_o2` if on O2 HPC
+```
 
 ### [Notebooks](notebooks/)
 
@@ -28,7 +36,7 @@ See the README in that directory for further details.
 
 ### [Python Modules](src/)
 
-All shared Python code is contained in the "src/" directory.
+All shared Python code is contained in the ["src/"](src) directory.
 The installed of this directory as an editable module should be done automatically when the conda environment is created.
 If this failed, the modules can be installed using the following command.
 
