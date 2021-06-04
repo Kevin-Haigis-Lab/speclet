@@ -172,6 +172,7 @@ class CrcDataManager(DataManager):
                 n_genes=10,
                 n_sgrnas_per_gene=3,
                 n_cell_lines=5,
+                n_lineages=2,
                 n_batches=2,
                 n_kras_types=2,
             )
@@ -180,6 +181,7 @@ class CrcDataManager(DataManager):
                 n_genes=25,
                 n_sgrnas_per_gene=5,
                 n_cell_lines=12,
+                n_lineages=2,
                 n_batches=3,
                 n_kras_types=3,
             )
@@ -188,6 +190,7 @@ class CrcDataManager(DataManager):
                 n_genes=100,
                 n_sgrnas_per_gene=5,
                 n_cell_lines=20,
+                n_lineages=3,
                 n_batches=3,
                 n_kras_types=3,
             )

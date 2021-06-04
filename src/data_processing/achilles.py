@@ -214,7 +214,7 @@ def common_indices(achilles_df: pd.DataFrame) -> CommonIndices:
         lineage_idx=dphelp.get_indices(achilles_df, "lineage"),
         cellline_to_lineage_map=cellline_to_lineage_map,
         cellline_to_lineage_idx=dphelp.get_indices(cellline_to_lineage_map, "lineage"),
-        batch_idx=dphelp.get_indices(achilles_df, "pdna_batch"),
+        batch_idx=dphelp.get_indices(achilles_df, "p_dna_batch"),
     )
 
 
