@@ -10,7 +10,7 @@ library(log4r)
 library(glue)
 library(tidyverse)
 
-logger <- logger("DEBUG")
+logger <- logger("INFO")
 
 #### ---- Interactions with Snakemake ---- ####
 
@@ -56,11 +56,14 @@ get_log_fold_change_data <- function(achilles_lfc_path, score_lfc_path) {
 
   achilles_lfc <- qs::qread(achilles_lfc_path) %>%
     prepare_lfc_data(screen_source = "broad") %>%
-    select(-n_sgrna_alignments) %>%
     mutate(p_dna_batch = as.character(p_dna_batch))
 
   score_lfc <- qs::qread(score_lfc_path) %>%
     prepare_lfc_data(screen_source = "sanger")
+
+  shared_cols <- intersect(colnames(achilles_lfc), colnames(score_lfc))
+  achilles_lfc <- achilles_lfc[, colnames(achilles_lfc) %in% shared_cols]
+  score_lfc <- score_lfc[, colnames(score_lfc) %in% shared_cols]
 
   if (nrow(achilles_lfc) == 0 && nrow(score_lfc) == 0) {
     msg <- "LFC data not found from either data source."
@@ -105,8 +108,8 @@ reconcile_sgrna_targeting_one_gene_in_mutliple_places <- function(lfc_df) {
     return(lfc_df)
   }
 
-  multi_sgrna <- lfc_df %>%
-    group_by(sgrna, hugo_symbol, genome_alignment) %>%
+  lfc_df %>%
+    group_by(sgrna, hugo_symbol) %>%
     mutate(multiple_hits_on_gene = n() > 1) %>%
     slice(1) %>%
     ungroup()
@@ -400,9 +403,9 @@ get_copy_number_at_chromosome_location <- function(chr, pos, segment_cn_df) {
     return(NA_real_)
   } else if (nrow(cn) > 1) {
     # print(cn)
-    warn(logger, glue("Found {nrow(cn)} CN segments for chr{chr}:{pos}."))
+    log4r::debug(logger, glue("Found {nrow(cn)} CN segments for chr{chr}:{pos}."))
     cn_val <- reconcile_multiple_segment_copy_numbers(cn)
-    warn(logger, glue("Reconciled multiple values to {round(cn_val, 3)}."))
+    log4r::debug(logger, glue("Reconciled multiple values to {round(cn_val, 3)}."))
     return(cn_val)
   } else {
     return(cn$segment_mean[[1]])

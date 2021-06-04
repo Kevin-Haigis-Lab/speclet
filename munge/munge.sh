@@ -31,6 +31,7 @@ snakemake \
     --jobs 9000 \
     --restart-times 0 \
     --latency-wait 120 \
+    --use-conda \
     --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
     --cluster-config munge/munge-config.json \
     --keep-going

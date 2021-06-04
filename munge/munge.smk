@@ -14,8 +14,10 @@ MODELING_DATA_DIR = Path("modeling_data")
 TEMP_DIR = Path("/n/scratch3/users/j/jc604/speclet/munge-intermediates")
 # TEMP_DIR = Path("temp")
 
+ENVIRONMENT_YAML = "pipeline-environment.yml"
+
 all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list()
-all_depmap_ids = all_depmap_ids[:10] ### TESTING ###
+# all_depmap_ids = all_depmap_ids[:10] ### TESTING ###
 # all_depmap_ids += ["ACH-002227", "ACH-001738"]
 
 rule all:
@@ -210,6 +212,8 @@ rule check_depmap_modeling_data:
         check_nb = "munge/017_check-depmap-modeling-data.ipynb",
     output:
         output_md = "munge/017_check-depmap-modeling-data.md"
+    conda:
+        ENVIRONMENT_YAML
     shell:
         "jupyter nbconvert --to notebook --inplace --execute {input.check_nb} && "
         "nbqa black {input.check_nb} --nbqa-mutate && "
