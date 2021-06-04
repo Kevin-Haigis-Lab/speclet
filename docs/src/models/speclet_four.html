@@ -32,7 +32,6 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pymc3 as pm
 import theano
-from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 from src.data_processing import achilles as achelp
 from src.loggers import logger
@@ -45,8 +44,7 @@ class SpecletFour(SpecletModel):
 
     Model with the following covariates:
     - h: consistent gene effect
-    - g: cell line-specific gene effect [gene x cell line] and the mean of the prior
-         varies by [gene x KRAS allele] of the cell line.
+    - g: cell line-specific gene effect [gene x cell line]
     - o: CN effect varying per cell line
     - b: batch effect
 
@@ -54,7 +52,6 @@ class SpecletFour(SpecletModel):
     the varying copy number effect will also act as a varying effect for the cell line.
     &#34;&#34;&#34;
 
-    _kras_mutation_minimum: int
     _noncentered_param: bool
     _copy_number_cov: bool
 
@@ -64,7 +61,6 @@ class SpecletFour(SpecletModel):
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = CrcDataManager(),
-        kras_mutation_minimum: int = 3,
         copy_number_cov: bool = False,
         noncentered_param: bool = True,
     ):
@@ -78,9 +74,6 @@ class SpecletFour(SpecletModel):
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. Defaults to None.
-            kras_mutation_minimum (int, optional): The minimum number of cell lines with
-              a KRAS allele for the allele to be included as a separate group. Defaults
-              to 3.
             copy_number_cov (bool, optional): Should the covariate for gene copy number
               effect be included in the model? The covariate varies by cell line.
               Defaults to False.
@@ -93,25 +86,8 @@ class SpecletFour(SpecletModel):
             debug=debug,
             data_manager=data_manager,
         )
-        self._kras_mutation_minimum = kras_mutation_minimum
         self._noncentered_param = noncentered_param
         self._copy_number_cov = copy_number_cov
-
-    @property
-    def kras_mutation_minimum(self) -&gt; int:
-        &#34;&#34;&#34;Value of `kras_mutation_minimum` attribute.&#34;&#34;&#34;
-        return self._kras_mutation_minimum
-
-    @kras_mutation_minimum.setter
-    def kras_mutation_minimum(self, new_value: int) -&gt; None:
-        &#34;&#34;&#34;Set the value of `kras_mutation_minimum` attribute.
-
-        If the new value is different, all model and sampling results are reset.
-        &#34;&#34;&#34;
-        if new_value != self._kras_mutation_minimum:
-            logger.info(f&#34;Changing `kras_mutation_minimum` attribute to &#39;{new_value}&#39;.&#34;)
-            self._kras_mutation_minimum = new_value
-            self._reset_model_and_results()
 
     @property
     def copy_number_cov(self) -&gt; bool:
@@ -131,7 +107,7 @@ class SpecletFour(SpecletModel):
 
     @property
     def noncentered_param(self) -&gt; bool:
-        &#34;&#34;&#34;Value of `kras_cov` attribute.&#34;&#34;&#34;
+        &#34;&#34;&#34;Value of `noncentered_param` attribute.&#34;&#34;&#34;
         return self._noncentered_param
 
     @noncentered_param.setter
@@ -151,10 +127,6 @@ class SpecletFour(SpecletModel):
             μ_h = pm.Normal(&#34;μ_h&#34;, 0, 1)  # noqa: F841
             σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)  # noqa: F841
 
-            # [gene, cell line] varying intercept.
-            μ_μ_g = pm.Normal(&#34;μ_μ_g&#34;, 0, 0.2)  # noqa: F841
-            σ_μ_g = pm.HalfNormal(&#34;σ_μ_g&#34;, 1)  # noqa: F841
-
             # Batch effect varying intercept.
             μ_b = pm.Normal(&#34;μ_b&#34;, 0, 0.2)  # noqa: F841
             σ_b = pm.HalfNormal(&#34;σ_b&#34;, 0.5)  # noqa: F841
@@ -165,11 +137,7 @@ class SpecletFour(SpecletModel):
         return model
 
     def _model_centered_parameterization(
-        self,
-        model: pm.Model,
-        co_idx: achelp.CommonIndices,
-        unco_idx: achelp.UncommonIndices,
-        cellline_to_kras_idx_shared: TTShared,
+        self, model: pm.Model, co_idx: achelp.CommonIndices
     ) -&gt; pm.Model:
         with model:
             # Gene varying intercept.
@@ -178,16 +146,11 @@ class SpecletFour(SpecletModel):
             )
 
             # [gene, cell line] varying intercept.
-            μ_g = pm.Normal(
-                &#34;μ_g&#34;,
-                model[&#34;μ_μ_g&#34;],
-                model[&#34;σ_μ_g&#34;],
-                shape=(co_idx.n_genes, unco_idx.n_kras_mutations),
-            )
+            μ_g = pm.Normal(&#34;μ_g&#34;, 0, 1)
             σ_g = pm.HalfNormal(&#34;σ_g&#34;, 1)
             g = pm.Normal(  # noqa: F841
                 &#34;g&#34;,
-                μ_g[:, cellline_to_kras_idx_shared],
+                μ_g,
                 σ_g,
                 shape=(co_idx.n_genes, co_idx.n_celllines),
             )
@@ -204,11 +167,7 @@ class SpecletFour(SpecletModel):
         return model
 
     def _model_non_centered_parameterization(
-        self,
-        model: pm.Model,
-        co_idx: achelp.CommonIndices,
-        unco_idx: achelp.UncommonIndices,
-        cellline_to_kras_idx_shared: TTShared,
+        self, model: pm.Model, co_idx: achelp.CommonIndices
     ) -&gt; pm.Model:
         with model:
             # Gene varying intercept.
@@ -218,17 +177,12 @@ class SpecletFour(SpecletModel):
             )
 
             # [gene, cell line] varying intercept.
-            μ_g_offset = pm.Normal(
-                &#34;μ_g_offset&#34;, 0, 1, shape=(co_idx.n_genes, unco_idx.n_kras_mutations)
-            )
-            μ_g = pm.Deterministic(&#34;μ_g&#34;, model[&#34;μ_μ_g&#34;] + μ_g_offset * model[&#34;σ_μ_g&#34;])
+            μ_g = pm.Normal(&#34;μ_g&#34;, 0, 1)
             σ_g = pm.HalfNormal(&#34;σ_g&#34;, 1)
             g_offset = pm.Normal(
                 &#34;g_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
             )
-            g = pm.Deterministic(  # noqa: F841
-                &#34;g&#34;, μ_g[:, cellline_to_kras_idx_shared] + g_offset * σ_g
-            )
+            g = pm.Deterministic(&#34;g&#34;, μ_g + g_offset * σ_g)  # noqa: F841
 
             if self.copy_number_cov:
                 μ_o = pm.Normal(&#34;μ_o&#34;, -0.5, 1)
@@ -253,21 +207,15 @@ class SpecletFour(SpecletModel):
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
-        co_idx = achelp.common_indices(data, min_kras_muts=self.kras_mutation_minimum)
-        unco_idx = achelp.uncommon_indices(
-            data, min_kras_muts=self.kras_mutation_minimum
-        )
+        co_idx = achelp.common_indices(data)
 
         # Shared Theano variables
         logger.info(&#34;Getting Theano shared variables.&#34;)
         sgrna_idx_shared = theano.shared(co_idx.sgrna_idx)
         gene_idx_shared = theano.shared(co_idx.gene_idx)
         cellline_idx_shared = theano.shared(co_idx.cellline_idx)
-        cellline_to_kras_idx_shared = theano.shared(
-            unco_idx.cellline_to_kras_mutation_idx
-        )
         batch_idx_shared = theano.shared(co_idx.batch_idx)
-        cn_shared = theano.shared(data.gene_cn.values / 2.0)
+        cn_shared = theano.shared(data.copy_number.values / 2.0)
         lfc_shared = theano.shared(data.lfc.values)
 
         logger.info(&#34;Creating PyMC3 model.&#34;)
@@ -275,19 +223,11 @@ class SpecletFour(SpecletModel):
         if self.noncentered_param:
             logger.info(&#34;Using non-centered parameterization.&#34;)
             model = self._model_non_centered_parameterization(
-                model=model,
-                co_idx=co_idx,
-                unco_idx=unco_idx,
-                cellline_to_kras_idx_shared=cellline_to_kras_idx_shared,
+                model=model, co_idx=co_idx
             )
         else:
             logger.info(&#34;Using centered parameterization.&#34;)
-            model = self._model_centered_parameterization(
-                model=model,
-                co_idx=co_idx,
-                unco_idx=unco_idx,
-                cellline_to_kras_idx_shared=cellline_to_kras_idx_shared,
-            )
+            model = self._model_centered_parameterization(model=model, co_idx=co_idx)
 
         with model:
             _μ = (
@@ -316,7 +256,6 @@ class SpecletFour(SpecletModel):
             &#34;sgrna_idx_shared&#34;: sgrna_idx_shared,
             &#34;gene_idx_shared&#34;: gene_idx_shared,
             &#34;cellline_idx_shared&#34;: cellline_idx_shared,
-            &#34;cellline_to_kras_idx_shared&#34;: cellline_to_kras_idx_shared,
             &#34;batch_idx_shared&#34;: batch_idx_shared,
             &#34;lfc_shared&#34;: lfc_shared,
         }
@@ -343,22 +282,16 @@ class SpecletFour(SpecletModel):
 
         data = self.data_manager.get_data()
         batch_size = self.data_manager.get_batch_size()
-        ic = achelp.common_indices(data, min_kras_muts=self.kras_mutation_minimum)
+        ic = achelp.common_indices(data)
 
         gene_idx_batch = pm.Minibatch(ic.gene_idx, batch_size=batch_size)
         cellline_idx_batch = pm.Minibatch(ic.cellline_idx, batch_size=batch_size)
         batch_idx_batch = pm.Minibatch(ic.batch_idx, batch_size=batch_size)
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
-        uc = achelp.uncommon_indices(data, min_kras_muts=self.kras_mutation_minimum)
-        cellline_to_kras_idx = pm.Minibatch(
-            uc.cellline_to_kras_mutation_idx, batch_size=batch_size
-        )
-
         return {
             self.shared_vars[&#34;gene_idx_shared&#34;]: gene_idx_batch,
             self.shared_vars[&#34;cellline_idx_shared&#34;]: cellline_idx_batch,
-            self.shared_vars[&#34;cellline_to_kras_idx_shared&#34;]: cellline_to_kras_idx,
             self.shared_vars[&#34;batch_idx_shared&#34;]: batch_idx_batch,
             self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
         }
@@ -404,14 +337,13 @@ class SpecletFour(SpecletModel):
 <dl>
 <dt id="src.models.speclet_four.SpecletFour"><code class="flex name class">
 <span>class <span class="ident">SpecletFour</span></span>
-<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = &lt;src.managers.model_data_managers.CrcDataManager object&gt;, kras_mutation_minimum: int = 3, copy_number_cov: bool = False, noncentered_param: bool = True)</span>
+<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = &lt;src.managers.model_data_managers.CrcDataManager object&gt;, copy_number_cov: bool = False, noncentered_param: bool = True)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>SpecletFour Model.</p>
 <p>Model with the following covariates:
 - h: consistent gene effect
-- g: cell line-specific gene effect [gene x cell line] and the mean of the prior
-varies by [gene x KRAS allele] of the cell line.
+- g: cell line-specific gene effect [gene x cell line]
 - o: CN effect varying per cell line
 - b: batch effect</p>
 <p>Copy number values are divided by 2.0 to make diploid values equal 1. Therefore,
@@ -430,10 +362,6 @@ sampling/fitting results. Defaults to None.</dd>
 <dt><strong><code>data_manager</code></strong> :&ensp;<code>Optional[DataManager]</code>, optional</dt>
 <dd>Object that will manage the
 data. Defaults to None.</dd>
-<dt><strong><code>kras_mutation_minimum</code></strong> :&ensp;<code>int</code>, optional</dt>
-<dd>The minimum number of cell lines with
-a KRAS allele for the allele to be included as a separate group. Defaults
-to 3.</dd>
 <dt><strong><code>copy_number_cov</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Should the covariate for gene copy number
 effect be included in the model? The covariate varies by cell line.
@@ -451,8 +379,7 @@ parameterization? Default to True.</dd>
 
     Model with the following covariates:
     - h: consistent gene effect
-    - g: cell line-specific gene effect [gene x cell line] and the mean of the prior
-         varies by [gene x KRAS allele] of the cell line.
+    - g: cell line-specific gene effect [gene x cell line]
     - o: CN effect varying per cell line
     - b: batch effect
 
@@ -460,7 +387,6 @@ parameterization? Default to True.</dd>
     the varying copy number effect will also act as a varying effect for the cell line.
     &#34;&#34;&#34;
 
-    _kras_mutation_minimum: int
     _noncentered_param: bool
     _copy_number_cov: bool
 
@@ -470,7 +396,6 @@ parameterization? Default to True.</dd>
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = CrcDataManager(),
-        kras_mutation_minimum: int = 3,
         copy_number_cov: bool = False,
         noncentered_param: bool = True,
     ):
@@ -484,9 +409,6 @@ parameterization? Default to True.</dd>
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. Defaults to None.
-            kras_mutation_minimum (int, optional): The minimum number of cell lines with
-              a KRAS allele for the allele to be included as a separate group. Defaults
-              to 3.
             copy_number_cov (bool, optional): Should the covariate for gene copy number
               effect be included in the model? The covariate varies by cell line.
               Defaults to False.
@@ -499,25 +421,8 @@ parameterization? Default to True.</dd>
             debug=debug,
             data_manager=data_manager,
         )
-        self._kras_mutation_minimum = kras_mutation_minimum
         self._noncentered_param = noncentered_param
         self._copy_number_cov = copy_number_cov
-
-    @property
-    def kras_mutation_minimum(self) -&gt; int:
-        &#34;&#34;&#34;Value of `kras_mutation_minimum` attribute.&#34;&#34;&#34;
-        return self._kras_mutation_minimum
-
-    @kras_mutation_minimum.setter
-    def kras_mutation_minimum(self, new_value: int) -&gt; None:
-        &#34;&#34;&#34;Set the value of `kras_mutation_minimum` attribute.
-
-        If the new value is different, all model and sampling results are reset.
-        &#34;&#34;&#34;
-        if new_value != self._kras_mutation_minimum:
-            logger.info(f&#34;Changing `kras_mutation_minimum` attribute to &#39;{new_value}&#39;.&#34;)
-            self._kras_mutation_minimum = new_value
-            self._reset_model_and_results()
 
     @property
     def copy_number_cov(self) -&gt; bool:
@@ -537,7 +442,7 @@ parameterization? Default to True.</dd>
 
     @property
     def noncentered_param(self) -&gt; bool:
-        &#34;&#34;&#34;Value of `kras_cov` attribute.&#34;&#34;&#34;
+        &#34;&#34;&#34;Value of `noncentered_param` attribute.&#34;&#34;&#34;
         return self._noncentered_param
 
     @noncentered_param.setter
@@ -557,10 +462,6 @@ parameterization? Default to True.</dd>
             μ_h = pm.Normal(&#34;μ_h&#34;, 0, 1)  # noqa: F841
             σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)  # noqa: F841
 
-            # [gene, cell line] varying intercept.
-            μ_μ_g = pm.Normal(&#34;μ_μ_g&#34;, 0, 0.2)  # noqa: F841
-            σ_μ_g = pm.HalfNormal(&#34;σ_μ_g&#34;, 1)  # noqa: F841
-
             # Batch effect varying intercept.
             μ_b = pm.Normal(&#34;μ_b&#34;, 0, 0.2)  # noqa: F841
             σ_b = pm.HalfNormal(&#34;σ_b&#34;, 0.5)  # noqa: F841
@@ -571,11 +472,7 @@ parameterization? Default to True.</dd>
         return model
 
     def _model_centered_parameterization(
-        self,
-        model: pm.Model,
-        co_idx: achelp.CommonIndices,
-        unco_idx: achelp.UncommonIndices,
-        cellline_to_kras_idx_shared: TTShared,
+        self, model: pm.Model, co_idx: achelp.CommonIndices
     ) -&gt; pm.Model:
         with model:
             # Gene varying intercept.
@@ -584,16 +481,11 @@ parameterization? Default to True.</dd>
             )
 
             # [gene, cell line] varying intercept.
-            μ_g = pm.Normal(
-                &#34;μ_g&#34;,
-                model[&#34;μ_μ_g&#34;],
-                model[&#34;σ_μ_g&#34;],
-                shape=(co_idx.n_genes, unco_idx.n_kras_mutations),
-            )
+            μ_g = pm.Normal(&#34;μ_g&#34;, 0, 1)
             σ_g = pm.HalfNormal(&#34;σ_g&#34;, 1)
             g = pm.Normal(  # noqa: F841
                 &#34;g&#34;,
-                μ_g[:, cellline_to_kras_idx_shared],
+                μ_g,
                 σ_g,
                 shape=(co_idx.n_genes, co_idx.n_celllines),
             )
@@ -610,11 +502,7 @@ parameterization? Default to True.</dd>
         return model
 
     def _model_non_centered_parameterization(
-        self,
-        model: pm.Model,
-        co_idx: achelp.CommonIndices,
-        unco_idx: achelp.UncommonIndices,
-        cellline_to_kras_idx_shared: TTShared,
+        self, model: pm.Model, co_idx: achelp.CommonIndices
     ) -&gt; pm.Model:
         with model:
             # Gene varying intercept.
@@ -624,17 +512,12 @@ parameterization? Default to True.</dd>
             )
 
             # [gene, cell line] varying intercept.
-            μ_g_offset = pm.Normal(
-                &#34;μ_g_offset&#34;, 0, 1, shape=(co_idx.n_genes, unco_idx.n_kras_mutations)
-            )
-            μ_g = pm.Deterministic(&#34;μ_g&#34;, model[&#34;μ_μ_g&#34;] + μ_g_offset * model[&#34;σ_μ_g&#34;])
+            μ_g = pm.Normal(&#34;μ_g&#34;, 0, 1)
             σ_g = pm.HalfNormal(&#34;σ_g&#34;, 1)
             g_offset = pm.Normal(
                 &#34;g_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
             )
-            g = pm.Deterministic(  # noqa: F841
-                &#34;g&#34;, μ_g[:, cellline_to_kras_idx_shared] + g_offset * σ_g
-            )
+            g = pm.Deterministic(&#34;g&#34;, μ_g + g_offset * σ_g)  # noqa: F841
 
             if self.copy_number_cov:
                 μ_o = pm.Normal(&#34;μ_o&#34;, -0.5, 1)
@@ -659,21 +542,15 @@ parameterization? Default to True.</dd>
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
-        co_idx = achelp.common_indices(data, min_kras_muts=self.kras_mutation_minimum)
-        unco_idx = achelp.uncommon_indices(
-            data, min_kras_muts=self.kras_mutation_minimum
-        )
+        co_idx = achelp.common_indices(data)
 
         # Shared Theano variables
         logger.info(&#34;Getting Theano shared variables.&#34;)
         sgrna_idx_shared = theano.shared(co_idx.sgrna_idx)
         gene_idx_shared = theano.shared(co_idx.gene_idx)
         cellline_idx_shared = theano.shared(co_idx.cellline_idx)
-        cellline_to_kras_idx_shared = theano.shared(
-            unco_idx.cellline_to_kras_mutation_idx
-        )
         batch_idx_shared = theano.shared(co_idx.batch_idx)
-        cn_shared = theano.shared(data.gene_cn.values / 2.0)
+        cn_shared = theano.shared(data.copy_number.values / 2.0)
         lfc_shared = theano.shared(data.lfc.values)
 
         logger.info(&#34;Creating PyMC3 model.&#34;)
@@ -681,19 +558,11 @@ parameterization? Default to True.</dd>
         if self.noncentered_param:
             logger.info(&#34;Using non-centered parameterization.&#34;)
             model = self._model_non_centered_parameterization(
-                model=model,
-                co_idx=co_idx,
-                unco_idx=unco_idx,
-                cellline_to_kras_idx_shared=cellline_to_kras_idx_shared,
+                model=model, co_idx=co_idx
             )
         else:
             logger.info(&#34;Using centered parameterization.&#34;)
-            model = self._model_centered_parameterization(
-                model=model,
-                co_idx=co_idx,
-                unco_idx=unco_idx,
-                cellline_to_kras_idx_shared=cellline_to_kras_idx_shared,
-            )
+            model = self._model_centered_parameterization(model=model, co_idx=co_idx)
 
         with model:
             _μ = (
@@ -722,7 +591,6 @@ parameterization? Default to True.</dd>
             &#34;sgrna_idx_shared&#34;: sgrna_idx_shared,
             &#34;gene_idx_shared&#34;: gene_idx_shared,
             &#34;cellline_idx_shared&#34;: cellline_idx_shared,
-            &#34;cellline_to_kras_idx_shared&#34;: cellline_to_kras_idx_shared,
             &#34;batch_idx_shared&#34;: batch_idx_shared,
             &#34;lfc_shared&#34;: lfc_shared,
         }
@@ -749,22 +617,16 @@ parameterization? Default to True.</dd>
 
         data = self.data_manager.get_data()
         batch_size = self.data_manager.get_batch_size()
-        ic = achelp.common_indices(data, min_kras_muts=self.kras_mutation_minimum)
+        ic = achelp.common_indices(data)
 
         gene_idx_batch = pm.Minibatch(ic.gene_idx, batch_size=batch_size)
         cellline_idx_batch = pm.Minibatch(ic.cellline_idx, batch_size=batch_size)
         batch_idx_batch = pm.Minibatch(ic.batch_idx, batch_size=batch_size)
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
-        uc = achelp.uncommon_indices(data, min_kras_muts=self.kras_mutation_minimum)
-        cellline_to_kras_idx = pm.Minibatch(
-            uc.cellline_to_kras_mutation_idx, batch_size=batch_size
-        )
-
         return {
             self.shared_vars[&#34;gene_idx_shared&#34;]: gene_idx_batch,
             self.shared_vars[&#34;cellline_idx_shared&#34;]: cellline_idx_batch,
-            self.shared_vars[&#34;cellline_to_kras_idx_shared&#34;]: cellline_to_kras_idx,
             self.shared_vars[&#34;batch_idx_shared&#34;]: batch_idx_batch,
             self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
         }
@@ -817,29 +679,16 @@ def copy_number_cov(self) -&gt; bool:
     return self._copy_number_cov</code></pre>
 </details>
 </dd>
-<dt id="src.models.speclet_four.SpecletFour.kras_mutation_minimum"><code class="name">var <span class="ident">kras_mutation_minimum</span> : int</code></dt>
-<dd>
-<div class="desc"><p>Value of <code>kras_mutation_minimum</code> attribute.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def kras_mutation_minimum(self) -&gt; int:
-    &#34;&#34;&#34;Value of `kras_mutation_minimum` attribute.&#34;&#34;&#34;
-    return self._kras_mutation_minimum</code></pre>
-</details>
-</dd>
 <dt id="src.models.speclet_four.SpecletFour.noncentered_param"><code class="name">var <span class="ident">noncentered_param</span> : bool</code></dt>
 <dd>
-<div class="desc"><p>Value of <code>kras_cov</code> attribute.</p></div>
+<div class="desc"><p>Value of <code>noncentered_param</code> attribute.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def noncentered_param(self) -&gt; bool:
-    &#34;&#34;&#34;Value of `kras_cov` attribute.&#34;&#34;&#34;
+    &#34;&#34;&#34;Value of `noncentered_param` attribute.&#34;&#34;&#34;
     return self._noncentered_param</code></pre>
 </details>
 </dd>
@@ -888,22 +737,16 @@ def noncentered_param(self) -&gt; bool:
 
     data = self.data_manager.get_data()
     batch_size = self.data_manager.get_batch_size()
-    ic = achelp.common_indices(data, min_kras_muts=self.kras_mutation_minimum)
+    ic = achelp.common_indices(data)
 
     gene_idx_batch = pm.Minibatch(ic.gene_idx, batch_size=batch_size)
     cellline_idx_batch = pm.Minibatch(ic.cellline_idx, batch_size=batch_size)
     batch_idx_batch = pm.Minibatch(ic.batch_idx, batch_size=batch_size)
     lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
-    uc = achelp.uncommon_indices(data, min_kras_muts=self.kras_mutation_minimum)
-    cellline_to_kras_idx = pm.Minibatch(
-        uc.cellline_to_kras_mutation_idx, batch_size=batch_size
-    )
-
     return {
         self.shared_vars[&#34;gene_idx_shared&#34;]: gene_idx_batch,
         self.shared_vars[&#34;cellline_idx_shared&#34;]: cellline_idx_batch,
-        self.shared_vars[&#34;cellline_to_kras_idx_shared&#34;]: cellline_to_kras_idx,
         self.shared_vars[&#34;batch_idx_shared&#34;]: batch_idx_batch,
         self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
     }</code></pre>
@@ -933,21 +776,15 @@ def noncentered_param(self) -&gt; bool:
     data = self.data_manager.get_data()
 
     total_size = data.shape[0]
-    co_idx = achelp.common_indices(data, min_kras_muts=self.kras_mutation_minimum)
-    unco_idx = achelp.uncommon_indices(
-        data, min_kras_muts=self.kras_mutation_minimum
-    )
+    co_idx = achelp.common_indices(data)
 
     # Shared Theano variables
     logger.info(&#34;Getting Theano shared variables.&#34;)
     sgrna_idx_shared = theano.shared(co_idx.sgrna_idx)
     gene_idx_shared = theano.shared(co_idx.gene_idx)
     cellline_idx_shared = theano.shared(co_idx.cellline_idx)
-    cellline_to_kras_idx_shared = theano.shared(
-        unco_idx.cellline_to_kras_mutation_idx
-    )
     batch_idx_shared = theano.shared(co_idx.batch_idx)
-    cn_shared = theano.shared(data.gene_cn.values / 2.0)
+    cn_shared = theano.shared(data.copy_number.values / 2.0)
     lfc_shared = theano.shared(data.lfc.values)
 
     logger.info(&#34;Creating PyMC3 model.&#34;)
@@ -955,19 +792,11 @@ def noncentered_param(self) -&gt; bool:
     if self.noncentered_param:
         logger.info(&#34;Using non-centered parameterization.&#34;)
         model = self._model_non_centered_parameterization(
-            model=model,
-            co_idx=co_idx,
-            unco_idx=unco_idx,
-            cellline_to_kras_idx_shared=cellline_to_kras_idx_shared,
+            model=model, co_idx=co_idx
         )
     else:
         logger.info(&#34;Using centered parameterization.&#34;)
-        model = self._model_centered_parameterization(
-            model=model,
-            co_idx=co_idx,
-            unco_idx=unco_idx,
-            cellline_to_kras_idx_shared=cellline_to_kras_idx_shared,
-        )
+        model = self._model_centered_parameterization(model=model, co_idx=co_idx)
 
     with model:
         _μ = (
@@ -996,7 +825,6 @@ def noncentered_param(self) -&gt; bool:
         &#34;sgrna_idx_shared&#34;: sgrna_idx_shared,
         &#34;gene_idx_shared&#34;: gene_idx_shared,
         &#34;cellline_idx_shared&#34;: cellline_idx_shared,
-        &#34;cellline_to_kras_idx_shared&#34;: cellline_to_kras_idx_shared,
         &#34;batch_idx_shared&#34;: batch_idx_shared,
         &#34;lfc_shared&#34;: lfc_shared,
     }
@@ -1075,7 +903,6 @@ def noncentered_param(self) -&gt; bool:
 <ul class="">
 <li><code><a title="src.models.speclet_four.SpecletFour.copy_number_cov" href="#src.models.speclet_four.SpecletFour.copy_number_cov">copy_number_cov</a></code></li>
 <li><code><a title="src.models.speclet_four.SpecletFour.get_replacement_parameters" href="#src.models.speclet_four.SpecletFour.get_replacement_parameters">get_replacement_parameters</a></code></li>
-<li><code><a title="src.models.speclet_four.SpecletFour.kras_mutation_minimum" href="#src.models.speclet_four.SpecletFour.kras_mutation_minimum">kras_mutation_minimum</a></code></li>
 <li><code><a title="src.models.speclet_four.SpecletFour.model_specification" href="#src.models.speclet_four.SpecletFour.model_specification">model_specification</a></code></li>
 <li><code><a title="src.models.speclet_four.SpecletFour.noncentered_param" href="#src.models.speclet_four.SpecletFour.noncentered_param">noncentered_param</a></code></li>
 <li><code><a title="src.models.speclet_four.SpecletFour.update_advi_sampling_parameters" href="#src.models.speclet_four.SpecletFour.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>

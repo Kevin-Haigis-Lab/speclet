@@ -156,7 +156,7 @@ class CrcDataManager(DataManager):
 
     def _drop_missing_copynumber(self, df: pd.DataFrame) -&gt; pd.DataFrame:
         logger.warning(&#34;Dropping data points with missing copy number.&#34;)
-        df_new = df.copy()[~df[&#34;gene_cn&#34;].isna()]
+        df_new = df.copy()[~df[&#34;copy_number&#34;].isna()]
         return df_new
 
     def _load_data(self) -&gt; pd.DataFrame:
@@ -369,7 +369,7 @@ class MockDataManager(DataManager):
 
     def _drop_missing_copynumber(self, df: pd.DataFrame) -&gt; pd.DataFrame:
         logger.warning(&#34;Dropping data points with missing copy number.&#34;)
-        df_new = df.copy()[~df[&#34;gene_cn&#34;].isna()]
+        df_new = df.copy()[~df[&#34;copy_number&#34;].isna()]
         return df_new
 
     def _load_data(self) -&gt; pd.DataFrame:

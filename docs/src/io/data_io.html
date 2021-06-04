@@ -40,12 +40,11 @@ class DataFile(str, Enum):
     &#34;&#34;&#34;Data file names.&#34;&#34;&#34;
 
     # crc_data = &#34;depmap_CRC_data.csv&#34;
-    crc_data = &#34;depmap_CRC_data_largesubsample.csv&#34;
-    crc_subsample = &#34;depmap_CRC_data_subsample.csv&#34;
+    crc_data = &#34;depmap_modeling_dataframe_crc.csv&#34;
+    crc_subsample = &#34;depmap_modeling_dataframe_crc-subsample.csv&#34;
     achilles_data = &#34;depmap_modeling_dataframe.csv&#34;
-    achilles_subsample = &#34;depmap_modeling_dataframe_subsample.csv&#34;
-    achilles_guide_efficacy = &#34;achilles_guide_efficacy.csv&#34;
-    achilles_essentials = &#34;achilles_essential_genes.csv&#34;
+    achilles_subsample = &#34;depmap_modeling_dataframe_crc-subsample.csv&#34;
+    achilles_essentials = &#34;known_essentials.csv&#34;
     achilles_gene_effect = &#34;achilles_gene_effect.csv&#34;
     ccle_mutations = &#34;ccle_mutations.csv&#34;
     ccle_copynumber = &#34;ccle_gene_cn.csv&#34;
@@ -194,12 +193,11 @@ def data_path(to: Union[str, DataFile]) -&gt; Path:
     &#34;&#34;&#34;Data file names.&#34;&#34;&#34;
 
     # crc_data = &#34;depmap_CRC_data.csv&#34;
-    crc_data = &#34;depmap_CRC_data_largesubsample.csv&#34;
-    crc_subsample = &#34;depmap_CRC_data_subsample.csv&#34;
+    crc_data = &#34;depmap_modeling_dataframe_crc.csv&#34;
+    crc_subsample = &#34;depmap_modeling_dataframe_crc-subsample.csv&#34;
     achilles_data = &#34;depmap_modeling_dataframe.csv&#34;
-    achilles_subsample = &#34;depmap_modeling_dataframe_subsample.csv&#34;
-    achilles_guide_efficacy = &#34;achilles_guide_efficacy.csv&#34;
-    achilles_essentials = &#34;achilles_essential_genes.csv&#34;
+    achilles_subsample = &#34;depmap_modeling_dataframe_crc-subsample.csv&#34;
+    achilles_essentials = &#34;known_essentials.csv&#34;
     achilles_gene_effect = &#34;achilles_gene_effect.csv&#34;
     ccle_mutations = &#34;ccle_mutations.csv&#34;
     ccle_copynumber = &#34;ccle_gene_cn.csv&#34;</code></pre>
@@ -220,14 +218,6 @@ def data_path(to: Union[str, DataFile]) -&gt; Path:
 <div class="desc"></div>
 </dd>
 <dt id="src.io.data_io.DataFile.achilles_gene_effect"><code class="name">var <span class="ident">achilles_gene_effect</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="src.io.data_io.DataFile.achilles_guide_efficacy"><code class="name">var <span class="ident">achilles_guide_efficacy</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="src.io.data_io.DataFile.achilles_subsample"><code class="name">var <span class="ident">achilles_subsample</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -278,8 +268,6 @@ def data_path(to: Union[str, DataFile]) -&gt; Path:
 <li><code><a title="src.io.data_io.DataFile.achilles_data" href="#src.io.data_io.DataFile.achilles_data">achilles_data</a></code></li>
 <li><code><a title="src.io.data_io.DataFile.achilles_essentials" href="#src.io.data_io.DataFile.achilles_essentials">achilles_essentials</a></code></li>
 <li><code><a title="src.io.data_io.DataFile.achilles_gene_effect" href="#src.io.data_io.DataFile.achilles_gene_effect">achilles_gene_effect</a></code></li>
-<li><code><a title="src.io.data_io.DataFile.achilles_guide_efficacy" href="#src.io.data_io.DataFile.achilles_guide_efficacy">achilles_guide_efficacy</a></code></li>
-<li><code><a title="src.io.data_io.DataFile.achilles_subsample" href="#src.io.data_io.DataFile.achilles_subsample">achilles_subsample</a></code></li>
 <li><code><a title="src.io.data_io.DataFile.ccle_copynumber" href="#src.io.data_io.DataFile.ccle_copynumber">ccle_copynumber</a></code></li>
 <li><code><a title="src.io.data_io.DataFile.ccle_mutations" href="#src.io.data_io.DataFile.ccle_mutations">ccle_mutations</a></code></li>
 <li><code><a title="src.io.data_io.DataFile.crc_data" href="#src.io.data_io.DataFile.crc_data">crc_data</a></code></li>

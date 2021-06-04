@@ -17,14 +17,14 @@ class TestSBCFileManager:
 
     @pytest.fixture()
     def priors(self) -> Dict[str, Any]:
-        return dict(
-            alpha=np.random.uniform(0, 100, size=3),
-            beta_log=np.random.uniform(0, 100, size=(10, 15)),
-        )
+        return {
+            "alpha": np.random.uniform(0, 100, size=3),
+            "beta_log": np.random.uniform(0, 100, size=(10, 15)),
+        }
 
     @pytest.fixture
     def posterior_summary(self) -> pd.DataFrame:
-        return pd.DataFrame(dict(x=[5, 6, 7], y=["a", "b", "c"]))
+        return pd.DataFrame({"x": [5, 6, 7], "y": ["a", "b", "c"]})
 
     def test_saving(
         self, tmp_path: Path, priors: Dict[str, Any], posterior_summary: pd.DataFrame

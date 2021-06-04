@@ -420,7 +420,7 @@ class SpecletModel:
         results_path: Path,
         random_seed: Optional[int] = None,
         size: str = "large",
-        fit_kwargs: Dict[Any, Any] = {},
+        fit_kwargs: Optional[Dict[Any, Any]] = None,
     ) -> None:
         """Run a round of simulation-based calibration.
 
@@ -429,9 +429,12 @@ class SpecletModel:
             random_seed (Optional[int], optional): Random seed (for reproducibility).
               Defaults to None.
             size (str, optional): Size of the data set to mock. Defaults to "large".
-            fit_kwargs (Dict[Any, Any], optional): Keyword arguments to be passed to the
-              fitting method. Default is an empty dictionary.
+            fit_kwargs (Optional[Dict[Any, Any]], optional): Keyword arguments to be
+              passed to the fitting method. Default is None.
         """
+        if fit_kwargs is None:
+            fit_kwargs = {}
+
         assert self.data_manager is not None
         mock_data = self.data_manager.generate_mock_data(
             size=size, random_seed=random_seed

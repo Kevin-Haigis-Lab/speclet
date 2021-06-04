@@ -32,7 +32,7 @@ class CeresMimic(SpecletModel):
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
-        data_manager: Optional[DataManager] = CrcDataManager(),
+        data_manager: Optional[DataManager] = None,
         copynumber_cov: bool = False,
         sgrna_intercept_cov: bool = False,
     ):
@@ -44,11 +44,16 @@ class CeresMimic(SpecletModel):
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
             debug (bool, optional): Are you in debug mode? Defaults to False.
+            data_manager (Optional[DataManager], optional): Object that will manage the
+              data. If None (default), a `CrcDataManager` is created automatically.
             copynumber_cov (bool, optional): Should the gene copy number covariate be
               included in the model? Default to False.
             sgrna_intercept_cov (bool, optional): Should a varying intercept for
               `sgRNA|gene` be included in the model? Default to False.
         """
+        if data_manager is None:
+            data_manager = CrcDataManager(debug=debug)
+
         super().__init__(
             name="ceres-mimic-1_" + name,
             root_cache_dir=root_cache_dir,

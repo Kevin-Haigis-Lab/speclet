@@ -17,7 +17,7 @@ class SpecletTestModel(SpecletModel):
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
-        data_manager: Optional[DataManager] = MockDataManager(),
+        data_manager: Optional[DataManager] = None,
     ):
         """Initialize a SpecletTestModel.
 
@@ -26,9 +26,12 @@ class SpecletTestModel(SpecletModel):
             root_cache_dir (Optional[Path], optional): Location for cache. Defaults to
               None.
             debug (bool, optional): In debug mode? Defaults to False.
-            data_manager (Optional[DataManager], optional): Data manager object.
-              Defaults to MockDataManager().
+            data_manager (Optional[DataManager], optional): Object that will manage the
+              data. If None (default), a `MockDataManager` is created automatically.
         """
+        if data_manager is None:
+            data_manager = MockDataManager(debug=debug)
+
         super().__init__(
             name="TestingModel-" + name,
             root_cache_dir=root_cache_dir,

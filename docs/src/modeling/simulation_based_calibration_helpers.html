@@ -190,7 +190,10 @@ def generate_mock_achilles_data(
     cell_lines = prefixed_count(&#34;cellline&#34;, n=n_cell_lines)
     batches = prefixed_count(&#34;batch&#34;, n=n_batches)
     batch_map = pd.DataFrame(
-        {&#34;depmap_id&#34;: cell_lines, &#34;pdna_batch&#34;: np.random.choice(batches, n_cell_lines)}
+        {
+            &#34;depmap_id&#34;: cell_lines,
+            &#34;p_dna_batch&#34;: np.random.choice(batches, n_cell_lines),
+        }
     )
 
     genes = prefixed_count(&#34;gene&#34;, n=n_genes)
@@ -235,15 +238,15 @@ def generate_mock_achilles_data(
     df = achelp.set_achilles_categorical_columns(df, cols=df.columns.tolist())
 
     # Mock values for gene copy number.
-    df[&#34;gene_cn&#34;] = 2 ** np.random.normal(1, 0.5, df.shape[0])
-    df[&#34;log2_cn&#34;] = np.log2(df.gene_cn + 1)
-    df = achelp.zscale_cna_by_group(
-        df,
-        gene_cn_col=&#34;log2_cn&#34;,
-        new_col=&#34;z_log2_cn&#34;,
-        groupby_cols=[&#34;depmap_id&#34;],
-        cn_max=np.log2(10),
-    )
+    df[&#34;copy_number&#34;] = 2 ** np.random.normal(1, 0.5, df.shape[0])
+    # df[&#34;log2_cn&#34;] = np.log2(df.gene_cn + 1)
+    # df = achelp.zscale_cna_by_group(
+    #     df,
+    #     gene_cn_col=&#34;log2_cn&#34;,
+    #     new_col=&#34;z_log2_cn&#34;,
+    #     groupby_cols=[&#34;depmap_id&#34;],
+    #     cn_max=np.log2(10),
+    # )
 
     df[&#34;lfc&#34;] = np.random.normal(0, 2, df.shape[0])
     return df</code></pre>
@@ -312,7 +315,10 @@ include. Defaults to None which ignores this attribute altogether.</dd>
     cell_lines = prefixed_count(&#34;cellline&#34;, n=n_cell_lines)
     batches = prefixed_count(&#34;batch&#34;, n=n_batches)
     batch_map = pd.DataFrame(
-        {&#34;depmap_id&#34;: cell_lines, &#34;pdna_batch&#34;: np.random.choice(batches, n_cell_lines)}
+        {
+            &#34;depmap_id&#34;: cell_lines,
+            &#34;p_dna_batch&#34;: np.random.choice(batches, n_cell_lines),
+        }
     )
 
     genes = prefixed_count(&#34;gene&#34;, n=n_genes)
@@ -357,15 +363,15 @@ include. Defaults to None which ignores this attribute altogether.</dd>
     df = achelp.set_achilles_categorical_columns(df, cols=df.columns.tolist())
 
     # Mock values for gene copy number.
-    df[&#34;gene_cn&#34;] = 2 ** np.random.normal(1, 0.5, df.shape[0])
-    df[&#34;log2_cn&#34;] = np.log2(df.gene_cn + 1)
-    df = achelp.zscale_cna_by_group(
-        df,
-        gene_cn_col=&#34;log2_cn&#34;,
-        new_col=&#34;z_log2_cn&#34;,
-        groupby_cols=[&#34;depmap_id&#34;],
-        cn_max=np.log2(10),
-    )
+    df[&#34;copy_number&#34;] = 2 ** np.random.normal(1, 0.5, df.shape[0])
+    # df[&#34;log2_cn&#34;] = np.log2(df.gene_cn + 1)
+    # df = achelp.zscale_cna_by_group(
+    #     df,
+    #     gene_cn_col=&#34;log2_cn&#34;,
+    #     new_col=&#34;z_log2_cn&#34;,
+    #     groupby_cols=[&#34;depmap_id&#34;],
+    #     cn_max=np.log2(10),
+    # )
 
     df[&#34;lfc&#34;] = np.random.normal(0, 2, df.shape[0])
     return df</code></pre>
