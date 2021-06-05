@@ -104,7 +104,8 @@ class SpecletThree(SpecletModel):
 
     def _model_centered_parameterization(
         self,
-        idx: achelp.CommonIndices,
+        co_idx: achelp.CommonIndices,
+        b_idx: achelp.DataBatchIndices,
         total_size: int,
         sgrna_idx_shared: TTShared,
         gene_idx_shared: TTShared,
@@ -112,16 +113,19 @@ class SpecletThree(SpecletModel):
         batch_idx_shared: TTShared,
         lfc_shared: TTShared,
     ) -> pm.Model:
-        model = self._common_model_components(common_indices=idx)
+        model = self._common_model_components(common_indices=co_idx)
         with model:
             # Gene varying intercept.
-            h = pm.Normal("h", model["μ_h"], model["σ_h"], shape=idx.n_genes)
+            h = pm.Normal("h", model["μ_h"], model["σ_h"], shape=co_idx.n_genes)
             # [gene, cell line] varying intercept.
             g = pm.Normal(
-                "g", model["μ_g"], model["σ_g"], shape=(idx.n_genes, idx.n_celllines)
+                "g",
+                model["μ_g"],
+                model["σ_g"],
+                shape=(co_idx.n_genes, co_idx.n_celllines),
             )
             # Batch effect varying intercept.
-            b = pm.Normal("b", model["μ_b"], model["σ_b"], shape=idx.n_batches)
+            b = pm.Normal("b", model["μ_b"], model["σ_b"], shape=b_idx.n_batches)
 
             μ = pm.Deterministic(
                 "μ",
@@ -142,7 +146,8 @@ class SpecletThree(SpecletModel):
 
     def _model_non_centered_parameterization(
         self,
-        idx: achelp.CommonIndices,
+        co_idx: achelp.CommonIndices,
+        b_idx: achelp.DataBatchIndices,
         total_size: int,
         sgrna_idx_shared: TTShared,
         gene_idx_shared: TTShared,
@@ -150,18 +155,20 @@ class SpecletThree(SpecletModel):
         batch_idx_shared: TTShared,
         lfc_shared: TTShared,
     ) -> pm.Model:
-        model = self._common_model_components(common_indices=idx)
+        model = self._common_model_components(common_indices=co_idx)
         with model:
             # Gene varying intercept.
-            h_offset = pm.Normal("h_offset", 0, 1, shape=idx.n_genes)
+            h_offset = pm.Normal("h_offset", 0, 1, shape=co_idx.n_genes)
             h = pm.Deterministic("h", model["μ_h"] + h_offset * model["σ_h"])
 
             # [gene, cell line] varying intercept.
-            g_offset = pm.Normal("g_offset", 0, 1, shape=(idx.n_genes, idx.n_celllines))
+            g_offset = pm.Normal(
+                "g_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+            )
             g = pm.Deterministic("g", model["μ_g"] + g_offset * model["σ_g"])
 
             # Batch effect varying intercept.
-            b_offset = pm.Normal("b_offset", 0, 1, shape=idx.n_batches)
+            b_offset = pm.Normal("b_offset", 0, 1, shape=b_idx.n_batches)
             b = pm.Deterministic("b", model["μ_b"] + b_offset * model["σ_b"])
 
             μ = pm.Deterministic(
@@ -191,20 +198,22 @@ class SpecletThree(SpecletModel):
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
-        idx = achelp.common_indices(data)
+        co_idx = achelp.common_indices(data)
+        b_idx = achelp.data_batch_indices(data)
 
         # Shared Theano variables
         logger.info("Getting Theano shared variables.")
-        sgrna_idx_shared = theano.shared(idx.sgrna_idx)
-        gene_idx_shared = theano.shared(idx.gene_idx)
-        cellline_idx_shared = theano.shared(idx.cellline_idx)
-        batch_idx_shared = theano.shared(idx.batch_idx)
+        sgrna_idx_shared = theano.shared(co_idx.sgrna_idx)
+        gene_idx_shared = theano.shared(co_idx.gene_idx)
+        cellline_idx_shared = theano.shared(co_idx.cellline_idx)
+        batch_idx_shared = theano.shared(b_idx.batch_idx)
         lfc_shared = theano.shared(data.lfc.values)
 
         if self.noncentered_param:
             logger.info("Creating PyMC3 model (non-centered parameterization).")
             model = self._model_non_centered_parameterization(
-                idx=idx,
+                co_idx=co_idx,
+                b_idx=b_idx,
                 total_size=total_size,
                 sgrna_idx_shared=sgrna_idx_shared,
                 gene_idx_shared=gene_idx_shared,
@@ -215,7 +224,8 @@ class SpecletThree(SpecletModel):
         else:
             logger.info("Creating PyMC3 model (centered parameterization).")
             model = self._model_centered_parameterization(
-                idx=idx,
+                co_idx=co_idx,
+                b_idx=b_idx,
                 total_size=total_size,
                 sgrna_idx_shared=sgrna_idx_shared,
                 gene_idx_shared=gene_idx_shared,
@@ -255,12 +265,13 @@ class SpecletThree(SpecletModel):
 
         data = self.data_manager.get_data()
         batch_size = self.data_manager.get_batch_size()
-        idx = achelp.common_indices(data)
+        co_idx = achelp.common_indices(data)
+        b_idx = achelp.data_batch_indices(data)
 
-        sgrna_idx_batch = pm.Minibatch(idx.sgrna_idx, batch_size=batch_size)
-        gene_idx_batch = pm.Minibatch(idx.gene_idx, batch_size=batch_size)
-        cellline_idx_batch = pm.Minibatch(idx.cellline_idx, batch_size=batch_size)
-        batch_idx_batch = pm.Minibatch(idx.batch_idx, batch_size=batch_size)
+        sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=batch_size)
+        gene_idx_batch = pm.Minibatch(co_idx.gene_idx, batch_size=batch_size)
+        cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=batch_size)
+        batch_idx_batch = pm.Minibatch(b_idx.batch_idx, batch_size=batch_size)
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
         return {

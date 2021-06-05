@@ -67,13 +67,14 @@ class SpecletFive(SpecletModel):
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
-        idx = achelp.common_indices(data)
+        co_idx = achelp.common_indices(data)
+        b_idx = achelp.data_batch_indices(data)
 
         # Shared Theano variables
         logger.info("Getting Theano shared variables.")
-        gene_idx_shared = theano.shared(idx.gene_idx)
-        cellline_idx_shared = theano.shared(idx.cellline_idx)
-        batch_idx_shared = theano.shared(idx.batch_idx)
+        gene_idx_shared = theano.shared(co_idx.gene_idx)
+        cellline_idx_shared = theano.shared(co_idx.cellline_idx)
+        batch_idx_shared = theano.shared(b_idx.batch_idx)
         lfc_shared = theano.shared(data.lfc.values)
 
         logger.info("Creating PyMC3 model.")
@@ -82,25 +83,27 @@ class SpecletFive(SpecletModel):
             # Varying batch intercept.
             μ_j = pm.Normal("μ_j", 0, 0.2)
             σ_j = pm.HalfNormal("σ_j", 1)
-            j_offset = pm.Normal("j_offset", 0, 1, shape=idx.n_celllines)
+            j_offset = pm.Normal("j_offset", 0, 1, shape=b_idx.n_batches)
             j = pm.Deterministic("j", μ_j + j_offset * σ_j)
 
             # Varying gene and cell line intercept.
             μ_h = pm.Normal("μ_h", 0, 0.2)
             σ_h = pm.HalfNormal("σ_h", 1)
-            h_offset = pm.Normal("h_offset", 0, 1, shape=(idx.n_genes, idx.n_celllines))
+            h_offset = pm.Normal(
+                "h_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+            )
             h = pm.Deterministic("h", μ_h + h_offset * σ_h)
 
             # Varying cell line intercept.
             μ_d = pm.Normal("μ_d", 0, 0.2)
             σ_d = pm.HalfNormal("σ_d", 1)
-            d_offset = pm.Normal("d_offset", 0, 1, shape=idx.n_celllines)
+            d_offset = pm.Normal("d_offset", 0, 1, shape=co_idx.n_celllines)
             d = pm.Deterministic("d", μ_d + d_offset * σ_d)
 
             # Varying gene intercept.
             μ_a = pm.Normal("μ_a", 0, 1)
             σ_a = pm.HalfNormal("σ_a", 1)
-            a_offset = pm.Normal("a_offset", 0, 1, shape=idx.n_genes)
+            a_offset = pm.Normal("a_offset", 0, 1, shape=co_idx.n_genes)
             a = pm.Deterministic("a", μ_a + a_offset * σ_a)
 
             # Global intercept.
@@ -116,7 +119,7 @@ class SpecletFive(SpecletModel):
 
             # Standard deviation of log-fold change, varies per batch.
             σ_σ = pm.HalfNormal("σ_σ", 1)
-            σ = pm.HalfNormal("σ", σ_σ, shape=idx.n_batches)
+            σ = pm.HalfNormal("σ", σ_σ, shape=b_idx.n_batches)
 
             lfc = pm.Normal(  # noqa: F841
                 "lfc",
@@ -160,10 +163,11 @@ class SpecletFive(SpecletModel):
         data = self.data_manager.get_data()
         batch_size = self.data_manager.get_batch_size()
         idx = achelp.common_indices(data)
+        b_idx = achelp.data_batch_indices(data)
 
         gene_idx_batch = pm.Minibatch(idx.gene_idx, batch_size=batch_size)
         cellline_idx_batch = pm.Minibatch(idx.cellline_idx, batch_size=batch_size)
-        batch_idx_batch = pm.Minibatch(idx.batch_idx, batch_size=batch_size)
+        batch_idx_batch = pm.Minibatch(b_idx.batch_idx, batch_size=batch_size)
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
         return {

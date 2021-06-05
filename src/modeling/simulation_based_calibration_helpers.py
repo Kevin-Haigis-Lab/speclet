@@ -143,6 +143,7 @@ def generate_mock_achilles_data(
     n_cell_lines: int,
     n_lineages: int,
     n_batches: int,
+    n_screens: int,
     n_kras_types: Optional[int] = None,
 ) -> pd.DataFrame:
     """Generate mock Achilles data.
@@ -157,6 +158,8 @@ def generate_mock_achilles_data(
         n_lineages (int, optional): Number of lineages. Must be less than or equal to
           the number of cell lines.
         n_batches (int): Number of pDNA batchs.
+        n_screens (int): Number of screens sourced for the data. Must be less than or
+          equal to the number of batches.
         n_kras_types (Optional[int], optional): Number of types of KRAS mutations to
           include. Defaults to None which ignores this attribute altogether.
 
@@ -172,6 +175,11 @@ def generate_mock_achilles_data(
             "lineage": np.random.choice(lineages, n_cell_lines),
             "p_dna_batch": np.random.choice(batches, n_cell_lines),
         }
+    )
+
+    screens = prefixed_count("screen", n=n_screens)
+    screen_map = pd.DataFrame(
+        {"p_dna_batch": batches, "screen": np.random.choice(screens, n_batches)}
     )
 
     genes = prefixed_count("gene", n=n_genes)
@@ -191,6 +199,7 @@ def generate_mock_achilles_data(
             }
         )
         .merge(batch_map, on="depmap_id")
+        .merge(screen_map, on="p_dna_batch")
         .merge(sgnra_map, on="hugo_symbol")
         .reset_index(drop=True)
     )

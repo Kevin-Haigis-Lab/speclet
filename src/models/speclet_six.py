@@ -108,7 +108,7 @@ class SpecletSix(SpecletModel):
 
         total_size = data.shape[0]
         co_idx = achelp.common_indices(data)
-        batch_idx = achelp.data_batch_indices(data)
+        b_idx = achelp.data_batch_indices(data)
 
         # Shared Theano variables
         logger.info("Getting Theano shared variables.")
@@ -118,8 +118,8 @@ class SpecletSix(SpecletModel):
         cellline_idx_shared = ts(co_idx.cellline_idx)
         lineage_idx_shared = ts(co_idx.lineage_idx)
         cellline_to_lineage_idx_shared = ts(co_idx.cellline_to_lineage_idx)
-        batch_idx_shared = ts(batch_idx.batch_idx)
-        batch_to_screen_idx_shared = ts(batch_idx.batch_to_screen_idx)
+        batch_idx_shared = ts(b_idx.batch_idx)
+        batch_to_screen_idx_shared = ts(b_idx.batch_to_screen_idx)
         lfc_shared = ts(data.lfc.values)
 
         self.shared_vars = {
@@ -141,19 +141,19 @@ class SpecletSix(SpecletModel):
 
         with pm.Model() as model:
             # Varying batch intercept.
-            if batch_idx.n_screens == 1:
+            if b_idx.n_screens == 1:
                 μ_j = pm.Normal("μ_j", 0, 0.2)
                 σ_j = pm.HalfNormal("σ_j", 1)
-                j_offset = pm.Normal("j_offset", 0, 1, shape=batch_idx.n_batches)
+                j_offset = pm.Normal("j_offset", 0, 1, shape=b_idx.n_batches)
                 j = pm.Deterministic("j", μ_j + j_offset * σ_j)
             else:
                 μ_μ_j = pm.Normal("μ_μ_j", 0, 0.5)
                 σ_μ_j = pm.HalfNormal("σ_μ_j", 0.5)
                 σ_σ_j = pm.HalfNormal("σ_σ_j", 1)
-                μ_j_offset = pm.Normal("μ_j_offset", 0, 1, shape=batch_idx.n_screens)
+                μ_j_offset = pm.Normal("μ_j_offset", 0, 1, shape=b_idx.n_screens)
                 μ_j = pm.Deterministic("μ_j", μ_μ_j + μ_j_offset * σ_μ_j)
-                σ_j = pm.HalfNormal("σ_j", σ_σ_j, shape=batch_idx.n_screens)
-                j_offset = pm.Normal("j_offset", 0, 1, shape=batch_idx.n_batches)
+                σ_j = pm.HalfNormal("σ_j", σ_σ_j, shape=b_idx.n_screens)
+                j_offset = pm.Normal("j_offset", 0, 1, shape=b_idx.n_batches)
                 j = pm.Deterministic(
                     "j",
                     μ_j[batch_to_screen_idx_shared]
@@ -217,7 +217,7 @@ class SpecletSix(SpecletModel):
 
             # Standard deviation of log-fold change, varies per batch.
             σ_σ = pm.HalfNormal("σ_σ", 1)
-            σ = pm.HalfNormal("σ", σ_σ, shape=batch_idx.n_batches)
+            σ = pm.HalfNormal("σ", σ_σ, shape=b_idx.n_batches)
 
             lfc = pm.Normal(  # noqa: F841
                 "lfc",

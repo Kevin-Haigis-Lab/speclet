@@ -121,14 +121,15 @@ class CeresMimic(SpecletModel):
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
-        indices_collection = achelp.common_indices(data)
+        co_idx = achelp.common_indices(data)
+        b_idx = achelp.data_batch_indices(data)
 
         # Shared Theano variables
-        sgrna_idx_shared = theano.shared(indices_collection.sgrna_idx)
-        sgrna_to_gene_idx_shared = theano.shared(indices_collection.sgrna_to_gene_idx)
-        gene_idx_shared = theano.shared(indices_collection.gene_idx)
-        cellline_idx_shared = theano.shared(indices_collection.cellline_idx)
-        batch_idx_shared = theano.shared(indices_collection.batch_idx)
+        sgrna_idx_shared = theano.shared(co_idx.sgrna_idx)
+        sgrna_to_gene_idx_shared = theano.shared(co_idx.sgrna_to_gene_idx)
+        gene_idx_shared = theano.shared(co_idx.gene_idx)
+        cellline_idx_shared = theano.shared(co_idx.cellline_idx)
+        batch_idx_shared = theano.shared(b_idx.batch_idx)
         lfc_shared = theano.shared(data.lfc.values)
         copynumber_shared = theano.shared(data.copy_number.values)
 
@@ -136,7 +137,7 @@ class CeresMimic(SpecletModel):
 
             # Hyper-priors
             σ_a = pm.HalfNormal("σ_a", np.array([0.1, 2]), shape=2)
-            a = pm.Exponential("a", σ_a, shape=(indices_collection.n_genes, 2))
+            a = pm.Exponential("a", σ_a, shape=(co_idx.n_genes, 2))
 
             μ_h = pm.Normal("μ_h", 0, 0.2)
             σ_h = pm.HalfNormal("σ_h", 1)
@@ -152,16 +153,16 @@ class CeresMimic(SpecletModel):
                 "q",
                 alpha=a[sgrna_to_gene_idx_shared, 0],
                 beta=a[sgrna_to_gene_idx_shared, 1],
-                shape=indices_collection.n_sgrnas,
+                shape=co_idx.n_sgrnas,
             )
-            h = pm.Normal("h", μ_h, σ_h, shape=indices_collection.n_genes)
+            h = pm.Normal("h", μ_h, σ_h, shape=co_idx.n_genes)
             d = pm.Normal(
                 "d",
                 μ_d,
                 σ_d,
-                shape=(indices_collection.n_genes, indices_collection.n_celllines),
+                shape=(co_idx.n_genes, co_idx.n_celllines),
             )
-            η = pm.Normal("η", μ_η, σ_η, shape=indices_collection.n_batches)
+            η = pm.Normal("η", μ_η, σ_η, shape=b_idx.n_batches)
 
             gene_comp = h[gene_idx_shared] + d[gene_idx_shared, cellline_idx_shared]
 
@@ -169,7 +170,7 @@ class CeresMimic(SpecletModel):
                 # Add varying slope with copy number.
                 μ_β = pm.Normal("μ_β", 0, 0.1)
                 σ_β = pm.HalfNormal("σ_β", 0.5)
-                β = pm.Normal("β", μ_β, σ_β, shape=indices_collection.n_celllines)
+                β = pm.Normal("β", μ_β, σ_β, shape=co_idx.n_celllines)
                 gene_comp += β[cellline_idx_shared] * copynumber_shared
 
             μ = pm.Deterministic(
@@ -181,14 +182,14 @@ class CeresMimic(SpecletModel):
                 μ_og = pm.Normal("μ_og", 0, 0.1)
                 σ_og = pm.HalfNormal("σ_og", 0.2)
                 # Priors for sgRNA|gene varying intercept.
-                μ_o = pm.Normal("μ_o", μ_og, σ_og, shape=indices_collection.n_genes)
+                μ_o = pm.Normal("μ_o", μ_og, σ_og, shape=co_idx.n_genes)
                 σ_o = pm.HalfNormal("σ_o", 0.2)
                 # sgRNA|gene varying intercept.
                 o = pm.Normal(
                     "o",
                     μ_o[sgrna_to_gene_idx_shared],
                     σ_o,
-                    shape=indices_collection.n_sgrnas,
+                    shape=co_idx.n_sgrnas,
                 )
                 μ = μ + o[sgrna_idx_shared]
 
@@ -233,12 +234,13 @@ class CeresMimic(SpecletModel):
 
         data = self.data_manager.get_data()
         batch_size = self.data_manager.get_batch_size()
-        indices = achelp.common_indices(data)
+        co_idx = achelp.common_indices(data)
+        b_idx = achelp.data_batch_indices(data)
 
-        sgrna_idx_batch = pm.Minibatch(indices.sgrna_idx, batch_size=batch_size)
-        gene_idx_batch = pm.Minibatch(indices.gene_idx, batch_size=batch_size)
-        cellline_idx_batch = pm.Minibatch(indices.cellline_idx, batch_size=batch_size)
-        batch_idx_batch = pm.Minibatch(indices.batch_idx, batch_size=batch_size)
+        sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=batch_size)
+        gene_idx_batch = pm.Minibatch(co_idx.gene_idx, batch_size=batch_size)
+        cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=batch_size)
+        batch_idx_batch = pm.Minibatch(b_idx.batch_idx, batch_size=batch_size)
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
         copynumber_data_batch = pm.Minibatch(
             data.copy_number.values, batch_size=batch_size

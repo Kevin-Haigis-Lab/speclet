@@ -174,6 +174,7 @@ class CrcDataManager(DataManager):
                 n_cell_lines=5,
                 n_lineages=2,
                 n_batches=2,
+                n_screens=1,
                 n_kras_types=2,
             )
         elif size == sbc.MockDataSizes.medium:
@@ -183,6 +184,7 @@ class CrcDataManager(DataManager):
                 n_cell_lines=12,
                 n_lineages=2,
                 n_batches=3,
+                n_screens=2,
                 n_kras_types=3,
             )
         else:
@@ -191,7 +193,8 @@ class CrcDataManager(DataManager):
                 n_sgrnas_per_gene=5,
                 n_cell_lines=20,
                 n_lineages=3,
-                n_batches=3,
+                n_batches=4,
+                n_screens=2,
                 n_kras_types=3,
             )
         return self.data

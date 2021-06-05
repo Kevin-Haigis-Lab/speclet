@@ -113,7 +113,10 @@ class SpecletFour(SpecletModel):
         return model
 
     def _model_centered_parameterization(
-        self, model: pm.Model, co_idx: achelp.CommonIndices
+        self,
+        model: pm.Model,
+        co_idx: achelp.CommonIndices,
+        batch_idx: achelp.DataBatchIndices,
     ) -> pm.Model:
         with model:
             # Gene varying intercept.
@@ -138,12 +141,15 @@ class SpecletFour(SpecletModel):
 
             # Batch effect varying intercept.
             b = pm.Normal(  # noqa: F841
-                "b", model["μ_b"], model["σ_b"], shape=co_idx.n_batches
+                "b", model["μ_b"], model["σ_b"], shape=batch_idx.n_batches
             )
         return model
 
     def _model_non_centered_parameterization(
-        self, model: pm.Model, co_idx: achelp.CommonIndices
+        self,
+        model: pm.Model,
+        co_idx: achelp.CommonIndices,
+        batch_idx: achelp.DataBatchIndices,
     ) -> pm.Model:
         with model:
             # Gene varying intercept.
@@ -167,7 +173,7 @@ class SpecletFour(SpecletModel):
                 o = pm.Deterministic("o", μ_o + o_offset * σ_o)  # noqa: F841
 
             # Batch effect varying intercept.
-            b_offset = pm.Normal("b_offset", 0, 1, shape=co_idx.n_batches)
+            b_offset = pm.Normal("b_offset", 0, 1, shape=batch_idx.n_batches)
             b = pm.Deterministic(  # noqa: F841
                 "b", model["μ_b"] + b_offset * model["σ_b"]
             )
@@ -184,13 +190,14 @@ class SpecletFour(SpecletModel):
 
         total_size = data.shape[0]
         co_idx = achelp.common_indices(data)
+        b_idx = achelp.data_batch_indices(data)
 
         # Shared Theano variables
         logger.info("Getting Theano shared variables.")
         sgrna_idx_shared = theano.shared(co_idx.sgrna_idx)
         gene_idx_shared = theano.shared(co_idx.gene_idx)
         cellline_idx_shared = theano.shared(co_idx.cellline_idx)
-        batch_idx_shared = theano.shared(co_idx.batch_idx)
+        batch_idx_shared = theano.shared(b_idx.batch_idx)
         cn_shared = theano.shared(data.copy_number.values / 2.0)
         lfc_shared = theano.shared(data.lfc.values)
 
@@ -199,11 +206,13 @@ class SpecletFour(SpecletModel):
         if self.noncentered_param:
             logger.info("Using non-centered parameterization.")
             model = self._model_non_centered_parameterization(
-                model=model, co_idx=co_idx
+                model=model, co_idx=co_idx, batch_idx=b_idx
             )
         else:
             logger.info("Using centered parameterization.")
-            model = self._model_centered_parameterization(model=model, co_idx=co_idx)
+            model = self._model_centered_parameterization(
+                model=model, co_idx=co_idx, batch_idx=b_idx
+            )
 
         with model:
             _μ = (
