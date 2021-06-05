@@ -32,7 +32,7 @@ class SpecletFive(SpecletModel):
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
-        data_manager: Optional[DataManager] = CrcDataManager(),
+        data_manager: Optional[DataManager] = None,
     ) -> None:
         """Instantiate a SpecletFive model.
 
@@ -43,9 +43,13 @@ class SpecletFive(SpecletModel):
               sampling/fitting results. Defaults to None.
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
-              data. Defaults to None.
+              data. If None (default), a `CrcDataManager` is created automatically.
         """
         logger.debug("Instantiating a SpecletFive model.")
+        if data_manager is None:
+            logger.debug("Creating a data manager since none was supplied.")
+            data_manager = CrcDataManager(debug=debug)
+
         super().__init__(
             name="speclet-five_" + name,
             root_cache_dir=root_cache_dir,
