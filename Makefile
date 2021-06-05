@@ -14,7 +14,7 @@ help:
 	@echo " - munge           : prepare the data for analysis"
 	@echo " - munge_o2        : prepare the data for analysis on O2"
 	@echo " - test            : run tests"
-	@echo " - test            : run tests on O2 (-m 'not plots')"
+	@echo " - test_o2         : run tests on O2 (-m 'not plots')"
 	@echo " - style           : style R and Python files"
 	@echo " - docs            : build documentation for Python modules"
 	@echo " - clean           : remove old logs and temp files"
@@ -49,7 +49,7 @@ style:
 	($(CONDA_ACTIVATE) speclet && flake8 src && flake8 tests)
 
 docs:
-	pdoc --html -o docs --force src
+	pdoc --html -o docs --force -c latex_math=True src
 
 clean:
 	find ./logs/*.log -mtime +7 -exec rm {} \ || echo "No logs to remove.";

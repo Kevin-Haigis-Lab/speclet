@@ -1,4 +1,4 @@
-"""Speclet Five model."""
+"""Speclet Model Five."""
 
 from pathlib import Path
 from typing import Optional, Tuple

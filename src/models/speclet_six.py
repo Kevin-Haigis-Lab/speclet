@@ -1,4 +1,4 @@
-"""Speclet Five model."""
+"""Speclet Model Six."""
 
 from pathlib import Path
 from typing import Optional, Tuple
@@ -15,29 +15,36 @@ from src.models.speclet_model import ReplacementsDict, SpecletModel
 class SpecletSix(SpecletModel):
     """SpecletSix Model.
 
-      lfc ~ i + a_s + d_c + h_[g,c] + j_b + k_c Cc + n_g Cg + q_[g,l] R[g,l] + m_[g,l] M
-        a_s ~ N(μ_a, σ_a)[gene]
-        d_c ~ N(μ_d, σ_d)[lineage]
-        j_b ~ N(μ_j, σ_j)[source] (if more than one source)
+    $$
+    \\begin{aligned}
+    lfc &\\sim i + a_s + d_c + h_{g,c} + j_b +
+    k_c C^{(c)} + n_g C^{(g)} + q_{g,l} R^{(g,l)} + m_{g,l} M \\\\
+    a_s &\\sim N(μ_a, σ_a)[\\text{gene}] \\\\
+    d_c &\\sim N(μ_d, σ_d)[\\text{lineage}] \\\\
+    j_b &\\sim N(μ_j, σ_j)[\\text{source}] \\text{(if more than one source)}
+    \\end{aligned}
+    $$
 
     where:
-        - s: sgRNA
-        - g: gene
-        - c: cell line
-        - l: cell line lineage
-        - b: batch
-        - o: data source (Broad or Sanger)
+
+    - s: sgRNA
+    - g: gene
+    - c: cell line
+    - l: cell line lineage
+    - b: batch
+    - o: data source (Broad or Sanger)
 
     Below is a description of each parameter in the model:
-        a_s     : sgRNA effect with hierarchical level for gene (g)
-        d_c     : cell line effect with hierarchical level for lineage (l; if more than
-                  one is found)
-        j_b     : data source (o; if more than one is found)
-        k_c     : cell line effect of copy number (Cc: z-scaled per cell line)
-        n_g     : gene effect of copy number (Cg: z-scaled per gene)
-        q_[g,l] : RNA effect varying per gene and cell line lineage (R[g,l]: z-scaled
-                  within each gene and lineage)
-        m_[g,l] : mutation effect varying per gene and cell line lineage (M: {0, 1})
+
+    - a_s : sgRNA effect with hierarchical level for gene (g)
+    - d_c: cell line effect with hierarchical level for lineage (l; if more than
+                one is found)
+    - j_b: data source (o; if more than one is found)
+    - k_c: cell line effect of copy number (Cc: z-scaled per cell line)
+    - n_g: gene effect of copy number (Cg: z-scaled per gene)
+    - q_{g,l} : RNA effect varying per gene and cell line lineage (R[g,l]: z-scaled
+                within each gene and lineage)
+    - m_{g,l} : mutation effect varying per gene and cell line lineage (M: {0, 1})
     """
 
     _cell_line_cna_cov: bool
@@ -66,13 +73,21 @@ class SpecletSix(SpecletModel):
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. If None (default), a `CrcDataManager` is created automatically.
+            cell_line_cna_cov (bool, optional): Include the cell line copy number
+              covariate? Defaults to False.
+            gene_cna_cov (bool, optional): Include the gene-specific copy number
+              covariate? Defaults to False.
+            rna_cov (bool, optional): Include the RNA expression covariate? Defaults to
+              False.
+            mutation_cov (bool, optional): Include the mutation covariate? Defaults to
+              False.
         """
         logger.debug("Instantiating a SpecletSix model.")
         if data_manager is None:
             logger.debug("Creating a data manager since none was supplied.")
             data_manager = CrcDataManager(debug=debug)
         super().__init__(
-            name="speclet-five_" + name,
+            name="speclet-six_" + name,
             root_cache_dir=root_cache_dir,
             debug=debug,
             data_manager=data_manager,

@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
 <title>src.data_processing.achilles API documentation</title>
-<meta name="description" content="Funnctions for handling common modifications and processing of the Achilles data." />
+<meta name="description" content="Functions for handling common modifications and processing of the Achilles data." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
 <style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS_CHTML'></script>
 </head>
 <body>
 <main>
@@ -20,14 +21,14 @@
 <h1 class="title">Module <code>src.data_processing.achilles</code></h1>
 </header>
 <section id="section-intro">
-<p>Funnctions for handling common modifications and processing of the Achilles data.</p>
+<p>Functions for handling common modifications and processing of the Achilles data.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">#!/usr/bin/env python3
 
-&#34;&#34;&#34;Funnctions for handling common modifications and processing of the Achilles data.&#34;&#34;&#34;
+&#34;&#34;&#34;Functions for handling common modifications and processing of the Achilles data.&#34;&#34;&#34;
 
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
@@ -84,6 +85,28 @@ def zscale_cna_by_group(
 #### ---- Indices ---- ####
 
 
+def make_mapping_df(data: pd.DataFrame, col1: str, col2: str) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate a DataFrame mapping two columns.
+
+    Args:
+        data (pd.DataFrame): The data set.
+        col1 (str): The name of the column with the lower level group (group that will
+          have all values appear exactly once).
+        col2 (str): The name of the column with the higher level group (multiple values
+          in group 1 will map to a single value in group 2).
+
+    Returns:
+        pd.DataFrame: A DataFrame mapping the values in col1 and col2.
+    &#34;&#34;&#34;
+    return (
+        data[[col1, col2]]
+        .drop_duplicates()
+        .reset_index(drop=True)
+        .sort_values(col1)
+        .reset_index(drop=True)
+    )
+
+
 def make_sgrna_to_gene_mapping_df(
     data: pd.DataFrame, sgrna_col: str = &#34;sgrna&#34;, gene_col: str = &#34;hugo_symbol&#34;
 ) -&gt; pd.DataFrame:
@@ -91,21 +114,33 @@ def make_sgrna_to_gene_mapping_df(
 
     Args:
         data (pd.DataFrame): The data set.
-        sgrna_col (str, optional): The name of the column with sgRNA data.
-          Defaults to &#34;sgrna&#34;.
-        gene_col (str, optional): The name of the column with gene names.
-          Defaults to &#34;hugo_symbol&#34;.
+        sgrna_col (str, optional): The name of the column with sgRNA data. Defaults to
+         &#34;sgrna&#34;.
+        gene_col (str, optional): The name of the column with gene names. Defaults to
+          &#34;hugo_symbol&#34;.
 
     Returns:
         pd.DataFrame: A DataFrame mapping sgRNAs to genes.
     &#34;&#34;&#34;
-    return (
-        data[[sgrna_col, gene_col]]
-        .drop_duplicates()
-        .reset_index(drop=True)
-        .sort_values(sgrna_col)
-        .reset_index(drop=True)
-    )
+    return make_mapping_df(data, sgrna_col, gene_col)
+
+
+def make_cell_line_to_lineage_mapping_df(
+    data: pd.DataFrame, cell_line_col: str = &#34;depmap_id&#34;, lineage_col: str = &#34;lineage&#34;
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate a DataFrame mapping cell lines to lineages.
+
+    Args:
+        data (pd.DataFrame): The data set.
+        cell_line_col (str, optional): The name of the column with cell line names.
+          Defaults to &#34;depmap_id&#34;.
+        lineage_col (str, optional): The name of the column with lineages. Defaults to
+          &#34;lineage&#34;.
+
+    Returns:
+        pd.DataFrame: A DataFrame mapping cell lines to lineages.
+    &#34;&#34;&#34;
+    return make_mapping_df(data, cell_line_col, lineage_col)
 
 
 def make_kras_mutation_index_with_other(
@@ -165,6 +200,10 @@ class CommonIndices(BaseModel):
     n_genes: int = 0
     cellline_idx: np.ndarray
     n_celllines: int = 0
+    lineage_idx: np.ndarray
+    n_lineages: int = 0
+    cellline_to_lineage_map: pd.DataFrame
+    cellline_to_lineage_idx: np.ndarray
     batch_idx: np.ndarray
     n_batches: int = 0
 
@@ -174,6 +213,7 @@ class CommonIndices(BaseModel):
         self.n_sgrnas = dphelp.nunique(self.sgrna_idx)
         self.n_genes = dphelp.nunique(self.gene_idx)
         self.n_celllines = dphelp.nunique(self.cellline_idx)
+        self.n_lineages = dphelp.nunique(self.lineage_idx)
         self.n_batches = dphelp.nunique(self.batch_idx)
 
     class Config:
@@ -192,12 +232,16 @@ def common_indices(achilles_df: pd.DataFrame) -&gt; CommonIndices:
         CommonIndices: A data model with a collection of indices.
     &#34;&#34;&#34;
     sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(achilles_df)
+    cellline_to_lineage_map = make_cell_line_to_lineage_mapping_df(achilles_df)
     return CommonIndices(
         sgrna_idx=dphelp.get_indices(achilles_df, &#34;sgrna&#34;),
         sgrna_to_gene_map=sgrna_to_gene_map,
         sgrna_to_gene_idx=dphelp.get_indices(sgrna_to_gene_map, &#34;hugo_symbol&#34;),
         gene_idx=dphelp.get_indices(achilles_df, &#34;hugo_symbol&#34;),
         cellline_idx=dphelp.get_indices(achilles_df, &#34;depmap_id&#34;),
+        lineage_idx=dphelp.get_indices(achilles_df, &#34;lineage&#34;),
+        cellline_to_lineage_map=cellline_to_lineage_map,
+        cellline_to_lineage_idx=dphelp.get_indices(cellline_to_lineage_map, &#34;lineage&#34;),
         batch_idx=dphelp.get_indices(achilles_df, &#34;p_dna_batch&#34;),
     )
 
@@ -385,14 +429,61 @@ def subsample_achilles_data(
         CommonIndices: A data model with a collection of indices.
     &#34;&#34;&#34;
     sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(achilles_df)
+    cellline_to_lineage_map = make_cell_line_to_lineage_mapping_df(achilles_df)
     return CommonIndices(
         sgrna_idx=dphelp.get_indices(achilles_df, &#34;sgrna&#34;),
         sgrna_to_gene_map=sgrna_to_gene_map,
         sgrna_to_gene_idx=dphelp.get_indices(sgrna_to_gene_map, &#34;hugo_symbol&#34;),
         gene_idx=dphelp.get_indices(achilles_df, &#34;hugo_symbol&#34;),
         cellline_idx=dphelp.get_indices(achilles_df, &#34;depmap_id&#34;),
+        lineage_idx=dphelp.get_indices(achilles_df, &#34;lineage&#34;),
+        cellline_to_lineage_map=cellline_to_lineage_map,
+        cellline_to_lineage_idx=dphelp.get_indices(cellline_to_lineage_map, &#34;lineage&#34;),
         batch_idx=dphelp.get_indices(achilles_df, &#34;p_dna_batch&#34;),
     )</code></pre>
+</details>
+</dd>
+<dt id="src.data_processing.achilles.make_cell_line_to_lineage_mapping_df"><code class="name flex">
+<span>def <span class="ident">make_cell_line_to_lineage_mapping_df</span></span>(<span>data: pandas.core.frame.DataFrame, cell_line_col: str = 'depmap_id', lineage_col: str = 'lineage') -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate a DataFrame mapping cell lines to lineages.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>The data set.</dd>
+<dt><strong><code>cell_line_col</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>The name of the column with cell line names.
+Defaults to "depmap_id".</dd>
+<dt><strong><code>lineage_col</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>The name of the column with lineages. Defaults to
+"lineage".</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>A DataFrame mapping cell lines to lineages.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def make_cell_line_to_lineage_mapping_df(
+    data: pd.DataFrame, cell_line_col: str = &#34;depmap_id&#34;, lineage_col: str = &#34;lineage&#34;
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate a DataFrame mapping cell lines to lineages.
+
+    Args:
+        data (pd.DataFrame): The data set.
+        cell_line_col (str, optional): The name of the column with cell line names.
+          Defaults to &#34;depmap_id&#34;.
+        lineage_col (str, optional): The name of the column with lineages. Defaults to
+          &#34;lineage&#34;.
+
+    Returns:
+        pd.DataFrame: A DataFrame mapping cell lines to lineages.
+    &#34;&#34;&#34;
+    return make_mapping_df(data, cell_line_col, lineage_col)</code></pre>
 </details>
 </dd>
 <dt id="src.data_processing.achilles.make_kras_mutation_index_with_other"><code class="name flex">
@@ -474,6 +565,53 @@ as a separate group. Defaults to 0.</dd>
     )</code></pre>
 </details>
 </dd>
+<dt id="src.data_processing.achilles.make_mapping_df"><code class="name flex">
+<span>def <span class="ident">make_mapping_df</span></span>(<span>data: pandas.core.frame.DataFrame, col1: str, col2: str) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate a DataFrame mapping two columns.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>The data set.</dd>
+<dt><strong><code>col1</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the column with the lower level group (group that will
+have all values appear exactly once).</dd>
+<dt><strong><code>col2</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the column with the higher level group (multiple values
+in group 1 will map to a single value in group 2).</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>A DataFrame mapping the values in col1 and col2.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def make_mapping_df(data: pd.DataFrame, col1: str, col2: str) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate a DataFrame mapping two columns.
+
+    Args:
+        data (pd.DataFrame): The data set.
+        col1 (str): The name of the column with the lower level group (group that will
+          have all values appear exactly once).
+        col2 (str): The name of the column with the higher level group (multiple values
+          in group 1 will map to a single value in group 2).
+
+    Returns:
+        pd.DataFrame: A DataFrame mapping the values in col1 and col2.
+    &#34;&#34;&#34;
+    return (
+        data[[col1, col2]]
+        .drop_duplicates()
+        .reset_index(drop=True)
+        .sort_values(col1)
+        .reset_index(drop=True)
+    )</code></pre>
+</details>
+</dd>
 <dt id="src.data_processing.achilles.make_sgrna_to_gene_mapping_df"><code class="name flex">
 <span>def <span class="ident">make_sgrna_to_gene_mapping_df</span></span>(<span>data: pandas.core.frame.DataFrame, sgrna_col: str = 'sgrna', gene_col: str = 'hugo_symbol') -> pandas.core.frame.DataFrame</span>
 </code></dt>
@@ -484,11 +622,11 @@ as a separate group. Defaults to 0.</dd>
 <dt><strong><code>data</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
 <dd>The data set.</dd>
 <dt><strong><code>sgrna_col</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>The name of the column with sgRNA data.
-Defaults to "sgrna".</dd>
+<dd>The name of the column with sgRNA data. Defaults to</dd>
+<dt>"sgrna".</dt>
 <dt><strong><code>gene_col</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>The name of the column with gene names.
-Defaults to "hugo_symbol".</dd>
+<dd>The name of the column with gene names. Defaults to
+"hugo_symbol".</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -506,21 +644,15 @@ Defaults to "hugo_symbol".</dd>
 
     Args:
         data (pd.DataFrame): The data set.
-        sgrna_col (str, optional): The name of the column with sgRNA data.
-          Defaults to &#34;sgrna&#34;.
-        gene_col (str, optional): The name of the column with gene names.
-          Defaults to &#34;hugo_symbol&#34;.
+        sgrna_col (str, optional): The name of the column with sgRNA data. Defaults to
+         &#34;sgrna&#34;.
+        gene_col (str, optional): The name of the column with gene names. Defaults to
+          &#34;hugo_symbol&#34;.
 
     Returns:
         pd.DataFrame: A DataFrame mapping sgRNAs to genes.
     &#34;&#34;&#34;
-    return (
-        data[[sgrna_col, gene_col]]
-        .drop_duplicates()
-        .reset_index(drop=True)
-        .sort_values(sgrna_col)
-        .reset_index(drop=True)
-    )</code></pre>
+    return make_mapping_df(data, sgrna_col, gene_col)</code></pre>
 </details>
 </dd>
 <dt id="src.data_processing.achilles.read_achilles_data"><code class="name flex">
@@ -793,7 +925,7 @@ Defaults to None.</dd>
 <dl>
 <dt id="src.data_processing.achilles.CommonIndices"><code class="flex name class">
 <span>class <span class="ident">CommonIndices</span></span>
-<span>(</span><span>*, sgrna_idx: numpy.ndarray, n_sgrnas: int = 0, sgrna_to_gene_map: pandas.core.frame.DataFrame, sgrna_to_gene_idx: numpy.ndarray, gene_idx: numpy.ndarray, n_genes: int = 0, cellline_idx: numpy.ndarray, n_celllines: int = 0, batch_idx: numpy.ndarray, n_batches: int = 0)</span>
+<span>(</span><span>*, sgrna_idx: numpy.ndarray, n_sgrnas: int = 0, sgrna_to_gene_map: pandas.core.frame.DataFrame, sgrna_to_gene_idx: numpy.ndarray, gene_idx: numpy.ndarray, n_genes: int = 0, cellline_idx: numpy.ndarray, n_celllines: int = 0, lineage_idx: numpy.ndarray, n_lineages: int = 0, cellline_to_lineage_map: pandas.core.frame.DataFrame, cellline_to_lineage_idx: numpy.ndarray, batch_idx: numpy.ndarray, n_batches: int = 0)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Object to hold common indices used for modeling Achilles data.</p>
@@ -813,6 +945,10 @@ Defaults to None.</dd>
     n_genes: int = 0
     cellline_idx: np.ndarray
     n_celllines: int = 0
+    lineage_idx: np.ndarray
+    n_lineages: int = 0
+    cellline_to_lineage_map: pd.DataFrame
+    cellline_to_lineage_idx: np.ndarray
     batch_idx: np.ndarray
     n_batches: int = 0
 
@@ -822,6 +958,7 @@ Defaults to None.</dd>
         self.n_sgrnas = dphelp.nunique(self.sgrna_idx)
         self.n_genes = dphelp.nunique(self.gene_idx)
         self.n_celllines = dphelp.nunique(self.cellline_idx)
+        self.n_lineages = dphelp.nunique(self.lineage_idx)
         self.n_batches = dphelp.nunique(self.batch_idx)
 
     class Config:
@@ -859,7 +996,9 @@ Defaults to None.</dd>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="src.data_processing.achilles.common_indices" href="#src.data_processing.achilles.common_indices">common_indices</a></code></li>
+<li><code><a title="src.data_processing.achilles.make_cell_line_to_lineage_mapping_df" href="#src.data_processing.achilles.make_cell_line_to_lineage_mapping_df">make_cell_line_to_lineage_mapping_df</a></code></li>
 <li><code><a title="src.data_processing.achilles.make_kras_mutation_index_with_other" href="#src.data_processing.achilles.make_kras_mutation_index_with_other">make_kras_mutation_index_with_other</a></code></li>
+<li><code><a title="src.data_processing.achilles.make_mapping_df" href="#src.data_processing.achilles.make_mapping_df">make_mapping_df</a></code></li>
 <li><code><a title="src.data_processing.achilles.make_sgrna_to_gene_mapping_df" href="#src.data_processing.achilles.make_sgrna_to_gene_mapping_df">make_sgrna_to_gene_mapping_df</a></code></li>
 <li><code><a title="src.data_processing.achilles.read_achilles_data" href="#src.data_processing.achilles.read_achilles_data">read_achilles_data</a></code></li>
 <li><code><a title="src.data_processing.achilles.set_achilles_categorical_columns" href="#src.data_processing.achilles.set_achilles_categorical_columns">set_achilles_categorical_columns</a></code></li>
