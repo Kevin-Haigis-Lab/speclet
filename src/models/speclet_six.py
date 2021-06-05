@@ -107,17 +107,19 @@ class SpecletSix(SpecletModel):
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
-        idx = achelp.common_indices(data)
+        co_idx = achelp.common_indices(data)
+        batch_idx = achelp.data_batch_indices(data)
 
         # Shared Theano variables
         logger.info("Getting Theano shared variables.")
-        sgrna_idx_shared = ts(idx.sgrna_idx)
-        gene_idx_shared = ts(idx.gene_idx)
-        sgrna_to_gene_idx_shared = ts(idx.sgrna_to_gene_idx)
-        cellline_idx_shared = ts(idx.cellline_idx)
-        # lineage_idx_shared = ts(idx.lineage_idx)
-        cellline_to_lineage_idx_shared = ts(idx.cellline_to_lineage_idx)
-        batch_idx_shared = ts(idx.batch_idx)
+        sgrna_idx_shared = ts(co_idx.sgrna_idx)
+        gene_idx_shared = ts(co_idx.gene_idx)
+        sgrna_to_gene_idx_shared = ts(co_idx.sgrna_to_gene_idx)
+        cellline_idx_shared = ts(co_idx.cellline_idx)
+        lineage_idx_shared = ts(co_idx.lineage_idx)
+        cellline_to_lineage_idx_shared = ts(co_idx.cellline_to_lineage_idx)
+        batch_idx_shared = ts(batch_idx.batch_idx)
+        batch_to_screen_idx_shared = ts(batch_idx.batch_to_screen_idx)
         lfc_shared = ts(data.lfc.values)
 
         self.shared_vars = {
@@ -125,9 +127,10 @@ class SpecletSix(SpecletModel):
             "gene_idx_shared": gene_idx_shared,
             "sgrna_to_gene_idx_shared": sgrna_to_gene_idx_shared,
             "cellline_idx_shared": cellline_idx_shared,
-            # "lineage_idx_shared": lineage_idx_shared,
+            "lineage_idx_shared": lineage_idx_shared,
             "cellline_to_lineage_idx_shared": cellline_to_lineage_idx_shared,
             "batch_idx_shared": batch_idx_shared,
+            "batch_to_screen_idx_shared": batch_to_screen_idx_shared,
             "lfc_shared": lfc_shared,
         }
 
@@ -138,33 +141,49 @@ class SpecletSix(SpecletModel):
 
         with pm.Model() as model:
             # Varying batch intercept.
-            μ_j = pm.Normal("μ_j", 0, 0.2)
-            σ_j = pm.HalfNormal("σ_j", 1)
-            j_offset = pm.Normal("j_offset", 0, 1, shape=idx.n_celllines)
-            j = pm.Deterministic("j", μ_j + j_offset * σ_j)
+            if batch_idx.n_screens == 1:
+                μ_j = pm.Normal("μ_j", 0, 0.2)
+                σ_j = pm.HalfNormal("σ_j", 1)
+                j_offset = pm.Normal("j_offset", 0, 1, shape=batch_idx.n_batches)
+                j = pm.Deterministic("j", μ_j + j_offset * σ_j)
+            else:
+                μ_μ_j = pm.Normal("μ_μ_j", 0, 0.5)
+                σ_μ_j = pm.HalfNormal("σ_μ_j", 0.5)
+                σ_σ_j = pm.HalfNormal("σ_σ_j", 1)
+                μ_j_offset = pm.Normal("μ_j_offset", 0, 1, shape=batch_idx.n_screens)
+                μ_j = pm.Deterministic("μ_j", μ_μ_j + μ_j_offset * σ_μ_j)
+                σ_j = pm.HalfNormal("σ_j", σ_σ_j, shape=batch_idx.n_screens)
+                j_offset = pm.Normal("j_offset", 0, 1, shape=batch_idx.n_batches)
+                j = pm.Deterministic(
+                    "j",
+                    μ_j[batch_to_screen_idx_shared]
+                    + j_offset * σ_j[batch_to_screen_idx_shared],
+                )
 
             # Varying gene and cell line intercept.
             μ_h = pm.Normal("μ_h", 0, 0.2)
             σ_h = pm.HalfNormal("σ_h", 1)
-            h_offset = pm.Normal("h_offset", 0, 1, shape=(idx.n_genes, idx.n_celllines))
+            h_offset = pm.Normal(
+                "h_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+            )
             h = pm.Deterministic("h", μ_h + h_offset * σ_h)
 
             # Varying cell line intercept.
-            if idx.n_lineages == 1:
+            if co_idx.n_lineages == 1:
                 logger.info("Only 1 cell line lineage found.")
                 μ_d = pm.Normal("μ_d", 0, 0.2)
                 σ_d = pm.HalfNormal("σ_d", 1)
-                d_offset = pm.Normal("d_offset", 0, 1, shape=idx.n_celllines)
+                d_offset = pm.Normal("d_offset", 0, 1, shape=co_idx.n_celllines)
                 d = pm.Deterministic("d", μ_d + d_offset * σ_d)
             else:
-                logger.info(f"Found {idx.n_lineages} cell line lineages.")
+                logger.info(f"Found {co_idx.n_lineages} cell line lineages.")
                 μ_μ_d = pm.Normal("μ_μ_d", 0, 0.2)
                 σ_μ_d = pm.HalfNormal("σ_μ_d", 1)
-                μ_d_offset = pm.Normal("μ_d_offset", 0, 1, shape=idx.n_lineages)
+                μ_d_offset = pm.Normal("μ_d_offset", 0, 1, shape=co_idx.n_lineages)
                 μ_d = pm.Deterministic("μ_d", μ_μ_d + μ_d_offset * σ_μ_d)
                 σ_σ_d = pm.HalfNormal("σ_σ_d", 1)
-                σ_d = pm.HalfNormal("σ_d", σ_σ_d, shape=idx.n_lineages)
-                d_offset = pm.Normal("d_offset", 0, 1, shape=idx.n_celllines)
+                σ_d = pm.HalfNormal("σ_d", σ_σ_d, shape=co_idx.n_lineages)
+                d_offset = pm.Normal("d_offset", 0, 1, shape=co_idx.n_celllines)
                 d = pm.Deterministic(
                     "d",
                     μ_d[cellline_to_lineage_idx_shared]
@@ -174,11 +193,11 @@ class SpecletSix(SpecletModel):
             # Varying gene intercept.
             μ_μ_a = pm.Normal("μ_μ_a", 0, 1)
             σ_μ_a = pm.HalfNormal("σ_μ_a", 1)
-            μ_a_offset = pm.Normal("μ_a_offset", 0, 1, shape=idx.n_sgrnas)
+            μ_a_offset = pm.Normal("μ_a_offset", 0, 1, shape=co_idx.n_sgrnas)
             μ_a = pm.Deterministic("μ_a", μ_μ_a + μ_a_offset * σ_μ_a)
             σ_σ_a = pm.HalfNormal("σ_σ_a", 1)
-            σ_a = pm.HalfNormal("σ_a", σ_σ_a, shape=idx.n_genes)
-            a_offset = pm.Normal("a_offset", 0, 1, shape=idx.n_sgrnas)
+            σ_a = pm.HalfNormal("σ_a", σ_σ_a, shape=co_idx.n_genes)
+            a_offset = pm.Normal("a_offset", 0, 1, shape=co_idx.n_sgrnas)
             a = pm.Deterministic(
                 "a",
                 μ_a[sgrna_to_gene_idx_shared]
@@ -198,7 +217,7 @@ class SpecletSix(SpecletModel):
 
             # Standard deviation of log-fold change, varies per batch.
             σ_σ = pm.HalfNormal("σ_σ", 1)
-            σ = pm.HalfNormal("σ", σ_σ, shape=idx.n_batches)
+            σ = pm.HalfNormal("σ", σ_σ, shape=batch_idx.n_batches)
 
             lfc = pm.Normal(  # noqa: F841
                 "lfc",
@@ -233,17 +252,22 @@ class SpecletSix(SpecletModel):
             )
 
         data = self.data_manager.get_data()
-        batch_size = self.data_manager.get_batch_size()
-        idx = achelp.common_indices(data)
+        mb_size = self.data_manager.get_batch_size()
+        co_idx = achelp.common_indices(data)
+        batch_idx = achelp.data_batch_indices(data)
 
-        gene_idx_batch = pm.Minibatch(idx.gene_idx, batch_size=batch_size)
-        cellline_idx_batch = pm.Minibatch(idx.cellline_idx, batch_size=batch_size)
-        batch_idx_batch = pm.Minibatch(idx.batch_idx, batch_size=batch_size)
-        lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
+        sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=mb_size)
+        gene_idx_batch = pm.Minibatch(co_idx.gene_idx, batch_size=mb_size)
+        cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=mb_size)
+        lineage_idx_batch = pm.Minibatch(co_idx.lineage_idx, batch_size=mb_size)
+        batch_idx_batch = pm.Minibatch(batch_idx.batch_idx, batch_size=mb_size)
+        lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=mb_size)
 
         return {
+            self.shared_vars["sgrna_idx_shared"]: sgrna_idx_batch,
             self.shared_vars["gene_idx_shared"]: gene_idx_batch,
             self.shared_vars["cellline_idx_shared"]: cellline_idx_batch,
+            self.shared_vars["lineage_idx_shared"]: lineage_idx_batch,
             self.shared_vars["batch_idx_shared"]: batch_idx_batch,
             self.shared_vars["lfc_shared"]: lfc_data_batch,
         }

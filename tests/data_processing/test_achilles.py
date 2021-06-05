@@ -67,7 +67,7 @@ class TestModifyingAchillesData:
         data = achelp.read_achilles_data(self.data_path, set_categorical_cols=False)
         assert "category" not in data.dtypes
         data = achelp.set_achilles_categorical_columns(data=data)
-        assert sum(data.dtypes == "category") == 6
+        assert sum(data.dtypes == "category") == 7
 
     def test_custom_achilles_categorical_columns(self):
         data = achelp.read_achilles_data(self.data_path, set_categorical_cols=False)
@@ -248,7 +248,6 @@ def test_common_idx_counters(example_achilles_data: pd.DataFrame):
     assert indices.n_sgrnas == dphelp.nunique(indices.sgrna_idx)
     assert indices.n_genes == dphelp.nunique(indices.gene_idx)
     assert indices.n_celllines == dphelp.nunique(indices.cellline_idx)
-    assert indices.n_batches == dphelp.nunique(indices.batch_idx)
 
 
 def test_common_idx_sgrna_to_gene_map(example_achilles_data: pd.DataFrame):
@@ -263,13 +262,6 @@ def test_common_idx_depmap(example_achilles_data: pd.DataFrame):
     indices = achelp.common_indices(example_achilles_data.sample(frac=1.0))
     assert dphelp.nunique(example_achilles_data.depmap_id.values) == dphelp.nunique(
         indices.cellline_idx
-    )
-
-
-def test_common_idx_pdna_batch(example_achilles_data: pd.DataFrame):
-    indices = achelp.common_indices(example_achilles_data.sample(frac=1.0))
-    assert dphelp.nunique(example_achilles_data.p_dna_batch.values) == dphelp.nunique(
-        indices.batch_idx
     )
 
 
@@ -327,3 +319,16 @@ def test_make_kras_mutation_index_with_other_colnames():
 #     assert len(idx.cellline_to_kras_mutation_idx) == len(
 #         example_achilles_data["depmap_id"].unique()
 #     )
+
+
+def test_data_batch_indices(example_achilles_data: pd.DataFrame):
+    bi = achelp.data_batch_indices(example_achilles_data)
+    n_sources = len(example_achilles_data["screen"].values.unique())
+    n_batches = len(example_achilles_data["p_dna_batch"].values.unique())
+    assert bi.n_screens == n_sources
+    assert bi.n_batches == n_batches
+
+    batch_map = bi.batch_to_screen_map
+    np.testing.assert_array_equal(
+        batch_map["p_dna_batch"].values, batch_map["p_dna_batch"].unique()
+    )
