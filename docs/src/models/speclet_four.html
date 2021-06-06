@@ -141,7 +141,10 @@ class SpecletFour(SpecletModel):
         return model
 
     def _model_centered_parameterization(
-        self, model: pm.Model, co_idx: achelp.CommonIndices
+        self,
+        model: pm.Model,
+        co_idx: achelp.CommonIndices,
+        batch_idx: achelp.DataBatchIndices,
     ) -&gt; pm.Model:
         with model:
             # Gene varying intercept.
@@ -166,12 +169,15 @@ class SpecletFour(SpecletModel):
 
             # Batch effect varying intercept.
             b = pm.Normal(  # noqa: F841
-                &#34;b&#34;, model[&#34;μ_b&#34;], model[&#34;σ_b&#34;], shape=co_idx.n_batches
+                &#34;b&#34;, model[&#34;μ_b&#34;], model[&#34;σ_b&#34;], shape=batch_idx.n_batches
             )
         return model
 
     def _model_non_centered_parameterization(
-        self, model: pm.Model, co_idx: achelp.CommonIndices
+        self,
+        model: pm.Model,
+        co_idx: achelp.CommonIndices,
+        batch_idx: achelp.DataBatchIndices,
     ) -&gt; pm.Model:
         with model:
             # Gene varying intercept.
@@ -195,7 +201,7 @@ class SpecletFour(SpecletModel):
                 o = pm.Deterministic(&#34;o&#34;, μ_o + o_offset * σ_o)  # noqa: F841
 
             # Batch effect varying intercept.
-            b_offset = pm.Normal(&#34;b_offset&#34;, 0, 1, shape=co_idx.n_batches)
+            b_offset = pm.Normal(&#34;b_offset&#34;, 0, 1, shape=batch_idx.n_batches)
             b = pm.Deterministic(  # noqa: F841
                 &#34;b&#34;, model[&#34;μ_b&#34;] + b_offset * model[&#34;σ_b&#34;]
             )
@@ -212,13 +218,14 @@ class SpecletFour(SpecletModel):
 
         total_size = data.shape[0]
         co_idx = achelp.common_indices(data)
+        b_idx = achelp.data_batch_indices(data)
 
         # Shared Theano variables
         logger.info(&#34;Getting Theano shared variables.&#34;)
         sgrna_idx_shared = theano.shared(co_idx.sgrna_idx)
         gene_idx_shared = theano.shared(co_idx.gene_idx)
         cellline_idx_shared = theano.shared(co_idx.cellline_idx)
-        batch_idx_shared = theano.shared(co_idx.batch_idx)
+        batch_idx_shared = theano.shared(b_idx.batch_idx)
         cn_shared = theano.shared(data.copy_number.values / 2.0)
         lfc_shared = theano.shared(data.lfc.values)
 
@@ -227,11 +234,13 @@ class SpecletFour(SpecletModel):
         if self.noncentered_param:
             logger.info(&#34;Using non-centered parameterization.&#34;)
             model = self._model_non_centered_parameterization(
-                model=model, co_idx=co_idx
+                model=model, co_idx=co_idx, batch_idx=b_idx
             )
         else:
             logger.info(&#34;Using centered parameterization.&#34;)
-            model = self._model_centered_parameterization(model=model, co_idx=co_idx)
+            model = self._model_centered_parameterization(
+                model=model, co_idx=co_idx, batch_idx=b_idx
+            )
 
         with model:
             _μ = (
@@ -480,7 +489,10 @@ parameterization? Default to True.</dd>
         return model
 
     def _model_centered_parameterization(
-        self, model: pm.Model, co_idx: achelp.CommonIndices
+        self,
+        model: pm.Model,
+        co_idx: achelp.CommonIndices,
+        batch_idx: achelp.DataBatchIndices,
     ) -&gt; pm.Model:
         with model:
             # Gene varying intercept.
@@ -505,12 +517,15 @@ parameterization? Default to True.</dd>
 
             # Batch effect varying intercept.
             b = pm.Normal(  # noqa: F841
-                &#34;b&#34;, model[&#34;μ_b&#34;], model[&#34;σ_b&#34;], shape=co_idx.n_batches
+                &#34;b&#34;, model[&#34;μ_b&#34;], model[&#34;σ_b&#34;], shape=batch_idx.n_batches
             )
         return model
 
     def _model_non_centered_parameterization(
-        self, model: pm.Model, co_idx: achelp.CommonIndices
+        self,
+        model: pm.Model,
+        co_idx: achelp.CommonIndices,
+        batch_idx: achelp.DataBatchIndices,
     ) -&gt; pm.Model:
         with model:
             # Gene varying intercept.
@@ -534,7 +549,7 @@ parameterization? Default to True.</dd>
                 o = pm.Deterministic(&#34;o&#34;, μ_o + o_offset * σ_o)  # noqa: F841
 
             # Batch effect varying intercept.
-            b_offset = pm.Normal(&#34;b_offset&#34;, 0, 1, shape=co_idx.n_batches)
+            b_offset = pm.Normal(&#34;b_offset&#34;, 0, 1, shape=batch_idx.n_batches)
             b = pm.Deterministic(  # noqa: F841
                 &#34;b&#34;, model[&#34;μ_b&#34;] + b_offset * model[&#34;σ_b&#34;]
             )
@@ -551,13 +566,14 @@ parameterization? Default to True.</dd>
 
         total_size = data.shape[0]
         co_idx = achelp.common_indices(data)
+        b_idx = achelp.data_batch_indices(data)
 
         # Shared Theano variables
         logger.info(&#34;Getting Theano shared variables.&#34;)
         sgrna_idx_shared = theano.shared(co_idx.sgrna_idx)
         gene_idx_shared = theano.shared(co_idx.gene_idx)
         cellline_idx_shared = theano.shared(co_idx.cellline_idx)
-        batch_idx_shared = theano.shared(co_idx.batch_idx)
+        batch_idx_shared = theano.shared(b_idx.batch_idx)
         cn_shared = theano.shared(data.copy_number.values / 2.0)
         lfc_shared = theano.shared(data.lfc.values)
 
@@ -566,11 +582,13 @@ parameterization? Default to True.</dd>
         if self.noncentered_param:
             logger.info(&#34;Using non-centered parameterization.&#34;)
             model = self._model_non_centered_parameterization(
-                model=model, co_idx=co_idx
+                model=model, co_idx=co_idx, batch_idx=b_idx
             )
         else:
             logger.info(&#34;Using centered parameterization.&#34;)
-            model = self._model_centered_parameterization(model=model, co_idx=co_idx)
+            model = self._model_centered_parameterization(
+                model=model, co_idx=co_idx, batch_idx=b_idx
+            )
 
         with model:
             _μ = (
@@ -786,13 +804,14 @@ def noncentered_param(self) -&gt; bool:
 
     total_size = data.shape[0]
     co_idx = achelp.common_indices(data)
+    b_idx = achelp.data_batch_indices(data)
 
     # Shared Theano variables
     logger.info(&#34;Getting Theano shared variables.&#34;)
     sgrna_idx_shared = theano.shared(co_idx.sgrna_idx)
     gene_idx_shared = theano.shared(co_idx.gene_idx)
     cellline_idx_shared = theano.shared(co_idx.cellline_idx)
-    batch_idx_shared = theano.shared(co_idx.batch_idx)
+    batch_idx_shared = theano.shared(b_idx.batch_idx)
     cn_shared = theano.shared(data.copy_number.values / 2.0)
     lfc_shared = theano.shared(data.lfc.values)
 
@@ -801,11 +820,13 @@ def noncentered_param(self) -&gt; bool:
     if self.noncentered_param:
         logger.info(&#34;Using non-centered parameterization.&#34;)
         model = self._model_non_centered_parameterization(
-            model=model, co_idx=co_idx
+            model=model, co_idx=co_idx, batch_idx=b_idx
         )
     else:
         logger.info(&#34;Using centered parameterization.&#34;)
-        model = self._model_centered_parameterization(model=model, co_idx=co_idx)
+        model = self._model_centered_parameterization(
+            model=model, co_idx=co_idx, batch_idx=b_idx
+        )
 
     with model:
         _μ = (

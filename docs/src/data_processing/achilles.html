@@ -204,8 +204,6 @@ class CommonIndices(BaseModel):
     n_lineages: int = 0
     cellline_to_lineage_map: pd.DataFrame
     cellline_to_lineage_idx: np.ndarray
-    batch_idx: np.ndarray
-    n_batches: int = 0
 
     def __init__(self, **data):
         &#34;&#34;&#34;Object to hold common indices used for modeling Achilles data.&#34;&#34;&#34;
@@ -214,7 +212,6 @@ class CommonIndices(BaseModel):
         self.n_genes = dphelp.nunique(self.gene_idx)
         self.n_celllines = dphelp.nunique(self.cellline_idx)
         self.n_lineages = dphelp.nunique(self.lineage_idx)
-        self.n_batches = dphelp.nunique(self.batch_idx)
 
     class Config:
         &#34;&#34;&#34;Configuration for pydantic validation.&#34;&#34;&#34;
@@ -243,6 +240,48 @@ def common_indices(achilles_df: pd.DataFrame) -&gt; CommonIndices:
         cellline_to_lineage_map=cellline_to_lineage_map,
         cellline_to_lineage_idx=dphelp.get_indices(cellline_to_lineage_map, &#34;lineage&#34;),
         batch_idx=dphelp.get_indices(achilles_df, &#34;p_dna_batch&#34;),
+    )
+
+
+class DataBatchIndices(BaseModel):
+    &#34;&#34;&#34;Object to hold indices relating to data screens and batches.&#34;&#34;&#34;
+
+    batch_idx: np.ndarray
+    n_batches: int = 0
+    screen_idx: np.ndarray
+    n_screens: int = 0
+    batch_to_screen_map: pd.DataFrame
+    batch_to_screen_idx: np.ndarray
+
+    def __init__(self, **data):
+        &#34;&#34;&#34;Object to hold indices relating to data screens and batches.&#34;&#34;&#34;
+        super().__init__(**data)
+        self.n_batches = dphelp.nunique(self.batch_idx)
+        self.n_screens = dphelp.nunique(self.screen_idx)
+
+    class Config:
+        &#34;&#34;&#34;Configuration for pydantic validation.&#34;&#34;&#34;
+
+        arbitrary_types_allowed = True
+
+
+def data_batch_indices(achilles_df: pd.DataFrame) -&gt; DataBatchIndices:
+    &#34;&#34;&#34;Generate a collection of indices relating to data screens and batches.
+
+    Args:
+        achilles_df (pd.DataFrame): The DataFrame with Achilles data.
+
+    Returns:
+        DataBatchIndices: A data model with a collection of indices.
+    &#34;&#34;&#34;
+    batch_to_screen_map = make_mapping_df(
+        achilles_df, col1=&#34;p_dna_batch&#34;, col2=&#34;screen&#34;
+    )
+    return DataBatchIndices(
+        batch_idx=dphelp.get_indices(achilles_df, &#34;p_dna_batch&#34;),
+        screen_idx=dphelp.get_indices(achilles_df, &#34;screen&#34;),
+        batch_to_screen_map=batch_to_screen_map,
+        batch_to_screen_idx=dphelp.get_indices(batch_to_screen_map, &#34;screen&#34;),
     )
 
 
@@ -295,6 +334,7 @@ def set_achilles_categorical_columns(
         &#34;lineage&#34;,
         &#34;sgrna_target_chr&#34;,
         &#34;p_dna_batch&#34;,
+        &#34;screen&#34;,
     ),
     ordered: bool = True,
     sort_cats: bool = False,
@@ -305,7 +345,7 @@ def set_achilles_categorical_columns(
         data (pd.DataFrame): Achilles DataFrame.
         cols (Union[List[str], Tuple[str, ...]], optional): The names of the columns to
           make categorical. Defaults to (&#34;hugo_symbol&#34;, &#34;depmap_id&#34;, &#34;sgrna&#34;,
-          &#34;lineage&#34;, &#34;sgrna_target_chr&#34;, &#34;p_dna_batch&#34;).
+          &#34;lineage&#34;, &#34;sgrna_target_chr&#34;, &#34;p_dna_batch&#34;, &#34;sreen&#34;).
         ordered (bool, optional): Should the categorical columns be ordered?
           Defaults to True.
         sort_cats (bool, optional): Should the categorical columns be sorted?
@@ -440,6 +480,45 @@ def subsample_achilles_data(
         cellline_to_lineage_map=cellline_to_lineage_map,
         cellline_to_lineage_idx=dphelp.get_indices(cellline_to_lineage_map, &#34;lineage&#34;),
         batch_idx=dphelp.get_indices(achilles_df, &#34;p_dna_batch&#34;),
+    )</code></pre>
+</details>
+</dd>
+<dt id="src.data_processing.achilles.data_batch_indices"><code class="name flex">
+<span>def <span class="ident">data_batch_indices</span></span>(<span>achilles_df: pandas.core.frame.DataFrame) -> <a title="src.data_processing.achilles.DataBatchIndices" href="#src.data_processing.achilles.DataBatchIndices">DataBatchIndices</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate a collection of indices relating to data screens and batches.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>achilles_df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>The DataFrame with Achilles data.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="src.data_processing.achilles.DataBatchIndices" href="#src.data_processing.achilles.DataBatchIndices">DataBatchIndices</a></code></dt>
+<dd>A data model with a collection of indices.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def data_batch_indices(achilles_df: pd.DataFrame) -&gt; DataBatchIndices:
+    &#34;&#34;&#34;Generate a collection of indices relating to data screens and batches.
+
+    Args:
+        achilles_df (pd.DataFrame): The DataFrame with Achilles data.
+
+    Returns:
+        DataBatchIndices: A data model with a collection of indices.
+    &#34;&#34;&#34;
+    batch_to_screen_map = make_mapping_df(
+        achilles_df, col1=&#34;p_dna_batch&#34;, col2=&#34;screen&#34;
+    )
+    return DataBatchIndices(
+        batch_idx=dphelp.get_indices(achilles_df, &#34;p_dna_batch&#34;),
+        screen_idx=dphelp.get_indices(achilles_df, &#34;screen&#34;),
+        batch_to_screen_map=batch_to_screen_map,
+        batch_to_screen_idx=dphelp.get_indices(batch_to_screen_map, &#34;screen&#34;),
     )</code></pre>
 </details>
 </dd>
@@ -717,7 +796,7 @@ be set? Defaults to True.</dd>
 </details>
 </dd>
 <dt id="src.data_processing.achilles.set_achilles_categorical_columns"><code class="name flex">
-<span>def <span class="ident">set_achilles_categorical_columns</span></span>(<span>data: pandas.core.frame.DataFrame, cols: Union[List[str], Tuple[str, ...]] = ('hugo_symbol', 'depmap_id', 'sgrna', 'lineage', 'sgrna_target_chr', 'p_dna_batch'), ordered: bool = True, sort_cats: bool = False) -> pandas.core.frame.DataFrame</span>
+<span>def <span class="ident">set_achilles_categorical_columns</span></span>(<span>data: pandas.core.frame.DataFrame, cols: Union[List[str], Tuple[str, ...]] = ('hugo_symbol', 'depmap_id', 'sgrna', 'lineage', 'sgrna_target_chr', 'p_dna_batch', 'screen'), ordered: bool = True, sort_cats: bool = False) -> pandas.core.frame.DataFrame</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Set the appropriate columns of the Achilles data as factors.</p>
@@ -728,7 +807,7 @@ be set? Defaults to True.</dd>
 <dt><strong><code>cols</code></strong> :&ensp;<code>Union[List[str], Tuple[str, &hellip;]]</code>, optional</dt>
 <dd>The names of the columns to
 make categorical. Defaults to ("hugo_symbol", "depmap_id", "sgrna",
-"lineage", "sgrna_target_chr", "p_dna_batch").</dd>
+"lineage", "sgrna_target_chr", "p_dna_batch", "sreen").</dd>
 <dt><strong><code>ordered</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Should the categorical columns be ordered?
 Defaults to True.</dd>
@@ -754,6 +833,7 @@ Defaults to False.</dd>
         &#34;lineage&#34;,
         &#34;sgrna_target_chr&#34;,
         &#34;p_dna_batch&#34;,
+        &#34;screen&#34;,
     ),
     ordered: bool = True,
     sort_cats: bool = False,
@@ -764,7 +844,7 @@ Defaults to False.</dd>
         data (pd.DataFrame): Achilles DataFrame.
         cols (Union[List[str], Tuple[str, ...]], optional): The names of the columns to
           make categorical. Defaults to (&#34;hugo_symbol&#34;, &#34;depmap_id&#34;, &#34;sgrna&#34;,
-          &#34;lineage&#34;, &#34;sgrna_target_chr&#34;, &#34;p_dna_batch&#34;).
+          &#34;lineage&#34;, &#34;sgrna_target_chr&#34;, &#34;p_dna_batch&#34;, &#34;sreen&#34;).
         ordered (bool, optional): Should the categorical columns be ordered?
           Defaults to True.
         sort_cats (bool, optional): Should the categorical columns be sorted?
@@ -925,7 +1005,7 @@ Defaults to None.</dd>
 <dl>
 <dt id="src.data_processing.achilles.CommonIndices"><code class="flex name class">
 <span>class <span class="ident">CommonIndices</span></span>
-<span>(</span><span>*, sgrna_idx: numpy.ndarray, n_sgrnas: int = 0, sgrna_to_gene_map: pandas.core.frame.DataFrame, sgrna_to_gene_idx: numpy.ndarray, gene_idx: numpy.ndarray, n_genes: int = 0, cellline_idx: numpy.ndarray, n_celllines: int = 0, lineage_idx: numpy.ndarray, n_lineages: int = 0, cellline_to_lineage_map: pandas.core.frame.DataFrame, cellline_to_lineage_idx: numpy.ndarray, batch_idx: numpy.ndarray, n_batches: int = 0)</span>
+<span>(</span><span>*, sgrna_idx: numpy.ndarray, n_sgrnas: int = 0, sgrna_to_gene_map: pandas.core.frame.DataFrame, sgrna_to_gene_idx: numpy.ndarray, gene_idx: numpy.ndarray, n_genes: int = 0, cellline_idx: numpy.ndarray, n_celllines: int = 0, lineage_idx: numpy.ndarray, n_lineages: int = 0, cellline_to_lineage_map: pandas.core.frame.DataFrame, cellline_to_lineage_idx: numpy.ndarray)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Object to hold common indices used for modeling Achilles data.</p>
@@ -949,8 +1029,6 @@ Defaults to None.</dd>
     n_lineages: int = 0
     cellline_to_lineage_map: pd.DataFrame
     cellline_to_lineage_idx: np.ndarray
-    batch_idx: np.ndarray
-    n_batches: int = 0
 
     def __init__(self, **data):
         &#34;&#34;&#34;Object to hold common indices used for modeling Achilles data.&#34;&#34;&#34;
@@ -959,7 +1037,6 @@ Defaults to None.</dd>
         self.n_genes = dphelp.nunique(self.gene_idx)
         self.n_celllines = dphelp.nunique(self.cellline_idx)
         self.n_lineages = dphelp.nunique(self.lineage_idx)
-        self.n_batches = dphelp.nunique(self.batch_idx)
 
     class Config:
         &#34;&#34;&#34;Configuration for pydantic validation.&#34;&#34;&#34;
@@ -974,6 +1051,51 @@ Defaults to None.</dd>
 <h3>Class variables</h3>
 <dl>
 <dt id="src.data_processing.achilles.CommonIndices.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"><p>Configuration for pydantic validation.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="src.data_processing.achilles.DataBatchIndices"><code class="flex name class">
+<span>class <span class="ident">DataBatchIndices</span></span>
+<span>(</span><span>*, batch_idx: numpy.ndarray, n_batches: int = 0, screen_idx: numpy.ndarray, n_screens: int = 0, batch_to_screen_map: pandas.core.frame.DataFrame, batch_to_screen_idx: numpy.ndarray)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Object to hold indices relating to data screens and batches.</p>
+<p>Object to hold indices relating to data screens and batches.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DataBatchIndices(BaseModel):
+    &#34;&#34;&#34;Object to hold indices relating to data screens and batches.&#34;&#34;&#34;
+
+    batch_idx: np.ndarray
+    n_batches: int = 0
+    screen_idx: np.ndarray
+    n_screens: int = 0
+    batch_to_screen_map: pd.DataFrame
+    batch_to_screen_idx: np.ndarray
+
+    def __init__(self, **data):
+        &#34;&#34;&#34;Object to hold indices relating to data screens and batches.&#34;&#34;&#34;
+        super().__init__(**data)
+        self.n_batches = dphelp.nunique(self.batch_idx)
+        self.n_screens = dphelp.nunique(self.screen_idx)
+
+    class Config:
+        &#34;&#34;&#34;Configuration for pydantic validation.&#34;&#34;&#34;
+
+        arbitrary_types_allowed = True</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="src.data_processing.achilles.DataBatchIndices.Config"><code class="name">var <span class="ident">Config</span></code></dt>
 <dd>
 <div class="desc"><p>Configuration for pydantic validation.</p></div>
 </dd>
@@ -996,6 +1118,7 @@ Defaults to None.</dd>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="src.data_processing.achilles.common_indices" href="#src.data_processing.achilles.common_indices">common_indices</a></code></li>
+<li><code><a title="src.data_processing.achilles.data_batch_indices" href="#src.data_processing.achilles.data_batch_indices">data_batch_indices</a></code></li>
 <li><code><a title="src.data_processing.achilles.make_cell_line_to_lineage_mapping_df" href="#src.data_processing.achilles.make_cell_line_to_lineage_mapping_df">make_cell_line_to_lineage_mapping_df</a></code></li>
 <li><code><a title="src.data_processing.achilles.make_kras_mutation_index_with_other" href="#src.data_processing.achilles.make_kras_mutation_index_with_other">make_kras_mutation_index_with_other</a></code></li>
 <li><code><a title="src.data_processing.achilles.make_mapping_df" href="#src.data_processing.achilles.make_mapping_df">make_mapping_df</a></code></li>
@@ -1012,6 +1135,12 @@ Defaults to None.</dd>
 <h4><code><a title="src.data_processing.achilles.CommonIndices" href="#src.data_processing.achilles.CommonIndices">CommonIndices</a></code></h4>
 <ul class="">
 <li><code><a title="src.data_processing.achilles.CommonIndices.Config" href="#src.data_processing.achilles.CommonIndices.Config">Config</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="src.data_processing.achilles.DataBatchIndices" href="#src.data_processing.achilles.DataBatchIndices">DataBatchIndices</a></code></h4>
+<ul class="">
+<li><code><a title="src.data_processing.achilles.DataBatchIndices.Config" href="#src.data_processing.achilles.DataBatchIndices.Config">Config</a></code></li>
 </ul>
 </li>
 </ul>

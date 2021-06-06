@@ -171,6 +171,7 @@ def generate_mock_achilles_data(
     n_cell_lines: int,
     n_lineages: int,
     n_batches: int,
+    n_screens: int,
     n_kras_types: Optional[int] = None,
 ) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Generate mock Achilles data.
@@ -185,6 +186,8 @@ def generate_mock_achilles_data(
         n_lineages (int, optional): Number of lineages. Must be less than or equal to
           the number of cell lines.
         n_batches (int): Number of pDNA batchs.
+        n_screens (int): Number of screens sourced for the data. Must be less than or
+          equal to the number of batches.
         n_kras_types (Optional[int], optional): Number of types of KRAS mutations to
           include. Defaults to None which ignores this attribute altogether.
 
@@ -200,6 +203,11 @@ def generate_mock_achilles_data(
             &#34;lineage&#34;: np.random.choice(lineages, n_cell_lines),
             &#34;p_dna_batch&#34;: np.random.choice(batches, n_cell_lines),
         }
+    )
+
+    screens = prefixed_count(&#34;screen&#34;, n=n_screens)
+    screen_map = pd.DataFrame(
+        {&#34;p_dna_batch&#34;: batches, &#34;screen&#34;: np.random.choice(screens, n_batches)}
     )
 
     genes = prefixed_count(&#34;gene&#34;, n=n_genes)
@@ -219,6 +227,7 @@ def generate_mock_achilles_data(
             }
         )
         .merge(batch_map, on=&#34;depmap_id&#34;)
+        .merge(screen_map, on=&#34;p_dna_batch&#34;)
         .merge(sgnra_map, on=&#34;hugo_symbol&#34;)
         .reset_index(drop=True)
     )
@@ -266,7 +275,7 @@ def generate_mock_achilles_data(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.modeling.simulation_based_calibration_helpers.generate_mock_achilles_data"><code class="name flex">
-<span>def <span class="ident">generate_mock_achilles_data</span></span>(<span>n_genes: int, n_sgrnas_per_gene: int, n_cell_lines: int, n_lineages: int, n_batches: int, n_kras_types: Optional[int] = None) -> pandas.core.frame.DataFrame</span>
+<span>def <span class="ident">generate_mock_achilles_data</span></span>(<span>n_genes: int, n_sgrnas_per_gene: int, n_cell_lines: int, n_lineages: int, n_batches: int, n_screens: int, n_kras_types: Optional[int] = None) -> pandas.core.frame.DataFrame</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Generate mock Achilles data.</p>
@@ -285,6 +294,9 @@ Each cell line / sgRNA combination occurs exactly once.</p>
 the number of cell lines.</dd>
 <dt><strong><code>n_batches</code></strong> :&ensp;<code>int</code></dt>
 <dd>Number of pDNA batchs.</dd>
+<dt><strong><code>n_screens</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of screens sourced for the data. Must be less than or
+equal to the number of batches.</dd>
 <dt><strong><code>n_kras_types</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
 <dd>Number of types of KRAS mutations to
 include. Defaults to None which ignores this attribute altogether.</dd>
@@ -304,6 +316,7 @@ include. Defaults to None which ignores this attribute altogether.</dd>
     n_cell_lines: int,
     n_lineages: int,
     n_batches: int,
+    n_screens: int,
     n_kras_types: Optional[int] = None,
 ) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Generate mock Achilles data.
@@ -318,6 +331,8 @@ include. Defaults to None which ignores this attribute altogether.</dd>
         n_lineages (int, optional): Number of lineages. Must be less than or equal to
           the number of cell lines.
         n_batches (int): Number of pDNA batchs.
+        n_screens (int): Number of screens sourced for the data. Must be less than or
+          equal to the number of batches.
         n_kras_types (Optional[int], optional): Number of types of KRAS mutations to
           include. Defaults to None which ignores this attribute altogether.
 
@@ -333,6 +348,11 @@ include. Defaults to None which ignores this attribute altogether.</dd>
             &#34;lineage&#34;: np.random.choice(lineages, n_cell_lines),
             &#34;p_dna_batch&#34;: np.random.choice(batches, n_cell_lines),
         }
+    )
+
+    screens = prefixed_count(&#34;screen&#34;, n=n_screens)
+    screen_map = pd.DataFrame(
+        {&#34;p_dna_batch&#34;: batches, &#34;screen&#34;: np.random.choice(screens, n_batches)}
     )
 
     genes = prefixed_count(&#34;gene&#34;, n=n_genes)
@@ -352,6 +372,7 @@ include. Defaults to None which ignores this attribute altogether.</dd>
             }
         )
         .merge(batch_map, on=&#34;depmap_id&#34;)
+        .merge(screen_map, on=&#34;p_dna_batch&#34;)
         .merge(sgnra_map, on=&#34;hugo_symbol&#34;)
         .reset_index(drop=True)
     )
