@@ -32,7 +32,7 @@
 
 import abc
 from pathlib import Path
-from typing import Optional, Union
+from typing import Callable, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -47,15 +47,23 @@ class DataManager(abc.ABC):
     &#34;&#34;&#34;Abstract base class for the data managers.&#34;&#34;&#34;
 
     debug: bool
-    data: Optional[pd.DataFrame] = None
+    _data: Optional[pd.DataFrame] = None
+    transformations: List[Callable[[pd.DataFrame], pd.DataFrame]]
 
     @abc.abstractmethod
-    def __init__(self, debug: bool = False) -&gt; None:
+    def __init__(
+        self,
+        debug: bool = False,
+        transformations: Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]] = None,
+    ) -&gt; None:
         &#34;&#34;&#34;Initialize the data manager.
 
         Args:
             debug (bool, optional): Should the debugging data be used? Defaults to
               False.
+            transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
+              optional): List of callable functions or classes for transforming the
+              data. Defaults to None (an empty list).
         &#34;&#34;&#34;
         pass
 
@@ -89,6 +97,15 @@ class DataManager(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+        &#34;&#34;&#34;Set the data object (can be `None`).
+
+        Args:
+            new_data (Optional[pd.DataFrame]): New data object.
+        &#34;&#34;&#34;
+        pass
+
+    @abc.abstractmethod
     def generate_mock_data(
         self, size: Union[sbc.MockDataSizes, str], random_seed: Optional[int] = None
     ) -&gt; pd.DataFrame:
@@ -103,20 +120,79 @@ class DataManager(abc.ABC):
         &#34;&#34;&#34;
         pass
 
+    def apply_transformations(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Apply the stored transformations to the data set.
+
+        Args:
+            df (pd.DataFrame): The data on which to operate.
+
+        Returns:
+            pd.DataFrame: The transformed data set.
+        &#34;&#34;&#34;
+        if len(self.transformations) == 0:
+            return df
+
+        for transform in self.transformations:
+            df = transform(df)
+
+        return df
+
+    def add_transformations(
+        self, new_trans: List[Callable[[pd.DataFrame], pd.DataFrame]]
+    ):
+        &#34;&#34;&#34;Add new data transformations.
+
+        Args:
+            new_trans (List[Callable[[pd.DataFrame], pd.DataFrame]]): A list of
+            callables to be used to transform the data. Each transformation must take a
+            pandas DataFrame and return a pandas DataFrame.
+        &#34;&#34;&#34;
+        self.transformations += new_trans
+
+    @property
+    def data(self) -&gt; Optional[pd.DataFrame]:
+        &#34;&#34;&#34;The data object.
+
+        Returns:
+            Optional[pd.DataFrame]: If the data has been loaded, the pandas DataFrame,
+            else `None`.
+        &#34;&#34;&#34;
+        return self._data
+
+    @data.setter
+    def data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+        &#34;&#34;&#34;Set the data object (can be `None`).
+
+        Calls `self.set_data()` so that the subclass can have specific behavior when
+        setting the data.
+
+        Args:
+            new_data (Optional[pd.DataFrame]): The new data object.
+        &#34;&#34;&#34;
+        self.set_data(new_data=new_data)
+
 
 class CrcDataManager(DataManager):
     &#34;&#34;&#34;Manager for CRC modeling data.&#34;&#34;&#34;
 
-    debug: bool
-    data: Optional[pd.DataFrame] = None
-
-    def __init__(self, debug: bool = False):
+    def __init__(
+        self,
+        debug: bool = False,
+        transformations: Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]] = None,
+    ) -&gt; None:
         &#34;&#34;&#34;Create a CRC data manager.
 
         Args:
             debug (bool, optional): Are you in debug mode? Defaults to False.
+            transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
+              optional): List of callable functions or classes for transforming the
+              data. Defaults to None (an empty list).
         &#34;&#34;&#34;
         self.debug = debug
+        if transformations is None:
+            self.transformations = []
+        else:
+            self.transformations = transformations
 
     def get_data_path(self) -&gt; Path:
         &#34;&#34;&#34;Get the path for the data set to use.
@@ -150,14 +226,17 @@ class CrcDataManager(DataManager):
         )
 
     def _drop_sgrnas_that_map_to_multiple_genes(self, df: pd.DataFrame) -&gt; pd.DataFrame:
-        logger.warning(&#34;Dropping data points of sgRNA that map to multiple genes.&#34;)
         sgrnas_to_remove = self._get_sgrnas_that_map_to_multiple_genes(df)
+        logger.warning(
+            f&#34;Dropping {len(sgrnas_to_remove)} sgRNA that map to multiple genes.&#34;
+        )
         df_new = df.copy()[~df[&#34;sgrna&#34;].isin(sgrnas_to_remove)]
         return df_new
 
     def _drop_missing_copynumber(self, df: pd.DataFrame) -&gt; pd.DataFrame:
-        logger.warning(&#34;Dropping data points with missing copy number.&#34;)
         df_new = df.copy()[~df[&#34;copy_number&#34;].isna()]
+        size_diff = df.shape[0] - df_new.shape[0]
+        logger.warning(f&#34;Dropping {size_diff} data points with missing copy number.&#34;)
         return df_new
 
     def _load_data(self) -&gt; pd.DataFrame:
@@ -175,9 +254,22 @@ class CrcDataManager(DataManager):
         If the data is not already loaded, it is first read from disk.
         &#34;&#34;&#34;
         logger.debug(&#34;Retrieving data.&#34;)
-        if self.data is None:
-            self.data = self._load_data()
-        return self.data
+        if self._data is None:
+            self._data: pd.DataFrame = self._load_data().pipe(
+                self.apply_transformations
+            )
+        return self._data
+
+    def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+        &#34;&#34;&#34;Set the new data set and apply the transofrmations automatically.
+
+        Args:
+            new_data (Optional[pd.DataFrame]): New data set.
+        &#34;&#34;&#34;
+        if new_data is None:
+            self._data = None
+        else:
+            self._data = self.apply_transformations(new_data)
 
     def generate_mock_data(
         self, size: Union[sbc.MockDataSizes, str], random_seed: Optional[int] = None
@@ -231,7 +323,11 @@ class CrcDataManager(DataManager):
 class MockDataManager(DataManager):
     &#34;&#34;&#34;A data manager with mock data (primarily for testing).&#34;&#34;&#34;
 
-    def __init__(self, debug: bool = False) -&gt; None:
+    def __init__(
+        self,
+        debug: bool = False,
+        transformations: Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]] = None,
+    ) -&gt; None:
         &#34;&#34;&#34;Initialize a MockDataManager.
 
         This DataManager makes a small data set for testing and demo purpose.
@@ -239,8 +335,15 @@ class MockDataManager(DataManager):
         Args:
             debug (bool, optional): Should the debugging data be used? Defaults to
               False.
+            transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
+              optional): List of callable functions or classes for transforming the
+              data. Defaults to None (an empty list).
         &#34;&#34;&#34;
         self.debug = debug
+        if transformations is None:
+            self.transformations = []
+        else:
+            self.transformations = transformations
 
     def get_data_path(self) -&gt; Path:
         &#34;&#34;&#34;Location of the data.
@@ -273,6 +376,17 @@ class MockDataManager(DataManager):
             y = -1 + 2 * x + (np.random.randn(n_data_points) / 2.0)
             self.data = pd.DataFrame({&#34;x&#34;: x, &#34;y&#34;: y})
         return self.data
+
+    def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+        &#34;&#34;&#34;Set the new data set and apply the transofrmations automatically.
+
+        Args:
+            new_data (Optional[pd.DataFrame]): New data set.
+        &#34;&#34;&#34;
+        if new_data is None:
+            self._data = None
+        else:
+            self._data = self.apply_transformations(new_data)
 
     def generate_mock_data(
         self, size: Union[sbc.MockDataSizes, str], random_seed: Optional[int] = None
@@ -309,7 +423,7 @@ class MockDataManager(DataManager):
 <dl>
 <dt id="src.managers.model_data_managers.CrcDataManager"><code class="flex name class">
 <span>class <span class="ident">CrcDataManager</span></span>
-<span>(</span><span>debug: bool = False)</span>
+<span>(</span><span>debug: bool = False, transformations: Optional[List[Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Manager for CRC modeling data.</p>
@@ -318,7 +432,10 @@ class MockDataManager(DataManager):
 <dl>
 <dt><strong><code>debug</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Are you in debug mode? Defaults to False.</dd>
-</dl></div>
+</dl>
+<p>transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
+optional): List of callable functions or classes for transforming the
+data. Defaults to None (an empty list).</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -326,16 +443,24 @@ class MockDataManager(DataManager):
 <pre><code class="python">class CrcDataManager(DataManager):
     &#34;&#34;&#34;Manager for CRC modeling data.&#34;&#34;&#34;
 
-    debug: bool
-    data: Optional[pd.DataFrame] = None
-
-    def __init__(self, debug: bool = False):
+    def __init__(
+        self,
+        debug: bool = False,
+        transformations: Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]] = None,
+    ) -&gt; None:
         &#34;&#34;&#34;Create a CRC data manager.
 
         Args:
             debug (bool, optional): Are you in debug mode? Defaults to False.
+            transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
+              optional): List of callable functions or classes for transforming the
+              data. Defaults to None (an empty list).
         &#34;&#34;&#34;
         self.debug = debug
+        if transformations is None:
+            self.transformations = []
+        else:
+            self.transformations = transformations
 
     def get_data_path(self) -&gt; Path:
         &#34;&#34;&#34;Get the path for the data set to use.
@@ -369,14 +494,17 @@ class MockDataManager(DataManager):
         )
 
     def _drop_sgrnas_that_map_to_multiple_genes(self, df: pd.DataFrame) -&gt; pd.DataFrame:
-        logger.warning(&#34;Dropping data points of sgRNA that map to multiple genes.&#34;)
         sgrnas_to_remove = self._get_sgrnas_that_map_to_multiple_genes(df)
+        logger.warning(
+            f&#34;Dropping {len(sgrnas_to_remove)} sgRNA that map to multiple genes.&#34;
+        )
         df_new = df.copy()[~df[&#34;sgrna&#34;].isin(sgrnas_to_remove)]
         return df_new
 
     def _drop_missing_copynumber(self, df: pd.DataFrame) -&gt; pd.DataFrame:
-        logger.warning(&#34;Dropping data points with missing copy number.&#34;)
         df_new = df.copy()[~df[&#34;copy_number&#34;].isna()]
+        size_diff = df.shape[0] - df_new.shape[0]
+        logger.warning(f&#34;Dropping {size_diff} data points with missing copy number.&#34;)
         return df_new
 
     def _load_data(self) -&gt; pd.DataFrame:
@@ -394,9 +522,22 @@ class MockDataManager(DataManager):
         If the data is not already loaded, it is first read from disk.
         &#34;&#34;&#34;
         logger.debug(&#34;Retrieving data.&#34;)
-        if self.data is None:
-            self.data = self._load_data()
-        return self.data
+        if self._data is None:
+            self._data: pd.DataFrame = self._load_data().pipe(
+                self.apply_transformations
+            )
+        return self._data
+
+    def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+        &#34;&#34;&#34;Set the new data set and apply the transofrmations automatically.
+
+        Args:
+            new_data (Optional[pd.DataFrame]): New data set.
+        &#34;&#34;&#34;
+        if new_data is None:
+            self._data = None
+        else:
+            self._data = self.apply_transformations(new_data)
 
     def generate_mock_data(
         self, size: Union[sbc.MockDataSizes, str], random_seed: Optional[int] = None
@@ -451,13 +592,6 @@ class MockDataManager(DataManager):
 <li><a title="src.managers.model_data_managers.DataManager" href="#src.managers.model_data_managers.DataManager">DataManager</a></li>
 <li>abc.ABC</li>
 </ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="src.managers.model_data_managers.CrcDataManager.data"><code class="name">var <span class="ident">data</span> : Optional[pandas.core.frame.DataFrame]</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="src.managers.model_data_managers.CrcDataManager.get_batch_size"><code class="name flex">
@@ -502,9 +636,11 @@ class MockDataManager(DataManager):
     If the data is not already loaded, it is first read from disk.
     &#34;&#34;&#34;
     logger.debug(&#34;Retrieving data.&#34;)
-    if self.data is None:
-        self.data = self._load_data()
-    return self.data</code></pre>
+    if self._data is None:
+        self._data: pd.DataFrame = self._load_data().pipe(
+            self.apply_transformations
+        )
+    return self._data</code></pre>
 </details>
 </dd>
 <dt id="src.managers.model_data_managers.CrcDataManager.get_data_path"><code class="name flex">
@@ -532,11 +668,40 @@ class MockDataManager(DataManager):
     return data_io.data_path(to=data_io.DataFile.crc_data)</code></pre>
 </details>
 </dd>
+<dt id="src.managers.model_data_managers.CrcDataManager.set_data"><code class="name flex">
+<span>def <span class="ident">set_data</span></span>(<span>self, new_data: Optional[pandas.core.frame.DataFrame]) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the new data set and apply the transofrmations automatically.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>new_data</code></strong> :&ensp;<code>Optional[pd.DataFrame]</code></dt>
+<dd>New data set.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+    &#34;&#34;&#34;Set the new data set and apply the transofrmations automatically.
+
+    Args:
+        new_data (Optional[pd.DataFrame]): New data set.
+    &#34;&#34;&#34;
+    if new_data is None:
+        self._data = None
+    else:
+        self._data = self.apply_transformations(new_data)</code></pre>
+</details>
+</dd>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="src.managers.model_data_managers.DataManager" href="#src.managers.model_data_managers.DataManager">DataManager</a></b></code>:
 <ul class="hlist">
+<li><code><a title="src.managers.model_data_managers.DataManager.add_transformations" href="#src.managers.model_data_managers.DataManager.add_transformations">add_transformations</a></code></li>
+<li><code><a title="src.managers.model_data_managers.DataManager.apply_transformations" href="#src.managers.model_data_managers.DataManager.apply_transformations">apply_transformations</a></code></li>
+<li><code><a title="src.managers.model_data_managers.DataManager.data" href="#src.managers.model_data_managers.DataManager.data">data</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.generate_mock_data" href="#src.managers.model_data_managers.DataManager.generate_mock_data">generate_mock_data</a></code></li>
 </ul>
 </li>
@@ -544,7 +709,7 @@ class MockDataManager(DataManager):
 </dd>
 <dt id="src.managers.model_data_managers.DataManager"><code class="flex name class">
 <span>class <span class="ident">DataManager</span></span>
-<span>(</span><span>debug: bool = False)</span>
+<span>(</span><span>debug: bool = False, transformations: Optional[List[Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract base class for the data managers.</p>
@@ -554,7 +719,10 @@ class MockDataManager(DataManager):
 <dt><strong><code>debug</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Should the debugging data be used? Defaults to
 False.</dd>
-</dl></div>
+</dl>
+<p>transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
+optional): List of callable functions or classes for transforming the
+data. Defaults to None (an empty list).</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -563,15 +731,23 @@ False.</dd>
     &#34;&#34;&#34;Abstract base class for the data managers.&#34;&#34;&#34;
 
     debug: bool
-    data: Optional[pd.DataFrame] = None
+    _data: Optional[pd.DataFrame] = None
+    transformations: List[Callable[[pd.DataFrame], pd.DataFrame]]
 
     @abc.abstractmethod
-    def __init__(self, debug: bool = False) -&gt; None:
+    def __init__(
+        self,
+        debug: bool = False,
+        transformations: Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]] = None,
+    ) -&gt; None:
         &#34;&#34;&#34;Initialize the data manager.
 
         Args:
             debug (bool, optional): Should the debugging data be used? Defaults to
               False.
+            transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
+              optional): List of callable functions or classes for transforming the
+              data. Defaults to None (an empty list).
         &#34;&#34;&#34;
         pass
 
@@ -605,6 +781,15 @@ False.</dd>
         pass
 
     @abc.abstractmethod
+    def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+        &#34;&#34;&#34;Set the data object (can be `None`).
+
+        Args:
+            new_data (Optional[pd.DataFrame]): New data object.
+        &#34;&#34;&#34;
+        pass
+
+    @abc.abstractmethod
     def generate_mock_data(
         self, size: Union[sbc.MockDataSizes, str], random_seed: Optional[int] = None
     ) -&gt; pd.DataFrame:
@@ -617,7 +802,58 @@ False.</dd>
         Returns:
             pd.DataFrame: Mock data.
         &#34;&#34;&#34;
-        pass</code></pre>
+        pass
+
+    def apply_transformations(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Apply the stored transformations to the data set.
+
+        Args:
+            df (pd.DataFrame): The data on which to operate.
+
+        Returns:
+            pd.DataFrame: The transformed data set.
+        &#34;&#34;&#34;
+        if len(self.transformations) == 0:
+            return df
+
+        for transform in self.transformations:
+            df = transform(df)
+
+        return df
+
+    def add_transformations(
+        self, new_trans: List[Callable[[pd.DataFrame], pd.DataFrame]]
+    ):
+        &#34;&#34;&#34;Add new data transformations.
+
+        Args:
+            new_trans (List[Callable[[pd.DataFrame], pd.DataFrame]]): A list of
+            callables to be used to transform the data. Each transformation must take a
+            pandas DataFrame and return a pandas DataFrame.
+        &#34;&#34;&#34;
+        self.transformations += new_trans
+
+    @property
+    def data(self) -&gt; Optional[pd.DataFrame]:
+        &#34;&#34;&#34;The data object.
+
+        Returns:
+            Optional[pd.DataFrame]: If the data has been loaded, the pandas DataFrame,
+            else `None`.
+        &#34;&#34;&#34;
+        return self._data
+
+    @data.setter
+    def data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+        &#34;&#34;&#34;Set the data object (can be `None`).
+
+        Calls `self.set_data()` so that the subclass can have specific behavior when
+        setting the data.
+
+        Args:
+            new_data (Optional[pd.DataFrame]): The new data object.
+        &#34;&#34;&#34;
+        self.set_data(new_data=new_data)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -628,15 +864,101 @@ False.</dd>
 <li><a title="src.managers.model_data_managers.CrcDataManager" href="#src.managers.model_data_managers.CrcDataManager">CrcDataManager</a></li>
 <li><a title="src.managers.model_data_managers.MockDataManager" href="#src.managers.model_data_managers.MockDataManager">MockDataManager</a></li>
 </ul>
-<h3>Class variables</h3>
+<h3>Instance variables</h3>
 <dl>
 <dt id="src.managers.model_data_managers.DataManager.data"><code class="name">var <span class="ident">data</span> : Optional[pandas.core.frame.DataFrame]</code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>The data object.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Optional[pd.DataFrame]</code></dt>
+<dd>If the data has been loaded, the pandas DataFrame,</dd>
+</dl>
+<p>else <code>None</code>.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def data(self) -&gt; Optional[pd.DataFrame]:
+    &#34;&#34;&#34;The data object.
+
+    Returns:
+        Optional[pd.DataFrame]: If the data has been loaded, the pandas DataFrame,
+        else `None`.
+    &#34;&#34;&#34;
+    return self._data</code></pre>
+</details>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="src.managers.model_data_managers.DataManager.add_transformations"><code class="name flex">
+<span>def <span class="ident">add_transformations</span></span>(<span>self, new_trans: List[Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add new data transformations.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>new_trans</code></strong> :&ensp;<code>List[Callable[[pd.DataFrame], pd.DataFrame]]</code></dt>
+<dd>A list of</dd>
+</dl>
+<p>callables to be used to transform the data. Each transformation must take a
+pandas DataFrame and return a pandas DataFrame.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_transformations(
+    self, new_trans: List[Callable[[pd.DataFrame], pd.DataFrame]]
+):
+    &#34;&#34;&#34;Add new data transformations.
+
+    Args:
+        new_trans (List[Callable[[pd.DataFrame], pd.DataFrame]]): A list of
+        callables to be used to transform the data. Each transformation must take a
+        pandas DataFrame and return a pandas DataFrame.
+    &#34;&#34;&#34;
+    self.transformations += new_trans</code></pre>
+</details>
+</dd>
+<dt id="src.managers.model_data_managers.DataManager.apply_transformations"><code class="name flex">
+<span>def <span class="ident">apply_transformations</span></span>(<span>self, df: pandas.core.frame.DataFrame) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Apply the stored transformations to the data set.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>The data on which to operate.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>The transformed data set.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def apply_transformations(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Apply the stored transformations to the data set.
+
+    Args:
+        df (pd.DataFrame): The data on which to operate.
+
+    Returns:
+        pd.DataFrame: The transformed data set.
+    &#34;&#34;&#34;
+    if len(self.transformations) == 0:
+        return df
+
+    for transform in self.transformations:
+        df = transform(df)
+
+    return df</code></pre>
+</details>
+</dd>
 <dt id="src.managers.model_data_managers.DataManager.generate_mock_data"><code class="name flex">
 <span>def <span class="ident">generate_mock_data</span></span>(<span>self, size: Union[src.modeling.simulation_based_calibration_helpers.MockDataSizes, str], random_seed: Optional[int] = None) -> pandas.core.frame.DataFrame</span>
 </code></dt>
@@ -749,11 +1071,35 @@ def get_data_path(self) -&gt; Path:
     pass</code></pre>
 </details>
 </dd>
+<dt id="src.managers.model_data_managers.DataManager.set_data"><code class="name flex">
+<span>def <span class="ident">set_data</span></span>(<span>self, new_data: Optional[pandas.core.frame.DataFrame]) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the data object (can be <code>None</code>).</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>new_data</code></strong> :&ensp;<code>Optional[pd.DataFrame]</code></dt>
+<dd>New data object.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abc.abstractmethod
+def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+    &#34;&#34;&#34;Set the data object (can be `None`).
+
+    Args:
+        new_data (Optional[pd.DataFrame]): New data object.
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 <dt id="src.managers.model_data_managers.MockDataManager"><code class="flex name class">
 <span>class <span class="ident">MockDataManager</span></span>
-<span>(</span><span>debug: bool = False)</span>
+<span>(</span><span>debug: bool = False, transformations: Optional[List[Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A data manager with mock data (primarily for testing).</p>
@@ -764,7 +1110,10 @@ def get_data_path(self) -&gt; Path:
 <dt><strong><code>debug</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Should the debugging data be used? Defaults to
 False.</dd>
-</dl></div>
+</dl>
+<p>transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
+optional): List of callable functions or classes for transforming the
+data. Defaults to None (an empty list).</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -772,7 +1121,11 @@ False.</dd>
 <pre><code class="python">class MockDataManager(DataManager):
     &#34;&#34;&#34;A data manager with mock data (primarily for testing).&#34;&#34;&#34;
 
-    def __init__(self, debug: bool = False) -&gt; None:
+    def __init__(
+        self,
+        debug: bool = False,
+        transformations: Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]] = None,
+    ) -&gt; None:
         &#34;&#34;&#34;Initialize a MockDataManager.
 
         This DataManager makes a small data set for testing and demo purpose.
@@ -780,8 +1133,15 @@ False.</dd>
         Args:
             debug (bool, optional): Should the debugging data be used? Defaults to
               False.
+            transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
+              optional): List of callable functions or classes for transforming the
+              data. Defaults to None (an empty list).
         &#34;&#34;&#34;
         self.debug = debug
+        if transformations is None:
+            self.transformations = []
+        else:
+            self.transformations = transformations
 
     def get_data_path(self) -&gt; Path:
         &#34;&#34;&#34;Location of the data.
@@ -814,6 +1174,17 @@ False.</dd>
             y = -1 + 2 * x + (np.random.randn(n_data_points) / 2.0)
             self.data = pd.DataFrame({&#34;x&#34;: x, &#34;y&#34;: y})
         return self.data
+
+    def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+        &#34;&#34;&#34;Set the new data set and apply the transofrmations automatically.
+
+        Args:
+            new_data (Optional[pd.DataFrame]): New data set.
+        &#34;&#34;&#34;
+        if new_data is None:
+            self._data = None
+        else:
+            self._data = self.apply_transformations(new_data)
 
     def generate_mock_data(
         self, size: Union[sbc.MockDataSizes, str], random_seed: Optional[int] = None
@@ -890,11 +1261,40 @@ False.</dd>
     return self.get_data()</code></pre>
 </details>
 </dd>
+<dt id="src.managers.model_data_managers.MockDataManager.set_data"><code class="name flex">
+<span>def <span class="ident">set_data</span></span>(<span>self, new_data: Optional[pandas.core.frame.DataFrame]) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the new data set and apply the transofrmations automatically.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>new_data</code></strong> :&ensp;<code>Optional[pd.DataFrame]</code></dt>
+<dd>New data set.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+    &#34;&#34;&#34;Set the new data set and apply the transofrmations automatically.
+
+    Args:
+        new_data (Optional[pd.DataFrame]): New data set.
+    &#34;&#34;&#34;
+    if new_data is None:
+        self._data = None
+    else:
+        self._data = self.apply_transformations(new_data)</code></pre>
+</details>
+</dd>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="src.managers.model_data_managers.DataManager" href="#src.managers.model_data_managers.DataManager">DataManager</a></b></code>:
 <ul class="hlist">
+<li><code><a title="src.managers.model_data_managers.DataManager.add_transformations" href="#src.managers.model_data_managers.DataManager.add_transformations">add_transformations</a></code></li>
+<li><code><a title="src.managers.model_data_managers.DataManager.apply_transformations" href="#src.managers.model_data_managers.DataManager.apply_transformations">apply_transformations</a></code></li>
+<li><code><a title="src.managers.model_data_managers.DataManager.data" href="#src.managers.model_data_managers.DataManager.data">data</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.get_batch_size" href="#src.managers.model_data_managers.DataManager.get_batch_size">get_batch_size</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.get_data" href="#src.managers.model_data_managers.DataManager.get_data">get_data</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.get_data_path" href="#src.managers.model_data_managers.DataManager.get_data_path">get_data_path</a></code></li>
@@ -921,26 +1321,30 @@ False.</dd>
 <li>
 <h4><code><a title="src.managers.model_data_managers.CrcDataManager" href="#src.managers.model_data_managers.CrcDataManager">CrcDataManager</a></code></h4>
 <ul class="">
-<li><code><a title="src.managers.model_data_managers.CrcDataManager.data" href="#src.managers.model_data_managers.CrcDataManager.data">data</a></code></li>
 <li><code><a title="src.managers.model_data_managers.CrcDataManager.get_batch_size" href="#src.managers.model_data_managers.CrcDataManager.get_batch_size">get_batch_size</a></code></li>
 <li><code><a title="src.managers.model_data_managers.CrcDataManager.get_data" href="#src.managers.model_data_managers.CrcDataManager.get_data">get_data</a></code></li>
 <li><code><a title="src.managers.model_data_managers.CrcDataManager.get_data_path" href="#src.managers.model_data_managers.CrcDataManager.get_data_path">get_data_path</a></code></li>
+<li><code><a title="src.managers.model_data_managers.CrcDataManager.set_data" href="#src.managers.model_data_managers.CrcDataManager.set_data">set_data</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="src.managers.model_data_managers.DataManager" href="#src.managers.model_data_managers.DataManager">DataManager</a></code></h4>
 <ul class="">
+<li><code><a title="src.managers.model_data_managers.DataManager.add_transformations" href="#src.managers.model_data_managers.DataManager.add_transformations">add_transformations</a></code></li>
+<li><code><a title="src.managers.model_data_managers.DataManager.apply_transformations" href="#src.managers.model_data_managers.DataManager.apply_transformations">apply_transformations</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.data" href="#src.managers.model_data_managers.DataManager.data">data</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.generate_mock_data" href="#src.managers.model_data_managers.DataManager.generate_mock_data">generate_mock_data</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.get_batch_size" href="#src.managers.model_data_managers.DataManager.get_batch_size">get_batch_size</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.get_data" href="#src.managers.model_data_managers.DataManager.get_data">get_data</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.get_data_path" href="#src.managers.model_data_managers.DataManager.get_data_path">get_data_path</a></code></li>
+<li><code><a title="src.managers.model_data_managers.DataManager.set_data" href="#src.managers.model_data_managers.DataManager.set_data">set_data</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="src.managers.model_data_managers.MockDataManager" href="#src.managers.model_data_managers.MockDataManager">MockDataManager</a></code></h4>
 <ul class="">
 <li><code><a title="src.managers.model_data_managers.MockDataManager.generate_mock_data" href="#src.managers.model_data_managers.MockDataManager.generate_mock_data">generate_mock_data</a></code></li>
+<li><code><a title="src.managers.model_data_managers.MockDataManager.set_data" href="#src.managers.model_data_managers.MockDataManager.set_data">set_data</a></code></li>
 </ul>
 </li>
 </ul>

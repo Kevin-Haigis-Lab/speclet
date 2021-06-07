@@ -31,10 +31,12 @@
 &#34;&#34;&#34;Functions for modifying the everyday pandas DataFrame.&#34;&#34;&#34;
 
 import warnings
-from typing import Any, Iterable, List, Tuple
+from typing import Any, Iterable, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
+
+from src.loggers import logger
 
 
 def make_cat(
@@ -128,7 +130,43 @@ def nunique(x: Iterable[Any]) -&gt; int:
     &#34;&#34;&#34;
     if isinstance(x, dict):
         raise ValueError(&#34;Cannot count the number of unique values in a dict.&#34;)
-    return len(np.unique(x))</code></pre>
+    return len(np.unique(x))
+
+
+def center_column_grouped_dataframe(
+    df: pd.DataFrame, grp_col: Union[str, List[str]], val_col: str, new_col_name: str
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Center the values of a column after grouping by another.
+
+    Args:
+        df (pd.DataFrame): Pandas DataFrame.
+        grp_col (Union[str, List[str]]): The column(s) to group by.
+        val_col (str): COlumn with values to center.
+        new_col_name (str): New column name to hold the centered values.
+
+    Returns:
+        pd.DataFrame: The same input data frame with one new column.
+    &#34;&#34;&#34;
+    avg_val_col = f&#34;_avg_{val_col}&#34;
+    df_avgs: pd.DataFrame = df.copy()
+
+    if any(df[val_col].isna()):
+        logger.warn(&#34;There are missing values in data frame; removed from average.&#34;)
+        df_avgs = df_avgs.loc[~df_avgs[val_col].isna()]
+
+    df_avgs = (
+        df_avgs.groupby(grp_col)[val_col]
+        .mean()
+        .reset_index(drop=False)
+        .rename(columns={val_col: avg_val_col})
+    )
+
+    return (
+        df.merge(df_avgs, how=&#34;left&#34;, on=grp_col)
+        .assign(_new_centered_column=lambda d: d[val_col] - d[avg_val_col])
+        .rename(columns={&#34;_new_centered_column&#34;: new_col_name})
+        .drop(columns=[avg_val_col])
+    )</code></pre>
 </details>
 </section>
 <section>
@@ -138,6 +176,67 @@ def nunique(x: Iterable[Any]) -&gt; int:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="src.data_processing.common.center_column_grouped_dataframe"><code class="name flex">
+<span>def <span class="ident">center_column_grouped_dataframe</span></span>(<span>df: pandas.core.frame.DataFrame, grp_col: Union[str, List[str]], val_col: str, new_col_name: str) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Center the values of a column after grouping by another.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>Pandas DataFrame.</dd>
+<dt><strong><code>grp_col</code></strong> :&ensp;<code>Union[str, List[str]]</code></dt>
+<dd>The column(s) to group by.</dd>
+<dt><strong><code>val_col</code></strong> :&ensp;<code>str</code></dt>
+<dd>COlumn with values to center.</dd>
+<dt><strong><code>new_col_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>New column name to hold the centered values.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>The same input data frame with one new column.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def center_column_grouped_dataframe(
+    df: pd.DataFrame, grp_col: Union[str, List[str]], val_col: str, new_col_name: str
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Center the values of a column after grouping by another.
+
+    Args:
+        df (pd.DataFrame): Pandas DataFrame.
+        grp_col (Union[str, List[str]]): The column(s) to group by.
+        val_col (str): COlumn with values to center.
+        new_col_name (str): New column name to hold the centered values.
+
+    Returns:
+        pd.DataFrame: The same input data frame with one new column.
+    &#34;&#34;&#34;
+    avg_val_col = f&#34;_avg_{val_col}&#34;
+    df_avgs: pd.DataFrame = df.copy()
+
+    if any(df[val_col].isna()):
+        logger.warn(&#34;There are missing values in data frame; removed from average.&#34;)
+        df_avgs = df_avgs.loc[~df_avgs[val_col].isna()]
+
+    df_avgs = (
+        df_avgs.groupby(grp_col)[val_col]
+        .mean()
+        .reset_index(drop=False)
+        .rename(columns={val_col: avg_val_col})
+    )
+
+    return (
+        df.merge(df_avgs, how=&#34;left&#34;, on=grp_col)
+        .assign(_new_centered_column=lambda d: d[val_col] - d[avg_val_col])
+        .rename(columns={&#34;_new_centered_column&#34;: new_col_name})
+        .drop(columns=[avg_val_col])
+    )</code></pre>
+</details>
+</dd>
 <dt id="src.data_processing.common.extract_flat_ary"><code class="name flex">
 <span>def <span class="ident">extract_flat_ary</span></span>(<span>s: pandas.core.series.Series) -> numpy.ndarray</span>
 </code></dt>
@@ -382,6 +481,7 @@ needs to be binary (is mutated/is not mutated).</dd>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="src.data_processing.common.center_column_grouped_dataframe" href="#src.data_processing.common.center_column_grouped_dataframe">center_column_grouped_dataframe</a></code></li>
 <li><code><a title="src.data_processing.common.extract_flat_ary" href="#src.data_processing.common.extract_flat_ary">extract_flat_ary</a></code></li>
 <li><code><a title="src.data_processing.common.get_indices" href="#src.data_processing.common.get_indices">get_indices</a></code></li>
 <li><code><a title="src.data_processing.common.get_indices_and_count" href="#src.data_processing.common.get_indices_and_count">get_indices_and_count</a></code></li>

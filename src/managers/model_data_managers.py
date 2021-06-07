@@ -14,21 +14,30 @@ from src.data_processing import achilles as achelp
 from src.io import data_io
 from src.loggers import logger
 
+DataFrameTransformations = List[Callable[[pd.DataFrame], pd.DataFrame]]
+
 
 class DataManager(abc.ABC):
     """Abstract base class for the data managers."""
 
     debug: bool
+    transformations: DataFrameTransformations
     _data: Optional[pd.DataFrame] = None
-    transformations: List[Callable[[pd.DataFrame], pd.DataFrame]] = []
 
     @abc.abstractmethod
-    def __init__(self, debug: bool = False) -> None:
+    def __init__(
+        self,
+        debug: bool = False,
+        transformations: Optional[DataFrameTransformations] = None,
+    ) -> None:
         """Initialize the data manager.
 
         Args:
             debug (bool, optional): Should the debugging data be used? Defaults to
               False.
+            transformations (Optional[DataFrameTransformations], optional): List of
+              callable functions or classes for transforming the data. Defaults to None
+              (an empty list).
         """
         pass
 
@@ -140,13 +149,24 @@ class DataManager(abc.ABC):
 class CrcDataManager(DataManager):
     """Manager for CRC modeling data."""
 
-    def __init__(self, debug: bool = False):
+    def __init__(
+        self,
+        debug: bool = False,
+        transformations: Optional[DataFrameTransformations] = None,
+    ) -> None:
         """Create a CRC data manager.
 
         Args:
             debug (bool, optional): Are you in debug mode? Defaults to False.
+            transformations (Optional[DataFrameTransformations], optional): List of
+              callable functions or classes for transforming the data. Defaults to None
+              (an empty list).
         """
         self.debug = debug
+        if transformations is None:
+            self.transformations = []
+        else:
+            self.transformations = transformations
 
     def get_data_path(self) -> Path:
         """Get the path for the data set to use.
@@ -277,7 +297,11 @@ class CrcDataManager(DataManager):
 class MockDataManager(DataManager):
     """A data manager with mock data (primarily for testing)."""
 
-    def __init__(self, debug: bool = False) -> None:
+    def __init__(
+        self,
+        debug: bool = False,
+        transformations: Optional[DataFrameTransformations] = None,
+    ) -> None:
         """Initialize a MockDataManager.
 
         This DataManager makes a small data set for testing and demo purpose.
@@ -285,8 +309,15 @@ class MockDataManager(DataManager):
         Args:
             debug (bool, optional): Should the debugging data be used? Defaults to
               False.
+            transformations (Optional[DataFrameTransformations], optional): List of
+              callable functions or classes for transforming the data. Defaults to None
+              (an empty list).
         """
         self.debug = debug
+        if transformations is None:
+            self.transformations = []
+        else:
+            self.transformations = transformations
 
     def get_data_path(self) -> Path:
         """Location of the data.
@@ -319,6 +350,17 @@ class MockDataManager(DataManager):
             y = -1 + 2 * x + (np.random.randn(n_data_points) / 2.0)
             self.data = pd.DataFrame({"x": x, "y": y})
         return self.data
+
+    def set_data(self, new_data: Optional[pd.DataFrame]) -> None:
+        """Set the new data set and apply the transofrmations automatically.
+
+        Args:
+            new_data (Optional[pd.DataFrame]): New data set.
+        """
+        if new_data is None:
+            self._data = None
+        else:
+            self._data = self.apply_transformations(new_data)
 
     def generate_mock_data(
         self, size: Union[sbc.MockDataSizes, str], random_seed: Optional[int] = None
