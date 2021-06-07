@@ -4,7 +4,7 @@
 
 import abc
 from pathlib import Path
-from typing import Optional, Union
+from typing import Callable, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -19,7 +19,8 @@ class DataManager(abc.ABC):
     """Abstract base class for the data managers."""
 
     debug: bool
-    data: Optional[pd.DataFrame] = None
+    _data: Optional[pd.DataFrame] = None
+    transformations: List[Callable[[pd.DataFrame], pd.DataFrame]] = []
 
     @abc.abstractmethod
     def __init__(self, debug: bool = False) -> None:
@@ -61,6 +62,15 @@ class DataManager(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def set_data(self, new_data: Optional[pd.DataFrame]) -> None:
+        """Set the data object (can be `None`).
+
+        Args:
+            new_data (Optional[pd.DataFrame]): New data object.
+        """
+        pass
+
+    @abc.abstractmethod
     def generate_mock_data(
         self, size: Union[sbc.MockDataSizes, str], random_seed: Optional[int] = None
     ) -> pd.DataFrame:
@@ -75,12 +85,60 @@ class DataManager(abc.ABC):
         """
         pass
 
+    def apply_transformations(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Apply the stored transformations to the data set.
+
+        Args:
+            df (pd.DataFrame): The data on which to operate.
+
+        Returns:
+            pd.DataFrame: The transformed data set.
+        """
+        if len(self.transformations) == 0:
+            return df
+
+        for transform in self.transformations:
+            df = transform(df)
+
+        return df
+
+    def add_transformations(
+        self, new_trans: List[Callable[[pd.DataFrame], pd.DataFrame]]
+    ):
+        """Add new data transformations.
+
+        Args:
+            new_trans (List[Callable[[pd.DataFrame], pd.DataFrame]]): A list of
+            callables to be used to transform the data. Each transformation must take a
+            pandas DataFrame and return a pandas DataFrame.
+        """
+        self.transformations += new_trans
+
+    @property
+    def data(self) -> Optional[pd.DataFrame]:
+        """The data object.
+
+        Returns:
+            Optional[pd.DataFrame]: If the data has been loaded, the pandas DataFrame,
+            else `None`.
+        """
+        return self._data
+
+    @data.setter
+    def data(self, new_data: Optional[pd.DataFrame]) -> None:
+        """Set the data object (can be `None`).
+
+        Calls `self.set_data()` so that the subclass can have specific behavior when
+        setting the data.
+
+        Args:
+            new_data (Optional[pd.DataFrame]): The new data object.
+        """
+        self.set_data(new_data=new_data)
+
 
 class CrcDataManager(DataManager):
     """Manager for CRC modeling data."""
-
-    debug: bool
-    data: Optional[pd.DataFrame] = None
 
     def __init__(self, debug: bool = False):
         """Create a CRC data manager.
@@ -122,14 +180,17 @@ class CrcDataManager(DataManager):
         )
 
     def _drop_sgrnas_that_map_to_multiple_genes(self, df: pd.DataFrame) -> pd.DataFrame:
-        logger.warning("Dropping data points of sgRNA that map to multiple genes.")
         sgrnas_to_remove = self._get_sgrnas_that_map_to_multiple_genes(df)
+        logger.warning(
+            f"Dropping {len(sgrnas_to_remove)} sgRNA that map to multiple genes."
+        )
         df_new = df.copy()[~df["sgrna"].isin(sgrnas_to_remove)]
         return df_new
 
     def _drop_missing_copynumber(self, df: pd.DataFrame) -> pd.DataFrame:
-        logger.warning("Dropping data points with missing copy number.")
         df_new = df.copy()[~df["copy_number"].isna()]
+        size_diff = df.shape[0] - df_new.shape[0]
+        logger.warning(f"Dropping {size_diff} data points with missing copy number.")
         return df_new
 
     def _load_data(self) -> pd.DataFrame:
@@ -147,9 +208,22 @@ class CrcDataManager(DataManager):
         If the data is not already loaded, it is first read from disk.
         """
         logger.debug("Retrieving data.")
-        if self.data is None:
-            self.data = self._load_data()
-        return self.data
+        if self._data is None:
+            self._data: pd.DataFrame = self._load_data().pipe(
+                self.apply_transformations
+            )
+        return self._data
+
+    def set_data(self, new_data: Optional[pd.DataFrame]) -> None:
+        """Set the new data set and apply the transofrmations automatically.
+
+        Args:
+            new_data (Optional[pd.DataFrame]): New data set.
+        """
+        if new_data is None:
+            self._data = None
+        else:
+            self._data = self.apply_transformations(new_data)
 
     def generate_mock_data(
         self, size: Union[sbc.MockDataSizes, str], random_seed: Optional[int] = None
