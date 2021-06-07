@@ -3,13 +3,49 @@
 from pathlib import Path
 from typing import Optional, Tuple
 
+import pandas as pd
 import pymc3 as pm
 from theano import shared as ts
 
 from src.data_processing import achilles as achelp
+from src.data_processing import common as dphelp
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
 from src.models.speclet_model import ReplacementsDict, SpecletModel
+
+
+def centered_copynumber_by_cellline(df: pd.DataFrame) -> pd.DataFrame:
+    """Add a column of centered copy number values by cell line.
+
+    Args:
+        df (pd.DataFrame): Achilles data frame.
+
+    Returns:
+        pd.DataFrame: Same data frame with a new column `"copy_number_cellline"`.
+    """
+    return dphelp.center_column_grouped_dataframe(
+        df,
+        grp_col="depmap_id",
+        val_col="copy_number",
+        new_col_name="copy_number_cellline",
+    )
+
+
+def centered_copynumber_by_gene(df: pd.DataFrame) -> pd.DataFrame:
+    """Add a column of centered copy number values by gene.
+
+    Args:
+        df (pd.DataFrame): Achilles data frame.
+
+    Returns:
+        pd.DataFrame: Same data frame with a new column `"copy_number_gene"`.
+    """
+    return dphelp.center_column_grouped_dataframe(
+        df,
+        grp_col="hugo_symbol",
+        val_col="copy_number",
+        new_col_name="copy_number_gene",
+    )
 
 
 class SpecletSix(SpecletModel):
@@ -86,6 +122,11 @@ class SpecletSix(SpecletModel):
         if data_manager is None:
             logger.debug("Creating a data manager since none was supplied.")
             data_manager = CrcDataManager(debug=debug)
+
+        data_manager.add_transformations(
+            [centered_copynumber_by_cellline, centered_copynumber_by_gene]
+        )
+
         super().__init__(
             name="speclet-six_" + name,
             root_cache_dir=root_cache_dir,
