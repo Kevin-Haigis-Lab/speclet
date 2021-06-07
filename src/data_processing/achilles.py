@@ -355,15 +355,6 @@ def read_achilles_data(
     if set_categorical_cols:
         data = set_achilles_categorical_columns(data)
 
-    # data["log2_cn"] = np.log2(data.copy_number + 1)
-    # data = zscale_cna_by_group(
-    #     data,
-    #     cn_col="log2_cn",
-    #     new_col="z_log2_cn",
-    #     groupby_cols=["depmap_id"],
-    #     cn_max=np.log2(10),
-    # )
-
     return data
 
 
