@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
-from hypothesis import given
+from hypothesis import given, note
 from hypothesis import strategies as st
 
 from src.data_processing import common as dphelp
@@ -128,12 +128,12 @@ def grouped_dataframe(draw) -> pd.DataFrame:
     )
 
 
-@pytest.mark.DEV
 @given(grouped_dataframe())
 def test_center_column_grouped_dataframe(df: pd.DataFrame):
     centered_df = dphelp.center_column_grouped_dataframe(
         df, grp_col="group", val_col="value", new_col_name="centered_value"
     )
+    note(centered_df)
     for g in df["group"].unique():
         vals = centered_df[centered_df["group"] == g]["centered_value"].values
         assert np.mean(vals) == pytest.approx(0.0, abs=0.001)

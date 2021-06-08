@@ -32,12 +32,16 @@ from typing import List
 import pymc3 as pm
 
 
+def _rm_log(model_vars: List[str]) -&gt; List[str]:
+    return [v.replace(&#34;_log__&#34;, &#34;&#34;) for v in model_vars]
+
+
 def get_random_variable_names(m: pm.Model, rm_log: bool = False) -&gt; List[str]:
     &#34;&#34;&#34;Retrieve the names of the random variables in a model.
 
     Args:
         m (pm.Model): PyMC3 model.
-        rm_log (bool, optional): Should the &#39;_log__&#39; suffixes be removed?. Defaults to
+        rm_log (bool, optional): Should the &#39;_log__&#39; suffixes be removed? Defaults to
           False.
 
     Returns:
@@ -45,31 +49,46 @@ def get_random_variable_names(m: pm.Model, rm_log: bool = False) -&gt; List[str]
     &#34;&#34;&#34;
     model_vars: List[str] = [v.name for v in m.free_RVs]
     if rm_log:
-        model_vars = [v.replace(&#34;_log__&#34;, &#34;&#34;) for v in model_vars]
+        model_vars = _rm_log(model_vars)
     return model_vars
 
 
 def get_deterministic_variable_names(m: pm.Model, rm_log: bool = False) -&gt; List[str]:
-    &#34;&#34;&#34;Retrieve the  names of the deterministic variables in a model.
+    &#34;&#34;&#34;Retrieve the names of the deterministic variables in a model.
 
     Args:
         m (pm.Model): PyMC3 model.
-        rm_log (bool, optional): Should the &#39;_log__&#39; suffixes be removed?. Defaults to
+        rm_log (bool, optional): Should the &#39;_log__&#39; suffixes be removed? Defaults to
           False.
 
     Returns:
         List[str]: A list of the deterministic variable names.
     &#34;&#34;&#34;
-    model_vars: List[str] = [v.name for v in m.deterministics]
+    model_vars = list(
+        set([v.name for v in m.unobserved_RVs])
+        .difference(get_random_variable_names(m))
+        .difference(get_random_variable_names(m, rm_log=True))
+    )
     if rm_log:
-        model_vars = [v.replace(&#34;_log__&#34;, &#34;&#34;) for v in model_vars]
+        model_vars = _rm_log(model_vars)
     return model_vars
 
 
 def get_variable_names(m: pm.Model, rm_log: bool = False) -&gt; List[str]:
-    rvs = get_random_variable_names(m, rm_log)
-    dvs = get_deterministic_variable_names(m, rm_log)
-    return list(set(rvs + dvs))</code></pre>
+    &#34;&#34;&#34;Get all variable names from a model.
+
+    Args:
+        m (pm.Model): PyMC3 model.
+        rm_log (bool, optional): Should the &#39;_log__&#39; suffices be removed? Defaults to
+          False.
+
+    Returns:
+        List[str]: List of unique variable names.
+    &#34;&#34;&#34;
+    rvs = [v.name for v in m.unobserved_RVs] + [v.name for v in m.observed_RVs]
+    if rm_log:
+        rvs = _rm_log(rvs)
+    return list(set(rvs))</code></pre>
 </details>
 </section>
 <section>
@@ -83,14 +102,13 @@ def get_variable_names(m: pm.Model, rm_log: bool = False) -&gt; List[str]:
 <span>def <span class="ident">get_deterministic_variable_names</span></span>(<span>m: pymc3.model.Model, rm_log: bool = False) -> List[str]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Retrieve the
-names of the deterministic variables in a model.</p>
+<div class="desc"><p>Retrieve the names of the deterministic variables in a model.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>m</code></strong> :&ensp;<code>pm.Model</code></dt>
 <dd>PyMC3 model.</dd>
 <dt><strong><code>rm_log</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>Should the '_log__' suffixes be removed?. Defaults to
+<dd>Should the '_log__' suffixes be removed? Defaults to
 False.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
@@ -103,19 +121,23 @@ False.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_deterministic_variable_names(m: pm.Model, rm_log: bool = False) -&gt; List[str]:
-    &#34;&#34;&#34;Retrieve the  names of the deterministic variables in a model.
+    &#34;&#34;&#34;Retrieve the names of the deterministic variables in a model.
 
     Args:
         m (pm.Model): PyMC3 model.
-        rm_log (bool, optional): Should the &#39;_log__&#39; suffixes be removed?. Defaults to
+        rm_log (bool, optional): Should the &#39;_log__&#39; suffixes be removed? Defaults to
           False.
 
     Returns:
         List[str]: A list of the deterministic variable names.
     &#34;&#34;&#34;
-    model_vars: List[str] = [v.name for v in m.deterministics]
+    model_vars = list(
+        set([v.name for v in m.unobserved_RVs])
+        .difference(get_random_variable_names(m))
+        .difference(get_random_variable_names(m, rm_log=True))
+    )
     if rm_log:
-        model_vars = [v.replace(&#34;_log__&#34;, &#34;&#34;) for v in model_vars]
+        model_vars = _rm_log(model_vars)
     return model_vars</code></pre>
 </details>
 </dd>
@@ -129,7 +151,7 @@ False.</dd>
 <dt><strong><code>m</code></strong> :&ensp;<code>pm.Model</code></dt>
 <dd>PyMC3 model.</dd>
 <dt><strong><code>rm_log</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>Should the '_log__' suffixes be removed?. Defaults to
+<dd>Should the '_log__' suffixes be removed? Defaults to
 False.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
@@ -146,7 +168,7 @@ False.</dd>
 
     Args:
         m (pm.Model): PyMC3 model.
-        rm_log (bool, optional): Should the &#39;_log__&#39; suffixes be removed?. Defaults to
+        rm_log (bool, optional): Should the &#39;_log__&#39; suffixes be removed? Defaults to
           False.
 
     Returns:
@@ -154,7 +176,7 @@ False.</dd>
     &#34;&#34;&#34;
     model_vars: List[str] = [v.name for v in m.free_RVs]
     if rm_log:
-        model_vars = [v.replace(&#34;_log__&#34;, &#34;&#34;) for v in model_vars]
+        model_vars = _rm_log(model_vars)
     return model_vars</code></pre>
 </details>
 </dd>
@@ -162,15 +184,39 @@ False.</dd>
 <span>def <span class="ident">get_variable_names</span></span>(<span>m: pymc3.model.Model, rm_log: bool = False) -> List[str]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get all variable names from a model.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>m</code></strong> :&ensp;<code>pm.Model</code></dt>
+<dd>PyMC3 model.</dd>
+<dt><strong><code>rm_log</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the '_log__' suffices be removed? Defaults to
+False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[str]</code></dt>
+<dd>List of unique variable names.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_variable_names(m: pm.Model, rm_log: bool = False) -&gt; List[str]:
-    rvs = get_random_variable_names(m, rm_log)
-    dvs = get_deterministic_variable_names(m, rm_log)
-    return list(set(rvs + dvs))</code></pre>
+    &#34;&#34;&#34;Get all variable names from a model.
+
+    Args:
+        m (pm.Model): PyMC3 model.
+        rm_log (bool, optional): Should the &#39;_log__&#39; suffices be removed? Defaults to
+          False.
+
+    Returns:
+        List[str]: List of unique variable names.
+    &#34;&#34;&#34;
+    rvs = [v.name for v in m.unobserved_RVs] + [v.name for v in m.observed_RVs]
+    if rm_log:
+        rvs = _rm_log(rvs)
+    return list(set(rvs))</code></pre>
 </details>
 </dd>
 </dl>
