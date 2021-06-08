@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import pandas as pd
+import pytest
 import seaborn as sns
 
 from src.managers.model_data_managers import CrcDataManager
@@ -8,7 +9,19 @@ from src.managers.model_data_managers import CrcDataManager
 #### ---- Test CrcDataManager ---- ####
 
 
+def head(df: pd.DataFrame) -> pd.DataFrame:
+    return df.head(n=5)
+
+
+def select(df: pd.DataFrame) -> pd.DataFrame:
+    return df[["sepal_length", "species"]]
+
+
 class TestCrcDataManager:
+    @pytest.fixture(scope="function")
+    def iris(self) -> pd.DataFrame:
+        return sns.load_dataset("iris")
+
     def test_batch_size(self):
         dm = CrcDataManager()
         not_debug_batch_size = dm.get_batch_size()
@@ -45,23 +58,56 @@ class TestCrcDataManager:
             < large_mock_data.shape[0]
         )
 
-    def test_data_transformations(self):
+    def test_data_transformations(self, iris: pd.DataFrame):
         dm = CrcDataManager(debug=True)
-        dm.data = sns.load_dataset("iris")
+        dm.data = iris.copy()
         assert dm.data.shape[0] > 5
 
-        def head(df: pd.DataFrame) -> pd.DataFrame:
-            return df.head(n=5)
-
-        def select(df: pd.DataFrame) -> pd.DataFrame:
-            return df[["sepal_length", "species"]]
-
         dm.add_transformations([head])
-        dm.data = sns.load_dataset("iris")
+        dm.data = iris.copy()
         assert dm.data.shape[0] == 5
 
         dm.add_transformations([select])
-        dm.data = sns.load_dataset("iris")
+        dm.data = iris.copy()
         assert dm.data.shape[0] == 5
         assert dm.data.shape[1] == 2
         assert set(["sepal_length", "species"]) == set(dm.data.columns.to_list())
+
+    def test_transform_when_data_is_set(self, iris: pd.DataFrame):
+        dm = CrcDataManager(debug=True)
+        dm.add_transformations([head, select])
+        dm.data is None
+        dm.data = iris
+        assert dm.get_data().shape[0] == 5
+        assert dm.get_data().shape[1] == 2
+
+    def test_transform_when_getting_data(self, monkeypatch: pytest.MonkeyPatch):
+        def mock_load_data(*args, **kwargs):
+            return sns.load_dataset("iris")
+
+        # Monkeypatch to load 'iris' instead of real data.
+        monkeypatch.setattr(CrcDataManager, "_load_data", mock_load_data)
+
+        dm = CrcDataManager(debug=True)
+        dm.add_transformations([head, select])
+        data = dm.get_data()
+        assert data is dm.get_data()
+        assert data.shape[0] == 5
+        assert data.shape[1] == 2
+
+    def test_adding_new_transformations(self, iris: pd.DataFrame):
+        dm = CrcDataManager(debug=True)
+        dm.data = iris.copy()
+        dm.transform_data()
+        assert dm.data.shape == iris.shape
+
+        dm.add_transformations([head], run_transformations=False)
+        assert dm.data.shape == iris.shape
+
+        dm.add_transformations([select], run_transformations=True, new_only=True)
+        assert dm.data.shape[0] == iris.shape[0]
+        assert dm.data.shape[1] == 2
+
+        dm.transform_data()
+        assert dm.data.shape[0] == 5
+        assert dm.data.shape[1] == 2

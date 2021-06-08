@@ -94,6 +94,29 @@ class DataManager(abc.ABC):
         """
         pass
 
+    def transform_data(self):
+        """Transform the data held by the manager.
+
+        The data must be loaded using `get_data()` prior running this method. The
+        `get_data()` method already applies the transformations, so this method is
+        usually not required.
+        """
+        if self.data is None:
+            logger.warn("No data available to transform.")
+            return
+
+        logger.info("Transforming data in place.")
+        self._data = self.apply_transformations(self.data)
+
+    @staticmethod
+    def _apply_transformations(
+        df: pd.DataFrame, transformations: DataFrameTransformations
+    ) -> pd.DataFrame:
+        for transform in transformations:
+            logger.info(f"Applying transformation: '{transform.__name__}'")
+            df = transform(df)
+        return df
+
     def apply_transformations(self, df: pd.DataFrame) -> pd.DataFrame:
         """Apply the stored transformations to the data set.
 
@@ -103,25 +126,42 @@ class DataManager(abc.ABC):
         Returns:
             pd.DataFrame: The transformed data set.
         """
+        logger.info(f"Applying {len(self.transformations)} data transformations.")
+
         if len(self.transformations) == 0:
+            logger.info("No transformations to apply.")
             return df
 
-        for transform in self.transformations:
-            df = transform(df)
-
+        df = DataManager._apply_transformations(df, self.transformations)
         return df
 
     def add_transformations(
-        self, new_trans: List[Callable[[pd.DataFrame], pd.DataFrame]]
-    ):
+        self,
+        new_trans: List[Callable[[pd.DataFrame], pd.DataFrame]],
+        run_transformations: bool = True,
+        new_only: bool = True,
+    ) -> None:
         """Add new data transformations.
 
         Args:
             new_trans (List[Callable[[pd.DataFrame], pd.DataFrame]]): A list of
-            callables to be used to transform the data. Each transformation must take a
-            pandas DataFrame and return a pandas DataFrame.
+              callables to be used to transform the data. Each transformation must take
+              a pandas DataFrame and return a pandas DataFrame.
+            run_transformations (bool, optional): Should the new transforms be applied
+              to the data? Defaults to True.
+            new_only (bool, optional): Should only the new transformations (those in
+              `new_trans`) be applied? Defaults to True.
         """
+        if len(new_trans) == 0:
+            return
+
         self.transformations += new_trans
+
+        if self.data is not None:
+            if run_transformations and new_only:
+                self._data = DataManager._apply_transformations(self.data, new_trans)
+            elif run_transformations:
+                self.transform_data()
 
     @property
     def data(self) -> Optional[pd.DataFrame]:
@@ -163,10 +203,13 @@ class CrcDataManager(DataManager):
               (an empty list).
         """
         self.debug = debug
-        if transformations is None:
-            self.transformations = []
-        else:
-            self.transformations = transformations
+
+        self.transformations = [
+            CrcDataManager._drop_sgrnas_that_map_to_multiple_genes,
+            CrcDataManager._drop_missing_copynumber,
+        ]
+        if transformations is not None:
+            self.transformations += transformations
 
     def get_data_path(self) -> Path:
         """Get the path for the data set to use.
@@ -189,7 +232,8 @@ class CrcDataManager(DataManager):
         else:
             return 10000
 
-    def _get_sgrnas_that_map_to_multiple_genes(self, df: pd.DataFrame) -> np.ndarray:
+    @staticmethod
+    def _get_sgrnas_that_map_to_multiple_genes(df: pd.DataFrame) -> np.ndarray:
         return (
             achelp.make_sgrna_to_gene_mapping_df(df)
             .groupby(["sgrna"])["hugo_symbol"]
@@ -199,15 +243,17 @@ class CrcDataManager(DataManager):
             .unique()
         )
 
-    def _drop_sgrnas_that_map_to_multiple_genes(self, df: pd.DataFrame) -> pd.DataFrame:
-        sgrnas_to_remove = self._get_sgrnas_that_map_to_multiple_genes(df)
+    @staticmethod
+    def _drop_sgrnas_that_map_to_multiple_genes(df: pd.DataFrame) -> pd.DataFrame:
+        sgrnas_to_remove = CrcDataManager._get_sgrnas_that_map_to_multiple_genes(df)
         logger.warning(
             f"Dropping {len(sgrnas_to_remove)} sgRNA that map to multiple genes."
         )
         df_new = df.copy()[~df["sgrna"].isin(sgrnas_to_remove)]
         return df_new
 
-    def _drop_missing_copynumber(self, df: pd.DataFrame) -> pd.DataFrame:
+    @staticmethod
+    def _drop_missing_copynumber(df: pd.DataFrame) -> pd.DataFrame:
         df_new = df.copy()[~df["copy_number"].isna()]
         size_diff = df.shape[0] - df_new.shape[0]
         logger.warning(f"Dropping {size_diff} data points with missing copy number.")
@@ -215,10 +261,9 @@ class CrcDataManager(DataManager):
 
     def _load_data(self) -> pd.DataFrame:
         """Load CRC data."""
-        logger.debug("Reading data from file.")
-        df = achelp.read_achilles_data(self.get_data_path(), low_memory=False)
-        df = self._drop_sgrnas_that_map_to_multiple_genes(df)
-        df = self._drop_missing_copynumber(df)
+        data_path = self.get_data_path()
+        logger.debug(f"Reading data from file: '{data_path.as_posix()}'.")
+        df = achelp.read_achilles_data(data_path, low_memory=False)
         df = achelp.set_achilles_categorical_columns(df)
         return df
 
@@ -228,14 +273,14 @@ class CrcDataManager(DataManager):
         If the data is not already loaded, it is first read from disk.
         """
         logger.debug("Retrieving data.")
+
         if self._data is None:
-            self._data: pd.DataFrame = self._load_data().pipe(
-                self.apply_transformations
-            )
+            self._data = self._load_data().pipe(self.apply_transformations)
+            assert isinstance(self._data, pd.DataFrame)
         return self._data
 
     def set_data(self, new_data: Optional[pd.DataFrame]) -> None:
-        """Set the new data set and apply the transofrmations automatically.
+        """Set the new data set and apply the transformations automatically.
 
         Args:
             new_data (Optional[pd.DataFrame]): New data set.

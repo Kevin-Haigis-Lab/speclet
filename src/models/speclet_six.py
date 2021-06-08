@@ -23,6 +23,7 @@ def centered_copynumber_by_cellline(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Same data frame with a new column `"copy_number_cellline"`.
     """
+    logger.info("Adding 'copy_number_cellline' column.")
     return dphelp.center_column_grouped_dataframe(
         df,
         grp_col="depmap_id",
@@ -40,6 +41,7 @@ def centered_copynumber_by_gene(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Same data frame with a new column `"copy_number_gene"`.
     """
+    logger.info("Adding 'copy_number_gene' column.")
     return dphelp.center_column_grouped_dataframe(
         df,
         grp_col="hugo_symbol",
@@ -138,6 +140,48 @@ class SpecletSix(SpecletModel):
         self._rna_cov = rna_cov
         self._mutation_cov = mutation_cov
 
+    @property
+    def cell_line_cna_cov(self) -> bool:
+        """Should the covariate for cell line-specific CN be included?
+
+        Returns:
+            bool: Whether the covariate is included or not.
+        """
+        return self._cell_line_cna_cov
+
+    @cell_line_cna_cov.setter
+    def cell_line_cna_cov(self, new_value: bool) -> None:
+        """Decide if the cell line-specific CN covariate should be included.
+
+        Args:
+            new_value (bool): Whether the covariate is included or not.
+        """
+        if self._cell_line_cna_cov != new_value:
+            logger.info("Changing `cell_line_cna_cov` to `{new_value}`.")
+            self._cell_line_cna_cov = new_value
+            self._reset_model_and_results()
+
+    @property
+    def gene_cna_cov(self) -> bool:
+        """Should the covariate for gene-specific CN be included?
+
+        Returns:
+            bool: Whether the covariate is included or not.
+        """
+        return self._gene_cna_cov
+
+    @gene_cna_cov.setter
+    def gene_cna_cov(self, new_value: bool) -> None:
+        """Decide if the gene-specific CN covariate should be included.
+
+        Args:
+            new_value (bool): Whether the covariate is included or not.
+        """
+        if self._gene_cna_cov != new_value:
+            logger.info("Changing `gene_cna_cov` to `{new_value}`.")
+            self._gene_cna_cov = new_value
+            self._reset_model_and_results()
+
     def model_specification(self) -> Tuple[pm.Model, str]:
         """Build SpecletSix model.
 
@@ -174,6 +218,14 @@ class SpecletSix(SpecletModel):
             "batch_to_screen_idx_shared": batch_to_screen_idx_shared,
             "lfc_shared": lfc_shared,
         }
+
+        if self._cell_line_cna_cov:
+            cellline_cna_shared = ts(data["copy_number_cellline"].values)
+            self.shared_vars["cellline_cna_shared"] = cellline_cna_shared
+
+        if self._gene_cna_cov:
+            gene_cna_shared = ts(data["copy_number_gene"].values)
+            self.shared_vars["gene_cna_shared"] = gene_cna_shared
 
         logger.info("Creating PyMC3 model.")
         logger.warning(
@@ -248,13 +300,29 @@ class SpecletSix(SpecletModel):
             # Global intercept.
             i = pm.Normal("i", 0, 1)
 
-            μ = (
+            _μ = (
                 i
                 + a[gene_idx_shared]
                 + d[cellline_idx_shared]
                 + h[gene_idx_shared, cellline_idx_shared]
                 + j[batch_idx_shared]
             )
+
+            if self._cell_line_cna_cov:
+                μ_k = pm.Normal("μ_k", -0.5, 2)
+                σ_k = pm.HalfNormal("σ_k", 1)
+                k_offset = pm.Normal("k_offset", 0, 1, shape=co_idx.n_celllines)
+                k = pm.Deterministic("k", (μ_k + k_offset * σ_k))
+                _μ += k[cellline_idx_shared] * cellline_cna_shared
+
+            if self._gene_cna_cov:
+                μ_n = pm.Normal("μ_n", 0, 2)
+                σ_n = pm.HalfNormal("σ_n", 1)
+                n_offset = pm.Normal("n_offset", 0, 1, shape=co_idx.n_genes)
+                n = pm.Deterministic("n", (μ_n + n_offset * σ_n))
+                _μ += n[gene_idx_shared] * gene_cna_shared
+
+            μ = pm.Deterministic("μ", _μ)
 
             # Standard deviation of log-fold change, varies per batch.
             σ_σ = pm.HalfNormal("σ_σ", 1)

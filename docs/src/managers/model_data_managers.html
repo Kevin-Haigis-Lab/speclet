@@ -42,28 +42,30 @@ from src.data_processing import achilles as achelp
 from src.io import data_io
 from src.loggers import logger
 
+DataFrameTransformations = List[Callable[[pd.DataFrame], pd.DataFrame]]
+
 
 class DataManager(abc.ABC):
     &#34;&#34;&#34;Abstract base class for the data managers.&#34;&#34;&#34;
 
     debug: bool
+    transformations: DataFrameTransformations
     _data: Optional[pd.DataFrame] = None
-    transformations: List[Callable[[pd.DataFrame], pd.DataFrame]]
 
     @abc.abstractmethod
     def __init__(
         self,
         debug: bool = False,
-        transformations: Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]] = None,
+        transformations: Optional[DataFrameTransformations] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize the data manager.
 
         Args:
             debug (bool, optional): Should the debugging data be used? Defaults to
               False.
-            transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
-              optional): List of callable functions or classes for transforming the
-              data. Defaults to None (an empty list).
+            transformations (Optional[DataFrameTransformations], optional): List of
+              callable functions or classes for transforming the data. Defaults to None
+              (an empty list).
         &#34;&#34;&#34;
         pass
 
@@ -120,6 +122,29 @@ class DataManager(abc.ABC):
         &#34;&#34;&#34;
         pass
 
+    def transform_data(self):
+        &#34;&#34;&#34;Transform the data held by the manager.
+
+        The data must be loaded using `get_data()` prior running this method. The
+        `get_data()` method already applies the transformations, so this method is
+        usually not required.
+        &#34;&#34;&#34;
+        if self.data is None:
+            logger.warn(&#34;No data available to transform.&#34;)
+            return
+
+        logger.info(&#34;Transforming data in place.&#34;)
+        self._data = self.apply_transformations(self.data)
+
+    @staticmethod
+    def _apply_transformations(
+        df: pd.DataFrame, transformations: DataFrameTransformations
+    ) -&gt; pd.DataFrame:
+        for transform in transformations:
+            logger.info(f&#34;Applying transformation: &#39;{transform.__name__}&#39;&#34;)
+            df = transform(df)
+        return df
+
     def apply_transformations(self, df: pd.DataFrame) -&gt; pd.DataFrame:
         &#34;&#34;&#34;Apply the stored transformations to the data set.
 
@@ -129,25 +154,42 @@ class DataManager(abc.ABC):
         Returns:
             pd.DataFrame: The transformed data set.
         &#34;&#34;&#34;
+        logger.info(f&#34;Applying {len(self.transformations)} data transformations.&#34;)
+
         if len(self.transformations) == 0:
+            logger.info(&#34;No transformations to apply.&#34;)
             return df
 
-        for transform in self.transformations:
-            df = transform(df)
-
+        df = DataManager._apply_transformations(df, self.transformations)
         return df
 
     def add_transformations(
-        self, new_trans: List[Callable[[pd.DataFrame], pd.DataFrame]]
-    ):
+        self,
+        new_trans: List[Callable[[pd.DataFrame], pd.DataFrame]],
+        run_transformations: bool = True,
+        new_only: bool = True,
+    ) -&gt; None:
         &#34;&#34;&#34;Add new data transformations.
 
         Args:
             new_trans (List[Callable[[pd.DataFrame], pd.DataFrame]]): A list of
-            callables to be used to transform the data. Each transformation must take a
-            pandas DataFrame and return a pandas DataFrame.
+              callables to be used to transform the data. Each transformation must take
+              a pandas DataFrame and return a pandas DataFrame.
+            run_transformations (bool, optional): Should the new transforms be applied
+              to the data? Defaults to True.
+            new_only (bool, optional): Should only the new transformations (those in
+              `new_trans`) be applied? Defaults to True.
         &#34;&#34;&#34;
+        if len(new_trans) == 0:
+            return
+
         self.transformations += new_trans
+
+        if self.data is not None:
+            if run_transformations and new_only:
+                self._data = DataManager._apply_transformations(self.data, new_trans)
+            elif run_transformations:
+                self.transform_data()
 
     @property
     def data(self) -&gt; Optional[pd.DataFrame]:
@@ -178,21 +220,24 @@ class CrcDataManager(DataManager):
     def __init__(
         self,
         debug: bool = False,
-        transformations: Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]] = None,
+        transformations: Optional[DataFrameTransformations] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Create a CRC data manager.
 
         Args:
             debug (bool, optional): Are you in debug mode? Defaults to False.
-            transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
-              optional): List of callable functions or classes for transforming the
-              data. Defaults to None (an empty list).
+            transformations (Optional[DataFrameTransformations], optional): List of
+              callable functions or classes for transforming the data. Defaults to None
+              (an empty list).
         &#34;&#34;&#34;
         self.debug = debug
-        if transformations is None:
-            self.transformations = []
-        else:
-            self.transformations = transformations
+
+        self.transformations = [
+            CrcDataManager._drop_sgrnas_that_map_to_multiple_genes,
+            CrcDataManager._drop_missing_copynumber,
+        ]
+        if transformations is not None:
+            self.transformations += transformations
 
     def get_data_path(self) -&gt; Path:
         &#34;&#34;&#34;Get the path for the data set to use.
@@ -215,7 +260,8 @@ class CrcDataManager(DataManager):
         else:
             return 10000
 
-    def _get_sgrnas_that_map_to_multiple_genes(self, df: pd.DataFrame) -&gt; np.ndarray:
+    @staticmethod
+    def _get_sgrnas_that_map_to_multiple_genes(df: pd.DataFrame) -&gt; np.ndarray:
         return (
             achelp.make_sgrna_to_gene_mapping_df(df)
             .groupby([&#34;sgrna&#34;])[&#34;hugo_symbol&#34;]
@@ -225,15 +271,17 @@ class CrcDataManager(DataManager):
             .unique()
         )
 
-    def _drop_sgrnas_that_map_to_multiple_genes(self, df: pd.DataFrame) -&gt; pd.DataFrame:
-        sgrnas_to_remove = self._get_sgrnas_that_map_to_multiple_genes(df)
+    @staticmethod
+    def _drop_sgrnas_that_map_to_multiple_genes(df: pd.DataFrame) -&gt; pd.DataFrame:
+        sgrnas_to_remove = CrcDataManager._get_sgrnas_that_map_to_multiple_genes(df)
         logger.warning(
             f&#34;Dropping {len(sgrnas_to_remove)} sgRNA that map to multiple genes.&#34;
         )
         df_new = df.copy()[~df[&#34;sgrna&#34;].isin(sgrnas_to_remove)]
         return df_new
 
-    def _drop_missing_copynumber(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+    @staticmethod
+    def _drop_missing_copynumber(df: pd.DataFrame) -&gt; pd.DataFrame:
         df_new = df.copy()[~df[&#34;copy_number&#34;].isna()]
         size_diff = df.shape[0] - df_new.shape[0]
         logger.warning(f&#34;Dropping {size_diff} data points with missing copy number.&#34;)
@@ -241,10 +289,9 @@ class CrcDataManager(DataManager):
 
     def _load_data(self) -&gt; pd.DataFrame:
         &#34;&#34;&#34;Load CRC data.&#34;&#34;&#34;
-        logger.debug(&#34;Reading data from file.&#34;)
-        df = achelp.read_achilles_data(self.get_data_path(), low_memory=False)
-        df = self._drop_sgrnas_that_map_to_multiple_genes(df)
-        df = self._drop_missing_copynumber(df)
+        data_path = self.get_data_path()
+        logger.debug(f&#34;Reading data from file: &#39;{data_path.as_posix()}&#39;.&#34;)
+        df = achelp.read_achilles_data(data_path, low_memory=False)
         df = achelp.set_achilles_categorical_columns(df)
         return df
 
@@ -254,14 +301,14 @@ class CrcDataManager(DataManager):
         If the data is not already loaded, it is first read from disk.
         &#34;&#34;&#34;
         logger.debug(&#34;Retrieving data.&#34;)
+
         if self._data is None:
-            self._data: pd.DataFrame = self._load_data().pipe(
-                self.apply_transformations
-            )
+            self._data = self._load_data().pipe(self.apply_transformations)
+            assert isinstance(self._data, pd.DataFrame)
         return self._data
 
     def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
-        &#34;&#34;&#34;Set the new data set and apply the transofrmations automatically.
+        &#34;&#34;&#34;Set the new data set and apply the transformations automatically.
 
         Args:
             new_data (Optional[pd.DataFrame]): New data set.
@@ -326,7 +373,7 @@ class MockDataManager(DataManager):
     def __init__(
         self,
         debug: bool = False,
-        transformations: Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]] = None,
+        transformations: Optional[DataFrameTransformations] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a MockDataManager.
 
@@ -335,9 +382,9 @@ class MockDataManager(DataManager):
         Args:
             debug (bool, optional): Should the debugging data be used? Defaults to
               False.
-            transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
-              optional): List of callable functions or classes for transforming the
-              data. Defaults to None (an empty list).
+            transformations (Optional[DataFrameTransformations], optional): List of
+              callable functions or classes for transforming the data. Defaults to None
+              (an empty list).
         &#34;&#34;&#34;
         self.debug = debug
         if transformations is None:
@@ -432,10 +479,11 @@ class MockDataManager(DataManager):
 <dl>
 <dt><strong><code>debug</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Are you in debug mode? Defaults to False.</dd>
-</dl>
-<p>transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
-optional): List of callable functions or classes for transforming the
-data. Defaults to None (an empty list).</p></div>
+<dt><strong><code>transformations</code></strong> :&ensp;<code>Optional[DataFrameTransformations]</code>, optional</dt>
+<dd>List of
+callable functions or classes for transforming the data. Defaults to None
+(an empty list).</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -446,21 +494,24 @@ data. Defaults to None (an empty list).</p></div>
     def __init__(
         self,
         debug: bool = False,
-        transformations: Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]] = None,
+        transformations: Optional[DataFrameTransformations] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Create a CRC data manager.
 
         Args:
             debug (bool, optional): Are you in debug mode? Defaults to False.
-            transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
-              optional): List of callable functions or classes for transforming the
-              data. Defaults to None (an empty list).
+            transformations (Optional[DataFrameTransformations], optional): List of
+              callable functions or classes for transforming the data. Defaults to None
+              (an empty list).
         &#34;&#34;&#34;
         self.debug = debug
-        if transformations is None:
-            self.transformations = []
-        else:
-            self.transformations = transformations
+
+        self.transformations = [
+            CrcDataManager._drop_sgrnas_that_map_to_multiple_genes,
+            CrcDataManager._drop_missing_copynumber,
+        ]
+        if transformations is not None:
+            self.transformations += transformations
 
     def get_data_path(self) -&gt; Path:
         &#34;&#34;&#34;Get the path for the data set to use.
@@ -483,7 +534,8 @@ data. Defaults to None (an empty list).</p></div>
         else:
             return 10000
 
-    def _get_sgrnas_that_map_to_multiple_genes(self, df: pd.DataFrame) -&gt; np.ndarray:
+    @staticmethod
+    def _get_sgrnas_that_map_to_multiple_genes(df: pd.DataFrame) -&gt; np.ndarray:
         return (
             achelp.make_sgrna_to_gene_mapping_df(df)
             .groupby([&#34;sgrna&#34;])[&#34;hugo_symbol&#34;]
@@ -493,15 +545,17 @@ data. Defaults to None (an empty list).</p></div>
             .unique()
         )
 
-    def _drop_sgrnas_that_map_to_multiple_genes(self, df: pd.DataFrame) -&gt; pd.DataFrame:
-        sgrnas_to_remove = self._get_sgrnas_that_map_to_multiple_genes(df)
+    @staticmethod
+    def _drop_sgrnas_that_map_to_multiple_genes(df: pd.DataFrame) -&gt; pd.DataFrame:
+        sgrnas_to_remove = CrcDataManager._get_sgrnas_that_map_to_multiple_genes(df)
         logger.warning(
             f&#34;Dropping {len(sgrnas_to_remove)} sgRNA that map to multiple genes.&#34;
         )
         df_new = df.copy()[~df[&#34;sgrna&#34;].isin(sgrnas_to_remove)]
         return df_new
 
-    def _drop_missing_copynumber(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+    @staticmethod
+    def _drop_missing_copynumber(df: pd.DataFrame) -&gt; pd.DataFrame:
         df_new = df.copy()[~df[&#34;copy_number&#34;].isna()]
         size_diff = df.shape[0] - df_new.shape[0]
         logger.warning(f&#34;Dropping {size_diff} data points with missing copy number.&#34;)
@@ -509,10 +563,9 @@ data. Defaults to None (an empty list).</p></div>
 
     def _load_data(self) -&gt; pd.DataFrame:
         &#34;&#34;&#34;Load CRC data.&#34;&#34;&#34;
-        logger.debug(&#34;Reading data from file.&#34;)
-        df = achelp.read_achilles_data(self.get_data_path(), low_memory=False)
-        df = self._drop_sgrnas_that_map_to_multiple_genes(df)
-        df = self._drop_missing_copynumber(df)
+        data_path = self.get_data_path()
+        logger.debug(f&#34;Reading data from file: &#39;{data_path.as_posix()}&#39;.&#34;)
+        df = achelp.read_achilles_data(data_path, low_memory=False)
         df = achelp.set_achilles_categorical_columns(df)
         return df
 
@@ -522,14 +575,14 @@ data. Defaults to None (an empty list).</p></div>
         If the data is not already loaded, it is first read from disk.
         &#34;&#34;&#34;
         logger.debug(&#34;Retrieving data.&#34;)
+
         if self._data is None:
-            self._data: pd.DataFrame = self._load_data().pipe(
-                self.apply_transformations
-            )
+            self._data = self._load_data().pipe(self.apply_transformations)
+            assert isinstance(self._data, pd.DataFrame)
         return self._data
 
     def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
-        &#34;&#34;&#34;Set the new data set and apply the transofrmations automatically.
+        &#34;&#34;&#34;Set the new data set and apply the transformations automatically.
 
         Args:
             new_data (Optional[pd.DataFrame]): New data set.
@@ -636,10 +689,10 @@ data. Defaults to None (an empty list).</p></div>
     If the data is not already loaded, it is first read from disk.
     &#34;&#34;&#34;
     logger.debug(&#34;Retrieving data.&#34;)
+
     if self._data is None:
-        self._data: pd.DataFrame = self._load_data().pipe(
-            self.apply_transformations
-        )
+        self._data = self._load_data().pipe(self.apply_transformations)
+        assert isinstance(self._data, pd.DataFrame)
     return self._data</code></pre>
 </details>
 </dd>
@@ -672,7 +725,7 @@ data. Defaults to None (an empty list).</p></div>
 <span>def <span class="ident">set_data</span></span>(<span>self, new_data: Optional[pandas.core.frame.DataFrame]) -> NoneType</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Set the new data set and apply the transofrmations automatically.</p>
+<div class="desc"><p>Set the new data set and apply the transformations automatically.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>new_data</code></strong> :&ensp;<code>Optional[pd.DataFrame]</code></dt>
@@ -683,7 +736,7 @@ data. Defaults to None (an empty list).</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
-    &#34;&#34;&#34;Set the new data set and apply the transofrmations automatically.
+    &#34;&#34;&#34;Set the new data set and apply the transformations automatically.
 
     Args:
         new_data (Optional[pd.DataFrame]): New data set.
@@ -703,6 +756,7 @@ data. Defaults to None (an empty list).</p></div>
 <li><code><a title="src.managers.model_data_managers.DataManager.apply_transformations" href="#src.managers.model_data_managers.DataManager.apply_transformations">apply_transformations</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.data" href="#src.managers.model_data_managers.DataManager.data">data</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.generate_mock_data" href="#src.managers.model_data_managers.DataManager.generate_mock_data">generate_mock_data</a></code></li>
+<li><code><a title="src.managers.model_data_managers.DataManager.transform_data" href="#src.managers.model_data_managers.DataManager.transform_data">transform_data</a></code></li>
 </ul>
 </li>
 </ul>
@@ -719,10 +773,11 @@ data. Defaults to None (an empty list).</p></div>
 <dt><strong><code>debug</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Should the debugging data be used? Defaults to
 False.</dd>
-</dl>
-<p>transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
-optional): List of callable functions or classes for transforming the
-data. Defaults to None (an empty list).</p></div>
+<dt><strong><code>transformations</code></strong> :&ensp;<code>Optional[DataFrameTransformations]</code>, optional</dt>
+<dd>List of
+callable functions or classes for transforming the data. Defaults to None
+(an empty list).</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -731,23 +786,23 @@ data. Defaults to None (an empty list).</p></div>
     &#34;&#34;&#34;Abstract base class for the data managers.&#34;&#34;&#34;
 
     debug: bool
+    transformations: DataFrameTransformations
     _data: Optional[pd.DataFrame] = None
-    transformations: List[Callable[[pd.DataFrame], pd.DataFrame]]
 
     @abc.abstractmethod
     def __init__(
         self,
         debug: bool = False,
-        transformations: Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]] = None,
+        transformations: Optional[DataFrameTransformations] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize the data manager.
 
         Args:
             debug (bool, optional): Should the debugging data be used? Defaults to
               False.
-            transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
-              optional): List of callable functions or classes for transforming the
-              data. Defaults to None (an empty list).
+            transformations (Optional[DataFrameTransformations], optional): List of
+              callable functions or classes for transforming the data. Defaults to None
+              (an empty list).
         &#34;&#34;&#34;
         pass
 
@@ -804,6 +859,29 @@ data. Defaults to None (an empty list).</p></div>
         &#34;&#34;&#34;
         pass
 
+    def transform_data(self):
+        &#34;&#34;&#34;Transform the data held by the manager.
+
+        The data must be loaded using `get_data()` prior running this method. The
+        `get_data()` method already applies the transformations, so this method is
+        usually not required.
+        &#34;&#34;&#34;
+        if self.data is None:
+            logger.warn(&#34;No data available to transform.&#34;)
+            return
+
+        logger.info(&#34;Transforming data in place.&#34;)
+        self._data = self.apply_transformations(self.data)
+
+    @staticmethod
+    def _apply_transformations(
+        df: pd.DataFrame, transformations: DataFrameTransformations
+    ) -&gt; pd.DataFrame:
+        for transform in transformations:
+            logger.info(f&#34;Applying transformation: &#39;{transform.__name__}&#39;&#34;)
+            df = transform(df)
+        return df
+
     def apply_transformations(self, df: pd.DataFrame) -&gt; pd.DataFrame:
         &#34;&#34;&#34;Apply the stored transformations to the data set.
 
@@ -813,25 +891,42 @@ data. Defaults to None (an empty list).</p></div>
         Returns:
             pd.DataFrame: The transformed data set.
         &#34;&#34;&#34;
+        logger.info(f&#34;Applying {len(self.transformations)} data transformations.&#34;)
+
         if len(self.transformations) == 0:
+            logger.info(&#34;No transformations to apply.&#34;)
             return df
 
-        for transform in self.transformations:
-            df = transform(df)
-
+        df = DataManager._apply_transformations(df, self.transformations)
         return df
 
     def add_transformations(
-        self, new_trans: List[Callable[[pd.DataFrame], pd.DataFrame]]
-    ):
+        self,
+        new_trans: List[Callable[[pd.DataFrame], pd.DataFrame]],
+        run_transformations: bool = True,
+        new_only: bool = True,
+    ) -&gt; None:
         &#34;&#34;&#34;Add new data transformations.
 
         Args:
             new_trans (List[Callable[[pd.DataFrame], pd.DataFrame]]): A list of
-            callables to be used to transform the data. Each transformation must take a
-            pandas DataFrame and return a pandas DataFrame.
+              callables to be used to transform the data. Each transformation must take
+              a pandas DataFrame and return a pandas DataFrame.
+            run_transformations (bool, optional): Should the new transforms be applied
+              to the data? Defaults to True.
+            new_only (bool, optional): Should only the new transformations (those in
+              `new_trans`) be applied? Defaults to True.
         &#34;&#34;&#34;
+        if len(new_trans) == 0:
+            return
+
         self.transformations += new_trans
+
+        if self.data is not None:
+            if run_transformations and new_only:
+                self._data = DataManager._apply_transformations(self.data, new_trans)
+            elif run_transformations:
+                self.transform_data()
 
     @property
     def data(self) -&gt; Optional[pd.DataFrame]:
@@ -894,32 +989,54 @@ def data(self) -&gt; Optional[pd.DataFrame]:
 <h3>Methods</h3>
 <dl>
 <dt id="src.managers.model_data_managers.DataManager.add_transformations"><code class="name flex">
-<span>def <span class="ident">add_transformations</span></span>(<span>self, new_trans: List[Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]])</span>
+<span>def <span class="ident">add_transformations</span></span>(<span>self, new_trans: List[Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]], run_transformations: bool = True, new_only: bool = True) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add new data transformations.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>new_trans</code></strong> :&ensp;<code>List[Callable[[pd.DataFrame], pd.DataFrame]]</code></dt>
-<dd>A list of</dd>
-</dl>
-<p>callables to be used to transform the data. Each transformation must take a
-pandas DataFrame and return a pandas DataFrame.</p></div>
+<dd>A list of
+callables to be used to transform the data. Each transformation must take
+a pandas DataFrame and return a pandas DataFrame.</dd>
+<dt><strong><code>run_transformations</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the new transforms be applied
+to the data? Defaults to True.</dd>
+<dt><strong><code>new_only</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should only the new transformations (those in
+<code>new_trans</code>) be applied? Defaults to True.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_transformations(
-    self, new_trans: List[Callable[[pd.DataFrame], pd.DataFrame]]
-):
+    self,
+    new_trans: List[Callable[[pd.DataFrame], pd.DataFrame]],
+    run_transformations: bool = True,
+    new_only: bool = True,
+) -&gt; None:
     &#34;&#34;&#34;Add new data transformations.
 
     Args:
         new_trans (List[Callable[[pd.DataFrame], pd.DataFrame]]): A list of
-        callables to be used to transform the data. Each transformation must take a
-        pandas DataFrame and return a pandas DataFrame.
+          callables to be used to transform the data. Each transformation must take
+          a pandas DataFrame and return a pandas DataFrame.
+        run_transformations (bool, optional): Should the new transforms be applied
+          to the data? Defaults to True.
+        new_only (bool, optional): Should only the new transformations (those in
+          `new_trans`) be applied? Defaults to True.
     &#34;&#34;&#34;
-    self.transformations += new_trans</code></pre>
+    if len(new_trans) == 0:
+        return
+
+    self.transformations += new_trans
+
+    if self.data is not None:
+        if run_transformations and new_only:
+            self._data = DataManager._apply_transformations(self.data, new_trans)
+        elif run_transformations:
+            self.transform_data()</code></pre>
 </details>
 </dd>
 <dt id="src.managers.model_data_managers.DataManager.apply_transformations"><code class="name flex">
@@ -950,12 +1067,13 @@ pandas DataFrame and return a pandas DataFrame.</p></div>
     Returns:
         pd.DataFrame: The transformed data set.
     &#34;&#34;&#34;
+    logger.info(f&#34;Applying {len(self.transformations)} data transformations.&#34;)
+
     if len(self.transformations) == 0:
+        logger.info(&#34;No transformations to apply.&#34;)
         return df
 
-    for transform in self.transformations:
-        df = transform(df)
-
+    df = DataManager._apply_transformations(df, self.transformations)
     return df</code></pre>
 </details>
 </dd>
@@ -1095,6 +1213,33 @@ def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
     pass</code></pre>
 </details>
 </dd>
+<dt id="src.managers.model_data_managers.DataManager.transform_data"><code class="name flex">
+<span>def <span class="ident">transform_data</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Transform the data held by the manager.</p>
+<p>The data must be loaded using <code>get_data()</code> prior running this method. The
+<code>get_data()</code> method already applies the transformations, so this method is
+usually not required.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def transform_data(self):
+    &#34;&#34;&#34;Transform the data held by the manager.
+
+    The data must be loaded using `get_data()` prior running this method. The
+    `get_data()` method already applies the transformations, so this method is
+    usually not required.
+    &#34;&#34;&#34;
+    if self.data is None:
+        logger.warn(&#34;No data available to transform.&#34;)
+        return
+
+    logger.info(&#34;Transforming data in place.&#34;)
+    self._data = self.apply_transformations(self.data)</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 <dt id="src.managers.model_data_managers.MockDataManager"><code class="flex name class">
@@ -1110,10 +1255,11 @@ def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
 <dt><strong><code>debug</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Should the debugging data be used? Defaults to
 False.</dd>
-</dl>
-<p>transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
-optional): List of callable functions or classes for transforming the
-data. Defaults to None (an empty list).</p></div>
+<dt><strong><code>transformations</code></strong> :&ensp;<code>Optional[DataFrameTransformations]</code>, optional</dt>
+<dd>List of
+callable functions or classes for transforming the data. Defaults to None
+(an empty list).</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1124,7 +1270,7 @@ data. Defaults to None (an empty list).</p></div>
     def __init__(
         self,
         debug: bool = False,
-        transformations: Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]] = None,
+        transformations: Optional[DataFrameTransformations] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a MockDataManager.
 
@@ -1133,9 +1279,9 @@ data. Defaults to None (an empty list).</p></div>
         Args:
             debug (bool, optional): Should the debugging data be used? Defaults to
               False.
-            transformations (Optional[List[Callable[[pd.DataFrame], pd.DataFrame]]],
-              optional): List of callable functions or classes for transforming the
-              data. Defaults to None (an empty list).
+            transformations (Optional[DataFrameTransformations], optional): List of
+              callable functions or classes for transforming the data. Defaults to None
+              (an empty list).
         &#34;&#34;&#34;
         self.debug = debug
         if transformations is None:
@@ -1298,6 +1444,7 @@ data. Defaults to None (an empty list).</p></div>
 <li><code><a title="src.managers.model_data_managers.DataManager.get_batch_size" href="#src.managers.model_data_managers.DataManager.get_batch_size">get_batch_size</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.get_data" href="#src.managers.model_data_managers.DataManager.get_data">get_data</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.get_data_path" href="#src.managers.model_data_managers.DataManager.get_data_path">get_data_path</a></code></li>
+<li><code><a title="src.managers.model_data_managers.DataManager.transform_data" href="#src.managers.model_data_managers.DataManager.transform_data">transform_data</a></code></li>
 </ul>
 </li>
 </ul>
@@ -1338,6 +1485,7 @@ data. Defaults to None (an empty list).</p></div>
 <li><code><a title="src.managers.model_data_managers.DataManager.get_data" href="#src.managers.model_data_managers.DataManager.get_data">get_data</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.get_data_path" href="#src.managers.model_data_managers.DataManager.get_data_path">get_data_path</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.set_data" href="#src.managers.model_data_managers.DataManager.set_data">set_data</a></code></li>
+<li><code><a title="src.managers.model_data_managers.DataManager.transform_data" href="#src.managers.model_data_managers.DataManager.transform_data">transform_data</a></code></li>
 </ul>
 </li>
 <li>

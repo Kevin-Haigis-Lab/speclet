@@ -51,6 +51,7 @@ def centered_copynumber_by_cellline(df: pd.DataFrame) -&gt; pd.DataFrame:
     Returns:
         pd.DataFrame: Same data frame with a new column `&#34;copy_number_cellline&#34;`.
     &#34;&#34;&#34;
+    logger.info(&#34;Adding &#39;copy_number_cellline&#39; column.&#34;)
     return dphelp.center_column_grouped_dataframe(
         df,
         grp_col=&#34;depmap_id&#34;,
@@ -68,6 +69,7 @@ def centered_copynumber_by_gene(df: pd.DataFrame) -&gt; pd.DataFrame:
     Returns:
         pd.DataFrame: Same data frame with a new column `&#34;copy_number_gene&#34;`.
     &#34;&#34;&#34;
+    logger.info(&#34;Adding &#39;copy_number_gene&#39; column.&#34;)
     return dphelp.center_column_grouped_dataframe(
         df,
         grp_col=&#34;hugo_symbol&#34;,
@@ -166,6 +168,48 @@ class SpecletSix(SpecletModel):
         self._rna_cov = rna_cov
         self._mutation_cov = mutation_cov
 
+    @property
+    def cell_line_cna_cov(self) -&gt; bool:
+        &#34;&#34;&#34;Should the covariate for cell line-specific CN be included?
+
+        Returns:
+            bool: Whether the covariate is included or not.
+        &#34;&#34;&#34;
+        return self._cell_line_cna_cov
+
+    @cell_line_cna_cov.setter
+    def cell_line_cna_cov(self, new_value: bool) -&gt; None:
+        &#34;&#34;&#34;Decide if the cell line-specific CN covariate should be included.
+
+        Args:
+            new_value (bool): Whether the covariate is included or not.
+        &#34;&#34;&#34;
+        if self._cell_line_cna_cov != new_value:
+            logger.info(&#34;Changing `cell_line_cna_cov` to `{new_value}`.&#34;)
+            self._cell_line_cna_cov = new_value
+            self._reset_model_and_results()
+
+    @property
+    def gene_cna_cov(self) -&gt; bool:
+        &#34;&#34;&#34;Should the covariate for gene-specific CN be included?
+
+        Returns:
+            bool: Whether the covariate is included or not.
+        &#34;&#34;&#34;
+        return self._gene_cna_cov
+
+    @gene_cna_cov.setter
+    def gene_cna_cov(self, new_value: bool) -&gt; None:
+        &#34;&#34;&#34;Decide if the gene-specific CN covariate should be included.
+
+        Args:
+            new_value (bool): Whether the covariate is included or not.
+        &#34;&#34;&#34;
+        if self._gene_cna_cov != new_value:
+            logger.info(&#34;Changing `gene_cna_cov` to `{new_value}`.&#34;)
+            self._gene_cna_cov = new_value
+            self._reset_model_and_results()
+
     def model_specification(self) -&gt; Tuple[pm.Model, str]:
         &#34;&#34;&#34;Build SpecletSix model.
 
@@ -202,6 +246,14 @@ class SpecletSix(SpecletModel):
             &#34;batch_to_screen_idx_shared&#34;: batch_to_screen_idx_shared,
             &#34;lfc_shared&#34;: lfc_shared,
         }
+
+        if self._cell_line_cna_cov:
+            cellline_cna_shared = ts(data[&#34;copy_number_cellline&#34;].values)
+            self.shared_vars[&#34;cellline_cna_shared&#34;] = cellline_cna_shared
+
+        if self._gene_cna_cov:
+            gene_cna_shared = ts(data[&#34;copy_number_gene&#34;].values)
+            self.shared_vars[&#34;gene_cna_shared&#34;] = gene_cna_shared
 
         logger.info(&#34;Creating PyMC3 model.&#34;)
         logger.warning(
@@ -276,13 +328,29 @@ class SpecletSix(SpecletModel):
             # Global intercept.
             i = pm.Normal(&#34;i&#34;, 0, 1)
 
-            μ = (
+            _μ = (
                 i
                 + a[gene_idx_shared]
                 + d[cellline_idx_shared]
                 + h[gene_idx_shared, cellline_idx_shared]
                 + j[batch_idx_shared]
             )
+
+            if self._cell_line_cna_cov:
+                μ_k = pm.Normal(&#34;μ_k&#34;, -0.5, 2)
+                σ_k = pm.HalfNormal(&#34;σ_k&#34;, 1)
+                k_offset = pm.Normal(&#34;k_offset&#34;, 0, 1, shape=co_idx.n_celllines)
+                k = pm.Deterministic(&#34;k&#34;, (μ_k + k_offset * σ_k))
+                _μ += k[cellline_idx_shared] * cellline_cna_shared
+
+            if self._gene_cna_cov:
+                μ_n = pm.Normal(&#34;μ_n&#34;, 0, 2)
+                σ_n = pm.HalfNormal(&#34;σ_n&#34;, 1)
+                n_offset = pm.Normal(&#34;n_offset&#34;, 0, 1, shape=co_idx.n_genes)
+                n = pm.Deterministic(&#34;n&#34;, (μ_n + n_offset * σ_n))
+                _μ += n[gene_idx_shared] * gene_cna_shared
+
+            μ = pm.Deterministic(&#34;μ&#34;, _μ)
 
             # Standard deviation of log-fold change, varies per batch.
             σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 1)
@@ -392,6 +460,7 @@ class SpecletSix(SpecletModel):
     Returns:
         pd.DataFrame: Same data frame with a new column `&#34;copy_number_cellline&#34;`.
     &#34;&#34;&#34;
+    logger.info(&#34;Adding &#39;copy_number_cellline&#39; column.&#34;)
     return dphelp.center_column_grouped_dataframe(
         df,
         grp_col=&#34;depmap_id&#34;,
@@ -428,6 +497,7 @@ class SpecletSix(SpecletModel):
     Returns:
         pd.DataFrame: Same data frame with a new column `&#34;copy_number_gene&#34;`.
     &#34;&#34;&#34;
+    logger.info(&#34;Adding &#39;copy_number_gene&#39; column.&#34;)
     return dphelp.center_column_grouped_dataframe(
         df,
         grp_col=&#34;hugo_symbol&#34;,
@@ -606,6 +676,48 @@ False.</dd>
         self._rna_cov = rna_cov
         self._mutation_cov = mutation_cov
 
+    @property
+    def cell_line_cna_cov(self) -&gt; bool:
+        &#34;&#34;&#34;Should the covariate for cell line-specific CN be included?
+
+        Returns:
+            bool: Whether the covariate is included or not.
+        &#34;&#34;&#34;
+        return self._cell_line_cna_cov
+
+    @cell_line_cna_cov.setter
+    def cell_line_cna_cov(self, new_value: bool) -&gt; None:
+        &#34;&#34;&#34;Decide if the cell line-specific CN covariate should be included.
+
+        Args:
+            new_value (bool): Whether the covariate is included or not.
+        &#34;&#34;&#34;
+        if self._cell_line_cna_cov != new_value:
+            logger.info(&#34;Changing `cell_line_cna_cov` to `{new_value}`.&#34;)
+            self._cell_line_cna_cov = new_value
+            self._reset_model_and_results()
+
+    @property
+    def gene_cna_cov(self) -&gt; bool:
+        &#34;&#34;&#34;Should the covariate for gene-specific CN be included?
+
+        Returns:
+            bool: Whether the covariate is included or not.
+        &#34;&#34;&#34;
+        return self._gene_cna_cov
+
+    @gene_cna_cov.setter
+    def gene_cna_cov(self, new_value: bool) -&gt; None:
+        &#34;&#34;&#34;Decide if the gene-specific CN covariate should be included.
+
+        Args:
+            new_value (bool): Whether the covariate is included or not.
+        &#34;&#34;&#34;
+        if self._gene_cna_cov != new_value:
+            logger.info(&#34;Changing `gene_cna_cov` to `{new_value}`.&#34;)
+            self._gene_cna_cov = new_value
+            self._reset_model_and_results()
+
     def model_specification(self) -&gt; Tuple[pm.Model, str]:
         &#34;&#34;&#34;Build SpecletSix model.
 
@@ -642,6 +754,14 @@ False.</dd>
             &#34;batch_to_screen_idx_shared&#34;: batch_to_screen_idx_shared,
             &#34;lfc_shared&#34;: lfc_shared,
         }
+
+        if self._cell_line_cna_cov:
+            cellline_cna_shared = ts(data[&#34;copy_number_cellline&#34;].values)
+            self.shared_vars[&#34;cellline_cna_shared&#34;] = cellline_cna_shared
+
+        if self._gene_cna_cov:
+            gene_cna_shared = ts(data[&#34;copy_number_gene&#34;].values)
+            self.shared_vars[&#34;gene_cna_shared&#34;] = gene_cna_shared
 
         logger.info(&#34;Creating PyMC3 model.&#34;)
         logger.warning(
@@ -716,13 +836,29 @@ False.</dd>
             # Global intercept.
             i = pm.Normal(&#34;i&#34;, 0, 1)
 
-            μ = (
+            _μ = (
                 i
                 + a[gene_idx_shared]
                 + d[cellline_idx_shared]
                 + h[gene_idx_shared, cellline_idx_shared]
                 + j[batch_idx_shared]
             )
+
+            if self._cell_line_cna_cov:
+                μ_k = pm.Normal(&#34;μ_k&#34;, -0.5, 2)
+                σ_k = pm.HalfNormal(&#34;σ_k&#34;, 1)
+                k_offset = pm.Normal(&#34;k_offset&#34;, 0, 1, shape=co_idx.n_celllines)
+                k = pm.Deterministic(&#34;k&#34;, (μ_k + k_offset * σ_k))
+                _μ += k[cellline_idx_shared] * cellline_cna_shared
+
+            if self._gene_cna_cov:
+                μ_n = pm.Normal(&#34;μ_n&#34;, 0, 2)
+                σ_n = pm.HalfNormal(&#34;σ_n&#34;, 1)
+                n_offset = pm.Normal(&#34;n_offset&#34;, 0, 1, shape=co_idx.n_genes)
+                n = pm.Deterministic(&#34;n&#34;, (μ_n + n_offset * σ_n))
+                _μ += n[gene_idx_shared] * gene_cna_shared
+
+            μ = pm.Deterministic(&#34;μ&#34;, _μ)
 
             # Standard deviation of log-fold change, varies per batch.
             σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 1)
@@ -800,6 +936,53 @@ False.</dd>
 <ul class="hlist">
 <li><a title="src.models.speclet_model.SpecletModel" href="speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a></li>
 </ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="src.models.speclet_six.SpecletSix.cell_line_cna_cov"><code class="name">var <span class="ident">cell_line_cna_cov</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>Should the covariate for cell line-specific CN be included?</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>Whether the covariate is included or not.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def cell_line_cna_cov(self) -&gt; bool:
+    &#34;&#34;&#34;Should the covariate for cell line-specific CN be included?
+
+    Returns:
+        bool: Whether the covariate is included or not.
+    &#34;&#34;&#34;
+    return self._cell_line_cna_cov</code></pre>
+</details>
+</dd>
+<dt id="src.models.speclet_six.SpecletSix.gene_cna_cov"><code class="name">var <span class="ident">gene_cna_cov</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>Should the covariate for gene-specific CN be included?</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>Whether the covariate is included or not.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def gene_cna_cov(self) -&gt; bool:
+    &#34;&#34;&#34;Should the covariate for gene-specific CN be included?
+
+    Returns:
+        bool: Whether the covariate is included or not.
+    &#34;&#34;&#34;
+    return self._gene_cna_cov</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="src.models.speclet_six.SpecletSix.get_replacement_parameters"><code class="name flex">
@@ -916,6 +1099,14 @@ False.</dd>
         &#34;lfc_shared&#34;: lfc_shared,
     }
 
+    if self._cell_line_cna_cov:
+        cellline_cna_shared = ts(data[&#34;copy_number_cellline&#34;].values)
+        self.shared_vars[&#34;cellline_cna_shared&#34;] = cellline_cna_shared
+
+    if self._gene_cna_cov:
+        gene_cna_shared = ts(data[&#34;copy_number_gene&#34;].values)
+        self.shared_vars[&#34;gene_cna_shared&#34;] = gene_cna_shared
+
     logger.info(&#34;Creating PyMC3 model.&#34;)
     logger.warning(
         &#34;Still need to implement varying effect for source on batch effect.&#34;
@@ -989,13 +1180,29 @@ False.</dd>
         # Global intercept.
         i = pm.Normal(&#34;i&#34;, 0, 1)
 
-        μ = (
+        _μ = (
             i
             + a[gene_idx_shared]
             + d[cellline_idx_shared]
             + h[gene_idx_shared, cellline_idx_shared]
             + j[batch_idx_shared]
         )
+
+        if self._cell_line_cna_cov:
+            μ_k = pm.Normal(&#34;μ_k&#34;, -0.5, 2)
+            σ_k = pm.HalfNormal(&#34;σ_k&#34;, 1)
+            k_offset = pm.Normal(&#34;k_offset&#34;, 0, 1, shape=co_idx.n_celllines)
+            k = pm.Deterministic(&#34;k&#34;, (μ_k + k_offset * σ_k))
+            _μ += k[cellline_idx_shared] * cellline_cna_shared
+
+        if self._gene_cna_cov:
+            μ_n = pm.Normal(&#34;μ_n&#34;, 0, 2)
+            σ_n = pm.HalfNormal(&#34;σ_n&#34;, 1)
+            n_offset = pm.Normal(&#34;n_offset&#34;, 0, 1, shape=co_idx.n_genes)
+            n = pm.Deterministic(&#34;n&#34;, (μ_n + n_offset * σ_n))
+            _μ += n[gene_idx_shared] * gene_cna_shared
+
+        μ = pm.Deterministic(&#34;μ&#34;, _μ)
 
         # Standard deviation of log-fold change, varies per batch.
         σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 1)
@@ -1092,6 +1299,8 @@ False.</dd>
 <li>
 <h4><code><a title="src.models.speclet_six.SpecletSix" href="#src.models.speclet_six.SpecletSix">SpecletSix</a></code></h4>
 <ul class="">
+<li><code><a title="src.models.speclet_six.SpecletSix.cell_line_cna_cov" href="#src.models.speclet_six.SpecletSix.cell_line_cna_cov">cell_line_cna_cov</a></code></li>
+<li><code><a title="src.models.speclet_six.SpecletSix.gene_cna_cov" href="#src.models.speclet_six.SpecletSix.gene_cna_cov">gene_cna_cov</a></code></li>
 <li><code><a title="src.models.speclet_six.SpecletSix.get_replacement_parameters" href="#src.models.speclet_six.SpecletSix.get_replacement_parameters">get_replacement_parameters</a></code></li>
 <li><code><a title="src.models.speclet_six.SpecletSix.model_specification" href="#src.models.speclet_six.SpecletSix.model_specification">model_specification</a></code></li>
 <li><code><a title="src.models.speclet_six.SpecletSix.update_advi_sampling_parameters" href="#src.models.speclet_six.SpecletSix.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>

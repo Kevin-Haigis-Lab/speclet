@@ -9,12 +9,16 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from src.data_processing import achilles as achelp
-from src.data_processing import common as dphelp
 from src.managers.model_data_managers import CrcDataManager
+from src.modeling.pymc3_helpers import get_variable_names
 from src.models import speclet_six
 from src.models.speclet_six import SpecletSix
 
 chars = [str(i) for i in range(10)] + list(ascii_letters)
+
+
+def monkey_get_data_path(*args, **kwargs) -> Path:
+    return Path("tests", "depmap_test_data.csv")
 
 
 def make_column_tiled(
@@ -70,16 +74,10 @@ def copynumber_dataframe(draw, group_name: str) -> pd.DataFrame:
 
 
 class TestSpecletSix:
-    @pytest.fixture(scope="class")
-    def data_manager(self) -> CrcDataManager:
+    @pytest.fixture(scope="function")
+    def data_manager(self, monkeypatch: pytest.MonkeyPatch) -> CrcDataManager:
+        monkeypatch.setattr(CrcDataManager, "get_data_path", monkey_get_data_path)
         dm = CrcDataManager(debug=True)
-        dm.data = (
-            dm.get_data()
-            .pipe(achelp.subsample_achilles_data, n_genes=5, n_cell_lines=3)
-            .pipe(achelp.set_achilles_categorical_columns)
-        )
-        assert dphelp.nunique(dm.data["hugo_symbol"]) == 5
-        assert dphelp.nunique(dm.data["depmap_id"]) == 3
         return dm
 
     @settings(deadline=None)
@@ -104,6 +102,7 @@ class TestSpecletSix:
         sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path, debug=True)
         assert sp6.model is None
 
+    @pytest.mark.DEV
     def test_build_model(self, tmp_path: Path, data_manager: CrcDataManager):
         sp6 = SpecletSix(
             "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
@@ -120,8 +119,8 @@ class TestSpecletSix:
             "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
         )
         sp6.build_model()
-        model_vars = [v.name for v in sp6.model.free_RVs]
-        model_vars = [v.replace("_log__", "") for v in model_vars]
+        assert sp6.model is not None
+        model_vars = get_variable_names(sp6.model, rm_log=True)
         for expected_v in ["μ_μ_d", "σ_μ_d", "μ_d_offset", "σ_σ_d"]:
             assert expected_v in model_vars
 
@@ -142,19 +141,55 @@ class TestSpecletSix:
         multi_screen_vars = ["μ_μ_j", "σ_μ_j", "σ_σ_j", "μ_j_offset"]
 
         sp6.build_model()
-        model_vars = [v.name for v in sp6.model.free_RVs]
-        model_vars = [v.replace("_log__", "") for v in model_vars]
+        assert sp6.model is not None
+        model_vars = get_variable_names(sp6.model, rm_log=True)
         for var in multi_screen_vars:
             assert var not in model_vars
 
         make_data_multiple_screens(dm=data_manager)
         sp6.build_model()
-        model_vars = [v.name for v in sp6.model.free_RVs]
-        model_vars = [v.replace("_log__", "") for v in model_vars]
+        assert sp6.model is not None
+        model_vars = get_variable_names(sp6.model, rm_log=True)
         for var in multi_screen_vars:
             assert var in model_vars
 
         data_manager.data = None  # clean up changes to data
+
+    def test_model_with_optional_cellline_cn_covariate(
+        self, tmp_path: Path, data_manager: CrcDataManager
+    ):
+        sp6 = SpecletSix(
+            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
+        )
+
+        expected_vars = set(["μ_k", "σ_k", "k_offset", "k"])
+
+        for with_cell_line_cov in [False, True]:
+            sp6.cell_line_cna_cov = with_cell_line_cov
+            assert sp6.model is None
+            sp6.build_model()
+            assert sp6.model is not None
+            model_vars = get_variable_names(sp6.model, rm_log=True)
+            for v in expected_vars:
+                assert (v in model_vars) == with_cell_line_cov
+
+    def test_model_with_optional_gene_cn_covariate(
+        self, tmp_path: Path, data_manager: CrcDataManager
+    ):
+        sp6 = SpecletSix(
+            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
+        )
+
+        expected_vars = set(["μ_n", "σ_n", "n_offset", "n"])
+
+        for with_gene_cov in [False, True]:
+            sp6.gene_cna_cov = with_gene_cov
+            assert sp6.model is None
+            sp6.build_model()
+            assert sp6.model is not None
+            model_vars = get_variable_names(sp6.model, rm_log=True)
+            for v in expected_vars:
+                assert (v in model_vars) == with_gene_cov
 
     @pytest.mark.slow
     def test_mcmc_sampling(self, tmp_path: Path, data_manager: CrcDataManager):
