@@ -8,10 +8,22 @@ from typing import List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel
+from scipy import stats
 
 from src.data_processing import common as dphelp
 
 #### ---- Data manipulation ---- ####
+
+
+def _zscale(x: np.ndarray) -> np.ndarray:
+    return stats.zscore(x)
+
+
+def _squish(x: float, lower: float, upper: float) -> float:
+    return max(min(x, upper), lower)
+
+
+_squish_array = np.vectorize(_squish)
 
 
 def zscale_cna_by_group(
@@ -22,6 +34,9 @@ def zscale_cna_by_group(
     cn_max: Optional[float] = None,
 ) -> pd.DataFrame:
     """Z-scale the copy number values.
+
+    TODO: Address the same concerns as accounted for in `zscale_rna_expression()`.
+    TODO: Use hypothesis to test.
 
     Args:
         df (pd.DataFrame): The DataFrame to modify.
@@ -44,7 +59,7 @@ def zscale_cna_by_group(
         df[new_col] = df[cn_col]
 
     def z_scale(x: pd.Series) -> pd.Series:
-        return (x - np.mean(x)) / np.std(x)
+        return _zscale(x)
 
     if groupby_cols is not None:
         df[new_col] = df.groupby(list(groupby_cols))[new_col].apply(z_scale)
@@ -52,6 +67,78 @@ def zscale_cna_by_group(
         df[new_col] = df[new_col].apply(z_scale)
 
     return df
+
+
+def zscale_rna_expression(
+    df: pd.DataFrame,
+    rna_col: str = "rna_expr",
+    new_col: Optional[str] = None,
+    lower_bound: Optional[float] = None,
+    upper_bound: Optional[float] = None,
+) -> pd.DataFrame:
+    """Z-scale RNA expression data.
+
+    If there is not enough variation in the values, dividing by the standard deviation
+    becomes very unstable. Thus, in this function, if the values are all too similar,
+    all are set to 0 instead of either `NaN` or very extreme values.
+
+    Args:
+        df (pd.DataFrame): Data frame.
+        rna_col (str, optional): Column with RNA expr data. Defaults to "rna_expr".
+        new_col (Optional[str], optional): Name of the new column to be generated.
+          Defaults to `f"{rna_col}_z"` if None.
+        lower_bound (Optional[float], optional): Hard lower bound on the scaled values.
+          Defaults to None.
+        upper_bound (Optional[float], optional): Hard upper bound on the scaled values.
+          Defaults to None.
+
+    Returns:
+        pd.DataFrame: The original data frame with a new column with the z-scaled RNA
+          expression values.
+    """
+    if new_col is None:
+        new_col = rna_col + "_z"
+
+    rna = df[rna_col].values
+
+    if len(rna) == 1:
+        # If there is only one value, set z-scaled expr to 0.
+        df[new_col] = 0
+        return df
+
+    if np.allclose(rna, 0.0, atol=0.01):
+        # If all values are close to 0, set value to 0.
+        df[new_col] = 0
+    elif np.allclose(rna, np.mean(rna), atol=0.01):
+        # If all values are about equal, set value to 0.
+        df[new_col] = 0
+
+    else:
+        df[new_col] = _zscale(np.log10(rna + 1))
+
+    if lower_bound is not None and upper_bound is not None:
+        df[new_col] = _squish_array(df[new_col], lower=lower_bound, upper=upper_bound)
+
+    return df
+
+
+def zscale_rna_expression_by_gene_lineage(
+    df: pd.DataFrame, *args, **kwargs
+) -> pd.DataFrame:
+    """Z-scale RNA expression data grouping by lineage and gene.
+
+    All positional and keyword arguments are passed to `zscale_rna_expression()`.
+
+    Args:
+        df (pd.DataFrame): The Achilles data frame.
+
+    Returns:
+        pd.DataFrame: The original data frame with a new column with the z-scaled RNA
+          expression values.
+    """
+    return df.groupby(["lineage", "hugo_symbol"]).apply(
+        zscale_rna_expression, *args, **kwargs
+    )
 
 
 #### ---- Indices ---- ####

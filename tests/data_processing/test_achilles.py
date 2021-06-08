@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+from itertools import product
 from pathlib import Path
 from string import ascii_lowercase as letters
 from string import ascii_uppercase as LETTERS
@@ -8,11 +8,18 @@ from typing import List
 import numpy as np
 import pandas as pd
 import pytest
+from hypothesis import given, note
+from hypothesis import strategies as st
 
 from src.data_processing import achilles as achelp
 from src.data_processing import common as dphelp
 
 DATA_PATH = Path("tests", "depmap_test_data.csv")
+
+
+@pytest.fixture
+def data() -> pd.DataFrame:
+    return achelp.read_achilles_data(DATA_PATH, low_memory=True)
 
 
 #### ---- Reading and modifying Achilles data ---- ####
@@ -36,13 +43,6 @@ class TestHandlingAchillesData:
 
 
 class TestModifyingAchillesData:
-    def setup_class(self):
-        self.data_path = DATA_PATH
-
-    @pytest.fixture
-    def data(self) -> pd.DataFrame:
-        return achelp.read_achilles_data(self.data_path, low_memory=True)
-
     @pytest.fixture
     def mock_data(self) -> pd.DataFrame:
         np.random.seed(0)
@@ -64,13 +64,13 @@ class TestModifyingAchillesData:
             assert data[col].dtype == "category"
 
     def test_setting_achilles_categorical_columns(self):
-        data = achelp.read_achilles_data(self.data_path, set_categorical_cols=False)
+        data = achelp.read_achilles_data(DATA_PATH, set_categorical_cols=False)
         assert "category" not in data.dtypes
         data = achelp.set_achilles_categorical_columns(data=data)
         assert sum(data.dtypes == "category") == 7
 
     def test_custom_achilles_categorical_columns(self):
-        data = achelp.read_achilles_data(self.data_path, set_categorical_cols=False)
+        data = achelp.read_achilles_data(DATA_PATH, set_categorical_cols=False)
         data = achelp.set_achilles_categorical_columns(
             data, cols=["hugo_symbol", "sgrna"]
         )
@@ -140,6 +140,79 @@ class TestModifyingAchillesData:
         z_vals = z_data.loc[less_than_max_idx, "copy_number_z"]
         z_max_vals = z_data_max.loc[less_than_max_idx, "copy_number_z"]
         assert (z_vals <= z_max_vals).all()
+
+
+@st.composite
+def my_arrays(draw, min_size: int = 1):
+    return draw(
+        st.lists(
+            st.floats(
+                min_value=0.0,
+                max_value=100.0,
+                allow_infinity=False,
+                allow_nan=False,
+            ),
+            min_size=min_size,
+        )
+    )
+
+
+@given(my_arrays())
+def test_zscale_rna_expression(rna_expr_ary):
+    df = pd.DataFrame({"rna_expr": rna_expr_ary})
+    note(df)
+    df_z = achelp.zscale_rna_expression(df, "rna_expr", new_col="rna_expr_z")
+    assert df_z["rna_expr_z"].mean() == pytest.approx(0.0, abs=0.01)
+
+
+@given(
+    rna_expr_ary=my_arrays(),
+    lower_bound=st.floats(
+        min_value=-5.0, max_value=-0.01, allow_infinity=False, allow_nan=False
+    ),
+    upper_bound=st.floats(
+        min_value=0.01, max_value=5.0, allow_infinity=False, allow_nan=False
+    ),
+)
+def test_zscale_rna_expression_with_bounds(
+    rna_expr_ary: List[float], lower_bound: float, upper_bound: float
+):
+    df = pd.DataFrame({"rna_expr": rna_expr_ary})
+    note(df)
+    df_z = achelp.zscale_rna_expression(
+        df,
+        "rna_expr",
+        new_col="rna_expr_z",
+        lower_bound=lower_bound,
+        upper_bound=upper_bound,
+    )
+    assert df_z["rna_expr_z"].mean() == pytest.approx(0.0, abs=1)
+    assert df_z["rna_expr_z"].min() >= lower_bound
+    assert df_z["rna_expr_z"].max() <= upper_bound
+
+
+@given(st.data())
+def test_zscale_rna_expression_by_gene_lineage(hyp_data):
+    n_lineages = hyp_data.draw(st.integers(min_value=1, max_value=4))
+    n_genes = hyp_data.draw(st.integers(min_value=1, max_value=7))
+    lineages = [f"lineage_{i}" for i in range(n_lineages)]
+    genes = [f"gene_{i}" for i in range(n_genes)]
+    df = pd.DataFrame(
+        list(product(lineages, genes)), columns=["lineage", "hugo_symbol"]
+    )
+    df["rna_expr"] = np.random.uniform(0.0, 100.0, size=len(df))
+    note(df.__str__())
+    df_z = achelp.zscale_rna_expression(df, "rna_expr", new_col="rna_expr_z")
+    assert df_z["rna_expr_z"].mean() == pytest.approx(0.0, abs=0.01)
+    df_z_g = achelp.zscale_rna_expression_by_gene_lineage(
+        df, "rna_expr", new_col="rna_expr_z"
+    )
+    for gene in genes:
+        for lineage in lineages:
+            rna_expr_z = df_z_g.query(f"hugo_symbol == '{gene}'").query(
+                f"lineage == '{lineage}'"
+            )["rna_expr_z"]
+            assert np.mean(rna_expr_z) == pytest.approx(0, abs=0.01)
 
 
 #### ---- Index helpers ---- ####
