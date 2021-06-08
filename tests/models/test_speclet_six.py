@@ -98,11 +98,16 @@ class TestSpecletSix:
             avg = mod_df.query(f"hugo_symbol == '{gene}'")["copy_number_gene"].mean()
             assert avg == pytest.approx(0.0, abs=0.001)
 
+    @given(st.lists(st.booleans()))
+    def test_converting_is_mutated_column(self, is_mutated: List[bool]):
+        df = pd.DataFrame({"is_mutated": is_mutated})
+        mod_df = speclet_six.convert_is_mutated_to_numeric(df)
+        assert mod_df["is_mutated"].dtype == np.int64
+
     def test_instantiation(self, tmp_path: Path):
         sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path, debug=True)
         assert sp6.model is None
 
-    @pytest.mark.DEV
     def test_build_model(self, tmp_path: Path, data_manager: CrcDataManager):
         sp6 = SpecletSix(
             "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
@@ -123,8 +128,6 @@ class TestSpecletSix:
         model_vars = get_variable_names(sp6.model, rm_log=True)
         for expected_v in ["μ_μ_d", "σ_μ_d", "μ_d_offset", "σ_σ_d"]:
             assert expected_v in model_vars
-
-        data_manager.data = None  # clean up changes to data
 
     def test_model_with_multiple_screens(
         self, tmp_path: Path, data_manager: CrcDataManager
@@ -152,8 +155,6 @@ class TestSpecletSix:
         model_vars = get_variable_names(sp6.model, rm_log=True)
         for var in multi_screen_vars:
             assert var in model_vars
-
-        data_manager.data = None  # clean up changes to data
 
     def test_model_with_optional_cellline_cn_covariate(
         self, tmp_path: Path, data_manager: CrcDataManager
@@ -190,6 +191,24 @@ class TestSpecletSix:
             model_vars = get_variable_names(sp6.model, rm_log=True)
             for v in expected_vars:
                 assert (v in model_vars) == with_gene_cov
+
+    def test_model_with_optional_gene_lineage_rna_covariate(
+        self, tmp_path: Path, data_manager: CrcDataManager
+    ):
+        sp6 = SpecletSix(
+            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
+        )
+
+        expected_vars = set(["μ_q", "σ_q", "q_offset", "q"])
+
+        for with_rna_cov in [False, True]:
+            sp6.rna_cov = with_rna_cov
+            assert sp6.model is None
+            sp6.build_model()
+            assert sp6.model is not None
+            model_vars = get_variable_names(sp6.model, rm_log=True)
+            for v in expected_vars:
+                assert (v in model_vars) == with_rna_cov
 
     @pytest.mark.slow
     def test_mcmc_sampling(self, tmp_path: Path, data_manager: CrcDataManager):
@@ -241,7 +260,36 @@ class TestSpecletSix:
             random_seed=1,
         )
         assert sp6.mcmc_results is not None
-        data_manager.data = None  # clean up changes to data
+
+    @pytest.mark.slow
+    def test_mcmc_sampling_with_optional_covariates(
+        self, tmp_path: Path, data_manager: CrcDataManager
+    ):
+        sp6 = SpecletSix(
+            "TEST-MODEL",
+            root_cache_dir=tmp_path,
+            debug=True,
+            data_manager=data_manager,
+            cell_line_cna_cov=True,
+            gene_cna_cov=True,
+            rna_cov=True,
+            mutation_cov=True,
+        )
+        assert sp6.model is None
+        sp6.build_model()
+        assert sp6.model is not None
+        assert sp6.observed_var_name is not None
+        assert sp6.mcmc_results is None
+        _ = sp6.mcmc_sample_model(
+            mcmc_draws=10,
+            tune=10,
+            chains=2,
+            cores=2,
+            prior_pred_samples=10,
+            post_pred_samples=10,
+            random_seed=1,
+        )
+        assert sp6.mcmc_results is not None
 
     @pytest.mark.slow
     def test_advi_sampling(self, tmp_path: Path, data_manager: CrcDataManager):

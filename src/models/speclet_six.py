@@ -50,6 +50,37 @@ def centered_copynumber_by_gene(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+def zscale_rna_expression_by_gene_and_lineage(df: pd.DataFrame) -> pd.DataFrame:
+    """Z-scale the RNA expression per gene in each lineage.
+
+    Args:
+        df (pd.DataFrame): Achilles data frame.
+
+    Returns:
+        pd.DataFrame: Same data frame with a new column `"rna_expr_gene_lineage"`.
+    """
+    return achelp.zscale_rna_expression_by_gene_lineage(
+        df,
+        rna_col="rna_expr",
+        new_col="rna_expr_gene_lineage",
+        lower_bound=-5.0,
+        upper_bound=5.0,
+    )
+
+
+def convert_is_mutated_to_numeric(df: pd.DataFrame) -> pd.DataFrame:
+    """Convert the boolean column for gene mutation status to type integer.
+
+    Args:
+        df (pd.DataFrame): Achilles data frame.
+
+    Returns:
+        pd.DataFrame: Same data frame with the column `"is_mutated"` as type integer.
+    """
+    df["is_mutated"] = df["is_mutated"].astype(int)
+    return df
+
+
 class SpecletSix(SpecletModel):
     """SpecletSix Model.
 
@@ -126,7 +157,12 @@ class SpecletSix(SpecletModel):
             data_manager = CrcDataManager(debug=debug)
 
         data_manager.add_transformations(
-            [centered_copynumber_by_cellline, centered_copynumber_by_gene]
+            [
+                centered_copynumber_by_cellline,
+                centered_copynumber_by_gene,
+                zscale_rna_expression_by_gene_and_lineage,
+                convert_is_mutated_to_numeric,
+            ]
         )
 
         super().__init__(
@@ -182,6 +218,27 @@ class SpecletSix(SpecletModel):
             self._gene_cna_cov = new_value
             self._reset_model_and_results()
 
+    @property
+    def rna_cov(self) -> bool:
+        """Should the covariate for gene- and lineage-specific RNA be included?
+
+        Returns:
+            bool: Whether the covariate is included or not.
+        """
+        return self._rna_cov
+
+    @rna_cov.setter
+    def rna_cov(self, new_value: bool) -> None:
+        """Decide if the gene- and lineage-specific RNA covariate should be included.
+
+        Args:
+            new_value (bool): Whether the covariate is included or not.
+        """
+        if self._rna_cov != new_value:
+            logger.info("Changing `rna_cov` to `{new_value}`.")
+            self._rna_cov = new_value
+            self._reset_model_and_results()
+
     def model_specification(self) -> Tuple[pm.Model, str]:
         """Build SpecletSix model.
 
@@ -219,13 +276,17 @@ class SpecletSix(SpecletModel):
             "lfc_shared": lfc_shared,
         }
 
-        if self._cell_line_cna_cov:
+        if self.cell_line_cna_cov:
             cellline_cna_shared = ts(data["copy_number_cellline"].values)
             self.shared_vars["cellline_cna_shared"] = cellline_cna_shared
 
-        if self._gene_cna_cov:
+        if self.gene_cna_cov:
             gene_cna_shared = ts(data["copy_number_gene"].values)
             self.shared_vars["gene_cna_shared"] = gene_cna_shared
+
+        if self.rna_cov:
+            rna_expr_shared = ts(data["rna_expr_gene_lineage"].values)
+            self.shared_vars["rna_expr_shared"] = rna_expr_shared
 
         logger.info("Creating PyMC3 model.")
         logger.warning(
@@ -308,19 +369,28 @@ class SpecletSix(SpecletModel):
                 + j[batch_idx_shared]
             )
 
-            if self._cell_line_cna_cov:
+            if self.cell_line_cna_cov:
                 μ_k = pm.Normal("μ_k", -0.5, 2)
                 σ_k = pm.HalfNormal("σ_k", 1)
                 k_offset = pm.Normal("k_offset", 0, 1, shape=co_idx.n_celllines)
                 k = pm.Deterministic("k", (μ_k + k_offset * σ_k))
                 _μ += k[cellline_idx_shared] * cellline_cna_shared
 
-            if self._gene_cna_cov:
-                μ_n = pm.Normal("μ_n", 0, 2)
-                σ_n = pm.HalfNormal("σ_n", 1)
+            if self.gene_cna_cov:
+                μ_q = pm.Normal("μ_n", 0, 2)
+                σ_q = pm.HalfNormal("σ_n", 1)
                 n_offset = pm.Normal("n_offset", 0, 1, shape=co_idx.n_genes)
-                n = pm.Deterministic("n", (μ_n + n_offset * σ_n))
+                n = pm.Deterministic("n", (μ_q + n_offset * σ_q))
                 _μ += n[gene_idx_shared] * gene_cna_shared
+
+            if self.rna_cov:
+                μ_q = pm.Normal("μ_q", 0, 2)
+                σ_q = pm.HalfNormal("σ_q", 1)
+                q_offset = pm.Normal(
+                    "q_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
+                )
+                q = pm.Deterministic("q", (μ_q + q_offset * σ_q))
+                _μ += q[gene_idx_shared, lineage_idx_shared] * rna_expr_shared
 
             μ = pm.Deterministic("μ", _μ)
 
