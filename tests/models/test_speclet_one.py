@@ -2,38 +2,38 @@ from pathlib import Path
 
 import pytest
 
-from src.data_processing import achilles as achelp
-from src.data_processing import common as dphelp
+from src.managers.model_data_managers import CrcDataManager
 from src.models.speclet_one import SpecletOne
 
 
+def monkey_get_data_path(*args, **kwargs) -> Path:
+    return Path("tests", "depmap_test_data.csv")
+
+
 class TestSpecletOne:
+    @pytest.fixture(scope="function")
+    def data_manager(self, monkeypatch: pytest.MonkeyPatch) -> CrcDataManager:
+        monkeypatch.setattr(CrcDataManager, "get_data_path", monkey_get_data_path)
+        dm = CrcDataManager(debug=True)
+        return dm
+
     def test_instantiation(self, tmp_path: Path):
         sp_one = SpecletOne("test-model", root_cache_dir=tmp_path, debug=True)
         assert sp_one.model is None
 
-    def test_build_model(self, tmp_path: Path):
-        sp_one = SpecletOne("test-model", root_cache_dir=tmp_path, debug=True)
-        d = sp_one.data_manager.get_data()
-        sp_one.data_manager.data = achelp.subsample_achilles_data(
-            d, n_genes=5, n_cell_lines=3
-        ).pipe(achelp.set_achilles_categorical_columns)
-        assert dphelp.nunique(sp_one.data_manager.data["hugo_symbol"]) == 5
-        assert dphelp.nunique(sp_one.data_manager.data["depmap_id"]) == 3
+    def test_build_model(self, tmp_path: Path, data_manager: CrcDataManager):
+        sp_one = SpecletOne(
+            "test-model", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
+        )
         assert sp_one.model is None
         sp_one.build_model()
         assert sp_one.model is not None
 
     @pytest.mark.slow
-    def test_mcmc_sampling(self, tmp_path: Path):
-        sp_one = SpecletOne("test-model", root_cache_dir=tmp_path, debug=True)
-        d = sp_one.data_manager.get_data()
-        sp_one.data_manager.data = achelp.subsample_achilles_data(
-            d, n_genes=5, n_cell_lines=3
-        ).pipe(achelp.set_achilles_categorical_columns)
-        assert dphelp.nunique(sp_one.data_manager.data["hugo_symbol"]) <= 5
-        assert dphelp.nunique(sp_one.data_manager.data["depmap_id"]) <= 3
-        assert sp_one.model is None
+    def test_mcmc_sampling(self, tmp_path: Path, data_manager: CrcDataManager):
+        sp_one = SpecletOne(
+            "test-model", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
+        )
         sp_one.build_model()
         assert sp_one.model is not None
         assert sp_one.observed_var_name is not None
@@ -50,14 +50,10 @@ class TestSpecletOne:
         assert sp_one.mcmc_results is not None
 
     @pytest.mark.slow
-    def test_advi_sampling(self, tmp_path: Path):
-        sp_one = SpecletOne("test-model", root_cache_dir=tmp_path, debug=True)
-        d = sp_one.data_manager.get_data()
-        sp_one.data_manager.data = achelp.subsample_achilles_data(
-            d, n_genes=5, n_cell_lines=3
-        ).pipe(achelp.set_achilles_categorical_columns)
-        assert dphelp.nunique(sp_one.data_manager.data["hugo_symbol"]) <= 5
-        assert dphelp.nunique(sp_one.data_manager.data["depmap_id"]) <= 3
+    def test_advi_sampling(self, tmp_path: Path, data_manager: CrcDataManager):
+        sp_one = SpecletOne(
+            "test-model", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
+        )
         assert sp_one.model is None
         sp_one.build_model()
         assert sp_one.model is not None

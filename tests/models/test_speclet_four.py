@@ -3,23 +3,19 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from src.data_processing import achilles as achelp
-from src.data_processing import common as dphelp
 from src.managers.model_data_managers import CrcDataManager
 from src.models.speclet_four import SpecletFour
 
 
+def monkey_get_data_path(*args, **kwargs) -> Path:
+    return Path("tests", "depmap_test_data.csv")
+
+
 class TestSpecletFour:
-    @pytest.fixture(scope="class")
-    def data_manager(self) -> CrcDataManager:
+    @pytest.fixture(scope="function")
+    def data_manager(self, monkeypatch: pytest.MonkeyPatch) -> CrcDataManager:
+        monkeypatch.setattr(CrcDataManager, "get_data_path", monkey_get_data_path)
         dm = CrcDataManager(debug=True)
-        dm.data = (
-            dm.get_data()
-            .pipe(achelp.subsample_achilles_data, n_genes=5, n_cell_lines=3)
-            .pipe(achelp.set_achilles_categorical_columns)
-        )
-        assert dphelp.nunique(dm.data["hugo_symbol"]) == 5
-        assert dphelp.nunique(dm.data["depmap_id"]) == 3
         return dm
 
     def test_instantiation(self, tmp_path: Path):
