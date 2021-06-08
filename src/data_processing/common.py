@@ -134,7 +134,7 @@ def center_column_grouped_dataframe(
     )
 
     return (
-        df.merge(df_avgs, how="left", on=grp_col)
+        df.merge(df_avgs, how="left", on=grp_col, left_index=False, right_index=False)
         .assign(_new_centered_column=lambda d: d[val_col] - d[avg_val_col])
         .rename(columns={"_new_centered_column": new_col_name})
         .drop(columns=[avg_val_col])

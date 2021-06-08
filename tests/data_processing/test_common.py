@@ -106,6 +106,7 @@ class TestIndexingFunctions:
 @st.composite
 def grouped_dataframe(draw) -> pd.DataFrame:
     groups = draw(st.lists(st.text(), min_size=1))
+    groups = [g.encode("ascii", "ignore") for g in groups]
     values = [
         draw(
             st.lists(
