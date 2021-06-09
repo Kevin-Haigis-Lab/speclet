@@ -51,6 +51,7 @@ repos:
         types: [python]
         exclude: ".snakemake."
         files: "src/.*"
+        args: [--convention=google, --add-ignore=D301]
 -   repo: https://github.com/PyCQA/flake8
     rev: 3.9.2
     hooks:

@@ -12,6 +12,7 @@
 <style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS_CHTML'></script>
 </head>
 <body>
 <main>
@@ -30,10 +31,12 @@
 &#34;&#34;&#34;Functions for modifying the everyday pandas DataFrame.&#34;&#34;&#34;
 
 import warnings
-from typing import Any, Iterable, List, Tuple
+from typing import Any, Iterable, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
+
+from src.loggers import logger
 
 
 def make_cat(
@@ -127,7 +130,43 @@ def nunique(x: Iterable[Any]) -&gt; int:
     &#34;&#34;&#34;
     if isinstance(x, dict):
         raise ValueError(&#34;Cannot count the number of unique values in a dict.&#34;)
-    return len(np.unique(x))</code></pre>
+    return len(np.unique(x))
+
+
+def center_column_grouped_dataframe(
+    df: pd.DataFrame, grp_col: Union[str, List[str]], val_col: str, new_col_name: str
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Center the values of a column after grouping by another.
+
+    Args:
+        df (pd.DataFrame): Pandas DataFrame.
+        grp_col (Union[str, List[str]]): The column(s) to group by.
+        val_col (str): COlumn with values to center.
+        new_col_name (str): New column name to hold the centered values.
+
+    Returns:
+        pd.DataFrame: The same input data frame with one new column.
+    &#34;&#34;&#34;
+    avg_val_col = f&#34;_avg_{val_col}&#34;
+    df_avgs: pd.DataFrame = df.copy()
+
+    if any(df[val_col].isna()):
+        logger.warn(&#34;There are missing values in data frame; removed from average.&#34;)
+        df_avgs = df_avgs.loc[~df_avgs[val_col].isna()]
+
+    df_avgs = (
+        df_avgs.groupby(grp_col)[val_col]
+        .mean()
+        .reset_index(drop=False)
+        .rename(columns={val_col: avg_val_col})
+    )
+
+    return (
+        df.merge(df_avgs, how=&#34;left&#34;, on=grp_col)
+        .assign(_new_centered_column=lambda d: d[val_col] - d[avg_val_col])
+        .rename(columns={&#34;_new_centered_column&#34;: new_col_name})
+        .drop(columns=[avg_val_col])
+    )</code></pre>
 </details>
 </section>
 <section>
@@ -137,6 +176,67 @@ def nunique(x: Iterable[Any]) -&gt; int:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="src.data_processing.common.center_column_grouped_dataframe"><code class="name flex">
+<span>def <span class="ident">center_column_grouped_dataframe</span></span>(<span>df: pandas.core.frame.DataFrame, grp_col: Union[str, List[str]], val_col: str, new_col_name: str) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Center the values of a column after grouping by another.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>Pandas DataFrame.</dd>
+<dt><strong><code>grp_col</code></strong> :&ensp;<code>Union[str, List[str]]</code></dt>
+<dd>The column(s) to group by.</dd>
+<dt><strong><code>val_col</code></strong> :&ensp;<code>str</code></dt>
+<dd>COlumn with values to center.</dd>
+<dt><strong><code>new_col_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>New column name to hold the centered values.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>The same input data frame with one new column.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def center_column_grouped_dataframe(
+    df: pd.DataFrame, grp_col: Union[str, List[str]], val_col: str, new_col_name: str
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Center the values of a column after grouping by another.
+
+    Args:
+        df (pd.DataFrame): Pandas DataFrame.
+        grp_col (Union[str, List[str]]): The column(s) to group by.
+        val_col (str): COlumn with values to center.
+        new_col_name (str): New column name to hold the centered values.
+
+    Returns:
+        pd.DataFrame: The same input data frame with one new column.
+    &#34;&#34;&#34;
+    avg_val_col = f&#34;_avg_{val_col}&#34;
+    df_avgs: pd.DataFrame = df.copy()
+
+    if any(df[val_col].isna()):
+        logger.warn(&#34;There are missing values in data frame; removed from average.&#34;)
+        df_avgs = df_avgs.loc[~df_avgs[val_col].isna()]
+
+    df_avgs = (
+        df_avgs.groupby(grp_col)[val_col]
+        .mean()
+        .reset_index(drop=False)
+        .rename(columns={val_col: avg_val_col})
+    )
+
+    return (
+        df.merge(df_avgs, how=&#34;left&#34;, on=grp_col)
+        .assign(_new_centered_column=lambda d: d[val_col] - d[avg_val_col])
+        .rename(columns={&#34;_new_centered_column&#34;: new_col_name})
+        .drop(columns=[avg_val_col])
+    )</code></pre>
+</details>
+</dd>
 <dt id="src.data_processing.common.extract_flat_ary"><code class="name flex">
 <span>def <span class="ident">extract_flat_ary</span></span>(<span>s: pandas.core.series.Series) -> numpy.ndarray</span>
 </code></dt>
@@ -381,6 +481,7 @@ needs to be binary (is mutated/is not mutated).</dd>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="src.data_processing.common.center_column_grouped_dataframe" href="#src.data_processing.common.center_column_grouped_dataframe">center_column_grouped_dataframe</a></code></li>
 <li><code><a title="src.data_processing.common.extract_flat_ary" href="#src.data_processing.common.extract_flat_ary">extract_flat_ary</a></code></li>
 <li><code><a title="src.data_processing.common.get_indices" href="#src.data_processing.common.get_indices">get_indices</a></code></li>
 <li><code><a title="src.data_processing.common.get_indices_and_count" href="#src.data_processing.common.get_indices_and_count">get_indices_and_count</a></code></li>

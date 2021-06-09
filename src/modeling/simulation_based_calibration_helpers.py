@@ -141,7 +141,9 @@ def generate_mock_achilles_data(
     n_genes: int,
     n_sgrnas_per_gene: int,
     n_cell_lines: int,
+    n_lineages: int,
     n_batches: int,
+    n_screens: int,
     n_kras_types: Optional[int] = None,
 ) -> pd.DataFrame:
     """Generate mock Achilles data.
@@ -153,7 +155,11 @@ def generate_mock_achilles_data(
         n_genes (int): Number of genes.
         n_sgrnas_per_gene (int): Number of sgRNAs per gene.
         n_cell_lines (int): Number of cell lines.
+        n_lineages (int, optional): Number of lineages. Must be less than or equal to
+          the number of cell lines.
         n_batches (int): Number of pDNA batchs.
+        n_screens (int): Number of screens sourced for the data. Must be less than or
+          equal to the number of batches.
         n_kras_types (Optional[int], optional): Number of types of KRAS mutations to
           include. Defaults to None which ignores this attribute altogether.
 
@@ -161,12 +167,19 @@ def generate_mock_achilles_data(
         pd.DataFrame: A pandas data frame the resembles the Achilles data.
     """
     cell_lines = prefixed_count("cellline", n=n_cell_lines)
+    lineages = prefixed_count("lineage", n=n_lineages)
     batches = prefixed_count("batch", n=n_batches)
     batch_map = pd.DataFrame(
         {
             "depmap_id": cell_lines,
+            "lineage": np.random.choice(lineages, n_cell_lines),
             "p_dna_batch": np.random.choice(batches, n_cell_lines),
         }
+    )
+
+    screens = prefixed_count("screen", n=n_screens)
+    screen_map = pd.DataFrame(
+        {"p_dna_batch": batches, "screen": np.random.choice(screens, n_batches)}
     )
 
     genes = prefixed_count("gene", n=n_genes)
@@ -186,6 +199,7 @@ def generate_mock_achilles_data(
             }
         )
         .merge(batch_map, on="depmap_id")
+        .merge(screen_map, on="p_dna_batch")
         .merge(sgnra_map, on="hugo_symbol")
         .reset_index(drop=True)
     )
@@ -212,14 +226,6 @@ def generate_mock_achilles_data(
 
     # Mock values for gene copy number.
     df["copy_number"] = 2 ** np.random.normal(1, 0.5, df.shape[0])
-    # df["log2_cn"] = np.log2(df.gene_cn + 1)
-    # df = achelp.zscale_cna_by_group(
-    #     df,
-    #     gene_cn_col="log2_cn",
-    #     new_col="z_log2_cn",
-    #     groupby_cols=["depmap_id"],
-    #     cn_max=np.log2(10),
-    # )
-
     df["lfc"] = np.random.normal(0, 2, df.shape[0])
+
     return df

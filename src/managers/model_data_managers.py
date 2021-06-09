@@ -4,7 +4,7 @@
 
 import abc
 from pathlib import Path
-from typing import Optional, Union
+from typing import Callable, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -14,20 +14,30 @@ from src.data_processing import achilles as achelp
 from src.io import data_io
 from src.loggers import logger
 
+DataFrameTransformations = List[Callable[[pd.DataFrame], pd.DataFrame]]
+
 
 class DataManager(abc.ABC):
     """Abstract base class for the data managers."""
 
     debug: bool
-    data: Optional[pd.DataFrame] = None
+    transformations: DataFrameTransformations
+    _data: Optional[pd.DataFrame] = None
 
     @abc.abstractmethod
-    def __init__(self, debug: bool = False) -> None:
+    def __init__(
+        self,
+        debug: bool = False,
+        transformations: Optional[DataFrameTransformations] = None,
+    ) -> None:
         """Initialize the data manager.
 
         Args:
             debug (bool, optional): Should the debugging data be used? Defaults to
               False.
+            transformations (Optional[DataFrameTransformations], optional): List of
+              callable functions or classes for transforming the data. Defaults to None
+              (an empty list).
         """
         pass
 
@@ -61,6 +71,15 @@ class DataManager(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def set_data(self, new_data: Optional[pd.DataFrame]) -> None:
+        """Set the data object (can be `None`).
+
+        Args:
+            new_data (Optional[pd.DataFrame]): New data object.
+        """
+        pass
+
+    @abc.abstractmethod
     def generate_mock_data(
         self, size: Union[sbc.MockDataSizes, str], random_seed: Optional[int] = None
     ) -> pd.DataFrame:
@@ -75,20 +94,122 @@ class DataManager(abc.ABC):
         """
         pass
 
+    def transform_data(self):
+        """Transform the data held by the manager.
+
+        The data must be loaded using `get_data()` prior running this method. The
+        `get_data()` method already applies the transformations, so this method is
+        usually not required.
+        """
+        if self.data is None:
+            logger.warn("No data available to transform.")
+            return
+
+        logger.info("Transforming data in place.")
+        self._data = self.apply_transformations(self.data)
+
+    @staticmethod
+    def _apply_transformations(
+        df: pd.DataFrame, transformations: DataFrameTransformations
+    ) -> pd.DataFrame:
+        for transform in transformations:
+            logger.info(f"Applying transformation: '{transform.__name__}'")
+            df = transform(df)
+        return df
+
+    def apply_transformations(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Apply the stored transformations to the data set.
+
+        Args:
+            df (pd.DataFrame): The data on which to operate.
+
+        Returns:
+            pd.DataFrame: The transformed data set.
+        """
+        logger.info(f"Applying {len(self.transformations)} data transformations.")
+
+        if len(self.transformations) == 0:
+            logger.info("No transformations to apply.")
+            return df
+
+        df = DataManager._apply_transformations(df, self.transformations)
+        return df
+
+    def add_transformations(
+        self,
+        new_trans: List[Callable[[pd.DataFrame], pd.DataFrame]],
+        run_transformations: bool = True,
+        new_only: bool = True,
+    ) -> None:
+        """Add new data transformations.
+
+        Args:
+            new_trans (List[Callable[[pd.DataFrame], pd.DataFrame]]): A list of
+              callables to be used to transform the data. Each transformation must take
+              a pandas DataFrame and return a pandas DataFrame.
+            run_transformations (bool, optional): Should the new transforms be applied
+              to the data? Defaults to True.
+            new_only (bool, optional): Should only the new transformations (those in
+              `new_trans`) be applied? Defaults to True.
+        """
+        if len(new_trans) == 0:
+            return
+
+        self.transformations += new_trans
+
+        if self.data is not None:
+            if run_transformations and new_only:
+                self._data = DataManager._apply_transformations(self.data, new_trans)
+            elif run_transformations:
+                self.transform_data()
+
+    @property
+    def data(self) -> Optional[pd.DataFrame]:
+        """The data object.
+
+        Returns:
+            Optional[pd.DataFrame]: If the data has been loaded, the pandas DataFrame,
+            else `None`.
+        """
+        return self._data
+
+    @data.setter
+    def data(self, new_data: Optional[pd.DataFrame]) -> None:
+        """Set the data object (can be `None`).
+
+        Calls `self.set_data()` so that the subclass can have specific behavior when
+        setting the data.
+
+        Args:
+            new_data (Optional[pd.DataFrame]): The new data object.
+        """
+        self.set_data(new_data=new_data)
+
 
 class CrcDataManager(DataManager):
     """Manager for CRC modeling data."""
 
-    debug: bool
-    data: Optional[pd.DataFrame] = None
-
-    def __init__(self, debug: bool = False):
+    def __init__(
+        self,
+        debug: bool = False,
+        transformations: Optional[DataFrameTransformations] = None,
+    ) -> None:
         """Create a CRC data manager.
 
         Args:
             debug (bool, optional): Are you in debug mode? Defaults to False.
+            transformations (Optional[DataFrameTransformations], optional): List of
+              callable functions or classes for transforming the data. Defaults to None
+              (an empty list).
         """
         self.debug = debug
+
+        self.transformations = [
+            CrcDataManager._drop_sgrnas_that_map_to_multiple_genes,
+            CrcDataManager._drop_missing_copynumber,
+        ]
+        if transformations is not None:
+            self.transformations += transformations
 
     def get_data_path(self) -> Path:
         """Get the path for the data set to use.
@@ -111,7 +232,8 @@ class CrcDataManager(DataManager):
         else:
             return 10000
 
-    def _get_sgrnas_that_map_to_multiple_genes(self, df: pd.DataFrame) -> np.ndarray:
+    @staticmethod
+    def _get_sgrnas_that_map_to_multiple_genes(df: pd.DataFrame) -> np.ndarray:
         return (
             achelp.make_sgrna_to_gene_mapping_df(df)
             .groupby(["sgrna"])["hugo_symbol"]
@@ -121,23 +243,27 @@ class CrcDataManager(DataManager):
             .unique()
         )
 
-    def _drop_sgrnas_that_map_to_multiple_genes(self, df: pd.DataFrame) -> pd.DataFrame:
-        logger.warning("Dropping data points of sgRNA that map to multiple genes.")
-        sgrnas_to_remove = self._get_sgrnas_that_map_to_multiple_genes(df)
+    @staticmethod
+    def _drop_sgrnas_that_map_to_multiple_genes(df: pd.DataFrame) -> pd.DataFrame:
+        sgrnas_to_remove = CrcDataManager._get_sgrnas_that_map_to_multiple_genes(df)
+        logger.warning(
+            f"Dropping {len(sgrnas_to_remove)} sgRNA that map to multiple genes."
+        )
         df_new = df.copy()[~df["sgrna"].isin(sgrnas_to_remove)]
         return df_new
 
-    def _drop_missing_copynumber(self, df: pd.DataFrame) -> pd.DataFrame:
-        logger.warning("Dropping data points with missing copy number.")
+    @staticmethod
+    def _drop_missing_copynumber(df: pd.DataFrame) -> pd.DataFrame:
         df_new = df.copy()[~df["copy_number"].isna()]
+        size_diff = df.shape[0] - df_new.shape[0]
+        logger.warning(f"Dropping {size_diff} data points with missing copy number.")
         return df_new
 
     def _load_data(self) -> pd.DataFrame:
         """Load CRC data."""
-        logger.debug("Reading data from file.")
-        df = achelp.read_achilles_data(self.get_data_path(), low_memory=False)
-        df = self._drop_sgrnas_that_map_to_multiple_genes(df)
-        df = self._drop_missing_copynumber(df)
+        data_path = self.get_data_path()
+        logger.debug(f"Reading data from file: '{data_path.as_posix()}'.")
+        df = achelp.read_achilles_data(data_path, low_memory=False)
         df = achelp.set_achilles_categorical_columns(df)
         return df
 
@@ -147,9 +273,22 @@ class CrcDataManager(DataManager):
         If the data is not already loaded, it is first read from disk.
         """
         logger.debug("Retrieving data.")
-        if self.data is None:
-            self.data = self._load_data()
-        return self.data
+
+        if self._data is None:
+            self._data = self._load_data().pipe(self.apply_transformations)
+            assert isinstance(self._data, pd.DataFrame)
+        return self._data
+
+    def set_data(self, new_data: Optional[pd.DataFrame]) -> None:
+        """Set the new data set and apply the transformations automatically.
+
+        Args:
+            new_data (Optional[pd.DataFrame]): New data set.
+        """
+        if new_data is None:
+            self._data = None
+        else:
+            self._data = self.apply_transformations(new_data)
 
     def generate_mock_data(
         self, size: Union[sbc.MockDataSizes, str], random_seed: Optional[int] = None
@@ -172,7 +311,9 @@ class CrcDataManager(DataManager):
                 n_genes=10,
                 n_sgrnas_per_gene=3,
                 n_cell_lines=5,
+                n_lineages=2,
                 n_batches=2,
+                n_screens=1,
                 n_kras_types=2,
             )
         elif size == sbc.MockDataSizes.medium:
@@ -180,7 +321,9 @@ class CrcDataManager(DataManager):
                 n_genes=25,
                 n_sgrnas_per_gene=5,
                 n_cell_lines=12,
+                n_lineages=2,
                 n_batches=3,
+                n_screens=2,
                 n_kras_types=3,
             )
         else:
@@ -188,7 +331,9 @@ class CrcDataManager(DataManager):
                 n_genes=100,
                 n_sgrnas_per_gene=5,
                 n_cell_lines=20,
-                n_batches=3,
+                n_lineages=3,
+                n_batches=4,
+                n_screens=2,
                 n_kras_types=3,
             )
         return self.data
@@ -197,7 +342,11 @@ class CrcDataManager(DataManager):
 class MockDataManager(DataManager):
     """A data manager with mock data (primarily for testing)."""
 
-    def __init__(self, debug: bool = False) -> None:
+    def __init__(
+        self,
+        debug: bool = False,
+        transformations: Optional[DataFrameTransformations] = None,
+    ) -> None:
         """Initialize a MockDataManager.
 
         This DataManager makes a small data set for testing and demo purpose.
@@ -205,8 +354,15 @@ class MockDataManager(DataManager):
         Args:
             debug (bool, optional): Should the debugging data be used? Defaults to
               False.
+            transformations (Optional[DataFrameTransformations], optional): List of
+              callable functions or classes for transforming the data. Defaults to None
+              (an empty list).
         """
         self.debug = debug
+        if transformations is None:
+            self.transformations = []
+        else:
+            self.transformations = transformations
 
     def get_data_path(self) -> Path:
         """Location of the data.
@@ -239,6 +395,17 @@ class MockDataManager(DataManager):
             y = -1 + 2 * x + (np.random.randn(n_data_points) / 2.0)
             self.data = pd.DataFrame({"x": x, "y": y})
         return self.data
+
+    def set_data(self, new_data: Optional[pd.DataFrame]) -> None:
+        """Set the new data set and apply the transofrmations automatically.
+
+        Args:
+            new_data (Optional[pd.DataFrame]): New data set.
+        """
+        if new_data is None:
+            self._data = None
+        else:
+            self._data = self.apply_transformations(new_data)
 
     def generate_mock_data(
         self, size: Union[sbc.MockDataSizes, str], random_seed: Optional[int] = None

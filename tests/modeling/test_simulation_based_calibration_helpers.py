@@ -67,12 +67,16 @@ def generate_data_with_random_params() -> pd.DataFrame:
     n_genes = np.random.randint(2, 20)
     n_sgrnas_per_gene = np.random.randint(2, 20)
     n_cell_lines = np.random.randint(3, 20)
+    n_lineages = np.random.randint(1, n_cell_lines)
     n_batches = np.random.randint(1, n_cell_lines)
+    n_screens = 1 if n_batches == 1 else np.random.randint(1, n_batches)
     return sbc.generate_mock_achilles_data(
         n_genes=n_genes,
         n_sgrnas_per_gene=n_sgrnas_per_gene,
         n_cell_lines=n_cell_lines,
+        n_lineages=n_lineages,
         n_batches=n_batches,
+        n_screens=n_screens,
     )
 
 
@@ -81,12 +85,16 @@ def test_mock_data_has_correct_categories_sizes():
         n_genes = np.random.randint(2, 20)
         n_sgrnas_per_gene = np.random.randint(2, 20)
         n_cell_lines = np.random.randint(3, 20)
+        n_lineages = np.random.randint(1, n_cell_lines)
         n_batches = np.random.randint(1, n_cell_lines)
+        n_screens = 1 if n_batches == 1 else np.random.randint(1, n_batches)
         mock_data = sbc.generate_mock_achilles_data(
             n_genes=n_genes,
             n_sgrnas_per_gene=n_sgrnas_per_gene,
             n_cell_lines=n_cell_lines,
+            n_lineages=n_lineages,
             n_batches=n_batches,
+            n_screens=n_screens,
         )
         assert n_genes == dphelp.nunique(mock_data.hugo_symbol)
         assert n_genes * n_sgrnas_per_gene == dphelp.nunique(mock_data.sgrna)
@@ -99,13 +107,17 @@ def test_mock_data_has_correct_kras_mutation_types():
         n_genes = np.random.randint(2, 20)
         n_sgrnas_per_gene = np.random.randint(2, 20)
         n_cell_lines = np.random.randint(4, 20)
+        n_lineages = np.random.randint(1, n_cell_lines)
         n_batches = np.random.randint(1, n_cell_lines)
+        n_screens = 1 if n_batches == 1 else np.random.randint(1, n_batches)
         n_kras_types = np.min([np.random.randint(1, n_cell_lines // 2), 7])
         mock_data = sbc.generate_mock_achilles_data(
             n_genes=n_genes,
             n_sgrnas_per_gene=n_sgrnas_per_gene,
             n_cell_lines=n_cell_lines,
+            n_lineages=n_lineages,
             n_batches=n_batches,
+            n_screens=n_screens,
             n_kras_types=n_kras_types,
         )
         assert n_kras_types >= dphelp.nunique(mock_data.kras_mutation)

@@ -3,6 +3,8 @@
 import numpy as np
 import pandas as pd
 import pytest
+from hypothesis import given, note
+from hypothesis import strategies as st
 
 from src.data_processing import common as dphelp
 
@@ -96,3 +98,43 @@ class TestIndexingFunctions:
         assert data["d"].dtype == np.dtype("int64")
         data = dphelp.make_cat(data.copy(), "d", ordered=True, sort_cats=False)
         np.testing.assert_equal(dphelp.get_indices(data, "d"), [0, 1, 2, 0, 1])
+
+
+#### ---- center_column_grouped_dataframe ---- ####
+
+
+@st.composite
+def grouped_dataframe(draw) -> pd.DataFrame:
+    groups = draw(st.lists(st.text(), min_size=1))
+    groups = [g.encode("ascii", "ignore") for g in groups]
+    values = [
+        draw(
+            st.lists(
+                st.floats(
+                    min_value=-1000.0,
+                    max_value=1000.0,
+                    allow_nan=False,
+                    allow_infinity=False,
+                ),
+                min_size=1,
+            )
+        )
+        for _ in groups
+    ]
+    return (
+        pd.DataFrame({"group": groups, "value": values})
+        .explode("value")
+        .astype({"value": float})
+        .reset_index(drop=True)
+    )
+
+
+@given(grouped_dataframe())
+def test_center_column_grouped_dataframe(df: pd.DataFrame):
+    centered_df = dphelp.center_column_grouped_dataframe(
+        df, grp_col="group", val_col="value", new_col_name="centered_value"
+    )
+    note(centered_df)
+    for g in df["group"].unique():
+        vals = centered_df[centered_df["group"] == g]["centered_value"].values
+        assert np.mean(vals) == pytest.approx(0.0, abs=0.001)

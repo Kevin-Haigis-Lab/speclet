@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
 <title>src.data_processing.achilles API documentation</title>
-<meta name="description" content="Funnctions for handling common modifications and processing of the Achilles data." />
+<meta name="description" content="Functions for handling common modifications and processing of the Achilles data." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
 <style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS_CHTML'></script>
 </head>
 <body>
 <main>
@@ -20,14 +21,14 @@
 <h1 class="title">Module <code>src.data_processing.achilles</code></h1>
 </header>
 <section id="section-intro">
-<p>Funnctions for handling common modifications and processing of the Achilles data.</p>
+<p>Functions for handling common modifications and processing of the Achilles data.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">#!/usr/bin/env python3
 
-&#34;&#34;&#34;Funnctions for handling common modifications and processing of the Achilles data.&#34;&#34;&#34;
+&#34;&#34;&#34;Functions for handling common modifications and processing of the Achilles data.&#34;&#34;&#34;
 
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
@@ -35,10 +36,22 @@ from typing import List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel
+from scipy import stats
 
 from src.data_processing import common as dphelp
 
 #### ---- Data manipulation ---- ####
+
+
+def _zscale(x: np.ndarray) -&gt; np.ndarray:
+    return stats.zscore(x)
+
+
+def _squish(x: float, lower: float, upper: float) -&gt; float:
+    return max(min(x, upper), lower)
+
+
+_squish_array = np.vectorize(_squish)
 
 
 def zscale_cna_by_group(
@@ -49,6 +62,9 @@ def zscale_cna_by_group(
     cn_max: Optional[float] = None,
 ) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Z-scale the copy number values.
+
+    TODO: Address the same concerns as accounted for in `zscale_rna_expression()`.
+    TODO: Use hypothesis to test.
 
     Args:
         df (pd.DataFrame): The DataFrame to modify.
@@ -71,7 +87,7 @@ def zscale_cna_by_group(
         df[new_col] = df[cn_col]
 
     def z_scale(x: pd.Series) -&gt; pd.Series:
-        return (x - np.mean(x)) / np.std(x)
+        return _zscale(x)
 
     if groupby_cols is not None:
         df[new_col] = df.groupby(list(groupby_cols))[new_col].apply(z_scale)
@@ -81,7 +97,101 @@ def zscale_cna_by_group(
     return df
 
 
+def zscale_rna_expression(
+    df: pd.DataFrame,
+    rna_col: str = &#34;rna_expr&#34;,
+    new_col: Optional[str] = None,
+    lower_bound: Optional[float] = None,
+    upper_bound: Optional[float] = None,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Z-scale RNA expression data.
+
+    If there is not enough variation in the values, dividing by the standard deviation
+    becomes very unstable. Thus, in this function, if the values are all too similar,
+    all are set to 0 instead of either `NaN` or very extreme values.
+
+    Args:
+        df (pd.DataFrame): Data frame.
+        rna_col (str, optional): Column with RNA expr data. Defaults to &#34;rna_expr&#34;.
+        new_col (Optional[str], optional): Name of the new column to be generated.
+          Defaults to `f&#34;{rna_col}_z&#34;` if None.
+        lower_bound (Optional[float], optional): Hard lower bound on the scaled values.
+          Defaults to None.
+        upper_bound (Optional[float], optional): Hard upper bound on the scaled values.
+          Defaults to None.
+
+    Returns:
+        pd.DataFrame: The original data frame with a new column with the z-scaled RNA
+          expression values.
+    &#34;&#34;&#34;
+    if new_col is None:
+        new_col = rna_col + &#34;_z&#34;
+
+    rna = df[rna_col].values
+
+    if len(rna) == 1:
+        # If there is only one value, set z-scaled expr to 0.
+        df[new_col] = 0
+        return df
+
+    if np.allclose(rna, 0.0, atol=0.01):
+        # If all values are close to 0, set value to 0.
+        df[new_col] = 0
+    elif np.allclose(rna, np.mean(rna), atol=0.01):
+        # If all values are about equal, set value to 0.
+        df[new_col] = 0
+
+    else:
+        df[new_col] = _zscale(np.log10(rna + 1))
+
+    if lower_bound is not None and upper_bound is not None:
+        df[new_col] = _squish_array(df[new_col], lower=lower_bound, upper=upper_bound)
+
+    return df
+
+
+def zscale_rna_expression_by_gene_lineage(
+    df: pd.DataFrame, *args, **kwargs
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Z-scale RNA expression data grouping by lineage and gene.
+
+    All positional and keyword arguments are passed to `zscale_rna_expression()`.
+
+    Args:
+        df (pd.DataFrame): The Achilles data frame.
+
+    Returns:
+        pd.DataFrame: The original data frame with a new column with the z-scaled RNA
+          expression values.
+    &#34;&#34;&#34;
+    return df.groupby([&#34;lineage&#34;, &#34;hugo_symbol&#34;]).apply(
+        zscale_rna_expression, *args, **kwargs
+    )
+
+
 #### ---- Indices ---- ####
+
+
+def make_mapping_df(data: pd.DataFrame, col1: str, col2: str) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate a DataFrame mapping two columns.
+
+    Args:
+        data (pd.DataFrame): The data set.
+        col1 (str): The name of the column with the lower level group (group that will
+          have all values appear exactly once).
+        col2 (str): The name of the column with the higher level group (multiple values
+          in group 1 will map to a single value in group 2).
+
+    Returns:
+        pd.DataFrame: A DataFrame mapping the values in col1 and col2.
+    &#34;&#34;&#34;
+    return (
+        data[[col1, col2]]
+        .drop_duplicates()
+        .reset_index(drop=True)
+        .sort_values(col1)
+        .reset_index(drop=True)
+    )
 
 
 def make_sgrna_to_gene_mapping_df(
@@ -91,21 +201,33 @@ def make_sgrna_to_gene_mapping_df(
 
     Args:
         data (pd.DataFrame): The data set.
-        sgrna_col (str, optional): The name of the column with sgRNA data.
-          Defaults to &#34;sgrna&#34;.
-        gene_col (str, optional): The name of the column with gene names.
-          Defaults to &#34;hugo_symbol&#34;.
+        sgrna_col (str, optional): The name of the column with sgRNA data. Defaults to
+         &#34;sgrna&#34;.
+        gene_col (str, optional): The name of the column with gene names. Defaults to
+          &#34;hugo_symbol&#34;.
 
     Returns:
         pd.DataFrame: A DataFrame mapping sgRNAs to genes.
     &#34;&#34;&#34;
-    return (
-        data[[sgrna_col, gene_col]]
-        .drop_duplicates()
-        .reset_index(drop=True)
-        .sort_values(sgrna_col)
-        .reset_index(drop=True)
-    )
+    return make_mapping_df(data, sgrna_col, gene_col)
+
+
+def make_cell_line_to_lineage_mapping_df(
+    data: pd.DataFrame, cell_line_col: str = &#34;depmap_id&#34;, lineage_col: str = &#34;lineage&#34;
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate a DataFrame mapping cell lines to lineages.
+
+    Args:
+        data (pd.DataFrame): The data set.
+        cell_line_col (str, optional): The name of the column with cell line names.
+          Defaults to &#34;depmap_id&#34;.
+        lineage_col (str, optional): The name of the column with lineages. Defaults to
+          &#34;lineage&#34;.
+
+    Returns:
+        pd.DataFrame: A DataFrame mapping cell lines to lineages.
+    &#34;&#34;&#34;
+    return make_mapping_df(data, cell_line_col, lineage_col)
 
 
 def make_kras_mutation_index_with_other(
@@ -165,8 +287,10 @@ class CommonIndices(BaseModel):
     n_genes: int = 0
     cellline_idx: np.ndarray
     n_celllines: int = 0
-    batch_idx: np.ndarray
-    n_batches: int = 0
+    lineage_idx: np.ndarray
+    n_lineages: int = 0
+    cellline_to_lineage_map: pd.DataFrame
+    cellline_to_lineage_idx: np.ndarray
 
     def __init__(self, **data):
         &#34;&#34;&#34;Object to hold common indices used for modeling Achilles data.&#34;&#34;&#34;
@@ -174,7 +298,7 @@ class CommonIndices(BaseModel):
         self.n_sgrnas = dphelp.nunique(self.sgrna_idx)
         self.n_genes = dphelp.nunique(self.gene_idx)
         self.n_celllines = dphelp.nunique(self.cellline_idx)
-        self.n_batches = dphelp.nunique(self.batch_idx)
+        self.n_lineages = dphelp.nunique(self.lineage_idx)
 
     class Config:
         &#34;&#34;&#34;Configuration for pydantic validation.&#34;&#34;&#34;
@@ -192,13 +316,59 @@ def common_indices(achilles_df: pd.DataFrame) -&gt; CommonIndices:
         CommonIndices: A data model with a collection of indices.
     &#34;&#34;&#34;
     sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(achilles_df)
+    cellline_to_lineage_map = make_cell_line_to_lineage_mapping_df(achilles_df)
     return CommonIndices(
         sgrna_idx=dphelp.get_indices(achilles_df, &#34;sgrna&#34;),
         sgrna_to_gene_map=sgrna_to_gene_map,
         sgrna_to_gene_idx=dphelp.get_indices(sgrna_to_gene_map, &#34;hugo_symbol&#34;),
         gene_idx=dphelp.get_indices(achilles_df, &#34;hugo_symbol&#34;),
         cellline_idx=dphelp.get_indices(achilles_df, &#34;depmap_id&#34;),
+        lineage_idx=dphelp.get_indices(achilles_df, &#34;lineage&#34;),
+        cellline_to_lineage_map=cellline_to_lineage_map,
+        cellline_to_lineage_idx=dphelp.get_indices(cellline_to_lineage_map, &#34;lineage&#34;),
         batch_idx=dphelp.get_indices(achilles_df, &#34;p_dna_batch&#34;),
+    )
+
+
+class DataBatchIndices(BaseModel):
+    &#34;&#34;&#34;Object to hold indices relating to data screens and batches.&#34;&#34;&#34;
+
+    batch_idx: np.ndarray
+    n_batches: int = 0
+    screen_idx: np.ndarray
+    n_screens: int = 0
+    batch_to_screen_map: pd.DataFrame
+    batch_to_screen_idx: np.ndarray
+
+    def __init__(self, **data):
+        &#34;&#34;&#34;Object to hold indices relating to data screens and batches.&#34;&#34;&#34;
+        super().__init__(**data)
+        self.n_batches = dphelp.nunique(self.batch_idx)
+        self.n_screens = dphelp.nunique(self.screen_idx)
+
+    class Config:
+        &#34;&#34;&#34;Configuration for pydantic validation.&#34;&#34;&#34;
+
+        arbitrary_types_allowed = True
+
+
+def data_batch_indices(achilles_df: pd.DataFrame) -&gt; DataBatchIndices:
+    &#34;&#34;&#34;Generate a collection of indices relating to data screens and batches.
+
+    Args:
+        achilles_df (pd.DataFrame): The DataFrame with Achilles data.
+
+    Returns:
+        DataBatchIndices: A data model with a collection of indices.
+    &#34;&#34;&#34;
+    batch_to_screen_map = make_mapping_df(
+        achilles_df, col1=&#34;p_dna_batch&#34;, col2=&#34;screen&#34;
+    )
+    return DataBatchIndices(
+        batch_idx=dphelp.get_indices(achilles_df, &#34;p_dna_batch&#34;),
+        screen_idx=dphelp.get_indices(achilles_df, &#34;screen&#34;),
+        batch_to_screen_map=batch_to_screen_map,
+        batch_to_screen_idx=dphelp.get_indices(batch_to_screen_map, &#34;screen&#34;),
     )
 
 
@@ -251,6 +421,7 @@ def set_achilles_categorical_columns(
         &#34;lineage&#34;,
         &#34;sgrna_target_chr&#34;,
         &#34;p_dna_batch&#34;,
+        &#34;screen&#34;,
     ),
     ordered: bool = True,
     sort_cats: bool = False,
@@ -261,7 +432,7 @@ def set_achilles_categorical_columns(
         data (pd.DataFrame): Achilles DataFrame.
         cols (Union[List[str], Tuple[str, ...]], optional): The names of the columns to
           make categorical. Defaults to (&#34;hugo_symbol&#34;, &#34;depmap_id&#34;, &#34;sgrna&#34;,
-          &#34;lineage&#34;, &#34;sgrna_target_chr&#34;, &#34;p_dna_batch&#34;).
+          &#34;lineage&#34;, &#34;sgrna_target_chr&#34;, &#34;p_dna_batch&#34;, &#34;sreen&#34;).
         ordered (bool, optional): Should the categorical columns be ordered?
           Defaults to True.
         sort_cats (bool, optional): Should the categorical columns be sorted?
@@ -298,15 +469,6 @@ def read_achilles_data(
 
     if set_categorical_cols:
         data = set_achilles_categorical_columns(data)
-
-    # data[&#34;log2_cn&#34;] = np.log2(data.copy_number + 1)
-    # data = zscale_cna_by_group(
-    #     data,
-    #     cn_col=&#34;log2_cn&#34;,
-    #     new_col=&#34;z_log2_cn&#34;,
-    #     groupby_cols=[&#34;depmap_id&#34;],
-    #     cn_max=np.log2(10),
-    # )
 
     return data
 
@@ -385,14 +547,100 @@ def subsample_achilles_data(
         CommonIndices: A data model with a collection of indices.
     &#34;&#34;&#34;
     sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(achilles_df)
+    cellline_to_lineage_map = make_cell_line_to_lineage_mapping_df(achilles_df)
     return CommonIndices(
         sgrna_idx=dphelp.get_indices(achilles_df, &#34;sgrna&#34;),
         sgrna_to_gene_map=sgrna_to_gene_map,
         sgrna_to_gene_idx=dphelp.get_indices(sgrna_to_gene_map, &#34;hugo_symbol&#34;),
         gene_idx=dphelp.get_indices(achilles_df, &#34;hugo_symbol&#34;),
         cellline_idx=dphelp.get_indices(achilles_df, &#34;depmap_id&#34;),
+        lineage_idx=dphelp.get_indices(achilles_df, &#34;lineage&#34;),
+        cellline_to_lineage_map=cellline_to_lineage_map,
+        cellline_to_lineage_idx=dphelp.get_indices(cellline_to_lineage_map, &#34;lineage&#34;),
         batch_idx=dphelp.get_indices(achilles_df, &#34;p_dna_batch&#34;),
     )</code></pre>
+</details>
+</dd>
+<dt id="src.data_processing.achilles.data_batch_indices"><code class="name flex">
+<span>def <span class="ident">data_batch_indices</span></span>(<span>achilles_df: pandas.core.frame.DataFrame) -> <a title="src.data_processing.achilles.DataBatchIndices" href="#src.data_processing.achilles.DataBatchIndices">DataBatchIndices</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate a collection of indices relating to data screens and batches.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>achilles_df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>The DataFrame with Achilles data.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="src.data_processing.achilles.DataBatchIndices" href="#src.data_processing.achilles.DataBatchIndices">DataBatchIndices</a></code></dt>
+<dd>A data model with a collection of indices.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def data_batch_indices(achilles_df: pd.DataFrame) -&gt; DataBatchIndices:
+    &#34;&#34;&#34;Generate a collection of indices relating to data screens and batches.
+
+    Args:
+        achilles_df (pd.DataFrame): The DataFrame with Achilles data.
+
+    Returns:
+        DataBatchIndices: A data model with a collection of indices.
+    &#34;&#34;&#34;
+    batch_to_screen_map = make_mapping_df(
+        achilles_df, col1=&#34;p_dna_batch&#34;, col2=&#34;screen&#34;
+    )
+    return DataBatchIndices(
+        batch_idx=dphelp.get_indices(achilles_df, &#34;p_dna_batch&#34;),
+        screen_idx=dphelp.get_indices(achilles_df, &#34;screen&#34;),
+        batch_to_screen_map=batch_to_screen_map,
+        batch_to_screen_idx=dphelp.get_indices(batch_to_screen_map, &#34;screen&#34;),
+    )</code></pre>
+</details>
+</dd>
+<dt id="src.data_processing.achilles.make_cell_line_to_lineage_mapping_df"><code class="name flex">
+<span>def <span class="ident">make_cell_line_to_lineage_mapping_df</span></span>(<span>data: pandas.core.frame.DataFrame, cell_line_col: str = 'depmap_id', lineage_col: str = 'lineage') -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate a DataFrame mapping cell lines to lineages.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>The data set.</dd>
+<dt><strong><code>cell_line_col</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>The name of the column with cell line names.
+Defaults to "depmap_id".</dd>
+<dt><strong><code>lineage_col</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>The name of the column with lineages. Defaults to
+"lineage".</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>A DataFrame mapping cell lines to lineages.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def make_cell_line_to_lineage_mapping_df(
+    data: pd.DataFrame, cell_line_col: str = &#34;depmap_id&#34;, lineage_col: str = &#34;lineage&#34;
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate a DataFrame mapping cell lines to lineages.
+
+    Args:
+        data (pd.DataFrame): The data set.
+        cell_line_col (str, optional): The name of the column with cell line names.
+          Defaults to &#34;depmap_id&#34;.
+        lineage_col (str, optional): The name of the column with lineages. Defaults to
+          &#34;lineage&#34;.
+
+    Returns:
+        pd.DataFrame: A DataFrame mapping cell lines to lineages.
+    &#34;&#34;&#34;
+    return make_mapping_df(data, cell_line_col, lineage_col)</code></pre>
 </details>
 </dd>
 <dt id="src.data_processing.achilles.make_kras_mutation_index_with_other"><code class="name flex">
@@ -474,6 +722,53 @@ as a separate group. Defaults to 0.</dd>
     )</code></pre>
 </details>
 </dd>
+<dt id="src.data_processing.achilles.make_mapping_df"><code class="name flex">
+<span>def <span class="ident">make_mapping_df</span></span>(<span>data: pandas.core.frame.DataFrame, col1: str, col2: str) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate a DataFrame mapping two columns.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>The data set.</dd>
+<dt><strong><code>col1</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the column with the lower level group (group that will
+have all values appear exactly once).</dd>
+<dt><strong><code>col2</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the column with the higher level group (multiple values
+in group 1 will map to a single value in group 2).</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>A DataFrame mapping the values in col1 and col2.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def make_mapping_df(data: pd.DataFrame, col1: str, col2: str) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate a DataFrame mapping two columns.
+
+    Args:
+        data (pd.DataFrame): The data set.
+        col1 (str): The name of the column with the lower level group (group that will
+          have all values appear exactly once).
+        col2 (str): The name of the column with the higher level group (multiple values
+          in group 1 will map to a single value in group 2).
+
+    Returns:
+        pd.DataFrame: A DataFrame mapping the values in col1 and col2.
+    &#34;&#34;&#34;
+    return (
+        data[[col1, col2]]
+        .drop_duplicates()
+        .reset_index(drop=True)
+        .sort_values(col1)
+        .reset_index(drop=True)
+    )</code></pre>
+</details>
+</dd>
 <dt id="src.data_processing.achilles.make_sgrna_to_gene_mapping_df"><code class="name flex">
 <span>def <span class="ident">make_sgrna_to_gene_mapping_df</span></span>(<span>data: pandas.core.frame.DataFrame, sgrna_col: str = 'sgrna', gene_col: str = 'hugo_symbol') -> pandas.core.frame.DataFrame</span>
 </code></dt>
@@ -484,11 +779,11 @@ as a separate group. Defaults to 0.</dd>
 <dt><strong><code>data</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
 <dd>The data set.</dd>
 <dt><strong><code>sgrna_col</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>The name of the column with sgRNA data.
-Defaults to "sgrna".</dd>
+<dd>The name of the column with sgRNA data. Defaults to</dd>
+<dt>"sgrna".</dt>
 <dt><strong><code>gene_col</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>The name of the column with gene names.
-Defaults to "hugo_symbol".</dd>
+<dd>The name of the column with gene names. Defaults to
+"hugo_symbol".</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -506,21 +801,15 @@ Defaults to "hugo_symbol".</dd>
 
     Args:
         data (pd.DataFrame): The data set.
-        sgrna_col (str, optional): The name of the column with sgRNA data.
-          Defaults to &#34;sgrna&#34;.
-        gene_col (str, optional): The name of the column with gene names.
-          Defaults to &#34;hugo_symbol&#34;.
+        sgrna_col (str, optional): The name of the column with sgRNA data. Defaults to
+         &#34;sgrna&#34;.
+        gene_col (str, optional): The name of the column with gene names. Defaults to
+          &#34;hugo_symbol&#34;.
 
     Returns:
         pd.DataFrame: A DataFrame mapping sgRNAs to genes.
     &#34;&#34;&#34;
-    return (
-        data[[sgrna_col, gene_col]]
-        .drop_duplicates()
-        .reset_index(drop=True)
-        .sort_values(sgrna_col)
-        .reset_index(drop=True)
-    )</code></pre>
+    return make_mapping_df(data, sgrna_col, gene_col)</code></pre>
 </details>
 </dd>
 <dt id="src.data_processing.achilles.read_achilles_data"><code class="name flex">
@@ -572,20 +861,11 @@ be set? Defaults to True.</dd>
     if set_categorical_cols:
         data = set_achilles_categorical_columns(data)
 
-    # data[&#34;log2_cn&#34;] = np.log2(data.copy_number + 1)
-    # data = zscale_cna_by_group(
-    #     data,
-    #     cn_col=&#34;log2_cn&#34;,
-    #     new_col=&#34;z_log2_cn&#34;,
-    #     groupby_cols=[&#34;depmap_id&#34;],
-    #     cn_max=np.log2(10),
-    # )
-
     return data</code></pre>
 </details>
 </dd>
 <dt id="src.data_processing.achilles.set_achilles_categorical_columns"><code class="name flex">
-<span>def <span class="ident">set_achilles_categorical_columns</span></span>(<span>data: pandas.core.frame.DataFrame, cols: Union[List[str], Tuple[str, ...]] = ('hugo_symbol', 'depmap_id', 'sgrna', 'lineage', 'sgrna_target_chr', 'p_dna_batch'), ordered: bool = True, sort_cats: bool = False) -> pandas.core.frame.DataFrame</span>
+<span>def <span class="ident">set_achilles_categorical_columns</span></span>(<span>data: pandas.core.frame.DataFrame, cols: Union[List[str], Tuple[str, ...]] = ('hugo_symbol', 'depmap_id', 'sgrna', 'lineage', 'sgrna_target_chr', 'p_dna_batch', 'screen'), ordered: bool = True, sort_cats: bool = False) -> pandas.core.frame.DataFrame</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Set the appropriate columns of the Achilles data as factors.</p>
@@ -596,7 +876,7 @@ be set? Defaults to True.</dd>
 <dt><strong><code>cols</code></strong> :&ensp;<code>Union[List[str], Tuple[str, &hellip;]]</code>, optional</dt>
 <dd>The names of the columns to
 make categorical. Defaults to ("hugo_symbol", "depmap_id", "sgrna",
-"lineage", "sgrna_target_chr", "p_dna_batch").</dd>
+"lineage", "sgrna_target_chr", "p_dna_batch", "sreen").</dd>
 <dt><strong><code>ordered</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Should the categorical columns be ordered?
 Defaults to True.</dd>
@@ -622,6 +902,7 @@ Defaults to False.</dd>
         &#34;lineage&#34;,
         &#34;sgrna_target_chr&#34;,
         &#34;p_dna_batch&#34;,
+        &#34;screen&#34;,
     ),
     ordered: bool = True,
     sort_cats: bool = False,
@@ -632,7 +913,7 @@ Defaults to False.</dd>
         data (pd.DataFrame): Achilles DataFrame.
         cols (Union[List[str], Tuple[str, ...]], optional): The names of the columns to
           make categorical. Defaults to (&#34;hugo_symbol&#34;, &#34;depmap_id&#34;, &#34;sgrna&#34;,
-          &#34;lineage&#34;, &#34;sgrna_target_chr&#34;, &#34;p_dna_batch&#34;).
+          &#34;lineage&#34;, &#34;sgrna_target_chr&#34;, &#34;p_dna_batch&#34;, &#34;sreen&#34;).
         ordered (bool, optional): Should the categorical columns be ordered?
           Defaults to True.
         sort_cats (bool, optional): Should the categorical columns be sorted?
@@ -719,6 +1000,8 @@ Defaults to None.</dd>
 </code></dt>
 <dd>
 <div class="desc"><p>Z-scale the copy number values.</p>
+<p>TODO: Address the same concerns as accounted for in <code><a title="src.data_processing.achilles.zscale_rna_expression" href="#src.data_processing.achilles.zscale_rna_expression">zscale_rna_expression()</a></code>.
+TODO: Use hypothesis to test.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
@@ -755,6 +1038,9 @@ Defaults to None.</dd>
 ) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Z-scale the copy number values.
 
+    TODO: Address the same concerns as accounted for in `zscale_rna_expression()`.
+    TODO: Use hypothesis to test.
+
     Args:
         df (pd.DataFrame): The DataFrame to modify.
         cn_col (str, optional): Column with the gene copy number values.
@@ -776,7 +1062,7 @@ Defaults to None.</dd>
         df[new_col] = df[cn_col]
 
     def z_scale(x: pd.Series) -&gt; pd.Series:
-        return (x - np.mean(x)) / np.std(x)
+        return _zscale(x)
 
     if groupby_cols is not None:
         df[new_col] = df.groupby(list(groupby_cols))[new_col].apply(z_scale)
@@ -786,6 +1072,133 @@ Defaults to None.</dd>
     return df</code></pre>
 </details>
 </dd>
+<dt id="src.data_processing.achilles.zscale_rna_expression"><code class="name flex">
+<span>def <span class="ident">zscale_rna_expression</span></span>(<span>df: pandas.core.frame.DataFrame, rna_col: str = 'rna_expr', new_col: Optional[str] = None, lower_bound: Optional[float] = None, upper_bound: Optional[float] = None) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Z-scale RNA expression data.</p>
+<p>If there is not enough variation in the values, dividing by the standard deviation
+becomes very unstable. Thus, in this function, if the values are all too similar,
+all are set to 0 instead of either <code>NaN</code> or very extreme values.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>Data frame.</dd>
+<dt><strong><code>rna_col</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Column with RNA expr data. Defaults to "rna_expr".</dd>
+<dt><strong><code>new_col</code></strong> :&ensp;<code>Optional[str]</code>, optional</dt>
+<dd>Name of the new column to be generated.
+Defaults to <code>f"{rna_col}_z"</code> if None.</dd>
+<dt><strong><code>lower_bound</code></strong> :&ensp;<code>Optional[float]</code>, optional</dt>
+<dd>Hard lower bound on the scaled values.
+Defaults to None.</dd>
+<dt><strong><code>upper_bound</code></strong> :&ensp;<code>Optional[float]</code>, optional</dt>
+<dd>Hard upper bound on the scaled values.
+Defaults to None.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>The original data frame with a new column with the z-scaled RNA
+expression values.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def zscale_rna_expression(
+    df: pd.DataFrame,
+    rna_col: str = &#34;rna_expr&#34;,
+    new_col: Optional[str] = None,
+    lower_bound: Optional[float] = None,
+    upper_bound: Optional[float] = None,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Z-scale RNA expression data.
+
+    If there is not enough variation in the values, dividing by the standard deviation
+    becomes very unstable. Thus, in this function, if the values are all too similar,
+    all are set to 0 instead of either `NaN` or very extreme values.
+
+    Args:
+        df (pd.DataFrame): Data frame.
+        rna_col (str, optional): Column with RNA expr data. Defaults to &#34;rna_expr&#34;.
+        new_col (Optional[str], optional): Name of the new column to be generated.
+          Defaults to `f&#34;{rna_col}_z&#34;` if None.
+        lower_bound (Optional[float], optional): Hard lower bound on the scaled values.
+          Defaults to None.
+        upper_bound (Optional[float], optional): Hard upper bound on the scaled values.
+          Defaults to None.
+
+    Returns:
+        pd.DataFrame: The original data frame with a new column with the z-scaled RNA
+          expression values.
+    &#34;&#34;&#34;
+    if new_col is None:
+        new_col = rna_col + &#34;_z&#34;
+
+    rna = df[rna_col].values
+
+    if len(rna) == 1:
+        # If there is only one value, set z-scaled expr to 0.
+        df[new_col] = 0
+        return df
+
+    if np.allclose(rna, 0.0, atol=0.01):
+        # If all values are close to 0, set value to 0.
+        df[new_col] = 0
+    elif np.allclose(rna, np.mean(rna), atol=0.01):
+        # If all values are about equal, set value to 0.
+        df[new_col] = 0
+
+    else:
+        df[new_col] = _zscale(np.log10(rna + 1))
+
+    if lower_bound is not None and upper_bound is not None:
+        df[new_col] = _squish_array(df[new_col], lower=lower_bound, upper=upper_bound)
+
+    return df</code></pre>
+</details>
+</dd>
+<dt id="src.data_processing.achilles.zscale_rna_expression_by_gene_lineage"><code class="name flex">
+<span>def <span class="ident">zscale_rna_expression_by_gene_lineage</span></span>(<span>df: pandas.core.frame.DataFrame, *args, **kwargs) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Z-scale RNA expression data grouping by lineage and gene.</p>
+<p>All positional and keyword arguments are passed to <code><a title="src.data_processing.achilles.zscale_rna_expression" href="#src.data_processing.achilles.zscale_rna_expression">zscale_rna_expression()</a></code>.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>The Achilles data frame.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>The original data frame with a new column with the z-scaled RNA
+expression values.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def zscale_rna_expression_by_gene_lineage(
+    df: pd.DataFrame, *args, **kwargs
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Z-scale RNA expression data grouping by lineage and gene.
+
+    All positional and keyword arguments are passed to `zscale_rna_expression()`.
+
+    Args:
+        df (pd.DataFrame): The Achilles data frame.
+
+    Returns:
+        pd.DataFrame: The original data frame with a new column with the z-scaled RNA
+          expression values.
+    &#34;&#34;&#34;
+    return df.groupby([&#34;lineage&#34;, &#34;hugo_symbol&#34;]).apply(
+        zscale_rna_expression, *args, **kwargs
+    )</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -793,7 +1206,7 @@ Defaults to None.</dd>
 <dl>
 <dt id="src.data_processing.achilles.CommonIndices"><code class="flex name class">
 <span>class <span class="ident">CommonIndices</span></span>
-<span>(</span><span>*, sgrna_idx: numpy.ndarray, n_sgrnas: int = 0, sgrna_to_gene_map: pandas.core.frame.DataFrame, sgrna_to_gene_idx: numpy.ndarray, gene_idx: numpy.ndarray, n_genes: int = 0, cellline_idx: numpy.ndarray, n_celllines: int = 0, batch_idx: numpy.ndarray, n_batches: int = 0)</span>
+<span>(</span><span>*, sgrna_idx: numpy.ndarray, n_sgrnas: int = 0, sgrna_to_gene_map: pandas.core.frame.DataFrame, sgrna_to_gene_idx: numpy.ndarray, gene_idx: numpy.ndarray, n_genes: int = 0, cellline_idx: numpy.ndarray, n_celllines: int = 0, lineage_idx: numpy.ndarray, n_lineages: int = 0, cellline_to_lineage_map: pandas.core.frame.DataFrame, cellline_to_lineage_idx: numpy.ndarray)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Object to hold common indices used for modeling Achilles data.</p>
@@ -813,8 +1226,10 @@ Defaults to None.</dd>
     n_genes: int = 0
     cellline_idx: np.ndarray
     n_celllines: int = 0
-    batch_idx: np.ndarray
-    n_batches: int = 0
+    lineage_idx: np.ndarray
+    n_lineages: int = 0
+    cellline_to_lineage_map: pd.DataFrame
+    cellline_to_lineage_idx: np.ndarray
 
     def __init__(self, **data):
         &#34;&#34;&#34;Object to hold common indices used for modeling Achilles data.&#34;&#34;&#34;
@@ -822,7 +1237,7 @@ Defaults to None.</dd>
         self.n_sgrnas = dphelp.nunique(self.sgrna_idx)
         self.n_genes = dphelp.nunique(self.gene_idx)
         self.n_celllines = dphelp.nunique(self.cellline_idx)
-        self.n_batches = dphelp.nunique(self.batch_idx)
+        self.n_lineages = dphelp.nunique(self.lineage_idx)
 
     class Config:
         &#34;&#34;&#34;Configuration for pydantic validation.&#34;&#34;&#34;
@@ -837,6 +1252,51 @@ Defaults to None.</dd>
 <h3>Class variables</h3>
 <dl>
 <dt id="src.data_processing.achilles.CommonIndices.Config"><code class="name">var <span class="ident">Config</span></code></dt>
+<dd>
+<div class="desc"><p>Configuration for pydantic validation.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="src.data_processing.achilles.DataBatchIndices"><code class="flex name class">
+<span>class <span class="ident">DataBatchIndices</span></span>
+<span>(</span><span>*, batch_idx: numpy.ndarray, n_batches: int = 0, screen_idx: numpy.ndarray, n_screens: int = 0, batch_to_screen_map: pandas.core.frame.DataFrame, batch_to_screen_idx: numpy.ndarray)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Object to hold indices relating to data screens and batches.</p>
+<p>Object to hold indices relating to data screens and batches.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DataBatchIndices(BaseModel):
+    &#34;&#34;&#34;Object to hold indices relating to data screens and batches.&#34;&#34;&#34;
+
+    batch_idx: np.ndarray
+    n_batches: int = 0
+    screen_idx: np.ndarray
+    n_screens: int = 0
+    batch_to_screen_map: pd.DataFrame
+    batch_to_screen_idx: np.ndarray
+
+    def __init__(self, **data):
+        &#34;&#34;&#34;Object to hold indices relating to data screens and batches.&#34;&#34;&#34;
+        super().__init__(**data)
+        self.n_batches = dphelp.nunique(self.batch_idx)
+        self.n_screens = dphelp.nunique(self.screen_idx)
+
+    class Config:
+        &#34;&#34;&#34;Configuration for pydantic validation.&#34;&#34;&#34;
+
+        arbitrary_types_allowed = True</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="src.data_processing.achilles.DataBatchIndices.Config"><code class="name">var <span class="ident">Config</span></code></dt>
 <dd>
 <div class="desc"><p>Configuration for pydantic validation.</p></div>
 </dd>
@@ -859,12 +1319,17 @@ Defaults to None.</dd>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="src.data_processing.achilles.common_indices" href="#src.data_processing.achilles.common_indices">common_indices</a></code></li>
+<li><code><a title="src.data_processing.achilles.data_batch_indices" href="#src.data_processing.achilles.data_batch_indices">data_batch_indices</a></code></li>
+<li><code><a title="src.data_processing.achilles.make_cell_line_to_lineage_mapping_df" href="#src.data_processing.achilles.make_cell_line_to_lineage_mapping_df">make_cell_line_to_lineage_mapping_df</a></code></li>
 <li><code><a title="src.data_processing.achilles.make_kras_mutation_index_with_other" href="#src.data_processing.achilles.make_kras_mutation_index_with_other">make_kras_mutation_index_with_other</a></code></li>
+<li><code><a title="src.data_processing.achilles.make_mapping_df" href="#src.data_processing.achilles.make_mapping_df">make_mapping_df</a></code></li>
 <li><code><a title="src.data_processing.achilles.make_sgrna_to_gene_mapping_df" href="#src.data_processing.achilles.make_sgrna_to_gene_mapping_df">make_sgrna_to_gene_mapping_df</a></code></li>
 <li><code><a title="src.data_processing.achilles.read_achilles_data" href="#src.data_processing.achilles.read_achilles_data">read_achilles_data</a></code></li>
 <li><code><a title="src.data_processing.achilles.set_achilles_categorical_columns" href="#src.data_processing.achilles.set_achilles_categorical_columns">set_achilles_categorical_columns</a></code></li>
 <li><code><a title="src.data_processing.achilles.subsample_achilles_data" href="#src.data_processing.achilles.subsample_achilles_data">subsample_achilles_data</a></code></li>
 <li><code><a title="src.data_processing.achilles.zscale_cna_by_group" href="#src.data_processing.achilles.zscale_cna_by_group">zscale_cna_by_group</a></code></li>
+<li><code><a title="src.data_processing.achilles.zscale_rna_expression" href="#src.data_processing.achilles.zscale_rna_expression">zscale_rna_expression</a></code></li>
+<li><code><a title="src.data_processing.achilles.zscale_rna_expression_by_gene_lineage" href="#src.data_processing.achilles.zscale_rna_expression_by_gene_lineage">zscale_rna_expression_by_gene_lineage</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
@@ -873,6 +1338,12 @@ Defaults to None.</dd>
 <h4><code><a title="src.data_processing.achilles.CommonIndices" href="#src.data_processing.achilles.CommonIndices">CommonIndices</a></code></h4>
 <ul class="">
 <li><code><a title="src.data_processing.achilles.CommonIndices.Config" href="#src.data_processing.achilles.CommonIndices.Config">Config</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="src.data_processing.achilles.DataBatchIndices" href="#src.data_processing.achilles.DataBatchIndices">DataBatchIndices</a></code></h4>
+<ul class="">
+<li><code><a title="src.data_processing.achilles.DataBatchIndices.Config" href="#src.data_processing.achilles.DataBatchIndices.Config">Config</a></code></li>
 </ul>
 </li>
 </ul>

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+from itertools import product
 from pathlib import Path
 from string import ascii_lowercase as letters
 from string import ascii_uppercase as LETTERS
@@ -8,11 +8,18 @@ from typing import List
 import numpy as np
 import pandas as pd
 import pytest
+from hypothesis import given, note
+from hypothesis import strategies as st
 
 from src.data_processing import achilles as achelp
 from src.data_processing import common as dphelp
 
 DATA_PATH = Path("tests", "depmap_test_data.csv")
+
+
+@pytest.fixture
+def data() -> pd.DataFrame:
+    return achelp.read_achilles_data(DATA_PATH, low_memory=True)
 
 
 #### ---- Reading and modifying Achilles data ---- ####
@@ -36,13 +43,6 @@ class TestHandlingAchillesData:
 
 
 class TestModifyingAchillesData:
-    def setup_class(self):
-        self.data_path = DATA_PATH
-
-    @pytest.fixture
-    def data(self) -> pd.DataFrame:
-        return achelp.read_achilles_data(self.data_path, low_memory=True)
-
     @pytest.fixture
     def mock_data(self) -> pd.DataFrame:
         np.random.seed(0)
@@ -64,13 +64,13 @@ class TestModifyingAchillesData:
             assert data[col].dtype == "category"
 
     def test_setting_achilles_categorical_columns(self):
-        data = achelp.read_achilles_data(self.data_path, set_categorical_cols=False)
+        data = achelp.read_achilles_data(DATA_PATH, set_categorical_cols=False)
         assert "category" not in data.dtypes
         data = achelp.set_achilles_categorical_columns(data=data)
-        assert sum(data.dtypes == "category") == 6
+        assert sum(data.dtypes == "category") == 7
 
     def test_custom_achilles_categorical_columns(self):
-        data = achelp.read_achilles_data(self.data_path, set_categorical_cols=False)
+        data = achelp.read_achilles_data(DATA_PATH, set_categorical_cols=False)
         data = achelp.set_achilles_categorical_columns(
             data, cols=["hugo_symbol", "sgrna"]
         )
@@ -106,40 +106,107 @@ class TestModifyingAchillesData:
             _ = achelp.subsample_achilles_data(data, n_cell_lines=-1)
 
     def test_z_scaling_means(self, mock_data: pd.DataFrame):
+        print(mock_data)
         z_data = achelp.zscale_cna_by_group(mock_data)
-        gene_means = (
-            z_data.groupby(["hugo_symbol"])["copy_number_z"].agg(np.mean).values
-        )
-        expected_mean = np.zeros_like(gene_means)
-        np.testing.assert_almost_equal(gene_means, expected_mean)
+        print(z_data)
+        for gene in z_data["hugo_symbol"].unique():
+            m = z_data.query(f"hugo_symbol == '{gene}'")["copy_number_z"].mean()
+            assert m == pytest.approx(0.0, abs=0.01)
 
     def test_z_scaling_stddevs(self, mock_data: pd.DataFrame):
         z_data = achelp.zscale_cna_by_group(mock_data)
-        gene_sds = z_data.groupby(["hugo_symbol"])["copy_number_z"].agg(np.std).values
-        expected_sd = np.ones_like(gene_sds)
-        np.testing.assert_almost_equal(gene_sds, expected_sd, decimal=2)
+        for gene in z_data["hugo_symbol"].unique():
+            s = z_data.query(f"hugo_symbol == '{gene}'")["copy_number_z"].std()
+            assert s == pytest.approx(1.0, abs=0.1)
 
     def test_z_scaling_max(self, mock_data: pd.DataFrame):
         cn_max = 25
-        z_data = achelp.zscale_cna_by_group(mock_data)
         z_data_max = achelp.zscale_cna_by_group(mock_data, cn_max=cn_max)
+        for gene in z_data_max["hugo_symbol"].unique():
+            m = z_data_max.query(f"hugo_symbol == '{gene}'")["copy_number_z"].mean()
+            assert m == pytest.approx(0.0, abs=0.01)
+            s = z_data_max.query(f"hugo_symbol == '{gene}'")["copy_number_z"].std()
+            assert s == pytest.approx(1.0, abs=0.1)
 
-        gene_means = (
-            z_data_max.groupby(["hugo_symbol"])["copy_number_z"].agg(np.mean).values
+
+@st.composite
+def my_arrays(draw, min_size: int = 1):
+    return draw(
+        st.lists(
+            st.floats(
+                min_value=0.0,
+                max_value=100.0,
+                allow_infinity=False,
+                allow_nan=False,
+            ),
+            min_size=min_size,
         )
-        expected_mean = np.zeros_like(gene_means)
-        np.testing.assert_almost_equal(gene_means, expected_mean)
+    )
 
-        gene_sds = (
-            z_data_max.groupby(["hugo_symbol"])["copy_number_z"].agg(np.std).values
-        )
-        expected_sd = np.ones_like(gene_sds)
-        np.testing.assert_almost_equal(gene_sds, expected_sd, decimal=2)
 
-        less_than_max_idx = np.where(mock_data["copy_number"] < cn_max)
-        z_vals = z_data.loc[less_than_max_idx, "copy_number_z"]
-        z_max_vals = z_data_max.loc[less_than_max_idx, "copy_number_z"]
-        assert (z_vals <= z_max_vals).all()
+@given(my_arrays())
+def test_careful_zscore(ary: np.ndarray):
+    z_ary = achelp.careful_zscore(ary)
+    assert np.mean(z_ary) == pytest.approx(0.0, abs=0.01)
+    assert np.allclose(z_ary, 0.0) or np.std(z_ary) == pytest.approx(1.0, abs=0.01)
+
+
+@given(my_arrays())
+def test_zscale_rna_expression(rna_expr_ary):
+    df = pd.DataFrame({"rna_expr": rna_expr_ary})
+    note(df)
+    df_z = achelp.zscale_rna_expression(df, "rna_expr", new_col="rna_expr_z")
+    assert df_z["rna_expr_z"].mean() == pytest.approx(0.0, abs=0.01)
+
+
+@given(
+    rna_expr_ary=my_arrays(),
+    lower_bound=st.floats(
+        min_value=-5.0, max_value=-0.01, allow_infinity=False, allow_nan=False
+    ),
+    upper_bound=st.floats(
+        min_value=0.01, max_value=5.0, allow_infinity=False, allow_nan=False
+    ),
+)
+def test_zscale_rna_expression_with_bounds(
+    rna_expr_ary: List[float], lower_bound: float, upper_bound: float
+):
+    df = pd.DataFrame({"rna_expr": rna_expr_ary})
+    note(df)
+    df_z = achelp.zscale_rna_expression(
+        df,
+        "rna_expr",
+        new_col="rna_expr_z",
+        lower_bound=lower_bound,
+        upper_bound=upper_bound,
+    )
+    assert df_z["rna_expr_z"].mean() == pytest.approx(0.0, abs=1)
+    assert df_z["rna_expr_z"].min() >= lower_bound
+    assert df_z["rna_expr_z"].max() <= upper_bound
+
+
+@given(st.data())
+def test_zscale_rna_expression_by_gene_lineage(hyp_data):
+    n_lineages = hyp_data.draw(st.integers(min_value=1, max_value=4))
+    n_genes = hyp_data.draw(st.integers(min_value=1, max_value=7))
+    lineages = [f"lineage_{i}" for i in range(n_lineages)]
+    genes = [f"gene_{i}" for i in range(n_genes)]
+    df = pd.DataFrame(
+        list(product(lineages, genes)), columns=["lineage", "hugo_symbol"]
+    )
+    df["rna_expr"] = np.random.uniform(0.0, 100.0, size=len(df))
+    note(df.__str__())
+    df_z = achelp.zscale_rna_expression(df, "rna_expr", new_col="rna_expr_z")
+    assert df_z["rna_expr_z"].mean() == pytest.approx(0.0, abs=0.01)
+    df_z_g = achelp.zscale_rna_expression_by_gene_lineage(
+        df, "rna_expr", new_col="rna_expr_z"
+    )
+    for gene in genes:
+        for lineage in lineages:
+            rna_expr_z = df_z_g.query(f"hugo_symbol == '{gene}'").query(
+                f"lineage == '{lineage}'"
+            )["rna_expr_z"]
+            assert np.mean(rna_expr_z) == pytest.approx(0, abs=0.01)
 
 
 #### ---- Index helpers ---- ####
@@ -169,6 +236,41 @@ def mock_gene_data() -> pd.DataFrame:
 @pytest.fixture(scope="module")
 def example_achilles_data():
     return achelp.read_achilles_data(Path("tests", "depmap_test_data.csv"))
+
+
+def test_make_mapping_df():
+    df = pd.DataFrame({"g1": np.arange(9), "g2": np.repeat(["a", "b", "c"], 3)})
+    df_map = achelp.make_mapping_df(df, "g1", "g2")
+    for i1, i2 in zip(df.itertuples(), df_map.itertuples()):
+        assert i1.g1 == i2.g1
+        assert i1.g2 == i2.g2
+
+    df2 = pd.concat([df, df, df])
+    df_map2 = achelp.make_mapping_df(df2, "g1", "g2")
+    assert df.shape == df_map2.shape
+
+    df3 = df.copy()
+    df3["other_column"] = "X"
+    df_map3 = achelp.make_mapping_df(df3, "g1", "g2")
+    assert df.shape == df_map3.shape
+    for i1, i2 in zip(df.itertuples(), df_map3.itertuples()):
+        assert i1.g1 == i2.g1
+        assert i1.g2 == i2.g2
+    df_map3 = achelp.make_mapping_df(df3, "g1", "other_column")
+    for i1, i2 in zip(df.itertuples(), df_map3.itertuples()):
+        assert i1.g1 == i2.g1
+        assert i2.other_column == "X"
+
+
+def test_cell_line_to_lineage_map(example_achilles_data: pd.DataFrame):
+    df_map = achelp.make_cell_line_to_lineage_mapping_df(example_achilles_data)
+    assert "depmap_id" in df_map.columns
+    assert "lineage" in df_map.columns
+    assert len(df_map.depmap_id.unique()) == len(df_map)
+    assert len(df_map.depmap_id.unique()) == len(
+        example_achilles_data.depmap_id.unique()
+    )
+    assert len(df_map.lineage.unique()) == len(example_achilles_data.lineage.unique())
 
 
 def test_sgrna_to_gene_mapping_df_is_smaller(mock_gene_data: pd.DataFrame):
@@ -213,7 +315,6 @@ def test_common_idx_counters(example_achilles_data: pd.DataFrame):
     assert indices.n_sgrnas == dphelp.nunique(indices.sgrna_idx)
     assert indices.n_genes == dphelp.nunique(indices.gene_idx)
     assert indices.n_celllines == dphelp.nunique(indices.cellline_idx)
-    assert indices.n_batches == dphelp.nunique(indices.batch_idx)
 
 
 def test_common_idx_sgrna_to_gene_map(example_achilles_data: pd.DataFrame):
@@ -228,13 +329,6 @@ def test_common_idx_depmap(example_achilles_data: pd.DataFrame):
     indices = achelp.common_indices(example_achilles_data.sample(frac=1.0))
     assert dphelp.nunique(example_achilles_data.depmap_id.values) == dphelp.nunique(
         indices.cellline_idx
-    )
-
-
-def test_common_idx_pdna_batch(example_achilles_data: pd.DataFrame):
-    indices = achelp.common_indices(example_achilles_data.sample(frac=1.0))
-    assert dphelp.nunique(example_achilles_data.p_dna_batch.values) == dphelp.nunique(
-        indices.batch_idx
     )
 
 
@@ -292,3 +386,16 @@ def test_make_kras_mutation_index_with_other_colnames():
 #     assert len(idx.cellline_to_kras_mutation_idx) == len(
 #         example_achilles_data["depmap_id"].unique()
 #     )
+
+
+def test_data_batch_indices(example_achilles_data: pd.DataFrame):
+    bi = achelp.data_batch_indices(example_achilles_data)
+    n_sources = len(example_achilles_data["screen"].values.unique())
+    n_batches = len(example_achilles_data["p_dna_batch"].values.unique())
+    assert bi.n_screens == n_sources
+    assert bi.n_batches == n_batches
+
+    batch_map = bi.batch_to_screen_map
+    np.testing.assert_array_equal(
+        batch_map["p_dna_batch"].values, batch_map["p_dna_batch"].unique()
+    )

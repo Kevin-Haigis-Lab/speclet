@@ -3,10 +3,12 @@
 """Functions for modifying the everyday pandas DataFrame."""
 
 import warnings
-from typing import Any, Iterable, List, Tuple
+from typing import Any, Iterable, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
+
+from src.loggers import logger
 
 
 def make_cat(
@@ -101,3 +103,39 @@ def nunique(x: Iterable[Any]) -> int:
     if isinstance(x, dict):
         raise ValueError("Cannot count the number of unique values in a dict.")
     return len(np.unique(x))
+
+
+def center_column_grouped_dataframe(
+    df: pd.DataFrame, grp_col: Union[str, List[str]], val_col: str, new_col_name: str
+) -> pd.DataFrame:
+    """Center the values of a column after grouping by another.
+
+    Args:
+        df (pd.DataFrame): Pandas DataFrame.
+        grp_col (Union[str, List[str]]): The column(s) to group by.
+        val_col (str): COlumn with values to center.
+        new_col_name (str): New column name to hold the centered values.
+
+    Returns:
+        pd.DataFrame: The same input data frame with one new column.
+    """
+    avg_val_col = f"_avg_{val_col}"
+    df_avgs: pd.DataFrame = df.copy()
+
+    if any(df[val_col].isna()):
+        logger.warn("There are missing values in data frame; removed from average.")
+        df_avgs = df_avgs.loc[~df_avgs[val_col].isna()]
+
+    df_avgs = (
+        df_avgs.groupby(grp_col)[val_col]
+        .mean()
+        .reset_index(drop=False)
+        .rename(columns={val_col: avg_val_col})
+    )
+
+    return (
+        df.merge(df_avgs, how="left", on=grp_col, left_index=False, right_index=False)
+        .assign(_new_centered_column=lambda d: d[val_col] - d[avg_val_col])
+        .rename(columns={"_new_centered_column": new_col_name})
+        .drop(columns=[avg_val_col])
+    )

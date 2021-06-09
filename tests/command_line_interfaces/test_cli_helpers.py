@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-from typing import List
+from typing import Callable
 
 import pytest
+from hypothesis import given
+from hypothesis.extra import numpy as hnp
 
 from src.command_line_interfaces import cli_helpers
 from src.models.ceres_mimic import CeresMimic
+from src.models.speclet_five import SpecletFive
+from src.models.speclet_four import SpecletFour
+from src.models.speclet_six import SpecletSix
+from src.models.speclet_three import SpecletThree
+from src.models.speclet_two import SpecletTwo
 
 #### ---- Models ---- ####
 
@@ -26,50 +33,207 @@ def test_get_model_class():
 #### ---- Modifying models ---- ####
 
 
-@pytest.fixture
-def ceres_model(tmp_path: Path) -> CeresMimic:
-    return CeresMimic(name="TEST-MODEL", root_cache_dir=Path(tmp_path), debug=True)
+class TestCeresMimicModifications:
+    @pytest.fixture
+    def ceres_model(self, tmp_path: Path) -> CeresMimic:
+        return CeresMimic(name="TEST-MODEL", root_cache_dir=Path(tmp_path), debug=True)
 
+    model_names = [
+        "model",
+        "ceres-model",
+        "CERES-model",
+        "pymc3-ceres",
+        "pymc3 ceres",
+    ]
 
-@pytest.fixture
-def model_names() -> List[str]:
-    return ["model", "ceres-model", "CERES-model", "pymc3-ceres", "pymc3 ceres"]
+    functions_to_test = [
+        cli_helpers.modify_ceres_model_by_name,
+        cli_helpers.modify_model_by_name,
+    ]
 
-
-def test_modify_ceres_model_by_name_nochange(
-    ceres_model: CeresMimic, model_names: List[str]
-):
-    for name in model_names:
-        cli_helpers.modify_ceres_model_by_name(ceres_model, name)
+    @pytest.mark.parametrize("model_name", model_names)
+    @pytest.mark.parametrize("fxn", functions_to_test)
+    def test_modify_ceres_model_by_name_nochange(
+        self, ceres_model: CeresMimic, model_name: str, fxn: Callable
+    ):
+        fxn(ceres_model, model_name)
         assert not ceres_model.copynumber_cov
         assert not ceres_model.sgrna_intercept_cov
 
-
-def test_modify_ceres_model_by_name_sgrna(
-    ceres_model: CeresMimic, model_names: List[str]
-):
-    model_names_a = [n + "_sgrnaint" for n in model_names]
-    for name in model_names_a:
-        cli_helpers.modify_ceres_model_by_name(ceres_model, name)
+    @pytest.mark.parametrize("model_name", model_names)
+    @pytest.mark.parametrize("fxn", functions_to_test)
+    def test_modify_ceres_model_by_name_sgrna(
+        self, ceres_model: CeresMimic, model_name: str, fxn: Callable
+    ):
+        model_name += "_sgrnaint"
+        fxn(ceres_model, model_name)
         assert not ceres_model.copynumber_cov
         assert ceres_model.sgrna_intercept_cov
 
-
-def test_modify_ceres_model_by_name_copynumber(
-    ceres_model: CeresMimic, model_names: List[str]
-):
-    model_names_a = [n + "_copynumber" for n in model_names]
-    for name in model_names_a:
-        cli_helpers.modify_ceres_model_by_name(ceres_model, name)
+    @pytest.mark.parametrize("model_name", model_names)
+    @pytest.mark.parametrize("fxn", functions_to_test)
+    def test_modify_ceres_model_by_name_copynumber(
+        self, ceres_model: CeresMimic, model_name: str, fxn: Callable
+    ):
+        model_name += "_copynumber"
+        fxn(ceres_model, model_name)
         assert ceres_model.copynumber_cov
         assert not ceres_model.sgrna_intercept_cov
 
-
-def test_modify_ceres_model_by_name_copynumber_sgrna(
-    ceres_model: CeresMimic, model_names: List[str]
-):
-    model_names_a = [n + "_copynumber-sgrnaint" for n in model_names]
-    for name in model_names_a:
-        cli_helpers.modify_ceres_model_by_name(ceres_model, name)
+    @pytest.mark.parametrize("model_name", model_names)
+    @pytest.mark.parametrize("fxn", functions_to_test)
+    def test_modify_ceres_model_by_name_copynumber_sgrna(
+        self, ceres_model: CeresMimic, model_name: str, fxn: Callable
+    ):
+        model_name += "_copynumber-sgrnaint"
+        fxn(ceres_model, model_name)
         assert ceres_model.copynumber_cov
         assert ceres_model.sgrna_intercept_cov
+
+
+class TestSpecletTwoModifications:
+    @pytest.fixture
+    def sp2_model(self, tmp_path: Path) -> SpecletTwo:
+        return SpecletTwo(name="TEST-MODEL", root_cache_dir=Path(tmp_path), debug=True)
+
+    model_names = [
+        "model",
+        "sp2-model",
+        "SpecletTwo-model",
+        "pymc3-Sp2",
+        "pymc3 Speclet2",
+        "pymc3 SpecletTwo",
+        "SpecletTwo-kras",
+        "SpecletTwo-cna",
+        "SpecletTwo-gene",
+        "SpecletTwo-mutation",
+    ]
+
+    @pytest.mark.parametrize("name", model_names)
+    def test_modify_sp2_model_by_name_nochange(self, sp2_model: SpecletTwo, name: str):
+        cli_helpers.modify_model_by_name(sp2_model, name)
+        assert True  # to force code to run
+
+
+class TestSpecletThreeModifications:
+    @pytest.fixture
+    def sp3_model(self, tmp_path: Path) -> SpecletThree:
+        return SpecletThree(
+            name="TEST-MODEL", root_cache_dir=Path(tmp_path), debug=True
+        )
+
+    model_names = [
+        "model",
+        "sp3-model",
+        "SpecletThree-model",
+        "pymc3-Sp3",
+        "pymc3 Speclet2",
+        "pymc3 SpecletThree",
+        "SpecletThree-kras",
+        "SpecletThree-cna",
+        "SpecletThree-gene",
+        "SpecletThree-mutation",
+    ]
+
+    @pytest.mark.parametrize("name", model_names)
+    def test_modify_sp3_model_by_name_nochange(
+        self, sp3_model: SpecletThree, name: str
+    ):
+        cli_helpers.modify_model_by_name(sp3_model, name)
+        assert True  # to force code to run
+
+
+class TestSpecletFourModifications:
+    @pytest.fixture
+    def sp4_model(self, tmp_path: Path) -> SpecletFour:
+        return SpecletFour(name="TEST-MODEL", root_cache_dir=Path(tmp_path), debug=True)
+
+    model_names = [
+        "model",
+        "sp4-model",
+        "SpecletFour-model",
+        "pymc3-Sp4",
+        "pymc3 Speclet2",
+        "pymc3 SpecletFour",
+    ]
+
+    functions_to_test = [
+        cli_helpers.modify_specletfour_model_by_name,
+        cli_helpers.modify_model_by_name,
+    ]
+
+    @pytest.mark.parametrize("name", model_names)
+    @pytest.mark.parametrize("fxn", functions_to_test)
+    def test_modify_sp4_model_by_name_nochange(
+        self, sp4_model: SpecletFour, name: str, fxn: Callable
+    ):
+        fxn(sp4_model, name)
+        assert not sp4_model.copy_number_cov
+
+    @pytest.mark.parametrize("name", model_names)
+    @pytest.mark.parametrize("fxn", functions_to_test)
+    def test_modify_sp4_model_by_name_copynumber(
+        self, sp4_model: SpecletFour, name: str, fxn: Callable
+    ):
+        name += "cn-cov"
+        fxn(sp4_model, name)
+        assert sp4_model.copy_number_cov
+
+
+class TestSpecletFiveModifications:
+    @pytest.fixture
+    def sp5_model(self, tmp_path: Path) -> SpecletFive:
+        return SpecletFive(name="TEST-MODEL", root_cache_dir=Path(tmp_path), debug=True)
+
+    model_names = [
+        "model",
+        "sp5-model",
+        "SpecletFive-model",
+        "pymc3-Sp5",
+        "pymc3 Speclet2",
+        "pymc3 SpecletFive",
+        "SpecletFive-kras",
+        "SpecletFive-cna",
+        "SpecletFive-gene",
+        "SpecletFive-mutation",
+    ]
+
+    @pytest.mark.parametrize("name", model_names)
+    def test_modify_sp5_model_by_name_nochange(self, sp5_model: SpecletFive, name: str):
+        cli_helpers.modify_model_by_name(sp5_model, name)
+        assert True  # to force code to run
+
+
+class TestSpecletSixModifications:
+
+    model_names = [
+        "model",
+        "sp6-model",
+        "SpecletSix-model",
+        "pymc3-Sp6",
+        "pymc3 Speclet2",
+        "pymc3 SpecletSix",
+    ]
+
+    functions_to_test = [
+        cli_helpers.modify_specletsix_model_by_name,
+        cli_helpers.modify_model_by_name,
+    ]
+
+    @pytest.mark.parametrize("name", model_names)
+    @pytest.mark.parametrize("fxn", functions_to_test)
+    @given(bool_ary=hnp.arrays(bool, shape=4))
+    def test_modify_sp6_model_by_name(self, name: str, fxn: Callable, bool_ary):
+        sp6_model = SpecletSix(
+            name="TEST-MODEL", root_cache_dir=Path("temp/test-models"), debug=True
+        )
+        suffixes = ["cellcna", "genecna", "rna", "mutation"]
+        for b, s in zip(bool_ary.flatten(), suffixes):
+            if b:
+                name += s
+
+        fxn(sp6_model, name)
+        assert sp6_model.cell_line_cna_cov == bool_ary[0]
+        assert sp6_model.gene_cna_cov == bool_ary[1]
+        assert sp6_model.rna_cov == bool_ary[2]
+        assert sp6_model.mutation_cov == bool_ary[3]

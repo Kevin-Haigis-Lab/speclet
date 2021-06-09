@@ -1,17 +1,79 @@
 #!/usr/bin/env python3
 
-"""Funnctions for handling common modifications and processing of the Achilles data."""
+"""Functions for handling common modifications and processing of the Achilles data."""
 
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Callable, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel
+from scipy import stats
 
 from src.data_processing import common as dphelp
 
 #### ---- Data manipulation ---- ####
+
+
+def _zscale(x: np.ndarray) -> np.ndarray:
+    return stats.zscore(x)
+
+
+def _squish(x: float, lower: float, upper: float) -> float:
+    return max(min(x, upper), lower)
+
+
+_squish_array = np.vectorize(_squish)
+
+
+def _np_identity(x: np.ndarray) -> np.ndarray:
+    return x
+
+
+NumpyTransform = Callable[[np.ndarray], np.ndarray]
+
+
+def careful_zscore(
+    x: np.ndarray,
+    atol: float = 0.01,
+    transform: Optional[NumpyTransform] = None,
+) -> np.ndarray:
+    """Z-scale an array carefully.
+
+    Z-scaling can be very unstable if the values are very close together because the
+    standard deviation is very small. For the case of modeling, it is logical to just
+    set the values to 0 so that the covariate is canceled out. If any of the following
+    critera are met, the z-score is ignored and an array of 0's is returned:
+
+    1. If there is only one value.
+    2. If the values are all close to 0.
+    3. If the values are all very close together.
+
+    Args:
+        x (np.ndarray): Array to rescale.
+        atol (float, optional): Absolute tolerance for variance in values to decide if
+          the z-score should be applied. Defaults to 0.01.
+        transform (Optional[NumpyTransform], optional): A transformation to apply to the
+          array before z-scaling, but after checking the variance. Defaults to None
+          which is equivalent to an identity transform.
+
+    Returns:
+        np.ndarray: Z-scaled array or array of 0's.
+    """
+    if transform is None:
+        transform = _np_identity
+
+    if len(x) == 1:
+        # If there is only one value, set z-scaled expr to 0.
+        return np.zeros_like(x)
+    elif np.allclose(x, 0.0, atol=atol):
+        # If all values are close to 0, set value to 0.
+        return np.zeros_like(x)
+    elif np.allclose(x, np.mean(x), atol=atol):
+        # If all values are about equal, set value to 0.
+        return np.zeros_like(x)
+    else:
+        return _zscale(transform(x))
 
 
 def zscale_cna_by_group(
@@ -39,22 +101,104 @@ def zscale_cna_by_group(
         pd.DataFrame: The modified DataFrame.
     """
     if cn_max is not None and cn_max > 0:
-        df[new_col] = df[cn_col].apply(lambda x: np.min((x, cn_max)))
+        df[new_col] = _squish_array(df[cn_col].values, lower=0, upper=cn_max)
     else:
         df[new_col] = df[cn_col]
 
-    def z_scale(x: pd.Series) -> pd.Series:
-        return (x - np.mean(x)) / np.std(x)
+    def zscore_cna_col(d: pd.DataFrame):
+        d[new_col] = careful_zscore(d[new_col].values)
+        return d
 
-    if groupby_cols is not None:
-        df[new_col] = df.groupby(list(groupby_cols))[new_col].apply(z_scale)
+    if groupby_cols is None:
+        df = zscore_cna_col(df)
     else:
-        df[new_col] = df[new_col].apply(z_scale)
+        df = df.groupby(list(groupby_cols)).apply(zscore_cna_col)
 
     return df
 
 
+def zscale_rna_expression(
+    df: pd.DataFrame,
+    rna_col: str = "rna_expr",
+    new_col: Optional[str] = None,
+    lower_bound: Optional[float] = None,
+    upper_bound: Optional[float] = None,
+) -> pd.DataFrame:
+    """Z-scale RNA expression data.
+
+    If there is not enough variation in the values, dividing by the standard deviation
+    becomes very unstable. Thus, in this function, if the values are all too similar,
+    all are set to 0 instead of either `NaN` or very extreme values.
+
+    Args:
+        df (pd.DataFrame): Data frame.
+        rna_col (str, optional): Column with RNA expr data. Defaults to "rna_expr".
+        new_col (Optional[str], optional): Name of the new column to be generated.
+          Defaults to `f"{rna_col}_z"` if None.
+        lower_bound (Optional[float], optional): Hard lower bound on the scaled values.
+          Defaults to None.
+        upper_bound (Optional[float], optional): Hard upper bound on the scaled values.
+          Defaults to None.
+
+    Returns:
+        pd.DataFrame: The original data frame with a new column with the z-scaled RNA
+          expression values.
+    """
+    if new_col is None:
+        new_col = rna_col + "_z"
+
+    rna = df[rna_col].values
+    rna_z = careful_zscore(rna, atol=0.01, transform=lambda x: np.log10(x + 1))
+
+    if lower_bound is not None and upper_bound is not None:
+        rna_z = _squish_array(rna_z, lower=lower_bound, upper=upper_bound)
+
+    df[new_col] = rna_z
+    return df
+
+
+def zscale_rna_expression_by_gene_lineage(
+    df: pd.DataFrame, *args, **kwargs
+) -> pd.DataFrame:
+    """Z-scale RNA expression data grouping by lineage and gene.
+
+    All positional and keyword arguments are passed to `zscale_rna_expression()`.
+
+    Args:
+        df (pd.DataFrame): The Achilles data frame.
+
+    Returns:
+        pd.DataFrame: The original data frame with a new column with the z-scaled RNA
+          expression values.
+    """
+    return df.groupby(["lineage", "hugo_symbol"]).apply(
+        zscale_rna_expression, *args, **kwargs
+    )
+
+
 #### ---- Indices ---- ####
+
+
+def make_mapping_df(data: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
+    """Generate a DataFrame mapping two columns.
+
+    Args:
+        data (pd.DataFrame): The data set.
+        col1 (str): The name of the column with the lower level group (group that will
+          have all values appear exactly once).
+        col2 (str): The name of the column with the higher level group (multiple values
+          in group 1 will map to a single value in group 2).
+
+    Returns:
+        pd.DataFrame: A DataFrame mapping the values in col1 and col2.
+    """
+    return (
+        data[[col1, col2]]
+        .drop_duplicates()
+        .reset_index(drop=True)
+        .sort_values(col1)
+        .reset_index(drop=True)
+    )
 
 
 def make_sgrna_to_gene_mapping_df(
@@ -64,21 +208,33 @@ def make_sgrna_to_gene_mapping_df(
 
     Args:
         data (pd.DataFrame): The data set.
-        sgrna_col (str, optional): The name of the column with sgRNA data.
-          Defaults to "sgrna".
-        gene_col (str, optional): The name of the column with gene names.
-          Defaults to "hugo_symbol".
+        sgrna_col (str, optional): The name of the column with sgRNA data. Defaults to
+         "sgrna".
+        gene_col (str, optional): The name of the column with gene names. Defaults to
+          "hugo_symbol".
 
     Returns:
         pd.DataFrame: A DataFrame mapping sgRNAs to genes.
     """
-    return (
-        data[[sgrna_col, gene_col]]
-        .drop_duplicates()
-        .reset_index(drop=True)
-        .sort_values(sgrna_col)
-        .reset_index(drop=True)
-    )
+    return make_mapping_df(data, sgrna_col, gene_col)
+
+
+def make_cell_line_to_lineage_mapping_df(
+    data: pd.DataFrame, cell_line_col: str = "depmap_id", lineage_col: str = "lineage"
+) -> pd.DataFrame:
+    """Generate a DataFrame mapping cell lines to lineages.
+
+    Args:
+        data (pd.DataFrame): The data set.
+        cell_line_col (str, optional): The name of the column with cell line names.
+          Defaults to "depmap_id".
+        lineage_col (str, optional): The name of the column with lineages. Defaults to
+          "lineage".
+
+    Returns:
+        pd.DataFrame: A DataFrame mapping cell lines to lineages.
+    """
+    return make_mapping_df(data, cell_line_col, lineage_col)
 
 
 def make_kras_mutation_index_with_other(
@@ -138,8 +294,10 @@ class CommonIndices(BaseModel):
     n_genes: int = 0
     cellline_idx: np.ndarray
     n_celllines: int = 0
-    batch_idx: np.ndarray
-    n_batches: int = 0
+    lineage_idx: np.ndarray
+    n_lineages: int = 0
+    cellline_to_lineage_map: pd.DataFrame
+    cellline_to_lineage_idx: np.ndarray
 
     def __init__(self, **data):
         """Object to hold common indices used for modeling Achilles data."""
@@ -147,7 +305,7 @@ class CommonIndices(BaseModel):
         self.n_sgrnas = dphelp.nunique(self.sgrna_idx)
         self.n_genes = dphelp.nunique(self.gene_idx)
         self.n_celllines = dphelp.nunique(self.cellline_idx)
-        self.n_batches = dphelp.nunique(self.batch_idx)
+        self.n_lineages = dphelp.nunique(self.lineage_idx)
 
     class Config:
         """Configuration for pydantic validation."""
@@ -165,13 +323,59 @@ def common_indices(achilles_df: pd.DataFrame) -> CommonIndices:
         CommonIndices: A data model with a collection of indices.
     """
     sgrna_to_gene_map = make_sgrna_to_gene_mapping_df(achilles_df)
+    cellline_to_lineage_map = make_cell_line_to_lineage_mapping_df(achilles_df)
     return CommonIndices(
         sgrna_idx=dphelp.get_indices(achilles_df, "sgrna"),
         sgrna_to_gene_map=sgrna_to_gene_map,
         sgrna_to_gene_idx=dphelp.get_indices(sgrna_to_gene_map, "hugo_symbol"),
         gene_idx=dphelp.get_indices(achilles_df, "hugo_symbol"),
         cellline_idx=dphelp.get_indices(achilles_df, "depmap_id"),
+        lineage_idx=dphelp.get_indices(achilles_df, "lineage"),
+        cellline_to_lineage_map=cellline_to_lineage_map,
+        cellline_to_lineage_idx=dphelp.get_indices(cellline_to_lineage_map, "lineage"),
         batch_idx=dphelp.get_indices(achilles_df, "p_dna_batch"),
+    )
+
+
+class DataBatchIndices(BaseModel):
+    """Object to hold indices relating to data screens and batches."""
+
+    batch_idx: np.ndarray
+    n_batches: int = 0
+    screen_idx: np.ndarray
+    n_screens: int = 0
+    batch_to_screen_map: pd.DataFrame
+    batch_to_screen_idx: np.ndarray
+
+    def __init__(self, **data):
+        """Object to hold indices relating to data screens and batches."""
+        super().__init__(**data)
+        self.n_batches = dphelp.nunique(self.batch_idx)
+        self.n_screens = dphelp.nunique(self.screen_idx)
+
+    class Config:
+        """Configuration for pydantic validation."""
+
+        arbitrary_types_allowed = True
+
+
+def data_batch_indices(achilles_df: pd.DataFrame) -> DataBatchIndices:
+    """Generate a collection of indices relating to data screens and batches.
+
+    Args:
+        achilles_df (pd.DataFrame): The DataFrame with Achilles data.
+
+    Returns:
+        DataBatchIndices: A data model with a collection of indices.
+    """
+    batch_to_screen_map = make_mapping_df(
+        achilles_df, col1="p_dna_batch", col2="screen"
+    )
+    return DataBatchIndices(
+        batch_idx=dphelp.get_indices(achilles_df, "p_dna_batch"),
+        screen_idx=dphelp.get_indices(achilles_df, "screen"),
+        batch_to_screen_map=batch_to_screen_map,
+        batch_to_screen_idx=dphelp.get_indices(batch_to_screen_map, "screen"),
     )
 
 
@@ -224,6 +428,7 @@ def set_achilles_categorical_columns(
         "lineage",
         "sgrna_target_chr",
         "p_dna_batch",
+        "screen",
     ),
     ordered: bool = True,
     sort_cats: bool = False,
@@ -234,7 +439,7 @@ def set_achilles_categorical_columns(
         data (pd.DataFrame): Achilles DataFrame.
         cols (Union[List[str], Tuple[str, ...]], optional): The names of the columns to
           make categorical. Defaults to ("hugo_symbol", "depmap_id", "sgrna",
-          "lineage", "sgrna_target_chr", "p_dna_batch").
+          "lineage", "sgrna_target_chr", "p_dna_batch", "sreen").
         ordered (bool, optional): Should the categorical columns be ordered?
           Defaults to True.
         sort_cats (bool, optional): Should the categorical columns be sorted?
@@ -271,15 +476,6 @@ def read_achilles_data(
 
     if set_categorical_cols:
         data = set_achilles_categorical_columns(data)
-
-    # data["log2_cn"] = np.log2(data.copy_number + 1)
-    # data = zscale_cna_by_group(
-    #     data,
-    #     cn_col="log2_cn",
-    #     new_col="z_log2_cn",
-    #     groupby_cols=["depmap_id"],
-    #     cn_max=np.log2(10),
-    # )
 
     return data
 

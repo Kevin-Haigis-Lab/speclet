@@ -1,4 +1,4 @@
-"""First new model for the speclet project."""
+"""Speclet Model One."""
 
 from pathlib import Path
 from typing import Optional, Tuple
@@ -55,14 +55,15 @@ class SpecletOne(SpecletModel):
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
-        ic = achelp.common_indices(data)
+        co_idx = achelp.common_indices(data)
+        b_idx = achelp.data_batch_indices(data)
 
         # Shared Theano variables
-        sgrna_idx_shared = theano.shared(ic.sgrna_idx)
-        sgrna_to_gene_idx_shared = theano.shared(ic.sgrna_to_gene_idx)
-        gene_idx_shared = theano.shared(ic.gene_idx)
-        cellline_idx_shared = theano.shared(ic.cellline_idx)
-        batch_idx_shared = theano.shared(ic.batch_idx)
+        sgrna_idx_shared = theano.shared(co_idx.sgrna_idx)
+        sgrna_to_gene_idx_shared = theano.shared(co_idx.sgrna_to_gene_idx)
+        gene_idx_shared = theano.shared(co_idx.gene_idx)
+        cellline_idx_shared = theano.shared(co_idx.cellline_idx)
+        batch_idx_shared = theano.shared(b_idx.batch_idx)
         lfc_shared = theano.shared(data.lfc.values)
         copynumber_shared = theano.shared(data.copy_number.values)
 
@@ -70,38 +71,42 @@ class SpecletOne(SpecletModel):
             # sgRNA|gene varying intercept.
             μ_μ_h = pm.Normal("μ_μ_h", 0, 5)
             σ_μ_h = pm.HalfNormal("σ_μ_h", 5)
-            μ_h = pm.Normal("μ_h", μ_μ_h, σ_μ_h, shape=ic.n_genes)
+            μ_h = pm.Normal("μ_h", μ_μ_h, σ_μ_h, shape=co_idx.n_genes)
             σ_σ_h = pm.HalfNormal("σ_σ_h", 5)
-            σ_h = pm.HalfNormal("σ_h", σ_σ_h, shape=ic.n_genes)
+            σ_h = pm.HalfNormal("σ_h", σ_σ_h, shape=co_idx.n_genes)
             h = pm.Normal(
                 "h",
-                μ_h[ic.sgrna_to_gene_idx],
-                σ_h[ic.sgrna_to_gene_idx],
-                shape=ic.n_sgrnas,
+                μ_h[co_idx.sgrna_to_gene_idx],
+                σ_h[co_idx.sgrna_to_gene_idx],
+                shape=co_idx.n_sgrnas,
             )
 
             # [sgRNA|gene, cell line] varying intercept.
             μ_μ_d = pm.Normal("μ_μ_d", 0, 1)
             σ_μ_d = pm.Normal("σ_μ_d", 1)
-            μ_d = pm.Normal("μ_d", μ_μ_d, σ_μ_d, shape=(ic.n_genes, ic.n_celllines))
+            μ_d = pm.Normal(
+                "μ_d", μ_μ_d, σ_μ_d, shape=(co_idx.n_genes, co_idx.n_celllines)
+            )
             σ_σ_d = pm.HalfNormal("σ_σ_d", 0.2)
-            σ_d = pm.HalfNormal("σ_d", σ_σ_d, shape=(ic.n_genes, ic.n_celllines))
+            σ_d = pm.HalfNormal(
+                "σ_d", σ_σ_d, shape=(co_idx.n_genes, co_idx.n_celllines)
+            )
             d = pm.Normal(
                 "d",
                 μ_d[sgrna_to_gene_idx_shared, :],
                 σ_d[sgrna_to_gene_idx_shared, :],
-                shape=(ic.n_sgrnas, ic.n_celllines),
+                shape=(co_idx.n_sgrnas, co_idx.n_celllines),
             )
 
             # Varying slope per cell line for CN.
             μ_β = pm.Normal("μ_β", -1, 2)
             σ_β = pm.HalfNormal("σ_β", 1)
-            β = pm.Normal("β", μ_β, σ_β, shape=ic.n_celllines)
+            β = pm.Normal("β", μ_β, σ_β, shape=co_idx.n_celllines)
 
             # Batch effect varying intercept.
             μ_η = pm.Normal("μ_η", 0, 0.1)
             σ_η = pm.HalfNormal("σ_η", 0.1)
-            η = pm.Normal("η", μ_η, σ_η, shape=ic.n_batches)
+            η = pm.Normal("η", μ_η, σ_η, shape=b_idx.n_batches)
 
             μ = pm.Deterministic(
                 "μ",
@@ -151,12 +156,13 @@ class SpecletOne(SpecletModel):
 
         data = self.data_manager.get_data()
         batch_size = self.data_manager.get_batch_size()
-        indices = achelp.common_indices(data)
+        co_idx = achelp.common_indices(data)
+        b_idx = achelp.data_batch_indices(data)
 
-        sgrna_idx_batch = pm.Minibatch(indices.sgrna_idx, batch_size=batch_size)
-        gene_idx_batch = pm.Minibatch(indices.gene_idx, batch_size=batch_size)
-        cellline_idx_batch = pm.Minibatch(indices.cellline_idx, batch_size=batch_size)
-        batch_idx_batch = pm.Minibatch(indices.batch_idx, batch_size=batch_size)
+        sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=batch_size)
+        gene_idx_batch = pm.Minibatch(co_idx.gene_idx, batch_size=batch_size)
+        cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=batch_size)
+        batch_idx_batch = pm.Minibatch(b_idx.batch_idx, batch_size=batch_size)
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
         copynumber_data_batch = pm.Minibatch(
             data.copy_number.values, batch_size=batch_size

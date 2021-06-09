@@ -1,4 +1,4 @@
-"""First new model for the speclet project."""
+"""Speclet Model Two."""
 
 from pathlib import Path
 from typing import Any, List, Optional, Tuple
@@ -57,14 +57,15 @@ class SpecletTwo(SpecletModel):
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
-        ic = achelp.common_indices(data)
+        co_idx = achelp.common_indices(data)
+        b_idx = achelp.data_batch_indices(data)
 
         # Shared Theano variables
         logger.info("Getting Theano shared variables.")
-        sgrna_idx_shared = theano.shared(ic.sgrna_idx)
-        gene_idx_shared = theano.shared(ic.gene_idx)
-        cellline_idx_shared = theano.shared(ic.cellline_idx)
-        batch_idx_shared = theano.shared(ic.batch_idx)
+        sgrna_idx_shared = theano.shared(co_idx.sgrna_idx)
+        gene_idx_shared = theano.shared(co_idx.gene_idx)
+        cellline_idx_shared = theano.shared(co_idx.cellline_idx)
+        batch_idx_shared = theano.shared(b_idx.batch_idx)
         lfc_shared = theano.shared(data.lfc.values)
 
         logger.info("Creating PyMC3 model.")
@@ -72,19 +73,19 @@ class SpecletTwo(SpecletModel):
             # [gene, cell line] varying intercept.
             μ_α = pm.Normal("μ_α", 0, 0.5)
             σ_α = pm.HalfNormal("σ_α", 1)
-            α = pm.Normal("α", μ_α, σ_α, shape=(ic.n_genes, ic.n_celllines))
+            α = pm.Normal("α", μ_α, σ_α, shape=(co_idx.n_genes, co_idx.n_celllines))
 
             # Batch effect varying intercept.
             μ_η = pm.Normal("μ_η", 0, 0.1)
             σ_η = pm.HalfNormal("σ_η", 0.1)
-            η = pm.Normal("η", μ_η, σ_η, shape=ic.n_batches)
+            η = pm.Normal("η", μ_η, σ_η, shape=b_idx.n_batches)
 
             μ = pm.Deterministic(
                 "μ", α[gene_idx_shared, cellline_idx_shared] + η[batch_idx_shared]
             )
 
             σ_σ = pm.HalfNormal("σ_σ", 0.5)
-            σ = pm.HalfNormal("σ", σ_σ, shape=ic.n_sgrnas)
+            σ = pm.HalfNormal("σ", σ_σ, shape=co_idx.n_sgrnas)
 
             # Likelihood
             lfc = pm.Normal(  # noqa: F841
@@ -126,12 +127,13 @@ class SpecletTwo(SpecletModel):
 
         data = self.data_manager.get_data()
         batch_size = self.data_manager.get_batch_size()
-        ic = achelp.common_indices(data)
+        co_idx = achelp.common_indices(data)
+        b_idx = achelp.data_batch_indices(data)
 
-        sgrna_idx_batch = pm.Minibatch(ic.sgrna_idx, batch_size=batch_size)
-        gene_idx_batch = pm.Minibatch(ic.gene_idx, batch_size=batch_size)
-        cellline_idx_batch = pm.Minibatch(ic.cellline_idx, batch_size=batch_size)
-        batch_idx_batch = pm.Minibatch(ic.batch_idx, batch_size=batch_size)
+        sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=batch_size)
+        gene_idx_batch = pm.Minibatch(co_idx.gene_idx, batch_size=batch_size)
+        cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=batch_size)
+        batch_idx_batch = pm.Minibatch(b_idx.batch_idx, batch_size=batch_size)
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
         return {
