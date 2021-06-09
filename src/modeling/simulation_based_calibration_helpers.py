@@ -219,16 +219,22 @@ def add_mock_copynumber_data(mock_df: pd.DataFrame) -> pd.DataFrame:
     return mock_df
 
 
-def add_mock_zero_effect_lfc_data(mock_df: pd.DataFrame) -> pd.DataFrame:
+def add_mock_zero_effect_lfc_data(
+    mock_df: pd.DataFrame, mu: float = 0.0, sigma: float = 0.5
+) -> pd.DataFrame:
     """Add fake log-fold change column to mock Achilles data.
 
     Args:
         mock_df (pd.DataFrame): Mock Achilles data frame.
+        mu (float, optional): Mean of normal distribution for sampling LFC values.
+          Defaults to 0.0.
+        sigma (float, optional): Standard deviation of normal distribution for sampling
+          LFC values. Defaults to 0.5.
 
     Returns:
         pd.DataFrame: Same mock Achilles data with a new "lfc" column.
     """
-    mock_df["lfc"] = np.random.normal(0, 0.5, mock_df.shape[0])
+    mock_df["lfc"] = np.random.normal(mu, sigma, mock_df.shape[0])
     return mock_df
 
 
