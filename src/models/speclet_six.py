@@ -239,6 +239,27 @@ class SpecletSix(SpecletModel):
             self._rna_cov = new_value
             self._reset_model_and_results()
 
+    @property
+    def mutation_cov(self) -> bool:
+        """Should the covariate for gene- and lineage-specific mutation be included?
+
+        Returns:
+            bool: Whether the covariate is included or not.
+        """
+        return self._mutation_cov
+
+    @mutation_cov.setter
+    def mutation_cov(self, new_value: bool) -> None:
+        """Decide if the gene- and lineage-specific mutation covariate should be included.
+
+        Args:
+            new_value (bool): Whether the covariate is included or not.
+        """
+        if self._mutation_cov != new_value:
+            logger.info("Changing `mutation_cov` to `{new_value}`.")
+            self._mutation_cov = new_value
+            self._reset_model_and_results()
+
     def model_specification(self) -> Tuple[pm.Model, str]:
         """Build SpecletSix model.
 
@@ -287,6 +308,10 @@ class SpecletSix(SpecletModel):
         if self.rna_cov:
             rna_expr_shared = ts(data["rna_expr_gene_lineage"].values)
             self.shared_vars["rna_expr_shared"] = rna_expr_shared
+
+        if self.mutation_cov:
+            mutation_shared = ts(data["is_mutated"].values)
+            self.shared_vars["mutation_shared"] = mutation_shared
 
         logger.info("Creating PyMC3 model.")
         logger.warning(
@@ -391,6 +416,15 @@ class SpecletSix(SpecletModel):
                 )
                 q = pm.Deterministic("q", (μ_q + q_offset * σ_q))
                 _μ += q[gene_idx_shared, lineage_idx_shared] * rna_expr_shared
+
+            if self.mutation_cov:
+                μ_m = pm.Normal("μ_m", 0, 2)
+                σ_m = pm.HalfNormal("σ_m", 1)
+                m_offset = pm.Normal(
+                    "m_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
+                )
+                m = pm.Deterministic("m", (μ_m + m_offset * σ_m))
+                _μ += m[gene_idx_shared, lineage_idx_shared] * mutation_shared
 
             μ = pm.Deterministic("μ", _μ)
 

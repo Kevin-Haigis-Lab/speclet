@@ -210,6 +210,24 @@ class TestSpecletSix:
             for v in expected_vars:
                 assert (v in model_vars) == with_rna_cov
 
+    def test_model_with_optional_gene_lineage_mutation_covariate(
+        self, tmp_path: Path, data_manager: CrcDataManager
+    ):
+        sp6 = SpecletSix(
+            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
+        )
+
+        expected_vars = set(["μ_m", "σ_m", "m_offset", "m"])
+
+        for with_mut_cov in [False, True]:
+            sp6.mutation_cov = with_mut_cov
+            assert sp6.model is None
+            sp6.build_model()
+            assert sp6.model is not None
+            model_vars = get_variable_names(sp6.model, rm_log=True)
+            for v in expected_vars:
+                assert (v in model_vars) == with_mut_cov
+
     @pytest.mark.slow
     def test_mcmc_sampling(self, tmp_path: Path, data_manager: CrcDataManager):
         sp6 = SpecletSix(
