@@ -59,6 +59,7 @@ def zscale_rna_expression_by_gene_and_lineage(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Same data frame with a new column `"rna_expr_gene_lineage"`.
     """
+    logger.info("Adding 'rna_expr_gene_lineage' column.")
     return achelp.zscale_rna_expression_by_gene_lineage(
         df,
         rna_col="rna_expr",
@@ -77,6 +78,7 @@ def convert_is_mutated_to_numeric(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Same data frame with the column `"is_mutated"` as type integer.
     """
+    logger.info("Converting 'is_mutated' column to 'int'.")
     df["is_mutated"] = df["is_mutated"].astype(int)
     return df
 

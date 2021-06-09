@@ -85,9 +85,6 @@ def zscale_cna_by_group(
 ) -> pd.DataFrame:
     """Z-scale the copy number values.
 
-    TODO: Address the same concerns as accounted for in `zscale_rna_expression()`.
-    TODO: Use hypothesis to test.
-
     Args:
         df (pd.DataFrame): The DataFrame to modify.
         cn_col (str, optional): Column with the gene copy number values.

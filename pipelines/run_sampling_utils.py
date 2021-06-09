@@ -16,6 +16,7 @@ sample_models_memory_lookup = {
     "speclet-three": {True: {"ADVI": 7, "MCMC": 60}, False: {"ADVI": 40, "MCMC": 150}},
     "speclet-four": {True: {"ADVI": 7, "MCMC": 60}, False: {"ADVI": 40, "MCMC": 150}},
     "speclet-five": {True: {"ADVI": 7, "MCMC": 60}, False: {"ADVI": 40, "MCMC": 150}},
+    "speclet-six": {True: {"ADVI": 7, "MCMC": 60}, False: {"ADVI": 40, "MCMC": 150}},
 }
 
 
@@ -43,6 +44,10 @@ sample_models_time_lookup = {
         False: {"ADVI": "10:00:00", "MCMC": "48:00:00"},
     },
     "speclet-five": {
+        True: {"ADVI": "03:00:00", "MCMC": "24:00:00"},
+        False: {"ADVI": "10:00:00", "MCMC": "48:00:00"},
+    },
+    "speclet-six": {
         True: {"ADVI": "03:00:00", "MCMC": "24:00:00"},
         False: {"ADVI": "10:00:00", "MCMC": "48:00:00"},
     },

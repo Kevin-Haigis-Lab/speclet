@@ -4,7 +4,7 @@
 
 
 from enum import Enum
-from typing import Any, Dict, Type, Union
+from typing import Any, Dict, Type
 
 import pretty_errors
 
@@ -15,6 +15,7 @@ from src.models.speclet_four import SpecletFour
 from src.models.speclet_model import SpecletModel
 from src.models.speclet_one import SpecletOne
 from src.models.speclet_pipeline_test_model import SpecletTestModel
+from src.models.speclet_six import SpecletSix
 from src.models.speclet_three import SpecletThree
 from src.models.speclet_two import SpecletTwo
 
@@ -78,6 +79,7 @@ def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
         ModelOption.speclet_three: SpecletThree,
         ModelOption.speclet_four: SpecletFour,
         ModelOption.speclet_five: SpecletFive,
+        ModelOption.speclet_six: SpecletSix,
     }
     return model_option_map[model_opt]
 
@@ -105,10 +107,12 @@ def modify_model_by_name(model: Any, name: str) -> None:
     """
     if isinstance(model, CeresMimic):
         modify_ceres_model_by_name(model, name)
-    elif isinstance(model, SpecletTwo) or isinstance(model, SpecletThree):
-        modify_speclettwo_and_three_model_by_name(model, name)
     elif isinstance(model, SpecletFour):
         modify_specletfour_model_by_name(model, name)
+    elif isinstance(model, SpecletSix):
+        modify_specletsix_model_by_name(model, name)
+    else:
+        logger.info("No modifications make to model based on its name.")
     return None
 
 
@@ -127,20 +131,6 @@ def modify_ceres_model_by_name(model: CeresMimic, name: str) -> None:
         model.sgrna_intercept_cov = True
 
 
-def modify_speclettwo_and_three_model_by_name(
-    model: Union[SpecletTwo, SpecletThree], name: str
-) -> None:
-    """Modify a SpecletTwo/Three object based on the user-provided input name.
-
-    Args:
-        model (Union[SpecletTwo, SpecletThree]): The SpecletTwo or SpecletThree model.
-        name (str): User-provided name.
-    """
-    if "kras" in name:
-        logger.info("Including KRAS allele covariate in the model.")
-        model.kras_cov = True
-
-
 def modify_specletfour_model_by_name(model: SpecletFour, name: str) -> None:
     """Modify a SpecletFour object based on the user-provided input name.
 
@@ -151,3 +141,24 @@ def modify_specletfour_model_by_name(model: SpecletFour, name: str) -> None:
     if "copy-number" in name or "cn-cov" in name:
         logger.info("Including copy number covariate in the Sp4 model.")
         model.copy_number_cov = True
+
+
+def modify_specletsix_model_by_name(model: SpecletSix, name: str) -> None:
+    """Modify a SpecletSix object based on the user-provided input name.
+
+    Args:
+        model (SpecletSix): The SpecletSix model.
+        name (str): User-provided name.
+    """
+    if "cellcna" in name:
+        logger.info("Including cell line copy number covariate in the Sp6 model.")
+        model.cell_line_cna_cov = True
+    if "genecna" in name:
+        logger.info("Including gene copy number covariate in the Sp6 model.")
+        model.gene_cna_cov = True
+    if "rna" in name:
+        logger.info("Including RNA covariate in the Sp6 model.")
+        model.rna_cov = True
+    if "mutation" in name:
+        logger.info("Including mutation covariate in the Sp6 model.")
+        model.mutation_cov = True
