@@ -3,7 +3,7 @@
 """Functions for handling common modifications and processing of the Achilles data."""
 
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Callable, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -24,6 +24,56 @@ def _squish(x: float, lower: float, upper: float) -> float:
 
 
 _squish_array = np.vectorize(_squish)
+
+
+def _np_identity(x: np.ndarray) -> np.ndarray:
+    return x
+
+
+NumpyTransform = Callable[[np.ndarray], np.ndarray]
+
+
+def careful_zscore(
+    x: np.ndarray,
+    atol: float = 0.01,
+    transform: Optional[NumpyTransform] = None,
+) -> np.ndarray:
+    """Z-scale an array carefully.
+
+    Z-scaling can be very unstable if the values are very close together because the
+    standard deviation is very small. For the case of modeling, it is logical to just
+    set the values to 0 so that the covariate is canceled out. If any of the following
+    critera are met, the z-score is ignored and an array of 0's is returned:
+
+    1. If there is only one value.
+    2. If the values are all close to 0.
+    3. If the values are all very close together.
+
+    Args:
+        x (np.ndarray): Array to rescale.
+        atol (float, optional): Absolute tolerance for variance in values to decide if
+          the z-score should be applied. Defaults to 0.01.
+        transform (Optional[NumpyTransform], optional): A transformation to apply to the
+          array before z-scaling, but after checking the variance. Defaults to None
+          which is equivalent to an identity transform.
+
+    Returns:
+        np.ndarray: Z-scaled array or array of 0's.
+    """
+    if transform is None:
+        transform = _np_identity
+
+    if len(x) == 1:
+        # If there is only one value, set z-scaled expr to 0.
+        return np.zeros_like(x)
+    elif np.allclose(x, 0.0, atol=atol):
+        # If all values are close to 0, set value to 0.
+        return np.zeros_like(x)
+    elif np.allclose(x, np.mean(x), atol=atol):
+        # If all values are about equal, set value to 0.
+        return np.zeros_like(x)
+    else:
+        return _zscale(transform(x))
 
 
 def zscale_cna_by_group(
@@ -54,17 +104,18 @@ def zscale_cna_by_group(
         pd.DataFrame: The modified DataFrame.
     """
     if cn_max is not None and cn_max > 0:
-        df[new_col] = df[cn_col].apply(lambda x: np.min((x, cn_max)))
+        df[new_col] = _squish_array(df[cn_col].values, lower=0, upper=cn_max)
     else:
         df[new_col] = df[cn_col]
 
-    def z_scale(x: pd.Series) -> pd.Series:
-        return _zscale(x)
+    def zscore_cna_col(d: pd.DataFrame):
+        d[new_col] = careful_zscore(d[new_col].values)
+        return d
 
-    if groupby_cols is not None:
-        df[new_col] = df.groupby(list(groupby_cols))[new_col].apply(z_scale)
+    if groupby_cols is None:
+        df = zscore_cna_col(df)
     else:
-        df[new_col] = df[new_col].apply(z_scale)
+        df = df.groupby(list(groupby_cols)).apply(zscore_cna_col)
 
     return df
 
@@ -100,25 +151,12 @@ def zscale_rna_expression(
         new_col = rna_col + "_z"
 
     rna = df[rna_col].values
-
-    if len(rna) == 1:
-        # If there is only one value, set z-scaled expr to 0.
-        df[new_col] = 0
-        return df
-
-    if np.allclose(rna, 0.0, atol=0.01):
-        # If all values are close to 0, set value to 0.
-        df[new_col] = 0
-    elif np.allclose(rna, np.mean(rna), atol=0.01):
-        # If all values are about equal, set value to 0.
-        df[new_col] = 0
-
-    else:
-        df[new_col] = _zscale(np.log10(rna + 1))
+    rna_z = careful_zscore(rna, atol=0.01, transform=lambda x: np.log10(x + 1))
 
     if lower_bound is not None and upper_bound is not None:
-        df[new_col] = _squish_array(df[new_col], lower=lower_bound, upper=upper_bound)
+        rna_z = _squish_array(rna_z, lower=lower_bound, upper=upper_bound)
 
+    df[new_col] = rna_z
     return df
 
 

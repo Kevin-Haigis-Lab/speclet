@@ -106,40 +106,27 @@ class TestModifyingAchillesData:
             _ = achelp.subsample_achilles_data(data, n_cell_lines=-1)
 
     def test_z_scaling_means(self, mock_data: pd.DataFrame):
+        print(mock_data)
         z_data = achelp.zscale_cna_by_group(mock_data)
-        gene_means = (
-            z_data.groupby(["hugo_symbol"])["copy_number_z"].agg(np.mean).values
-        )
-        expected_mean = np.zeros_like(gene_means)
-        np.testing.assert_almost_equal(gene_means, expected_mean)
+        print(z_data)
+        for gene in z_data["hugo_symbol"].unique():
+            m = z_data.query(f"hugo_symbol == '{gene}'")["copy_number_z"].mean()
+            assert m == pytest.approx(0.0, abs=0.01)
 
     def test_z_scaling_stddevs(self, mock_data: pd.DataFrame):
         z_data = achelp.zscale_cna_by_group(mock_data)
-        gene_sds = z_data.groupby(["hugo_symbol"])["copy_number_z"].agg(np.std).values
-        expected_sd = np.ones_like(gene_sds)
-        np.testing.assert_almost_equal(gene_sds, expected_sd, decimal=2)
+        for gene in z_data["hugo_symbol"].unique():
+            s = z_data.query(f"hugo_symbol == '{gene}'")["copy_number_z"].std()
+            assert s == pytest.approx(1.0, abs=0.1)
 
     def test_z_scaling_max(self, mock_data: pd.DataFrame):
         cn_max = 25
-        z_data = achelp.zscale_cna_by_group(mock_data)
         z_data_max = achelp.zscale_cna_by_group(mock_data, cn_max=cn_max)
-
-        gene_means = (
-            z_data_max.groupby(["hugo_symbol"])["copy_number_z"].agg(np.mean).values
-        )
-        expected_mean = np.zeros_like(gene_means)
-        np.testing.assert_almost_equal(gene_means, expected_mean)
-
-        gene_sds = (
-            z_data_max.groupby(["hugo_symbol"])["copy_number_z"].agg(np.std).values
-        )
-        expected_sd = np.ones_like(gene_sds)
-        np.testing.assert_almost_equal(gene_sds, expected_sd, decimal=2)
-
-        less_than_max_idx = np.where(mock_data["copy_number"] < cn_max)
-        z_vals = z_data.loc[less_than_max_idx, "copy_number_z"]
-        z_max_vals = z_data_max.loc[less_than_max_idx, "copy_number_z"]
-        assert (z_vals <= z_max_vals).all()
+        for gene in z_data_max["hugo_symbol"].unique():
+            m = z_data_max.query(f"hugo_symbol == '{gene}'")["copy_number_z"].mean()
+            assert m == pytest.approx(0.0, abs=0.01)
+            s = z_data_max.query(f"hugo_symbol == '{gene}'")["copy_number_z"].std()
+            assert s == pytest.approx(1.0, abs=0.1)
 
 
 @st.composite
@@ -155,6 +142,13 @@ def my_arrays(draw, min_size: int = 1):
             min_size=min_size,
         )
     )
+
+
+@given(my_arrays())
+def test_careful_zscore(ary: np.ndarray):
+    z_ary = achelp.careful_zscore(ary)
+    assert np.mean(z_ary) == pytest.approx(0.0, abs=0.01)
+    assert np.allclose(z_ary, 0.0) or np.std(z_ary) == pytest.approx(1.0, abs=0.01)
 
 
 @given(my_arrays())

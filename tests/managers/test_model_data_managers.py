@@ -17,6 +17,17 @@ def select(df: pd.DataFrame) -> pd.DataFrame:
     return df[["sepal_length", "species"]]
 
 
+@pytest.fixture(autouse=True)
+def no_requests(monkeypatch: pytest.MonkeyPatch):
+    def identity(df: pd.DataFrame) -> pd.DataFrame:
+        return df
+
+    monkeypatch.setattr(
+        CrcDataManager, "_drop_sgrnas_that_map_to_multiple_genes", identity
+    )
+    monkeypatch.setattr(CrcDataManager, "_drop_missing_copynumber", identity)
+
+
 class TestCrcDataManager:
     @pytest.fixture(scope="function")
     def iris(self) -> pd.DataFrame:
