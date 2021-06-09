@@ -314,7 +314,6 @@ class CrcDataManager(DataManager):
                 n_lineages=2,
                 n_batches=2,
                 n_screens=1,
-                n_kras_types=2,
             )
         elif size == sbc.MockDataSizes.medium:
             self.data = sbc.generate_mock_achilles_data(
@@ -324,7 +323,6 @@ class CrcDataManager(DataManager):
                 n_lineages=2,
                 n_batches=3,
                 n_screens=2,
-                n_kras_types=3,
             )
         else:
             self.data = sbc.generate_mock_achilles_data(
@@ -334,7 +332,6 @@ class CrcDataManager(DataManager):
                 n_lineages=3,
                 n_batches=4,
                 n_screens=2,
-                n_kras_types=3,
             )
         return self.data
 
