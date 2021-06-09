@@ -60,7 +60,7 @@ class TestSBCFileManager:
             )
 
 
-#### ---- Test mock data generator ---- ####
+#### ---- Test mock data generation ---- ####
 
 
 def generate_data_with_random_params() -> pd.DataFrame:
@@ -100,27 +100,6 @@ def test_mock_data_has_correct_categories_sizes():
         assert n_genes * n_sgrnas_per_gene == dphelp.nunique(mock_data.sgrna)
         assert n_cell_lines == dphelp.nunique(mock_data.depmap_id)
         assert n_batches >= dphelp.nunique(mock_data.p_dna_batch)
-
-
-def test_mock_data_has_correct_kras_mutation_types():
-    for _ in range(20):
-        n_genes = np.random.randint(2, 20)
-        n_sgrnas_per_gene = np.random.randint(2, 20)
-        n_cell_lines = np.random.randint(4, 20)
-        n_lineages = np.random.randint(1, n_cell_lines)
-        n_batches = np.random.randint(1, n_cell_lines)
-        n_screens = 1 if n_batches == 1 else np.random.randint(1, n_batches)
-        n_kras_types = np.min([np.random.randint(1, n_cell_lines // 2), 7])
-        mock_data = sbc.generate_mock_achilles_data(
-            n_genes=n_genes,
-            n_sgrnas_per_gene=n_sgrnas_per_gene,
-            n_cell_lines=n_cell_lines,
-            n_lineages=n_lineages,
-            n_batches=n_batches,
-            n_screens=n_screens,
-            n_kras_types=n_kras_types,
-        )
-        assert n_kras_types >= dphelp.nunique(mock_data.kras_mutation)
 
 
 def test_sgrnas_uniquely_map_to_genes():

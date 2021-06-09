@@ -1,9 +1,8 @@
 """Helpers for organizing simualtaion-based calibrations."""
 
-import random
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import arviz as az
 import numpy as np
@@ -137,34 +136,48 @@ class SBCFileManager:
         return True
 
 
-def generate_mock_achilles_data(
-    n_genes: int,
-    n_sgrnas_per_gene: int,
+def generate_mock_sgrna_gene_map(n_genes: int, n_sgrnas_per_gene: int) -> pd.DataFrame:
+    """Generate a fake sgRNA-gene map.
+
+    Args:
+        n_genes (int): Number of genes.
+        n_sgrnas_per_gene (int): Number of sgRNA per gene.
+
+    Returns:
+        pd.DataFrame: A data frame mapping each sgRNA to a gene. Each sgRNA only matches
+          to a single gene and each gene will have `n_sgrnas_per_gene` sgRNAs mapped
+          to it.
+    """
+    genes = prefixed_count("gene", n=n_genes)
+    sgrnas = [prefixed_count(gene + "_sgrna", n=n_sgrnas_per_gene) for gene in genes]
+    return pd.DataFrame(
+        {
+            "hugo_symbol": np.repeat(genes, n_sgrnas_per_gene),
+            "sgrna": np.array(sgrnas).flatten(),
+        }
+    )
+
+
+def generate_mock_cell_line_information(
+    genes: Union[List[str], np.ndarray],
     n_cell_lines: int,
     n_lineages: int,
     n_batches: int,
     n_screens: int,
-    n_kras_types: Optional[int] = None,
 ) -> pd.DataFrame:
-    """Generate mock Achilles data.
-
-    Each sgRNA maps to a single gene. Each cell lines only received on pDNA batch.
-    Each cell line / sgRNA combination occurs exactly once.
+    """Generate mock "sample information" for fake cell lines.
 
     Args:
-        n_genes (int): Number of genes.
-        n_sgrnas_per_gene (int): Number of sgRNAs per gene.
+        genes (List[str]): List of genes tested in the cell lines.
         n_cell_lines (int): Number of cell lines.
         n_lineages (int, optional): Number of lineages. Must be less than or equal to
           the number of cell lines.
         n_batches (int): Number of pDNA batchs.
         n_screens (int): Number of screens sourced for the data. Must be less than or
           equal to the number of batches.
-        n_kras_types (Optional[int], optional): Number of types of KRAS mutations to
-          include. Defaults to None which ignores this attribute altogether.
 
     Returns:
-        pd.DataFrame: A pandas data frame the resembles the Achilles data.
+        pd.DataFrame: The mock sample information.
     """
     cell_lines = prefixed_count("cellline", n=n_cell_lines)
     lineages = prefixed_count("lineage", n=n_lineages)
@@ -181,51 +194,90 @@ def generate_mock_achilles_data(
     screen_map = pd.DataFrame(
         {"p_dna_batch": batches, "screen": np.random.choice(screens, n_batches)}
     )
-
-    genes = prefixed_count("gene", n=n_genes)
-    sgrnas = [prefixed_count(gene + "_sgrna", n=n_sgrnas_per_gene) for gene in genes]
-    sgnra_map = pd.DataFrame(
-        {
-            "hugo_symbol": np.repeat(genes, n_sgrnas_per_gene),
-            "sgrna": np.array(sgrnas).flatten(),
-        }
-    )
-
-    df = (
+    return (
         pd.DataFrame(
             {
-                "depmap_id": np.repeat(cell_lines, n_genes),
+                "depmap_id": np.repeat(cell_lines, len(np.unique(genes))),
                 "hugo_symbol": np.tile(genes, n_cell_lines),
             }
         )
         .merge(batch_map, on="depmap_id")
         .merge(screen_map, on="p_dna_batch")
-        .merge(sgnra_map, on="hugo_symbol")
-        .reset_index(drop=True)
     )
 
-    kras_types: List[str] = ["WT", "G12D", "G13D", "A146T", "Q61L", "G12C", "G12R"]
-    if n_kras_types is not None:
-        if n_kras_types > len(kras_types):
-            raise ValueError(
-                f"Please use less than {len(kras_types)} types of KRAS mutations."
-            )
-        elif n_kras_types <= 0:
-            raise ValueError("Number of KRAS types must be positive and non-zero.")
 
-        kras_types = kras_types[:n_kras_types]
-        kras_assignments = pd.DataFrame(
-            {
-                "depmap_id": cell_lines,
-                "kras_mutation": random.choices(kras_types, k=len(cell_lines)),
-            }
-        )
-        df = df.merge(kras_assignments, how="left", on="depmap_id")
+def add_mock_copynumber_data(mock_df: pd.DataFrame) -> pd.DataFrame:
+    """Add mock copy number data to mock Achilles data.
 
-    df = achelp.set_achilles_categorical_columns(df, cols=df.columns.tolist())
+    Args:
+        mock_df (pd.DataFrame): Mock Achilles data frame.
 
-    # Mock values for gene copy number.
-    df["copy_number"] = 2 ** np.random.normal(1, 0.5, df.shape[0])
-    df["lfc"] = np.random.normal(0, 2, df.shape[0])
+    Returns:
+        pd.DataFrame: Same mock Achilles data frame with a new "copy_number" column.
+    """
+    mock_df["copy_number"] = 2 ** np.random.normal(1, 0.5, mock_df.shape[0])
+    return mock_df
+
+
+def add_mock_zero_effect_lfc_data(mock_df: pd.DataFrame) -> pd.DataFrame:
+    """Add fake log-fold change column to mock Achilles data.
+
+    Args:
+        mock_df (pd.DataFrame): Mock Achilles data frame.
+
+    Returns:
+        pd.DataFrame: Same mock Achilles data with a new "lfc" column.
+    """
+    mock_df["lfc"] = np.random.normal(0, 0.5, mock_df.shape[0])
+    return mock_df
+
+
+def generate_mock_achilles_data(
+    n_genes: int,
+    n_sgrnas_per_gene: int,
+    n_cell_lines: int,
+    n_lineages: int,
+    n_batches: int,
+    n_screens: int,
+) -> pd.DataFrame:
+    """Generate mock Achilles data.
+
+    Each sgRNA maps to a single gene. Each cell lines only received on pDNA batch.
+    Each cell line / sgRNA combination occurs exactly once.
+
+    Args:
+        n_genes (int): Number of genes.
+        n_sgrnas_per_gene (int): Number of sgRNAs per gene.
+        n_cell_lines (int): Number of cell lines.
+        n_lineages (int, optional): Number of lineages. Must be less than or equal to
+          the number of cell lines.
+        n_batches (int): Number of pDNA batchs.
+        n_screens (int): Number of screens sourced for the data. Must be less than or
+          equal to the number of batches.
+
+    Returns:
+        pd.DataFrame: A pandas data frame the resembles the Achilles data.
+    """
+    sgnra_map = generate_mock_sgrna_gene_map(
+        n_genes=n_genes, n_sgrnas_per_gene=n_sgrnas_per_gene
+    )
+    cell_line_info = generate_mock_cell_line_information(
+        genes=sgnra_map.hugo_symbol.unique(),
+        n_cell_lines=n_cell_lines,
+        n_lineages=n_lineages,
+        n_batches=n_batches,
+        n_screens=n_screens,
+    )
+
+    def _make_cat_cols(_df: pd.DataFrame) -> pd.DataFrame:
+        return achelp.set_achilles_categorical_columns(_df, cols=_df.columns.tolist())
+
+    df = (
+        cell_line_info.merge(sgnra_map, on="hugo_symbol")
+        .reset_index(drop=True)
+        .pipe(_make_cat_cols)
+        .pipe(add_mock_copynumber_data)
+        .pipe(add_mock_zero_effect_lfc_data)
+    )
 
     return df
