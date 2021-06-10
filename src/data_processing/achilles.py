@@ -14,6 +14,8 @@ from src.data_processing import common as dphelp
 
 #### ---- Data manipulation ---- ####
 
+# TODO: move these functions to "src/data_processing/vectors.py"
+
 
 def _zscale(x: np.ndarray) -> np.ndarray:
     return stats.zscore(x)
