@@ -70,6 +70,14 @@ class SBCFileManager:
         self.priors_path_set = dir / "priors"
         self.priors_path_get = dir / "priors.npz"
         self.posterior_summary_path = dir / "posterior-summary.csv"
+        _ = self._check_dir_exists()
+
+    def _check_dir_exists(self) -> bool:
+        if self.dir.exists():
+            return True
+        else:
+            self.dir.mkdir()
+            return False
 
     def save_sbc_results(
         self,

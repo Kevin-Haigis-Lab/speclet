@@ -6,7 +6,7 @@ import papermill
 
 from sbc_resource_requirements import SBCResourceManager as RM
 
-NUM_SIMULATIONS = 5
+NUM_SIMULATIONS = 10
 
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yml"
@@ -56,7 +56,7 @@ rule run_sbc:
         "  {wildcards.model_name} "
         "  " + ROOT_PERMUTATION_DIR + "{wildcards.model}_{wildcards.model_name}/sbc-perm{wildcards.perm_num} "
         "  {wildcards.perm_num} "
-        "  small"
+        "  medium"
 
 
 rule papermill_report:
