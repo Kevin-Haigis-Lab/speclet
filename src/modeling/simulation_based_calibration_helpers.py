@@ -465,7 +465,7 @@ def generate_mock_achilles_data(
             n_screens=n_screens,
         )
         .pipe(add_mock_copynumber_data)
-        .pipe(add_mock_rna_expression_data)
+        .pipe(add_mock_rna_expression_data, groups=["hugo_symbol", "lineage"])
         .pipe(add_mock_is_mutated_data)
         .pipe(add_mock_zero_effect_lfc_data)
     )
