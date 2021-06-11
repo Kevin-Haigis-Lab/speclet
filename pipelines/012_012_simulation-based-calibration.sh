@@ -27,7 +27,7 @@ fi
 snakemake \
     --snakefile $SNAKEFILE \
     --jobs 20 \
-    --restart-times 3 \
+    --restart-times 0 \
     --latency-wait 120 \
     --use-conda \
     --cluster-config pipelines/012_011_smk-config.json \

@@ -4,7 +4,9 @@ from pathlib import Path
 
 import papermill
 
-NUM_SIMULATIONS = 10
+from sbc_resource_requirements import SBCResourceManager as RM
+
+NUM_SIMULATIONS = 5
 
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yml"
@@ -44,6 +46,10 @@ rule run_sbc:
         ),
     conda:
         ENVIRONMENT_YAML
+    params:
+        cores=lambda w: RM(w.model_name).cores,
+        mem=lambda w: RM(w.model_name).memory,
+        time=lambda w: RM(w.model_name).time,
     shell:
         "src/command_line_interfaces/simulation_based_calibration_cli.py "
         "  {wildcards.model} "
