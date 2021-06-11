@@ -55,7 +55,7 @@ NUM_SIMULATIONS = -1
 MODEL = "speclet-six"
 MODEL_NAME = "SpecletSix-advi"
 SBC_RESULTS_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/speclet-six_SpecletSix-advi"
-NUM_SIMULATIONS = 5
+NUM_SIMULATIONS = 10
 
 ```
 
@@ -255,82 +255,82 @@ simulation_posteriors_df.head()
   </thead>
   <tbody>
     <tr>
-      <th>μ_j</th>
-      <th>μ_j</th>
-      <td>0.261</td>
-      <td>0.212</td>
-      <td>-0.037</td>
-      <td>0.620</td>
-      <td>0.007</td>
-      <td>0.005</td>
-      <td>963.0</td>
-      <td>1014.0</td>
+      <th>μ_μ_j</th>
+      <th>μ_μ_j</th>
+      <td>0.147</td>
+      <td>0.064</td>
+      <td>0.037</td>
+      <td>0.239</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>947.0</td>
+      <td>933.0</td>
       <td>NaN</td>
-      <td>-0.219880</td>
+      <td>0.004314</td>
       <td>False</td>
+      <td>sim_id_0000</td>
+    </tr>
+    <tr>
+      <th>μ_j_offset[0]</th>
+      <th>μ_j_offset</th>
+      <td>-0.019</td>
+      <td>0.454</td>
+      <td>-0.712</td>
+      <td>0.730</td>
+      <td>0.015</td>
+      <td>0.010</td>
+      <td>962.0</td>
+      <td>907.0</td>
+      <td>NaN</td>
+      <td>0.527004</td>
+      <td>True</td>
+      <td>sim_id_0000</td>
+    </tr>
+    <tr>
+      <th>μ_j_offset[1]</th>
+      <th>μ_j_offset</th>
+      <td>0.122</td>
+      <td>0.429</td>
+      <td>-0.613</td>
+      <td>0.758</td>
+      <td>0.014</td>
+      <td>0.010</td>
+      <td>946.0</td>
+      <td>1066.0</td>
+      <td>NaN</td>
+      <td>0.453782</td>
+      <td>True</td>
       <td>sim_id_0000</td>
     </tr>
     <tr>
       <th>j_offset[0]</th>
       <th>j_offset</th>
-      <td>-0.016</td>
-      <td>0.404</td>
-      <td>-0.666</td>
-      <td>0.617</td>
+      <td>-0.784</td>
+      <td>0.418</td>
+      <td>-1.373</td>
+      <td>-0.025</td>
       <td>0.013</td>
       <td>0.009</td>
-      <td>958.0</td>
-      <td>845.0</td>
+      <td>1037.0</td>
+      <td>1021.0</td>
       <td>NaN</td>
-      <td>0.298238</td>
-      <td>True</td>
+      <td>-1.829740</td>
+      <td>False</td>
       <td>sim_id_0000</td>
     </tr>
     <tr>
       <th>j_offset[1]</th>
       <th>j_offset</th>
-      <td>0.781</td>
-      <td>0.419</td>
-      <td>0.093</td>
-      <td>1.434</td>
-      <td>0.013</td>
-      <td>0.009</td>
-      <td>1037.0</td>
-      <td>912.0</td>
-      <td>NaN</td>
-      <td>1.326386</td>
-      <td>True</td>
-      <td>sim_id_0000</td>
-    </tr>
-    <tr>
-      <th>μ_h</th>
-      <th>μ_h</th>
-      <td>0.264</td>
-      <td>0.208</td>
-      <td>-0.049</td>
-      <td>0.619</td>
+      <td>0.127</td>
+      <td>0.278</td>
+      <td>-0.333</td>
+      <td>0.546</td>
+      <td>0.008</td>
       <td>0.007</td>
-      <td>0.005</td>
-      <td>953.0</td>
-      <td>866.0</td>
+      <td>1061.0</td>
+      <td>858.0</td>
       <td>NaN</td>
-      <td>0.145818</td>
-      <td>True</td>
-      <td>sim_id_0000</td>
-    </tr>
-    <tr>
-      <th>h_offset[0,0]</th>
-      <th>h_offset</th>
-      <td>-0.082</td>
-      <td>0.769</td>
-      <td>-1.337</td>
-      <td>1.004</td>
-      <td>0.025</td>
-      <td>0.018</td>
-      <td>962.0</td>
-      <td>984.0</td>
-      <td>NaN</td>
-      <td>0.128983</td>
+      <td>0.037006</td>
       <td>True</td>
       <td>sim_id_0000</td>
     </tr>
@@ -368,7 +368,7 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 
 ![png](speclet-six_SpecletSix-advi_sbc-results_files/speclet-six_SpecletSix-advi_sbc-results_23_0.png)
 
-    <ggplot: (2988304395668)>
+    <ggplot: (2999021477009)>
 
 ```python
 hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -415,7 +415,7 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 
 ![png](speclet-six_SpecletSix-advi_sbc-results_files/speclet-six_SpecletSix-advi_sbc-results_24_0.png)
 
-    <ggplot: (2988304497044)>
+    <ggplot: (2999021475268)>
 
 ---
 
@@ -424,7 +424,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.21 minutes
+    execution time: 0.40 minutes
 
 ```python
 %load_ext watermark
@@ -450,11 +450,11 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Git branch: update-sbc
 
     arviz     : 0.11.2
+    re        : 2.2.1
+    pymc3     : 3.11.1
+    plotnine  : 0.7.1
+    janitor   : 0.20.14
+    matplotlib: 3.3.4
     pandas    : 1.2.3
     numpy     : 1.20.1
-    pymc3     : 3.11.1
     seaborn   : 0.11.1
-    matplotlib: 3.3.4
-    re        : 2.2.1
-    janitor   : 0.20.14
-    plotnine  : 0.7.1

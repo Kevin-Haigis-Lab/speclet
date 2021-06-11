@@ -8,16 +8,16 @@ class SBCResourceManager:
     @property
     def memory(self) -> str:
         if "mcmc" in self.name:
-            return "8000"
+            return "3000"
         else:
-            return "2000"
+            return "1600"
 
     @property
     def time(self) -> str:
         if "mcmc" in self.name:
             return "02:00:00"
         else:
-            return "00:30:00"
+            return "00:15:00"
 
     @property
     def cores(self) -> int:
