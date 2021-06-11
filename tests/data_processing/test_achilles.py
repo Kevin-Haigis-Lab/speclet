@@ -145,13 +145,6 @@ def my_arrays(draw, min_size: int = 1):
 
 
 @given(my_arrays())
-def test_careful_zscore(ary: np.ndarray):
-    z_ary = achelp.careful_zscore(ary)
-    assert np.mean(z_ary) == pytest.approx(0.0, abs=0.01)
-    assert np.allclose(z_ary, 0.0) or np.std(z_ary) == pytest.approx(1.0, abs=0.01)
-
-
-@given(my_arrays())
 def test_zscale_rna_expression(rna_expr_ary):
     df = pd.DataFrame({"rna_expr": rna_expr_ary})
     note(df)

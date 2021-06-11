@@ -10,16 +10,8 @@ import numpy as np
 import pandas as pd
 
 from src.data_processing import achilles as achelp
+from src.data_processing import vectors as vhelp
 from src.string_functions import prefixed_count
-
-
-# COPIED FROM ACHILLES -- DELETE AFTER REFACTOR.
-def _squish(x: float, lower: float, upper: float) -> float:
-    return max(min(x, upper), lower)
-
-
-# COPIED FROM ACHILLES -- DELETE AFTER REFACTOR.
-_squish_array = np.vectorize(_squish)
 
 
 class MockDataSizes(str, Enum):
@@ -380,7 +372,7 @@ def add_mock_rna_expression_data(
         mu = np.abs(np.random.normal(10.0, 3))
         sd = np.abs(np.random.normal(0.0, 3))
         rna_expr = np.random.normal(mu, sd, size=df.shape[0])
-        rna_expr = _squish_array(rna_expr, lower=0.0, upper=np.inf)
+        rna_expr = vhelp.squish_array(rna_expr, lower=0.0, upper=np.inf)
         df["rna_expr"] = rna_expr
         return df
 
