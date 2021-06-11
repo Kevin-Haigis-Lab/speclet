@@ -11,6 +11,7 @@ import pandas as pd
 
 from src.data_processing import achilles as achelp
 from src.data_processing import vectors as vhelp
+from src.io.data_io import DataFile, data_path
 from src.string_functions import prefixed_count
 
 
@@ -222,8 +223,6 @@ def generate_mock_cell_line_information(
 ) -> pd.DataFrame:
     """Generate mock "sample information" for fake cell lines.
 
-    TODO: test options for random or patterned
-
     Args:
         genes (List[str]): List of genes tested in the cell lines.
         n_cell_lines (int): Number of cell lines.
@@ -335,8 +334,9 @@ def generate_mock_achilles_categorical_groups(
 def add_mock_copynumber_data(mock_df: pd.DataFrame) -> pd.DataFrame:
     """Add mock copy number data to mock Achilles data.
 
-    TODO: Turn this into a (1 + Poisson(lambda=1.0)) + random noise.
-    TODO: Test some assumptions about this distribution.
+    The mock CNA values actually come from real copy number values from CRC cancer cell
+    lines. The values are randomly sampled with replacement and some noise is added to
+    each value.
 
     Args:
         mock_df (pd.DataFrame): Mock Achilles data frame.
@@ -344,7 +344,11 @@ def add_mock_copynumber_data(mock_df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Same mock Achilles data frame with a new "copy_number" column.
     """
-    mock_df["copy_number"] = 2 ** np.random.normal(1, 0.5, mock_df.shape[0])
+    real_cna_values = np.load(data_path(DataFile.copy_number_sample))
+    mock_cn = np.random.choice(real_cna_values, size=mock_df.shape[0], replace=True)
+    mock_cn = mock_cn + np.random.normal(0, 0.1, size=mock_cn.shape)
+    mock_cn = vhelp.squish_array(mock_cn, lower=0.0, upper=np.inf)
+    mock_df["copy_number"] = mock_cn.flatten()
     return mock_df
 
 

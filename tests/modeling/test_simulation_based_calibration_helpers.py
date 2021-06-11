@@ -296,10 +296,11 @@ def generate_data_with_random_params(draw) -> pd.DataFrame:
 
 def test_add_mock_copynumber_data():
     df = sns.load_dataset("iris")
-    df_cna = sbc.add_mock_copynumber_data(df)
-    assert "copy_number" in df_cna.columns.to_list()
-    assert all(df_cna["copy_number"] > 0.0)
-    assert not any(df_cna["copy_number"].isna())
+    for _ in range(10):
+        df_cna = sbc.add_mock_copynumber_data(df.copy())
+        assert "copy_number" in df_cna.columns.to_list()
+        assert all(df_cna["copy_number"] >= 0.0)
+        assert not any(df_cna["copy_number"].isna())
 
 
 def test_add_mock_rna_expression_data():
