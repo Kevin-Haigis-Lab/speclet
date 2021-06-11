@@ -4,14 +4,14 @@ from pathlib import Path
 
 import papermill
 
-NUM_SIMULATIONS = 500
+NUM_SIMULATIONS = 10
 
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yml"
 ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
 
 model_names = (
-    ("speclet_six", "SpecletSix"),
+    ("speclet-six", "SpecletSix"),
 )
 
 models = [m for m, _ in model_names]
@@ -49,7 +49,7 @@ rule run_sbc:
         "  {wildcards.model_name} "
         "  " + ROOT_PERMUTATION_DIR + "{wildcards.model}_{wildcards.model_name}/sbc-perm{wildcards.perm_num} "
         "  {wildcards.perm_num} "
-        "  large"
+        "  small"
 
 
 rule papermill_report:
