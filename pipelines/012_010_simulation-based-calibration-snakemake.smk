@@ -11,7 +11,8 @@ ENVIRONMENT_YAML = "default_environment.yml"
 ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
 
 model_names = (
-    ("speclet-six", "SpecletSix"),
+    ("speclet-six", "SpecletSix-mcmc"),
+    ("speclet-six", "SpecletSix-advi"),
 )
 
 models = [m for m, _ in model_names]

@@ -18,6 +18,7 @@ from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.models.speclet_six import SpecletSix
 from src.models.speclet_three import SpecletThree
 from src.models.speclet_two import SpecletTwo
+from src.project_enums import ModelFitMethod
 
 #### ---- Pretty Errors ---- ####
 
@@ -84,11 +85,24 @@ def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
     return model_option_map[model_opt]
 
 
-class ModelFitMethod(str, Enum):
-    """Available fit methods."""
+def extract_fit_method(name: str) -> ModelFitMethod:
+    """Extract the model fitting method to use based on the unique name of the model.
 
-    advi = "ADVI"
-    mcmc = "MCMC"
+    TODO: test
+
+    Args:
+        name (str): NAme of the model (*not* the type of model).
+
+    Raises:
+        ValueError: Raised if no fitting method is found.
+
+    Returns:
+        ModelFitMethod: The method to use for the fitting the model.
+    """
+    for method_name, method_member in ModelFitMethod.__members__.items():
+        if method_name.lower() in name.lower():
+            return method_member
+    raise ValueError(f"Did not find a viable fit method in the model name: '{name}'")
 
 
 #### ---- Modifying models ---- ####

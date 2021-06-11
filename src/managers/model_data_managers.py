@@ -333,6 +333,7 @@ class CrcDataManager(DataManager):
                 n_batches=4,
                 n_screens=2,
             )
+        assert self.data is not None
         return self.data
 
 
