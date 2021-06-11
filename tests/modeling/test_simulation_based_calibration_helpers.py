@@ -351,6 +351,13 @@ def test_add_mock_rna_expression_data_grouped():
     assert not np.allclose(np.array(gene_avgs) - np.mean(gene_avgs), 0.0, atol=1.0)
 
 
+@given(st.floats(0, 1, allow_nan=False, allow_infinity=False))
+def test_add_mock_is_mutated_data(prob: float):
+    df = pd.DataFrame({"A": np.zeros(10000)})
+    df = sbc.add_mock_is_mutated_data(df, prob=prob)
+    assert df["is_mutated"].mean() == pytest.approx(prob, abs=0.1)
+
+
 @given(
     st.floats(-5.0, 5.0, allow_infinity=False, allow_nan=False),
     st.floats(0.0, 2.0, allow_infinity=False, allow_nan=False),

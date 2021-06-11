@@ -387,17 +387,18 @@ def add_mock_rna_expression_data(
     return mock_df
 
 
-def add_mock_is_mutated_data(mock_df: pd.DataFrame) -> pd.DataFrame:
+def add_mock_is_mutated_data(mock_df: pd.DataFrame, prob: float = 0.01) -> pd.DataFrame:
     """Add a mutation column to mock Achilles data.
-
-    TODO: Still needs to be implemented (with a Poisson?)
 
     Args:
         mock_df (pd.DataFrame): Mock Achilles data frame.
+        prob (float, optional): The probability of a gene being mutated. All mutations
+          are indpendent of each other. Defaults to 0.01.
 
     Returns:
         pd.DataFrame: The same mock Achilles data frame with an "is_mutated" columns.
     """
+    mock_df["is_mutated"] = np.random.uniform(0, 1, size=mock_df.shape[0]) < prob
     return mock_df
 
 
