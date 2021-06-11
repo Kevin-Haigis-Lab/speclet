@@ -374,7 +374,7 @@ class SpecletSix(SpecletModel):
             # Varying gene intercept.
             μ_μ_a = pm.Normal("μ_μ_a", 0, 1)
             σ_μ_a = pm.HalfNormal("σ_μ_a", 1)
-            μ_a_offset = pm.Normal("μ_a_offset", 0, 1, shape=co_idx.n_sgrnas)
+            μ_a_offset = pm.Normal("μ_a_offset", 0, 1, shape=co_idx.n_genes)
             μ_a = pm.Deterministic("μ_a", μ_μ_a + μ_a_offset * σ_μ_a)
             σ_σ_a = pm.HalfNormal("σ_σ_a", 1)
             σ_a = pm.HalfNormal("σ_a", σ_σ_a, shape=co_idx.n_genes)
