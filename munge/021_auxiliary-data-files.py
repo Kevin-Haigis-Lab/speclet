@@ -14,7 +14,7 @@ from pydantic import validate_arguments
 def sample_copy_number_data(source_file: Path, out_file: Path) -> None:
     df = pd.read_csv(source_file, low_memory=False)
     cna = np.random.choice(df["copy_number"].values, size=10_000, replace=False)
-    np.save(file=out_file, arr=cna, allow_pickel=True, fix_imports=False)
+    np.save(file=out_file, arr=cna, allow_pickle=True, fix_imports=False)
 
 
 snakemake: Any  # for mypy

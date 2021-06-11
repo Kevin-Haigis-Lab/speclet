@@ -46,7 +46,8 @@ rule all:
         crc_subset = MODELING_DATA_DIR / "depmap_modeling_dataframe_crc.csv",
         crc_subsample = MODELING_DATA_DIR / "depmap_modeling_dataframe_crc-subsample.csv",
         test_data = TESTS_DIR / "depmap_test_data.csv",
-
+        # auxillary_data_subsets
+        cna_sample = MODELING_DATA_DIR / "copy_number_data_samples.npy",
 
 
 rule tidy_ccle:
