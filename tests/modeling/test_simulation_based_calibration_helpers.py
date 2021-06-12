@@ -274,9 +274,9 @@ def test_generate_mock_achilles_categorical_groups(
 
 @st.composite
 def generate_data_with_random_params(draw) -> pd.DataFrame:
-    n_genes = draw(st.integers(2, 20), label="n_genes")
-    n_sgrnas_per_gene = draw(st.integers(2, 20), label="n_sgrnas_per_gene")
-    n_cell_lines = draw(st.integers(3, 20), label="n_cell_lines")
+    n_genes = draw(st.integers(2, 7), label="n_genes")
+    n_sgrnas_per_gene = draw(st.integers(1, 3), label="n_sgrnas_per_gene")
+    n_cell_lines = draw(st.integers(3, 6), label="n_cell_lines")
     n_lineages = draw(st.integers(1, n_cell_lines), label="n_lineages")
     n_batches = draw(st.integers(1, n_cell_lines), label="n_batches")
     if n_batches == 1:
@@ -371,6 +371,7 @@ def test_add_mock_zero_effect_lfc_data(mu: float, sigma: float):
     assert not any(df_lfc["lfc"].isna())
 
 
+@settings(deadline=None)
 @given(st.data())
 def test_mock_data_has_correct_categories_sizes(data):
     n_genes = data.draw(st.integers(2, 20), label="n_genes")

@@ -303,6 +303,9 @@ class CrcDataManager(DataManager):
             pd.DataFrame: Mock data.
         """
         logger.info(f"Generating mock data of size '{size}'.")
+        if random_seed is not None:
+            np.random.seed(random_seed)
+
         if isinstance(size, str):
             size = sbc.MockDataSizes(size)
 
