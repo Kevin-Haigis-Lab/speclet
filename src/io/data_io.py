@@ -21,6 +21,7 @@ class DataFile(str, Enum):
     achilles_gene_effect = "achilles_gene_effect.csv"
     ccle_mutations = "ccle_mutations.csv"
     ccle_copynumber = "ccle_gene_cn.csv"
+    copy_number_sample = "copy_number_data_samples.npy"
 
 
 #### ---- Basics ---- ####

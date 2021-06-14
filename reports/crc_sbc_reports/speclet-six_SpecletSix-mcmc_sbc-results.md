@@ -8,12 +8,14 @@ from time import time
 from typing import Dict, List, Tuple
 
 import arviz as az
+import janitor
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotnine as gg
 import pymc3 as pm
 import seaborn as sns
+
 from src.command_line_interfaces import cli_helpers
 from src.modeling.simulation_based_calibration_helpers import SBCFileManager
 
@@ -50,12 +52,10 @@ NUM_SIMULATIONS = -1
 
 ```python
 # Parameters
-MODEL = "crc_ceres_mimic"
-MODEL_NAME = "CERES-copynumber"
-SBC_RESULTS_DIR = (
-    "/n/scratch3/users/j/jc604/speclet-sbc/crc_ceres_mimic_CERES-copynumber"
-)
-NUM_SIMULATIONS = 500
+MODEL = "speclet-six"
+MODEL_NAME = "SpecletSix-mcmc"
+SBC_RESULTS_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/speclet-six_SpecletSix-mcmc"
+NUM_SIMULATIONS = 10
 
 ```
 
@@ -64,7 +64,7 @@ NUM_SIMULATIONS = 500
 Build the model using the `MODEL` parameter.
 
 ```python
-ModelClass = cli_helpers.get_model_class(cli_helpers.ModelOption[MODEL])
+ModelClass = cli_helpers.get_model_class(cli_helpers.ModelOption(MODEL))
 ```
 
 Check values passed as the directory with results of the rounds of SBC.
@@ -185,7 +185,7 @@ ax.set_xlabel("HDI accuracy")
 plt.show()
 ```
 
-![png](crc_ceres_mimic_CERES-copynumber_sbc-results_files/crc_ceres_mimic_CERES-copynumber_sbc-results_21_0.png)
+![png](speclet-six_SpecletSix-mcmc_sbc-results_files/speclet-six_SpecletSix-mcmc_sbc-results_21_0.png)
 
 ```python
 simulation_posteriors_df = pd.concat(
@@ -255,83 +255,83 @@ simulation_posteriors_df.head()
   </thead>
   <tbody>
     <tr>
-      <th>μ_h</th>
-      <th>μ_h</th>
-      <td>0.606</td>
-      <td>0.056</td>
-      <td>0.510</td>
-      <td>0.690</td>
-      <td>0.002</td>
-      <td>0.001</td>
-      <td>906.0</td>
-      <td>996.0</td>
-      <td>NaN</td>
-      <td>1.757625</td>
-      <td>False</td>
-      <td>sim_id_0000</td>
-    </tr>
-    <tr>
-      <th>μ_d</th>
-      <th>μ_d</th>
-      <td>0.039</td>
-      <td>0.015</td>
-      <td>0.018</td>
-      <td>0.066</td>
-      <td>0.000</td>
-      <td>0.000</td>
-      <td>1001.0</td>
-      <td>787.0</td>
-      <td>NaN</td>
-      <td>-0.127048</td>
-      <td>False</td>
-      <td>sim_id_0000</td>
-    </tr>
-    <tr>
-      <th>μ_η</th>
-      <th>μ_η</th>
-      <td>0.099</td>
-      <td>0.100</td>
-      <td>-0.057</td>
-      <td>0.255</td>
+      <th>μ_μ_j</th>
+      <th>μ_μ_j</th>
+      <td>-0.003</td>
+      <td>0.476</td>
+      <td>-0.821</td>
+      <td>0.710</td>
       <td>0.003</td>
-      <td>0.002</td>
-      <td>1001.0</td>
-      <td>880.0</td>
-      <td>NaN</td>
-      <td>-0.020091</td>
+      <td>0.004</td>
+      <td>31446.0</td>
+      <td>11089.0</td>
+      <td>1.0</td>
+      <td>0.004314</td>
       <td>True</td>
       <td>sim_id_0000</td>
     </tr>
     <tr>
-      <th>h[0]</th>
-      <th>h</th>
-      <td>0.777</td>
-      <td>0.270</td>
-      <td>0.283</td>
-      <td>1.157</td>
-      <td>0.009</td>
+      <th>μ_j_offset[0]</th>
+      <th>μ_j_offset</th>
+      <td>0.087</td>
+      <td>0.836</td>
+      <td>-1.231</td>
+      <td>1.425</td>
       <td>0.006</td>
-      <td>954.0</td>
-      <td>846.0</td>
-      <td>NaN</td>
-      <td>2.149274</td>
+      <td>0.007</td>
+      <td>20917.0</td>
+      <td>11706.0</td>
+      <td>1.0</td>
+      <td>0.527004</td>
+      <td>True</td>
+      <td>sim_id_0000</td>
+    </tr>
+    <tr>
+      <th>μ_j_offset[1]</th>
+      <th>μ_j_offset</th>
+      <td>-0.096</td>
+      <td>0.829</td>
+      <td>-1.446</td>
+      <td>1.170</td>
+      <td>0.006</td>
+      <td>0.006</td>
+      <td>20725.0</td>
+      <td>12718.0</td>
+      <td>1.0</td>
+      <td>0.453782</td>
+      <td>True</td>
+      <td>sim_id_0000</td>
+    </tr>
+    <tr>
+      <th>j_offset[0]</th>
+      <th>j_offset</th>
+      <td>0.173</td>
+      <td>0.844</td>
+      <td>-1.218</td>
+      <td>1.477</td>
+      <td>0.006</td>
+      <td>0.006</td>
+      <td>17362.0</td>
+      <td>12262.0</td>
+      <td>1.0</td>
+      <td>-1.829740</td>
       <td>False</td>
       <td>sim_id_0000</td>
     </tr>
     <tr>
-      <th>h[1]</th>
-      <th>h</th>
-      <td>1.351</td>
-      <td>0.266</td>
-      <td>0.954</td>
-      <td>1.789</td>
-      <td>0.008</td>
+      <th>j_offset[1]</th>
+      <th>j_offset</th>
+      <td>-0.082</td>
+      <td>0.887</td>
+      <td>-1.484</td>
+      <td>1.383</td>
       <td>0.006</td>
-      <td>1044.0</td>
-      <td>1026.0</td>
-      <td>NaN</td>
-      <td>2.654335</td>
-      <td>False</td>
+      <td>0.007</td>
+      <td>22144.0</td>
+      <td>12105.0</td>
+      <td>1.0</td>
+      <td>0.037006</td>
+      <td>True</td>
       <td>sim_id_0000</td>
     </tr>
   </tbody>
@@ -366,16 +366,25 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 )
 ```
 
-![png](crc_ceres_mimic_CERES-copynumber_sbc-results_files/crc_ceres_mimic_CERES-copynumber_sbc-results_23_0.png)
+![png](speclet-six_SpecletSix-mcmc_sbc-results_files/speclet-six_SpecletSix-mcmc_sbc-results_23_0.png)
 
-    <ggplot: (2953610760467)>
+    <ggplot: (2988984117992)>
 
 ```python
 hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
 
+
+def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
+    return (
+        df.reset_index(drop=False)
+        .query("parameter_name != 'μ'")
+        .filter_string("parameter_name", search_string="offset", complement=True)
+    )
+
+
 (
     gg.ggplot(
-        simulation_posteriors_df.reset_index(drop=False).query("parameter_name != 'μ'"),
+        filter_uninsteresting_parameters(simulation_posteriors_df),
         gg.aes(x="true_value", y="mean", color="within_hdi"),
     )
     + gg.facet_wrap("~ parameter_name", ncol=3, scales="free")
@@ -404,11 +413,9 @@ hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
 )
 ```
 
-    /n/data2/dfci/cancerbio/haigis/Cook/speclet/.snakemake/conda/f4a519a1/lib/python3.9/site-packages/mizani/bounds.py:456: RuntimeWarning: overflow encountered in double_scalars
+![png](speclet-six_SpecletSix-mcmc_sbc-results_files/speclet-six_SpecletSix-mcmc_sbc-results_24_0.png)
 
-![png](crc_ceres_mimic_CERES-copynumber_sbc-results_files/crc_ceres_mimic_CERES-copynumber_sbc-results_24_1.png)
-
-    <ggplot: (2953598074182)>
+    <ggplot: (2988939586838)>
 
 ---
 
@@ -417,14 +424,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 17.34 minutes
+    execution time: 0.36 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-04-19
+    Last updated: 2021-06-11
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -438,15 +445,16 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-e-16-243.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-187.o2.rc.hms.harvard.edu
 
-    Git branch: pipelines
+    Git branch: update-sbc
 
     plotnine  : 0.7.1
-    re        : 2.2.1
     numpy     : 1.20.1
     pandas    : 1.2.3
-    arviz     : 0.11.2
+    re        : 2.2.1
+    seaborn   : 0.11.1
+    janitor   : 0.20.14
     pymc3     : 3.11.1
     matplotlib: 3.3.4
-    seaborn   : 0.11.1
+    arviz     : 0.11.2

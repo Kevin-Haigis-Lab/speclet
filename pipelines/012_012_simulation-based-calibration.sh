@@ -12,7 +12,7 @@ module load gcc conda2 slurm-drmaa/1.1.1
 
 # shellcheck source=/dev/null
 source "$HOME/.bashrc"
-conda activate speclet_smakemake
+conda activate speclet_snakemake
 
 SNAKEFILE="pipelines/012_010_simulation-based-calibration-snakemake.smk"
 
@@ -27,7 +27,7 @@ fi
 snakemake \
     --snakefile $SNAKEFILE \
     --jobs 20 \
-    --restart-times 3 \
+    --restart-times 0 \
     --latency-wait 120 \
     --use-conda \
     --cluster-config pipelines/012_011_smk-config.json \

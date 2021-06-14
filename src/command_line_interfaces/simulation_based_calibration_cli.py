@@ -53,7 +53,10 @@ def run_sbc(
     )
     cli_helpers.modify_model_by_name(model=model, name=name)
     model.run_simulation_based_calibration(
-        cache_dir, random_seed=sim_number, size=data_size
+        cache_dir,
+        fit_method=cli_helpers.extract_fit_method(name),
+        random_seed=sim_number,
+        size=data_size,
     )
     logger.info("SBC finished.")
     return None

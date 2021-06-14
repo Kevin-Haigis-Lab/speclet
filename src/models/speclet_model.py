@@ -16,6 +16,7 @@ from src.loggers import logger
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.managers.model_data_managers import DataManager
 from src.modeling import pymc3_sampling_api as pmapi
+from src.project_enums import ModelFitMethod
 
 ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
@@ -418,6 +419,7 @@ class SpecletModel:
     def run_simulation_based_calibration(
         self,
         results_path: Path,
+        fit_method: ModelFitMethod,
         random_seed: Optional[int] = None,
         size: str = "large",
         fit_kwargs: Optional[Dict[Any, Any]] = None,
@@ -426,6 +428,7 @@ class SpecletModel:
 
         Args:
             results_path (Path): Where to store the results.
+            fit_method (ModelFitMethod): Which method to use for fitting.
             random_seed (Optional[int], optional): Random seed (for reproducibility).
               Defaults to None.
             size (str, optional): Size of the data set to mock. Defaults to "large".
@@ -448,11 +451,16 @@ class SpecletModel:
             priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
         mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
-        self.data = mock_data
+        self.data_manager.data = mock_data
 
-        res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
+        if fit_method == ModelFitMethod.advi:
+            res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
+        elif fit_method == ModelFitMethod.mcmc:
+            res = self.mcmc_sample_model(random_seed=random_seed, **fit_kwargs)
+        else:
+            raise ValueError(f"Unknown fit method '{fit_method}'.")
+
         posterior_summary = az.summary(res, fmt="wide", hdi_prob=0.89)
-        assert isinstance(posterior_summary, pd.DataFrame)
         assert isinstance(posterior_summary, pd.DataFrame)
         results_manager = sbc.SBCFileManager(dir=results_path)
         results_manager.save_sbc_results(

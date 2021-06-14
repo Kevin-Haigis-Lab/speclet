@@ -303,6 +303,9 @@ class CrcDataManager(DataManager):
             pd.DataFrame: Mock data.
         """
         logger.info(f"Generating mock data of size '{size}'.")
+        if random_seed is not None:
+            np.random.seed(random_seed)
+
         if isinstance(size, str):
             size = sbc.MockDataSizes(size)
 
@@ -314,7 +317,6 @@ class CrcDataManager(DataManager):
                 n_lineages=2,
                 n_batches=2,
                 n_screens=1,
-                n_kras_types=2,
             )
         elif size == sbc.MockDataSizes.medium:
             self.data = sbc.generate_mock_achilles_data(
@@ -324,7 +326,6 @@ class CrcDataManager(DataManager):
                 n_lineages=2,
                 n_batches=3,
                 n_screens=2,
-                n_kras_types=3,
             )
         else:
             self.data = sbc.generate_mock_achilles_data(
@@ -334,8 +335,8 @@ class CrcDataManager(DataManager):
                 n_lineages=3,
                 n_batches=4,
                 n_screens=2,
-                n_kras_types=3,
             )
+        assert self.data is not None
         return self.data
 
 

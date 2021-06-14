@@ -1,6 +1,6 @@
 from pathlib import Path
 from time import time
-from typing import Tuple
+from typing import Dict, Tuple, Union
 
 import arviz as az
 import numpy as np
@@ -9,6 +9,7 @@ import pytest
 
 from src.managers.model_data_managers import MockDataManager
 from src.models import speclet_model
+from src.project_enums import ModelFitMethod
 
 
 class MockSpecletModelClass(speclet_model.SpecletModel):
@@ -130,21 +131,38 @@ class TestSpecletModel:
                 advi_res.posterior[p], advi_res_2.posterior[p]
             )
 
+    @pytest.mark.DEV
     @pytest.mark.slow
-    def test_run_simulation_based_calibration(self, tmp_path: Path):
+    @pytest.mark.parametrize("fit_method", [ModelFitMethod.advi, ModelFitMethod.mcmc])
+    def test_run_simulation_based_calibration(
+        self, tmp_path: Path, fit_method: ModelFitMethod
+    ):
         sp = MockSpecletModelClass(
             "test-model", root_cache_dir=tmp_path, data_manager=MockDataManager()
         )
         assert sp.model is None
+
+        fit_kwargs: Dict[str, Union[float, int]]
+
+        if fit_method == ModelFitMethod.advi:
+            fit_kwargs = {"n_iterations": 100, "draws": 10}
+        else:
+            fit_kwargs = {
+                "mcmc_draws": 10,
+                "tune": 10,
+                "chains": 2,
+                "cores": 2,
+                "target_accept": 0.8,
+            }
+
+        fit_kwargs["prior_pred_samples"] = 10
+        fit_kwargs["post_pred_samples"] = 10
+
         sp.run_simulation_based_calibration(
             results_path=tmp_path,
+            fit_method=fit_method,
             size="small",
-            fit_kwargs={
-                "n_iterations": 100,
-                "draws": 10,
-                "prior_pred_samples": 10,
-                "post_pred_samples": 10,
-            },
+            fit_kwargs=fit_kwargs,
         )
         assert sp.model is not None
         assert (tmp_path / "inference-data.netcdf").exists()

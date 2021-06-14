@@ -46,7 +46,8 @@ rule all:
         crc_subset = MODELING_DATA_DIR / "depmap_modeling_dataframe_crc.csv",
         crc_subsample = MODELING_DATA_DIR / "depmap_modeling_dataframe_crc-subsample.csv",
         test_data = TESTS_DIR / "depmap_test_data.csv",
-
+        # auxillary_data_subsets
+        cna_sample = MODELING_DATA_DIR / "copy_number_data_samples.npy",
 
 
 rule tidy_ccle:
@@ -236,3 +237,14 @@ rule modeling_data_subsets:
         test_data = TESTS_DIR / "depmap_test_data.csv",
     script:
         "019_depmap-subset-dataframes.R"
+
+rule auxillary_data_subsets:
+    input:
+        check_output = MUNGE_DIR / "017_check-depmap-modeling-data.md",
+        crc_subset = MODELING_DATA_DIR / "depmap_modeling_dataframe_crc.csv",
+    output:
+        cna_sample = MODELING_DATA_DIR / "copy_number_data_samples.npy",
+    conda:
+        ENVIRONMENT_YAML
+    script:
+        "021_auxiliary-data-files.py"

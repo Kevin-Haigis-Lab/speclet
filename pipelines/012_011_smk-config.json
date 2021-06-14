@@ -11,9 +11,9 @@
     },
     "run_sbc": {
         "partition": "short",
-        "cores": 2,
-        "mem": "8000",
-        "time": "00:35:00",
+        "cores": "{params.cores}",
+        "mem": "{params.mem}",
+        "time": "{params.time}",
         "J": "run-sbc"
     },
     "papermill_report": {

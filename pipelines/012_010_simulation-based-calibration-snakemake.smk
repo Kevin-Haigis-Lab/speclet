@@ -4,14 +4,17 @@ from pathlib import Path
 
 import papermill
 
-NUM_SIMULATIONS = 500
+from sbc_resource_requirements import SBCResourceManager as RM
+
+NUM_SIMULATIONS = 10
 
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yml"
 ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
 
 model_names = (
-    ("speclet_six", "SpecletSix"),
+    ("speclet-six", "SpecletSix-mcmc"),
+    ("speclet-six", "SpecletSix-advi"),
 )
 
 models = [m for m, _ in model_names]
@@ -43,13 +46,17 @@ rule run_sbc:
         ),
     conda:
         ENVIRONMENT_YAML
+    params:
+        cores=lambda w: RM(w.model_name).cores,
+        mem=lambda w: RM(w.model_name).memory,
+        time=lambda w: RM(w.model_name).time,
     shell:
         "src/command_line_interfaces/simulation_based_calibration_cli.py "
         "  {wildcards.model} "
         "  {wildcards.model_name} "
         "  " + ROOT_PERMUTATION_DIR + "{wildcards.model}_{wildcards.model_name}/sbc-perm{wildcards.perm_num} "
         "  {wildcards.perm_num} "
-        "  large"
+        "  medium"
 
 
 rule papermill_report:
