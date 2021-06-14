@@ -25,15 +25,20 @@ class TestSpecletSeven:
         assert sp7.advi_results is None
         assert sp7.data_manager is not None
 
-    def test_build_model_spec(self, sp7: SpecletSeven):
+    @pytest.mark.parametrize("noncentered_param", [True, False])
+    def test_build_model_spec(self, sp7: SpecletSeven, noncentered_param: bool):
+        sp7.noncentered_param = noncentered_param
         sp7.build_model()
         assert sp7.model is not None
 
     top_priors = ["μ_μ_μ_a", "σ_μ_μ_a", "σ_σ_μ_a", "σ_σ_a", "σ"]
 
-    @pytest.mark.DEV
     @pytest.mark.parametrize("fit_method", ["mcmc", "advi"])
-    def test_mcmc_sampling(self, sp7: SpecletSeven, fit_method: str):
+    @pytest.mark.parametrize("noncentered_param", [True, False])
+    def test_mcmc_sampling(
+        self, sp7: SpecletSeven, fit_method: str, noncentered_param: bool
+    ):
+        sp7.noncentered_param = noncentered_param
         sp7.build_model()
         assert sp7.model is not None
 

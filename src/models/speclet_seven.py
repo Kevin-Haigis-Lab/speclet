@@ -6,6 +6,7 @@ from typing import Optional, Tuple
 import pymc3 as pm
 from theano import shared as ts
 from theano import tensor
+from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 from src.data_processing import achilles as achelp
 from src.loggers import logger
@@ -40,12 +41,15 @@ class SpecletSeven(SpecletModel):
     - l: cell line lineage
     """
 
+    noncentered_param: bool
+
     def __init__(
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
+        noncentered_param: bool = False,
     ) -> None:
         """Instantiate a SpecletSeven model.
 
@@ -57,6 +61,8 @@ class SpecletSeven(SpecletModel):
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. If None (default), a `CrcDataManager` is created automatically.
+            noncentered_param (bool, optional): Use the non-centered parameterization.
+              Defaults to False.
         """
         logger.debug("Instantiating a SpecletSeven model.")
         if data_manager is None:
@@ -69,6 +75,80 @@ class SpecletSeven(SpecletModel):
             debug=debug,
             data_manager=data_manager,
         )
+
+        self.noncentered_param = noncentered_param
+
+    def _base_model(self, model: pm.Model, co_idx: achelp.CommonIndices):
+        with model:
+            μ_μ_μ_a = pm.Normal("μ_μ_μ_a", 0, 2)  # noqa: F841
+            σ_μ_μ_a = pm.HalfNormal("σ_μ_μ_a", 2)  # noqa: F841
+
+            σ_σ_μ_a = pm.HalfNormal("σ_σ_μ_a", 1)
+            σ_μ_a = pm.HalfNormal(  # noqa: F841
+                "σ_μ_a", σ_σ_μ_a, shape=(1, co_idx.n_celllines)
+            )
+
+            σ_σ_a = pm.HalfNormal("σ_σ_a", 1)
+            σ_a = pm.HalfNormal("σ_a", σ_σ_a, shape=(co_idx.n_sgrnas, 1))  # noqa: F841
+
+    def _noncentered_model_parameterization(
+        self,
+        model: pm.Model,
+        co_idx: achelp.CommonIndices,
+        cellline_to_lineage_idx_shared: TTShared,
+        sgrna_to_gene_idx_shared: TTShared,
+    ) -> None:
+        with model:
+            μ_μ_a_offset = pm.Normal(
+                "μ_μ_a_offset", 0, 1.0, shape=(co_idx.n_genes, co_idx.n_lineages)
+            )
+            μ_μ_a = pm.Deterministic(
+                "μ_μ_a", model["μ_μ_μ_a"] + μ_μ_a_offset * model["σ_μ_μ_a"]
+            )
+
+            μ_a_offset = pm.Normal(
+                "μ_a_offset", 0, 1.0, shape=(co_idx.n_genes, co_idx.n_celllines)
+            )
+            μ_a = pm.Deterministic(
+                "μ_a",
+                μ_μ_a[:, cellline_to_lineage_idx_shared] + μ_a_offset * model["σ_μ_a"],
+            )
+            a_offset = pm.Normal(
+                "a_offset", 0, 1.0, shape=(co_idx.n_sgrnas, co_idx.n_celllines)
+            )
+            a = pm.Deterministic(  # noqa: F841
+                "a", μ_a[sgrna_to_gene_idx_shared, :] + a_offset * model["σ_a"]
+            )
+
+    def _centered_model_parameterization(
+        self,
+        model: pm.Model,
+        co_idx: achelp.CommonIndices,
+        cellline_to_lineage_idx_shared: TTShared,
+        sgrna_to_gene_idx_shared: TTShared,
+    ) -> None:
+        _mu_a_shape = (co_idx.n_genes, co_idx.n_celllines)
+        with model:
+            μ_μ_a = pm.Normal(
+                "μ_μ_a",
+                model["μ_μ_μ_a"],
+                model["σ_μ_μ_a"],
+                shape=(co_idx.n_genes, co_idx.n_lineages),
+            )
+
+            μ_a = pm.Normal(
+                "μ_a",
+                μ_μ_a[:, cellline_to_lineage_idx_shared],
+                tensor.ones(shape=_mu_a_shape) * model["σ_μ_a"],
+                shape=_mu_a_shape,
+            )
+
+            a = pm.Normal(  # noqa: F841
+                "a",
+                μ_a[sgrna_to_gene_idx_shared, :],
+                model["σ_a"],
+                shape=(co_idx.n_sgrnas, co_idx.n_celllines),
+            )
 
     def model_specification(self) -> Tuple[pm.Model, str]:
         """Build SpecletSeven model.
@@ -99,39 +179,22 @@ class SpecletSeven(SpecletModel):
         }
 
         logger.info("Creating PyMC3 model for SpecletSeven.")
-        logger.warning(
-            "Still need to implement varying effect for source on batch effect."
-        )
 
-        with pm.Model() as model:
-            μ_μ_μ_a = pm.Normal("μ_μ_μ_a", 0, 1)
-            σ_μ_μ_a = pm.HalfNormal("σ_μ_μ_a", 1)
+        model = pm.Model()
+        self._base_model(model, co_idx=co_idx)
+        _params = {
+            "model": model,
+            "co_idx": co_idx,
+            "cellline_to_lineage_idx_shared": cellline_to_lineage_idx_shared,
+            "sgrna_to_gene_idx_shared": sgrna_to_gene_idx_shared,
+        }
+        if self.noncentered_param:
+            self._noncentered_model_parameterization(**_params)
+        else:
+            self._centered_model_parameterization(**_params)
 
-            μ_μ_a_offset = pm.Normal(
-                "μ_μ_a_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
-            )
-            μ_μ_a = pm.Deterministic("μ_μ_a", μ_μ_μ_a + μ_μ_a_offset * σ_μ_μ_a)
-            σ_σ_μ_a = pm.HalfNormal("σ_σ_μ_a", 1)
-            σ_μ_a = pm.HalfNormal("σ_μ_a", σ_σ_μ_a, shape=(1, co_idx.n_celllines))
-
-            μ_a_offset = pm.Normal(
-                "μ_a_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
-            )
-            μ_a = pm.Deterministic(
-                "μ_a",
-                μ_μ_a[:, cellline_to_lineage_idx_shared]
-                + μ_a_offset
-                * tensor.ones(shape=(co_idx.n_genes, co_idx.n_celllines))
-                * σ_μ_a,
-            )
-            σ_σ_a = pm.HalfNormal("σ_σ_a", 1)
-            σ_a = pm.HalfNormal("σ_a", σ_σ_a, shape=(co_idx.n_sgrnas, 1))
-            a_offset = pm.Normal(
-                "a_offset", 0, 1, shape=(co_idx.n_sgrnas, co_idx.n_celllines)
-            )
-            a = pm.Deterministic("a", μ_a[sgrna_to_gene_idx_shared, :] + a_offset * σ_a)
-
-            μ = pm.Deterministic("μ", a[sgrna_idx_shared, cellline_idx_shared])
+        with model:
+            μ = pm.Deterministic("μ", model["a"][sgrna_idx_shared, cellline_idx_shared])
 
             # Standard deviation of log-fold change, varies per batch.
             σ = pm.HalfNormal("σ", 1)

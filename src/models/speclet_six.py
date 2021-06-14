@@ -315,10 +315,7 @@ class SpecletSix(SpecletModel):
             mutation_shared = ts(data["is_mutated"].values)
             self.shared_vars["mutation_shared"] = mutation_shared
 
-        logger.info("Creating PyMC3 model.")
-        logger.warning(
-            "Still need to implement varying effect for source on batch effect."
-        )
+        logger.info("Creating PyMC3 SpecletSix model.")
 
         with pm.Model() as model:
             # Varying batch intercept.
