@@ -162,7 +162,7 @@ def center_column_grouped_dataframe(
     )
 
     return (
-        df.merge(df_avgs, how=&#34;left&#34;, on=grp_col)
+        df.merge(df_avgs, how=&#34;left&#34;, on=grp_col, left_index=False, right_index=False)
         .assign(_new_centered_column=lambda d: d[val_col] - d[avg_val_col])
         .rename(columns={&#34;_new_centered_column&#34;: new_col_name})
         .drop(columns=[avg_val_col])
@@ -230,7 +230,7 @@ def center_column_grouped_dataframe(
     )
 
     return (
-        df.merge(df_avgs, how=&#34;left&#34;, on=grp_col)
+        df.merge(df_avgs, how=&#34;left&#34;, on=grp_col, left_index=False, right_index=False)
         .assign(_new_centered_column=lambda d: d[val_col] - d[avg_val_col])
         .rename(columns={&#34;_new_centered_column&#34;: new_col_name})
         .drop(columns=[avg_val_col])

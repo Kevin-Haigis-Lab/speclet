@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>src.models.speclet_five API documentation</title>
-<meta name="description" content="Speclet Model Five." />
+<title>src.models.speclet_seven API documentation</title>
+<meta name="description" content="Speclet Model Six." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -18,21 +18,22 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>src.models.speclet_five</code></h1>
+<h1 class="title">Module <code>src.models.speclet_seven</code></h1>
 </header>
 <section id="section-intro">
-<p>Speclet Model Five.</p>
+<p>Speclet Model Six.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Speclet Model Five.&#34;&#34;&#34;
+<pre><code class="python">&#34;&#34;&#34;Speclet Model Six.&#34;&#34;&#34;
 
 from pathlib import Path
 from typing import Optional, Tuple
 
 import pymc3 as pm
-import theano
+from theano import shared as ts
+from theano import tensor
 
 from src.data_processing import achilles as achelp
 from src.loggers import logger
@@ -40,22 +41,31 @@ from src.managers.model_data_managers import CrcDataManager, DataManager
 from src.models.speclet_model import ReplacementsDict, SpecletModel
 
 
-class SpecletFive(SpecletModel):
-    &#34;&#34;&#34;SpecletFive Model.
+class SpecletSeven(SpecletModel):
+    &#34;&#34;&#34;SpecletSeven Model.
 
     $$
-    lfc ~ i + a_g + d_c + h_{g,c} + j_b
+    \\begin{aligned}
+    lfc &amp;\\sim N(\\mu, \\sigma) \\\\
+    \\mu &amp;= a_{s,c} \\quad \\sigma \\sim HN(1) \\\\
+    a_{s,c} &amp;\\sim N(\\mu_a, \\sigma_a)_{s,c} \\\\
+    \\mu_a &amp;\\sim N(\\mu_{\\mu_a}, \\sigma_{\\mu_a})_{g,c}
+      \\quad \\sigma_a \\sim HN(\\sigma_{\\sigma_a})_{s}
+      \\quad \\sigma_{\\sigma_a} \\sim HN(1) \\\\
+    \\mu_{\\mu_a} &amp;\\sim N(\\mu_{\\mu_{\\mu_a}}, \\sigma_{\\mu_{\\mu_a}})_{g,l}
+      \\quad \\sigma_{\\mu_a} \\sim HN(\\sigma_{\\sigma_{\\mu_a}})_{c}
+      \\quad \\sigma_{\\sigma_{\\mu_a}} \\sim HN(1)_{c} \\\\
+    \\mu_{\\mu_{\\mu_a}} &amp;\\sim N(0, 1)
+      \\quad \\sigma_{\\mu_{\\mu_a}} \\sim HN(1)
+    \\end{aligned}
     $$
 
     where:
 
+    - s: sgRNA
     - g: gene
     - c: cell line
-    - b: batch
-
-    The model is relatively simple. It has a single global intercept (i) and two varying
-    intercepts for gene (a) and cell line (d) and for varying effects per gene per cell
-    line (h). Finally, there is a coefficient for batch effect (j).
+    - l: cell line lineage
     &#34;&#34;&#34;
 
     def __init__(
@@ -65,10 +75,10 @@ class SpecletFive(SpecletModel):
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
     ) -&gt; None:
-        &#34;&#34;&#34;Instantiate a SpecletFive model.
+        &#34;&#34;&#34;Instantiate a SpecletSeven model.
 
         Args:
-            name (str): A unique identifier for this instance of CrcCeresMimic. (Used
+            name (str): A unique identifier for this instance of SpecletSeven. (Used
               for cache management.)
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
@@ -76,20 +86,20 @@ class SpecletFive(SpecletModel):
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. If None (default), a `CrcDataManager` is created automatically.
         &#34;&#34;&#34;
-        logger.debug(&#34;Instantiating a SpecletFive model.&#34;)
+        logger.debug(&#34;Instantiating a SpecletSeven model.&#34;)
         if data_manager is None:
             logger.debug(&#34;Creating a data manager since none was supplied.&#34;)
             data_manager = CrcDataManager(debug=debug)
 
         super().__init__(
-            name=&#34;speclet-five_&#34; + name,
+            name=&#34;speclet-six_&#34; + name,
             root_cache_dir=root_cache_dir,
             debug=debug,
             data_manager=data_manager,
         )
 
     def model_specification(self) -&gt; Tuple[pm.Model, str]:
-        &#34;&#34;&#34;Build SpecletFour model.
+        &#34;&#34;&#34;Build SpecletSeven model.
 
         Returns:
             Tuple[pm.Model, str]: The model and name of the observed variable.
@@ -99,75 +109,70 @@ class SpecletFive(SpecletModel):
 
         total_size = data.shape[0]
         co_idx = achelp.common_indices(data)
-        b_idx = achelp.data_batch_indices(data)
 
         # Shared Theano variables
         logger.info(&#34;Getting Theano shared variables.&#34;)
-        gene_idx_shared = theano.shared(co_idx.gene_idx)
-        cellline_idx_shared = theano.shared(co_idx.cellline_idx)
-        batch_idx_shared = theano.shared(b_idx.batch_idx)
-        lfc_shared = theano.shared(data.lfc.values)
+        sgrna_idx_shared = ts(co_idx.sgrna_idx)
+        sgrna_to_gene_idx_shared = ts(co_idx.sgrna_to_gene_idx)
+        cellline_idx_shared = ts(co_idx.cellline_idx)
+        cellline_to_lineage_idx_shared = ts(co_idx.cellline_to_lineage_idx)
+        lfc_shared = ts(data.lfc.values)
 
-        logger.info(&#34;Creating PyMC3 model.&#34;)
+        self.shared_vars = {
+            &#34;sgrna_idx_shared&#34;: sgrna_idx_shared,
+            &#34;sgrna_to_gene_idx_shared&#34;: sgrna_to_gene_idx_shared,
+            &#34;cellline_idx_shared&#34;: cellline_idx_shared,
+            &#34;cellline_to_lineage_idx_shared&#34;: cellline_to_lineage_idx_shared,
+            &#34;lfc_shared&#34;: lfc_shared,
+        }
+
+        logger.info(&#34;Creating PyMC3 model for SpecletSeven.&#34;)
+        logger.warning(
+            &#34;Still need to implement varying effect for source on batch effect.&#34;
+        )
 
         with pm.Model() as model:
-            # Varying batch intercept.
-            μ_j = pm.Normal(&#34;μ_j&#34;, 0, 0.2)
-            σ_j = pm.HalfNormal(&#34;σ_j&#34;, 1)
-            j_offset = pm.Normal(&#34;j_offset&#34;, 0, 1, shape=b_idx.n_batches)
-            j = pm.Deterministic(&#34;j&#34;, μ_j + j_offset * σ_j)
+            μ_μ_μ_a = pm.Normal(&#34;μ_μ_μ_a&#34;, 0, 1)
+            σ_μ_μ_a = pm.HalfNormal(&#34;σ_μ_μ_a&#34;, 1)
 
-            # Varying gene and cell line intercept.
-            μ_h = pm.Normal(&#34;μ_h&#34;, 0, 0.2)
-            σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)
-            h_offset = pm.Normal(
-                &#34;h_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+            μ_μ_a_offset = pm.Normal(
+                &#34;μ_μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
             )
-            h = pm.Deterministic(&#34;h&#34;, μ_h + h_offset * σ_h)
+            μ_μ_a = pm.Deterministic(&#34;μ_μ_a&#34;, μ_μ_μ_a + μ_μ_a_offset * σ_μ_μ_a)
+            σ_σ_μ_a = pm.HalfNormal(&#34;σ_σ_μ_a&#34;, 1)
+            σ_μ_a = pm.HalfNormal(&#34;σ_μ_a&#34;, σ_σ_μ_a, shape=(1, co_idx.n_celllines))
 
-            # Varying cell line intercept.
-            μ_d = pm.Normal(&#34;μ_d&#34;, 0, 0.2)
-            σ_d = pm.HalfNormal(&#34;σ_d&#34;, 1)
-            d_offset = pm.Normal(&#34;d_offset&#34;, 0, 1, shape=co_idx.n_celllines)
-            d = pm.Deterministic(&#34;d&#34;, μ_d + d_offset * σ_d)
-
-            # Varying gene intercept.
-            μ_a = pm.Normal(&#34;μ_a&#34;, 0, 1)
-            σ_a = pm.HalfNormal(&#34;σ_a&#34;, 1)
-            a_offset = pm.Normal(&#34;a_offset&#34;, 0, 1, shape=co_idx.n_genes)
-            a = pm.Deterministic(&#34;a&#34;, μ_a + a_offset * σ_a)
-
-            # Global intercept.
-            i = pm.Normal(&#34;i&#34;, 0, 1)
-
-            μ = (
-                i
-                + a[gene_idx_shared]
-                + d[cellline_idx_shared]
-                + h[gene_idx_shared, cellline_idx_shared]
-                + j[batch_idx_shared]
+            μ_a_offset = pm.Normal(
+                &#34;μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
             )
+            μ_a = pm.Deterministic(
+                &#34;μ_a&#34;,
+                μ_μ_a[:, cellline_to_lineage_idx_shared]
+                + μ_a_offset
+                * tensor.ones(shape=(co_idx.n_genes, co_idx.n_celllines))
+                * σ_μ_a,
+            )
+            σ_σ_a = pm.HalfNormal(&#34;σ_σ_a&#34;, 1)
+            σ_a = pm.HalfNormal(&#34;σ_a&#34;, σ_σ_a, shape=(co_idx.n_sgrnas, 1))
+            a_offset = pm.Normal(
+                &#34;a_offset&#34;, 0, 1, shape=(co_idx.n_sgrnas, co_idx.n_celllines)
+            )
+            a = pm.Deterministic(&#34;a&#34;, μ_a[sgrna_to_gene_idx_shared, :] + a_offset * σ_a)
+
+            μ = pm.Deterministic(&#34;μ&#34;, a[sgrna_idx_shared, cellline_idx_shared])
 
             # Standard deviation of log-fold change, varies per batch.
-            σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 1)
-            σ = pm.HalfNormal(&#34;σ&#34;, σ_σ, shape=b_idx.n_batches)
+            σ = pm.HalfNormal(&#34;σ&#34;, 1)
 
             lfc = pm.Normal(  # noqa: F841
                 &#34;lfc&#34;,
                 μ,
-                σ[batch_idx_shared],
+                σ,
                 observed=lfc_shared,
                 total_size=total_size,
             )
 
         logger.debug(&#34;Finished building model.&#34;)
-
-        self.shared_vars = {
-            &#34;gene_idx_shared&#34;: gene_idx_shared,
-            &#34;cellline_idx_shared&#34;: cellline_idx_shared,
-            &#34;batch_idx_shared&#34;: batch_idx_shared,
-            &#34;lfc_shared&#34;: lfc_shared,
-        }
 
         return model, &#34;lfc&#34;
 
@@ -192,19 +197,16 @@ class SpecletFive(SpecletModel):
             )
 
         data = self.data_manager.get_data()
-        batch_size = self.data_manager.get_batch_size()
-        idx = achelp.common_indices(data)
-        b_idx = achelp.data_batch_indices(data)
+        mb_size = self.data_manager.get_batch_size()
+        co_idx = achelp.common_indices(data)
 
-        gene_idx_batch = pm.Minibatch(idx.gene_idx, batch_size=batch_size)
-        cellline_idx_batch = pm.Minibatch(idx.cellline_idx, batch_size=batch_size)
-        batch_idx_batch = pm.Minibatch(b_idx.batch_idx, batch_size=batch_size)
-        lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
+        sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=mb_size)
+        cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=mb_size)
+        lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=mb_size)
 
         return {
-            self.shared_vars[&#34;gene_idx_shared&#34;]: gene_idx_batch,
+            self.shared_vars[&#34;sgrna_idx_shared&#34;]: sgrna_idx_batch,
             self.shared_vars[&#34;cellline_idx_shared&#34;]: cellline_idx_batch,
-            self.shared_vars[&#34;batch_idx_shared&#34;]: batch_idx_batch,
             self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
         }
 
@@ -233,31 +235,53 @@ class SpecletFive(SpecletModel):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="src.models.speclet_five.SpecletFive"><code class="flex name class">
-<span>class <span class="ident">SpecletFive</span></span>
+<dt id="src.models.speclet_seven.SpecletSeven"><code class="flex name class">
+<span>class <span class="ident">SpecletSeven</span></span>
 <span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>SpecletFive Model.</p>
+<div class="desc"><p>SpecletSeven Model.</p>
 <p><span><span class="MathJax_Preview">
-lfc ~ i + a_g + d_c + h_{g,c} + j_b
+\begin{aligned}
+lfc &amp;\sim N(\mu, \sigma) \\
+\mu &amp;= a_{s,c} \quad \sigma \sim HN(1) \\
+a_{s,c} &amp;\sim N(\mu_a, \sigma_a)_{s,c} \\
+\mu_a &amp;\sim N(\mu_{\mu_a}, \sigma_{\mu_a})_{g,c}
+\quad \sigma_a \sim HN(\sigma_{\sigma_a})_{s}
+\quad \sigma_{\sigma_a} \sim HN(1) \\
+\mu_{\mu_a} &amp;\sim N(\mu_{\mu_{\mu_a}}, \sigma_{\mu_{\mu_a}})_{g,l}
+\quad \sigma_{\mu_a} \sim HN(\sigma_{\sigma_{\mu_a}})_{c}
+\quad \sigma_{\sigma_{\mu_a}} \sim HN(1)_{c} \\
+\mu_{\mu_{\mu_a}} &amp;\sim N(0, 1)
+\quad \sigma_{\mu_{\mu_a}} \sim HN(1)
+\end{aligned}
 </span><script type="math/tex; mode=display">
-lfc ~ i + a_g + d_c + h_{g,c} + j_b
+\begin{aligned}
+lfc &\sim N(\mu, \sigma) \\
+\mu &= a_{s,c} \quad \sigma \sim HN(1) \\
+a_{s,c} &\sim N(\mu_a, \sigma_a)_{s,c} \\
+\mu_a &\sim N(\mu_{\mu_a}, \sigma_{\mu_a})_{g,c}
+\quad \sigma_a \sim HN(\sigma_{\sigma_a})_{s}
+\quad \sigma_{\sigma_a} \sim HN(1) \\
+\mu_{\mu_a} &\sim N(\mu_{\mu_{\mu_a}}, \sigma_{\mu_{\mu_a}})_{g,l}
+\quad \sigma_{\mu_a} \sim HN(\sigma_{\sigma_{\mu_a}})_{c}
+\quad \sigma_{\sigma_{\mu_a}} \sim HN(1)_{c} \\
+\mu_{\mu_{\mu_a}} &\sim N(0, 1)
+\quad \sigma_{\mu_{\mu_a}} \sim HN(1)
+\end{aligned}
 </script></span></p>
 <p>where:</p>
 <ul>
+<li>s: sgRNA</li>
 <li>g: gene</li>
 <li>c: cell line</li>
-<li>b: batch</li>
+<li>l: cell line lineage</li>
 </ul>
-<p>The model is relatively simple. It has a single global intercept (i) and two varying
-intercepts for gene (a) and cell line (d) and for varying effects per gene per cell
-line (h). Finally, there is a coefficient for batch effect (j).</p>
-<p>Instantiate a SpecletFive model.</p>
+<p>Instantiate a SpecletSeven model.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
-<dd>A unique identifier for this instance of CrcCeresMimic. (Used
+<dd>A unique identifier for this instance of SpecletSeven. (Used
 for cache management.)</dd>
 <dt><strong><code>root_cache_dir</code></strong> :&ensp;<code>Optional[Path]</code>, optional</dt>
 <dd>The directory for caching
@@ -272,22 +296,31 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class SpecletFive(SpecletModel):
-    &#34;&#34;&#34;SpecletFive Model.
+<pre><code class="python">class SpecletSeven(SpecletModel):
+    &#34;&#34;&#34;SpecletSeven Model.
 
     $$
-    lfc ~ i + a_g + d_c + h_{g,c} + j_b
+    \\begin{aligned}
+    lfc &amp;\\sim N(\\mu, \\sigma) \\\\
+    \\mu &amp;= a_{s,c} \\quad \\sigma \\sim HN(1) \\\\
+    a_{s,c} &amp;\\sim N(\\mu_a, \\sigma_a)_{s,c} \\\\
+    \\mu_a &amp;\\sim N(\\mu_{\\mu_a}, \\sigma_{\\mu_a})_{g,c}
+      \\quad \\sigma_a \\sim HN(\\sigma_{\\sigma_a})_{s}
+      \\quad \\sigma_{\\sigma_a} \\sim HN(1) \\\\
+    \\mu_{\\mu_a} &amp;\\sim N(\\mu_{\\mu_{\\mu_a}}, \\sigma_{\\mu_{\\mu_a}})_{g,l}
+      \\quad \\sigma_{\\mu_a} \\sim HN(\\sigma_{\\sigma_{\\mu_a}})_{c}
+      \\quad \\sigma_{\\sigma_{\\mu_a}} \\sim HN(1)_{c} \\\\
+    \\mu_{\\mu_{\\mu_a}} &amp;\\sim N(0, 1)
+      \\quad \\sigma_{\\mu_{\\mu_a}} \\sim HN(1)
+    \\end{aligned}
     $$
 
     where:
 
+    - s: sgRNA
     - g: gene
     - c: cell line
-    - b: batch
-
-    The model is relatively simple. It has a single global intercept (i) and two varying
-    intercepts for gene (a) and cell line (d) and for varying effects per gene per cell
-    line (h). Finally, there is a coefficient for batch effect (j).
+    - l: cell line lineage
     &#34;&#34;&#34;
 
     def __init__(
@@ -297,10 +330,10 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
     ) -&gt; None:
-        &#34;&#34;&#34;Instantiate a SpecletFive model.
+        &#34;&#34;&#34;Instantiate a SpecletSeven model.
 
         Args:
-            name (str): A unique identifier for this instance of CrcCeresMimic. (Used
+            name (str): A unique identifier for this instance of SpecletSeven. (Used
               for cache management.)
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
@@ -308,20 +341,20 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. If None (default), a `CrcDataManager` is created automatically.
         &#34;&#34;&#34;
-        logger.debug(&#34;Instantiating a SpecletFive model.&#34;)
+        logger.debug(&#34;Instantiating a SpecletSeven model.&#34;)
         if data_manager is None:
             logger.debug(&#34;Creating a data manager since none was supplied.&#34;)
             data_manager = CrcDataManager(debug=debug)
 
         super().__init__(
-            name=&#34;speclet-five_&#34; + name,
+            name=&#34;speclet-six_&#34; + name,
             root_cache_dir=root_cache_dir,
             debug=debug,
             data_manager=data_manager,
         )
 
     def model_specification(self) -&gt; Tuple[pm.Model, str]:
-        &#34;&#34;&#34;Build SpecletFour model.
+        &#34;&#34;&#34;Build SpecletSeven model.
 
         Returns:
             Tuple[pm.Model, str]: The model and name of the observed variable.
@@ -331,75 +364,70 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 
         total_size = data.shape[0]
         co_idx = achelp.common_indices(data)
-        b_idx = achelp.data_batch_indices(data)
 
         # Shared Theano variables
         logger.info(&#34;Getting Theano shared variables.&#34;)
-        gene_idx_shared = theano.shared(co_idx.gene_idx)
-        cellline_idx_shared = theano.shared(co_idx.cellline_idx)
-        batch_idx_shared = theano.shared(b_idx.batch_idx)
-        lfc_shared = theano.shared(data.lfc.values)
+        sgrna_idx_shared = ts(co_idx.sgrna_idx)
+        sgrna_to_gene_idx_shared = ts(co_idx.sgrna_to_gene_idx)
+        cellline_idx_shared = ts(co_idx.cellline_idx)
+        cellline_to_lineage_idx_shared = ts(co_idx.cellline_to_lineage_idx)
+        lfc_shared = ts(data.lfc.values)
 
-        logger.info(&#34;Creating PyMC3 model.&#34;)
+        self.shared_vars = {
+            &#34;sgrna_idx_shared&#34;: sgrna_idx_shared,
+            &#34;sgrna_to_gene_idx_shared&#34;: sgrna_to_gene_idx_shared,
+            &#34;cellline_idx_shared&#34;: cellline_idx_shared,
+            &#34;cellline_to_lineage_idx_shared&#34;: cellline_to_lineage_idx_shared,
+            &#34;lfc_shared&#34;: lfc_shared,
+        }
+
+        logger.info(&#34;Creating PyMC3 model for SpecletSeven.&#34;)
+        logger.warning(
+            &#34;Still need to implement varying effect for source on batch effect.&#34;
+        )
 
         with pm.Model() as model:
-            # Varying batch intercept.
-            μ_j = pm.Normal(&#34;μ_j&#34;, 0, 0.2)
-            σ_j = pm.HalfNormal(&#34;σ_j&#34;, 1)
-            j_offset = pm.Normal(&#34;j_offset&#34;, 0, 1, shape=b_idx.n_batches)
-            j = pm.Deterministic(&#34;j&#34;, μ_j + j_offset * σ_j)
+            μ_μ_μ_a = pm.Normal(&#34;μ_μ_μ_a&#34;, 0, 1)
+            σ_μ_μ_a = pm.HalfNormal(&#34;σ_μ_μ_a&#34;, 1)
 
-            # Varying gene and cell line intercept.
-            μ_h = pm.Normal(&#34;μ_h&#34;, 0, 0.2)
-            σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)
-            h_offset = pm.Normal(
-                &#34;h_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+            μ_μ_a_offset = pm.Normal(
+                &#34;μ_μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
             )
-            h = pm.Deterministic(&#34;h&#34;, μ_h + h_offset * σ_h)
+            μ_μ_a = pm.Deterministic(&#34;μ_μ_a&#34;, μ_μ_μ_a + μ_μ_a_offset * σ_μ_μ_a)
+            σ_σ_μ_a = pm.HalfNormal(&#34;σ_σ_μ_a&#34;, 1)
+            σ_μ_a = pm.HalfNormal(&#34;σ_μ_a&#34;, σ_σ_μ_a, shape=(1, co_idx.n_celllines))
 
-            # Varying cell line intercept.
-            μ_d = pm.Normal(&#34;μ_d&#34;, 0, 0.2)
-            σ_d = pm.HalfNormal(&#34;σ_d&#34;, 1)
-            d_offset = pm.Normal(&#34;d_offset&#34;, 0, 1, shape=co_idx.n_celllines)
-            d = pm.Deterministic(&#34;d&#34;, μ_d + d_offset * σ_d)
-
-            # Varying gene intercept.
-            μ_a = pm.Normal(&#34;μ_a&#34;, 0, 1)
-            σ_a = pm.HalfNormal(&#34;σ_a&#34;, 1)
-            a_offset = pm.Normal(&#34;a_offset&#34;, 0, 1, shape=co_idx.n_genes)
-            a = pm.Deterministic(&#34;a&#34;, μ_a + a_offset * σ_a)
-
-            # Global intercept.
-            i = pm.Normal(&#34;i&#34;, 0, 1)
-
-            μ = (
-                i
-                + a[gene_idx_shared]
-                + d[cellline_idx_shared]
-                + h[gene_idx_shared, cellline_idx_shared]
-                + j[batch_idx_shared]
+            μ_a_offset = pm.Normal(
+                &#34;μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
             )
+            μ_a = pm.Deterministic(
+                &#34;μ_a&#34;,
+                μ_μ_a[:, cellline_to_lineage_idx_shared]
+                + μ_a_offset
+                * tensor.ones(shape=(co_idx.n_genes, co_idx.n_celllines))
+                * σ_μ_a,
+            )
+            σ_σ_a = pm.HalfNormal(&#34;σ_σ_a&#34;, 1)
+            σ_a = pm.HalfNormal(&#34;σ_a&#34;, σ_σ_a, shape=(co_idx.n_sgrnas, 1))
+            a_offset = pm.Normal(
+                &#34;a_offset&#34;, 0, 1, shape=(co_idx.n_sgrnas, co_idx.n_celllines)
+            )
+            a = pm.Deterministic(&#34;a&#34;, μ_a[sgrna_to_gene_idx_shared, :] + a_offset * σ_a)
+
+            μ = pm.Deterministic(&#34;μ&#34;, a[sgrna_idx_shared, cellline_idx_shared])
 
             # Standard deviation of log-fold change, varies per batch.
-            σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 1)
-            σ = pm.HalfNormal(&#34;σ&#34;, σ_σ, shape=b_idx.n_batches)
+            σ = pm.HalfNormal(&#34;σ&#34;, 1)
 
             lfc = pm.Normal(  # noqa: F841
                 &#34;lfc&#34;,
                 μ,
-                σ[batch_idx_shared],
+                σ,
                 observed=lfc_shared,
                 total_size=total_size,
             )
 
         logger.debug(&#34;Finished building model.&#34;)
-
-        self.shared_vars = {
-            &#34;gene_idx_shared&#34;: gene_idx_shared,
-            &#34;cellline_idx_shared&#34;: cellline_idx_shared,
-            &#34;batch_idx_shared&#34;: batch_idx_shared,
-            &#34;lfc_shared&#34;: lfc_shared,
-        }
 
         return model, &#34;lfc&#34;
 
@@ -424,19 +452,16 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             )
 
         data = self.data_manager.get_data()
-        batch_size = self.data_manager.get_batch_size()
-        idx = achelp.common_indices(data)
-        b_idx = achelp.data_batch_indices(data)
+        mb_size = self.data_manager.get_batch_size()
+        co_idx = achelp.common_indices(data)
 
-        gene_idx_batch = pm.Minibatch(idx.gene_idx, batch_size=batch_size)
-        cellline_idx_batch = pm.Minibatch(idx.cellline_idx, batch_size=batch_size)
-        batch_idx_batch = pm.Minibatch(b_idx.batch_idx, batch_size=batch_size)
-        lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
+        sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=mb_size)
+        cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=mb_size)
+        lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=mb_size)
 
         return {
-            self.shared_vars[&#34;gene_idx_shared&#34;]: gene_idx_batch,
+            self.shared_vars[&#34;sgrna_idx_shared&#34;]: sgrna_idx_batch,
             self.shared_vars[&#34;cellline_idx_shared&#34;]: cellline_idx_batch,
-            self.shared_vars[&#34;batch_idx_shared&#34;]: batch_idx_batch,
             self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
         }
 
@@ -461,7 +486,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="src.models.speclet_five.SpecletFive.get_replacement_parameters"><code class="name flex">
+<dt id="src.models.speclet_seven.SpecletSeven.get_replacement_parameters"><code class="name flex">
 <span>def <span class="ident">get_replacement_parameters</span></span>(<span>self) -> Dict[theano.tensor.sharedvar.TensorSharedVariable, Union[pymc3.data.Minibatch, numpy.ndarray]]</span>
 </code></dt>
 <dd>
@@ -503,28 +528,25 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
         )
 
     data = self.data_manager.get_data()
-    batch_size = self.data_manager.get_batch_size()
-    idx = achelp.common_indices(data)
-    b_idx = achelp.data_batch_indices(data)
+    mb_size = self.data_manager.get_batch_size()
+    co_idx = achelp.common_indices(data)
 
-    gene_idx_batch = pm.Minibatch(idx.gene_idx, batch_size=batch_size)
-    cellline_idx_batch = pm.Minibatch(idx.cellline_idx, batch_size=batch_size)
-    batch_idx_batch = pm.Minibatch(b_idx.batch_idx, batch_size=batch_size)
-    lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
+    sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=mb_size)
+    cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=mb_size)
+    lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=mb_size)
 
     return {
-        self.shared_vars[&#34;gene_idx_shared&#34;]: gene_idx_batch,
+        self.shared_vars[&#34;sgrna_idx_shared&#34;]: sgrna_idx_batch,
         self.shared_vars[&#34;cellline_idx_shared&#34;]: cellline_idx_batch,
-        self.shared_vars[&#34;batch_idx_shared&#34;]: batch_idx_batch,
         self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
     }</code></pre>
 </details>
 </dd>
-<dt id="src.models.speclet_five.SpecletFive.model_specification"><code class="name flex">
+<dt id="src.models.speclet_seven.SpecletSeven.model_specification"><code class="name flex">
 <span>def <span class="ident">model_specification</span></span>(<span>self) -> Tuple[pymc3.model.Model, str]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Build SpecletFour model.</p>
+<div class="desc"><p>Build SpecletSeven model.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>Tuple[pm.Model, str]</code></dt>
@@ -535,7 +557,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def model_specification(self) -&gt; Tuple[pm.Model, str]:
-    &#34;&#34;&#34;Build SpecletFour model.
+    &#34;&#34;&#34;Build SpecletSeven model.
 
     Returns:
         Tuple[pm.Model, str]: The model and name of the observed variable.
@@ -545,80 +567,75 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 
     total_size = data.shape[0]
     co_idx = achelp.common_indices(data)
-    b_idx = achelp.data_batch_indices(data)
 
     # Shared Theano variables
     logger.info(&#34;Getting Theano shared variables.&#34;)
-    gene_idx_shared = theano.shared(co_idx.gene_idx)
-    cellline_idx_shared = theano.shared(co_idx.cellline_idx)
-    batch_idx_shared = theano.shared(b_idx.batch_idx)
-    lfc_shared = theano.shared(data.lfc.values)
+    sgrna_idx_shared = ts(co_idx.sgrna_idx)
+    sgrna_to_gene_idx_shared = ts(co_idx.sgrna_to_gene_idx)
+    cellline_idx_shared = ts(co_idx.cellline_idx)
+    cellline_to_lineage_idx_shared = ts(co_idx.cellline_to_lineage_idx)
+    lfc_shared = ts(data.lfc.values)
 
-    logger.info(&#34;Creating PyMC3 model.&#34;)
+    self.shared_vars = {
+        &#34;sgrna_idx_shared&#34;: sgrna_idx_shared,
+        &#34;sgrna_to_gene_idx_shared&#34;: sgrna_to_gene_idx_shared,
+        &#34;cellline_idx_shared&#34;: cellline_idx_shared,
+        &#34;cellline_to_lineage_idx_shared&#34;: cellline_to_lineage_idx_shared,
+        &#34;lfc_shared&#34;: lfc_shared,
+    }
+
+    logger.info(&#34;Creating PyMC3 model for SpecletSeven.&#34;)
+    logger.warning(
+        &#34;Still need to implement varying effect for source on batch effect.&#34;
+    )
 
     with pm.Model() as model:
-        # Varying batch intercept.
-        μ_j = pm.Normal(&#34;μ_j&#34;, 0, 0.2)
-        σ_j = pm.HalfNormal(&#34;σ_j&#34;, 1)
-        j_offset = pm.Normal(&#34;j_offset&#34;, 0, 1, shape=b_idx.n_batches)
-        j = pm.Deterministic(&#34;j&#34;, μ_j + j_offset * σ_j)
+        μ_μ_μ_a = pm.Normal(&#34;μ_μ_μ_a&#34;, 0, 1)
+        σ_μ_μ_a = pm.HalfNormal(&#34;σ_μ_μ_a&#34;, 1)
 
-        # Varying gene and cell line intercept.
-        μ_h = pm.Normal(&#34;μ_h&#34;, 0, 0.2)
-        σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)
-        h_offset = pm.Normal(
-            &#34;h_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+        μ_μ_a_offset = pm.Normal(
+            &#34;μ_μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
         )
-        h = pm.Deterministic(&#34;h&#34;, μ_h + h_offset * σ_h)
+        μ_μ_a = pm.Deterministic(&#34;μ_μ_a&#34;, μ_μ_μ_a + μ_μ_a_offset * σ_μ_μ_a)
+        σ_σ_μ_a = pm.HalfNormal(&#34;σ_σ_μ_a&#34;, 1)
+        σ_μ_a = pm.HalfNormal(&#34;σ_μ_a&#34;, σ_σ_μ_a, shape=(1, co_idx.n_celllines))
 
-        # Varying cell line intercept.
-        μ_d = pm.Normal(&#34;μ_d&#34;, 0, 0.2)
-        σ_d = pm.HalfNormal(&#34;σ_d&#34;, 1)
-        d_offset = pm.Normal(&#34;d_offset&#34;, 0, 1, shape=co_idx.n_celllines)
-        d = pm.Deterministic(&#34;d&#34;, μ_d + d_offset * σ_d)
-
-        # Varying gene intercept.
-        μ_a = pm.Normal(&#34;μ_a&#34;, 0, 1)
-        σ_a = pm.HalfNormal(&#34;σ_a&#34;, 1)
-        a_offset = pm.Normal(&#34;a_offset&#34;, 0, 1, shape=co_idx.n_genes)
-        a = pm.Deterministic(&#34;a&#34;, μ_a + a_offset * σ_a)
-
-        # Global intercept.
-        i = pm.Normal(&#34;i&#34;, 0, 1)
-
-        μ = (
-            i
-            + a[gene_idx_shared]
-            + d[cellline_idx_shared]
-            + h[gene_idx_shared, cellline_idx_shared]
-            + j[batch_idx_shared]
+        μ_a_offset = pm.Normal(
+            &#34;μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
         )
+        μ_a = pm.Deterministic(
+            &#34;μ_a&#34;,
+            μ_μ_a[:, cellline_to_lineage_idx_shared]
+            + μ_a_offset
+            * tensor.ones(shape=(co_idx.n_genes, co_idx.n_celllines))
+            * σ_μ_a,
+        )
+        σ_σ_a = pm.HalfNormal(&#34;σ_σ_a&#34;, 1)
+        σ_a = pm.HalfNormal(&#34;σ_a&#34;, σ_σ_a, shape=(co_idx.n_sgrnas, 1))
+        a_offset = pm.Normal(
+            &#34;a_offset&#34;, 0, 1, shape=(co_idx.n_sgrnas, co_idx.n_celllines)
+        )
+        a = pm.Deterministic(&#34;a&#34;, μ_a[sgrna_to_gene_idx_shared, :] + a_offset * σ_a)
+
+        μ = pm.Deterministic(&#34;μ&#34;, a[sgrna_idx_shared, cellline_idx_shared])
 
         # Standard deviation of log-fold change, varies per batch.
-        σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 1)
-        σ = pm.HalfNormal(&#34;σ&#34;, σ_σ, shape=b_idx.n_batches)
+        σ = pm.HalfNormal(&#34;σ&#34;, 1)
 
         lfc = pm.Normal(  # noqa: F841
             &#34;lfc&#34;,
             μ,
-            σ[batch_idx_shared],
+            σ,
             observed=lfc_shared,
             total_size=total_size,
         )
 
     logger.debug(&#34;Finished building model.&#34;)
 
-    self.shared_vars = {
-        &#34;gene_idx_shared&#34;: gene_idx_shared,
-        &#34;cellline_idx_shared&#34;: cellline_idx_shared,
-        &#34;batch_idx_shared&#34;: batch_idx_shared,
-        &#34;lfc_shared&#34;: lfc_shared,
-    }
-
     return model, &#34;lfc&#34;</code></pre>
 </details>
 </dd>
-<dt id="src.models.speclet_five.SpecletFive.update_advi_sampling_parameters"><code class="name flex">
+<dt id="src.models.speclet_seven.SpecletSeven.update_advi_sampling_parameters"><code class="name flex">
 <span>def <span class="ident">update_advi_sampling_parameters</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
@@ -635,7 +652,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
     return None</code></pre>
 </details>
 </dd>
-<dt id="src.models.speclet_five.SpecletFive.update_mcmc_sampling_parameters"><code class="name flex">
+<dt id="src.models.speclet_seven.SpecletSeven.update_mcmc_sampling_parameters"><code class="name flex">
 <span>def <span class="ident">update_mcmc_sampling_parameters</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
@@ -688,12 +705,12 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="src.models.speclet_five.SpecletFive" href="#src.models.speclet_five.SpecletFive">SpecletFive</a></code></h4>
+<h4><code><a title="src.models.speclet_seven.SpecletSeven" href="#src.models.speclet_seven.SpecletSeven">SpecletSeven</a></code></h4>
 <ul class="">
-<li><code><a title="src.models.speclet_five.SpecletFive.get_replacement_parameters" href="#src.models.speclet_five.SpecletFive.get_replacement_parameters">get_replacement_parameters</a></code></li>
-<li><code><a title="src.models.speclet_five.SpecletFive.model_specification" href="#src.models.speclet_five.SpecletFive.model_specification">model_specification</a></code></li>
-<li><code><a title="src.models.speclet_five.SpecletFive.update_advi_sampling_parameters" href="#src.models.speclet_five.SpecletFive.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>
-<li><code><a title="src.models.speclet_five.SpecletFive.update_mcmc_sampling_parameters" href="#src.models.speclet_five.SpecletFive.update_mcmc_sampling_parameters">update_mcmc_sampling_parameters</a></code></li>
+<li><code><a title="src.models.speclet_seven.SpecletSeven.get_replacement_parameters" href="#src.models.speclet_seven.SpecletSeven.get_replacement_parameters">get_replacement_parameters</a></code></li>
+<li><code><a title="src.models.speclet_seven.SpecletSeven.model_specification" href="#src.models.speclet_seven.SpecletSeven.model_specification">model_specification</a></code></li>
+<li><code><a title="src.models.speclet_seven.SpecletSeven.update_advi_sampling_parameters" href="#src.models.speclet_seven.SpecletSeven.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>
+<li><code><a title="src.models.speclet_seven.SpecletSeven.update_mcmc_sampling_parameters" href="#src.models.speclet_seven.SpecletSeven.update_mcmc_sampling_parameters">update_mcmc_sampling_parameters</a></code></li>
 </ul>
 </li>
 </ul>

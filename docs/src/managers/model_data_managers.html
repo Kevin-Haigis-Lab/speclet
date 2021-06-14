@@ -331,6 +331,9 @@ class CrcDataManager(DataManager):
             pd.DataFrame: Mock data.
         &#34;&#34;&#34;
         logger.info(f&#34;Generating mock data of size &#39;{size}&#39;.&#34;)
+        if random_seed is not None:
+            np.random.seed(random_seed)
+
         if isinstance(size, str):
             size = sbc.MockDataSizes(size)
 
@@ -342,7 +345,6 @@ class CrcDataManager(DataManager):
                 n_lineages=2,
                 n_batches=2,
                 n_screens=1,
-                n_kras_types=2,
             )
         elif size == sbc.MockDataSizes.medium:
             self.data = sbc.generate_mock_achilles_data(
@@ -352,7 +354,6 @@ class CrcDataManager(DataManager):
                 n_lineages=2,
                 n_batches=3,
                 n_screens=2,
-                n_kras_types=3,
             )
         else:
             self.data = sbc.generate_mock_achilles_data(
@@ -362,8 +363,8 @@ class CrcDataManager(DataManager):
                 n_lineages=3,
                 n_batches=4,
                 n_screens=2,
-                n_kras_types=3,
             )
+        assert self.data is not None
         return self.data
 
 
@@ -605,6 +606,9 @@ callable functions or classes for transforming the data. Defaults to None
             pd.DataFrame: Mock data.
         &#34;&#34;&#34;
         logger.info(f&#34;Generating mock data of size &#39;{size}&#39;.&#34;)
+        if random_seed is not None:
+            np.random.seed(random_seed)
+
         if isinstance(size, str):
             size = sbc.MockDataSizes(size)
 
@@ -616,7 +620,6 @@ callable functions or classes for transforming the data. Defaults to None
                 n_lineages=2,
                 n_batches=2,
                 n_screens=1,
-                n_kras_types=2,
             )
         elif size == sbc.MockDataSizes.medium:
             self.data = sbc.generate_mock_achilles_data(
@@ -626,7 +629,6 @@ callable functions or classes for transforming the data. Defaults to None
                 n_lineages=2,
                 n_batches=3,
                 n_screens=2,
-                n_kras_types=3,
             )
         else:
             self.data = sbc.generate_mock_achilles_data(
@@ -636,8 +638,8 @@ callable functions or classes for transforming the data. Defaults to None
                 n_lineages=3,
                 n_batches=4,
                 n_screens=2,
-                n_kras_types=3,
             )
+        assert self.data is not None
         return self.data</code></pre>
 </details>
 <h3>Ancestors</h3>

@@ -175,7 +175,7 @@ if __name__ == &#34;__main__&#34;:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.command_line_interfaces.sampling_pymc3_models_cli.sample_speclet_model"><code class="name flex">
-<span>def <span class="ident">sample_speclet_model</span></span>(<span>model: <a title="src.command_line_interfaces.cli_helpers.ModelOption" href="cli_helpers.html#src.command_line_interfaces.cli_helpers.ModelOption">ModelOption</a>, name: str, fit_method: <a title="src.command_line_interfaces.cli_helpers.ModelFitMethod" href="cli_helpers.html#src.command_line_interfaces.cli_helpers.ModelFitMethod">ModelFitMethod</a> = ModelFitMethod.advi, mcmc_chains: int = 4, mcmc_cores: int = 4, sample: bool = True, ignore_cache: bool = False, debug: bool = False, random_seed: Optional[int] = None, touch: bool = False) -> Type[<a title="src.models.speclet_model.SpecletModel" href="../models/speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a>]</span>
+<span>def <span class="ident">sample_speclet_model</span></span>(<span>model: <a title="src.command_line_interfaces.cli_helpers.ModelOption" href="cli_helpers.html#src.command_line_interfaces.cli_helpers.ModelOption">ModelOption</a>, name: str, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a> = ModelFitMethod.advi, mcmc_chains: int = 4, mcmc_cores: int = 4, sample: bool = True, ignore_cache: bool = False, debug: bool = False, random_seed: Optional[int] = None, touch: bool = False) -> Type[<a title="src.models.speclet_model.SpecletModel" href="../models/speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Fit and sample from a variety of predefined PyMC3 models.</p>
@@ -302,7 +302,7 @@ built and fit.</dd>
 </details>
 </dd>
 <dt id="src.command_line_interfaces.sampling_pymc3_models_cli.touch_file"><code class="name flex">
-<span>def <span class="ident">touch_file</span></span>(<span>cache_dir: pathlib.Path, model: str, name: str, fit_method: <a title="src.command_line_interfaces.cli_helpers.ModelFitMethod" href="cli_helpers.html#src.command_line_interfaces.cli_helpers.ModelFitMethod">ModelFitMethod</a>, touch_suffix: Optional[str] = None) -> NoneType</span>
+<span>def <span class="ident">touch_file</span></span>(<span>cache_dir: pathlib.Path, model: str, name: str, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, touch_suffix: Optional[str] = None) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Touch a file.</p>

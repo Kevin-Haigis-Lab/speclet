@@ -87,6 +87,7 @@ def zscale_rna_expression_by_gene_and_lineage(df: pd.DataFrame) -&gt; pd.DataFra
     Returns:
         pd.DataFrame: Same data frame with a new column `&#34;rna_expr_gene_lineage&#34;`.
     &#34;&#34;&#34;
+    logger.info(&#34;Adding &#39;rna_expr_gene_lineage&#39; column.&#34;)
     return achelp.zscale_rna_expression_by_gene_lineage(
         df,
         rna_col=&#34;rna_expr&#34;,
@@ -105,6 +106,7 @@ def convert_is_mutated_to_numeric(df: pd.DataFrame) -&gt; pd.DataFrame:
     Returns:
         pd.DataFrame: Same data frame with the column `&#34;is_mutated&#34;` as type integer.
     &#34;&#34;&#34;
+    logger.info(&#34;Converting &#39;is_mutated&#39; column to &#39;int&#39;.&#34;)
     df[&#34;is_mutated&#34;] = df[&#34;is_mutated&#34;].astype(int)
     return df
 
@@ -267,6 +269,27 @@ class SpecletSix(SpecletModel):
             self._rna_cov = new_value
             self._reset_model_and_results()
 
+    @property
+    def mutation_cov(self) -&gt; bool:
+        &#34;&#34;&#34;Should the covariate for gene- and lineage-specific mutation be included?
+
+        Returns:
+            bool: Whether the covariate is included or not.
+        &#34;&#34;&#34;
+        return self._mutation_cov
+
+    @mutation_cov.setter
+    def mutation_cov(self, new_value: bool) -&gt; None:
+        &#34;&#34;&#34;Decide if the gene- and lineage-specific mutation covariate should be included.
+
+        Args:
+            new_value (bool): Whether the covariate is included or not.
+        &#34;&#34;&#34;
+        if self._mutation_cov != new_value:
+            logger.info(&#34;Changing `mutation_cov` to `{new_value}`.&#34;)
+            self._mutation_cov = new_value
+            self._reset_model_and_results()
+
     def model_specification(self) -&gt; Tuple[pm.Model, str]:
         &#34;&#34;&#34;Build SpecletSix model.
 
@@ -316,6 +339,10 @@ class SpecletSix(SpecletModel):
             rna_expr_shared = ts(data[&#34;rna_expr_gene_lineage&#34;].values)
             self.shared_vars[&#34;rna_expr_shared&#34;] = rna_expr_shared
 
+        if self.mutation_cov:
+            mutation_shared = ts(data[&#34;is_mutated&#34;].values)
+            self.shared_vars[&#34;mutation_shared&#34;] = mutation_shared
+
         logger.info(&#34;Creating PyMC3 model.&#34;)
         logger.warning(
             &#34;Still need to implement varying effect for source on batch effect.&#34;
@@ -324,18 +351,18 @@ class SpecletSix(SpecletModel):
         with pm.Model() as model:
             # Varying batch intercept.
             if b_idx.n_screens == 1:
-                μ_j = pm.Normal(&#34;μ_j&#34;, 0, 0.2)
+                μ_j = pm.Normal(&#34;μ_j&#34;, 0, 1)
                 σ_j = pm.HalfNormal(&#34;σ_j&#34;, 1)
-                j_offset = pm.Normal(&#34;j_offset&#34;, 0, 1, shape=b_idx.n_batches)
+                j_offset = pm.Normal(&#34;j_offset&#34;, 0, 0.5, shape=b_idx.n_batches)
                 j = pm.Deterministic(&#34;j&#34;, μ_j + j_offset * σ_j)
             else:
-                μ_μ_j = pm.Normal(&#34;μ_μ_j&#34;, 0, 0.5)
-                σ_μ_j = pm.HalfNormal(&#34;σ_μ_j&#34;, 0.5)
+                μ_μ_j = pm.Normal(&#34;μ_μ_j&#34;, 0, 1)
+                σ_μ_j = pm.HalfNormal(&#34;σ_μ_j&#34;, 1)
                 σ_σ_j = pm.HalfNormal(&#34;σ_σ_j&#34;, 1)
-                μ_j_offset = pm.Normal(&#34;μ_j_offset&#34;, 0, 1, shape=b_idx.n_screens)
+                μ_j_offset = pm.Normal(&#34;μ_j_offset&#34;, 0, 0.5, shape=b_idx.n_screens)
                 μ_j = pm.Deterministic(&#34;μ_j&#34;, μ_μ_j + μ_j_offset * σ_μ_j)
                 σ_j = pm.HalfNormal(&#34;σ_j&#34;, σ_σ_j, shape=b_idx.n_screens)
-                j_offset = pm.Normal(&#34;j_offset&#34;, 0, 1, shape=b_idx.n_batches)
+                j_offset = pm.Normal(&#34;j_offset&#34;, 0, 0.5, shape=b_idx.n_batches)
                 j = pm.Deterministic(
                     &#34;j&#34;,
                     μ_j[batch_to_screen_idx_shared]
@@ -343,29 +370,29 @@ class SpecletSix(SpecletModel):
                 )
 
             # Varying gene and cell line intercept.
-            μ_h = pm.Normal(&#34;μ_h&#34;, 0, 0.2)
+            μ_h = pm.Normal(&#34;μ_h&#34;, 0, 2)
             σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)
             h_offset = pm.Normal(
-                &#34;h_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+                &#34;h_offset&#34;, 0, 0.5, shape=(co_idx.n_genes, co_idx.n_celllines)
             )
             h = pm.Deterministic(&#34;h&#34;, μ_h + h_offset * σ_h)
 
             # Varying cell line intercept.
             if co_idx.n_lineages == 1:
                 logger.info(&#34;Only 1 cell line lineage found.&#34;)
-                μ_d = pm.Normal(&#34;μ_d&#34;, 0, 0.2)
+                μ_d = pm.Normal(&#34;μ_d&#34;, 0, 1)
                 σ_d = pm.HalfNormal(&#34;σ_d&#34;, 1)
-                d_offset = pm.Normal(&#34;d_offset&#34;, 0, 1, shape=co_idx.n_celllines)
+                d_offset = pm.Normal(&#34;d_offset&#34;, 0, 0.5, shape=co_idx.n_celllines)
                 d = pm.Deterministic(&#34;d&#34;, μ_d + d_offset * σ_d)
             else:
                 logger.info(f&#34;Found {co_idx.n_lineages} cell line lineages.&#34;)
-                μ_μ_d = pm.Normal(&#34;μ_μ_d&#34;, 0, 0.2)
+                μ_μ_d = pm.Normal(&#34;μ_μ_d&#34;, 0, 1)
                 σ_μ_d = pm.HalfNormal(&#34;σ_μ_d&#34;, 1)
-                μ_d_offset = pm.Normal(&#34;μ_d_offset&#34;, 0, 1, shape=co_idx.n_lineages)
+                μ_d_offset = pm.Normal(&#34;μ_d_offset&#34;, 0, 0.5, shape=co_idx.n_lineages)
                 μ_d = pm.Deterministic(&#34;μ_d&#34;, μ_μ_d + μ_d_offset * σ_μ_d)
                 σ_σ_d = pm.HalfNormal(&#34;σ_σ_d&#34;, 1)
                 σ_d = pm.HalfNormal(&#34;σ_d&#34;, σ_σ_d, shape=co_idx.n_lineages)
-                d_offset = pm.Normal(&#34;d_offset&#34;, 0, 1, shape=co_idx.n_celllines)
+                d_offset = pm.Normal(&#34;d_offset&#34;, 0, 0.5, shape=co_idx.n_celllines)
                 d = pm.Deterministic(
                     &#34;d&#34;,
                     μ_d[cellline_to_lineage_idx_shared]
@@ -375,11 +402,11 @@ class SpecletSix(SpecletModel):
             # Varying gene intercept.
             μ_μ_a = pm.Normal(&#34;μ_μ_a&#34;, 0, 1)
             σ_μ_a = pm.HalfNormal(&#34;σ_μ_a&#34;, 1)
-            μ_a_offset = pm.Normal(&#34;μ_a_offset&#34;, 0, 1, shape=co_idx.n_sgrnas)
+            μ_a_offset = pm.Normal(&#34;μ_a_offset&#34;, 0, 0.5, shape=co_idx.n_genes)
             μ_a = pm.Deterministic(&#34;μ_a&#34;, μ_μ_a + μ_a_offset * σ_μ_a)
             σ_σ_a = pm.HalfNormal(&#34;σ_σ_a&#34;, 1)
             σ_a = pm.HalfNormal(&#34;σ_a&#34;, σ_σ_a, shape=co_idx.n_genes)
-            a_offset = pm.Normal(&#34;a_offset&#34;, 0, 1, shape=co_idx.n_sgrnas)
+            a_offset = pm.Normal(&#34;a_offset&#34;, 0, 0.5, shape=co_idx.n_sgrnas)
             a = pm.Deterministic(
                 &#34;a&#34;,
                 μ_a[sgrna_to_gene_idx_shared]
@@ -387,11 +414,10 @@ class SpecletSix(SpecletModel):
             )
 
             # Global intercept.
-            i = pm.Normal(&#34;i&#34;, 0, 1)
+            # i = pm.Normal(&#34;i&#34;, 0, 5)
 
             _μ = (
-                i
-                + a[gene_idx_shared]
+                a[gene_idx_shared]
                 + d[cellline_idx_shared]
                 + h[gene_idx_shared, cellline_idx_shared]
                 + j[batch_idx_shared]
@@ -420,10 +446,19 @@ class SpecletSix(SpecletModel):
                 q = pm.Deterministic(&#34;q&#34;, (μ_q + q_offset * σ_q))
                 _μ += q[gene_idx_shared, lineage_idx_shared] * rna_expr_shared
 
+            if self.mutation_cov:
+                μ_m = pm.Normal(&#34;μ_m&#34;, 0, 2)
+                σ_m = pm.HalfNormal(&#34;σ_m&#34;, 1)
+                m_offset = pm.Normal(
+                    &#34;m_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
+                )
+                m = pm.Deterministic(&#34;m&#34;, (μ_m + m_offset * σ_m))
+                _μ += m[gene_idx_shared, lineage_idx_shared] * mutation_shared
+
             μ = pm.Deterministic(&#34;μ&#34;, _μ)
 
             # Standard deviation of log-fold change, varies per batch.
-            σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 1)
+            σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 0.5)
             σ = pm.HalfNormal(&#34;σ&#34;, σ_σ, shape=b_idx.n_batches)
 
             lfc = pm.Normal(  # noqa: F841
@@ -604,6 +639,7 @@ class SpecletSix(SpecletModel):
     Returns:
         pd.DataFrame: Same data frame with the column `&#34;is_mutated&#34;` as type integer.
     &#34;&#34;&#34;
+    logger.info(&#34;Converting &#39;is_mutated&#39; column to &#39;int&#39;.&#34;)
     df[&#34;is_mutated&#34;] = df[&#34;is_mutated&#34;].astype(int)
     return df</code></pre>
 </details>
@@ -636,6 +672,7 @@ class SpecletSix(SpecletModel):
     Returns:
         pd.DataFrame: Same data frame with a new column `&#34;rna_expr_gene_lineage&#34;`.
     &#34;&#34;&#34;
+    logger.info(&#34;Adding &#39;rna_expr_gene_lineage&#39; column.&#34;)
     return achelp.zscale_rna_expression_by_gene_lineage(
         df,
         rna_col=&#34;rna_expr&#34;,
@@ -883,6 +920,27 @@ False.</dd>
             self._rna_cov = new_value
             self._reset_model_and_results()
 
+    @property
+    def mutation_cov(self) -&gt; bool:
+        &#34;&#34;&#34;Should the covariate for gene- and lineage-specific mutation be included?
+
+        Returns:
+            bool: Whether the covariate is included or not.
+        &#34;&#34;&#34;
+        return self._mutation_cov
+
+    @mutation_cov.setter
+    def mutation_cov(self, new_value: bool) -&gt; None:
+        &#34;&#34;&#34;Decide if the gene- and lineage-specific mutation covariate should be included.
+
+        Args:
+            new_value (bool): Whether the covariate is included or not.
+        &#34;&#34;&#34;
+        if self._mutation_cov != new_value:
+            logger.info(&#34;Changing `mutation_cov` to `{new_value}`.&#34;)
+            self._mutation_cov = new_value
+            self._reset_model_and_results()
+
     def model_specification(self) -&gt; Tuple[pm.Model, str]:
         &#34;&#34;&#34;Build SpecletSix model.
 
@@ -932,6 +990,10 @@ False.</dd>
             rna_expr_shared = ts(data[&#34;rna_expr_gene_lineage&#34;].values)
             self.shared_vars[&#34;rna_expr_shared&#34;] = rna_expr_shared
 
+        if self.mutation_cov:
+            mutation_shared = ts(data[&#34;is_mutated&#34;].values)
+            self.shared_vars[&#34;mutation_shared&#34;] = mutation_shared
+
         logger.info(&#34;Creating PyMC3 model.&#34;)
         logger.warning(
             &#34;Still need to implement varying effect for source on batch effect.&#34;
@@ -940,18 +1002,18 @@ False.</dd>
         with pm.Model() as model:
             # Varying batch intercept.
             if b_idx.n_screens == 1:
-                μ_j = pm.Normal(&#34;μ_j&#34;, 0, 0.2)
+                μ_j = pm.Normal(&#34;μ_j&#34;, 0, 1)
                 σ_j = pm.HalfNormal(&#34;σ_j&#34;, 1)
-                j_offset = pm.Normal(&#34;j_offset&#34;, 0, 1, shape=b_idx.n_batches)
+                j_offset = pm.Normal(&#34;j_offset&#34;, 0, 0.5, shape=b_idx.n_batches)
                 j = pm.Deterministic(&#34;j&#34;, μ_j + j_offset * σ_j)
             else:
-                μ_μ_j = pm.Normal(&#34;μ_μ_j&#34;, 0, 0.5)
-                σ_μ_j = pm.HalfNormal(&#34;σ_μ_j&#34;, 0.5)
+                μ_μ_j = pm.Normal(&#34;μ_μ_j&#34;, 0, 1)
+                σ_μ_j = pm.HalfNormal(&#34;σ_μ_j&#34;, 1)
                 σ_σ_j = pm.HalfNormal(&#34;σ_σ_j&#34;, 1)
-                μ_j_offset = pm.Normal(&#34;μ_j_offset&#34;, 0, 1, shape=b_idx.n_screens)
+                μ_j_offset = pm.Normal(&#34;μ_j_offset&#34;, 0, 0.5, shape=b_idx.n_screens)
                 μ_j = pm.Deterministic(&#34;μ_j&#34;, μ_μ_j + μ_j_offset * σ_μ_j)
                 σ_j = pm.HalfNormal(&#34;σ_j&#34;, σ_σ_j, shape=b_idx.n_screens)
-                j_offset = pm.Normal(&#34;j_offset&#34;, 0, 1, shape=b_idx.n_batches)
+                j_offset = pm.Normal(&#34;j_offset&#34;, 0, 0.5, shape=b_idx.n_batches)
                 j = pm.Deterministic(
                     &#34;j&#34;,
                     μ_j[batch_to_screen_idx_shared]
@@ -959,29 +1021,29 @@ False.</dd>
                 )
 
             # Varying gene and cell line intercept.
-            μ_h = pm.Normal(&#34;μ_h&#34;, 0, 0.2)
+            μ_h = pm.Normal(&#34;μ_h&#34;, 0, 2)
             σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)
             h_offset = pm.Normal(
-                &#34;h_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+                &#34;h_offset&#34;, 0, 0.5, shape=(co_idx.n_genes, co_idx.n_celllines)
             )
             h = pm.Deterministic(&#34;h&#34;, μ_h + h_offset * σ_h)
 
             # Varying cell line intercept.
             if co_idx.n_lineages == 1:
                 logger.info(&#34;Only 1 cell line lineage found.&#34;)
-                μ_d = pm.Normal(&#34;μ_d&#34;, 0, 0.2)
+                μ_d = pm.Normal(&#34;μ_d&#34;, 0, 1)
                 σ_d = pm.HalfNormal(&#34;σ_d&#34;, 1)
-                d_offset = pm.Normal(&#34;d_offset&#34;, 0, 1, shape=co_idx.n_celllines)
+                d_offset = pm.Normal(&#34;d_offset&#34;, 0, 0.5, shape=co_idx.n_celllines)
                 d = pm.Deterministic(&#34;d&#34;, μ_d + d_offset * σ_d)
             else:
                 logger.info(f&#34;Found {co_idx.n_lineages} cell line lineages.&#34;)
-                μ_μ_d = pm.Normal(&#34;μ_μ_d&#34;, 0, 0.2)
+                μ_μ_d = pm.Normal(&#34;μ_μ_d&#34;, 0, 1)
                 σ_μ_d = pm.HalfNormal(&#34;σ_μ_d&#34;, 1)
-                μ_d_offset = pm.Normal(&#34;μ_d_offset&#34;, 0, 1, shape=co_idx.n_lineages)
+                μ_d_offset = pm.Normal(&#34;μ_d_offset&#34;, 0, 0.5, shape=co_idx.n_lineages)
                 μ_d = pm.Deterministic(&#34;μ_d&#34;, μ_μ_d + μ_d_offset * σ_μ_d)
                 σ_σ_d = pm.HalfNormal(&#34;σ_σ_d&#34;, 1)
                 σ_d = pm.HalfNormal(&#34;σ_d&#34;, σ_σ_d, shape=co_idx.n_lineages)
-                d_offset = pm.Normal(&#34;d_offset&#34;, 0, 1, shape=co_idx.n_celllines)
+                d_offset = pm.Normal(&#34;d_offset&#34;, 0, 0.5, shape=co_idx.n_celllines)
                 d = pm.Deterministic(
                     &#34;d&#34;,
                     μ_d[cellline_to_lineage_idx_shared]
@@ -991,11 +1053,11 @@ False.</dd>
             # Varying gene intercept.
             μ_μ_a = pm.Normal(&#34;μ_μ_a&#34;, 0, 1)
             σ_μ_a = pm.HalfNormal(&#34;σ_μ_a&#34;, 1)
-            μ_a_offset = pm.Normal(&#34;μ_a_offset&#34;, 0, 1, shape=co_idx.n_sgrnas)
+            μ_a_offset = pm.Normal(&#34;μ_a_offset&#34;, 0, 0.5, shape=co_idx.n_genes)
             μ_a = pm.Deterministic(&#34;μ_a&#34;, μ_μ_a + μ_a_offset * σ_μ_a)
             σ_σ_a = pm.HalfNormal(&#34;σ_σ_a&#34;, 1)
             σ_a = pm.HalfNormal(&#34;σ_a&#34;, σ_σ_a, shape=co_idx.n_genes)
-            a_offset = pm.Normal(&#34;a_offset&#34;, 0, 1, shape=co_idx.n_sgrnas)
+            a_offset = pm.Normal(&#34;a_offset&#34;, 0, 0.5, shape=co_idx.n_sgrnas)
             a = pm.Deterministic(
                 &#34;a&#34;,
                 μ_a[sgrna_to_gene_idx_shared]
@@ -1003,11 +1065,10 @@ False.</dd>
             )
 
             # Global intercept.
-            i = pm.Normal(&#34;i&#34;, 0, 1)
+            # i = pm.Normal(&#34;i&#34;, 0, 5)
 
             _μ = (
-                i
-                + a[gene_idx_shared]
+                a[gene_idx_shared]
                 + d[cellline_idx_shared]
                 + h[gene_idx_shared, cellline_idx_shared]
                 + j[batch_idx_shared]
@@ -1036,10 +1097,19 @@ False.</dd>
                 q = pm.Deterministic(&#34;q&#34;, (μ_q + q_offset * σ_q))
                 _μ += q[gene_idx_shared, lineage_idx_shared] * rna_expr_shared
 
+            if self.mutation_cov:
+                μ_m = pm.Normal(&#34;μ_m&#34;, 0, 2)
+                σ_m = pm.HalfNormal(&#34;σ_m&#34;, 1)
+                m_offset = pm.Normal(
+                    &#34;m_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
+                )
+                m = pm.Deterministic(&#34;m&#34;, (μ_m + m_offset * σ_m))
+                _μ += m[gene_idx_shared, lineage_idx_shared] * mutation_shared
+
             μ = pm.Deterministic(&#34;μ&#34;, _μ)
 
             # Standard deviation of log-fold change, varies per batch.
-            σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 1)
+            σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 0.5)
             σ = pm.HalfNormal(&#34;σ&#34;, σ_σ, shape=b_idx.n_batches)
 
             lfc = pm.Normal(  # noqa: F841
@@ -1158,6 +1228,28 @@ def gene_cna_cov(self) -&gt; bool:
         bool: Whether the covariate is included or not.
     &#34;&#34;&#34;
     return self._gene_cna_cov</code></pre>
+</details>
+</dd>
+<dt id="src.models.speclet_six.SpecletSix.mutation_cov"><code class="name">var <span class="ident">mutation_cov</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>Should the covariate for gene- and lineage-specific mutation be included?</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>Whether the covariate is included or not.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def mutation_cov(self) -&gt; bool:
+    &#34;&#34;&#34;Should the covariate for gene- and lineage-specific mutation be included?
+
+    Returns:
+        bool: Whether the covariate is included or not.
+    &#34;&#34;&#34;
+    return self._mutation_cov</code></pre>
 </details>
 </dd>
 <dt id="src.models.speclet_six.SpecletSix.rna_cov"><code class="name">var <span class="ident">rna_cov</span> : bool</code></dt>
@@ -1311,6 +1403,10 @@ def rna_cov(self) -&gt; bool:
         rna_expr_shared = ts(data[&#34;rna_expr_gene_lineage&#34;].values)
         self.shared_vars[&#34;rna_expr_shared&#34;] = rna_expr_shared
 
+    if self.mutation_cov:
+        mutation_shared = ts(data[&#34;is_mutated&#34;].values)
+        self.shared_vars[&#34;mutation_shared&#34;] = mutation_shared
+
     logger.info(&#34;Creating PyMC3 model.&#34;)
     logger.warning(
         &#34;Still need to implement varying effect for source on batch effect.&#34;
@@ -1319,18 +1415,18 @@ def rna_cov(self) -&gt; bool:
     with pm.Model() as model:
         # Varying batch intercept.
         if b_idx.n_screens == 1:
-            μ_j = pm.Normal(&#34;μ_j&#34;, 0, 0.2)
+            μ_j = pm.Normal(&#34;μ_j&#34;, 0, 1)
             σ_j = pm.HalfNormal(&#34;σ_j&#34;, 1)
-            j_offset = pm.Normal(&#34;j_offset&#34;, 0, 1, shape=b_idx.n_batches)
+            j_offset = pm.Normal(&#34;j_offset&#34;, 0, 0.5, shape=b_idx.n_batches)
             j = pm.Deterministic(&#34;j&#34;, μ_j + j_offset * σ_j)
         else:
-            μ_μ_j = pm.Normal(&#34;μ_μ_j&#34;, 0, 0.5)
-            σ_μ_j = pm.HalfNormal(&#34;σ_μ_j&#34;, 0.5)
+            μ_μ_j = pm.Normal(&#34;μ_μ_j&#34;, 0, 1)
+            σ_μ_j = pm.HalfNormal(&#34;σ_μ_j&#34;, 1)
             σ_σ_j = pm.HalfNormal(&#34;σ_σ_j&#34;, 1)
-            μ_j_offset = pm.Normal(&#34;μ_j_offset&#34;, 0, 1, shape=b_idx.n_screens)
+            μ_j_offset = pm.Normal(&#34;μ_j_offset&#34;, 0, 0.5, shape=b_idx.n_screens)
             μ_j = pm.Deterministic(&#34;μ_j&#34;, μ_μ_j + μ_j_offset * σ_μ_j)
             σ_j = pm.HalfNormal(&#34;σ_j&#34;, σ_σ_j, shape=b_idx.n_screens)
-            j_offset = pm.Normal(&#34;j_offset&#34;, 0, 1, shape=b_idx.n_batches)
+            j_offset = pm.Normal(&#34;j_offset&#34;, 0, 0.5, shape=b_idx.n_batches)
             j = pm.Deterministic(
                 &#34;j&#34;,
                 μ_j[batch_to_screen_idx_shared]
@@ -1338,29 +1434,29 @@ def rna_cov(self) -&gt; bool:
             )
 
         # Varying gene and cell line intercept.
-        μ_h = pm.Normal(&#34;μ_h&#34;, 0, 0.2)
+        μ_h = pm.Normal(&#34;μ_h&#34;, 0, 2)
         σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)
         h_offset = pm.Normal(
-            &#34;h_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+            &#34;h_offset&#34;, 0, 0.5, shape=(co_idx.n_genes, co_idx.n_celllines)
         )
         h = pm.Deterministic(&#34;h&#34;, μ_h + h_offset * σ_h)
 
         # Varying cell line intercept.
         if co_idx.n_lineages == 1:
             logger.info(&#34;Only 1 cell line lineage found.&#34;)
-            μ_d = pm.Normal(&#34;μ_d&#34;, 0, 0.2)
+            μ_d = pm.Normal(&#34;μ_d&#34;, 0, 1)
             σ_d = pm.HalfNormal(&#34;σ_d&#34;, 1)
-            d_offset = pm.Normal(&#34;d_offset&#34;, 0, 1, shape=co_idx.n_celllines)
+            d_offset = pm.Normal(&#34;d_offset&#34;, 0, 0.5, shape=co_idx.n_celllines)
             d = pm.Deterministic(&#34;d&#34;, μ_d + d_offset * σ_d)
         else:
             logger.info(f&#34;Found {co_idx.n_lineages} cell line lineages.&#34;)
-            μ_μ_d = pm.Normal(&#34;μ_μ_d&#34;, 0, 0.2)
+            μ_μ_d = pm.Normal(&#34;μ_μ_d&#34;, 0, 1)
             σ_μ_d = pm.HalfNormal(&#34;σ_μ_d&#34;, 1)
-            μ_d_offset = pm.Normal(&#34;μ_d_offset&#34;, 0, 1, shape=co_idx.n_lineages)
+            μ_d_offset = pm.Normal(&#34;μ_d_offset&#34;, 0, 0.5, shape=co_idx.n_lineages)
             μ_d = pm.Deterministic(&#34;μ_d&#34;, μ_μ_d + μ_d_offset * σ_μ_d)
             σ_σ_d = pm.HalfNormal(&#34;σ_σ_d&#34;, 1)
             σ_d = pm.HalfNormal(&#34;σ_d&#34;, σ_σ_d, shape=co_idx.n_lineages)
-            d_offset = pm.Normal(&#34;d_offset&#34;, 0, 1, shape=co_idx.n_celllines)
+            d_offset = pm.Normal(&#34;d_offset&#34;, 0, 0.5, shape=co_idx.n_celllines)
             d = pm.Deterministic(
                 &#34;d&#34;,
                 μ_d[cellline_to_lineage_idx_shared]
@@ -1370,11 +1466,11 @@ def rna_cov(self) -&gt; bool:
         # Varying gene intercept.
         μ_μ_a = pm.Normal(&#34;μ_μ_a&#34;, 0, 1)
         σ_μ_a = pm.HalfNormal(&#34;σ_μ_a&#34;, 1)
-        μ_a_offset = pm.Normal(&#34;μ_a_offset&#34;, 0, 1, shape=co_idx.n_sgrnas)
+        μ_a_offset = pm.Normal(&#34;μ_a_offset&#34;, 0, 0.5, shape=co_idx.n_genes)
         μ_a = pm.Deterministic(&#34;μ_a&#34;, μ_μ_a + μ_a_offset * σ_μ_a)
         σ_σ_a = pm.HalfNormal(&#34;σ_σ_a&#34;, 1)
         σ_a = pm.HalfNormal(&#34;σ_a&#34;, σ_σ_a, shape=co_idx.n_genes)
-        a_offset = pm.Normal(&#34;a_offset&#34;, 0, 1, shape=co_idx.n_sgrnas)
+        a_offset = pm.Normal(&#34;a_offset&#34;, 0, 0.5, shape=co_idx.n_sgrnas)
         a = pm.Deterministic(
             &#34;a&#34;,
             μ_a[sgrna_to_gene_idx_shared]
@@ -1382,11 +1478,10 @@ def rna_cov(self) -&gt; bool:
         )
 
         # Global intercept.
-        i = pm.Normal(&#34;i&#34;, 0, 1)
+        # i = pm.Normal(&#34;i&#34;, 0, 5)
 
         _μ = (
-            i
-            + a[gene_idx_shared]
+            a[gene_idx_shared]
             + d[cellline_idx_shared]
             + h[gene_idx_shared, cellline_idx_shared]
             + j[batch_idx_shared]
@@ -1415,10 +1510,19 @@ def rna_cov(self) -&gt; bool:
             q = pm.Deterministic(&#34;q&#34;, (μ_q + q_offset * σ_q))
             _μ += q[gene_idx_shared, lineage_idx_shared] * rna_expr_shared
 
+        if self.mutation_cov:
+            μ_m = pm.Normal(&#34;μ_m&#34;, 0, 2)
+            σ_m = pm.HalfNormal(&#34;σ_m&#34;, 1)
+            m_offset = pm.Normal(
+                &#34;m_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
+            )
+            m = pm.Deterministic(&#34;m&#34;, (μ_m + m_offset * σ_m))
+            _μ += m[gene_idx_shared, lineage_idx_shared] * mutation_shared
+
         μ = pm.Deterministic(&#34;μ&#34;, _μ)
 
         # Standard deviation of log-fold change, varies per batch.
-        σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 1)
+        σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 0.5)
         σ = pm.HalfNormal(&#34;σ&#34;, σ_σ, shape=b_idx.n_batches)
 
         lfc = pm.Normal(  # noqa: F841
@@ -1518,6 +1622,7 @@ def rna_cov(self) -&gt; bool:
 <li><code><a title="src.models.speclet_six.SpecletSix.gene_cna_cov" href="#src.models.speclet_six.SpecletSix.gene_cna_cov">gene_cna_cov</a></code></li>
 <li><code><a title="src.models.speclet_six.SpecletSix.get_replacement_parameters" href="#src.models.speclet_six.SpecletSix.get_replacement_parameters">get_replacement_parameters</a></code></li>
 <li><code><a title="src.models.speclet_six.SpecletSix.model_specification" href="#src.models.speclet_six.SpecletSix.model_specification">model_specification</a></code></li>
+<li><code><a title="src.models.speclet_six.SpecletSix.mutation_cov" href="#src.models.speclet_six.SpecletSix.mutation_cov">mutation_cov</a></code></li>
 <li><code><a title="src.models.speclet_six.SpecletSix.rna_cov" href="#src.models.speclet_six.SpecletSix.rna_cov">rna_cov</a></code></li>
 <li><code><a title="src.models.speclet_six.SpecletSix.update_advi_sampling_parameters" href="#src.models.speclet_six.SpecletSix.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>
 <li><code><a title="src.models.speclet_six.SpecletSix.update_mcmc_sampling_parameters" href="#src.models.speclet_six.SpecletSix.update_mcmc_sampling_parameters">update_mcmc_sampling_parameters</a></code></li>
