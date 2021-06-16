@@ -4,7 +4,8 @@ from pathlib import Path
 from typing import Callable
 
 import pytest
-from hypothesis import given
+from hypothesis import assume, given
+from hypothesis import strategies as st
 from hypothesis.extra import numpy as hnp
 
 from src.command_line_interfaces import cli_helpers
@@ -14,6 +15,7 @@ from src.models.speclet_four import SpecletFour
 from src.models.speclet_six import SpecletSix
 from src.models.speclet_three import SpecletThree
 from src.models.speclet_two import SpecletTwo
+from src.project_enums import ModelFitMethod
 
 #### ---- Models ---- ####
 
@@ -28,6 +30,18 @@ def test_get_model_class():
 
     m2 = cli_helpers.get_model_class(cli_helpers.ModelOption.crc_ceres_mimic)
     assert m2 == CeresMimic
+
+
+@given(name=st.text(min_size=1))
+def test_extract_fit_method(name: str):
+    assume(name.lower() not in [n.value.lower() for n in ModelFitMethod])
+    for fit_method in ["ADVI", "advi"]:
+        name_mod = name + "_" + fit_method
+        assert cli_helpers.extract_fit_method(name_mod) == ModelFitMethod.advi
+
+    for fit_method in ["MCMC", "mcmc"]:
+        name_mod = name + "_" + "mcmc"
+        assert cli_helpers.extract_fit_method(name_mod) == ModelFitMethod.mcmc
 
 
 #### ---- Modifying models ---- ####
