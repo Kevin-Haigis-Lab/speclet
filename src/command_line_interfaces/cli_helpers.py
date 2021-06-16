@@ -15,6 +15,7 @@ from src.models.speclet_four import SpecletFour
 from src.models.speclet_model import SpecletModel
 from src.models.speclet_one import SpecletOne
 from src.models.speclet_pipeline_test_model import SpecletTestModel
+from src.models.speclet_seven import SpecletSeven
 from src.models.speclet_six import SpecletSix
 from src.models.speclet_three import SpecletThree
 from src.models.speclet_two import SpecletTwo
@@ -81,14 +82,13 @@ def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
         ModelOption.speclet_four: SpecletFour,
         ModelOption.speclet_five: SpecletFive,
         ModelOption.speclet_six: SpecletSix,
+        ModelOption.speclet_seven: SpecletSeven,
     }
     return model_option_map[model_opt]
 
 
 def extract_fit_method(name: str) -> ModelFitMethod:
     """Extract the model fitting method to use based on the unique name of the model.
-
-    TODO: test
 
     Args:
         name (str): NAme of the model (*not* the type of model).
@@ -125,6 +125,8 @@ def modify_model_by_name(model: Any, name: str) -> None:
         modify_specletfour_model_by_name(model, name)
     elif isinstance(model, SpecletSix):
         modify_specletsix_model_by_name(model, name)
+    elif isinstance(model, SpecletSeven):
+        modify_specletseven_model_by_name(model, name)
     else:
         logger.info("No modifications make to model based on its name.")
     return None
@@ -176,3 +178,14 @@ def modify_specletsix_model_by_name(model: SpecletSix, name: str) -> None:
     if "mutation" in name:
         logger.info("Including mutation covariate in the Sp6 model.")
         model.mutation_cov = True
+
+
+def modify_specletseven_model_by_name(model: SpecletSeven, name: str) -> None:
+    """Modify a SpecletSeven object based on the user-provided input name.
+
+    Args:
+        model (SpecletSeven): The SpecletSeven model.
+        name (str): User-provided name.
+    """
+    logger.info(f"Modifying SpecletSeven model based on the name: '{name}'.")
+    model.noncentered_param = "noncentered" in name

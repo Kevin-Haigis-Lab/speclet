@@ -15,6 +15,8 @@ ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
 model_names = (
     ("speclet-six", "SpecletSix-mcmc"),
     ("speclet-six", "SpecletSix-advi"),
+    ("speclet-seven", "SpecletSeven-mcmc-noncentered"),
+    ("speclet-seven", "SpecletSeven-advi-noncentered"),
 )
 
 models = [m for m, _ in model_names]
