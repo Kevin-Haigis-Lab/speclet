@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from src.managers.model_data_managers import CrcDataManager
+from src.modeling import pymc3_helpers as pmhelp
 from src.models.speclet_seven import SpecletSeven
 
 
@@ -30,6 +31,8 @@ class TestSpecletSeven:
         sp7.noncentered_param = noncentered_param
         sp7.build_model()
         assert sp7.model is not None
+        includes_offset = ["offset" in v for v in pmhelp.get_variable_names(sp7.model)]
+        assert any(includes_offset) == noncentered_param
 
     top_priors = ["μ_μ_μ_a", "σ_μ_μ_a", "σ_σ_μ_a", "σ_σ_a", "σ"]
 
