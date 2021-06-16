@@ -5,6 +5,8 @@ from enum import Enum
 
 from pydantic import BaseModel
 
+from src.project_enums import ModelFitMethod
+
 #### ---- Enums ---- ####
 
 
@@ -20,13 +22,6 @@ class ModelOption(str, Enum):
     speclet_five = "speclet-five"
     speclet_six = "speclet-six"
     speclet_seven = "speclet-seven"
-
-
-class ModelFitMethod(str, Enum):
-    """Available fit methods."""
-
-    advi = "ADVI"
-    mcmc = "MCMC"
 
 
 #### ---- Models ---- ####

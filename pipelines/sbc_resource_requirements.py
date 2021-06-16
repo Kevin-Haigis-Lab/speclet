@@ -1,7 +1,9 @@
 """Manage resources for the simulation-based calibration pipeline."""
 
-from pipeline_classes import ModelFitMethod, ModelOption
+from pipeline_classes import ModelOption
 from pydantic import validate_arguments
+
+from src.project_enums import ModelFitMethod
 
 
 class SBCResourceManager:

@@ -5,7 +5,9 @@ from typing import List
 
 import papermill
 
-from pipeline_classes import ModelOption, ModelFitMethod, ModelConfig
+from src.project_enums import ModelFitMethod
+
+from pipeline_classes import ModelOption, ModelConfig
 from sbc_resource_requirements import SBCResourceManager as RM
 
 NUM_SIMULATIONS = 3
