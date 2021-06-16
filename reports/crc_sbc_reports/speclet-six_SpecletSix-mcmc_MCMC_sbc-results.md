@@ -53,9 +53,11 @@ NUM_SIMULATIONS = -1
 ```python
 # Parameters
 MODEL = "speclet-six"
-MODEL_NAME = "SpecletSix-advi"
-SBC_RESULTS_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/speclet-six_SpecletSix-advi"
-NUM_SIMULATIONS = 10
+MODEL_NAME = "SpecletSix-mcmc"
+SBC_RESULTS_DIR = (
+    "/n/scratch3/users/j/jc604/speclet-sbc/speclet-six_SpecletSix-mcmc_MCMC"
+)
+NUM_SIMULATIONS = 3
 
 ```
 
@@ -185,7 +187,7 @@ ax.set_xlabel("HDI accuracy")
 plt.show()
 ```
 
-![png](speclet-six_SpecletSix-advi_sbc-results_files/speclet-six_SpecletSix-advi_sbc-results_21_0.png)
+![png](speclet-six_SpecletSix-mcmc_MCMC_sbc-results_files/speclet-six_SpecletSix-mcmc_MCMC_sbc-results_21_0.png)
 
 ```python
 simulation_posteriors_df = pd.concat(
@@ -255,82 +257,82 @@ simulation_posteriors_df.head()
   </thead>
   <tbody>
     <tr>
-      <th>μ_μ_j</th>
-      <th>μ_μ_j</th>
-      <td>0.147</td>
-      <td>0.064</td>
-      <td>0.037</td>
-      <td>0.239</td>
-      <td>0.002</td>
-      <td>0.001</td>
-      <td>947.0</td>
-      <td>933.0</td>
-      <td>NaN</td>
-      <td>0.004314</td>
-      <td>False</td>
-      <td>sim_id_0000</td>
-    </tr>
-    <tr>
-      <th>μ_j_offset[0]</th>
-      <th>μ_j_offset</th>
-      <td>-0.019</td>
-      <td>0.454</td>
-      <td>-0.712</td>
-      <td>0.730</td>
-      <td>0.015</td>
-      <td>0.010</td>
-      <td>962.0</td>
-      <td>907.0</td>
-      <td>NaN</td>
-      <td>0.527004</td>
-      <td>True</td>
-      <td>sim_id_0000</td>
-    </tr>
-    <tr>
-      <th>μ_j_offset[1]</th>
-      <th>μ_j_offset</th>
-      <td>0.122</td>
-      <td>0.429</td>
-      <td>-0.613</td>
-      <td>0.758</td>
-      <td>0.014</td>
-      <td>0.010</td>
-      <td>946.0</td>
-      <td>1066.0</td>
-      <td>NaN</td>
-      <td>0.453782</td>
+      <th>μ_j</th>
+      <th>μ_j</th>
+      <td>0.539</td>
+      <td>0.841</td>
+      <td>-0.812</td>
+      <td>1.864</td>
+      <td>0.008</td>
+      <td>0.006</td>
+      <td>11967.0</td>
+      <td>11763.0</td>
+      <td>1.0</td>
+      <td>0.950088</td>
       <td>True</td>
       <td>sim_id_0000</td>
     </tr>
     <tr>
       <th>j_offset[0]</th>
       <th>j_offset</th>
-      <td>-0.784</td>
-      <td>0.418</td>
-      <td>-1.373</td>
-      <td>-0.025</td>
-      <td>0.013</td>
-      <td>0.009</td>
-      <td>1037.0</td>
-      <td>1021.0</td>
-      <td>NaN</td>
-      <td>-1.829740</td>
-      <td>False</td>
+      <td>-0.398</td>
+      <td>0.396</td>
+      <td>-1.028</td>
+      <td>0.232</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>8889.0</td>
+      <td>10008.0</td>
+      <td>1.0</td>
+      <td>-0.635242</td>
+      <td>True</td>
       <td>sim_id_0000</td>
     </tr>
     <tr>
       <th>j_offset[1]</th>
       <th>j_offset</th>
-      <td>0.127</td>
-      <td>0.278</td>
-      <td>-0.333</td>
-      <td>0.546</td>
-      <td>0.008</td>
-      <td>0.007</td>
-      <td>1061.0</td>
-      <td>858.0</td>
-      <td>NaN</td>
-      <td>0.037006</td>
+      <td>0.570</td>
+      <td>0.377</td>
+      <td>-0.022</td>
+      <td>1.168</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>9552.0</td>
+      <td>8564.0</td>
+      <td>1.0</td>
+      <td>0.484698</td>
+      <td>True</td>
+      <td>sim_id_0000</td>
+    </tr>
+    <tr>
+      <th>μ_h</th>
+      <th>μ_h</th>
+      <td>0.142</td>
+      <td>0.481</td>
+      <td>-0.618</td>
+      <td>0.915</td>
+      <td>0.004</td>
+      <td>0.004</td>
+      <td>14127.0</td>
+      <td>11584.0</td>
+      <td>1.0</td>
+      <td>-0.673880</td>
+      <td>False</td>
+      <td>sim_id_0000</td>
+    </tr>
+    <tr>
+      <th>h_offset[0,0]</th>
+      <th>h_offset</th>
+      <td>0.033</td>
+      <td>0.333</td>
+      <td>-0.486</td>
+      <td>0.577</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>6701.0</td>
+      <td>10231.0</td>
+      <td>1.0</td>
+      <td>-0.075679</td>
       <td>True</td>
       <td>sim_id_0000</td>
     </tr>
@@ -366,9 +368,9 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 )
 ```
 
-![png](speclet-six_SpecletSix-advi_sbc-results_files/speclet-six_SpecletSix-advi_sbc-results_23_0.png)
+![png](speclet-six_SpecletSix-mcmc_MCMC_sbc-results_files/speclet-six_SpecletSix-mcmc_MCMC_sbc-results_23_0.png)
 
-    <ggplot: (2999021477009)>
+    <ggplot: (2935482042152)>
 
 ```python
 hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -413,9 +415,9 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 )
 ```
 
-![png](speclet-six_SpecletSix-advi_sbc-results_files/speclet-six_SpecletSix-advi_sbc-results_24_0.png)
+![png](speclet-six_SpecletSix-mcmc_MCMC_sbc-results_files/speclet-six_SpecletSix-mcmc_MCMC_sbc-results_24_0.png)
 
-    <ggplot: (2999021475268)>
+    <ggplot: (2935490586570)>
 
 ---
 
@@ -424,14 +426,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.40 minutes
+    execution time: 0.18 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-06-11
+    Last updated: 2021-06-16
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -445,16 +447,16 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-e-16-189.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-241.o2.rc.hms.harvard.edu
 
-    Git branch: update-sbc
+    Git branch: sp7
 
-    arviz     : 0.11.2
-    re        : 2.2.1
-    pymc3     : 3.11.1
-    plotnine  : 0.7.1
-    janitor   : 0.20.14
-    matplotlib: 3.3.4
-    pandas    : 1.2.3
-    numpy     : 1.20.1
     seaborn   : 0.11.1
+    arviz     : 0.11.2
+    matplotlib: 3.3.4
+    janitor   : 0.20.14
+    numpy     : 1.20.1
+    re        : 2.2.1
+    plotnine  : 0.7.1
+    pymc3     : 3.11.1
+    pandas    : 1.2.3
