@@ -33,14 +33,14 @@ models_configurations = []
 #     ModelConfig(name="SpecletTwo-kras", model="speclet-two", fit_method="MCMC"),
 # ]
 # models_configurations += [
-    # ModelConfig(name="SpecletThree-debug", model="speclet-three", fit_method="ADVI"),
-    # ModelConfig(name="SpecletThree-debug", model="speclet-three", fit_method="MCMC"),
-    # ModelConfig(name="SpecletThree-kras-debug", model="speclet-three", fit_method="ADVI"),
-    # ModelConfig(name="SpecletThree-kras-debug", model="speclet-three", fit_method="MCMC"),
-    # ModelConfig(name="SpecletThree", model="speclet-three", fit_method="ADVI"),
-    # ModelConfig(name="SpecletThree", model="speclet-three", fit_method="MCMC"),
-    # ModelConfig(name="SpecletThree-kras", model="speclet-three", fit_method="ADVI"),
-    # ModelConfig(name="SpecletThree-kras", model="speclet-three", fit_method="MCMC"),
+#     ModelConfig(name="SpecletThree-debug", model="speclet-three", fit_method="ADVI"),
+#     ModelConfig(name="SpecletThree-debug", model="speclet-three", fit_method="MCMC"),
+#     ModelConfig(name="SpecletThree-kras-debug", model="speclet-three", fit_method="ADVI"),
+#     ModelConfig(name="SpecletThree-kras-debug", model="speclet-three", fit_method="MCMC"),
+#     ModelConfig(name="SpecletThree", model="speclet-three", fit_method="ADVI"),
+#     ModelConfig(name="SpecletThree", model="speclet-three", fit_method="MCMC"),
+#     ModelConfig(name="SpecletThree-kras", model="speclet-three", fit_method="ADVI"),
+#     ModelConfig(name="SpecletThree-kras", model="speclet-three", fit_method="MCMC"),
 # ]
 # models_configurations += [
 #     ModelConfig(name="SpecletFour-debug", model="speclet-four", fit_method="MCMC"),
@@ -50,8 +50,8 @@ models_configurations = []
 models_configurations += [
     ModelConfig(name="SpecletSeven-debug-noncentered", model="speclet-seven", fit_method="MCMC"),
     ModelConfig(name="SpecletSeven-debug-noncentered", model="speclet-seven", fit_method="ADVI"),
-    ModelConfig(name="SpecletSeven-noncentered", model="speclet-seven", fit_method="MCMC"),
-    ModelConfig(name="SpecletSeven-noncentered", model="speclet-seven", fit_method="MCMC"),
+#     ModelConfig(name="SpecletSeven-noncentered", model="speclet-seven", fit_method="MCMC"),
+#     ModelConfig(name="SpecletSeven-noncentered", model="speclet-seven", fit_method="MCMC"),
 ]
 
 # Separate information in model configuration for `all` step to create wildcards.
