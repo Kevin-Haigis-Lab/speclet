@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Callable
 
 import pytest
-from hypothesis import assume, given
+from hypothesis import assume, given, settings
 from hypothesis import strategies as st
 from hypothesis.extra import numpy as hnp
 
@@ -235,6 +235,7 @@ class TestSpecletSixModifications:
         cli_helpers.modify_model_by_name,
     ]
 
+    @settings(deadline=60000.0)  # 1 minute deadline
     @pytest.mark.parametrize("name", model_names)
     @pytest.mark.parametrize("fxn", functions_to_test)
     @given(bool_ary=hnp.arrays(bool, shape=4))
