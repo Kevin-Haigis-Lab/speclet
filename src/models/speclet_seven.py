@@ -41,7 +41,7 @@ class SpecletSeven(SpecletModel):
     - l: cell line lineage
     """
 
-    noncentered_param: bool
+    _noncentered_param: bool
 
     def __init__(
         self,
@@ -76,7 +76,28 @@ class SpecletSeven(SpecletModel):
             data_manager=data_manager,
         )
 
-        self.noncentered_param = noncentered_param
+        self._noncentered_param = noncentered_param
+
+    @property
+    def noncentered_param(self) -> bool:
+        """Whether to use the non-centered parameterization for the model.
+
+        Returns:
+            bool: True if using the non-centered parameterization.
+        """
+        return self._noncentered_param
+
+    @noncentered_param.setter
+    def noncentered_param(self, new_value: bool) -> None:
+        """Decide whether to use the non-centered parameterization for the model.
+
+        Args:
+            new_value (bool): True to use the non-centered parameterization.
+        """
+        if self._noncentered_param != new_value:
+            logger.info("Changing `noncentered_param` to `{new_value}`.")
+            self._noncentered_param = new_value
+            self._reset_model_and_results()
 
     def _base_model(self, model: pm.Model, co_idx: achelp.CommonIndices):
         with model:
