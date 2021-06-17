@@ -3,7 +3,6 @@
 """Helper functions for the various CLIs."""
 
 
-from enum import Enum
 from typing import Any, Dict, Type
 
 import pretty_errors
@@ -19,6 +18,7 @@ from src.models.speclet_seven import SpecletSeven
 from src.models.speclet_six import SpecletSix
 from src.models.speclet_three import SpecletThree
 from src.models.speclet_two import SpecletTwo
+from src.pipelines.pipeline_classes import ModelOption
 from src.project_enums import ModelFitMethod
 
 #### ---- Pretty Errors ---- ####
@@ -50,20 +50,6 @@ def clean_model_names(n: str) -> str:
     return n.replace(" ", "-")
 
 
-class ModelOption(str, Enum):
-    """Model options."""
-
-    speclet_test_model = "speclet-test-model"
-    crc_ceres_mimic = "crc-ceres-mimic"
-    speclet_one = "speclet-one"
-    speclet_two = "speclet-two"
-    speclet_three = "speclet-three"
-    speclet_four = "speclet-four"
-    speclet_five = "speclet-five"
-    speclet_six = "speclet-six"
-    speclet_seven = "speclet-seven"
-
-
 def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
     """Get the model class from its string identifier.
 
@@ -91,7 +77,7 @@ def extract_fit_method(name: str) -> ModelFitMethod:
     """Extract the model fitting method to use based on the unique name of the model.
 
     Args:
-        name (str): NAme of the model (*not* the type of model).
+        name (str): Name of the model (*not* the type of model).
 
     Raises:
         ValueError: Raised if no fitting method is found.

@@ -11,10 +11,11 @@ import numpy as np
 import typer
 
 from src.command_line_interfaces import cli_helpers
-from src.command_line_interfaces.cli_helpers import ModelFitMethod, ModelOption
+from src.command_line_interfaces.cli_helpers import ModelFitMethod
 from src.io import cache_io
 from src.loggers import logger
 from src.models.speclet_model import SpecletModel
+from src.pipelines.pipeline_classes import ModelOption
 
 cli_helpers.configure_pretty()
 
@@ -32,8 +33,12 @@ def touch_file(
     """Touch a file.
 
     Args:
+        cache_dir (Path): Location of the cache directory.
         model (str): The model.
         name (str): The custom name of the model.
+        fit_method (ModelFitMethod): Method used to fit the model.
+        touch_suffix (Optional[str], optional): Optional suffix to add the to the file.
+          Defaults to None for no additional suffix.
     """
     if touch_suffix is None:
         touch_suffix = ""

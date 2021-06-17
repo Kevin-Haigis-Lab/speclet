@@ -1,8 +1,8 @@
 """Manage resources for the simulation-based calibration pipeline."""
 
-from pipeline_classes import ModelOption
 from pydantic import validate_arguments
 
+from src.pipelines.pipeline_classes import ModelOption
 from src.project_enums import ModelFitMethod
 
 
@@ -23,6 +23,7 @@ class SBCResourceManager:
             model (str): Type of model.
             name (str): Unique, identifiable, descriptive name for the model.
             mock_data_size (str): Size of the mock data.
+            fit_method (ModelFitMethod): Method used to fit the model.
         """
         self.model = model
         self.name = name

@@ -24,6 +24,16 @@ class ModelOption(str, Enum):
     speclet_seven = "speclet-seven"
 
 
+class SlurmPartitions(str, Enum):
+    """Partitions of the HPC available through SLURM."""
+
+    priority = "priority"
+    interactive = "interactive"
+    short = "short"
+    medium = "medium"
+    long = "long"
+
+
 #### ---- Models ---- ####
 
 

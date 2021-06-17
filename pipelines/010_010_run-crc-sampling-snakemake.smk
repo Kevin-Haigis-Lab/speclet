@@ -6,7 +6,7 @@ from pathlib import Path
 import papermill
 
 import run_sampling_utils as utils
-from pipeline_classes import ModelOption, ModelFitMethod, ModelConfig
+from src.pipelines.pipeline_classes import ModelOption, ModelFitMethod, ModelConfig
 
 PYMC3_MODEL_CACHE_DIR = "models/"
 REPORTS_DIR = "reports/crc_model_sampling_reports/"

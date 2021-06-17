@@ -7,8 +7,8 @@ import papermill
 
 from src.project_enums import ModelFitMethod
 
-from pipeline_classes import ModelOption, ModelConfig
-from sbc_resource_requirements import SBCResourceManager as RM
+from src.pipelines.pipeline_classes import ModelOption, ModelConfig
+from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
 NUM_SIMULATIONS = 3
 
