@@ -18,6 +18,8 @@ help:
 	@echo " - style           : style R and Python files"
 	@echo " - docs            : build documentation for Python modules"
 	@echo " - clean           : remove old logs and temp files"
+	@echo " - sbc             : run the SBC pipeline (on O2)"
+	@echo " - fit             : run the fitting pipeline (on O2)"
 
 install:
 	@echo "Installing speclet conda environment."
@@ -55,3 +57,9 @@ clean:
 	find ./logs/*.log -mtime +7 -exec rm {} \ || echo "No logs to remove.";
 	find ./temp/* -mtime +7 -exec rm {} \ || echo "No temp files to remove.";
 	rm .coverage* || echo "No coverage remnants to remove."
+
+sbc:
+	sbatch pipelines/012_012_simulation-based-calibration.sh
+
+fit:
+	sbatch pipelines/010_012_run-crc-sampling.sh

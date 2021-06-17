@@ -315,10 +315,7 @@ class SpecletSix(SpecletModel):
             mutation_shared = ts(data["is_mutated"].values)
             self.shared_vars["mutation_shared"] = mutation_shared
 
-        logger.info("Creating PyMC3 model.")
-        logger.warning(
-            "Still need to implement varying effect for source on batch effect."
-        )
+        logger.info("Creating PyMC3 SpecletSix model.")
 
         with pm.Model() as model:
             # Varying batch intercept.
@@ -328,7 +325,7 @@ class SpecletSix(SpecletModel):
                 j_offset = pm.Normal("j_offset", 0, 0.5, shape=b_idx.n_batches)
                 j = pm.Deterministic("j", μ_j + j_offset * σ_j)
             else:
-                μ_μ_j = pm.Normal("μ_μ_j", 0, 1)
+                μ_μ_j = pm.Normal("μ_μ_j", 0, 0.5)
                 σ_μ_j = pm.HalfNormal("σ_μ_j", 1)
                 σ_σ_j = pm.HalfNormal("σ_σ_j", 1)
                 μ_j_offset = pm.Normal("μ_j_offset", 0, 0.5, shape=b_idx.n_screens)
@@ -342,7 +339,7 @@ class SpecletSix(SpecletModel):
                 )
 
             # Varying gene and cell line intercept.
-            μ_h = pm.Normal("μ_h", 0, 2)
+            μ_h = pm.Normal("μ_h", 0, 0.5)
             σ_h = pm.HalfNormal("σ_h", 1)
             h_offset = pm.Normal(
                 "h_offset", 0, 0.5, shape=(co_idx.n_genes, co_idx.n_celllines)
@@ -352,13 +349,13 @@ class SpecletSix(SpecletModel):
             # Varying cell line intercept.
             if co_idx.n_lineages == 1:
                 logger.info("Only 1 cell line lineage found.")
-                μ_d = pm.Normal("μ_d", 0, 1)
-                σ_d = pm.HalfNormal("σ_d", 1)
+                μ_d = pm.Normal("μ_d", 0, 0.5)
+                σ_d = pm.HalfNormal("σ_d", 2)
                 d_offset = pm.Normal("d_offset", 0, 0.5, shape=co_idx.n_celllines)
                 d = pm.Deterministic("d", μ_d + d_offset * σ_d)
             else:
                 logger.info(f"Found {co_idx.n_lineages} cell line lineages.")
-                μ_μ_d = pm.Normal("μ_μ_d", 0, 1)
+                μ_μ_d = pm.Normal("μ_μ_d", 0, 0.5)
                 σ_μ_d = pm.HalfNormal("σ_μ_d", 1)
                 μ_d_offset = pm.Normal("μ_d_offset", 0, 0.5, shape=co_idx.n_lineages)
                 μ_d = pm.Deterministic("μ_d", μ_μ_d + μ_d_offset * σ_μ_d)
@@ -372,7 +369,7 @@ class SpecletSix(SpecletModel):
                 )
 
             # Varying gene intercept.
-            μ_μ_a = pm.Normal("μ_μ_a", 0, 1)
+            μ_μ_a = pm.Normal("μ_μ_a", 0, 0.5)
             σ_μ_a = pm.HalfNormal("σ_μ_a", 1)
             μ_a_offset = pm.Normal("μ_a_offset", 0, 0.5, shape=co_idx.n_genes)
             μ_a = pm.Deterministic("μ_a", μ_μ_a + μ_a_offset * σ_μ_a)
@@ -386,10 +383,11 @@ class SpecletSix(SpecletModel):
             )
 
             # Global intercept.
-            # i = pm.Normal("i", 0, 5)
+            i = pm.Normal("i", 0, 1)
 
             _μ = (
-                a[gene_idx_shared]
+                i
+                + a[gene_idx_shared]
                 + d[cellline_idx_shared]
                 + h[gene_idx_shared, cellline_idx_shared]
                 + j[batch_idx_shared]

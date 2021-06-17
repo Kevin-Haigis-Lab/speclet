@@ -43,12 +43,15 @@ from src.models.speclet_model import ReplacementsDict, SpecletModel
 class SpecletFive(SpecletModel):
     &#34;&#34;&#34;SpecletFive Model.
 
-      lfc ~ i + a_g + d_c + h_[g,c] + j_b
+    $$
+    lfc ~ i + a_g + d_c + h_{g,c} + j_b
+    $$
 
-    where
-        - g: gene
-        - c: cell line
-        - b: batch
+    where:
+
+    - g: gene
+    - c: cell line
+    - b: batch
 
     The model is relatively simple. It has a single global intercept (i) and two varying
     intercepts for gene (a) and cell line (d) and for varying effects per gene per cell
@@ -236,11 +239,17 @@ class SpecletFive(SpecletModel):
 </code></dt>
 <dd>
 <div class="desc"><p>SpecletFive Model.</p>
-<p>lfc ~ i + a_g + d_c + h_[g,c] + j_b</p>
-<p>where
-- g: gene
-- c: cell line
-- b: batch</p>
+<p><span><span class="MathJax_Preview">
+lfc ~ i + a_g + d_c + h_{g,c} + j_b
+</span><script type="math/tex; mode=display">
+lfc ~ i + a_g + d_c + h_{g,c} + j_b
+</script></span></p>
+<p>where:</p>
+<ul>
+<li>g: gene</li>
+<li>c: cell line</li>
+<li>b: batch</li>
+</ul>
 <p>The model is relatively simple. It has a single global intercept (i) and two varying
 intercepts for gene (a) and cell line (d) and for varying effects per gene per cell
 line (h). Finally, there is a coefficient for batch effect (j).</p>
@@ -266,12 +275,15 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <pre><code class="python">class SpecletFive(SpecletModel):
     &#34;&#34;&#34;SpecletFive Model.
 
-      lfc ~ i + a_g + d_c + h_[g,c] + j_b
+    $$
+    lfc ~ i + a_g + d_c + h_{g,c} + j_b
+    $$
 
-    where
-        - g: gene
-        - c: cell line
-        - b: batch
+    where:
+
+    - g: gene
+    - c: cell line
+    - b: batch
 
     The model is relatively simple. It has a single global intercept (i) and two varying
     intercepts for gene (a) and cell line (d) and for varying effects per gene per cell

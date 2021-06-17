@@ -44,6 +44,7 @@ from src.loggers import logger
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.managers.model_data_managers import DataManager
 from src.modeling import pymc3_sampling_api as pmapi
+from src.project_enums import ModelFitMethod
 
 ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
@@ -446,6 +447,7 @@ class SpecletModel:
     def run_simulation_based_calibration(
         self,
         results_path: Path,
+        fit_method: ModelFitMethod,
         random_seed: Optional[int] = None,
         size: str = &#34;large&#34;,
         fit_kwargs: Optional[Dict[Any, Any]] = None,
@@ -454,6 +456,7 @@ class SpecletModel:
 
         Args:
             results_path (Path): Where to store the results.
+            fit_method (ModelFitMethod): Which method to use for fitting.
             random_seed (Optional[int], optional): Random seed (for reproducibility).
               Defaults to None.
             size (str, optional): Size of the data set to mock. Defaults to &#34;large&#34;.
@@ -476,11 +479,16 @@ class SpecletModel:
             priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
         mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
-        self.data = mock_data
+        self.data_manager.data = mock_data
 
-        res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
+        if fit_method == ModelFitMethod.advi:
+            res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
+        elif fit_method == ModelFitMethod.mcmc:
+            res = self.mcmc_sample_model(random_seed=random_seed, **fit_kwargs)
+        else:
+            raise ValueError(f&#34;Unknown fit method &#39;{fit_method}&#39;.&#34;)
+
         posterior_summary = az.summary(res, fmt=&#34;wide&#34;, hdi_prob=0.89)
-        assert isinstance(posterior_summary, pd.DataFrame)
         assert isinstance(posterior_summary, pd.DataFrame)
         results_manager = sbc.SBCFileManager(dir=results_path)
         results_manager.save_sbc_results(
@@ -971,6 +979,7 @@ data. Defaults to None.</dd>
     def run_simulation_based_calibration(
         self,
         results_path: Path,
+        fit_method: ModelFitMethod,
         random_seed: Optional[int] = None,
         size: str = &#34;large&#34;,
         fit_kwargs: Optional[Dict[Any, Any]] = None,
@@ -979,6 +988,7 @@ data. Defaults to None.</dd>
 
         Args:
             results_path (Path): Where to store the results.
+            fit_method (ModelFitMethod): Which method to use for fitting.
             random_seed (Optional[int], optional): Random seed (for reproducibility).
               Defaults to None.
             size (str, optional): Size of the data set to mock. Defaults to &#34;large&#34;.
@@ -1001,11 +1011,16 @@ data. Defaults to None.</dd>
             priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
         mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
-        self.data = mock_data
+        self.data_manager.data = mock_data
 
-        res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
+        if fit_method == ModelFitMethod.advi:
+            res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
+        elif fit_method == ModelFitMethod.mcmc:
+            res = self.mcmc_sample_model(random_seed=random_seed, **fit_kwargs)
+        else:
+            raise ValueError(f&#34;Unknown fit method &#39;{fit_method}&#39;.&#34;)
+
         posterior_summary = az.summary(res, fmt=&#34;wide&#34;, hdi_prob=0.89)
-        assert isinstance(posterior_summary, pd.DataFrame)
         assert isinstance(posterior_summary, pd.DataFrame)
         results_manager = sbc.SBCFileManager(dir=results_path)
         results_manager.save_sbc_results(
@@ -1037,6 +1052,7 @@ data. Defaults to None.</dd>
 <li><a title="src.models.speclet_four.SpecletFour" href="speclet_four.html#src.models.speclet_four.SpecletFour">SpecletFour</a></li>
 <li><a title="src.models.speclet_one.SpecletOne" href="speclet_one.html#src.models.speclet_one.SpecletOne">SpecletOne</a></li>
 <li><a title="src.models.speclet_pipeline_test_model.SpecletTestModel" href="speclet_pipeline_test_model.html#src.models.speclet_pipeline_test_model.SpecletTestModel">SpecletTestModel</a></li>
+<li><a title="src.models.speclet_seven.SpecletSeven" href="speclet_seven.html#src.models.speclet_seven.SpecletSeven">SpecletSeven</a></li>
 <li><a title="src.models.speclet_six.SpecletSix" href="speclet_six.html#src.models.speclet_six.SpecletSix">SpecletSix</a></li>
 <li><a title="src.models.speclet_three.SpecletThree" href="speclet_three.html#src.models.speclet_three.SpecletThree">SpecletThree</a></li>
 <li><a title="src.models.speclet_two.SpecletTwo" href="speclet_two.html#src.models.speclet_two.SpecletTwo">SpecletTwo</a></li>
@@ -1569,7 +1585,7 @@ def model_specification(self) -&gt; Tuple[pm.Model, str]:
 </details>
 </dd>
 <dt id="src.models.speclet_model.SpecletModel.run_simulation_based_calibration"><code class="name flex">
-<span>def <span class="ident">run_simulation_based_calibration</span></span>(<span>self, results_path: pathlib.Path, random_seed: Optional[int] = None, size: str = 'large', fit_kwargs: Optional[Dict[Any, Any]] = None) -> NoneType</span>
+<span>def <span class="ident">run_simulation_based_calibration</span></span>(<span>self, results_path: pathlib.Path, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, random_seed: Optional[int] = None, size: str = 'large', fit_kwargs: Optional[Dict[Any, Any]] = None) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Run a round of simulation-based calibration.</p>
@@ -1577,6 +1593,8 @@ def model_specification(self) -&gt; Tuple[pm.Model, str]:
 <dl>
 <dt><strong><code>results_path</code></strong> :&ensp;<code>Path</code></dt>
 <dd>Where to store the results.</dd>
+<dt><strong><code>fit_method</code></strong> :&ensp;<code>ModelFitMethod</code></dt>
+<dd>Which method to use for fitting.</dd>
 <dt><strong><code>random_seed</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
 <dd>Random seed (for reproducibility).
 Defaults to None.</dd>
@@ -1593,6 +1611,7 @@ passed to the fitting method. Default is None.</dd>
 <pre><code class="python">def run_simulation_based_calibration(
     self,
     results_path: Path,
+    fit_method: ModelFitMethod,
     random_seed: Optional[int] = None,
     size: str = &#34;large&#34;,
     fit_kwargs: Optional[Dict[Any, Any]] = None,
@@ -1601,6 +1620,7 @@ passed to the fitting method. Default is None.</dd>
 
     Args:
         results_path (Path): Where to store the results.
+        fit_method (ModelFitMethod): Which method to use for fitting.
         random_seed (Optional[int], optional): Random seed (for reproducibility).
           Defaults to None.
         size (str, optional): Size of the data set to mock. Defaults to &#34;large&#34;.
@@ -1623,11 +1643,16 @@ passed to the fitting method. Default is None.</dd>
         priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
     mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
-    self.data = mock_data
+    self.data_manager.data = mock_data
 
-    res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
+    if fit_method == ModelFitMethod.advi:
+        res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
+    elif fit_method == ModelFitMethod.mcmc:
+        res = self.mcmc_sample_model(random_seed=random_seed, **fit_kwargs)
+    else:
+        raise ValueError(f&#34;Unknown fit method &#39;{fit_method}&#39;.&#34;)
+
     posterior_summary = az.summary(res, fmt=&#34;wide&#34;, hdi_prob=0.89)
-    assert isinstance(posterior_summary, pd.DataFrame)
     assert isinstance(posterior_summary, pd.DataFrame)
     results_manager = sbc.SBCFileManager(dir=results_path)
     results_manager.save_sbc_results(

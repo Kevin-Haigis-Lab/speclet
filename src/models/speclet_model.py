@@ -21,6 +21,18 @@ from src.project_enums import ModelFitMethod
 ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
 
+class UnableToLocateNamedVariable(Exception):
+    """Error when a named variable or object cannot be located."""
+
+    pass
+
+
+class SharedVariableDictionaryNotSet(AttributeError):
+    """Error for when the shared variable dictionary should be available but is not."""
+
+    pass
+
+
 class PyMC3SamplingParameters(BaseModel):
     """Paramerers common to fitting a model in PyMC3."""
 
@@ -451,7 +463,10 @@ class SpecletModel:
             priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
         mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
-        self.data_manager.data = mock_data
+        self.data_manager.set_data(mock_data)
+
+        # Update shared variable with adjusted observed data.
+        self.update_observed_data(mock_data[self.observed_var_name].values)
 
         if fit_method == ModelFitMethod.advi:
             res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
@@ -484,3 +499,23 @@ class SpecletModel:
             )
         else:
             logger.warning("Did not cache MCMC samples because they do not exist.")
+
+    def update_observed_data(self, new_data: np.ndarray) -> None:
+        """Update the values for the shared tensor for observed data.
+
+        Args:
+            new_data (np.ndarray): New data to set in the shared tensor.
+        """
+        if self.shared_vars is None:
+            raise SharedVariableDictionaryNotSet(
+                "Cannot locate shared variable dictionary."
+            )
+        _var_name = f"{self.observed_var_name}_shared"
+        observed_var_shared = self.shared_vars.get(_var_name)
+        if observed_var_shared is not None:
+            observed_var_shared.set_value(new_data)
+            logger.info(f"Setting new data for observed variable: '{_var_name}'.")
+        else:
+            msg = f"Unable to set new values for observed variable: '{_var_name}'."
+            logger.error(msg)
+            raise UnableToLocateNamedVariable(msg)

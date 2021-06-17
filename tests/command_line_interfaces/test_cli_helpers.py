@@ -4,16 +4,19 @@ from pathlib import Path
 from typing import Callable
 
 import pytest
-from hypothesis import given
+from hypothesis import assume, given, settings
+from hypothesis import strategies as st
 from hypothesis.extra import numpy as hnp
 
 from src.command_line_interfaces import cli_helpers
 from src.models.ceres_mimic import CeresMimic
 from src.models.speclet_five import SpecletFive
 from src.models.speclet_four import SpecletFour
+from src.models.speclet_seven import SpecletSeven
 from src.models.speclet_six import SpecletSix
 from src.models.speclet_three import SpecletThree
 from src.models.speclet_two import SpecletTwo
+from src.project_enums import ModelFitMethod
 
 #### ---- Models ---- ####
 
@@ -28,6 +31,18 @@ def test_get_model_class():
 
     m2 = cli_helpers.get_model_class(cli_helpers.ModelOption.crc_ceres_mimic)
     assert m2 == CeresMimic
+
+
+@given(name=st.text(min_size=1))
+def test_extract_fit_method(name: str):
+    assume(name.lower() not in [n.value.lower() for n in ModelFitMethod])
+    for fit_method in ["ADVI", "advi"]:
+        name_mod = name + "_" + fit_method
+        assert cli_helpers.extract_fit_method(name_mod) == ModelFitMethod.advi
+
+    for fit_method in ["MCMC", "mcmc"]:
+        name_mod = name + "_" + "mcmc"
+        assert cli_helpers.extract_fit_method(name_mod) == ModelFitMethod.mcmc
 
 
 #### ---- Modifying models ---- ####
@@ -220,6 +235,7 @@ class TestSpecletSixModifications:
         cli_helpers.modify_model_by_name,
     ]
 
+    @settings(deadline=60000.0)  # 1 minute deadline
     @pytest.mark.parametrize("name", model_names)
     @pytest.mark.parametrize("fxn", functions_to_test)
     @given(bool_ary=hnp.arrays(bool, shape=4))
@@ -237,3 +253,35 @@ class TestSpecletSixModifications:
         assert sp6_model.gene_cna_cov == bool_ary[1]
         assert sp6_model.rna_cov == bool_ary[2]
         assert sp6_model.mutation_cov == bool_ary[3]
+
+
+class TestSpecletSevenModifications:
+
+    model_names = [
+        "model",
+        "sp7-model",
+        "SpecletSeven-model",
+        "pymc3-Sp7",
+        "pymc3 Speclet2",
+        "pymc3 SpecletSeven",
+    ]
+
+    functions_to_test = [
+        cli_helpers.modify_specletseven_model_by_name,
+        cli_helpers.modify_model_by_name,
+    ]
+
+    @pytest.mark.parametrize("name", model_names)
+    @pytest.mark.parametrize("fxn", functions_to_test)
+    @given(bool_ary=hnp.arrays(bool, shape=1))
+    def test_modify_sp7_model_by_name(self, name: str, fxn: Callable, bool_ary):
+        sp7_model = SpecletSeven(
+            name="TEST-MODEL", root_cache_dir=Path("temp/test-models"), debug=True
+        )
+        suffixes = ["noncentered"]
+        for b, s in zip(bool_ary.flatten(), suffixes):
+            if b:
+                name += s
+
+        fxn(sp7_model, name)
+        assert sp7_model.noncentered_param == bool_ary[0]

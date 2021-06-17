@@ -131,12 +131,20 @@ class TestSpecletModel:
                 advi_res.posterior[p], advi_res_2.posterior[p]
             )
 
-    @pytest.mark.DEV
     @pytest.mark.slow
     @pytest.mark.parametrize("fit_method", [ModelFitMethod.advi, ModelFitMethod.mcmc])
     def test_run_simulation_based_calibration(
-        self, tmp_path: Path, fit_method: ModelFitMethod
+        self,
+        tmp_path: Path,
+        fit_method: ModelFitMethod,
+        monkeypatch: pytest.MonkeyPatch,
     ):
+        def identity(*args, **kwargs) -> None:
+            return None
+
+        monkeypatch.setattr(
+            speclet_model.SpecletModel, "update_observed_data", identity
+        )
         sp = MockSpecletModelClass(
             "test-model", root_cache_dir=tmp_path, data_manager=MockDataManager()
         )

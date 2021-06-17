@@ -9,6 +9,7 @@ import typer
 from src.command_line_interfaces import cli_helpers
 from src.command_line_interfaces.cli_helpers import ModelOption
 from src.loggers import logger
+from src.project_enums import ModelFitMethod
 
 app = typer.Typer()
 cli_helpers.configure_pretty()
@@ -18,6 +19,7 @@ cli_helpers.configure_pretty()
 def run_sbc(
     model_class: ModelOption,
     name: str,
+    fit_method: ModelFitMethod,
     cache_dir: Path,
     sim_number: int,
     data_size: str,
@@ -54,7 +56,7 @@ def run_sbc(
     cli_helpers.modify_model_by_name(model=model, name=name)
     model.run_simulation_based_calibration(
         cache_dir,
-        fit_method=cli_helpers.extract_fit_method(name),
+        fit_method=fit_method,
         random_seed=sim_number,
         size=data_size,
     )

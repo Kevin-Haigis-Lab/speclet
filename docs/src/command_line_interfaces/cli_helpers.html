@@ -32,7 +32,7 @@
 
 
 from enum import Enum
-from typing import Any, Dict, Type, Union
+from typing import Any, Dict, Type
 
 import pretty_errors
 
@@ -43,8 +43,10 @@ from src.models.speclet_four import SpecletFour
 from src.models.speclet_model import SpecletModel
 from src.models.speclet_one import SpecletOne
 from src.models.speclet_pipeline_test_model import SpecletTestModel
+from src.models.speclet_six import SpecletSix
 from src.models.speclet_three import SpecletThree
 from src.models.speclet_two import SpecletTwo
+from src.project_enums import ModelFitMethod
 
 #### ---- Pretty Errors ---- ####
 
@@ -106,15 +108,29 @@ def get_model_class(model_opt: ModelOption) -&gt; Type[SpecletModel]:
         ModelOption.speclet_three: SpecletThree,
         ModelOption.speclet_four: SpecletFour,
         ModelOption.speclet_five: SpecletFive,
+        ModelOption.speclet_six: SpecletSix,
     }
     return model_option_map[model_opt]
 
 
-class ModelFitMethod(str, Enum):
-    &#34;&#34;&#34;Available fit methods.&#34;&#34;&#34;
+def extract_fit_method(name: str) -&gt; ModelFitMethod:
+    &#34;&#34;&#34;Extract the model fitting method to use based on the unique name of the model.
 
-    advi = &#34;ADVI&#34;
-    mcmc = &#34;MCMC&#34;
+    TODO: test
+
+    Args:
+        name (str): NAme of the model (*not* the type of model).
+
+    Raises:
+        ValueError: Raised if no fitting method is found.
+
+    Returns:
+        ModelFitMethod: The method to use for the fitting the model.
+    &#34;&#34;&#34;
+    for method_name, method_member in ModelFitMethod.__members__.items():
+        if method_name.lower() in name.lower():
+            return method_member
+    raise ValueError(f&#34;Did not find a viable fit method in the model name: &#39;{name}&#39;&#34;)
 
 
 #### ---- Modifying models ---- ####
@@ -133,10 +149,12 @@ def modify_model_by_name(model: Any, name: str) -&gt; None:
     &#34;&#34;&#34;
     if isinstance(model, CeresMimic):
         modify_ceres_model_by_name(model, name)
-    elif isinstance(model, SpecletTwo) or isinstance(model, SpecletThree):
-        modify_speclettwo_and_three_model_by_name(model, name)
     elif isinstance(model, SpecletFour):
         modify_specletfour_model_by_name(model, name)
+    elif isinstance(model, SpecletSix):
+        modify_specletsix_model_by_name(model, name)
+    else:
+        logger.info(&#34;No modifications make to model based on its name.&#34;)
     return None
 
 
@@ -155,20 +173,6 @@ def modify_ceres_model_by_name(model: CeresMimic, name: str) -&gt; None:
         model.sgrna_intercept_cov = True
 
 
-def modify_speclettwo_and_three_model_by_name(
-    model: Union[SpecletTwo, SpecletThree], name: str
-) -&gt; None:
-    &#34;&#34;&#34;Modify a SpecletTwo/Three object based on the user-provided input name.
-
-    Args:
-        model (Union[SpecletTwo, SpecletThree]): The SpecletTwo or SpecletThree model.
-        name (str): User-provided name.
-    &#34;&#34;&#34;
-    if &#34;kras&#34; in name:
-        logger.info(&#34;Including KRAS allele covariate in the model.&#34;)
-        model.kras_cov = True
-
-
 def modify_specletfour_model_by_name(model: SpecletFour, name: str) -&gt; None:
     &#34;&#34;&#34;Modify a SpecletFour object based on the user-provided input name.
 
@@ -178,7 +182,28 @@ def modify_specletfour_model_by_name(model: SpecletFour, name: str) -&gt; None:
     &#34;&#34;&#34;
     if &#34;copy-number&#34; in name or &#34;cn-cov&#34; in name:
         logger.info(&#34;Including copy number covariate in the Sp4 model.&#34;)
-        model.copy_number_cov = True</code></pre>
+        model.copy_number_cov = True
+
+
+def modify_specletsix_model_by_name(model: SpecletSix, name: str) -&gt; None:
+    &#34;&#34;&#34;Modify a SpecletSix object based on the user-provided input name.
+
+    Args:
+        model (SpecletSix): The SpecletSix model.
+        name (str): User-provided name.
+    &#34;&#34;&#34;
+    if &#34;cellcna&#34; in name:
+        logger.info(&#34;Including cell line copy number covariate in the Sp6 model.&#34;)
+        model.cell_line_cna_cov = True
+    if &#34;genecna&#34; in name:
+        logger.info(&#34;Including gene copy number covariate in the Sp6 model.&#34;)
+        model.gene_cna_cov = True
+    if &#34;rna&#34; in name:
+        logger.info(&#34;Including RNA covariate in the Sp6 model.&#34;)
+        model.rna_cov = True
+    if &#34;mutation&#34; in name:
+        logger.info(&#34;Including mutation covariate in the Sp6 model.&#34;)
+        model.mutation_cov = True</code></pre>
 </details>
 </section>
 <section>
@@ -239,6 +264,51 @@ def modify_specletfour_model_by_name(model: SpecletFour, name: str) -&gt; None:
     )</code></pre>
 </details>
 </dd>
+<dt id="src.command_line_interfaces.cli_helpers.extract_fit_method"><code class="name flex">
+<span>def <span class="ident">extract_fit_method</span></span>(<span>name: str) -> <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Extract the model fitting method to use based on the unique name of the model.</p>
+<p>TODO: test</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>NAme of the model (<em>not</em> the type of model).</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>Raised if no fitting method is found.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>ModelFitMethod</code></dt>
+<dd>The method to use for the fitting the model.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def extract_fit_method(name: str) -&gt; ModelFitMethod:
+    &#34;&#34;&#34;Extract the model fitting method to use based on the unique name of the model.
+
+    TODO: test
+
+    Args:
+        name (str): NAme of the model (*not* the type of model).
+
+    Raises:
+        ValueError: Raised if no fitting method is found.
+
+    Returns:
+        ModelFitMethod: The method to use for the fitting the model.
+    &#34;&#34;&#34;
+    for method_name, method_member in ModelFitMethod.__members__.items():
+        if method_name.lower() in name.lower():
+            return method_member
+    raise ValueError(f&#34;Did not find a viable fit method in the model name: &#39;{name}&#39;&#34;)</code></pre>
+</details>
+</dd>
 <dt id="src.command_line_interfaces.cli_helpers.get_model_class"><code class="name flex">
 <span>def <span class="ident">get_model_class</span></span>(<span>model_opt: <a title="src.command_line_interfaces.cli_helpers.ModelOption" href="#src.command_line_interfaces.cli_helpers.ModelOption">ModelOption</a>) -> Type[<a title="src.models.speclet_model.SpecletModel" href="../models/speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a>]</span>
 </code></dt>
@@ -275,6 +345,7 @@ def modify_specletfour_model_by_name(model: SpecletFour, name: str) -&gt; None:
         ModelOption.speclet_three: SpecletThree,
         ModelOption.speclet_four: SpecletFour,
         ModelOption.speclet_five: SpecletFive,
+        ModelOption.speclet_six: SpecletSix,
     }
     return model_option_map[model_opt]</code></pre>
 </details>
@@ -345,10 +416,12 @@ will be sent through the method.</dd>
     &#34;&#34;&#34;
     if isinstance(model, CeresMimic):
         modify_ceres_model_by_name(model, name)
-    elif isinstance(model, SpecletTwo) or isinstance(model, SpecletThree):
-        modify_speclettwo_and_three_model_by_name(model, name)
     elif isinstance(model, SpecletFour):
         modify_specletfour_model_by_name(model, name)
+    elif isinstance(model, SpecletSix):
+        modify_specletsix_model_by_name(model, name)
+    else:
+        logger.info(&#34;No modifications make to model based on its name.&#34;)
     return None</code></pre>
 </details>
 </dd>
@@ -380,15 +453,15 @@ will be sent through the method.</dd>
         model.copy_number_cov = True</code></pre>
 </details>
 </dd>
-<dt id="src.command_line_interfaces.cli_helpers.modify_speclettwo_and_three_model_by_name"><code class="name flex">
-<span>def <span class="ident">modify_speclettwo_and_three_model_by_name</span></span>(<span>model: Union[src.models.speclet_two.SpecletTwo, src.models.speclet_three.SpecletThree], name: str) -> NoneType</span>
+<dt id="src.command_line_interfaces.cli_helpers.modify_specletsix_model_by_name"><code class="name flex">
+<span>def <span class="ident">modify_specletsix_model_by_name</span></span>(<span>model: <a title="src.models.speclet_six.SpecletSix" href="../models/speclet_six.html#src.models.speclet_six.SpecletSix">SpecletSix</a>, name: str) -> NoneType</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Modify a SpecletTwo/Three object based on the user-provided input name.</p>
+<div class="desc"><p>Modify a SpecletSix object based on the user-provided input name.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>model</code></strong> :&ensp;<code>Union[SpecletTwo, SpecletThree]</code></dt>
-<dd>The SpecletTwo or SpecletThree model.</dd>
+<dt><strong><code>model</code></strong> :&ensp;<code>SpecletSix</code></dt>
+<dd>The SpecletSix model.</dd>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
 <dd>User-provided name.</dd>
 </dl></div>
@@ -396,18 +469,25 @@ will be sent through the method.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def modify_speclettwo_and_three_model_by_name(
-    model: Union[SpecletTwo, SpecletThree], name: str
-) -&gt; None:
-    &#34;&#34;&#34;Modify a SpecletTwo/Three object based on the user-provided input name.
+<pre><code class="python">def modify_specletsix_model_by_name(model: SpecletSix, name: str) -&gt; None:
+    &#34;&#34;&#34;Modify a SpecletSix object based on the user-provided input name.
 
     Args:
-        model (Union[SpecletTwo, SpecletThree]): The SpecletTwo or SpecletThree model.
+        model (SpecletSix): The SpecletSix model.
         name (str): User-provided name.
     &#34;&#34;&#34;
-    if &#34;kras&#34; in name:
-        logger.info(&#34;Including KRAS allele covariate in the model.&#34;)
-        model.kras_cov = True</code></pre>
+    if &#34;cellcna&#34; in name:
+        logger.info(&#34;Including cell line copy number covariate in the Sp6 model.&#34;)
+        model.cell_line_cna_cov = True
+    if &#34;genecna&#34; in name:
+        logger.info(&#34;Including gene copy number covariate in the Sp6 model.&#34;)
+        model.gene_cna_cov = True
+    if &#34;rna&#34; in name:
+        logger.info(&#34;Including RNA covariate in the Sp6 model.&#34;)
+        model.rna_cov = True
+    if &#34;mutation&#34; in name:
+        logger.info(&#34;Including mutation covariate in the Sp6 model.&#34;)
+        model.mutation_cov = True</code></pre>
 </details>
 </dd>
 </dl>
@@ -415,39 +495,6 @@ will be sent through the method.</dd>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="src.command_line_interfaces.cli_helpers.ModelFitMethod"><code class="flex name class">
-<span>class <span class="ident">ModelFitMethod</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Available fit methods.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class ModelFitMethod(str, Enum):
-    &#34;&#34;&#34;Available fit methods.&#34;&#34;&#34;
-
-    advi = &#34;ADVI&#34;
-    mcmc = &#34;MCMC&#34;</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.str</li>
-<li>enum.Enum</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="src.command_line_interfaces.cli_helpers.ModelFitMethod.advi"><code class="name">var <span class="ident">advi</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="src.command_line_interfaces.cli_helpers.ModelFitMethod.mcmc"><code class="name">var <span class="ident">mcmc</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
 <dt id="src.command_line_interfaces.cli_helpers.ModelOption"><code class="flex name class">
 <span>class <span class="ident">ModelOption</span></span>
 <span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
@@ -534,22 +581,16 @@ will be sent through the method.</dd>
 <ul class="">
 <li><code><a title="src.command_line_interfaces.cli_helpers.clean_model_names" href="#src.command_line_interfaces.cli_helpers.clean_model_names">clean_model_names</a></code></li>
 <li><code><a title="src.command_line_interfaces.cli_helpers.configure_pretty" href="#src.command_line_interfaces.cli_helpers.configure_pretty">configure_pretty</a></code></li>
+<li><code><a title="src.command_line_interfaces.cli_helpers.extract_fit_method" href="#src.command_line_interfaces.cli_helpers.extract_fit_method">extract_fit_method</a></code></li>
 <li><code><a title="src.command_line_interfaces.cli_helpers.get_model_class" href="#src.command_line_interfaces.cli_helpers.get_model_class">get_model_class</a></code></li>
 <li><code><a title="src.command_line_interfaces.cli_helpers.modify_ceres_model_by_name" href="#src.command_line_interfaces.cli_helpers.modify_ceres_model_by_name">modify_ceres_model_by_name</a></code></li>
 <li><code><a title="src.command_line_interfaces.cli_helpers.modify_model_by_name" href="#src.command_line_interfaces.cli_helpers.modify_model_by_name">modify_model_by_name</a></code></li>
 <li><code><a title="src.command_line_interfaces.cli_helpers.modify_specletfour_model_by_name" href="#src.command_line_interfaces.cli_helpers.modify_specletfour_model_by_name">modify_specletfour_model_by_name</a></code></li>
-<li><code><a title="src.command_line_interfaces.cli_helpers.modify_speclettwo_and_three_model_by_name" href="#src.command_line_interfaces.cli_helpers.modify_speclettwo_and_three_model_by_name">modify_speclettwo_and_three_model_by_name</a></code></li>
+<li><code><a title="src.command_line_interfaces.cli_helpers.modify_specletsix_model_by_name" href="#src.command_line_interfaces.cli_helpers.modify_specletsix_model_by_name">modify_specletsix_model_by_name</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
-<li>
-<h4><code><a title="src.command_line_interfaces.cli_helpers.ModelFitMethod" href="#src.command_line_interfaces.cli_helpers.ModelFitMethod">ModelFitMethod</a></code></h4>
-<ul class="">
-<li><code><a title="src.command_line_interfaces.cli_helpers.ModelFitMethod.advi" href="#src.command_line_interfaces.cli_helpers.ModelFitMethod.advi">advi</a></code></li>
-<li><code><a title="src.command_line_interfaces.cli_helpers.ModelFitMethod.mcmc" href="#src.command_line_interfaces.cli_helpers.ModelFitMethod.mcmc">mcmc</a></code></li>
-</ul>
-</li>
 <li>
 <h4><code><a title="src.command_line_interfaces.cli_helpers.ModelOption" href="#src.command_line_interfaces.cli_helpers.ModelOption">ModelOption</a></code></h4>
 <ul class="two-column">

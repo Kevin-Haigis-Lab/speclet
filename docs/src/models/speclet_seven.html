@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>src.models.speclet_seven API documentation</title>
+<meta name="description" content="Speclet Model Six." />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS_CHTML'></script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>src.models.speclet_seven</code></h1>
+</header>
+<section id="section-intro">
+<p>Speclet Model Six.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Speclet Model Six.&#34;&#34;&#34;
+
+from pathlib import Path
+from typing import Optional, Tuple
+
+import pymc3 as pm
+from theano import shared as ts
+from theano import tensor
+
+from src.data_processing import achilles as achelp
+from src.loggers import logger
+from src.managers.model_data_managers import CrcDataManager, DataManager
+from src.models.speclet_model import ReplacementsDict, SpecletModel
+
+
+class SpecletSeven(SpecletModel):
+    &#34;&#34;&#34;SpecletSeven Model.
+
+    $$
+    \\begin{aligned}
+    lfc &amp;\\sim N(\\mu, \\sigma) \\\\
+    \\mu &amp;= a_{s,c} \\quad \\sigma \\sim HN(1) \\\\
+    a_{s,c} &amp;\\sim N(\\mu_a, \\sigma_a)_{s,c} \\\\
+    \\mu_a &amp;\\sim N(\\mu_{\\mu_a}, \\sigma_{\\mu_a})_{g,c}
+      \\quad \\sigma_a \\sim HN(\\sigma_{\\sigma_a})_{s}
+      \\quad \\sigma_{\\sigma_a} \\sim HN(1) \\\\
+    \\mu_{\\mu_a} &amp;\\sim N(\\mu_{\\mu_{\\mu_a}}, \\sigma_{\\mu_{\\mu_a}})_{g,l}
+      \\quad \\sigma_{\\mu_a} \\sim HN(\\sigma_{\\sigma_{\\mu_a}})_{c}
+      \\quad \\sigma_{\\sigma_{\\mu_a}} \\sim HN(1)_{c} \\\\
+    \\mu_{\\mu_{\\mu_a}} &amp;\\sim N(0, 1)
+      \\quad \\sigma_{\\mu_{\\mu_a}} \\sim HN(1)
+    \\end{aligned}
+    $$
+
+    where:
+
+    - s: sgRNA
+    - g: gene
+    - c: cell line
+    - l: cell line lineage
+    &#34;&#34;&#34;
+
+    def __init__(
+        self,
+        name: str,
+        root_cache_dir: Optional[Path] = None,
+        debug: bool = False,
+        data_manager: Optional[DataManager] = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;Instantiate a SpecletSeven model.
+
+        Args:
+            name (str): A unique identifier for this instance of SpecletSeven. (Used
+              for cache management.)
+            root_cache_dir (Optional[Path], optional): The directory for caching
+              sampling/fitting results. Defaults to None.
+            debug (bool, optional): Are you in debug mode? Defaults to False.
+            data_manager (Optional[DataManager], optional): Object that will manage the
+              data. If None (default), a `CrcDataManager` is created automatically.
+        &#34;&#34;&#34;
+        logger.debug(&#34;Instantiating a SpecletSeven model.&#34;)
+        if data_manager is None:
+            logger.debug(&#34;Creating a data manager since none was supplied.&#34;)
+            data_manager = CrcDataManager(debug=debug)
+
+        super().__init__(
+            name=&#34;speclet-six_&#34; + name,
+            root_cache_dir=root_cache_dir,
+            debug=debug,
+            data_manager=data_manager,
+        )
+
+    def model_specification(self) -&gt; Tuple[pm.Model, str]:
+        &#34;&#34;&#34;Build SpecletSeven model.
+
+        Returns:
+            Tuple[pm.Model, str]: The model and name of the observed variable.
+        &#34;&#34;&#34;
+        logger.info(&#34;Beginning PyMC3 model specification.&#34;)
+        data = self.data_manager.get_data()
+
+        total_size = data.shape[0]
+        co_idx = achelp.common_indices(data)
+
+        # Shared Theano variables
+        logger.info(&#34;Getting Theano shared variables.&#34;)
+        sgrna_idx_shared = ts(co_idx.sgrna_idx)
+        sgrna_to_gene_idx_shared = ts(co_idx.sgrna_to_gene_idx)
+        cellline_idx_shared = ts(co_idx.cellline_idx)
+        cellline_to_lineage_idx_shared = ts(co_idx.cellline_to_lineage_idx)
+        lfc_shared = ts(data.lfc.values)
+
+        self.shared_vars = {
+            &#34;sgrna_idx_shared&#34;: sgrna_idx_shared,
+            &#34;sgrna_to_gene_idx_shared&#34;: sgrna_to_gene_idx_shared,
+            &#34;cellline_idx_shared&#34;: cellline_idx_shared,
+            &#34;cellline_to_lineage_idx_shared&#34;: cellline_to_lineage_idx_shared,
+            &#34;lfc_shared&#34;: lfc_shared,
+        }
+
+        logger.info(&#34;Creating PyMC3 model for SpecletSeven.&#34;)
+        logger.warning(
+            &#34;Still need to implement varying effect for source on batch effect.&#34;
+        )
+
+        with pm.Model() as model:
+            μ_μ_μ_a = pm.Normal(&#34;μ_μ_μ_a&#34;, 0, 1)
+            σ_μ_μ_a = pm.HalfNormal(&#34;σ_μ_μ_a&#34;, 1)
+
+            μ_μ_a_offset = pm.Normal(
+                &#34;μ_μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
+            )
+            μ_μ_a = pm.Deterministic(&#34;μ_μ_a&#34;, μ_μ_μ_a + μ_μ_a_offset * σ_μ_μ_a)
+            σ_σ_μ_a = pm.HalfNormal(&#34;σ_σ_μ_a&#34;, 1)
+            σ_μ_a = pm.HalfNormal(&#34;σ_μ_a&#34;, σ_σ_μ_a, shape=(1, co_idx.n_celllines))
+
+            μ_a_offset = pm.Normal(
+                &#34;μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+            )
+            μ_a = pm.Deterministic(
+                &#34;μ_a&#34;,
+                μ_μ_a[:, cellline_to_lineage_idx_shared]
+                + μ_a_offset
+                * tensor.ones(shape=(co_idx.n_genes, co_idx.n_celllines))
+                * σ_μ_a,
+            )
+            σ_σ_a = pm.HalfNormal(&#34;σ_σ_a&#34;, 1)
+            σ_a = pm.HalfNormal(&#34;σ_a&#34;, σ_σ_a, shape=(co_idx.n_sgrnas, 1))
+            a_offset = pm.Normal(
+                &#34;a_offset&#34;, 0, 1, shape=(co_idx.n_sgrnas, co_idx.n_celllines)
+            )
+            a = pm.Deterministic(&#34;a&#34;, μ_a[sgrna_to_gene_idx_shared, :] + a_offset * σ_a)
+
+            μ = pm.Deterministic(&#34;μ&#34;, a[sgrna_idx_shared, cellline_idx_shared])
+
+            # Standard deviation of log-fold change, varies per batch.
+            σ = pm.HalfNormal(&#34;σ&#34;, 1)
+
+            lfc = pm.Normal(  # noqa: F841
+                &#34;lfc&#34;,
+                μ,
+                σ,
+                observed=lfc_shared,
+                total_size=total_size,
+            )
+
+        logger.debug(&#34;Finished building model.&#34;)
+
+        return model, &#34;lfc&#34;
+
+    def get_replacement_parameters(self) -&gt; ReplacementsDict:
+        &#34;&#34;&#34;Make a dictionary mapping the shared data variables to new data.
+
+        Raises:
+            AttributeError: Raised if there is no data manager.
+            AttributeError: Raised if there are no shared variables.
+
+        Returns:
+            ReplacementsDict: A dictionary mapping new data to shared variables.
+        &#34;&#34;&#34;
+        logger.debug(&#34;Making dictionary of replacement parameters.&#34;)
+        if self.data_manager is None:
+            raise AttributeError(
+                &#34;Cannot create replacement parameters without a DataManager.&#34;
+            )
+        if self.shared_vars is None:
+            raise AttributeError(
+                &#34;No shared variables - cannot create replacement parameters..&#34;
+            )
+
+        data = self.data_manager.get_data()
+        mb_size = self.data_manager.get_batch_size()
+        co_idx = achelp.common_indices(data)
+
+        sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=mb_size)
+        cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=mb_size)
+        lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=mb_size)
+
+        return {
+            self.shared_vars[&#34;sgrna_idx_shared&#34;]: sgrna_idx_batch,
+            self.shared_vars[&#34;cellline_idx_shared&#34;]: cellline_idx_batch,
+            self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
+        }
+
+    def update_mcmc_sampling_parameters(self) -&gt; None:
+        &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
+        logger.info(&#34;Updating the MCMC sampling parameters.&#34;)
+        self.mcmc_sampling_params.draws = 4000
+        self.mcmc_sampling_params.tune = 2000
+        self.mcmc_sampling_params.target_accept = 0.99
+        return None
+
+    def update_advi_sampling_parameters(self) -&gt; None:
+        &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
+        logger.info(&#34;Updating the ADVI fitting parameters.&#34;)
+        parameter_adjustment_map = {True: 40000, False: 100000}
+        self.advi_sampling_params.n_iterations = parameter_adjustment_map[self.debug]
+        return None</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="src.models.speclet_seven.SpecletSeven"><code class="flex name class">
+<span>class <span class="ident">SpecletSeven</span></span>
+<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>SpecletSeven Model.</p>
+<p><span><span class="MathJax_Preview">
+\begin{aligned}
+lfc &amp;\sim N(\mu, \sigma) \\
+\mu &amp;= a_{s,c} \quad \sigma \sim HN(1) \\
+a_{s,c} &amp;\sim N(\mu_a, \sigma_a)_{s,c} \\
+\mu_a &amp;\sim N(\mu_{\mu_a}, \sigma_{\mu_a})_{g,c}
+\quad \sigma_a \sim HN(\sigma_{\sigma_a})_{s}
+\quad \sigma_{\sigma_a} \sim HN(1) \\
+\mu_{\mu_a} &amp;\sim N(\mu_{\mu_{\mu_a}}, \sigma_{\mu_{\mu_a}})_{g,l}
+\quad \sigma_{\mu_a} \sim HN(\sigma_{\sigma_{\mu_a}})_{c}
+\quad \sigma_{\sigma_{\mu_a}} \sim HN(1)_{c} \\
+\mu_{\mu_{\mu_a}} &amp;\sim N(0, 1)
+\quad \sigma_{\mu_{\mu_a}} \sim HN(1)
+\end{aligned}
+</span><script type="math/tex; mode=display">
+\begin{aligned}
+lfc &\sim N(\mu, \sigma) \\
+\mu &= a_{s,c} \quad \sigma \sim HN(1) \\
+a_{s,c} &\sim N(\mu_a, \sigma_a)_{s,c} \\
+\mu_a &\sim N(\mu_{\mu_a}, \sigma_{\mu_a})_{g,c}
+\quad \sigma_a \sim HN(\sigma_{\sigma_a})_{s}
+\quad \sigma_{\sigma_a} \sim HN(1) \\
+\mu_{\mu_a} &\sim N(\mu_{\mu_{\mu_a}}, \sigma_{\mu_{\mu_a}})_{g,l}
+\quad \sigma_{\mu_a} \sim HN(\sigma_{\sigma_{\mu_a}})_{c}
+\quad \sigma_{\sigma_{\mu_a}} \sim HN(1)_{c} \\
+\mu_{\mu_{\mu_a}} &\sim N(0, 1)
+\quad \sigma_{\mu_{\mu_a}} \sim HN(1)
+\end{aligned}
+</script></span></p>
+<p>where:</p>
+<ul>
+<li>s: sgRNA</li>
+<li>g: gene</li>
+<li>c: cell line</li>
+<li>l: cell line lineage</li>
+</ul>
+<p>Instantiate a SpecletSeven model.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>A unique identifier for this instance of SpecletSeven. (Used
+for cache management.)</dd>
+<dt><strong><code>root_cache_dir</code></strong> :&ensp;<code>Optional[Path]</code>, optional</dt>
+<dd>The directory for caching
+sampling/fitting results. Defaults to None.</dd>
+<dt><strong><code>debug</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Are you in debug mode? Defaults to False.</dd>
+<dt><strong><code>data_manager</code></strong> :&ensp;<code>Optional[DataManager]</code>, optional</dt>
+<dd>Object that will manage the
+data. If None (default), a <code>CrcDataManager</code> is created automatically.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SpecletSeven(SpecletModel):
+    &#34;&#34;&#34;SpecletSeven Model.
+
+    $$
+    \\begin{aligned}
+    lfc &amp;\\sim N(\\mu, \\sigma) \\\\
+    \\mu &amp;= a_{s,c} \\quad \\sigma \\sim HN(1) \\\\
+    a_{s,c} &amp;\\sim N(\\mu_a, \\sigma_a)_{s,c} \\\\
+    \\mu_a &amp;\\sim N(\\mu_{\\mu_a}, \\sigma_{\\mu_a})_{g,c}
+      \\quad \\sigma_a \\sim HN(\\sigma_{\\sigma_a})_{s}
+      \\quad \\sigma_{\\sigma_a} \\sim HN(1) \\\\
+    \\mu_{\\mu_a} &amp;\\sim N(\\mu_{\\mu_{\\mu_a}}, \\sigma_{\\mu_{\\mu_a}})_{g,l}
+      \\quad \\sigma_{\\mu_a} \\sim HN(\\sigma_{\\sigma_{\\mu_a}})_{c}
+      \\quad \\sigma_{\\sigma_{\\mu_a}} \\sim HN(1)_{c} \\\\
+    \\mu_{\\mu_{\\mu_a}} &amp;\\sim N(0, 1)
+      \\quad \\sigma_{\\mu_{\\mu_a}} \\sim HN(1)
+    \\end{aligned}
+    $$
+
+    where:
+
+    - s: sgRNA
+    - g: gene
+    - c: cell line
+    - l: cell line lineage
+    &#34;&#34;&#34;
+
+    def __init__(
+        self,
+        name: str,
+        root_cache_dir: Optional[Path] = None,
+        debug: bool = False,
+        data_manager: Optional[DataManager] = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;Instantiate a SpecletSeven model.
+
+        Args:
+            name (str): A unique identifier for this instance of SpecletSeven. (Used
+              for cache management.)
+            root_cache_dir (Optional[Path], optional): The directory for caching
+              sampling/fitting results. Defaults to None.
+            debug (bool, optional): Are you in debug mode? Defaults to False.
+            data_manager (Optional[DataManager], optional): Object that will manage the
+              data. If None (default), a `CrcDataManager` is created automatically.
+        &#34;&#34;&#34;
+        logger.debug(&#34;Instantiating a SpecletSeven model.&#34;)
+        if data_manager is None:
+            logger.debug(&#34;Creating a data manager since none was supplied.&#34;)
+            data_manager = CrcDataManager(debug=debug)
+
+        super().__init__(
+            name=&#34;speclet-six_&#34; + name,
+            root_cache_dir=root_cache_dir,
+            debug=debug,
+            data_manager=data_manager,
+        )
+
+    def model_specification(self) -&gt; Tuple[pm.Model, str]:
+        &#34;&#34;&#34;Build SpecletSeven model.
+
+        Returns:
+            Tuple[pm.Model, str]: The model and name of the observed variable.
+        &#34;&#34;&#34;
+        logger.info(&#34;Beginning PyMC3 model specification.&#34;)
+        data = self.data_manager.get_data()
+
+        total_size = data.shape[0]
+        co_idx = achelp.common_indices(data)
+
+        # Shared Theano variables
+        logger.info(&#34;Getting Theano shared variables.&#34;)
+        sgrna_idx_shared = ts(co_idx.sgrna_idx)
+        sgrna_to_gene_idx_shared = ts(co_idx.sgrna_to_gene_idx)
+        cellline_idx_shared = ts(co_idx.cellline_idx)
+        cellline_to_lineage_idx_shared = ts(co_idx.cellline_to_lineage_idx)
+        lfc_shared = ts(data.lfc.values)
+
+        self.shared_vars = {
+            &#34;sgrna_idx_shared&#34;: sgrna_idx_shared,
+            &#34;sgrna_to_gene_idx_shared&#34;: sgrna_to_gene_idx_shared,
+            &#34;cellline_idx_shared&#34;: cellline_idx_shared,
+            &#34;cellline_to_lineage_idx_shared&#34;: cellline_to_lineage_idx_shared,
+            &#34;lfc_shared&#34;: lfc_shared,
+        }
+
+        logger.info(&#34;Creating PyMC3 model for SpecletSeven.&#34;)
+        logger.warning(
+            &#34;Still need to implement varying effect for source on batch effect.&#34;
+        )
+
+        with pm.Model() as model:
+            μ_μ_μ_a = pm.Normal(&#34;μ_μ_μ_a&#34;, 0, 1)
+            σ_μ_μ_a = pm.HalfNormal(&#34;σ_μ_μ_a&#34;, 1)
+
+            μ_μ_a_offset = pm.Normal(
+                &#34;μ_μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
+            )
+            μ_μ_a = pm.Deterministic(&#34;μ_μ_a&#34;, μ_μ_μ_a + μ_μ_a_offset * σ_μ_μ_a)
+            σ_σ_μ_a = pm.HalfNormal(&#34;σ_σ_μ_a&#34;, 1)
+            σ_μ_a = pm.HalfNormal(&#34;σ_μ_a&#34;, σ_σ_μ_a, shape=(1, co_idx.n_celllines))
+
+            μ_a_offset = pm.Normal(
+                &#34;μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+            )
+            μ_a = pm.Deterministic(
+                &#34;μ_a&#34;,
+                μ_μ_a[:, cellline_to_lineage_idx_shared]
+                + μ_a_offset
+                * tensor.ones(shape=(co_idx.n_genes, co_idx.n_celllines))
+                * σ_μ_a,
+            )
+            σ_σ_a = pm.HalfNormal(&#34;σ_σ_a&#34;, 1)
+            σ_a = pm.HalfNormal(&#34;σ_a&#34;, σ_σ_a, shape=(co_idx.n_sgrnas, 1))
+            a_offset = pm.Normal(
+                &#34;a_offset&#34;, 0, 1, shape=(co_idx.n_sgrnas, co_idx.n_celllines)
+            )
+            a = pm.Deterministic(&#34;a&#34;, μ_a[sgrna_to_gene_idx_shared, :] + a_offset * σ_a)
+
+            μ = pm.Deterministic(&#34;μ&#34;, a[sgrna_idx_shared, cellline_idx_shared])
+
+            # Standard deviation of log-fold change, varies per batch.
+            σ = pm.HalfNormal(&#34;σ&#34;, 1)
+
+            lfc = pm.Normal(  # noqa: F841
+                &#34;lfc&#34;,
+                μ,
+                σ,
+                observed=lfc_shared,
+                total_size=total_size,
+            )
+
+        logger.debug(&#34;Finished building model.&#34;)
+
+        return model, &#34;lfc&#34;
+
+    def get_replacement_parameters(self) -&gt; ReplacementsDict:
+        &#34;&#34;&#34;Make a dictionary mapping the shared data variables to new data.
+
+        Raises:
+            AttributeError: Raised if there is no data manager.
+            AttributeError: Raised if there are no shared variables.
+
+        Returns:
+            ReplacementsDict: A dictionary mapping new data to shared variables.
+        &#34;&#34;&#34;
+        logger.debug(&#34;Making dictionary of replacement parameters.&#34;)
+        if self.data_manager is None:
+            raise AttributeError(
+                &#34;Cannot create replacement parameters without a DataManager.&#34;
+            )
+        if self.shared_vars is None:
+            raise AttributeError(
+                &#34;No shared variables - cannot create replacement parameters..&#34;
+            )
+
+        data = self.data_manager.get_data()
+        mb_size = self.data_manager.get_batch_size()
+        co_idx = achelp.common_indices(data)
+
+        sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=mb_size)
+        cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=mb_size)
+        lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=mb_size)
+
+        return {
+            self.shared_vars[&#34;sgrna_idx_shared&#34;]: sgrna_idx_batch,
+            self.shared_vars[&#34;cellline_idx_shared&#34;]: cellline_idx_batch,
+            self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
+        }
+
+    def update_mcmc_sampling_parameters(self) -&gt; None:
+        &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
+        logger.info(&#34;Updating the MCMC sampling parameters.&#34;)
+        self.mcmc_sampling_params.draws = 4000
+        self.mcmc_sampling_params.tune = 2000
+        self.mcmc_sampling_params.target_accept = 0.99
+        return None
+
+    def update_advi_sampling_parameters(self) -&gt; None:
+        &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
+        logger.info(&#34;Updating the ADVI fitting parameters.&#34;)
+        parameter_adjustment_map = {True: 40000, False: 100000}
+        self.advi_sampling_params.n_iterations = parameter_adjustment_map[self.debug]
+        return None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="src.models.speclet_model.SpecletModel" href="speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="src.models.speclet_seven.SpecletSeven.get_replacement_parameters"><code class="name flex">
+<span>def <span class="ident">get_replacement_parameters</span></span>(<span>self) -> Dict[theano.tensor.sharedvar.TensorSharedVariable, Union[pymc3.data.Minibatch, numpy.ndarray]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Make a dictionary mapping the shared data variables to new data.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>AttributeError</code></dt>
+<dd>Raised if there is no data manager.</dd>
+<dt><code>AttributeError</code></dt>
+<dd>Raised if there are no shared variables.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>ReplacementsDict</code></dt>
+<dd>A dictionary mapping new data to shared variables.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_replacement_parameters(self) -&gt; ReplacementsDict:
+    &#34;&#34;&#34;Make a dictionary mapping the shared data variables to new data.
+
+    Raises:
+        AttributeError: Raised if there is no data manager.
+        AttributeError: Raised if there are no shared variables.
+
+    Returns:
+        ReplacementsDict: A dictionary mapping new data to shared variables.
+    &#34;&#34;&#34;
+    logger.debug(&#34;Making dictionary of replacement parameters.&#34;)
+    if self.data_manager is None:
+        raise AttributeError(
+            &#34;Cannot create replacement parameters without a DataManager.&#34;
+        )
+    if self.shared_vars is None:
+        raise AttributeError(
+            &#34;No shared variables - cannot create replacement parameters..&#34;
+        )
+
+    data = self.data_manager.get_data()
+    mb_size = self.data_manager.get_batch_size()
+    co_idx = achelp.common_indices(data)
+
+    sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=mb_size)
+    cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=mb_size)
+    lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=mb_size)
+
+    return {
+        self.shared_vars[&#34;sgrna_idx_shared&#34;]: sgrna_idx_batch,
+        self.shared_vars[&#34;cellline_idx_shared&#34;]: cellline_idx_batch,
+        self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
+    }</code></pre>
+</details>
+</dd>
+<dt id="src.models.speclet_seven.SpecletSeven.model_specification"><code class="name flex">
+<span>def <span class="ident">model_specification</span></span>(<span>self) -> Tuple[pymc3.model.Model, str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Build SpecletSeven model.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tuple[pm.Model, str]</code></dt>
+<dd>The model and name of the observed variable.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def model_specification(self) -&gt; Tuple[pm.Model, str]:
+    &#34;&#34;&#34;Build SpecletSeven model.
+
+    Returns:
+        Tuple[pm.Model, str]: The model and name of the observed variable.
+    &#34;&#34;&#34;
+    logger.info(&#34;Beginning PyMC3 model specification.&#34;)
+    data = self.data_manager.get_data()
+
+    total_size = data.shape[0]
+    co_idx = achelp.common_indices(data)
+
+    # Shared Theano variables
+    logger.info(&#34;Getting Theano shared variables.&#34;)
+    sgrna_idx_shared = ts(co_idx.sgrna_idx)
+    sgrna_to_gene_idx_shared = ts(co_idx.sgrna_to_gene_idx)
+    cellline_idx_shared = ts(co_idx.cellline_idx)
+    cellline_to_lineage_idx_shared = ts(co_idx.cellline_to_lineage_idx)
+    lfc_shared = ts(data.lfc.values)
+
+    self.shared_vars = {
+        &#34;sgrna_idx_shared&#34;: sgrna_idx_shared,
+        &#34;sgrna_to_gene_idx_shared&#34;: sgrna_to_gene_idx_shared,
+        &#34;cellline_idx_shared&#34;: cellline_idx_shared,
+        &#34;cellline_to_lineage_idx_shared&#34;: cellline_to_lineage_idx_shared,
+        &#34;lfc_shared&#34;: lfc_shared,
+    }
+
+    logger.info(&#34;Creating PyMC3 model for SpecletSeven.&#34;)
+    logger.warning(
+        &#34;Still need to implement varying effect for source on batch effect.&#34;
+    )
+
+    with pm.Model() as model:
+        μ_μ_μ_a = pm.Normal(&#34;μ_μ_μ_a&#34;, 0, 1)
+        σ_μ_μ_a = pm.HalfNormal(&#34;σ_μ_μ_a&#34;, 1)
+
+        μ_μ_a_offset = pm.Normal(
+            &#34;μ_μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
+        )
+        μ_μ_a = pm.Deterministic(&#34;μ_μ_a&#34;, μ_μ_μ_a + μ_μ_a_offset * σ_μ_μ_a)
+        σ_σ_μ_a = pm.HalfNormal(&#34;σ_σ_μ_a&#34;, 1)
+        σ_μ_a = pm.HalfNormal(&#34;σ_μ_a&#34;, σ_σ_μ_a, shape=(1, co_idx.n_celllines))
+
+        μ_a_offset = pm.Normal(
+            &#34;μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+        )
+        μ_a = pm.Deterministic(
+            &#34;μ_a&#34;,
+            μ_μ_a[:, cellline_to_lineage_idx_shared]
+            + μ_a_offset
+            * tensor.ones(shape=(co_idx.n_genes, co_idx.n_celllines))
+            * σ_μ_a,
+        )
+        σ_σ_a = pm.HalfNormal(&#34;σ_σ_a&#34;, 1)
+        σ_a = pm.HalfNormal(&#34;σ_a&#34;, σ_σ_a, shape=(co_idx.n_sgrnas, 1))
+        a_offset = pm.Normal(
+            &#34;a_offset&#34;, 0, 1, shape=(co_idx.n_sgrnas, co_idx.n_celllines)
+        )
+        a = pm.Deterministic(&#34;a&#34;, μ_a[sgrna_to_gene_idx_shared, :] + a_offset * σ_a)
+
+        μ = pm.Deterministic(&#34;μ&#34;, a[sgrna_idx_shared, cellline_idx_shared])
+
+        # Standard deviation of log-fold change, varies per batch.
+        σ = pm.HalfNormal(&#34;σ&#34;, 1)
+
+        lfc = pm.Normal(  # noqa: F841
+            &#34;lfc&#34;,
+            μ,
+            σ,
+            observed=lfc_shared,
+            total_size=total_size,
+        )
+
+    logger.debug(&#34;Finished building model.&#34;)
+
+    return model, &#34;lfc&#34;</code></pre>
+</details>
+</dd>
+<dt id="src.models.speclet_seven.SpecletSeven.update_advi_sampling_parameters"><code class="name flex">
+<span>def <span class="ident">update_advi_sampling_parameters</span></span>(<span>self) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adjust the ADVI parameters depending on the state of the object.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def update_advi_sampling_parameters(self) -&gt; None:
+    &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
+    logger.info(&#34;Updating the ADVI fitting parameters.&#34;)
+    parameter_adjustment_map = {True: 40000, False: 100000}
+    self.advi_sampling_params.n_iterations = parameter_adjustment_map[self.debug]
+    return None</code></pre>
+</details>
+</dd>
+<dt id="src.models.speclet_seven.SpecletSeven.update_mcmc_sampling_parameters"><code class="name flex">
+<span>def <span class="ident">update_mcmc_sampling_parameters</span></span>(<span>self) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adjust the ADVI parameters depending on the state of the object.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def update_mcmc_sampling_parameters(self) -&gt; None:
+    &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
+    logger.info(&#34;Updating the MCMC sampling parameters.&#34;)
+    self.mcmc_sampling_params.draws = 4000
+    self.mcmc_sampling_params.tune = 2000
+    self.mcmc_sampling_params.target_accept = 0.99
+    return None</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="src.models.speclet_model.SpecletModel" href="speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a></b></code>:
+<ul class="hlist">
+<li><code><a title="src.models.speclet_model.SpecletModel.advi_sample_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.advi_sample_model">advi_sample_model</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.build_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.build_model">build_model</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.clear_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.clear_cache">clear_cache</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.debug" href="speclet_model.html#src.models.speclet_model.SpecletModel.debug">debug</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.get_advi_callbacks" href="speclet_model.html#src.models.speclet_model.SpecletModel.get_advi_callbacks">get_advi_callbacks</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.mcmc_sample_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.mcmc_sample_model">mcmc_sample_model</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.run_simulation_based_calibration" href="speclet_model.html#src.models.speclet_model.SpecletModel.run_simulation_based_calibration">run_simulation_based_calibration</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.write_advi_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_advi_cache">write_advi_cache</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.write_mcmc_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_mcmc_cache">write_mcmc_cache</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="src.models" href="index.html">src.models</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="src.models.speclet_seven.SpecletSeven" href="#src.models.speclet_seven.SpecletSeven">SpecletSeven</a></code></h4>
+<ul class="">
+<li><code><a title="src.models.speclet_seven.SpecletSeven.get_replacement_parameters" href="#src.models.speclet_seven.SpecletSeven.get_replacement_parameters">get_replacement_parameters</a></code></li>
+<li><code><a title="src.models.speclet_seven.SpecletSeven.model_specification" href="#src.models.speclet_seven.SpecletSeven.model_specification">model_specification</a></code></li>
+<li><code><a title="src.models.speclet_seven.SpecletSeven.update_advi_sampling_parameters" href="#src.models.speclet_seven.SpecletSeven.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>
+<li><code><a title="src.models.speclet_seven.SpecletSeven.update_mcmc_sampling_parameters" href="#src.models.speclet_seven.SpecletSeven.update_mcmc_sampling_parameters">update_mcmc_sampling_parameters</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

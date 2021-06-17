@@ -146,6 +146,11 @@ class SBCFileManager:
                 return False
         return True
 
+    def clear_results(self) -> None:
+        """Clear the stored SBC results (if they exist)."""
+        if self.dir.exists():
+            self.dir.rmdir()
+
 
 def generate_mock_sgrna_gene_map(n_genes: int, n_sgrnas_per_gene: int) -> pd.DataFrame:
     """Generate a fake sgRNA-gene map.

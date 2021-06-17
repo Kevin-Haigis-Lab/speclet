@@ -36,22 +36,11 @@ from typing import List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel
-from scipy import stats
 
 from src.data_processing import common as dphelp
+from src.data_processing.vectors import careful_zscore, squish_array
 
 #### ---- Data manipulation ---- ####
-
-
-def _zscale(x: np.ndarray) -&gt; np.ndarray:
-    return stats.zscore(x)
-
-
-def _squish(x: float, lower: float, upper: float) -&gt; float:
-    return max(min(x, upper), lower)
-
-
-_squish_array = np.vectorize(_squish)
 
 
 def zscale_cna_by_group(
@@ -62,9 +51,6 @@ def zscale_cna_by_group(
     cn_max: Optional[float] = None,
 ) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Z-scale the copy number values.
-
-    TODO: Address the same concerns as accounted for in `zscale_rna_expression()`.
-    TODO: Use hypothesis to test.
 
     Args:
         df (pd.DataFrame): The DataFrame to modify.
@@ -82,17 +68,18 @@ def zscale_cna_by_group(
         pd.DataFrame: The modified DataFrame.
     &#34;&#34;&#34;
     if cn_max is not None and cn_max &gt; 0:
-        df[new_col] = df[cn_col].apply(lambda x: np.min((x, cn_max)))
+        df[new_col] = squish_array(df[cn_col].values, lower=0, upper=cn_max)
     else:
         df[new_col] = df[cn_col]
 
-    def z_scale(x: pd.Series) -&gt; pd.Series:
-        return _zscale(x)
+    def zscore_cna_col(d: pd.DataFrame):
+        d[new_col] = careful_zscore(d[new_col].values)
+        return d
 
-    if groupby_cols is not None:
-        df[new_col] = df.groupby(list(groupby_cols))[new_col].apply(z_scale)
+    if groupby_cols is None:
+        df = zscore_cna_col(df)
     else:
-        df[new_col] = df[new_col].apply(z_scale)
+        df = df.groupby(list(groupby_cols)).apply(zscore_cna_col)
 
     return df
 
@@ -128,25 +115,12 @@ def zscale_rna_expression(
         new_col = rna_col + &#34;_z&#34;
 
     rna = df[rna_col].values
-
-    if len(rna) == 1:
-        # If there is only one value, set z-scaled expr to 0.
-        df[new_col] = 0
-        return df
-
-    if np.allclose(rna, 0.0, atol=0.01):
-        # If all values are close to 0, set value to 0.
-        df[new_col] = 0
-    elif np.allclose(rna, np.mean(rna), atol=0.01):
-        # If all values are about equal, set value to 0.
-        df[new_col] = 0
-
-    else:
-        df[new_col] = _zscale(np.log10(rna + 1))
+    rna_z = careful_zscore(rna, atol=0.01, transform=lambda x: np.log10(x + 1))
 
     if lower_bound is not None and upper_bound is not None:
-        df[new_col] = _squish_array(df[new_col], lower=lower_bound, upper=upper_bound)
+        rna_z = squish_array(rna_z, lower=lower_bound, upper=upper_bound)
 
+    df[new_col] = rna_z
     return df
 
 
@@ -1000,8 +974,6 @@ Defaults to None.</dd>
 </code></dt>
 <dd>
 <div class="desc"><p>Z-scale the copy number values.</p>
-<p>TODO: Address the same concerns as accounted for in <code><a title="src.data_processing.achilles.zscale_rna_expression" href="#src.data_processing.achilles.zscale_rna_expression">zscale_rna_expression()</a></code>.
-TODO: Use hypothesis to test.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
@@ -1038,9 +1010,6 @@ Defaults to None.</dd>
 ) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Z-scale the copy number values.
 
-    TODO: Address the same concerns as accounted for in `zscale_rna_expression()`.
-    TODO: Use hypothesis to test.
-
     Args:
         df (pd.DataFrame): The DataFrame to modify.
         cn_col (str, optional): Column with the gene copy number values.
@@ -1057,17 +1026,18 @@ Defaults to None.</dd>
         pd.DataFrame: The modified DataFrame.
     &#34;&#34;&#34;
     if cn_max is not None and cn_max &gt; 0:
-        df[new_col] = df[cn_col].apply(lambda x: np.min((x, cn_max)))
+        df[new_col] = squish_array(df[cn_col].values, lower=0, upper=cn_max)
     else:
         df[new_col] = df[cn_col]
 
-    def z_scale(x: pd.Series) -&gt; pd.Series:
-        return _zscale(x)
+    def zscore_cna_col(d: pd.DataFrame):
+        d[new_col] = careful_zscore(d[new_col].values)
+        return d
 
-    if groupby_cols is not None:
-        df[new_col] = df.groupby(list(groupby_cols))[new_col].apply(z_scale)
+    if groupby_cols is None:
+        df = zscore_cna_col(df)
     else:
-        df[new_col] = df[new_col].apply(z_scale)
+        df = df.groupby(list(groupby_cols)).apply(zscore_cna_col)
 
     return df</code></pre>
 </details>
@@ -1137,25 +1107,12 @@ expression values.</dd>
         new_col = rna_col + &#34;_z&#34;
 
     rna = df[rna_col].values
-
-    if len(rna) == 1:
-        # If there is only one value, set z-scaled expr to 0.
-        df[new_col] = 0
-        return df
-
-    if np.allclose(rna, 0.0, atol=0.01):
-        # If all values are close to 0, set value to 0.
-        df[new_col] = 0
-    elif np.allclose(rna, np.mean(rna), atol=0.01):
-        # If all values are about equal, set value to 0.
-        df[new_col] = 0
-
-    else:
-        df[new_col] = _zscale(np.log10(rna + 1))
+    rna_z = careful_zscore(rna, atol=0.01, transform=lambda x: np.log10(x + 1))
 
     if lower_bound is not None and upper_bound is not None:
-        df[new_col] = _squish_array(df[new_col], lower=lower_bound, upper=upper_bound)
+        rna_z = squish_array(rna_z, lower=lower_bound, upper=upper_bound)
 
+    df[new_col] = rna_z
     return df</code></pre>
 </details>
 </dd>
