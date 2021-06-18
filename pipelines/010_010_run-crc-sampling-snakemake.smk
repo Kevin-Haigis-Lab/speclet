@@ -2,11 +2,15 @@
 
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 import papermill
 
-import run_sampling_utils as utils
-from pipeline_classes import ModelOption, ModelFitMethod, ModelConfig
+from src.managers.model_fitting_pipeline_resource_manager import (
+    ModelFittingPipelineResourceManager as RM,
+)
+from src.pipelines.pipeline_classes import ModelOption, ModelConfig
+from src.project_enums import ModelFitMethod
 
 PYMC3_MODEL_CACHE_DIR = "models/"
 REPORTS_DIR = "reports/crc_model_sampling_reports/"
@@ -68,6 +72,15 @@ wildcard_constraints:
     fit_method="|".join(a.value for a in ModelFitMethod),
     chain="\d+",
 
+
+#### ---- Helpers ---- ####
+
+def create_resource_manager(w: Any, fit_method: ModelFitMethod) -> RM:
+    return RM(model=w.model, name=w.model_name, fit_method=fit_method)
+
+def cli_is_debug(w: Any) -> str:
+    return create_resource_manager(w=w, fit_method=ModelFitMethod.advi).is_debug_cli()
+
 #### ---- Rules ---- ####
 
 
@@ -85,10 +98,10 @@ rule sample_mcmc:
     output:
         PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_chain{chain}_MCMC.txt",
     params:
-        debug=utils.cli_is_debug,
-        mem=lambda w: utils.get_sample_models_memory(w, "MCMC"),
-        time=lambda w: utils.get_sample_models_time(w, "MCMC"),
-        partition=lambda w: utils.get_sample_models_partition(w, "MCMC"),
+        mem=lambda w: create_resource_manager(w, ModelFitMethod.mcmc).memory,
+        time=lambda w: create_resource_manager(w, ModelFitMethod.mcmc).time,
+        partition=lambda w: create_resource_manager(w, ModelFitMethod.mcmc).partition,
+        debug=lambda w: create_resource_manager(w, ModelFitMethod.mcmc).is_debug_cli(),
     conda:
         ENVIRONMENT_YAML
     shell:
@@ -111,7 +124,7 @@ rule combine_mcmc:
     output:
         touch_file=PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_MCMC.txt",
     params:
-        debug=utils.cli_is_debug,
+        debug=cli_is_debug,
     conda:
         ENVIRONMENT_YAML
     shell:
@@ -127,10 +140,10 @@ rule sample_advi:
     output:
         PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_ADVI.txt",
     params:
-        debug=utils.cli_is_debug,
-        mem=lambda w: utils.get_sample_models_memory(w, "MCMC"),
-        time=lambda w: utils.get_sample_models_time(w, "MCMC"),
-        partition=lambda w: utils.get_sample_models_partition(w, "MCMC"),
+        mem=lambda w: create_resource_manager(w, ModelFitMethod.advi).memory,
+        time=lambda w: create_resource_manager(w, ModelFitMethod.advi).time,
+        partition=lambda w: create_resource_manager(w, ModelFitMethod.advi).partition,
+        debug=lambda w: create_resource_manager(w, ModelFitMethod.advi).is_debug_cli(),
     conda:
         ENVIRONMENT_YAML
     shell:
