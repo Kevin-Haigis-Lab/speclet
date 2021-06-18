@@ -57,10 +57,7 @@ sample_models_memory_lookup: ResourceLookupDict[int] = {
 #   key: [model][debug][fit_method]
 sample_models_time_lookup: ResourceLookupDict[td] = {
     ModelOption.speclet_test_model: {
-        True: {
-            ModelFitMethod.advi: td(minutes=5),
-            ModelFitMethod.mcmc: td(minutes=5),
-        },
+        True: {ModelFitMethod.advi: td(minutes=5), ModelFitMethod.mcmc: td(minutes=5)},
         False: {
             ModelFitMethod.advi: td(minutes=10),
             ModelFitMethod.mcmc: td(minutes=10),
