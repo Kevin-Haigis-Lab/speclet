@@ -124,7 +124,6 @@ class ModelFittingPipelineResourceManager:
         model: ModelOption,
         name: str,
         fit_method: ModelFitMethod,
-        debug: bool,
     ) -> None:
         """Create a resource manager of the model-fitting pipeline.
 
@@ -132,12 +131,11 @@ class ModelFittingPipelineResourceManager:
             model (ModelOption): Type of model being bit.
             name (str): Identifiable and descriptive name of the model.
             fit_method (ModelFitMethod): Method being used to fit the model.
-            debug (bool): Is the model in debug mode?
         """
         self.model = model
         self.name = name
         self.fit_method = fit_method
-        self.debug = debug
+        self.debug = self._is_debug()
 
     @property
     def memory(self) -> str:
@@ -198,7 +196,7 @@ class ModelFittingPipelineResourceManager:
     def _format_duration_for_slurm(self, duration: td) -> str:
         return str(duration).replace(" day, ", "-").replace(" days, ", "-")
 
-    def is_debug(self) -> bool:
+    def _is_debug(self) -> bool:
         """Determine the debug status of model name.
 
         Returns:
@@ -206,10 +204,10 @@ class ModelFittingPipelineResourceManager:
         """
         return "debug" in self.name
 
-    def cli_is_debug(self):
+    def is_debug_cli(self):
         """Get the correct flag for indicating debug mode through a CLI.
 
         Returns:
             [type]: The flag for a CLI to indicate debug status.
         """
-        return "--debug" if self.is_debug() else "--no-debug"
+        return "--debug" if self.debug else "--no-debug"
