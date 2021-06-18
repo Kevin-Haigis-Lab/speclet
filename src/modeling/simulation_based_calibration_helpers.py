@@ -15,14 +15,6 @@ from src.io.data_io import DataFile, data_path
 from src.string_functions import prefixed_count
 
 
-class MockDataSizes(str, Enum):
-    """Options for dataset seizes when generating mock data."""
-
-    small = "small"
-    medium = "medium"
-    large = "large"
-
-
 class SBCResults:
     """Results from a single round of SBC."""
 
