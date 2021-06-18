@@ -1,7 +1,7 @@
 import pytest
 
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
-from src.modeling.simulation_based_calibration_helpers import MockDataSizes
+from src.modeling.simulation_based_calibration_enums import MockDataSizes
 from src.pipelines.pipeline_classes import ModelOption
 from src.project_enums import ModelFitMethod
 
