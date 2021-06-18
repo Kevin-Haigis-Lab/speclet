@@ -1,7 +1,7 @@
 """Models and enums for the pipelines."""
 
 
-from enum import Enum
+from enum import Enum, unique
 
 from pydantic import BaseModel
 
@@ -10,6 +10,7 @@ from src.project_enums import ModelFitMethod
 #### ---- Enums ---- ####
 
 
+@unique
 class ModelOption(str, Enum):
     """Model options."""
 
@@ -24,6 +25,7 @@ class ModelOption(str, Enum):
     speclet_seven = "speclet-seven"
 
 
+@unique
 class SlurmPartitions(str, Enum):
     """Partitions of the HPC available through SLURM."""
 

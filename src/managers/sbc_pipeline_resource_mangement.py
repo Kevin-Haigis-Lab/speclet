@@ -2,6 +2,7 @@
 
 from pydantic import validate_arguments
 
+from src.modeling.simulation_based_calibration_helpers import MockDataSizes
 from src.pipelines.pipeline_classes import ModelOption
 from src.project_enums import ModelFitMethod
 
@@ -14,7 +15,7 @@ class SBCResourceManager:
         self,
         model: ModelOption,
         name: str,
-        mock_data_size: str,
+        mock_data_size: MockDataSizes,
         fit_method: ModelFitMethod,
     ) -> None:
         """Create a resource manager.
