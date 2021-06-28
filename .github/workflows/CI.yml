@@ -54,7 +54,6 @@ jobs:
         shell: bash -l {0}
         run: |
           python3 -m pytest \
-            -m "not slow" \
             --disable-warnings \
             --force-sugar \
             --testmon \
