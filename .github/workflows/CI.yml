@@ -57,7 +57,7 @@ jobs:
             --disable-warnings \
             --force-sugar \
             --testmon \
-            tests/data_processing/test_vectors.py
+            tests
       - name: List all files
         shell: bash -l {0}
         run: |
