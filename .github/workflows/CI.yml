@@ -1,4 +1,5 @@
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -13,55 +14,23 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Cache conda environment
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         env:
           # Increase this value to reset cache if environment.yml has not changed
-          CACHE_NUMBER: 0
+          CACHE_NUMBER: 1
         with:
           path: ~/conda_pkgs_dir
           key:
             ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
-      - name: Install conda
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          activate-environment: speclet
-          auto-activate-base: false
-          channel-priority: strict
-          environment-file: environment.yml
-          use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work!
-      - name: Activate conda environment
-        shell: bash -l {0}
-        run: conda activate speclet
-      - name: Describe virtual environment
-        shell: bash -l {0}
-        run: |
-          python3 --version
-          which python3
-          conda env list
-          conda list
-      - name: Run tests
-        shell: bash -l {0}
-        run: |
-          python3 -m pytest \
-            -m "not slow" \
-            --disable-warnings \
-            --cov="src" \
-            --force-sugar \
-            tests/
-  pytest-slow:
-    name: slow pytest suite
-    runs-on: "ubuntu-latest"
-    steps:
-      - uses: actions/checkout@v2
-      - name: Cache conda environment
-        uses: actions/cache@v1
+      - name: Cache pytest-testmon database
+        uses: actions/cache@v2
         env:
-          # Increase this value to reset cache if environment.yml has not changed
-          CACHE_NUMBER: 0
+          # Increase this value to reset cache for pytest-testmon
+          CACHE_NUMBER: 2
         with:
-          path: ~/conda_pkgs_dir
+          path: .testmondata
           key:
-            ${{ runner.os }}-conda-slow-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
+            ${{ runner.os }}-testmon-${{ env.CACHE_NUMBER }}
       - name: Install conda
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -73,9 +42,11 @@ jobs:
       - name: Activate conda environment
         shell: bash -l {0}
         run: conda activate speclet
-      - name: Describe virtual environment
+      - name: Describe environment
         shell: bash -l {0}
         run: |
+          pwd
+          ls -lha
           python3 --version
           which python3
           conda env list
@@ -84,8 +55,7 @@ jobs:
         shell: bash -l {0}
         run: |
           python3 -m pytest \
-            -m "slow" \
             --disable-warnings \
-            --cov="src" \
             --force-sugar \
-            tests/
+            --testmon \
+            tests
