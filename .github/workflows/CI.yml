@@ -59,4 +59,9 @@ jobs:
             --cov="src" \
             --force-sugar \
             --testmon \
-            tests/
+            tests/data_processing/test_vectors.py
+      - name: List all files
+        shell: bash -l {0}
+        run: |
+          ls -lha
+          tree
