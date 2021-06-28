@@ -29,7 +29,7 @@ jobs:
           # Increase this value to reset cache for pytest-testmon
           CACHE_NUMBER: 0
         with:
-          path: ~/.testmondata
+          path: .testmondata
           key:
             ${{ runner.os }}-testmon-${{ env.CACHE_NUMBER }}-${{ hashFiles('.testmondata') }}
       - name: Install conda
@@ -56,12 +56,12 @@ jobs:
           python3 -m pytest \
             -m "not slow" \
             --disable-warnings \
-            --cov="src" \
             --force-sugar \
             --testmon \
             tests/data_processing/test_vectors.py
       - name: List all files
         shell: bash -l {0}
         run: |
+          pwd
           ls -lha
           tree
