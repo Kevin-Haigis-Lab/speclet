@@ -29,9 +29,9 @@ jobs:
           # Increase this value to reset cache for pytest-testmon
           CACHE_NUMBER: 1
         with:
-          path: ~/work/speclet/speclet/.testmondata
+          path: .testmondata
           key:
-            ${{ runner.os }}-testmon-${{ env.CACHE_NUMBER }}-${{ hashFiles('.testmondata') }}
+            ${{ runner.os }}-testmon-${{ env.CACHE_NUMBER }}
       - name: Install conda
         uses: conda-incubator/setup-miniconda@v2
         with:
