@@ -49,6 +49,18 @@ from src.project_enums import ModelFitMethod
 ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
 
+class UnableToLocateNamedVariable(Exception):
+    &#34;&#34;&#34;Error when a named variable or object cannot be located.&#34;&#34;&#34;
+
+    pass
+
+
+class SharedVariableDictionaryNotSet(AttributeError):
+    &#34;&#34;&#34;Error for when the shared variable dictionary should be available but is not.&#34;&#34;&#34;
+
+    pass
+
+
 class PyMC3SamplingParameters(BaseModel):
     &#34;&#34;&#34;Paramerers common to fitting a model in PyMC3.&#34;&#34;&#34;
 
@@ -479,7 +491,10 @@ class SpecletModel:
             priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
         mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
-        self.data_manager.data = mock_data
+        self.data_manager.set_data(mock_data)
+
+        # Update shared variable with adjusted observed data.
+        self.update_observed_data(mock_data[self.observed_var_name].values)
 
         if fit_method == ModelFitMethod.advi:
             res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
@@ -511,7 +526,27 @@ class SpecletModel:
                 self.advi_results[0], self.advi_results[1]
             )
         else:
-            logger.warning(&#34;Did not cache MCMC samples because they do not exist.&#34;)</code></pre>
+            logger.warning(&#34;Did not cache MCMC samples because they do not exist.&#34;)
+
+    def update_observed_data(self, new_data: np.ndarray) -&gt; None:
+        &#34;&#34;&#34;Update the values for the shared tensor for observed data.
+
+        Args:
+            new_data (np.ndarray): New data to set in the shared tensor.
+        &#34;&#34;&#34;
+        if self.shared_vars is None:
+            raise SharedVariableDictionaryNotSet(
+                &#34;Cannot locate shared variable dictionary.&#34;
+            )
+        _var_name = f&#34;{self.observed_var_name}_shared&#34;
+        observed_var_shared = self.shared_vars.get(_var_name)
+        if observed_var_shared is not None:
+            observed_var_shared.set_value(new_data)
+            logger.info(f&#34;Setting new data for observed variable: &#39;{_var_name}&#39;.&#34;)
+        else:
+            msg = f&#34;Unable to set new values for observed variable: &#39;{_var_name}&#39;.&#34;
+            logger.error(msg)
+            raise UnableToLocateNamedVariable(msg)</code></pre>
 </details>
 </section>
 <section>
@@ -580,6 +615,28 @@ class SpecletModel:
 <ul class="hlist">
 <li><a title="src.models.speclet_model.MCMCSamplingParameters" href="#src.models.speclet_model.MCMCSamplingParameters">MCMCSamplingParameters</a></li>
 <li><a title="src.models.speclet_model.VISamplingParameters" href="#src.models.speclet_model.VISamplingParameters">VISamplingParameters</a></li>
+</ul>
+</dd>
+<dt id="src.models.speclet_model.SharedVariableDictionaryNotSet"><code class="flex name class">
+<span>class <span class="ident">SharedVariableDictionaryNotSet</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Error for when the shared variable dictionary should be available but is not.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SharedVariableDictionaryNotSet(AttributeError):
+    &#34;&#34;&#34;Error for when the shared variable dictionary should be available but is not.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.AttributeError</li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
 </ul>
 </dd>
 <dt id="src.models.speclet_model.SpecletModel"><code class="flex name class">
@@ -1011,7 +1068,10 @@ data. Defaults to None.</dd>
             priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
         mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
-        self.data_manager.data = mock_data
+        self.data_manager.set_data(mock_data)
+
+        # Update shared variable with adjusted observed data.
+        self.update_observed_data(mock_data[self.observed_var_name].values)
 
         if fit_method == ModelFitMethod.advi:
             res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
@@ -1043,7 +1103,27 @@ data. Defaults to None.</dd>
                 self.advi_results[0], self.advi_results[1]
             )
         else:
-            logger.warning(&#34;Did not cache MCMC samples because they do not exist.&#34;)</code></pre>
+            logger.warning(&#34;Did not cache MCMC samples because they do not exist.&#34;)
+
+    def update_observed_data(self, new_data: np.ndarray) -&gt; None:
+        &#34;&#34;&#34;Update the values for the shared tensor for observed data.
+
+        Args:
+            new_data (np.ndarray): New data to set in the shared tensor.
+        &#34;&#34;&#34;
+        if self.shared_vars is None:
+            raise SharedVariableDictionaryNotSet(
+                &#34;Cannot locate shared variable dictionary.&#34;
+            )
+        _var_name = f&#34;{self.observed_var_name}_shared&#34;
+        observed_var_shared = self.shared_vars.get(_var_name)
+        if observed_var_shared is not None:
+            observed_var_shared.set_value(new_data)
+            logger.info(f&#34;Setting new data for observed variable: &#39;{_var_name}&#39;.&#34;)
+        else:
+            msg = f&#34;Unable to set new values for observed variable: &#39;{_var_name}&#39;.&#34;
+            logger.error(msg)
+            raise UnableToLocateNamedVariable(msg)</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -1643,7 +1723,10 @@ passed to the fitting method. Default is None.</dd>
         priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
     mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
-    self.data_manager.data = mock_data
+    self.data_manager.set_data(mock_data)
+
+    # Update shared variable with adjusted observed data.
+    self.update_observed_data(mock_data[self.observed_var_name].values)
 
     if fit_method == ModelFitMethod.advi:
         res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
@@ -1690,6 +1773,41 @@ passed to the fitting method. Default is None.</dd>
     return None</code></pre>
 </details>
 </dd>
+<dt id="src.models.speclet_model.SpecletModel.update_observed_data"><code class="name flex">
+<span>def <span class="ident">update_observed_data</span></span>(<span>self, new_data: numpy.ndarray) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Update the values for the shared tensor for observed data.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>new_data</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>New data to set in the shared tensor.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def update_observed_data(self, new_data: np.ndarray) -&gt; None:
+    &#34;&#34;&#34;Update the values for the shared tensor for observed data.
+
+    Args:
+        new_data (np.ndarray): New data to set in the shared tensor.
+    &#34;&#34;&#34;
+    if self.shared_vars is None:
+        raise SharedVariableDictionaryNotSet(
+            &#34;Cannot locate shared variable dictionary.&#34;
+        )
+    _var_name = f&#34;{self.observed_var_name}_shared&#34;
+    observed_var_shared = self.shared_vars.get(_var_name)
+    if observed_var_shared is not None:
+        observed_var_shared.set_value(new_data)
+        logger.info(f&#34;Setting new data for observed variable: &#39;{_var_name}&#39;.&#34;)
+    else:
+        msg = f&#34;Unable to set new values for observed variable: &#39;{_var_name}&#39;.&#34;
+        logger.error(msg)
+        raise UnableToLocateNamedVariable(msg)</code></pre>
+</details>
+</dd>
 <dt id="src.models.speclet_model.SpecletModel.write_advi_cache"><code class="name flex">
 <span>def <span class="ident">write_advi_cache</span></span>(<span>self) -> NoneType</span>
 </code></dt>
@@ -1727,6 +1845,27 @@ passed to the fitting method. Default is None.</dd>
 </details>
 </dd>
 </dl>
+</dd>
+<dt id="src.models.speclet_model.UnableToLocateNamedVariable"><code class="flex name class">
+<span>class <span class="ident">UnableToLocateNamedVariable</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Error when a named variable or object cannot be located.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class UnableToLocateNamedVariable(Exception):
+    &#34;&#34;&#34;Error when a named variable or object cannot be located.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
 </dd>
 <dt id="src.models.speclet_model.VISamplingParameters"><code class="flex name class">
 <span>class <span class="ident">VISamplingParameters</span></span>
@@ -1776,6 +1915,9 @@ passed to the fitting method. Default is None.</dd>
 <h4><code><a title="src.models.speclet_model.PyMC3SamplingParameters" href="#src.models.speclet_model.PyMC3SamplingParameters">PyMC3SamplingParameters</a></code></h4>
 </li>
 <li>
+<h4><code><a title="src.models.speclet_model.SharedVariableDictionaryNotSet" href="#src.models.speclet_model.SharedVariableDictionaryNotSet">SharedVariableDictionaryNotSet</a></code></h4>
+</li>
+<li>
 <h4><code><a title="src.models.speclet_model.SpecletModel" href="#src.models.speclet_model.SpecletModel">SpecletModel</a></code></h4>
 <ul class="">
 <li><code><a title="src.models.speclet_model.SpecletModel.advi_results" href="#src.models.speclet_model.SpecletModel.advi_results">advi_results</a></code></li>
@@ -1797,9 +1939,13 @@ passed to the fitting method. Default is None.</dd>
 <li><code><a title="src.models.speclet_model.SpecletModel.shared_vars" href="#src.models.speclet_model.SpecletModel.shared_vars">shared_vars</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.update_advi_sampling_parameters" href="#src.models.speclet_model.SpecletModel.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.update_mcmc_sampling_parameters" href="#src.models.speclet_model.SpecletModel.update_mcmc_sampling_parameters">update_mcmc_sampling_parameters</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.update_observed_data" href="#src.models.speclet_model.SpecletModel.update_observed_data">update_observed_data</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.write_advi_cache" href="#src.models.speclet_model.SpecletModel.write_advi_cache">write_advi_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.write_mcmc_cache" href="#src.models.speclet_model.SpecletModel.write_mcmc_cache">write_mcmc_cache</a></code></li>
 </ul>
+</li>
+<li>
+<h4><code><a title="src.models.speclet_model.UnableToLocateNamedVariable" href="#src.models.speclet_model.UnableToLocateNamedVariable">UnableToLocateNamedVariable</a></code></h4>
 </li>
 <li>
 <h4><code><a title="src.models.speclet_model.VISamplingParameters" href="#src.models.speclet_model.VISamplingParameters">VISamplingParameters</a></code></h4>

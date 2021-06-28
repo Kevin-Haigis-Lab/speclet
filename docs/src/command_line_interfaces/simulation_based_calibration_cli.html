@@ -37,6 +37,7 @@ import typer
 from src.command_line_interfaces import cli_helpers
 from src.command_line_interfaces.cli_helpers import ModelOption
 from src.loggers import logger
+from src.project_enums import ModelFitMethod
 
 app = typer.Typer()
 cli_helpers.configure_pretty()
@@ -46,6 +47,7 @@ cli_helpers.configure_pretty()
 def run_sbc(
     model_class: ModelOption,
     name: str,
+    fit_method: ModelFitMethod,
     cache_dir: Path,
     sim_number: int,
     data_size: str,
@@ -82,7 +84,7 @@ def run_sbc(
     cli_helpers.modify_model_by_name(model=model, name=name)
     model.run_simulation_based_calibration(
         cache_dir,
-        fit_method=cli_helpers.extract_fit_method(name),
+        fit_method=fit_method,
         random_seed=sim_number,
         size=data_size,
     )
@@ -102,7 +104,7 @@ if __name__ == &#34;__main__&#34;:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.command_line_interfaces.simulation_based_calibration_cli.run_sbc"><code class="name flex">
-<span>def <span class="ident">run_sbc</span></span>(<span>model_class: <a title="src.command_line_interfaces.cli_helpers.ModelOption" href="cli_helpers.html#src.command_line_interfaces.cli_helpers.ModelOption">ModelOption</a>, name: str, cache_dir: pathlib.Path, sim_number: int, data_size: str) -> NoneType</span>
+<span>def <span class="ident">run_sbc</span></span>(<span>model_class: <a title="src.pipelines.pipeline_classes.ModelOption" href="../pipelines/pipeline_classes.html#src.pipelines.pipeline_classes.ModelOption">ModelOption</a>, name: str, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, cache_dir: pathlib.Path, sim_number: int, data_size: str) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>CLI for running a round of simulation-based calibration for a model.</p>
@@ -139,6 +141,7 @@ for details and options.</dd>
 def run_sbc(
     model_class: ModelOption,
     name: str,
+    fit_method: ModelFitMethod,
     cache_dir: Path,
     sim_number: int,
     data_size: str,
@@ -175,7 +178,7 @@ def run_sbc(
     cli_helpers.modify_model_by_name(model=model, name=name)
     model.run_simulation_based_calibration(
         cache_dir,
-        fit_method=cli_helpers.extract_fit_method(name),
+        fit_method=fit_method,
         random_seed=sim_number,
         size=data_size,
     )

@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>src.modeling API documentation</title>
-<meta name="description" content="" />
+<title>src.modeling.simulation_based_calibration_enums API documentation</title>
+<meta name="description" content="Enums for simulation based calibration." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -18,44 +18,77 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Namespace <code>src.modeling</code></h1>
+<h1 class="title">Module <code>src.modeling.simulation_based_calibration_enums</code></h1>
 </header>
 <section id="section-intro">
+<p>Enums for simulation based calibration.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Enums for simulation based calibration.&#34;&#34;&#34;
+
+from enum import Enum, unique
+
+
+@unique
+class MockDataSizes(str, Enum):
+    &#34;&#34;&#34;Options for dataset seizes when generating mock data.&#34;&#34;&#34;
+
+    small = &#34;small&#34;
+    medium = &#34;medium&#34;
+    large = &#34;large&#34;</code></pre>
+</details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt><code class="name"><a title="src.modeling.custom_pymc3_callbacks" href="custom_pymc3_callbacks.html">src.modeling.custom_pymc3_callbacks</a></code></dt>
+<dt id="src.modeling.simulation_based_calibration_enums.MockDataSizes"><code class="flex name class">
+<span>class <span class="ident">MockDataSizes</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
 <dd>
-<div class="desc"><p>Sampling and fitting callbacks for PyMC3 models.</p></div>
+<div class="desc"><p>Options for dataset seizes when generating mock data.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@unique
+class MockDataSizes(str, Enum):
+    &#34;&#34;&#34;Options for dataset seizes when generating mock data.&#34;&#34;&#34;
+
+    small = &#34;small&#34;
+    medium = &#34;medium&#34;
+    large = &#34;large&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="src.modeling.simulation_based_calibration_enums.MockDataSizes.large"><code class="name">var <span class="ident">large</span></code></dt>
+<dd>
+<div class="desc"></div>
 </dd>
-<dt><code class="name"><a title="src.modeling.pymc3_analysis" href="pymc3_analysis.html">src.modeling.pymc3_analysis</a></code></dt>
+<dt id="src.modeling.simulation_based_calibration_enums.MockDataSizes.medium"><code class="name">var <span class="ident">medium</span></code></dt>
 <dd>
-<div class="desc"><p>Functions to aid in the analysis of PyMC3 models.</p></div>
+<div class="desc"></div>
 </dd>
-<dt><code class="name"><a title="src.modeling.pymc3_helpers" href="pymc3_helpers.html">src.modeling.pymc3_helpers</a></code></dt>
+<dt id="src.modeling.simulation_based_calibration_enums.MockDataSizes.small"><code class="name">var <span class="ident">small</span></code></dt>
 <dd>
-<div class="desc"><p>Simple functions for common interactions with PyMC3.</p></div>
-</dd>
-<dt><code class="name"><a title="src.modeling.pymc3_sampling_api" href="pymc3_sampling_api.html">src.modeling.pymc3_sampling_api</a></code></dt>
-<dd>
-<div class="desc"><p>Standardization of the interactions with PyMC3 sampling.</p></div>
-</dd>
-<dt><code class="name"><a title="src.modeling.simulation_based_calibration_enums" href="simulation_based_calibration_enums.html">src.modeling.simulation_based_calibration_enums</a></code></dt>
-<dd>
-<div class="desc"><p>Enums for simulation based calibration.</p></div>
-</dd>
-<dt><code class="name"><a title="src.modeling.simulation_based_calibration_helpers" href="simulation_based_calibration_helpers.html">src.modeling.simulation_based_calibration_helpers</a></code></dt>
-<dd>
-<div class="desc"><p>Helpers for organizing simualtaion-based calibrations.</p></div>
+<div class="desc"></div>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
-</section>
-<section>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -66,17 +99,19 @@
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="src" href="../index.html">src</a></code></li>
+<li><code><a title="src.modeling" href="index.html">src.modeling</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
-<li><code><a title="src.modeling.custom_pymc3_callbacks" href="custom_pymc3_callbacks.html">src.modeling.custom_pymc3_callbacks</a></code></li>
-<li><code><a title="src.modeling.pymc3_analysis" href="pymc3_analysis.html">src.modeling.pymc3_analysis</a></code></li>
-<li><code><a title="src.modeling.pymc3_helpers" href="pymc3_helpers.html">src.modeling.pymc3_helpers</a></code></li>
-<li><code><a title="src.modeling.pymc3_sampling_api" href="pymc3_sampling_api.html">src.modeling.pymc3_sampling_api</a></code></li>
-<li><code><a title="src.modeling.simulation_based_calibration_enums" href="simulation_based_calibration_enums.html">src.modeling.simulation_based_calibration_enums</a></code></li>
-<li><code><a title="src.modeling.simulation_based_calibration_helpers" href="simulation_based_calibration_helpers.html">src.modeling.simulation_based_calibration_helpers</a></code></li>
+<li>
+<h4><code><a title="src.modeling.simulation_based_calibration_enums.MockDataSizes" href="#src.modeling.simulation_based_calibration_enums.MockDataSizes">MockDataSizes</a></code></h4>
+<ul class="">
+<li><code><a title="src.modeling.simulation_based_calibration_enums.MockDataSizes.large" href="#src.modeling.simulation_based_calibration_enums.MockDataSizes.large">large</a></code></li>
+<li><code><a title="src.modeling.simulation_based_calibration_enums.MockDataSizes.medium" href="#src.modeling.simulation_based_calibration_enums.MockDataSizes.medium">medium</a></code></li>
+<li><code><a title="src.modeling.simulation_based_calibration_enums.MockDataSizes.small" href="#src.modeling.simulation_based_calibration_enums.MockDataSizes.small">small</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

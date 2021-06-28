@@ -34,6 +34,7 @@ from typing import Optional, Tuple
 import pymc3 as pm
 from theano import shared as ts
 from theano import tensor
+from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 from src.data_processing import achilles as achelp
 from src.loggers import logger
@@ -68,12 +69,15 @@ class SpecletSeven(SpecletModel):
     - l: cell line lineage
     &#34;&#34;&#34;
 
+    _noncentered_param: bool
+
     def __init__(
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
+        noncentered_param: bool = False,
     ) -&gt; None:
         &#34;&#34;&#34;Instantiate a SpecletSeven model.
 
@@ -85,6 +89,8 @@ class SpecletSeven(SpecletModel):
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. If None (default), a `CrcDataManager` is created automatically.
+            noncentered_param (bool, optional): Use the non-centered parameterization.
+              Defaults to False.
         &#34;&#34;&#34;
         logger.debug(&#34;Instantiating a SpecletSeven model.&#34;)
         if data_manager is None:
@@ -97,6 +103,101 @@ class SpecletSeven(SpecletModel):
             debug=debug,
             data_manager=data_manager,
         )
+
+        self._noncentered_param = noncentered_param
+
+    @property
+    def noncentered_param(self) -&gt; bool:
+        &#34;&#34;&#34;Whether to use the non-centered parameterization for the model.
+
+        Returns:
+            bool: True if using the non-centered parameterization.
+        &#34;&#34;&#34;
+        return self._noncentered_param
+
+    @noncentered_param.setter
+    def noncentered_param(self, new_value: bool) -&gt; None:
+        &#34;&#34;&#34;Decide whether to use the non-centered parameterization for the model.
+
+        Args:
+            new_value (bool): True to use the non-centered parameterization.
+        &#34;&#34;&#34;
+        if self._noncentered_param != new_value:
+            logger.info(&#34;Changing `noncentered_param` to `{new_value}`.&#34;)
+            self._noncentered_param = new_value
+            self._reset_model_and_results()
+
+    def _base_model(self, model: pm.Model, co_idx: achelp.CommonIndices):
+        with model:
+            μ_μ_μ_a = pm.Normal(&#34;μ_μ_μ_a&#34;, 0, 2)  # noqa: F841
+            σ_μ_μ_a = pm.HalfNormal(&#34;σ_μ_μ_a&#34;, 2)  # noqa: F841
+
+            σ_σ_μ_a = pm.HalfNormal(&#34;σ_σ_μ_a&#34;, 1)
+            σ_μ_a = pm.HalfNormal(  # noqa: F841
+                &#34;σ_μ_a&#34;, σ_σ_μ_a, shape=(1, co_idx.n_celllines)
+            )
+
+            σ_σ_a = pm.HalfNormal(&#34;σ_σ_a&#34;, 1)
+            σ_a = pm.HalfNormal(&#34;σ_a&#34;, σ_σ_a, shape=(co_idx.n_sgrnas, 1))  # noqa: F841
+
+    def _noncentered_model_parameterization(
+        self,
+        model: pm.Model,
+        co_idx: achelp.CommonIndices,
+        cellline_to_lineage_idx_shared: TTShared,
+        sgrna_to_gene_idx_shared: TTShared,
+    ) -&gt; None:
+        with model:
+            μ_μ_a_offset = pm.Normal(
+                &#34;μ_μ_a_offset&#34;, 0, 1.0, shape=(co_idx.n_genes, co_idx.n_lineages)
+            )
+            μ_μ_a = pm.Deterministic(
+                &#34;μ_μ_a&#34;, model[&#34;μ_μ_μ_a&#34;] + μ_μ_a_offset * model[&#34;σ_μ_μ_a&#34;]
+            )
+
+            μ_a_offset = pm.Normal(
+                &#34;μ_a_offset&#34;, 0, 1.0, shape=(co_idx.n_genes, co_idx.n_celllines)
+            )
+            μ_a = pm.Deterministic(
+                &#34;μ_a&#34;,
+                μ_μ_a[:, cellline_to_lineage_idx_shared] + μ_a_offset * model[&#34;σ_μ_a&#34;],
+            )
+            a_offset = pm.Normal(
+                &#34;a_offset&#34;, 0, 1.0, shape=(co_idx.n_sgrnas, co_idx.n_celllines)
+            )
+            a = pm.Deterministic(  # noqa: F841
+                &#34;a&#34;, μ_a[sgrna_to_gene_idx_shared, :] + a_offset * model[&#34;σ_a&#34;]
+            )
+
+    def _centered_model_parameterization(
+        self,
+        model: pm.Model,
+        co_idx: achelp.CommonIndices,
+        cellline_to_lineage_idx_shared: TTShared,
+        sgrna_to_gene_idx_shared: TTShared,
+    ) -&gt; None:
+        _mu_a_shape = (co_idx.n_genes, co_idx.n_celllines)
+        with model:
+            μ_μ_a = pm.Normal(
+                &#34;μ_μ_a&#34;,
+                model[&#34;μ_μ_μ_a&#34;],
+                model[&#34;σ_μ_μ_a&#34;],
+                shape=(co_idx.n_genes, co_idx.n_lineages),
+            )
+
+            μ_a = pm.Normal(
+                &#34;μ_a&#34;,
+                μ_μ_a[:, cellline_to_lineage_idx_shared],
+                tensor.ones(shape=_mu_a_shape) * model[&#34;σ_μ_a&#34;],
+                shape=_mu_a_shape,
+            )
+
+            a = pm.Normal(  # noqa: F841
+                &#34;a&#34;,
+                μ_a[sgrna_to_gene_idx_shared, :],
+                model[&#34;σ_a&#34;],
+                shape=(co_idx.n_sgrnas, co_idx.n_celllines),
+            )
 
     def model_specification(self) -&gt; Tuple[pm.Model, str]:
         &#34;&#34;&#34;Build SpecletSeven model.
@@ -127,39 +228,22 @@ class SpecletSeven(SpecletModel):
         }
 
         logger.info(&#34;Creating PyMC3 model for SpecletSeven.&#34;)
-        logger.warning(
-            &#34;Still need to implement varying effect for source on batch effect.&#34;
-        )
 
-        with pm.Model() as model:
-            μ_μ_μ_a = pm.Normal(&#34;μ_μ_μ_a&#34;, 0, 1)
-            σ_μ_μ_a = pm.HalfNormal(&#34;σ_μ_μ_a&#34;, 1)
+        model = pm.Model()
+        self._base_model(model, co_idx=co_idx)
+        _params = {
+            &#34;model&#34;: model,
+            &#34;co_idx&#34;: co_idx,
+            &#34;cellline_to_lineage_idx_shared&#34;: cellline_to_lineage_idx_shared,
+            &#34;sgrna_to_gene_idx_shared&#34;: sgrna_to_gene_idx_shared,
+        }
+        if self.noncentered_param:
+            self._noncentered_model_parameterization(**_params)
+        else:
+            self._centered_model_parameterization(**_params)
 
-            μ_μ_a_offset = pm.Normal(
-                &#34;μ_μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
-            )
-            μ_μ_a = pm.Deterministic(&#34;μ_μ_a&#34;, μ_μ_μ_a + μ_μ_a_offset * σ_μ_μ_a)
-            σ_σ_μ_a = pm.HalfNormal(&#34;σ_σ_μ_a&#34;, 1)
-            σ_μ_a = pm.HalfNormal(&#34;σ_μ_a&#34;, σ_σ_μ_a, shape=(1, co_idx.n_celllines))
-
-            μ_a_offset = pm.Normal(
-                &#34;μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
-            )
-            μ_a = pm.Deterministic(
-                &#34;μ_a&#34;,
-                μ_μ_a[:, cellline_to_lineage_idx_shared]
-                + μ_a_offset
-                * tensor.ones(shape=(co_idx.n_genes, co_idx.n_celllines))
-                * σ_μ_a,
-            )
-            σ_σ_a = pm.HalfNormal(&#34;σ_σ_a&#34;, 1)
-            σ_a = pm.HalfNormal(&#34;σ_a&#34;, σ_σ_a, shape=(co_idx.n_sgrnas, 1))
-            a_offset = pm.Normal(
-                &#34;a_offset&#34;, 0, 1, shape=(co_idx.n_sgrnas, co_idx.n_celllines)
-            )
-            a = pm.Deterministic(&#34;a&#34;, μ_a[sgrna_to_gene_idx_shared, :] + a_offset * σ_a)
-
-            μ = pm.Deterministic(&#34;μ&#34;, a[sgrna_idx_shared, cellline_idx_shared])
+        with model:
+            μ = pm.Deterministic(&#34;μ&#34;, model[&#34;a&#34;][sgrna_idx_shared, cellline_idx_shared])
 
             # Standard deviation of log-fold change, varies per batch.
             σ = pm.HalfNormal(&#34;σ&#34;, 1)
@@ -237,7 +321,7 @@ class SpecletSeven(SpecletModel):
 <dl>
 <dt id="src.models.speclet_seven.SpecletSeven"><code class="flex name class">
 <span>class <span class="ident">SpecletSeven</span></span>
-<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = None)</span>
+<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = None, noncentered_param: bool = False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>SpecletSeven Model.</p>
@@ -291,6 +375,9 @@ sampling/fitting results. Defaults to None.</dd>
 <dt><strong><code>data_manager</code></strong> :&ensp;<code>Optional[DataManager]</code>, optional</dt>
 <dd>Object that will manage the
 data. If None (default), a <code>CrcDataManager</code> is created automatically.</dd>
+<dt><strong><code>noncentered_param</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Use the non-centered parameterization.
+Defaults to False.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -323,12 +410,15 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
     - l: cell line lineage
     &#34;&#34;&#34;
 
+    _noncentered_param: bool
+
     def __init__(
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
+        noncentered_param: bool = False,
     ) -&gt; None:
         &#34;&#34;&#34;Instantiate a SpecletSeven model.
 
@@ -340,6 +430,8 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. If None (default), a `CrcDataManager` is created automatically.
+            noncentered_param (bool, optional): Use the non-centered parameterization.
+              Defaults to False.
         &#34;&#34;&#34;
         logger.debug(&#34;Instantiating a SpecletSeven model.&#34;)
         if data_manager is None:
@@ -352,6 +444,101 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             debug=debug,
             data_manager=data_manager,
         )
+
+        self._noncentered_param = noncentered_param
+
+    @property
+    def noncentered_param(self) -&gt; bool:
+        &#34;&#34;&#34;Whether to use the non-centered parameterization for the model.
+
+        Returns:
+            bool: True if using the non-centered parameterization.
+        &#34;&#34;&#34;
+        return self._noncentered_param
+
+    @noncentered_param.setter
+    def noncentered_param(self, new_value: bool) -&gt; None:
+        &#34;&#34;&#34;Decide whether to use the non-centered parameterization for the model.
+
+        Args:
+            new_value (bool): True to use the non-centered parameterization.
+        &#34;&#34;&#34;
+        if self._noncentered_param != new_value:
+            logger.info(&#34;Changing `noncentered_param` to `{new_value}`.&#34;)
+            self._noncentered_param = new_value
+            self._reset_model_and_results()
+
+    def _base_model(self, model: pm.Model, co_idx: achelp.CommonIndices):
+        with model:
+            μ_μ_μ_a = pm.Normal(&#34;μ_μ_μ_a&#34;, 0, 2)  # noqa: F841
+            σ_μ_μ_a = pm.HalfNormal(&#34;σ_μ_μ_a&#34;, 2)  # noqa: F841
+
+            σ_σ_μ_a = pm.HalfNormal(&#34;σ_σ_μ_a&#34;, 1)
+            σ_μ_a = pm.HalfNormal(  # noqa: F841
+                &#34;σ_μ_a&#34;, σ_σ_μ_a, shape=(1, co_idx.n_celllines)
+            )
+
+            σ_σ_a = pm.HalfNormal(&#34;σ_σ_a&#34;, 1)
+            σ_a = pm.HalfNormal(&#34;σ_a&#34;, σ_σ_a, shape=(co_idx.n_sgrnas, 1))  # noqa: F841
+
+    def _noncentered_model_parameterization(
+        self,
+        model: pm.Model,
+        co_idx: achelp.CommonIndices,
+        cellline_to_lineage_idx_shared: TTShared,
+        sgrna_to_gene_idx_shared: TTShared,
+    ) -&gt; None:
+        with model:
+            μ_μ_a_offset = pm.Normal(
+                &#34;μ_μ_a_offset&#34;, 0, 1.0, shape=(co_idx.n_genes, co_idx.n_lineages)
+            )
+            μ_μ_a = pm.Deterministic(
+                &#34;μ_μ_a&#34;, model[&#34;μ_μ_μ_a&#34;] + μ_μ_a_offset * model[&#34;σ_μ_μ_a&#34;]
+            )
+
+            μ_a_offset = pm.Normal(
+                &#34;μ_a_offset&#34;, 0, 1.0, shape=(co_idx.n_genes, co_idx.n_celllines)
+            )
+            μ_a = pm.Deterministic(
+                &#34;μ_a&#34;,
+                μ_μ_a[:, cellline_to_lineage_idx_shared] + μ_a_offset * model[&#34;σ_μ_a&#34;],
+            )
+            a_offset = pm.Normal(
+                &#34;a_offset&#34;, 0, 1.0, shape=(co_idx.n_sgrnas, co_idx.n_celllines)
+            )
+            a = pm.Deterministic(  # noqa: F841
+                &#34;a&#34;, μ_a[sgrna_to_gene_idx_shared, :] + a_offset * model[&#34;σ_a&#34;]
+            )
+
+    def _centered_model_parameterization(
+        self,
+        model: pm.Model,
+        co_idx: achelp.CommonIndices,
+        cellline_to_lineage_idx_shared: TTShared,
+        sgrna_to_gene_idx_shared: TTShared,
+    ) -&gt; None:
+        _mu_a_shape = (co_idx.n_genes, co_idx.n_celllines)
+        with model:
+            μ_μ_a = pm.Normal(
+                &#34;μ_μ_a&#34;,
+                model[&#34;μ_μ_μ_a&#34;],
+                model[&#34;σ_μ_μ_a&#34;],
+                shape=(co_idx.n_genes, co_idx.n_lineages),
+            )
+
+            μ_a = pm.Normal(
+                &#34;μ_a&#34;,
+                μ_μ_a[:, cellline_to_lineage_idx_shared],
+                tensor.ones(shape=_mu_a_shape) * model[&#34;σ_μ_a&#34;],
+                shape=_mu_a_shape,
+            )
+
+            a = pm.Normal(  # noqa: F841
+                &#34;a&#34;,
+                μ_a[sgrna_to_gene_idx_shared, :],
+                model[&#34;σ_a&#34;],
+                shape=(co_idx.n_sgrnas, co_idx.n_celllines),
+            )
 
     def model_specification(self) -&gt; Tuple[pm.Model, str]:
         &#34;&#34;&#34;Build SpecletSeven model.
@@ -382,39 +569,22 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
         }
 
         logger.info(&#34;Creating PyMC3 model for SpecletSeven.&#34;)
-        logger.warning(
-            &#34;Still need to implement varying effect for source on batch effect.&#34;
-        )
 
-        with pm.Model() as model:
-            μ_μ_μ_a = pm.Normal(&#34;μ_μ_μ_a&#34;, 0, 1)
-            σ_μ_μ_a = pm.HalfNormal(&#34;σ_μ_μ_a&#34;, 1)
+        model = pm.Model()
+        self._base_model(model, co_idx=co_idx)
+        _params = {
+            &#34;model&#34;: model,
+            &#34;co_idx&#34;: co_idx,
+            &#34;cellline_to_lineage_idx_shared&#34;: cellline_to_lineage_idx_shared,
+            &#34;sgrna_to_gene_idx_shared&#34;: sgrna_to_gene_idx_shared,
+        }
+        if self.noncentered_param:
+            self._noncentered_model_parameterization(**_params)
+        else:
+            self._centered_model_parameterization(**_params)
 
-            μ_μ_a_offset = pm.Normal(
-                &#34;μ_μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
-            )
-            μ_μ_a = pm.Deterministic(&#34;μ_μ_a&#34;, μ_μ_μ_a + μ_μ_a_offset * σ_μ_μ_a)
-            σ_σ_μ_a = pm.HalfNormal(&#34;σ_σ_μ_a&#34;, 1)
-            σ_μ_a = pm.HalfNormal(&#34;σ_μ_a&#34;, σ_σ_μ_a, shape=(1, co_idx.n_celllines))
-
-            μ_a_offset = pm.Normal(
-                &#34;μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
-            )
-            μ_a = pm.Deterministic(
-                &#34;μ_a&#34;,
-                μ_μ_a[:, cellline_to_lineage_idx_shared]
-                + μ_a_offset
-                * tensor.ones(shape=(co_idx.n_genes, co_idx.n_celllines))
-                * σ_μ_a,
-            )
-            σ_σ_a = pm.HalfNormal(&#34;σ_σ_a&#34;, 1)
-            σ_a = pm.HalfNormal(&#34;σ_a&#34;, σ_σ_a, shape=(co_idx.n_sgrnas, 1))
-            a_offset = pm.Normal(
-                &#34;a_offset&#34;, 0, 1, shape=(co_idx.n_sgrnas, co_idx.n_celllines)
-            )
-            a = pm.Deterministic(&#34;a&#34;, μ_a[sgrna_to_gene_idx_shared, :] + a_offset * σ_a)
-
-            μ = pm.Deterministic(&#34;μ&#34;, a[sgrna_idx_shared, cellline_idx_shared])
+        with model:
+            μ = pm.Deterministic(&#34;μ&#34;, model[&#34;a&#34;][sgrna_idx_shared, cellline_idx_shared])
 
             # Standard deviation of log-fold change, varies per batch.
             σ = pm.HalfNormal(&#34;σ&#34;, 1)
@@ -484,6 +654,31 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <ul class="hlist">
 <li><a title="src.models.speclet_model.SpecletModel" href="speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a></li>
 </ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="src.models.speclet_seven.SpecletSeven.noncentered_param"><code class="name">var <span class="ident">noncentered_param</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>Whether to use the non-centered parameterization for the model.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>True if using the non-centered parameterization.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def noncentered_param(self) -&gt; bool:
+    &#34;&#34;&#34;Whether to use the non-centered parameterization for the model.
+
+    Returns:
+        bool: True if using the non-centered parameterization.
+    &#34;&#34;&#34;
+    return self._noncentered_param</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="src.models.speclet_seven.SpecletSeven.get_replacement_parameters"><code class="name flex">
@@ -585,39 +780,22 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
     }
 
     logger.info(&#34;Creating PyMC3 model for SpecletSeven.&#34;)
-    logger.warning(
-        &#34;Still need to implement varying effect for source on batch effect.&#34;
-    )
 
-    with pm.Model() as model:
-        μ_μ_μ_a = pm.Normal(&#34;μ_μ_μ_a&#34;, 0, 1)
-        σ_μ_μ_a = pm.HalfNormal(&#34;σ_μ_μ_a&#34;, 1)
+    model = pm.Model()
+    self._base_model(model, co_idx=co_idx)
+    _params = {
+        &#34;model&#34;: model,
+        &#34;co_idx&#34;: co_idx,
+        &#34;cellline_to_lineage_idx_shared&#34;: cellline_to_lineage_idx_shared,
+        &#34;sgrna_to_gene_idx_shared&#34;: sgrna_to_gene_idx_shared,
+    }
+    if self.noncentered_param:
+        self._noncentered_model_parameterization(**_params)
+    else:
+        self._centered_model_parameterization(**_params)
 
-        μ_μ_a_offset = pm.Normal(
-            &#34;μ_μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
-        )
-        μ_μ_a = pm.Deterministic(&#34;μ_μ_a&#34;, μ_μ_μ_a + μ_μ_a_offset * σ_μ_μ_a)
-        σ_σ_μ_a = pm.HalfNormal(&#34;σ_σ_μ_a&#34;, 1)
-        σ_μ_a = pm.HalfNormal(&#34;σ_μ_a&#34;, σ_σ_μ_a, shape=(1, co_idx.n_celllines))
-
-        μ_a_offset = pm.Normal(
-            &#34;μ_a_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
-        )
-        μ_a = pm.Deterministic(
-            &#34;μ_a&#34;,
-            μ_μ_a[:, cellline_to_lineage_idx_shared]
-            + μ_a_offset
-            * tensor.ones(shape=(co_idx.n_genes, co_idx.n_celllines))
-            * σ_μ_a,
-        )
-        σ_σ_a = pm.HalfNormal(&#34;σ_σ_a&#34;, 1)
-        σ_a = pm.HalfNormal(&#34;σ_a&#34;, σ_σ_a, shape=(co_idx.n_sgrnas, 1))
-        a_offset = pm.Normal(
-            &#34;a_offset&#34;, 0, 1, shape=(co_idx.n_sgrnas, co_idx.n_celllines)
-        )
-        a = pm.Deterministic(&#34;a&#34;, μ_a[sgrna_to_gene_idx_shared, :] + a_offset * σ_a)
-
-        μ = pm.Deterministic(&#34;μ&#34;, a[sgrna_idx_shared, cellline_idx_shared])
+    with model:
+        μ = pm.Deterministic(&#34;μ&#34;, model[&#34;a&#34;][sgrna_idx_shared, cellline_idx_shared])
 
         # Standard deviation of log-fold change, varies per batch.
         σ = pm.HalfNormal(&#34;σ&#34;, 1)
@@ -682,6 +860,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <li><code><a title="src.models.speclet_model.SpecletModel.get_advi_callbacks" href="speclet_model.html#src.models.speclet_model.SpecletModel.get_advi_callbacks">get_advi_callbacks</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.mcmc_sample_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.mcmc_sample_model">mcmc_sample_model</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.run_simulation_based_calibration" href="speclet_model.html#src.models.speclet_model.SpecletModel.run_simulation_based_calibration">run_simulation_based_calibration</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.update_observed_data" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_observed_data">update_observed_data</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.write_advi_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_advi_cache">write_advi_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.write_mcmc_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_mcmc_cache">write_mcmc_cache</a></code></li>
 </ul>
@@ -709,6 +888,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <ul class="">
 <li><code><a title="src.models.speclet_seven.SpecletSeven.get_replacement_parameters" href="#src.models.speclet_seven.SpecletSeven.get_replacement_parameters">get_replacement_parameters</a></code></li>
 <li><code><a title="src.models.speclet_seven.SpecletSeven.model_specification" href="#src.models.speclet_seven.SpecletSeven.model_specification">model_specification</a></code></li>
+<li><code><a title="src.models.speclet_seven.SpecletSeven.noncentered_param" href="#src.models.speclet_seven.SpecletSeven.noncentered_param">noncentered_param</a></code></li>
 <li><code><a title="src.models.speclet_seven.SpecletSeven.update_advi_sampling_parameters" href="#src.models.speclet_seven.SpecletSeven.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>
 <li><code><a title="src.models.speclet_seven.SpecletSeven.update_mcmc_sampling_parameters" href="#src.models.speclet_seven.SpecletSeven.update_mcmc_sampling_parameters">update_mcmc_sampling_parameters</a></code></li>
 </ul>
