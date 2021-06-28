@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - master
-      - efficient-ci
   pull_request:
     branches:
       - master
@@ -43,9 +42,11 @@ jobs:
       - name: Activate conda environment
         shell: bash -l {0}
         run: conda activate speclet
-      - name: Describe virtual environment
+      - name: Describe environment
         shell: bash -l {0}
         run: |
+          pwd
+          ls -lha
           python3 --version
           which python3
           conda env list
@@ -58,9 +59,3 @@ jobs:
             --force-sugar \
             --testmon \
             tests
-      - name: List all files
-        shell: bash -l {0}
-        run: |
-          pwd
-          echo ~
-          ls -lha
