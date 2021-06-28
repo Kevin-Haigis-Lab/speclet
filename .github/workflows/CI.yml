@@ -27,9 +27,9 @@ jobs:
         uses: actions/cache@v1
         env:
           # Increase this value to reset cache for pytest-testmon
-          CACHE_NUMBER: 0
+          CACHE_NUMBER: 1
         with:
-          path: .testmondata
+          path: ~/work/speclet/speclet/.testmondata
           key:
             ${{ runner.os }}-testmon-${{ env.CACHE_NUMBER }}-${{ hashFiles('.testmondata') }}
       - name: Install conda
@@ -63,5 +63,6 @@ jobs:
         shell: bash -l {0}
         run: |
           pwd
+          echo ~
           ls -lha
           tree
