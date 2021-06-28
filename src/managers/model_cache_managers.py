@@ -34,9 +34,11 @@ class Pymc3ModelCacheManager:
         """Instantiate a new SpecletModel object.
 
         Args:
-            name
-            cache_dir (Optional[Path], optional): The directory for caching
-              sampling/fitting results. Defaults to None.
+            name (str): Identifiable name of the model to be incorporated in the cache
+              directory name.
+            root_cache_dir (Optional[Path], optional): The directory for caching
+              sampling/fitting results. Defaults to None to use the project default
+              cache directory.
         """
         self.name = name
 
@@ -72,7 +74,7 @@ class Pymc3ModelCacheManager:
         """Cache MCMC sampling results.
 
         Args:
-            res (pmapi.MCMCSamplingResults): MCMC sampling results.
+            inference_data (az.InferenceData): MCMC sampling results.
         """
         self.mcmc_cache_delegate.cache_sampling_results(inference_data)
 
@@ -84,7 +86,8 @@ class Pymc3ModelCacheManager:
         """Cache ADVI fitting results.
 
         Args:
-            res (pmapi.ApproximationSamplingResults): ADVI fitting results.
+            inference_data (az.InferenceData): Fitting results.
+            approx (pm.Approximation): ADVI approximation information.
         """
         self.advi_cache_delegate.cache_sampling_results(inference_data, approx)
 

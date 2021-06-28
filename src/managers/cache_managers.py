@@ -131,14 +131,13 @@ class Pymc3CacheManager:
             approximation=approx,
         )
 
-    def cache_sampling_results(
-        self, res: Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]
-    ) -> None:
+    _SamplingResT = Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]
+
+    def cache_sampling_results(self, res: _SamplingResT) -> None:
         """Cache sampling results to disk.
 
         Args:
-            res (Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]):
-              The results to cache.
+            res (_SamplingResT): The results to cache.
         """
         _mkdir(self.cache_dir)
         cache_paths = self.get_cache_file_names()
