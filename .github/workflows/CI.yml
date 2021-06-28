@@ -15,19 +15,19 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Cache conda environment
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         env:
           # Increase this value to reset cache if environment.yml has not changed
-          CACHE_NUMBER: 0
+          CACHE_NUMBER: 1
         with:
           path: ~/conda_pkgs_dir
           key:
             ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
       - name: Cache pytest-testmon database
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         env:
           # Increase this value to reset cache for pytest-testmon
-          CACHE_NUMBER: 1
+          CACHE_NUMBER: 2
         with:
           path: .testmondata
           key:
