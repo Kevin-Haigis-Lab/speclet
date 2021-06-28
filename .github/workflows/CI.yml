@@ -64,4 +64,3 @@ jobs:
           pwd
           echo ~
           ls -lha
-          tree
