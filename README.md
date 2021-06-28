@@ -1,6 +1,6 @@
-# *KRAS* allele-specific synthetic lethal analysis using Bayesian statistics
+# *speclet* - Bayesian modeling of genome-wide CRISPR-Cas9 LOF screens
 
-**Using Bayesian statistics to model CRISPR-Cas9 genetic screen data to identify, with measurable uncertainty, synthetic lethal interactions that are specific to the individual *KRAS* mutations.**
+**Use Bayesian data analysis to create flexible and informative models of genome-wide CRISPR-Cas9 loss-of-function genetic screens.**
 
 [![python](https://img.shields.io/badge/Python-3.9-3776AB.svg?style=flat&logo=python)](https://www.python.org)
 [![jupyerlab](https://img.shields.io/badge/Jupyter-Lab-F37626.svg?style=flat&logo=jupyter)](https://jupyter.org) <br>
@@ -37,42 +37,45 @@ See the README in that directory for further details.
 ### [Python Modules](src/)
 
 All shared Python code is contained in the ["src/"](src) directory.
-The installed of this directory as an editable module should be done automatically when the conda environment is created.
-If this failed, the modules can be installed using the following command.
+The installation of this directory as an editable module should be done automatically when the conda environment is created.
+If this failed, the module can be installed using the following command.
 
 ```python
 # Run only if the module was not automatically installed by conda.
 pip install -e .
 ```
 
-The modules are tested using ['pytest'](https://docs.pytest.org/en/stable/); see below for how to run the tests.
+The modules are tested using ['pytest'](https://docs.pytest.org/en/stable/) –  see below for how to run the tests.
 They also conform to the ['black'](https://github.com/psf/black) formatter and make heavy use of Python's type-hinting system checked by ['mypy'](http://mypy-lang.org/).
 The functions are well documented using the Google documentation style and are checked by ['pydocstyle'](http://www.pydocstyle.org/en/stable/).
 
 ### [Pipelines](pipelines/)
 
-All pipelines and associated files (e.g. configurations and runners) are in the "pipelines/" directory.
-Each pipeline should contain an associated bash script that can be used to run the pipeline.
+All pipelines and associated files (e.g. configurations and runners) are in the ["pipelines/"](pipelines) directory.
+Each pipeline should contain an associated bash script and `make` command that can be used to run the pipeline (usually on O2).
 
 ### [Reports](reports/)
 
-Standardized reports are available in the "reports/" directory.
-Currently, there is only one pipeline making use of this directory, but if more are added, subdirectories should be used to separate groups of reports.
+Standardized reports are available in the ["reports/"](reports) directory.
+Each annalysis pipeline should have a corresponding subdirectory in the reports directory.
 
 ### [Presentations](presentations/)
 
-Presentations that involved this project are stored in the "presentations/" directory.
+Presentations that involved this project are stored in the ["presentations/"](presentations) directory.
 
 ### [Testing](tests/)
 
-Tests have been written against the modules in `src/` using ['pytest'](https://docs.pytest.org/en/stable/).
+Tests in the ["tests/"](tests) directory have been written against the modules in ["src/"](src) using ['pytest'](https://docs.pytest.org/en/stable/) and ['hypothesis'](https://hypothesis.readthedocs.io/en/latest/).
 They can be run using the following command.
 
 ```python
+# Run full test suite.
 pytest
+# Or run the tests in two groups simultaneously.
+make test  # `test_o2` on O2
 ```
 
-The coverage report can be shown by adding the `--cov="src"` parameter.
+The coverage report can be shown by adding the `--cov="src"` flag.
 Some tests are slow because they involve the creation of PyMC3 models or sampling/fitting them.
 These can be skipped using the `-m "not slow"` argument.
 Some tests require the ability to construct plots (using the 'matplotlib' library), but not all platforms (notably the HMS research computing cluster) provide this ability.

@@ -208,9 +208,9 @@ def test_generate_mock_cell_line_information_notrandomness(data: st.DataObject):
 def test_generate_mock_cell_line_information_randomness(data: st.DataObject):
     genes = data.draw(st.lists(st.text(chars), min_size=1, unique=True), label="genes")
     n_cell_lines = data.draw(st.integers(1, 10), label="n_cell_lines")
-    n_lineages = data.draw(st.integers(1, n_cell_lines), label="n_lineages")
-    n_batches = data.draw(st.integers(1, n_cell_lines), label="n_batches")
-    n_screens = data.draw(st.integers(1, n_cell_lines), label="n_screens")
+    n_lineages = data.draw(st.integers(1, min(n_cell_lines, 3)), label="n_lineages")
+    n_batches = data.draw(st.integers(1, min(n_cell_lines, 3)), label="n_batches")
+    n_screens = data.draw(st.integers(1, min(n_cell_lines, 3)), label="n_screens")
     mock_info = sbc.generate_mock_cell_line_information(
         genes=genes,
         n_cell_lines=n_cell_lines,
@@ -277,8 +277,8 @@ def generate_data_with_random_params(draw) -> pd.DataFrame:
     n_genes = draw(st.integers(2, 7), label="n_genes")
     n_sgrnas_per_gene = draw(st.integers(1, 3), label="n_sgrnas_per_gene")
     n_cell_lines = draw(st.integers(3, 6), label="n_cell_lines")
-    n_lineages = draw(st.integers(1, n_cell_lines), label="n_lineages")
-    n_batches = draw(st.integers(1, n_cell_lines), label="n_batches")
+    n_lineages = draw(st.integers(1, min(n_cell_lines, 3)), label="n_lineages")
+    n_batches = draw(st.integers(1, min(n_cell_lines, 3)), label="n_batches")
     if n_batches == 1:
         n_screens = 1
     else:

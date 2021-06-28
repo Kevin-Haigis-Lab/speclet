@@ -39,10 +39,11 @@ import numpy as np
 import typer
 
 from src.command_line_interfaces import cli_helpers
-from src.command_line_interfaces.cli_helpers import ModelFitMethod, ModelOption
+from src.command_line_interfaces.cli_helpers import ModelFitMethod
 from src.io import cache_io
 from src.loggers import logger
 from src.models.speclet_model import SpecletModel
+from src.pipelines.pipeline_classes import ModelOption
 
 cli_helpers.configure_pretty()
 
@@ -60,8 +61,12 @@ def touch_file(
     &#34;&#34;&#34;Touch a file.
 
     Args:
+        cache_dir (Path): Location of the cache directory.
         model (str): The model.
         name (str): The custom name of the model.
+        fit_method (ModelFitMethod): Method used to fit the model.
+        touch_suffix (Optional[str], optional): Optional suffix to add the to the file.
+          Defaults to None for no additional suffix.
     &#34;&#34;&#34;
     if touch_suffix is None:
         touch_suffix = &#34;&#34;
@@ -175,7 +180,7 @@ if __name__ == &#34;__main__&#34;:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.command_line_interfaces.sampling_pymc3_models_cli.sample_speclet_model"><code class="name flex">
-<span>def <span class="ident">sample_speclet_model</span></span>(<span>model: <a title="src.command_line_interfaces.cli_helpers.ModelOption" href="cli_helpers.html#src.command_line_interfaces.cli_helpers.ModelOption">ModelOption</a>, name: str, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a> = ModelFitMethod.advi, mcmc_chains: int = 4, mcmc_cores: int = 4, sample: bool = True, ignore_cache: bool = False, debug: bool = False, random_seed: Optional[int] = None, touch: bool = False) -> Type[<a title="src.models.speclet_model.SpecletModel" href="../models/speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a>]</span>
+<span>def <span class="ident">sample_speclet_model</span></span>(<span>model: <a title="src.pipelines.pipeline_classes.ModelOption" href="../pipelines/pipeline_classes.html#src.pipelines.pipeline_classes.ModelOption">ModelOption</a>, name: str, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a> = ModelFitMethod.advi, mcmc_chains: int = 4, mcmc_cores: int = 4, sample: bool = True, ignore_cache: bool = False, debug: bool = False, random_seed: Optional[int] = None, touch: bool = False) -> Type[<a title="src.models.speclet_model.SpecletModel" href="../models/speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Fit and sample from a variety of predefined PyMC3 models.</p>
@@ -308,10 +313,17 @@ built and fit.</dd>
 <div class="desc"><p>Touch a file.</p>
 <h2 id="args">Args</h2>
 <dl>
+<dt><strong><code>cache_dir</code></strong> :&ensp;<code>Path</code></dt>
+<dd>Location of the cache directory.</dd>
 <dt><strong><code>model</code></strong> :&ensp;<code>str</code></dt>
 <dd>The model.</dd>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
 <dd>The custom name of the model.</dd>
+<dt><strong><code>fit_method</code></strong> :&ensp;<code>ModelFitMethod</code></dt>
+<dd>Method used to fit the model.</dd>
+<dt><strong><code>touch_suffix</code></strong> :&ensp;<code>Optional[str]</code>, optional</dt>
+<dd>Optional suffix to add the to the file.
+Defaults to None for no additional suffix.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -327,8 +339,12 @@ built and fit.</dd>
     &#34;&#34;&#34;Touch a file.
 
     Args:
+        cache_dir (Path): Location of the cache directory.
         model (str): The model.
         name (str): The custom name of the model.
+        fit_method (ModelFitMethod): Method used to fit the model.
+        touch_suffix (Optional[str], optional): Optional suffix to add the to the file.
+          Defaults to None for no additional suffix.
     &#34;&#34;&#34;
     if touch_suffix is None:
         touch_suffix = &#34;&#34;

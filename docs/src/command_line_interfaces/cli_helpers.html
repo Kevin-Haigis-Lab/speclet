@@ -31,7 +31,6 @@
 &#34;&#34;&#34;Helper functions for the various CLIs.&#34;&#34;&#34;
 
 
-from enum import Enum
 from typing import Any, Dict, Type
 
 import pretty_errors
@@ -43,9 +42,11 @@ from src.models.speclet_four import SpecletFour
 from src.models.speclet_model import SpecletModel
 from src.models.speclet_one import SpecletOne
 from src.models.speclet_pipeline_test_model import SpecletTestModel
+from src.models.speclet_seven import SpecletSeven
 from src.models.speclet_six import SpecletSix
 from src.models.speclet_three import SpecletThree
 from src.models.speclet_two import SpecletTwo
+from src.pipelines.pipeline_classes import ModelOption
 from src.project_enums import ModelFitMethod
 
 #### ---- Pretty Errors ---- ####
@@ -77,20 +78,6 @@ def clean_model_names(n: str) -&gt; str:
     return n.replace(&#34; &#34;, &#34;-&#34;)
 
 
-class ModelOption(str, Enum):
-    &#34;&#34;&#34;Model options.&#34;&#34;&#34;
-
-    speclet_test_model = &#34;speclet-test-model&#34;
-    crc_ceres_mimic = &#34;crc-ceres-mimic&#34;
-    speclet_one = &#34;speclet-one&#34;
-    speclet_two = &#34;speclet-two&#34;
-    speclet_three = &#34;speclet-three&#34;
-    speclet_four = &#34;speclet-four&#34;
-    speclet_five = &#34;speclet-five&#34;
-    speclet_six = &#34;speclet-six&#34;
-    speclet_seven = &#34;speclet-seven&#34;
-
-
 def get_model_class(model_opt: ModelOption) -&gt; Type[SpecletModel]:
     &#34;&#34;&#34;Get the model class from its string identifier.
 
@@ -109,6 +96,7 @@ def get_model_class(model_opt: ModelOption) -&gt; Type[SpecletModel]:
         ModelOption.speclet_four: SpecletFour,
         ModelOption.speclet_five: SpecletFive,
         ModelOption.speclet_six: SpecletSix,
+        ModelOption.speclet_seven: SpecletSeven,
     }
     return model_option_map[model_opt]
 
@@ -116,10 +104,8 @@ def get_model_class(model_opt: ModelOption) -&gt; Type[SpecletModel]:
 def extract_fit_method(name: str) -&gt; ModelFitMethod:
     &#34;&#34;&#34;Extract the model fitting method to use based on the unique name of the model.
 
-    TODO: test
-
     Args:
-        name (str): NAme of the model (*not* the type of model).
+        name (str): Name of the model (*not* the type of model).
 
     Raises:
         ValueError: Raised if no fitting method is found.
@@ -153,6 +139,8 @@ def modify_model_by_name(model: Any, name: str) -&gt; None:
         modify_specletfour_model_by_name(model, name)
     elif isinstance(model, SpecletSix):
         modify_specletsix_model_by_name(model, name)
+    elif isinstance(model, SpecletSeven):
+        modify_specletseven_model_by_name(model, name)
     else:
         logger.info(&#34;No modifications make to model based on its name.&#34;)
     return None
@@ -203,7 +191,18 @@ def modify_specletsix_model_by_name(model: SpecletSix, name: str) -&gt; None:
         model.rna_cov = True
     if &#34;mutation&#34; in name:
         logger.info(&#34;Including mutation covariate in the Sp6 model.&#34;)
-        model.mutation_cov = True</code></pre>
+        model.mutation_cov = True
+
+
+def modify_specletseven_model_by_name(model: SpecletSeven, name: str) -&gt; None:
+    &#34;&#34;&#34;Modify a SpecletSeven object based on the user-provided input name.
+
+    Args:
+        model (SpecletSeven): The SpecletSeven model.
+        name (str): User-provided name.
+    &#34;&#34;&#34;
+    logger.info(f&#34;Modifying SpecletSeven model based on the name: &#39;{name}&#39;.&#34;)
+    model.noncentered_param = &#34;noncentered&#34; in name</code></pre>
 </details>
 </section>
 <section>
@@ -269,11 +268,10 @@ def modify_specletsix_model_by_name(model: SpecletSix, name: str) -&gt; None:
 </code></dt>
 <dd>
 <div class="desc"><p>Extract the model fitting method to use based on the unique name of the model.</p>
-<p>TODO: test</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
-<dd>NAme of the model (<em>not</em> the type of model).</dd>
+<dd>Name of the model (<em>not</em> the type of model).</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
@@ -292,10 +290,8 @@ def modify_specletsix_model_by_name(model: SpecletSix, name: str) -&gt; None:
 <pre><code class="python">def extract_fit_method(name: str) -&gt; ModelFitMethod:
     &#34;&#34;&#34;Extract the model fitting method to use based on the unique name of the model.
 
-    TODO: test
-
     Args:
-        name (str): NAme of the model (*not* the type of model).
+        name (str): Name of the model (*not* the type of model).
 
     Raises:
         ValueError: Raised if no fitting method is found.
@@ -310,13 +306,13 @@ def modify_specletsix_model_by_name(model: SpecletSix, name: str) -&gt; None:
 </details>
 </dd>
 <dt id="src.command_line_interfaces.cli_helpers.get_model_class"><code class="name flex">
-<span>def <span class="ident">get_model_class</span></span>(<span>model_opt: <a title="src.command_line_interfaces.cli_helpers.ModelOption" href="#src.command_line_interfaces.cli_helpers.ModelOption">ModelOption</a>) -> Type[<a title="src.models.speclet_model.SpecletModel" href="../models/speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a>]</span>
+<span>def <span class="ident">get_model_class</span></span>(<span>model_opt: <a title="src.pipelines.pipeline_classes.ModelOption" href="../pipelines/pipeline_classes.html#src.pipelines.pipeline_classes.ModelOption">ModelOption</a>) -> Type[<a title="src.models.speclet_model.SpecletModel" href="../models/speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the model class from its string identifier.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>model_opt</code></strong> :&ensp;<code><a title="src.command_line_interfaces.cli_helpers.ModelOption" href="#src.command_line_interfaces.cli_helpers.ModelOption">ModelOption</a></code></dt>
+<dt><strong><code>model_opt</code></strong> :&ensp;<code>ModelOption</code></dt>
 <dd>The string identifier for the model.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
@@ -346,6 +342,7 @@ def modify_specletsix_model_by_name(model: SpecletSix, name: str) -&gt; None:
         ModelOption.speclet_four: SpecletFour,
         ModelOption.speclet_five: SpecletFive,
         ModelOption.speclet_six: SpecletSix,
+        ModelOption.speclet_seven: SpecletSeven,
     }
     return model_option_map[model_opt]</code></pre>
 </details>
@@ -420,6 +417,8 @@ will be sent through the method.</dd>
         modify_specletfour_model_by_name(model, name)
     elif isinstance(model, SpecletSix):
         modify_specletsix_model_by_name(model, name)
+    elif isinstance(model, SpecletSeven):
+        modify_specletseven_model_by_name(model, name)
     else:
         logger.info(&#34;No modifications make to model based on its name.&#34;)
     return None</code></pre>
@@ -451,6 +450,33 @@ will be sent through the method.</dd>
     if &#34;copy-number&#34; in name or &#34;cn-cov&#34; in name:
         logger.info(&#34;Including copy number covariate in the Sp4 model.&#34;)
         model.copy_number_cov = True</code></pre>
+</details>
+</dd>
+<dt id="src.command_line_interfaces.cli_helpers.modify_specletseven_model_by_name"><code class="name flex">
+<span>def <span class="ident">modify_specletseven_model_by_name</span></span>(<span>model: <a title="src.models.speclet_seven.SpecletSeven" href="../models/speclet_seven.html#src.models.speclet_seven.SpecletSeven">SpecletSeven</a>, name: str) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Modify a SpecletSeven object based on the user-provided input name.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model</code></strong> :&ensp;<code>SpecletSeven</code></dt>
+<dd>The SpecletSeven model.</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>User-provided name.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def modify_specletseven_model_by_name(model: SpecletSeven, name: str) -&gt; None:
+    &#34;&#34;&#34;Modify a SpecletSeven object based on the user-provided input name.
+
+    Args:
+        model (SpecletSeven): The SpecletSeven model.
+        name (str): User-provided name.
+    &#34;&#34;&#34;
+    logger.info(f&#34;Modifying SpecletSeven model based on the name: &#39;{name}&#39;.&#34;)
+    model.noncentered_param = &#34;noncentered&#34; in name</code></pre>
 </details>
 </dd>
 <dt id="src.command_line_interfaces.cli_helpers.modify_specletsix_model_by_name"><code class="name flex">
@@ -493,77 +519,6 @@ will be sent through the method.</dd>
 </dl>
 </section>
 <section>
-<h2 class="section-title" id="header-classes">Classes</h2>
-<dl>
-<dt id="src.command_line_interfaces.cli_helpers.ModelOption"><code class="flex name class">
-<span>class <span class="ident">ModelOption</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Model options.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class ModelOption(str, Enum):
-    &#34;&#34;&#34;Model options.&#34;&#34;&#34;
-
-    speclet_test_model = &#34;speclet-test-model&#34;
-    crc_ceres_mimic = &#34;crc-ceres-mimic&#34;
-    speclet_one = &#34;speclet-one&#34;
-    speclet_two = &#34;speclet-two&#34;
-    speclet_three = &#34;speclet-three&#34;
-    speclet_four = &#34;speclet-four&#34;
-    speclet_five = &#34;speclet-five&#34;
-    speclet_six = &#34;speclet-six&#34;
-    speclet_seven = &#34;speclet-seven&#34;</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.str</li>
-<li>enum.Enum</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="src.command_line_interfaces.cli_helpers.ModelOption.crc_ceres_mimic"><code class="name">var <span class="ident">crc_ceres_mimic</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="src.command_line_interfaces.cli_helpers.ModelOption.speclet_five"><code class="name">var <span class="ident">speclet_five</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="src.command_line_interfaces.cli_helpers.ModelOption.speclet_four"><code class="name">var <span class="ident">speclet_four</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="src.command_line_interfaces.cli_helpers.ModelOption.speclet_one"><code class="name">var <span class="ident">speclet_one</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="src.command_line_interfaces.cli_helpers.ModelOption.speclet_seven"><code class="name">var <span class="ident">speclet_seven</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="src.command_line_interfaces.cli_helpers.ModelOption.speclet_six"><code class="name">var <span class="ident">speclet_six</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="src.command_line_interfaces.cli_helpers.ModelOption.speclet_test_model"><code class="name">var <span class="ident">speclet_test_model</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="src.command_line_interfaces.cli_helpers.ModelOption.speclet_three"><code class="name">var <span class="ident">speclet_three</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="src.command_line_interfaces.cli_helpers.ModelOption.speclet_two"><code class="name">var <span class="ident">speclet_two</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
-</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -586,25 +541,8 @@ will be sent through the method.</dd>
 <li><code><a title="src.command_line_interfaces.cli_helpers.modify_ceres_model_by_name" href="#src.command_line_interfaces.cli_helpers.modify_ceres_model_by_name">modify_ceres_model_by_name</a></code></li>
 <li><code><a title="src.command_line_interfaces.cli_helpers.modify_model_by_name" href="#src.command_line_interfaces.cli_helpers.modify_model_by_name">modify_model_by_name</a></code></li>
 <li><code><a title="src.command_line_interfaces.cli_helpers.modify_specletfour_model_by_name" href="#src.command_line_interfaces.cli_helpers.modify_specletfour_model_by_name">modify_specletfour_model_by_name</a></code></li>
+<li><code><a title="src.command_line_interfaces.cli_helpers.modify_specletseven_model_by_name" href="#src.command_line_interfaces.cli_helpers.modify_specletseven_model_by_name">modify_specletseven_model_by_name</a></code></li>
 <li><code><a title="src.command_line_interfaces.cli_helpers.modify_specletsix_model_by_name" href="#src.command_line_interfaces.cli_helpers.modify_specletsix_model_by_name">modify_specletsix_model_by_name</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-classes">Classes</a></h3>
-<ul>
-<li>
-<h4><code><a title="src.command_line_interfaces.cli_helpers.ModelOption" href="#src.command_line_interfaces.cli_helpers.ModelOption">ModelOption</a></code></h4>
-<ul class="two-column">
-<li><code><a title="src.command_line_interfaces.cli_helpers.ModelOption.crc_ceres_mimic" href="#src.command_line_interfaces.cli_helpers.ModelOption.crc_ceres_mimic">crc_ceres_mimic</a></code></li>
-<li><code><a title="src.command_line_interfaces.cli_helpers.ModelOption.speclet_five" href="#src.command_line_interfaces.cli_helpers.ModelOption.speclet_five">speclet_five</a></code></li>
-<li><code><a title="src.command_line_interfaces.cli_helpers.ModelOption.speclet_four" href="#src.command_line_interfaces.cli_helpers.ModelOption.speclet_four">speclet_four</a></code></li>
-<li><code><a title="src.command_line_interfaces.cli_helpers.ModelOption.speclet_one" href="#src.command_line_interfaces.cli_helpers.ModelOption.speclet_one">speclet_one</a></code></li>
-<li><code><a title="src.command_line_interfaces.cli_helpers.ModelOption.speclet_seven" href="#src.command_line_interfaces.cli_helpers.ModelOption.speclet_seven">speclet_seven</a></code></li>
-<li><code><a title="src.command_line_interfaces.cli_helpers.ModelOption.speclet_six" href="#src.command_line_interfaces.cli_helpers.ModelOption.speclet_six">speclet_six</a></code></li>
-<li><code><a title="src.command_line_interfaces.cli_helpers.ModelOption.speclet_test_model" href="#src.command_line_interfaces.cli_helpers.ModelOption.speclet_test_model">speclet_test_model</a></code></li>
-<li><code><a title="src.command_line_interfaces.cli_helpers.ModelOption.speclet_three" href="#src.command_line_interfaces.cli_helpers.ModelOption.speclet_three">speclet_three</a></code></li>
-<li><code><a title="src.command_line_interfaces.cli_helpers.ModelOption.speclet_two" href="#src.command_line_interfaces.cli_helpers.ModelOption.speclet_two">speclet_two</a></code></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
