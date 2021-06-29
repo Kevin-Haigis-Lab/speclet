@@ -2,13 +2,15 @@
 
 import re
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional
 
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+from src.data_processing.vectors import index_array_by_list
 from src.exceptions import IncorrectNumberOfFilesFoundError
+from src.modeling.pymc3_analysis import get_hdi_colnames_from_az_summary
 from src.modeling.simulation_based_calibration_helpers import SBCFileManager
 
 
@@ -32,16 +34,11 @@ def _get_prior_value_using_index_list(ary: np.ndarray, idx: List[int]) -> float:
     Returns:
         float: The value in the array at a location.
     """
-    #     ary = ary.astype(float)
-    if len(idx) == 0:
-        return float(ary)
-
-    assert len(idx) == len(ary.shape)
-
-    value: np.ndarray = ary.copy()
-    for i in idx:
-        value = value[i]
-    return float(value)
+    if ary.shape == (1,):
+        ary = np.asarray(ary[0])
+    res = index_array_by_list(ary, idx)
+    assert len(res.shape) == 0
+    return float(res)
 
 
 def _make_priors_dataframe(
@@ -57,13 +54,6 @@ def _make_priors_dataframe(
     return df
 
 
-def _get_hdi_colnames_from_az_summary(df: pd.DataFrame) -> Tuple[str, str]:
-    cols: List[str] = [c for c in df.columns if "hdi_" in c]
-    cols = [c for c in cols if "%" in c]
-    assert len(cols) == 2
-    return cols[0], cols[1]
-
-
 def _is_true_value_within_hdi(
     low_hdi: pd.Series, true_vals: pd.Series, high_hdi: pd.Series
 ) -> np.ndarray:
@@ -76,7 +66,7 @@ def _is_true_value_within_hdi(
 def _assign_column_for_within_hdi(
     df: pd.DataFrame, true_value_col: str = "true_value"
 ) -> pd.DataFrame:
-    hdi_low, hdi_high = _get_hdi_colnames_from_az_summary(df)
+    hdi_low, hdi_high = get_hdi_colnames_from_az_summary(df)
     df["within_hdi"] = _is_true_value_within_hdi(
         df[hdi_low], df["true_value"], df[hdi_high]
     )

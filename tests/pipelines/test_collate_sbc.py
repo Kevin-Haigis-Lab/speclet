@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.pipelines import collate_sbc_cli as csbc
+from src.pipelines import collate_sbc as csbc
 
 
 @pytest.fixture
@@ -20,11 +20,6 @@ def centered_eight_post(centered_eight: az.InferenceData) -> pd.DataFrame:
     x = az.summary(centered_eight)
     assert isinstance(x, pd.DataFrame)
     return x
-
-
-def test_get_hdi_colnames_from_az_summary(centered_eight_post: pd.DataFrame) -> None:
-    hdi_cols = csbc._get_hdi_colnames_from_az_summary(centered_eight_post)
-    assert hdi_cols == ("hdi_3%", "hdi_97%")
 
 
 def test_is_true_value_within_hdi_lower_limit() -> None:
@@ -47,11 +42,25 @@ def test_is_true_value_within_hdi_upper_limit() -> None:
     assert np.all(is_within[51:])
 
 
-def test_get_prior_value_using_index_list_empty_idx() -> None:
+def test_get_prior_value_using_index_list_mismatch_index_size() -> None:
     a = np.array([4, 3, 2, 1])
     idx: List[int] = []
+    with pytest.raises(AssertionError):
+        _ = csbc._get_prior_value_using_index_list(a, idx)
+
+
+def test_get_prior_value_using_index_list_empty_idx() -> None:
+    a = np.array(4)
+    idx: List[int] = []
     b = csbc._get_prior_value_using_index_list(a, idx)
-    assert b == 4
+    assert b == 4.0
+
+
+def test_get_prior_value_using_index_list_empty_idx_but_not_flat_array() -> None:
+    a = np.array([4])
+    idx: List[int] = []
+    b = csbc._get_prior_value_using_index_list(a, idx)
+    assert b == 4.0
 
 
 def test_get_prior_value_using_index_list_1d() -> None:
@@ -66,7 +75,6 @@ def test_get_prior_value_using_index_list_1d() -> None:
 
 def test_get_prior_value_using_index_list_2d() -> None:
     a = np.arange(9).reshape((3, 3))
-    print(a)
     idx = [1, 2]
     b = csbc._get_prior_value_using_index_list(a, idx)
     assert b == a[1, 2]

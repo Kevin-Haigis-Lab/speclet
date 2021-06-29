@@ -8,7 +8,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 import pytest
-from hypothesis import given, note
+from hypothesis import given, note, settings
 from hypothesis import strategies as st
 
 from src.data_processing import achilles as achelp
@@ -179,6 +179,7 @@ def test_zscale_rna_expression_with_bounds(
 
 
 @given(st.data())
+@settings(deadline=None)
 def test_zscale_rna_expression_by_gene_lineage(hyp_data):
     n_lineages = hyp_data.draw(st.integers(min_value=1, max_value=4))
     n_genes = hyp_data.draw(st.integers(min_value=1, max_value=7))
