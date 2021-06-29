@@ -18,12 +18,12 @@ ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
 
 MOCK_DATA_SIZE = "small"
 
-model_configurations: List[ModelConfig] = (
+model_configurations: List[ModelConfig] = [
     ModelConfig(name="SpecletSix-mcmc", model=ModelOption.speclet_six, fit_method=ModelFitMethod.mcmc),
-    ModelConfig(name="SpecletSix-advi", model=ModelOption.speclet_six, fit_method=ModelFitMethod.advi),
-    ModelConfig(name="SpecletSeven-mcmc-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.mcmc),
-    ModelConfig(name="SpecletSeven-advi-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.advi),
-)
+    # ModelConfig(name="SpecletSix-advi", model=ModelOption.speclet_six, fit_method=ModelFitMethod.advi),
+    # ModelConfig(name="SpecletSeven-mcmc-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.mcmc),
+    # ModelConfig(name="SpecletSeven-advi-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.advi),
+]
 
 models = [c.model.value for c in model_configurations]
 model_names = [c.name for c in model_configurations]

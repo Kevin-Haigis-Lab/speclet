@@ -1,4 +1,4 @@
-#!/usr/env/bin python3
+#!/usr/bin/env python3
 
 """Collate the posteriors of separate simulations of SBC into a single file."""
 
@@ -11,9 +11,12 @@ import pandas as pd
 import typer
 from tqdm import tqdm
 
+from src.command_line_interfaces import cli_helpers
 from src.exceptions import IncorrectNumberOfFilesFoundError, UnsupportedFileTypeError
 from src.loggers import logger
 from src.modeling.simulation_based_calibration_helpers import SBCFileManager
+
+cli_helpers.configure_pretty()
 
 
 def _split_parameter(p: str) -> List[str]:
@@ -36,9 +39,9 @@ def _get_prior_value_using_index_list(ary: np.ndarray, idx: List[int]) -> float:
     Returns:
         float: The value in the array at a location.
     """
-    ary = ary.astype(float)
+    #     ary = ary.astype(float)
     if len(idx) == 0:
-        return ary[0]
+        return float(ary)
 
     assert len(idx) == len(ary.shape)
 
