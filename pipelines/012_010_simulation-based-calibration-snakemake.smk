@@ -104,11 +104,11 @@ rule collate_sbc:
         perm_dir=make_root_permutation_directory,
     output:
         collated_results=root_perm_dir_template + "/collated-posterior-summaries.pkl",
-    run:
+    shell:
         "src/pipelines/collate_sbc_cli.py "
-        " {input.perm_dir} "
+        " {params.perm_dir} "
         " {output.collated_results} "
-        " --num-permutations=" + NUM_SIMULATIONS
+        " --num-permutations=" + str(NUM_SIMULATIONS)
 
 rule papermill_report:
     params:
