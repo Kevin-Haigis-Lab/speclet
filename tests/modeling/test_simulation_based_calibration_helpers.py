@@ -275,14 +275,14 @@ def test_generate_mock_achilles_categorical_groups(
 @st.composite
 def generate_data_with_random_params(draw) -> pd.DataFrame:
     n_genes = draw(st.integers(2, 7), label="n_genes")
-    n_sgrnas_per_gene = draw(st.integers(1, 3), label="n_sgrnas_per_gene")
+    n_sgrnas_per_gene = draw(st.integers(1, 5), label="n_sgrnas_per_gene")
     n_cell_lines = draw(st.integers(3, 6), label="n_cell_lines")
     n_lineages = draw(st.integers(1, min(n_cell_lines, 3)), label="n_lineages")
     n_batches = draw(st.integers(1, min(n_cell_lines, 3)), label="n_batches")
     if n_batches == 1:
         n_screens = 1
     else:
-        n_screens = draw(st.integers(1, n_cell_lines), label="n_screens")
+        n_screens = draw(st.integers(1, min(n_cell_lines, 3)), label="n_screens")
 
     return sbc.generate_mock_achilles_data(
         n_genes=n_genes,
