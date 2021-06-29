@@ -17,6 +17,7 @@ import pymc3 as pm
 import seaborn as sns
 
 from src.command_line_interfaces import cli_helpers
+from src.modeling.pymc3_analysis import get_hdi_colnames_from_az_summary
 from src.modeling.simulation_based_calibration_helpers import SBCFileManager
 
 notebook_tic = time()
@@ -47,6 +48,7 @@ Parameters for papermill:
 MODEL = ""
 MODEL_NAME = ""
 SBC_RESULTS_DIR = ""
+SBC_COLLATED_RESULTS = ""
 NUM_SIMULATIONS = -1
 ```
 
@@ -55,6 +57,7 @@ NUM_SIMULATIONS = -1
 MODEL = "speclet-seven"
 MODEL_NAME = "SpecletSeven-advi-noncentered"
 SBC_RESULTS_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/speclet-seven_SpecletSeven-advi-noncentered_ADVI"
+SBC_COLLATED_RESULTS = "cache/sbc-cache/speclet-seven_SpecletSeven-advi-noncentered_ADVI_collated-posterior-summaries.pkl"
 NUM_SIMULATIONS = 3
 
 ```
@@ -70,9 +73,15 @@ ModelClass = cli_helpers.get_model_class(cli_helpers.ModelOption(MODEL))
 Check values passed as the directory with results of the rounds of SBC.
 
 ```python
-sbc_results_dir = Path("../..", SBC_RESULTS_DIR)
+path_addition = "../.."
+
+sbc_results_dir = Path(path_addition, SBC_RESULTS_DIR)
 assert sbc_results_dir.is_dir()
 assert sbc_results_dir.exists()
+
+sbc_collated_results_path = Path(path_addition, SBC_COLLATED_RESULTS)
+assert sbc_collated_results_path.is_file()
+assert sbc_collated_results_path.exists()
 ```
 
 Confirm that there is a positive number of simulations.
@@ -84,123 +93,7 @@ assert NUM_SIMULATIONS > 0
 ## Read in all results
 
 ```python
-def split_parameter(p: str) -> List[str]:
-    return [a for a in re.split("\\[|,|\\]", p) if a != ""]
-
-
-def get_prior_value_using_index_list(ary: np.ndarray, idx: List[int]) -> float:
-    if len(idx) == 0:
-        return ary
-
-    assert len(idx) == len(ary.shape)
-    value = ary
-    for i in idx:
-        value = value[i]
-    return value
-
-
-def make_priors_dataframe(
-    priors: Dict[str, np.ndarray], parameters: List[str]
-) -> pd.DataFrame:
-    df = pd.DataFrame({"parameter": parameters, "true_value": 0}).set_index("parameter")
-    for parameter in parameters:
-        split_p = split_parameter(parameter)
-        param = split_p[0]
-        idx = [int(i) for i in split_p[1:]]
-        value = get_prior_value_using_index_list(priors[param][0], idx)
-        df.loc[parameter] = value
-    return df
-```
-
-```python
-simulation_posteriors = []
-
-for sbc_dir in sbc_results_dir.iterdir():
-    sbc_fm = SBCFileManager(sbc_dir)
-    if not sbc_fm.all_data_exists():
-        raise Exception(f"Not all output from '{sbc_fm.dir.name}' exist.")
-    res = sbc_fm.get_sbc_results()
-    true_values = make_priors_dataframe(
-        res.priors, parameters=res.posterior_summary.index.values
-    )
-    posterior_summary = res.posterior_summary.merge(
-        true_values, left_index=True, right_index=True
-    )
-    simulation_posteriors.append(posterior_summary)
-```
-
-```python
-if len(simulation_posteriors) == NUM_SIMULATIONS:
-    print("Collected all simulations.")
-else:
-    print(
-        f"The number of simluations ({NUM_SIMULATIONS}) does not match the number collected ({len(simulation_posteriors)})."
-    )
-```
-
-    Collected all simulations.
-
-## Analysis
-
-```python
-def get_hdi_colnames_from_az_summary(df: pd.DataFrame) -> Tuple[str, str]:
-    cols: List[str] = [c for c in df.columns if "hdi_" in c]
-    cols = [c for c in cols if "%" in c]
-    assert len(cols) == 2
-    return cols[0], cols[1]
-
-
-def is_true_value_within_hdi(
-    low_hdi: pd.Series, true_vals: pd.Series, high_hdi: pd.Series
-) -> np.ndarray:
-    return (
-        (low_hdi.values < true_vals.values).astype(int)
-        * (true_vals.values < high_hdi.values).astype(int)
-    ).astype(bool)
-
-
-def assign_column_for_within_hdi(
-    df: pd.DataFrame, true_value_col: str = "true_value"
-) -> pd.DataFrame:
-    hdi_low, hdi_high = get_hdi_colnames_from_az_summary(df)
-    df["within_hdi"] = is_true_value_within_hdi(
-        df[hdi_low], df["true_value"], df[hdi_high]
-    )
-    return df
-
-
-def measure_posterior_accuracy(df: pd.DataFrame) -> float:
-    return assign_column_for_within_hdi(df)["within_hdi"].mean()
-```
-
-```python
-hdi_acc = [measure_posterior_accuracy(p) for p in simulation_posteriors]
-```
-
-```python
-sns.set_theme()
-fig, ax = plt.subplots(figsize=(8, 5))
-sns.histplot(hdi_acc, ax=ax)
-ax.set_xlabel("HDI accuracy")
-plt.show()
-```
-
-![png](speclet-seven_SpecletSeven-advi-noncentered_ADVI_sbc-results_files/speclet-seven_SpecletSeven-advi-noncentered_ADVI_sbc-results_21_0.png)
-
-```python
-simulation_posteriors_df = pd.concat(
-    [
-        d.assign(simulation_id=f"sim_id_{str(i).rjust(4, '0')}")
-        for i, d in enumerate(simulation_posteriors)
-    ]
-)
-simulation_posteriors_df["parameter_name"] = [
-    x.split("[")[0] for x in simulation_posteriors_df.index.values
-]
-simulation_posteriors_df = simulation_posteriors_df.set_index(
-    "parameter_name", append=True
-).pipe(assign_column_for_within_hdi)
-
+simulation_posteriors_df = pd.read_pickle(sbc_collated_results_path)
 simulation_posteriors_df.head()
 ```
 
@@ -233,8 +126,8 @@ simulation_posteriors_df.head()
       <th>ess_tail</th>
       <th>r_hat</th>
       <th>true_value</th>
-      <th>within_hdi</th>
       <th>simulation_id</th>
+      <th>within_hdi</th>
     </tr>
     <tr>
       <th>parameter</th>
@@ -267,8 +160,8 @@ simulation_posteriors_df.head()
       <td>1021.0</td>
       <td>NaN</td>
       <td>-5.105980</td>
-      <td>False</td>
       <td>sim_id_0000</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>μ_μ_a_offset[0,0]</th>
@@ -283,8 +176,8 @@ simulation_posteriors_df.head()
       <td>850.0</td>
       <td>NaN</td>
       <td>1.764052</td>
-      <td>False</td>
       <td>sim_id_0000</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>μ_μ_a_offset[0,1]</th>
@@ -299,8 +192,8 @@ simulation_posteriors_df.head()
       <td>876.0</td>
       <td>NaN</td>
       <td>0.400157</td>
-      <td>False</td>
       <td>sim_id_0000</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>μ_μ_a_offset[1,0]</th>
@@ -315,8 +208,8 @@ simulation_posteriors_df.head()
       <td>1022.0</td>
       <td>NaN</td>
       <td>0.978738</td>
-      <td>False</td>
       <td>sim_id_0000</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>μ_μ_a_offset[1,1]</th>
@@ -331,12 +224,14 @@ simulation_posteriors_df.head()
       <td>944.0</td>
       <td>NaN</td>
       <td>2.240893</td>
-      <td>False</td>
       <td>sim_id_0000</td>
+      <td>False</td>
     </tr>
   </tbody>
 </table>
 </div>
+
+## Analysis
 
 ```python
 accuracy_per_parameter = (
@@ -366,9 +261,9 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 )
 ```
 
-![png](speclet-seven_SpecletSeven-advi-noncentered_ADVI_sbc-results_files/speclet-seven_SpecletSeven-advi-noncentered_ADVI_sbc-results_23_0.png)
+![png](speclet-seven_SpecletSeven-advi-noncentered_ADVI_sbc-results_files/speclet-seven_SpecletSeven-advi-noncentered_ADVI_sbc-results_17_0.png)
 
-    <ggplot: (2941145485505)>
+    <ggplot: (2965119121327)>
 
 ```python
 hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -413,9 +308,9 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 )
 ```
 
-![png](speclet-seven_SpecletSeven-advi-noncentered_ADVI_sbc-results_files/speclet-seven_SpecletSeven-advi-noncentered_ADVI_sbc-results_24_0.png)
+![png](speclet-seven_SpecletSeven-advi-noncentered_ADVI_sbc-results_files/speclet-seven_SpecletSeven-advi-noncentered_ADVI_sbc-results_18_0.png)
 
-    <ggplot: (2941137065015)>
+    <ggplot: (2965127644401)>
 
 ---
 
@@ -424,14 +319,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.11 minutes
+    execution time: 0.09 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-06-16
+    Last updated: 2021-06-29
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -442,19 +337,19 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 20
     Architecture: 64bit
 
-    Hostname: compute-e-16-183.o2.rc.hms.harvard.edu
+    Hostname: compute-f-17-09.o2.rc.hms.harvard.edu
 
-    Git branch: sp7
+    Git branch: sbc-refactor
 
+    pandas    : 1.2.3
     janitor   : 0.20.14
     re        : 2.2.1
-    pandas    : 1.2.3
-    pymc3     : 3.11.1
-    matplotlib: 3.3.4
     numpy     : 1.20.1
     plotnine  : 0.7.1
-    seaborn   : 0.11.1
+    pymc3     : 3.11.1
+    matplotlib: 3.3.4
     arviz     : 0.11.2
+    seaborn   : 0.11.1

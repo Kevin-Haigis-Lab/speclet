@@ -1,6 +1,6 @@
 """Common and general vector operations."""
 
-from typing import Callable, Optional
+from typing import Callable, List, Optional
 
 import numpy as np
 from scipy import stats
@@ -92,3 +92,34 @@ def careful_zscore(
         return np.zeros_like(x)
     else:
         return zscale(transform(x))
+
+
+def index_array_by_list(ary: np.ndarray, idx: List[int]) -> np.ndarray:
+    """Extract a value from an array by a list of indices.
+
+    The input array may be any number of dimensions and the indices in the list each
+    correspond to a single dimension. The final result will be a single value extracted
+    from the array.
+
+    An array is always returned to avoid having to return Any. It will always be flat
+    and contain a single value.
+
+    Args:
+        ary (np.ndarray): Input array of any dimension.
+        idx (List[int]): List of indices, one per dimension.
+
+    Returns:
+        np.ndarray: A flattened array of the same type as was input, but contains only
+        a single value.
+    """
+    assert len(idx) == len(ary.shape)
+
+    if len(idx) == 0:
+        return np.asarray(ary)
+
+    value: np.ndarray = ary.copy()
+
+    for i in idx:
+        value = value[i]
+
+    return np.asarray(value)

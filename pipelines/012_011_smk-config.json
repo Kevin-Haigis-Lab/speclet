@@ -16,6 +16,13 @@
         "time": "{params.time}",
         "J": "run-sbc"
     },
+    "collate_sbc": {
+        "partition": "short",
+        "cores": 1,
+        "mem": "8000",
+        "time": "00:30:00",
+        "J": "collate"
+    },
     "papermill_report": {
         "partition": "short",
         "cores": 1,

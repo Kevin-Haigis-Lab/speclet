@@ -56,3 +56,27 @@ def test_np_identity_floats(ary: np.ndarray):
 def test_np_identity_ints(ary: np.ndarray):
     i_ary = vhelp.np_identity(ary)
     np.testing.assert_array_equal(ary, i_ary)
+
+
+def test_index_array_by_list_empty():
+    a = np.array(1)
+    idx = []
+    b = vhelp.index_array_by_list(a, idx)
+    assert b == np.asarray(1)
+
+
+def test_index_array_by_list_1d():
+    a = np.array([1, 2, 3, 4])
+    idx = [2]
+    b = vhelp.index_array_by_list(a, idx)
+    assert b == np.asarray(3)
+
+
+@pytest.mark.parametrize("dtype", ["int", "float", "str"])
+@given(nrows=st.integers(1, 10), ncols=st.integers(0, 10))
+def test_index_array_by_list_2d(nrows: int, ncols: int, dtype: str):
+    a = np.random.standard_normal((nrows, ncols)).astype(dtype)
+    for i in range(nrows):
+        for j in range(ncols):
+            b = vhelp.index_array_by_list(a, [i, j])
+            assert b == a[i, j] == a[i][j]

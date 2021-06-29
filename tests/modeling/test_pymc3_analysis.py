@@ -277,3 +277,22 @@ class TestPlottingOfPriors(PyMC3AnalysisTesting):
         axes_titles = [ax.get_title() for ax in axes.flatten()]
         for ax_title in axes_titles:
             assert ax_title in prior_pred.keys()
+
+
+@pytest.fixture
+def centered_eight() -> az.InferenceData:
+    x = az.load_arviz_data("centered_eight")
+    assert isinstance(x, az.InferenceData)
+    return x
+
+
+@pytest.fixture
+def centered_eight_post(centered_eight: az.InferenceData) -> pd.DataFrame:
+    x = az.summary(centered_eight)
+    assert isinstance(x, pd.DataFrame)
+    return x
+
+
+def test_get_hdi_colnames_from_az_summary(centered_eight_post: pd.DataFrame) -> None:
+    hdi_cols = pmanal.get_hdi_colnames_from_az_summary(centered_eight_post)
+    assert hdi_cols == ("hdi_3%", "hdi_97%")

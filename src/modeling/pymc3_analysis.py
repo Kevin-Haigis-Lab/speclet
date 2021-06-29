@@ -158,3 +158,18 @@ def plot_vi_hist(approx: pm.variational.Approximation) -> gg.ggplot:
         + gg.scale_x_continuous(expand=(0.02, 0, 0.02, 0))
         + gg.labs(x="step", y="loss", title="Approximation history")
     )
+
+
+def get_hdi_colnames_from_az_summary(df: pd.DataFrame) -> Tuple[str, str]:
+    """Get the column names corresponding to the HDI from an ArviZ summary.
+
+    Args:
+        df (pd.DataFrame): ArviZ posterior summary data frame.
+
+    Returns:
+        Tuple[str, str]: The two column names.
+    """
+    cols: List[str] = [c for c in df.columns if "hdi_" in c]
+    cols = [c for c in cols if "%" in c]
+    assert len(cols) == 2
+    return cols[0], cols[1]
