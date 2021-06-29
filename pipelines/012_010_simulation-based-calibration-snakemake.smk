@@ -6,7 +6,6 @@ from typing import List
 import papermill
 
 from src.project_enums import ModelFitMethod
-
 from src.pipelines.pipeline_classes import ModelOption, ModelConfig
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
@@ -20,9 +19,9 @@ MOCK_DATA_SIZE = "small"
 
 model_configurations: List[ModelConfig] = [
     ModelConfig(name="SpecletSix-mcmc", model=ModelOption.speclet_six, fit_method=ModelFitMethod.mcmc),
-    # ModelConfig(name="SpecletSix-advi", model=ModelOption.speclet_six, fit_method=ModelFitMethod.advi),
-    # ModelConfig(name="SpecletSeven-mcmc-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.mcmc),
-    # ModelConfig(name="SpecletSeven-advi-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.advi),
+    ModelConfig(name="SpecletSix-advi", model=ModelOption.speclet_six, fit_method=ModelFitMethod.advi),
+    ModelConfig(name="SpecletSeven-mcmc-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.mcmc),
+    ModelConfig(name="SpecletSeven-advi-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.advi),
 ]
 
 models = [c.model.value for c in model_configurations]
@@ -45,7 +44,6 @@ root_perm_dir_template = ROOT_PERMUTATION_DIR + "{model}_{model_name}_{fit_metho
 perm_dir_template = "sbc-perm{perm_num}"
 
 def make_root_permutation_directory(w) -> str:
-    # print(type(w))
     return root_perm_dir_template.format(
         model=w.model,
         model_name=w.model_name,
@@ -55,6 +53,15 @@ def make_root_permutation_directory(w) -> str:
 def make_permutation_dir(w) -> str:
     return make_root_permutation_directory(w) + "/" + perm_dir_template.format(perm_num=w.perm_num)
 
+collated_results_template = "cache/sbc-cache/{model}_{model_name}_{fit_method}_collated-posterior-summaries.pkl"
+
+def make_collated_results_path(w) -> str:
+    print(type(w))
+    return collated_results_template.format(
+        model=w.model,
+        model_name=w.model_name,
+        fit_method=w.fit_method,
+    )
 
 #### ---- Rules ---- ####
 
@@ -90,7 +97,6 @@ rule run_sbc:
         "  {wildcards.perm_num} "
         " " + MOCK_DATA_SIZE
 
-# Still need to add SLURM requirements in config.
 rule collate_sbc:
     input:
         sbc_results_csvs=expand(
@@ -103,7 +109,7 @@ rule collate_sbc:
     params:
         perm_dir=make_root_permutation_directory,
     output:
-        collated_results=root_perm_dir_template + "/collated-posterior-summaries.pkl",
+        collated_results=collated_results_template,
     shell:
         "src/command_line_interfaces/collate_sbc_cli.py "
         " {params.perm_dir} "
@@ -113,7 +119,7 @@ rule collate_sbc:
 rule papermill_report:
     params:
         root_perm_dir=make_root_permutation_directory,
-        collated_results=lambda w: make_root_permutation_directory(w) + "/collated-posterior-summaries.pkl",
+        collated_results=make_collated_results_path,
     output:
         notebook=REPORTS_DIR + "{model}_{model_name}_{fit_method}_sbc-results.ipynb",
     run:
@@ -133,7 +139,7 @@ rule papermill_report:
 
 rule execute_report:
     input:
-        collated_results=root_perm_dir_template + "/collated-posterior-summaries.pkl",
+        collated_results=collated_results_template,
         notebook=REPORTS_DIR + "{model}_{model_name}_{fit_method}_sbc-results.ipynb",
     output:
         markdown=REPORTS_DIR + "{model}_{model_name}_{fit_method}_sbc-results.md",

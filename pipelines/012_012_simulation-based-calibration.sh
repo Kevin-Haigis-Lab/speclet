@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#SBATCH -c 2
+#SBATCH -c 1
 #SBATCH -p priority
 #SBATCH -t 0-06:00
-#SBATCH --mem 4G
+#SBATCH --mem 2G
 #SBATCH -o logs/%j-sbc-snakemake.log
 #SBATCH -e logs/%j-sbc-snakemake.log
 

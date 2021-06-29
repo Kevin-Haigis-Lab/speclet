@@ -15,6 +15,12 @@ from src.pipelines import collate_sbc
 cli_helpers.configure_pretty()
 
 
+def _check_parent_dir(p: Path) -> None:
+    if not p.parent.exists():
+        p.parent.mkdir()
+    return None
+
+
 def collate_sbc_posteriors_cli(
     root_perm_dir: Path,
     output_path: Path,
@@ -36,7 +42,7 @@ def collate_sbc_posteriors_cli(
         extension.
     """
     if not root_perm_dir.is_dir():
-        raise NotADirectoryError()
+        raise NotADirectoryError(root_perm_dir)
 
     logger.info(
         f"Collating {num_permutations} SBC simulations in '{root_perm_dir.as_posix()}'."

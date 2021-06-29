@@ -58,7 +58,7 @@ class SBCFileManager:
             dir (Path): The directory where the data is stored.
         """
         if not dir.is_dir():
-            raise NotADirectoryError()
+            raise NotADirectoryError(dir)
         self.dir = dir
         self.inference_data_path = dir / "inference-data.netcdf"
         self.priors_path_set = dir / "priors"

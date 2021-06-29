@@ -1,5 +1,7 @@
 """Custom exceptions for the project."""
 
+# NOTE: Only import built in libraries so can use in any venv.
+
 
 class IncorrectNumberOfFilesFoundError(Exception):
     """Incorrect number of files found."""
