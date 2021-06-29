@@ -90,27 +90,30 @@ rule run_sbc:
         "  {wildcards.perm_num} "
         " " + MOCK_DATA_SIZE
 
-
-# rule collate_sbc:
-#     input:
-#         sbc_results=expand(
-#             ROOT_PERMUTATION_DIR
-#             + "{model}_{model_name}_{fit_method}/sbc-perm{perm_num}/posterior-summary.csv",
-#             perm_num=list(range(NUM_SIMULATIONS)),
-#             allow_missing=True,
-#         ),
-#     params:
-#         sbc_results_dir=ROOT_PERMUTATION_DIR + wildcards.model + "_" + wildcards.model_name + "_" + wildcards.fit_method,
-#     output:
-#         collated_results=
-#     run:
-#         "src/pipelines/collate_sbc_cli.py "
-#         " {params.sbc_results_dir} "
-#         " --num-permutations=" + NUM_SIMULATIONS
+# Still need to add SLURM requirements in config.
+rule collate_sbc:
+    input:
+        sbc_results_csvs=expand(
+            root_perm_dir_template + "/" + perm_dir_template + "/posterior-summary.csv",
+            perm_num=list(range(NUM_SIMULATIONS)),
+            allow_missing=True,
+        ),
+    conda:
+        ENVIRONMENT_YAML
+    params:
+        perm_dir=make_root_permutation_directory,
+    output:
+        collated_results=root_perm_dir_template + "/collated-posterior-summaries.pkl",
+    run:
+        "src/pipelines/collate_sbc_cli.py "
+        " {input.perm_dir} "
+        " {output.collated_results} "
+        " --num-permutations=" + NUM_SIMULATIONS
 
 rule papermill_report:
     params:
         root_perm_dir=make_root_permutation_directory,
+        collated_results=lambda w: make_root_permutation_directory(w) + "/collated-posterior-summaries.pkl",
     output:
         notebook=REPORTS_DIR + "{model}_{model_name}_{fit_method}_sbc-results.ipynb",
     run:
@@ -121,6 +124,7 @@ rule papermill_report:
                 "MODEL": wildcards.model,
                 "MODEL_NAME": wildcards.model_name,
                 "SBC_RESULTS_DIR": params.root_perm_dir,
+                "SBC_COLLATED_RESULTS": params.collated_results,
                 "NUM_SIMULATIONS": NUM_SIMULATIONS,
             },
             prepare_only=True,
@@ -129,11 +133,7 @@ rule papermill_report:
 
 rule execute_report:
     input:
-        sbc_results=expand(
-            root_perm_dir_template + "/" + perm_dir_template + "/posterior-summary.csv",
-            perm_num=list(range(NUM_SIMULATIONS)),
-            allow_missing=True,
-        ),
+        collated_results=root_perm_dir_template + "/collated-posterior-summaries.pkl",
         notebook=REPORTS_DIR + "{model}_{model_name}_{fit_method}_sbc-results.ipynb",
     output:
         markdown=REPORTS_DIR + "{model}_{model_name}_{fit_method}_sbc-results.md",
