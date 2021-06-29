@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """Collate the posteriors of separate simulations of SBC into a single file."""
 
 import re
@@ -8,15 +6,10 @@ from typing import Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-import typer
 from tqdm import tqdm
 
-from src.command_line_interfaces import cli_helpers
-from src.exceptions import IncorrectNumberOfFilesFoundError, UnsupportedFileTypeError
-from src.loggers import logger
+from src.exceptions import IncorrectNumberOfFilesFoundError
 from src.modeling.simulation_based_calibration_helpers import SBCFileManager
-
-cli_helpers.configure_pretty()
 
 
 def _split_parameter(p: str) -> List[str]:
@@ -163,55 +156,3 @@ def collate_sbc_posteriors(
     )
 
     return simulation_posteriors_df
-
-
-def collate_sbc_posteriors_cli(
-    root_perm_dir: Path,
-    output_path: Path,
-    num_permutations: Optional[int] = None,
-) -> None:
-    """Command line interface for collating the results of many SBC simulations.
-
-    Args:
-        root_perm_dir (Path): Path to the root directory containing the subdirectories
-          with the results of all of the simulations.
-        output_path (Path): Path to save the results to. Can either be saved as a pickle
-          or CSV.
-        num_permutations (Optional[int], optional):  Number of permutations expected. If
-          supplied, this will be checked against the number of found simulations.
-          Defaults to None.
-
-    Raises:
-        UnsupportedOutputFileTypeError: Raised if the output path has an unsupported
-        extension.
-    """
-    if not root_perm_dir.is_dir():
-        raise NotADirectoryError()
-
-    logger.info(
-        f"Collating {num_permutations} SBC simulations in '{root_perm_dir.as_posix()}'."
-    )
-    df = collate_sbc_posteriors(
-        posterior_dirs=root_perm_dir.iterdir(), num_permutations=num_permutations
-    )
-    if output_path.suffix == ".pkl":
-        logger.info(f"Saving final results to pickle: '{output_path.as_posix()}'.")
-        df.to_pickle(output_path.as_posix())
-    elif output_path.suffix == ".csv":
-        logger.info(f"Saving final results to CSV: '{output_path.as_posix()}'.")
-        df.to_csv(output_path)
-    else:
-        raise UnsupportedFileTypeError(output_path.suffix)
-
-
-if __name__ == "__main__":
-    typer.run(collate_sbc_posteriors_cli)
-
-
-# TODO:
-# 1. docstrings for above functions ✅
-# 2. add logging ✅
-# 3. test behavior ✅
-# 4. (in pipeline) add resource requirements for SLURM in config
-# 5. run SBC pipeline with a few simulations (need to remove files in reports)
-# 6. debug

@@ -105,7 +105,7 @@ rule collate_sbc:
     output:
         collated_results=root_perm_dir_template + "/collated-posterior-summaries.pkl",
     shell:
-        "src/pipelines/collate_sbc_cli.py "
+        "src/command_line_interfaces/collate_sbc_cli.py "
         " {params.perm_dir} "
         " {output.collated_results} "
         " --num-permutations=" + str(NUM_SIMULATIONS)
