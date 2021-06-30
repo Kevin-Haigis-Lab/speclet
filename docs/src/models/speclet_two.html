@@ -43,8 +43,17 @@ from src.models.speclet_model import ReplacementsDict, SpecletModel
 class SpecletTwo(SpecletModel):
     &#34;&#34;&#34;SpecletTwo Model.
 
-    This is a simple model with varying intercepts for [gene, cell line],
-    and batch.
+    $$
+    lfc \\sim \\alpha_{g,c} + \\eta_b
+    $$
+
+    where:
+
+    - g: gene
+    - c: cell line
+    - b: batch
+
+    This is a simple model with varying intercepts for [gene|cell line] and batch.
     &#34;&#34;&#34;
 
     def __init__(
@@ -82,6 +91,8 @@ class SpecletTwo(SpecletModel):
             Tuple[pm.Model, str]: The model and name of the observed variable.
         &#34;&#34;&#34;
         logger.info(&#34;Beginning PyMC3 model specification.&#34;)
+
+        assert self.data_manager is not None
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
@@ -217,8 +228,18 @@ class SpecletTwo(SpecletModel):
 </code></dt>
 <dd>
 <div class="desc"><p>SpecletTwo Model.</p>
-<p>This is a simple model with varying intercepts for [gene, cell line],
-and batch.</p>
+<p><span><span class="MathJax_Preview">
+lfc \sim \alpha_{g,c} + \eta_b
+</span><script type="math/tex; mode=display">
+lfc \sim \alpha_{g,c} + \eta_b
+</script></span></p>
+<p>where:</p>
+<ul>
+<li>g: gene</li>
+<li>c: cell line</li>
+<li>b: batch</li>
+</ul>
+<p>This is a simple model with varying intercepts for [gene|cell line] and batch.</p>
 <p>Instantiate a SpecletTwo model.</p>
 <h2 id="args">Args</h2>
 <dl>
@@ -241,8 +262,17 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <pre><code class="python">class SpecletTwo(SpecletModel):
     &#34;&#34;&#34;SpecletTwo Model.
 
-    This is a simple model with varying intercepts for [gene, cell line],
-    and batch.
+    $$
+    lfc \\sim \\alpha_{g,c} + \\eta_b
+    $$
+
+    where:
+
+    - g: gene
+    - c: cell line
+    - b: batch
+
+    This is a simple model with varying intercepts for [gene|cell line] and batch.
     &#34;&#34;&#34;
 
     def __init__(
@@ -280,6 +310,8 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             Tuple[pm.Model, str]: The model and name of the observed variable.
         &#34;&#34;&#34;
         logger.info(&#34;Beginning PyMC3 model specification.&#34;)
+
+        assert self.data_manager is not None
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
@@ -486,6 +518,8 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
         Tuple[pm.Model, str]: The model and name of the observed variable.
     &#34;&#34;&#34;
     logger.info(&#34;Beginning PyMC3 model specification.&#34;)
+
+    assert self.data_manager is not None
     data = self.data_manager.get_data()
 
     total_size = data.shape[0]

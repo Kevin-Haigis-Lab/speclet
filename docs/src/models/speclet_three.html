@@ -44,10 +44,22 @@ from src.models.speclet_model import ReplacementsDict, SpecletModel
 class SpecletThree(SpecletModel):
     &#34;&#34;&#34;SpecletThree Model.
 
-    Model with the following covariates:
-    - h: consistent gene effect
-    - g: cell line-specific gene effect [gene x cell line]
-    - b: batch effect
+    $$
+    lfc \\sim h_g + d_g + \\eta_b
+    $$
+
+    where:
+
+    - g: gene
+    - c: cell line
+    - b: batch
+
+    A simple model with a separate consistnet gene effect \\(h_g\\) and cell-line
+    varying gene effect \\(d_{g,c}\\). There is also an option for a centered and
+    non-centered parameterization.
+
+    Attributes
+        noncentered_param (bool): Use the non-centered parameterization of the model.
     &#34;&#34;&#34;
 
     _noncentered_param: bool
@@ -118,12 +130,12 @@ class SpecletThree(SpecletModel):
             σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)  # noqa: F841
 
             # [gene, cell line] varying intercept.
-            μ_g = pm.Normal(&#34;μ_g&#34;, 0, 0.2)  # noqa: F841
-            σ_g = pm.HalfNormal(&#34;σ_g&#34;, 1)  # noqa: F841
+            μ_d = pm.Normal(&#34;μ_d&#34;, 0, 0.2)  # noqa: F841
+            σ_d = pm.HalfNormal(&#34;σ_d&#34;, 1)  # noqa: F841
 
             # Batch effect varying intercept.
-            μ_b = pm.Normal(&#34;μ_b&#34;, 0, 0.2)  # noqa: F841
-            σ_b = pm.HalfNormal(&#34;σ_b&#34;, 0.5)  # noqa: F841
+            μ_η = pm.Normal(&#34;μ_η&#34;, 0, 0.2)  # noqa: F841
+            σ_η = pm.HalfNormal(&#34;σ_η&#34;, 0.5)  # noqa: F841
 
             σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 0.5)
             σ = pm.HalfNormal(&#34;σ&#34;, σ_σ, shape=common_indices.n_sgrnas)  # noqa: F841
@@ -146,20 +158,20 @@ class SpecletThree(SpecletModel):
             # Gene varying intercept.
             h = pm.Normal(&#34;h&#34;, model[&#34;μ_h&#34;], model[&#34;σ_h&#34;], shape=co_idx.n_genes)
             # [gene, cell line] varying intercept.
-            g = pm.Normal(
-                &#34;g&#34;,
-                model[&#34;μ_g&#34;],
-                model[&#34;σ_g&#34;],
+            d = pm.Normal(
+                &#34;d&#34;,
+                model[&#34;μ_d&#34;],
+                model[&#34;σ_d&#34;],
                 shape=(co_idx.n_genes, co_idx.n_celllines),
             )
             # Batch effect varying intercept.
-            b = pm.Normal(&#34;b&#34;, model[&#34;μ_b&#34;], model[&#34;σ_b&#34;], shape=b_idx.n_batches)
+            η = pm.Normal(&#34;η&#34;, model[&#34;μ_η&#34;], model[&#34;σ_η&#34;], shape=b_idx.n_batches)
 
             μ = pm.Deterministic(
                 &#34;μ&#34;,
                 h[gene_idx_shared]
-                + g[gene_idx_shared, cellline_idx_shared]
-                + b[batch_idx_shared],
+                + d[gene_idx_shared, cellline_idx_shared]
+                + η[batch_idx_shared],
             )
 
             # Likelihood
@@ -190,20 +202,20 @@ class SpecletThree(SpecletModel):
             h = pm.Deterministic(&#34;h&#34;, model[&#34;μ_h&#34;] + h_offset * model[&#34;σ_h&#34;])
 
             # [gene, cell line] varying intercept.
-            g_offset = pm.Normal(
-                &#34;g_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+            d_offset = pm.Normal(
+                &#34;d_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
             )
-            g = pm.Deterministic(&#34;g&#34;, model[&#34;μ_g&#34;] + g_offset * model[&#34;σ_g&#34;])
+            d = pm.Deterministic(&#34;d&#34;, model[&#34;μ_d&#34;] + d_offset * model[&#34;σ_d&#34;])
 
             # Batch effect varying intercept.
-            b_offset = pm.Normal(&#34;b_offset&#34;, 0, 1, shape=b_idx.n_batches)
-            b = pm.Deterministic(&#34;b&#34;, model[&#34;μ_b&#34;] + b_offset * model[&#34;σ_b&#34;])
+            η_offset = pm.Normal(&#34;η_offset&#34;, 0, 1, shape=b_idx.n_batches)
+            η = pm.Deterministic(&#34;η&#34;, model[&#34;μ_η&#34;] + η_offset * model[&#34;σ_η&#34;])
 
             μ = pm.Deterministic(
                 &#34;μ&#34;,
                 h[gene_idx_shared]
-                + g[gene_idx_shared, cellline_idx_shared]
-                + b[batch_idx_shared],
+                + d[gene_idx_shared, cellline_idx_shared]
+                + η[batch_idx_shared],
             )
 
             # Likelihood
@@ -223,6 +235,8 @@ class SpecletThree(SpecletModel):
             Tuple[pm.Model, str]: The model and name of the observed variable.
         &#34;&#34;&#34;
         logger.info(&#34;Beginning PyMC3 model specification.&#34;)
+
+        assert self.data_manager is not None
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
@@ -358,10 +372,22 @@ class SpecletThree(SpecletModel):
 </code></dt>
 <dd>
 <div class="desc"><p>SpecletThree Model.</p>
-<p>Model with the following covariates:
-- h: consistent gene effect
-- g: cell line-specific gene effect [gene x cell line]
-- b: batch effect</p>
+<p><span><span class="MathJax_Preview">
+lfc \sim h_g + d_g + \eta_b
+</span><script type="math/tex; mode=display">
+lfc \sim h_g + d_g + \eta_b
+</script></span></p>
+<p>where:</p>
+<ul>
+<li>g: gene</li>
+<li>c: cell line</li>
+<li>b: batch</li>
+</ul>
+<p>A simple model with a separate consistnet gene effect <span><span class="MathJax_Preview">h_g</span><script type="math/tex">h_g</script></span> and cell-line
+varying gene effect <span><span class="MathJax_Preview">d_{g,c}</span><script type="math/tex">d_{g,c}</script></span>. There is also an option for a centered and
+non-centered parameterization.</p>
+<p>Attributes
+noncentered_param (bool): Use the non-centered parameterization of the model.</p>
 <p>Instantiate a SpecletThree model.</p>
 <h2 id="args">Args</h2>
 <dl>
@@ -387,10 +413,22 @@ parameterization? Default to True.</dd>
 <pre><code class="python">class SpecletThree(SpecletModel):
     &#34;&#34;&#34;SpecletThree Model.
 
-    Model with the following covariates:
-    - h: consistent gene effect
-    - g: cell line-specific gene effect [gene x cell line]
-    - b: batch effect
+    $$
+    lfc \\sim h_g + d_g + \\eta_b
+    $$
+
+    where:
+
+    - g: gene
+    - c: cell line
+    - b: batch
+
+    A simple model with a separate consistnet gene effect \\(h_g\\) and cell-line
+    varying gene effect \\(d_{g,c}\\). There is also an option for a centered and
+    non-centered parameterization.
+
+    Attributes
+        noncentered_param (bool): Use the non-centered parameterization of the model.
     &#34;&#34;&#34;
 
     _noncentered_param: bool
@@ -461,12 +499,12 @@ parameterization? Default to True.</dd>
             σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)  # noqa: F841
 
             # [gene, cell line] varying intercept.
-            μ_g = pm.Normal(&#34;μ_g&#34;, 0, 0.2)  # noqa: F841
-            σ_g = pm.HalfNormal(&#34;σ_g&#34;, 1)  # noqa: F841
+            μ_d = pm.Normal(&#34;μ_d&#34;, 0, 0.2)  # noqa: F841
+            σ_d = pm.HalfNormal(&#34;σ_d&#34;, 1)  # noqa: F841
 
             # Batch effect varying intercept.
-            μ_b = pm.Normal(&#34;μ_b&#34;, 0, 0.2)  # noqa: F841
-            σ_b = pm.HalfNormal(&#34;σ_b&#34;, 0.5)  # noqa: F841
+            μ_η = pm.Normal(&#34;μ_η&#34;, 0, 0.2)  # noqa: F841
+            σ_η = pm.HalfNormal(&#34;σ_η&#34;, 0.5)  # noqa: F841
 
             σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 0.5)
             σ = pm.HalfNormal(&#34;σ&#34;, σ_σ, shape=common_indices.n_sgrnas)  # noqa: F841
@@ -489,20 +527,20 @@ parameterization? Default to True.</dd>
             # Gene varying intercept.
             h = pm.Normal(&#34;h&#34;, model[&#34;μ_h&#34;], model[&#34;σ_h&#34;], shape=co_idx.n_genes)
             # [gene, cell line] varying intercept.
-            g = pm.Normal(
-                &#34;g&#34;,
-                model[&#34;μ_g&#34;],
-                model[&#34;σ_g&#34;],
+            d = pm.Normal(
+                &#34;d&#34;,
+                model[&#34;μ_d&#34;],
+                model[&#34;σ_d&#34;],
                 shape=(co_idx.n_genes, co_idx.n_celllines),
             )
             # Batch effect varying intercept.
-            b = pm.Normal(&#34;b&#34;, model[&#34;μ_b&#34;], model[&#34;σ_b&#34;], shape=b_idx.n_batches)
+            η = pm.Normal(&#34;η&#34;, model[&#34;μ_η&#34;], model[&#34;σ_η&#34;], shape=b_idx.n_batches)
 
             μ = pm.Deterministic(
                 &#34;μ&#34;,
                 h[gene_idx_shared]
-                + g[gene_idx_shared, cellline_idx_shared]
-                + b[batch_idx_shared],
+                + d[gene_idx_shared, cellline_idx_shared]
+                + η[batch_idx_shared],
             )
 
             # Likelihood
@@ -533,20 +571,20 @@ parameterization? Default to True.</dd>
             h = pm.Deterministic(&#34;h&#34;, model[&#34;μ_h&#34;] + h_offset * model[&#34;σ_h&#34;])
 
             # [gene, cell line] varying intercept.
-            g_offset = pm.Normal(
-                &#34;g_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+            d_offset = pm.Normal(
+                &#34;d_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
             )
-            g = pm.Deterministic(&#34;g&#34;, model[&#34;μ_g&#34;] + g_offset * model[&#34;σ_g&#34;])
+            d = pm.Deterministic(&#34;d&#34;, model[&#34;μ_d&#34;] + d_offset * model[&#34;σ_d&#34;])
 
             # Batch effect varying intercept.
-            b_offset = pm.Normal(&#34;b_offset&#34;, 0, 1, shape=b_idx.n_batches)
-            b = pm.Deterministic(&#34;b&#34;, model[&#34;μ_b&#34;] + b_offset * model[&#34;σ_b&#34;])
+            η_offset = pm.Normal(&#34;η_offset&#34;, 0, 1, shape=b_idx.n_batches)
+            η = pm.Deterministic(&#34;η&#34;, model[&#34;μ_η&#34;] + η_offset * model[&#34;σ_η&#34;])
 
             μ = pm.Deterministic(
                 &#34;μ&#34;,
                 h[gene_idx_shared]
-                + g[gene_idx_shared, cellline_idx_shared]
-                + b[batch_idx_shared],
+                + d[gene_idx_shared, cellline_idx_shared]
+                + η[batch_idx_shared],
             )
 
             # Likelihood
@@ -566,6 +604,8 @@ parameterization? Default to True.</dd>
             Tuple[pm.Model, str]: The model and name of the observed variable.
         &#34;&#34;&#34;
         logger.info(&#34;Beginning PyMC3 model specification.&#34;)
+
+        assert self.data_manager is not None
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
@@ -788,6 +828,8 @@ def noncentered_param(self) -&gt; bool:
         Tuple[pm.Model, str]: The model and name of the observed variable.
     &#34;&#34;&#34;
     logger.info(&#34;Beginning PyMC3 model specification.&#34;)
+
+    assert self.data_manager is not None
     data = self.data_manager.get_data()
 
     total_size = data.shape[0]

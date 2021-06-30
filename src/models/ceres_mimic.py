@@ -19,9 +19,28 @@ from src.models.speclet_model import ReplacementsDict, SpecletModel
 class CeresMimic(SpecletModel):
     """CERES Mimic.
 
-    This model is just the part of the CERES model that includes the sgRNA
-    "activity score" (q) and the per-gene (h) and per-gene-per-cell-line (d) covariates.
-    In addition, I have included a parameter for pDNA batch.
+    $$
+    \\begin{aligned}
+    lfc &\\sim q_s (h_g + d_{g,c} + \\beta_c C) + \\eta_b + o_s \\\\
+    o_s &\\sim N(\\mu_o, \\sigma_o)[\\text{gene}] \\\\
+    \\end{aligned}
+    $$
+
+    where:
+
+    - s: sgRNA
+    - g: gene
+    - c: cell line
+    - b: batch
+    - C: copy number (input data)
+
+    This is a mimic of the CERES model with an additional parameter for pDNA batch.
+    There are two optional parameters, `copynumber_cov` and `sgrna_intercept_cov`, to
+    control the inclusion of \\(\\beta_c\\) and \\(o_s\\), respectively.
+
+    Attributes:
+        copynumber_cov (bool): Include the copy number covariate \\(\\beta_c\\).
+        sgrna_intercept_cov (bool): Include the varying intercept for sgRNA \\(o_s\\).
     """
 
     _copynumber_cov: bool
@@ -173,9 +192,7 @@ class CeresMimic(SpecletModel):
                 β = pm.Normal("β", μ_β, σ_β, shape=co_idx.n_celllines)
                 gene_comp += β[cellline_idx_shared] * copynumber_shared
 
-            μ = pm.Deterministic(
-                "μ", q[sgrna_idx_shared] * gene_comp + η[batch_idx_shared]
-            )
+            _mu = q[sgrna_idx_shared] * gene_comp + η[batch_idx_shared]
 
             if self.sgrna_intercept_cov:
                 # Hyper priors for sgRNA|gene varying intercept.
@@ -191,7 +208,9 @@ class CeresMimic(SpecletModel):
                     σ_o,
                     shape=co_idx.n_sgrnas,
                 )
-                μ = μ + o[sgrna_idx_shared]
+                _mu += o[sgrna_idx_shared]
+
+            μ = pm.Deterministic("μ", _mu)
 
             σ = pm.HalfNormal("σ", 2)
 

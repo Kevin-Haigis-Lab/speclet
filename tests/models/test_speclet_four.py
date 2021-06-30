@@ -69,21 +69,21 @@ class TestSpecletFour:
         sp_four.build_model()
         assert sp_four.model is not None
         rv_names = [v.name for v in sp_four.model.free_RVs]
-        assert np.sum(np.array(rv_names) == "o") == 0
+        assert np.sum(np.array(rv_names) == "β") == 0
 
         sp_four.copy_number_cov = True
         assert sp_four.model is None
         sp_four.build_model()
         assert sp_four.model is not None
         rv_names = [v.name for v in sp_four.model.free_RVs]
-        assert any([v == "o" for v in rv_names])
+        assert any([v == "β" for v in rv_names])
 
         sp_four.noncentered_param = True
         assert sp_four.model is None
         sp_four.build_model()
         assert sp_four.model is not None
         rv_names = [v.name for v in sp_four.model.free_RVs]
-        assert any([v == "o_offset" for v in rv_names])
+        assert any([v == "β_offset" for v in rv_names])
 
     def test_switching_noncentered_parameterization(
         self, tmp_path: Path, data_manager: CrcDataManager

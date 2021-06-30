@@ -43,14 +43,25 @@ from src.models.speclet_model import ReplacementsDict, SpecletModel
 class SpecletFour(SpecletModel):
     &#34;&#34;&#34;SpecletFour Model.
 
-    Model with the following covariates:
-    - h: consistent gene effect
-    - g: cell line-specific gene effect [gene x cell line]
-    - o: CN effect varying per cell line
-    - b: batch effect
+    $$
+    lfc \\sim h_g + d_g + \\beta_c C + \\eta_b
+    $$
 
-    Copy number values are divided by 2.0 to make diploid values equal 1. Therefore,
-    the varying copy number effect will also act as a varying effect for the cell line.
+    where:
+
+    - g: gene
+    - c: cell line
+    - b: batch
+    - C: copy number (input data)
+
+    A simple model with a separate consistent gene effect \\(h_g\\) and cell-line
+    varying gene effect \\(d_{g,c}\\). The coefficient for copy number effect
+    \\(\\beta_c\\) varies by cell line and is optional. There is an option for a
+    centered and non-centered parameterization.
+
+    Attributes:
+        noncentered_param (bool): Use the non-centered parameterization.
+        copy_number_cov (bool): Include the copy number coefficient.
     &#34;&#34;&#34;
 
     _noncentered_param: bool
@@ -131,9 +142,18 @@ class SpecletFour(SpecletModel):
             μ_h = pm.Normal(&#34;μ_h&#34;, 0, 1)  # noqa: F841
             σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)  # noqa: F841
 
+            # [gene, cell line] varying intercept.
+            μ_d = pm.Normal(&#34;μ_d&#34;, 0, 1)  # noqa: F841
+            σ_d = pm.HalfNormal(&#34;σ_d&#34;, 1)  # noqa: F841
+
             # Batch effect varying intercept.
-            μ_b = pm.Normal(&#34;μ_b&#34;, 0, 0.2)  # noqa: F841
-            σ_b = pm.HalfNormal(&#34;σ_b&#34;, 0.5)  # noqa: F841
+            μ_η = pm.Normal(&#34;μ_η&#34;, 0, 0.2)  # noqa: F841
+            σ_η = pm.HalfNormal(&#34;σ_η&#34;, 0.5)  # noqa: F841
+
+            # Copy number varying effect.
+            if self.copy_number_cov:
+                μ_β = pm.Normal(&#34;μ_β&#34;, -0.5, 1)  # noqa: F841
+                σ_β = pm.Normal(&#34;σ_β&#34;, -0.5, 1)  # noqa: F841
 
             σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 0.5)
             σ = pm.HalfNormal(&#34;σ&#34;, σ_σ, shape=n_sgrnas)  # noqa: F841
@@ -153,23 +173,21 @@ class SpecletFour(SpecletModel):
             )
 
             # [gene, cell line] varying intercept.
-            μ_g = pm.Normal(&#34;μ_g&#34;, 0, 1)
-            σ_g = pm.HalfNormal(&#34;σ_g&#34;, 1)
-            g = pm.Normal(  # noqa: F841
-                &#34;g&#34;,
-                μ_g,
-                σ_g,
+            d = pm.Normal(  # noqa: F841
+                &#34;d&#34;,
+                model[&#34;μ_d&#34;],
+                model[&#34;σ_d&#34;],
                 shape=(co_idx.n_genes, co_idx.n_celllines),
             )
 
             if self.copy_number_cov:
-                μ_o = pm.Normal(&#34;μ_o&#34;, -0.5, 1)
-                σ_o = pm.Normal(&#34;σ_o&#34;, -0.5, 1)
-                o = pm.Normal(&#34;o&#34;, μ_o, σ_o, shape=co_idx.n_celllines)  # noqa: F841
+                β = pm.Normal(  # noqa: F841
+                    &#34;β&#34;, model[&#34;μ_β&#34;], model[&#34;σ_β&#34;], shape=co_idx.n_celllines
+                )
 
             # Batch effect varying intercept.
-            b = pm.Normal(  # noqa: F841
-                &#34;b&#34;, model[&#34;μ_b&#34;], model[&#34;σ_b&#34;], shape=batch_idx.n_batches
+            η = pm.Normal(  # noqa: F841
+                &#34;η&#34;, model[&#34;μ_η&#34;], model[&#34;σ_η&#34;], shape=batch_idx.n_batches
             )
         return model
 
@@ -187,23 +205,23 @@ class SpecletFour(SpecletModel):
             )
 
             # [gene, cell line] varying intercept.
-            μ_g = pm.Normal(&#34;μ_g&#34;, 0, 1)
-            σ_g = pm.HalfNormal(&#34;σ_g&#34;, 1)
-            g_offset = pm.Normal(
-                &#34;g_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+            d_offset = pm.Normal(
+                &#34;d_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
             )
-            g = pm.Deterministic(&#34;g&#34;, μ_g + g_offset * σ_g)  # noqa: F841
+            d = pm.Deterministic(  # noqa: F841
+                &#34;d&#34;, model[&#34;μ_d&#34;] + d_offset * model[&#34;σ_d&#34;]
+            )
 
             if self.copy_number_cov:
-                μ_o = pm.Normal(&#34;μ_o&#34;, -0.5, 1)
-                σ_o = pm.Normal(&#34;σ_o&#34;, -0.5, 1)
-                o_offset = pm.Normal(&#34;o_offset&#34;, 0, 1, shape=co_idx.n_celllines)
-                o = pm.Deterministic(&#34;o&#34;, μ_o + o_offset * σ_o)  # noqa: F841
+                β_offset = pm.Normal(&#34;β_offset&#34;, 0, 1, shape=co_idx.n_celllines)
+                β = pm.Deterministic(  # noqa: F841
+                    &#34;β&#34;, model[&#34;μ_β&#34;] + β_offset * model[&#34;σ_β&#34;]
+                )
 
             # Batch effect varying intercept.
-            b_offset = pm.Normal(&#34;b_offset&#34;, 0, 1, shape=batch_idx.n_batches)
-            b = pm.Deterministic(  # noqa: F841
-                &#34;b&#34;, model[&#34;μ_b&#34;] + b_offset * model[&#34;σ_b&#34;]
+            η_offset = pm.Normal(&#34;η_offset&#34;, 0, 1, shape=batch_idx.n_batches)
+            η = pm.Deterministic(  # noqa: F841
+                &#34;η&#34;, model[&#34;μ_η&#34;] + η_offset * model[&#34;σ_η&#34;]
             )
         return model
 
@@ -214,6 +232,8 @@ class SpecletFour(SpecletModel):
             Tuple[pm.Model, str]: The model and name of the observed variable.
         &#34;&#34;&#34;
         logger.info(&#34;Beginning PyMC3 model specification.&#34;)
+
+        assert self.data_manager is not None
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
@@ -226,7 +246,7 @@ class SpecletFour(SpecletModel):
         gene_idx_shared = theano.shared(co_idx.gene_idx)
         cellline_idx_shared = theano.shared(co_idx.cellline_idx)
         batch_idx_shared = theano.shared(b_idx.batch_idx)
-        cn_shared = theano.shared(data.copy_number.values / 2.0)
+        cn_shared = theano.shared(data.copy_number.values)
         lfc_shared = theano.shared(data.lfc.values)
 
         logger.info(&#34;Creating PyMC3 model.&#34;)
@@ -245,12 +265,12 @@ class SpecletFour(SpecletModel):
         with model:
             _μ = (
                 model[&#34;h&#34;][gene_idx_shared]
-                + model[&#34;g&#34;][gene_idx_shared, cellline_idx_shared]
-                + model[&#34;b&#34;][batch_idx_shared]
+                + model[&#34;d&#34;][gene_idx_shared, cellline_idx_shared]
+                + model[&#34;η&#34;][batch_idx_shared]
             )
 
             if self.copy_number_cov:
-                _μ += model[&#34;o&#34;][cellline_idx_shared] * cn_shared
+                _μ += model[&#34;β&#34;][cellline_idx_shared] * cn_shared
 
             μ = pm.Deterministic(&#34;μ&#34;, _μ)
 
@@ -355,13 +375,29 @@ class SpecletFour(SpecletModel):
 </code></dt>
 <dd>
 <div class="desc"><p>SpecletFour Model.</p>
-<p>Model with the following covariates:
-- h: consistent gene effect
-- g: cell line-specific gene effect [gene x cell line]
-- o: CN effect varying per cell line
-- b: batch effect</p>
-<p>Copy number values are divided by 2.0 to make diploid values equal 1. Therefore,
-the varying copy number effect will also act as a varying effect for the cell line.</p>
+<p><span><span class="MathJax_Preview">
+lfc \sim h_g + d_g + \beta_c C + \eta_b
+</span><script type="math/tex; mode=display">
+lfc \sim h_g + d_g + \beta_c C + \eta_b
+</script></span></p>
+<p>where:</p>
+<ul>
+<li>g: gene</li>
+<li>c: cell line</li>
+<li>b: batch</li>
+<li>C: copy number (input data)</li>
+</ul>
+<p>A simple model with a separate consistent gene effect <span><span class="MathJax_Preview">h_g</span><script type="math/tex">h_g</script></span> and cell-line
+varying gene effect <span><span class="MathJax_Preview">d_{g,c}</span><script type="math/tex">d_{g,c}</script></span>. The coefficient for copy number effect
+<span><span class="MathJax_Preview">\beta_c</span><script type="math/tex">\beta_c</script></span> varies by cell line and is optional. There is an option for a
+centered and non-centered parameterization.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>noncentered_param</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Use the non-centered parameterization.</dd>
+<dt><strong><code>copy_number_cov</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include the copy number coefficient.</dd>
+</dl>
 <p>Instantiate a SpecletFour model.</p>
 <h2 id="args">Args</h2>
 <dl>
@@ -391,14 +427,25 @@ parameterization? Default to True.</dd>
 <pre><code class="python">class SpecletFour(SpecletModel):
     &#34;&#34;&#34;SpecletFour Model.
 
-    Model with the following covariates:
-    - h: consistent gene effect
-    - g: cell line-specific gene effect [gene x cell line]
-    - o: CN effect varying per cell line
-    - b: batch effect
+    $$
+    lfc \\sim h_g + d_g + \\beta_c C + \\eta_b
+    $$
 
-    Copy number values are divided by 2.0 to make diploid values equal 1. Therefore,
-    the varying copy number effect will also act as a varying effect for the cell line.
+    where:
+
+    - g: gene
+    - c: cell line
+    - b: batch
+    - C: copy number (input data)
+
+    A simple model with a separate consistent gene effect \\(h_g\\) and cell-line
+    varying gene effect \\(d_{g,c}\\). The coefficient for copy number effect
+    \\(\\beta_c\\) varies by cell line and is optional. There is an option for a
+    centered and non-centered parameterization.
+
+    Attributes:
+        noncentered_param (bool): Use the non-centered parameterization.
+        copy_number_cov (bool): Include the copy number coefficient.
     &#34;&#34;&#34;
 
     _noncentered_param: bool
@@ -479,9 +526,18 @@ parameterization? Default to True.</dd>
             μ_h = pm.Normal(&#34;μ_h&#34;, 0, 1)  # noqa: F841
             σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)  # noqa: F841
 
+            # [gene, cell line] varying intercept.
+            μ_d = pm.Normal(&#34;μ_d&#34;, 0, 1)  # noqa: F841
+            σ_d = pm.HalfNormal(&#34;σ_d&#34;, 1)  # noqa: F841
+
             # Batch effect varying intercept.
-            μ_b = pm.Normal(&#34;μ_b&#34;, 0, 0.2)  # noqa: F841
-            σ_b = pm.HalfNormal(&#34;σ_b&#34;, 0.5)  # noqa: F841
+            μ_η = pm.Normal(&#34;μ_η&#34;, 0, 0.2)  # noqa: F841
+            σ_η = pm.HalfNormal(&#34;σ_η&#34;, 0.5)  # noqa: F841
+
+            # Copy number varying effect.
+            if self.copy_number_cov:
+                μ_β = pm.Normal(&#34;μ_β&#34;, -0.5, 1)  # noqa: F841
+                σ_β = pm.Normal(&#34;σ_β&#34;, -0.5, 1)  # noqa: F841
 
             σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 0.5)
             σ = pm.HalfNormal(&#34;σ&#34;, σ_σ, shape=n_sgrnas)  # noqa: F841
@@ -501,23 +557,21 @@ parameterization? Default to True.</dd>
             )
 
             # [gene, cell line] varying intercept.
-            μ_g = pm.Normal(&#34;μ_g&#34;, 0, 1)
-            σ_g = pm.HalfNormal(&#34;σ_g&#34;, 1)
-            g = pm.Normal(  # noqa: F841
-                &#34;g&#34;,
-                μ_g,
-                σ_g,
+            d = pm.Normal(  # noqa: F841
+                &#34;d&#34;,
+                model[&#34;μ_d&#34;],
+                model[&#34;σ_d&#34;],
                 shape=(co_idx.n_genes, co_idx.n_celllines),
             )
 
             if self.copy_number_cov:
-                μ_o = pm.Normal(&#34;μ_o&#34;, -0.5, 1)
-                σ_o = pm.Normal(&#34;σ_o&#34;, -0.5, 1)
-                o = pm.Normal(&#34;o&#34;, μ_o, σ_o, shape=co_idx.n_celllines)  # noqa: F841
+                β = pm.Normal(  # noqa: F841
+                    &#34;β&#34;, model[&#34;μ_β&#34;], model[&#34;σ_β&#34;], shape=co_idx.n_celllines
+                )
 
             # Batch effect varying intercept.
-            b = pm.Normal(  # noqa: F841
-                &#34;b&#34;, model[&#34;μ_b&#34;], model[&#34;σ_b&#34;], shape=batch_idx.n_batches
+            η = pm.Normal(  # noqa: F841
+                &#34;η&#34;, model[&#34;μ_η&#34;], model[&#34;σ_η&#34;], shape=batch_idx.n_batches
             )
         return model
 
@@ -535,23 +589,23 @@ parameterization? Default to True.</dd>
             )
 
             # [gene, cell line] varying intercept.
-            μ_g = pm.Normal(&#34;μ_g&#34;, 0, 1)
-            σ_g = pm.HalfNormal(&#34;σ_g&#34;, 1)
-            g_offset = pm.Normal(
-                &#34;g_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+            d_offset = pm.Normal(
+                &#34;d_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
             )
-            g = pm.Deterministic(&#34;g&#34;, μ_g + g_offset * σ_g)  # noqa: F841
+            d = pm.Deterministic(  # noqa: F841
+                &#34;d&#34;, model[&#34;μ_d&#34;] + d_offset * model[&#34;σ_d&#34;]
+            )
 
             if self.copy_number_cov:
-                μ_o = pm.Normal(&#34;μ_o&#34;, -0.5, 1)
-                σ_o = pm.Normal(&#34;σ_o&#34;, -0.5, 1)
-                o_offset = pm.Normal(&#34;o_offset&#34;, 0, 1, shape=co_idx.n_celllines)
-                o = pm.Deterministic(&#34;o&#34;, μ_o + o_offset * σ_o)  # noqa: F841
+                β_offset = pm.Normal(&#34;β_offset&#34;, 0, 1, shape=co_idx.n_celllines)
+                β = pm.Deterministic(  # noqa: F841
+                    &#34;β&#34;, model[&#34;μ_β&#34;] + β_offset * model[&#34;σ_β&#34;]
+                )
 
             # Batch effect varying intercept.
-            b_offset = pm.Normal(&#34;b_offset&#34;, 0, 1, shape=batch_idx.n_batches)
-            b = pm.Deterministic(  # noqa: F841
-                &#34;b&#34;, model[&#34;μ_b&#34;] + b_offset * model[&#34;σ_b&#34;]
+            η_offset = pm.Normal(&#34;η_offset&#34;, 0, 1, shape=batch_idx.n_batches)
+            η = pm.Deterministic(  # noqa: F841
+                &#34;η&#34;, model[&#34;μ_η&#34;] + η_offset * model[&#34;σ_η&#34;]
             )
         return model
 
@@ -562,6 +616,8 @@ parameterization? Default to True.</dd>
             Tuple[pm.Model, str]: The model and name of the observed variable.
         &#34;&#34;&#34;
         logger.info(&#34;Beginning PyMC3 model specification.&#34;)
+
+        assert self.data_manager is not None
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
@@ -574,7 +630,7 @@ parameterization? Default to True.</dd>
         gene_idx_shared = theano.shared(co_idx.gene_idx)
         cellline_idx_shared = theano.shared(co_idx.cellline_idx)
         batch_idx_shared = theano.shared(b_idx.batch_idx)
-        cn_shared = theano.shared(data.copy_number.values / 2.0)
+        cn_shared = theano.shared(data.copy_number.values)
         lfc_shared = theano.shared(data.lfc.values)
 
         logger.info(&#34;Creating PyMC3 model.&#34;)
@@ -593,12 +649,12 @@ parameterization? Default to True.</dd>
         with model:
             _μ = (
                 model[&#34;h&#34;][gene_idx_shared]
-                + model[&#34;g&#34;][gene_idx_shared, cellline_idx_shared]
-                + model[&#34;b&#34;][batch_idx_shared]
+                + model[&#34;d&#34;][gene_idx_shared, cellline_idx_shared]
+                + model[&#34;η&#34;][batch_idx_shared]
             )
 
             if self.copy_number_cov:
-                _μ += model[&#34;o&#34;][cellline_idx_shared] * cn_shared
+                _μ += model[&#34;β&#34;][cellline_idx_shared] * cn_shared
 
             μ = pm.Deterministic(&#34;μ&#34;, _μ)
 
@@ -800,6 +856,8 @@ def noncentered_param(self) -&gt; bool:
         Tuple[pm.Model, str]: The model and name of the observed variable.
     &#34;&#34;&#34;
     logger.info(&#34;Beginning PyMC3 model specification.&#34;)
+
+    assert self.data_manager is not None
     data = self.data_manager.get_data()
 
     total_size = data.shape[0]
@@ -812,7 +870,7 @@ def noncentered_param(self) -&gt; bool:
     gene_idx_shared = theano.shared(co_idx.gene_idx)
     cellline_idx_shared = theano.shared(co_idx.cellline_idx)
     batch_idx_shared = theano.shared(b_idx.batch_idx)
-    cn_shared = theano.shared(data.copy_number.values / 2.0)
+    cn_shared = theano.shared(data.copy_number.values)
     lfc_shared = theano.shared(data.lfc.values)
 
     logger.info(&#34;Creating PyMC3 model.&#34;)
@@ -831,12 +889,12 @@ def noncentered_param(self) -&gt; bool:
     with model:
         _μ = (
             model[&#34;h&#34;][gene_idx_shared]
-            + model[&#34;g&#34;][gene_idx_shared, cellline_idx_shared]
-            + model[&#34;b&#34;][batch_idx_shared]
+            + model[&#34;d&#34;][gene_idx_shared, cellline_idx_shared]
+            + model[&#34;η&#34;][batch_idx_shared]
         )
 
         if self.copy_number_cov:
-            _μ += model[&#34;o&#34;][cellline_idx_shared] * cn_shared
+            _μ += model[&#34;β&#34;][cellline_idx_shared] * cn_shared
 
         μ = pm.Deterministic(&#34;μ&#34;, _μ)
 

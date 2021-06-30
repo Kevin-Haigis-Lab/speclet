@@ -16,10 +16,22 @@ from src.models.speclet_model import ReplacementsDict, SpecletModel
 class SpecletThree(SpecletModel):
     """SpecletThree Model.
 
-    Model with the following covariates:
-    - h: consistent gene effect
-    - g: cell line-specific gene effect [gene x cell line]
-    - b: batch effect
+    $$
+    lfc \\sim h_g + d_g + \\eta_b
+    $$
+
+    where:
+
+    - g: gene
+    - c: cell line
+    - b: batch
+
+    A simple model with a separate consistnet gene effect \\(h_g\\) and cell-line
+    varying gene effect \\(d_{g,c}\\). There is also an option for a centered and
+    non-centered parameterization.
+
+    Attributes
+        noncentered_param (bool): Use the non-centered parameterization of the model.
     """
 
     _noncentered_param: bool
@@ -90,12 +102,12 @@ class SpecletThree(SpecletModel):
             σ_h = pm.HalfNormal("σ_h", 1)  # noqa: F841
 
             # [gene, cell line] varying intercept.
-            μ_g = pm.Normal("μ_g", 0, 0.2)  # noqa: F841
-            σ_g = pm.HalfNormal("σ_g", 1)  # noqa: F841
+            μ_d = pm.Normal("μ_d", 0, 0.2)  # noqa: F841
+            σ_d = pm.HalfNormal("σ_d", 1)  # noqa: F841
 
             # Batch effect varying intercept.
-            μ_b = pm.Normal("μ_b", 0, 0.2)  # noqa: F841
-            σ_b = pm.HalfNormal("σ_b", 0.5)  # noqa: F841
+            μ_η = pm.Normal("μ_η", 0, 0.2)  # noqa: F841
+            σ_η = pm.HalfNormal("σ_η", 0.5)  # noqa: F841
 
             σ_σ = pm.HalfNormal("σ_σ", 0.5)
             σ = pm.HalfNormal("σ", σ_σ, shape=common_indices.n_sgrnas)  # noqa: F841
@@ -118,20 +130,20 @@ class SpecletThree(SpecletModel):
             # Gene varying intercept.
             h = pm.Normal("h", model["μ_h"], model["σ_h"], shape=co_idx.n_genes)
             # [gene, cell line] varying intercept.
-            g = pm.Normal(
-                "g",
-                model["μ_g"],
-                model["σ_g"],
+            d = pm.Normal(
+                "d",
+                model["μ_d"],
+                model["σ_d"],
                 shape=(co_idx.n_genes, co_idx.n_celllines),
             )
             # Batch effect varying intercept.
-            b = pm.Normal("b", model["μ_b"], model["σ_b"], shape=b_idx.n_batches)
+            η = pm.Normal("η", model["μ_η"], model["σ_η"], shape=b_idx.n_batches)
 
             μ = pm.Deterministic(
                 "μ",
                 h[gene_idx_shared]
-                + g[gene_idx_shared, cellline_idx_shared]
-                + b[batch_idx_shared],
+                + d[gene_idx_shared, cellline_idx_shared]
+                + η[batch_idx_shared],
             )
 
             # Likelihood
@@ -162,20 +174,20 @@ class SpecletThree(SpecletModel):
             h = pm.Deterministic("h", model["μ_h"] + h_offset * model["σ_h"])
 
             # [gene, cell line] varying intercept.
-            g_offset = pm.Normal(
-                "g_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+            d_offset = pm.Normal(
+                "d_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
             )
-            g = pm.Deterministic("g", model["μ_g"] + g_offset * model["σ_g"])
+            d = pm.Deterministic("d", model["μ_d"] + d_offset * model["σ_d"])
 
             # Batch effect varying intercept.
-            b_offset = pm.Normal("b_offset", 0, 1, shape=b_idx.n_batches)
-            b = pm.Deterministic("b", model["μ_b"] + b_offset * model["σ_b"])
+            η_offset = pm.Normal("η_offset", 0, 1, shape=b_idx.n_batches)
+            η = pm.Deterministic("η", model["μ_η"] + η_offset * model["σ_η"])
 
             μ = pm.Deterministic(
                 "μ",
                 h[gene_idx_shared]
-                + g[gene_idx_shared, cellline_idx_shared]
-                + b[batch_idx_shared],
+                + d[gene_idx_shared, cellline_idx_shared]
+                + η[batch_idx_shared],
             )
 
             # Likelihood
@@ -195,6 +207,8 @@ class SpecletThree(SpecletModel):
             Tuple[pm.Model, str]: The model and name of the observed variable.
         """
         logger.info("Beginning PyMC3 model specification.")
+
+        assert self.data_manager is not None
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]

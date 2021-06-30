@@ -39,6 +39,12 @@ class SpecletSeven(SpecletModel):
     - g: gene
     - c: cell line
     - l: cell line lineage
+
+    A very deep hierarchical model that is, in part, meant to be a proof-of-concept for
+    constructing, fitting, and interpreting such a "tall" hierarchical model.
+
+    Attributes:
+        noncentered_param (bool): Use the non-centered parameterization.
     """
 
     _noncentered_param: bool

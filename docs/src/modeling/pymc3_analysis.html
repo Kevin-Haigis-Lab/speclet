@@ -185,7 +185,22 @@ def plot_vi_hist(approx: pm.variational.Approximation) -&gt; gg.ggplot:
         + gg.scale_y_continuous(expand=(0.02, 0, 0.02, 0))
         + gg.scale_x_continuous(expand=(0.02, 0, 0.02, 0))
         + gg.labs(x=&#34;step&#34;, y=&#34;loss&#34;, title=&#34;Approximation history&#34;)
-    )</code></pre>
+    )
+
+
+def get_hdi_colnames_from_az_summary(df: pd.DataFrame) -&gt; Tuple[str, str]:
+    &#34;&#34;&#34;Get the column names corresponding to the HDI from an ArviZ summary.
+
+    Args:
+        df (pd.DataFrame): ArviZ posterior summary data frame.
+
+    Returns:
+        Tuple[str, str]: The two column names.
+    &#34;&#34;&#34;
+    cols: List[str] = [c for c in df.columns if &#34;hdi_&#34; in c]
+    cols = [c for c in cols if &#34;%&#34; in c]
+    assert len(cols) == 2
+    return cols[0], cols[1]</code></pre>
 </details>
 </section>
 <section>
@@ -254,6 +269,40 @@ PyMC3 model.</dd>
     d[idx1name] = idx1[indices_array[:, 0]]
     d[idx2name] = idx2[indices_array[:, 1]]
     return d</code></pre>
+</details>
+</dd>
+<dt id="src.modeling.pymc3_analysis.get_hdi_colnames_from_az_summary"><code class="name flex">
+<span>def <span class="ident">get_hdi_colnames_from_az_summary</span></span>(<span>df: pandas.core.frame.DataFrame) -> Tuple[str, str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the column names corresponding to the HDI from an ArviZ summary.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>ArviZ posterior summary data frame.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tuple[str, str]</code></dt>
+<dd>The two column names.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_hdi_colnames_from_az_summary(df: pd.DataFrame) -&gt; Tuple[str, str]:
+    &#34;&#34;&#34;Get the column names corresponding to the HDI from an ArviZ summary.
+
+    Args:
+        df (pd.DataFrame): ArviZ posterior summary data frame.
+
+    Returns:
+        Tuple[str, str]: The two column names.
+    &#34;&#34;&#34;
+    cols: List[str] = [c for c in df.columns if &#34;hdi_&#34; in c]
+    cols = [c for c in cols if &#34;%&#34; in c]
+    assert len(cols) == 2
+    return cols[0], cols[1]</code></pre>
 </details>
 </dd>
 <dt id="src.modeling.pymc3_analysis.plot_all_priors"><code class="name flex">
@@ -468,6 +517,7 @@ the posterior predictions.</dd>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="src.modeling.pymc3_analysis.extract_matrix_variable_indices" href="#src.modeling.pymc3_analysis.extract_matrix_variable_indices">extract_matrix_variable_indices</a></code></li>
+<li><code><a title="src.modeling.pymc3_analysis.get_hdi_colnames_from_az_summary" href="#src.modeling.pymc3_analysis.get_hdi_colnames_from_az_summary">get_hdi_colnames_from_az_summary</a></code></li>
 <li><code><a title="src.modeling.pymc3_analysis.plot_all_priors" href="#src.modeling.pymc3_analysis.plot_all_priors">plot_all_priors</a></code></li>
 <li><code><a title="src.modeling.pymc3_analysis.plot_vi_hist" href="#src.modeling.pymc3_analysis.plot_vi_hist">plot_vi_hist</a></code></li>
 <li><code><a title="src.modeling.pymc3_analysis.summarize_posterior_predictions" href="#src.modeling.pymc3_analysis.summarize_posterior_predictions">summarize_posterior_predictions</a></code></li>

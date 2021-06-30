@@ -85,6 +85,8 @@ class SBCFileManager:
         Args:
             dir (Path): The directory where the data is stored.
         &#34;&#34;&#34;
+        if not dir.is_dir():
+            raise NotADirectoryError(dir)
         self.dir = dir
         self.inference_data_path = dir / &#34;inference-data.netcdf&#34;
         self.priors_path_set = dir / &#34;priors&#34;
@@ -1113,6 +1115,8 @@ to it.</dd>
         Args:
             dir (Path): The directory where the data is stored.
         &#34;&#34;&#34;
+        if not dir.is_dir():
+            raise NotADirectoryError(dir)
         self.dir = dir
         self.inference_data_path = dir / &#34;inference-data.netcdf&#34;
         self.priors_path_set = dir / &#34;priors&#34;

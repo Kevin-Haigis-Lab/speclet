@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>src.command_line_interfaces API documentation</title>
-<meta name="description" content="" />
+<title>src.exceptions API documentation</title>
+<meta name="description" content="Custom exceptions for the project." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -18,40 +18,133 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Namespace <code>src.command_line_interfaces</code></h1>
+<h1 class="title">Module <code>src.exceptions</code></h1>
 </header>
 <section id="section-intro">
+<p>Custom exceptions for the project.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Custom exceptions for the project.&#34;&#34;&#34;
+
+# NOTE: Only import built in libraries so can use in any venv.
+
+
+class IncorrectNumberOfFilesFoundError(Exception):
+    &#34;&#34;&#34;Incorrect number of files found.&#34;&#34;&#34;
+
+    def __init__(self, expected: int, found: int) -&gt; None:
+        &#34;&#34;&#34;Create an IncorrectNumberOfFilesFoundError instance.
+
+        Args:
+            expected (int): Expected number of files.
+            found (int): Number of files found.
+        &#34;&#34;&#34;
+        self.expected = expected
+        self.found = found
+        self.message = f&#34;Expected {self.expected} files, but found {self.found} files.&#34;
+        super().__init__(self.message)
+
+
+class UnsupportedFileTypeError(Exception):
+    &#34;&#34;&#34;Unsupported file type.&#34;&#34;&#34;
+
+    def __init__(self, suffix: str) -&gt; None:
+        &#34;&#34;&#34;Create an UnsupportedFileTypeError instance.
+
+        Args:
+            suffix (str): The unsupported suffix that some monster tried to use.
+        &#34;&#34;&#34;
+        self.suffix = suffix
+        self.message = f&#34;File type &#39;{self.suffix}&#39; is not supported.&#34;
+        super().__init__(self.message)</code></pre>
+</details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt><code class="name"><a title="src.command_line_interfaces.cli_helpers" href="cli_helpers.html">src.command_line_interfaces.cli_helpers</a></code></dt>
+<dt id="src.exceptions.IncorrectNumberOfFilesFoundError"><code class="flex name class">
+<span>class <span class="ident">IncorrectNumberOfFilesFoundError</span></span>
+<span>(</span><span>expected: int, found: int)</span>
+</code></dt>
 <dd>
-<div class="desc"><p>Helper functions for the various CLIs.</p></div>
+<div class="desc"><p>Incorrect number of files found.</p>
+<p>Create an IncorrectNumberOfFilesFoundError instance.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>expected</code></strong> :&ensp;<code>int</code></dt>
+<dd>Expected number of files.</dd>
+<dt><strong><code>found</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of files found.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class IncorrectNumberOfFilesFoundError(Exception):
+    &#34;&#34;&#34;Incorrect number of files found.&#34;&#34;&#34;
+
+    def __init__(self, expected: int, found: int) -&gt; None:
+        &#34;&#34;&#34;Create an IncorrectNumberOfFilesFoundError instance.
+
+        Args:
+            expected (int): Expected number of files.
+            found (int): Number of files found.
+        &#34;&#34;&#34;
+        self.expected = expected
+        self.found = found
+        self.message = f&#34;Expected {self.expected} files, but found {self.found} files.&#34;
+        super().__init__(self.message)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
 </dd>
-<dt><code class="name"><a title="src.command_line_interfaces.collate_sbc_cli" href="collate_sbc_cli.html">src.command_line_interfaces.collate_sbc_cli</a></code></dt>
+<dt id="src.exceptions.UnsupportedFileTypeError"><code class="flex name class">
+<span>class <span class="ident">UnsupportedFileTypeError</span></span>
+<span>(</span><span>suffix: str)</span>
+</code></dt>
 <dd>
-<div class="desc"><p>Command line interface for collating SBC simulation results.</p></div>
-</dd>
-<dt><code class="name"><a title="src.command_line_interfaces.combine_mcmc_chains_cli" href="combine_mcmc_chains_cli.html">src.command_line_interfaces.combine_mcmc_chains_cli</a></code></dt>
-<dd>
-<div class="desc"><p>Command line interface for merging MCMC chains for a single model.</p></div>
-</dd>
-<dt><code class="name"><a title="src.command_line_interfaces.sampling_pymc3_models_cli" href="sampling_pymc3_models_cli.html">src.command_line_interfaces.sampling_pymc3_models_cli</a></code></dt>
-<dd>
-<div class="desc"><p>CLI for standardized sampling from predefined PyMC3 models.</p></div>
-</dd>
-<dt><code class="name"><a title="src.command_line_interfaces.simulation_based_calibration_cli" href="simulation_based_calibration_cli.html">src.command_line_interfaces.simulation_based_calibration_cli</a></code></dt>
-<dd>
-<div class="desc"><p>A helpful command line interface for simulation-based calibration.</p></div>
+<div class="desc"><p>Unsupported file type.</p>
+<p>Create an UnsupportedFileTypeError instance.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>suffix</code></strong> :&ensp;<code>str</code></dt>
+<dd>The unsupported suffix that some monster tried to use.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class UnsupportedFileTypeError(Exception):
+    &#34;&#34;&#34;Unsupported file type.&#34;&#34;&#34;
+
+    def __init__(self, suffix: str) -&gt; None:
+        &#34;&#34;&#34;Create an UnsupportedFileTypeError instance.
+
+        Args:
+            suffix (str): The unsupported suffix that some monster tried to use.
+        &#34;&#34;&#34;
+        self.suffix = suffix
+        self.message = f&#34;File type &#39;{self.suffix}&#39; is not supported.&#34;
+        super().__init__(self.message)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
-</section>
-<section>
 </section>
 </article>
 <nav id="sidebar">
@@ -62,16 +155,17 @@
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="src" href="../index.html">src</a></code></li>
+<li><code><a title="src" href="index.html">src</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
-<li><code><a title="src.command_line_interfaces.cli_helpers" href="cli_helpers.html">src.command_line_interfaces.cli_helpers</a></code></li>
-<li><code><a title="src.command_line_interfaces.collate_sbc_cli" href="collate_sbc_cli.html">src.command_line_interfaces.collate_sbc_cli</a></code></li>
-<li><code><a title="src.command_line_interfaces.combine_mcmc_chains_cli" href="combine_mcmc_chains_cli.html">src.command_line_interfaces.combine_mcmc_chains_cli</a></code></li>
-<li><code><a title="src.command_line_interfaces.sampling_pymc3_models_cli" href="sampling_pymc3_models_cli.html">src.command_line_interfaces.sampling_pymc3_models_cli</a></code></li>
-<li><code><a title="src.command_line_interfaces.simulation_based_calibration_cli" href="simulation_based_calibration_cli.html">src.command_line_interfaces.simulation_based_calibration_cli</a></code></li>
+<li>
+<h4><code><a title="src.exceptions.IncorrectNumberOfFilesFoundError" href="#src.exceptions.IncorrectNumberOfFilesFoundError">IncorrectNumberOfFilesFoundError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="src.exceptions.UnsupportedFileTypeError" href="#src.exceptions.UnsupportedFileTypeError">UnsupportedFileTypeError</a></code></h4>
+</li>
 </ul>
 </li>
 </ul>

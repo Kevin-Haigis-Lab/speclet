@@ -16,7 +16,7 @@ class SpecletFive(SpecletModel):
     """SpecletFive Model.
 
     $$
-    lfc ~ i + a_g + d_c + h_{g,c} + j_b
+    lfc \\sim i + a_g + d_c + h_{g,c} + j_b
     $$
 
     where:
@@ -25,9 +25,10 @@ class SpecletFive(SpecletModel):
     - c: cell line
     - b: batch
 
-    The model is relatively simple. It has a single global intercept (i) and two varying
-    intercepts for gene (a) and cell line (d) and for varying effects per gene per cell
-    line (h). Finally, there is a coefficient for batch effect (j).
+    The model is relatively simple. It has a single global intercept \\(i\\) and two
+    varying intercepts for gene \\(a_g\\) and cell line \\(d_c\\) and for varying
+    effects per gene per cell line \\(h_{g,c}\\). Finally, there is a coefficient for
+    batch effect \\(j_b\\).
     """
 
     def __init__(

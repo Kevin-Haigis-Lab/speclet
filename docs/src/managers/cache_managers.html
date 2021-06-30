@@ -159,14 +159,13 @@ class Pymc3CacheManager:
             approximation=approx,
         )
 
-    def cache_sampling_results(
-        self, res: Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]
-    ) -&gt; None:
+    _SamplingResT = Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]
+
+    def cache_sampling_results(self, res: _SamplingResT) -&gt; None:
         &#34;&#34;&#34;Cache sampling results to disk.
 
         Args:
-            res (Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]):
-              The results to cache.
+            res (_SamplingResT): The results to cache.
         &#34;&#34;&#34;
         _mkdir(self.cache_dir)
         cache_paths = self.get_cache_file_names()
@@ -961,14 +960,13 @@ first? Defaults to True.</dd>
             approximation=approx,
         )
 
-    def cache_sampling_results(
-        self, res: Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]
-    ) -&gt; None:
+    _SamplingResT = Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]
+
+    def cache_sampling_results(self, res: _SamplingResT) -&gt; None:
         &#34;&#34;&#34;Cache sampling results to disk.
 
         Args:
-            res (Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]):
-              The results to cache.
+            res (_SamplingResT): The results to cache.
         &#34;&#34;&#34;
         _mkdir(self.cache_dir)
         cache_paths = self.get_cache_file_names()
@@ -1083,20 +1081,19 @@ first? Defaults to True.</dd>
 <dd>
 <div class="desc"><p>Cache sampling results to disk.</p>
 <h2 id="args">Args</h2>
-<p>res (Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]):
-The results to cache.</p></div>
+<dl>
+<dt><strong><code>res</code></strong> :&ensp;<code>_SamplingResT</code></dt>
+<dd>The results to cache.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def cache_sampling_results(
-    self, res: Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]
-) -&gt; None:
+<pre><code class="python">def cache_sampling_results(self, res: _SamplingResT) -&gt; None:
     &#34;&#34;&#34;Cache sampling results to disk.
 
     Args:
-        res (Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]):
-          The results to cache.
+        res (_SamplingResT): The results to cache.
     &#34;&#34;&#34;
     _mkdir(self.cache_dir)
     cache_paths = self.get_cache_file_names()

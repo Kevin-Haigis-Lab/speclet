@@ -14,8 +14,27 @@ from src.models.speclet_model import ReplacementsDict, SpecletModel
 class SpecletOne(SpecletModel):
     """SpecletOne Model.
 
+    $$
+    \\begin{aligned}
+    lfc &\\sim h_s + d_{s,c} + \\beta_c C) + \\eta_b \\\\
+    h_s &\\sim N(\\mu_h, \\sigma_h)[\\text{gene}] \\\\
+    d_{s,c} &\\sim N(\\mu_d, \\sigma_d)[\\text{gene}|\\text{cell line}] \\\\
+    \\end{aligned}
+    $$
+
+    where:
+
+    - s: sgRNA
+    - g: gene
+    - c: cell line
+    - b: batch
+    - C: copy number (input data)
+
     This model is based on the CERES model, but removes the multiplicative sgRNA
-    "activity" score due to issues of non-identifiability.
+    "activity" score due to issues of non-identifiability. Also, the consistent gene
+    effect parameter has been replaced with a coefficient for sgRNA with a pooling prior
+    per gene. Similarly, the cell-line specific gene effect coefficient \\(d_{s,c}\\)
+    has been extended with a similar structure.
     """
 
     def __init__(

@@ -91,8 +91,8 @@ class SpecletSix(SpecletModel):
     lfc &\\sim i + a_s + d_c + h_{g,c} + j_b +
     k_c C^{(c)} + n_g C^{(g)} + q_{g,l} R^{(g,l)} + m_{g,l} M \\\\
     a_s &\\sim N(μ_a, σ_a)[\\text{gene}] \\\\
-    d_c &\\sim N(μ_d, σ_d)[\\text{lineage}] \\\\
-    j_b &\\sim N(μ_j, σ_j)[\\text{source}] \\text{(if more than one source)}
+    d_c &\\sim N(μ_d, σ_d)[\\text{lineage}] \\text{ (if more than one lineage)} \\\\
+    j_b &\\sim N(μ_j, σ_j)[\\text{source}] \\text{ (if more than one source)}
     \\end{aligned}
     $$
 
@@ -107,15 +107,27 @@ class SpecletSix(SpecletModel):
 
     Below is a description of each parameter in the model:
 
-    - a_s : sgRNA effect with hierarchical level for gene (g)
-    - d_c: cell line effect with hierarchical level for lineage (l; if more than
-                one is found)
-    - j_b: data source (o; if more than one is found)
-    - k_c: cell line effect of copy number (Cc: z-scaled per cell line)
-    - n_g: gene effect of copy number (Cg: z-scaled per gene)
-    - q_{g,l} : RNA effect varying per gene and cell line lineage (R[g,l]: z-scaled
-                within each gene and lineage)
-    - m_{g,l} : mutation effect varying per gene and cell line lineage (M: {0, 1})
+    - \\(a_s\\): sgRNA effect with hierarchical level for gene (g)
+    - \\(d_c\\): cell line effect with hierarchical level for lineage (l; if more than
+      one is found)
+    - \\(j_b\\): data source (o; if more than one is found)
+    - \\(k_c\\): cell line effect of copy number ( \\(C^{(c)}\\): z-scaled per cell
+      line)
+    - \\(n_g\\): gene effect of copy number ( \\(C^{(g)}\\): z-scaled per gene)
+    - \\(q_{g,l}\\): RNA effect varying per gene and cell line lineage
+      ( \\(R^{(g,l)}\\): z-scaled within each gene and lineage)
+    - \\(m_{g,l}\\): mutation effect varying per gene and cell line lineage
+      ( \\(M \\in {0, 1}\\))
+
+    Attributes:
+        cell_line_cna_cov (bool): Include the covariate for copy number effect per cell
+          line \\(k_c\\).
+        gene_cna_cov (bool): Include the covariate for copy number effect per gene
+          \\(n_g\\).
+        rna_cov (bool): Include the covariate for RNA expression per gene/lineage
+          \\(q_{g,l}\\).
+        mutation_cov (bool): Include the covariate for mutation effect per
+          gene/lineage \\(m_{g,l}\\).
     """
 
     _cell_line_cna_cov: bool

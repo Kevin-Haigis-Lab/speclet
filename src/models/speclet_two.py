@@ -15,8 +15,17 @@ from src.models.speclet_model import ReplacementsDict, SpecletModel
 class SpecletTwo(SpecletModel):
     """SpecletTwo Model.
 
-    This is a simple model with varying intercepts for [gene, cell line],
-    and batch.
+    $$
+    lfc \\sim \\alpha_{g,c} + \\eta_b
+    $$
+
+    where:
+
+    - g: gene
+    - c: cell line
+    - b: batch
+
+    This is a simple model with varying intercepts for [gene|cell line] and batch.
     """
 
     def __init__(
@@ -54,6 +63,8 @@ class SpecletTwo(SpecletModel):
             Tuple[pm.Model, str]: The model and name of the observed variable.
         """
         logger.info("Beginning PyMC3 model specification.")
+
+        assert self.data_manager is not None
         data = self.data_manager.get_data()
 
         total_size = data.shape[0]
