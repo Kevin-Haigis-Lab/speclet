@@ -3,6 +3,12 @@
 # NOTE: Only import built in libraries so can use in any venv.
 
 
+class UnsupportedFitMethod(Exception):
+    """The indicated fit method is not supported."""
+
+    pass
+
+
 class IncorrectNumberOfFilesFoundError(Exception):
     """Incorrect number of files found."""
 
@@ -31,3 +37,9 @@ class UnsupportedFileTypeError(Exception):
         self.suffix = suffix
         self.message = f"File type '{self.suffix}' is not supported."
         super().__init__(self.message)
+
+
+class NoDirectorySpecified(Exception):
+    """No directory is specified when one is required."""
+
+    pass
