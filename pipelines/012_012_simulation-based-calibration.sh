@@ -27,9 +27,10 @@ fi
 snakemake \
     --snakefile $SNAKEFILE \
     --jobs 20 \
-    --restart-times 0 \
+    --restart-times 1 \
     --latency-wait 120 \
     --use-conda \
+    --keep-going \
     --cluster-config pipelines/012_011_smk-config.json \
     --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}"
 

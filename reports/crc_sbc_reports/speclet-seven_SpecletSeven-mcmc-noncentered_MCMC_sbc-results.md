@@ -58,7 +58,7 @@ MODEL = "speclet-seven"
 MODEL_NAME = "SpecletSeven-mcmc-noncentered"
 SBC_RESULTS_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/speclet-seven_SpecletSeven-mcmc-noncentered_MCMC"
 SBC_COLLATED_RESULTS = "cache/sbc-cache/speclet-seven_SpecletSeven-mcmc-noncentered_MCMC_collated-posterior-summaries.pkl"
-NUM_SIMULATIONS = 3
+NUM_SIMULATIONS = 5
 
 ```
 
@@ -150,80 +150,80 @@ simulation_posteriors_df.head()
     <tr>
       <th>μ_μ_μ_a</th>
       <th>μ_μ_μ_a</th>
-      <td>3.687</td>
-      <td>0.198</td>
-      <td>3.370</td>
-      <td>3.999</td>
+      <td>2.173</td>
+      <td>0.141</td>
+      <td>1.946</td>
+      <td>2.389</td>
       <td>0.002</td>
       <td>0.001</td>
-      <td>8770.0</td>
-      <td>10337.0</td>
+      <td>7567.0</td>
+      <td>10433.0</td>
       <td>1.0</td>
-      <td>3.528105</td>
+      <td>1.841718</td>
       <td>sim_id_0000</td>
-      <td>True</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>μ_μ_a_offset[0,0]</th>
       <th>μ_μ_a_offset</th>
-      <td>-0.181</td>
-      <td>0.454</td>
-      <td>-0.877</td>
-      <td>0.550</td>
+      <td>0.587</td>
+      <td>0.643</td>
+      <td>-0.431</td>
+      <td>1.588</td>
+      <td>0.006</td>
       <td>0.004</td>
-      <td>0.003</td>
-      <td>15249.0</td>
-      <td>12645.0</td>
+      <td>11602.0</td>
+      <td>7639.0</td>
+      <td>1.0</td>
+      <td>1.764052</td>
+      <td>sim_id_0000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>μ_μ_a_offset[0,1]</th>
+      <th>μ_μ_a_offset</th>
+      <td>0.660</td>
+      <td>0.720</td>
+      <td>-0.496</td>
+      <td>1.780</td>
+      <td>0.008</td>
+      <td>0.006</td>
+      <td>8921.0</td>
+      <td>7092.0</td>
       <td>1.0</td>
       <td>0.400157</td>
       <td>sim_id_0000</td>
       <td>True</td>
     </tr>
     <tr>
-      <th>μ_μ_a_offset[0,1]</th>
+      <th>μ_μ_a_offset[1,0]</th>
       <th>μ_μ_a_offset</th>
-      <td>0.590</td>
-      <td>0.627</td>
-      <td>-0.386</td>
-      <td>1.589</td>
+      <td>0.434</td>
+      <td>0.640</td>
+      <td>-0.584</td>
+      <td>1.436</td>
       <td>0.005</td>
-      <td>0.004</td>
-      <td>14205.0</td>
-      <td>12119.0</td>
+      <td>0.005</td>
+      <td>14737.0</td>
+      <td>9127.0</td>
       <td>1.0</td>
       <td>0.978738</td>
       <td>sim_id_0000</td>
       <td>True</td>
     </tr>
     <tr>
-      <th>μ_μ_a_offset[1,0]</th>
-      <th>μ_μ_a_offset</th>
-      <td>1.991</td>
-      <td>0.559</td>
-      <td>1.112</td>
-      <td>2.866</td>
-      <td>0.005</td>
-      <td>0.004</td>
-      <td>12233.0</td>
-      <td>12536.0</td>
-      <td>1.0</td>
-      <td>2.240893</td>
-      <td>sim_id_0000</td>
-      <td>True</td>
-    </tr>
-    <tr>
       <th>μ_μ_a_offset[1,1]</th>
       <th>μ_μ_a_offset</th>
-      <td>1.515</td>
-      <td>0.663</td>
-      <td>0.489</td>
-      <td>2.572</td>
-      <td>0.006</td>
-      <td>0.004</td>
-      <td>13978.0</td>
-      <td>11447.0</td>
+      <td>1.170</td>
+      <td>0.778</td>
+      <td>-0.101</td>
+      <td>2.350</td>
+      <td>0.012</td>
+      <td>0.009</td>
+      <td>4543.0</td>
+      <td>3863.0</td>
       <td>1.0</td>
-      <td>1.867558</td>
+      <td>2.240893</td>
       <td>sim_id_0000</td>
       <td>True</td>
     </tr>
@@ -263,7 +263,7 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 
 ![png](speclet-seven_SpecletSeven-mcmc-noncentered_MCMC_sbc-results_files/speclet-seven_SpecletSeven-mcmc-noncentered_MCMC_sbc-results_17_0.png)
 
-    <ggplot: (2981471995049)>
+    <ggplot: (2996480333906)>
 
 ```python
 hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -310,7 +310,7 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 
 ![png](speclet-seven_SpecletSeven-mcmc-noncentered_MCMC_sbc-results_files/speclet-seven_SpecletSeven-mcmc-noncentered_MCMC_sbc-results_18_0.png)
 
-    <ggplot: (2981525697021)>
+    <ggplot: (2996525293023)>
 
 ---
 
@@ -319,14 +319,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.07 minutes
+    execution time: 0.11 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-06-29
+    Last updated: 2021-06-30
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -337,19 +337,19 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-183.o2.rc.hms.harvard.edu
+    Hostname: compute-a-17-76.o2.rc.hms.harvard.edu
 
-    Git branch: sbc-refactor
+    Git branch: sbc-run-limited
 
     numpy     : 1.20.1
-    matplotlib: 3.3.4
-    re        : 2.2.1
-    seaborn   : 0.11.1
-    pandas    : 1.2.3
     pymc3     : 3.11.1
-    janitor   : 0.20.14
+    re        : 2.2.1
+    pandas    : 1.2.3
     plotnine  : 0.7.1
     arviz     : 0.11.2
+    matplotlib: 3.3.4
+    seaborn   : 0.11.1
+    janitor   : 0.20.14

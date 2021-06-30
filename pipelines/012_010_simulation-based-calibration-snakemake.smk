@@ -10,7 +10,7 @@ from src.project_enums import ModelFitMethod
 from src.pipelines.pipeline_classes import ModelOption, ModelConfig
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
-NUM_SIMULATIONS = 5
+NUM_SIMULATIONS = 100
 
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yml"
@@ -20,9 +20,9 @@ MOCK_DATA_SIZE = "small"
 
 model_configurations: List[ModelConfig] = [
     ModelConfig(name="SpecletSix-mcmc", model=ModelOption.speclet_six, fit_method=ModelFitMethod.mcmc),
-    #ModelConfig(name="SpecletSix-advi", model=ModelOption.speclet_six, fit_method=ModelFitMethod.advi),
-    #ModelConfig(name="SpecletSeven-mcmc-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.mcmc),
-    #ModelConfig(name="SpecletSeven-advi-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.advi),
+    ModelConfig(name="SpecletSix-advi", model=ModelOption.speclet_six, fit_method=ModelFitMethod.advi),
+    ModelConfig(name="SpecletSeven-mcmc-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.mcmc),
+    ModelConfig(name="SpecletSeven-advi-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.advi),
 ]
 
 models = [c.model.value for c in model_configurations]
