@@ -1,0 +1,69 @@
+name: project-build
+on:
+  workflow_dispatch:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '0 0 * * *'
+defaults:
+  run:
+    shell: bash -l {0}
+jobs:
+  pytest:
+    name: pytest suite
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: speclet
+          auto-activate-base: false
+          channel-priority: strict
+          environment-file: environment.yml
+      - name: Activate conda environment
+        run: conda activate speclet
+      - name: Describe virtual environment
+        run: |
+          python3 --version
+          which python3
+          conda env list
+          conda list
+      - name: Run tests
+        run: |
+          python3 -m pytest \
+            --disable-warnings \
+            --cov="src" \
+            --force-sugar \
+            tests/
+  snakemake:
+    name: snakemake pipelines
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: speclet_snakemake
+          auto-activate-base: false
+          channel-priority: strict
+          environment-file: snakemake_environment.yml
+      - name: Activate conda environment
+        run: conda activate speclet_snakemake
+      - name: Describe virtual environment
+        run: |
+          python3 --version
+          which python3
+          conda env list
+          conda list
+      - name: Model fitting pipeline
+        run: |
+          snakemake \
+            --snakefile pipelines/010_010_run-crc-sampling-snakemake.smk \
+            --dry-run \
+            --forceall
+      - name: SBC pipeline
+        run: |
+          snakemake \
+            --snakefile pipelines/012_010_simulation-based-calibration-snakemake.smk \
+            --dry-run \
+            --forceall
