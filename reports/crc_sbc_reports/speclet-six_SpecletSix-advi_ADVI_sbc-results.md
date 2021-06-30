@@ -62,7 +62,7 @@ SBC_RESULTS_DIR = (
 SBC_COLLATED_RESULTS = (
     "cache/sbc-cache/speclet-six_SpecletSix-advi_ADVI_collated-posterior-summaries.pkl"
 )
-NUM_SIMULATIONS = 3
+NUM_SIMULATIONS = 5
 
 ```
 
@@ -154,80 +154,80 @@ simulation_posteriors_df.head()
     <tr>
       <th>μ_j</th>
       <th>μ_j</th>
-      <td>0.721</td>
-      <td>0.053</td>
-      <td>0.645</td>
-      <td>0.818</td>
+      <td>-0.694</td>
+      <td>0.047</td>
+      <td>-0.767</td>
+      <td>-0.620</td>
       <td>0.002</td>
       <td>0.001</td>
-      <td>802.0</td>
-      <td>981.0</td>
+      <td>971.0</td>
+      <td>878.0</td>
       <td>NaN</td>
-      <td>2.240893</td>
+      <td>-1.347759</td>
       <td>sim_id_0000</td>
       <td>False</td>
     </tr>
     <tr>
       <th>j_offset[0]</th>
       <th>j_offset</th>
-      <td>-0.165</td>
-      <td>0.192</td>
-      <td>-0.488</td>
-      <td>0.117</td>
-      <td>0.006</td>
-      <td>0.005</td>
-      <td>924.0</td>
-      <td>857.0</td>
+      <td>-0.963</td>
+      <td>0.081</td>
+      <td>-1.085</td>
+      <td>-0.827</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>823.0</td>
+      <td>751.0</td>
       <td>NaN</td>
-      <td>0.200079</td>
+      <td>-0.635242</td>
       <td>sim_id_0000</td>
       <td>False</td>
     </tr>
     <tr>
       <th>j_offset[1]</th>
       <th>j_offset</th>
-      <td>0.521</td>
-      <td>0.213</td>
-      <td>0.173</td>
-      <td>0.854</td>
-      <td>0.007</td>
-      <td>0.005</td>
-      <td>991.0</td>
-      <td>1014.0</td>
+      <td>0.674</td>
+      <td>0.087</td>
+      <td>0.527</td>
+      <td>0.806</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>967.0</td>
+      <td>941.0</td>
       <td>NaN</td>
-      <td>0.489369</td>
+      <td>0.484698</td>
       <td>sim_id_0000</td>
-      <td>True</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>μ_h</th>
       <th>μ_h</th>
-      <td>0.636</td>
-      <td>0.056</td>
-      <td>0.546</td>
-      <td>0.724</td>
-      <td>0.002</td>
+      <td>-0.593</td>
+      <td>0.041</td>
+      <td>-0.662</td>
+      <td>-0.531</td>
       <td>0.001</td>
-      <td>1009.0</td>
-      <td>983.0</td>
+      <td>0.001</td>
+      <td>999.0</td>
+      <td>942.0</td>
       <td>NaN</td>
-      <td>0.151236</td>
+      <td>-0.447733</td>
       <td>sim_id_0000</td>
       <td>False</td>
     </tr>
     <tr>
       <th>h_offset[0,0]</th>
       <th>h_offset</th>
-      <td>0.161</td>
-      <td>0.520</td>
-      <td>-0.669</td>
-      <td>0.972</td>
+      <td>0.101</td>
+      <td>0.518</td>
+      <td>-0.680</td>
+      <td>0.921</td>
       <td>0.016</td>
       <td>0.012</td>
-      <td>1037.0</td>
-      <td>908.0</td>
+      <td>1097.0</td>
+      <td>915.0</td>
       <td>NaN</td>
-      <td>0.933779</td>
+      <td>0.193451</td>
       <td>sim_id_0000</td>
       <td>True</td>
     </tr>
@@ -267,7 +267,7 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 
 ![png](speclet-six_SpecletSix-advi_ADVI_sbc-results_files/speclet-six_SpecletSix-advi_ADVI_sbc-results_17_0.png)
 
-    <ggplot: (2945372652505)>
+    <ggplot: (2957820621020)>
 
 ```python
 hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -314,7 +314,7 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 
 ![png](speclet-six_SpecletSix-advi_ADVI_sbc-results_files/speclet-six_SpecletSix-advi_ADVI_sbc-results_18_0.png)
 
-    <ggplot: (2945381304040)>
+    <ggplot: (2957865131252)>
 
 ---
 
@@ -323,14 +323,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.14 minutes
+    execution time: 0.16 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-06-29
+    Last updated: 2021-06-30
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -344,16 +344,16 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-a-16-170.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-61.o2.rc.hms.harvard.edu
 
-    Git branch: sbc-refactor
+    Git branch: sbc-run-limited
 
-    seaborn   : 0.11.1
-    janitor   : 0.20.14
-    arviz     : 0.11.2
-    pymc3     : 3.11.1
-    plotnine  : 0.7.1
-    pandas    : 1.2.3
-    re        : 2.2.1
     matplotlib: 3.3.4
+    pandas    : 1.2.3
+    janitor   : 0.20.14
+    seaborn   : 0.11.1
+    arviz     : 0.11.2
     numpy     : 1.20.1
+    plotnine  : 0.7.1
+    pymc3     : 3.11.1
+    re        : 2.2.1

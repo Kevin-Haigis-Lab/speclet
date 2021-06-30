@@ -62,7 +62,7 @@ SBC_RESULTS_DIR = (
 SBC_COLLATED_RESULTS = (
     "cache/sbc-cache/speclet-six_SpecletSix-mcmc_MCMC_collated-posterior-summaries.pkl"
 )
-NUM_SIMULATIONS = 3
+NUM_SIMULATIONS = 5
 
 ```
 
@@ -154,30 +154,30 @@ simulation_posteriors_df.head()
     <tr>
       <th>μ_j</th>
       <th>μ_j</th>
-      <td>0.539</td>
-      <td>0.841</td>
-      <td>-0.812</td>
-      <td>1.864</td>
+      <td>0.073</td>
+      <td>0.835</td>
+      <td>-1.301</td>
+      <td>1.381</td>
       <td>0.008</td>
       <td>0.006</td>
-      <td>11967.0</td>
-      <td>11763.0</td>
+      <td>12165.0</td>
+      <td>11762.0</td>
       <td>1.0</td>
-      <td>0.950088</td>
+      <td>-1.347759</td>
       <td>sim_id_0000</td>
-      <td>True</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>j_offset[0]</th>
       <th>j_offset</th>
-      <td>-0.398</td>
-      <td>0.396</td>
-      <td>-1.028</td>
-      <td>0.232</td>
+      <td>-0.492</td>
+      <td>0.384</td>
+      <td>-1.097</td>
+      <td>0.131</td>
       <td>0.004</td>
       <td>0.003</td>
-      <td>8889.0</td>
-      <td>10008.0</td>
+      <td>9206.0</td>
+      <td>9653.0</td>
       <td>1.0</td>
       <td>-0.635242</td>
       <td>sim_id_0000</td>
@@ -186,14 +186,14 @@ simulation_posteriors_df.head()
     <tr>
       <th>j_offset[1]</th>
       <th>j_offset</th>
-      <td>0.570</td>
-      <td>0.377</td>
-      <td>-0.022</td>
-      <td>1.168</td>
+      <td>0.508</td>
+      <td>0.379</td>
+      <td>-0.086</td>
+      <td>1.110</td>
       <td>0.004</td>
       <td>0.003</td>
-      <td>9552.0</td>
-      <td>8564.0</td>
+      <td>10313.0</td>
+      <td>10822.0</td>
       <td>1.0</td>
       <td>0.484698</td>
       <td>sim_id_0000</td>
@@ -202,32 +202,32 @@ simulation_posteriors_df.head()
     <tr>
       <th>μ_h</th>
       <th>μ_h</th>
-      <td>0.142</td>
+      <td>0.025</td>
       <td>0.481</td>
-      <td>-0.618</td>
-      <td>0.915</td>
+      <td>-0.719</td>
+      <td>0.809</td>
       <td>0.004</td>
       <td>0.004</td>
-      <td>14127.0</td>
-      <td>11584.0</td>
+      <td>15481.0</td>
+      <td>12116.0</td>
       <td>1.0</td>
-      <td>-0.673880</td>
+      <td>-0.447733</td>
       <td>sim_id_0000</td>
-      <td>False</td>
+      <td>True</td>
     </tr>
     <tr>
       <th>h_offset[0,0]</th>
       <th>h_offset</th>
-      <td>0.033</td>
-      <td>0.333</td>
-      <td>-0.486</td>
-      <td>0.577</td>
+      <td>0.497</td>
+      <td>0.383</td>
+      <td>-0.107</td>
+      <td>1.117</td>
       <td>0.004</td>
       <td>0.003</td>
-      <td>6701.0</td>
-      <td>10231.0</td>
+      <td>10870.0</td>
+      <td>11039.0</td>
       <td>1.0</td>
-      <td>-0.075679</td>
+      <td>0.193451</td>
       <td>sim_id_0000</td>
       <td>True</td>
     </tr>
@@ -267,7 +267,7 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 
 ![png](speclet-six_SpecletSix-mcmc_MCMC_sbc-results_files/speclet-six_SpecletSix-mcmc_MCMC_sbc-results_17_0.png)
 
-    <ggplot: (2966351545558)>
+    <ggplot: (2968649914290)>
 
 ```python
 hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -314,7 +314,7 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 
 ![png](speclet-six_SpecletSix-mcmc_MCMC_sbc-results_files/speclet-six_SpecletSix-mcmc_MCMC_sbc-results_18_0.png)
 
-    <ggplot: (2966405273579)>
+    <ggplot: (2968650249978)>
 
 ---
 
@@ -323,14 +323,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.12 minutes
+    execution time: 0.16 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-06-29
+    Last updated: 2021-06-30
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -341,19 +341,19 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-186.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-53.o2.rc.hms.harvard.edu
 
-    Git branch: sbc-refactor
+    Git branch: sbc-run-limited
 
-    seaborn   : 0.11.1
-    re        : 2.2.1
-    numpy     : 1.20.1
-    plotnine  : 0.7.1
-    pymc3     : 3.11.1
-    pandas    : 1.2.3
-    arviz     : 0.11.2
-    janitor   : 0.20.14
     matplotlib: 3.3.4
+    numpy     : 1.20.1
+    pymc3     : 3.11.1
+    plotnine  : 0.7.1
+    janitor   : 0.20.14
+    re        : 2.2.1
+    seaborn   : 0.11.1
+    arviz     : 0.11.2
+    pandas    : 1.2.3
