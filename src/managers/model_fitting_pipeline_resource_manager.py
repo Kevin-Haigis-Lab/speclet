@@ -15,40 +15,40 @@ ResourceLookupDict = Dict[ModelOption, Dict[bool, Dict[ModelFitMethod, T]]]
 #   key: [model][debug][fit_method]
 sample_models_memory_lookup: ResourceLookupDict[int] = {
     ModelOption.speclet_test_model: {
-        True: {ModelFitMethod.advi: 8, ModelFitMethod.mcmc: 8},
-        False: {ModelFitMethod.advi: 8, ModelFitMethod.mcmc: 8},
+        True: {ModelFitMethod.ADVI: 8, ModelFitMethod.MCMC: 8},
+        False: {ModelFitMethod.ADVI: 8, ModelFitMethod.MCMC: 8},
     },
     ModelOption.crc_ceres_mimic: {
-        True: {ModelFitMethod.advi: 15, ModelFitMethod.mcmc: 20},
-        False: {ModelFitMethod.advi: 20, ModelFitMethod.mcmc: 40},
+        True: {ModelFitMethod.ADVI: 15, ModelFitMethod.MCMC: 20},
+        False: {ModelFitMethod.ADVI: 20, ModelFitMethod.MCMC: 40},
     },
     ModelOption.speclet_one: {
-        True: {ModelFitMethod.advi: 7, ModelFitMethod.mcmc: 30},
-        False: {ModelFitMethod.advi: 40, ModelFitMethod.mcmc: 150},
+        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 30},
+        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
     ModelOption.speclet_two: {
-        True: {ModelFitMethod.advi: 7, ModelFitMethod.mcmc: 30},
-        False: {ModelFitMethod.advi: 40, ModelFitMethod.mcmc: 150},
+        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 30},
+        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
     ModelOption.speclet_three: {
-        True: {ModelFitMethod.advi: 7, ModelFitMethod.mcmc: 60},
-        False: {ModelFitMethod.advi: 40, ModelFitMethod.mcmc: 150},
+        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 60},
+        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
     ModelOption.speclet_four: {
-        True: {ModelFitMethod.advi: 7, ModelFitMethod.mcmc: 60},
-        False: {ModelFitMethod.advi: 40, ModelFitMethod.mcmc: 150},
+        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 60},
+        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
     ModelOption.speclet_five: {
-        True: {ModelFitMethod.advi: 7, ModelFitMethod.mcmc: 60},
-        False: {ModelFitMethod.advi: 40, ModelFitMethod.mcmc: 150},
+        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 60},
+        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
     ModelOption.speclet_six: {
-        True: {ModelFitMethod.advi: 7, ModelFitMethod.mcmc: 60},
-        False: {ModelFitMethod.advi: 40, ModelFitMethod.mcmc: 150},
+        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 60},
+        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
     ModelOption.speclet_seven: {
-        True: {ModelFitMethod.advi: 7, ModelFitMethod.mcmc: 60},
-        False: {ModelFitMethod.advi: 40, ModelFitMethod.mcmc: 150},
+        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 60},
+        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
 }
 
@@ -57,46 +57,46 @@ sample_models_memory_lookup: ResourceLookupDict[int] = {
 #   key: [model][debug][fit_method]
 sample_models_time_lookup: ResourceLookupDict[td] = {
     ModelOption.speclet_test_model: {
-        True: {ModelFitMethod.advi: td(minutes=5), ModelFitMethod.mcmc: td(minutes=5)},
+        True: {ModelFitMethod.ADVI: td(minutes=5), ModelFitMethod.MCMC: td(minutes=5)},
         False: {
-            ModelFitMethod.advi: td(minutes=10),
-            ModelFitMethod.mcmc: td(minutes=10),
+            ModelFitMethod.ADVI: td(minutes=10),
+            ModelFitMethod.MCMC: td(minutes=10),
         },
     },
     ModelOption.crc_ceres_mimic: {
         True: {
-            ModelFitMethod.advi: td(minutes=30),
-            ModelFitMethod.mcmc: td(minutes=30),
+            ModelFitMethod.ADVI: td(minutes=30),
+            ModelFitMethod.MCMC: td(minutes=30),
         },
-        False: {ModelFitMethod.advi: td(hours=3), ModelFitMethod.mcmc: td(hours=6)},
+        False: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(hours=6)},
     },
     ModelOption.speclet_one: {
-        True: {ModelFitMethod.advi: td(minutes=30), ModelFitMethod.mcmc: td(hours=8)},
-        False: {ModelFitMethod.advi: td(hours=12), ModelFitMethod.mcmc: td(days=2)},
+        True: {ModelFitMethod.ADVI: td(minutes=30), ModelFitMethod.MCMC: td(hours=8)},
+        False: {ModelFitMethod.ADVI: td(hours=12), ModelFitMethod.MCMC: td(days=2)},
     },
     ModelOption.speclet_two: {
-        True: {ModelFitMethod.advi: td(minutes=30), ModelFitMethod.mcmc: td(hours=8)},
-        False: {ModelFitMethod.advi: td(hours=12), ModelFitMethod.mcmc: td(days=2)},
+        True: {ModelFitMethod.ADVI: td(minutes=30), ModelFitMethod.MCMC: td(hours=8)},
+        False: {ModelFitMethod.ADVI: td(hours=12), ModelFitMethod.MCMC: td(days=2)},
     },
     ModelOption.speclet_three: {
-        True: {ModelFitMethod.advi: td(minutes=30), ModelFitMethod.mcmc: td(days=1)},
-        False: {ModelFitMethod.advi: td(hours=10), ModelFitMethod.mcmc: td(days=2)},
+        True: {ModelFitMethod.ADVI: td(minutes=30), ModelFitMethod.MCMC: td(days=1)},
+        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
     ModelOption.speclet_four: {
-        True: {ModelFitMethod.advi: td(hours=3), ModelFitMethod.mcmc: td(days=1)},
-        False: {ModelFitMethod.advi: td(hours=10), ModelFitMethod.mcmc: td(days=2)},
+        True: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(days=1)},
+        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
     ModelOption.speclet_five: {
-        True: {ModelFitMethod.advi: td(hours=3), ModelFitMethod.mcmc: td(days=1)},
-        False: {ModelFitMethod.advi: td(hours=10), ModelFitMethod.mcmc: td(days=2)},
+        True: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(days=1)},
+        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
     ModelOption.speclet_six: {
-        True: {ModelFitMethod.advi: td(hours=3), ModelFitMethod.mcmc: td(days=1)},
-        False: {ModelFitMethod.advi: td(hours=10), ModelFitMethod.mcmc: td(days=2)},
+        True: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(days=1)},
+        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
     ModelOption.speclet_seven: {
-        True: {ModelFitMethod.advi: td(hours=3), ModelFitMethod.mcmc: td(days=1)},
-        False: {ModelFitMethod.advi: td(hours=10), ModelFitMethod.mcmc: td(days=2)},
+        True: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(days=1)},
+        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
 }
 

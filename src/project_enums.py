@@ -7,8 +7,8 @@ from typing import NoReturn
 class ModelFitMethod(str, Enum):
     """Available fit methods."""
 
-    advi = "ADVI"
-    mcmc = "MCMC"
+    ADVI = "ADVI"
+    MCMC = "MCMC"
 
 
 #### ---- Exhaustiveness checks ---- ####

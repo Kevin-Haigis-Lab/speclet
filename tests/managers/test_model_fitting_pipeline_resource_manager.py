@@ -23,7 +23,7 @@ def test_resource_manager_detects_debug():
     rm = RM(
         model=ModelOption.speclet_test_model,
         name="my-model-debug",
-        fit_method=ModelFitMethod.advi,
+        fit_method=ModelFitMethod.ADVI,
     )
     assert rm.debug
     assert rm.is_debug_cli() == "--debug"
@@ -31,7 +31,7 @@ def test_resource_manager_detects_debug():
     rm = RM(
         model=ModelOption.speclet_test_model,
         name="my-model",
-        fit_method=ModelFitMethod.advi,
+        fit_method=ModelFitMethod.ADVI,
     )
     assert not rm.debug
     assert rm.is_debug_cli() == "--no-debug"

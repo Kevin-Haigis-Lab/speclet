@@ -98,7 +98,7 @@ class Pymc3ModelCacheManager:
         Returns:
             bool: Does the cache exist?
         """
-        return self.mcmc_cache_delegate.cache_exists(method=ModelFitMethod.mcmc)
+        return self.mcmc_cache_delegate.cache_exists(method=ModelFitMethod.MCMC)
 
     def advi_cache_exists(self) -> bool:
         """Confirm that a cache of ADVI fitting results exists.
@@ -106,7 +106,7 @@ class Pymc3ModelCacheManager:
         Returns:
             bool: Does the cache exist?
         """
-        return self.advi_cache_delegate.cache_exists(method=ModelFitMethod.advi)
+        return self.advi_cache_delegate.cache_exists(method=ModelFitMethod.ADVI)
 
     def clear_mcmc_cache(self) -> None:
         """Clear the MCMC cache."""

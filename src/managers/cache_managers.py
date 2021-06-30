@@ -165,9 +165,9 @@ class Pymc3CacheManager:
         ):
             return False
 
-        if method is ModelFitMethod.mcmc:
+        if method is ModelFitMethod.MCMC:
             return cache_paths.trace_path.exists()
-        elif method is ModelFitMethod.advi:
+        elif method is ModelFitMethod.ADVI:
             return cache_paths.approximation_path.exists()
         else:
             assert_never(method)
@@ -251,10 +251,10 @@ class ArvizCacheManager:
         if not cache_paths.inference_data_path.exists():
             return False
 
-        if method is ModelFitMethod.mcmc:
+        if method is ModelFitMethod.MCMC:
             # Nothing special to add.
             logger.info("ArvizCacheManager: MCMC cache exists.")
-        elif method is ModelFitMethod.advi:
+        elif method is ModelFitMethod.ADVI:
             if not cache_paths.approximation_path.exists():
                 return False
             logger.info("ArvizCacheManager: ADVI cache exists.")
@@ -280,7 +280,7 @@ class ArvizCacheManager:
         logger.debug("Reading sampling cache from file.")
         cache_paths = self.get_cache_file_names()
         if check_exists:
-            if not self.cache_exists(method=ModelFitMethod.mcmc):
+            if not self.cache_exists(method=ModelFitMethod.MCMC):
                 raise FileNotFoundError("Cannot locate cached data.")
         return az.from_netcdf(cache_paths.inference_data_path.as_posix())
 
@@ -303,7 +303,7 @@ class ArvizCacheManager:
         logger.debug("Reading approximation cache from file.")
         cache_paths = self.get_cache_file_names()
         if check_exists:
-            if not self.cache_exists(method=ModelFitMethod.advi):
+            if not self.cache_exists(method=ModelFitMethod.ADVI):
                 raise FileNotFoundError("Cannot locate cached data.")
         inf_data = self.read_cached_sampling(check_exists=False)
         approx = _get_pickle(cache_paths.approximation_path)

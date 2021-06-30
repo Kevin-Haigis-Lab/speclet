@@ -132,7 +132,7 @@ class TestSpecletModel:
             )
 
     @pytest.mark.slow
-    @pytest.mark.parametrize("fit_method", [ModelFitMethod.advi, ModelFitMethod.mcmc])
+    @pytest.mark.parametrize("fit_method", [ModelFitMethod.ADVI, ModelFitMethod.MCMC])
     def test_run_simulation_based_calibration(
         self,
         tmp_path: Path,
@@ -152,7 +152,7 @@ class TestSpecletModel:
 
         fit_kwargs: Dict[str, Union[float, int]]
 
-        if fit_method == ModelFitMethod.advi:
+        if fit_method == ModelFitMethod.ADVI:
             fit_kwargs = {"n_iterations": 100, "draws": 10}
         else:
             fit_kwargs = {
