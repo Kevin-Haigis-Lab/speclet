@@ -59,6 +59,14 @@ jobs:
           conda env list
           conda list
       - name: Model fitting pipeline
-        run: snakemake pipelines/010_010_run-crc-sampling-snakemake.smk --dry-run
-      - name: Model fitting pipeline
-        run: snakemake pipelines/012_010_simulation-based-calibration-snakemake.smk --dry-run
+        run: |
+          snakemake \
+            --snakefile pipelines/010_010_run-crc-sampling-snakemake.smk \
+            --dry-run \
+            --forceall
+      - name: SBC pipeline
+        run: |
+          snakemake \
+            --snakefile pipelines/012_010_simulation-based-calibration-snakemake.smk \
+            --dry-run \
+            --forceall
