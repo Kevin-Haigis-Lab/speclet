@@ -179,46 +179,46 @@ class TestPymc3CacheManager:
         self, tmp_path: Path, advi_results: pmapi.ApproximationSamplingResults
     ):
         cm = Pymc3CacheManager(cache_dir=tmp_path)
-        assert not cm.cache_exists(method=ModelFitMethod.mcmc)
-        assert not cm.cache_exists(method=ModelFitMethod.advi)
+        assert not cm.cache_exists(method=ModelFitMethod.MCMC)
+        assert not cm.cache_exists(method=ModelFitMethod.ADVI)
         # Cache results and check existence.
         cm.cache_sampling_results(res=advi_results)
-        assert cm.cache_exists(ModelFitMethod.advi)
-        assert not cm.cache_exists(ModelFitMethod.mcmc)
+        assert cm.cache_exists(ModelFitMethod.ADVI)
+        assert not cm.cache_exists(ModelFitMethod.MCMC)
 
     @pytest.mark.slow
     def test_mcmc_cache_exists(
         self, tmp_path: Path, mcmc_results: pmapi.MCMCSamplingResults
     ):
         cm = Pymc3CacheManager(cache_dir=tmp_path)
-        assert not cm.cache_exists(method=ModelFitMethod.mcmc)
-        assert not cm.cache_exists(method=ModelFitMethod.advi)
+        assert not cm.cache_exists(method=ModelFitMethod.MCMC)
+        assert not cm.cache_exists(method=ModelFitMethod.ADVI)
         # Cache results and check existence.
         cm.cache_sampling_results(res=mcmc_results)
-        assert not cm.cache_exists(ModelFitMethod.advi)
-        assert cm.cache_exists(ModelFitMethod.mcmc)
+        assert not cm.cache_exists(ModelFitMethod.ADVI)
+        assert cm.cache_exists(ModelFitMethod.MCMC)
 
     @pytest.mark.slow
     def test_clear_advi_cache(
         self, tmp_path: Path, advi_results: pmapi.ApproximationSamplingResults
     ):
         cm = Pymc3CacheManager(cache_dir=tmp_path)
-        assert not cm.cache_exists(method=ModelFitMethod.advi)
+        assert not cm.cache_exists(method=ModelFitMethod.ADVI)
         cm.cache_sampling_results(res=advi_results)
-        assert cm.cache_exists(ModelFitMethod.advi)
+        assert cm.cache_exists(ModelFitMethod.ADVI)
         cm.clear_cache()
-        assert not cm.cache_exists(ModelFitMethod.advi)
+        assert not cm.cache_exists(ModelFitMethod.ADVI)
 
     @pytest.mark.slow
     def test_clear_mcmc_cache(
         self, tmp_path: Path, mcmc_results: pmapi.MCMCSamplingResults
     ):
         cm = Pymc3CacheManager(cache_dir=tmp_path)
-        assert not cm.cache_exists(method=ModelFitMethod.mcmc)
+        assert not cm.cache_exists(method=ModelFitMethod.MCMC)
         cm.cache_sampling_results(res=mcmc_results)
-        assert cm.cache_exists(ModelFitMethod.mcmc)
+        assert cm.cache_exists(ModelFitMethod.MCMC)
         cm.clear_cache()
-        assert not cm.cache_exists(ModelFitMethod.mcmc)
+        assert not cm.cache_exists(ModelFitMethod.MCMC)
 
     @pytest.mark.slow
     def test_clear_mcmc_and_advi_cache(
@@ -228,16 +228,16 @@ class TestPymc3CacheManager:
         advi_results: pmapi.ApproximationSamplingResults,
     ):
         cm = Pymc3CacheManager(cache_dir=tmp_path)
-        assert not cm.cache_exists(method=ModelFitMethod.mcmc)
-        assert not cm.cache_exists(method=ModelFitMethod.advi)
+        assert not cm.cache_exists(method=ModelFitMethod.MCMC)
+        assert not cm.cache_exists(method=ModelFitMethod.ADVI)
         cm.cache_sampling_results(res=mcmc_results)
         cm.cache_sampling_results(res=advi_results)
-        assert cm.cache_exists(ModelFitMethod.mcmc) and cm.cache_exists(
-            ModelFitMethod.advi
+        assert cm.cache_exists(ModelFitMethod.MCMC) and cm.cache_exists(
+            ModelFitMethod.ADVI
         )
         cm.clear_cache()
-        assert not cm.cache_exists(method=ModelFitMethod.mcmc)
-        assert not cm.cache_exists(method=ModelFitMethod.advi)
+        assert not cm.cache_exists(method=ModelFitMethod.MCMC)
+        assert not cm.cache_exists(method=ModelFitMethod.ADVI)
 
 
 class TestArvizCacheManager:
@@ -358,23 +358,23 @@ class TestArvizCacheManager:
         advi_results: pmapi.ApproximationSamplingResults,
     ):
         cm = ArvizCacheManager(cache_dir=tmp_path)
-        assert not cm.cache_exists(method=ModelFitMethod.mcmc)
-        assert not cm.cache_exists(method=ModelFitMethod.advi)
+        assert not cm.cache_exists(method=ModelFitMethod.MCMC)
+        assert not cm.cache_exists(method=ModelFitMethod.ADVI)
         # Cache results and check existence.
         cm.cache_sampling_results(
             advi_inf_data, approximation=advi_results.approximation
         )
-        assert cm.cache_exists(ModelFitMethod.advi)
+        assert cm.cache_exists(ModelFitMethod.ADVI)
 
     @pytest.mark.slow
     def test_mcmc_cache_exists(self, tmp_path: Path, mcmc_inf_data: az.InferenceData):
         cm = ArvizCacheManager(cache_dir=tmp_path)
-        assert not cm.cache_exists(method=ModelFitMethod.mcmc)
-        assert not cm.cache_exists(method=ModelFitMethod.advi)
+        assert not cm.cache_exists(method=ModelFitMethod.MCMC)
+        assert not cm.cache_exists(method=ModelFitMethod.ADVI)
         # Cache results and check existence.
         cm.cache_sampling_results(mcmc_inf_data)
-        assert not cm.cache_exists(ModelFitMethod.advi)
-        assert cm.cache_exists(ModelFitMethod.mcmc)
+        assert not cm.cache_exists(ModelFitMethod.ADVI)
+        assert cm.cache_exists(ModelFitMethod.MCMC)
 
     @pytest.mark.slow
     def test_clear_advi_cache(
@@ -384,22 +384,22 @@ class TestArvizCacheManager:
         advi_results: pmapi.ApproximationSamplingResults,
     ):
         cm = ArvizCacheManager(cache_dir=tmp_path)
-        assert not cm.cache_exists(method=ModelFitMethod.advi)
+        assert not cm.cache_exists(method=ModelFitMethod.ADVI)
         cm.cache_sampling_results(
             advi_inf_data, approximation=advi_results.approximation
         )
-        assert cm.cache_exists(ModelFitMethod.advi)
+        assert cm.cache_exists(ModelFitMethod.ADVI)
         cm.clear_cache()
-        assert not cm.cache_exists(ModelFitMethod.advi)
+        assert not cm.cache_exists(ModelFitMethod.ADVI)
 
     @pytest.mark.slow
     def test_clear_mcmc_cache(self, tmp_path: Path, mcmc_inf_data: az.InferenceData):
         cm = ArvizCacheManager(cache_dir=tmp_path)
-        assert not cm.cache_exists(method=ModelFitMethod.mcmc)
+        assert not cm.cache_exists(method=ModelFitMethod.MCMC)
         cm.cache_sampling_results(mcmc_inf_data)
-        assert cm.cache_exists(ModelFitMethod.mcmc)
+        assert cm.cache_exists(ModelFitMethod.MCMC)
         cm.clear_cache()
-        assert not cm.cache_exists(ModelFitMethod.mcmc)
+        assert not cm.cache_exists(ModelFitMethod.MCMC)
 
     @pytest.mark.slow
     def test_clear_mcmc_and_advi_cache(
@@ -410,15 +410,15 @@ class TestArvizCacheManager:
         advi_results: pmapi.ApproximationSamplingResults,
     ):
         cm = ArvizCacheManager(cache_dir=tmp_path)
-        assert not cm.cache_exists(method=ModelFitMethod.mcmc)
-        assert not cm.cache_exists(method=ModelFitMethod.advi)
+        assert not cm.cache_exists(method=ModelFitMethod.MCMC)
+        assert not cm.cache_exists(method=ModelFitMethod.ADVI)
         cm.cache_sampling_results(mcmc_inf_data)
         cm.cache_sampling_results(
             advi_inf_data, approximation=advi_results.approximation
         )
-        assert cm.cache_exists(ModelFitMethod.mcmc) and cm.cache_exists(
-            ModelFitMethod.advi
+        assert cm.cache_exists(ModelFitMethod.MCMC) and cm.cache_exists(
+            ModelFitMethod.ADVI
         )
         cm.clear_cache()
-        assert not cm.cache_exists(method=ModelFitMethod.mcmc)
-        assert not cm.cache_exists(method=ModelFitMethod.advi)
+        assert not cm.cache_exists(method=ModelFitMethod.MCMC)
+        assert not cm.cache_exists(method=ModelFitMethod.ADVI)

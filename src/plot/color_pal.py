@@ -9,30 +9,30 @@ from typing import Dict
 class SeabornColor(str, Enum):
     """Colors from the 'seaborn' package."""
 
-    orange = "#ED854A"
-    blue = "#4878D0"
-    green = "#6BCC64"
-    red = "#D65F5F"
+    ORANGE = "#ED854A"
+    BLUE = "#4878D0"
+    GREEN = "#6BCC64"
+    RED = "#D65F5F"
 
 
 class ModelColors(str, Enum):
     """Colors for specific models."""
 
     CERES = "#417BB1"
-    CERES_mimic = "#853FA2"
-    speclet_one = "#009C77"
-    speclet_two = "#DE522F"
+    CERES_MIMIC = "#853FA2"
+    SPECLET_ONE = "#009C77"
+    SPECLET_TWO = "#DE522F"
 
 
 class FitMethodColors(str, Enum):
     """Colors for the different ways to fit a model."""
 
-    pymc3_mcmc = "#F57E3F"
-    pymc3_advi = "#0AA8A2"
+    PYMC3_MCMC = "#F57E3F"
+    PYMC3_ADVI = "#0AA8A2"
 
 
 def make_pal(colors: EnumMeta) -> Dict[str, str]:
-    """Convert an Enum to a uable color palette.
+    """Convert an Enum to a usable color palette.
 
     Args:
         colors (EnumMeta): Enum to convert to a palette.

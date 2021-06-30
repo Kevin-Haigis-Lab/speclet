@@ -38,7 +38,7 @@ class SBCResourceManager:
         Returns:
             str: Amount of RAM required.
         """
-        if self.fit_method is ModelFitMethod.mcmc:
+        if self.fit_method is ModelFitMethod.MCMC:
             return "3000"
         else:
             return "1600"
@@ -50,7 +50,7 @@ class SBCResourceManager:
         Returns:
             str: Amount of time required.
         """
-        if self.fit_method is ModelFitMethod.mcmc:
+        if self.fit_method is ModelFitMethod.MCMC:
             return "02:00:00"
         else:
             return "00:15:00"
@@ -62,7 +62,7 @@ class SBCResourceManager:
         Returns:
             str: Number of cores needed for fitting.
         """
-        if self.fit_method is ModelFitMethod.mcmc:
+        if self.fit_method is ModelFitMethod.MCMC:
             return 4
         else:
             return 1
