@@ -4,12 +4,13 @@ from pathlib import Path
 from typing import List
 
 import papermill
+from snakemake.io import Wildcards
 
 from src.project_enums import ModelFitMethod
 from src.pipelines.pipeline_classes import ModelOption, ModelConfig
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
-NUM_SIMULATIONS = 3
+NUM_SIMULATIONS = 5
 
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yml"
@@ -19,9 +20,9 @@ MOCK_DATA_SIZE = "small"
 
 model_configurations: List[ModelConfig] = [
     ModelConfig(name="SpecletSix-mcmc", model=ModelOption.speclet_six, fit_method=ModelFitMethod.mcmc),
-    ModelConfig(name="SpecletSix-advi", model=ModelOption.speclet_six, fit_method=ModelFitMethod.advi),
-    ModelConfig(name="SpecletSeven-mcmc-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.mcmc),
-    ModelConfig(name="SpecletSeven-advi-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.advi),
+    #ModelConfig(name="SpecletSix-advi", model=ModelOption.speclet_six, fit_method=ModelFitMethod.advi),
+    #ModelConfig(name="SpecletSeven-mcmc-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.mcmc),
+    #ModelConfig(name="SpecletSeven-advi-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.advi),
 ]
 
 models = [c.model.value for c in model_configurations]
@@ -43,20 +44,19 @@ wildcard_constraints:
 root_perm_dir_template = ROOT_PERMUTATION_DIR + "{model}_{model_name}_{fit_method}"
 perm_dir_template = "sbc-perm{perm_num}"
 
-def make_root_permutation_directory(w) -> str:
+def make_root_permutation_directory(w: Wildcards) -> str:
     return root_perm_dir_template.format(
         model=w.model,
         model_name=w.model_name,
         fit_method=w.fit_method
     )
 
-def make_permutation_dir(w) -> str:
+def make_permutation_dir(w: Wildcards) -> str:
     return make_root_permutation_directory(w) + "/" + perm_dir_template.format(perm_num=w.perm_num)
 
 collated_results_template = "cache/sbc-cache/{model}_{model_name}_{fit_method}_collated-posterior-summaries.pkl"
 
-def make_collated_results_path(w) -> str:
-    print(type(w))
+def make_collated_results_path(w: Wildcards) -> str:
     return collated_results_template.format(
         model=w.model,
         model_name=w.model_name,
@@ -87,7 +87,7 @@ rule run_sbc:
         cores=lambda w: RM(w.model, w.model_name, MOCK_DATA_SIZE, w.fit_method).cores,
         mem=lambda w: RM(w.model, w.model_name, MOCK_DATA_SIZE, w.fit_method).memory,
         time=lambda w: RM(w.model, w.model_name, MOCK_DATA_SIZE, w.fit_method).time,
-        perm_dir=make_root_permutation_directory,
+        perm_dir=make_permutation_dir,
     shell:
         "src/command_line_interfaces/simulation_based_calibration_cli.py "
         "  {wildcards.model} "
