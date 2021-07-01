@@ -25,8 +25,6 @@ def _get_prior_value_using_index_list(ary: np.ndarray, idx: List[int]) -> float:
     correspond to a single dimension. The final result will be a single value extract
     from the array.
 
-    # TODO (refactor): move this to vector helpers.
-
     Args:
         ary (np.ndarray): Input array of priors of any dimension.
         idx (List[int]): List of indices, one per dimension.
@@ -73,6 +71,12 @@ def _assign_column_for_within_hdi(
     return df
 
 
+class SBCResultsNotFoundError(FileNotFoundError):
+    """SBC Results not found."""
+
+    pass
+
+
 def get_posterior_summary_for_file_manager(sbc_dir: Path) -> pd.DataFrame:
     """Create a summary of the results of an SBC sim. cached in a directory.
 
@@ -80,14 +84,14 @@ def get_posterior_summary_for_file_manager(sbc_dir: Path) -> pd.DataFrame:
         sbc_dir (Path): Directory with the results of a SBC simulation.
 
     Raises:
-        Exception: Raised if the path is not to a directory.
+        SBCResultsNotFoundError: Raised if the SBC results are not found.
 
     Returns:
         pd.DataFrame: Dataframe with the summary of the simulation results.
     """
     sbc_fm = SBCFileManager(sbc_dir)
     if not sbc_fm.all_data_exists():
-        raise Exception(f"Not all output from '{sbc_fm.dir.name}' exist.")
+        raise SBCResultsNotFoundError(f"Not all output from '{sbc_fm.dir.name}' exist.")
     res = sbc_fm.get_sbc_results()
     true_values = _make_priors_dataframe(
         res.priors, parameters=res.posterior_summary.index.values.tolist()
@@ -104,7 +108,7 @@ def _index_and_concat_summaries(post_summaries: List[pd.DataFrame]) -> pd.DataFr
     )
 
 
-def _extract_paramter_names(df: pd.DataFrame) -> pd.DataFrame:
+def _extract_parameter_names(df: pd.DataFrame) -> pd.DataFrame:
     df["parameter_name"] = [x.split("[")[0] for x in df.index.values]
     df = df.set_index("parameter_name", append=True)
     return df
@@ -141,7 +145,7 @@ def collate_sbc_posteriors(
 
     simulation_posteriors_df = (
         _index_and_concat_summaries(simulation_posteriors)
-        .pipe(_extract_paramter_names)
+        .pipe(_extract_parameter_names)
         .pipe(_assign_column_for_within_hdi)
     )
 
