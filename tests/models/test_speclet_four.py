@@ -92,7 +92,6 @@ class TestSpecletFour:
         rv_names += [v.name for v in sp_four.model.unobserved_RVs]
         assert ("β" in set(rv_names)) != copy_cov
 
-    @pytest.mark.DEV
     @pytest.mark.parametrize("copy_cov", [True, False])
     @pytest.mark.parametrize("model_param", model_parameterizations)
     def test_model_parameterizations(
