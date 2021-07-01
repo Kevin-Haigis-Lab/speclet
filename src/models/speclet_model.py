@@ -65,7 +65,7 @@ class SpecletModel:
     name: str
     _debug: bool
     cache_manager: Pymc3ModelCacheManager
-    data_manager: Optional[DataManager] = None
+    data_manager: DataManager
 
     model: Optional[pm.Model] = None
     observed_var_name: Optional[str] = None
@@ -79,9 +79,9 @@ class SpecletModel:
     def __init__(
         self,
         name: str,
+        data_manager: DataManager,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
-        data_manager: Optional[DataManager] = None,
     ) -> None:
         """Instantiate a Speclet Model.
 
@@ -99,9 +99,8 @@ class SpecletModel:
         self.cache_manager = Pymc3ModelCacheManager(
             name=name, root_cache_dir=root_cache_dir
         )
-        if data_manager is not None:
-            self.data_manager = data_manager
-            self.data_manager.debug = self._debug
+        self.data_manager = data_manager
+        self.data_manager.debug = self._debug
 
     def __str__(self) -> str:
         """Describe the object.
@@ -177,9 +176,6 @@ class SpecletModel:
               after calling `self.model_specification()`
         """
         logger.debug("Building PyMC3 model.")
-        if self.data_manager is None:
-            logger.error("Cannot build a model without a data manager.")
-            raise AttributeError("Cannot build a model without a data manager.")
 
         logger.info("Calling `model_specification()` method.")
         self.model, self.observed_var_name = self.model_specification()

@@ -262,16 +262,11 @@ class SpecletThree(SpecletModel):
         """Make a dictionary mapping the shared data variables to new data.
 
         Raises:
-            AttributeError: Raised if there is no data manager.
             AttributeError: Raised if there are no shared variables.
 
         Returns:
             ReplacementsDict: A dictionary mapping new data to shared variables.
         """
-        if self.data_manager is None:
-            raise AttributeError(
-                "Cannot create replacement parameters without a DataManager."
-            )
         if self.shared_vars is None:
             raise AttributeError(
                 "No shared variables - cannot create replacement parameters.."
