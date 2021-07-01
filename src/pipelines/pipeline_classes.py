@@ -18,7 +18,6 @@ class ModelOption(str, Enum):
     crc_ceres_mimic = "crc-ceres-mimic"
     speclet_one = "speclet-one"
     speclet_two = "speclet-two"
-    speclet_three = "speclet-three"
     speclet_four = "speclet-four"
     speclet_five = "speclet-five"
     speclet_six = "speclet-six"

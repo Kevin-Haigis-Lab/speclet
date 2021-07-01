@@ -14,7 +14,6 @@ from src.models.speclet_five import SpecletFive
 from src.models.speclet_four import SpecletFour
 from src.models.speclet_seven import SpecletSeven
 from src.models.speclet_six import SpecletSix
-from src.models.speclet_three import SpecletThree
 from src.models.speclet_two import SpecletTwo
 from src.project_enums import ModelFitMethod
 
@@ -127,34 +126,6 @@ class TestSpecletTwoModifications:
     @pytest.mark.parametrize("name", model_names)
     def test_modify_sp2_model_by_name_nochange(self, sp2_model: SpecletTwo, name: str):
         cli_helpers.modify_model_by_name(sp2_model, name)
-        assert True  # to force code to run
-
-
-class TestSpecletThreeModifications:
-    @pytest.fixture
-    def sp3_model(self, tmp_path: Path) -> SpecletThree:
-        return SpecletThree(
-            name="TEST-MODEL", root_cache_dir=Path(tmp_path), debug=True
-        )
-
-    model_names = [
-        "model",
-        "sp3-model",
-        "SpecletThree-model",
-        "pymc3-Sp3",
-        "pymc3 Speclet2",
-        "pymc3 SpecletThree",
-        "SpecletThree-kras",
-        "SpecletThree-cna",
-        "SpecletThree-gene",
-        "SpecletThree-mutation",
-    ]
-
-    @pytest.mark.parametrize("name", model_names)
-    def test_modify_sp3_model_by_name_nochange(
-        self, sp3_model: SpecletThree, name: str
-    ):
-        cli_helpers.modify_model_by_name(sp3_model, name)
         assert True  # to force code to run
 
 

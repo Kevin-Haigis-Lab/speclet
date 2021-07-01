@@ -31,10 +31,6 @@ sample_models_memory_lookup: ResourceLookupDict[int] = {
         True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 30},
         False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
-    ModelOption.speclet_three: {
-        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 60},
-        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
-    },
     ModelOption.speclet_four: {
         True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 60},
         False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
@@ -78,10 +74,6 @@ sample_models_time_lookup: ResourceLookupDict[td] = {
     ModelOption.speclet_two: {
         True: {ModelFitMethod.ADVI: td(minutes=30), ModelFitMethod.MCMC: td(hours=8)},
         False: {ModelFitMethod.ADVI: td(hours=12), ModelFitMethod.MCMC: td(days=2)},
-    },
-    ModelOption.speclet_three: {
-        True: {ModelFitMethod.ADVI: td(minutes=30), ModelFitMethod.MCMC: td(days=1)},
-        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
     ModelOption.speclet_four: {
         True: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(days=1)},
