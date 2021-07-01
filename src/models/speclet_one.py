@@ -131,7 +131,7 @@ class SpecletOne(SpecletModel):
                 "μ",
                 h[sgrna_idx_shared]
                 + d[sgrna_idx_shared, cellline_idx_shared]
-                + β[cellline_idx_shared]
+                + β[cellline_idx_shared] * copynumber_shared
                 + η[batch_idx_shared],
             )
 
