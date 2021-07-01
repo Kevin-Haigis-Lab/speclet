@@ -108,14 +108,14 @@ def sample_speclet_model(
     speclet_model.build_model()
 
     if sample:
-        if fit_method == ModelFitMethod.advi:
+        if fit_method == ModelFitMethod.ADVI:
             logger.info("Running ADVI fitting method.")
             _ = speclet_model.advi_sample_model(
                 random_seed=random_seed,
                 ignore_cache=ignore_cache,
             )
 
-        elif fit_method == ModelFitMethod.mcmc:
+        elif fit_method == ModelFitMethod.MCMC:
             logger.info("Running MCMC fitting method.")
             _ = speclet_model.mcmc_sample_model(
                 chains=mcmc_chains,

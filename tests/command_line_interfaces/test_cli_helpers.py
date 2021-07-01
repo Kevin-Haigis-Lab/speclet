@@ -38,11 +38,11 @@ def test_extract_fit_method(name: str):
     assume(name.lower() not in [n.value.lower() for n in ModelFitMethod])
     for fit_method in ["ADVI", "advi"]:
         name_mod = name + "_" + fit_method
-        assert cli_helpers.extract_fit_method(name_mod) == ModelFitMethod.advi
+        assert cli_helpers.extract_fit_method(name_mod) == ModelFitMethod.ADVI
 
     for fit_method in ["MCMC", "mcmc"]:
         name_mod = name + "_" + "mcmc"
-        assert cli_helpers.extract_fit_method(name_mod) == ModelFitMethod.mcmc
+        assert cli_helpers.extract_fit_method(name_mod) == ModelFitMethod.MCMC
 
 
 #### ---- Modifying models ---- ####

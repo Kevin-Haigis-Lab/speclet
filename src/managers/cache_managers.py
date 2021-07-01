@@ -13,6 +13,7 @@ from pydantic import BaseModel
 
 from src.loggers import logger
 from src.modeling import pymc3_sampling_api as pmapi
+from src.project_enums import ModelFitMethod, assert_never
 
 
 class ModelComponentCachePaths(BaseModel):
@@ -65,17 +66,10 @@ class Pymc3CacheManager:
     def get_cache_file_names(self) -> ModelComponentCachePaths:
         """Generate standard caching file paths.
 
-        Raises:
-            ValueError: Thrown if `self.cache_dir` is None.
-
         Returns:
             ModelComponentCachePaths: Object containing the paths to use for caching
               various results from fitting a model.
         """
-        if self.cache_dir is None:
-            raise ValueError(
-                "Cannot generate caching directory when `cache_dir` is None."
-            )
         trace_dir_path = self.cache_dir / "pm-trace"
         prior_file_path = self.cache_dir / "prior-predictive-check.pkl"
         post_file_path = self.cache_dir / "posterior-predictive-check.pkl"
@@ -150,19 +144,19 @@ class Pymc3CacheManager:
                 res.trace, directory=cache_paths.trace_path.as_posix(), overwrite=True
             )
 
-    def cache_exists(self, method: str) -> bool:
+    def cache_exists(self, method: ModelFitMethod) -> bool:
         """Confirm that the cached sampling/fitting results exist.
 
         This method checks for each pickle file and the trace directory (if applicable).
 
         Args:
-            method (str): Which cache to look for (either "mcmc" or "approx").
+            method (ModelFitMethod): Which cache to look for.
 
         Returns:
             bool: Does the cache exist?
 
         Raises:
-            ValueError: If the passed method is not an acceptable option.
+            UnsupportedFitMethod: If the passed method is not an acceptable option.
         """
         cache_paths = self.get_cache_file_names()
         if (
@@ -171,12 +165,12 @@ class Pymc3CacheManager:
         ):
             return False
 
-        if method == "mcmc":
+        if method is ModelFitMethod.MCMC:
             return cache_paths.trace_path.exists()
-        elif method == "approx":
+        elif method is ModelFitMethod.ADVI:
             return cache_paths.approximation_path.exists()
         else:
-            raise ValueError(f"Unknown method '{method}'.")
+            assert_never(method)
 
     def clear_cache(self) -> bool:
         """Remove the cache directory.
@@ -208,17 +202,10 @@ class ArvizCacheManager:
     def get_cache_file_names(self) -> ArvizCachePaths:
         """Generate standard caching file paths.
 
-        Raises:
-            ValueError: Thrown if `self.cache_dir` is None.
-
         Returns:
             ArvizCachePaths: Object containing the paths to use for caching the ArviZ
               InferenceObject and approximation object.
         """
-        if self.cache_dir is None:
-            raise ValueError(
-                "Cannot generate caching directory when `cache_dir` is None."
-            )
         inference_data_file_path = self.cache_dir / "inference-data.nc"
         approx_file_path = self.cache_dir / "vi-approximation.pkl"
         return ArvizCachePaths(
@@ -251,14 +238,11 @@ class ArvizCacheManager:
             )
             _write_pickle(approximation, cache_paths.approximation_path)
 
-    def cache_exists(self, method: str) -> bool:
+    def cache_exists(self, method: ModelFitMethod) -> bool:
         """Confirm that the cached sampling/fitting results exist.
 
         Args:
-            method (str): Which cache to look for (either "mcmc" or "approx").
-
-        Raises:
-            ValueError: If the passed method is not an acceptable option.
+            method (ModelFitMethod): Which cache to look for.
 
         Returns:
             bool: Does the cache exist?
@@ -267,17 +251,17 @@ class ArvizCacheManager:
         if not cache_paths.inference_data_path.exists():
             return False
 
-        if method == "mcmc":
-            # Nothing implemented at the moment.
+        if method is ModelFitMethod.MCMC:
+            # Nothing special to add.
             logger.info("ArvizCacheManager: MCMC cache exists.")
-            return True
-        elif method == "approx":
-            if cache_paths.approximation_path.exists():
-                logger.info("ArvizCacheManager: ADVI cache exists.")
-                return True
-            return False
+        elif method is ModelFitMethod.ADVI:
+            if not cache_paths.approximation_path.exists():
+                return False
+            logger.info("ArvizCacheManager: ADVI cache exists.")
         else:
-            raise ValueError(f"Unknown method '{method}'.")
+            assert_never(method)
+
+        return True
 
     def read_cached_sampling(self, check_exists: bool = True) -> az.InferenceData:
         """Read sampling from cache.
@@ -296,7 +280,7 @@ class ArvizCacheManager:
         logger.debug("Reading sampling cache from file.")
         cache_paths = self.get_cache_file_names()
         if check_exists:
-            if not self.cache_exists(method="mcmc"):
+            if not self.cache_exists(method=ModelFitMethod.MCMC):
                 raise FileNotFoundError("Cannot locate cached data.")
         return az.from_netcdf(cache_paths.inference_data_path.as_posix())
 
@@ -319,7 +303,7 @@ class ArvizCacheManager:
         logger.debug("Reading approximation cache from file.")
         cache_paths = self.get_cache_file_names()
         if check_exists:
-            if not self.cache_exists(method="approx"):
+            if not self.cache_exists(method=ModelFitMethod.ADVI):
                 raise FileNotFoundError("Cannot locate cached data.")
         inf_data = self.read_cached_sampling(check_exists=False)
         approx = _get_pickle(cache_paths.approximation_path)

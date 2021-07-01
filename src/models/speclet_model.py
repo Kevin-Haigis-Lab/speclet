@@ -468,9 +468,9 @@ class SpecletModel:
         # Update shared variable with adjusted observed data.
         self.update_observed_data(mock_data[self.observed_var_name].values)
 
-        if fit_method == ModelFitMethod.advi:
+        if fit_method == ModelFitMethod.ADVI:
             res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
-        elif fit_method == ModelFitMethod.mcmc:
+        elif fit_method == ModelFitMethod.MCMC:
             res = self.mcmc_sample_model(random_seed=random_seed, **fit_kwargs)
         else:
             raise ValueError(f"Unknown fit method '{fit_method}'.")

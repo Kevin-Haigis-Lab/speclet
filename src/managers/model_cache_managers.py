@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from src.io import cache_io
 from src.managers.cache_managers import ArvizCacheManager
+from src.project_enums import ModelFitMethod
 
 
 class ModelCachePaths(BaseModel):
@@ -97,7 +98,7 @@ class Pymc3ModelCacheManager:
         Returns:
             bool: Does the cache exist?
         """
-        return self.mcmc_cache_delegate.cache_exists(method="mcmc")
+        return self.mcmc_cache_delegate.cache_exists(method=ModelFitMethod.MCMC)
 
     def advi_cache_exists(self) -> bool:
         """Confirm that a cache of ADVI fitting results exists.
@@ -105,7 +106,7 @@ class Pymc3ModelCacheManager:
         Returns:
             bool: Does the cache exist?
         """
-        return self.advi_cache_delegate.cache_exists(method="approx")
+        return self.advi_cache_delegate.cache_exists(method=ModelFitMethod.ADVI)
 
     def clear_mcmc_cache(self) -> None:
         """Clear the MCMC cache."""

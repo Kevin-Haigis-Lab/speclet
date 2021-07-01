@@ -98,7 +98,7 @@ class TestSpecletSix:
             avg = mod_df.query(f"hugo_symbol == '{gene}'")["copy_number_gene"].mean()
             assert avg == pytest.approx(0.0, abs=0.001)
 
-    @given(st.lists(st.booleans()))
+    @given(st.lists(st.booleans(), max_size=100))
     def test_converting_is_mutated_column(self, is_mutated: List[bool]):
         df = pd.DataFrame({"is_mutated": is_mutated})
         mod_df = speclet_six.convert_is_mutated_to_numeric(df)
