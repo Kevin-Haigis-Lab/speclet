@@ -43,3 +43,19 @@ class NoDirectorySpecified(Exception):
     """No directory is specified when one is required."""
 
     pass
+
+
+class ResourceRequestUnkown(NotImplementedError):
+    """Exception raised when a resource request cannot be fullfilled."""
+
+    def __init__(self, resource: str, id: str) -> None:
+        """Create a ResourceRequestUnkown instance.
+
+        Args:
+            resource (str): Resource being requested.
+            id (str): Some name to help identify the source of the problem.
+        """
+        self.resource = resource
+        self.id = id
+        self.message = f"Unknown {self.resource} for '{self.id}'"
+        super().__init__(self.message)

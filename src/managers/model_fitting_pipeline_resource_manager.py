@@ -5,6 +5,7 @@ from typing import Dict, TypeVar
 
 from pydantic import validate_arguments
 
+from src.exceptions import ResourceRequestUnkown
 from src.pipelines.pipeline_classes import ModelOption, SlurmPartitions
 from src.project_enums import ModelFitMethod
 
@@ -101,12 +102,6 @@ sample_models_time_lookup: ResourceLookupDict[td] = {
 }
 
 
-class ResourceRequestUnkown(NotImplementedError):
-    """Exception raised when a resource request cannot be fullfilled."""
-
-    pass
-
-
 class ModelFittingPipelineResourceManager:
     """Resource manager for the pipeline to fit models on O2."""
 
@@ -141,12 +136,7 @@ class ModelFittingPipelineResourceManager:
         Returns:
             str: Amount of RAM required.
         """
-        try:
-            return self._retrieve_memory_requirement()
-        except Exception:
-            raise ResourceRequestUnkown(
-                f"Unable to request memory from '{self.model.value}'."
-            )
+        return self._retrieve_memory_requirement()
 
     @property
     def time(self) -> str:
@@ -155,13 +145,8 @@ class ModelFittingPipelineResourceManager:
         Returns:
             str: Amount of time required.
         """
-        try:
-            duration = self._retrieve_time_requirement()
-            return self._format_duration_for_slurm(duration)
-        except Exception:
-            raise ResourceRequestUnkown(
-                f"No time known for model '{self.model.value}'."
-            )
+        duration = self._retrieve_time_requirement()
+        return self._format_duration_for_slurm(duration)
 
     @property
     def partition(self) -> str:
@@ -183,12 +168,17 @@ class ModelFittingPipelineResourceManager:
             return SlurmPartitions.long
 
     def _retrieve_memory_requirement(self) -> str:
-        return str(
-            sample_models_memory_lookup[self.model][self.debug][self.fit_method] * 1000
-        )
+        try:
+            mem = sample_models_memory_lookup[self.model][self.debug][self.fit_method]
+            return str(mem * 1000)
+        except KeyError as err:
+            raise ResourceRequestUnkown("memory", err.args[0])
 
     def _retrieve_time_requirement(self) -> td:
-        return sample_models_time_lookup[self.model][self.debug][self.fit_method]
+        try:
+            return sample_models_time_lookup[self.model][self.debug][self.fit_method]
+        except KeyError as err:
+            raise ResourceRequestUnkown("time", err.args[0])
 
     def _format_duration_for_slurm(self, duration: td) -> str:
         return str(duration).replace(" day, ", "-").replace(" days, ", "-")
