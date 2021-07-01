@@ -1,14 +1,26 @@
 from pathlib import Path
+from random import choices
+from typing import List
 
-import numpy as np
 import pytest
 
 from src.managers.model_data_managers import CrcDataManager
-from src.models.speclet_four import SpecletFour
+from src.modeling import pymc3_helpers as pmhelp
+from src.models.speclet_four import SpecletFour, SpecletFourParameterization
+from src.project_enums import ModelParameterization as MP
 
 
 def monkey_get_data_path(*args, **kwargs) -> Path:
     return Path("tests", "depmap_test_data.csv")
+
+
+_params: List[MP] = [MP.CENTERED, MP.NONCENTERED]
+_random_MP_idx: List[List[int]] = [choices((0, 1), k=4) for _ in range(3)]
+
+model_parameterizations: List[SpecletFourParameterization] = [
+    SpecletFourParameterization(_params[h], _params[d], _params[beta], _params[eta])
+    for h, d, beta, eta in _random_MP_idx
+]
 
 
 class TestSpecletFour:
@@ -54,56 +66,62 @@ class TestSpecletFour:
         )
         assert sp_four.mcmc_results is not None
 
+    @pytest.mark.parametrize("copy_cov", [True, False])
     def test_switching_copynumber_covariate(
-        self, tmp_path: Path, data_manager: CrcDataManager
+        self, tmp_path: Path, data_manager: CrcDataManager, copy_cov: bool
     ):
         sp_four = SpecletFour(
             "test-model",
             root_cache_dir=tmp_path,
             debug=True,
             data_manager=data_manager,
-            copy_number_cov=False,
-            noncentered_param=False,
+            copy_number_cov=copy_cov,
         )
         assert sp_four.model is None
         sp_four.build_model()
         assert sp_four.model is not None
         rv_names = [v.name for v in sp_four.model.free_RVs]
-        assert np.sum(np.array(rv_names) == "β") == 0
+        rv_names += [v.name for v in sp_four.model.unobserved_RVs]
+        assert ("β" in set(rv_names)) == copy_cov
 
-        sp_four.copy_number_cov = True
+        sp_four.copy_number_cov = not copy_cov
         assert sp_four.model is None
         sp_four.build_model()
         assert sp_four.model is not None
         rv_names = [v.name for v in sp_four.model.free_RVs]
-        assert any([v == "β" for v in rv_names])
+        rv_names += [v.name for v in sp_four.model.unobserved_RVs]
+        assert ("β" in set(rv_names)) != copy_cov
 
-        sp_four.noncentered_param = True
-        assert sp_four.model is None
-        sp_four.build_model()
-        assert sp_four.model is not None
-        rv_names = [v.name for v in sp_four.model.free_RVs]
-        assert any([v == "β_offset" for v in rv_names])
-
-    def test_switching_noncentered_parameterization(
-        self, tmp_path: Path, data_manager: CrcDataManager
+    @pytest.mark.DEV
+    @pytest.mark.parametrize("copy_cov", [True, False])
+    @pytest.mark.parametrize("model_param", model_parameterizations)
+    def test_model_parameterizations(
+        self,
+        tmp_path: Path,
+        data_manager: CrcDataManager,
+        copy_cov: bool,
+        model_param: SpecletFourParameterization,
     ):
         sp_four = SpecletFour(
             "test-model",
             root_cache_dir=tmp_path,
             debug=True,
             data_manager=data_manager,
-            noncentered_param=False,
+            copy_number_cov=copy_cov,
+            parameterization=model_param,
         )
         assert sp_four.model is None
         sp_four.build_model()
         assert sp_four.model is not None
-        rv_names = [v.name for v in sp_four.model.free_RVs]
-        assert not any(["offset" in n for n in rv_names])
 
-        sp_four.noncentered_param = True
-        assert sp_four.model is None
-        sp_four.build_model()
-        assert sp_four.model is not None
-        rv_names = [v.name for v in sp_four.model.free_RVs]
-        assert any(["offset" in n for n in rv_names])
+        rv_names = pmhelp.get_random_variable_names(sp_four.model)
+        unobs_names = pmhelp.get_deterministic_variable_names(sp_four.model)
+        all_var_names = rv_names + unobs_names
+
+        assert ("β" in set(all_var_names)) == copy_cov
+
+        for param_name, param_method in zip(model_param._fields, model_param):
+            if param_name == "β":
+                continue
+            assert (param_name in set(rv_names)) == (param_method is MP.CENTERED)
+            assert (param_name in set(unobs_names)) == (param_method is MP.NONCENTERED)

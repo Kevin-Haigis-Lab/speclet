@@ -11,6 +11,13 @@ class ModelFitMethod(str, Enum):
     MCMC = "MCMC"
 
 
+class ModelParameterization(Enum):
+    """Possible model parameterization methods."""
+
+    CENTERED = "centered"
+    NONCENTERED = "noncentered"
+
+
 #### ---- Exhaustiveness checks ---- ####
 
 
