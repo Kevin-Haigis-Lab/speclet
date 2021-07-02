@@ -1,10 +1,19 @@
 from pathlib import Path
+from typing import List
 
 import pytest
 
 from src.managers.model_data_managers import CrcDataManager
+from src.misc.test_helpers import generate_model_parameterizations
 from src.modeling import pymc3_helpers as pmhelp
-from src.models.speclet_seven import SpecletSeven
+from src.models.speclet_seven import SpecletSeven, SpecletSevenParameterization
+from src.project_enums import ModelParameterization as MP
+
+model_parameterizations: List[
+    SpecletSevenParameterization
+] = generate_model_parameterizations(
+    param_class=SpecletSevenParameterization, n_randoms=10
+)
 
 
 @pytest.fixture(autouse=True)
@@ -26,22 +35,11 @@ class TestSpecletSeven:
         assert sp7.advi_results is None
         assert sp7.data_manager is not None
 
-    @pytest.mark.parametrize("noncentered_param", [True, False])
-    def test_build_model_spec(self, sp7: SpecletSeven, noncentered_param: bool):
-        sp7.noncentered_param = noncentered_param
-        sp7.build_model()
-        assert sp7.model is not None
-        includes_offset = ["offset" in v for v in pmhelp.get_variable_names(sp7.model)]
-        assert any(includes_offset) == noncentered_param
-
     top_priors = ["μ_μ_μ_a", "σ_μ_μ_a", "σ_σ_μ_a", "σ_σ_a", "σ"]
 
+    @pytest.mark.slow
     @pytest.mark.parametrize("fit_method", ["mcmc", "advi"])
-    @pytest.mark.parametrize("noncentered_param", [True, False])
-    def test_mcmc_sampling(
-        self, sp7: SpecletSeven, fit_method: str, noncentered_param: bool
-    ):
-        sp7.noncentered_param = noncentered_param
+    def test_model_fitting(self, sp7: SpecletSeven, fit_method: str):
         sp7.build_model()
         assert sp7.model is not None
 
@@ -68,6 +66,32 @@ class TestSpecletSeven:
                 post_pred_samples=10,
                 ignore_cache=True,
             )
+            assert sp7.mcmc_results is None
+            assert sp7.advi_results is not None
 
         for p in self.top_priors:
             assert fit_res.posterior[p].shape == (n_chains, n_draws)
+
+    @pytest.mark.parametrize("model_param", model_parameterizations)
+    def test_model_parameterizations(
+        self,
+        tmp_path: Path,
+        model_param: SpecletSevenParameterization,
+    ):
+        sp7 = SpecletSeven(
+            "test-model",
+            root_cache_dir=tmp_path,
+            debug=True,
+            data_manager=CrcDataManager(),
+            parameterization=model_param,
+        )
+        assert sp7.model is None
+        sp7.build_model()
+        assert sp7.model is not None
+
+        rv_names = pmhelp.get_random_variable_names(sp7.model)
+        unobs_names = pmhelp.get_deterministic_variable_names(sp7.model)
+
+        for param_name, param_method in zip(model_param._fields, model_param):
+            assert (param_name in set(rv_names)) == (param_method is MP.CENTERED)
+            assert (param_name in set(unobs_names)) == (param_method is MP.NONCENTERED)

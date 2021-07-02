@@ -172,4 +172,3 @@ def modify_specletseven_model_by_name(model: SpecletSeven, name: str) -> None:
         name (str): User-provided name.
     """
     logger.info(f"Modifying SpecletSeven model based on the name: '{name}'.")
-    model.noncentered_param = "noncentered" in name

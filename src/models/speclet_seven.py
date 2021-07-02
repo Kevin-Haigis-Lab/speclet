@@ -1,7 +1,7 @@
 """Speclet Model Six."""
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import NamedTuple, Optional, Tuple
 
 import pymc3 as pm
 from theano import shared as ts
@@ -12,6 +12,15 @@ from src.data_processing import achilles as achelp
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
 from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.project_enums import ModelParameterization as MP
+
+
+class SpecletSevenParameterization(NamedTuple):
+    """Parameterizations for each covariate in SpecletSeven model."""
+
+    a: MP = MP.CENTERED
+    μ_a: MP = MP.CENTERED
+    μ_μ_a: MP = MP.CENTERED
 
 
 class SpecletSeven(SpecletModel):
@@ -55,7 +64,7 @@ class SpecletSeven(SpecletModel):
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
-        noncentered_param: bool = False,
+        parameterization: SpecletSevenParameterization = SpecletSevenParameterization(),
     ) -> None:
         """Instantiate a SpecletSeven model.
 
@@ -69,11 +78,15 @@ class SpecletSeven(SpecletModel):
               data. If None (default), a `CrcDataManager` is created automatically.
             noncentered_param (bool, optional): Use the non-centered parameterization.
               Defaults to False.
+            parameterization (SpecletFiveParameterization, optional): Covariate-specific
+              parameterization options.
         """
         logger.debug("Instantiating a SpecletSeven model.")
         if data_manager is None:
             logger.debug("Creating a data manager since none was supplied.")
             data_manager = CrcDataManager(debug=debug)
+
+        self.parameterization = parameterization
 
         super().__init__(
             name="speclet-six_" + name,
@@ -82,100 +95,83 @@ class SpecletSeven(SpecletModel):
             data_manager=data_manager,
         )
 
-        self._noncentered_param = noncentered_param
-
-    @property
-    def noncentered_param(self) -> bool:
-        """Whether to use the non-centered parameterization for the model.
-
-        Returns:
-            bool: True if using the non-centered parameterization.
-        """
-        return self._noncentered_param
-
-    @noncentered_param.setter
-    def noncentered_param(self, new_value: bool) -> None:
-        """Decide whether to use the non-centered parameterization for the model.
-
-        Args:
-            new_value (bool): True to use the non-centered parameterization.
-        """
-        if self._noncentered_param != new_value:
-            logger.info("Changing `noncentered_param` to `{new_value}`.")
-            self._noncentered_param = new_value
-            self._reset_model_and_results()
-
-    def _base_model(self, model: pm.Model, co_idx: achelp.CommonIndices):
-        with model:
-            μ_μ_μ_a = pm.Normal("μ_μ_μ_a", 0, 2)  # noqa: F841
-            σ_μ_μ_a = pm.HalfNormal("σ_μ_μ_a", 2)  # noqa: F841
+    def _model_specification(
+        self,
+        co_idx: achelp.CommonIndices,
+        sgrna_idx_shared: TTShared,
+        sgrna_to_gene_idx_shared: TTShared,
+        cellline_idx_shared: TTShared,
+        cellline_to_lineage_idx_shared: TTShared,
+        lfc_shared: TTShared,
+        total_size: int,
+    ) -> Tuple[pm.Model, str]:
+        _mu_a_shape = (co_idx.n_genes, co_idx.n_celllines)
+        with pm.Model() as model:
+            μ_μ_μ_a = pm.Normal("μ_μ_μ_a", 0, 2)
+            σ_μ_μ_a = pm.HalfNormal("σ_μ_μ_a", 2)
 
             σ_σ_μ_a = pm.HalfNormal("σ_σ_μ_a", 1)
-            σ_μ_a = pm.HalfNormal(  # noqa: F841
-                "σ_μ_a", σ_σ_μ_a, shape=(1, co_idx.n_celllines)
-            )
+            σ_μ_a = pm.HalfNormal("σ_μ_a", σ_σ_μ_a, shape=(1, co_idx.n_celllines))
 
             σ_σ_a = pm.HalfNormal("σ_σ_a", 1)
-            σ_a = pm.HalfNormal("σ_a", σ_σ_a, shape=(co_idx.n_sgrnas, 1))  # noqa: F841
+            σ_a = pm.HalfNormal("σ_a", σ_σ_a, shape=(co_idx.n_sgrnas, 1))
 
-    def _noncentered_model_parameterization(
-        self,
-        model: pm.Model,
-        co_idx: achelp.CommonIndices,
-        cellline_to_lineage_idx_shared: TTShared,
-        sgrna_to_gene_idx_shared: TTShared,
-    ) -> None:
-        with model:
-            μ_μ_a_offset = pm.Normal(
-                "μ_μ_a_offset", 0, 1.0, shape=(co_idx.n_genes, co_idx.n_lineages)
-            )
-            μ_μ_a = pm.Deterministic(
-                "μ_μ_a", model["μ_μ_μ_a"] + μ_μ_a_offset * model["σ_μ_μ_a"]
+            if self.parameterization.μ_μ_a is MP.NONCENTERED:
+                μ_μ_a_offset = pm.Normal(
+                    "μ_μ_a_offset", 0, 1.0, shape=(co_idx.n_genes, co_idx.n_lineages)
+                )
+                μ_μ_a = pm.Deterministic("μ_μ_a", μ_μ_μ_a + μ_μ_a_offset * σ_μ_μ_a)
+            else:
+                μ_μ_a = pm.Normal(
+                    "μ_μ_a",
+                    μ_μ_μ_a,
+                    σ_μ_μ_a,
+                    shape=(co_idx.n_genes, co_idx.n_lineages),
+                )
+
+            if self.parameterization.μ_a is MP.NONCENTERED:
+                μ_a_offset = pm.Normal("μ_a_offset", 0, 1.0, shape=_mu_a_shape)
+                μ_a = pm.Deterministic(
+                    "μ_a",
+                    μ_μ_a[:, cellline_to_lineage_idx_shared] + μ_a_offset * σ_μ_a,
+                )
+            else:
+                μ_a = pm.Normal(
+                    "μ_a",
+                    μ_μ_a[:, cellline_to_lineage_idx_shared],
+                    tensor.ones(shape=_mu_a_shape) * σ_μ_a,
+                    shape=_mu_a_shape,
+                )
+
+            if self.parameterization.a is MP.NONCENTERED:
+                a_offset = pm.Normal(
+                    "a_offset", 0, 1.0, shape=(co_idx.n_sgrnas, co_idx.n_celllines)
+                )
+                a = pm.Deterministic(
+                    "a", μ_a[sgrna_to_gene_idx_shared, :] + a_offset * σ_a
+                )
+            else:
+                a = pm.Normal(
+                    "a",
+                    μ_a[sgrna_to_gene_idx_shared, :],
+                    σ_a,
+                    shape=(co_idx.n_sgrnas, co_idx.n_celllines),
+                )
+
+            μ = pm.Deterministic("μ", a[sgrna_idx_shared, cellline_idx_shared])
+
+            # Standard deviation of log-fold change.
+            σ = pm.HalfNormal("σ", 1)
+
+            lfc = pm.Normal(  # noqa: F841
+                "lfc",
+                μ,
+                σ,
+                observed=lfc_shared,
+                total_size=total_size,
             )
 
-            μ_a_offset = pm.Normal(
-                "μ_a_offset", 0, 1.0, shape=(co_idx.n_genes, co_idx.n_celllines)
-            )
-            μ_a = pm.Deterministic(
-                "μ_a",
-                μ_μ_a[:, cellline_to_lineage_idx_shared] + μ_a_offset * model["σ_μ_a"],
-            )
-            a_offset = pm.Normal(
-                "a_offset", 0, 1.0, shape=(co_idx.n_sgrnas, co_idx.n_celllines)
-            )
-            a = pm.Deterministic(  # noqa: F841
-                "a", μ_a[sgrna_to_gene_idx_shared, :] + a_offset * model["σ_a"]
-            )
-
-    def _centered_model_parameterization(
-        self,
-        model: pm.Model,
-        co_idx: achelp.CommonIndices,
-        cellline_to_lineage_idx_shared: TTShared,
-        sgrna_to_gene_idx_shared: TTShared,
-    ) -> None:
-        _mu_a_shape = (co_idx.n_genes, co_idx.n_celllines)
-        with model:
-            μ_μ_a = pm.Normal(
-                "μ_μ_a",
-                model["μ_μ_μ_a"],
-                model["σ_μ_μ_a"],
-                shape=(co_idx.n_genes, co_idx.n_lineages),
-            )
-
-            μ_a = pm.Normal(
-                "μ_a",
-                μ_μ_a[:, cellline_to_lineage_idx_shared],
-                tensor.ones(shape=_mu_a_shape) * model["σ_μ_a"],
-                shape=_mu_a_shape,
-            )
-
-            a = pm.Normal(  # noqa: F841
-                "a",
-                μ_a[sgrna_to_gene_idx_shared, :],
-                model["σ_a"],
-                shape=(co_idx.n_sgrnas, co_idx.n_celllines),
-            )
+        return model, "lfc"
 
     def model_specification(self) -> Tuple[pm.Model, str]:
         """Build SpecletSeven model.
@@ -206,37 +202,17 @@ class SpecletSeven(SpecletModel):
         }
 
         logger.info("Creating PyMC3 model for SpecletSeven.")
-
-        model = pm.Model()
-        self._base_model(model, co_idx=co_idx)
-        _params = {
-            "model": model,
-            "co_idx": co_idx,
-            "cellline_to_lineage_idx_shared": cellline_to_lineage_idx_shared,
-            "sgrna_to_gene_idx_shared": sgrna_to_gene_idx_shared,
-        }
-        if self.noncentered_param:
-            self._noncentered_model_parameterization(**_params)
-        else:
-            self._centered_model_parameterization(**_params)
-
-        with model:
-            μ = pm.Deterministic("μ", model["a"][sgrna_idx_shared, cellline_idx_shared])
-
-            # Standard deviation of log-fold change, varies per batch.
-            σ = pm.HalfNormal("σ", 1)
-
-            lfc = pm.Normal(  # noqa: F841
-                "lfc",
-                μ,
-                σ,
-                observed=lfc_shared,
-                total_size=total_size,
-            )
-
+        model, obs_var_name = self._model_specification(
+            co_idx=co_idx,
+            sgrna_idx_shared=sgrna_idx_shared,
+            sgrna_to_gene_idx_shared=sgrna_to_gene_idx_shared,
+            cellline_idx_shared=cellline_idx_shared,
+            cellline_to_lineage_idx_shared=cellline_to_lineage_idx_shared,
+            lfc_shared=lfc_shared,
+            total_size=total_size,
+        )
         logger.debug("Finished building model.")
-
-        return model, "lfc"
+        return model, obs_var_name
 
     def get_replacement_parameters(self) -> ReplacementsDict:
         """Make a dictionary mapping the shared data variables to new data.

@@ -7,6 +7,7 @@ from typing import List, Optional, Tuple, Type, TypeVar
 
 from src.models.speclet_five import SpecletFiveParameterization
 from src.models.speclet_four import SpecletFourParameterization
+from src.models.speclet_seven import SpecletSevenParameterization
 from src.models.speclet_six import SpecletSixParameterization
 from src.project_enums import ModelParameterization as MP
 
@@ -15,6 +16,7 @@ _ParameterizationT = TypeVar(
     SpecletFourParameterization,
     SpecletFiveParameterization,
     SpecletSixParameterization,
+    SpecletSevenParameterization,
 )
 
 _param_options: List[MP] = [MP.CENTERED, MP.NONCENTERED]
