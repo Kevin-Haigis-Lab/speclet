@@ -1,6 +1,6 @@
 from pathlib import Path
 from string import ascii_letters
-from typing import List
+from typing import Any, List, Set
 
 import numpy as np
 import pandas as pd
@@ -10,14 +10,23 @@ from hypothesis import strategies as st
 
 from src.data_processing import achilles as achelp
 from src.managers.model_data_managers import CrcDataManager
-from src.modeling.pymc3_helpers import get_variable_names
+from src.misc.test_helpers import generate_model_parameterizations
+from src.modeling import pymc3_helpers as pmhelp
 from src.models import speclet_six
-from src.models.speclet_six import SpecletSix
+from src.models.speclet_six import SpecletSix, SpecletSixParameterization
+from src.project_enums import ModelParameterization as MP
+
+model_parameterizations: List[
+    SpecletSixParameterization
+] = generate_model_parameterizations(
+    param_class=SpecletSixParameterization, n_randoms=10
+)
+
 
 chars = [str(i) for i in range(10)] + list(ascii_letters)
 
 
-def monkey_get_data_path(*args, **kwargs) -> Path:
+def monkey_get_data_path(*args: Any, **kwargs: Any) -> Path:
     return Path("tests", "depmap_test_data.csv")
 
 
@@ -125,7 +134,7 @@ class TestSpecletSix:
         )
         sp6.build_model()
         assert sp6.model is not None
-        model_vars = get_variable_names(sp6.model, rm_log=True)
+        model_vars = pmhelp.get_variable_names(sp6.model, rm_log=True)
         for expected_v in ["μ_μ_d", "σ_μ_d", "μ_d_offset", "σ_σ_d"]:
             assert expected_v in model_vars
 
@@ -145,88 +154,45 @@ class TestSpecletSix:
 
         sp6.build_model()
         assert sp6.model is not None
-        model_vars = get_variable_names(sp6.model, rm_log=True)
+        model_vars = pmhelp.get_variable_names(sp6.model, rm_log=True)
         for var in multi_screen_vars:
             assert var not in model_vars
 
         make_data_multiple_screens(dm=data_manager)
         sp6.build_model()
         assert sp6.model is not None
-        model_vars = get_variable_names(sp6.model, rm_log=True)
+        model_vars = pmhelp.get_variable_names(sp6.model, rm_log=True)
         for var in multi_screen_vars:
             assert var in model_vars
 
+    @pytest.mark.parametrize(
+        "arg_name, expected_vars",
+        [
+            ("cell_line_cna_cov", {"μ_k", "σ_k", "k"}),
+            ("gene_cna_cov", {"μ_n", "σ_n", "n"}),
+            ("rna_cov", {"μ_q", "σ_q", "q"}),
+            ("mutation_cov", {"μ_m", "σ_m", "m"}),
+        ],
+    )
+    @pytest.mark.parametrize("arg_value", [True, False])
     def test_model_with_optional_cellline_cn_covariate(
-        self, tmp_path: Path, data_manager: CrcDataManager
+        self,
+        tmp_path: Path,
+        data_manager: CrcDataManager,
+        arg_name: str,
+        arg_value: bool,
+        expected_vars: Set[str],
     ):
         sp6 = SpecletSix(
             "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
         )
-
-        expected_vars = set(["μ_k", "σ_k", "k_offset", "k"])
-
-        for with_cell_line_cov in [False, True]:
-            sp6.cell_line_cna_cov = with_cell_line_cov
-            assert sp6.model is None
-            sp6.build_model()
-            assert sp6.model is not None
-            model_vars = get_variable_names(sp6.model, rm_log=True)
-            for v in expected_vars:
-                assert (v in model_vars) == with_cell_line_cov
-
-    def test_model_with_optional_gene_cn_covariate(
-        self, tmp_path: Path, data_manager: CrcDataManager
-    ):
-        sp6 = SpecletSix(
-            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
-        )
-
-        expected_vars = set(["μ_n", "σ_n", "n_offset", "n"])
-
-        for with_gene_cov in [False, True]:
-            sp6.gene_cna_cov = with_gene_cov
-            assert sp6.model is None
-            sp6.build_model()
-            assert sp6.model is not None
-            model_vars = get_variable_names(sp6.model, rm_log=True)
-            for v in expected_vars:
-                assert (v in model_vars) == with_gene_cov
-
-    def test_model_with_optional_gene_lineage_rna_covariate(
-        self, tmp_path: Path, data_manager: CrcDataManager
-    ):
-        sp6 = SpecletSix(
-            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
-        )
-
-        expected_vars = set(["μ_q", "σ_q", "q_offset", "q"])
-
-        for with_rna_cov in [False, True]:
-            sp6.rna_cov = with_rna_cov
-            assert sp6.model is None
-            sp6.build_model()
-            assert sp6.model is not None
-            model_vars = get_variable_names(sp6.model, rm_log=True)
-            for v in expected_vars:
-                assert (v in model_vars) == with_rna_cov
-
-    def test_model_with_optional_gene_lineage_mutation_covariate(
-        self, tmp_path: Path, data_manager: CrcDataManager
-    ):
-        sp6 = SpecletSix(
-            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
-        )
-
-        expected_vars = set(["μ_m", "σ_m", "m_offset", "m"])
-
-        for with_mut_cov in [False, True]:
-            sp6.mutation_cov = with_mut_cov
-            assert sp6.model is None
-            sp6.build_model()
-            assert sp6.model is not None
-            model_vars = get_variable_names(sp6.model, rm_log=True)
-            for v in expected_vars:
-                assert (v in model_vars) == with_mut_cov
+        sp6.__setattr__(arg_name, arg_value)
+        assert sp6.model is None
+        sp6.build_model()
+        assert sp6.model is not None
+        model_vars = pmhelp.get_variable_names(sp6.model, rm_log=True)
+        for v in expected_vars:
+            assert (v in model_vars) == arg_value
 
     @pytest.mark.slow
     def test_mcmc_sampling(self, tmp_path: Path, data_manager: CrcDataManager):
@@ -327,3 +293,32 @@ class TestSpecletSix:
             random_seed=1,
         )
         assert sp6.advi_results is not None
+
+    @pytest.mark.parametrize("model_param", model_parameterizations)
+    def test_model_parameterizations(
+        self,
+        tmp_path: Path,
+        data_manager: CrcDataManager,
+        model_param: SpecletSixParameterization,
+    ):
+        sp6 = SpecletSix(
+            "test-model",
+            root_cache_dir=tmp_path,
+            debug=True,
+            data_manager=data_manager,
+            cell_line_cna_cov=True,
+            gene_cna_cov=True,
+            rna_cov=True,
+            mutation_cov=True,
+            parameterization=model_param,
+        )
+        assert sp6.model is None
+        sp6.build_model()
+        assert sp6.model is not None
+
+        rv_names = pmhelp.get_random_variable_names(sp6.model)
+        unobs_names = pmhelp.get_deterministic_variable_names(sp6.model)
+
+        for param_name, param_method in zip(model_param._fields, model_param):
+            assert (param_name in set(rv_names)) == (param_method is MP.CENTERED)
+            assert (param_name in set(unobs_names)) == (param_method is MP.NONCENTERED)

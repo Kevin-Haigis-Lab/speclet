@@ -1,7 +1,7 @@
 """Speclet Model Six."""
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import NamedTuple, Optional, Tuple
 
 import pandas as pd
 import pymc3 as pm
@@ -12,6 +12,7 @@ from src.data_processing import common as dphelp
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
 from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.project_enums import ModelParameterization as MP
 
 
 def centered_copynumber_by_cellline(df: pd.DataFrame) -> pd.DataFrame:
@@ -83,6 +84,19 @@ def convert_is_mutated_to_numeric(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+class SpecletSixParameterization(NamedTuple):
+    """Parameterizations for each covariate in SpecletSix model."""
+
+    a: MP = MP.CENTERED
+    d: MP = MP.CENTERED
+    h: MP = MP.CENTERED
+    j: MP = MP.CENTERED
+    k: MP = MP.CENTERED
+    n: MP = MP.CENTERED
+    q: MP = MP.CENTERED
+    m: MP = MP.CENTERED
+
+
 class SpecletSix(SpecletModel):
     """SpecletSix Model.
 
@@ -145,6 +159,7 @@ class SpecletSix(SpecletModel):
         gene_cna_cov: bool = False,
         rna_cov: bool = False,
         mutation_cov: bool = False,
+        parameterization: SpecletSixParameterization = SpecletSixParameterization(),
     ) -> None:
         """Instantiate a SpecletSix model.
 
@@ -164,6 +179,8 @@ class SpecletSix(SpecletModel):
               False.
             mutation_cov (bool, optional): Include the mutation covariate? Defaults to
               False.
+            parameterization (SpecletFiveParameterization, optional): Covariate-specific
+              parameterization options.
         """
         logger.debug("Instantiating a SpecletSix model.")
         if data_manager is None:
@@ -179,16 +196,18 @@ class SpecletSix(SpecletModel):
             ]
         )
 
+        self.parameterization = parameterization
+        self._cell_line_cna_cov = cell_line_cna_cov
+        self._gene_cna_cov = gene_cna_cov
+        self._rna_cov = rna_cov
+        self._mutation_cov = mutation_cov
+
         super().__init__(
             name="speclet-six_" + name,
             root_cache_dir=root_cache_dir,
             debug=debug,
             data_manager=data_manager,
         )
-        self._cell_line_cna_cov = cell_line_cna_cov
-        self._gene_cna_cov = gene_cna_cov
-        self._rna_cov = rna_cov
-        self._mutation_cov = mutation_cov
 
     @property
     def cell_line_cna_cov(self) -> bool:
@@ -329,42 +348,58 @@ class SpecletSix(SpecletModel):
 
         logger.info("Creating PyMC3 SpecletSix model.")
 
+        single_screen = b_idx.n_screens == 1
+        single_cell_line_lineage = co_idx.n_lineages == 1
+
         with pm.Model() as model:
             # Varying batch intercept.
-            if b_idx.n_screens == 1:
+            if single_screen:
                 μ_j = pm.Normal("μ_j", 0, 1)
                 σ_j = pm.HalfNormal("σ_j", 1)
-                j_offset = pm.Normal("j_offset", 0, 0.5, shape=b_idx.n_batches)
-                j = pm.Deterministic("j", μ_j + j_offset * σ_j)
             else:
                 μ_μ_j = pm.Normal("μ_μ_j", 0, 0.5)
                 σ_μ_j = pm.HalfNormal("σ_μ_j", 1)
                 σ_σ_j = pm.HalfNormal("σ_σ_j", 1)
-                μ_j_offset = pm.Normal("μ_j_offset", 0, 0.5, shape=b_idx.n_screens)
-                μ_j = pm.Deterministic("μ_j", μ_μ_j + μ_j_offset * σ_μ_j)
+                μ_j = pm.Normal("μ_j", μ_μ_j, σ_μ_j, shape=b_idx.n_screens)
                 σ_j = pm.HalfNormal("σ_j", σ_σ_j, shape=b_idx.n_screens)
+
+            if self.parameterization.j is MP.NONCENTERED:
                 j_offset = pm.Normal("j_offset", 0, 0.5, shape=b_idx.n_batches)
-                j = pm.Deterministic(
-                    "j",
-                    μ_j[batch_to_screen_idx_shared]
-                    + j_offset * σ_j[batch_to_screen_idx_shared],
-                )
+                if single_screen:
+                    j = pm.Deterministic("j", μ_j + j_offset * σ_j)
+                else:
+                    j = pm.Deterministic(
+                        "j",
+                        μ_j[batch_to_screen_idx_shared]
+                        + j_offset * σ_j[batch_to_screen_idx_shared],
+                    )
+            else:
+                if single_screen:
+                    j = pm.Normal("j", μ_j, σ_j, shape=b_idx.n_batches)
+                else:
+                    j = pm.Normal(
+                        "j",
+                        μ_j[batch_to_screen_idx_shared],
+                        σ_j[batch_to_screen_idx_shared],
+                        shape=b_idx.n_batches,
+                    )
 
             # Varying gene and cell line intercept.
             μ_h = pm.Normal("μ_h", 0, 0.5)
             σ_h = pm.HalfNormal("σ_h", 1)
-            h_offset = pm.Normal(
-                "h_offset", 0, 0.5, shape=(co_idx.n_genes, co_idx.n_celllines)
-            )
-            h = pm.Deterministic("h", μ_h + h_offset * σ_h)
+            if self.parameterization.h is MP.NONCENTERED:
+                h_offset = pm.Normal(
+                    "h_offset", 0, 0.5, shape=(co_idx.n_genes, co_idx.n_celllines)
+                )
+                h = pm.Deterministic("h", μ_h + h_offset * σ_h)
+            else:
+                h = pm.Normal("h", μ_h, σ_h, shape=(co_idx.n_genes, co_idx.n_celllines))
 
             # Varying cell line intercept.
-            if co_idx.n_lineages == 1:
+            if single_cell_line_lineage:
                 logger.info("Only 1 cell line lineage found.")
                 μ_d = pm.Normal("μ_d", 0, 0.5)
                 σ_d = pm.HalfNormal("σ_d", 2)
-                d_offset = pm.Normal("d_offset", 0, 0.5, shape=co_idx.n_celllines)
-                d = pm.Deterministic("d", μ_d + d_offset * σ_d)
             else:
                 logger.info(f"Found {co_idx.n_lineages} cell line lineages.")
                 μ_μ_d = pm.Normal("μ_μ_d", 0, 0.5)
@@ -373,12 +408,27 @@ class SpecletSix(SpecletModel):
                 μ_d = pm.Deterministic("μ_d", μ_μ_d + μ_d_offset * σ_μ_d)
                 σ_σ_d = pm.HalfNormal("σ_σ_d", 1)
                 σ_d = pm.HalfNormal("σ_d", σ_σ_d, shape=co_idx.n_lineages)
+
+            if self.parameterization.d is MP.NONCENTERED:
                 d_offset = pm.Normal("d_offset", 0, 0.5, shape=co_idx.n_celllines)
-                d = pm.Deterministic(
-                    "d",
-                    μ_d[cellline_to_lineage_idx_shared]
-                    + d_offset * σ_d[cellline_to_lineage_idx_shared],
-                )
+                if single_cell_line_lineage:
+                    d = pm.Deterministic("d", μ_d + d_offset * σ_d)
+                else:
+                    d = pm.Deterministic(
+                        "d",
+                        μ_d[cellline_to_lineage_idx_shared]
+                        + d_offset * σ_d[cellline_to_lineage_idx_shared],
+                    )
+            else:
+                if single_cell_line_lineage:
+                    d = pm.Normal("d", μ_d, σ_d, shape=co_idx.n_celllines)
+                else:
+                    d = pm.Normal(
+                        "d",
+                        μ_d[cellline_to_lineage_idx_shared],
+                        σ_d[cellline_to_lineage_idx_shared],
+                        shape=co_idx.n_celllines,
+                    )
 
             # Varying gene intercept.
             μ_μ_a = pm.Normal("μ_μ_a", 0, 0.5)
@@ -387,12 +437,21 @@ class SpecletSix(SpecletModel):
             μ_a = pm.Deterministic("μ_a", μ_μ_a + μ_a_offset * σ_μ_a)
             σ_σ_a = pm.HalfNormal("σ_σ_a", 1)
             σ_a = pm.HalfNormal("σ_a", σ_σ_a, shape=co_idx.n_genes)
-            a_offset = pm.Normal("a_offset", 0, 0.5, shape=co_idx.n_sgrnas)
-            a = pm.Deterministic(
-                "a",
-                μ_a[sgrna_to_gene_idx_shared]
-                + a_offset * σ_a[sgrna_to_gene_idx_shared],
-            )
+
+            if self.parameterization.a is MP.NONCENTERED:
+                a_offset = pm.Normal("a_offset", 0, 0.5, shape=co_idx.n_sgrnas)
+                a = pm.Deterministic(
+                    "a",
+                    μ_a[sgrna_to_gene_idx_shared]
+                    + a_offset * σ_a[sgrna_to_gene_idx_shared],
+                )
+            else:
+                a = pm.Normal(
+                    "a",
+                    μ_a[sgrna_to_gene_idx_shared],
+                    σ_a[sgrna_to_gene_idx_shared],
+                    shape=co_idx.n_sgrnas,
+                )
 
             # Global intercept.
             i = pm.Normal("i", 0, 1)
@@ -408,33 +467,53 @@ class SpecletSix(SpecletModel):
             if self.cell_line_cna_cov:
                 μ_k = pm.Normal("μ_k", -0.5, 2)
                 σ_k = pm.HalfNormal("σ_k", 1)
-                k_offset = pm.Normal("k_offset", 0, 1, shape=co_idx.n_celllines)
-                k = pm.Deterministic("k", (μ_k + k_offset * σ_k))
+                if self.parameterization.k is MP.NONCENTERED:
+                    k_offset = pm.Normal("k_offset", 0, 1, shape=co_idx.n_celllines)
+                    k = pm.Deterministic("k", (μ_k + k_offset * σ_k))
+                else:
+                    k = pm.Normal("k", μ_k, σ_k, shape=co_idx.n_celllines)
+
                 _μ += k[cellline_idx_shared] * cellline_cna_shared
 
             if self.gene_cna_cov:
-                μ_q = pm.Normal("μ_n", 0, 2)
-                σ_q = pm.HalfNormal("σ_n", 1)
-                n_offset = pm.Normal("n_offset", 0, 1, shape=co_idx.n_genes)
-                n = pm.Deterministic("n", (μ_q + n_offset * σ_q))
+                μ_n = pm.Normal("μ_n", 0, 2)
+                σ_n = pm.HalfNormal("σ_n", 1)
+                if self.parameterization.n is MP.NONCENTERED:
+                    n_offset = pm.Normal("n_offset", 0, 1, shape=co_idx.n_genes)
+                    n = pm.Deterministic("n", (μ_n + n_offset * σ_n))
+                else:
+                    n = pm.Normal("n", μ_n, σ_n, shape=co_idx.n_genes)
+
                 _μ += n[gene_idx_shared] * gene_cna_shared
 
             if self.rna_cov:
                 μ_q = pm.Normal("μ_q", 0, 2)
                 σ_q = pm.HalfNormal("σ_q", 1)
-                q_offset = pm.Normal(
-                    "q_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
-                )
-                q = pm.Deterministic("q", (μ_q + q_offset * σ_q))
+                if self.parameterization.q is MP.NONCENTERED:
+                    q_offset = pm.Normal(
+                        "q_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
+                    )
+                    q = pm.Deterministic("q", (μ_q + q_offset * σ_q))
+                else:
+                    q = pm.Normal(
+                        "q", μ_q, σ_q, shape=(co_idx.n_genes, co_idx.n_lineages)
+                    )
+
                 _μ += q[gene_idx_shared, lineage_idx_shared] * rna_expr_shared
 
             if self.mutation_cov:
                 μ_m = pm.Normal("μ_m", 0, 2)
                 σ_m = pm.HalfNormal("σ_m", 1)
-                m_offset = pm.Normal(
-                    "m_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
-                )
-                m = pm.Deterministic("m", (μ_m + m_offset * σ_m))
+                if self.parameterization.m is MP.NONCENTERED:
+                    m_offset = pm.Normal(
+                        "m_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
+                    )
+                    m = pm.Deterministic("m", (μ_m + m_offset * σ_m))
+                else:
+                    m = pm.Normal(
+                        "m", μ_m, σ_m, shape=(co_idx.n_genes, co_idx.n_lineages)
+                    )
+
                 _μ += m[gene_idx_shared, lineage_idx_shared] * mutation_shared
 
             μ = pm.Deterministic("μ", _μ)
