@@ -7,7 +7,7 @@ import papermill
 from snakemake.io import Wildcards
 
 from src.project_enums import ModelFitMethod
-from src.pipelines.pipeline_classes import ModelOption, ModelConfig
+from src.pipelines.pipeline_classes import ModelOption, model_config_from_yaml
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
 NUM_SIMULATIONS = 100
@@ -18,12 +18,11 @@ ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
 
 MOCK_DATA_SIZE = "small"
 
-model_configurations: List[ModelConfig] = [
-    ModelConfig(name="SpecletSix-mcmc", model=ModelOption.speclet_six, fit_method=ModelFitMethod.mcmc),
-    ModelConfig(name="SpecletSix-advi", model=ModelOption.speclet_six, fit_method=ModelFitMethod.advi),
-    ModelConfig(name="SpecletSeven-mcmc-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.mcmc),
-    ModelConfig(name="SpecletSeven-advi-noncentered", model=ModelOption.speclet_seven, fit_method=ModelFitMethod.advi),
-]
+
+#### ---- Model Configurations ---- ####
+
+MODEL_CONFIG = Path("pipelines", "model-configurations.yaml")
+model_configurations = model_config_from_yaml(MODEL_CONFIG).configurations
 
 models = [c.model.value for c in model_configurations]
 model_names = [c.name for c in model_configurations]

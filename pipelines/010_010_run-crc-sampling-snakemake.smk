@@ -9,7 +9,7 @@ import papermill
 from src.managers.model_fitting_pipeline_resource_manager import (
     ModelFittingPipelineResourceManager as RM,
 )
-from src.pipelines.pipeline_classes import ModelOption, ModelConfig
+from src.pipelines.pipeline_classes import ModelOption, model_config_from_yaml
 from src.project_enums import ModelFitMethod
 
 PYMC3_MODEL_CACHE_DIR = "models/"
@@ -18,50 +18,16 @@ ENVIRONMENT_YAML = Path("default_environment.yml").as_posix()
 
 N_CHAINS = 4
 
+MODEL_CONFIG = Path("pipelines", "model-configurations.yaml")
+
 #### ---- Model configurations ---- ####
 
-models_configurations = []
-
-# models_configurations += [
-#     ModelConfig(name="SpecletTest-debug", model="speclet-test-model", fit_method="ADVI"),
-#     ModelConfig(name="SpecletTest-debug", model="speclet-test-model", fit_method="MCMC"),
-# ]
-# models_configurations += [
-#     ModelConfig(name="SpecletTwo-debug", model="speclet-two", fit_method="ADVI"),
-#     ModelConfig(name="SpecletTwo-debug", model="speclet-two", fit_method="MCMC"),
-#     ModelConfig(name="SpecletTwo-kras-debug", model="speclet-two", fit_method="ADVI"),
-#     ModelConfig(name="SpecletTwo-kras-debug", model="speclet-two", fit_method="MCMC"),
-#     ModelConfig(name="SpecletTwo", model="speclet-two", fit_method="ADVI"),
-#     ModelConfig(name="SpecletTwo", model="speclet-two", fit_method="MCMC"),
-#     ModelConfig(name="SpecletTwo-kras", model="speclet-two", fit_method="ADVI"),
-#     ModelConfig(name="SpecletTwo-kras", model="speclet-two", fit_method="MCMC"),
-# ]
-# models_configurations += [
-#     ModelConfig(name="SpecletThree-debug", model="speclet-three", fit_method="ADVI"),
-#     ModelConfig(name="SpecletThree-debug", model="speclet-three", fit_method="MCMC"),
-#     ModelConfig(name="SpecletThree-kras-debug", model="speclet-three", fit_method="ADVI"),
-#     ModelConfig(name="SpecletThree-kras-debug", model="speclet-three", fit_method="MCMC"),
-#     ModelConfig(name="SpecletThree", model="speclet-three", fit_method="ADVI"),
-#     ModelConfig(name="SpecletThree", model="speclet-three", fit_method="MCMC"),
-#     ModelConfig(name="SpecletThree-kras", model="speclet-three", fit_method="ADVI"),
-#     ModelConfig(name="SpecletThree-kras", model="speclet-three", fit_method="MCMC"),
-# ]
-# models_configurations += [
-#     ModelConfig(name="SpecletFour-debug", model="speclet-four", fit_method="MCMC"),
-#     ModelConfig(name="SpecletFour", model="speclet-four", fit_method="MCMC"),
-# ]
-
-models_configurations += [
-    ModelConfig(name="SpecletSeven-debug-noncentered", model="speclet-seven", fit_method="MCMC"),
-    ModelConfig(name="SpecletSeven-debug-noncentered", model="speclet-seven", fit_method="ADVI"),
-#     ModelConfig(name="SpecletSeven-noncentered", model="speclet-seven", fit_method="MCMC"),
-#     ModelConfig(name="SpecletSeven-noncentered", model="speclet-seven", fit_method="MCMC"),
-]
+model_configurations = model_config_from_yaml(MODEL_CONFIG).configurations
 
 # Separate information in model configuration for `all` step to create wildcards.
-models = [m.model.value for m in models_configurations]
-model_names = [m.name for m in models_configurations]
-fit_methods = [m.fit_method.value for m in models_configurations]
+models = [m.model.value for m in model_configurations]
+model_names = [m.name for m in model_configurations]
+fit_methods = [m.fit_method.value for m in model_configurations]
 
 
 #### ---- Wildcard constrains ---- ####
@@ -79,7 +45,7 @@ def create_resource_manager(w: Any, fit_method: ModelFitMethod) -> RM:
     return RM(model=w.model, name=w.model_name, fit_method=fit_method)
 
 def cli_is_debug(w: Any) -> str:
-    return create_resource_manager(w=w, fit_method=ModelFitMethod.advi).is_debug_cli()
+    return create_resource_manager(w=w, fit_method=ModelFitMethod.ADVI).is_debug_cli()
 
 #### ---- Rules ---- ####
 
@@ -98,10 +64,10 @@ rule sample_mcmc:
     output:
         PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_chain{chain}_MCMC.txt",
     params:
-        mem=lambda w: create_resource_manager(w, ModelFitMethod.mcmc).memory,
-        time=lambda w: create_resource_manager(w, ModelFitMethod.mcmc).time,
-        partition=lambda w: create_resource_manager(w, ModelFitMethod.mcmc).partition,
-        debug=lambda w: create_resource_manager(w, ModelFitMethod.mcmc).is_debug_cli(),
+        mem=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).memory,
+        time=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).time,
+        partition=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).partition,
+        debug=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).is_debug_cli(),
     conda:
         ENVIRONMENT_YAML
     shell:
@@ -140,10 +106,10 @@ rule sample_advi:
     output:
         PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_ADVI.txt",
     params:
-        mem=lambda w: create_resource_manager(w, ModelFitMethod.advi).memory,
-        time=lambda w: create_resource_manager(w, ModelFitMethod.advi).time,
-        partition=lambda w: create_resource_manager(w, ModelFitMethod.advi).partition,
-        debug=lambda w: create_resource_manager(w, ModelFitMethod.advi).is_debug_cli(),
+        mem=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).memory,
+        time=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).time,
+        partition=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).partition,
+        debug=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).is_debug_cli(),
     conda:
         ENVIRONMENT_YAML
     shell:

@@ -58,6 +58,7 @@ dependencies:
   - theano=1.0.5
   - theano-pymc=1.1.2
   - typer=0.3.2
+  - types-pyyaml=5.4.3
   - watermark=2.2.0
   - xarray=0.18.0
   - pip:
