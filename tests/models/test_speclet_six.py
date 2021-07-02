@@ -135,7 +135,7 @@ class TestSpecletSix:
         sp6.build_model()
         assert sp6.model is not None
         model_vars = pmhelp.get_variable_names(sp6.model, rm_log=True)
-        for expected_v in ["μ_μ_d", "σ_μ_d", "μ_d_offset", "σ_σ_d"]:
+        for expected_v in ["μ_μ_d", "σ_μ_d", "μ_d", "σ_σ_d"]:
             assert expected_v in model_vars
 
     def test_model_with_multiple_screens(
@@ -150,11 +150,12 @@ class TestSpecletSix:
             "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
         )
 
-        multi_screen_vars = ["μ_μ_j", "σ_μ_j", "σ_σ_j", "μ_j_offset"]
+        multi_screen_vars = ["μ_μ_j", "σ_μ_j", "σ_σ_j"]
 
         sp6.build_model()
         assert sp6.model is not None
         model_vars = pmhelp.get_variable_names(sp6.model, rm_log=True)
+        print(model_vars)
         for var in multi_screen_vars:
             assert var not in model_vars
 
