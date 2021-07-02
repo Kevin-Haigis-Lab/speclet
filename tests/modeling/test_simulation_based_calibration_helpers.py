@@ -206,7 +206,9 @@ def test_generate_mock_cell_line_information_notrandomness(data: st.DataObject):
 
 @given(st.data())
 def test_generate_mock_cell_line_information_randomness(data: st.DataObject):
-    genes = data.draw(st.lists(st.text(chars), min_size=1, unique=True), label="genes")
+    genes = data.draw(
+        st.lists(st.text(chars), min_size=1, max_size=25, unique=True), label="genes"
+    )
     n_cell_lines = data.draw(st.integers(1, 10), label="n_cell_lines")
     n_lineages = data.draw(st.integers(1, min(n_cell_lines, 3)), label="n_lineages")
     n_batches = data.draw(st.integers(1, min(n_cell_lines, 3)), label="n_batches")

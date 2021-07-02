@@ -1,7 +1,7 @@
 """Speclet Model Five."""
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import NamedTuple, Optional, Tuple
 
 import pymc3 as pm
 import theano
@@ -10,6 +10,16 @@ from src.data_processing import achilles as achelp
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
 from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.project_enums import ModelParameterization as MP
+
+
+class SpecletFiveParameterization(NamedTuple):
+    """Parameterizations for each covariate in SpecletFive model."""
+
+    a: MP = MP.CENTERED
+    d: MP = MP.CENTERED
+    h: MP = MP.CENTERED
+    j: MP = MP.CENTERED
 
 
 class SpecletFive(SpecletModel):
@@ -37,6 +47,7 @@ class SpecletFive(SpecletModel):
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
+        parameterization: SpecletFiveParameterization = SpecletFiveParameterization(),
     ) -> None:
         """Instantiate a SpecletFive model.
 
@@ -48,12 +59,14 @@ class SpecletFive(SpecletModel):
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. If None (default), a `CrcDataManager` is created automatically.
+            parameterization (SpecletFiveParameterization, optional): Covariate-specific
+              parameterization options.
         """
         logger.debug("Instantiating a SpecletFive model.")
         if data_manager is None:
             logger.debug("Creating a data manager since none was supplied.")
             data_manager = CrcDataManager(debug=debug)
-
+        self.parameterization = parameterization
         super().__init__(
             name="speclet-five_" + name,
             root_cache_dir=root_cache_dir,
@@ -81,34 +94,53 @@ class SpecletFive(SpecletModel):
         batch_idx_shared = theano.shared(b_idx.batch_idx)
         lfc_shared = theano.shared(data.lfc.values)
 
+        self.shared_vars = {
+            "gene_idx_shared": gene_idx_shared,
+            "cellline_idx_shared": cellline_idx_shared,
+            "batch_idx_shared": batch_idx_shared,
+            "lfc_shared": lfc_shared,
+        }
+
         logger.info("Creating PyMC3 model.")
 
         with pm.Model() as model:
             # Varying batch intercept.
             μ_j = pm.Normal("μ_j", 0, 0.2)
             σ_j = pm.HalfNormal("σ_j", 1)
-            j_offset = pm.Normal("j_offset", 0, 1, shape=b_idx.n_batches)
-            j = pm.Deterministic("j", μ_j + j_offset * σ_j)
+            if self.parameterization.j is MP.NONCENTERED:
+                j_offset = pm.Normal("j_offset", 0, 1, shape=b_idx.n_batches)
+                j = pm.Deterministic("j", μ_j + j_offset * σ_j)
+            else:
+                j = pm.Normal("j", μ_j, σ_j, shape=b_idx.n_batches)
 
             # Varying gene and cell line intercept.
             μ_h = pm.Normal("μ_h", 0, 0.2)
             σ_h = pm.HalfNormal("σ_h", 1)
-            h_offset = pm.Normal(
-                "h_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
-            )
-            h = pm.Deterministic("h", μ_h + h_offset * σ_h)
+            if self.parameterization.h is MP.NONCENTERED:
+                h_offset = pm.Normal(
+                    "h_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+                )
+                h = pm.Deterministic("h", μ_h + h_offset * σ_h)
+            else:
+                h = pm.Normal("h", μ_h, σ_h, shape=(co_idx.n_genes, co_idx.n_celllines))
 
             # Varying cell line intercept.
             μ_d = pm.Normal("μ_d", 0, 0.2)
             σ_d = pm.HalfNormal("σ_d", 1)
-            d_offset = pm.Normal("d_offset", 0, 1, shape=co_idx.n_celllines)
-            d = pm.Deterministic("d", μ_d + d_offset * σ_d)
+            if self.parameterization.d is MP.NONCENTERED:
+                d_offset = pm.Normal("d_offset", 0, 1, shape=co_idx.n_celllines)
+                d = pm.Deterministic("d", μ_d + d_offset * σ_d)
+            else:
+                d = pm.Normal("d", μ_d, σ_d, shape=co_idx.n_celllines)
 
             # Varying gene intercept.
             μ_a = pm.Normal("μ_a", 0, 1)
             σ_a = pm.HalfNormal("σ_a", 1)
-            a_offset = pm.Normal("a_offset", 0, 1, shape=co_idx.n_genes)
-            a = pm.Deterministic("a", μ_a + a_offset * σ_a)
+            if self.parameterization.a is MP.NONCENTERED:
+                a_offset = pm.Normal("a_offset", 0, 1, shape=co_idx.n_genes)
+                a = pm.Deterministic("a", μ_a + a_offset * σ_a)
+            else:
+                a = pm.Normal("a", μ_a, σ_a, shape=co_idx.n_genes)
 
             # Global intercept.
             i = pm.Normal("i", 0, 1)
@@ -134,31 +166,19 @@ class SpecletFive(SpecletModel):
             )
 
         logger.debug("Finished building model.")
-
-        self.shared_vars = {
-            "gene_idx_shared": gene_idx_shared,
-            "cellline_idx_shared": cellline_idx_shared,
-            "batch_idx_shared": batch_idx_shared,
-            "lfc_shared": lfc_shared,
-        }
-
         return model, "lfc"
 
     def get_replacement_parameters(self) -> ReplacementsDict:
         """Make a dictionary mapping the shared data variables to new data.
 
         Raises:
-            AttributeError: Raised if there is no data manager.
             AttributeError: Raised if there are no shared variables.
 
         Returns:
             ReplacementsDict: A dictionary mapping new data to shared variables.
         """
         logger.debug("Making dictionary of replacement parameters.")
-        if self.data_manager is None:
-            raise AttributeError(
-                "Cannot create replacement parameters without a DataManager."
-            )
+
         if self.shared_vars is None:
             raise AttributeError(
                 "No shared variables - cannot create replacement parameters.."

@@ -16,7 +16,6 @@ from src.models.speclet_one import SpecletOne
 from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.models.speclet_seven import SpecletSeven
 from src.models.speclet_six import SpecletSix
-from src.models.speclet_three import SpecletThree
 from src.models.speclet_two import SpecletTwo
 from src.pipelines.pipeline_classes import ModelOption
 from src.project_enums import ModelFitMethod
@@ -64,7 +63,6 @@ def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
         ModelOption.crc_ceres_mimic: CeresMimic,
         ModelOption.speclet_one: SpecletOne,
         ModelOption.speclet_two: SpecletTwo,
-        ModelOption.speclet_three: SpecletThree,
         ModelOption.speclet_four: SpecletFour,
         ModelOption.speclet_five: SpecletFive,
         ModelOption.speclet_six: SpecletSix,
@@ -174,4 +172,3 @@ def modify_specletseven_model_by_name(model: SpecletSeven, name: str) -> None:
         name (str): User-provided name.
     """
     logger.info(f"Modifying SpecletSeven model based on the name: '{name}'.")
-    model.noncentered_param = "noncentered" in name

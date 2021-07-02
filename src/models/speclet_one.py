@@ -47,7 +47,7 @@ class SpecletOne(SpecletModel):
         """Instantiate a SpecletOne model.
 
         Args:
-            name (str): A unique identifier for this instance of CrcCeresMimic. (Used
+            name (str): A unique identifier for this instance of SpecletOne. (Used
               for cache management.)
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
@@ -131,7 +131,7 @@ class SpecletOne(SpecletModel):
                 "μ",
                 h[sgrna_idx_shared]
                 + d[sgrna_idx_shared, cellline_idx_shared]
-                + β[cellline_idx_shared]
+                + β[cellline_idx_shared] * copynumber_shared
                 + η[batch_idx_shared],
             )
 
@@ -158,16 +158,11 @@ class SpecletOne(SpecletModel):
         """Make a dictionary mapping the shared data variables to new data.
 
         Raises:
-            AttributeError: Raised if there is no data manager.
             AttributeError: Raised if there are no shared variables.
 
         Returns:
             ReplacementsDict: A dictionary mapping new data to shared variables.
         """
-        if self.data_manager is None:
-            raise AttributeError(
-                "Cannot create replacement parameters without a DataManager."
-            )
         if self.shared_vars is None:
             raise AttributeError(
                 "No shared variables - cannot create replacement parameters.."

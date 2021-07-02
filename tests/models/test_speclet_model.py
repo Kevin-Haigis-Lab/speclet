@@ -26,13 +26,10 @@ class MockSpecletModelClass(speclet_model.SpecletModel):
 
 
 class TestSpecletModel:
-    def test_build_model_fails_without_data_manager(self, tmp_path: Path):
-        sp = speclet_model.SpecletModel("test-model", root_cache_dir=tmp_path)
-        with pytest.raises(AttributeError, match="without a data manager"):
-            sp.build_model()
-
     def test_mcmc_sample_model_fails_without_overriding(self, tmp_path: Path):
-        sp = speclet_model.SpecletModel("test-model", root_cache_dir=tmp_path)
+        sp = speclet_model.SpecletModel(
+            "test-model", data_manager=MockDataManager(), root_cache_dir=tmp_path
+        )
         with pytest.raises(AttributeError, match="Cannot sample: model is 'None'"):
             sp.mcmc_sample_model()
 
@@ -90,7 +87,9 @@ class TestSpecletModel:
             )
 
     def test_advi_sample_model_fails_without_model(self, tmp_path: Path):
-        sp = speclet_model.SpecletModel("test-model", root_cache_dir=tmp_path)
+        sp = speclet_model.SpecletModel(
+            "test-model", data_manager=MockDataManager(), root_cache_dir=tmp_path
+        )
         with pytest.raises(AttributeError, match="model is 'None'"):
             sp.advi_sample_model()
 

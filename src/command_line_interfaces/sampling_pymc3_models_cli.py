@@ -56,7 +56,7 @@ PYMC3_CACHE_DIR = cache_io.default_cache_dir()
 def sample_speclet_model(
     model: ModelOption,
     name: str,
-    fit_method: ModelFitMethod = ModelFitMethod.advi,
+    fit_method: ModelFitMethod = ModelFitMethod.ADVI,
     mcmc_chains: int = 4,
     mcmc_cores: int = 4,
     sample: bool = True,
