@@ -1,9 +1,0 @@
-# Model configurations for pipelines.
-
-configurations:
-  - name: SpecletSeven-debug
-    model: speclet-seven
-    fit_method: MCMC
-  - name: SpecletSeven-debug
-    model: speclet-seven
-    fit_method: ADVI

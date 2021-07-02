@@ -15,35 +15,35 @@ ResourceLookupDict = Dict[ModelOption, Dict[bool, Dict[ModelFitMethod, T]]]
 # RAM required for each configuration (in GB -> mult by 1000).
 #   key: [model][debug][fit_method]
 sample_models_memory_lookup: ResourceLookupDict[int] = {
-    ModelOption.speclet_test_model: {
+    ModelOption.SPECLET_TEST_MODEL: {
         True: {ModelFitMethod.ADVI: 8, ModelFitMethod.MCMC: 8},
         False: {ModelFitMethod.ADVI: 8, ModelFitMethod.MCMC: 8},
     },
-    ModelOption.crc_ceres_mimic: {
+    ModelOption.CRC_CERES_MIMIC: {
         True: {ModelFitMethod.ADVI: 15, ModelFitMethod.MCMC: 20},
         False: {ModelFitMethod.ADVI: 20, ModelFitMethod.MCMC: 40},
     },
-    ModelOption.speclet_one: {
+    ModelOption.SPECLET_ONE: {
         True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 30},
         False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
-    ModelOption.speclet_two: {
+    ModelOption.SPECLET_TWO: {
         True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 30},
         False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
-    ModelOption.speclet_four: {
+    ModelOption.SPECLET_FOUR: {
         True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 60},
         False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
-    ModelOption.speclet_five: {
+    ModelOption.SPECLET_FIVE: {
         True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 60},
         False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
-    ModelOption.speclet_six: {
+    ModelOption.SPECLET_SIX: {
         True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 60},
         False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
-    ModelOption.speclet_seven: {
+    ModelOption.SPECLET_SEVEN: {
         True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 60},
         False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
@@ -53,41 +53,41 @@ sample_models_memory_lookup: ResourceLookupDict[int] = {
 # Time required for each configuration.
 #   key: [model][debug][fit_method]
 sample_models_time_lookup: ResourceLookupDict[td] = {
-    ModelOption.speclet_test_model: {
+    ModelOption.SPECLET_TEST_MODEL: {
         True: {ModelFitMethod.ADVI: td(minutes=5), ModelFitMethod.MCMC: td(minutes=5)},
         False: {
             ModelFitMethod.ADVI: td(minutes=10),
             ModelFitMethod.MCMC: td(minutes=10),
         },
     },
-    ModelOption.crc_ceres_mimic: {
+    ModelOption.CRC_CERES_MIMIC: {
         True: {
             ModelFitMethod.ADVI: td(minutes=30),
             ModelFitMethod.MCMC: td(minutes=30),
         },
         False: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(hours=6)},
     },
-    ModelOption.speclet_one: {
+    ModelOption.SPECLET_ONE: {
         True: {ModelFitMethod.ADVI: td(minutes=30), ModelFitMethod.MCMC: td(hours=8)},
         False: {ModelFitMethod.ADVI: td(hours=12), ModelFitMethod.MCMC: td(days=2)},
     },
-    ModelOption.speclet_two: {
+    ModelOption.SPECLET_TWO: {
         True: {ModelFitMethod.ADVI: td(minutes=30), ModelFitMethod.MCMC: td(hours=8)},
         False: {ModelFitMethod.ADVI: td(hours=12), ModelFitMethod.MCMC: td(days=2)},
     },
-    ModelOption.speclet_four: {
+    ModelOption.SPECLET_FOUR: {
         True: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(days=1)},
         False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
-    ModelOption.speclet_five: {
+    ModelOption.SPECLET_FIVE: {
         True: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(days=1)},
         False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
-    ModelOption.speclet_six: {
+    ModelOption.SPECLET_SIX: {
         True: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(days=1)},
         False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
-    ModelOption.speclet_seven: {
+    ModelOption.SPECLET_SEVEN: {
         True: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(days=1)},
         False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
@@ -153,11 +153,11 @@ class ModelFittingPipelineResourceManager:
         """Time O2 partition for the `sample_models` step."""
         duration = self._retrieve_time_requirement()
         if duration <= td(hours=12):
-            return SlurmPartitions.short
+            return SlurmPartitions.SHORT
         elif duration <= td(days=5):
-            return SlurmPartitions.medium
+            return SlurmPartitions.MEDIUM
         else:
-            return SlurmPartitions.long
+            return SlurmPartitions.LONG
 
     def _retrieve_memory_requirement(self) -> str:
         try:

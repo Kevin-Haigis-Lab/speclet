@@ -515,3 +515,7 @@ class SpecletModel:
             msg = f"Unable to set new values for observed variable: '{_var_name}'."
             logger.error(msg)
             raise UnableToLocateNamedVariable(msg)
+
+    def set_config(self, info: Dict[Any, Any]) -> None:
+        """Set model-specific configuration."""
+        return None

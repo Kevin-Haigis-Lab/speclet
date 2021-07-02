@@ -3,22 +3,23 @@
 """Helper functions for the various CLIs."""
 
 
-from typing import Any, Dict, Type
+from pathlib import Path
+from typing import Dict, Optional, Type, TypeVar, Union
 
 import pretty_errors
 
 from src.loggers import logger
 from src.models.ceres_mimic import CeresMimic
-from src.models.speclet_five import SpecletFive
-from src.models.speclet_four import SpecletFour
+from src.models.speclet_five import SpecletFive, SpecletFiveConfiguration
+from src.models.speclet_four import SpecletFour, SpecletFourConfiguration
 from src.models.speclet_model import SpecletModel
 from src.models.speclet_one import SpecletOne
 from src.models.speclet_pipeline_test_model import SpecletTestModel
-from src.models.speclet_seven import SpecletSeven
-from src.models.speclet_six import SpecletSix
+from src.models.speclet_seven import SpecletSeven, SpecletSevenConfiguration
+from src.models.speclet_six import SpecletSix, SpecletSixConfiguration
 from src.models.speclet_two import SpecletTwo
+from src.pipelines import pipeline_classes
 from src.pipelines.pipeline_classes import ModelOption
-from src.project_enums import ModelFitMethod
 
 #### ---- Pretty Errors ---- ####
 
@@ -49,7 +50,19 @@ def clean_model_names(n: str) -> str:
     return n.replace(" ", "-")
 
 
-def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
+_SpecletProjectModelTypes = Union[
+    SpecletTestModel,
+    CeresMimic,
+    SpecletOne,
+    SpecletTwo,
+    SpecletFour,
+    SpecletFive,
+    SpecletSix,
+    SpecletSeven,
+]
+
+
+def get_model_class(model_opt: ModelOption) -> Type[_SpecletProjectModelTypes]:
     """Get the model class from its string identifier.
 
     Args:
@@ -58,117 +71,115 @@ def get_model_class(model_opt: ModelOption) -> Type[SpecletModel]:
     Returns:
         Type[SpecletModel]: The corresponding model class.
     """
-    model_option_map: Dict[ModelOption, Type[SpecletModel]] = {
-        ModelOption.speclet_test_model: SpecletTestModel,
-        ModelOption.crc_ceres_mimic: CeresMimic,
-        ModelOption.speclet_one: SpecletOne,
-        ModelOption.speclet_two: SpecletTwo,
-        ModelOption.speclet_four: SpecletFour,
-        ModelOption.speclet_five: SpecletFive,
-        ModelOption.speclet_six: SpecletSix,
-        ModelOption.speclet_seven: SpecletSeven,
+    model_option_map: Dict[ModelOption, Type[_SpecletProjectModelTypes]] = {
+        ModelOption.SPECLET_TEST_MODEL: SpecletTestModel,
+        ModelOption.CRC_CERES_MIMIC: CeresMimic,
+        ModelOption.SPECLET_ONE: SpecletOne,
+        ModelOption.SPECLET_TWO: SpecletTwo,
+        ModelOption.SPECLET_FOUR: SpecletFour,
+        ModelOption.SPECLET_FIVE: SpecletFive,
+        ModelOption.SPECLET_SIX: SpecletSix,
+        ModelOption.SPECLET_SEVEN: SpecletSeven,
     }
     return model_option_map[model_opt]
 
 
-def extract_fit_method(name: str) -> ModelFitMethod:
-    """Extract the model fitting method to use based on the unique name of the model.
+#### ---- Model configurations ---- ####
+
+_ConfigurationT = TypeVar(
+    "_ConfigurationT",
+    SpecletFiveConfiguration,
+    SpecletFourConfiguration,
+    SpecletSixConfiguration,
+    SpecletSevenConfiguration,
+)
+
+
+class FoundMultipleModelConfigurationsError(BaseException):
+    """Found multiple model configurations."""
+
+    def __init__(self, name: str, n_configs: int) -> None:
+        """Create a FoundMultipleModelConfigurationsError error.
+
+        Args:
+            name (str): Name of the model whose configuration was searched for.
+            n_configs (int): Number of configs found.
+        """
+        self.name = name
+        self.n_configs = n_configs
+        self.message = f"Found {self.n_configs} configuration files for '{self.name}'."
+        super().__init__(self.message)
+
+
+def get_configuration_for_model(
+    config_path: Path, name: str
+) -> Optional[pipeline_classes.ModelConfig]:
+    """Get the configuration information for a named model.
 
     Args:
-        name (str): Name of the model (*not* the type of model).
+        config_path (Path): Path to the configuration file.
+        name (str): Model configuration identifier.
 
     Raises:
-        ValueError: Raised if no fitting method is found.
+        FoundMultipleModelConfigurationsError: Raised if multiple configuration files
+        are found.
 
     Returns:
-        ModelFitMethod: The method to use for the fitting the model.
+        Optional[pipeline_classes.ModelConfig]: If a configuration file is found, it is
+        returned, else None.
     """
-    for method_name, method_member in ModelFitMethod.__members__.items():
-        if method_name.lower() in name.lower():
-            return method_member
-    raise ValueError(f"Did not find a viable fit method in the model name: '{name}'")
+    configs = [
+        config
+        for config in pipeline_classes.get_model_configurations(
+            config_path
+        ).configurations
+        if config.name == name
+    ]
+    if len(configs) > 1:
+        raise FoundMultipleModelConfigurationsError(name, len(configs))
+    if len(configs) == 0:
+        return None
+    return configs[0]
 
 
-#### ---- Modifying models ---- ####
+def configure_model(model: SpecletModel, name: str, config_path: Path) -> None:
+    """Apply model-specific configuration from a configuration file.
 
-
-def modify_model_by_name(model: Any, name: str) -> None:
-    """Modify a model using keys in the name.
+    Configuration is applied in-place to the provided SpecletModel object.
 
     Args:
-        model (Any): Any model. If it is a type that has a modification method, then it
-          will be sent through the method.
-        name (str): Name of the model provided by the user.
-
-    Returns:
-        [None]: None
+        model (SpecletModel): Speclet model to configure.
+        name (str): Identifiable name of the model.
+        config_path (Path): Path to the configuration file.
     """
-    if isinstance(model, CeresMimic):
-        modify_ceres_model_by_name(model, name)
-    elif isinstance(model, SpecletFour):
-        modify_specletfour_model_by_name(model, name)
-    elif isinstance(model, SpecletSix):
-        modify_specletsix_model_by_name(model, name)
-    elif isinstance(model, SpecletSeven):
-        modify_specletseven_model_by_name(model, name)
+    configuration = get_configuration_for_model(config_path, name=name)
+    if configuration is not None:
+        logger.info(f"Found configuration for model name: '{name}'.")
+        model.set_config(configuration.config)
     else:
-        logger.info("No modifications make to model based on its name.")
-    return None
+        logger.info(f"No configuration found for model name: '{name}'.")
 
 
-def modify_ceres_model_by_name(model: CeresMimic, name: str) -> None:
-    """Modify a CeresMimic object based on the user-provided input name.
-
-    Args:
-        model (CeresMimic): The CeresMimic model.
-        name (str): User-provided name.
-    """
-    if "copynumber" in name:
-        logger.info("Including gene copy number covariate in CERES model.")
-        model.copynumber_cov = True
-    if "sgrnaint" in name:
-        logger.info("Including sgRNA|gene varying intercept in CERES model.")
-        model.sgrna_intercept_cov = True
-
-
-def modify_specletfour_model_by_name(model: SpecletFour, name: str) -> None:
-    """Modify a SpecletFour object based on the user-provided input name.
+def instantiate_and_configure_model(
+    model_opt: ModelOption,
+    name: str,
+    root_cache_dir: Path,
+    debug: bool,
+    config_path: Path,
+) -> _SpecletProjectModelTypes:
+    """Instantiate and configure a model.
 
     Args:
-        model (SpecletFour): The SpecletFour model.
-        name (str): User-provided name.
+        model_opt (ModelOption): Type of speclet model to create.
+        name (str): Name of the model.
+        root_cache_dir (Path): Root caching directory.
+        debug (bool): Debug mode?
+        config_path (Path): Path to configuration file.
+
+    Returns:
+        _SpecletProjectModelTypes: An instance of the desired speclet model.
     """
-    if "copy-number" in name or "cn-cov" in name:
-        logger.info("Including copy number covariate in the Sp4 model.")
-        model.copy_number_cov = True
-
-
-def modify_specletsix_model_by_name(model: SpecletSix, name: str) -> None:
-    """Modify a SpecletSix object based on the user-provided input name.
-
-    Args:
-        model (SpecletSix): The SpecletSix model.
-        name (str): User-provided name.
-    """
-    if "cellcna" in name:
-        logger.info("Including cell line copy number covariate in the Sp6 model.")
-        model.cell_line_cna_cov = True
-    if "genecna" in name:
-        logger.info("Including gene copy number covariate in the Sp6 model.")
-        model.gene_cna_cov = True
-    if "rna" in name:
-        logger.info("Including RNA covariate in the Sp6 model.")
-        model.rna_cov = True
-    if "mutation" in name:
-        logger.info("Including mutation covariate in the Sp6 model.")
-        model.mutation_cov = True
-
-
-def modify_specletseven_model_by_name(model: SpecletSeven, name: str) -> None:
-    """Modify a SpecletSeven object based on the user-provided input name.
-
-    Args:
-        model (SpecletSeven): The SpecletSeven model.
-        name (str): User-provided name.
-    """
-    logger.info(f"Modifying SpecletSeven model based on the name: '{name}'.")
+    ModelClass = get_model_class(model_opt=model_opt)
+    speclet_model = ModelClass(name=name, root_cache_dir=root_cache_dir, debug=debug)
+    configure_model(model=speclet_model, name=name, config_path=config_path)
+    return speclet_model

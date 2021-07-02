@@ -5,17 +5,17 @@
 
 from pathlib import Path
 from time import time
-from typing import Optional, Type
+from typing import Optional
 
 import numpy as np
 import typer
 
 from src.command_line_interfaces import cli_helpers
-from src.command_line_interfaces.cli_helpers import ModelFitMethod
 from src.io import cache_io
 from src.loggers import logger
 from src.models.speclet_model import SpecletModel
 from src.pipelines.pipeline_classes import ModelOption
+from src.project_enums import ModelFitMethod
 
 cli_helpers.configure_pretty()
 
@@ -56,6 +56,7 @@ PYMC3_CACHE_DIR = cache_io.default_cache_dir()
 def sample_speclet_model(
     model: ModelOption,
     name: str,
+    config_path: Path,
     fit_method: ModelFitMethod = ModelFitMethod.ADVI,
     mcmc_chains: int = 4,
     mcmc_cores: int = 4,
@@ -64,14 +65,18 @@ def sample_speclet_model(
     debug: bool = False,
     random_seed: Optional[int] = None,
     touch: bool = False,
-) -> Type[SpecletModel]:
+) -> SpecletModel:
     """Fit and sample from a variety of predefined PyMC3 models.
 
     Args:
         model (ModelOption): The name of the model.
         name (str): Custom name for the model. This is useful for creating multiple
           caches of the same model.
-        cores (int, optional): Number of compute cores. Defaults to 1.
+        config_path (Path): Path to the model configuration file.
+        fit_method (ModelFitMethod, optional): Fitting method. Defaults to
+          ModelFitMethod.ADVI.
+        mcmc_chains (int, optional): Number of MCMC chains to run. Defaults to 4.
+        mcmc_cores (int, optional): Number of compute cores. Defaults to 4.
         sample (bool, optional): Should the model be sampled? Defaults to True.
         ignore_cache (bool, optional): Should the cache be ignored? Defaults to False.
         debug (bool, optional): In debug mode? Defaults to False.
@@ -79,11 +84,9 @@ def sample_speclet_model(
         touch (bool, optional): Should there be a file touched to indicate that the
           sampling process is complete? This is helpful for telling pipelines/workflows
           that this step is complete. Defaults to False.
-        touch_suffix (Optional[str], optional): Add a string as a suffix to the touch
-          file. Defaults to None.
 
     Returns:
-        Type[SpecletModel]: An instance of the requested model with the PyMC3 model
+        SpecletModel: An instance of the requested model with the PyMC3 model
           built and fit.
     """
     tic = time()
@@ -97,12 +100,13 @@ def sample_speclet_model(
         logger.info("Sampling in debug mode.")
 
     logger.info(f"Sampling '{model}' with custom name '{name}'")
-    ModelClass = cli_helpers.get_model_class(model_opt=model)
-    speclet_model = ModelClass(name=name, root_cache_dir=PYMC3_CACHE_DIR, debug=debug)
-
-    assert isinstance(speclet_model, SpecletModel)
-
-    cli_helpers.modify_model_by_name(model=speclet_model, name=name)
+    speclet_model = cli_helpers.instantiate_and_configure_model(
+        model_opt=model,
+        name=name,
+        root_cache_dir=PYMC3_CACHE_DIR,
+        debug=debug,
+        config_path=config_path,
+    )
 
     logger.info("Running model build method.")
     speclet_model.build_model()

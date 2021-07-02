@@ -2,14 +2,15 @@
 
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, List
 
 import papermill
 
 from src.managers.model_fitting_pipeline_resource_manager import (
     ModelFittingPipelineResourceManager as RM,
 )
-from src.pipelines.pipeline_classes import ModelOption, model_config_from_yaml
+from src.pipelines.snakemake_parsing_helpers import get_models_names_fit_methods
+from src.pipelines.pipeline_classes import ModelOption
 from src.project_enums import ModelFitMethod
 
 PYMC3_MODEL_CACHE_DIR = "models/"
@@ -18,16 +19,15 @@ ENVIRONMENT_YAML = Path("default_environment.yml").as_posix()
 
 N_CHAINS = 4
 
-MODEL_CONFIG = Path("pipelines", "model-configurations.yaml")
-
 #### ---- Model configurations ---- ####
 
-model_configurations = model_config_from_yaml(MODEL_CONFIG).configurations
+MODEL_CONFIG = Path("models", "model-configs.yaml")
 
 # Separate information in model configuration for `all` step to create wildcards.
-models = [m.model.value for m in model_configurations]
-model_names = [m.name for m in model_configurations]
-fit_methods = [m.fit_method.value for m in model_configurations]
+model_infos = get_models_names_fit_methods(MODEL_CONFIG)
+models: List[str] = model_infos.models
+model_names: List[str] = model_infos.model_names
+fit_methods: List[str] = model_infos.fit_methods
 
 
 #### ---- Wildcard constrains ---- ####
@@ -68,12 +68,14 @@ rule sample_mcmc:
         time=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).time,
         partition=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).partition,
         debug=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).is_debug_cli(),
+        config_file=MODEL_CONFIG.as_posix(),
     conda:
         ENVIRONMENT_YAML
     shell:
         "python3 src/command_line_interfaces/sampling_pymc3_models_cli.py"
         '  "{wildcards.model}"'
         '  "{wildcards.model_name}_chain{wildcards.chain}"'
+        " {params.config_file}"
         "  --fit-method MCMC"
         "  --mcmc-chains 1"
         "  --mcmc-cores 1"
@@ -110,12 +112,14 @@ rule sample_advi:
         time=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).time,
         partition=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).partition,
         debug=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).is_debug_cli(),
+        config_file=MODEL_CONFIG.as_posix(),
     conda:
         ENVIRONMENT_YAML
     shell:
         "python3 src/command_line_interfaces/sampling_pymc3_models_cli.py"
         '  "{wildcards.model}"'
         '  "{wildcards.model_name}"'
+        " {params.config_file}"
         "  --fit-method ADVI"
         "  --mcmc-cores 1"
         "  --random-seed 7414"

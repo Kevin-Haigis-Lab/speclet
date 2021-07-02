@@ -7,7 +7,8 @@ import papermill
 from snakemake.io import Wildcards
 
 from src.project_enums import ModelFitMethod
-from src.pipelines.pipeline_classes import ModelOption, model_config_from_yaml
+from src.pipelines.snakemake_parsing_helpers import get_models_names_fit_methods
+from src.pipelines.pipeline_classes import ModelOption
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
 NUM_SIMULATIONS = 100
@@ -21,12 +22,14 @@ MOCK_DATA_SIZE = "small"
 
 #### ---- Model Configurations ---- ####
 
-MODEL_CONFIG = Path("pipelines", "model-configurations.yaml")
-model_configurations = model_config_from_yaml(MODEL_CONFIG).configurations
+MODEL_CONFIG = Path("models", "model-configs.yaml")
 
-models = [c.model.value for c in model_configurations]
-model_names = [c.name for c in model_configurations]
-fit_methods = [c.fit_method.value for c in model_configurations]
+# Separate information in model configuration for `all` step to create wildcards.
+model_infos = get_models_names_fit_methods(MODEL_CONFIG)
+models: List[str] = model_infos.models
+model_names: List[str] = model_infos.model_names
+fit_methods: List[str] = model_infos.fit_methods
+
 
 
 #### ---- Wildcard constrains ---- ####

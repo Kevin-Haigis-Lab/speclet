@@ -1,10 +1,11 @@
 """Speclet Model Five."""
 
 from pathlib import Path
-from typing import NamedTuple, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import pymc3 as pm
 import theano
+from pydantic import BaseModel
 
 from src.data_processing import achilles as achelp
 from src.loggers import logger
@@ -13,7 +14,7 @@ from src.models.speclet_model import ReplacementsDict, SpecletModel
 from src.project_enums import ModelParameterization as MP
 
 
-class SpecletFiveParameterization(NamedTuple):
+class SpecletFiveConfiguration(BaseModel):
     """Parameterizations for each covariate in SpecletFive model."""
 
     a: MP = MP.CENTERED
@@ -47,7 +48,7 @@ class SpecletFive(SpecletModel):
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
-        parameterization: SpecletFiveParameterization = SpecletFiveParameterization(),
+        config: SpecletFiveConfiguration = SpecletFiveConfiguration(),
     ) -> None:
         """Instantiate a SpecletFive model.
 
@@ -59,20 +60,24 @@ class SpecletFive(SpecletModel):
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. If None (default), a `CrcDataManager` is created automatically.
-            parameterization (SpecletFiveParameterization, optional): Covariate-specific
-              parameterization options.
+            config (SpecletFiveConfiguration, optional): Model configuration.
         """
         logger.debug("Instantiating a SpecletFive model.")
         if data_manager is None:
             logger.debug("Creating a data manager since none was supplied.")
             data_manager = CrcDataManager(debug=debug)
-        self.parameterization = parameterization
+        self.config = config
         super().__init__(
             name="speclet-five_" + name,
             root_cache_dir=root_cache_dir,
             debug=debug,
             data_manager=data_manager,
         )
+
+    def set_config(self, info: Dict[Any, Any]) -> None:
+        """Set model-specific configuration."""
+        logger.info("Setting model-specific configuration.")
+        self.config = SpecletFiveConfiguration(**info)
 
     def model_specification(self) -> Tuple[pm.Model, str]:
         """Build SpecletFour model.
@@ -107,7 +112,7 @@ class SpecletFive(SpecletModel):
             # Varying batch intercept.
             μ_j = pm.Normal("μ_j", 0, 0.2)
             σ_j = pm.HalfNormal("σ_j", 1)
-            if self.parameterization.j is MP.NONCENTERED:
+            if self.config.j is MP.NONCENTERED:
                 j_offset = pm.Normal("j_offset", 0, 1, shape=b_idx.n_batches)
                 j = pm.Deterministic("j", μ_j + j_offset * σ_j)
             else:
@@ -116,7 +121,7 @@ class SpecletFive(SpecletModel):
             # Varying gene and cell line intercept.
             μ_h = pm.Normal("μ_h", 0, 0.2)
             σ_h = pm.HalfNormal("σ_h", 1)
-            if self.parameterization.h is MP.NONCENTERED:
+            if self.config.h is MP.NONCENTERED:
                 h_offset = pm.Normal(
                     "h_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
                 )
@@ -127,7 +132,7 @@ class SpecletFive(SpecletModel):
             # Varying cell line intercept.
             μ_d = pm.Normal("μ_d", 0, 0.2)
             σ_d = pm.HalfNormal("σ_d", 1)
-            if self.parameterization.d is MP.NONCENTERED:
+            if self.config.d is MP.NONCENTERED:
                 d_offset = pm.Normal("d_offset", 0, 1, shape=co_idx.n_celllines)
                 d = pm.Deterministic("d", μ_d + d_offset * σ_d)
             else:
@@ -136,7 +141,7 @@ class SpecletFive(SpecletModel):
             # Varying gene intercept.
             μ_a = pm.Normal("μ_a", 0, 1)
             σ_a = pm.HalfNormal("σ_a", 1)
-            if self.parameterization.a is MP.NONCENTERED:
+            if self.config.a is MP.NONCENTERED:
                 a_offset = pm.Normal("a_offset", 0, 1, shape=co_idx.n_genes)
                 a = pm.Deterministic("a", μ_a + a_offset * σ_a)
             else:

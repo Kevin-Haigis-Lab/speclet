@@ -16,6 +16,7 @@ from src.models.speclet_seven import SpecletSeven
 from src.models.speclet_six import SpecletSix
 from src.models.speclet_two import SpecletTwo
 from src.project_enums import ModelFitMethod
+from src.project_enums import ModelParameterization as MP
 
 #### ---- Models ---- ####
 
@@ -226,6 +227,7 @@ class TestSpecletSixModifications:
         assert sp6_model.mutation_cov == bool_ary[3]
 
 
+@pytest.mark.DEV
 class TestSpecletSevenModifications:
 
     model_names = [
@@ -246,13 +248,19 @@ class TestSpecletSevenModifications:
     @pytest.mark.parametrize("fxn", functions_to_test)
     @given(bool_ary=hnp.arrays(bool, shape=1))
     def test_modify_sp7_model_by_name(self, name: str, fxn: Callable, bool_ary):
-        sp7_model = SpecletSeven(
-            name="TEST-MODEL", root_cache_dir=Path("temp/test-models"), debug=True
-        )
-        suffixes = ["noncentered"]
+        suffixes = ["NCa", "NCmua", "NCmumua"]
         for b, s in zip(bool_ary.flatten(), suffixes):
             if b:
-                name += s
+                name += "-" + s
+
+        sp7_model = SpecletSeven(
+            name=name, root_cache_dir=Path("temp/test-models"), debug=True
+        )
 
         fxn(sp7_model, name)
-        assert 1 == 1  # holder for now, but no mods to check
+        assert ("NCa" in name) == (sp7_model.config.a is MP.NONCENTERED)
+        assert ("NCa" not in name) == (sp7_model.config.a is MP.CENTERED)
+        assert ("NCmua" in name) == (sp7_model.config.μ_a is MP.NONCENTERED)
+        assert ("NCmua" not in name) == (sp7_model.config.μ_a is MP.CENTERED)
+        assert ("NCmumua" in name) == (sp7_model.config.μ_μ_a is MP.NONCENTERED)
+        assert ("NCmumua" not in name) == (sp7_model.config.μ_μ_a is MP.CENTERED)
