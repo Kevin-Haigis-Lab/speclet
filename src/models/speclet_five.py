@@ -14,7 +14,7 @@ from src.project_enums import ModelParameterization as MP
 
 
 class SpecletFiveParameterization(NamedTuple):
-    """Parameterizations for each covariate in SpecletFour model."""
+    """Parameterizations for each covariate in SpecletFive model."""
 
     a: MP = MP.CENTERED
     d: MP = MP.CENTERED

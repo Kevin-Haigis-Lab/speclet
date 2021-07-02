@@ -1,10 +1,10 @@
 from pathlib import Path
-from random import choices
 from typing import List
 
 import pytest
 
 from src.managers.model_data_managers import CrcDataManager
+from src.misc.test_helpers import generate_model_parameterizations
 from src.modeling import pymc3_helpers as pmhelp
 from src.models.speclet_four import SpecletFour, SpecletFourParameterization
 from src.project_enums import ModelParameterization as MP
@@ -14,13 +14,11 @@ def monkey_get_data_path(*args, **kwargs) -> Path:
     return Path("tests", "depmap_test_data.csv")
 
 
-_params: List[MP] = [MP.CENTERED, MP.NONCENTERED]
-_random_MP_idx: List[List[int]] = [choices((0, 1), k=4) for _ in range(3)]
-
-model_parameterizations: List[SpecletFourParameterization] = [
-    SpecletFourParameterization(_params[h], _params[d], _params[beta], _params[eta])
-    for h, d, beta, eta in _random_MP_idx
-]
+model_parameterizations: List[
+    SpecletFourParameterization
+] = generate_model_parameterizations(
+    param_class=SpecletFourParameterization, n_randoms=10
+)
 
 
 class TestSpecletFour:
