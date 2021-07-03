@@ -44,13 +44,15 @@ class SpecletFour(SpecletModel):
     \\(\\beta_c\\) varies by cell line and is optional.
     """
 
+    _config: SpecletFourConfiguration
+
     def __init__(
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
-        config: SpecletFourConfiguration = SpecletFourConfiguration(),
+        config: Optional[SpecletFourConfiguration] = None,
     ):
         """Instantiate a SpecletFour model.
 
@@ -62,12 +64,15 @@ class SpecletFour(SpecletModel):
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. If None (default), a `CrcDataManager` is created automatically.
-            config (SpecletFourConfiguration, optional): Model configuration.
+            config (Optional[SpecletFourConfiguration], optional): Model configuration.
         """
         if data_manager is None:
             data_manager = CrcDataManager(debug=debug)
 
-        self.config = config
+        if config is None:
+            self.config = SpecletFourConfiguration()
+        else:
+            self.config = config
 
         super().__init__(
             name=name,
@@ -78,8 +83,11 @@ class SpecletFour(SpecletModel):
 
     def set_config(self, info: Dict[Any, Any]) -> None:
         """Set model-specific configuration."""
-        logger.info("Setting model-specific configuration.")
-        self.config = SpecletFourConfiguration(**info)
+        new_config = SpecletFourConfiguration(**info)
+        if self.config is not None and self.config != new_config:
+            logger.info("Setting model-specific configuration.")
+            self.config = new_config
+            self.model = None
 
     def _model_specification(
         self,
