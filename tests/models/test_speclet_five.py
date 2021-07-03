@@ -23,6 +23,33 @@ class TestSpecletFive:
         sp5.build_model()
         assert sp5.model is not None
 
+    @settings(
+        max_examples=5,
+        deadline=None,
+        suppress_health_check=[HealthCheck.function_scoped_fixture],
+    )
+    @given(config=st.builds(SpecletFiveConfiguration))
+    def test_changing_configuration_resets_model(
+        self,
+        tmp_path: Path,
+        mock_crc_dm: CrcDataManager,
+        config: SpecletFiveConfiguration,
+    ):
+        sp5 = SpecletFive(
+            "test-model",
+            root_cache_dir=tmp_path,
+            debug=True,
+            data_manager=mock_crc_dm,
+        )
+        assert sp5.model is None
+        sp5.build_model()
+        assert sp5.model is not None
+        sp5.set_config(config.dict())
+        if config == SpecletFiveConfiguration():
+            assert sp5.model is not None
+        else:
+            assert sp5.model is None
+
     @pytest.mark.slow
     def test_mcmc_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
         sp5 = SpecletFive(

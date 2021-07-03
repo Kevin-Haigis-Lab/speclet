@@ -139,11 +139,6 @@ class SpecletSix(SpecletModel):
       ( \\(M \\in {0, 1}\\))
     """
 
-    _cell_line_cna_cov: bool
-    _gene_cna_cov: bool
-    _rna_cov: bool
-    _mutation_cov: bool
-
     def __init__(
         self,
         name: str,
@@ -189,8 +184,11 @@ class SpecletSix(SpecletModel):
 
     def set_config(self, info: Dict[Any, Any]) -> None:
         """Set model-specific configuration."""
-        logger.info("Setting model-specific configuration.")
-        self.config = SpecletSixConfiguration(**info)
+        new_config = SpecletSixConfiguration(**info)
+        if self.config is not None and self.config != new_config:
+            logger.info("Setting model-specific configuration.")
+            self.config = new_config
+            self.model = None
 
     def model_specification(self) -> Tuple[pm.Model, str]:
         """Build SpecletSix model.

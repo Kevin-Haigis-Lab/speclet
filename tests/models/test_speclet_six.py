@@ -1,27 +1,19 @@
 from pathlib import Path
 from string import ascii_letters
-from typing import Any, List, Set
+from typing import Any, Dict, List, Set
 
 import numpy as np
 import pandas as pd
 import pytest
-from hypothesis import given, settings
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
 from src.data_processing import achilles as achelp
 from src.managers.model_data_managers import CrcDataManager
-from src.misc.test_helpers import generate_model_parameterizations
 from src.modeling import pymc3_helpers as pmhelp
 from src.models import speclet_six
-from src.models.speclet_six import SpecletSix, SpecletSixParameterization
+from src.models.speclet_six import SpecletSix, SpecletSixConfiguration
 from src.project_enums import ModelParameterization as MP
-
-model_parameterizations: List[
-    SpecletSixParameterization
-] = generate_model_parameterizations(
-    param_class=SpecletSixParameterization, n_randoms=10
-)
-
 
 chars = [str(i) for i in range(10)] + list(ascii_letters)
 
@@ -83,12 +75,6 @@ def copynumber_dataframe(draw, group_name: str) -> pd.DataFrame:
 
 
 class TestSpecletSix:
-    @pytest.fixture(scope="function")
-    def data_manager(self, monkeypatch: pytest.MonkeyPatch) -> CrcDataManager:
-        monkeypatch.setattr(CrcDataManager, "get_data_path", monkey_get_data_path)
-        dm = CrcDataManager(debug=True)
-        return dm
-
     @settings(deadline=None)
     @given(copynumber_dataframe(group_name="depmap_id"))
     def test_centered_copynumber_by_cellline(self, df: pd.DataFrame):
@@ -117,20 +103,47 @@ class TestSpecletSix:
         sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path, debug=True)
         assert sp6.model is None
 
-    def test_build_model(self, tmp_path: Path, data_manager: CrcDataManager):
+    def test_build_model(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
         sp6 = SpecletSix(
-            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
+            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=mock_crc_dm
         )
         assert sp6.model is None
         sp6.build_model()
         assert sp6.model is not None
 
-    def test_model_with_multiple_cell_line_lineages(
-        self, tmp_path: Path, data_manager: CrcDataManager
+    @settings(
+        max_examples=5,
+        deadline=None,
+        suppress_health_check=[HealthCheck.function_scoped_fixture],
+    )
+    @given(config=st.builds(SpecletSixConfiguration))
+    def test_changing_configuration_resets_model(
+        self,
+        tmp_path: Path,
+        mock_crc_dm: CrcDataManager,
+        config: SpecletSixConfiguration,
     ):
-        make_data_multiple_lineages(data_manager)
         sp6 = SpecletSix(
-            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
+            "test-model",
+            root_cache_dir=tmp_path,
+            debug=True,
+            data_manager=mock_crc_dm,
+        )
+        assert sp6.model is None
+        sp6.build_model()
+        assert sp6.model is not None
+        sp6.set_config(config.dict())
+        if config == SpecletSixConfiguration():
+            assert sp6.model is not None
+        else:
+            assert sp6.model is None
+
+    def test_model_with_multiple_cell_line_lineages(
+        self, tmp_path: Path, mock_crc_dm: CrcDataManager
+    ):
+        make_data_multiple_lineages(mock_crc_dm)
+        sp6 = SpecletSix(
+            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=mock_crc_dm
         )
         sp6.build_model()
         assert sp6.model is not None
@@ -139,15 +152,15 @@ class TestSpecletSix:
             assert expected_v in model_vars
 
     def test_model_with_multiple_screens(
-        self, tmp_path: Path, data_manager: CrcDataManager
+        self, tmp_path: Path, mock_crc_dm: CrcDataManager
     ):
-        d = data_manager.get_data().copy()
+        d = mock_crc_dm.get_data().copy()
         d["screen"] = "screen_A"
         d = achelp.set_achilles_categorical_columns(d)
-        data_manager.data = d
+        mock_crc_dm.data = d
 
         sp6 = SpecletSix(
-            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
+            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=mock_crc_dm
         )
 
         multi_screen_vars = ["μ_μ_j", "σ_μ_j", "σ_σ_j"]
@@ -159,7 +172,7 @@ class TestSpecletSix:
         for var in multi_screen_vars:
             assert var not in model_vars
 
-        make_data_multiple_screens(dm=data_manager)
+        make_data_multiple_screens(dm=mock_crc_dm)
         sp6.build_model()
         assert sp6.model is not None
         model_vars = pmhelp.get_variable_names(sp6.model, rm_log=True)
@@ -179,15 +192,19 @@ class TestSpecletSix:
     def test_model_with_optional_cellline_cn_covariate(
         self,
         tmp_path: Path,
-        data_manager: CrcDataManager,
+        mock_crc_dm: CrcDataManager,
         arg_name: str,
         arg_value: bool,
         expected_vars: Set[str],
     ):
+        config = SpecletSixConfiguration(**{arg_name: arg_value})
         sp6 = SpecletSix(
-            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
+            "TEST-MODEL",
+            root_cache_dir=tmp_path,
+            debug=True,
+            data_manager=mock_crc_dm,
+            config=config,
         )
-        sp6.__setattr__(arg_name, arg_value)
         assert sp6.model is None
         sp6.build_model()
         assert sp6.model is not None
@@ -196,12 +213,12 @@ class TestSpecletSix:
             assert (v in model_vars) == arg_value
 
     @pytest.mark.slow
-    def test_mcmc_sampling(self, tmp_path: Path, data_manager: CrcDataManager):
+    def test_mcmc_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
         sp6 = SpecletSix(
             "TEST-MODEL",
             root_cache_dir=tmp_path,
             debug=True,
-            data_manager=data_manager,
+            data_manager=mock_crc_dm,
         )
         assert sp6.model is None
         sp6.build_model()
@@ -221,14 +238,14 @@ class TestSpecletSix:
 
     @pytest.mark.slow
     def test_mcmc_sampling_multiple_lineages(
-        self, tmp_path: Path, data_manager: CrcDataManager
+        self, tmp_path: Path, mock_crc_dm: CrcDataManager
     ):
-        make_data_multiple_lineages(data_manager)
+        make_data_multiple_lineages(mock_crc_dm)
         sp6 = SpecletSix(
             "TEST-MODEL",
             root_cache_dir=tmp_path,
             debug=True,
-            data_manager=data_manager,
+            data_manager=mock_crc_dm,
         )
         assert sp6.model is None
         sp6.build_model()
@@ -248,17 +265,21 @@ class TestSpecletSix:
 
     @pytest.mark.slow
     def test_mcmc_sampling_with_optional_covariates(
-        self, tmp_path: Path, data_manager: CrcDataManager
+        self, tmp_path: Path, mock_crc_dm: CrcDataManager
     ):
         sp6 = SpecletSix(
             "TEST-MODEL",
             root_cache_dir=tmp_path,
             debug=True,
-            data_manager=data_manager,
-            cell_line_cna_cov=True,
-            gene_cna_cov=True,
-            rna_cov=True,
-            mutation_cov=True,
+            data_manager=mock_crc_dm,
+            config=SpecletSixConfiguration(
+                **{
+                    "cell_line_cna_cov": True,
+                    "gene_cna_cov": True,
+                    "rna_cov": True,
+                    "mutation_cov": True,
+                }
+            ),
         )
         assert sp6.model is None
         sp6.build_model()
@@ -277,9 +298,9 @@ class TestSpecletSix:
         assert sp6.mcmc_results is not None
 
     @pytest.mark.slow
-    def test_advi_sampling(self, tmp_path: Path, data_manager: CrcDataManager):
+    def test_advi_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
         sp6 = SpecletSix(
-            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
+            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=mock_crc_dm
         )
         assert sp6.model is None
         sp6.build_model()
@@ -295,23 +316,24 @@ class TestSpecletSix:
         )
         assert sp6.advi_results is not None
 
-    @pytest.mark.parametrize("model_param", model_parameterizations)
+    @settings(
+        max_examples=5,
+        deadline=None,
+        suppress_health_check=[HealthCheck.function_scoped_fixture],
+    )
+    @given(config=st.builds(SpecletSixConfiguration))
     def test_model_parameterizations(
         self,
         tmp_path: Path,
-        data_manager: CrcDataManager,
-        model_param: SpecletSixParameterization,
+        mock_crc_dm: CrcDataManager,
+        config: SpecletSixConfiguration,
     ):
         sp6 = SpecletSix(
             "test-model",
             root_cache_dir=tmp_path,
             debug=True,
-            data_manager=data_manager,
-            cell_line_cna_cov=True,
-            gene_cna_cov=True,
-            rna_cov=True,
-            mutation_cov=True,
-            parameterization=model_param,
+            data_manager=mock_crc_dm,
+            config=config,
         )
         assert sp6.model is None
         sp6.build_model()
@@ -320,6 +342,21 @@ class TestSpecletSix:
         rv_names = pmhelp.get_random_variable_names(sp6.model)
         unobs_names = pmhelp.get_deterministic_variable_names(sp6.model)
 
-        for param_name, param_method in zip(model_param._fields, model_param):
+        optional_param_to_name: Dict[str, str] = {
+            "k": "cell_line_cna_cov",
+            "n": "gene_cna_cov",
+            "q": "rna_cov",
+            "m": "mutation_cov",
+        }
+
+        for param_name, param_method in config.dict().items():
+            if len(param_name) > 1:
+                continue
+            if (
+                param_name in optional_param_to_name.keys()
+                and not config.dict()[optional_param_to_name[param_name]]
+            ):
+                continue
+
             assert (param_name in set(rv_names)) == (param_method is MP.CENTERED)
             assert (param_name in set(unobs_names)) == (param_method is MP.NONCENTERED)
