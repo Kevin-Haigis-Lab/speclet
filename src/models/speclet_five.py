@@ -76,8 +76,11 @@ class SpecletFive(SpecletModel):
 
     def set_config(self, info: Dict[Any, Any]) -> None:
         """Set model-specific configuration."""
-        logger.info("Setting model-specific configuration.")
-        self.config = SpecletFiveConfiguration(**info)
+        new_config = SpecletFiveConfiguration(**info)
+        if self.config is not None and self.config != new_config:
+            logger.info("Setting model-specific configuration.")
+            self.config = new_config
+            self.model = None
 
     def model_specification(self) -> Tuple[pm.Model, str]:
         """Build SpecletFour model.

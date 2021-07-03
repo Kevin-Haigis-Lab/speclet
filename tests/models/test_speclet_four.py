@@ -12,31 +12,31 @@ from src.project_enums import ModelParameterization as MP
 
 class TestSpecletFour:
     def test_instantiation(self, tmp_path: Path):
-        sp_four = SpecletFour("test-model", root_cache_dir=tmp_path, debug=True)
-        assert sp_four.model is None
+        sp4 = SpecletFour("test-model", root_cache_dir=tmp_path, debug=True)
+        assert sp4.model is None
 
     def test_build_model(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
-        sp_four = SpecletFour(
+        sp4 = SpecletFour(
             "test-model", root_cache_dir=tmp_path, debug=True, data_manager=mock_crc_dm
         )
-        assert sp_four.model is None
-        sp_four.build_model()
-        assert sp_four.model is not None
+        assert sp4.model is None
+        sp4.build_model()
+        assert sp4.model is not None
 
     @pytest.mark.slow
     def test_mcmc_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
-        sp_four = SpecletFour(
+        sp4 = SpecletFour(
             "test-model",
             root_cache_dir=tmp_path,
             debug=True,
             data_manager=mock_crc_dm,
         )
-        assert sp_four.model is None
-        sp_four.build_model()
-        assert sp_four.model is not None
-        assert sp_four.observed_var_name is not None
-        assert sp_four.mcmc_results is None
-        _ = sp_four.mcmc_sample_model(
+        assert sp4.model is None
+        sp4.build_model()
+        assert sp4.model is not None
+        assert sp4.observed_var_name is not None
+        assert sp4.mcmc_results is None
+        _ = sp4.mcmc_sample_model(
             mcmc_draws=10,
             tune=10,
             chains=2,
@@ -45,7 +45,7 @@ class TestSpecletFour:
             post_pred_samples=10,
             random_seed=1,
         )
-        assert sp_four.mcmc_results is not None
+        assert sp4.mcmc_results is not None
 
     @settings(
         max_examples=5,
@@ -106,19 +106,19 @@ class TestSpecletFour:
         mock_crc_dm: CrcDataManager,
         config: SpecletFourConfiguration,
     ):
-        sp_four = SpecletFour(
+        sp4 = SpecletFour(
             "test-model",
             root_cache_dir=tmp_path,
             debug=True,
             data_manager=mock_crc_dm,
             config=config,
         )
-        assert sp_four.model is None
-        sp_four.build_model()
-        assert sp_four.model is not None
+        assert sp4.model is None
+        sp4.build_model()
+        assert sp4.model is not None
 
-        rv_names = pmhelp.get_random_variable_names(sp_four.model)
-        unobs_names = pmhelp.get_deterministic_variable_names(sp_four.model)
+        rv_names = pmhelp.get_random_variable_names(sp4.model)
+        unobs_names = pmhelp.get_deterministic_variable_names(sp4.model)
         all_var_names = rv_names + unobs_names
 
         assert ("β" in set(all_var_names)) == config.copy_number_cov
