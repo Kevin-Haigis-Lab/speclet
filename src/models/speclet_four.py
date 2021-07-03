@@ -70,7 +70,7 @@ class SpecletFour(SpecletModel):
         self.config = config
 
         super().__init__(
-            name="speclet-four_" + name,
+            name=name,
             root_cache_dir=root_cache_dir,
             debug=debug,
             data_manager=data_manager,

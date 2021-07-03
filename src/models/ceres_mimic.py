@@ -74,7 +74,7 @@ class CeresMimic(SpecletModel):
             data_manager = CrcDataManager(debug=debug)
 
         super().__init__(
-            name="ceres-mimic-1_" + name,
+            name=name,
             root_cache_dir=root_cache_dir,
             debug=debug,
             data_manager=data_manager,
