@@ -1,0 +1,23 @@
+- name: my-test-model
+  description: My model for testing model configs.
+  model: speclet-test-model
+  fit_methods:
+    - ADVI
+  config:
+    some_param: noncentered
+    cov2: true
+  pipelines:
+    - fitting
+- name: second-test-model
+  description: Another model for testing the pipelines.
+  model: speclet-test-model
+  fit_methods:
+    - ADVI
+    - MCMC
+  config:
+    some_param: noncentered
+    cov1: true
+    cov2: true
+  pipelines:
+    - fitting
+    - sbc
