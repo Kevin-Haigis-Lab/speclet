@@ -4,22 +4,21 @@
 
 
 from pathlib import Path
-from typing import Dict, Optional, Type, TypeVar, Union
+from typing import Dict, Type, TypeVar, Union
 
 import pretty_errors
 
 from src.loggers import logger
 from src.models.ceres_mimic import CeresMimic
+from src.models.configuration import configure_model
 from src.models.speclet_five import SpecletFive, SpecletFiveConfiguration
 from src.models.speclet_four import SpecletFour, SpecletFourConfiguration
-from src.models.speclet_model import SpecletModel
 from src.models.speclet_one import SpecletOne
 from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.models.speclet_seven import SpecletSeven, SpecletSevenConfiguration
 from src.models.speclet_six import SpecletSix, SpecletSixConfiguration
 from src.models.speclet_two import SpecletTwo
-from src.pipelines import pipeline_classes
-from src.pipelines.pipeline_classes import ModelOption
+from src.project_enums import ModelOption
 
 #### ---- Pretty Errors ---- ####
 
@@ -95,71 +94,6 @@ _ConfigurationT = TypeVar(
 )
 
 
-class FoundMultipleModelConfigurationsError(BaseException):
-    """Found multiple model configurations."""
-
-    def __init__(self, name: str, n_configs: int) -> None:
-        """Create a FoundMultipleModelConfigurationsError error.
-
-        Args:
-            name (str): Name of the model whose configuration was searched for.
-            n_configs (int): Number of configs found.
-        """
-        self.name = name
-        self.n_configs = n_configs
-        self.message = f"Found {self.n_configs} configuration files for '{self.name}'."
-        super().__init__(self.message)
-
-
-def get_configuration_for_model(
-    config_path: Path, name: str
-) -> Optional[pipeline_classes.ModelConfig]:
-    """Get the configuration information for a named model.
-
-    Args:
-        config_path (Path): Path to the configuration file.
-        name (str): Model configuration identifier.
-
-    Raises:
-        FoundMultipleModelConfigurationsError: Raised if multiple configuration files
-        are found.
-
-    Returns:
-        Optional[pipeline_classes.ModelConfig]: If a configuration file is found, it is
-        returned, else None.
-    """
-    configs = [
-        config
-        for config in pipeline_classes.get_model_configurations(
-            config_path
-        ).configurations
-        if config.name == name
-    ]
-    if len(configs) > 1:
-        raise FoundMultipleModelConfigurationsError(name, len(configs))
-    if len(configs) == 0:
-        return None
-    return configs[0]
-
-
-def configure_model(model: SpecletModel, name: str, config_path: Path) -> None:
-    """Apply model-specific configuration from a configuration file.
-
-    Configuration is applied in-place to the provided SpecletModel object.
-
-    Args:
-        model (SpecletModel): Speclet model to configure.
-        name (str): Identifiable name of the model.
-        config_path (Path): Path to the configuration file.
-    """
-    configuration = get_configuration_for_model(config_path, name=name)
-    if configuration is not None:
-        logger.info(f"Found configuration for model name: '{name}'.")
-        model.set_config(configuration.config)
-    else:
-        logger.info(f"No configuration found for model name: '{name}'.")
-
-
 def instantiate_and_configure_model(
     model_opt: ModelOption,
     name: str,
@@ -179,7 +113,9 @@ def instantiate_and_configure_model(
     Returns:
         _SpecletProjectModelTypes: An instance of the desired speclet model.
     """
+    logger.info(f"Instantiating and configuring a '{model_opt.value}' model.")
     ModelClass = get_model_class(model_opt=model_opt)
     speclet_model = ModelClass(name=name, root_cache_dir=root_cache_dir, debug=debug)
-    configure_model(model=speclet_model, name=name, config_path=config_path)
+    logger.info(f"Configuring model using config: '{config_path.as_posix()}'")
+    configure_model(model=speclet_model, config_path=config_path)
     return speclet_model
