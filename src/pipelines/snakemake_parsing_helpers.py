@@ -5,7 +5,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from src.models import configuration as model_config
+from src.io import model_config
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
 
 

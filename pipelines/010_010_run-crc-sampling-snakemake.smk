@@ -10,8 +10,7 @@ from src.managers.model_fitting_pipeline_resource_manager import (
     ModelFittingPipelineResourceManager as RM,
 )
 from src.pipelines.snakemake_parsing_helpers import get_models_names_fit_methods
-from src.pipelines.pipeline_classes import ModelOption
-from src.project_enums import ModelFitMethod
+from src.project_enums import ModelFitMethod, ModelOption
 
 PYMC3_MODEL_CACHE_DIR = "models/"
 REPORTS_DIR = "reports/crc_model_sampling_reports/"
@@ -24,17 +23,13 @@ N_CHAINS = 4
 MODEL_CONFIG = Path("models", "model-configs.yaml")
 
 # Separate information in model configuration for `all` step to create wildcards.
-model_infos = get_models_names_fit_methods(MODEL_CONFIG)
-models: List[str] = model_infos.models
-model_names: List[str] = model_infos.model_names
-fit_methods: List[str] = model_infos.fit_methods
-
+model_configuration_lists = get_models_names_fit_methods(MODEL_CONFIG)
 
 #### ---- Wildcard constrains ---- ####
 
 wildcard_constraints:
     model="|".join([a.value for a in ModelOption]),
-    model_name="|".join(set(model_names)),
+    model_name="|".join(set(model_configuration_lists.model_names)),
     fit_method="|".join(a.value for a in ModelFitMethod),
     chain="\d+",
 
@@ -47,6 +42,7 @@ def create_resource_manager(w: Any, fit_method: ModelFitMethod) -> RM:
 def cli_is_debug(w: Any) -> str:
     return create_resource_manager(w=w, fit_method=ModelFitMethod.ADVI).is_debug_cli()
 
+
 #### ---- Rules ---- ####
 
 
@@ -55,14 +51,15 @@ rule all:
         expand(
             REPORTS_DIR + "{model}_{model_name}_{fit_method}.md",
             zip,
-            model=models,
-            model_name=model_names,
-            fit_method=fit_methods,
+            model=model_configuration_lists.models,
+            model_name=model_configuration_lists.model_names,
+            fit_method=model_configuration_lists.fit_methods,
         ),
+
 
 rule sample_mcmc:
     output:
-        PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_chain{chain}_MCMC.txt",
+        touch_file=PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_chain{chain}_MCMC.txt",
     params:
         mem=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).memory,
         time=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).time,
@@ -81,7 +78,7 @@ rule sample_mcmc:
         "  --mcmc-cores 1"
         "  --random-seed 7414"
         "  {params.debug}"
-        "  --touch"
+        "  --touch {output.touch_file}"
 
 rule combine_mcmc:
     input:
