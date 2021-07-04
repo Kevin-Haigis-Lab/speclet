@@ -1,0 +1,33 @@
+- name: sp4-default-config
+  description: Default settings for SpecletFour
+  model: speclet-four
+  fit_methods:
+    - MCMC
+    - ADVI
+  pipelines:
+    - fitting
+    - sbc
+- name: sp4-noncentered
+  description: SpecletFour with all covariates in non-centered parameterization.
+  model: speclet-four
+  fit_methods:
+    - ADVI
+  config:
+    h: NONCENTERED
+    d: NONCENTERED
+    η: NONCENTERED
+  pipelines:
+    - fitting
+- name: sp4-noncentered-copynum
+  description: SpecletFour with all covariates, including copy number, in non-centered parameterization.
+  model: speclet-four
+  fit_methods:
+    - ADVI
+  config:
+    copy_number_cov: true
+    h: NONCENTERED
+    d: NONCENTERED
+    β: NONCENTERED
+    η: NONCENTERED
+  pipelines:
+    - fitting
