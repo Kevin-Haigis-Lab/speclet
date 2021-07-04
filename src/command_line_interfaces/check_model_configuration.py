@@ -6,7 +6,7 @@ from pathlib import Path
 
 import typer
 
-from src.models import configuration as c
+from src.io import model_config as c
 
 
 def check_model_configuration(path: Path) -> None:

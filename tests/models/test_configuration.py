@@ -20,15 +20,6 @@ from src.project_enums import ModelOption
 from src.project_enums import ModelParameterization as MP
 
 
-def test_get_model_configuration(mock_model_config: Path):
-    names: Tuple[str, ...] = ("my-test-model", "second-test-model", "not-a-model-name")
-    results: Tuple[bool, ...] = (True, True, False)
-    assert len(names) == len(results)
-    for name, result in zip(names, results):
-        config = c.get_configuration_for_model(mock_model_config, name)
-        assert (config is not None) == result
-
-
 def test_configure_model(mock_model_config: Path, tmp_path: Path):
     sp = SpecletTestModel("my-test-model", tmp_path)
     c.configure_model(sp, config_path=mock_model_config)

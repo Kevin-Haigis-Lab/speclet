@@ -29,7 +29,7 @@ def configure_model(model: SpecletModel, config_path: Path) -> None:
         config_path (Path): Path to the configuration file.
     """
     configuration = get_configuration_for_model(config_path, name=model.name)
-    if configuration is not None:
+    if configuration is not None and configuration.config is not None:
         logger.info(f"Found configuration for model name: '{model.name}'.")
         model.set_config(configuration.config)
     else:

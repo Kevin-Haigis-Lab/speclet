@@ -27,12 +27,17 @@ def test_model_names_are_unique_does_not_fail(model_configs: c.ModelConfigs):
 
 def test_get_model_configurations(mock_model_config: Path):
     config = c.get_model_configurations(mock_model_config)
-    assert len(config.configurations) == 2
+    assert len(config.configurations) == 3
 
 
 def test_get_model_configuration(mock_model_config: Path):
-    names: Tuple[str, ...] = ("my-test-model", "second-test-model", "not-a-model-name")
-    results: Tuple[bool, ...] = (True, True, False)
+    names: Tuple[str, ...] = (
+        "my-test-model",
+        "second-test-model",
+        "not-a-model-name",
+        "no-config-test",
+    )
+    results: Tuple[bool, ...] = (True, True, False, True)
     assert len(names) == len(results)
     for name, result in zip(names, results):
         config = c.get_configuration_for_model(mock_model_config, name)

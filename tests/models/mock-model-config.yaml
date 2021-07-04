@@ -21,3 +21,10 @@
   pipelines:
     - fitting
     - sbc
+- name: no-config-test
+  description: A config without a `config` section.
+  model: speclet-test-model
+  fit_methods:
+    - ADVI
+  pipelines:
+    - fitting

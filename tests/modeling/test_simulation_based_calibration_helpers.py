@@ -410,6 +410,7 @@ def test_sgrnas_uniquely_map_to_genes(mock_data: pd.DataFrame):
     assert len(sgrnas) == len(np.unique(sgrnas))
 
 
+@settings(max_examples=5)
 @given(mock_data=generate_data_with_random_params())
 def test_cellline_in_one_batch(mock_data: pd.DataFrame):
     cellline_to_batch = (

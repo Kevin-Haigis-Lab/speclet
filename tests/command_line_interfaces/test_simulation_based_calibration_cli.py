@@ -19,7 +19,9 @@ def run_sbc_app() -> typer.Typer:
 runner = CliRunner()
 
 
-@pytest.mark.parametrize("model_name", ["my-test-model", "second-test-model"])
+@pytest.mark.parametrize(
+    "model_name", ["my-test-model", "second-test-model", "no-config-test"]
+)
 def test_run_sbc_with_sampling(
     model_name: str,
     run_sbc_app: typer.Typer,

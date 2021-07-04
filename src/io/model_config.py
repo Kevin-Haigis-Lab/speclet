@@ -17,9 +17,9 @@ class ModelConfig(BaseModel):
     name: str
     description: str
     model: ModelOption
-    fit_methods: List[ModelFitMethod] = []
-    config: Dict[str, Union[ModelFitMethod, str, bool, int, float]]
-    pipelines: List[SpecletPipeline]
+    fit_methods: List[ModelFitMethod]
+    config: Optional[Dict[str, Union[ModelFitMethod, str, bool, int, float]]]
+    pipelines: Optional[List[SpecletPipeline]]
 
 
 class ModelConfigs(BaseModel):
