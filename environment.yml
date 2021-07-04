@@ -22,7 +22,7 @@ dependencies:
   - isort=5.7.0
   - jedi=0.18.0
   - jupyterlab_code_formatter=1.4.4
-  - jupyter_contrib_nbextensions=0.5.1
+  #- jupyter_contrib_nbextensions=0.5.1
   - matplotlib=3.3.4
   - mkl=2020.4
   - mypy=0.812
@@ -30,7 +30,7 @@ dependencies:
   - nbdime=2.1.0
   - nbformat=5.1.2
   - nbqa=0.5.9
-  - nodejs=15.11.0
+  - nodejs
   - numpy=1.20.1
   - openssl=1.1.1k
   - pandas=1.2.3
