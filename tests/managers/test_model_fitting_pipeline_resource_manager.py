@@ -4,8 +4,7 @@ from src.managers.model_fitting_pipeline_resource_manager import (
     ModelFittingPipelineResourceManager as RM,
 )
 from src.managers.model_fitting_pipeline_resource_manager import ResourceRequestUnkown
-from src.pipelines.pipeline_classes import ModelOption, SlurmPartitions
-from src.project_enums import ModelFitMethod
+from src.project_enums import ModelFitMethod, ModelOption, SlurmPartitions
 
 
 @pytest.mark.parametrize("model", [a.value for a in ModelOption])
@@ -23,7 +22,7 @@ def test_resources_available_for_models(model: str, fit_method: str):
 
 def test_resource_manager_detects_debug():
     rm = RM(
-        model=ModelOption.speclet_test_model,
+        model=ModelOption.SPECLET_TEST_MODEL,
         name="my-model-debug",
         fit_method=ModelFitMethod.ADVI,
     )
@@ -31,7 +30,7 @@ def test_resource_manager_detects_debug():
     assert rm.is_debug_cli() == "--debug"
 
     rm = RM(
-        model=ModelOption.speclet_test_model,
+        model=ModelOption.SPECLET_TEST_MODEL,
         name="my-model",
         fit_method=ModelFitMethod.ADVI,
     )
@@ -41,7 +40,7 @@ def test_resource_manager_detects_debug():
 
 def test_error_on_invalid_model_params():
     rm = RM(
-        model=ModelOption.speclet_test_model,
+        model=ModelOption.SPECLET_TEST_MODEL,
         name="my-model-debug",
         fit_method=ModelFitMethod.ADVI,
     )

@@ -2,8 +2,7 @@ import pytest
 
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 from src.modeling.simulation_based_calibration_enums import MockDataSizes
-from src.pipelines.pipeline_classes import ModelOption
-from src.project_enums import ModelFitMethod
+from src.project_enums import ModelFitMethod, ModelOption
 
 
 @pytest.mark.parametrize("model", [a.value for a in ModelOption])

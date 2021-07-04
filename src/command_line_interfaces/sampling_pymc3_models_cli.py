@@ -14,8 +14,7 @@ from src.command_line_interfaces import cli_helpers
 from src.io import cache_io
 from src.loggers import logger
 from src.models.speclet_model import SpecletModel
-from src.pipelines.pipeline_classes import ModelOption
-from src.project_enums import ModelFitMethod
+from src.project_enums import ModelFitMethod, ModelOption
 
 cli_helpers.configure_pretty()
 

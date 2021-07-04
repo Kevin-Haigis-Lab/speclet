@@ -6,8 +6,7 @@ from typing import Dict, TypeVar
 from pydantic import validate_arguments
 
 from src.exceptions import ResourceRequestUnkown
-from src.pipelines.pipeline_classes import ModelOption, SlurmPartitions
-from src.project_enums import ModelFitMethod
+from src.project_enums import ModelFitMethod, ModelOption, SlurmPartitions
 
 T = TypeVar("T")
 ResourceLookupDict = Dict[ModelOption, Dict[bool, Dict[ModelFitMethod, T]]]
