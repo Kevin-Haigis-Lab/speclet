@@ -1,13 +1,14 @@
 from pathlib import Path
+from typing import Any
 
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
 from src.managers.model_data_managers import CrcDataManager
+from src.misc import test_helpers as th
 from src.modeling import pymc3_helpers as pmhelp
 from src.models.speclet_four import SpecletFour, SpecletFourConfiguration
-from src.project_enums import ModelParameterization as MP
 
 
 class TestSpecletFour:
@@ -65,14 +66,9 @@ class TestSpecletFour:
             debug=True,
             data_manager=mock_crc_dm,
         )
-        assert sp4.model is None
-        sp4.build_model()
-        assert sp4.model is not None
-        sp4.set_config(config.dict())
-        if config == SpecletFourConfiguration():
-            assert sp4.model is not None
-        else:
-            assert sp4.model is None
+        th.assert_changing_configuration_resets_model(
+            sp4, new_config=config, default_config=SpecletFourConfiguration()
+        )
 
     @pytest.mark.parametrize("copy_cov", [True, False])
     def test_switching_copynumber_covariate(
@@ -93,7 +89,6 @@ class TestSpecletFour:
         var_names = pmhelp.get_variable_names(sp4.model)
         assert ("β" in set(var_names)) == copy_cov
 
-    @pytest.mark.DEV
     @settings(
         max_examples=5,
         deadline=None,
@@ -113,20 +108,14 @@ class TestSpecletFour:
             data_manager=mock_crc_dm,
             config=config,
         )
-        assert sp4.model is None
-        sp4.build_model()
-        assert sp4.model is not None
 
-        rv_names = pmhelp.get_random_variable_names(sp4.model)
-        unobs_names = pmhelp.get_deterministic_variable_names(sp4.model)
-        all_var_names = rv_names + unobs_names
-
-        assert ("β" in set(all_var_names)) == config.copy_number_cov
-
-        for param_name, param_method in config.dict().items():
+        def pre_check_callback(param_name: str, *args: Any, **kwargs: Any) -> bool:
             if param_name == "β" and not config.copy_number_cov:
-                continue
+                return True
             elif param_name == "copy_number_cov":
-                continue
-            assert (param_name in set(rv_names)) == (param_method is MP.CENTERED)
-            assert (param_name in set(unobs_names)) == (param_method is MP.NONCENTERED)
+                return True
+            return False
+
+        th.assert_model_reparameterization(
+            sp4, config=config, pre_check_callback=pre_check_callback
+        )

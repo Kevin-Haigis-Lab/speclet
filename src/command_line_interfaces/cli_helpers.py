@@ -4,21 +4,22 @@
 
 
 from pathlib import Path
-from typing import Dict, Type, TypeVar, Union
+from typing import Dict, Type
 
 import pretty_errors
 
 from src.loggers import logger
 from src.models.ceres_mimic import CeresMimic
 from src.models.configuration import configure_model
-from src.models.speclet_five import SpecletFive, SpecletFiveConfiguration
-from src.models.speclet_four import SpecletFour, SpecletFourConfiguration
+from src.models.speclet_five import SpecletFive
+from src.models.speclet_four import SpecletFour
 from src.models.speclet_one import SpecletOne
 from src.models.speclet_pipeline_test_model import SpecletTestModel
-from src.models.speclet_seven import SpecletSeven, SpecletSevenConfiguration
-from src.models.speclet_six import SpecletSix, SpecletSixConfiguration
+from src.models.speclet_seven import SpecletSeven
+from src.models.speclet_six import SpecletSix
 from src.models.speclet_two import SpecletTwo
 from src.project_enums import ModelOption
+from src.types import SpecletProjectModelTypes
 
 #### ---- Pretty Errors ---- ####
 
@@ -49,19 +50,7 @@ def clean_model_names(n: str) -> str:
     return n.replace(" ", "-")
 
 
-_SpecletProjectModelTypes = Union[
-    SpecletTestModel,
-    CeresMimic,
-    SpecletOne,
-    SpecletTwo,
-    SpecletFour,
-    SpecletFive,
-    SpecletSix,
-    SpecletSeven,
-]
-
-
-def get_model_class(model_opt: ModelOption) -> Type[_SpecletProjectModelTypes]:
+def get_model_class(model_opt: ModelOption) -> Type[SpecletProjectModelTypes]:
     """Get the model class from its string identifier.
 
     Args:
@@ -70,7 +59,7 @@ def get_model_class(model_opt: ModelOption) -> Type[_SpecletProjectModelTypes]:
     Returns:
         Type[SpecletModel]: The corresponding model class.
     """
-    model_option_map: Dict[ModelOption, Type[_SpecletProjectModelTypes]] = {
+    model_option_map: Dict[ModelOption, Type[SpecletProjectModelTypes]] = {
         ModelOption.SPECLET_TEST_MODEL: SpecletTestModel,
         ModelOption.CRC_CERES_MIMIC: CeresMimic,
         ModelOption.SPECLET_ONE: SpecletOne,
@@ -85,14 +74,6 @@ def get_model_class(model_opt: ModelOption) -> Type[_SpecletProjectModelTypes]:
 
 #### ---- Model configurations ---- ####
 
-_ConfigurationT = TypeVar(
-    "_ConfigurationT",
-    SpecletFiveConfiguration,
-    SpecletFourConfiguration,
-    SpecletSixConfiguration,
-    SpecletSevenConfiguration,
-)
-
 
 def instantiate_and_configure_model(
     model_opt: ModelOption,
@@ -100,7 +81,7 @@ def instantiate_and_configure_model(
     root_cache_dir: Path,
     debug: bool,
     config_path: Path,
-) -> _SpecletProjectModelTypes:
+) -> SpecletProjectModelTypes:
     """Instantiate and configure a model.
 
     Args:
@@ -111,7 +92,7 @@ def instantiate_and_configure_model(
         config_path (Path): Path to configuration file.
 
     Returns:
-        _SpecletProjectModelTypes: An instance of the desired speclet model.
+        SpecletProjectModelTypes: An instance of the desired speclet model.
     """
     logger.info(f"Instantiating and configuring a '{model_opt.value}' model.")
     ModelClass = get_model_class(model_opt=model_opt)

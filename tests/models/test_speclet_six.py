@@ -10,10 +10,10 @@ from hypothesis import strategies as st
 
 from src.data_processing import achilles as achelp
 from src.managers.model_data_managers import CrcDataManager
+from src.misc import test_helpers as th
 from src.modeling import pymc3_helpers as pmhelp
 from src.models import speclet_six
 from src.models.speclet_six import SpecletSix, SpecletSixConfiguration
-from src.project_enums import ModelParameterization as MP
 
 chars = [str(i) for i in range(10)] + list(ascii_letters)
 
@@ -129,14 +129,9 @@ class TestSpecletSix:
             debug=True,
             data_manager=mock_crc_dm,
         )
-        assert sp6.model is None
-        sp6.build_model()
-        assert sp6.model is not None
-        sp6.set_config(config.dict())
-        if config == SpecletSixConfiguration():
-            assert sp6.model is not None
-        else:
-            assert sp6.model is None
+        th.assert_changing_configuration_resets_model(
+            sp6, new_config=config, default_config=SpecletSixConfiguration()
+        )
 
     def test_model_with_multiple_cell_line_lineages(
         self, tmp_path: Path, mock_crc_dm: CrcDataManager
@@ -335,12 +330,6 @@ class TestSpecletSix:
             data_manager=mock_crc_dm,
             config=config,
         )
-        assert sp6.model is None
-        sp6.build_model()
-        assert sp6.model is not None
-
-        rv_names = pmhelp.get_random_variable_names(sp6.model)
-        unobs_names = pmhelp.get_deterministic_variable_names(sp6.model)
 
         optional_param_to_name: Dict[str, str] = {
             "k": "cell_line_cna_cov",
@@ -349,14 +338,16 @@ class TestSpecletSix:
             "m": "mutation_cov",
         }
 
-        for param_name, param_method in config.dict().items():
+        def pre_check_callback(param_name: str, *args: Any, **kwargs: Any) -> bool:
             if len(param_name) > 1:
-                continue
+                return True
             if (
                 param_name in optional_param_to_name.keys()
                 and not config.dict()[optional_param_to_name[param_name]]
             ):
-                continue
+                return True
+            return False
 
-            assert (param_name in set(rv_names)) == (param_method is MP.CENTERED)
-            assert (param_name in set(unobs_names)) == (param_method is MP.NONCENTERED)
+        th.assert_model_reparameterization(
+            sp6, config=config, pre_check_callback=pre_check_callback
+        )
