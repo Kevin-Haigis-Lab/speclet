@@ -18,12 +18,12 @@ ENVIRONMENT_YAML = Path("default_environment.yml").as_posix()
 
 N_CHAINS = 4
 
+
 #### ---- Model configurations ---- ####
 
 MODEL_CONFIG = Path("models", "model-configs.yaml")
-
-# Separate information in model configuration for `all` step to create wildcards.
 model_configuration_lists = get_models_names_fit_methods(MODEL_CONFIG)
+
 
 #### ---- Wildcard constrains ---- ####
 

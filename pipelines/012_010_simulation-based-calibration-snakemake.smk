@@ -6,9 +6,8 @@ from typing import List
 import papermill
 from snakemake.io import Wildcards
 
-from src.project_enums import ModelFitMethod
+from src.project_enums import ModelFitMethod, ModelOption
 from src.pipelines.snakemake_parsing_helpers import get_models_names_fit_methods
-from src.pipelines.pipeline_classes import ModelOption
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
 NUM_SIMULATIONS = 100
@@ -23,20 +22,14 @@ MOCK_DATA_SIZE = "small"
 #### ---- Model Configurations ---- ####
 
 MODEL_CONFIG = Path("models", "model-configs.yaml")
-
-# Separate information in model configuration for `all` step to create wildcards.
-model_infos = get_models_names_fit_methods(MODEL_CONFIG)
-models: List[str] = model_infos.models
-model_names: List[str] = model_infos.model_names
-fit_methods: List[str] = model_infos.fit_methods
-
+model_configuration_lists = get_models_names_fit_methods(MODEL_CONFIG)
 
 
 #### ---- Wildcard constrains ---- ####
 
 wildcard_constraints:
     model="|".join([a.value for a in ModelOption]),
-    model_name="|".join(set(model_names)),
+    model_name="|".join(set(model_configuration_lists.model_names)),
     fit_method="|".join(a.value for a in ModelFitMethod),
     perm_num="\d+",
 
@@ -72,9 +65,9 @@ rule all:
         expand(
             REPORTS_DIR + "{model}_{model_name}_{fit_method}_sbc-results.md",
             zip,
-            model=models,
-            model_name=model_names,
-            fit_method=fit_methods,
+            model=model_configuration_lists.models,
+            model_name=model_configuration_lists.model_names,
+            fit_method=model_configuration_lists.fit_methods,
         ),
 
 
