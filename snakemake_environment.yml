@@ -9,6 +9,7 @@ dependencies:
   - snakemake=5.32.2
   - colorama
   - drmaa=0.7.9
+  - future=0.18.2
   - graphviz
   - ipython=7.24.1
   - nbconvert=6.0.7
@@ -21,5 +22,6 @@ dependencies:
   - pytest
   - papermill=2.3.3
   - pydantic=1.8.1
+  - rich=10.4.0
   - pip:
     - -e .  # install the source directory as a package (keep as last)
