@@ -11,14 +11,13 @@ from src.command_line_interfaces.cli_helpers import ModelOption
 from src.loggers import logger
 from src.project_enums import ModelFitMethod
 
-app = typer.Typer()
 cli_helpers.configure_pretty()
 
 
-@app.command()
 def run_sbc(
     model_class: ModelOption,
     name: str,
+    config_path: Path,
     fit_method: ModelFitMethod,
     cache_dir: Path,
     sim_number: int,
@@ -26,17 +25,11 @@ def run_sbc(
 ) -> None:
     """CLI for running a round of simulation-based calibration for a model.
 
-    The `name` argument can contain model specification information. These are
-    documented below.
-
-    [model: CERES Mimic]
-    - If the name contains "copynumber" then the copynumber covariate will be included.
-    - If the name contains "sgrnaint" then the sgRNA|gene varying intercept will be
-      included.
-
     Args:
         model_class (ModelOption): Name of the model to use.
         name (str): Unique identifiable name for the model.
+        config_path (Path): Path to the model configuration file.
+        fit_method (ModelFitMethod): Fitting method.
         cache_dir (Path): Where to store the results.
         sim_number (int): Simulation number.
         data_size (str): Which data size to use. See the actual methods
@@ -47,14 +40,14 @@ def run_sbc(
     """
     logger.info(f"Running SBC for model '{model_class.value}' named '{name}'.")
     name = cli_helpers.clean_model_names(name)
-    ModelClass = cli_helpers.get_model_class(model_opt=model_class)
-    model = ModelClass(
-        f"{name}-sbc{sim_number}",
+    sp_model = cli_helpers.instantiate_and_configure_model(
+        model_opt=model_class,
+        name=name,
         root_cache_dir=cache_dir,
-        debug=True,
+        debug=False,
+        config_path=config_path,
     )
-    cli_helpers.modify_model_by_name(model=model, name=name)
-    model.run_simulation_based_calibration(
+    sp_model.run_simulation_based_calibration(
         cache_dir,
         fit_method=fit_method,
         random_seed=sim_number,
@@ -65,4 +58,4 @@ def run_sbc(
 
 
 if __name__ == "__main__":
-    app()
+    typer.run(run_sbc)
