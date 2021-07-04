@@ -3,7 +3,7 @@ import typer
 from typer.testing import CliRunner
 
 import src.command_line_interfaces.sampling_pymc3_models_cli as sampling
-from src.command_line_interfaces import cli_helpers
+from src.project_enums import ModelOption
 
 #### ---- CLI ---- ####
 
@@ -37,6 +37,6 @@ class TestTyperCLI:
         assert result.exit_code > 0
 
     def test_no_name_error(self, app: typer.Typer, runner: CliRunner):
-        result = runner.invoke(app, [cli_helpers.ModelOption.SPECLET_TEST_MODEL])
+        result = runner.invoke(app, [ModelOption.SPECLET_TEST_MODEL])
         assert "Error: Missing argument" in result.output
         assert result.exit_code > 0
