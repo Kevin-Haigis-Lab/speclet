@@ -7,9 +7,9 @@ from pathlib import Path
 import typer
 
 from src.command_line_interfaces import cli_helpers
-from src.command_line_interfaces.cli_helpers import ModelOption
 from src.loggers import logger
-from src.project_enums import ModelFitMethod
+from src.models.configuration import instantiate_and_configure_model
+from src.project_enums import ModelFitMethod, ModelOption
 
 cli_helpers.configure_pretty()
 
@@ -40,7 +40,7 @@ def run_sbc(
     """
     logger.info(f"Running SBC for model '{model_class.value}' named '{name}'.")
     name = cli_helpers.clean_model_names(name)
-    sp_model = cli_helpers.instantiate_and_configure_model(
+    sp_model = instantiate_and_configure_model(
         model_opt=model_class,
         name=name,
         root_cache_dir=cache_dir,

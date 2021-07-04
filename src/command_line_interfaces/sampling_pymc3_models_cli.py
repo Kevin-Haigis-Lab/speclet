@@ -13,38 +13,11 @@ import typer
 from src.command_line_interfaces import cli_helpers
 from src.io import cache_io
 from src.loggers import logger
+from src.models.configuration import instantiate_and_configure_model
 from src.models.speclet_model import SpecletModel
 from src.project_enums import ModelFitMethod, ModelOption
 
 cli_helpers.configure_pretty()
-
-
-#### ---- File IO ---- ####
-
-
-def touch_file(
-    cache_dir: Path,
-    model: str,
-    name: str,
-    fit_method: ModelFitMethod,
-    touch_suffix: Optional[str] = None,
-) -> None:
-    """Touch a file.
-
-    Args:
-        cache_dir (Path): Location of the cache directory.
-        model (str): The model.
-        name (str): The custom name of the model.
-        fit_method (ModelFitMethod): Method used to fit the model.
-        touch_suffix (Optional[str], optional): Optional suffix to add the to the file.
-          Defaults to None for no additional suffix.
-    """
-    if touch_suffix is None:
-        touch_suffix = ""
-    fn = f"_{model}_{name}_{fit_method.value}{touch_suffix}.txt"
-    p = cache_dir / fn
-    p.touch()
-    return None
 
 
 #### ---- Main ---- ####
@@ -63,7 +36,7 @@ def sample_speclet_model(
     ignore_cache: bool = False,
     debug: bool = False,
     random_seed: Optional[int] = None,
-    touch: bool = False,
+    touch: Optional[Path] = None,
 ) -> SpecletModel:
     """Fit and sample from a variety of predefined PyMC3 models.
 
@@ -99,7 +72,7 @@ def sample_speclet_model(
         logger.info("Sampling in debug mode.")
 
     logger.info(f"Sampling '{model}' with custom name '{name}'")
-    speclet_model = cli_helpers.instantiate_and_configure_model(
+    speclet_model = instantiate_and_configure_model(
         model_opt=model,
         name=name,
         root_cache_dir=PYMC3_CACHE_DIR,
@@ -129,14 +102,9 @@ def sample_speclet_model(
         else:
             raise Exception(f"Unknown fit method '{fit_method.value}'.")
 
-    if touch:
-        logger.info("Touching output file.")
-        touch_file(
-            cache_dir=PYMC3_CACHE_DIR,
-            model=model.value,
-            name=name,
-            fit_method=fit_method,
-        )
+    if touch is not None:
+        logger.info(f"Touching file: '{touch.as_posix()}'.")
+        touch.touch()
 
     toc = time()
     logger.info(f"finished; execution time: {(toc - tic) / 60:.2f} minutes")

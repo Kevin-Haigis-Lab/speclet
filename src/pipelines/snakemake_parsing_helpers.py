@@ -5,9 +5,8 @@ from typing import List
 
 from pydantic import BaseModel
 
-from src.pipelines import pipeline_classes
-from src.pipelines.pipeline_classes import ModelOption, SpecletPipeline
-from src.project_enums import ModelFitMethod
+from src.models import configuration as model_config
+from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
 
 
 class ParsedPipelineInformation(BaseModel):
@@ -27,8 +26,8 @@ class _PipelineIntermediateInformation(BaseModel):
 
 
 def get_models_names_fit_methods(config_path: Path) -> ParsedPipelineInformation:
-    model_configurations = pipeline_classes.get_model_configurations(config_path)
-    pipeline_classes.check_model_names_are_unique(model_configurations)
+    model_configurations = model_config.get_model_configurations(config_path)
+    model_config.check_model_names_are_unique(model_configurations)
 
     pipeline_informations: List[_PipelineIntermediateInformation] = []
 
