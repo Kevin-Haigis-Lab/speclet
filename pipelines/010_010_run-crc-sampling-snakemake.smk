@@ -131,8 +131,10 @@ rule papermill_report:
             REPORTS_DIR + "model-report-template.ipynb",
             output.notebook,
             parameters={
+                "CONFIG_PATH": MODEL_CONFIG.as_posix(),
                 "MODEL_NAME": wildcards.model_name,
                 "FIT_METHOD": wildcards.fit_method,
+                "ROOT_CACHE_DIR": PYMC3_MODEL_CACHE_DIR,
             },
             prepare_only=True,
         )

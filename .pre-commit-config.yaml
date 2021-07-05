@@ -70,7 +70,7 @@ repos:
     rev: 0.13.1
     hooks:
     -   id: nbqa-isort
-        args: ["--nbqa-mutate", "--profile", "black"]
+        args: ["--nbqa-mutate", "--profile=black"]
         exclude: "munge/019_prepare-data-subsample.ipynb"
     -   id: nbqa-black
         args: ["--nbqa-mutate"]
