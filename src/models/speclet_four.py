@@ -242,15 +242,19 @@ class SpecletFour(SpecletModel):
         co_idx = achelp.common_indices(data)
         batch_idx = achelp.data_batch_indices(data)
 
+        sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=batch_size)
         gene_idx_batch = pm.Minibatch(co_idx.gene_idx, batch_size=batch_size)
         cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=batch_size)
         batch_idx_batch = pm.Minibatch(batch_idx.batch_idx, batch_size=batch_size)
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
+        lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
         return {
+            self.shared_vars["sgrna_idx_shared"]: sgrna_idx_batch,
             self.shared_vars["gene_idx_shared"]: gene_idx_batch,
             self.shared_vars["cellline_idx_shared"]: cellline_idx_batch,
             self.shared_vars["batch_idx_shared"]: batch_idx_batch,
+            self.shared_vars["cn_shared"]: data.copy_number.values,
             self.shared_vars["lfc_shared"]: lfc_data_batch,
         }
 
