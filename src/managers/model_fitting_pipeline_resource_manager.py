@@ -174,7 +174,7 @@ class ModelFittingPipelineResourceManager:
 
     def _format_duration_for_slurm(self, duration: td) -> str:
         return formatting.format_timedelta(
-            duration, fmt=formatting.TimeDeltaFormat.SLURM
+            duration, fmt=formatting.TimeDeltaFormat.DRMAA
         )
 
     def _is_debug(self) -> bool:
