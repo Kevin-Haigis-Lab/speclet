@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Dict, Type
 
-from src.io.model_config import get_configuration_for_model
+from src.io.model_config import ModelConfig, get_configuration_for_model
 from src.loggers import logger
 from src.models.ceres_mimic import CeresMimic
 from src.models.speclet_five import SpecletFive
@@ -59,6 +59,29 @@ def get_model_class(model_opt: ModelOption) -> Type[SpecletProjectModelTypes]:
 
 
 #### ---- Model configurations ---- ####
+
+
+def instantiate_and_configure_model_from_config(
+    config: ModelConfig, root_cache_dir: Path, debug: bool
+) -> SpecletProjectModelTypes:
+    """Create a model from a configuration.
+
+    Args:
+        config (ModelConfig): Model configuration.
+        root_cache_dir (Path): Cache directory.
+        debug (bool): In debug mode.
+
+    Returns:
+        SpecletProjectModelTypes: Configured instance of a speclet model.
+    """
+    logger.info("Instantiating and configuring a speclet model from config.")
+    ModelClass = get_model_class(model_opt=config.model)
+    speclet_model = ModelClass(
+        name=config.name, root_cache_dir=root_cache_dir, debug=debug
+    )
+    if config.config is not None:
+        speclet_model.set_config(config.config)
+    return speclet_model
 
 
 def instantiate_and_configure_model(

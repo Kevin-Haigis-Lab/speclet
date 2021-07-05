@@ -7,6 +7,7 @@ from pathlib import Path
 import typer
 
 from src.io import model_config as c
+from src.models.configuration import instantiate_and_configure_model_from_config
 
 
 def check_model_configuration(path: Path) -> None:
@@ -20,9 +21,22 @@ def check_model_configuration(path: Path) -> None:
     Args:
         path (Path): Path to the config file.
     """
-    typer.echo(f"Checking model config: '{path.as_posix()}'")
+    typer.secho(f"Checking model config: '{path.as_posix()}'", fg=typer.colors.BLUE)
+
     configs = c.get_model_configurations(path)
+    typer.echo("Configuration file can be parsed: ✔︎")
+
     c.check_model_names_are_unique(configs)
+    typer.echo("Configuration names are unique: ✔︎")
+
+    for config in configs.configurations:
+        _ = instantiate_and_configure_model_from_config(
+            config,
+            root_cache_dir=Path("temp"),
+            debug=True,
+        )
+    typer.echo("All models can be instantiated and configured: ✔︎")
+
     typer.secho("Configuration file looks good.", fg=typer.colors.GREEN)
     return None
 

@@ -13,9 +13,9 @@
   fit_methods:
     - ADVI
   config:
-    h: NONCENTERED
-    d: NONCENTERED
-    η: NONCENTERED
+    h: noncentered
+    d: noncentered
+    η: noncentered
   pipelines:
     - fitting
 - name: sp4-noncentered-copynum
@@ -25,9 +25,9 @@
     - ADVI
   config:
     copy_number_cov: true
-    h: NONCENTERED
-    d: NONCENTERED
-    β: NONCENTERED
-    η: NONCENTERED
+    h: noncentered
+    d: noncentered
+    β: noncentered
+    η: noncentered
   pipelines:
     - fitting
