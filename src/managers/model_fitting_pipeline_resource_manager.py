@@ -103,7 +103,6 @@ class ModelFittingPipelineResourceManager:
     fit_method: ModelFitMethod
     config_path: Path
     config: model_config.ModelConfig
-    debug: bool
 
     @validate_arguments
     def __init__(
@@ -125,7 +124,6 @@ class ModelFittingPipelineResourceManager:
         if _config is None:
             raise model_config.ModelConfigurationNotFound(self.name)
         self.config = _config
-        self.debug = self._is_debug()
 
     @property
     def memory(self) -> str:
@@ -187,7 +185,8 @@ class ModelFittingPipelineResourceManager:
             duration, fmt=formatting.TimeDeltaFormat.DRMAA
         )
 
-    def _is_debug(self) -> bool:
+    @property
+    def debug(self) -> bool:
         """Determine the debug status of model name.
 
         Returns:
