@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 import src.modeling.simulation_based_calibration_helpers as sbc
+from src.exceptions import CacheDoesNotExistError
 from src.loggers import logger
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.managers.model_data_managers import DataManager
@@ -495,6 +496,45 @@ class SpecletModel:
             )
         else:
             logger.warning("Did not cache MCMC samples because they do not exist.")
+
+    def load_mcmc_cache(self) -> az.InferenceData:
+        """Load MCMC from cache.
+
+        Sets the cached MCMC result as the instance's `mcmc_results` attribute, too.
+
+        Raises:
+            CacheDoesNotExistError: Raised if the cache does not exist.
+
+        Returns:
+            az.InferenceData: Cached MCMC results.
+        """
+        if self.cache_manager.mcmc_cache_exists():
+            self.mcmc_results = self.cache_manager.get_mcmc_cache()
+            return self.mcmc_results
+        else:
+            raise CacheDoesNotExistError(
+                self.cache_manager.mcmc_cache_delegate.cache_dir
+            )
+
+    def load_advi_cache(self) -> Tuple[az.InferenceData, pm.Approximation]:
+        """Load ADVI from cache.
+
+        Sets the cached ADVI result as the instance's `advi_results` attribute, too.
+
+        Raises:
+            CacheDoesNotExistError: Raised if the cache does not exist.
+
+        Returns:
+            Tuple[az.InferenceData, pm.Approximation]: Cached ADVI results.
+        """
+        if self.cache_manager.advi_cache_exists():
+            _advi_results = self.cache_manager.get_advi_cache()
+            self.advi_results = _advi_results
+            return _advi_results
+        else:
+            raise CacheDoesNotExistError(
+                self.cache_manager.advi_cache_delegate.cache_dir
+            )
 
     def update_observed_data(self, new_data: np.ndarray) -> None:
         """Update the values for the shared tensor for observed data.
