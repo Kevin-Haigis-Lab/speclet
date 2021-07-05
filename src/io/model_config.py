@@ -20,6 +20,7 @@ class ModelConfig(BaseModel):
     fit_methods: List[ModelFitMethod]
     config: Optional[Dict[str, Union[ModelFitMethod, str, bool, int, float]]]
     pipelines: Optional[List[SpecletPipeline]]
+    debug: bool
 
 
 class ModelConfigs(BaseModel):
@@ -82,6 +83,20 @@ def get_configuration_for_model(config_path: Path, name: str) -> Optional[ModelC
     if len(configs) == 0:
         return None
     return configs[0]
+
+
+class ModelConfigurationNotFound(BaseException):
+    """Model configuration not found."""
+
+    def __init__(self, model_name: str) -> None:
+        """Create a ModelConfigurationNotFound error.
+
+        Args:
+            model_name (str): Name of the model.
+        """
+        self.model_name = model_name
+        self.message = f"Configuration not found for model: '{self.model_name}'."
+        super().__init__(self.message)
 
 
 class ModelNamesAreNotAllUnique(BaseException):

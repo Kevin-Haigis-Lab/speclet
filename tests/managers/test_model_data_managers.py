@@ -209,3 +209,7 @@ class TestCrcDataManager:
         dm.transform_data()
         assert dm.data.shape[0] == 5
         assert dm.data.shape[1] == 2
+
+
+# TODO: test that Achilles cat. columns are reset when data changes
+# (is set, transforms, etc.)

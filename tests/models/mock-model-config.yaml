@@ -8,6 +8,7 @@
     cov2: true
   pipelines:
     - fitting
+  debug: False
 - name: second-test-model
   description: Another model for testing the pipelines.
   model: speclet-test-model
@@ -21,6 +22,7 @@
   pipelines:
     - fitting
     - sbc
+  debug: True
 - name: no-config-test
   description: A config without a `config` section.
   model: speclet-test-model
@@ -28,3 +30,4 @@
     - ADVI
   pipelines:
     - fitting
+  debug: False

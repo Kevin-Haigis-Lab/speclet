@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, List
 
 import papermill
+from snakemake.io import Wildcards
 
 from src.managers.model_fitting_pipeline_resource_manager import (
     ModelFittingPipelineResourceManager as RM,
@@ -12,6 +13,7 @@ from src.managers.model_fitting_pipeline_resource_manager import (
 from src.pipelines.snakemake_parsing_helpers import get_models_names_fit_methods
 from src.project_enums import ModelFitMethod, ModelOption
 
+SCRATCH_DIR = "/n/scratch3/users/j/jc604/speclet/fitting-mcmc/"
 PYMC3_MODEL_CACHE_DIR = "models/"
 REPORTS_DIR = "reports/crc_model_sampling_reports/"
 ENVIRONMENT_YAML = Path("default_environment.yml").as_posix()
@@ -28,7 +30,6 @@ model_configuration_lists = get_models_names_fit_methods(MODEL_CONFIG)
 #### ---- Wildcard constrains ---- ####
 
 wildcard_constraints:
-    model="|".join([a.value for a in ModelOption]),
     model_name="|".join(set(model_configuration_lists.model_names)),
     fit_method="|".join(a.value for a in ModelFitMethod),
     chain="\d+",
@@ -36,10 +37,10 @@ wildcard_constraints:
 
 #### ---- Helpers ---- ####
 
-def create_resource_manager(w: Any, fit_method: ModelFitMethod) -> RM:
-    return RM(model=w.model, name=w.model_name, fit_method=fit_method)
+def create_resource_manager(w: Wildcards, fit_method: ModelFitMethod) -> RM:
+    return RM(name=w.model_name, fit_method=fit_method, config_path=MODEL_CONFIG)
 
-def cli_is_debug(w: Any) -> str:
+def cli_is_debug(w: Wildcards) -> str:
     return create_resource_manager(w=w, fit_method=ModelFitMethod.ADVI).is_debug_cli()
 
 
@@ -49,9 +50,8 @@ def cli_is_debug(w: Any) -> str:
 rule all:
     input:
         expand(
-            REPORTS_DIR + "{model}_{model_name}_{fit_method}.md",
+            REPORTS_DIR + "{model_name}_{fit_method}.md",
             zip,
-            model=model_configuration_lists.models,
             model_name=model_configuration_lists.model_names,
             fit_method=model_configuration_lists.fit_methods,
         ),
@@ -59,7 +59,8 @@ rule all:
 
 rule sample_mcmc:
     output:
-        touch_file=PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_chain{chain}_MCMC.txt",
+        touch_file=PYMC3_MODEL_CACHE_DIR + "_{model_name}_chain{chain}_MCMC.txt",
+        chain_dir=directory(SCRATCH_DIR + "{model_name}_chain{chain}"),
     params:
         mem=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).memory,
         time=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).time,
@@ -70,70 +71,72 @@ rule sample_mcmc:
         ENVIRONMENT_YAML
     shell:
         "python3 src/command_line_interfaces/sampling_pymc3_models_cli.py"
-        '  "{wildcards.model}"'
-        '  "{wildcards.model_name}_chain{wildcards.chain}"'
-        " {params.config_file}"
-        "  --fit-method MCMC"
+        '  "{wildcards.model_name}"'
+        "  {params.config_file}"
+        "  MCMC"
+        "  {output.chain_dir}"
         "  --mcmc-chains 1"
         "  --mcmc-cores 1"
         "  --random-seed 7414"
-        "  {params.debug}"
         "  --touch {output.touch_file}"
 
 rule combine_mcmc:
     input:
         chains=expand(
-            PYMC3_MODEL_CACHE_DIR + "_{{model}}_{{model_name}}_chain{chain}_MCMC.txt",
+            PYMC3_MODEL_CACHE_DIR + "_{{model_name}}_chain{chain}_MCMC.txt",
             chain=list(range(N_CHAINS))
         ),
     output:
-        touch_file=PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_MCMC.txt",
+        touch_file=PYMC3_MODEL_CACHE_DIR + "_{model_name}_MCMC.txt",
     params:
-        debug=cli_is_debug,
+        config_file=MODEL_CONFIG.as_posix(),
+        combined_cache_dir=PYMC3_MODEL_CACHE_DIR,
+        chain_dirs=directory(
+            expand(SCRATCH_DIR + "{{model_name}}_chain{chain}", chain=list(range(N_CHAINS)))
+        )
     conda:
         ENVIRONMENT_YAML
     shell:
         "python3 src/command_line_interfaces/combine_mcmc_chains_cli.py"
-        "  {wildcards.model}"
         "  {wildcards.model_name}"
-        "  {input.chains}"
-        "  --touch-file {output.touch_file}"
-        "  {params.debug}"
+        "  {params.config_file}"
+        "  {params.chain_dirs}"
+        "  {params.combined_cache_dir}"
+        "  --touch {output.touch_file}"
 
 
 rule sample_advi:
     output:
-        touch_file=PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_ADVI.txt",
+        touch_file=PYMC3_MODEL_CACHE_DIR + "_{model_name}_ADVI.txt",
     params:
         mem=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).memory,
         time=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).time,
         partition=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).partition,
         debug=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).is_debug_cli(),
         config_file=MODEL_CONFIG.as_posix(),
+        cache_dir=PYMC3_MODEL_CACHE_DIR
     conda:
         ENVIRONMENT_YAML
     shell:
         "python3 src/command_line_interfaces/sampling_pymc3_models_cli.py"
-        '  "{wildcards.model}"'
         '  "{wildcards.model_name}"'
         " {params.config_file}"
-        "  --fit-method ADVI"
+        "  ADVI"
+        " {params.cache_dir}"
         "  --mcmc-cores 1"
         "  --random-seed 7414"
         "  {params.debug}"
         "  --touch {output.touch_file}"
 
+
 rule papermill_report:
-    input:
-        model_touch=PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_{fit_method}.txt",
     output:
-        notebook=REPORTS_DIR + "{model}_{model_name}_{fit_method}.ipynb",
+        notebook=REPORTS_DIR + "{model_name}_{fit_method}.ipynb",
     run:
         papermill.execute_notebook(
             REPORTS_DIR + "model-report-template.ipynb",
             output.notebook,
             parameters={
-                "MODEL": wildcards.model,
                 "MODEL_NAME": wildcards.model_name,
                 "DEBUG": utils.is_debug(wildcards.model_name),
                 "FIT_METHOD": wildcards.fit_method,
@@ -144,9 +147,10 @@ rule papermill_report:
 
 rule execute_report:
     input:
-        notebook=REPORTS_DIR + "{model}_{model_name}_{fit_method}.ipynb",
+        model_touch=PYMC3_MODEL_CACHE_DIR + "_{model_name}_{fit_method}.txt",
+        notebook=REPORTS_DIR + "{model_name}_{fit_method}.ipynb",
     output:
-        markdown=REPORTS_DIR + "{model}_{model_name}_{fit_method}.md",
+        markdown=REPORTS_DIR + "{model_name}_{fit_method}.md",
     conda:
         ENVIRONMENT_YAML
     shell:

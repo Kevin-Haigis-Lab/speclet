@@ -7,6 +7,7 @@
   pipelines:
     - fitting
     - sbc
+  debug: true
 - name: sp4-noncentered
   description: SpecletFour with all covariates in non-centered parameterization.
   model: speclet-four
@@ -18,6 +19,7 @@
     η: noncentered
   pipelines:
     - fitting
+  debug: true
 - name: sp4-noncentered-copynum
   description: SpecletFour with all covariates, including copy number, in non-centered parameterization.
   model: speclet-four
@@ -31,3 +33,4 @@
     η: noncentered
   pipelines:
     - fitting
+  debug: true

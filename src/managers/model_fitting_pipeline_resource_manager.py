@@ -1,12 +1,14 @@
 """Utilities for snakemake workflow: 010_010_run-crc-sampling-snakemake."""
 
 from datetime import timedelta as td
+from pathlib import Path
 from typing import Dict, TypeVar
 
 from pydantic import validate_arguments
 
 from src import formatting
 from src.exceptions import ResourceRequestUnkown
+from src.io import model_config
 from src.project_enums import ModelFitMethod, ModelOption, SlurmPartitions
 
 T = TypeVar("T")
@@ -97,28 +99,32 @@ sample_models_time_lookup: ResourceLookupDict[td] = {
 class ModelFittingPipelineResourceManager:
     """Resource manager for the pipeline to fit models on O2."""
 
-    model: ModelOption
     name: str
     fit_method: ModelFitMethod
+    config_path: Path
+    config: model_config.ModelConfig
     debug: bool
 
     @validate_arguments
     def __init__(
-        self,
-        model: ModelOption,
-        name: str,
-        fit_method: ModelFitMethod,
+        self, name: str, fit_method: ModelFitMethod, config_path: Path
     ) -> None:
         """Create a resource manager of the model-fitting pipeline.
 
         Args:
-            model (ModelOption): Type of model being bit.
             name (str): Identifiable and descriptive name of the model.
             fit_method (ModelFitMethod): Method being used to fit the model.
+            config_path (Path): Path to a model configuration file.
         """
-        self.model = model
         self.name = name
         self.fit_method = fit_method
+        self.config_path = config_path
+        _config = model_config.get_configuration_for_model(
+            self.config_path, name=self.name
+        )
+        if _config is None:
+            raise model_config.ModelConfigurationNotFound(self.name)
+        self.config = _config
         self.debug = self._is_debug()
 
     @property
@@ -161,14 +167,18 @@ class ModelFittingPipelineResourceManager:
 
     def _retrieve_memory_requirement(self) -> str:
         try:
-            mem = sample_models_memory_lookup[self.model][self.debug][self.fit_method]
+            mem = sample_models_memory_lookup[self.config.model][self.debug][
+                self.fit_method
+            ]
             return str(mem * 1000)
         except KeyError as err:
             raise ResourceRequestUnkown("memory", err.args[0])
 
     def _retrieve_time_requirement(self) -> td:
         try:
-            return sample_models_time_lookup[self.model][self.debug][self.fit_method]
+            return sample_models_time_lookup[self.config.model][self.debug][
+                self.fit_method
+            ]
         except KeyError as err:
             raise ResourceRequestUnkown("time", err.args[0])
 
@@ -183,7 +193,7 @@ class ModelFittingPipelineResourceManager:
         Returns:
             bool: Whether or not the model should be in debug mode.
         """
-        return "debug" in self.name
+        return self.config.debug
 
     def is_debug_cli(self):
         """Get the correct flag for indicating debug mode through a CLI.
