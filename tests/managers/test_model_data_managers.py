@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+from random import choice
 from typing import Any
 
 import pandas as pd
@@ -210,6 +211,84 @@ class TestCrcDataManager:
         assert dm.data.shape[0] == 5
         assert dm.data.shape[1] == 2
 
+    @pytest.mark.parametrize("col", achilles._default_achilles_categorical_cols)
+    def test_achilles_cat_columns_reset_when_data_is_retrieved(
+        self, mock_crc_dm: CrcDataManager, col: str, monkeypatch: pytest.MonkeyPatch
+    ):
+        original_df = mock_crc_dm.get_data()
+        mock_crc_dm.data = None
+        mod_df = remove_random_cat(original_df, col=col)
+        assert not check_achilles_cat_columns_correct_indexing(mod_df, col)
 
-# TODO: test that Achilles cat. columns are reset when data changes
-# (is set, transforms, etc.)
+        def return_mod_data(*args: Any, **kwargs: Any) -> pd.DataFrame:
+            return mod_df
+
+        monkeypatch.setattr(mock_crc_dm, "_load_data", return_mod_data)
+        new_data = mock_crc_dm.get_data()
+        assert check_achilles_cat_columns_correct_indexing(new_data, col)
+
+    @pytest.mark.parametrize("col", achilles._default_achilles_categorical_cols)
+    def test_achilles_cat_columns_reset_when_data_is_assigned(
+        self, mock_crc_dm: CrcDataManager, col: str
+    ):
+        original_df = mock_crc_dm.get_data()
+        mod_df = remove_random_cat(original_df, col=col)
+        assert not check_achilles_cat_columns_correct_indexing(mod_df, col)
+
+        mock_crc_dm.data = mod_df
+        assert mock_crc_dm.data is not None
+        assert check_achilles_cat_columns_correct_indexing(mock_crc_dm.data, col)
+        assert check_achilles_cat_columns_correct_indexing(mock_crc_dm.get_data(), col)
+
+    @pytest.mark.parametrize("col", achilles._default_achilles_categorical_cols)
+    def test_achilles_cat_columns_reset_when_data_is_set(
+        self, mock_crc_dm: CrcDataManager, col: str
+    ):
+        original_df = mock_crc_dm.get_data()
+        mod_df = remove_random_cat(original_df, col=col)
+        assert not check_achilles_cat_columns_correct_indexing(mod_df, col)
+
+        mock_crc_dm.set_data(mod_df)
+        assert mock_crc_dm.data is not None
+        assert check_achilles_cat_columns_correct_indexing(mock_crc_dm.data, col)
+        assert check_achilles_cat_columns_correct_indexing(mock_crc_dm.get_data(), col)
+
+    @pytest.mark.parametrize("col", achilles._default_achilles_categorical_cols)
+    def test_achilles_cat_columns_reset_when_apply_transforms(
+        self, mock_crc_dm: CrcDataManager, col: str
+    ):
+        original_df = mock_crc_dm.get_data()
+        mod_df = remove_random_cat(original_df, col=col)
+        assert not check_achilles_cat_columns_correct_indexing(mod_df, col)
+
+        mock_crc_dm.transformations = []
+        transformed_data = mock_crc_dm.apply_transformations(mod_df)
+        assert check_achilles_cat_columns_correct_indexing(transformed_data, col)
+
+    @pytest.mark.parametrize("col", achilles._default_achilles_categorical_cols)
+    def test_achilles_cat_columns_reset_when_add_new_transforms(
+        self, mock_crc_dm: CrcDataManager, col: str
+    ):
+        original_df = mock_crc_dm.get_data()
+
+        def my_transformation(df: pd.DataFrame) -> pd.DataFrame:
+            return remove_random_cat(df, col=col)
+
+        mock_crc_dm.add_transformations([my_transformation], new_only=False)
+        assert mock_crc_dm.data is not None
+        assert original_df.shape[0] > mock_crc_dm.data.shape[0]
+        assert check_achilles_cat_columns_correct_indexing(mock_crc_dm.data, col)
+
+
+def remove_random_cat(df: pd.DataFrame, col: str) -> pd.DataFrame:
+    """Remove a random value from a column of a pandas data frame."""
+    x = choice(df[col].tolist())
+    mod_df = df.copy()[df[col] != x]
+    mod_df = mod_df.reset_index(drop=True)
+    return mod_df
+
+
+def check_achilles_cat_columns_correct_indexing(data: pd.DataFrame, col: str) -> bool:
+    check_one = data[col].nunique() == len(data[col].cat.categories)
+    check_two = set(range(data[col].nunique())) == set(data[col].cat.codes.tolist())
+    return check_one and check_two

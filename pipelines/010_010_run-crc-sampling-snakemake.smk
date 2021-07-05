@@ -40,9 +40,6 @@ wildcard_constraints:
 def create_resource_manager(w: Wildcards, fit_method: ModelFitMethod) -> RM:
     return RM(name=w.model_name, fit_method=fit_method, config_path=MODEL_CONFIG)
 
-def cli_is_debug(w: Wildcards) -> str:
-    return create_resource_manager(w=w, fit_method=ModelFitMethod.ADVI).is_debug_cli()
-
 
 #### ---- Rules ---- ####
 
@@ -65,7 +62,6 @@ rule sample_mcmc:
         mem=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).memory,
         time=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).time,
         partition=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).partition,
-        debug=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).is_debug_cli(),
         config_file=MODEL_CONFIG.as_posix(),
     conda:
         ENVIRONMENT_YAML
@@ -112,7 +108,6 @@ rule sample_advi:
         mem=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).memory,
         time=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).time,
         partition=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).partition,
-        debug=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).is_debug_cli(),
         config_file=MODEL_CONFIG.as_posix(),
         cache_dir=PYMC3_MODEL_CACHE_DIR
     conda:
@@ -125,7 +120,6 @@ rule sample_advi:
         " {params.cache_dir}"
         "  --mcmc-cores 1"
         "  --random-seed 7414"
-        "  {params.debug}"
         "  --touch {output.touch_file}"
 
 
@@ -138,7 +132,6 @@ rule papermill_report:
             output.notebook,
             parameters={
                 "MODEL_NAME": wildcards.model_name,
-                "DEBUG": utils.is_debug(wildcards.model_name),
                 "FIT_METHOD": wildcards.fit_method,
             },
             prepare_only=True,
