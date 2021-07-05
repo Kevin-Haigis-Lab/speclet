@@ -82,13 +82,15 @@ rule run_sbc:
         mem=lambda w: create_resource_manager(w).memory,
         time=lambda w: create_resource_manager(w).time,
         perm_dir=make_permutation_dir,
+        config_path=MODEL_CONFIG.as_posix()
     shell:
-        "src/command_line_interfaces/simulation_based_calibration_cli.py "
-        "  {wildcards.model_name} "
-        "  {wildcards.fit_method} "
-        "  {params.perm_dir} "
-        "  {wildcards.perm_num} "
-        " " + MOCK_DATA_SIZE
+        "src/command_line_interfaces/simulation_based_calibration_cli.py"
+        "  {wildcards.model_name}"
+        "  {params.config_path}"
+        "  {wildcards.fit_method}"
+        "  {params.perm_dir}"
+        "  {wildcards.perm_num}"
+        "  " + MOCK_DATA_SIZE
 
 rule collate_sbc:
     input:
