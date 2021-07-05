@@ -3,6 +3,7 @@
 import math
 from enum import Enum, unique
 from pathlib import Path
+from random import choices
 from typing import Any, Dict, List, Optional, Union
 
 import arviz as az
@@ -159,10 +160,12 @@ def generate_mock_sgrna_gene_map(n_genes: int, n_sgrnas_per_gene: int) -> pd.Dat
           to it.
     """
     genes = prefixed_count("gene", n=n_genes)
+    sgrna_target_chr = choices(["Chr1", "Chr2", "Chr3"], k=n_genes)
     sgrnas = [prefixed_count(gene + "_sgrna", n=n_sgrnas_per_gene) for gene in genes]
     return pd.DataFrame(
         {
             "hugo_symbol": np.repeat(genes, n_sgrnas_per_gene),
+            "sgrna_target_chr": np.repeat(sgrna_target_chr, n_sgrnas_per_gene),
             "sgrna": np.array(sgrnas).flatten(),
         }
     )
