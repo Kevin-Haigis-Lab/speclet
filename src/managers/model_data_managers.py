@@ -276,7 +276,11 @@ class CrcDataManager(DataManager):
         logger.debug("Retrieving data.")
 
         if self._data is None:
-            self._data = self._load_data().pipe(self.apply_transformations)
+            self._data = (
+                self._load_data()
+                .pipe(self.apply_transformations)
+                .pipe(achelp.set_achilles_categorical_columns)
+            )
             assert isinstance(self._data, pd.DataFrame)
         return self._data
 

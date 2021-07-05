@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 import pytest
 import seaborn as sns
 
+from src.data_processing import achilles
 from src.managers.model_data_managers import CrcDataManager
 
 #### ---- Test CrcDataManager ---- ####
@@ -32,6 +34,14 @@ def no_standard_crc_transformations(monkeypatch: pytest.MonkeyPatch):
         CrcDataManager, "_drop_sgrnas_that_map_to_multiple_genes", identity
     )
     monkeypatch.setattr(CrcDataManager, "_drop_missing_copynumber", identity)
+
+
+@pytest.fixture(autouse=True)
+def no_setting_achilles_categorical_columns(monkeypatch: pytest.MonkeyPatch):
+    def identity(df: pd.DataFrame, *args: Any, **kwargs: Any) -> pd.DataFrame:
+        return df
+
+    monkeypatch.setattr(achilles, "set_achilles_categorical_columns", identity)
 
 
 class TestCrcDataManager:
