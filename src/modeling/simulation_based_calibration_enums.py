@@ -7,6 +7,6 @@ from enum import Enum, unique
 class MockDataSizes(str, Enum):
     """Options for dataset seizes when generating mock data."""
 
-    small = "small"
-    medium = "medium"
-    large = "large"
+    SMALL = "small"
+    MEDIUM = "medium"
+    LARGE = "large"
