@@ -35,40 +35,37 @@ pymc3_cache_dir = Path("..", "models", "modeling_cache", "pymc3_model_cache")
 
 Parameters for papermill:
 
-- `MODEL`: which model was tested
 - `MODEL_NAME`: unique, identifiable name of the model
 - `SBC_RESULTS_DIR`: directory containing results of many rounds of SBC
+- `SBC_COLLATED_RESULTS`: path to collated simulation posteriors
 - `NUM_SIMULATIONS`: the number of simiulations; will be used to check that all results are found
+- `CONFIG_PATH`: path to the model configuration file
 
 ## Setup
 
 ### Papermill parameters
 
 ```python
-MODEL = ""
 MODEL_NAME = ""
 SBC_RESULTS_DIR = ""
 SBC_COLLATED_RESULTS = ""
 NUM_SIMULATIONS = -1
+CONFIG_PATH = ""
 ```
 
 ```python
 # Parameters
-MODEL = "speclet-seven"
-MODEL_NAME = "SpecletSeven-advi-noncentered"
-SBC_RESULTS_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/speclet-seven_SpecletSeven-advi-noncentered_ADVI"
-SBC_COLLATED_RESULTS = "cache/sbc-cache/speclet-seven_SpecletSeven-advi-noncentered_ADVI_collated-posterior-summaries.pkl"
-NUM_SIMULATIONS = 100
+MODEL_NAME = "sp4-default-config"
+SBC_RESULTS_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/sp4-default-config_MCMC"
+SBC_COLLATED_RESULTS = (
+    "cache/sbc-cache/sp4-default-config_MCMC_collated-posterior-summaries.pkl"
+)
+NUM_SIMULATIONS = 3
+CONFIG_PATH = "models/model-configs.yaml"
 
 ```
 
 ### Prepare and validate papermill parameters
-
-Build the model using the `MODEL` parameter.
-
-```python
-ModelClass = cli_helpers.get_model_class(cli_helpers.ModelOption(MODEL))
-```
 
 Check values passed as the directory with results of the rounds of SBC.
 
@@ -148,82 +145,82 @@ simulation_posteriors_df.head()
   </thead>
   <tbody>
     <tr>
-      <th>μ_μ_μ_a</th>
-      <th>μ_μ_μ_a</th>
-      <td>3.186</td>
-      <td>0.105</td>
-      <td>3.009</td>
-      <td>3.331</td>
-      <td>0.003</td>
-      <td>0.002</td>
-      <td>1025.0</td>
-      <td>979.0</td>
-      <td>NaN</td>
-      <td>3.528105</td>
-      <td>sim_id_0000</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>μ_μ_a_offset[0,0]</th>
-      <th>μ_μ_a_offset</th>
-      <td>0.418</td>
-      <td>0.399</td>
-      <td>-0.217</td>
-      <td>1.017</td>
-      <td>0.012</td>
-      <td>0.009</td>
-      <td>1056.0</td>
-      <td>807.0</td>
-      <td>NaN</td>
-      <td>0.400157</td>
-      <td>sim_id_0000</td>
-      <td>True</td>
-    </tr>
-    <tr>
-      <th>μ_μ_a_offset[0,1]</th>
-      <th>μ_μ_a_offset</th>
-      <td>1.058</td>
-      <td>0.453</td>
-      <td>0.420</td>
-      <td>1.912</td>
-      <td>0.014</td>
-      <td>0.010</td>
-      <td>989.0</td>
-      <td>867.0</td>
-      <td>NaN</td>
-      <td>0.978738</td>
-      <td>sim_id_0000</td>
-      <td>True</td>
-    </tr>
-    <tr>
-      <th>μ_μ_a_offset[1,0]</th>
-      <th>μ_μ_a_offset</th>
-      <td>2.155</td>
-      <td>0.383</td>
-      <td>1.587</td>
-      <td>2.809</td>
-      <td>0.012</td>
-      <td>0.008</td>
-      <td>1047.0</td>
-      <td>976.0</td>
-      <td>NaN</td>
-      <td>2.240893</td>
-      <td>sim_id_0000</td>
-      <td>True</td>
-    </tr>
-    <tr>
-      <th>μ_μ_a_offset[1,1]</th>
-      <th>μ_μ_a_offset</th>
-      <td>2.011</td>
-      <td>0.449</td>
-      <td>1.306</td>
-      <td>2.723</td>
-      <td>0.014</td>
-      <td>0.010</td>
-      <td>1017.0</td>
-      <td>882.0</td>
-      <td>NaN</td>
+      <th>μ_h</th>
+      <th>μ_h</th>
+      <td>1.861</td>
+      <td>0.713</td>
+      <td>0.739</td>
+      <td>2.972</td>
+      <td>0.136</td>
+      <td>0.097</td>
+      <td>30.0</td>
+      <td>155.0</td>
+      <td>1.13</td>
       <td>1.867558</td>
+      <td>sim_id_0000</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>μ_d</th>
+      <th>μ_d</th>
+      <td>2.230</td>
+      <td>0.618</td>
+      <td>1.233</td>
+      <td>3.156</td>
+      <td>0.116</td>
+      <td>0.083</td>
+      <td>32.0</td>
+      <td>135.0</td>
+      <td>1.13</td>
+      <td>1.494079</td>
+      <td>sim_id_0000</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>μ_η</th>
+      <th>μ_η</th>
+      <td>0.078</td>
+      <td>0.193</td>
+      <td>-0.222</td>
+      <td>0.393</td>
+      <td>0.006</td>
+      <td>0.005</td>
+      <td>1040.0</td>
+      <td>3043.0</td>
+      <td>1.04</td>
+      <td>0.352810</td>
+      <td>sim_id_0000</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>h[0]</th>
+      <th>h</th>
+      <td>2.386</td>
+      <td>0.712</td>
+      <td>1.295</td>
+      <td>3.537</td>
+      <td>0.132</td>
+      <td>0.094</td>
+      <td>31.0</td>
+      <td>155.0</td>
+      <td>1.13</td>
+      <td>2.796058</td>
+      <td>sim_id_0000</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>h[1]</th>
+      <th>h</th>
+      <td>1.522</td>
+      <td>0.712</td>
+      <td>0.412</td>
+      <td>2.679</td>
+      <td>0.126</td>
+      <td>0.090</td>
+      <td>34.0</td>
+      <td>154.0</td>
+      <td>1.13</td>
+      <td>1.719640</td>
       <td>sim_id_0000</td>
       <td>True</td>
     </tr>
@@ -261,9 +258,9 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 )
 ```
 
-![png](speclet-seven_SpecletSeven-advi-noncentered_ADVI_sbc-results_files/speclet-seven_SpecletSeven-advi-noncentered_ADVI_sbc-results_17_0.png)
+![png](sp4-default-config_MCMC_sbc-results_files/sp4-default-config_MCMC_sbc-results_15_0.png)
 
-    <ggplot: (2969308569977)>
+    <ggplot: (2962327853424)>
 
 ```python
 hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -308,9 +305,9 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 )
 ```
 
-![png](speclet-seven_SpecletSeven-advi-noncentered_ADVI_sbc-results_files/speclet-seven_SpecletSeven-advi-noncentered_ADVI_sbc-results_18_0.png)
+![png](sp4-default-config_MCMC_sbc-results_files/sp4-default-config_MCMC_sbc-results_16_0.png)
 
-    <ggplot: (2969308570040)>
+    <ggplot: (2962337058765)>
 
 ---
 
@@ -319,14 +316,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.12 minutes
+    execution time: 0.08 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-06-30
+    Last updated: 2021-07-05
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -340,16 +337,16 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-a-17-127.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-79.o2.rc.hms.harvard.edu
 
-    Git branch: sbc-run-limited
+    Git branch: pipeline-confg
 
-    plotnine  : 0.7.1
-    seaborn   : 0.11.1
-    numpy     : 1.20.1
-    pandas    : 1.2.3
-    re        : 2.2.1
     pymc3     : 3.11.1
-    arviz     : 0.11.2
+    seaborn   : 0.11.1
+    pandas    : 1.2.3
+    plotnine  : 0.7.1
+    numpy     : 1.20.1
     matplotlib: 3.3.4
+    re        : 2.2.1
+    arviz     : 0.11.2
     janitor   : 0.20.14

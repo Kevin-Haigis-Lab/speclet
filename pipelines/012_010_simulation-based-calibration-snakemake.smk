@@ -126,7 +126,7 @@ rule papermill_report:
                 "SBC_RESULTS_DIR": params.root_perm_dir,
                 "SBC_COLLATED_RESULTS": params.collated_results,
                 "NUM_SIMULATIONS": NUM_SIMULATIONS,
-                "CONFIG_PATH": MODEL_CONFIG,
+                "CONFIG_PATH": MODEL_CONFIG.as_posix(),
             },
             prepare_only=True,
         )
