@@ -103,7 +103,7 @@ rule combine_mcmc:
 
 rule sample_advi:
     output:
-        PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_ADVI.txt",
+        touch_file=PYMC3_MODEL_CACHE_DIR + "_{model}_{model_name}_ADVI.txt",
     params:
         mem=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).memory,
         time=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).time,
@@ -121,7 +121,7 @@ rule sample_advi:
         "  --mcmc-cores 1"
         "  --random-seed 7414"
         "  {params.debug}"
-        "  --touch"
+        "  --touch {output.touch_file}"
 
 rule papermill_report:
     input:
