@@ -5,6 +5,7 @@ from typing import Dict, TypeVar
 
 from pydantic import validate_arguments
 
+from src import formatting
 from src.exceptions import ResourceRequestUnkown
 from src.project_enums import ModelFitMethod, ModelOption, SlurmPartitions
 
@@ -172,7 +173,9 @@ class ModelFittingPipelineResourceManager:
             raise ResourceRequestUnkown("time", err.args[0])
 
     def _format_duration_for_slurm(self, duration: td) -> str:
-        return str(duration).replace(" day, ", "-").replace(" days, ", "-")
+        return formatting.format_timedelta(
+            duration, fmt=formatting.TimeDeltaFormat.SLURM
+        )
 
     def _is_debug(self) -> bool:
         """Determine the debug status of model name.
