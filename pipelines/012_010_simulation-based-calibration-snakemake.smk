@@ -10,7 +10,7 @@ from src.project_enums import ModelFitMethod, ModelOption
 from src.pipelines.snakemake_parsing_helpers import get_models_names_fit_methods
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
-NUM_SIMULATIONS = 100
+NUM_SIMULATIONS = 3
 
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yml"
@@ -28,7 +28,6 @@ model_configuration_lists = get_models_names_fit_methods(MODEL_CONFIG)
 #### ---- Wildcard constrains ---- ####
 
 wildcard_constraints:
-    model="|".join([a.value for a in ModelOption]),
     model_name="|".join(set(model_configuration_lists.model_names)),
     fit_method="|".join(a.value for a in ModelFitMethod),
     perm_num="\d+",
@@ -36,12 +35,11 @@ wildcard_constraints:
 
 #### ---- Directory management ---- ####
 
-root_perm_dir_template = ROOT_PERMUTATION_DIR + "{model}_{model_name}_{fit_method}"
+root_perm_dir_template = ROOT_PERMUTATION_DIR + "{model_name}_{fit_method}"
 perm_dir_template = "sbc-perm{perm_num}"
 
 def make_root_permutation_directory(w: Wildcards) -> str:
     return root_perm_dir_template.format(
-        model=w.model,
         model_name=w.model_name,
         fit_method=w.fit_method
     )
@@ -49,23 +47,24 @@ def make_root_permutation_directory(w: Wildcards) -> str:
 def make_permutation_dir(w: Wildcards) -> str:
     return make_root_permutation_directory(w) + "/" + perm_dir_template.format(perm_num=w.perm_num)
 
-collated_results_template = "cache/sbc-cache/{model}_{model_name}_{fit_method}_collated-posterior-summaries.pkl"
+collated_results_template = "cache/sbc-cache/{model_name}_{fit_method}_collated-posterior-summaries.pkl"
 
 def make_collated_results_path(w: Wildcards) -> str:
     return collated_results_template.format(
-        model=w.model,
         model_name=w.model_name,
         fit_method=w.fit_method,
     )
+
+def create_resource_manager(w: Wildcards) -> RM:
+    return RM(w.model_name, MOCK_DATA_SIZE, w.fit_method, MODEL_CONFIG)
 
 #### ---- Rules ---- ####
 
 rule all:
     input:
         expand(
-            REPORTS_DIR + "{model}_{model_name}_{fit_method}_sbc-results.md",
+            REPORTS_DIR + "{model_name}_{fit_method}_sbc-results.md",
             zip,
-            model=model_configuration_lists.models,
             model_name=model_configuration_lists.model_names,
             fit_method=model_configuration_lists.fit_methods,
         ),
@@ -79,13 +78,12 @@ rule run_sbc:
     conda:
         ENVIRONMENT_YAML
     params:
-        cores=lambda w: RM(w.model, w.model_name, MOCK_DATA_SIZE, w.fit_method).cores,
-        mem=lambda w: RM(w.model, w.model_name, MOCK_DATA_SIZE, w.fit_method).memory,
-        time=lambda w: RM(w.model, w.model_name, MOCK_DATA_SIZE, w.fit_method).time,
+        cores=lambda w: create_resource_manager(w).cores,
+        mem=lambda w: create_resource_manager(w).memory,
+        time=lambda w: create_resource_manager(w).time,
         perm_dir=make_permutation_dir,
     shell:
         "src/command_line_interfaces/simulation_based_calibration_cli.py "
-        "  {wildcards.model} "
         "  {wildcards.model_name} "
         "  {wildcards.fit_method} "
         "  {params.perm_dir} "
@@ -116,17 +114,17 @@ rule papermill_report:
         root_perm_dir=make_root_permutation_directory,
         collated_results=make_collated_results_path,
     output:
-        notebook=REPORTS_DIR + "{model}_{model_name}_{fit_method}_sbc-results.ipynb",
+        notebook=REPORTS_DIR + "{model_name}_{fit_method}_sbc-results.ipynb",
     run:
         papermill.execute_notebook(
             REPORTS_DIR + "sbc-results-template.ipynb",
             output.notebook,
             parameters={
-                "MODEL": wildcards.model,
                 "MODEL_NAME": wildcards.model_name,
                 "SBC_RESULTS_DIR": params.root_perm_dir,
                 "SBC_COLLATED_RESULTS": params.collated_results,
                 "NUM_SIMULATIONS": NUM_SIMULATIONS,
+                "CONFIG_PATH": MODEL_CONFIG,
             },
             prepare_only=True,
         )
@@ -135,9 +133,9 @@ rule papermill_report:
 rule execute_report:
     input:
         collated_results=collated_results_template,
-        notebook=REPORTS_DIR + "{model}_{model_name}_{fit_method}_sbc-results.ipynb",
+        notebook=REPORTS_DIR + "{model_name}_{fit_method}_sbc-results.ipynb",
     output:
-        markdown=REPORTS_DIR + "{model}_{model_name}_{fit_method}_sbc-results.md",
+        markdown=REPORTS_DIR + "{model_name}_{fit_method}_sbc-results.md",
     conda:
         ENVIRONMENT_YAML
     shell:

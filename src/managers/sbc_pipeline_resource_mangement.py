@@ -1,9 +1,12 @@
 """Manage resources for the simulation-based calibration pipeline."""
 
+from pathlib import Path
+
 from pydantic import validate_arguments
 
+from src.io import model_config
 from src.modeling.simulation_based_calibration_enums import MockDataSizes
-from src.project_enums import ModelFitMethod, ModelOption
+from src.project_enums import ModelFitMethod
 
 
 class SBCResourceManager:
@@ -12,23 +15,29 @@ class SBCResourceManager:
     @validate_arguments
     def __init__(
         self,
-        model: ModelOption,
         name: str,
         mock_data_size: MockDataSizes,
         fit_method: ModelFitMethod,
+        config_path: Path,
     ) -> None:
         """Create a resource manager.
 
         Args:
-            model (str): Type of model.
             name (str): Unique, identifiable, descriptive name for the model.
             mock_data_size (str): Size of the mock data.
             fit_method (ModelFitMethod): Method used to fit the model.
+            config_path (Path): Path to a model configuration file.
         """
-        self.model = model
         self.name = name
         self.mock_data_size = mock_data_size
         self.fit_method = fit_method
+        self.config_path = config_path
+        _config = model_config.get_configuration_for_model(
+            self.config_path, name=self.name
+        )
+        if _config is None:
+            raise model_config.ModelConfigurationNotFound(self.name)
+        self.config = _config
 
     @property
     def memory(self) -> str:

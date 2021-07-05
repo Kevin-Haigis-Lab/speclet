@@ -9,13 +9,12 @@ import typer
 from src.command_line_interfaces import cli_helpers
 from src.loggers import logger
 from src.models import configuration
-from src.project_enums import ModelFitMethod, ModelOption
+from src.project_enums import ModelFitMethod
 
 cli_helpers.configure_pretty()
 
 
 def run_sbc(
-    model_class: ModelOption,
     name: str,
     config_path: Path,
     fit_method: ModelFitMethod,
@@ -26,7 +25,6 @@ def run_sbc(
     """CLI for running a round of simulation-based calibration for a model.
 
     Args:
-        model_class (ModelOption): Name of the model to use.
         name (str): Unique identifiable name for the model.
         config_path (Path): Path to the model configuration file.
         fit_method (ModelFitMethod): Fitting method.
@@ -38,10 +36,10 @@ def run_sbc(
     Returns:
         None: None
     """
-    logger.info(f"Running SBC for model '{model_class.value}' named '{name}'.")
     sp_model = configuration.get_config_and_instantiate_model(
         config_path=config_path, name=name, root_cache_dir=cache_dir
     )
+    logger.info(f"Running SBC for model '{sp_model.__class__}' - '{name}'.")
     sp_model.run_simulation_based_calibration(
         cache_dir,
         fit_method=fit_method,
