@@ -14,6 +14,7 @@ from src.data_processing import achilles as achelp
 from src.io import data_io
 from src.loggers import logger
 from src.modeling.simulation_based_calibration_enums import MockDataSizes
+from src.project_enums import assert_never
 
 DataFrameTransformations = List[Callable[[pd.DataFrame], pd.DataFrame]]
 
@@ -276,11 +277,7 @@ class CrcDataManager(DataManager):
         logger.debug("Retrieving data.")
 
         if self._data is None:
-            self._data = (
-                self._load_data()
-                .pipe(self.apply_transformations)
-                .pipe(achelp.set_achilles_categorical_columns)
-            )
+            self._data = self._load_data().pipe(self.apply_transformations)
             assert isinstance(self._data, pd.DataFrame)
         return self._data
 
@@ -294,6 +291,23 @@ class CrcDataManager(DataManager):
             self._data = None
         else:
             self._data = self.apply_transformations(new_data)
+
+    def apply_transformations(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Apply the stored transformations to the data set.
+
+        Same as parent method, but resets Achilles categorical columns afterwards.
+
+        Args:
+            df (pd.DataFrame): The data on which to operate.
+
+        Returns:
+            pd.DataFrame: The transformed data set.
+        """
+        return (
+            super()
+            .apply_transformations(df)
+            .pipe(achelp.set_achilles_categorical_columns)
+        )
 
     def generate_mock_data(
         self, size: Union[MockDataSizes, str], random_seed: Optional[int] = None
@@ -314,7 +328,7 @@ class CrcDataManager(DataManager):
         if isinstance(size, str):
             size = MockDataSizes(size)
 
-        if size == MockDataSizes.small:
+        if size is MockDataSizes.SMALL:
             self.data = sbc.generate_mock_achilles_data(
                 n_genes=10,
                 n_sgrnas_per_gene=3,
@@ -323,7 +337,7 @@ class CrcDataManager(DataManager):
                 n_batches=2,
                 n_screens=1,
             )
-        elif size == MockDataSizes.medium:
+        elif size is MockDataSizes.MEDIUM:
             self.data = sbc.generate_mock_achilles_data(
                 n_genes=25,
                 n_sgrnas_per_gene=5,
@@ -332,7 +346,7 @@ class CrcDataManager(DataManager):
                 n_batches=3,
                 n_screens=2,
             )
-        else:
+        elif size is MockDataSizes.LARGE:
             self.data = sbc.generate_mock_achilles_data(
                 n_genes=100,
                 n_sgrnas_per_gene=5,
@@ -341,6 +355,8 @@ class CrcDataManager(DataManager):
                 n_batches=4,
                 n_screens=2,
             )
+        else:
+            assert_never(size)
         assert self.data is not None
         return self.data
 
@@ -403,7 +419,7 @@ class MockDataManager(DataManager):
         return self.data
 
     def set_data(self, new_data: Optional[pd.DataFrame]) -> None:
-        """Set the new data set and apply the transofrmations automatically.
+        """Set the new data set and apply the transformations automatically.
 
         Args:
             new_data (Optional[pd.DataFrame]): New data set.
@@ -430,7 +446,7 @@ class MockDataManager(DataManager):
         if isinstance(size, str):
             size = MockDataSizes(size)
 
-        if size == MockDataSizes.small:
+        if size == MockDataSizes.SMALL:
             self.debug = True
         else:
             self.debug = False

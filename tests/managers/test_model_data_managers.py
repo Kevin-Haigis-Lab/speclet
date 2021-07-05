@@ -21,11 +21,11 @@ def select(df: pd.DataFrame) -> pd.DataFrame:
     return df[["sepal_length", "species"]]
 
 
-def mock_load_data(*args, **kwargs):
+def mock_load_data(*args, **kwargs) -> pd.DataFrame:
     return sns.load_dataset("iris")
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def no_standard_crc_transformations(monkeypatch: pytest.MonkeyPatch):
     def identity(df: pd.DataFrame) -> pd.DataFrame:
         return df
@@ -36,7 +36,7 @@ def no_standard_crc_transformations(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(CrcDataManager, "_drop_missing_copynumber", identity)
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def no_setting_achilles_categorical_columns(monkeypatch: pytest.MonkeyPatch):
     def identity(df: pd.DataFrame, *args: Any, **kwargs: Any) -> pd.DataFrame:
         return df
@@ -66,7 +66,12 @@ class TestCrcDataManager:
         assert isinstance(dm.get_data_path(), Path)
         assert dm.get_data_path().suffix == ".csv"
 
-    def test_set_data_to_none(self, monkeypatch: pytest.MonkeyPatch):
+    def test_set_data_to_none(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        no_standard_crc_transformations,
+        no_setting_achilles_categorical_columns,
+    ):
         dm = CrcDataManager(debug=True)
         assert dm.data is None
 
@@ -82,7 +87,12 @@ class TestCrcDataManager:
         dm.set_data(None)
         assert dm.data is None
 
-    def test_set_data_apply_trans(self, iris: pd.DataFrame):
+    def test_set_data_apply_trans(
+        self,
+        iris: pd.DataFrame,
+        no_standard_crc_transformations,
+        no_setting_achilles_categorical_columns,
+    ):
         dm = CrcDataManager()
         dm.add_transformations([head])
         dm.set_data(iris)
@@ -91,7 +101,9 @@ class TestCrcDataManager:
         dm.data = iris
         assert dm.data is not None and dm.data.shape[0] == 5
 
-    def test_get_data(self):
+    def test_get_data(
+        self, no_standard_crc_transformations, no_setting_achilles_categorical_columns
+    ):
         dm = CrcDataManager(debug=True)
         assert dm.data is None
         data = dm.get_data()
@@ -116,13 +128,23 @@ class TestCrcDataManager:
             < large_mock_data.shape[0]
         )
 
-    def test_init_with_transformations(self, iris: pd.DataFrame):
+    def test_init_with_transformations(
+        self,
+        iris: pd.DataFrame,
+        no_standard_crc_transformations,
+        no_setting_achilles_categorical_columns,
+    ):
         assert iris.shape[0] > 5
         dm = CrcDataManager(debug=True, transformations=[head])
         dm.data = iris
         assert dm.data.shape[0] == 5
 
-    def test_data_transformations(self, iris: pd.DataFrame):
+    def test_data_transformations(
+        self,
+        iris: pd.DataFrame,
+        no_standard_crc_transformations,
+        no_setting_achilles_categorical_columns,
+    ):
         dm = CrcDataManager(debug=True)
         dm.data = iris.copy()
         assert dm.data.shape[0] > 5
@@ -137,7 +159,12 @@ class TestCrcDataManager:
         assert dm.data.shape[1] == 2
         assert set(["sepal_length", "species"]) == set(dm.data.columns.to_list())
 
-    def test_transform_when_data_is_set(self, iris: pd.DataFrame):
+    def test_transform_when_data_is_set(
+        self,
+        iris: pd.DataFrame,
+        no_standard_crc_transformations,
+        no_setting_achilles_categorical_columns,
+    ):
         dm = CrcDataManager(debug=True)
         dm.add_transformations([head, select])
         dm.data is None
@@ -145,7 +172,12 @@ class TestCrcDataManager:
         assert dm.get_data().shape[0] == 5
         assert dm.get_data().shape[1] == 2
 
-    def test_transform_when_getting_data(self, monkeypatch: pytest.MonkeyPatch):
+    def test_transform_when_getting_data(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        no_standard_crc_transformations,
+        no_setting_achilles_categorical_columns,
+    ):
         # Monkeypatch to load 'iris' instead of real data.
         monkeypatch.setattr(CrcDataManager, "_load_data", mock_load_data)
 
@@ -156,7 +188,12 @@ class TestCrcDataManager:
         assert data.shape[0] == 5
         assert data.shape[1] == 2
 
-    def test_adding_new_transformations(self, iris: pd.DataFrame):
+    def test_adding_new_transformations(
+        self,
+        iris: pd.DataFrame,
+        no_standard_crc_transformations,
+        no_setting_achilles_categorical_columns,
+    ):
         dm = CrcDataManager(debug=True)
         dm.data = iris.copy()
         dm.transform_data()
