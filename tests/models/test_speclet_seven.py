@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Tuple
 
 import pytest
 from hypothesis import HealthCheck, given, settings
@@ -65,18 +66,19 @@ class TestSpecletSeven:
         for p in self.top_priors:
             assert fit_res.posterior[p].shape == (n_chains, n_draws)
 
-    @settings(
-        max_examples=5,
-        deadline=None,
-        suppress_health_check=[HealthCheck.function_scoped_fixture],
-    )
+    @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(config=st.builds(SpecletSevenConfiguration))
     def test_changing_configuration_resets_model(
         self,
         tmp_path: Path,
         mock_crc_dm: CrcDataManager,
         config: SpecletSevenConfiguration,
+        monkeypatch: pytest.MonkeyPatch,
     ):
+        def mock_build_model(*args, **kwargs) -> Tuple[str, str]:
+            return "my-test-model", "another-string"
+
+        monkeypatch.setattr(SpecletSeven, "model_specification", mock_build_model)
         sp7 = SpecletSeven(
             "test-model",
             root_cache_dir=tmp_path,
@@ -88,8 +90,7 @@ class TestSpecletSeven:
         )
 
     @settings(
-        max_examples=5,
-        deadline=None,
+        settings.get_profile("slow-adaptive"),
         suppress_health_check=[HealthCheck.function_scoped_fixture],
     )
     @given(config=st.builds(SpecletSevenConfiguration))

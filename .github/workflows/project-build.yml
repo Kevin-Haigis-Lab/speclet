@@ -34,6 +34,7 @@ jobs:
             --disable-warnings \
             --cov="src" \
             --force-sugar \
+            --hypothesis-profile "ci" \
             tests/
 
   snakemake:

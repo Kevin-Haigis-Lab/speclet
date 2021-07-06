@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any
+from typing import Any, Tuple
 
 import pytest
 from hypothesis import HealthCheck, given, settings
@@ -48,18 +48,19 @@ class TestSpecletFour:
         )
         assert sp4.mcmc_results is not None
 
-    @settings(
-        max_examples=5,
-        deadline=None,
-        suppress_health_check=[HealthCheck.function_scoped_fixture],
-    )
+    @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(config=st.builds(SpecletFourConfiguration))
     def test_changing_configuration_resets_model(
         self,
         tmp_path: Path,
         mock_crc_dm: CrcDataManager,
         config: SpecletFourConfiguration,
+        monkeypatch: pytest.MonkeyPatch,
     ):
+        def mock_build_model(*args, **kwargs) -> Tuple[str, str]:
+            return "my-test-model", "another-string"
+
+        monkeypatch.setattr(SpecletFour, "model_specification", mock_build_model)
         sp4 = SpecletFour(
             "test-model",
             root_cache_dir=tmp_path,
@@ -89,9 +90,9 @@ class TestSpecletFour:
         var_names = pmhelp.get_variable_names(sp4.model)
         assert ("β" in set(var_names)) == copy_cov
 
+    @pytest.mark.DEV
     @settings(
-        max_examples=5,
-        deadline=None,
+        settings.get_profile("slow-adaptive"),
         suppress_health_check=[HealthCheck.function_scoped_fixture],
     )
     @given(config=st.builds(SpecletFourConfiguration))

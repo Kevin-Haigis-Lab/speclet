@@ -179,7 +179,7 @@ def test_zscale_rna_expression_with_bounds(
 
 
 @given(st.data())
-@settings(deadline=None)
+@settings(settings.get_profile("slow-adaptive"))
 def test_zscale_rna_expression_by_gene_lineage(hyp_data):
     n_lineages = hyp_data.draw(st.integers(min_value=1, max_value=4))
     n_genes = hyp_data.draw(st.integers(min_value=1, max_value=7))
