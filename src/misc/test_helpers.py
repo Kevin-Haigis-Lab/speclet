@@ -1,7 +1,5 @@
 """Various functions used in many test modules."""
 
-#### ---- src.models ---- ####
-
 from typing import Callable, Optional
 
 from pydantic import BaseModel
@@ -9,6 +7,20 @@ from pydantic import BaseModel
 from src.modeling import pymc3_helpers as pmhelp
 from src.models.speclet_model import SpecletModel
 from src.project_enums import ModelParameterization as MP
+
+#### ---- General ---- ####
+
+
+def do_nothing(*args, **kwargs) -> None:
+    """Take any arguments and do nothing.
+
+    Returns:
+        None: None
+    """
+    return None
+
+
+#### ---- src.models ---- ####
 
 
 def assert_changing_configuration_resets_model(

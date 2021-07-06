@@ -1,6 +1,6 @@
 from pathlib import Path
 from string import ascii_letters
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List, Set, Tuple
 
 import numpy as np
 import pandas as pd
@@ -75,7 +75,6 @@ def copynumber_dataframe(draw, group_name: str) -> pd.DataFrame:
 
 
 class TestSpecletSix:
-    @settings(deadline=None)
     @given(copynumber_dataframe(group_name="depmap_id"))
     def test_centered_copynumber_by_cellline(self, df: pd.DataFrame):
         mod_df = speclet_six.centered_copynumber_by_cellline(df.copy())
@@ -85,7 +84,6 @@ class TestSpecletSix:
             ].mean()
             assert avg == pytest.approx(0.0, abs=0.001)
 
-    @settings(deadline=None)
     @given(copynumber_dataframe(group_name="hugo_symbol"))
     def test_centered_copynumber_by_gene(self, df: pd.DataFrame):
         mod_df = speclet_six.centered_copynumber_by_gene(df.copy())
@@ -111,18 +109,19 @@ class TestSpecletSix:
         sp6.build_model()
         assert sp6.model is not None
 
-    @settings(
-        max_examples=5,
-        deadline=None,
-        suppress_health_check=[HealthCheck.function_scoped_fixture],
-    )
+    @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(config=st.builds(SpecletSixConfiguration))
     def test_changing_configuration_resets_model(
         self,
         tmp_path: Path,
         mock_crc_dm: CrcDataManager,
         config: SpecletSixConfiguration,
+        monkeypatch: pytest.MonkeyPatch,
     ):
+        def mock_build_model(*args, **kwargs) -> Tuple[str, str]:
+            return "my-test-model", "another-string"
+
+        monkeypatch.setattr(SpecletSix, "model_specification", mock_build_model)
         sp6 = SpecletSix(
             "test-model",
             root_cache_dir=tmp_path,
@@ -312,8 +311,7 @@ class TestSpecletSix:
         assert sp6.advi_results is not None
 
     @settings(
-        max_examples=5,
-        deadline=None,
+        settings.get_profile("slow-adaptive"),
         suppress_health_check=[HealthCheck.function_scoped_fixture],
     )
     @given(config=st.builds(SpecletSixConfiguration))

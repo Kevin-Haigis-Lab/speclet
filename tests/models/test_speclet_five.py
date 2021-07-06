@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Tuple
 
 import pytest
 from hypothesis import HealthCheck, given, settings
@@ -22,18 +23,19 @@ class TestSpecletFive:
         sp5.build_model()
         assert sp5.model is not None
 
-    @settings(
-        max_examples=5,
-        deadline=None,
-        suppress_health_check=[HealthCheck.function_scoped_fixture],
-    )
+    @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(config=st.builds(SpecletFiveConfiguration))
     def test_changing_configuration_resets_model(
         self,
         tmp_path: Path,
         mock_crc_dm: CrcDataManager,
         config: SpecletFiveConfiguration,
+        monkeypatch: pytest.MonkeyPatch,
     ):
+        def mock_build_model(*args, **kwargs) -> Tuple[str, str]:
+            return "my-test-model", "another-string"
+
+        monkeypatch.setattr(SpecletFive, "model_specification", mock_build_model)
         sp5 = SpecletFive(
             "test-model",
             root_cache_dir=tmp_path,

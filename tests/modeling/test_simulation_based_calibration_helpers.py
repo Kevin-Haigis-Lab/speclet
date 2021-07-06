@@ -228,7 +228,7 @@ def test_generate_mock_cell_line_information_randomness(data: st.DataObject):
     assert len(mock_info["p_dna_batch"].unique()) <= n_batches
 
 
-@settings(deadline=60000)  # 60 seconds
+@settings(settings.get_profile("slow-adaptive"))
 @given(
     n_genes=st.integers(1, 5),
     n_sgrnas_per_gene=st.integers(1, 3),
@@ -373,7 +373,7 @@ def test_add_mock_zero_effect_lfc_data(mu: float, sigma: float):
     assert not any(df_lfc["lfc"].isna())
 
 
-@settings(deadline=None)
+@settings(settings.get_profile("slow-adaptive"))
 @given(st.data())
 def test_mock_data_has_correct_categories_sizes(data):
     n_genes = data.draw(st.integers(2, 20), label="n_genes")
@@ -400,7 +400,6 @@ def test_mock_data_has_correct_categories_sizes(data):
     assert n_batches >= dphelp.nunique(mock_data.p_dna_batch)
 
 
-@settings(deadline=60000)  # 60 seconds
 @given(mock_data=generate_data_with_random_params())
 def test_sgrnas_uniquely_map_to_genes(mock_data: pd.DataFrame):
     sgrna_gene_map = (
@@ -410,7 +409,7 @@ def test_sgrnas_uniquely_map_to_genes(mock_data: pd.DataFrame):
     assert len(sgrnas) == len(np.unique(sgrnas))
 
 
-@settings(max_examples=5)
+@settings(settings.get_profile("slow-adaptive"))
 @given(mock_data=generate_data_with_random_params())
 def test_cellline_in_one_batch(mock_data: pd.DataFrame):
     cellline_to_batch = (
