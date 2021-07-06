@@ -31,8 +31,8 @@ def get_mock_configuration(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
 
-@pytest.mark.parametrize("model", [a.value for a in ModelOption])
-@pytest.mark.parametrize("fit_method", [a.value for a in ModelFitMethod])
+@pytest.mark.parametrize("model", ModelOption)
+@pytest.mark.parametrize("fit_method", ModelFitMethod)
 @pytest.mark.parametrize("debug", (True, False))
 def test_resources_available_for_models(
     model: ModelOption, fit_method: ModelFitMethod, debug: bool
@@ -49,7 +49,7 @@ def test_resources_available_for_models(
 @pytest.mark.parametrize("fit_method", [a.value for a in ModelFitMethod])
 def test_create_resource_manager_with_wrong_types(fit_method: str):
     rm = RM(
-        name=TEST_MODEL_NAME,
+        name=TEST_MODEL_NAME,  # type: ignore
         fit_method=fit_method,  # type: ignore
         config_path="some-directory/not-a-real-file.txt",  # type: ignore
     )

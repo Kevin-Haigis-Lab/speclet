@@ -9,14 +9,22 @@ from pydantic import validate_arguments
 from src import formatting
 from src.exceptions import ResourceRequestUnkown
 from src.io import model_config
-from src.project_enums import ModelFitMethod, ModelOption, SlurmPartitions
+from src.managers import pipeline_resource_manager as prm
+from src.managers.pipeline_resource_manager import PipelineResourceManager
+from src.project_enums import ModelFitMethod, ModelOption
 
 T = TypeVar("T")
 ResourceLookupDict = Dict[ModelOption, Dict[bool, Dict[ModelFitMethod, T]]]
 
 # RAM required for each configuration (in GB -> mult by 1000).
 #   key: [model][debug][fit_method]
-sample_models_memory_lookup: ResourceLookupDict[int] = {
+MemoryLookupDict = ResourceLookupDict[int]
+
+# Time required for each configuration.
+#   key: [model][debug][fit_method]
+TimeLookupDict = ResourceLookupDict[td]
+
+fitting_pipeline_memory_lookup: MemoryLookupDict = {
     ModelOption.SPECLET_TEST_MODEL: {
         True: {ModelFitMethod.ADVI: 8, ModelFitMethod.MCMC: 8},
         False: {ModelFitMethod.ADVI: 8, ModelFitMethod.MCMC: 8},
@@ -54,7 +62,7 @@ sample_models_memory_lookup: ResourceLookupDict[int] = {
 
 # Time required for each configuration.
 #   key: [model][debug][fit_method]
-sample_models_time_lookup: ResourceLookupDict[td] = {
+fitting_pipeline_time_lookup: TimeLookupDict = {
     ModelOption.SPECLET_TEST_MODEL: {
         True: {ModelFitMethod.ADVI: td(minutes=5), ModelFitMethod.MCMC: td(minutes=5)},
         False: {
@@ -96,7 +104,7 @@ sample_models_time_lookup: ResourceLookupDict[td] = {
 }
 
 
-class ModelFittingPipelineResourceManager:
+class ModelFittingPipelineResourceManager(PipelineResourceManager):
     """Resource manager for the pipeline to fit models on O2."""
 
     name: str
@@ -151,21 +159,22 @@ class ModelFittingPipelineResourceManager:
         Returns:
             str: The partition to request from SLURM.
         """
-        return self._decide_partition_requirement().value
+        return prm.slurm_partition_required_for_duration(
+            self._retrieve_time_requirement()
+        ).value
 
-    def _decide_partition_requirement(self) -> SlurmPartitions:
-        """Time O2 partition for the `sample_models` step."""
-        duration = self._retrieve_time_requirement()
-        if duration <= td(hours=12):
-            return SlurmPartitions.SHORT
-        elif duration <= td(days=5):
-            return SlurmPartitions.MEDIUM
-        else:
-            return SlurmPartitions.LONG
+    @property
+    def cores(self) -> int:
+        """Compute cores request.
+
+        Returns:
+            int: Number of cores.
+        """
+        return 1
 
     def _retrieve_memory_requirement(self) -> str:
         try:
-            mem = sample_models_memory_lookup[self.config.model][self.debug][
+            mem = fitting_pipeline_memory_lookup[self.config.model][self.debug][
                 self.fit_method
             ]
             return str(mem * 1000)
@@ -174,7 +183,7 @@ class ModelFittingPipelineResourceManager:
 
     def _retrieve_time_requirement(self) -> td:
         try:
-            return sample_models_time_lookup[self.config.model][self.debug][
+            return fitting_pipeline_time_lookup[self.config.model][self.debug][
                 self.fit_method
             ]
         except KeyError as err:
