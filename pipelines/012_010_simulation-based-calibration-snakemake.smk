@@ -10,13 +10,13 @@ from src.project_enums import ModelFitMethod, ModelOption
 from src.pipelines.snakemake_parsing_helpers import get_models_names_fit_methods
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
-NUM_SIMULATIONS = 3
+NUM_SIMULATIONS = 25
 
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yml"
 ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
 
-MOCK_DATA_SIZE = "small"
+MOCK_DATA_SIZE = "medium"
 
 
 #### ---- Model Configurations ---- ####
