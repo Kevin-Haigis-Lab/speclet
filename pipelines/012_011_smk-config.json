@@ -10,7 +10,7 @@
         "J": "snakejob"
     },
     "run_sbc": {
-        "partition": "short",
+        "partition": "{params.partition}",
         "cores": "{params.cores}",
         "mem": "{params.mem}",
         "time": "{params.time}",

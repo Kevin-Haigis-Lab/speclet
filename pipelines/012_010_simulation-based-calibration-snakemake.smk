@@ -10,7 +10,7 @@ from src.project_enums import ModelFitMethod, ModelOption
 from src.pipelines.snakemake_parsing_helpers import get_models_names_fit_methods
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
-NUM_SIMULATIONS = 25
+NUM_SIMULATIONS = 2
 
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yml"
@@ -81,6 +81,7 @@ rule run_sbc:
         cores=lambda w: create_resource_manager(w).cores,
         mem=lambda w: create_resource_manager(w).memory,
         time=lambda w: create_resource_manager(w).time,
+        partition=lambda w: create_resource_manager(w).partition,
         perm_dir=make_permutation_dir,
         config_path=MODEL_CONFIG.as_posix()
     shell:
