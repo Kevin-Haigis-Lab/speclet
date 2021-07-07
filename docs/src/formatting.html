@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>src.command_line_interfaces.cli_helpers API documentation</title>
-<meta name="description" content="Helper functions for the various CLIs." />
+<title>src.formatting API documentation</title>
+<meta name="description" content="Formatters and formatting." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -18,33 +18,60 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>src.command_line_interfaces.cli_helpers</code></h1>
+<h1 class="title">Module <code>src.formatting</code></h1>
 </header>
 <section id="section-intro">
-<p>Helper functions for the various CLIs.</p>
+<p>Formatters and formatting.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">#!/usr/bin/env python3
+<pre><code class="python">&#34;&#34;&#34;Formatters and formatting.&#34;&#34;&#34;
 
-&#34;&#34;&#34;Helper functions for the various CLIs.&#34;&#34;&#34;
-
-
-import pretty_errors
-
-#### ---- Pretty Errors ---- ####
+from datetime import timedelta
+from enum import Enum, unique
+from typing import Callable, Dict, Optional, Union
 
 
-def configure_pretty() -&gt; None:
-    &#34;&#34;&#34;Configure &#39;pretty&#39; for better Python error messages.&#34;&#34;&#34;
-    pretty_errors.configure(
-        filename_color=pretty_errors.BLUE,
-        code_color=pretty_errors.BLACK,
-        exception_color=pretty_errors.BRIGHT_RED,
-        exception_arg_color=pretty_errors.RED,
-        line_color=pretty_errors.BRIGHT_BLACK,
-    )</code></pre>
+@unique
+class TimeDeltaFormat(str, Enum):
+    &#34;&#34;&#34;Pre-built timedelta formatting options.&#34;&#34;&#34;
+
+    SLURM = &#34;{days}-{hours:02d}:{minutes:02d}&#34;
+    DRMAA = &#34;{hours:02d}:{minutes:02d}:00&#34;
+
+
+def _drmaa_timedelta_format_callabck(d: Dict[str, int]) -&gt; None:
+    d[&#34;hours&#34;] = (d[&#34;days&#34;] * 24) + d[&#34;hours&#34;]
+
+
+def format_timedelta(
+    tdelta: timedelta,
+    fmt: Union[str, TimeDeltaFormat],
+    callback: Optional[Callable[[Dict[str, int]], None]] = None,
+) -&gt; str:
+    &#34;&#34;&#34;Format time delta object.
+
+    Args:
+        tdelta (timedelta): Time delta object.
+        fmt (Union[str, TimeDeltaFormat]): Format string with keys for &#39;days&#39;, &#39;hours&#39;,
+          and &#39;minutes&#39;.
+
+    Returns:
+        [type]: Formatted time delta.
+    &#34;&#34;&#34;
+    if isinstance(fmt, TimeDeltaFormat):
+        if fmt is TimeDeltaFormat.DRMAA and callback is None:
+            callback = _drmaa_timedelta_format_callabck
+
+        fmt = fmt.value
+
+    d = {&#34;days&#34;: tdelta.days}
+    d[&#34;hours&#34;], rem = divmod(tdelta.seconds, 3600)
+    d[&#34;minutes&#34;], d[&#34;seconds&#34;] = divmod(rem, 60)
+    if callback is not None:
+        callback(d)
+    return fmt.format(**d)</code></pre>
 </details>
 </section>
 <section>
@@ -54,29 +81,97 @@ def configure_pretty() -&gt; None:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="src.command_line_interfaces.cli_helpers.configure_pretty"><code class="name flex">
-<span>def <span class="ident">configure_pretty</span></span>(<span>) -> NoneType</span>
+<dt id="src.formatting.format_timedelta"><code class="name flex">
+<span>def <span class="ident">format_timedelta</span></span>(<span>tdelta: datetime.timedelta, fmt: Union[str, src.formatting.TimeDeltaFormat], callback: Optional[Callable[[Dict[str, int]], NoneType]] = None) -> str</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Configure 'pretty' for better Python error messages.</p></div>
+<div class="desc"><p>Format time delta object.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tdelta</code></strong> :&ensp;<code>timedelta</code></dt>
+<dd>Time delta object.</dd>
+<dt><strong><code>fmt</code></strong> :&ensp;<code>Union[str, <a title="src.formatting.TimeDeltaFormat" href="#src.formatting.TimeDeltaFormat">TimeDeltaFormat</a>]</code></dt>
+<dd>Format string with keys for 'days', 'hours',
+and 'minutes'.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>[type]</code></dt>
+<dd>Formatted time delta.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def configure_pretty() -&gt; None:
-    &#34;&#34;&#34;Configure &#39;pretty&#39; for better Python error messages.&#34;&#34;&#34;
-    pretty_errors.configure(
-        filename_color=pretty_errors.BLUE,
-        code_color=pretty_errors.BLACK,
-        exception_color=pretty_errors.BRIGHT_RED,
-        exception_arg_color=pretty_errors.RED,
-        line_color=pretty_errors.BRIGHT_BLACK,
-    )</code></pre>
+<pre><code class="python">def format_timedelta(
+    tdelta: timedelta,
+    fmt: Union[str, TimeDeltaFormat],
+    callback: Optional[Callable[[Dict[str, int]], None]] = None,
+) -&gt; str:
+    &#34;&#34;&#34;Format time delta object.
+
+    Args:
+        tdelta (timedelta): Time delta object.
+        fmt (Union[str, TimeDeltaFormat]): Format string with keys for &#39;days&#39;, &#39;hours&#39;,
+          and &#39;minutes&#39;.
+
+    Returns:
+        [type]: Formatted time delta.
+    &#34;&#34;&#34;
+    if isinstance(fmt, TimeDeltaFormat):
+        if fmt is TimeDeltaFormat.DRMAA and callback is None:
+            callback = _drmaa_timedelta_format_callabck
+
+        fmt = fmt.value
+
+    d = {&#34;days&#34;: tdelta.days}
+    d[&#34;hours&#34;], rem = divmod(tdelta.seconds, 3600)
+    d[&#34;minutes&#34;], d[&#34;seconds&#34;] = divmod(rem, 60)
+    if callback is not None:
+        callback(d)
+    return fmt.format(**d)</code></pre>
 </details>
 </dd>
 </dl>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="src.formatting.TimeDeltaFormat"><code class="flex name class">
+<span>class <span class="ident">TimeDeltaFormat</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Pre-built timedelta formatting options.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@unique
+class TimeDeltaFormat(str, Enum):
+    &#34;&#34;&#34;Pre-built timedelta formatting options.&#34;&#34;&#34;
+
+    SLURM = &#34;{days}-{hours:02d}:{minutes:02d}&#34;
+    DRMAA = &#34;{hours:02d}:{minutes:02d}:00&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="src.formatting.TimeDeltaFormat.DRMAA"><code class="name">var <span class="ident">DRMAA</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="src.formatting.TimeDeltaFormat.SLURM"><code class="name">var <span class="ident">SLURM</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -87,12 +182,23 @@ def configure_pretty() -&gt; None:
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="src.command_line_interfaces" href="index.html">src.command_line_interfaces</a></code></li>
+<li><code><a title="src" href="index.html">src</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="src.command_line_interfaces.cli_helpers.configure_pretty" href="#src.command_line_interfaces.cli_helpers.configure_pretty">configure_pretty</a></code></li>
+<li><code><a title="src.formatting.format_timedelta" href="#src.formatting.format_timedelta">format_timedelta</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="src.formatting.TimeDeltaFormat" href="#src.formatting.TimeDeltaFormat">TimeDeltaFormat</a></code></h4>
+<ul class="">
+<li><code><a title="src.formatting.TimeDeltaFormat.DRMAA" href="#src.formatting.TimeDeltaFormat.DRMAA">DRMAA</a></code></li>
+<li><code><a title="src.formatting.TimeDeltaFormat.SLURM" href="#src.formatting.TimeDeltaFormat.SLURM">SLURM</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

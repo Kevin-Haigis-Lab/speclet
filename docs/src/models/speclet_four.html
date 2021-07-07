@@ -33,18 +33,31 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pymc3 as pm
 import theano
+from pydantic import BaseModel
+from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 from src.data_processing import achilles as achelp
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
 from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.project_enums import ModelParameterization as MP
+
+
+class SpecletFourConfiguration(BaseModel):
+    &#34;&#34;&#34;Parameterizations for each covariate in SpecletFour model.&#34;&#34;&#34;
+
+    copy_number_cov: bool = False
+    h: MP = MP.CENTERED
+    d: MP = MP.CENTERED
+    β: MP = MP.CENTERED
+    η: MP = MP.CENTERED
 
 
 class SpecletFour(SpecletModel):
     &#34;&#34;&#34;SpecletFour Model.
 
     $$
-    lfc \\sim h_g + d_g + \\beta_c C + \\eta_b
+    lfc \\sim h_g + d_{g,c} + \\beta_c C + \\eta_b
     $$
 
     where:
@@ -56,16 +69,10 @@ class SpecletFour(SpecletModel):
 
     A simple model with a separate consistent gene effect \\(h_g\\) and cell-line
     varying gene effect \\(d_{g,c}\\). The coefficient for copy number effect
-    \\(\\beta_c\\) varies by cell line and is optional. There is an option for a
-    centered and non-centered parameterization.
-
-    Attributes:
-        noncentered_param (bool): Use the non-centered parameterization.
-        copy_number_cov (bool): Include the copy number coefficient.
+    \\(\\beta_c\\) varies by cell line and is optional.
     &#34;&#34;&#34;
 
-    _noncentered_param: bool
-    _copy_number_cov: bool
+    _config: SpecletFourConfiguration
 
     def __init__(
         self,
@@ -73,8 +80,7 @@ class SpecletFour(SpecletModel):
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
-        copy_number_cov: bool = False,
-        noncentered_param: bool = True,
+        config: Optional[SpecletFourConfiguration] = None,
     ):
         &#34;&#34;&#34;Instantiate a SpecletFour model.
 
@@ -86,144 +92,115 @@ class SpecletFour(SpecletModel):
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. If None (default), a `CrcDataManager` is created automatically.
-            copy_number_cov (bool, optional): Should the covariate for gene copy number
-              effect be included in the model? The covariate varies by cell line.
-              Defaults to False.
-            noncentered_param (bool, optional): Should the model use a non-centered
-              parameterization? Default to True.
+            config (Optional[SpecletFourConfiguration], optional): Model configuration.
         &#34;&#34;&#34;
         if data_manager is None:
             data_manager = CrcDataManager(debug=debug)
 
+        if config is None:
+            self.config = SpecletFourConfiguration()
+        else:
+            self.config = config
+
         super().__init__(
-            name=&#34;speclet-four_&#34; + name,
+            name=name,
             root_cache_dir=root_cache_dir,
             debug=debug,
             data_manager=data_manager,
         )
-        self._noncentered_param = noncentered_param
-        self._copy_number_cov = copy_number_cov
 
-    @property
-    def copy_number_cov(self) -&gt; bool:
-        &#34;&#34;&#34;Value of `copy_number_cov` attribute.&#34;&#34;&#34;
-        return self._copy_number_cov
+    def set_config(self, info: Dict[Any, Any]) -&gt; None:
+        &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
+        new_config = SpecletFourConfiguration(**info)
+        if self.config is not None and self.config != new_config:
+            logger.info(&#34;Setting model-specific configuration.&#34;)
+            self.config = new_config
+            self.model = None
 
-    @copy_number_cov.setter
-    def copy_number_cov(self, new_value: bool) -&gt; None:
-        &#34;&#34;&#34;Set the value of `copy_number_cov` attribute.
-
-        If the new value is different, all model and sampling results are reset.
-        &#34;&#34;&#34;
-        if new_value != self._copy_number_cov:
-            logger.info(f&#34;Changing `copy_number_cov` attribute to &#39;{new_value}&#39;.&#34;)
-            self._copy_number_cov = new_value
-            self._reset_model_and_results()
-
-    @property
-    def noncentered_param(self) -&gt; bool:
-        &#34;&#34;&#34;Value of `noncentered_param` attribute.&#34;&#34;&#34;
-        return self._noncentered_param
-
-    @noncentered_param.setter
-    def noncentered_param(self, new_value: bool) -&gt; None:
-        &#34;&#34;&#34;Set the value of `noncentered_param` attribute.
-
-        If the new value is different, all model and sampling results are reset.
-        &#34;&#34;&#34;
-        if new_value != self._noncentered_param:
-            logger.info(f&#34;Changing `_noncentered_param` attribute to &#39;{new_value}&#39;.&#34;)
-            self._noncentered_param = new_value
-            self._reset_model_and_results()
-
-    def _common_model_components(self, n_sgrnas: int) -&gt; pm.Model:
+    def _model_specification(
+        self,
+        co_idx: achelp.CommonIndices,
+        batch_idx: achelp.DataBatchIndices,
+        sgrna_idx_shared: TTShared,
+        gene_idx_shared: TTShared,
+        cellline_idx_shared: TTShared,
+        batch_idx_shared: TTShared,
+        cn_shared: TTShared,
+        lfc_shared: TTShared,
+        total_size: int,
+    ) -&gt; Tuple[pm.Model, str]:
         with pm.Model() as model:
             # Gene varying intercept.
-            μ_h = pm.Normal(&#34;μ_h&#34;, 0, 1)  # noqa: F841
-            σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)  # noqa: F841
+            μ_h = pm.Normal(&#34;μ_h&#34;, 0, 1)
+            σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)
 
             # [gene, cell line] varying intercept.
-            μ_d = pm.Normal(&#34;μ_d&#34;, 0, 1)  # noqa: F841
-            σ_d = pm.HalfNormal(&#34;σ_d&#34;, 1)  # noqa: F841
+            μ_d = pm.Normal(&#34;μ_d&#34;, 0, 1)
+            σ_d = pm.HalfNormal(&#34;σ_d&#34;, 1)
 
             # Batch effect varying intercept.
-            μ_η = pm.Normal(&#34;μ_η&#34;, 0, 0.2)  # noqa: F841
-            σ_η = pm.HalfNormal(&#34;σ_η&#34;, 0.5)  # noqa: F841
+            μ_η = pm.Normal(&#34;μ_η&#34;, 0, 0.2)
+            σ_η = pm.HalfNormal(&#34;σ_η&#34;, 0.5)
 
             # Copy number varying effect.
-            if self.copy_number_cov:
-                μ_β = pm.Normal(&#34;μ_β&#34;, -0.5, 1)  # noqa: F841
-                σ_β = pm.Normal(&#34;σ_β&#34;, -0.5, 1)  # noqa: F841
+            if self.config.copy_number_cov:
+                μ_β = pm.Normal(&#34;μ_β&#34;, -0.5, 1)
+                σ_β = pm.Normal(&#34;σ_β&#34;, -0.5, 1)
+
+            # Gene varying intercept.
+            if self.config.h is MP.NONCENTERED:
+                h_offset = pm.Normal(&#34;h_offset&#34;, 0, 1, shape=co_idx.n_genes)
+                h = pm.Deterministic(&#34;h&#34;, μ_h + h_offset * σ_h)
+            else:
+                h = pm.Normal(&#34;h&#34;, μ_h, σ_h, shape=co_idx.n_genes)
+
+            # [gene, cell line] varying intercept.
+            if self.config.d is MP.NONCENTERED:
+                d_offset = pm.Normal(
+                    &#34;d_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+                )
+                d = pm.Deterministic(&#34;d&#34;, μ_d + d_offset * σ_d)
+            else:
+                d = pm.Normal(&#34;d&#34;, μ_d, σ_d, shape=(co_idx.n_genes, co_idx.n_celllines))
+
+            # Batch effect varying intercept.
+            if self.config.η is MP.NONCENTERED:
+                η_offset = pm.Normal(&#34;η_offset&#34;, 0, 1, shape=batch_idx.n_batches)
+                η = pm.Deterministic(&#34;η&#34;, μ_η + η_offset * σ_η)
+            else:
+                η = pm.Normal(&#34;η&#34;, μ_η, σ_η, shape=batch_idx.n_batches)
+
+            _μ = (
+                h[gene_idx_shared]
+                + d[gene_idx_shared, cellline_idx_shared]
+                + η[batch_idx_shared]
+            )
+
+            # Copy number effect varying by cell line.
+            if self.config.copy_number_cov:
+                if self.config.β is MP.NONCENTERED:
+                    β_offset = pm.Normal(&#34;β_offset&#34;, 0, 1, shape=co_idx.n_celllines)
+                    β = pm.Deterministic(&#34;β&#34;, μ_β + β_offset * σ_β)
+                else:
+                    β = pm.Normal(&#34;β&#34;, μ_β, σ_β, shape=co_idx.n_celllines)
+
+                _μ += β[cellline_idx_shared] * cn_shared
+
+            μ = pm.Deterministic(&#34;μ&#34;, _μ)
 
             σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 0.5)
-            σ = pm.HalfNormal(&#34;σ&#34;, σ_σ, shape=n_sgrnas)  # noqa: F841
+            σ = pm.HalfNormal(&#34;σ&#34;, σ_σ, shape=co_idx.n_sgrnas)
 
-        return model
-
-    def _model_centered_parameterization(
-        self,
-        model: pm.Model,
-        co_idx: achelp.CommonIndices,
-        batch_idx: achelp.DataBatchIndices,
-    ) -&gt; pm.Model:
-        with model:
-            # Gene varying intercept.
-            h = pm.Normal(  # noqa: F841
-                &#34;h&#34;, model[&#34;μ_h&#34;], model[&#34;σ_h&#34;], shape=co_idx.n_genes
+            # Likelihood
+            lfc = pm.Normal(  # noqa: F841
+                &#34;lfc&#34;,
+                μ,
+                σ[sgrna_idx_shared],
+                observed=lfc_shared,
+                total_size=total_size,
             )
 
-            # [gene, cell line] varying intercept.
-            d = pm.Normal(  # noqa: F841
-                &#34;d&#34;,
-                model[&#34;μ_d&#34;],
-                model[&#34;σ_d&#34;],
-                shape=(co_idx.n_genes, co_idx.n_celllines),
-            )
-
-            if self.copy_number_cov:
-                β = pm.Normal(  # noqa: F841
-                    &#34;β&#34;, model[&#34;μ_β&#34;], model[&#34;σ_β&#34;], shape=co_idx.n_celllines
-                )
-
-            # Batch effect varying intercept.
-            η = pm.Normal(  # noqa: F841
-                &#34;η&#34;, model[&#34;μ_η&#34;], model[&#34;σ_η&#34;], shape=batch_idx.n_batches
-            )
-        return model
-
-    def _model_non_centered_parameterization(
-        self,
-        model: pm.Model,
-        co_idx: achelp.CommonIndices,
-        batch_idx: achelp.DataBatchIndices,
-    ) -&gt; pm.Model:
-        with model:
-            # Gene varying intercept.
-            h_offset = pm.Normal(&#34;h_offset&#34;, 0, 1, shape=co_idx.n_genes)
-            h = pm.Deterministic(  # noqa: F841
-                &#34;h&#34;, model[&#34;μ_h&#34;] + h_offset * model[&#34;σ_h&#34;]
-            )
-
-            # [gene, cell line] varying intercept.
-            d_offset = pm.Normal(
-                &#34;d_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
-            )
-            d = pm.Deterministic(  # noqa: F841
-                &#34;d&#34;, model[&#34;μ_d&#34;] + d_offset * model[&#34;σ_d&#34;]
-            )
-
-            if self.copy_number_cov:
-                β_offset = pm.Normal(&#34;β_offset&#34;, 0, 1, shape=co_idx.n_celllines)
-                β = pm.Deterministic(  # noqa: F841
-                    &#34;β&#34;, model[&#34;μ_β&#34;] + β_offset * model[&#34;σ_β&#34;]
-                )
-
-            # Batch effect varying intercept.
-            η_offset = pm.Normal(&#34;η_offset&#34;, 0, 1, shape=batch_idx.n_batches)
-            η = pm.Deterministic(  # noqa: F841
-                &#34;η&#34;, model[&#34;μ_η&#34;] + η_offset * model[&#34;σ_η&#34;]
-            )
-        return model
+        return model, &#34;lfc&#34;
 
     def model_specification(self) -&gt; Tuple[pm.Model, str]:
         &#34;&#34;&#34;Build SpecletFour model.
@@ -249,42 +226,7 @@ class SpecletFour(SpecletModel):
         cn_shared = theano.shared(data.copy_number.values)
         lfc_shared = theano.shared(data.lfc.values)
 
-        logger.info(&#34;Creating PyMC3 model.&#34;)
-        model = self._common_model_components(n_sgrnas=co_idx.n_sgrnas)
-        if self.noncentered_param:
-            logger.info(&#34;Using non-centered parameterization.&#34;)
-            model = self._model_non_centered_parameterization(
-                model=model, co_idx=co_idx, batch_idx=b_idx
-            )
-        else:
-            logger.info(&#34;Using centered parameterization.&#34;)
-            model = self._model_centered_parameterization(
-                model=model, co_idx=co_idx, batch_idx=b_idx
-            )
-
-        with model:
-            _μ = (
-                model[&#34;h&#34;][gene_idx_shared]
-                + model[&#34;d&#34;][gene_idx_shared, cellline_idx_shared]
-                + model[&#34;η&#34;][batch_idx_shared]
-            )
-
-            if self.copy_number_cov:
-                _μ += model[&#34;β&#34;][cellline_idx_shared] * cn_shared
-
-            μ = pm.Deterministic(&#34;μ&#34;, _μ)
-
-            # Likelihood
-            lfc = pm.Normal(  # noqa: F841
-                &#34;lfc&#34;,
-                μ,
-                model[&#34;σ&#34;][sgrna_idx_shared],
-                observed=lfc_shared,
-                total_size=total_size,
-            )
-
-        logger.debug(&#34;Finished building model.&#34;)
-
+        logger.info(&#34;Saving shared variables to dictionary.&#34;)
         self.shared_vars = {
             &#34;sgrna_idx_shared&#34;: sgrna_idx_shared,
             &#34;gene_idx_shared&#34;: gene_idx_shared,
@@ -293,22 +235,31 @@ class SpecletFour(SpecletModel):
             &#34;cn_shared&#34;: cn_shared,
             &#34;lfc_shared&#34;: lfc_shared,
         }
-        return model, &#34;lfc&#34;
+
+        logger.info(&#34;Creating PyMC3 model.&#34;)
+        model, obs_var_name = self._model_specification(
+            co_idx=co_idx,
+            batch_idx=b_idx,
+            sgrna_idx_shared=sgrna_idx_shared,
+            gene_idx_shared=gene_idx_shared,
+            cellline_idx_shared=cellline_idx_shared,
+            batch_idx_shared=batch_idx_shared,
+            cn_shared=cn_shared,
+            lfc_shared=lfc_shared,
+            total_size=total_size,
+        )
+        logger.debug(&#34;Finished building model.&#34;)
+        return model, obs_var_name
 
     def get_replacement_parameters(self) -&gt; ReplacementsDict:
         &#34;&#34;&#34;Make a dictionary mapping the shared data variables to new data.
 
         Raises:
-            AttributeError: Raised if there is no data manager.
             AttributeError: Raised if there are no shared variables.
 
         Returns:
             ReplacementsDict: A dictionary mapping new data to shared variables.
         &#34;&#34;&#34;
-        if self.data_manager is None:
-            raise AttributeError(
-                &#34;Cannot create replacement parameters without a DataManager.&#34;
-            )
         if self.shared_vars is None:
             raise AttributeError(
                 &#34;No shared variables - cannot create replacement parameters..&#34;
@@ -316,17 +267,22 @@ class SpecletFour(SpecletModel):
 
         data = self.data_manager.get_data()
         batch_size = self.data_manager.get_batch_size()
-        ic = achelp.common_indices(data)
+        co_idx = achelp.common_indices(data)
+        batch_idx = achelp.data_batch_indices(data)
 
-        gene_idx_batch = pm.Minibatch(ic.gene_idx, batch_size=batch_size)
-        cellline_idx_batch = pm.Minibatch(ic.cellline_idx, batch_size=batch_size)
-        batch_idx_batch = pm.Minibatch(ic.batch_idx, batch_size=batch_size)
+        sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=batch_size)
+        gene_idx_batch = pm.Minibatch(co_idx.gene_idx, batch_size=batch_size)
+        cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=batch_size)
+        batch_idx_batch = pm.Minibatch(batch_idx.batch_idx, batch_size=batch_size)
+        cn_data_batch = pm.Minibatch(data.copy_number.values, batch_size=batch_size)
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
         return {
+            self.shared_vars[&#34;sgrna_idx_shared&#34;]: sgrna_idx_batch,
             self.shared_vars[&#34;gene_idx_shared&#34;]: gene_idx_batch,
             self.shared_vars[&#34;cellline_idx_shared&#34;]: cellline_idx_batch,
             self.shared_vars[&#34;batch_idx_shared&#34;]: batch_idx_batch,
+            self.shared_vars[&#34;cn_shared&#34;]: cn_data_batch,
             self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
         }
 
@@ -371,14 +327,14 @@ class SpecletFour(SpecletModel):
 <dl>
 <dt id="src.models.speclet_four.SpecletFour"><code class="flex name class">
 <span>class <span class="ident">SpecletFour</span></span>
-<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = None, copy_number_cov: bool = False, noncentered_param: bool = True)</span>
+<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = None, config: Optional[<a title="src.models.speclet_four.SpecletFourConfiguration" href="#src.models.speclet_four.SpecletFourConfiguration">SpecletFourConfiguration</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>SpecletFour Model.</p>
 <p><span><span class="MathJax_Preview">
-lfc \sim h_g + d_g + \beta_c C + \eta_b
+lfc \sim h_g + d_{g,c} + \beta_c C + \eta_b
 </span><script type="math/tex; mode=display">
-lfc \sim h_g + d_g + \beta_c C + \eta_b
+lfc \sim h_g + d_{g,c} + \beta_c C + \eta_b
 </script></span></p>
 <p>where:</p>
 <ul>
@@ -389,15 +345,7 @@ lfc \sim h_g + d_g + \beta_c C + \eta_b
 </ul>
 <p>A simple model with a separate consistent gene effect <span><span class="MathJax_Preview">h_g</span><script type="math/tex">h_g</script></span> and cell-line
 varying gene effect <span><span class="MathJax_Preview">d_{g,c}</span><script type="math/tex">d_{g,c}</script></span>. The coefficient for copy number effect
-<span><span class="MathJax_Preview">\beta_c</span><script type="math/tex">\beta_c</script></span> varies by cell line and is optional. There is an option for a
-centered and non-centered parameterization.</p>
-<h2 id="attributes">Attributes</h2>
-<dl>
-<dt><strong><code>noncentered_param</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Use the non-centered parameterization.</dd>
-<dt><strong><code>copy_number_cov</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Include the copy number coefficient.</dd>
-</dl>
+<span><span class="MathJax_Preview">\beta_c</span><script type="math/tex">\beta_c</script></span> varies by cell line and is optional.</p>
 <p>Instantiate a SpecletFour model.</p>
 <h2 id="args">Args</h2>
 <dl>
@@ -412,13 +360,8 @@ sampling/fitting results. Defaults to None.</dd>
 <dt><strong><code>data_manager</code></strong> :&ensp;<code>Optional[DataManager]</code>, optional</dt>
 <dd>Object that will manage the
 data. If None (default), a <code>CrcDataManager</code> is created automatically.</dd>
-<dt><strong><code>copy_number_cov</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>Should the covariate for gene copy number
-effect be included in the model? The covariate varies by cell line.
-Defaults to False.</dd>
-<dt><strong><code>noncentered_param</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>Should the model use a non-centered
-parameterization? Default to True.</dd>
+<dt><strong><code>config</code></strong> :&ensp;<code>Optional[<a title="src.models.speclet_four.SpecletFourConfiguration" href="#src.models.speclet_four.SpecletFourConfiguration">SpecletFourConfiguration</a>]</code>, optional</dt>
+<dd>Model configuration.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -428,7 +371,7 @@ parameterization? Default to True.</dd>
     &#34;&#34;&#34;SpecletFour Model.
 
     $$
-    lfc \\sim h_g + d_g + \\beta_c C + \\eta_b
+    lfc \\sim h_g + d_{g,c} + \\beta_c C + \\eta_b
     $$
 
     where:
@@ -440,16 +383,10 @@ parameterization? Default to True.</dd>
 
     A simple model with a separate consistent gene effect \\(h_g\\) and cell-line
     varying gene effect \\(d_{g,c}\\). The coefficient for copy number effect
-    \\(\\beta_c\\) varies by cell line and is optional. There is an option for a
-    centered and non-centered parameterization.
-
-    Attributes:
-        noncentered_param (bool): Use the non-centered parameterization.
-        copy_number_cov (bool): Include the copy number coefficient.
+    \\(\\beta_c\\) varies by cell line and is optional.
     &#34;&#34;&#34;
 
-    _noncentered_param: bool
-    _copy_number_cov: bool
+    _config: SpecletFourConfiguration
 
     def __init__(
         self,
@@ -457,8 +394,7 @@ parameterization? Default to True.</dd>
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
-        copy_number_cov: bool = False,
-        noncentered_param: bool = True,
+        config: Optional[SpecletFourConfiguration] = None,
     ):
         &#34;&#34;&#34;Instantiate a SpecletFour model.
 
@@ -470,144 +406,115 @@ parameterization? Default to True.</dd>
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. If None (default), a `CrcDataManager` is created automatically.
-            copy_number_cov (bool, optional): Should the covariate for gene copy number
-              effect be included in the model? The covariate varies by cell line.
-              Defaults to False.
-            noncentered_param (bool, optional): Should the model use a non-centered
-              parameterization? Default to True.
+            config (Optional[SpecletFourConfiguration], optional): Model configuration.
         &#34;&#34;&#34;
         if data_manager is None:
             data_manager = CrcDataManager(debug=debug)
 
+        if config is None:
+            self.config = SpecletFourConfiguration()
+        else:
+            self.config = config
+
         super().__init__(
-            name=&#34;speclet-four_&#34; + name,
+            name=name,
             root_cache_dir=root_cache_dir,
             debug=debug,
             data_manager=data_manager,
         )
-        self._noncentered_param = noncentered_param
-        self._copy_number_cov = copy_number_cov
 
-    @property
-    def copy_number_cov(self) -&gt; bool:
-        &#34;&#34;&#34;Value of `copy_number_cov` attribute.&#34;&#34;&#34;
-        return self._copy_number_cov
+    def set_config(self, info: Dict[Any, Any]) -&gt; None:
+        &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
+        new_config = SpecletFourConfiguration(**info)
+        if self.config is not None and self.config != new_config:
+            logger.info(&#34;Setting model-specific configuration.&#34;)
+            self.config = new_config
+            self.model = None
 
-    @copy_number_cov.setter
-    def copy_number_cov(self, new_value: bool) -&gt; None:
-        &#34;&#34;&#34;Set the value of `copy_number_cov` attribute.
-
-        If the new value is different, all model and sampling results are reset.
-        &#34;&#34;&#34;
-        if new_value != self._copy_number_cov:
-            logger.info(f&#34;Changing `copy_number_cov` attribute to &#39;{new_value}&#39;.&#34;)
-            self._copy_number_cov = new_value
-            self._reset_model_and_results()
-
-    @property
-    def noncentered_param(self) -&gt; bool:
-        &#34;&#34;&#34;Value of `noncentered_param` attribute.&#34;&#34;&#34;
-        return self._noncentered_param
-
-    @noncentered_param.setter
-    def noncentered_param(self, new_value: bool) -&gt; None:
-        &#34;&#34;&#34;Set the value of `noncentered_param` attribute.
-
-        If the new value is different, all model and sampling results are reset.
-        &#34;&#34;&#34;
-        if new_value != self._noncentered_param:
-            logger.info(f&#34;Changing `_noncentered_param` attribute to &#39;{new_value}&#39;.&#34;)
-            self._noncentered_param = new_value
-            self._reset_model_and_results()
-
-    def _common_model_components(self, n_sgrnas: int) -&gt; pm.Model:
+    def _model_specification(
+        self,
+        co_idx: achelp.CommonIndices,
+        batch_idx: achelp.DataBatchIndices,
+        sgrna_idx_shared: TTShared,
+        gene_idx_shared: TTShared,
+        cellline_idx_shared: TTShared,
+        batch_idx_shared: TTShared,
+        cn_shared: TTShared,
+        lfc_shared: TTShared,
+        total_size: int,
+    ) -&gt; Tuple[pm.Model, str]:
         with pm.Model() as model:
             # Gene varying intercept.
-            μ_h = pm.Normal(&#34;μ_h&#34;, 0, 1)  # noqa: F841
-            σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)  # noqa: F841
+            μ_h = pm.Normal(&#34;μ_h&#34;, 0, 1)
+            σ_h = pm.HalfNormal(&#34;σ_h&#34;, 1)
 
             # [gene, cell line] varying intercept.
-            μ_d = pm.Normal(&#34;μ_d&#34;, 0, 1)  # noqa: F841
-            σ_d = pm.HalfNormal(&#34;σ_d&#34;, 1)  # noqa: F841
+            μ_d = pm.Normal(&#34;μ_d&#34;, 0, 1)
+            σ_d = pm.HalfNormal(&#34;σ_d&#34;, 1)
 
             # Batch effect varying intercept.
-            μ_η = pm.Normal(&#34;μ_η&#34;, 0, 0.2)  # noqa: F841
-            σ_η = pm.HalfNormal(&#34;σ_η&#34;, 0.5)  # noqa: F841
+            μ_η = pm.Normal(&#34;μ_η&#34;, 0, 0.2)
+            σ_η = pm.HalfNormal(&#34;σ_η&#34;, 0.5)
 
             # Copy number varying effect.
-            if self.copy_number_cov:
-                μ_β = pm.Normal(&#34;μ_β&#34;, -0.5, 1)  # noqa: F841
-                σ_β = pm.Normal(&#34;σ_β&#34;, -0.5, 1)  # noqa: F841
+            if self.config.copy_number_cov:
+                μ_β = pm.Normal(&#34;μ_β&#34;, -0.5, 1)
+                σ_β = pm.Normal(&#34;σ_β&#34;, -0.5, 1)
+
+            # Gene varying intercept.
+            if self.config.h is MP.NONCENTERED:
+                h_offset = pm.Normal(&#34;h_offset&#34;, 0, 1, shape=co_idx.n_genes)
+                h = pm.Deterministic(&#34;h&#34;, μ_h + h_offset * σ_h)
+            else:
+                h = pm.Normal(&#34;h&#34;, μ_h, σ_h, shape=co_idx.n_genes)
+
+            # [gene, cell line] varying intercept.
+            if self.config.d is MP.NONCENTERED:
+                d_offset = pm.Normal(
+                    &#34;d_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
+                )
+                d = pm.Deterministic(&#34;d&#34;, μ_d + d_offset * σ_d)
+            else:
+                d = pm.Normal(&#34;d&#34;, μ_d, σ_d, shape=(co_idx.n_genes, co_idx.n_celllines))
+
+            # Batch effect varying intercept.
+            if self.config.η is MP.NONCENTERED:
+                η_offset = pm.Normal(&#34;η_offset&#34;, 0, 1, shape=batch_idx.n_batches)
+                η = pm.Deterministic(&#34;η&#34;, μ_η + η_offset * σ_η)
+            else:
+                η = pm.Normal(&#34;η&#34;, μ_η, σ_η, shape=batch_idx.n_batches)
+
+            _μ = (
+                h[gene_idx_shared]
+                + d[gene_idx_shared, cellline_idx_shared]
+                + η[batch_idx_shared]
+            )
+
+            # Copy number effect varying by cell line.
+            if self.config.copy_number_cov:
+                if self.config.β is MP.NONCENTERED:
+                    β_offset = pm.Normal(&#34;β_offset&#34;, 0, 1, shape=co_idx.n_celllines)
+                    β = pm.Deterministic(&#34;β&#34;, μ_β + β_offset * σ_β)
+                else:
+                    β = pm.Normal(&#34;β&#34;, μ_β, σ_β, shape=co_idx.n_celllines)
+
+                _μ += β[cellline_idx_shared] * cn_shared
+
+            μ = pm.Deterministic(&#34;μ&#34;, _μ)
 
             σ_σ = pm.HalfNormal(&#34;σ_σ&#34;, 0.5)
-            σ = pm.HalfNormal(&#34;σ&#34;, σ_σ, shape=n_sgrnas)  # noqa: F841
+            σ = pm.HalfNormal(&#34;σ&#34;, σ_σ, shape=co_idx.n_sgrnas)
 
-        return model
-
-    def _model_centered_parameterization(
-        self,
-        model: pm.Model,
-        co_idx: achelp.CommonIndices,
-        batch_idx: achelp.DataBatchIndices,
-    ) -&gt; pm.Model:
-        with model:
-            # Gene varying intercept.
-            h = pm.Normal(  # noqa: F841
-                &#34;h&#34;, model[&#34;μ_h&#34;], model[&#34;σ_h&#34;], shape=co_idx.n_genes
+            # Likelihood
+            lfc = pm.Normal(  # noqa: F841
+                &#34;lfc&#34;,
+                μ,
+                σ[sgrna_idx_shared],
+                observed=lfc_shared,
+                total_size=total_size,
             )
 
-            # [gene, cell line] varying intercept.
-            d = pm.Normal(  # noqa: F841
-                &#34;d&#34;,
-                model[&#34;μ_d&#34;],
-                model[&#34;σ_d&#34;],
-                shape=(co_idx.n_genes, co_idx.n_celllines),
-            )
-
-            if self.copy_number_cov:
-                β = pm.Normal(  # noqa: F841
-                    &#34;β&#34;, model[&#34;μ_β&#34;], model[&#34;σ_β&#34;], shape=co_idx.n_celllines
-                )
-
-            # Batch effect varying intercept.
-            η = pm.Normal(  # noqa: F841
-                &#34;η&#34;, model[&#34;μ_η&#34;], model[&#34;σ_η&#34;], shape=batch_idx.n_batches
-            )
-        return model
-
-    def _model_non_centered_parameterization(
-        self,
-        model: pm.Model,
-        co_idx: achelp.CommonIndices,
-        batch_idx: achelp.DataBatchIndices,
-    ) -&gt; pm.Model:
-        with model:
-            # Gene varying intercept.
-            h_offset = pm.Normal(&#34;h_offset&#34;, 0, 1, shape=co_idx.n_genes)
-            h = pm.Deterministic(  # noqa: F841
-                &#34;h&#34;, model[&#34;μ_h&#34;] + h_offset * model[&#34;σ_h&#34;]
-            )
-
-            # [gene, cell line] varying intercept.
-            d_offset = pm.Normal(
-                &#34;d_offset&#34;, 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
-            )
-            d = pm.Deterministic(  # noqa: F841
-                &#34;d&#34;, model[&#34;μ_d&#34;] + d_offset * model[&#34;σ_d&#34;]
-            )
-
-            if self.copy_number_cov:
-                β_offset = pm.Normal(&#34;β_offset&#34;, 0, 1, shape=co_idx.n_celllines)
-                β = pm.Deterministic(  # noqa: F841
-                    &#34;β&#34;, model[&#34;μ_β&#34;] + β_offset * model[&#34;σ_β&#34;]
-                )
-
-            # Batch effect varying intercept.
-            η_offset = pm.Normal(&#34;η_offset&#34;, 0, 1, shape=batch_idx.n_batches)
-            η = pm.Deterministic(  # noqa: F841
-                &#34;η&#34;, model[&#34;μ_η&#34;] + η_offset * model[&#34;σ_η&#34;]
-            )
-        return model
+        return model, &#34;lfc&#34;
 
     def model_specification(self) -&gt; Tuple[pm.Model, str]:
         &#34;&#34;&#34;Build SpecletFour model.
@@ -633,42 +540,7 @@ parameterization? Default to True.</dd>
         cn_shared = theano.shared(data.copy_number.values)
         lfc_shared = theano.shared(data.lfc.values)
 
-        logger.info(&#34;Creating PyMC3 model.&#34;)
-        model = self._common_model_components(n_sgrnas=co_idx.n_sgrnas)
-        if self.noncentered_param:
-            logger.info(&#34;Using non-centered parameterization.&#34;)
-            model = self._model_non_centered_parameterization(
-                model=model, co_idx=co_idx, batch_idx=b_idx
-            )
-        else:
-            logger.info(&#34;Using centered parameterization.&#34;)
-            model = self._model_centered_parameterization(
-                model=model, co_idx=co_idx, batch_idx=b_idx
-            )
-
-        with model:
-            _μ = (
-                model[&#34;h&#34;][gene_idx_shared]
-                + model[&#34;d&#34;][gene_idx_shared, cellline_idx_shared]
-                + model[&#34;η&#34;][batch_idx_shared]
-            )
-
-            if self.copy_number_cov:
-                _μ += model[&#34;β&#34;][cellline_idx_shared] * cn_shared
-
-            μ = pm.Deterministic(&#34;μ&#34;, _μ)
-
-            # Likelihood
-            lfc = pm.Normal(  # noqa: F841
-                &#34;lfc&#34;,
-                μ,
-                model[&#34;σ&#34;][sgrna_idx_shared],
-                observed=lfc_shared,
-                total_size=total_size,
-            )
-
-        logger.debug(&#34;Finished building model.&#34;)
-
+        logger.info(&#34;Saving shared variables to dictionary.&#34;)
         self.shared_vars = {
             &#34;sgrna_idx_shared&#34;: sgrna_idx_shared,
             &#34;gene_idx_shared&#34;: gene_idx_shared,
@@ -677,22 +549,31 @@ parameterization? Default to True.</dd>
             &#34;cn_shared&#34;: cn_shared,
             &#34;lfc_shared&#34;: lfc_shared,
         }
-        return model, &#34;lfc&#34;
+
+        logger.info(&#34;Creating PyMC3 model.&#34;)
+        model, obs_var_name = self._model_specification(
+            co_idx=co_idx,
+            batch_idx=b_idx,
+            sgrna_idx_shared=sgrna_idx_shared,
+            gene_idx_shared=gene_idx_shared,
+            cellline_idx_shared=cellline_idx_shared,
+            batch_idx_shared=batch_idx_shared,
+            cn_shared=cn_shared,
+            lfc_shared=lfc_shared,
+            total_size=total_size,
+        )
+        logger.debug(&#34;Finished building model.&#34;)
+        return model, obs_var_name
 
     def get_replacement_parameters(self) -&gt; ReplacementsDict:
         &#34;&#34;&#34;Make a dictionary mapping the shared data variables to new data.
 
         Raises:
-            AttributeError: Raised if there is no data manager.
             AttributeError: Raised if there are no shared variables.
 
         Returns:
             ReplacementsDict: A dictionary mapping new data to shared variables.
         &#34;&#34;&#34;
-        if self.data_manager is None:
-            raise AttributeError(
-                &#34;Cannot create replacement parameters without a DataManager.&#34;
-            )
         if self.shared_vars is None:
             raise AttributeError(
                 &#34;No shared variables - cannot create replacement parameters..&#34;
@@ -700,17 +581,22 @@ parameterization? Default to True.</dd>
 
         data = self.data_manager.get_data()
         batch_size = self.data_manager.get_batch_size()
-        ic = achelp.common_indices(data)
+        co_idx = achelp.common_indices(data)
+        batch_idx = achelp.data_batch_indices(data)
 
-        gene_idx_batch = pm.Minibatch(ic.gene_idx, batch_size=batch_size)
-        cellline_idx_batch = pm.Minibatch(ic.cellline_idx, batch_size=batch_size)
-        batch_idx_batch = pm.Minibatch(ic.batch_idx, batch_size=batch_size)
+        sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=batch_size)
+        gene_idx_batch = pm.Minibatch(co_idx.gene_idx, batch_size=batch_size)
+        cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=batch_size)
+        batch_idx_batch = pm.Minibatch(batch_idx.batch_idx, batch_size=batch_size)
+        cn_data_batch = pm.Minibatch(data.copy_number.values, batch_size=batch_size)
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
         return {
+            self.shared_vars[&#34;sgrna_idx_shared&#34;]: sgrna_idx_batch,
             self.shared_vars[&#34;gene_idx_shared&#34;]: gene_idx_batch,
             self.shared_vars[&#34;cellline_idx_shared&#34;]: cellline_idx_batch,
             self.shared_vars[&#34;batch_idx_shared&#34;]: batch_idx_batch,
+            self.shared_vars[&#34;cn_shared&#34;]: cn_data_batch,
             self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
         }
 
@@ -747,35 +633,6 @@ parameterization? Default to True.</dd>
 <ul class="hlist">
 <li><a title="src.models.speclet_model.SpecletModel" href="speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a></li>
 </ul>
-<h3>Instance variables</h3>
-<dl>
-<dt id="src.models.speclet_four.SpecletFour.copy_number_cov"><code class="name">var <span class="ident">copy_number_cov</span> : bool</code></dt>
-<dd>
-<div class="desc"><p>Value of <code>copy_number_cov</code> attribute.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def copy_number_cov(self) -&gt; bool:
-    &#34;&#34;&#34;Value of `copy_number_cov` attribute.&#34;&#34;&#34;
-    return self._copy_number_cov</code></pre>
-</details>
-</dd>
-<dt id="src.models.speclet_four.SpecletFour.noncentered_param"><code class="name">var <span class="ident">noncentered_param</span> : bool</code></dt>
-<dd>
-<div class="desc"><p>Value of <code>noncentered_param</code> attribute.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def noncentered_param(self) -&gt; bool:
-    &#34;&#34;&#34;Value of `noncentered_param` attribute.&#34;&#34;&#34;
-    return self._noncentered_param</code></pre>
-</details>
-</dd>
-</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="src.models.speclet_four.SpecletFour.get_replacement_parameters"><code class="name flex">
@@ -785,8 +642,6 @@ def noncentered_param(self) -&gt; bool:
 <div class="desc"><p>Make a dictionary mapping the shared data variables to new data.</p>
 <h2 id="raises">Raises</h2>
 <dl>
-<dt><code>AttributeError</code></dt>
-<dd>Raised if there is no data manager.</dd>
 <dt><code>AttributeError</code></dt>
 <dd>Raised if there are no shared variables.</dd>
 </dl>
@@ -803,16 +658,11 @@ def noncentered_param(self) -&gt; bool:
     &#34;&#34;&#34;Make a dictionary mapping the shared data variables to new data.
 
     Raises:
-        AttributeError: Raised if there is no data manager.
         AttributeError: Raised if there are no shared variables.
 
     Returns:
         ReplacementsDict: A dictionary mapping new data to shared variables.
     &#34;&#34;&#34;
-    if self.data_manager is None:
-        raise AttributeError(
-            &#34;Cannot create replacement parameters without a DataManager.&#34;
-        )
     if self.shared_vars is None:
         raise AttributeError(
             &#34;No shared variables - cannot create replacement parameters..&#34;
@@ -820,17 +670,22 @@ def noncentered_param(self) -&gt; bool:
 
     data = self.data_manager.get_data()
     batch_size = self.data_manager.get_batch_size()
-    ic = achelp.common_indices(data)
+    co_idx = achelp.common_indices(data)
+    batch_idx = achelp.data_batch_indices(data)
 
-    gene_idx_batch = pm.Minibatch(ic.gene_idx, batch_size=batch_size)
-    cellline_idx_batch = pm.Minibatch(ic.cellline_idx, batch_size=batch_size)
-    batch_idx_batch = pm.Minibatch(ic.batch_idx, batch_size=batch_size)
+    sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=batch_size)
+    gene_idx_batch = pm.Minibatch(co_idx.gene_idx, batch_size=batch_size)
+    cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=batch_size)
+    batch_idx_batch = pm.Minibatch(batch_idx.batch_idx, batch_size=batch_size)
+    cn_data_batch = pm.Minibatch(data.copy_number.values, batch_size=batch_size)
     lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
     return {
+        self.shared_vars[&#34;sgrna_idx_shared&#34;]: sgrna_idx_batch,
         self.shared_vars[&#34;gene_idx_shared&#34;]: gene_idx_batch,
         self.shared_vars[&#34;cellline_idx_shared&#34;]: cellline_idx_batch,
         self.shared_vars[&#34;batch_idx_shared&#34;]: batch_idx_batch,
+        self.shared_vars[&#34;cn_shared&#34;]: cn_data_batch,
         self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
     }</code></pre>
 </details>
@@ -873,42 +728,7 @@ def noncentered_param(self) -&gt; bool:
     cn_shared = theano.shared(data.copy_number.values)
     lfc_shared = theano.shared(data.lfc.values)
 
-    logger.info(&#34;Creating PyMC3 model.&#34;)
-    model = self._common_model_components(n_sgrnas=co_idx.n_sgrnas)
-    if self.noncentered_param:
-        logger.info(&#34;Using non-centered parameterization.&#34;)
-        model = self._model_non_centered_parameterization(
-            model=model, co_idx=co_idx, batch_idx=b_idx
-        )
-    else:
-        logger.info(&#34;Using centered parameterization.&#34;)
-        model = self._model_centered_parameterization(
-            model=model, co_idx=co_idx, batch_idx=b_idx
-        )
-
-    with model:
-        _μ = (
-            model[&#34;h&#34;][gene_idx_shared]
-            + model[&#34;d&#34;][gene_idx_shared, cellline_idx_shared]
-            + model[&#34;η&#34;][batch_idx_shared]
-        )
-
-        if self.copy_number_cov:
-            _μ += model[&#34;β&#34;][cellline_idx_shared] * cn_shared
-
-        μ = pm.Deterministic(&#34;μ&#34;, _μ)
-
-        # Likelihood
-        lfc = pm.Normal(  # noqa: F841
-            &#34;lfc&#34;,
-            μ,
-            model[&#34;σ&#34;][sgrna_idx_shared],
-            observed=lfc_shared,
-            total_size=total_size,
-        )
-
-    logger.debug(&#34;Finished building model.&#34;)
-
+    logger.info(&#34;Saving shared variables to dictionary.&#34;)
     self.shared_vars = {
         &#34;sgrna_idx_shared&#34;: sgrna_idx_shared,
         &#34;gene_idx_shared&#34;: gene_idx_shared,
@@ -917,7 +737,21 @@ def noncentered_param(self) -&gt; bool:
         &#34;cn_shared&#34;: cn_shared,
         &#34;lfc_shared&#34;: lfc_shared,
     }
-    return model, &#34;lfc&#34;</code></pre>
+
+    logger.info(&#34;Creating PyMC3 model.&#34;)
+    model, obs_var_name = self._model_specification(
+        co_idx=co_idx,
+        batch_idx=b_idx,
+        sgrna_idx_shared=sgrna_idx_shared,
+        gene_idx_shared=gene_idx_shared,
+        cellline_idx_shared=cellline_idx_shared,
+        batch_idx_shared=batch_idx_shared,
+        cn_shared=cn_shared,
+        lfc_shared=lfc_shared,
+        total_size=total_size,
+    )
+    logger.debug(&#34;Finished building model.&#34;)
+    return model, obs_var_name</code></pre>
 </details>
 </dd>
 <dt id="src.models.speclet_four.SpecletFour.update_advi_sampling_parameters"><code class="name flex">
@@ -963,13 +797,43 @@ def noncentered_param(self) -&gt; bool:
 <li><code><a title="src.models.speclet_model.SpecletModel.clear_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.clear_cache">clear_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.debug" href="speclet_model.html#src.models.speclet_model.SpecletModel.debug">debug</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_advi_callbacks" href="speclet_model.html#src.models.speclet_model.SpecletModel.get_advi_callbacks">get_advi_callbacks</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.load_advi_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.load_advi_cache">load_advi_cache</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.load_mcmc_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.load_mcmc_cache">load_mcmc_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.mcmc_sample_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.mcmc_sample_model">mcmc_sample_model</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.run_simulation_based_calibration" href="speclet_model.html#src.models.speclet_model.SpecletModel.run_simulation_based_calibration">run_simulation_based_calibration</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.set_config" href="speclet_model.html#src.models.speclet_model.SpecletModel.set_config">set_config</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.update_observed_data" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_observed_data">update_observed_data</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.write_advi_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_advi_cache">write_advi_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.write_mcmc_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_mcmc_cache">write_mcmc_cache</a></code></li>
 </ul>
 </li>
+</ul>
+</dd>
+<dt id="src.models.speclet_four.SpecletFourConfiguration"><code class="flex name class">
+<span>class <span class="ident">SpecletFourConfiguration</span></span>
+<span>(</span><span>*, copy_number_cov: bool = False, h: <a title="src.project_enums.ModelParameterization" href="../project_enums.html#src.project_enums.ModelParameterization">ModelParameterization</a> = ModelParameterization.CENTERED, d: <a title="src.project_enums.ModelParameterization" href="../project_enums.html#src.project_enums.ModelParameterization">ModelParameterization</a> = ModelParameterization.CENTERED, β: <a title="src.project_enums.ModelParameterization" href="../project_enums.html#src.project_enums.ModelParameterization">ModelParameterization</a> = ModelParameterization.CENTERED, η: <a title="src.project_enums.ModelParameterization" href="../project_enums.html#src.project_enums.ModelParameterization">ModelParameterization</a> = ModelParameterization.CENTERED)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Parameterizations for each covariate in SpecletFour model.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SpecletFourConfiguration(BaseModel):
+    &#34;&#34;&#34;Parameterizations for each covariate in SpecletFour model.&#34;&#34;&#34;
+
+    copy_number_cov: bool = False
+    h: MP = MP.CENTERED
+    d: MP = MP.CENTERED
+    β: MP = MP.CENTERED
+    η: MP = MP.CENTERED</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
 </ul>
 </dd>
 </dl>
@@ -991,13 +855,14 @@ def noncentered_param(self) -&gt; bool:
 <li>
 <h4><code><a title="src.models.speclet_four.SpecletFour" href="#src.models.speclet_four.SpecletFour">SpecletFour</a></code></h4>
 <ul class="">
-<li><code><a title="src.models.speclet_four.SpecletFour.copy_number_cov" href="#src.models.speclet_four.SpecletFour.copy_number_cov">copy_number_cov</a></code></li>
 <li><code><a title="src.models.speclet_four.SpecletFour.get_replacement_parameters" href="#src.models.speclet_four.SpecletFour.get_replacement_parameters">get_replacement_parameters</a></code></li>
 <li><code><a title="src.models.speclet_four.SpecletFour.model_specification" href="#src.models.speclet_four.SpecletFour.model_specification">model_specification</a></code></li>
-<li><code><a title="src.models.speclet_four.SpecletFour.noncentered_param" href="#src.models.speclet_four.SpecletFour.noncentered_param">noncentered_param</a></code></li>
 <li><code><a title="src.models.speclet_four.SpecletFour.update_advi_sampling_parameters" href="#src.models.speclet_four.SpecletFour.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>
 <li><code><a title="src.models.speclet_four.SpecletFour.update_mcmc_sampling_parameters" href="#src.models.speclet_four.SpecletFour.update_mcmc_sampling_parameters">update_mcmc_sampling_parameters</a></code></li>
 </ul>
+</li>
+<li>
+<h4><code><a title="src.models.speclet_four.SpecletFourConfiguration" href="#src.models.speclet_four.SpecletFourConfiguration">SpecletFourConfiguration</a></code></h4>
 </li>
 </ul>
 </li>

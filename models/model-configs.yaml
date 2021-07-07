@@ -34,10 +34,3 @@
   pipelines:
     - fitting
   debug: true
-  pipeline_sampling_parameters:
-    fitting:
-      ADVI:
-        n_iterations: 40000
-    sbc:
-      ADVI:
-        n_iterations: 10000

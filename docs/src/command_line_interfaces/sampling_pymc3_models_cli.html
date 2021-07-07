@@ -33,139 +33,108 @@
 
 from pathlib import Path
 from time import time
-from typing import Optional, Type
+from typing import Optional
 
 import numpy as np
 import typer
 
 from src.command_line_interfaces import cli_helpers
-from src.command_line_interfaces.cli_helpers import ModelFitMethod
-from src.io import cache_io
+from src.io import model_config
 from src.loggers import logger
+from src.models import configuration
 from src.models.speclet_model import SpecletModel
-from src.pipelines.pipeline_classes import ModelOption
+from src.project_enums import ModelFitMethod, SpecletPipeline
 
 cli_helpers.configure_pretty()
 
 
-#### ---- File IO ---- ####
-
-
-def touch_file(
-    cache_dir: Path,
-    model: str,
-    name: str,
-    fit_method: ModelFitMethod,
-    touch_suffix: Optional[str] = None,
-) -&gt; None:
-    &#34;&#34;&#34;Touch a file.
-
-    Args:
-        cache_dir (Path): Location of the cache directory.
-        model (str): The model.
-        name (str): The custom name of the model.
-        fit_method (ModelFitMethod): Method used to fit the model.
-        touch_suffix (Optional[str], optional): Optional suffix to add the to the file.
-          Defaults to None for no additional suffix.
-    &#34;&#34;&#34;
-    if touch_suffix is None:
-        touch_suffix = &#34;&#34;
-    fn = f&#34;_{model}_{name}_{fit_method.value}{touch_suffix}.txt&#34;
-    p = cache_dir / fn
-    p.touch()
-    return None
-
-
 #### ---- Main ---- ####
-
-PYMC3_CACHE_DIR = cache_io.default_cache_dir()
 
 
 def sample_speclet_model(
-    model: ModelOption,
     name: str,
-    fit_method: ModelFitMethod = ModelFitMethod.advi,
+    config_path: Path,
+    fit_method: ModelFitMethod,
+    cache_dir: Path,
     mcmc_chains: int = 4,
     mcmc_cores: int = 4,
     sample: bool = True,
     ignore_cache: bool = False,
-    debug: bool = False,
     random_seed: Optional[int] = None,
-    touch: bool = False,
-) -&gt; Type[SpecletModel]:
+    touch: Optional[Path] = None,
+) -&gt; SpecletModel:
     &#34;&#34;&#34;Fit and sample from a variety of predefined PyMC3 models.
 
     Args:
-        model (ModelOption): The name of the model.
         name (str): Custom name for the model. This is useful for creating multiple
           caches of the same model.
-        cores (int, optional): Number of compute cores. Defaults to 1.
+        config_path (Path): Path to the model configuration file.
+        fit_method (ModelFitMethod, optional): Fitting method.
+        cache_dir (Path): Root caching directory.
+        mcmc_chains (int, optional): Number of MCMC chains to run. Defaults to 4.
+        mcmc_cores (int, optional): Number of compute cores. Defaults to 4.
         sample (bool, optional): Should the model be sampled? Defaults to True.
         ignore_cache (bool, optional): Should the cache be ignored? Defaults to False.
-        debug (bool, optional): In debug mode? Defaults to False.
         random_seed (Optional[int], optional): Random seed. Defaults to None.
         touch (bool, optional): Should there be a file touched to indicate that the
           sampling process is complete? This is helpful for telling pipelines/workflows
           that this step is complete. Defaults to False.
-        touch_suffix (Optional[str], optional): Add a string as a suffix to the touch
-          file. Defaults to None.
 
     Returns:
-        Type[SpecletModel]: An instance of the requested model with the PyMC3 model
+        SpecletModel: An instance of the requested model with the PyMC3 model
           built and fit.
     &#34;&#34;&#34;
     tic = time()
-
-    name = cli_helpers.clean_model_names(name)
-    logger.info(f&#34;Cache directory: {PYMC3_CACHE_DIR.as_posix()}&#34;)
-
     if random_seed:
+        logger.info(f&#34;Setting random seed ({random_seed}).&#34;)
         np.random.seed(random_seed)
-    if debug:
-        logger.info(&#34;Sampling in debug mode.&#34;)
 
-    logger.info(f&#34;Sampling &#39;{model}&#39; with custom name &#39;{name}&#39;&#34;)
-    ModelClass = cli_helpers.get_model_class(model_opt=model)
-    speclet_model = ModelClass(name=name, root_cache_dir=PYMC3_CACHE_DIR, debug=debug)
+    logger.info(f&#34;Model config file: &#39;{config_path.as_posix()}&#39;.&#34;)
+    logger.info(f&#34;Root cache directory: {cache_dir.as_posix()}&#34;)
+    sp_model = configuration.get_config_and_instantiate_model(
+        config_path=config_path, name=name, root_cache_dir=cache_dir
+    )
+    logger.info(f&#34;Sampling &#39;{sp_model.__class__}&#39; with name &#39;{sp_model.name}&#39;&#34;)
+    logger.info(
+        f&#34;Model&#39;s cache directory: &#39;{sp_model.cache_manager.cache_dir.as_posix()}&#39;.&#34;
+    )
 
-    assert isinstance(speclet_model, SpecletModel)
-
-    cli_helpers.modify_model_by_name(model=speclet_model, name=name)
+    sampling_kwargs = model_config.get_sampling_kwargs(
+        config_path=config_path,
+        name=name,
+        pipeline=SpecletPipeline.FITTING,
+        fit_method=fit_method,
+    )
 
     logger.info(&#34;Running model build method.&#34;)
-    speclet_model.build_model()
+    sp_model.build_model()
 
     if sample:
-        if fit_method == ModelFitMethod.advi:
+        if fit_method == ModelFitMethod.ADVI:
             logger.info(&#34;Running ADVI fitting method.&#34;)
-            _ = speclet_model.advi_sample_model(
-                random_seed=random_seed,
-                ignore_cache=ignore_cache,
+            _ = sp_model.advi_sample_model(
+                random_seed=random_seed, ignore_cache=ignore_cache, **sampling_kwargs
             )
 
-        elif fit_method == ModelFitMethod.mcmc:
+        elif fit_method == ModelFitMethod.MCMC:
             logger.info(&#34;Running MCMC fitting method.&#34;)
-            _ = speclet_model.mcmc_sample_model(
+            _ = sp_model.mcmc_sample_model(
                 chains=mcmc_chains,
                 cores=mcmc_cores,
                 random_seed=random_seed,
                 ignore_cache=ignore_cache,
+                **sampling_kwargs,
             )
         else:
             raise Exception(f&#34;Unknown fit method &#39;{fit_method.value}&#39;.&#34;)
 
-    if touch:
-        logger.info(&#34;Touching output file.&#34;)
-        touch_file(
-            cache_dir=PYMC3_CACHE_DIR,
-            model=model.value,
-            name=name,
-            fit_method=fit_method,
-        )
+    if touch is not None:
+        logger.info(f&#34;Touching file: &#39;{touch.as_posix()}&#39;.&#34;)
+        touch.touch()
 
     toc = time()
     logger.info(f&#34;finished; execution time: {(toc - tic) / 60:.2f} minutes&#34;)
-    return speclet_model
+    return sp_model
 
 
 if __name__ == &#34;__main__&#34;:
@@ -180,38 +149,39 @@ if __name__ == &#34;__main__&#34;:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.command_line_interfaces.sampling_pymc3_models_cli.sample_speclet_model"><code class="name flex">
-<span>def <span class="ident">sample_speclet_model</span></span>(<span>model: <a title="src.pipelines.pipeline_classes.ModelOption" href="../pipelines/pipeline_classes.html#src.pipelines.pipeline_classes.ModelOption">ModelOption</a>, name: str, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a> = ModelFitMethod.advi, mcmc_chains: int = 4, mcmc_cores: int = 4, sample: bool = True, ignore_cache: bool = False, debug: bool = False, random_seed: Optional[int] = None, touch: bool = False) -> Type[<a title="src.models.speclet_model.SpecletModel" href="../models/speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a>]</span>
+<span>def <span class="ident">sample_speclet_model</span></span>(<span>name: str, config_path: pathlib.Path, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, cache_dir: pathlib.Path, mcmc_chains: int = 4, mcmc_cores: int = 4, sample: bool = True, ignore_cache: bool = False, random_seed: Optional[int] = None, touch: Optional[pathlib.Path] = None) -> <a title="src.models.speclet_model.SpecletModel" href="../models/speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Fit and sample from a variety of predefined PyMC3 models.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>model</code></strong> :&ensp;<code>ModelOption</code></dt>
-<dd>The name of the model.</dd>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
 <dd>Custom name for the model. This is useful for creating multiple
 caches of the same model.</dd>
-<dt><strong><code>cores</code></strong> :&ensp;<code>int</code>, optional</dt>
-<dd>Number of compute cores. Defaults to 1.</dd>
+<dt><strong><code>config_path</code></strong> :&ensp;<code>Path</code></dt>
+<dd>Path to the model configuration file.</dd>
+<dt><strong><code>fit_method</code></strong> :&ensp;<code>ModelFitMethod</code>, optional</dt>
+<dd>Fitting method.</dd>
+<dt><strong><code>cache_dir</code></strong> :&ensp;<code>Path</code></dt>
+<dd>Root caching directory.</dd>
+<dt><strong><code>mcmc_chains</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of MCMC chains to run. Defaults to 4.</dd>
+<dt><strong><code>mcmc_cores</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of compute cores. Defaults to 4.</dd>
 <dt><strong><code>sample</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Should the model be sampled? Defaults to True.</dd>
 <dt><strong><code>ignore_cache</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Should the cache be ignored? Defaults to False.</dd>
-<dt><strong><code>debug</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>In debug mode? Defaults to False.</dd>
 <dt><strong><code>random_seed</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
 <dd>Random seed. Defaults to None.</dd>
 <dt><strong><code>touch</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Should there be a file touched to indicate that the
 sampling process is complete? This is helpful for telling pipelines/workflows
 that this step is complete. Defaults to False.</dd>
-<dt><strong><code>touch_suffix</code></strong> :&ensp;<code>Optional[str]</code>, optional</dt>
-<dd>Add a string as a suffix to the touch
-file. Defaults to None.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Type[SpecletModel]</code></dt>
+<dt><code>SpecletModel</code></dt>
 <dd>An instance of the requested model with the PyMC3 model
 built and fit.</dd>
 </dl></div>
@@ -220,138 +190,89 @@ built and fit.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def sample_speclet_model(
-    model: ModelOption,
     name: str,
-    fit_method: ModelFitMethod = ModelFitMethod.advi,
+    config_path: Path,
+    fit_method: ModelFitMethod,
+    cache_dir: Path,
     mcmc_chains: int = 4,
     mcmc_cores: int = 4,
     sample: bool = True,
     ignore_cache: bool = False,
-    debug: bool = False,
     random_seed: Optional[int] = None,
-    touch: bool = False,
-) -&gt; Type[SpecletModel]:
+    touch: Optional[Path] = None,
+) -&gt; SpecletModel:
     &#34;&#34;&#34;Fit and sample from a variety of predefined PyMC3 models.
 
     Args:
-        model (ModelOption): The name of the model.
         name (str): Custom name for the model. This is useful for creating multiple
           caches of the same model.
-        cores (int, optional): Number of compute cores. Defaults to 1.
+        config_path (Path): Path to the model configuration file.
+        fit_method (ModelFitMethod, optional): Fitting method.
+        cache_dir (Path): Root caching directory.
+        mcmc_chains (int, optional): Number of MCMC chains to run. Defaults to 4.
+        mcmc_cores (int, optional): Number of compute cores. Defaults to 4.
         sample (bool, optional): Should the model be sampled? Defaults to True.
         ignore_cache (bool, optional): Should the cache be ignored? Defaults to False.
-        debug (bool, optional): In debug mode? Defaults to False.
         random_seed (Optional[int], optional): Random seed. Defaults to None.
         touch (bool, optional): Should there be a file touched to indicate that the
           sampling process is complete? This is helpful for telling pipelines/workflows
           that this step is complete. Defaults to False.
-        touch_suffix (Optional[str], optional): Add a string as a suffix to the touch
-          file. Defaults to None.
 
     Returns:
-        Type[SpecletModel]: An instance of the requested model with the PyMC3 model
+        SpecletModel: An instance of the requested model with the PyMC3 model
           built and fit.
     &#34;&#34;&#34;
     tic = time()
-
-    name = cli_helpers.clean_model_names(name)
-    logger.info(f&#34;Cache directory: {PYMC3_CACHE_DIR.as_posix()}&#34;)
-
     if random_seed:
+        logger.info(f&#34;Setting random seed ({random_seed}).&#34;)
         np.random.seed(random_seed)
-    if debug:
-        logger.info(&#34;Sampling in debug mode.&#34;)
 
-    logger.info(f&#34;Sampling &#39;{model}&#39; with custom name &#39;{name}&#39;&#34;)
-    ModelClass = cli_helpers.get_model_class(model_opt=model)
-    speclet_model = ModelClass(name=name, root_cache_dir=PYMC3_CACHE_DIR, debug=debug)
+    logger.info(f&#34;Model config file: &#39;{config_path.as_posix()}&#39;.&#34;)
+    logger.info(f&#34;Root cache directory: {cache_dir.as_posix()}&#34;)
+    sp_model = configuration.get_config_and_instantiate_model(
+        config_path=config_path, name=name, root_cache_dir=cache_dir
+    )
+    logger.info(f&#34;Sampling &#39;{sp_model.__class__}&#39; with name &#39;{sp_model.name}&#39;&#34;)
+    logger.info(
+        f&#34;Model&#39;s cache directory: &#39;{sp_model.cache_manager.cache_dir.as_posix()}&#39;.&#34;
+    )
 
-    assert isinstance(speclet_model, SpecletModel)
-
-    cli_helpers.modify_model_by_name(model=speclet_model, name=name)
+    sampling_kwargs = model_config.get_sampling_kwargs(
+        config_path=config_path,
+        name=name,
+        pipeline=SpecletPipeline.FITTING,
+        fit_method=fit_method,
+    )
 
     logger.info(&#34;Running model build method.&#34;)
-    speclet_model.build_model()
+    sp_model.build_model()
 
     if sample:
-        if fit_method == ModelFitMethod.advi:
+        if fit_method == ModelFitMethod.ADVI:
             logger.info(&#34;Running ADVI fitting method.&#34;)
-            _ = speclet_model.advi_sample_model(
-                random_seed=random_seed,
-                ignore_cache=ignore_cache,
+            _ = sp_model.advi_sample_model(
+                random_seed=random_seed, ignore_cache=ignore_cache, **sampling_kwargs
             )
 
-        elif fit_method == ModelFitMethod.mcmc:
+        elif fit_method == ModelFitMethod.MCMC:
             logger.info(&#34;Running MCMC fitting method.&#34;)
-            _ = speclet_model.mcmc_sample_model(
+            _ = sp_model.mcmc_sample_model(
                 chains=mcmc_chains,
                 cores=mcmc_cores,
                 random_seed=random_seed,
                 ignore_cache=ignore_cache,
+                **sampling_kwargs,
             )
         else:
             raise Exception(f&#34;Unknown fit method &#39;{fit_method.value}&#39;.&#34;)
 
-    if touch:
-        logger.info(&#34;Touching output file.&#34;)
-        touch_file(
-            cache_dir=PYMC3_CACHE_DIR,
-            model=model.value,
-            name=name,
-            fit_method=fit_method,
-        )
+    if touch is not None:
+        logger.info(f&#34;Touching file: &#39;{touch.as_posix()}&#39;.&#34;)
+        touch.touch()
 
     toc = time()
     logger.info(f&#34;finished; execution time: {(toc - tic) / 60:.2f} minutes&#34;)
-    return speclet_model</code></pre>
-</details>
-</dd>
-<dt id="src.command_line_interfaces.sampling_pymc3_models_cli.touch_file"><code class="name flex">
-<span>def <span class="ident">touch_file</span></span>(<span>cache_dir: pathlib.Path, model: str, name: str, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, touch_suffix: Optional[str] = None) -> NoneType</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Touch a file.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>cache_dir</code></strong> :&ensp;<code>Path</code></dt>
-<dd>Location of the cache directory.</dd>
-<dt><strong><code>model</code></strong> :&ensp;<code>str</code></dt>
-<dd>The model.</dd>
-<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
-<dd>The custom name of the model.</dd>
-<dt><strong><code>fit_method</code></strong> :&ensp;<code>ModelFitMethod</code></dt>
-<dd>Method used to fit the model.</dd>
-<dt><strong><code>touch_suffix</code></strong> :&ensp;<code>Optional[str]</code>, optional</dt>
-<dd>Optional suffix to add the to the file.
-Defaults to None for no additional suffix.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def touch_file(
-    cache_dir: Path,
-    model: str,
-    name: str,
-    fit_method: ModelFitMethod,
-    touch_suffix: Optional[str] = None,
-) -&gt; None:
-    &#34;&#34;&#34;Touch a file.
-
-    Args:
-        cache_dir (Path): Location of the cache directory.
-        model (str): The model.
-        name (str): The custom name of the model.
-        fit_method (ModelFitMethod): Method used to fit the model.
-        touch_suffix (Optional[str], optional): Optional suffix to add the to the file.
-          Defaults to None for no additional suffix.
-    &#34;&#34;&#34;
-    if touch_suffix is None:
-        touch_suffix = &#34;&#34;
-    fn = f&#34;_{model}_{name}_{fit_method.value}{touch_suffix}.txt&#34;
-    p = cache_dir / fn
-    p.touch()
-    return None</code></pre>
+    return sp_model</code></pre>
 </details>
 </dd>
 </dl>
@@ -373,7 +294,6 @@ Defaults to None for no additional suffix.</dd>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="src.command_line_interfaces.sampling_pymc3_models_cli.sample_speclet_model" href="#src.command_line_interfaces.sampling_pymc3_models_cli.sample_speclet_model">sample_speclet_model</a></code></li>
-<li><code><a title="src.command_line_interfaces.sampling_pymc3_models_cli.touch_file" href="#src.command_line_interfaces.sampling_pymc3_models_cli.touch_file">touch_file</a></code></li>
 </ul>
 </li>
 </ul>

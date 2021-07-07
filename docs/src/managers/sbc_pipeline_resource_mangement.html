@@ -28,36 +28,91 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Manage resources for the simulation-based calibration pipeline.&#34;&#34;&#34;
 
+from datetime import timedelta as td
+from pathlib import Path
+from typing import Dict, TypeVar
+
 from pydantic import validate_arguments
 
+from src.io import model_config
+from src.managers import pipeline_resource_manager as prm
+from src.managers.pipeline_resource_manager import PipelineResourceManager
 from src.modeling.simulation_based_calibration_enums import MockDataSizes
-from src.pipelines.pipeline_classes import ModelOption
-from src.project_enums import ModelFitMethod
+from src.project_enums import ModelFitMethod, ModelOption
+
+T = TypeVar(&#34;T&#34;)
+ResourceLookupDict = Dict[ModelFitMethod, Dict[MockDataSizes, T]]
+ModelResourceLookupDict = Dict[ModelOption, ResourceLookupDict[T]]
+
+# RAM required for each configuration (in GB -&gt; mult by 1000).
+#   key: [model][debug][fit_method]
+MemoryLookupDict = ModelResourceLookupDict[int]
+
+# Time required for each configuration.
+#   key: [model][debug][fit_method]
+TimeLookupDict = ModelResourceLookupDict[td]
 
 
-class SBCResourceManager:
+sbc_pipeline_memory_lookup: MemoryLookupDict = {
+    ModelOption.SPECLET_FOUR: {
+        ModelFitMethod.ADVI: {
+            MockDataSizes.SMALL: 4,
+            MockDataSizes.MEDIUM: 8,
+            MockDataSizes.LARGE: 16,
+        },
+        ModelFitMethod.MCMC: {
+            MockDataSizes.SMALL: 8,
+            MockDataSizes.MEDIUM: 16,
+            MockDataSizes.LARGE: 32,
+        },
+    }
+}
+
+sbc_pipeline_time_lookup: TimeLookupDict = {
+    ModelOption.SPECLET_FOUR: {
+        ModelFitMethod.ADVI: {
+            MockDataSizes.SMALL: td(minutes=15),
+            MockDataSizes.MEDIUM: td(hours=1),
+            MockDataSizes.LARGE: td(hours=8),
+        },
+        ModelFitMethod.MCMC: {
+            MockDataSizes.SMALL: td(hours=1),
+            MockDataSizes.MEDIUM: td(hours=8),
+            MockDataSizes.LARGE: td(hours=12),
+        },
+    }
+}
+
+
+class SBCResourceManager(PipelineResourceManager):
     &#34;&#34;&#34;Manage the SLURM resource request for a SBC run.&#34;&#34;&#34;
 
     @validate_arguments
     def __init__(
         self,
-        model: ModelOption,
         name: str,
         mock_data_size: MockDataSizes,
         fit_method: ModelFitMethod,
+        config_path: Path,
     ) -&gt; None:
         &#34;&#34;&#34;Create a resource manager.
 
         Args:
-            model (str): Type of model.
             name (str): Unique, identifiable, descriptive name for the model.
             mock_data_size (str): Size of the mock data.
             fit_method (ModelFitMethod): Method used to fit the model.
+            config_path (Path): Path to a model configuration file.
         &#34;&#34;&#34;
-        self.model = model
         self.name = name
         self.mock_data_size = mock_data_size
         self.fit_method = fit_method
+        self.config_path = config_path
+        _config = model_config.get_configuration_for_model(
+            self.config_path, name=self.name
+        )
+        if _config is None:
+            raise model_config.ModelConfigurationNotFound(self.name)
+        self.config = _config
 
     @property
     def memory(self) -&gt; str:
@@ -66,10 +121,7 @@ class SBCResourceManager:
         Returns:
             str: Amount of RAM required.
         &#34;&#34;&#34;
-        if self.fit_method is ModelFitMethod.mcmc:
-            return &#34;3000&#34;
-        else:
-            return &#34;1600&#34;
+        return str(self._retrieve_memory_requirement() * 1000)
 
     @property
     def time(self) -&gt; str:
@@ -78,10 +130,54 @@ class SBCResourceManager:
         Returns:
             str: Amount of time required.
         &#34;&#34;&#34;
-        if self.fit_method is ModelFitMethod.mcmc:
+        if self.fit_method is ModelFitMethod.MCMC:
             return &#34;02:00:00&#34;
         else:
             return &#34;00:15:00&#34;
+
+    def _retrieve_memory_requirement(self) -&gt; int:
+        default_memory_tbl: ResourceLookupDict[int] = {
+            ModelFitMethod.ADVI: {
+                MockDataSizes.SMALL: 4,
+                MockDataSizes.MEDIUM: 8,
+                MockDataSizes.LARGE: 16,
+            },
+            ModelFitMethod.MCMC: {
+                MockDataSizes.SMALL: 4,
+                MockDataSizes.MEDIUM: 16,
+                MockDataSizes.LARGE: 32,
+            },
+        }
+        return self._lookup_value_with_default(
+            sbc_pipeline_memory_lookup, default_memory_tbl
+        )
+
+    def _retrieve_time_requirement(self) -&gt; td:
+        default_time_tbl: ResourceLookupDict[td] = {
+            ModelFitMethod.ADVI: {
+                MockDataSizes.SMALL: td(minutes=15),
+                MockDataSizes.MEDIUM: td(hours=1),
+                MockDataSizes.LARGE: td(hours=8),
+            },
+            ModelFitMethod.MCMC: {
+                MockDataSizes.SMALL: td(hours=1),
+                MockDataSizes.MEDIUM: td(hours=8),
+                MockDataSizes.LARGE: td(hours=12),
+            },
+        }
+        return self._lookup_value_with_default(
+            sbc_pipeline_time_lookup, default_time_tbl
+        )
+
+    def _lookup_value_with_default(
+        self,
+        primary_tbl: ModelResourceLookupDict[T],
+        default_tbl: ResourceLookupDict[T],
+    ) -&gt; T:
+        try:
+            return primary_tbl[self.config.model][self.fit_method][self.mock_data_size]
+        except KeyError:
+            return default_tbl[self.fit_method][self.mock_data_size]
 
     @property
     def cores(self) -&gt; int:
@@ -90,10 +186,21 @@ class SBCResourceManager:
         Returns:
             str: Number of cores needed for fitting.
         &#34;&#34;&#34;
-        if self.fit_method is ModelFitMethod.mcmc:
+        if self.fit_method is ModelFitMethod.MCMC:
             return 4
         else:
-            return 1</code></pre>
+            return 1
+
+    @property
+    def partition(self) -&gt; str:
+        &#34;&#34;&#34;Partition on SLURM to request.
+
+        Returns:
+            str: The partition to request from SLURM.
+        &#34;&#34;&#34;
+        return prm.slurm_partition_required_for_duration(
+            self._retrieve_time_requirement()
+        ).value</code></pre>
 </details>
 </section>
 <section>
@@ -107,49 +214,55 @@ class SBCResourceManager:
 <dl>
 <dt id="src.managers.sbc_pipeline_resource_mangement.SBCResourceManager"><code class="flex name class">
 <span>class <span class="ident">SBCResourceManager</span></span>
-<span>(</span><span>model: <a title="src.pipelines.pipeline_classes.ModelOption" href="../pipelines/pipeline_classes.html#src.pipelines.pipeline_classes.ModelOption">ModelOption</a>, name: str, mock_data_size: <a title="src.modeling.simulation_based_calibration_enums.MockDataSizes" href="../modeling/simulation_based_calibration_enums.html#src.modeling.simulation_based_calibration_enums.MockDataSizes">MockDataSizes</a>, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>)</span>
+<span>(</span><span>name: str, mock_data_size: <a title="src.modeling.simulation_based_calibration_enums.MockDataSizes" href="../modeling/simulation_based_calibration_enums.html#src.modeling.simulation_based_calibration_enums.MockDataSizes">MockDataSizes</a>, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, config_path: pathlib.Path)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Manage the SLURM resource request for a SBC run.</p>
 <p>Create a resource manager.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>model</code></strong> :&ensp;<code>str</code></dt>
-<dd>Type of model.</dd>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
 <dd>Unique, identifiable, descriptive name for the model.</dd>
 <dt><strong><code>mock_data_size</code></strong> :&ensp;<code>str</code></dt>
 <dd>Size of the mock data.</dd>
 <dt><strong><code>fit_method</code></strong> :&ensp;<code>ModelFitMethod</code></dt>
 <dd>Method used to fit the model.</dd>
+<dt><strong><code>config_path</code></strong> :&ensp;<code>Path</code></dt>
+<dd>Path to a model configuration file.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class SBCResourceManager:
+<pre><code class="python">class SBCResourceManager(PipelineResourceManager):
     &#34;&#34;&#34;Manage the SLURM resource request for a SBC run.&#34;&#34;&#34;
 
     @validate_arguments
     def __init__(
         self,
-        model: ModelOption,
         name: str,
         mock_data_size: MockDataSizes,
         fit_method: ModelFitMethod,
+        config_path: Path,
     ) -&gt; None:
         &#34;&#34;&#34;Create a resource manager.
 
         Args:
-            model (str): Type of model.
             name (str): Unique, identifiable, descriptive name for the model.
             mock_data_size (str): Size of the mock data.
             fit_method (ModelFitMethod): Method used to fit the model.
+            config_path (Path): Path to a model configuration file.
         &#34;&#34;&#34;
-        self.model = model
         self.name = name
         self.mock_data_size = mock_data_size
         self.fit_method = fit_method
+        self.config_path = config_path
+        _config = model_config.get_configuration_for_model(
+            self.config_path, name=self.name
+        )
+        if _config is None:
+            raise model_config.ModelConfigurationNotFound(self.name)
+        self.config = _config
 
     @property
     def memory(self) -&gt; str:
@@ -158,10 +271,7 @@ class SBCResourceManager:
         Returns:
             str: Amount of RAM required.
         &#34;&#34;&#34;
-        if self.fit_method is ModelFitMethod.mcmc:
-            return &#34;3000&#34;
-        else:
-            return &#34;1600&#34;
+        return str(self._retrieve_memory_requirement() * 1000)
 
     @property
     def time(self) -&gt; str:
@@ -170,10 +280,54 @@ class SBCResourceManager:
         Returns:
             str: Amount of time required.
         &#34;&#34;&#34;
-        if self.fit_method is ModelFitMethod.mcmc:
+        if self.fit_method is ModelFitMethod.MCMC:
             return &#34;02:00:00&#34;
         else:
             return &#34;00:15:00&#34;
+
+    def _retrieve_memory_requirement(self) -&gt; int:
+        default_memory_tbl: ResourceLookupDict[int] = {
+            ModelFitMethod.ADVI: {
+                MockDataSizes.SMALL: 4,
+                MockDataSizes.MEDIUM: 8,
+                MockDataSizes.LARGE: 16,
+            },
+            ModelFitMethod.MCMC: {
+                MockDataSizes.SMALL: 4,
+                MockDataSizes.MEDIUM: 16,
+                MockDataSizes.LARGE: 32,
+            },
+        }
+        return self._lookup_value_with_default(
+            sbc_pipeline_memory_lookup, default_memory_tbl
+        )
+
+    def _retrieve_time_requirement(self) -&gt; td:
+        default_time_tbl: ResourceLookupDict[td] = {
+            ModelFitMethod.ADVI: {
+                MockDataSizes.SMALL: td(minutes=15),
+                MockDataSizes.MEDIUM: td(hours=1),
+                MockDataSizes.LARGE: td(hours=8),
+            },
+            ModelFitMethod.MCMC: {
+                MockDataSizes.SMALL: td(hours=1),
+                MockDataSizes.MEDIUM: td(hours=8),
+                MockDataSizes.LARGE: td(hours=12),
+            },
+        }
+        return self._lookup_value_with_default(
+            sbc_pipeline_time_lookup, default_time_tbl
+        )
+
+    def _lookup_value_with_default(
+        self,
+        primary_tbl: ModelResourceLookupDict[T],
+        default_tbl: ResourceLookupDict[T],
+    ) -&gt; T:
+        try:
+            return primary_tbl[self.config.model][self.fit_method][self.mock_data_size]
+        except KeyError:
+            return default_tbl[self.fit_method][self.mock_data_size]
 
     @property
     def cores(self) -&gt; int:
@@ -182,11 +336,28 @@ class SBCResourceManager:
         Returns:
             str: Number of cores needed for fitting.
         &#34;&#34;&#34;
-        if self.fit_method is ModelFitMethod.mcmc:
+        if self.fit_method is ModelFitMethod.MCMC:
             return 4
         else:
-            return 1</code></pre>
+            return 1
+
+    @property
+    def partition(self) -&gt; str:
+        &#34;&#34;&#34;Partition on SLURM to request.
+
+        Returns:
+            str: The partition to request from SLURM.
+        &#34;&#34;&#34;
+        return prm.slurm_partition_required_for_duration(
+            self._retrieve_time_requirement()
+        ).value</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="src.managers.pipeline_resource_manager.PipelineResourceManager" href="pipeline_resource_manager.html#src.managers.pipeline_resource_manager.PipelineResourceManager">PipelineResourceManager</a></li>
+<li>typing.Protocol</li>
+<li>typing.Generic</li>
+</ul>
 <h3>Instance variables</h3>
 <dl>
 <dt id="src.managers.sbc_pipeline_resource_mangement.SBCResourceManager.cores"><code class="name">var <span class="ident">cores</span> : int</code></dt>
@@ -208,7 +379,7 @@ def cores(self) -&gt; int:
     Returns:
         str: Number of cores needed for fitting.
     &#34;&#34;&#34;
-    if self.fit_method is ModelFitMethod.mcmc:
+    if self.fit_method is ModelFitMethod.MCMC:
         return 4
     else:
         return 1</code></pre>
@@ -233,10 +404,31 @@ def memory(self) -&gt; str:
     Returns:
         str: Amount of RAM required.
     &#34;&#34;&#34;
-    if self.fit_method is ModelFitMethod.mcmc:
-        return &#34;3000&#34;
-    else:
-        return &#34;1600&#34;</code></pre>
+    return str(self._retrieve_memory_requirement() * 1000)</code></pre>
+</details>
+</dd>
+<dt id="src.managers.sbc_pipeline_resource_mangement.SBCResourceManager.partition"><code class="name">var <span class="ident">partition</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Partition on SLURM to request.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>The partition to request from SLURM.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def partition(self) -&gt; str:
+    &#34;&#34;&#34;Partition on SLURM to request.
+
+    Returns:
+        str: The partition to request from SLURM.
+    &#34;&#34;&#34;
+    return prm.slurm_partition_required_for_duration(
+        self._retrieve_time_requirement()
+    ).value</code></pre>
 </details>
 </dd>
 <dt id="src.managers.sbc_pipeline_resource_mangement.SBCResourceManager.time"><code class="name">var <span class="ident">time</span> : str</code></dt>
@@ -258,7 +450,7 @@ def time(self) -&gt; str:
     Returns:
         str: Amount of time required.
     &#34;&#34;&#34;
-    if self.fit_method is ModelFitMethod.mcmc:
+    if self.fit_method is ModelFitMethod.MCMC:
         return &#34;02:00:00&#34;
     else:
         return &#34;00:15:00&#34;</code></pre>
@@ -287,6 +479,7 @@ def time(self) -&gt; str:
 <ul class="">
 <li><code><a title="src.managers.sbc_pipeline_resource_mangement.SBCResourceManager.cores" href="#src.managers.sbc_pipeline_resource_mangement.SBCResourceManager.cores">cores</a></code></li>
 <li><code><a title="src.managers.sbc_pipeline_resource_mangement.SBCResourceManager.memory" href="#src.managers.sbc_pipeline_resource_mangement.SBCResourceManager.memory">memory</a></code></li>
+<li><code><a title="src.managers.sbc_pipeline_resource_mangement.SBCResourceManager.partition" href="#src.managers.sbc_pipeline_resource_mangement.SBCResourceManager.partition">partition</a></code></li>
 <li><code><a title="src.managers.sbc_pipeline_resource_mangement.SBCResourceManager.time" href="#src.managers.sbc_pipeline_resource_mangement.SBCResourceManager.time">time</a></code></li>
 </ul>
 </li>

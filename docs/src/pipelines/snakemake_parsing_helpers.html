@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>src.pipelines API documentation</title>
-<meta name="description" content="" />
+<title>src.pipelines.snakemake_parsing_helpers API documentation</title>
+<meta name="description" content="Parsing complex structures for use in Snakemake pipelines." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -18,28 +18,134 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Namespace <code>src.pipelines</code></h1>
+<h1 class="title">Module <code>src.pipelines.snakemake_parsing_helpers</code></h1>
 </header>
 <section id="section-intro">
+<p>Parsing complex structures for use in Snakemake pipelines.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Parsing complex structures for use in Snakemake pipelines.&#34;&#34;&#34;
+
+from pathlib import Path
+from typing import List
+
+from pydantic import BaseModel
+
+from src.io import model_config
+from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
+
+
+class ParsedPipelineInformation(BaseModel):
+    &#34;&#34;&#34;Parsed pipeline information.&#34;&#34;&#34;
+
+    models: List[str]
+    model_names: List[str]
+    fit_methods: List[str]
+
+
+class _PipelineIntermediateInformation(BaseModel):
+    &#34;&#34;&#34;An intermediate step in the parsing process.&#34;&#34;&#34;
+
+    model: ModelOption
+    model_name: str
+    fit_method: ModelFitMethod
+
+
+def get_models_names_fit_methods(config_path: Path) -&gt; ParsedPipelineInformation:
+    model_configurations = model_config.get_model_configurations(config_path)
+    model_config.check_model_names_are_unique(model_configurations)
+
+    pipeline_informations: List[_PipelineIntermediateInformation] = []
+
+    for config in model_configurations.configurations:
+        if SpecletPipeline.FITTING not in config.pipelines:
+            continue
+        for fit_method in config.fit_methods:
+            pipeline_informations.append(
+                _PipelineIntermediateInformation(
+                    model=config.model, model_name=config.name, fit_method=fit_method
+                )
+            )
+
+    return ParsedPipelineInformation(
+        models=[pi.model.value for pi in pipeline_informations],
+        model_names=[pi.model_name for pi in pipeline_informations],
+        fit_methods=[pi.fit_method.value for pi in pipeline_informations],
+    )</code></pre>
+</details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="src.pipelines.collate_sbc" href="collate_sbc.html">src.pipelines.collate_sbc</a></code></dt>
+<dt id="src.pipelines.snakemake_parsing_helpers.get_models_names_fit_methods"><code class="name flex">
+<span>def <span class="ident">get_models_names_fit_methods</span></span>(<span>config_path: pathlib.Path) -> <a title="src.pipelines.snakemake_parsing_helpers.ParsedPipelineInformation" href="#src.pipelines.snakemake_parsing_helpers.ParsedPipelineInformation">ParsedPipelineInformation</a></span>
+</code></dt>
 <dd>
-<div class="desc"><p>Collate the posteriors of separate simulations of SBC into a single file.</p></div>
-</dd>
-<dt><code class="name"><a title="src.pipelines.snakemake_parsing_helpers" href="snakemake_parsing_helpers.html">src.pipelines.snakemake_parsing_helpers</a></code></dt>
-<dd>
-<div class="desc"><p>Parsing complex structures for use in Snakemake pipelines.</p></div>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_models_names_fit_methods(config_path: Path) -&gt; ParsedPipelineInformation:
+    model_configurations = model_config.get_model_configurations(config_path)
+    model_config.check_model_names_are_unique(model_configurations)
+
+    pipeline_informations: List[_PipelineIntermediateInformation] = []
+
+    for config in model_configurations.configurations:
+        if SpecletPipeline.FITTING not in config.pipelines:
+            continue
+        for fit_method in config.fit_methods:
+            pipeline_informations.append(
+                _PipelineIntermediateInformation(
+                    model=config.model, model_name=config.name, fit_method=fit_method
+                )
+            )
+
+    return ParsedPipelineInformation(
+        models=[pi.model.value for pi in pipeline_informations],
+        model_names=[pi.model_name for pi in pipeline_informations],
+        fit_methods=[pi.fit_method.value for pi in pipeline_informations],
+    )</code></pre>
+</details>
 </dd>
 </dl>
 </section>
 <section>
-</section>
-<section>
-</section>
-<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="src.pipelines.snakemake_parsing_helpers.ParsedPipelineInformation"><code class="flex name class">
+<span>class <span class="ident">ParsedPipelineInformation</span></span>
+<span>(</span><span>*, models: List[str], model_names: List[str], fit_methods: List[str])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Parsed pipeline information.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ParsedPipelineInformation(BaseModel):
+    &#34;&#34;&#34;Parsed pipeline information.&#34;&#34;&#34;
+
+    models: List[str]
+    model_names: List[str]
+    fit_methods: List[str]</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -50,13 +156,19 @@
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="src" href="../index.html">src</a></code></li>
+<li><code><a title="src.pipelines" href="index.html">src.pipelines</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="src.pipelines.snakemake_parsing_helpers.get_models_names_fit_methods" href="#src.pipelines.snakemake_parsing_helpers.get_models_names_fit_methods">get_models_names_fit_methods</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
-<li><code><a title="src.pipelines.collate_sbc" href="collate_sbc.html">src.pipelines.collate_sbc</a></code></li>
-<li><code><a title="src.pipelines.snakemake_parsing_helpers" href="snakemake_parsing_helpers.html">src.pipelines.snakemake_parsing_helpers</a></code></li>
+<li>
+<h4><code><a title="src.pipelines.snakemake_parsing_helpers.ParsedPipelineInformation" href="#src.pipelines.snakemake_parsing_helpers.ParsedPipelineInformation">ParsedPipelineInformation</a></code></h4>
+</li>
 </ul>
 </li>
 </ul>

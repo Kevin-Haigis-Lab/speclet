@@ -40,11 +40,12 @@ from pydantic import BaseModel
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 import src.modeling.simulation_based_calibration_helpers as sbc
+from src.exceptions import CacheDoesNotExistError
 from src.loggers import logger
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.managers.model_data_managers import DataManager
 from src.modeling import pymc3_sampling_api as pmapi
-from src.project_enums import ModelFitMethod
+from src.project_enums import ModelFitMethod, assert_never
 
 ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
@@ -93,7 +94,7 @@ class SpecletModel:
     name: str
     _debug: bool
     cache_manager: Pymc3ModelCacheManager
-    data_manager: Optional[DataManager] = None
+    data_manager: DataManager
 
     model: Optional[pm.Model] = None
     observed_var_name: Optional[str] = None
@@ -107,9 +108,9 @@ class SpecletModel:
     def __init__(
         self,
         name: str,
+        data_manager: DataManager,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
-        data_manager: Optional[DataManager] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Instantiate a Speclet Model.
 
@@ -127,9 +128,8 @@ class SpecletModel:
         self.cache_manager = Pymc3ModelCacheManager(
             name=name, root_cache_dir=root_cache_dir
         )
-        if data_manager is not None:
-            self.data_manager = data_manager
-            self.data_manager.debug = self._debug
+        self.data_manager = data_manager
+        self.data_manager.debug = self._debug
 
     def __str__(self) -&gt; str:
         &#34;&#34;&#34;Describe the object.
@@ -205,9 +205,6 @@ class SpecletModel:
               after calling `self.model_specification()`
         &#34;&#34;&#34;
         logger.debug(&#34;Building PyMC3 model.&#34;)
-        if self.data_manager is None:
-            logger.error(&#34;Cannot build a model without a data manager.&#34;)
-            raise AttributeError(&#34;Cannot build a model without a data manager.&#34;)
 
         logger.info(&#34;Calling `model_specification()` method.&#34;)
         self.model, self.observed_var_name = self.model_specification()
@@ -232,7 +229,7 @@ class SpecletModel:
 
     def mcmc_sample_model(
         self,
-        mcmc_draws: Optional[int] = None,
+        draws: Optional[int] = None,
         tune: Optional[int] = None,
         chains: Optional[int] = None,
         cores: Optional[int] = None,
@@ -280,8 +277,8 @@ class SpecletModel:
         &#34;&#34;&#34;
         logger.debug(&#34;Beginning MCMC sampling method.&#34;)
         self.update_mcmc_sampling_parameters()
-        if mcmc_draws is None:
-            mcmc_draws = self.mcmc_sampling_params.draws
+        if draws is None:
+            draws = self.mcmc_sampling_params.draws
         if tune is None:
             tune = self.mcmc_sampling_params.tune
         if chains is None:
@@ -317,7 +314,7 @@ class SpecletModel:
         logger.info(&#34;Beginning MCMC sampling.&#34;)
         _mcmc_results = pmapi.pymc3_sampling_procedure(
             model=self.model,
-            mcmc_draws=mcmc_draws,
+            mcmc_draws=draws,
             tune=tune,
             chains=chains,
             cores=cores,
@@ -483,10 +480,12 @@ class SpecletModel:
             size=size, random_seed=random_seed
         )
 
+        logger.debug(&#34;Building model for SBC.&#34;)
         self.build_model()
         assert self.model is not None
         assert self.observed_var_name is not None
 
+        logger.info(&#34;Sampling from the prior for mock values for SBC.&#34;)
         with self.model:
             priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
@@ -494,17 +493,22 @@ class SpecletModel:
         self.data_manager.set_data(mock_data)
 
         # Update shared variable with adjusted observed data.
+        logger.info(&#34;Updating observed value with prior-sampled values.&#34;)
         self.update_observed_data(mock_data[self.observed_var_name].values)
 
-        if fit_method == ModelFitMethod.advi:
+        logger.info(f&#34;Fitting model to mock data using {fit_method.value}.&#34;)
+        if fit_method is ModelFitMethod.ADVI:
             res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
-        elif fit_method == ModelFitMethod.mcmc:
+        elif fit_method is ModelFitMethod.MCMC:
             res = self.mcmc_sample_model(random_seed=random_seed, **fit_kwargs)
         else:
-            raise ValueError(f&#34;Unknown fit method &#39;{fit_method}&#39;.&#34;)
+            assert_never(fit_method)
 
+        logger.info(&#34;Making posterior summary for the SBC.&#34;)
         posterior_summary = az.summary(res, fmt=&#34;wide&#34;, hdi_prob=0.89)
         assert isinstance(posterior_summary, pd.DataFrame)
+
+        logger.info(&#34;Using a SBC file manager to save SBC results.&#34;)
         results_manager = sbc.SBCFileManager(dir=results_path)
         results_manager.save_sbc_results(
             priors=priors,
@@ -528,6 +532,45 @@ class SpecletModel:
         else:
             logger.warning(&#34;Did not cache MCMC samples because they do not exist.&#34;)
 
+    def load_mcmc_cache(self) -&gt; az.InferenceData:
+        &#34;&#34;&#34;Load MCMC from cache.
+
+        Sets the cached MCMC result as the instance&#39;s `mcmc_results` attribute, too.
+
+        Raises:
+            CacheDoesNotExistError: Raised if the cache does not exist.
+
+        Returns:
+            az.InferenceData: Cached MCMC results.
+        &#34;&#34;&#34;
+        if self.cache_manager.mcmc_cache_exists():
+            self.mcmc_results = self.cache_manager.get_mcmc_cache()
+            return self.mcmc_results
+        else:
+            raise CacheDoesNotExistError(
+                self.cache_manager.mcmc_cache_delegate.cache_dir
+            )
+
+    def load_advi_cache(self) -&gt; Tuple[az.InferenceData, pm.Approximation]:
+        &#34;&#34;&#34;Load ADVI from cache.
+
+        Sets the cached ADVI result as the instance&#39;s `advi_results` attribute, too.
+
+        Raises:
+            CacheDoesNotExistError: Raised if the cache does not exist.
+
+        Returns:
+            Tuple[az.InferenceData, pm.Approximation]: Cached ADVI results.
+        &#34;&#34;&#34;
+        if self.cache_manager.advi_cache_exists():
+            _advi_results = self.cache_manager.get_advi_cache()
+            self.advi_results = _advi_results
+            return _advi_results
+        else:
+            raise CacheDoesNotExistError(
+                self.cache_manager.advi_cache_delegate.cache_dir
+            )
+
     def update_observed_data(self, new_data: np.ndarray) -&gt; None:
         &#34;&#34;&#34;Update the values for the shared tensor for observed data.
 
@@ -546,7 +589,11 @@ class SpecletModel:
         else:
             msg = f&#34;Unable to set new values for observed variable: &#39;{_var_name}&#39;.&#34;
             logger.error(msg)
-            raise UnableToLocateNamedVariable(msg)</code></pre>
+            raise UnableToLocateNamedVariable(msg)
+
+    def set_config(self, info: Dict[Any, Any]) -&gt; None:
+        &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
+        return None</code></pre>
 </details>
 </section>
 <section>
@@ -641,7 +688,7 @@ class SpecletModel:
 </dd>
 <dt id="src.models.speclet_model.SpecletModel"><code class="flex name class">
 <span>class <span class="ident">SpecletModel</span></span>
-<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = None)</span>
+<span>(</span><span>name: str, data_manager: <a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Base class to contain a PyMC3 model.</p>
@@ -670,7 +717,7 @@ data. Defaults to None.</dd>
     name: str
     _debug: bool
     cache_manager: Pymc3ModelCacheManager
-    data_manager: Optional[DataManager] = None
+    data_manager: DataManager
 
     model: Optional[pm.Model] = None
     observed_var_name: Optional[str] = None
@@ -684,9 +731,9 @@ data. Defaults to None.</dd>
     def __init__(
         self,
         name: str,
+        data_manager: DataManager,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
-        data_manager: Optional[DataManager] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Instantiate a Speclet Model.
 
@@ -704,9 +751,8 @@ data. Defaults to None.</dd>
         self.cache_manager = Pymc3ModelCacheManager(
             name=name, root_cache_dir=root_cache_dir
         )
-        if data_manager is not None:
-            self.data_manager = data_manager
-            self.data_manager.debug = self._debug
+        self.data_manager = data_manager
+        self.data_manager.debug = self._debug
 
     def __str__(self) -&gt; str:
         &#34;&#34;&#34;Describe the object.
@@ -782,9 +828,6 @@ data. Defaults to None.</dd>
               after calling `self.model_specification()`
         &#34;&#34;&#34;
         logger.debug(&#34;Building PyMC3 model.&#34;)
-        if self.data_manager is None:
-            logger.error(&#34;Cannot build a model without a data manager.&#34;)
-            raise AttributeError(&#34;Cannot build a model without a data manager.&#34;)
 
         logger.info(&#34;Calling `model_specification()` method.&#34;)
         self.model, self.observed_var_name = self.model_specification()
@@ -809,7 +852,7 @@ data. Defaults to None.</dd>
 
     def mcmc_sample_model(
         self,
-        mcmc_draws: Optional[int] = None,
+        draws: Optional[int] = None,
         tune: Optional[int] = None,
         chains: Optional[int] = None,
         cores: Optional[int] = None,
@@ -857,8 +900,8 @@ data. Defaults to None.</dd>
         &#34;&#34;&#34;
         logger.debug(&#34;Beginning MCMC sampling method.&#34;)
         self.update_mcmc_sampling_parameters()
-        if mcmc_draws is None:
-            mcmc_draws = self.mcmc_sampling_params.draws
+        if draws is None:
+            draws = self.mcmc_sampling_params.draws
         if tune is None:
             tune = self.mcmc_sampling_params.tune
         if chains is None:
@@ -894,7 +937,7 @@ data. Defaults to None.</dd>
         logger.info(&#34;Beginning MCMC sampling.&#34;)
         _mcmc_results = pmapi.pymc3_sampling_procedure(
             model=self.model,
-            mcmc_draws=mcmc_draws,
+            mcmc_draws=draws,
             tune=tune,
             chains=chains,
             cores=cores,
@@ -1060,10 +1103,12 @@ data. Defaults to None.</dd>
             size=size, random_seed=random_seed
         )
 
+        logger.debug(&#34;Building model for SBC.&#34;)
         self.build_model()
         assert self.model is not None
         assert self.observed_var_name is not None
 
+        logger.info(&#34;Sampling from the prior for mock values for SBC.&#34;)
         with self.model:
             priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
@@ -1071,17 +1116,22 @@ data. Defaults to None.</dd>
         self.data_manager.set_data(mock_data)
 
         # Update shared variable with adjusted observed data.
+        logger.info(&#34;Updating observed value with prior-sampled values.&#34;)
         self.update_observed_data(mock_data[self.observed_var_name].values)
 
-        if fit_method == ModelFitMethod.advi:
+        logger.info(f&#34;Fitting model to mock data using {fit_method.value}.&#34;)
+        if fit_method is ModelFitMethod.ADVI:
             res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
-        elif fit_method == ModelFitMethod.mcmc:
+        elif fit_method is ModelFitMethod.MCMC:
             res = self.mcmc_sample_model(random_seed=random_seed, **fit_kwargs)
         else:
-            raise ValueError(f&#34;Unknown fit method &#39;{fit_method}&#39;.&#34;)
+            assert_never(fit_method)
 
+        logger.info(&#34;Making posterior summary for the SBC.&#34;)
         posterior_summary = az.summary(res, fmt=&#34;wide&#34;, hdi_prob=0.89)
         assert isinstance(posterior_summary, pd.DataFrame)
+
+        logger.info(&#34;Using a SBC file manager to save SBC results.&#34;)
         results_manager = sbc.SBCFileManager(dir=results_path)
         results_manager.save_sbc_results(
             priors=priors,
@@ -1105,6 +1155,45 @@ data. Defaults to None.</dd>
         else:
             logger.warning(&#34;Did not cache MCMC samples because they do not exist.&#34;)
 
+    def load_mcmc_cache(self) -&gt; az.InferenceData:
+        &#34;&#34;&#34;Load MCMC from cache.
+
+        Sets the cached MCMC result as the instance&#39;s `mcmc_results` attribute, too.
+
+        Raises:
+            CacheDoesNotExistError: Raised if the cache does not exist.
+
+        Returns:
+            az.InferenceData: Cached MCMC results.
+        &#34;&#34;&#34;
+        if self.cache_manager.mcmc_cache_exists():
+            self.mcmc_results = self.cache_manager.get_mcmc_cache()
+            return self.mcmc_results
+        else:
+            raise CacheDoesNotExistError(
+                self.cache_manager.mcmc_cache_delegate.cache_dir
+            )
+
+    def load_advi_cache(self) -&gt; Tuple[az.InferenceData, pm.Approximation]:
+        &#34;&#34;&#34;Load ADVI from cache.
+
+        Sets the cached ADVI result as the instance&#39;s `advi_results` attribute, too.
+
+        Raises:
+            CacheDoesNotExistError: Raised if the cache does not exist.
+
+        Returns:
+            Tuple[az.InferenceData, pm.Approximation]: Cached ADVI results.
+        &#34;&#34;&#34;
+        if self.cache_manager.advi_cache_exists():
+            _advi_results = self.cache_manager.get_advi_cache()
+            self.advi_results = _advi_results
+            return _advi_results
+        else:
+            raise CacheDoesNotExistError(
+                self.cache_manager.advi_cache_delegate.cache_dir
+            )
+
     def update_observed_data(self, new_data: np.ndarray) -&gt; None:
         &#34;&#34;&#34;Update the values for the shared tensor for observed data.
 
@@ -1123,7 +1212,11 @@ data. Defaults to None.</dd>
         else:
             msg = f&#34;Unable to set new values for observed variable: &#39;{_var_name}&#39;.&#34;
             logger.error(msg)
-            raise UnableToLocateNamedVariable(msg)</code></pre>
+            raise UnableToLocateNamedVariable(msg)
+
+    def set_config(self, info: Dict[Any, Any]) -&gt; None:
+        &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
+        return None</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -1134,7 +1227,6 @@ data. Defaults to None.</dd>
 <li><a title="src.models.speclet_pipeline_test_model.SpecletTestModel" href="speclet_pipeline_test_model.html#src.models.speclet_pipeline_test_model.SpecletTestModel">SpecletTestModel</a></li>
 <li><a title="src.models.speclet_seven.SpecletSeven" href="speclet_seven.html#src.models.speclet_seven.SpecletSeven">SpecletSeven</a></li>
 <li><a title="src.models.speclet_six.SpecletSix" href="speclet_six.html#src.models.speclet_six.SpecletSix">SpecletSix</a></li>
-<li><a title="src.models.speclet_three.SpecletThree" href="speclet_three.html#src.models.speclet_three.SpecletThree">SpecletThree</a></li>
 <li><a title="src.models.speclet_two.SpecletTwo" href="speclet_two.html#src.models.speclet_two.SpecletTwo">SpecletTwo</a></li>
 </ul>
 <h3>Class variables</h3>
@@ -1144,10 +1236,6 @@ data. Defaults to None.</dd>
 <div class="desc"></div>
 </dd>
 <dt id="src.models.speclet_model.SpecletModel.advi_sampling_params"><code class="name">var <span class="ident">advi_sampling_params</span> : <a title="src.models.speclet_model.VISamplingParameters" href="#src.models.speclet_model.VISamplingParameters">VISamplingParameters</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="src.models.speclet_model.SpecletModel.data_manager"><code class="name">var <span class="ident">data_manager</span> : Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1379,9 +1467,6 @@ after calling <code>self.model_specification()</code></dd>
           after calling `self.model_specification()`
     &#34;&#34;&#34;
     logger.debug(&#34;Building PyMC3 model.&#34;)
-    if self.data_manager is None:
-        logger.error(&#34;Cannot build a model without a data manager.&#34;)
-        raise AttributeError(&#34;Cannot build a model without a data manager.&#34;)
 
     logger.info(&#34;Calling `model_specification()` method.&#34;)
     self.model, self.observed_var_name = self.model_specification()
@@ -1475,8 +1560,89 @@ this method returns None and has no effect on ADVI.</p>
     return None</code></pre>
 </details>
 </dd>
+<dt id="src.models.speclet_model.SpecletModel.load_advi_cache"><code class="name flex">
+<span>def <span class="ident">load_advi_cache</span></span>(<span>self) -> Tuple[arviz.data.inference_data.InferenceData, pymc3.variational.opvi.Approximation]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Load ADVI from cache.</p>
+<p>Sets the cached ADVI result as the instance's <code>advi_results</code> attribute, too.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>CacheDoesNotExistError</code></dt>
+<dd>Raised if the cache does not exist.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Tuple[az.InferenceData, pm.Approximation]</code></dt>
+<dd>Cached ADVI results.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_advi_cache(self) -&gt; Tuple[az.InferenceData, pm.Approximation]:
+    &#34;&#34;&#34;Load ADVI from cache.
+
+    Sets the cached ADVI result as the instance&#39;s `advi_results` attribute, too.
+
+    Raises:
+        CacheDoesNotExistError: Raised if the cache does not exist.
+
+    Returns:
+        Tuple[az.InferenceData, pm.Approximation]: Cached ADVI results.
+    &#34;&#34;&#34;
+    if self.cache_manager.advi_cache_exists():
+        _advi_results = self.cache_manager.get_advi_cache()
+        self.advi_results = _advi_results
+        return _advi_results
+    else:
+        raise CacheDoesNotExistError(
+            self.cache_manager.advi_cache_delegate.cache_dir
+        )</code></pre>
+</details>
+</dd>
+<dt id="src.models.speclet_model.SpecletModel.load_mcmc_cache"><code class="name flex">
+<span>def <span class="ident">load_mcmc_cache</span></span>(<span>self) -> arviz.data.inference_data.InferenceData</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Load MCMC from cache.</p>
+<p>Sets the cached MCMC result as the instance's <code>mcmc_results</code> attribute, too.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>CacheDoesNotExistError</code></dt>
+<dd>Raised if the cache does not exist.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>az.InferenceData</code></dt>
+<dd>Cached MCMC results.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_mcmc_cache(self) -&gt; az.InferenceData:
+    &#34;&#34;&#34;Load MCMC from cache.
+
+    Sets the cached MCMC result as the instance&#39;s `mcmc_results` attribute, too.
+
+    Raises:
+        CacheDoesNotExistError: Raised if the cache does not exist.
+
+    Returns:
+        az.InferenceData: Cached MCMC results.
+    &#34;&#34;&#34;
+    if self.cache_manager.mcmc_cache_exists():
+        self.mcmc_results = self.cache_manager.get_mcmc_cache()
+        return self.mcmc_results
+    else:
+        raise CacheDoesNotExistError(
+            self.cache_manager.mcmc_cache_delegate.cache_dir
+        )</code></pre>
+</details>
+</dd>
 <dt id="src.models.speclet_model.SpecletModel.mcmc_sample_model"><code class="name flex">
-<span>def <span class="ident">mcmc_sample_model</span></span>(<span>self, mcmc_draws: Optional[int] = None, tune: Optional[int] = None, chains: Optional[int] = None, cores: Optional[int] = None, target_accept: Optional[float] = None, prior_pred_samples: Optional[int] = None, post_pred_samples: Optional[int] = None, random_seed: Optional[int] = None, sample_kwargs: Optional[Dict[str, Any]] = None, ignore_cache: bool = False) -> arviz.data.inference_data.InferenceData</span>
+<span>def <span class="ident">mcmc_sample_model</span></span>(<span>self, draws: Optional[int] = None, tune: Optional[int] = None, chains: Optional[int] = None, cores: Optional[int] = None, target_accept: Optional[float] = None, prior_pred_samples: Optional[int] = None, post_pred_samples: Optional[int] = None, random_seed: Optional[int] = None, sample_kwargs: Optional[Dict[str, Any]] = None, ignore_cache: bool = False) -> arviz.data.inference_data.InferenceData</span>
 </code></dt>
 <dd>
 <div class="desc"><p>MCMC sample the model.</p>
@@ -1532,7 +1698,7 @@ Defaults to False.</dd>
 </summary>
 <pre><code class="python">def mcmc_sample_model(
     self,
-    mcmc_draws: Optional[int] = None,
+    draws: Optional[int] = None,
     tune: Optional[int] = None,
     chains: Optional[int] = None,
     cores: Optional[int] = None,
@@ -1580,8 +1746,8 @@ Defaults to False.</dd>
     &#34;&#34;&#34;
     logger.debug(&#34;Beginning MCMC sampling method.&#34;)
     self.update_mcmc_sampling_parameters()
-    if mcmc_draws is None:
-        mcmc_draws = self.mcmc_sampling_params.draws
+    if draws is None:
+        draws = self.mcmc_sampling_params.draws
     if tune is None:
         tune = self.mcmc_sampling_params.tune
     if chains is None:
@@ -1617,7 +1783,7 @@ Defaults to False.</dd>
     logger.info(&#34;Beginning MCMC sampling.&#34;)
     _mcmc_results = pmapi.pymc3_sampling_procedure(
         model=self.model,
-        mcmc_draws=mcmc_draws,
+        mcmc_draws=draws,
         tune=tune,
         chains=chains,
         cores=cores,
@@ -1715,10 +1881,12 @@ passed to the fitting method. Default is None.</dd>
         size=size, random_seed=random_seed
     )
 
+    logger.debug(&#34;Building model for SBC.&#34;)
     self.build_model()
     assert self.model is not None
     assert self.observed_var_name is not None
 
+    logger.info(&#34;Sampling from the prior for mock values for SBC.&#34;)
     with self.model:
         priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
@@ -1726,23 +1894,42 @@ passed to the fitting method. Default is None.</dd>
     self.data_manager.set_data(mock_data)
 
     # Update shared variable with adjusted observed data.
+    logger.info(&#34;Updating observed value with prior-sampled values.&#34;)
     self.update_observed_data(mock_data[self.observed_var_name].values)
 
-    if fit_method == ModelFitMethod.advi:
+    logger.info(f&#34;Fitting model to mock data using {fit_method.value}.&#34;)
+    if fit_method is ModelFitMethod.ADVI:
         res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
-    elif fit_method == ModelFitMethod.mcmc:
+    elif fit_method is ModelFitMethod.MCMC:
         res = self.mcmc_sample_model(random_seed=random_seed, **fit_kwargs)
     else:
-        raise ValueError(f&#34;Unknown fit method &#39;{fit_method}&#39;.&#34;)
+        assert_never(fit_method)
 
+    logger.info(&#34;Making posterior summary for the SBC.&#34;)
     posterior_summary = az.summary(res, fmt=&#34;wide&#34;, hdi_prob=0.89)
     assert isinstance(posterior_summary, pd.DataFrame)
+
+    logger.info(&#34;Using a SBC file manager to save SBC results.&#34;)
     results_manager = sbc.SBCFileManager(dir=results_path)
     results_manager.save_sbc_results(
         priors=priors,
         inference_obj=res,
         posterior_summary=posterior_summary,
     )</code></pre>
+</details>
+</dd>
+<dt id="src.models.speclet_model.SpecletModel.set_config"><code class="name flex">
+<span>def <span class="ident">set_config</span></span>(<span>self, info: Dict[Any, Any]) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set model-specific configuration.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_config(self, info: Dict[Any, Any]) -&gt; None:
+    &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
+    return None</code></pre>
 </details>
 </dd>
 <dt id="src.models.speclet_model.SpecletModel.update_advi_sampling_parameters"><code class="name flex">
@@ -1925,10 +2112,11 @@ passed to the fitting method. Default is None.</dd>
 <li><code><a title="src.models.speclet_model.SpecletModel.advi_sampling_params" href="#src.models.speclet_model.SpecletModel.advi_sampling_params">advi_sampling_params</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.build_model" href="#src.models.speclet_model.SpecletModel.build_model">build_model</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.clear_cache" href="#src.models.speclet_model.SpecletModel.clear_cache">clear_cache</a></code></li>
-<li><code><a title="src.models.speclet_model.SpecletModel.data_manager" href="#src.models.speclet_model.SpecletModel.data_manager">data_manager</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.debug" href="#src.models.speclet_model.SpecletModel.debug">debug</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_advi_callbacks" href="#src.models.speclet_model.SpecletModel.get_advi_callbacks">get_advi_callbacks</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_replacement_parameters" href="#src.models.speclet_model.SpecletModel.get_replacement_parameters">get_replacement_parameters</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.load_advi_cache" href="#src.models.speclet_model.SpecletModel.load_advi_cache">load_advi_cache</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.load_mcmc_cache" href="#src.models.speclet_model.SpecletModel.load_mcmc_cache">load_mcmc_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.mcmc_results" href="#src.models.speclet_model.SpecletModel.mcmc_results">mcmc_results</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.mcmc_sample_model" href="#src.models.speclet_model.SpecletModel.mcmc_sample_model">mcmc_sample_model</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.mcmc_sampling_params" href="#src.models.speclet_model.SpecletModel.mcmc_sampling_params">mcmc_sampling_params</a></code></li>
@@ -1936,6 +2124,7 @@ passed to the fitting method. Default is None.</dd>
 <li><code><a title="src.models.speclet_model.SpecletModel.model_specification" href="#src.models.speclet_model.SpecletModel.model_specification">model_specification</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.observed_var_name" href="#src.models.speclet_model.SpecletModel.observed_var_name">observed_var_name</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.run_simulation_based_calibration" href="#src.models.speclet_model.SpecletModel.run_simulation_based_calibration">run_simulation_based_calibration</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.set_config" href="#src.models.speclet_model.SpecletModel.set_config">set_config</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.shared_vars" href="#src.models.speclet_model.SpecletModel.shared_vars">shared_vars</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.update_advi_sampling_parameters" href="#src.models.speclet_model.SpecletModel.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.update_mcmc_sampling_parameters" href="#src.models.speclet_model.SpecletModel.update_mcmc_sampling_parameters">update_mcmc_sampling_parameters</a></code></li>

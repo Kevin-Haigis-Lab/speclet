@@ -39,6 +39,7 @@ from pydantic import BaseModel
 
 from src.io import cache_io
 from src.managers.cache_managers import ArvizCacheManager
+from src.project_enums import ModelFitMethod
 
 
 class ModelCachePaths(BaseModel):
@@ -125,7 +126,7 @@ class Pymc3ModelCacheManager:
         Returns:
             bool: Does the cache exist?
         &#34;&#34;&#34;
-        return self.mcmc_cache_delegate.cache_exists(method=&#34;mcmc&#34;)
+        return self.mcmc_cache_delegate.cache_exists(method=ModelFitMethod.MCMC)
 
     def advi_cache_exists(self) -&gt; bool:
         &#34;&#34;&#34;Confirm that a cache of ADVI fitting results exists.
@@ -133,7 +134,7 @@ class Pymc3ModelCacheManager:
         Returns:
             bool: Does the cache exist?
         &#34;&#34;&#34;
-        return self.advi_cache_delegate.cache_exists(method=&#34;approx&#34;)
+        return self.advi_cache_delegate.cache_exists(method=ModelFitMethod.ADVI)
 
     def clear_mcmc_cache(self) -&gt; None:
         &#34;&#34;&#34;Clear the MCMC cache.&#34;&#34;&#34;
@@ -280,7 +281,7 @@ cache directory.</dd>
         Returns:
             bool: Does the cache exist?
         &#34;&#34;&#34;
-        return self.mcmc_cache_delegate.cache_exists(method=&#34;mcmc&#34;)
+        return self.mcmc_cache_delegate.cache_exists(method=ModelFitMethod.MCMC)
 
     def advi_cache_exists(self) -&gt; bool:
         &#34;&#34;&#34;Confirm that a cache of ADVI fitting results exists.
@@ -288,7 +289,7 @@ cache directory.</dd>
         Returns:
             bool: Does the cache exist?
         &#34;&#34;&#34;
-        return self.advi_cache_delegate.cache_exists(method=&#34;approx&#34;)
+        return self.advi_cache_delegate.cache_exists(method=ModelFitMethod.ADVI)
 
     def clear_mcmc_cache(self) -&gt; None:
         &#34;&#34;&#34;Clear the MCMC cache.&#34;&#34;&#34;
@@ -325,7 +326,7 @@ cache directory.</dd>
     Returns:
         bool: Does the cache exist?
     &#34;&#34;&#34;
-    return self.advi_cache_delegate.cache_exists(method=&#34;approx&#34;)</code></pre>
+    return self.advi_cache_delegate.cache_exists(method=ModelFitMethod.ADVI)</code></pre>
 </details>
 </dd>
 <dt id="src.managers.model_cache_managers.Pymc3ModelCacheManager.clear_advi_cache"><code class="name flex">
@@ -453,7 +454,7 @@ cache directory.</dd>
     Returns:
         bool: Does the cache exist?
     &#34;&#34;&#34;
-    return self.mcmc_cache_delegate.cache_exists(method=&#34;mcmc&#34;)</code></pre>
+    return self.mcmc_cache_delegate.cache_exists(method=ModelFitMethod.MCMC)</code></pre>
 </details>
 </dd>
 <dt id="src.managers.model_cache_managers.Pymc3ModelCacheManager.write_advi_cache"><code class="name flex">

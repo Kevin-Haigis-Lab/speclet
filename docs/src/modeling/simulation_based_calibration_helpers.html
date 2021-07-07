@@ -31,6 +31,7 @@
 import math
 from enum import Enum, unique
 from pathlib import Path
+from random import choices
 from typing import Any, Dict, List, Optional, Union
 
 import arviz as az
@@ -187,10 +188,12 @@ def generate_mock_sgrna_gene_map(n_genes: int, n_sgrnas_per_gene: int) -&gt; pd.
           to it.
     &#34;&#34;&#34;
     genes = prefixed_count(&#34;gene&#34;, n=n_genes)
+    sgrna_target_chr = choices([&#34;Chr1&#34;, &#34;Chr2&#34;, &#34;Chr3&#34;], k=n_genes)
     sgrnas = [prefixed_count(gene + &#34;_sgrna&#34;, n=n_sgrnas_per_gene) for gene in genes]
     return pd.DataFrame(
         {
             &#34;hugo_symbol&#34;: np.repeat(genes, n_sgrnas_per_gene),
+            &#34;sgrna_target_chr&#34;: np.repeat(sgrna_target_chr, n_sgrnas_per_gene),
             &#34;sgrna&#34;: np.array(sgrnas).flatten(),
         }
     )
@@ -991,10 +994,12 @@ to it.</dd>
           to it.
     &#34;&#34;&#34;
     genes = prefixed_count(&#34;gene&#34;, n=n_genes)
+    sgrna_target_chr = choices([&#34;Chr1&#34;, &#34;Chr2&#34;, &#34;Chr3&#34;], k=n_genes)
     sgrnas = [prefixed_count(gene + &#34;_sgrna&#34;, n=n_sgrnas_per_gene) for gene in genes]
     return pd.DataFrame(
         {
             &#34;hugo_symbol&#34;: np.repeat(genes, n_sgrnas_per_gene),
+            &#34;sgrna_target_chr&#34;: np.repeat(sgrna_target_chr, n_sgrnas_per_gene),
             &#34;sgrna&#34;: np.array(sgrnas).flatten(),
         }
     )</code></pre>

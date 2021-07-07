@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>src.pipelines API documentation</title>
-<meta name="description" content="" />
+<title>src.managers.pipeline_resource_manager API documentation</title>
+<meta name="description" content="Define a protocol for pipeline resource managers." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -18,28 +18,129 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Namespace <code>src.pipelines</code></h1>
+<h1 class="title">Module <code>src.managers.pipeline_resource_manager</code></h1>
 </header>
 <section id="section-intro">
+<p>Define a protocol for pipeline resource managers.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Define a protocol for pipeline resource managers.&#34;&#34;&#34;
+
+from datetime import timedelta as td
+from typing import Protocol
+
+from src.project_enums import SlurmPartitions
+
+
+class PipelineResourceManager(Protocol):
+    &#34;&#34;&#34;Protocol for pipeline resource managers.&#34;&#34;&#34;
+
+    memory: str
+    time: str
+    cores: int
+    partition: str
+
+
+#### ---- Common functions ---- ####
+
+
+def slurm_partition_required_for_duration(time_req: td) -&gt; SlurmPartitions:
+    &#34;&#34;&#34;SLURM partition best suited for a job with a given time requirement.
+
+    Args:
+        time_req (td): Time that will be requested for the job.
+
+    Returns:
+        SlurmPartitions: The SLURM partition most appropriate for the time.
+    &#34;&#34;&#34;
+    if time_req &lt;= td(hours=12):
+        return SlurmPartitions.SHORT
+    elif time_req &lt;= td(days=5):
+        return SlurmPartitions.MEDIUM
+    else:
+        return SlurmPartitions.LONG</code></pre>
+</details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="src.pipelines.collate_sbc" href="collate_sbc.html">src.pipelines.collate_sbc</a></code></dt>
+<dt id="src.managers.pipeline_resource_manager.slurm_partition_required_for_duration"><code class="name flex">
+<span>def <span class="ident">slurm_partition_required_for_duration</span></span>(<span>time_req: datetime.timedelta) -> <a title="src.project_enums.SlurmPartitions" href="../project_enums.html#src.project_enums.SlurmPartitions">SlurmPartitions</a></span>
+</code></dt>
 <dd>
-<div class="desc"><p>Collate the posteriors of separate simulations of SBC into a single file.</p></div>
-</dd>
-<dt><code class="name"><a title="src.pipelines.snakemake_parsing_helpers" href="snakemake_parsing_helpers.html">src.pipelines.snakemake_parsing_helpers</a></code></dt>
-<dd>
-<div class="desc"><p>Parsing complex structures for use in Snakemake pipelines.</p></div>
+<div class="desc"><p>SLURM partition best suited for a job with a given time requirement.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>time_req</code></strong> :&ensp;<code>td</code></dt>
+<dd>Time that will be requested for the job.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>SlurmPartitions</code></dt>
+<dd>The SLURM partition most appropriate for the time.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def slurm_partition_required_for_duration(time_req: td) -&gt; SlurmPartitions:
+    &#34;&#34;&#34;SLURM partition best suited for a job with a given time requirement.
+
+    Args:
+        time_req (td): Time that will be requested for the job.
+
+    Returns:
+        SlurmPartitions: The SLURM partition most appropriate for the time.
+    &#34;&#34;&#34;
+    if time_req &lt;= td(hours=12):
+        return SlurmPartitions.SHORT
+    elif time_req &lt;= td(days=5):
+        return SlurmPartitions.MEDIUM
+    else:
+        return SlurmPartitions.LONG</code></pre>
+</details>
 </dd>
 </dl>
 </section>
 <section>
-</section>
-<section>
-</section>
-<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="src.managers.pipeline_resource_manager.PipelineResourceManager"><code class="flex name class">
+<span>class <span class="ident">PipelineResourceManager</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Protocol for pipeline resource managers.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PipelineResourceManager(Protocol):
+    &#34;&#34;&#34;Protocol for pipeline resource managers.&#34;&#34;&#34;
+
+    memory: str
+    time: str
+    cores: int
+    partition: str</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>typing.Protocol</li>
+<li>typing.Generic</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager" href="model_fitting_pipeline_resource_manager.html#src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager">ModelFittingPipelineResourceManager</a></li>
+<li><a title="src.managers.sbc_pipeline_resource_mangement.SBCResourceManager" href="sbc_pipeline_resource_mangement.html#src.managers.sbc_pipeline_resource_mangement.SBCResourceManager">SBCResourceManager</a></li>
+</ul>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -50,13 +151,19 @@
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="src" href="../index.html">src</a></code></li>
+<li><code><a title="src.managers" href="index.html">src.managers</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="src.managers.pipeline_resource_manager.slurm_partition_required_for_duration" href="#src.managers.pipeline_resource_manager.slurm_partition_required_for_duration">slurm_partition_required_for_duration</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
-<li><code><a title="src.pipelines.collate_sbc" href="collate_sbc.html">src.pipelines.collate_sbc</a></code></li>
-<li><code><a title="src.pipelines.snakemake_parsing_helpers" href="snakemake_parsing_helpers.html">src.pipelines.snakemake_parsing_helpers</a></code></li>
+<li>
+<h4><code><a title="src.managers.pipeline_resource_manager.PipelineResourceManager" href="#src.managers.pipeline_resource_manager.PipelineResourceManager">PipelineResourceManager</a></code></h4>
+</li>
 </ul>
 </li>
 </ul>

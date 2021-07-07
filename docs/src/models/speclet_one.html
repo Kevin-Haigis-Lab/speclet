@@ -75,7 +75,7 @@ class SpecletOne(SpecletModel):
         &#34;&#34;&#34;Instantiate a SpecletOne model.
 
         Args:
-            name (str): A unique identifier for this instance of CrcCeresMimic. (Used
+            name (str): A unique identifier for this instance of SpecletOne. (Used
               for cache management.)
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
@@ -87,7 +87,7 @@ class SpecletOne(SpecletModel):
             data_manager = CrcDataManager(debug=debug)
 
         super().__init__(
-            name=&#34;speclet-one_&#34; + name,
+            name=name,
             root_cache_dir=root_cache_dir,
             debug=debug,
             data_manager=data_manager,
@@ -159,7 +159,7 @@ class SpecletOne(SpecletModel):
                 &#34;μ&#34;,
                 h[sgrna_idx_shared]
                 + d[sgrna_idx_shared, cellline_idx_shared]
-                + β[cellline_idx_shared]
+                + β[cellline_idx_shared] * copynumber_shared
                 + η[batch_idx_shared],
             )
 
@@ -186,16 +186,11 @@ class SpecletOne(SpecletModel):
         &#34;&#34;&#34;Make a dictionary mapping the shared data variables to new data.
 
         Raises:
-            AttributeError: Raised if there is no data manager.
             AttributeError: Raised if there are no shared variables.
 
         Returns:
             ReplacementsDict: A dictionary mapping new data to shared variables.
         &#34;&#34;&#34;
-        if self.data_manager is None:
-            raise AttributeError(
-                &#34;Cannot create replacement parameters without a DataManager.&#34;
-            )
         if self.shared_vars is None:
             raise AttributeError(
                 &#34;No shared variables - cannot create replacement parameters..&#34;
@@ -270,7 +265,7 @@ has been extended with a similar structure.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
-<dd>A unique identifier for this instance of CrcCeresMimic. (Used
+<dd>A unique identifier for this instance of SpecletOne. (Used
 for cache management.)</dd>
 <dt><strong><code>root_cache_dir</code></strong> :&ensp;<code>Optional[Path]</code>, optional</dt>
 <dd>The directory for caching
@@ -321,7 +316,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
         &#34;&#34;&#34;Instantiate a SpecletOne model.
 
         Args:
-            name (str): A unique identifier for this instance of CrcCeresMimic. (Used
+            name (str): A unique identifier for this instance of SpecletOne. (Used
               for cache management.)
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
@@ -333,7 +328,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             data_manager = CrcDataManager(debug=debug)
 
         super().__init__(
-            name=&#34;speclet-one_&#34; + name,
+            name=name,
             root_cache_dir=root_cache_dir,
             debug=debug,
             data_manager=data_manager,
@@ -405,7 +400,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
                 &#34;μ&#34;,
                 h[sgrna_idx_shared]
                 + d[sgrna_idx_shared, cellline_idx_shared]
-                + β[cellline_idx_shared]
+                + β[cellline_idx_shared] * copynumber_shared
                 + η[batch_idx_shared],
             )
 
@@ -432,16 +427,11 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
         &#34;&#34;&#34;Make a dictionary mapping the shared data variables to new data.
 
         Raises:
-            AttributeError: Raised if there is no data manager.
             AttributeError: Raised if there are no shared variables.
 
         Returns:
             ReplacementsDict: A dictionary mapping new data to shared variables.
         &#34;&#34;&#34;
-        if self.data_manager is None:
-            raise AttributeError(
-                &#34;Cannot create replacement parameters without a DataManager.&#34;
-            )
         if self.shared_vars is None:
             raise AttributeError(
                 &#34;No shared variables - cannot create replacement parameters..&#34;
@@ -484,8 +474,6 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <h2 id="raises">Raises</h2>
 <dl>
 <dt><code>AttributeError</code></dt>
-<dd>Raised if there is no data manager.</dd>
-<dt><code>AttributeError</code></dt>
 <dd>Raised if there are no shared variables.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
@@ -501,16 +489,11 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
     &#34;&#34;&#34;Make a dictionary mapping the shared data variables to new data.
 
     Raises:
-        AttributeError: Raised if there is no data manager.
         AttributeError: Raised if there are no shared variables.
 
     Returns:
         ReplacementsDict: A dictionary mapping new data to shared variables.
     &#34;&#34;&#34;
-    if self.data_manager is None:
-        raise AttributeError(
-            &#34;Cannot create replacement parameters without a DataManager.&#34;
-        )
     if self.shared_vars is None:
         raise AttributeError(
             &#34;No shared variables - cannot create replacement parameters..&#34;
@@ -620,7 +603,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             &#34;μ&#34;,
             h[sgrna_idx_shared]
             + d[sgrna_idx_shared, cellline_idx_shared]
-            + β[cellline_idx_shared]
+            + β[cellline_idx_shared] * copynumber_shared
             + η[batch_idx_shared],
         )
 
@@ -654,8 +637,11 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <li><code><a title="src.models.speclet_model.SpecletModel.clear_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.clear_cache">clear_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.debug" href="speclet_model.html#src.models.speclet_model.SpecletModel.debug">debug</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_advi_callbacks" href="speclet_model.html#src.models.speclet_model.SpecletModel.get_advi_callbacks">get_advi_callbacks</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.load_advi_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.load_advi_cache">load_advi_cache</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.load_mcmc_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.load_mcmc_cache">load_mcmc_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.mcmc_sample_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.mcmc_sample_model">mcmc_sample_model</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.run_simulation_based_calibration" href="speclet_model.html#src.models.speclet_model.SpecletModel.run_simulation_based_calibration">run_simulation_based_calibration</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.set_config" href="speclet_model.html#src.models.speclet_model.SpecletModel.set_config">set_config</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.update_advi_sampling_parameters" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.update_mcmc_sampling_parameters" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_mcmc_sampling_parameters">update_mcmc_sampling_parameters</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.update_observed_data" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_observed_data">update_observed_data</a></code></li>

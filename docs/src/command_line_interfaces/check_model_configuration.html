@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>src.pipelines API documentation</title>
-<meta name="description" content="" />
+<title>src.command_line_interfaces.check_model_configuration API documentation</title>
+<meta name="description" content="CLI for checking a model configuration file." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -18,26 +18,140 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Namespace <code>src.pipelines</code></h1>
+<h1 class="title">Module <code>src.command_line_interfaces.check_model_configuration</code></h1>
 </header>
 <section id="section-intro">
+<p>CLI for checking a model configuration file.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#!/usr/bin/env python3
+
+&#34;&#34;&#34;CLI for checking a model configuration file.&#34;&#34;&#34;
+
+from pathlib import Path
+
+import typer
+
+from src.io import model_config
+from src.models import configuration
+from src.project_enums import ModelFitMethod, SpecletPipeline
+
+
+def check_model_configuration(path: Path) -&gt; None:
+    &#34;&#34;&#34;Check a model configuration file.
+
+    Performs the following checks:
+
+    1. Configuration file can be read in and parsed into the data structure.
+    2. All names are unique.
+
+    Args:
+        path (Path): Path to the config file.
+    &#34;&#34;&#34;
+    typer.secho(f&#34;Checking model config: &#39;{path.as_posix()}&#39;&#34;, fg=typer.colors.BLUE)
+
+    configs = model_config.get_model_configurations(path)
+    typer.echo(&#34;Configuration file can be parsed: ✔︎&#34;)
+
+    model_config.check_model_names_are_unique(configs)
+    typer.echo(&#34;Configuration names are unique: ✔︎&#34;)
+
+    for config in configs.configurations:
+        _ = configuration.instantiate_and_configure_model(
+            config,
+            root_cache_dir=Path(&#34;temp&#34;),
+        )
+        for fit_method in ModelFitMethod:
+            for pipeline in SpecletPipeline:
+                sampling_kwargs = model_config.get_sampling_kwargs_from_config(
+                    config=config,
+                    pipeline=pipeline,
+                    fit_method=fit_method,
+                )
+                configuration.check_sampling_kwargs(
+                    sampling_kwargs, fit_method=fit_method
+                )
+
+    typer.echo(&#34;All models can be instantiated and configured: ✔︎&#34;)
+
+    typer.secho(&#34;Configuration file looks good.&#34;, fg=typer.colors.GREEN)
+    return None
+
+
+if __name__ == &#34;__main__&#34;:
+    typer.run(check_model_configuration)</code></pre>
+</details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="src.pipelines.collate_sbc" href="collate_sbc.html">src.pipelines.collate_sbc</a></code></dt>
+<dt id="src.command_line_interfaces.check_model_configuration.check_model_configuration"><code class="name flex">
+<span>def <span class="ident">check_model_configuration</span></span>(<span>path: pathlib.Path) -> NoneType</span>
+</code></dt>
 <dd>
-<div class="desc"><p>Collate the posteriors of separate simulations of SBC into a single file.</p></div>
-</dd>
-<dt><code class="name"><a title="src.pipelines.snakemake_parsing_helpers" href="snakemake_parsing_helpers.html">src.pipelines.snakemake_parsing_helpers</a></code></dt>
-<dd>
-<div class="desc"><p>Parsing complex structures for use in Snakemake pipelines.</p></div>
+<div class="desc"><p>Check a model configuration file.</p>
+<p>Performs the following checks:</p>
+<ol>
+<li>Configuration file can be read in and parsed into the data structure.</li>
+<li>All names are unique.</li>
+</ol>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong> :&ensp;<code>Path</code></dt>
+<dd>Path to the config file.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check_model_configuration(path: Path) -&gt; None:
+    &#34;&#34;&#34;Check a model configuration file.
+
+    Performs the following checks:
+
+    1. Configuration file can be read in and parsed into the data structure.
+    2. All names are unique.
+
+    Args:
+        path (Path): Path to the config file.
+    &#34;&#34;&#34;
+    typer.secho(f&#34;Checking model config: &#39;{path.as_posix()}&#39;&#34;, fg=typer.colors.BLUE)
+
+    configs = model_config.get_model_configurations(path)
+    typer.echo(&#34;Configuration file can be parsed: ✔︎&#34;)
+
+    model_config.check_model_names_are_unique(configs)
+    typer.echo(&#34;Configuration names are unique: ✔︎&#34;)
+
+    for config in configs.configurations:
+        _ = configuration.instantiate_and_configure_model(
+            config,
+            root_cache_dir=Path(&#34;temp&#34;),
+        )
+        for fit_method in ModelFitMethod:
+            for pipeline in SpecletPipeline:
+                sampling_kwargs = model_config.get_sampling_kwargs_from_config(
+                    config=config,
+                    pipeline=pipeline,
+                    fit_method=fit_method,
+                )
+                configuration.check_sampling_kwargs(
+                    sampling_kwargs, fit_method=fit_method
+                )
+
+    typer.echo(&#34;All models can be instantiated and configured: ✔︎&#34;)
+
+    typer.secho(&#34;Configuration file looks good.&#34;, fg=typer.colors.GREEN)
+    return None</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -50,13 +164,12 @@
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="src" href="../index.html">src</a></code></li>
+<li><code><a title="src.command_line_interfaces" href="index.html">src.command_line_interfaces</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="src.pipelines.collate_sbc" href="collate_sbc.html">src.pipelines.collate_sbc</a></code></li>
-<li><code><a title="src.pipelines.snakemake_parsing_helpers" href="snakemake_parsing_helpers.html">src.pipelines.snakemake_parsing_helpers</a></code></li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="src.command_line_interfaces.check_model_configuration.check_model_configuration" href="#src.command_line_interfaces.check_model_configuration.check_model_configuration">check_model_configuration</a></code></li>
 </ul>
 </li>
 </ul>

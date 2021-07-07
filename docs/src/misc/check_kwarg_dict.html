@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>src.command_line_interfaces.simulation_based_calibration_cli API documentation</title>
-<meta name="description" content="A helpful command line interface for simulation-based calibration." />
+<title>src.misc.check_kwarg_dict API documentation</title>
+<meta name="description" content="Check a dictionary of keyword arguments against the parameters of a function." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -18,79 +18,61 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>src.command_line_interfaces.simulation_based_calibration_cli</code></h1>
+<h1 class="title">Module <code>src.misc.check_kwarg_dict</code></h1>
 </header>
 <section id="section-intro">
-<p>A helpful command line interface for simulation-based calibration.</p>
+<p>Check a dictionary of keyword arguments against the parameters of a function.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">#!/usr/bin/env python3
+<pre><code class="python">&#34;&#34;&#34;Check a dictionary of keyword arguments against the parameters of a function.&#34;&#34;&#34;
 
-&#34;&#34;&#34;A helpful command line interface for simulation-based calibration.&#34;&#34;&#34;
-
-from pathlib import Path
-
-import typer
-
-from src.command_line_interfaces import cli_helpers
-from src.io import model_config
-from src.loggers import logger
-from src.models import configuration
-from src.project_enums import ModelFitMethod, SpecletPipeline
-
-cli_helpers.configure_pretty()
+import inspect
+from typing import Callable, List, Tuple
 
 
-def run_sbc(
-    name: str,
-    config_path: Path,
-    fit_method: ModelFitMethod,
-    cache_dir: Path,
-    sim_number: int,
-    data_size: str,
+class KeywordsNotInCallableParametersError(BaseException):
+    &#34;&#34;&#34;Keywords are not in a callable&#39;s available parameters.&#34;&#34;&#34;
+
+    def __init__(self, extra_keys: List[str]) -&gt; None:
+        &#34;&#34;&#34;Create a error.
+
+        Args:
+            extra_keys (List[str]): Extra keys found.
+        &#34;&#34;&#34;
+        self.extra_keys = extra_keys
+        self.message = f&#34;Spare keys: {self.extra_keys}&#34;
+        super().__init__(self.message)
+
+
+def _get_parameter_names(f: Callable) -&gt; List[str]:
+    return [x for x in inspect.signature(f).parameters]
+
+
+def check_kwarg_dict(
+    keywords: List[str], f: Callable, blacklist: Tuple[str, ...] = tuple()
 ) -&gt; None:
-    &#34;&#34;&#34;CLI for running a round of simulation-based calibration for a model.
+    &#34;&#34;&#34;Check a list of keywords against the parameters in a callable (e.g. function).
 
     Args:
-        name (str): Unique identifiable name for the model.
-        config_path (Path): Path to the model configuration file.
-        fit_method (ModelFitMethod): Fitting method.
-        cache_dir (Path): Where to store the results.
-        sim_number (int): Simulation number.
-        data_size (str): Which data size to use. See the actual methods
-          for details and options.
+        keywords (List[str]): List of expected keywords.
+        f (Callable): Callable object that will be passed they keyword arguments.
+        blacklist (Tuple[str]): Parameters to ignore (e.g. `(&#34;self&#34;,)`)
+
+    Raises:
+        KeywordsNotInCallableParametersError: Raised if spare keywords are found.
 
     Returns:
         None: None
     &#34;&#34;&#34;
-    sp_model = configuration.get_config_and_instantiate_model(
-        config_path=config_path, name=name, root_cache_dir=cache_dir
-    )
-    fit_kwargs = model_config.get_sampling_kwargs(
-        config_path=config_path,
-        name=name,
-        pipeline=SpecletPipeline.SBC,
-        fit_method=fit_method,
-    )
-    if fit_kwargs != {}:
-        logger.info(&#34;Found specific fitting keyword arguments.&#34;)
-
-    logger.info(f&#34;Running SBC for model &#39;{sp_model.__class__}&#39; - &#39;{name}&#39;.&#34;)
-    sp_model.run_simulation_based_calibration(
-        cache_dir,
-        fit_method=fit_method,
-        random_seed=sim_number,
-        size=data_size,
-        fit_kwargs=fit_kwargs,
-    )
-    logger.info(&#34;SBC finished.&#34;)
-    return None
-
-
-if __name__ == &#34;__main__&#34;:
-    typer.run(run_sbc)</code></pre>
+    param_names = _get_parameter_names(f)
+    if len(blacklist) &gt; 0:
+        param_names = list(filter(lambda x: x not in blacklist, param_names))
+    spare_keys = [k for k in keywords if k not in param_names]
+    if len(spare_keys):
+        raise KeywordsNotInCallableParametersError(spare_keys)
+    return None</code></pre>
 </details>
 </section>
 <section>
@@ -100,26 +82,24 @@ if __name__ == &#34;__main__&#34;:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="src.command_line_interfaces.simulation_based_calibration_cli.run_sbc"><code class="name flex">
-<span>def <span class="ident">run_sbc</span></span>(<span>name: str, config_path: pathlib.Path, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, cache_dir: pathlib.Path, sim_number: int, data_size: str) -> NoneType</span>
+<dt id="src.misc.check_kwarg_dict.check_kwarg_dict"><code class="name flex">
+<span>def <span class="ident">check_kwarg_dict</span></span>(<span>keywords: List[str], f: Callable, blacklist: Tuple[str, ...] = ()) -> NoneType</span>
 </code></dt>
 <dd>
-<div class="desc"><p>CLI for running a round of simulation-based calibration for a model.</p>
+<div class="desc"><p>Check a list of keywords against the parameters in a callable (e.g. function).</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
-<dd>Unique identifiable name for the model.</dd>
-<dt><strong><code>config_path</code></strong> :&ensp;<code>Path</code></dt>
-<dd>Path to the model configuration file.</dd>
-<dt><strong><code>fit_method</code></strong> :&ensp;<code>ModelFitMethod</code></dt>
-<dd>Fitting method.</dd>
-<dt><strong><code>cache_dir</code></strong> :&ensp;<code>Path</code></dt>
-<dd>Where to store the results.</dd>
-<dt><strong><code>sim_number</code></strong> :&ensp;<code>int</code></dt>
-<dd>Simulation number.</dd>
-<dt><strong><code>data_size</code></strong> :&ensp;<code>str</code></dt>
-<dd>Which data size to use. See the actual methods
-for details and options.</dd>
+<dt><strong><code>keywords</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>List of expected keywords.</dd>
+<dt><strong><code>f</code></strong> :&ensp;<code>Callable</code></dt>
+<dd>Callable object that will be passed they keyword arguments.</dd>
+<dt><strong><code>blacklist</code></strong> :&ensp;<code>Tuple[str]</code></dt>
+<dd>Parameters to ignore (e.g. <code>("self",)</code>)</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code><a title="src.misc.check_kwarg_dict.KeywordsNotInCallableParametersError" href="#src.misc.check_kwarg_dict.KeywordsNotInCallableParametersError">KeywordsNotInCallableParametersError</a></code></dt>
+<dd>Raised if spare keywords are found.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -130,55 +110,71 @@ for details and options.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run_sbc(
-    name: str,
-    config_path: Path,
-    fit_method: ModelFitMethod,
-    cache_dir: Path,
-    sim_number: int,
-    data_size: str,
+<pre><code class="python">def check_kwarg_dict(
+    keywords: List[str], f: Callable, blacklist: Tuple[str, ...] = tuple()
 ) -&gt; None:
-    &#34;&#34;&#34;CLI for running a round of simulation-based calibration for a model.
+    &#34;&#34;&#34;Check a list of keywords against the parameters in a callable (e.g. function).
 
     Args:
-        name (str): Unique identifiable name for the model.
-        config_path (Path): Path to the model configuration file.
-        fit_method (ModelFitMethod): Fitting method.
-        cache_dir (Path): Where to store the results.
-        sim_number (int): Simulation number.
-        data_size (str): Which data size to use. See the actual methods
-          for details and options.
+        keywords (List[str]): List of expected keywords.
+        f (Callable): Callable object that will be passed they keyword arguments.
+        blacklist (Tuple[str]): Parameters to ignore (e.g. `(&#34;self&#34;,)`)
+
+    Raises:
+        KeywordsNotInCallableParametersError: Raised if spare keywords are found.
 
     Returns:
         None: None
     &#34;&#34;&#34;
-    sp_model = configuration.get_config_and_instantiate_model(
-        config_path=config_path, name=name, root_cache_dir=cache_dir
-    )
-    fit_kwargs = model_config.get_sampling_kwargs(
-        config_path=config_path,
-        name=name,
-        pipeline=SpecletPipeline.SBC,
-        fit_method=fit_method,
-    )
-    if fit_kwargs != {}:
-        logger.info(&#34;Found specific fitting keyword arguments.&#34;)
-
-    logger.info(f&#34;Running SBC for model &#39;{sp_model.__class__}&#39; - &#39;{name}&#39;.&#34;)
-    sp_model.run_simulation_based_calibration(
-        cache_dir,
-        fit_method=fit_method,
-        random_seed=sim_number,
-        size=data_size,
-        fit_kwargs=fit_kwargs,
-    )
-    logger.info(&#34;SBC finished.&#34;)
+    param_names = _get_parameter_names(f)
+    if len(blacklist) &gt; 0:
+        param_names = list(filter(lambda x: x not in blacklist, param_names))
+    spare_keys = [k for k in keywords if k not in param_names]
+    if len(spare_keys):
+        raise KeywordsNotInCallableParametersError(spare_keys)
     return None</code></pre>
 </details>
 </dd>
 </dl>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="src.misc.check_kwarg_dict.KeywordsNotInCallableParametersError"><code class="flex name class">
+<span>class <span class="ident">KeywordsNotInCallableParametersError</span></span>
+<span>(</span><span>extra_keys: List[str])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Keywords are not in a callable's available parameters.</p>
+<p>Create a error.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>extra_keys</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>Extra keys found.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class KeywordsNotInCallableParametersError(BaseException):
+    &#34;&#34;&#34;Keywords are not in a callable&#39;s available parameters.&#34;&#34;&#34;
+
+    def __init__(self, extra_keys: List[str]) -&gt; None:
+        &#34;&#34;&#34;Create a error.
+
+        Args:
+            extra_keys (List[str]): Extra keys found.
+        &#34;&#34;&#34;
+        self.extra_keys = extra_keys
+        self.message = f&#34;Spare keys: {self.extra_keys}&#34;
+        super().__init__(self.message)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -189,12 +185,19 @@ for details and options.</dd>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="src.command_line_interfaces" href="index.html">src.command_line_interfaces</a></code></li>
+<li><code><a title="src.misc" href="index.html">src.misc</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="src.command_line_interfaces.simulation_based_calibration_cli.run_sbc" href="#src.command_line_interfaces.simulation_based_calibration_cli.run_sbc">run_sbc</a></code></li>
+<li><code><a title="src.misc.check_kwarg_dict.check_kwarg_dict" href="#src.misc.check_kwarg_dict.check_kwarg_dict">check_kwarg_dict</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="src.misc.check_kwarg_dict.KeywordsNotInCallableParametersError" href="#src.misc.check_kwarg_dict.KeywordsNotInCallableParametersError">KeywordsNotInCallableParametersError</a></code></h4>
+</li>
 </ul>
 </li>
 </ul>
