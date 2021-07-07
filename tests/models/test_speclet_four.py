@@ -38,7 +38,7 @@ class TestSpecletFour:
         assert sp4.observed_var_name is not None
         assert sp4.mcmc_results is None
         _ = sp4.mcmc_sample_model(
-            mcmc_draws=10,
+            draws=10,
             tune=10,
             chains=2,
             cores=2,
@@ -90,7 +90,6 @@ class TestSpecletFour:
         var_names = pmhelp.get_variable_names(sp4.model)
         assert ("β" in set(var_names)) == copy_cov
 
-    @pytest.mark.DEV
     @settings(
         settings.get_profile("slow-adaptive"),
         suppress_health_check=[HealthCheck.function_scoped_fixture],

@@ -41,7 +41,7 @@ class TestSpecletSeven:
 
         if fit_method == "mcmc":
             fit_res = sp7.mcmc_sample_model(
-                mcmc_draws=n_draws,
+                draws=n_draws,
                 tune=10,
                 chains=n_chains,
                 cores=n_chains,

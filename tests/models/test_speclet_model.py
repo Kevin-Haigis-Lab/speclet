@@ -53,7 +53,7 @@ class TestSpecletModel:
         )
         sp.build_model()
         mcmc_res = sp.mcmc_sample_model(
-            mcmc_draws=100,
+            draws=100,
             tune=100,
             chains=2,
             cores=2,
@@ -69,7 +69,7 @@ class TestSpecletModel:
 
         tic = time()
         mcmc_res_2 = sp.mcmc_sample_model(
-            mcmc_draws=100,
+            draws=100,
             tune=100,
             chains=2,
             cores=2,

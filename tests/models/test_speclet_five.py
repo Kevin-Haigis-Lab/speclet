@@ -60,7 +60,7 @@ class TestSpecletFive:
         assert sp5.observed_var_name is not None
         assert sp5.mcmc_results is None
         _ = sp5.mcmc_sample_model(
-            mcmc_draws=10,
+            draws=10,
             tune=10,
             chains=2,
             cores=2,

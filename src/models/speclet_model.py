@@ -201,7 +201,7 @@ class SpecletModel:
 
     def mcmc_sample_model(
         self,
-        mcmc_draws: Optional[int] = None,
+        draws: Optional[int] = None,
         tune: Optional[int] = None,
         chains: Optional[int] = None,
         cores: Optional[int] = None,
@@ -249,8 +249,8 @@ class SpecletModel:
         """
         logger.debug("Beginning MCMC sampling method.")
         self.update_mcmc_sampling_parameters()
-        if mcmc_draws is None:
-            mcmc_draws = self.mcmc_sampling_params.draws
+        if draws is None:
+            draws = self.mcmc_sampling_params.draws
         if tune is None:
             tune = self.mcmc_sampling_params.tune
         if chains is None:
@@ -286,7 +286,7 @@ class SpecletModel:
         logger.info("Beginning MCMC sampling.")
         _mcmc_results = pmapi.pymc3_sampling_procedure(
             model=self.model,
-            mcmc_draws=mcmc_draws,
+            mcmc_draws=draws,
             tune=tune,
             chains=chains,
             cores=cores,
