@@ -2,6 +2,8 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+import arviz as az
+import pandas as pd
 import pytest
 from hypothesis import Verbosity, settings
 
@@ -22,6 +24,23 @@ def mock_crc_dm(monkeypatch: pytest.MonkeyPatch) -> CrcDataManager:
     monkeypatch.setattr(CrcDataManager, "get_data_path", monkey_get_data_path)
     dm = CrcDataManager(debug=True)
     return dm
+
+
+#### ---- PyMC3 fixtures ---- ####
+
+
+@pytest.fixture
+def centered_eight() -> az.InferenceData:
+    x = az.load_arviz_data("centered_eight")
+    assert isinstance(x, az.InferenceData)
+    return x
+
+
+@pytest.fixture
+def centered_eight_post(centered_eight: az.InferenceData) -> pd.DataFrame:
+    x = az.summary(centered_eight)
+    assert isinstance(x, pd.DataFrame)
+    return x
 
 
 #### ---- Hypothesis profiles ---- ####
