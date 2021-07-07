@@ -10,6 +10,10 @@ from pydantic import BaseModel
 
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
 
+PipelineSamplingParameters = Dict[
+    SpecletPipeline, Dict[ModelFitMethod, Dict[str, Union[float, str, int]]]
+]
+
 
 class ModelConfig(BaseModel):
     """Model configuration format."""
@@ -17,10 +21,11 @@ class ModelConfig(BaseModel):
     name: str
     description: str
     model: ModelOption
-    fit_methods: List[ModelFitMethod]
     config: Optional[Dict[str, Union[ModelFitMethod, str, bool, int, float]]]
-    pipelines: Optional[List[SpecletPipeline]]
+    fit_methods: List[ModelFitMethod]
+    pipelines: List[SpecletPipeline]
     debug: bool
+    pipeline_sampling_parameters: Optional[PipelineSamplingParameters]
 
 
 class ModelConfigs(BaseModel):
@@ -83,6 +88,57 @@ def get_configuration_for_model(config_path: Path, name: str) -> Optional[ModelC
     if len(configs) == 0:
         return None
     return configs[0]
+
+
+def get_sampling_kwargs_from_config(
+    config: ModelConfig,
+    pipeline: SpecletPipeline,
+    fit_method: ModelFitMethod,
+) -> Dict[str, Union[float, str, int]]:
+    """Get the sampling keyword argument dictionary from a model configuration.
+
+    Args:
+        config (ModelConfig): Model configuration to extract the dictionary from.
+        pipeline (SpecletPipeline): Pipeline that is/will be used.
+        fit_method (ModelFitMethod): Desired model fitting method.
+
+    Returns:
+        Dict[str, Union[float, str, int]]: Keyword arguments for the model-fitting
+        method.
+    """
+    if (sampling_params := config.pipeline_sampling_parameters) is None:
+        return {}
+    if (pipeline_dict := sampling_params.get(pipeline, None)) is None:
+        return {}
+    if (kwargs_dict := pipeline_dict.get(fit_method, None)) is None:
+        return {}
+    return kwargs_dict
+
+
+def get_sampling_kwargs(
+    config_path: Path, name: str, pipeline: SpecletPipeline, fit_method: ModelFitMethod
+) -> Dict[str, Union[float, str, int]]:
+    """Get the sampling keyword argument dictionary from a configuration file.
+
+    Args:
+        config_path (Path): Path to the configuration file.
+        name (str): Identifiable name of the model.
+        pipeline (SpecletPipeline): Pipeline that is/will be used.
+        fit_method (ModelFitMethod): Desired model fitting method.
+
+    Raises:
+        ModelConfigurationNotFound: Raised if the configuration for the model name is
+        not found.
+
+    Returns:
+        Dict[str, Union[float, str, int]]: Keyword arguments for the model-fitting
+        method.
+    """
+    if (config := get_configuration_for_model(config_path, name)) is None:
+        raise ModelConfigurationNotFound(name)
+    return get_sampling_kwargs_from_config(
+        config, pipeline=pipeline, fit_method=fit_method
+    )
 
 
 class ModelConfigurationNotFound(BaseException):

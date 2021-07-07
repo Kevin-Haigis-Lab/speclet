@@ -17,18 +17,3 @@ def configure_pretty() -> None:
         exception_arg_color=pretty_errors.RED,
         line_color=pretty_errors.BRIGHT_BLACK,
     )
-
-
-#### ---- Models ---- ####
-
-
-def clean_model_names(n: str) -> str:
-    """Clean a custom model name.
-
-    Args:
-        n (str): Custom model name.
-
-    Returns:
-        str: Cleaned model name.
-    """
-    return n.replace(" ", "-")

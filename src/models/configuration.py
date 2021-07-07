@@ -1,10 +1,11 @@
 """Handle model configuration."""
 
 from pathlib import Path
-from typing import Dict, Type
+from typing import Any, Dict, Type
 
 from src.io import model_config
 from src.loggers import logger
+from src.misc import check_kwarg_dict
 from src.models.ceres_mimic import CeresMimic
 from src.models.speclet_five import SpecletFive
 from src.models.speclet_four import SpecletFour
@@ -14,7 +15,7 @@ from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.models.speclet_seven import SpecletSeven
 from src.models.speclet_six import SpecletSix
 from src.models.speclet_two import SpecletTwo
-from src.project_enums import ModelOption
+from src.project_enums import ModelFitMethod, ModelOption, assert_never
 from src.types import SpecletProjectModelTypes
 
 
@@ -110,3 +111,30 @@ def get_config_and_instantiate_model(
         root_cache_dir=root_cache_dir,
     )
     return speclet_model
+
+
+def check_sampling_kwargs(
+    sampling_kwargs: Dict[str, Any], fit_method: ModelFitMethod
+) -> None:
+    """Check that sampling keyword arguments are appropriate for the method called.
+
+    Checks a dictionary of keyword arguments against the actual parameter names in the
+    expected `SpecletModel` method. If there are spare arguments, then a
+    `KeywordsNotInCallableParametersError` will be raised.
+
+    Args:
+        sampling_kwargs (Dict[str, Any]): Keyword arguments to be used for sampling.
+        fit_method (ModelFitMethod): Fit method to be used.
+    """
+    keys = list(sampling_kwargs.keys())
+    blacklist = ("self",)
+    if fit_method is fit_method.ADVI:
+        check_kwarg_dict.check_kwarg_dict(
+            keys, SpecletModel.advi_sample_model, blacklist=blacklist
+        )
+    elif fit_method is fit_method.MCMC:
+        check_kwarg_dict.check_kwarg_dict(
+            keys, SpecletModel.mcmc_sample_model, blacklist=blacklist
+        )
+    else:
+        assert_never(fit_method)

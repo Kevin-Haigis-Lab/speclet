@@ -7,9 +7,10 @@ from pathlib import Path
 import typer
 
 from src.command_line_interfaces import cli_helpers
+from src.io import model_config
 from src.loggers import logger
 from src.models import configuration
-from src.project_enums import ModelFitMethod
+from src.project_enums import ModelFitMethod, SpecletPipeline
 
 cli_helpers.configure_pretty()
 
@@ -39,12 +40,22 @@ def run_sbc(
     sp_model = configuration.get_config_and_instantiate_model(
         config_path=config_path, name=name, root_cache_dir=cache_dir
     )
+    fit_kwargs = model_config.get_sampling_kwargs(
+        config_path=config_path,
+        name=name,
+        pipeline=SpecletPipeline.SBC,
+        fit_method=fit_method,
+    )
+    if fit_kwargs != {}:
+        logger.info("Found specific fitting keyword arguments.")
+
     logger.info(f"Running SBC for model '{sp_model.__class__}' - '{name}'.")
     sp_model.run_simulation_based_calibration(
         cache_dir,
         fit_method=fit_method,
         random_seed=sim_number,
         size=data_size,
+        fit_kwargs=fit_kwargs,
     )
     logger.info("SBC finished.")
     return None

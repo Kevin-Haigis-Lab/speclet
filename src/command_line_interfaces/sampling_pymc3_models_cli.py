@@ -11,10 +11,11 @@ import numpy as np
 import typer
 
 from src.command_line_interfaces import cli_helpers
+from src.io import model_config
 from src.loggers import logger
 from src.models import configuration
 from src.models.speclet_model import SpecletModel
-from src.project_enums import ModelFitMethod
+from src.project_enums import ModelFitMethod, SpecletPipeline
 
 cli_helpers.configure_pretty()
 
@@ -70,6 +71,13 @@ def sample_speclet_model(
         f"Model's cache directory: '{sp_model.cache_manager.cache_dir.as_posix()}'."
     )
 
+    sampling_kwargs = model_config.get_sampling_kwargs(
+        config_path=config_path,
+        name=name,
+        pipeline=SpecletPipeline.FITTING,
+        fit_method=fit_method,
+    )
+
     logger.info("Running model build method.")
     sp_model.build_model()
 
@@ -77,8 +85,7 @@ def sample_speclet_model(
         if fit_method == ModelFitMethod.ADVI:
             logger.info("Running ADVI fitting method.")
             _ = sp_model.advi_sample_model(
-                random_seed=random_seed,
-                ignore_cache=ignore_cache,
+                random_seed=random_seed, ignore_cache=ignore_cache, **sampling_kwargs
             )
 
         elif fit_method == ModelFitMethod.MCMC:
@@ -88,6 +95,7 @@ def sample_speclet_model(
                 cores=mcmc_cores,
                 random_seed=random_seed,
                 ignore_cache=ignore_cache,
+                **sampling_kwargs,
             )
         else:
             raise Exception(f"Unknown fit method '{fit_method.value}'.")
