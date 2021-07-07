@@ -17,7 +17,7 @@ from src.loggers import logger
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.managers.model_data_managers import DataManager
 from src.modeling import pymc3_sampling_api as pmapi
-from src.project_enums import ModelFitMethod
+from src.project_enums import ModelFitMethod, assert_never
 
 ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
@@ -452,10 +452,12 @@ class SpecletModel:
             size=size, random_seed=random_seed
         )
 
+        logger.debug("Building model for SBC.")
         self.build_model()
         assert self.model is not None
         assert self.observed_var_name is not None
 
+        logger.info("Sampling from the prior for mock values for SBC.")
         with self.model:
             priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
@@ -463,17 +465,22 @@ class SpecletModel:
         self.data_manager.set_data(mock_data)
 
         # Update shared variable with adjusted observed data.
+        logger.info("Updating observed value with prior-sampled values.")
         self.update_observed_data(mock_data[self.observed_var_name].values)
 
-        if fit_method == ModelFitMethod.ADVI:
+        logger.info(f"Fitting model to mock data using {fit_method.value}.")
+        if fit_method is ModelFitMethod.ADVI:
             res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
-        elif fit_method == ModelFitMethod.MCMC:
+        elif fit_method is ModelFitMethod.MCMC:
             res = self.mcmc_sample_model(random_seed=random_seed, **fit_kwargs)
         else:
-            raise ValueError(f"Unknown fit method '{fit_method}'.")
+            assert_never(fit_method)
 
+        logger.info("Making posterior summary for the SBC.")
         posterior_summary = az.summary(res, fmt="wide", hdi_prob=0.89)
         assert isinstance(posterior_summary, pd.DataFrame)
+
+        logger.info("Using a SBC file manager to save SBC results.")
         results_manager = sbc.SBCFileManager(dir=results_path)
         results_manager.save_sbc_results(
             priors=priors,

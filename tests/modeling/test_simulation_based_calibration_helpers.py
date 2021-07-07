@@ -400,6 +400,7 @@ def test_mock_data_has_correct_categories_sizes(data):
     assert n_batches >= dphelp.nunique(mock_data.p_dna_batch)
 
 
+@settings(settings.load_profile("slow-adaptive"))
 @given(mock_data=generate_data_with_random_params())
 def test_sgrnas_uniquely_map_to_genes(mock_data: pd.DataFrame):
     sgrna_gene_map = (

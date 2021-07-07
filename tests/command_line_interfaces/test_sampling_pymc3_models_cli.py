@@ -1,14 +1,15 @@
 from pathlib import Path
-from typing import Any, List
+from typing import Any, Dict, List, Optional
 
 import pytest
 import typer
 from typer.testing import CliRunner
 
 import src.command_line_interfaces.sampling_pymc3_models_cli as sampling
+from src.io import model_config
 from src.io.model_config import ModelConfigurationNotFound
 from src.models.speclet_pipeline_test_model import SpecletTestModel
-from src.project_enums import ModelFitMethod
+from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline, assert_never
 
 #### ---- CLI ---- ####
 
@@ -47,10 +48,17 @@ def test_not_real_model_name_error(
     model_name: str,
     fit_method: ModelFitMethod,
     mock_model_config: Path,
+    tmp_path: Path,
 ):
     with pytest.raises(ModelConfigurationNotFound):
         _ = runner.invoke(
-            app, [model_name, mock_model_config.as_posix(), fit_method.value, "temp"]
+            app,
+            [
+                model_name,
+                mock_model_config.as_posix(),
+                fit_method.value,
+                tmp_path.as_posix(),
+            ],
         )
 
 
@@ -75,7 +83,7 @@ def test_touch_file(
             "my-test-model",
             mock_model_config.as_posix(),
             fit_method.value,
-            "temp",
+            tmp_path.as_posix(),
             "--no-sample",
             "--touch",
             touch_path.as_posix(),
@@ -85,7 +93,6 @@ def test_touch_file(
     assert touch_path.exists() and touch_path.is_file()
 
 
-@pytest.mark.DEV
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 @pytest.mark.parametrize(
     "sampling,is_sampling", (("--sample", True), ("--no-sample", False))
@@ -96,6 +103,7 @@ def test_control_sampling(
     fit_method: ModelFitMethod,
     mock_model_config: Path,
     monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
     sampling: str,
     is_sampling: bool,
 ):
@@ -117,7 +125,7 @@ def test_control_sampling(
             "my-test-model",
             mock_model_config.as_posix(),
             fit_method.value,
-            "temp",
+            tmp_path.as_posix(),
             sampling,
         ],
     )
@@ -127,3 +135,69 @@ def test_control_sampling(
     else:
         assert len(method_calls) == 1
         assert method_calls[0] is fit_method
+
+
+@pytest.mark.parametrize("fit_method", ModelFitMethod)
+def test_uses_configuration_fitting_parameters(
+    app: typer.Typer,
+    runner: CliRunner,
+    mock_model_config: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    fit_method: ModelFitMethod,
+    tmp_path: Path,
+):
+
+    advi_kwargs = {"n_iterations": 42, "draws": 23, "post_pred_samples": 12}
+    mcmc_kwargs = {"tune": 33, "target_accept": 0.2, "prior_pred_samples": 121}
+
+    def _compare_dicts(d1: Dict[str, Any], d2: Dict[str, Any]) -> None:
+        for k, v in d1.items():
+            assert v == d2[k]
+
+    def check_kwargs(*args, **kwargs) -> None:
+        if fit_method is ModelFitMethod.ADVI:
+            _compare_dicts(advi_kwargs, kwargs)
+        elif fit_method is ModelFitMethod.MCMC:
+            _compare_dicts(mcmc_kwargs, kwargs)
+        else:
+            assert_never(fit_method)
+
+    monkeypatch.setattr(SpecletTestModel, "advi_sample_model", check_kwargs)
+    monkeypatch.setattr(SpecletTestModel, "mcmc_sample_model", check_kwargs)
+
+    model_name = "my-test-model"
+
+    def get_mock_model_config(*args, **kwargs) -> Optional[model_config.ModelConfig]:
+        return model_config.ModelConfig(
+            name=model_name,
+            description="",
+            model=ModelOption.SPECLET_TEST_MODEL,
+            fit_methods=[ModelFitMethod.ADVI],
+            pipelines=[SpecletPipeline.FITTING],
+            debug=False,
+            pipeline_sampling_parameters={
+                SpecletPipeline.FITTING: {
+                    ModelFitMethod.ADVI: advi_kwargs,
+                    ModelFitMethod.MCMC: mcmc_kwargs,
+                },
+                SpecletPipeline.SBC: {
+                    ModelFitMethod.ADVI: {},
+                    ModelFitMethod.MCMC: {},
+                },
+            },
+        )
+
+    monkeypatch.setattr(
+        model_config, "get_configuration_for_model", get_mock_model_config
+    )
+
+    result = runner.invoke(
+        app,
+        [
+            model_name,
+            mock_model_config.as_posix(),
+            fit_method.value,
+            tmp_path.as_posix(),
+        ],
+    )
+    assert result.exit_code == 0

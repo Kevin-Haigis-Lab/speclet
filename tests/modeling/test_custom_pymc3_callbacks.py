@@ -23,7 +23,6 @@ class TestDivergenceFractionCallback:
 
         return m
 
-    @pytest.mark.DEV
     def test_divergences(self, mock_model: pm.Model):
         n_tune_steps = 200
         cb = pymc3calls.DivergenceFractionCallback(

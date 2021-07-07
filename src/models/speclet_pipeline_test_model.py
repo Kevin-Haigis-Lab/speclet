@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
+import numpy as np
 import pymc3 as pm
 from pydantic import BaseModel
 
@@ -89,4 +90,8 @@ class SpecletTestModel(SpecletModel):
     def update_advi_sampling_parameters(self) -> None:
         """Adjust the ADVI parameters depending on the state of the object."""
         self.advi_sampling_params.n_iterations = 10000
+        return None
+
+    def update_observed_data(self, new_data: np.ndarray) -> None:
+        """Do nothing for this testing model."""
         return None

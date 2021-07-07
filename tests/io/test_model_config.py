@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Tuple
+from typing import Dict, Tuple
 from uuid import uuid4
 
 import pytest
@@ -66,7 +66,6 @@ def test_get_model_sampling_kwargs_dict(
     assert isinstance(sampling_kwargs, dict)
 
 
-@pytest.mark.DEV
 @pytest.mark.parametrize(
     "name, pipeline, fit_method, exists",
     (
@@ -91,3 +90,39 @@ def test_get_model_sampling_kwargs_exist(
         mock_model_config, name, fit_method=fit_method, pipeline=pipeline
     )
     assert (sampling_kwargs != {}) == exists
+
+
+@given(config=st.builds(model_config.ModelConfig))
+@pytest.mark.parametrize("fit_method", ModelFitMethod)
+@pytest.mark.parametrize("pipeline", SpecletPipeline)
+def test_get_model_sampling_from_config(
+    config: model_config.ModelConfig,
+    fit_method: ModelFitMethod,
+    pipeline: SpecletPipeline,
+):
+    kwargs = model_config.get_sampling_kwargs_from_config(
+        config, pipeline=pipeline, fit_method=fit_method
+    )
+    if config.pipeline_sampling_parameters is None:
+        assert kwargs == {}
+    assert isinstance(kwargs, dict)
+
+
+@given(
+    config=st.builds(model_config.ModelConfig),
+    expected_kwargs=st.dictionaries(st.text(), st.integers()),
+)
+@pytest.mark.parametrize("fit_method", ModelFitMethod)
+@pytest.mark.parametrize("pipeline", SpecletPipeline)
+def test_get_model_sampling_from_config_correct_pipeline_fitmethod(
+    config: model_config.ModelConfig,
+    expected_kwargs: Dict[str, int],
+    fit_method: ModelFitMethod,
+    pipeline: SpecletPipeline,
+):
+    pipeline_params = {pipeline: {fit_method: expected_kwargs.copy()}}
+    config.pipeline_sampling_parameters = pipeline_params  # type: ignore
+    kwargs = model_config.get_sampling_kwargs_from_config(
+        config, pipeline=pipeline, fit_method=fit_method
+    )
+    assert kwargs == expected_kwargs

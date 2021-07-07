@@ -10,8 +10,10 @@ from pydantic import BaseModel
 
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
 
+BasicTypes = Union[float, str, int, bool]
+
 PipelineSamplingParameters = Dict[
-    SpecletPipeline, Dict[ModelFitMethod, Dict[str, Union[float, str, int]]]
+    SpecletPipeline, Dict[ModelFitMethod, Dict[str, BasicTypes]]
 ]
 
 
@@ -21,7 +23,7 @@ class ModelConfig(BaseModel):
     name: str
     description: str
     model: ModelOption
-    config: Optional[Dict[str, Union[ModelFitMethod, str, bool, int, float]]]
+    config: Optional[Dict[str, Union[ModelFitMethod, BasicTypes]]]
     fit_methods: List[ModelFitMethod]
     pipelines: List[SpecletPipeline]
     debug: bool

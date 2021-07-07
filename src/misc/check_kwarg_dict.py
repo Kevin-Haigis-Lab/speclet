@@ -22,7 +22,9 @@ def _get_parameter_names(f: Callable) -> List[str]:
     return [x for x in inspect.signature(f).parameters]
 
 
-def check_kwarg_dict(keywords: List[str], f: Callable, blacklist: Tuple[str]) -> None:
+def check_kwarg_dict(
+    keywords: List[str], f: Callable, blacklist: Tuple[str, ...] = tuple()
+) -> None:
     """Check a list of keywords against the parameters in a callable (e.g. function).
 
     Args:

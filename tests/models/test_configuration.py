@@ -1,9 +1,12 @@
 from pathlib import Path
-from typing import List, Tuple, Type
+from typing import Any, Dict, List, Tuple, Type
 
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 
 from src.io import model_config as mc
+from src.misc.check_kwarg_dict import KeywordsNotInCallableParametersError
 from src.models import configuration
 from src.models.ceres_mimic import CeresMimic
 from src.models.speclet_five import SpecletFive
@@ -17,7 +20,7 @@ from src.models.speclet_pipeline_test_model import (
 from src.models.speclet_seven import SpecletSeven
 from src.models.speclet_six import SpecletSix
 from src.models.speclet_two import SpecletTwo
-from src.project_enums import ModelOption
+from src.project_enums import ModelFitMethod, ModelOption
 from src.project_enums import ModelParameterization as MP
 
 
@@ -121,3 +124,72 @@ def test_get_config_and_instantiate_model(
     )
     assert isinstance(sp_model, SpecletTestModel)
     check_test_model_configurations(sp_model, model_name)
+
+
+@given(sampling_kwargs=st.dictionaries(st.text(), st.text()))
+@pytest.mark.parametrize("fit_method", ModelFitMethod)
+def test_check_sampling_kwargs_raises(
+    sampling_kwargs: Dict[str, str], fit_method: ModelFitMethod
+):
+    if sampling_kwargs == {}:
+        assert (
+            configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
+            is None
+        )
+    else:
+        sampling_kwargs["fjieorjgiers;orgrhj"] = "vjdiorgvherogjheiorg"
+        with pytest.raises(KeywordsNotInCallableParametersError):
+            configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
+
+
+@pytest.mark.parametrize("fit_method", ModelFitMethod)
+def test_check_sampling_kwargs_empty_always_passes(fit_method: ModelFitMethod):
+    sampling_kwargs: Dict[str, Any] = {}
+    assert (
+        configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    "sampling_kwargs",
+    [
+        {"draws": 100, "prior_pred_samples": "hi", "post_pred_samples": 20},
+        {"prior_pred_samples": 10, "post_pred_samples": True},
+        {"draws": 100.0001, "prior_pred_samples": False},
+    ],
+)
+@pytest.mark.parametrize("fit_method", ModelFitMethod)
+def test_check_sampling_kwargs_all_fitmethods(
+    sampling_kwargs: Dict[str, Any], fit_method: ModelFitMethod
+):
+    assert (
+        configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    "sampling_kwargs, intended_fit_method",
+    [
+        ({"draws": 100, "tune": 20, "cores": 2, "chains": 40}, ModelFitMethod.MCMC),
+        ({"draws": 100, "target_accept": 0.0001}, ModelFitMethod.MCMC),
+        ({"draws": 100, "method": 20, "n_iterations": 2}, ModelFitMethod.ADVI),
+        ({"draws": 77, "method": "e", "n_iterations": "f"}, ModelFitMethod.ADVI),
+        ({"draws": 33, "method": False, "n_iterations": True}, ModelFitMethod.ADVI),
+    ],
+)
+@pytest.mark.parametrize("fit_method", ModelFitMethod)
+def test_check_sampling_kwargs_fitmethod_specfic(
+    sampling_kwargs: Dict[str, Any],
+    intended_fit_method: ModelFitMethod,
+    fit_method: ModelFitMethod,
+):
+    if fit_method == intended_fit_method:
+        assert (
+            configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
+            is None
+        )
+    else:
+        with pytest.raises(KeywordsNotInCallableParametersError):
+            configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)

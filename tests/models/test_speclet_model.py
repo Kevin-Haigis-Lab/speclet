@@ -155,7 +155,7 @@ class TestSpecletModel:
             fit_kwargs = {"n_iterations": 100, "draws": 10}
         else:
             fit_kwargs = {
-                "mcmc_draws": 10,
+                "draws": 10,
                 "tune": 10,
                 "chains": 2,
                 "cores": 2,
