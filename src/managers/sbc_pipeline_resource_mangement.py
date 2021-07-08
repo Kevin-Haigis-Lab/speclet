@@ -28,14 +28,14 @@ TimeLookupDict = ModelResourceLookupDict[td]
 sbc_pipeline_memory_lookup: MemoryLookupDict = {
     ModelOption.SPECLET_FOUR: {
         ModelFitMethod.ADVI: {
-            MockDataSize.SMALL: 4,
-            MockDataSize.MEDIUM: 8,
+            MockDataSize.SMALL: 2,
+            MockDataSize.MEDIUM: 2,
             MockDataSize.LARGE: 16,
         },
         ModelFitMethod.MCMC: {
-            MockDataSize.SMALL: 8,
-            MockDataSize.MEDIUM: 16,
-            MockDataSize.LARGE: 32,
+            MockDataSize.SMALL: 2,
+            MockDataSize.MEDIUM: 4,
+            MockDataSize.LARGE: 8,
         },
     }
 }
@@ -43,14 +43,14 @@ sbc_pipeline_memory_lookup: MemoryLookupDict = {
 sbc_pipeline_time_lookup: TimeLookupDict = {
     ModelOption.SPECLET_FOUR: {
         ModelFitMethod.ADVI: {
-            MockDataSize.SMALL: td(minutes=15),
-            MockDataSize.MEDIUM: td(hours=1),
-            MockDataSize.LARGE: td(hours=8),
+            MockDataSize.SMALL: td(minutes=5),
+            MockDataSize.MEDIUM: td(minutes=6),
+            MockDataSize.LARGE: td(minutes=20),
         },
         ModelFitMethod.MCMC: {
-            MockDataSize.SMALL: td(hours=1),
-            MockDataSize.MEDIUM: td(hours=8),
-            MockDataSize.LARGE: td(hours=12),
+            MockDataSize.SMALL: td(minutes=5),
+            MockDataSize.MEDIUM: td(minutes=10),
+            MockDataSize.LARGE: td(minutes=40),
         },
     }
 }
@@ -108,14 +108,14 @@ class SBCResourceManager(PipelineResourceManager):
     def _retrieve_memory_requirement(self) -> int:
         default_memory_tbl: ResourceLookupDict[int] = {
             ModelFitMethod.ADVI: {
-                MockDataSize.SMALL: 4,
-                MockDataSize.MEDIUM: 8,
-                MockDataSize.LARGE: 16,
+                MockDataSize.SMALL: 2,
+                MockDataSize.MEDIUM: 4,
+                MockDataSize.LARGE: 8,
             },
             ModelFitMethod.MCMC: {
                 MockDataSize.SMALL: 4,
-                MockDataSize.MEDIUM: 16,
-                MockDataSize.LARGE: 32,
+                MockDataSize.MEDIUM: 8,
+                MockDataSize.LARGE: 12,
             },
         }
         return self._lookup_value_with_default(
@@ -125,14 +125,14 @@ class SBCResourceManager(PipelineResourceManager):
     def _retrieve_time_requirement(self) -> td:
         default_time_tbl: ResourceLookupDict[td] = {
             ModelFitMethod.ADVI: {
-                MockDataSize.SMALL: td(minutes=15),
-                MockDataSize.MEDIUM: td(hours=1),
-                MockDataSize.LARGE: td(hours=8),
+                MockDataSize.SMALL: td(minutes=10),
+                MockDataSize.MEDIUM: td(minutes=20),
+                MockDataSize.LARGE: td(minutes=30),
             },
             ModelFitMethod.MCMC: {
-                MockDataSize.SMALL: td(hours=1),
-                MockDataSize.MEDIUM: td(hours=8),
-                MockDataSize.LARGE: td(hours=12),
+                MockDataSize.SMALL: td(minutes=15),
+                MockDataSize.MEDIUM: td(minutes=30),
+                MockDataSize.LARGE: td(minutes=45),
             },
         }
         return self._lookup_value_with_default(
