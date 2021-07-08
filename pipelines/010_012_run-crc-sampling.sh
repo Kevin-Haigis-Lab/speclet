@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#SBATCH --account=park
 #SBATCH -c 2
 #SBATCH -p priority
 #SBATCH -t 1-00:00
