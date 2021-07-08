@@ -9,11 +9,10 @@ from pydantic import validate_arguments
 from src.io import model_config
 from src.managers import pipeline_resource_manager as prm
 from src.managers.pipeline_resource_manager import PipelineResourceManager
-from src.modeling.simulation_based_calibration_enums import MockDataSizes
-from src.project_enums import ModelFitMethod, ModelOption
+from src.project_enums import MockDataSize, ModelFitMethod, ModelOption
 
 T = TypeVar("T")
-ResourceLookupDict = Dict[ModelFitMethod, Dict[MockDataSizes, T]]
+ResourceLookupDict = Dict[ModelFitMethod, Dict[MockDataSize, T]]
 ModelResourceLookupDict = Dict[ModelOption, ResourceLookupDict[T]]
 
 # RAM required for each configuration (in GB -> mult by 1000).
@@ -28,14 +27,14 @@ TimeLookupDict = ModelResourceLookupDict[td]
 sbc_pipeline_memory_lookup: MemoryLookupDict = {
     ModelOption.SPECLET_FOUR: {
         ModelFitMethod.ADVI: {
-            MockDataSizes.SMALL: 4,
-            MockDataSizes.MEDIUM: 8,
-            MockDataSizes.LARGE: 16,
+            MockDataSize.SMALL: 4,
+            MockDataSize.MEDIUM: 8,
+            MockDataSize.LARGE: 16,
         },
         ModelFitMethod.MCMC: {
-            MockDataSizes.SMALL: 8,
-            MockDataSizes.MEDIUM: 16,
-            MockDataSizes.LARGE: 32,
+            MockDataSize.SMALL: 8,
+            MockDataSize.MEDIUM: 16,
+            MockDataSize.LARGE: 32,
         },
     }
 }
@@ -43,14 +42,14 @@ sbc_pipeline_memory_lookup: MemoryLookupDict = {
 sbc_pipeline_time_lookup: TimeLookupDict = {
     ModelOption.SPECLET_FOUR: {
         ModelFitMethod.ADVI: {
-            MockDataSizes.SMALL: td(minutes=15),
-            MockDataSizes.MEDIUM: td(hours=1),
-            MockDataSizes.LARGE: td(hours=8),
+            MockDataSize.SMALL: td(minutes=15),
+            MockDataSize.MEDIUM: td(hours=1),
+            MockDataSize.LARGE: td(hours=8),
         },
         ModelFitMethod.MCMC: {
-            MockDataSizes.SMALL: td(hours=1),
-            MockDataSizes.MEDIUM: td(hours=8),
-            MockDataSizes.LARGE: td(hours=12),
+            MockDataSize.SMALL: td(hours=1),
+            MockDataSize.MEDIUM: td(hours=8),
+            MockDataSize.LARGE: td(hours=12),
         },
     }
 }
@@ -63,7 +62,7 @@ class SBCResourceManager(PipelineResourceManager):
     def __init__(
         self,
         name: str,
-        mock_data_size: MockDataSizes,
+        mock_data_size: MockDataSize,
         fit_method: ModelFitMethod,
         config_path: Path,
     ) -> None:
@@ -110,14 +109,14 @@ class SBCResourceManager(PipelineResourceManager):
     def _retrieve_memory_requirement(self) -> int:
         default_memory_tbl: ResourceLookupDict[int] = {
             ModelFitMethod.ADVI: {
-                MockDataSizes.SMALL: 4,
-                MockDataSizes.MEDIUM: 8,
-                MockDataSizes.LARGE: 16,
+                MockDataSize.SMALL: 4,
+                MockDataSize.MEDIUM: 8,
+                MockDataSize.LARGE: 16,
             },
             ModelFitMethod.MCMC: {
-                MockDataSizes.SMALL: 4,
-                MockDataSizes.MEDIUM: 16,
-                MockDataSizes.LARGE: 32,
+                MockDataSize.SMALL: 4,
+                MockDataSize.MEDIUM: 16,
+                MockDataSize.LARGE: 32,
             },
         }
         return self._lookup_value_with_default(
@@ -127,14 +126,14 @@ class SBCResourceManager(PipelineResourceManager):
     def _retrieve_time_requirement(self) -> td:
         default_time_tbl: ResourceLookupDict[td] = {
             ModelFitMethod.ADVI: {
-                MockDataSizes.SMALL: td(minutes=15),
-                MockDataSizes.MEDIUM: td(hours=1),
-                MockDataSizes.LARGE: td(hours=8),
+                MockDataSize.SMALL: td(minutes=15),
+                MockDataSize.MEDIUM: td(hours=1),
+                MockDataSize.LARGE: td(hours=8),
             },
             ModelFitMethod.MCMC: {
-                MockDataSizes.SMALL: td(hours=1),
-                MockDataSizes.MEDIUM: td(hours=8),
-                MockDataSizes.LARGE: td(hours=12),
+                MockDataSize.SMALL: td(hours=1),
+                MockDataSize.MEDIUM: td(hours=8),
+                MockDataSize.LARGE: td(hours=12),
             },
         }
         return self._lookup_value_with_default(

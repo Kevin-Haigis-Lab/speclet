@@ -10,7 +10,7 @@ from src.command_line_interfaces import cli_helpers
 from src.io import model_config
 from src.loggers import logger
 from src.models import configuration
-from src.project_enums import ModelFitMethod, SpecletPipeline
+from src.project_enums import MockDataSize, ModelFitMethod, SpecletPipeline
 
 cli_helpers.configure_pretty()
 
@@ -21,7 +21,7 @@ def run_sbc(
     fit_method: ModelFitMethod,
     cache_dir: Path,
     sim_number: int,
-    data_size: str,
+    data_size: MockDataSize,
 ) -> None:
     """CLI for running a round of simulation-based calibration for a model.
 

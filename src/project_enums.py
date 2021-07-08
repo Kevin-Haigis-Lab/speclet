@@ -58,11 +58,20 @@ class SpecletPipeline(Enum):
     SBC = "sbc"
 
 
+@unique
+class MockDataSize(Enum):
+    """Options for dataset seizes when generating mock data."""
+
+    SMALL = "small"
+    MEDIUM = "medium"
+    LARGE = "large"
+
+
 #### ---- Exhaustiveness checks ---- ####
 
 
 def assert_never(value: NoReturn) -> NoReturn:
-    """Force runtime and static enumeration exhausstiveness.
+    """Force runtime and static enumeration exhaustiveness.
 
     Args:
         value (NoReturn): Some value passed as an enum value.

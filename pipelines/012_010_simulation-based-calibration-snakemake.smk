@@ -6,7 +6,7 @@ from typing import List
 import papermill
 from snakemake.io import Wildcards
 
-from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
+from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline, MockDataSize
 from src.pipelines.snakemake_parsing_helpers import get_models_names_fit_methods
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
@@ -16,7 +16,7 @@ REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yml"
 ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
 
-MOCK_DATA_SIZE = "medium"
+MOCK_DATA_SIZE = MockDataSize.MEDIUM
 
 
 #### ---- Model Configurations ---- ####
@@ -93,7 +93,7 @@ rule run_sbc:
         "  {wildcards.fit_method}"
         "  {params.perm_dir}"
         "  {wildcards.perm_num}"
-        "  " + MOCK_DATA_SIZE
+        "  " + MOCK_DATA_SIZE.value
 
 rule collate_sbc:
     input:

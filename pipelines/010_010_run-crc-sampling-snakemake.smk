@@ -11,7 +11,7 @@ from src.managers.model_fitting_pipeline_resource_manager import (
     ModelFittingPipelineResourceManager as RM,
 )
 from src.pipelines.snakemake_parsing_helpers import get_models_names_fit_methods
-from src.project_enums import ModelFitMethod, ModelOption
+from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
 
 SCRATCH_DIR = "/n/scratch3/users/j/jc604/speclet/fitting-mcmc/"
 PYMC3_MODEL_CACHE_DIR = "models/"
