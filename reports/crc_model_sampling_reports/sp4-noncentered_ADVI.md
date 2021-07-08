@@ -16,8 +16,10 @@ from src.command_line_interfaces import sampling_pymc3_models_cli as sampling
 from src.data_processing import common as dphelp
 from src.modeling import pymc3_analysis as pmanal
 from src.modeling import pymc3_sampling_api as pmapi
+from src.models import configuration
 from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.plot.color_pal import SeabornColor
+from src.project_enums import ModelFitMethod
 
 notebook_tic = time()
 
@@ -30,10 +32,6 @@ RANDOM_SEED = 847
 np.random.seed(RANDOM_SEED)
 
 path_prefix = Path("..", "..")
-```
-
-```python
-from src.project_enums import ModelFitMethod
 ```
 
 Parameters for papermill:
@@ -68,8 +66,6 @@ assert ModelFitMethod(FIT_METHOD) in ModelFitMethod
 ```
 
 ```python
-from src.models import configuration
-
 speclet_model = configuration.get_config_and_instantiate_model(
     path_prefix / CONFIG_PATH,
     name=MODEL_NAME,
@@ -79,7 +75,7 @@ speclet_model = configuration.get_config_and_instantiate_model(
 speclet_model.build_model()
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/07/21 16:39:41] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Instantiating and configuring a speclet      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/configuration.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">configuration.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:79</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/08/21 07:54:18] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Instantiating and configuring a speclet      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/configuration.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">configuration.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:79</span>
                              model from config.
 </pre>
 
@@ -127,7 +123,7 @@ else:
     model_az = speclet_model.load_mcmc_cache()
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/07/21 16:40:23] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> ArvizCacheManager: ADVI cache exists.      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/cache_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">cache_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:261</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/08/21 07:54:56] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> ArvizCacheManager: ADVI cache exists.      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/cache_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">cache_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:261</span>
 </pre>
 
 <pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> ArvizCacheManager: ADVI cache exists.      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/cache_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">cache_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:261</span>
@@ -339,7 +335,7 @@ print(speclet_model.model)
 pm.model_to_graphviz(speclet_model.model)
 ```
 
-![svg](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_15_0.svg)
+![svg](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_14_0.svg)
 
 ## Fit diagnostics
 
@@ -347,6 +343,7 @@ pm.model_to_graphviz(speclet_model.model)
 if FIT_METHOD == "ADVI":
     pmanal.plot_vi_hist(advi_approx).draw()
     pmanal.plot_vi_hist(advi_approx, y_log=True).draw()
+    pmanal.plot_vi_hist(advi_approx, y_log=True, x_start=0.5).draw()
     plt.show()
 else:
     print("R-HAT")
@@ -356,9 +353,11 @@ else:
     print(az.bfmi(model_az))
 ```
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_17_0.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_16_0.png)
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_17_1.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_16_1.png)
+
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_16_2.png)
 
 ## Model parameters
 
@@ -432,65 +431,65 @@ for var in vars_to_inspect:
         print(err)
 ```
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_20_0.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_19_0.png)
 
-    <ggplot: (2960025901451)>
+    <ggplot: (8793187306638)>
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_20_2.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_19_2.png)
 
-    <ggplot: (2960028565348)>
+    <ggplot: (8793186448845)>
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_20_4.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_19_4.png)
 
-    <ggplot: (2960026219587)>
+    <ggplot: (8793187563391)>
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_20_6.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_19_6.png)
 
-    <ggplot: (2960026061343)>
+    <ggplot: (8793206709941)>
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_20_8.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_19_8.png)
 
-    <ggplot: (2960025900828)>
+    <ggplot: (8793187395970)>
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_20_10.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_19_10.png)
 
-    <ggplot: (2960028569236)>
+    <ggplot: (8793197675271)>
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_20_12.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_19_12.png)
 
-    <ggplot: (2960025901382)>
+    <ggplot: (8793197654309)>
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_20_14.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_19_14.png)
 
-    <ggplot: (2960028847351)>
+    <ggplot: (8793187629352)>
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_20_16.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_19_16.png)
 
-    <ggplot: (2960026061370)>
+    <ggplot: (8793208752966)>
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_20_18.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_19_18.png)
 
-    <ggplot: (2960029684140)>
+    <ggplot: (8793187498222)>
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_20_20.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_19_20.png)
 
-    <ggplot: (2960026060608)>
+    <ggplot: (8793182245184)>
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_20_22.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_19_22.png)
 
-    <ggplot: (2960028551150)>
+    <ggplot: (8793182185656)>
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_20_24.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_19_24.png)
 
-    <ggplot: (2960037904972)>
+    <ggplot: (8793182217370)>
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_20_26.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_19_26.png)
 
-    <ggplot: (2960025923621)>
+    <ggplot: (8793196964443)>
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_20_28.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_19_28.png)
 
-    <ggplot: (2960029753944)>
+    <ggplot: (8793186430687)>
 
 ```python
 if isinstance(speclet_model, SpecletTestModel):
@@ -686,7 +685,7 @@ except Exception as e:
     print(e)
 ```
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_24_0.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_23_0.png)
 
 ```python
 model_loo = az.loo(model_az, pointwise=True)
@@ -721,7 +720,7 @@ sns.distplot(model_loo.loo_i.values);
 
     <AxesSubplot:ylabel='Density'>
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_26_2.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_25_2.png)
 
 ```python
 pred_summary["loo"] = model_loo.loo_i.values
@@ -739,9 +738,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_28_0.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_27_0.png)
 
-    <ggplot: (2960026716115)>
+    <ggplot: (8793196946875)>
 
 ```python
 (
@@ -753,9 +752,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_29_0.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_28_0.png)
 
-    <ggplot: (2960029050555)>
+    <ggplot: (8793187559400)>
 
 ```python
 (
@@ -765,9 +764,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_30_0.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_29_0.png)
 
-    <ggplot: (2960029039255)>
+    <ggplot: (8793187401210)>
 
 ```python
 (
@@ -779,9 +778,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_31_0.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_30_0.png)
 
-    <ggplot: (2959973374317)>
+    <ggplot: (8793209745390)>
 
 ```python
 (
@@ -793,9 +792,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_32_0.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_31_0.png)
 
-    <ggplot: (2960029686809)>
+    <ggplot: (8793194836770)>
 
 ```python
 (
@@ -809,9 +808,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_33_0.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_32_0.png)
 
-    <ggplot: (2960038479002)>
+    <ggplot: (8793187103082)>
 
 ```python
 # Remove samples without gene CN data.
@@ -828,9 +827,9 @@ ppc_df_no_missing["binned_copy_number"] = [
 )
 ```
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_34_0.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_33_0.png)
 
-    <ggplot: (2960029041794)>
+    <ggplot: (8793187103064)>
 
 ```python
 gene_error = (
@@ -861,9 +860,9 @@ n_genes = 15
 )
 ```
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_35_0.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_34_0.png)
 
-    <ggplot: (2960027651416)>
+    <ggplot: (8793187574661)>
 
 ```python
 (
@@ -875,9 +874,9 @@ n_genes = 15
 )
 ```
 
-![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_36_0.png)
+![png](sp4-noncentered_ADVI_files/sp4-noncentered_ADVI_35_0.png)
 
-    <ggplot: (2960027587485)>
+    <ggplot: (8793194797593)>
 
 ---
 
@@ -886,14 +885,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 3.27 minutes
+    execution time: 2.73 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-07
+    Last updated: 2021-07-08
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -904,17 +903,17 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-h-17-50.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-236.o2.rc.hms.harvard.edu
 
     Git branch: pipeline-confg
 
-    numpy     : 1.20.1
     pymc3     : 3.11.1
-    matplotlib: 3.3.4
-    seaborn   : 0.11.1
-    pandas    : 1.2.3
     plotnine  : 0.7.1
+    seaborn   : 0.11.1
     arviz     : 0.11.2
+    pandas    : 1.2.3
+    matplotlib: 3.3.4
+    numpy     : 1.20.1

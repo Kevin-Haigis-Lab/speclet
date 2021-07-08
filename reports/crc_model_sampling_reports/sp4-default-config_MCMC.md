@@ -16,8 +16,10 @@ from src.command_line_interfaces import sampling_pymc3_models_cli as sampling
 from src.data_processing import common as dphelp
 from src.modeling import pymc3_analysis as pmanal
 from src.modeling import pymc3_sampling_api as pmapi
+from src.models import configuration
 from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.plot.color_pal import SeabornColor
+from src.project_enums import ModelFitMethod
 
 notebook_tic = time()
 
@@ -30,10 +32,6 @@ RANDOM_SEED = 847
 np.random.seed(RANDOM_SEED)
 
 path_prefix = Path("..", "..")
-```
-
-```python
-from src.project_enums import ModelFitMethod
 ```
 
 Parameters for papermill:
@@ -68,8 +66,6 @@ assert ModelFitMethod(FIT_METHOD) in ModelFitMethod
 ```
 
 ```python
-from src.models import configuration
-
 speclet_model = configuration.get_config_and_instantiate_model(
     path_prefix / CONFIG_PATH,
     name=MODEL_NAME,
@@ -79,7 +75,7 @@ speclet_model = configuration.get_config_and_instantiate_model(
 speclet_model.build_model()
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/07/21 17:05:20] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Instantiating and configuring a speclet      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/configuration.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">configuration.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:79</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/08/21 07:46:29] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Instantiating and configuring a speclet      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/configuration.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">configuration.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:79</span>
                              model from config.
 </pre>
 
@@ -124,7 +120,7 @@ else:
     model_az = speclet_model.load_mcmc_cache()
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/07/21 17:05:53] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> ArvizCacheManager: MCMC cache exists.      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/cache_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">cache_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:257</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/08/21 07:47:06] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> ArvizCacheManager: MCMC cache exists.      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/cache_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">cache_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:257</span>
 </pre>
 
 <pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> ArvizCacheManager: MCMC cache exists.      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/cache_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">cache_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:257</span>
@@ -333,7 +329,7 @@ print(speclet_model.model)
 pm.model_to_graphviz(speclet_model.model)
 ```
 
-![svg](sp4-default-config_MCMC_files/sp4-default-config_MCMC_15_0.svg)
+![svg](sp4-default-config_MCMC_files/sp4-default-config_MCMC_14_0.svg)
 
 ## Fit diagnostics
 
@@ -341,6 +337,7 @@ pm.model_to_graphviz(speclet_model.model)
 if FIT_METHOD == "ADVI":
     pmanal.plot_vi_hist(advi_approx).draw()
     pmanal.plot_vi_hist(advi_approx, y_log=True).draw()
+    pmanal.plot_vi_hist(advi_approx, y_log=True, x_start=0.5).draw()
     plt.show()
 else:
     print("R-HAT")
@@ -449,53 +446,30 @@ for var in vars_to_inspect:
         print(err)
 ```
 
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_20_0.png)
-
-    <ggplot: (2983698002923)>
-
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_20_2.png)
-
-    <ggplot: (2983704963015)>
-
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_20_4.png)
-
-    <ggplot: (2983696436959)>
-
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_20_6.png)
-
-    <ggplot: (2983734799144)>
-
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_20_8.png)
-
-    <ggplot: (2983704917842)>
-
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_20_10.png)
-
-    <ggplot: (2983778561299)>
-
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_20_12.png)
-
-    <ggplot: (2983704962488)>
-
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_20_14.png)
-
-    <ggplot: (2983778561374)>
-
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_20_16.png)
-
-    <ggplot: (2983705225195)>
-
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_20_18.png)
-
-    <ggplot: (2983705229858)>
-
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_20_20.png)
-
-    <ggplot: (2983705553604)>
-
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_20_22.png)
-
-    <ggplot: (2983700216664)>
+    Skipping variable 'd'.
+    'SeabornColor' object has no attribute 'lower'
+    Skipping variable 'h'.
+    'SeabornColor' object has no attribute 'lower'
+    Skipping variable 'η'.
+    'SeabornColor' object has no attribute 'lower'
+    Skipping variable 'μ'.
+    'SeabornColor' object has no attribute 'lower'
+    Skipping variable 'μ_d'.
+    'SeabornColor' object has no attribute 'lower'
+    Skipping variable 'μ_h'.
+    'SeabornColor' object has no attribute 'lower'
+    Skipping variable 'μ_η'.
+    'SeabornColor' object has no attribute 'lower'
+    Skipping variable 'σ'.
+    'SeabornColor' object has no attribute 'lower'
+    Skipping variable 'σ_d'.
+    'SeabornColor' object has no attribute 'lower'
+    Skipping variable 'σ_h'.
+    'SeabornColor' object has no attribute 'lower'
+    Skipping variable 'σ_η'.
+    'SeabornColor' object has no attribute 'lower'
+    Skipping variable 'σ_σ'.
+    'SeabornColor' object has no attribute 'lower'
 
 ```python
 if isinstance(speclet_model, SpecletTestModel):
@@ -694,7 +668,7 @@ except Exception as e:
     /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/arviz/stats/stats.py:876: RuntimeWarning: overflow encountered in exp
     /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/numpy/core/_methods.py:47: RuntimeWarning: overflow encountered in reduce
 
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_24_1.png)
+![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_23_1.png)
 
 ```python
 model_loo = az.loo(model_az, pointwise=True)
@@ -733,7 +707,7 @@ sns.distplot(model_loo.loo_i.values);
 
     <AxesSubplot:ylabel='Density'>
 
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_26_2.png)
+![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_25_2.png)
 
 ```python
 pred_summary["loo"] = model_loo.loo_i.values
@@ -751,9 +725,147 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_28_0.png)
+    ---------------------------------------------------------------------------
 
-    <ggplot: (2983790168167)>
+    AttributeError                            Traceback (most recent call last)
+
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/IPython/core/formatters.py in __call__(self, obj)
+        700                 type_pprinters=self.type_printers,
+        701                 deferred_pprinters=self.deferred_printers)
+    --> 702             printer.pretty(obj)
+        703             printer.flush()
+        704             return stream.getvalue()
+
+
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/IPython/lib/pretty.py in pretty(self, obj)
+        392                         if cls is not object \
+        393                                 and callable(cls.__dict__.get('__repr__')):
+    --> 394                             return _repr_pprint(obj, self, cycle)
+        395
+        396             return _default_pprint(obj, self, cycle)
+
+
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/IPython/lib/pretty.py in _repr_pprint(obj, p, cycle)
+        698     """A pprint that just redirects to the normal repr function."""
+        699     # Find newlines and replace them with p.break_()
+    --> 700     output = repr(obj)
+        701     lines = output.splitlines()
+        702     with p.group():
+
+
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/plotnine/ggplot.py in __repr__(self)
+         86         # in the jupyter notebook.
+         87         if not self.figure:
+    ---> 88             self.draw()
+         89         plt.show()
+         90         return '<ggplot: (%d)>' % self.__hash__()
+
+
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/plotnine/ggplot.py in draw(self, return_ggplot)
+        179         # new frames knowing that they are separate from the original.
+        180         with pd.option_context('mode.chained_assignment', None):
+    --> 181             return self._draw(return_ggplot)
+        182
+        183     def _draw(self, return_ggplot=False):
+
+
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/plotnine/ggplot.py in _draw(self, return_ggplot)
+        210             if self.figure is not None:
+        211                 plt.close(self.figure)
+    --> 212             raise err
+        213
+        214         if return_ggplot:
+
+
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/plotnine/ggplot.py in _draw(self, return_ggplot)
+        199                 self._resize_panels()
+        200                 # Drawing
+    --> 201                 self._draw_layers()
+        202                 self._draw_labels()
+        203                 self._draw_breaks_and_labels()
+
+
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/plotnine/ggplot.py in _draw_layers(self)
+        387         """
+        388         # Draw the geoms
+    --> 389         self.layers.draw(self.layout, self.coordinates)
+        390
+        391     def _draw_breaks_and_labels(self):
+
+
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/plotnine/layer.py in draw(self, layout, coord)
+         75         for i, l in enumerate(self, start=1):
+         76             l.zorder = i
+    ---> 77             l.draw(layout, coord)
+         78
+         79     def compute_aesthetics(self, plot):
+
+
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/plotnine/layer.py in draw(self, layout, coord)
+        468         # At this point each layer must have the data
+        469         # that is created by the plot build process
+    --> 470         self.geom.draw_layer(self.data, layout, coord, **params)
+        471
+        472     def use_defaults(self, data=None):
+
+
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/plotnine/geoms/geom.py in draw_layer(self, data, layout, coord, **params)
+        220             panel_params = layout.panel_params[ploc]
+        221             ax = layout.axs[ploc]
+    --> 222             self.draw_panel(pdata, panel_params, coord, ax, **params)
+        223
+        224     def draw_panel(self, data, panel_params, coord, ax, **params):
+
+
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/plotnine/geoms/geom.py in draw_panel(self, data, panel_params, coord, ax, **params)
+        255         for _, gdata in data.groupby('group'):
+        256             gdata.reset_index(inplace=True, drop=True)
+    --> 257             self.draw_group(gdata, panel_params, coord, ax, **params)
+        258
+        259     @staticmethod
+
+
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/plotnine/geoms/geom_smooth.py in draw_group(data, panel_params, coord, ax, **params)
+         45
+         46         data['alpha'] = 1
+    ---> 47         geom_line.draw_group(data, panel_params, coord, ax, **params)
+         48
+         49     @staticmethod
+
+
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/plotnine/geoms/geom_path.py in draw_group(data, panel_params, coord, ax, **params)
+        120             _draw_segments(data, ax, **params)
+        121         else:
+    --> 122             _draw_lines(data, ax, **params)
+        123
+        124         if 'arrow' in params and params['arrow']:
+
+
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/plotnine/geoms/geom_path.py in _draw_lines(data, ax, **params)
+        380     first point to the last point
+        381     """
+    --> 382     color = to_rgba(data['color'].iloc[0], data['alpha'].iloc[0])
+        383     join_style = _get_joinstyle(data, params)
+        384     lines = mlines.Line2D(data['x'],
+
+
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/plotnine/utils.py in to_rgba(colors, alpha)
+        595             return [to_rgba_hex(c, alpha) for c in colors]
+        596     else:
+    --> 597         if no_color(colors):
+        598             return colors
+        599         if is_iterable(alpha):
+
+
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/plotnine/utils.py in no_color(c)
+        568
+        569     def no_color(c):
+    --> 570         return c is None or c == '' or c.lower() == 'none'
+        571
+        572     def to_rgba_hex(c, a):
+
+
+    AttributeError: 'SeabornColor' object has no attribute 'lower'
 
 ```python
 (
@@ -765,9 +877,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_29_0.png)
+![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_28_0.png)
 
-    <ggplot: (2983893980025)>
+    <ggplot: (8767371278315)>
 
 ```python
 (
@@ -777,9 +889,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_30_0.png)
+![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_29_0.png)
 
-    <ggplot: (2983655649669)>
+    <ggplot: (8767371229025)>
 
 ```python
 (
@@ -791,9 +903,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_31_0.png)
+![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_30_0.png)
 
-    <ggplot: (2983610226131)>
+    <ggplot: (8767556866142)>
 
 ```python
 (
@@ -805,9 +917,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_32_0.png)
+![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_31_0.png)
 
-    <ggplot: (2983790168167)>
+    <ggplot: (8767371237919)>
 
 ```python
 (
@@ -821,9 +933,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_33_0.png)
+![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_32_0.png)
 
-    <ggplot: (2983894058352)>
+    <ggplot: (8767561949407)>
 
 ```python
 # Remove samples without gene CN data.
@@ -840,9 +952,9 @@ ppc_df_no_missing["binned_copy_number"] = [
 )
 ```
 
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_34_0.png)
+![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_33_0.png)
 
-    <ggplot: (2983894058439)>
+    <ggplot: (8767564438971)>
 
 ```python
 gene_error = (
@@ -873,9 +985,9 @@ n_genes = 15
 )
 ```
 
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_35_0.png)
+![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_34_0.png)
 
-    <ggplot: (2983610234290)>
+    <ggplot: (8767560377850)>
 
 ```python
 (
@@ -887,9 +999,9 @@ n_genes = 15
 )
 ```
 
-![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_36_0.png)
+![png](sp4-default-config_MCMC_files/sp4-default-config_MCMC_35_0.png)
 
-    <ggplot: (2983699024806)>
+    <ggplot: (8767561741132)>
 
 ---
 
@@ -898,14 +1010,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 4.75 minutes
+    execution time: 3.78 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-07
+    Last updated: 2021-07-08
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -916,17 +1028,17 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-h-17-55.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-236.o2.rc.hms.harvard.edu
 
     Git branch: pipeline-confg
 
+    seaborn   : 0.11.1
     pandas    : 1.2.3
     arviz     : 0.11.2
-    seaborn   : 0.11.1
     matplotlib: 3.3.4
-    plotnine  : 0.7.1
     pymc3     : 3.11.1
+    plotnine  : 0.7.1
     numpy     : 1.20.1

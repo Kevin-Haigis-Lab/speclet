@@ -16,8 +16,10 @@ from src.command_line_interfaces import sampling_pymc3_models_cli as sampling
 from src.data_processing import common as dphelp
 from src.modeling import pymc3_analysis as pmanal
 from src.modeling import pymc3_sampling_api as pmapi
+from src.models import configuration
 from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.plot.color_pal import SeabornColor
+from src.project_enums import ModelFitMethod
 
 notebook_tic = time()
 
@@ -30,10 +32,6 @@ RANDOM_SEED = 847
 np.random.seed(RANDOM_SEED)
 
 path_prefix = Path("..", "..")
-```
-
-```python
-from src.project_enums import ModelFitMethod
 ```
 
 Parameters for papermill:
@@ -68,8 +66,6 @@ assert ModelFitMethod(FIT_METHOD) in ModelFitMethod
 ```
 
 ```python
-from src.models import configuration
-
 speclet_model = configuration.get_config_and_instantiate_model(
     path_prefix / CONFIG_PATH,
     name=MODEL_NAME,
@@ -79,7 +75,7 @@ speclet_model = configuration.get_config_and_instantiate_model(
 speclet_model.build_model()
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/07/21 17:01:07] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Instantiating and configuring a speclet      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/configuration.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">configuration.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:79</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/08/21 07:57:24] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Instantiating and configuring a speclet      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/configuration.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">configuration.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:79</span>
                              model from config.
 </pre>
 
@@ -124,7 +120,7 @@ else:
     model_az = speclet_model.load_mcmc_cache()
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/07/21 17:01:44] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> ArvizCacheManager: ADVI cache exists.      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/cache_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">cache_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:261</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/08/21 07:57:57] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> ArvizCacheManager: ADVI cache exists.      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/cache_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">cache_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:261</span>
 </pre>
 
 <pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> ArvizCacheManager: ADVI cache exists.      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/cache_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">cache_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:261</span>
@@ -333,7 +329,7 @@ print(speclet_model.model)
 pm.model_to_graphviz(speclet_model.model)
 ```
 
-![svg](sp4-default-config_ADVI_files/sp4-default-config_ADVI_15_0.svg)
+![svg](sp4-default-config_ADVI_files/sp4-default-config_ADVI_14_0.svg)
 
 ## Fit diagnostics
 
@@ -341,6 +337,7 @@ pm.model_to_graphviz(speclet_model.model)
 if FIT_METHOD == "ADVI":
     pmanal.plot_vi_hist(advi_approx).draw()
     pmanal.plot_vi_hist(advi_approx, y_log=True).draw()
+    pmanal.plot_vi_hist(advi_approx, y_log=True, x_start=0.5).draw()
     plt.show()
 else:
     print("R-HAT")
@@ -350,9 +347,11 @@ else:
     print(az.bfmi(model_az))
 ```
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_17_0.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_16_0.png)
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_17_1.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_16_1.png)
+
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_16_2.png)
 
 ## Model parameters
 
@@ -426,53 +425,53 @@ for var in vars_to_inspect:
         print(err)
 ```
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_20_0.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_19_0.png)
 
-    <ggplot: (2943645199544)>
+    <ggplot: (8787150248153)>
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_20_2.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_19_2.png)
 
-    <ggplot: (2943641799828)>
+    <ggplot: (8787161196153)>
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_20_4.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_19_4.png)
 
-    <ggplot: (2943643501210)>
+    <ggplot: (8787170074477)>
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_20_6.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_19_6.png)
 
-    <ggplot: (2943641810348)>
+    <ggplot: (8787170074649)>
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_20_8.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_19_8.png)
 
-    <ggplot: (2943644340845)>
+    <ggplot: (8787159175677)>
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_20_10.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_19_10.png)
 
-    <ggplot: (2943645188542)>
+    <ggplot: (8787161307251)>
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_20_12.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_19_12.png)
 
-    <ggplot: (2943644340953)>
+    <ggplot: (8787147511652)>
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_20_14.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_19_14.png)
 
-    <ggplot: (2943644255326)>
+    <ggplot: (8787161040622)>
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_20_16.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_19_16.png)
 
-    <ggplot: (2943641725594)>
+    <ggplot: (8787161210116)>
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_20_18.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_19_18.png)
 
-    <ggplot: (2943641785884)>
+    <ggplot: (8787159182912)>
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_20_20.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_19_20.png)
 
-    <ggplot: (2943645199460)>
+    <ggplot: (8787150211401)>
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_20_22.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_19_22.png)
 
-    <ggplot: (2943643704733)>
+    <ggplot: (8787161357159)>
 
 ```python
 if isinstance(speclet_model, SpecletTestModel):
@@ -668,7 +667,7 @@ except Exception as e:
     print(e)
 ```
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_24_0.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_23_0.png)
 
 ```python
 model_loo = az.loo(model_az, pointwise=True)
@@ -703,7 +702,7 @@ sns.distplot(model_loo.loo_i.values);
 
     <AxesSubplot:ylabel='Density'>
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_26_2.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_25_2.png)
 
 ```python
 pred_summary["loo"] = model_loo.loo_i.values
@@ -721,9 +720,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_28_0.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_27_0.png)
 
-    <ggplot: (2943643505469)>
+    <ggplot: (8787150565172)>
 
 ```python
 (
@@ -735,9 +734,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_29_0.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_28_0.png)
 
-    <ggplot: (2943645196662)>
+    <ggplot: (8787150243280)>
 
 ```python
 (
@@ -747,9 +746,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_30_0.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_29_0.png)
 
-    <ggplot: (2943643701598)>
+    <ggplot: (8787146133764)>
 
 ```python
 (
@@ -761,9 +760,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_31_0.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_30_0.png)
 
-    <ggplot: (2943643505529)>
+    <ggplot: (8787172415799)>
 
 ```python
 (
@@ -775,9 +774,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_32_0.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_31_0.png)
 
-    <ggplot: (2943642381159)>
+    <ggplot: (8787161063885)>
 
 ```python
 (
@@ -791,9 +790,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_33_0.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_32_0.png)
 
-    <ggplot: (2943642451691)>
+    <ggplot: (8787161209588)>
 
 ```python
 # Remove samples without gene CN data.
@@ -810,9 +809,9 @@ ppc_df_no_missing["binned_copy_number"] = [
 )
 ```
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_34_0.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_33_0.png)
 
-    <ggplot: (2943545029569)>
+    <ggplot: (8787161320436)>
 
 ```python
 gene_error = (
@@ -843,9 +842,9 @@ n_genes = 15
 )
 ```
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_35_0.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_34_0.png)
 
-    <ggplot: (2943643619027)>
+    <ggplot: (8787161223063)>
 
 ```python
 (
@@ -857,9 +856,9 @@ n_genes = 15
 )
 ```
 
-![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_36_0.png)
+![png](sp4-default-config_ADVI_files/sp4-default-config_ADVI_35_0.png)
 
-    <ggplot: (2943642389279)>
+    <ggplot: (8787161138954)>
 
 ---
 
@@ -868,14 +867,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 2.54 minutes
+    execution time: 2.10 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-07
+    Last updated: 2021-07-08
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -886,17 +885,17 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-h-17-55.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-236.o2.rc.hms.harvard.edu
 
     Git branch: pipeline-confg
 
     numpy     : 1.20.1
-    pymc3     : 3.11.1
-    pandas    : 1.2.3
-    matplotlib: 3.3.4
-    plotnine  : 0.7.1
     seaborn   : 0.11.1
+    pandas    : 1.2.3
     arviz     : 0.11.2
+    matplotlib: 3.3.4
+    pymc3     : 3.11.1
+    plotnine  : 0.7.1
