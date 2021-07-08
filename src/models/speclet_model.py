@@ -17,7 +17,7 @@ from src.loggers import logger
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.managers.model_data_managers import DataManager
 from src.modeling import pymc3_sampling_api as pmapi
-from src.project_enums import ModelFitMethod, assert_never
+from src.project_enums import MockDataSize, ModelFitMethod, assert_never
 
 ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
@@ -429,8 +429,8 @@ class SpecletModel:
         self,
         results_path: Path,
         fit_method: ModelFitMethod,
+        size: MockDataSize,
         random_seed: Optional[int] = None,
-        size: str = "large",
         fit_kwargs: Optional[Dict[Any, Any]] = None,
     ) -> None:
         """Run a round of simulation-based calibration.
@@ -440,7 +440,7 @@ class SpecletModel:
             fit_method (ModelFitMethod): Which method to use for fitting.
             random_seed (Optional[int], optional): Random seed (for reproducibility).
               Defaults to None.
-            size (str, optional): Size of the data set to mock. Defaults to "large".
+            size (MockDataSize): Size of the data set to mock. Defaults to "large".
             fit_kwargs (Optional[Dict[Any, Any]], optional): Keyword arguments to be
               passed to the fitting method. Default is None.
         """
