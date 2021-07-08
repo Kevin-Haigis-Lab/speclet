@@ -6,7 +6,7 @@ from typing import List
 import papermill
 from snakemake.io import Wildcards
 
-from src.project_enums import ModelFitMethod, ModelOption
+from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
 from src.pipelines.snakemake_parsing_helpers import get_models_names_fit_methods
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
@@ -22,7 +22,9 @@ MOCK_DATA_SIZE = "medium"
 #### ---- Model Configurations ---- ####
 
 MODEL_CONFIG = Path("models", "model-configs.yaml")
-model_configuration_lists = get_models_names_fit_methods(MODEL_CONFIG)
+model_configuration_lists = get_models_names_fit_methods(
+    MODEL_CONFIG, pipeline=SpecletPipeline.SBC
+)
 
 
 #### ---- Wildcard constrains ---- ####

@@ -24,7 +24,10 @@ N_CHAINS = 4
 #### ---- Model configurations ---- ####
 
 MODEL_CONFIG = Path("models", "model-configs.yaml")
-model_configuration_lists = get_models_names_fit_methods(MODEL_CONFIG)
+model_configuration_lists = get_models_names_fit_methods(
+    MODEL_CONFIG, pipeline=SpecletPipeline.FITTING
+)
+
 
 
 #### ---- Wildcard constrains ---- ####

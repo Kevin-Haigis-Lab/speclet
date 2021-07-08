@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validate_arguments
 
 from src.io import model_config
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
@@ -25,14 +25,17 @@ class _PipelineIntermediateInformation(BaseModel):
     fit_method: ModelFitMethod
 
 
-def get_models_names_fit_methods(config_path: Path) -> ParsedPipelineInformation:
+@validate_arguments
+def get_models_names_fit_methods(
+    config_path: Path, pipeline: SpecletPipeline
+) -> ParsedPipelineInformation:
     model_configurations = model_config.get_model_configurations(config_path)
     model_config.check_model_names_are_unique(model_configurations)
 
     pipeline_informations: List[_PipelineIntermediateInformation] = []
 
     for config in model_configurations.configurations:
-        if SpecletPipeline.FITTING not in config.pipelines:
+        if pipeline not in config.pipelines:
             continue
         for fit_method in config.fit_methods:
             pipeline_informations.append(
