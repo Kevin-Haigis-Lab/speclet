@@ -96,7 +96,7 @@ def get_sampling_kwargs_from_config(
     config: ModelConfig,
     pipeline: SpecletPipeline,
     fit_method: ModelFitMethod,
-) -> Dict[str, Union[float, str, int]]:
+) -> Dict[str, Union[float, str, int, bool]]:
     """Get the sampling keyword argument dictionary from a model configuration.
 
     Args:

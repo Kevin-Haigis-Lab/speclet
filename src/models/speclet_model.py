@@ -39,7 +39,7 @@ class PyMC3SamplingParameters(BaseModel):
 
     draws: int = 1000
     prior_pred_samples: int = 1000
-    post_pred_samples: Optional[int] = None
+    post_pred_samples: int = 1000
 
 
 class MCMCSamplingParameters(PyMC3SamplingParameters):

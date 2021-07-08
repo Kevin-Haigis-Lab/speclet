@@ -12,7 +12,6 @@ from rich.logging import RichHandler
 
 def _get_console_handler() -> logging.Handler:
     handler = logging.StreamHandler()
-    handler.set_name("default-console-handler")
     handler.setLevel(logging.DEBUG)
     fmt = logging.Formatter("(%(levelname)s) %(message)s")
     handler.setFormatter(fmt)
@@ -20,9 +19,7 @@ def _get_console_handler() -> logging.Handler:
 
 
 def _get_rich_console_handler() -> RichHandler:
-    handler = RichHandler(level=logging.INFO)
-    handler.set_name("default-rich-console-handler")
-    return handler
+    return RichHandler(level=logging.INFO)
 
 
 def _get_log_file() -> pathlib.Path:
@@ -34,7 +31,6 @@ def _get_log_file() -> pathlib.Path:
 
 def _get_file_handler() -> logging.Handler:
     handler = logging.FileHandler(_get_log_file())
-    handler.set_name("default-file-handler")
     handler.setLevel(logging.DEBUG)
     fmt = logging.Formatter(
         "[%(levelname)s] %(asctime)s "
@@ -51,6 +47,7 @@ if len(logger.handlers) == 0:
     # logger.addHandler(_get_console_handler())
     logger.addHandler(_get_rich_console_handler())
     logger.addHandler(_get_file_handler())
+    # Update `_idx_console_loggers` in `set_console_handler_level()` if needed.
 
 
 def set_console_handler_level(to: Union[int, str]) -> None:
@@ -62,7 +59,7 @@ def set_console_handler_level(to: Union[int, str]) -> None:
     Returns:
         None: None
     """
-    for handler in logger.handlers:
-        if (handler_name := handler.name) is not None:
-            if "console" in handler_name:
-                handler.setLevel(to)
+    _idx_console_loggers = [0]  #
+    for idx in _idx_console_loggers:
+        handler = logger.handlers[idx]
+        handler.setLevel(to)

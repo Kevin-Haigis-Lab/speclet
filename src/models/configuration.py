@@ -128,11 +128,11 @@ def check_sampling_kwargs(
     """
     keys = list(sampling_kwargs.keys())
     blacklist = ("self",)
-    if fit_method is fit_method.ADVI:
+    if fit_method is ModelFitMethod.ADVI:
         check_kwarg_dict.check_kwarg_dict(
             keys, SpecletModel.advi_sample_model, blacklist=blacklist
         )
-    elif fit_method is fit_method.MCMC:
+    elif fit_method is ModelFitMethod.MCMC:
         check_kwarg_dict.check_kwarg_dict(
             keys, SpecletModel.mcmc_sample_model, blacklist=blacklist
         )
