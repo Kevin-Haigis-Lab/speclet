@@ -5,8 +5,7 @@ import pytest
 from src import project_enums
 from src.io import model_config
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
-from src.modeling.simulation_based_calibration_enums import MockDataSizes
-from src.project_enums import ModelFitMethod, ModelOption, SlurmPartitions
+from src.project_enums import MockDataSize, ModelFitMethod, ModelOption, SlurmPartitions
 
 TEST_MODEL_NAME = "test-model"
 
@@ -44,9 +43,9 @@ def check_resource_manager_requests(rm: RM, fit_method: ModelFitMethod):
 
 @pytest.mark.parametrize("model", ModelOption)
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
-@pytest.mark.parametrize("mock_data_size", MockDataSizes)
+@pytest.mark.parametrize("mock_data_size", MockDataSize)
 def test_resources_available_for_models(
-    model: ModelOption, fit_method: ModelFitMethod, mock_data_size: MockDataSizes
+    model: ModelOption, fit_method: ModelFitMethod, mock_data_size: MockDataSize
 ):
     rm = RM(
         name=TEST_MODEL_NAME,
@@ -60,9 +59,9 @@ def test_resources_available_for_models(
 
 @pytest.mark.parametrize("model", ModelOption)
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
-@pytest.mark.parametrize("mock_data_size", MockDataSizes)
+@pytest.mark.parametrize("mock_data_size", MockDataSize)
 def test_resources_available_for_models_wrong_types(
-    model: ModelOption, fit_method: ModelFitMethod, mock_data_size: MockDataSizes
+    model: ModelOption, fit_method: ModelFitMethod, mock_data_size: MockDataSize
 ):
     rm = RM(
         name=TEST_MODEL_NAME,  # type: ignore
