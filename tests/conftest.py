@@ -47,7 +47,7 @@ def centered_eight_post(centered_eight: az.InferenceData) -> pd.DataFrame:
 
 settings.register_profile("ci", deadline=None, max_examples=1000)
 settings.register_profile("debug", max_examples=10, verbosity=Verbosity.verbose)
-settings.register_profile("dev", max_examples=25)
+settings.register_profile("dev", max_examples=2)
 
 IS_CI = os.getenv("CI") is not None
 settings.register_profile(
