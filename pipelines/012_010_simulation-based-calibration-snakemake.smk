@@ -130,6 +130,7 @@ rule papermill_report:
                 "SBC_COLLATED_RESULTS": params.collated_results,
                 "NUM_SIMULATIONS": NUM_SIMULATIONS,
                 "CONFIG_PATH": MODEL_CONFIG.as_posix(),
+                "FIT_METHOD_STR": wildcards.fit_method,
             },
             prepare_only=True,
         )

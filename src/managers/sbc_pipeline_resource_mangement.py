@@ -6,6 +6,7 @@ from typing import Dict, TypeVar
 
 from pydantic import validate_arguments
 
+from src import formatting
 from src.io import model_config
 from src.managers import pipeline_resource_manager as prm
 from src.managers.pipeline_resource_manager import PipelineResourceManager
@@ -101,10 +102,8 @@ class SBCResourceManager(PipelineResourceManager):
         Returns:
             str: Amount of time required.
         """
-        if self.fit_method is ModelFitMethod.MCMC:
-            return "02:00:00"
-        else:
-            return "00:15:00"
+        _time = self._retrieve_time_requirement()
+        return formatting.format_timedelta(_time, formatting.TimeDeltaFormat.DRMAA)
 
     def _retrieve_memory_requirement(self) -> int:
         default_memory_tbl: ResourceLookupDict[int] = {

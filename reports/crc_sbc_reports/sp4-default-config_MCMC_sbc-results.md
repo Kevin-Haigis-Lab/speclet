@@ -1,6 +1,7 @@
 # Model Report
 
 ```python
+import logging
 import re
 import warnings
 from pathlib import Path
@@ -17,9 +18,14 @@ import pymc3 as pm
 import seaborn as sns
 
 from src.command_line_interfaces import cli_helpers
+from src.loggers import set_console_handler_level
+from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.modeling.pymc3_analysis import get_hdi_colnames_from_az_summary
 from src.modeling.simulation_based_calibration_helpers import SBCFileManager
+from src.project_enums import ModelFitMethod
+```
 
+```python
 notebook_tic = time()
 
 warnings.simplefilter(action="ignore", category=UserWarning)
@@ -30,6 +36,7 @@ gg.theme_set(gg.theme_classic())
 RANDOM_SEED = 847
 np.random.seed(RANDOM_SEED)
 
+set_console_handler_level(logging.WARNING)
 pymc3_cache_dir = Path("..", "models", "modeling_cache", "pymc3_model_cache")
 ```
 
@@ -40,6 +47,7 @@ Parameters for papermill:
 - `SBC_COLLATED_RESULTS`: path to collated simulation posteriors
 - `NUM_SIMULATIONS`: the number of simiulations; will be used to check that all results are found
 - `CONFIG_PATH`: path to the model configuration file
+- `FIT_METHOD`: model fitting method used for this SBC
 
 ## Setup
 
@@ -51,6 +59,7 @@ SBC_RESULTS_DIR = ""
 SBC_COLLATED_RESULTS = ""
 NUM_SIMULATIONS = -1
 CONFIG_PATH = ""
+FIT_METHOD_STR = ""
 ```
 
 ```python
@@ -62,7 +71,7 @@ SBC_COLLATED_RESULTS = (
 )
 NUM_SIMULATIONS = 2
 CONFIG_PATH = "models/model-configs.yaml"
-
+FIT_METHOD_STR = "MCMC"
 ```
 
 ### Prepare and validate papermill parameters
@@ -85,6 +94,10 @@ Confirm that there is a positive number of simulations.
 
 ```python
 assert NUM_SIMULATIONS > 0
+```
+
+```python
+FIT_METHOD = ModelFitMethod(FIT_METHOD_STR)
 ```
 
 ## Read in all results
@@ -172,9 +185,9 @@ simulation_posteriors_df.head()
       <td>8.0</td>
       <td>24.0</td>
       <td>1.47</td>
-      <td>0.978738</td>
+      <td>-0.187184</td>
       <td>sim_id_0000</td>
-      <td>False</td>
+      <td>True</td>
     </tr>
     <tr>
       <th>μ_η</th>
@@ -188,7 +201,7 @@ simulation_posteriors_df.head()
       <td>30.0</td>
       <td>69.0</td>
       <td>1.10</td>
-      <td>0.080031</td>
+      <td>0.188652</td>
       <td>sim_id_0000</td>
       <td>True</td>
     </tr>
@@ -204,9 +217,9 @@ simulation_posteriors_df.head()
       <td>17.0</td>
       <td>38.0</td>
       <td>1.23</td>
-      <td>1.653345</td>
+      <td>2.155701</td>
       <td>sim_id_0000</td>
-      <td>False</td>
+      <td>True</td>
     </tr>
     <tr>
       <th>h[1]</th>
@@ -220,7 +233,7 @@ simulation_posteriors_df.head()
       <td>25.0</td>
       <td>61.0</td>
       <td>1.12</td>
-      <td>1.671294</td>
+      <td>2.660762</td>
       <td>sim_id_0000</td>
       <td>True</td>
     </tr>
@@ -229,6 +242,49 @@ simulation_posteriors_df.head()
 </div>
 
 ## Analysis
+
+### ADVI approximation histories
+
+```python
+if FIT_METHOD is ModelFitMethod.ADVI:
+    advi_histories: List[np.ndarray] = []
+
+    for dir in sbc_results_dir.iterdir():
+        if not dir.is_dir():
+            continue
+
+        cache_manager = Pymc3ModelCacheManager(name=MODEL_NAME, root_cache_dir=dir)
+        if cache_manager.advi_cache_exists():
+            _, advi_approx = cache_manager.get_advi_cache()
+            advi_histories.append(advi_approx.hist)
+    n_sims_advi_hist = min(NUM_SIMULATIONS, 5)
+    sample_hist_idxs = np.random.choice(
+        list(range(len(advi_histories))), size=n_sims_advi_hist, replace=False
+    )
+
+    def make_hist_df(sim_idx: int, hist_list: List[np.ndarray]) -> pd.DataFrame:
+        df = pd.DataFrame({"sim_idx": sim_idx, "loss": hist_list[sim_idx].flatten()})
+        df["step"] = np.arange(df.shape[0])
+        return df
+
+    sampled_advi_histories = pd.concat(
+        [make_hist_df(i, advi_histories) for i in sample_hist_idxs]
+    ).reset_index(drop=True)
+
+    (
+        gg.ggplot(
+            sampled_advi_histories,
+            gg.aes(x="step", y="np.log(loss)", color="factor(sim_idx)"),
+        )
+        + gg.geom_line(alpha=0.5)
+        + gg.scale_color_brewer(type="qual", palette="Set1")
+        + gg.scale_x_continuous(expand=(0, 0))
+        + gg.scale_y_continuous(expand=(0.01, 0, 0.02, 0))
+        + gg.theme(legend_position=(0.8, 0.5))
+        + gg.labs(y="log loss", color="sim. idx.")
+    ).draw()
+    plt.show()
+```
 
 ```python
 accuracy_per_parameter = (
@@ -258,9 +314,9 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 )
 ```
 
-![png](sp4-default-config_MCMC_sbc-results_files/sp4-default-config_MCMC_sbc-results_15_0.png)
+![png](sp4-default-config_MCMC_sbc-results_files/sp4-default-config_MCMC_sbc-results_19_0.png)
 
-    <ggplot: (2943410513824)>
+    <ggplot: (8761299409451)>
 
 ```python
 hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -305,9 +361,9 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 )
 ```
 
-![png](sp4-default-config_MCMC_sbc-results_files/sp4-default-config_MCMC_sbc-results_16_0.png)
+![png](sp4-default-config_MCMC_sbc-results_files/sp4-default-config_MCMC_sbc-results_20_0.png)
 
-    <ggplot: (2943419717373)>
+    <ggplot: (8761290244334)>
 
 ---
 
@@ -316,7 +372,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.09 minutes
+    execution time: 0.07 minutes
 
 ```python
 %load_ext watermark
@@ -334,19 +390,20 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 20
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-f-17-14.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-236.o2.rc.hms.harvard.edu
 
     Git branch: pipeline-confg
 
-    pymc3     : 3.11.1
-    janitor   : 0.20.14
-    plotnine  : 0.7.1
-    matplotlib: 3.3.4
-    numpy     : 1.20.1
-    seaborn   : 0.11.1
-    arviz     : 0.11.2
     re        : 2.2.1
     pandas    : 1.2.3
+    logging   : 0.5.1.2
+    plotnine  : 0.7.1
+    seaborn   : 0.11.1
+    matplotlib: 3.3.4
+    arviz     : 0.11.2
+    pymc3     : 3.11.1
+    numpy     : 1.20.1
+    janitor   : 0.20.14

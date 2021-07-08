@@ -62,18 +62,6 @@ CONFIG_PATH = ""
 FIT_METHOD_STR = ""
 ```
 
-```python
-# Parameters
-MODEL_NAME = "sp4-default-fullrank"
-SBC_RESULTS_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/sp4-default-fullrank_ADVI"
-SBC_COLLATED_RESULTS = (
-    "cache/sbc-cache/sp4-default-fullrank_ADVI_collated-posterior-summaries.pkl"
-)
-NUM_SIMULATIONS = 2
-CONFIG_PATH = "models/model-configs.yaml"
-FIT_METHOD_STR = "ADVI"
-```
-
 ### Prepare and validate papermill parameters
 
 Check values passed as the directory with results of the rounds of SBC.
@@ -106,140 +94,6 @@ FIT_METHOD = ModelFitMethod(FIT_METHOD_STR)
 simulation_posteriors_df = pd.read_pickle(sbc_collated_results_path)
 simulation_posteriors_df.head()
 ```
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th></th>
-      <th>mean</th>
-      <th>sd</th>
-      <th>hdi_5.5%</th>
-      <th>hdi_94.5%</th>
-      <th>mcse_mean</th>
-      <th>mcse_sd</th>
-      <th>ess_bulk</th>
-      <th>ess_tail</th>
-      <th>r_hat</th>
-      <th>true_value</th>
-      <th>simulation_id</th>
-      <th>within_hdi</th>
-    </tr>
-    <tr>
-      <th>parameter</th>
-      <th>parameter_name</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>μ_h</th>
-      <th>μ_h</th>
-      <td>0.761</td>
-      <td>0.207</td>
-      <td>0.429</td>
-      <td>1.086</td>
-      <td>0.007</td>
-      <td>0.005</td>
-      <td>850.0</td>
-      <td>863.0</td>
-      <td>NaN</td>
-      <td>1.764052</td>
-      <td>sim_id_0000</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>μ_d</th>
-      <th>μ_d</th>
-      <td>0.377</td>
-      <td>0.086</td>
-      <td>0.238</td>
-      <td>0.512</td>
-      <td>0.003</td>
-      <td>0.002</td>
-      <td>969.0</td>
-      <td>937.0</td>
-      <td>NaN</td>
-      <td>-0.187184</td>
-      <td>sim_id_0000</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>μ_η</th>
-      <th>μ_η</th>
-      <td>0.188</td>
-      <td>0.198</td>
-      <td>-0.126</td>
-      <td>0.502</td>
-      <td>0.007</td>
-      <td>0.005</td>
-      <td>803.0</td>
-      <td>932.0</td>
-      <td>NaN</td>
-      <td>0.188652</td>
-      <td>sim_id_0000</td>
-      <td>True</td>
-    </tr>
-    <tr>
-      <th>h[0]</th>
-      <th>h</th>
-      <td>1.922</td>
-      <td>0.161</td>
-      <td>1.676</td>
-      <td>2.191</td>
-      <td>0.005</td>
-      <td>0.004</td>
-      <td>1021.0</td>
-      <td>843.0</td>
-      <td>NaN</td>
-      <td>2.155701</td>
-      <td>sim_id_0000</td>
-      <td>True</td>
-    </tr>
-    <tr>
-      <th>h[1]</th>
-      <th>h</th>
-      <td>1.520</td>
-      <td>0.141</td>
-      <td>1.313</td>
-      <td>1.760</td>
-      <td>0.005</td>
-      <td>0.003</td>
-      <td>980.0</td>
-      <td>766.0</td>
-      <td>NaN</td>
-      <td>2.660762</td>
-      <td>sim_id_0000</td>
-      <td>False</td>
-    </tr>
-  </tbody>
-</table>
-</div>
 
 ## Analysis
 
@@ -286,8 +140,6 @@ if FIT_METHOD is ModelFitMethod.ADVI:
     plt.show()
 ```
 
-![png](sp4-default-fullrank_ADVI_sbc-results_files/sp4-default-fullrank_ADVI_sbc-results_18_0.png)
-
 ```python
 accuracy_per_parameter = (
     simulation_posteriors_df.copy()
@@ -315,10 +167,6 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
     + gg.theme(axis_ticks_major_x=gg.element_blank(), figure_size=(6, 4))
 )
 ```
-
-![png](sp4-default-fullrank_ADVI_sbc-results_files/sp4-default-fullrank_ADVI_sbc-results_19_0.png)
-
-    <ggplot: (8740386053253)>
 
 ```python
 hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -363,10 +211,6 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 )
 ```
 
-![png](sp4-default-fullrank_ADVI_sbc-results_files/sp4-default-fullrank_ADVI_sbc-results_20_0.png)
-
-    <ggplot: (8740434152891)>
-
 ---
 
 ```python
@@ -374,38 +218,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.11 minutes
-
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
-
-    Last updated: 2021-07-08
-
-    Python implementation: CPython
-    Python version       : 3.9.2
-    IPython version      : 7.21.0
-
-    Compiler    : GCC 9.3.0
-    OS          : Linux
-    Release     : 3.10.0-1062.el7.x86_64
-    Machine     : x86_64
-    Processor   : x86_64
-    CPU cores   : 28
-    Architecture: 64bit
-
-    Hostname: compute-e-16-236.o2.rc.hms.harvard.edu
-
-    Git branch: pipeline-confg
-
-    seaborn   : 0.11.1
-    plotnine  : 0.7.1
-    re        : 2.2.1
-    pandas    : 1.2.3
-    logging   : 0.5.1.2
-    janitor   : 0.20.14
-    matplotlib: 3.3.4
-    pymc3     : 3.11.1
-    arviz     : 0.11.2
-    numpy     : 1.20.1
