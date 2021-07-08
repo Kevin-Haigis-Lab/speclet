@@ -3,7 +3,7 @@
 """Functions to aid in the analysis of PyMC3 models."""
 
 import re
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import arviz as az
 import matplotlib
@@ -13,6 +13,8 @@ import pandas as pd
 import plotnine as gg
 import pymc3 as pm
 import seaborn as sns
+
+from src.plot.color_pal import SeabornColor
 
 
 def plot_all_priors(
@@ -140,7 +142,35 @@ def summarize_posterior_predictions(
     return d
 
 
-def plot_vi_hist(approx: pm.Approximation, y_log: bool = False) -> gg.ggplot:
+def _plot_vi_axes_limits(
+    yvals: np.ndarray, x_start: Optional[Union[int, float]]
+) -> Tuple[List[int], List[float]]:
+    x_lims: List[int] = [0, len(yvals)]
+    if x_start is None:
+        pass
+    elif isinstance(x_start, float) and x_start <= 1.0:
+        x_lims[0] = int(x_start * len(yvals))
+    else:
+        x_lims[0] = int(x_start)
+
+    y_lims: List[float] = [min(yvals), max(yvals[x_lims[0] :])]
+
+    return x_lims, y_lims
+
+
+def _advi_hist_rolling_avg(df: pd.DataFrame, window: int) -> pd.DataFrame:
+    df["loss_rolling_avg"] = (
+        df[["loss"]].rolling(window=window, center=True).mean()["loss"]
+    )
+    return df
+
+
+def plot_vi_hist(
+    approx: pm.Approximation,
+    y_log: bool = False,
+    x_start: Optional[Union[int, float]] = None,
+    rolling_window: int = 100,
+) -> gg.ggplot:
     """Plot the history of fitting using Variational Inference.
 
     Args:
@@ -151,12 +181,23 @@ def plot_vi_hist(approx: pm.Approximation, y_log: bool = False) -> gg.ggplot:
         gg.ggplot: A plot showing the fitting history.
     """
     y = "np.log(loss)" if y_log else "loss"
-    d = pd.DataFrame({"loss": approx.hist}).assign(step=lambda d: np.arange(d.shape[0]))
+    rolling_y = "np.log(loss_rolling_avg)" if y_log else "loss_rolling_avg"
+    d = (
+        pd.DataFrame({"loss": approx.hist})
+        .assign(step=lambda d: np.arange(d.shape[0]))
+        .pipe(_advi_hist_rolling_avg, window=rolling_window)
+    )
+
+    _x_lims, _y_lims = _plot_vi_axes_limits(approx.hist, x_start)
+    if y_log:
+        _y_lims = np.log(_y_lims)
+
     return (
-        gg.ggplot(d, gg.aes(x="step", y=y))
-        + gg.geom_line(size=0.5, alpha=0.75, color="black")
-        + gg.scale_y_continuous(expand=(0.02, 0, 0.02, 0))
-        + gg.scale_x_continuous(expand=(0.02, 0, 0.02, 0))
+        gg.ggplot(d, gg.aes(x="step"))
+        + gg.geom_line(gg.aes(y=y), size=0.5, alpha=0.75, color="black")
+        + gg.geom_line(gg.aes(y=rolling_y), size=0.5, alpha=0.9, color=SeabornColor.RED)
+        + gg.scale_x_continuous(expand=(0, 0), limits=_x_lims)
+        + gg.scale_y_continuous(expand=(0.02, 0, 0.02, 0), limits=_y_lims)
         + gg.labs(
             x="step",
             y="$\\log$ loss" if y_log else "loss",
