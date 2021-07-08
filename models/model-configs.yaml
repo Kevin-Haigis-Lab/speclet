@@ -8,6 +8,19 @@
     - fitting
     - sbc
   debug: true
+- name: sp4-default-fullrank
+  description: Default settings for SpecletFour
+  model: speclet-four
+  fit_methods:
+    - ADVI
+  pipelines:
+    - fitting
+    - sbc
+  debug: true
+  pipeline_sampling_parameters:
+    fitting:
+      ADVI:
+        method: "fullrank_advi"
 - name: sp4-noncentered
   description: SpecletFour with all covariates in non-centered parameterization.
   model: speclet-four
