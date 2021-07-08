@@ -44,7 +44,7 @@ class SpecletFour(SpecletModel):
     \\(\\beta_c\\) varies by cell line and is optional.
     """
 
-    _config: SpecletFourConfiguration
+    config: SpecletFourConfiguration
 
     def __init__(
         self,
@@ -69,10 +69,7 @@ class SpecletFour(SpecletModel):
         if data_manager is None:
             data_manager = CrcDataManager(debug=debug)
 
-        if config is None:
-            self.config = SpecletFourConfiguration()
-        else:
-            self.config = config
+        self.config = config if config is not None else SpecletFourConfiguration()
 
         super().__init__(
             name=name,

@@ -42,13 +42,15 @@ class SpecletFive(SpecletModel):
     batch effect \\(j_b\\).
     """
 
+    config: SpecletFiveConfiguration
+
     def __init__(
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
-        config: SpecletFiveConfiguration = SpecletFiveConfiguration(),
+        config: Optional[SpecletFiveConfiguration] = None,
     ) -> None:
         """Instantiate a SpecletFive model.
 
@@ -66,7 +68,7 @@ class SpecletFive(SpecletModel):
         if data_manager is None:
             logger.debug("Creating a data manager since none was supplied.")
             data_manager = CrcDataManager(debug=debug)
-        self.config = config
+        self.config = config if config is not None else SpecletFiveConfiguration()
         super().__init__(
             name=name,
             root_cache_dir=root_cache_dir,

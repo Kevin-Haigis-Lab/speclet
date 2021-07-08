@@ -54,13 +54,15 @@ class SpecletSeven(SpecletModel):
     constructing, fitting, and interpreting such a "tall" hierarchical model.
     """
 
+    config: SpecletSevenConfiguration
+
     def __init__(
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
-        config: SpecletSevenConfiguration = SpecletSevenConfiguration(),
+        config: Optional[SpecletSevenConfiguration] = None,
     ) -> None:
         """Instantiate a SpecletSeven model.
 
@@ -79,7 +81,7 @@ class SpecletSeven(SpecletModel):
             logger.debug("Creating a data manager since none was supplied.")
             data_manager = CrcDataManager(debug=debug)
 
-        self.config = config
+        self.config = config if config is not None else SpecletSevenConfiguration()
 
         super().__init__(
             name=name,

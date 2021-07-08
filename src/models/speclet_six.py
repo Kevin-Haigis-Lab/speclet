@@ -139,13 +139,15 @@ class SpecletSix(SpecletModel):
       ( \\(M \\in {0, 1}\\))
     """
 
+    config: SpecletSixConfiguration
+
     def __init__(
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
-        config: SpecletSixConfiguration = SpecletSixConfiguration(),
+        config: Optional[SpecletSixConfiguration] = None,
     ) -> None:
         """Instantiate a SpecletSix model.
 
@@ -173,7 +175,7 @@ class SpecletSix(SpecletModel):
             ]
         )
 
-        self.config = config
+        self.config = config if config is not None else SpecletSixConfiguration()
 
         super().__init__(
             name=name,
