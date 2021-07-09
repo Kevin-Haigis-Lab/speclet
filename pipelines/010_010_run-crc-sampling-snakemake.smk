@@ -17,7 +17,7 @@ SCRATCH_DIR = "/n/scratch3/users/j/jc604/speclet/fitting-mcmc/"
 PYMC3_MODEL_CACHE_DIR = "models/"
 REPORTS_DIR = "reports/crc_model_sampling_reports/"
 ENVIRONMENT_YAML = Path("default_environment.yaml").as_posix()
-
+BENCHMARK_DIR = Path("benchmarks", "010_010_run-crc-sampling-snakemake")
 N_CHAINS = 4
 
 
@@ -69,6 +69,8 @@ rule sample_mcmc:
         config_file=MODEL_CONFIG.as_posix(),
     conda:
         ENVIRONMENT_YAML
+    benchmark:
+        BENCHMARK_DIR / "sample_mcmc/{model_name}_chain{chain}.tsv"
     shell:
         "python3 src/command_line_interfaces/sampling_pymc3_models_cli.py"
         '  "{wildcards.model_name}"'
@@ -119,6 +121,8 @@ rule sample_advi:
         cache_dir=PYMC3_MODEL_CACHE_DIR,
     conda:
         ENVIRONMENT_YAML
+    benchmark:
+        BENCHMARK_DIR / "sample_advi/{model_name}.tsv"
     shell:
         "python3 src/command_line_interfaces/sampling_pymc3_models_cli.py"
         '  "{wildcards.model_name}"'
