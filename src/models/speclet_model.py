@@ -50,7 +50,7 @@ class MCMCSamplingParameters(PyMC3SamplingParameters):
     chains: int = 4
     init: str = "auto"
     n_init: int = 200000
-    target_accept: float = 0.9
+    target_accept: Optional[float] = None
 
 
 class VISamplingParameters(PyMC3SamplingParameters):

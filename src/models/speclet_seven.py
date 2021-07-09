@@ -246,18 +246,3 @@ class SpecletSeven(SpecletModel):
             self.shared_vars["cellline_idx_shared"]: cellline_idx_batch,
             self.shared_vars["lfc_shared"]: lfc_data_batch,
         }
-
-    def update_mcmc_sampling_parameters(self) -> None:
-        """Adjust the ADVI parameters depending on the state of the object."""
-        logger.info("Updating the MCMC sampling parameters.")
-        self.mcmc_sampling_params.draws = 4000
-        self.mcmc_sampling_params.tune = 2000
-        self.mcmc_sampling_params.target_accept = 0.99
-        return None
-
-    def update_advi_sampling_parameters(self) -> None:
-        """Adjust the ADVI parameters depending on the state of the object."""
-        logger.info("Updating the ADVI fitting parameters.")
-        parameter_adjustment_map = {True: 40000, False: 100000}
-        self.advi_sampling_params.n_iterations = parameter_adjustment_map[self.debug]
-        return None

@@ -270,16 +270,3 @@ class SpecletFour(SpecletModel):
                 every=10, tolerance=0.01, diff="relative"
             )
         ]
-
-    def update_mcmc_sampling_parameters(self) -> None:
-        """Adjust the ADVI parameters depending on the state of the object."""
-        self.mcmc_sampling_params.draws = 4000
-        self.mcmc_sampling_params.tune = 2000
-        self.mcmc_sampling_params.target_accept = 0.99
-        return None
-
-    def update_advi_sampling_parameters(self) -> None:
-        """Adjust the ADVI parameters depending on the state of the object."""
-        parameter_adjustment_map: Dict[bool, int] = {True: 40000, False: 100000}
-        self.advi_sampling_params.n_iterations = parameter_adjustment_map[self.debug]
-        return None

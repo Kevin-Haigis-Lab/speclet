@@ -79,19 +79,6 @@ class SpecletTestModel(SpecletModel):
             )
         return model, "y"
 
-    def update_mcmc_sampling_parameters(self) -> None:
-        """Adjust the ADVI parameters depending on the state of the object."""
-        self.mcmc_sampling_params.chains = 2
-        self.mcmc_sampling_params.draws = 1000
-        self.mcmc_sampling_params.tune = 1000
-        self.mcmc_sampling_params.target_accept = 0.85
-        return None
-
-    def update_advi_sampling_parameters(self) -> None:
-        """Adjust the ADVI parameters depending on the state of the object."""
-        self.advi_sampling_params.n_iterations = 10000
-        return None
-
     def update_observed_data(self, new_data: np.ndarray) -> None:
         """Do nothing for this testing model."""
         return None
