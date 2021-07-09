@@ -16,7 +16,7 @@ class SpecletOne(SpecletModel):
 
     $$
     \\begin{aligned}
-    lfc &\\sim h_s + d_{s,c} + \\beta_c C) + \\eta_b \\\\
+    lfc &\\sim h_s + d_{s,c} + \\beta_c C + \\eta_b \\\\
     h_s &\\sim N(\\mu_h, \\sigma_h)[\\text{gene}] \\\\
     d_{s,c} &\\sim N(\\mu_d, \\sigma_d)[\\text{gene}|\\text{cell line}] \\\\
     \\end{aligned}
@@ -59,7 +59,7 @@ class SpecletOne(SpecletModel):
             data_manager = CrcDataManager(debug=debug)
 
         super().__init__(
-            name="speclet-one_" + name,
+            name=name,
             root_cache_dir=root_cache_dir,
             debug=debug,
             data_manager=data_manager,

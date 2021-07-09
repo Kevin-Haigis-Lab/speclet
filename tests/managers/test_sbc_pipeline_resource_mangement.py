@@ -1,40 +1,73 @@
+from pathlib import Path
+
 import pytest
 
+from src import project_enums
+from src.io import model_config
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
-from src.modeling.simulation_based_calibration_enums import MockDataSizes
-from src.pipelines.pipeline_classes import ModelOption
-from src.project_enums import ModelFitMethod
+from src.project_enums import MockDataSize, ModelFitMethod, ModelOption, SlurmPartitions
+
+TEST_MODEL_NAME = "test-model"
 
 
-@pytest.mark.parametrize("model", [a.value for a in ModelOption])
-@pytest.mark.parametrize("fit_method", [a.value for a in ModelFitMethod])
-@pytest.mark.parametrize("data_size", [a.value for a in MockDataSizes])
-def test_resources_available_for_models_string_inputs(
-    model: str, fit_method: str, data_size: str
-):
-    rm = RM(
-        model=model,  # type: ignore
-        name="test-model",
-        mock_data_size=data_size,  # type: ignore
-        fit_method=fit_method,  # type: ignore
+def mock_get_configuration_for_model(*args, **kwargs) -> model_config.ModelConfig:
+    return model_config.ModelConfig(
+        name=TEST_MODEL_NAME,
+        description="A model for testing model fitting resource manager.",
+        model=ModelOption.SPECLET_TEST_MODEL,
+        fit_methods=[],
+        config={},
+        pipelines=[],
+        debug=True,
     )
+
+
+@pytest.fixture(autouse=True)
+def get_mock_configuration(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        model_config, "get_configuration_for_model", mock_get_configuration_for_model
+    )
+
+
+def check_resource_manager_requests(rm: RM, fit_method: ModelFitMethod):
     assert int(rm.memory) > 0
     assert rm.time is not None
-    assert rm.cores >= 1
+    assert SlurmPartitions(rm.partition) in SlurmPartitions
+    if fit_method is ModelFitMethod.ADVI:
+        assert rm.cores == 1
+    elif fit_method is ModelFitMethod.MCMC:
+        assert rm.cores > 1
+    else:
+        project_enums.assert_never(fit_method)
 
 
 @pytest.mark.parametrize("model", ModelOption)
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
-@pytest.mark.parametrize("data_size", MockDataSizes)
+@pytest.mark.parametrize("mock_data_size", MockDataSize)
 def test_resources_available_for_models(
-    model: ModelOption, fit_method: ModelFitMethod, data_size: MockDataSizes
+    model: ModelOption, fit_method: ModelFitMethod, mock_data_size: MockDataSize
 ):
     rm = RM(
-        model=model,  # type: ignore
-        name="test-model",
-        mock_data_size=data_size,  # type: ignore
-        fit_method=fit_method,  # type: ignore
+        name=TEST_MODEL_NAME,
+        mock_data_size=mock_data_size,
+        fit_method=fit_method,
+        config_path=Path("."),
     )
-    assert int(rm.memory) > 0
-    assert rm.time is not None
-    assert rm.cores >= 1
+    rm.config.model = model
+    check_resource_manager_requests(rm, fit_method)
+
+
+@pytest.mark.parametrize("model", ModelOption)
+@pytest.mark.parametrize("fit_method", ModelFitMethod)
+@pytest.mark.parametrize("mock_data_size", MockDataSize)
+def test_resources_available_for_models_wrong_types(
+    model: ModelOption, fit_method: ModelFitMethod, mock_data_size: MockDataSize
+):
+    rm = RM(
+        name=TEST_MODEL_NAME,  # type: ignore
+        mock_data_size=mock_data_size.value,  # type: ignore
+        fit_method=fit_method.value,  # type: ignore
+        config_path=Path(".").as_posix(),  # type: ignore
+    )
+    rm.config.model = model
+    check_resource_manager_requests(rm, fit_method)

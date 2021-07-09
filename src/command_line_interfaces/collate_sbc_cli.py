@@ -15,12 +15,6 @@ from src.pipelines import collate_sbc
 cli_helpers.configure_pretty()
 
 
-def _check_parent_dir(p: Path) -> None:
-    if not p.parent.exists():
-        p.parent.mkdir()
-    return None
-
-
 def collate_sbc_posteriors_cli(
     root_perm_dir: Path,
     output_path: Path,

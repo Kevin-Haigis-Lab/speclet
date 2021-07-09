@@ -49,7 +49,7 @@ def plot_all_priors(
     figsize: Tuple[float, float],
     samples: int = 1000,
     rm_var_regex: str = &#34;log__|logodds_&#34;,
-) -&gt; Tuple[matplotlib.figure.Figure, np.ndarray]:
+) -&gt; Tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]:
     &#34;&#34;&#34;Plot all priors of a PyMC3 model.
 
     Args:
@@ -168,7 +168,7 @@ def summarize_posterior_predictions(
     return d
 
 
-def plot_vi_hist(approx: pm.variational.Approximation) -&gt; gg.ggplot:
+def plot_vi_hist(approx: pm.Approximation, y_log: bool = False) -&gt; gg.ggplot:
     &#34;&#34;&#34;Plot the history of fitting using Variational Inference.
 
     Args:
@@ -178,13 +178,18 @@ def plot_vi_hist(approx: pm.variational.Approximation) -&gt; gg.ggplot:
     Returns:
         gg.ggplot: A plot showing the fitting history.
     &#34;&#34;&#34;
+    y = &#34;np.log(loss)&#34; if y_log else &#34;loss&#34;
     d = pd.DataFrame({&#34;loss&#34;: approx.hist}).assign(step=lambda d: np.arange(d.shape[0]))
     return (
-        gg.ggplot(d, gg.aes(x=&#34;step&#34;, y=&#34;loss&#34;))
+        gg.ggplot(d, gg.aes(x=&#34;step&#34;, y=y))
         + gg.geom_line(size=0.5, alpha=0.75, color=&#34;black&#34;)
         + gg.scale_y_continuous(expand=(0.02, 0, 0.02, 0))
         + gg.scale_x_continuous(expand=(0.02, 0, 0.02, 0))
-        + gg.labs(x=&#34;step&#34;, y=&#34;loss&#34;, title=&#34;Approximation history&#34;)
+        + gg.labs(
+            x=&#34;step&#34;,
+            y=&#34;$\\log$ loss&#34; if y_log else &#34;loss&#34;,
+            title=&#34;Approximation history&#34;,
+        )
     )
 
 
@@ -306,7 +311,7 @@ PyMC3 model.</dd>
 </details>
 </dd>
 <dt id="src.modeling.pymc3_analysis.plot_all_priors"><code class="name flex">
-<span>def <span class="ident">plot_all_priors</span></span>(<span>prior_predictive: Dict[str, numpy.ndarray], subplots: Tuple[int, int], figsize: Tuple[float, float], samples: int = 1000, rm_var_regex: str = 'log__|logodds_') -> Tuple[matplotlib.figure.Figure, numpy.ndarray]</span>
+<span>def <span class="ident">plot_all_priors</span></span>(<span>prior_predictive: Dict[str, numpy.ndarray], subplots: Tuple[int, int], figsize: Tuple[float, float], samples: int = 1000, rm_var_regex: str = 'log__|logodds_') -> Tuple[matplotlib.figure.Figure, matplotlib.axes._axes.Axes]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Plot all priors of a PyMC3 model.</p>
@@ -343,7 +348,7 @@ of axes.</dd>
     figsize: Tuple[float, float],
     samples: int = 1000,
     rm_var_regex: str = &#34;log__|logodds_&#34;,
-) -&gt; Tuple[matplotlib.figure.Figure, np.ndarray]:
+) -&gt; Tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]:
     &#34;&#34;&#34;Plot all priors of a PyMC3 model.
 
     Args:
@@ -379,7 +384,7 @@ of axes.</dd>
 </details>
 </dd>
 <dt id="src.modeling.pymc3_analysis.plot_vi_hist"><code class="name flex">
-<span>def <span class="ident">plot_vi_hist</span></span>(<span>approx: pymc3.variational.opvi.Approximation) -> plotnine.ggplot.ggplot</span>
+<span>def <span class="ident">plot_vi_hist</span></span>(<span>approx: pymc3.variational.opvi.Approximation, y_log: bool = False) -> plotnine.ggplot.ggplot</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Plot the history of fitting using Variational Inference.</p>
@@ -398,7 +403,7 @@ VI object.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot_vi_hist(approx: pm.variational.Approximation) -&gt; gg.ggplot:
+<pre><code class="python">def plot_vi_hist(approx: pm.Approximation, y_log: bool = False) -&gt; gg.ggplot:
     &#34;&#34;&#34;Plot the history of fitting using Variational Inference.
 
     Args:
@@ -408,13 +413,18 @@ VI object.</dd>
     Returns:
         gg.ggplot: A plot showing the fitting history.
     &#34;&#34;&#34;
+    y = &#34;np.log(loss)&#34; if y_log else &#34;loss&#34;
     d = pd.DataFrame({&#34;loss&#34;: approx.hist}).assign(step=lambda d: np.arange(d.shape[0]))
     return (
-        gg.ggplot(d, gg.aes(x=&#34;step&#34;, y=&#34;loss&#34;))
+        gg.ggplot(d, gg.aes(x=&#34;step&#34;, y=y))
         + gg.geom_line(size=0.5, alpha=0.75, color=&#34;black&#34;)
         + gg.scale_y_continuous(expand=(0.02, 0, 0.02, 0))
         + gg.scale_x_continuous(expand=(0.02, 0, 0.02, 0))
-        + gg.labs(x=&#34;step&#34;, y=&#34;loss&#34;, title=&#34;Approximation history&#34;)
+        + gg.labs(
+            x=&#34;step&#34;,
+            y=&#34;$\\log$ loss&#34; if y_log else &#34;loss&#34;,
+            title=&#34;Approximation history&#34;,
+        )
     )</code></pre>
 </details>
 </dd>

@@ -1,57 +1,77 @@
 """Various functions used in many test modules."""
 
-#### ---- src.models ---- ####
+from typing import Callable, Optional
 
-from random import choices
-from typing import List, Optional, Tuple, Type, TypeVar
+from pydantic import BaseModel
 
-from src.models.speclet_five import SpecletFiveParameterization
-from src.models.speclet_four import SpecletFourParameterization
-from src.models.speclet_seven import SpecletSevenParameterization
-from src.models.speclet_six import SpecletSixParameterization
+from src.modeling import pymc3_helpers as pmhelp
+from src.models.speclet_model import SpecletModel
 from src.project_enums import ModelParameterization as MP
 
-_ParameterizationT = TypeVar(
-    "_ParameterizationT",
-    SpecletFourParameterization,
-    SpecletFiveParameterization,
-    SpecletSixParameterization,
-    SpecletSevenParameterization,
-)
-
-_param_options: List[MP] = [MP.CENTERED, MP.NONCENTERED]
+#### ---- General ---- ####
 
 
-def generate_model_parameterizations(
-    param_class: Type[_ParameterizationT],
-    n_randoms: int,
-    param_options: Optional[List[MP]] = None,
-) -> List[_ParameterizationT]:
-    """Generate k random parameterization configurations.
-
-    Args:
-        param_class (Type[_ParameterizationT]): The parameterization class to use.
-        n_randoms (int): Number of configurations to make. Since the process is random
-          and duplicates are removed, there may be fewer than `k` configurations in
-          the end.
-        param_options (Optional[List[MP]], optional): Options to use for
-          parameterization values. Defaults to `None` which uses a default list
-          of `ModelParameterization`.
+def do_nothing(*args, **kwargs) -> None:
+    """Take any arguments and do nothing.
 
     Returns:
-        List[_ParameterizationT]: A list of unique parameterization configurations.
+        None: None
     """
-    if param_options is None:
-        param_options = _param_options
+    return None
 
-    k = len(param_class._fields)
-    mp_idx_tuples: List[Tuple[int, ...]] = [
-        tuple(choices((0, 1), k=k)) for _ in range(n_randoms)
-    ]
-    mp_idx_tuples = list(set(mp_idx_tuples))
 
-    model_parameterizations: List[_ParameterizationT] = [
-        param_class(*[param_options[arg] for arg in args]) for args in mp_idx_tuples
-    ]
+#### ---- src.models ---- ####
 
-    return model_parameterizations
+
+def assert_changing_configuration_resets_model(
+    sp_model: SpecletModel, new_config: BaseModel, default_config: BaseModel
+) -> None:
+    """Test that changing a speclet model's config resets the model.
+
+    Also checks that if the configuration file does not change, then the model should
+    not reset.
+
+    Args:
+        sp_model (SpecletModel): Speclet model instance.
+        new_config (BaseModel): New configuration file.
+        default_config (BaseModel): The default configuration file.
+    """
+    assert sp_model.model is None
+    sp_model.build_model()
+    assert sp_model.model is not None
+    sp_model.set_config(new_config.dict())
+    if new_config == default_config:
+        assert sp_model.model is not None
+    else:
+        assert sp_model.model is None
+
+
+PreCheckCallback = Callable[[str, str], bool]
+
+
+def assert_model_reparameterization(
+    sp_model: SpecletModel,
+    config: BaseModel,
+    pre_check_callback: Optional[PreCheckCallback] = None,
+) -> None:
+    """Assert that parameterizations in the config result in changes in the model.
+
+    Args:
+        sp_model (SpecletModel): Speclet model instance.
+        config (BaseModel): Configuration file.
+        pre_check_callback (Optional[PreCheckCallback], optional): A callable object
+          (e.g. function) that is called before each parameterization check. If it
+          returns `True`, the check is skipped. Defaults to None.
+    """
+    assert sp_model.model is None
+    sp_model.build_model()
+    assert sp_model.model is not None
+    rv_names = pmhelp.get_random_variable_names(sp_model.model)
+    unobs_names = pmhelp.get_deterministic_variable_names(sp_model.model)
+    for param_name, param_method in config.dict().items():
+        if pre_check_callback is not None and pre_check_callback(
+            param_name, param_method
+        ):
+            continue
+        assert (param_name in set(rv_names)) == (param_method is MP.CENTERED)
+        assert (param_name in set(unobs_names)) == (param_method is MP.NONCENTERED)

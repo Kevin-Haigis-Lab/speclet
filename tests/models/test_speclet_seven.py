@@ -1,19 +1,13 @@
 from pathlib import Path
-from typing import List
+from typing import Tuple
 
 import pytest
+from hypothesis import HealthCheck, given, settings
+from hypothesis import strategies as st
 
 from src.managers.model_data_managers import CrcDataManager
-from src.misc.test_helpers import generate_model_parameterizations
-from src.modeling import pymc3_helpers as pmhelp
-from src.models.speclet_seven import SpecletSeven, SpecletSevenParameterization
-from src.project_enums import ModelParameterization as MP
-
-model_parameterizations: List[
-    SpecletSevenParameterization
-] = generate_model_parameterizations(
-    param_class=SpecletSevenParameterization, n_randoms=10
-)
+from src.misc import test_helpers as th
+from src.models.speclet_seven import SpecletSeven, SpecletSevenConfiguration
 
 
 @pytest.fixture(autouse=True)
@@ -47,7 +41,7 @@ class TestSpecletSeven:
 
         if fit_method == "mcmc":
             fit_res = sp7.mcmc_sample_model(
-                mcmc_draws=n_draws,
+                draws=n_draws,
                 tune=10,
                 chains=n_chains,
                 cores=n_chains,
@@ -72,26 +66,45 @@ class TestSpecletSeven:
         for p in self.top_priors:
             assert fit_res.posterior[p].shape == (n_chains, n_draws)
 
-    @pytest.mark.parametrize("model_param", model_parameterizations)
+    @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @given(config=st.builds(SpecletSevenConfiguration))
+    def test_changing_configuration_resets_model(
+        self,
+        tmp_path: Path,
+        mock_crc_dm: CrcDataManager,
+        config: SpecletSevenConfiguration,
+        monkeypatch: pytest.MonkeyPatch,
+    ):
+        def mock_build_model(*args, **kwargs) -> Tuple[str, str]:
+            return "my-test-model", "another-string"
+
+        monkeypatch.setattr(SpecletSeven, "model_specification", mock_build_model)
+        sp7 = SpecletSeven(
+            "test-model",
+            root_cache_dir=tmp_path,
+            debug=True,
+            data_manager=mock_crc_dm,
+        )
+        th.assert_changing_configuration_resets_model(
+            sp7, new_config=config, default_config=SpecletSevenConfiguration()
+        )
+
+    @settings(
+        settings.get_profile("slow-adaptive"),
+        suppress_health_check=[HealthCheck.function_scoped_fixture],
+    )
+    @given(config=st.builds(SpecletSevenConfiguration))
     def test_model_parameterizations(
         self,
         tmp_path: Path,
-        model_param: SpecletSevenParameterization,
+        mock_crc_dm: CrcDataManager,
+        config: SpecletSevenConfiguration,
     ):
         sp7 = SpecletSeven(
             "test-model",
             root_cache_dir=tmp_path,
             debug=True,
-            data_manager=CrcDataManager(),
-            parameterization=model_param,
+            data_manager=mock_crc_dm,
+            config=config,
         )
-        assert sp7.model is None
-        sp7.build_model()
-        assert sp7.model is not None
-
-        rv_names = pmhelp.get_random_variable_names(sp7.model)
-        unobs_names = pmhelp.get_deterministic_variable_names(sp7.model)
-
-        for param_name, param_method in zip(model_param._fields, model_param):
-            assert (param_name in set(rv_names)) == (param_method is MP.CENTERED)
-            assert (param_name in set(unobs_names)) == (param_method is MP.NONCENTERED)
+        th.assert_model_reparameterization(sp7, config=config)

@@ -1,10 +1,11 @@
 """Speclet Model Four."""
 
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import pymc3 as pm
 import theano
+from pydantic import BaseModel
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 from src.data_processing import achilles as achelp
@@ -14,9 +15,10 @@ from src.models.speclet_model import ReplacementsDict, SpecletModel
 from src.project_enums import ModelParameterization as MP
 
 
-class SpecletFourParameterization(NamedTuple):
+class SpecletFourConfiguration(BaseModel):
     """Parameterizations for each covariate in SpecletFour model."""
 
+    copy_number_cov: bool = False
     h: MP = MP.CENTERED
     d: MP = MP.CENTERED
     β: MP = MP.CENTERED
@@ -39,16 +41,10 @@ class SpecletFour(SpecletModel):
 
     A simple model with a separate consistent gene effect \\(h_g\\) and cell-line
     varying gene effect \\(d_{g,c}\\). The coefficient for copy number effect
-    \\(\\beta_c\\) varies by cell line and is optional. There is an option for a
-    centered and non-centered parameterization.
-
-    Attributes:
-        parameterization (SpecletFourParameterization): Options for parameterization of
-          individual covariates.
-        copy_number_cov (bool): Include the copy number coefficient.
+    \\(\\beta_c\\) varies by cell line and is optional.
     """
 
-    _copy_number_cov: bool
+    config: SpecletFourConfiguration
 
     def __init__(
         self,
@@ -56,8 +52,7 @@ class SpecletFour(SpecletModel):
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
-        copy_number_cov: bool = False,
-        parameterization: SpecletFourParameterization = SpecletFourParameterization(),
+        config: Optional[SpecletFourConfiguration] = None,
     ):
         """Instantiate a SpecletFour model.
 
@@ -69,40 +64,27 @@ class SpecletFour(SpecletModel):
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. If None (default), a `CrcDataManager` is created automatically.
-            copy_number_cov (bool, optional): Should the covariate for gene copy number
-              effect be included in the model? The covariate varies by cell line.
-              Defaults to False.
-            parameterization (SpecletFourParameterization, optional): Covariate-specific
-              parameterization options.
+            config (Optional[SpecletFourConfiguration], optional): Model configuration.
         """
         if data_manager is None:
             data_manager = CrcDataManager(debug=debug)
 
-        self.parameterization = parameterization
-        self._copy_number_cov = copy_number_cov
+        self.config = config if config is not None else SpecletFourConfiguration()
 
         super().__init__(
-            name="speclet-four_" + name,
+            name=name,
             root_cache_dir=root_cache_dir,
             debug=debug,
             data_manager=data_manager,
         )
 
-    @property
-    def copy_number_cov(self) -> bool:
-        """Value of `copy_number_cov` attribute."""
-        return self._copy_number_cov
-
-    @copy_number_cov.setter
-    def copy_number_cov(self, new_value: bool) -> None:
-        """Set the value of `copy_number_cov` attribute.
-
-        If the new value is different, all model and sampling results are reset.
-        """
-        if new_value != self._copy_number_cov:
-            logger.info(f"Changing `copy_number_cov` attribute to '{new_value}'.")
-            self._copy_number_cov = new_value
-            self._reset_model_and_results()
+    def set_config(self, info: Dict[Any, Any]) -> None:
+        """Set model-specific configuration."""
+        new_config = SpecletFourConfiguration(**info)
+        if self.config is not None and self.config != new_config:
+            logger.info("Setting model-specific configuration.")
+            self.config = new_config
+            self.model = None
 
     def _model_specification(
         self,
@@ -130,19 +112,19 @@ class SpecletFour(SpecletModel):
             σ_η = pm.HalfNormal("σ_η", 0.5)
 
             # Copy number varying effect.
-            if self.copy_number_cov:
+            if self.config.copy_number_cov:
                 μ_β = pm.Normal("μ_β", -0.5, 1)
                 σ_β = pm.Normal("σ_β", -0.5, 1)
 
             # Gene varying intercept.
-            if self.parameterization.h is MP.NONCENTERED:
+            if self.config.h is MP.NONCENTERED:
                 h_offset = pm.Normal("h_offset", 0, 1, shape=co_idx.n_genes)
                 h = pm.Deterministic("h", μ_h + h_offset * σ_h)
             else:
                 h = pm.Normal("h", μ_h, σ_h, shape=co_idx.n_genes)
 
             # [gene, cell line] varying intercept.
-            if self.parameterization.d is MP.NONCENTERED:
+            if self.config.d is MP.NONCENTERED:
                 d_offset = pm.Normal(
                     "d_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_celllines)
                 )
@@ -151,7 +133,7 @@ class SpecletFour(SpecletModel):
                 d = pm.Normal("d", μ_d, σ_d, shape=(co_idx.n_genes, co_idx.n_celllines))
 
             # Batch effect varying intercept.
-            if self.parameterization.η is MP.NONCENTERED:
+            if self.config.η is MP.NONCENTERED:
                 η_offset = pm.Normal("η_offset", 0, 1, shape=batch_idx.n_batches)
                 η = pm.Deterministic("η", μ_η + η_offset * σ_η)
             else:
@@ -164,8 +146,8 @@ class SpecletFour(SpecletModel):
             )
 
             # Copy number effect varying by cell line.
-            if self.copy_number_cov:
-                if self.parameterization.β is MP.NONCENTERED:
+            if self.config.copy_number_cov:
+                if self.config.β is MP.NONCENTERED:
                     β_offset = pm.Normal("β_offset", 0, 1, shape=co_idx.n_celllines)
                     β = pm.Deterministic("β", μ_β + β_offset * σ_β)
                 else:
@@ -254,17 +236,22 @@ class SpecletFour(SpecletModel):
 
         data = self.data_manager.get_data()
         batch_size = self.data_manager.get_batch_size()
-        ic = achelp.common_indices(data)
+        co_idx = achelp.common_indices(data)
+        batch_idx = achelp.data_batch_indices(data)
 
-        gene_idx_batch = pm.Minibatch(ic.gene_idx, batch_size=batch_size)
-        cellline_idx_batch = pm.Minibatch(ic.cellline_idx, batch_size=batch_size)
-        batch_idx_batch = pm.Minibatch(ic.batch_idx, batch_size=batch_size)
+        sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=batch_size)
+        gene_idx_batch = pm.Minibatch(co_idx.gene_idx, batch_size=batch_size)
+        cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=batch_size)
+        batch_idx_batch = pm.Minibatch(batch_idx.batch_idx, batch_size=batch_size)
+        cn_data_batch = pm.Minibatch(data.copy_number.values, batch_size=batch_size)
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
         return {
+            self.shared_vars["sgrna_idx_shared"]: sgrna_idx_batch,
             self.shared_vars["gene_idx_shared"]: gene_idx_batch,
             self.shared_vars["cellline_idx_shared"]: cellline_idx_batch,
             self.shared_vars["batch_idx_shared"]: batch_idx_batch,
+            self.shared_vars["cn_shared"]: cn_data_batch,
             self.shared_vars["lfc_shared"]: lfc_data_batch,
         }
 
@@ -283,16 +270,3 @@ class SpecletFour(SpecletModel):
                 every=10, tolerance=0.01, diff="relative"
             )
         ]
-
-    def update_mcmc_sampling_parameters(self) -> None:
-        """Adjust the ADVI parameters depending on the state of the object."""
-        self.mcmc_sampling_params.draws = 4000
-        self.mcmc_sampling_params.tune = 2000
-        self.mcmc_sampling_params.target_accept = 0.99
-        return None
-
-    def update_advi_sampling_parameters(self) -> None:
-        """Adjust the ADVI parameters depending on the state of the object."""
-        parameter_adjustment_map: Dict[bool, int] = {True: 40000, False: 100000}
-        self.advi_sampling_params.n_iterations = parameter_adjustment_map[self.debug]
-        return None

@@ -29,138 +29,137 @@
 <pre><code class="python">&#34;&#34;&#34;Utilities for snakemake workflow: 010_010_run-crc-sampling-snakemake.&#34;&#34;&#34;
 
 from datetime import timedelta as td
+from pathlib import Path
 from typing import Dict, TypeVar
 
 from pydantic import validate_arguments
 
-from src.pipelines.pipeline_classes import ModelOption, SlurmPartitions
-from src.project_enums import ModelFitMethod
+from src import formatting
+from src.exceptions import ResourceRequestUnkown
+from src.io import model_config
+from src.managers import pipeline_resource_manager as prm
+from src.managers.pipeline_resource_manager import PipelineResourceManager
+from src.project_enums import ModelFitMethod, ModelOption
 
 T = TypeVar(&#34;T&#34;)
 ResourceLookupDict = Dict[ModelOption, Dict[bool, Dict[ModelFitMethod, T]]]
 
 # RAM required for each configuration (in GB -&gt; mult by 1000).
 #   key: [model][debug][fit_method]
-sample_models_memory_lookup: ResourceLookupDict[int] = {
-    ModelOption.speclet_test_model: {
-        True: {ModelFitMethod.advi: 8, ModelFitMethod.mcmc: 8},
-        False: {ModelFitMethod.advi: 8, ModelFitMethod.mcmc: 8},
+MemoryLookupDict = ResourceLookupDict[int]
+
+# Time required for each configuration.
+#   key: [model][debug][fit_method]
+TimeLookupDict = ResourceLookupDict[td]
+
+fitting_pipeline_memory_lookup: MemoryLookupDict = {
+    ModelOption.SPECLET_TEST_MODEL: {
+        True: {ModelFitMethod.ADVI: 8, ModelFitMethod.MCMC: 8},
+        False: {ModelFitMethod.ADVI: 8, ModelFitMethod.MCMC: 8},
     },
-    ModelOption.crc_ceres_mimic: {
-        True: {ModelFitMethod.advi: 15, ModelFitMethod.mcmc: 20},
-        False: {ModelFitMethod.advi: 20, ModelFitMethod.mcmc: 40},
+    ModelOption.CRC_CERES_MIMIC: {
+        True: {ModelFitMethod.ADVI: 15, ModelFitMethod.MCMC: 20},
+        False: {ModelFitMethod.ADVI: 20, ModelFitMethod.MCMC: 40},
     },
-    ModelOption.speclet_one: {
-        True: {ModelFitMethod.advi: 7, ModelFitMethod.mcmc: 30},
-        False: {ModelFitMethod.advi: 40, ModelFitMethod.mcmc: 150},
+    ModelOption.SPECLET_ONE: {
+        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 30},
+        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
-    ModelOption.speclet_two: {
-        True: {ModelFitMethod.advi: 7, ModelFitMethod.mcmc: 30},
-        False: {ModelFitMethod.advi: 40, ModelFitMethod.mcmc: 150},
+    ModelOption.SPECLET_TWO: {
+        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 30},
+        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
-    ModelOption.speclet_three: {
-        True: {ModelFitMethod.advi: 7, ModelFitMethod.mcmc: 60},
-        False: {ModelFitMethod.advi: 40, ModelFitMethod.mcmc: 150},
+    ModelOption.SPECLET_FOUR: {
+        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 60},
+        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
-    ModelOption.speclet_four: {
-        True: {ModelFitMethod.advi: 7, ModelFitMethod.mcmc: 60},
-        False: {ModelFitMethod.advi: 40, ModelFitMethod.mcmc: 150},
+    ModelOption.SPECLET_FIVE: {
+        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 60},
+        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
-    ModelOption.speclet_five: {
-        True: {ModelFitMethod.advi: 7, ModelFitMethod.mcmc: 60},
-        False: {ModelFitMethod.advi: 40, ModelFitMethod.mcmc: 150},
+    ModelOption.SPECLET_SIX: {
+        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 60},
+        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
-    ModelOption.speclet_six: {
-        True: {ModelFitMethod.advi: 7, ModelFitMethod.mcmc: 60},
-        False: {ModelFitMethod.advi: 40, ModelFitMethod.mcmc: 150},
-    },
-    ModelOption.speclet_seven: {
-        True: {ModelFitMethod.advi: 7, ModelFitMethod.mcmc: 60},
-        False: {ModelFitMethod.advi: 40, ModelFitMethod.mcmc: 150},
+    ModelOption.SPECLET_SEVEN: {
+        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 60},
+        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
 }
 
 
 # Time required for each configuration.
 #   key: [model][debug][fit_method]
-sample_models_time_lookup: ResourceLookupDict[td] = {
-    ModelOption.speclet_test_model: {
-        True: {ModelFitMethod.advi: td(minutes=5), ModelFitMethod.mcmc: td(minutes=5)},
+fitting_pipeline_time_lookup: TimeLookupDict = {
+    ModelOption.SPECLET_TEST_MODEL: {
+        True: {ModelFitMethod.ADVI: td(minutes=5), ModelFitMethod.MCMC: td(minutes=5)},
         False: {
-            ModelFitMethod.advi: td(minutes=10),
-            ModelFitMethod.mcmc: td(minutes=10),
+            ModelFitMethod.ADVI: td(minutes=10),
+            ModelFitMethod.MCMC: td(minutes=10),
         },
     },
-    ModelOption.crc_ceres_mimic: {
+    ModelOption.CRC_CERES_MIMIC: {
         True: {
-            ModelFitMethod.advi: td(minutes=30),
-            ModelFitMethod.mcmc: td(minutes=30),
+            ModelFitMethod.ADVI: td(minutes=30),
+            ModelFitMethod.MCMC: td(minutes=30),
         },
-        False: {ModelFitMethod.advi: td(hours=3), ModelFitMethod.mcmc: td(hours=6)},
+        False: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(hours=6)},
     },
-    ModelOption.speclet_one: {
-        True: {ModelFitMethod.advi: td(minutes=30), ModelFitMethod.mcmc: td(hours=8)},
-        False: {ModelFitMethod.advi: td(hours=12), ModelFitMethod.mcmc: td(days=2)},
+    ModelOption.SPECLET_ONE: {
+        True: {ModelFitMethod.ADVI: td(minutes=30), ModelFitMethod.MCMC: td(hours=8)},
+        False: {ModelFitMethod.ADVI: td(hours=12), ModelFitMethod.MCMC: td(days=2)},
     },
-    ModelOption.speclet_two: {
-        True: {ModelFitMethod.advi: td(minutes=30), ModelFitMethod.mcmc: td(hours=8)},
-        False: {ModelFitMethod.advi: td(hours=12), ModelFitMethod.mcmc: td(days=2)},
+    ModelOption.SPECLET_TWO: {
+        True: {ModelFitMethod.ADVI: td(minutes=30), ModelFitMethod.MCMC: td(hours=8)},
+        False: {ModelFitMethod.ADVI: td(hours=12), ModelFitMethod.MCMC: td(days=2)},
     },
-    ModelOption.speclet_three: {
-        True: {ModelFitMethod.advi: td(minutes=30), ModelFitMethod.mcmc: td(days=1)},
-        False: {ModelFitMethod.advi: td(hours=10), ModelFitMethod.mcmc: td(days=2)},
+    ModelOption.SPECLET_FOUR: {
+        True: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(days=1)},
+        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
-    ModelOption.speclet_four: {
-        True: {ModelFitMethod.advi: td(hours=3), ModelFitMethod.mcmc: td(days=1)},
-        False: {ModelFitMethod.advi: td(hours=10), ModelFitMethod.mcmc: td(days=2)},
+    ModelOption.SPECLET_FIVE: {
+        True: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(days=1)},
+        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
-    ModelOption.speclet_five: {
-        True: {ModelFitMethod.advi: td(hours=3), ModelFitMethod.mcmc: td(days=1)},
-        False: {ModelFitMethod.advi: td(hours=10), ModelFitMethod.mcmc: td(days=2)},
+    ModelOption.SPECLET_SIX: {
+        True: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(days=1)},
+        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
-    ModelOption.speclet_six: {
-        True: {ModelFitMethod.advi: td(hours=3), ModelFitMethod.mcmc: td(days=1)},
-        False: {ModelFitMethod.advi: td(hours=10), ModelFitMethod.mcmc: td(days=2)},
-    },
-    ModelOption.speclet_seven: {
-        True: {ModelFitMethod.advi: td(hours=3), ModelFitMethod.mcmc: td(days=1)},
-        False: {ModelFitMethod.advi: td(hours=10), ModelFitMethod.mcmc: td(days=2)},
+    ModelOption.SPECLET_SEVEN: {
+        True: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(days=1)},
+        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
 }
 
 
-class ResourceRequestUnkown(NotImplementedError):
-    &#34;&#34;&#34;Exception raised when a resource request cannot be fullfilled.&#34;&#34;&#34;
-
-    pass
-
-
-class ModelFittingPipelineResourceManager:
+class ModelFittingPipelineResourceManager(PipelineResourceManager):
     &#34;&#34;&#34;Resource manager for the pipeline to fit models on O2.&#34;&#34;&#34;
 
-    model: ModelOption
     name: str
     fit_method: ModelFitMethod
-    debug: bool
+    config_path: Path
+    config: model_config.ModelConfig
 
     @validate_arguments
     def __init__(
-        self,
-        model: ModelOption,
-        name: str,
-        fit_method: ModelFitMethod,
+        self, name: str, fit_method: ModelFitMethod, config_path: Path
     ) -&gt; None:
         &#34;&#34;&#34;Create a resource manager of the model-fitting pipeline.
 
         Args:
-            model (ModelOption): Type of model being bit.
             name (str): Identifiable and descriptive name of the model.
             fit_method (ModelFitMethod): Method being used to fit the model.
+            config_path (Path): Path to a model configuration file.
         &#34;&#34;&#34;
-        self.model = model
         self.name = name
         self.fit_method = fit_method
-        self.debug = self._is_debug()
+        self.config_path = config_path
+        _config = model_config.get_configuration_for_model(
+            self.config_path, name=self.name
+        )
+        if _config is None:
+            raise model_config.ModelConfigurationNotFound(self.name)
+        self.config = _config
 
     @property
     def memory(self) -&gt; str:
@@ -169,12 +168,7 @@ class ModelFittingPipelineResourceManager:
         Returns:
             str: Amount of RAM required.
         &#34;&#34;&#34;
-        try:
-            return self._retrieve_memory_requirement()
-        except Exception:
-            raise ResourceRequestUnkown(
-                f&#34;Unable to request memory from &#39;{self.model.value}&#39;.&#34;
-            )
+        return self._retrieve_memory_requirement()
 
     @property
     def time(self) -&gt; str:
@@ -183,13 +177,8 @@ class ModelFittingPipelineResourceManager:
         Returns:
             str: Amount of time required.
         &#34;&#34;&#34;
-        try:
-            duration = self._retrieve_time_requirement()
-            return self._format_duration_for_slurm(duration)
-        except Exception:
-            raise ResourceRequestUnkown(
-                f&#34;No time known for model &#39;{self.model.value}&#39;.&#34;
-            )
+        duration = self._retrieve_time_requirement()
+        return self._format_duration_for_slurm(duration)
 
     @property
     def partition(self) -&gt; str:
@@ -198,36 +187,49 @@ class ModelFittingPipelineResourceManager:
         Returns:
             str: The partition to request from SLURM.
         &#34;&#34;&#34;
-        return self._decide_partition_requirement().value
+        return prm.slurm_partition_required_for_duration(
+            self._retrieve_time_requirement()
+        ).value
 
-    def _decide_partition_requirement(self) -&gt; SlurmPartitions:
-        &#34;&#34;&#34;Time O2 partition for the `sample_models` step.&#34;&#34;&#34;
-        duration = self._retrieve_time_requirement()
-        if duration &lt;= td(hours=12):
-            return SlurmPartitions.short
-        elif duration &lt;= td(days=5):
-            return SlurmPartitions.medium
-        else:
-            return SlurmPartitions.long
+    @property
+    def cores(self) -&gt; int:
+        &#34;&#34;&#34;Compute cores request.
+
+        Returns:
+            int: Number of cores.
+        &#34;&#34;&#34;
+        return 1
 
     def _retrieve_memory_requirement(self) -&gt; str:
-        return str(
-            sample_models_memory_lookup[self.model][self.debug][self.fit_method] * 1000
-        )
+        try:
+            mem = fitting_pipeline_memory_lookup[self.config.model][self.debug][
+                self.fit_method
+            ]
+            return str(mem * 1000)
+        except KeyError as err:
+            raise ResourceRequestUnkown(&#34;memory&#34;, err.args[0])
 
     def _retrieve_time_requirement(self) -&gt; td:
-        return sample_models_time_lookup[self.model][self.debug][self.fit_method]
+        try:
+            return fitting_pipeline_time_lookup[self.config.model][self.debug][
+                self.fit_method
+            ]
+        except KeyError as err:
+            raise ResourceRequestUnkown(&#34;time&#34;, err.args[0])
 
     def _format_duration_for_slurm(self, duration: td) -&gt; str:
-        return str(duration).replace(&#34; day, &#34;, &#34;-&#34;).replace(&#34; days, &#34;, &#34;-&#34;)
+        return formatting.format_timedelta(
+            duration, fmt=formatting.TimeDeltaFormat.DRMAA
+        )
 
-    def _is_debug(self) -&gt; bool:
+    @property
+    def debug(self) -&gt; bool:
         &#34;&#34;&#34;Determine the debug status of model name.
 
         Returns:
             bool: Whether or not the model should be in debug mode.
         &#34;&#34;&#34;
-        return &#34;debug&#34; in self.name
+        return self.config.debug
 
     def is_debug_cli(self):
         &#34;&#34;&#34;Get the correct flag for indicating debug mode through a CLI.
@@ -249,50 +251,52 @@ class ModelFittingPipelineResourceManager:
 <dl>
 <dt id="src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager"><code class="flex name class">
 <span>class <span class="ident">ModelFittingPipelineResourceManager</span></span>
-<span>(</span><span>model: <a title="src.pipelines.pipeline_classes.ModelOption" href="../pipelines/pipeline_classes.html#src.pipelines.pipeline_classes.ModelOption">ModelOption</a>, name: str, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>)</span>
+<span>(</span><span>name: str, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, config_path: pathlib.Path)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Resource manager for the pipeline to fit models on O2.</p>
 <p>Create a resource manager of the model-fitting pipeline.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>model</code></strong> :&ensp;<code>ModelOption</code></dt>
-<dd>Type of model being bit.</dd>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
 <dd>Identifiable and descriptive name of the model.</dd>
 <dt><strong><code>fit_method</code></strong> :&ensp;<code>ModelFitMethod</code></dt>
 <dd>Method being used to fit the model.</dd>
+<dt><strong><code>config_path</code></strong> :&ensp;<code>Path</code></dt>
+<dd>Path to a model configuration file.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class ModelFittingPipelineResourceManager:
+<pre><code class="python">class ModelFittingPipelineResourceManager(PipelineResourceManager):
     &#34;&#34;&#34;Resource manager for the pipeline to fit models on O2.&#34;&#34;&#34;
 
-    model: ModelOption
     name: str
     fit_method: ModelFitMethod
-    debug: bool
+    config_path: Path
+    config: model_config.ModelConfig
 
     @validate_arguments
     def __init__(
-        self,
-        model: ModelOption,
-        name: str,
-        fit_method: ModelFitMethod,
+        self, name: str, fit_method: ModelFitMethod, config_path: Path
     ) -&gt; None:
         &#34;&#34;&#34;Create a resource manager of the model-fitting pipeline.
 
         Args:
-            model (ModelOption): Type of model being bit.
             name (str): Identifiable and descriptive name of the model.
             fit_method (ModelFitMethod): Method being used to fit the model.
+            config_path (Path): Path to a model configuration file.
         &#34;&#34;&#34;
-        self.model = model
         self.name = name
         self.fit_method = fit_method
-        self.debug = self._is_debug()
+        self.config_path = config_path
+        _config = model_config.get_configuration_for_model(
+            self.config_path, name=self.name
+        )
+        if _config is None:
+            raise model_config.ModelConfigurationNotFound(self.name)
+        self.config = _config
 
     @property
     def memory(self) -&gt; str:
@@ -301,12 +305,7 @@ class ModelFittingPipelineResourceManager:
         Returns:
             str: Amount of RAM required.
         &#34;&#34;&#34;
-        try:
-            return self._retrieve_memory_requirement()
-        except Exception:
-            raise ResourceRequestUnkown(
-                f&#34;Unable to request memory from &#39;{self.model.value}&#39;.&#34;
-            )
+        return self._retrieve_memory_requirement()
 
     @property
     def time(self) -&gt; str:
@@ -315,13 +314,8 @@ class ModelFittingPipelineResourceManager:
         Returns:
             str: Amount of time required.
         &#34;&#34;&#34;
-        try:
-            duration = self._retrieve_time_requirement()
-            return self._format_duration_for_slurm(duration)
-        except Exception:
-            raise ResourceRequestUnkown(
-                f&#34;No time known for model &#39;{self.model.value}&#39;.&#34;
-            )
+        duration = self._retrieve_time_requirement()
+        return self._format_duration_for_slurm(duration)
 
     @property
     def partition(self) -&gt; str:
@@ -330,36 +324,49 @@ class ModelFittingPipelineResourceManager:
         Returns:
             str: The partition to request from SLURM.
         &#34;&#34;&#34;
-        return self._decide_partition_requirement().value
+        return prm.slurm_partition_required_for_duration(
+            self._retrieve_time_requirement()
+        ).value
 
-    def _decide_partition_requirement(self) -&gt; SlurmPartitions:
-        &#34;&#34;&#34;Time O2 partition for the `sample_models` step.&#34;&#34;&#34;
-        duration = self._retrieve_time_requirement()
-        if duration &lt;= td(hours=12):
-            return SlurmPartitions.short
-        elif duration &lt;= td(days=5):
-            return SlurmPartitions.medium
-        else:
-            return SlurmPartitions.long
+    @property
+    def cores(self) -&gt; int:
+        &#34;&#34;&#34;Compute cores request.
+
+        Returns:
+            int: Number of cores.
+        &#34;&#34;&#34;
+        return 1
 
     def _retrieve_memory_requirement(self) -&gt; str:
-        return str(
-            sample_models_memory_lookup[self.model][self.debug][self.fit_method] * 1000
-        )
+        try:
+            mem = fitting_pipeline_memory_lookup[self.config.model][self.debug][
+                self.fit_method
+            ]
+            return str(mem * 1000)
+        except KeyError as err:
+            raise ResourceRequestUnkown(&#34;memory&#34;, err.args[0])
 
     def _retrieve_time_requirement(self) -&gt; td:
-        return sample_models_time_lookup[self.model][self.debug][self.fit_method]
+        try:
+            return fitting_pipeline_time_lookup[self.config.model][self.debug][
+                self.fit_method
+            ]
+        except KeyError as err:
+            raise ResourceRequestUnkown(&#34;time&#34;, err.args[0])
 
     def _format_duration_for_slurm(self, duration: td) -&gt; str:
-        return str(duration).replace(&#34; day, &#34;, &#34;-&#34;).replace(&#34; days, &#34;, &#34;-&#34;)
+        return formatting.format_timedelta(
+            duration, fmt=formatting.TimeDeltaFormat.DRMAA
+        )
 
-    def _is_debug(self) -&gt; bool:
+    @property
+    def debug(self) -&gt; bool:
         &#34;&#34;&#34;Determine the debug status of model name.
 
         Returns:
             bool: Whether or not the model should be in debug mode.
         &#34;&#34;&#34;
-        return &#34;debug&#34; in self.name
+        return self.config.debug
 
     def is_debug_cli(self):
         &#34;&#34;&#34;Get the correct flag for indicating debug mode through a CLI.
@@ -369,8 +376,58 @@ class ModelFittingPipelineResourceManager:
         &#34;&#34;&#34;
         return &#34;--debug&#34; if self.debug else &#34;--no-debug&#34;</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="src.managers.pipeline_resource_manager.PipelineResourceManager" href="pipeline_resource_manager.html#src.managers.pipeline_resource_manager.PipelineResourceManager">PipelineResourceManager</a></li>
+<li>typing.Protocol</li>
+<li>typing.Generic</li>
+</ul>
 <h3>Instance variables</h3>
 <dl>
+<dt id="src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.cores"><code class="name">var <span class="ident">cores</span> : int</code></dt>
+<dd>
+<div class="desc"><p>Compute cores request.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>int</code></dt>
+<dd>Number of cores.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def cores(self) -&gt; int:
+    &#34;&#34;&#34;Compute cores request.
+
+    Returns:
+        int: Number of cores.
+    &#34;&#34;&#34;
+    return 1</code></pre>
+</details>
+</dd>
+<dt id="src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.debug"><code class="name">var <span class="ident">debug</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>Determine the debug status of model name.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>Whether or not the model should be in debug mode.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def debug(self) -&gt; bool:
+    &#34;&#34;&#34;Determine the debug status of model name.
+
+    Returns:
+        bool: Whether or not the model should be in debug mode.
+    &#34;&#34;&#34;
+    return self.config.debug</code></pre>
+</details>
+</dd>
 <dt id="src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.memory"><code class="name">var <span class="ident">memory</span> : str</code></dt>
 <dd>
 <div class="desc"><p>Memory (RAM) request.</p>
@@ -390,12 +447,7 @@ def memory(self) -&gt; str:
     Returns:
         str: Amount of RAM required.
     &#34;&#34;&#34;
-    try:
-        return self._retrieve_memory_requirement()
-    except Exception:
-        raise ResourceRequestUnkown(
-            f&#34;Unable to request memory from &#39;{self.model.value}&#39;.&#34;
-        )</code></pre>
+    return self._retrieve_memory_requirement()</code></pre>
 </details>
 </dd>
 <dt id="src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.partition"><code class="name">var <span class="ident">partition</span> : str</code></dt>
@@ -417,7 +469,9 @@ def partition(self) -&gt; str:
     Returns:
         str: The partition to request from SLURM.
     &#34;&#34;&#34;
-    return self._decide_partition_requirement().value</code></pre>
+    return prm.slurm_partition_required_for_duration(
+        self._retrieve_time_requirement()
+    ).value</code></pre>
 </details>
 </dd>
 <dt id="src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.time"><code class="name">var <span class="ident">time</span> : str</code></dt>
@@ -439,13 +493,8 @@ def time(self) -&gt; str:
     Returns:
         str: Amount of time required.
     &#34;&#34;&#34;
-    try:
-        duration = self._retrieve_time_requirement()
-        return self._format_duration_for_slurm(duration)
-    except Exception:
-        raise ResourceRequestUnkown(
-            f&#34;No time known for model &#39;{self.model.value}&#39;.&#34;
-        )</code></pre>
+    duration = self._retrieve_time_requirement()
+    return self._format_duration_for_slurm(duration)</code></pre>
 </details>
 </dd>
 </dl>
@@ -476,29 +525,6 @@ def time(self) -&gt; str:
 </dd>
 </dl>
 </dd>
-<dt id="src.managers.model_fitting_pipeline_resource_manager.ResourceRequestUnkown"><code class="flex name class">
-<span>class <span class="ident">ResourceRequestUnkown</span></span>
-<span>(</span><span>...)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Exception raised when a resource request cannot be fullfilled.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class ResourceRequestUnkown(NotImplementedError):
-    &#34;&#34;&#34;Exception raised when a resource request cannot be fullfilled.&#34;&#34;&#34;
-
-    pass</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.NotImplementedError</li>
-<li>builtins.RuntimeError</li>
-<li>builtins.Exception</li>
-<li>builtins.BaseException</li>
-</ul>
-</dd>
 </dl>
 </section>
 </article>
@@ -517,15 +543,14 @@ def time(self) -&gt; str:
 <ul>
 <li>
 <h4><code><a title="src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager" href="#src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager">ModelFittingPipelineResourceManager</a></code></h4>
-<ul class="">
+<ul class="two-column">
+<li><code><a title="src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.cores" href="#src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.cores">cores</a></code></li>
+<li><code><a title="src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.debug" href="#src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.debug">debug</a></code></li>
 <li><code><a title="src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.is_debug_cli" href="#src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.is_debug_cli">is_debug_cli</a></code></li>
 <li><code><a title="src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.memory" href="#src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.memory">memory</a></code></li>
 <li><code><a title="src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.partition" href="#src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.partition">partition</a></code></li>
 <li><code><a title="src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.time" href="#src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.time">time</a></code></li>
 </ul>
-</li>
-<li>
-<h4><code><a title="src.managers.model_fitting_pipeline_resource_manager.ResourceRequestUnkown" href="#src.managers.model_fitting_pipeline_resource_manager.ResourceRequestUnkown">ResourceRequestUnkown</a></code></h4>
 </li>
 </ul>
 </li>

@@ -385,18 +385,20 @@ def data_batch_indices(achilles_df: pd.DataFrame) -&gt; DataBatchIndices:
 
 #### ---- Data frames ---- ####
 
+_default_achilles_categorical_cols: Tuple[str, ...] = (
+    &#34;hugo_symbol&#34;,
+    &#34;depmap_id&#34;,
+    &#34;sgrna&#34;,
+    &#34;lineage&#34;,
+    &#34;sgrna_target_chr&#34;,
+    &#34;p_dna_batch&#34;,
+    &#34;screen&#34;,
+)
+
 
 def set_achilles_categorical_columns(
     data: pd.DataFrame,
-    cols: Union[List[str], Tuple[str, ...]] = (
-        &#34;hugo_symbol&#34;,
-        &#34;depmap_id&#34;,
-        &#34;sgrna&#34;,
-        &#34;lineage&#34;,
-        &#34;sgrna_target_chr&#34;,
-        &#34;p_dna_batch&#34;,
-        &#34;screen&#34;,
-    ),
+    cols: Union[List[str], Tuple[str, ...]] = _default_achilles_categorical_cols,
     ordered: bool = True,
     sort_cats: bool = False,
 ) -&gt; pd.DataFrame:
@@ -869,15 +871,7 @@ Defaults to False.</dd>
 </summary>
 <pre><code class="python">def set_achilles_categorical_columns(
     data: pd.DataFrame,
-    cols: Union[List[str], Tuple[str, ...]] = (
-        &#34;hugo_symbol&#34;,
-        &#34;depmap_id&#34;,
-        &#34;sgrna&#34;,
-        &#34;lineage&#34;,
-        &#34;sgrna_target_chr&#34;,
-        &#34;p_dna_batch&#34;,
-        &#34;screen&#34;,
-    ),
+    cols: Union[List[str], Tuple[str, ...]] = _default_achilles_categorical_cols,
     ordered: bool = True,
     sort_cats: bool = False,
 ) -&gt; pd.DataFrame:

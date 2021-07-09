@@ -13,7 +13,7 @@ import src.modeling.simulation_based_calibration_helpers as sbc
 from src.data_processing import achilles as achelp
 from src.io import data_io
 from src.loggers import logger
-from src.modeling.simulation_based_calibration_enums import MockDataSizes
+from src.project_enums import MockDataSize, assert_never
 
 DataFrameTransformations = List[Callable[[pd.DataFrame], pd.DataFrame]]
 
@@ -82,12 +82,12 @@ class DataManager(abc.ABC):
 
     @abc.abstractmethod
     def generate_mock_data(
-        self, size: Union[MockDataSizes, str], random_seed: Optional[int] = None
+        self, size: Union[MockDataSize, str], random_seed: Optional[int] = None
     ) -> pd.DataFrame:
         """Generate mock data to be used for testing or SBC.
 
         Args:
-            size (Union[MockDataSizes, str]): Size of the final mock dataset.
+            size (Union[MockDataSize, str]): Size of the final mock dataset.
             random_seed (Optional[int], optional): Random seed. Defaults to None.
 
         Returns:
@@ -291,13 +291,30 @@ class CrcDataManager(DataManager):
         else:
             self._data = self.apply_transformations(new_data)
 
+    def apply_transformations(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Apply the stored transformations to the data set.
+
+        Same as parent method, but resets Achilles categorical columns afterwards.
+
+        Args:
+            df (pd.DataFrame): The data on which to operate.
+
+        Returns:
+            pd.DataFrame: The transformed data set.
+        """
+        return (
+            super()
+            .apply_transformations(df)
+            .pipe(achelp.set_achilles_categorical_columns)
+        )
+
     def generate_mock_data(
-        self, size: Union[MockDataSizes, str], random_seed: Optional[int] = None
+        self, size: Union[MockDataSize, str], random_seed: Optional[int] = None
     ) -> pd.DataFrame:
         """Generate mock data to be used for testing or SBC.
 
         Args:
-            size (Union[MockDataSizes, str]): Size of the final mock dataset.
+            size (Union[MockDataSize, str]): Size of the final mock dataset.
             random_seed (Optional[int], optional): Random seed. Defaults to None.
 
         Returns:
@@ -308,9 +325,9 @@ class CrcDataManager(DataManager):
             np.random.seed(random_seed)
 
         if isinstance(size, str):
-            size = MockDataSizes(size)
+            size = MockDataSize(size)
 
-        if size == MockDataSizes.small:
+        if size is MockDataSize.SMALL:
             self.data = sbc.generate_mock_achilles_data(
                 n_genes=10,
                 n_sgrnas_per_gene=3,
@@ -319,7 +336,7 @@ class CrcDataManager(DataManager):
                 n_batches=2,
                 n_screens=1,
             )
-        elif size == MockDataSizes.medium:
+        elif size is MockDataSize.MEDIUM:
             self.data = sbc.generate_mock_achilles_data(
                 n_genes=25,
                 n_sgrnas_per_gene=5,
@@ -328,7 +345,7 @@ class CrcDataManager(DataManager):
                 n_batches=3,
                 n_screens=2,
             )
-        else:
+        elif size is MockDataSize.LARGE:
             self.data = sbc.generate_mock_achilles_data(
                 n_genes=100,
                 n_sgrnas_per_gene=5,
@@ -337,6 +354,8 @@ class CrcDataManager(DataManager):
                 n_batches=4,
                 n_screens=2,
             )
+        else:
+            assert_never(size)
         assert self.data is not None
         return self.data
 
@@ -399,7 +418,7 @@ class MockDataManager(DataManager):
         return self.data
 
     def set_data(self, new_data: Optional[pd.DataFrame]) -> None:
-        """Set the new data set and apply the transofrmations automatically.
+        """Set the new data set and apply the transformations automatically.
 
         Args:
             new_data (Optional[pd.DataFrame]): New data set.
@@ -410,12 +429,12 @@ class MockDataManager(DataManager):
             self._data = self.apply_transformations(new_data)
 
     def generate_mock_data(
-        self, size: Union[MockDataSizes, str], random_seed: Optional[int] = None
+        self, size: Union[MockDataSize, str], random_seed: Optional[int] = None
     ) -> pd.DataFrame:
         """Generate mock data to be used for testing or SBC.
 
         Args:
-            size (Union[MockDataSizes, str]): Size of the final mock dataset.
+            size (Union[MockDataSize, str]): Size of the final mock dataset.
             random_seed (Optional[int], optional): Not used. Defaults to None.
 
         Returns:
@@ -424,9 +443,9 @@ class MockDataManager(DataManager):
         logger.debug("Generating mock data.")
         logger.info("This method just calls `self.get_data()` in the MockDataManager.")
         if isinstance(size, str):
-            size = MockDataSizes(size)
+            size = MockDataSize(size)
 
-        if size == MockDataSizes.small:
+        if size == MockDataSize.SMALL:
             self.debug = True
         else:
             self.debug = False

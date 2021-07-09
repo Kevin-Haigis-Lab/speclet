@@ -357,18 +357,20 @@ def data_batch_indices(achilles_df: pd.DataFrame) -> DataBatchIndices:
 
 #### ---- Data frames ---- ####
 
+_default_achilles_categorical_cols: Tuple[str, ...] = (
+    "hugo_symbol",
+    "depmap_id",
+    "sgrna",
+    "lineage",
+    "sgrna_target_chr",
+    "p_dna_batch",
+    "screen",
+)
+
 
 def set_achilles_categorical_columns(
     data: pd.DataFrame,
-    cols: Union[List[str], Tuple[str, ...]] = (
-        "hugo_symbol",
-        "depmap_id",
-        "sgrna",
-        "lineage",
-        "sgrna_target_chr",
-        "p_dna_batch",
-        "screen",
-    ),
+    cols: Union[List[str], Tuple[str, ...]] = _default_achilles_categorical_cols,
     ordered: bool = True,
     sort_cats: bool = False,
 ) -> pd.DataFrame:

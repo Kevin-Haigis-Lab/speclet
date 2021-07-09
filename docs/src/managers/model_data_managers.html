@@ -42,6 +42,7 @@ from src.data_processing import achilles as achelp
 from src.io import data_io
 from src.loggers import logger
 from src.modeling.simulation_based_calibration_enums import MockDataSizes
+from src.project_enums import assert_never
 
 DataFrameTransformations = List[Callable[[pd.DataFrame], pd.DataFrame]]
 
@@ -319,6 +320,23 @@ class CrcDataManager(DataManager):
         else:
             self._data = self.apply_transformations(new_data)
 
+    def apply_transformations(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Apply the stored transformations to the data set.
+
+        Same as parent method, but resets Achilles categorical columns afterwards.
+
+        Args:
+            df (pd.DataFrame): The data on which to operate.
+
+        Returns:
+            pd.DataFrame: The transformed data set.
+        &#34;&#34;&#34;
+        return (
+            super()
+            .apply_transformations(df)
+            .pipe(achelp.set_achilles_categorical_columns)
+        )
+
     def generate_mock_data(
         self, size: Union[MockDataSizes, str], random_seed: Optional[int] = None
     ) -&gt; pd.DataFrame:
@@ -338,7 +356,7 @@ class CrcDataManager(DataManager):
         if isinstance(size, str):
             size = MockDataSizes(size)
 
-        if size == MockDataSizes.small:
+        if size is MockDataSizes.SMALL:
             self.data = sbc.generate_mock_achilles_data(
                 n_genes=10,
                 n_sgrnas_per_gene=3,
@@ -347,7 +365,7 @@ class CrcDataManager(DataManager):
                 n_batches=2,
                 n_screens=1,
             )
-        elif size == MockDataSizes.medium:
+        elif size is MockDataSizes.MEDIUM:
             self.data = sbc.generate_mock_achilles_data(
                 n_genes=25,
                 n_sgrnas_per_gene=5,
@@ -356,7 +374,7 @@ class CrcDataManager(DataManager):
                 n_batches=3,
                 n_screens=2,
             )
-        else:
+        elif size is MockDataSizes.LARGE:
             self.data = sbc.generate_mock_achilles_data(
                 n_genes=100,
                 n_sgrnas_per_gene=5,
@@ -365,6 +383,8 @@ class CrcDataManager(DataManager):
                 n_batches=4,
                 n_screens=2,
             )
+        else:
+            assert_never(size)
         assert self.data is not None
         return self.data
 
@@ -427,7 +447,7 @@ class MockDataManager(DataManager):
         return self.data
 
     def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
-        &#34;&#34;&#34;Set the new data set and apply the transofrmations automatically.
+        &#34;&#34;&#34;Set the new data set and apply the transformations automatically.
 
         Args:
             new_data (Optional[pd.DataFrame]): New data set.
@@ -454,7 +474,7 @@ class MockDataManager(DataManager):
         if isinstance(size, str):
             size = MockDataSizes(size)
 
-        if size == MockDataSizes.small:
+        if size == MockDataSizes.SMALL:
             self.debug = True
         else:
             self.debug = False
@@ -594,6 +614,23 @@ callable functions or classes for transforming the data. Defaults to None
         else:
             self._data = self.apply_transformations(new_data)
 
+    def apply_transformations(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Apply the stored transformations to the data set.
+
+        Same as parent method, but resets Achilles categorical columns afterwards.
+
+        Args:
+            df (pd.DataFrame): The data on which to operate.
+
+        Returns:
+            pd.DataFrame: The transformed data set.
+        &#34;&#34;&#34;
+        return (
+            super()
+            .apply_transformations(df)
+            .pipe(achelp.set_achilles_categorical_columns)
+        )
+
     def generate_mock_data(
         self, size: Union[MockDataSizes, str], random_seed: Optional[int] = None
     ) -&gt; pd.DataFrame:
@@ -613,7 +650,7 @@ callable functions or classes for transforming the data. Defaults to None
         if isinstance(size, str):
             size = MockDataSizes(size)
 
-        if size == MockDataSizes.small:
+        if size is MockDataSizes.SMALL:
             self.data = sbc.generate_mock_achilles_data(
                 n_genes=10,
                 n_sgrnas_per_gene=3,
@@ -622,7 +659,7 @@ callable functions or classes for transforming the data. Defaults to None
                 n_batches=2,
                 n_screens=1,
             )
-        elif size == MockDataSizes.medium:
+        elif size is MockDataSizes.MEDIUM:
             self.data = sbc.generate_mock_achilles_data(
                 n_genes=25,
                 n_sgrnas_per_gene=5,
@@ -631,7 +668,7 @@ callable functions or classes for transforming the data. Defaults to None
                 n_batches=3,
                 n_screens=2,
             )
-        else:
+        elif size is MockDataSizes.LARGE:
             self.data = sbc.generate_mock_achilles_data(
                 n_genes=100,
                 n_sgrnas_per_gene=5,
@@ -640,6 +677,8 @@ callable functions or classes for transforming the data. Defaults to None
                 n_batches=4,
                 n_screens=2,
             )
+        else:
+            assert_never(size)
         assert self.data is not None
         return self.data</code></pre>
 </details>
@@ -650,6 +689,44 @@ callable functions or classes for transforming the data. Defaults to None
 </ul>
 <h3>Methods</h3>
 <dl>
+<dt id="src.managers.model_data_managers.CrcDataManager.apply_transformations"><code class="name flex">
+<span>def <span class="ident">apply_transformations</span></span>(<span>self, df: pandas.core.frame.DataFrame) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Apply the stored transformations to the data set.</p>
+<p>Same as parent method, but resets Achilles categorical columns afterwards.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>The data on which to operate.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>The transformed data set.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def apply_transformations(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Apply the stored transformations to the data set.
+
+    Same as parent method, but resets Achilles categorical columns afterwards.
+
+    Args:
+        df (pd.DataFrame): The data on which to operate.
+
+    Returns:
+        pd.DataFrame: The transformed data set.
+    &#34;&#34;&#34;
+    return (
+        super()
+        .apply_transformations(df)
+        .pipe(achelp.set_achilles_categorical_columns)
+    )</code></pre>
+</details>
+</dd>
 <dt id="src.managers.model_data_managers.CrcDataManager.get_batch_size"><code class="name flex">
 <span>def <span class="ident">get_batch_size</span></span>(<span>self) -> int</span>
 </code></dt>
@@ -756,7 +833,6 @@ callable functions or classes for transforming the data. Defaults to None
 <li><code><b><a title="src.managers.model_data_managers.DataManager" href="#src.managers.model_data_managers.DataManager">DataManager</a></b></code>:
 <ul class="hlist">
 <li><code><a title="src.managers.model_data_managers.DataManager.add_transformations" href="#src.managers.model_data_managers.DataManager.add_transformations">add_transformations</a></code></li>
-<li><code><a title="src.managers.model_data_managers.DataManager.apply_transformations" href="#src.managers.model_data_managers.DataManager.apply_transformations">apply_transformations</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.data" href="#src.managers.model_data_managers.DataManager.data">data</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.generate_mock_data" href="#src.managers.model_data_managers.DataManager.generate_mock_data">generate_mock_data</a></code></li>
 <li><code><a title="src.managers.model_data_managers.DataManager.transform_data" href="#src.managers.model_data_managers.DataManager.transform_data">transform_data</a></code></li>
@@ -1325,7 +1401,7 @@ callable functions or classes for transforming the data. Defaults to None
         return self.data
 
     def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
-        &#34;&#34;&#34;Set the new data set and apply the transofrmations automatically.
+        &#34;&#34;&#34;Set the new data set and apply the transformations automatically.
 
         Args:
             new_data (Optional[pd.DataFrame]): New data set.
@@ -1352,7 +1428,7 @@ callable functions or classes for transforming the data. Defaults to None
         if isinstance(size, str):
             size = MockDataSizes(size)
 
-        if size == MockDataSizes.small:
+        if size == MockDataSizes.SMALL:
             self.debug = True
         else:
             self.debug = False
@@ -1403,7 +1479,7 @@ callable functions or classes for transforming the data. Defaults to None
     if isinstance(size, str):
         size = MockDataSizes(size)
 
-    if size == MockDataSizes.small:
+    if size == MockDataSizes.SMALL:
         self.debug = True
     else:
         self.debug = False
@@ -1414,7 +1490,7 @@ callable functions or classes for transforming the data. Defaults to None
 <span>def <span class="ident">set_data</span></span>(<span>self, new_data: Optional[pandas.core.frame.DataFrame]) -> NoneType</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Set the new data set and apply the transofrmations automatically.</p>
+<div class="desc"><p>Set the new data set and apply the transformations automatically.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>new_data</code></strong> :&ensp;<code>Optional[pd.DataFrame]</code></dt>
@@ -1425,7 +1501,7 @@ callable functions or classes for transforming the data. Defaults to None
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
-    &#34;&#34;&#34;Set the new data set and apply the transofrmations automatically.
+    &#34;&#34;&#34;Set the new data set and apply the transformations automatically.
 
     Args:
         new_data (Optional[pd.DataFrame]): New data set.
@@ -1471,6 +1547,7 @@ callable functions or classes for transforming the data. Defaults to None
 <li>
 <h4><code><a title="src.managers.model_data_managers.CrcDataManager" href="#src.managers.model_data_managers.CrcDataManager">CrcDataManager</a></code></h4>
 <ul class="">
+<li><code><a title="src.managers.model_data_managers.CrcDataManager.apply_transformations" href="#src.managers.model_data_managers.CrcDataManager.apply_transformations">apply_transformations</a></code></li>
 <li><code><a title="src.managers.model_data_managers.CrcDataManager.get_batch_size" href="#src.managers.model_data_managers.CrcDataManager.get_batch_size">get_batch_size</a></code></li>
 <li><code><a title="src.managers.model_data_managers.CrcDataManager.get_data" href="#src.managers.model_data_managers.CrcDataManager.get_data">get_data</a></code></li>
 <li><code><a title="src.managers.model_data_managers.CrcDataManager.get_data_path" href="#src.managers.model_data_managers.CrcDataManager.get_data_path">get_data_path</a></code></li>

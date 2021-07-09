@@ -11,6 +11,7 @@ import arviz as az
 import pymc3 as pm
 from pydantic import BaseModel
 
+from src.exceptions import CacheDoesNotExistError
 from src.loggers import logger
 from src.modeling import pymc3_sampling_api as pmapi
 from src.project_enums import ModelFitMethod, assert_never
@@ -281,7 +282,7 @@ class ArvizCacheManager:
         cache_paths = self.get_cache_file_names()
         if check_exists:
             if not self.cache_exists(method=ModelFitMethod.MCMC):
-                raise FileNotFoundError("Cannot locate cached data.")
+                raise CacheDoesNotExistError(self.cache_dir)
         return az.from_netcdf(cache_paths.inference_data_path.as_posix())
 
     def read_cached_approximation(
@@ -304,7 +305,7 @@ class ArvizCacheManager:
         cache_paths = self.get_cache_file_names()
         if check_exists:
             if not self.cache_exists(method=ModelFitMethod.ADVI):
-                raise FileNotFoundError("Cannot locate cached data.")
+                raise CacheDoesNotExistError(self.cache_dir)
         inf_data = self.read_cached_sampling(check_exists=False)
         approx = _get_pickle(cache_paths.approximation_path)
         return inf_data, approx

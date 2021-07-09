@@ -1,60 +1,44 @@
 from pathlib import Path
-from typing import List
+from typing import Any, Tuple
 
 import pytest
+from hypothesis import HealthCheck, given, settings
+from hypothesis import strategies as st
 
 from src.managers.model_data_managers import CrcDataManager
-from src.misc.test_helpers import generate_model_parameterizations
+from src.misc import test_helpers as th
 from src.modeling import pymc3_helpers as pmhelp
-from src.models.speclet_four import SpecletFour, SpecletFourParameterization
-from src.project_enums import ModelParameterization as MP
-
-
-def monkey_get_data_path(*args, **kwargs) -> Path:
-    return Path("tests", "depmap_test_data.csv")
-
-
-model_parameterizations: List[
-    SpecletFourParameterization
-] = generate_model_parameterizations(
-    param_class=SpecletFourParameterization, n_randoms=10
-)
+from src.models.speclet_four import SpecletFour, SpecletFourConfiguration
 
 
 class TestSpecletFour:
-    @pytest.fixture(scope="function")
-    def data_manager(self, monkeypatch: pytest.MonkeyPatch) -> CrcDataManager:
-        monkeypatch.setattr(CrcDataManager, "get_data_path", monkey_get_data_path)
-        dm = CrcDataManager(debug=True)
-        return dm
-
     def test_instantiation(self, tmp_path: Path):
-        sp_four = SpecletFour("test-model", root_cache_dir=tmp_path, debug=True)
-        assert sp_four.model is None
+        sp4 = SpecletFour("test-model", root_cache_dir=tmp_path, debug=True)
+        assert sp4.model is None
 
-    def test_build_model(self, tmp_path: Path, data_manager: CrcDataManager):
-        sp_four = SpecletFour(
-            "test-model", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
+    def test_build_model(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
+        sp4 = SpecletFour(
+            "test-model", root_cache_dir=tmp_path, debug=True, data_manager=mock_crc_dm
         )
-        assert sp_four.model is None
-        sp_four.build_model()
-        assert sp_four.model is not None
+        assert sp4.model is None
+        sp4.build_model()
+        assert sp4.model is not None
 
     @pytest.mark.slow
-    def test_mcmc_sampling(self, tmp_path: Path, data_manager: CrcDataManager):
-        sp_four = SpecletFour(
+    def test_mcmc_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
+        sp4 = SpecletFour(
             "test-model",
             root_cache_dir=tmp_path,
             debug=True,
-            data_manager=data_manager,
+            data_manager=mock_crc_dm,
         )
-        assert sp_four.model is None
-        sp_four.build_model()
-        assert sp_four.model is not None
-        assert sp_four.observed_var_name is not None
-        assert sp_four.mcmc_results is None
-        _ = sp_four.mcmc_sample_model(
-            mcmc_draws=10,
+        assert sp4.model is None
+        sp4.build_model()
+        assert sp4.model is not None
+        assert sp4.observed_var_name is not None
+        assert sp4.mcmc_results is None
+        _ = sp4.mcmc_sample_model(
+            draws=10,
             tune=10,
             chains=2,
             cores=2,
@@ -62,63 +46,76 @@ class TestSpecletFour:
             post_pred_samples=10,
             random_seed=1,
         )
-        assert sp_four.mcmc_results is not None
+        assert sp4.mcmc_results is not None
+
+    @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @given(config=st.builds(SpecletFourConfiguration))
+    def test_changing_configuration_resets_model(
+        self,
+        tmp_path: Path,
+        mock_crc_dm: CrcDataManager,
+        config: SpecletFourConfiguration,
+        monkeypatch: pytest.MonkeyPatch,
+    ):
+        def mock_build_model(*args, **kwargs) -> Tuple[str, str]:
+            return "my-test-model", "another-string"
+
+        monkeypatch.setattr(SpecletFour, "model_specification", mock_build_model)
+        sp4 = SpecletFour(
+            "test-model",
+            root_cache_dir=tmp_path,
+            debug=True,
+            data_manager=mock_crc_dm,
+        )
+        th.assert_changing_configuration_resets_model(
+            sp4, new_config=config, default_config=SpecletFourConfiguration()
+        )
 
     @pytest.mark.parametrize("copy_cov", [True, False])
     def test_switching_copynumber_covariate(
-        self, tmp_path: Path, data_manager: CrcDataManager, copy_cov: bool
+        self, tmp_path: Path, mock_crc_dm: CrcDataManager, copy_cov: bool
     ):
-        sp_four = SpecletFour(
+        sp4 = SpecletFour(
             "test-model",
             root_cache_dir=tmp_path,
             debug=True,
-            data_manager=data_manager,
-            copy_number_cov=copy_cov,
+            data_manager=mock_crc_dm,
         )
-        assert sp_four.model is None
-        sp_four.build_model()
-        assert sp_four.model is not None
-        rv_names = [v.name for v in sp_four.model.free_RVs]
-        rv_names += [v.name for v in sp_four.model.unobserved_RVs]
-        assert ("β" in set(rv_names)) == copy_cov
+        _config = sp4.config.copy()
+        _config.copy_number_cov = copy_cov
+        sp4.set_config(_config.dict())
+        assert sp4.model is None
+        sp4.build_model()
+        assert sp4.model is not None
+        var_names = pmhelp.get_variable_names(sp4.model)
+        assert ("β" in set(var_names)) == copy_cov
 
-        sp_four.copy_number_cov = not copy_cov
-        assert sp_four.model is None
-        sp_four.build_model()
-        assert sp_four.model is not None
-        rv_names = [v.name for v in sp_four.model.free_RVs]
-        rv_names += [v.name for v in sp_four.model.unobserved_RVs]
-        assert ("β" in set(rv_names)) != copy_cov
-
-    @pytest.mark.parametrize("copy_cov", [True, False])
-    @pytest.mark.parametrize("model_param", model_parameterizations)
+    @settings(
+        settings.get_profile("slow-adaptive"),
+        suppress_health_check=[HealthCheck.function_scoped_fixture],
+    )
+    @given(config=st.builds(SpecletFourConfiguration))
     def test_model_parameterizations(
         self,
         tmp_path: Path,
-        data_manager: CrcDataManager,
-        copy_cov: bool,
-        model_param: SpecletFourParameterization,
+        mock_crc_dm: CrcDataManager,
+        config: SpecletFourConfiguration,
     ):
-        sp_four = SpecletFour(
+        sp4 = SpecletFour(
             "test-model",
             root_cache_dir=tmp_path,
             debug=True,
-            data_manager=data_manager,
-            copy_number_cov=copy_cov,
-            parameterization=model_param,
+            data_manager=mock_crc_dm,
+            config=config,
         )
-        assert sp_four.model is None
-        sp_four.build_model()
-        assert sp_four.model is not None
 
-        rv_names = pmhelp.get_random_variable_names(sp_four.model)
-        unobs_names = pmhelp.get_deterministic_variable_names(sp_four.model)
-        all_var_names = rv_names + unobs_names
+        def pre_check_callback(param_name: str, *args: Any, **kwargs: Any) -> bool:
+            if param_name == "β" and not config.copy_number_cov:
+                return True
+            elif param_name == "copy_number_cov":
+                return True
+            return False
 
-        assert ("β" in set(all_var_names)) == copy_cov
-
-        for param_name, param_method in zip(model_param._fields, model_param):
-            if param_name == "β":
-                continue
-            assert (param_name in set(rv_names)) == (param_method is MP.CENTERED)
-            assert (param_name in set(unobs_names)) == (param_method is MP.NONCENTERED)
+        th.assert_model_reparameterization(
+            sp4, config=config, pre_check_callback=pre_check_callback
+        )

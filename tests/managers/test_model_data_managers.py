@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+from random import choice
+from typing import Any
 
 import pandas as pd
 import pytest
 import seaborn as sns
 
+from src.data_processing import achilles
 from src.managers.model_data_managers import CrcDataManager
 
 #### ---- Test CrcDataManager ---- ####
@@ -19,11 +22,11 @@ def select(df: pd.DataFrame) -> pd.DataFrame:
     return df[["sepal_length", "species"]]
 
 
-def mock_load_data(*args, **kwargs):
+def mock_load_data(*args, **kwargs) -> pd.DataFrame:
     return sns.load_dataset("iris")
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def no_standard_crc_transformations(monkeypatch: pytest.MonkeyPatch):
     def identity(df: pd.DataFrame) -> pd.DataFrame:
         return df
@@ -32,6 +35,14 @@ def no_standard_crc_transformations(monkeypatch: pytest.MonkeyPatch):
         CrcDataManager, "_drop_sgrnas_that_map_to_multiple_genes", identity
     )
     monkeypatch.setattr(CrcDataManager, "_drop_missing_copynumber", identity)
+
+
+@pytest.fixture
+def no_setting_achilles_categorical_columns(monkeypatch: pytest.MonkeyPatch):
+    def identity(df: pd.DataFrame, *args: Any, **kwargs: Any) -> pd.DataFrame:
+        return df
+
+    monkeypatch.setattr(achilles, "set_achilles_categorical_columns", identity)
 
 
 class TestCrcDataManager:
@@ -56,7 +67,12 @@ class TestCrcDataManager:
         assert isinstance(dm.get_data_path(), Path)
         assert dm.get_data_path().suffix == ".csv"
 
-    def test_set_data_to_none(self, monkeypatch: pytest.MonkeyPatch):
+    def test_set_data_to_none(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        no_standard_crc_transformations,
+        no_setting_achilles_categorical_columns,
+    ):
         dm = CrcDataManager(debug=True)
         assert dm.data is None
 
@@ -72,7 +88,12 @@ class TestCrcDataManager:
         dm.set_data(None)
         assert dm.data is None
 
-    def test_set_data_apply_trans(self, iris: pd.DataFrame):
+    def test_set_data_apply_trans(
+        self,
+        iris: pd.DataFrame,
+        no_standard_crc_transformations,
+        no_setting_achilles_categorical_columns,
+    ):
         dm = CrcDataManager()
         dm.add_transformations([head])
         dm.set_data(iris)
@@ -81,7 +102,9 @@ class TestCrcDataManager:
         dm.data = iris
         assert dm.data is not None and dm.data.shape[0] == 5
 
-    def test_get_data(self):
+    def test_get_data(
+        self, no_standard_crc_transformations, no_setting_achilles_categorical_columns
+    ):
         dm = CrcDataManager(debug=True)
         assert dm.data is None
         data = dm.get_data()
@@ -106,13 +129,23 @@ class TestCrcDataManager:
             < large_mock_data.shape[0]
         )
 
-    def test_init_with_transformations(self, iris: pd.DataFrame):
+    def test_init_with_transformations(
+        self,
+        iris: pd.DataFrame,
+        no_standard_crc_transformations,
+        no_setting_achilles_categorical_columns,
+    ):
         assert iris.shape[0] > 5
         dm = CrcDataManager(debug=True, transformations=[head])
         dm.data = iris
         assert dm.data.shape[0] == 5
 
-    def test_data_transformations(self, iris: pd.DataFrame):
+    def test_data_transformations(
+        self,
+        iris: pd.DataFrame,
+        no_standard_crc_transformations,
+        no_setting_achilles_categorical_columns,
+    ):
         dm = CrcDataManager(debug=True)
         dm.data = iris.copy()
         assert dm.data.shape[0] > 5
@@ -127,7 +160,12 @@ class TestCrcDataManager:
         assert dm.data.shape[1] == 2
         assert set(["sepal_length", "species"]) == set(dm.data.columns.to_list())
 
-    def test_transform_when_data_is_set(self, iris: pd.DataFrame):
+    def test_transform_when_data_is_set(
+        self,
+        iris: pd.DataFrame,
+        no_standard_crc_transformations,
+        no_setting_achilles_categorical_columns,
+    ):
         dm = CrcDataManager(debug=True)
         dm.add_transformations([head, select])
         dm.data is None
@@ -135,7 +173,12 @@ class TestCrcDataManager:
         assert dm.get_data().shape[0] == 5
         assert dm.get_data().shape[1] == 2
 
-    def test_transform_when_getting_data(self, monkeypatch: pytest.MonkeyPatch):
+    def test_transform_when_getting_data(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        no_standard_crc_transformations,
+        no_setting_achilles_categorical_columns,
+    ):
         # Monkeypatch to load 'iris' instead of real data.
         monkeypatch.setattr(CrcDataManager, "_load_data", mock_load_data)
 
@@ -146,7 +189,12 @@ class TestCrcDataManager:
         assert data.shape[0] == 5
         assert data.shape[1] == 2
 
-    def test_adding_new_transformations(self, iris: pd.DataFrame):
+    def test_adding_new_transformations(
+        self,
+        iris: pd.DataFrame,
+        no_standard_crc_transformations,
+        no_setting_achilles_categorical_columns,
+    ):
         dm = CrcDataManager(debug=True)
         dm.data = iris.copy()
         dm.transform_data()
@@ -162,3 +210,85 @@ class TestCrcDataManager:
         dm.transform_data()
         assert dm.data.shape[0] == 5
         assert dm.data.shape[1] == 2
+
+    @pytest.mark.parametrize("col", achilles._default_achilles_categorical_cols)
+    def test_achilles_cat_columns_reset_when_data_is_retrieved(
+        self, mock_crc_dm: CrcDataManager, col: str, monkeypatch: pytest.MonkeyPatch
+    ):
+        original_df = mock_crc_dm.get_data()
+        mock_crc_dm.data = None
+        mod_df = remove_random_cat(original_df, col=col)
+        assert not check_achilles_cat_columns_correct_indexing(mod_df, col)
+
+        def return_mod_data(*args: Any, **kwargs: Any) -> pd.DataFrame:
+            return mod_df
+
+        monkeypatch.setattr(mock_crc_dm, "_load_data", return_mod_data)
+        new_data = mock_crc_dm.get_data()
+        assert check_achilles_cat_columns_correct_indexing(new_data, col)
+
+    @pytest.mark.parametrize("col", achilles._default_achilles_categorical_cols)
+    def test_achilles_cat_columns_reset_when_data_is_assigned(
+        self, mock_crc_dm: CrcDataManager, col: str
+    ):
+        original_df = mock_crc_dm.get_data()
+        mod_df = remove_random_cat(original_df, col=col)
+        assert not check_achilles_cat_columns_correct_indexing(mod_df, col)
+
+        mock_crc_dm.data = mod_df
+        assert mock_crc_dm.data is not None
+        assert check_achilles_cat_columns_correct_indexing(mock_crc_dm.data, col)
+        assert check_achilles_cat_columns_correct_indexing(mock_crc_dm.get_data(), col)
+
+    @pytest.mark.parametrize("col", achilles._default_achilles_categorical_cols)
+    def test_achilles_cat_columns_reset_when_data_is_set(
+        self, mock_crc_dm: CrcDataManager, col: str
+    ):
+        original_df = mock_crc_dm.get_data()
+        mod_df = remove_random_cat(original_df, col=col)
+        assert not check_achilles_cat_columns_correct_indexing(mod_df, col)
+
+        mock_crc_dm.set_data(mod_df)
+        assert mock_crc_dm.data is not None
+        assert check_achilles_cat_columns_correct_indexing(mock_crc_dm.data, col)
+        assert check_achilles_cat_columns_correct_indexing(mock_crc_dm.get_data(), col)
+
+    @pytest.mark.parametrize("col", achilles._default_achilles_categorical_cols)
+    def test_achilles_cat_columns_reset_when_apply_transforms(
+        self, mock_crc_dm: CrcDataManager, col: str
+    ):
+        original_df = mock_crc_dm.get_data()
+        mod_df = remove_random_cat(original_df, col=col)
+        assert not check_achilles_cat_columns_correct_indexing(mod_df, col)
+
+        mock_crc_dm.transformations = []
+        transformed_data = mock_crc_dm.apply_transformations(mod_df)
+        assert check_achilles_cat_columns_correct_indexing(transformed_data, col)
+
+    @pytest.mark.parametrize("col", achilles._default_achilles_categorical_cols)
+    def test_achilles_cat_columns_reset_when_add_new_transforms(
+        self, mock_crc_dm: CrcDataManager, col: str
+    ):
+        original_df = mock_crc_dm.get_data()
+
+        def my_transformation(df: pd.DataFrame) -> pd.DataFrame:
+            return remove_random_cat(df, col=col)
+
+        mock_crc_dm.add_transformations([my_transformation], new_only=False)
+        assert mock_crc_dm.data is not None
+        assert original_df.shape[0] > mock_crc_dm.data.shape[0]
+        assert check_achilles_cat_columns_correct_indexing(mock_crc_dm.data, col)
+
+
+def remove_random_cat(df: pd.DataFrame, col: str) -> pd.DataFrame:
+    """Remove a random value from a column of a pandas data frame."""
+    x = choice(df[col].tolist())
+    mod_df = df.copy()[df[col] != x]
+    mod_df = mod_df.reset_index(drop=True)
+    return mod_df
+
+
+def check_achilles_cat_columns_correct_indexing(data: pd.DataFrame, col: str) -> bool:
+    check_one = data[col].nunique() == len(data[col].cat.categories)
+    check_two = set(range(data[col].nunique())) == set(data[col].cat.codes.tolist())
+    return check_one and check_two

@@ -5,6 +5,7 @@
 
 import logging
 import pathlib
+from typing import Union
 
 from rich.logging import RichHandler
 
@@ -46,3 +47,19 @@ if len(logger.handlers) == 0:
     # logger.addHandler(_get_console_handler())
     logger.addHandler(_get_rich_console_handler())
     logger.addHandler(_get_file_handler())
+    # Update `_idx_console_loggers` in `set_console_handler_level()` if needed.
+
+
+def set_console_handler_level(to: Union[int, str]) -> None:
+    """Set the consle handler level.
+
+    Args:
+        to (Union[int, str]): New log level for console handlers.
+
+    Returns:
+        None: None
+    """
+    _idx_console_loggers = [0]  #
+    for idx in _idx_console_loggers:
+        handler = logger.handlers[idx]
+        handler.setLevel(to)

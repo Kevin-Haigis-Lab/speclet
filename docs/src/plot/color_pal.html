@@ -37,30 +37,30 @@ from typing import Dict
 class SeabornColor(str, Enum):
     &#34;&#34;&#34;Colors from the &#39;seaborn&#39; package.&#34;&#34;&#34;
 
-    orange = &#34;#ED854A&#34;
-    blue = &#34;#4878D0&#34;
-    green = &#34;#6BCC64&#34;
-    red = &#34;#D65F5F&#34;
+    ORANGE = &#34;#ED854A&#34;
+    BLUE = &#34;#4878D0&#34;
+    GREEN = &#34;#6BCC64&#34;
+    RED = &#34;#D65F5F&#34;
 
 
 class ModelColors(str, Enum):
     &#34;&#34;&#34;Colors for specific models.&#34;&#34;&#34;
 
     CERES = &#34;#417BB1&#34;
-    CERES_mimic = &#34;#853FA2&#34;
-    speclet_one = &#34;#009C77&#34;
-    speclet_two = &#34;#DE522F&#34;
+    CERES_MIMIC = &#34;#853FA2&#34;
+    SPECLET_ONE = &#34;#009C77&#34;
+    SPECLET_TWO = &#34;#DE522F&#34;
 
 
 class FitMethodColors(str, Enum):
     &#34;&#34;&#34;Colors for the different ways to fit a model.&#34;&#34;&#34;
 
-    pymc3_mcmc = &#34;#F57E3F&#34;
-    pymc3_advi = &#34;#0AA8A2&#34;
+    PYMC3_MCMC = &#34;#F57E3F&#34;
+    PYMC3_ADVI = &#34;#0AA8A2&#34;
 
 
 def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
-    &#34;&#34;&#34;Convert an Enum to a uable color palette.
+    &#34;&#34;&#34;Convert an Enum to a usable color palette.
 
     Args:
         colors (EnumMeta): Enum to convert to a palette.
@@ -86,7 +86,7 @@ def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
 <span>def <span class="ident">make_pal</span></span>(<span>colors: enum.EnumMeta) -> Dict[str, str]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Convert an Enum to a uable color palette.</p>
+<div class="desc"><p>Convert an Enum to a usable color palette.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>colors</code></strong> :&ensp;<code>EnumMeta</code></dt>
@@ -99,7 +99,7 @@ def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
-    &#34;&#34;&#34;Convert an Enum to a uable color palette.
+    &#34;&#34;&#34;Convert an Enum to a usable color palette.
 
     Args:
         colors (EnumMeta): Enum to convert to a palette.
@@ -132,8 +132,8 @@ def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
 <pre><code class="python">class FitMethodColors(str, Enum):
     &#34;&#34;&#34;Colors for the different ways to fit a model.&#34;&#34;&#34;
 
-    pymc3_mcmc = &#34;#F57E3F&#34;
-    pymc3_advi = &#34;#0AA8A2&#34;</code></pre>
+    PYMC3_MCMC = &#34;#F57E3F&#34;
+    PYMC3_ADVI = &#34;#0AA8A2&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -142,11 +142,11 @@ def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="src.plot.color_pal.FitMethodColors.pymc3_advi"><code class="name">var <span class="ident">pymc3_advi</span></code></dt>
+<dt id="src.plot.color_pal.FitMethodColors.PYMC3_ADVI"><code class="name">var <span class="ident">PYMC3_ADVI</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.plot.color_pal.FitMethodColors.pymc3_mcmc"><code class="name">var <span class="ident">pymc3_mcmc</span></code></dt>
+<dt id="src.plot.color_pal.FitMethodColors.PYMC3_MCMC"><code class="name">var <span class="ident">PYMC3_MCMC</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -166,9 +166,9 @@ def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
     &#34;&#34;&#34;Colors for specific models.&#34;&#34;&#34;
 
     CERES = &#34;#417BB1&#34;
-    CERES_mimic = &#34;#853FA2&#34;
-    speclet_one = &#34;#009C77&#34;
-    speclet_two = &#34;#DE522F&#34;</code></pre>
+    CERES_MIMIC = &#34;#853FA2&#34;
+    SPECLET_ONE = &#34;#009C77&#34;
+    SPECLET_TWO = &#34;#DE522F&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -181,15 +181,15 @@ def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.plot.color_pal.ModelColors.CERES_mimic"><code class="name">var <span class="ident">CERES_mimic</span></code></dt>
+<dt id="src.plot.color_pal.ModelColors.CERES_MIMIC"><code class="name">var <span class="ident">CERES_MIMIC</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.plot.color_pal.ModelColors.speclet_one"><code class="name">var <span class="ident">speclet_one</span></code></dt>
+<dt id="src.plot.color_pal.ModelColors.SPECLET_ONE"><code class="name">var <span class="ident">SPECLET_ONE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.plot.color_pal.ModelColors.speclet_two"><code class="name">var <span class="ident">speclet_two</span></code></dt>
+<dt id="src.plot.color_pal.ModelColors.SPECLET_TWO"><code class="name">var <span class="ident">SPECLET_TWO</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -208,10 +208,10 @@ def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
 <pre><code class="python">class SeabornColor(str, Enum):
     &#34;&#34;&#34;Colors from the &#39;seaborn&#39; package.&#34;&#34;&#34;
 
-    orange = &#34;#ED854A&#34;
-    blue = &#34;#4878D0&#34;
-    green = &#34;#6BCC64&#34;
-    red = &#34;#D65F5F&#34;</code></pre>
+    ORANGE = &#34;#ED854A&#34;
+    BLUE = &#34;#4878D0&#34;
+    GREEN = &#34;#6BCC64&#34;
+    RED = &#34;#D65F5F&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -220,19 +220,19 @@ def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="src.plot.color_pal.SeabornColor.blue"><code class="name">var <span class="ident">blue</span></code></dt>
+<dt id="src.plot.color_pal.SeabornColor.BLUE"><code class="name">var <span class="ident">BLUE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.plot.color_pal.SeabornColor.green"><code class="name">var <span class="ident">green</span></code></dt>
+<dt id="src.plot.color_pal.SeabornColor.GREEN"><code class="name">var <span class="ident">GREEN</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.plot.color_pal.SeabornColor.orange"><code class="name">var <span class="ident">orange</span></code></dt>
+<dt id="src.plot.color_pal.SeabornColor.ORANGE"><code class="name">var <span class="ident">ORANGE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.plot.color_pal.SeabornColor.red"><code class="name">var <span class="ident">red</span></code></dt>
+<dt id="src.plot.color_pal.SeabornColor.RED"><code class="name">var <span class="ident">RED</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -262,26 +262,26 @@ def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
 <li>
 <h4><code><a title="src.plot.color_pal.FitMethodColors" href="#src.plot.color_pal.FitMethodColors">FitMethodColors</a></code></h4>
 <ul class="">
-<li><code><a title="src.plot.color_pal.FitMethodColors.pymc3_advi" href="#src.plot.color_pal.FitMethodColors.pymc3_advi">pymc3_advi</a></code></li>
-<li><code><a title="src.plot.color_pal.FitMethodColors.pymc3_mcmc" href="#src.plot.color_pal.FitMethodColors.pymc3_mcmc">pymc3_mcmc</a></code></li>
+<li><code><a title="src.plot.color_pal.FitMethodColors.PYMC3_ADVI" href="#src.plot.color_pal.FitMethodColors.PYMC3_ADVI">PYMC3_ADVI</a></code></li>
+<li><code><a title="src.plot.color_pal.FitMethodColors.PYMC3_MCMC" href="#src.plot.color_pal.FitMethodColors.PYMC3_MCMC">PYMC3_MCMC</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="src.plot.color_pal.ModelColors" href="#src.plot.color_pal.ModelColors">ModelColors</a></code></h4>
 <ul class="">
 <li><code><a title="src.plot.color_pal.ModelColors.CERES" href="#src.plot.color_pal.ModelColors.CERES">CERES</a></code></li>
-<li><code><a title="src.plot.color_pal.ModelColors.CERES_mimic" href="#src.plot.color_pal.ModelColors.CERES_mimic">CERES_mimic</a></code></li>
-<li><code><a title="src.plot.color_pal.ModelColors.speclet_one" href="#src.plot.color_pal.ModelColors.speclet_one">speclet_one</a></code></li>
-<li><code><a title="src.plot.color_pal.ModelColors.speclet_two" href="#src.plot.color_pal.ModelColors.speclet_two">speclet_two</a></code></li>
+<li><code><a title="src.plot.color_pal.ModelColors.CERES_MIMIC" href="#src.plot.color_pal.ModelColors.CERES_MIMIC">CERES_MIMIC</a></code></li>
+<li><code><a title="src.plot.color_pal.ModelColors.SPECLET_ONE" href="#src.plot.color_pal.ModelColors.SPECLET_ONE">SPECLET_ONE</a></code></li>
+<li><code><a title="src.plot.color_pal.ModelColors.SPECLET_TWO" href="#src.plot.color_pal.ModelColors.SPECLET_TWO">SPECLET_TWO</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="src.plot.color_pal.SeabornColor" href="#src.plot.color_pal.SeabornColor">SeabornColor</a></code></h4>
 <ul class="">
-<li><code><a title="src.plot.color_pal.SeabornColor.blue" href="#src.plot.color_pal.SeabornColor.blue">blue</a></code></li>
-<li><code><a title="src.plot.color_pal.SeabornColor.green" href="#src.plot.color_pal.SeabornColor.green">green</a></code></li>
-<li><code><a title="src.plot.color_pal.SeabornColor.orange" href="#src.plot.color_pal.SeabornColor.orange">orange</a></code></li>
-<li><code><a title="src.plot.color_pal.SeabornColor.red" href="#src.plot.color_pal.SeabornColor.red">red</a></code></li>
+<li><code><a title="src.plot.color_pal.SeabornColor.BLUE" href="#src.plot.color_pal.SeabornColor.BLUE">BLUE</a></code></li>
+<li><code><a title="src.plot.color_pal.SeabornColor.GREEN" href="#src.plot.color_pal.SeabornColor.GREEN">GREEN</a></code></li>
+<li><code><a title="src.plot.color_pal.SeabornColor.ORANGE" href="#src.plot.color_pal.SeabornColor.ORANGE">ORANGE</a></code></li>
+<li><code><a title="src.plot.color_pal.SeabornColor.RED" href="#src.plot.color_pal.SeabornColor.RED">RED</a></code></li>
 </ul>
 </li>
 </ul>

@@ -53,8 +53,6 @@ def _get_prior_value_using_index_list(ary: np.ndarray, idx: List[int]) -&gt; flo
     correspond to a single dimension. The final result will be a single value extract
     from the array.
 
-    # TODO (refactor): move this to vector helpers.
-
     Args:
         ary (np.ndarray): Input array of priors of any dimension.
         idx (List[int]): List of indices, one per dimension.
@@ -101,6 +99,12 @@ def _assign_column_for_within_hdi(
     return df
 
 
+class SBCResultsNotFoundError(FileNotFoundError):
+    &#34;&#34;&#34;SBC Results not found.&#34;&#34;&#34;
+
+    pass
+
+
 def get_posterior_summary_for_file_manager(sbc_dir: Path) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Create a summary of the results of an SBC sim. cached in a directory.
 
@@ -108,14 +112,14 @@ def get_posterior_summary_for_file_manager(sbc_dir: Path) -&gt; pd.DataFrame:
         sbc_dir (Path): Directory with the results of a SBC simulation.
 
     Raises:
-        Exception: Raised if the path is not to a directory.
+        SBCResultsNotFoundError: Raised if the SBC results are not found.
 
     Returns:
         pd.DataFrame: Dataframe with the summary of the simulation results.
     &#34;&#34;&#34;
     sbc_fm = SBCFileManager(sbc_dir)
     if not sbc_fm.all_data_exists():
-        raise Exception(f&#34;Not all output from &#39;{sbc_fm.dir.name}&#39; exist.&#34;)
+        raise SBCResultsNotFoundError(f&#34;Not all output from &#39;{sbc_fm.dir.name}&#39; exist.&#34;)
     res = sbc_fm.get_sbc_results()
     true_values = _make_priors_dataframe(
         res.priors, parameters=res.posterior_summary.index.values.tolist()
@@ -132,7 +136,7 @@ def _index_and_concat_summaries(post_summaries: List[pd.DataFrame]) -&gt; pd.Dat
     )
 
 
-def _extract_paramter_names(df: pd.DataFrame) -&gt; pd.DataFrame:
+def _extract_parameter_names(df: pd.DataFrame) -&gt; pd.DataFrame:
     df[&#34;parameter_name&#34;] = [x.split(&#34;[&#34;)[0] for x in df.index.values]
     df = df.set_index(&#34;parameter_name&#34;, append=True)
     return df
@@ -169,7 +173,7 @@ def collate_sbc_posteriors(
 
     simulation_posteriors_df = (
         _index_and_concat_summaries(simulation_posteriors)
-        .pipe(_extract_paramter_names)
+        .pipe(_extract_parameter_names)
         .pipe(_assign_column_for_within_hdi)
     )
 
@@ -244,7 +248,7 @@ Defaults to None.</dd>
 
     simulation_posteriors_df = (
         _index_and_concat_summaries(simulation_posteriors)
-        .pipe(_extract_paramter_names)
+        .pipe(_extract_parameter_names)
         .pipe(_assign_column_for_within_hdi)
     )
 
@@ -263,8 +267,8 @@ Defaults to None.</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
-<dt><code>Exception</code></dt>
-<dd>Raised if the path is not to a directory.</dd>
+<dt><code><a title="src.pipelines.collate_sbc.SBCResultsNotFoundError" href="#src.pipelines.collate_sbc.SBCResultsNotFoundError">SBCResultsNotFoundError</a></code></dt>
+<dd>Raised if the SBC results are not found.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -282,14 +286,14 @@ Defaults to None.</dd>
         sbc_dir (Path): Directory with the results of a SBC simulation.
 
     Raises:
-        Exception: Raised if the path is not to a directory.
+        SBCResultsNotFoundError: Raised if the SBC results are not found.
 
     Returns:
         pd.DataFrame: Dataframe with the summary of the simulation results.
     &#34;&#34;&#34;
     sbc_fm = SBCFileManager(sbc_dir)
     if not sbc_fm.all_data_exists():
-        raise Exception(f&#34;Not all output from &#39;{sbc_fm.dir.name}&#39; exist.&#34;)
+        raise SBCResultsNotFoundError(f&#34;Not all output from &#39;{sbc_fm.dir.name}&#39; exist.&#34;)
     res = sbc_fm.get_sbc_results()
     true_values = _make_priors_dataframe(
         res.priors, parameters=res.posterior_summary.index.values.tolist()
@@ -300,6 +304,32 @@ Defaults to None.</dd>
 </dl>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="src.pipelines.collate_sbc.SBCResultsNotFoundError"><code class="flex name class">
+<span>class <span class="ident">SBCResultsNotFoundError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>SBC Results not found.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SBCResultsNotFoundError(FileNotFoundError):
+    &#34;&#34;&#34;SBC Results not found.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.FileNotFoundError</li>
+<li>builtins.OSError</li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -317,6 +347,13 @@ Defaults to None.</dd>
 <ul class="">
 <li><code><a title="src.pipelines.collate_sbc.collate_sbc_posteriors" href="#src.pipelines.collate_sbc.collate_sbc_posteriors">collate_sbc_posteriors</a></code></li>
 <li><code><a title="src.pipelines.collate_sbc.get_posterior_summary_for_file_manager" href="#src.pipelines.collate_sbc.get_posterior_summary_for_file_manager">get_posterior_summary_for_file_manager</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="src.pipelines.collate_sbc.SBCResultsNotFoundError" href="#src.pipelines.collate_sbc.SBCResultsNotFoundError">SBCResultsNotFoundError</a></code></h4>
+</li>
 </ul>
 </li>
 </ul>

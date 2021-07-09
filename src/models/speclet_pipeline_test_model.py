@@ -1,12 +1,24 @@
 """A simple, light-weight SpecletModel for testing pipelines."""
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
+import numpy as np
 import pymc3 as pm
+from pydantic import BaseModel
 
 from src.managers.model_data_managers import DataManager, MockDataManager
 from src.models.speclet_model import SpecletModel
+from src.project_enums import ModelParameterization as MP
+
+
+class SpecletTestModelConfiguration(BaseModel):
+    """Parameterizations for each covariate in SpecletTestModel model."""
+
+    some_param: MP = MP.CENTERED
+    another_param: MP = MP.NONCENTERED
+    cov1: bool = True
+    cov2: bool = False
 
 
 class SpecletTestModel(SpecletModel):
@@ -18,6 +30,7 @@ class SpecletTestModel(SpecletModel):
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
+        config: Optional[SpecletTestModelConfiguration] = None,
     ):
         """Initialize a SpecletTestModel.
 
@@ -28,16 +41,27 @@ class SpecletTestModel(SpecletModel):
             debug (bool, optional): In debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. If None (default), a `MockDataManager` is created automatically.
+            config (Optional[SpecletTestModelConfiguration], optional): Model
+              configuration.
         """
         if data_manager is None:
             data_manager = MockDataManager(debug=debug)
 
+        if config is None:
+            self.config = SpecletTestModelConfiguration()
+        else:
+            self.config = config
+
         super().__init__(
-            name="TestingModel-" + name,
+            name=name,
             root_cache_dir=root_cache_dir,
             debug=debug,
             data_manager=data_manager,
         )
+
+    def set_config(self, info: Dict[Any, Any]) -> None:
+        """Set model-specific configuration."""
+        self.config = SpecletTestModelConfiguration(**info)
 
     def model_specification(self) -> Tuple[pm.Model, str]:
         """Specify a simple model.
@@ -55,15 +79,6 @@ class SpecletTestModel(SpecletModel):
             )
         return model, "y"
 
-    def update_mcmc_sampling_parameters(self) -> None:
-        """Adjust the ADVI parameters depending on the state of the object."""
-        self.mcmc_sampling_params.chains = 2
-        self.mcmc_sampling_params.draws = 1000
-        self.mcmc_sampling_params.tune = 1000
-        self.mcmc_sampling_params.target_accept = 0.85
-        return None
-
-    def update_advi_sampling_parameters(self) -> None:
-        """Adjust the ADVI parameters depending on the state of the object."""
-        self.advi_sampling_params.n_iterations = 10000
+    def update_observed_data(self, new_data: np.ndarray) -> None:
+        """Do nothing for this testing model."""
         return None

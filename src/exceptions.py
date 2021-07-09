@@ -3,6 +3,10 @@
 # NOTE: Only import built in libraries so can use in any venv.
 
 
+from pathlib import Path
+from typing import Union
+
+
 class UnsupportedFitMethod(Exception):
     """The indicated fit method is not supported."""
 
@@ -58,4 +62,18 @@ class ResourceRequestUnkown(NotImplementedError):
         self.resource = resource
         self.id = id
         self.message = f"Unknown {self.resource} for '{self.id}'"
+        super().__init__(self.message)
+
+
+class CacheDoesNotExistError(FileNotFoundError):
+    """Cache does not exist."""
+
+    def __init__(self, dir: Union[Path, str]) -> None:
+        """Create a CacheDoesNotExistError error.
+
+        Args:
+            dir (Union[Path, str]): Expected location of cached data.
+        """
+        self.dir = dir
+        self.message = str(dir)
         super().__init__(self.message)

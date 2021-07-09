@@ -1,9 +1,10 @@
 """Speclet Model Six."""
 
 from pathlib import Path
-from typing import NamedTuple, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import pymc3 as pm
+from pydantic import BaseModel
 from theano import shared as ts
 from theano import tensor
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
@@ -15,7 +16,7 @@ from src.models.speclet_model import ReplacementsDict, SpecletModel
 from src.project_enums import ModelParameterization as MP
 
 
-class SpecletSevenParameterization(NamedTuple):
+class SpecletSevenConfiguration(BaseModel):
     """Parameterizations for each covariate in SpecletSeven model."""
 
     a: MP = MP.CENTERED
@@ -51,12 +52,9 @@ class SpecletSeven(SpecletModel):
 
     A very deep hierarchical model that is, in part, meant to be a proof-of-concept for
     constructing, fitting, and interpreting such a "tall" hierarchical model.
-
-    Attributes:
-        noncentered_param (bool): Use the non-centered parameterization.
     """
 
-    _noncentered_param: bool
+    config: SpecletSevenConfiguration
 
     def __init__(
         self,
@@ -64,7 +62,7 @@ class SpecletSeven(SpecletModel):
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
-        parameterization: SpecletSevenParameterization = SpecletSevenParameterization(),
+        config: Optional[SpecletSevenConfiguration] = None,
     ) -> None:
         """Instantiate a SpecletSeven model.
 
@@ -76,24 +74,29 @@ class SpecletSeven(SpecletModel):
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. If None (default), a `CrcDataManager` is created automatically.
-            noncentered_param (bool, optional): Use the non-centered parameterization.
-              Defaults to False.
-            parameterization (SpecletFiveParameterization, optional): Covariate-specific
-              parameterization options.
+            config (SpecletSevenConfiguration, optional): Model configuration.
         """
         logger.debug("Instantiating a SpecletSeven model.")
         if data_manager is None:
             logger.debug("Creating a data manager since none was supplied.")
             data_manager = CrcDataManager(debug=debug)
 
-        self.parameterization = parameterization
+        self.config = config if config is not None else SpecletSevenConfiguration()
 
         super().__init__(
-            name="speclet-six_" + name,
+            name=name,
             root_cache_dir=root_cache_dir,
             debug=debug,
             data_manager=data_manager,
         )
+
+    def set_config(self, info: Dict[Any, Any]) -> None:
+        """Set model-specific configuration."""
+        new_config = SpecletSevenConfiguration(**info)
+        if self.config is not None and self.config != new_config:
+            logger.info("Setting model-specific configuration.")
+            self.config = new_config
+            self.model = None
 
     def _model_specification(
         self,
@@ -116,7 +119,7 @@ class SpecletSeven(SpecletModel):
             σ_σ_a = pm.HalfNormal("σ_σ_a", 1)
             σ_a = pm.HalfNormal("σ_a", σ_σ_a, shape=(co_idx.n_sgrnas, 1))
 
-            if self.parameterization.μ_μ_a is MP.NONCENTERED:
+            if self.config.μ_μ_a is MP.NONCENTERED:
                 μ_μ_a_offset = pm.Normal(
                     "μ_μ_a_offset", 0, 1.0, shape=(co_idx.n_genes, co_idx.n_lineages)
                 )
@@ -129,7 +132,7 @@ class SpecletSeven(SpecletModel):
                     shape=(co_idx.n_genes, co_idx.n_lineages),
                 )
 
-            if self.parameterization.μ_a is MP.NONCENTERED:
+            if self.config.μ_a is MP.NONCENTERED:
                 μ_a_offset = pm.Normal("μ_a_offset", 0, 1.0, shape=_mu_a_shape)
                 μ_a = pm.Deterministic(
                     "μ_a",
@@ -143,7 +146,7 @@ class SpecletSeven(SpecletModel):
                     shape=_mu_a_shape,
                 )
 
-            if self.parameterization.a is MP.NONCENTERED:
+            if self.config.a is MP.NONCENTERED:
                 a_offset = pm.Normal(
                     "a_offset", 0, 1.0, shape=(co_idx.n_sgrnas, co_idx.n_celllines)
                 )
@@ -243,18 +246,3 @@ class SpecletSeven(SpecletModel):
             self.shared_vars["cellline_idx_shared"]: cellline_idx_batch,
             self.shared_vars["lfc_shared"]: lfc_data_batch,
         }
-
-    def update_mcmc_sampling_parameters(self) -> None:
-        """Adjust the ADVI parameters depending on the state of the object."""
-        logger.info("Updating the MCMC sampling parameters.")
-        self.mcmc_sampling_params.draws = 4000
-        self.mcmc_sampling_params.tune = 2000
-        self.mcmc_sampling_params.target_accept = 0.99
-        return None
-
-    def update_advi_sampling_parameters(self) -> None:
-        """Adjust the ADVI parameters depending on the state of the object."""
-        logger.info("Updating the ADVI fitting parameters.")
-        parameter_adjustment_map = {True: 40000, False: 100000}
-        self.advi_sampling_params.n_iterations = parameter_adjustment_map[self.debug]
-        return None

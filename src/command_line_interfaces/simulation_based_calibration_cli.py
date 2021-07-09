@@ -7,36 +7,28 @@ from pathlib import Path
 import typer
 
 from src.command_line_interfaces import cli_helpers
-from src.command_line_interfaces.cli_helpers import ModelOption
+from src.io import model_config
 from src.loggers import logger
-from src.project_enums import ModelFitMethod
+from src.models import configuration
+from src.project_enums import MockDataSize, ModelFitMethod, SpecletPipeline
 
-app = typer.Typer()
 cli_helpers.configure_pretty()
 
 
-@app.command()
 def run_sbc(
-    model_class: ModelOption,
     name: str,
+    config_path: Path,
     fit_method: ModelFitMethod,
     cache_dir: Path,
     sim_number: int,
-    data_size: str,
+    data_size: MockDataSize,
 ) -> None:
     """CLI for running a round of simulation-based calibration for a model.
 
-    The `name` argument can contain model specification information. These are
-    documented below.
-
-    [model: CERES Mimic]
-    - If the name contains "copynumber" then the copynumber covariate will be included.
-    - If the name contains "sgrnaint" then the sgRNA|gene varying intercept will be
-      included.
-
     Args:
-        model_class (ModelOption): Name of the model to use.
         name (str): Unique identifiable name for the model.
+        config_path (Path): Path to the model configuration file.
+        fit_method (ModelFitMethod): Fitting method.
         cache_dir (Path): Where to store the results.
         sim_number (int): Simulation number.
         data_size (str): Which data size to use. See the actual methods
@@ -45,24 +37,29 @@ def run_sbc(
     Returns:
         None: None
     """
-    logger.info(f"Running SBC for model '{model_class.value}' named '{name}'.")
-    name = cli_helpers.clean_model_names(name)
-    ModelClass = cli_helpers.get_model_class(model_opt=model_class)
-    model = ModelClass(
-        f"{name}-sbc{sim_number}",
-        root_cache_dir=cache_dir,
-        debug=True,
+    sp_model = configuration.get_config_and_instantiate_model(
+        config_path=config_path, name=name, root_cache_dir=cache_dir
     )
-    cli_helpers.modify_model_by_name(model=model, name=name)
-    model.run_simulation_based_calibration(
+    fit_kwargs = model_config.get_sampling_kwargs(
+        config_path=config_path,
+        name=name,
+        pipeline=SpecletPipeline.SBC,
+        fit_method=fit_method,
+    )
+    if fit_kwargs != {}:
+        logger.info("Found specific fitting keyword arguments.")
+
+    logger.info(f"Running SBC for model '{sp_model.__class__}' - '{name}'.")
+    sp_model.run_simulation_based_calibration(
         cache_dir,
         fit_method=fit_method,
         random_seed=sim_number,
         size=data_size,
+        fit_kwargs=fit_kwargs,
     )
     logger.info("SBC finished.")
     return None
 
 
 if __name__ == "__main__":
-    app()
+    typer.run(run_sbc)

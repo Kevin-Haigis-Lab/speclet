@@ -1,10 +1,11 @@
 """Speclet Model Six."""
 
 from pathlib import Path
-from typing import NamedTuple, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import pandas as pd
 import pymc3 as pm
+from pydantic import BaseModel
 from theano import shared as ts
 
 from src.data_processing import achilles as achelp
@@ -84,9 +85,13 @@ def convert_is_mutated_to_numeric(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-class SpecletSixParameterization(NamedTuple):
+class SpecletSixConfiguration(BaseModel):
     """Parameterizations for each covariate in SpecletSix model."""
 
+    cell_line_cna_cov: bool = False
+    gene_cna_cov: bool = False
+    rna_cov: bool = False
+    mutation_cov: bool = False
     a: MP = MP.CENTERED
     d: MP = MP.CENTERED
     h: MP = MP.CENTERED
@@ -132,22 +137,9 @@ class SpecletSix(SpecletModel):
       ( \\(R^{(g,l)}\\): z-scaled within each gene and lineage)
     - \\(m_{g,l}\\): mutation effect varying per gene and cell line lineage
       ( \\(M \\in {0, 1}\\))
-
-    Attributes:
-        cell_line_cna_cov (bool): Include the covariate for copy number effect per cell
-          line \\(k_c\\).
-        gene_cna_cov (bool): Include the covariate for copy number effect per gene
-          \\(n_g\\).
-        rna_cov (bool): Include the covariate for RNA expression per gene/lineage
-          \\(q_{g,l}\\).
-        mutation_cov (bool): Include the covariate for mutation effect per
-          gene/lineage \\(m_{g,l}\\).
     """
 
-    _cell_line_cna_cov: bool
-    _gene_cna_cov: bool
-    _rna_cov: bool
-    _mutation_cov: bool
+    config: SpecletSixConfiguration
 
     def __init__(
         self,
@@ -155,11 +147,7 @@ class SpecletSix(SpecletModel):
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
-        cell_line_cna_cov: bool = False,
-        gene_cna_cov: bool = False,
-        rna_cov: bool = False,
-        mutation_cov: bool = False,
-        parameterization: SpecletSixParameterization = SpecletSixParameterization(),
+        config: Optional[SpecletSixConfiguration] = None,
     ) -> None:
         """Instantiate a SpecletSix model.
 
@@ -171,16 +159,7 @@ class SpecletSix(SpecletModel):
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. If None (default), a `CrcDataManager` is created automatically.
-            cell_line_cna_cov (bool, optional): Include the cell line copy number
-              covariate? Defaults to False.
-            gene_cna_cov (bool, optional): Include the gene-specific copy number
-              covariate? Defaults to False.
-            rna_cov (bool, optional): Include the RNA expression covariate? Defaults to
-              False.
-            mutation_cov (bool, optional): Include the mutation covariate? Defaults to
-              False.
-            parameterization (SpecletFiveParameterization, optional): Covariate-specific
-              parameterization options.
+            config (SpecletSixConfiguration, optional): Model configurations.
         """
         logger.debug("Instantiating a SpecletSix model.")
         if data_manager is None:
@@ -196,102 +175,22 @@ class SpecletSix(SpecletModel):
             ]
         )
 
-        self.parameterization = parameterization
-        self._cell_line_cna_cov = cell_line_cna_cov
-        self._gene_cna_cov = gene_cna_cov
-        self._rna_cov = rna_cov
-        self._mutation_cov = mutation_cov
+        self.config = config if config is not None else SpecletSixConfiguration()
 
         super().__init__(
-            name="speclet-six_" + name,
+            name=name,
             root_cache_dir=root_cache_dir,
             debug=debug,
             data_manager=data_manager,
         )
 
-    @property
-    def cell_line_cna_cov(self) -> bool:
-        """Should the covariate for cell line-specific CN be included?
-
-        Returns:
-            bool: Whether the covariate is included or not.
-        """
-        return self._cell_line_cna_cov
-
-    @cell_line_cna_cov.setter
-    def cell_line_cna_cov(self, new_value: bool) -> None:
-        """Decide if the cell line-specific CN covariate should be included.
-
-        Args:
-            new_value (bool): Whether the covariate is included or not.
-        """
-        if self._cell_line_cna_cov != new_value:
-            logger.info("Changing `cell_line_cna_cov` to `{new_value}`.")
-            self._cell_line_cna_cov = new_value
-            self._reset_model_and_results()
-
-    @property
-    def gene_cna_cov(self) -> bool:
-        """Should the covariate for gene-specific CN be included?
-
-        Returns:
-            bool: Whether the covariate is included or not.
-        """
-        return self._gene_cna_cov
-
-    @gene_cna_cov.setter
-    def gene_cna_cov(self, new_value: bool) -> None:
-        """Decide if the gene-specific CN covariate should be included.
-
-        Args:
-            new_value (bool): Whether the covariate is included or not.
-        """
-        if self._gene_cna_cov != new_value:
-            logger.info("Changing `gene_cna_cov` to `{new_value}`.")
-            self._gene_cna_cov = new_value
-            self._reset_model_and_results()
-
-    @property
-    def rna_cov(self) -> bool:
-        """Should the covariate for gene- and lineage-specific RNA be included?
-
-        Returns:
-            bool: Whether the covariate is included or not.
-        """
-        return self._rna_cov
-
-    @rna_cov.setter
-    def rna_cov(self, new_value: bool) -> None:
-        """Decide if the gene- and lineage-specific RNA covariate should be included.
-
-        Args:
-            new_value (bool): Whether the covariate is included or not.
-        """
-        if self._rna_cov != new_value:
-            logger.info("Changing `rna_cov` to `{new_value}`.")
-            self._rna_cov = new_value
-            self._reset_model_and_results()
-
-    @property
-    def mutation_cov(self) -> bool:
-        """Should the covariate for gene- and lineage-specific mutation be included?
-
-        Returns:
-            bool: Whether the covariate is included or not.
-        """
-        return self._mutation_cov
-
-    @mutation_cov.setter
-    def mutation_cov(self, new_value: bool) -> None:
-        """Decide if the gene- and lineage-specific mutation covariate should be included.
-
-        Args:
-            new_value (bool): Whether the covariate is included or not.
-        """
-        if self._mutation_cov != new_value:
-            logger.info("Changing `mutation_cov` to `{new_value}`.")
-            self._mutation_cov = new_value
-            self._reset_model_and_results()
+    def set_config(self, info: Dict[Any, Any]) -> None:
+        """Set model-specific configuration."""
+        new_config = SpecletSixConfiguration(**info)
+        if self.config is not None and self.config != new_config:
+            logger.info("Setting model-specific configuration.")
+            self.config = new_config
+            self.model = None
 
     def model_specification(self) -> Tuple[pm.Model, str]:
         """Build SpecletSix model.
@@ -330,19 +229,19 @@ class SpecletSix(SpecletModel):
             "lfc_shared": lfc_shared,
         }
 
-        if self.cell_line_cna_cov:
+        if self.config.cell_line_cna_cov:
             cellline_cna_shared = ts(data["copy_number_cellline"].values)
             self.shared_vars["cellline_cna_shared"] = cellline_cna_shared
 
-        if self.gene_cna_cov:
+        if self.config.gene_cna_cov:
             gene_cna_shared = ts(data["copy_number_gene"].values)
             self.shared_vars["gene_cna_shared"] = gene_cna_shared
 
-        if self.rna_cov:
+        if self.config.rna_cov:
             rna_expr_shared = ts(data["rna_expr_gene_lineage"].values)
             self.shared_vars["rna_expr_shared"] = rna_expr_shared
 
-        if self.mutation_cov:
+        if self.config.mutation_cov:
             mutation_shared = ts(data["is_mutated"].values)
             self.shared_vars["mutation_shared"] = mutation_shared
 
@@ -363,7 +262,7 @@ class SpecletSix(SpecletModel):
                 μ_j = pm.Normal("μ_j", μ_μ_j, σ_μ_j, shape=b_idx.n_screens)
                 σ_j = pm.HalfNormal("σ_j", σ_σ_j, shape=b_idx.n_screens)
 
-            if self.parameterization.j is MP.NONCENTERED:
+            if self.config.j is MP.NONCENTERED:
                 j_offset = pm.Normal("j_offset", 0, 0.5, shape=b_idx.n_batches)
                 if single_screen:
                     j = pm.Deterministic("j", μ_j + j_offset * σ_j)
@@ -387,7 +286,7 @@ class SpecletSix(SpecletModel):
             # Varying gene and cell line intercept.
             μ_h = pm.Normal("μ_h", 0, 0.5)
             σ_h = pm.HalfNormal("σ_h", 1)
-            if self.parameterization.h is MP.NONCENTERED:
+            if self.config.h is MP.NONCENTERED:
                 h_offset = pm.Normal(
                     "h_offset", 0, 0.5, shape=(co_idx.n_genes, co_idx.n_celllines)
                 )
@@ -409,7 +308,7 @@ class SpecletSix(SpecletModel):
                 σ_σ_d = pm.HalfNormal("σ_σ_d", 1)
                 σ_d = pm.HalfNormal("σ_d", σ_σ_d, shape=co_idx.n_lineages)
 
-            if self.parameterization.d is MP.NONCENTERED:
+            if self.config.d is MP.NONCENTERED:
                 d_offset = pm.Normal("d_offset", 0, 0.5, shape=co_idx.n_celllines)
                 if single_cell_line_lineage:
                     d = pm.Deterministic("d", μ_d + d_offset * σ_d)
@@ -438,7 +337,7 @@ class SpecletSix(SpecletModel):
             σ_σ_a = pm.HalfNormal("σ_σ_a", 1)
             σ_a = pm.HalfNormal("σ_a", σ_σ_a, shape=co_idx.n_genes)
 
-            if self.parameterization.a is MP.NONCENTERED:
+            if self.config.a is MP.NONCENTERED:
                 a_offset = pm.Normal("a_offset", 0, 0.5, shape=co_idx.n_sgrnas)
                 a = pm.Deterministic(
                     "a",
@@ -464,10 +363,10 @@ class SpecletSix(SpecletModel):
                 + j[batch_idx_shared]
             )
 
-            if self.cell_line_cna_cov:
+            if self.config.cell_line_cna_cov:
                 μ_k = pm.Normal("μ_k", -0.5, 2)
                 σ_k = pm.HalfNormal("σ_k", 1)
-                if self.parameterization.k is MP.NONCENTERED:
+                if self.config.k is MP.NONCENTERED:
                     k_offset = pm.Normal("k_offset", 0, 1, shape=co_idx.n_celllines)
                     k = pm.Deterministic("k", (μ_k + k_offset * σ_k))
                 else:
@@ -475,10 +374,10 @@ class SpecletSix(SpecletModel):
 
                 _μ += k[cellline_idx_shared] * cellline_cna_shared
 
-            if self.gene_cna_cov:
+            if self.config.gene_cna_cov:
                 μ_n = pm.Normal("μ_n", 0, 2)
                 σ_n = pm.HalfNormal("σ_n", 1)
-                if self.parameterization.n is MP.NONCENTERED:
+                if self.config.n is MP.NONCENTERED:
                     n_offset = pm.Normal("n_offset", 0, 1, shape=co_idx.n_genes)
                     n = pm.Deterministic("n", (μ_n + n_offset * σ_n))
                 else:
@@ -486,10 +385,10 @@ class SpecletSix(SpecletModel):
 
                 _μ += n[gene_idx_shared] * gene_cna_shared
 
-            if self.rna_cov:
+            if self.config.rna_cov:
                 μ_q = pm.Normal("μ_q", 0, 2)
                 σ_q = pm.HalfNormal("σ_q", 1)
-                if self.parameterization.q is MP.NONCENTERED:
+                if self.config.q is MP.NONCENTERED:
                     q_offset = pm.Normal(
                         "q_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
                     )
@@ -501,10 +400,10 @@ class SpecletSix(SpecletModel):
 
                 _μ += q[gene_idx_shared, lineage_idx_shared] * rna_expr_shared
 
-            if self.mutation_cov:
+            if self.config.mutation_cov:
                 μ_m = pm.Normal("μ_m", 0, 2)
                 σ_m = pm.HalfNormal("σ_m", 1)
-                if self.parameterization.m is MP.NONCENTERED:
+                if self.config.m is MP.NONCENTERED:
                     m_offset = pm.Normal(
                         "m_offset", 0, 1, shape=(co_idx.n_genes, co_idx.n_lineages)
                     )
@@ -570,18 +469,3 @@ class SpecletSix(SpecletModel):
             self.shared_vars["batch_idx_shared"]: batch_idx_batch,
             self.shared_vars["lfc_shared"]: lfc_data_batch,
         }
-
-    def update_mcmc_sampling_parameters(self) -> None:
-        """Adjust the ADVI parameters depending on the state of the object."""
-        logger.info("Updating the MCMC sampling parameters.")
-        self.mcmc_sampling_params.draws = 4000
-        self.mcmc_sampling_params.tune = 2000
-        self.mcmc_sampling_params.target_accept = 0.99
-        return None
-
-    def update_advi_sampling_parameters(self) -> None:
-        """Adjust the ADVI parameters depending on the state of the object."""
-        logger.info("Updating the ADVI fitting parameters.")
-        parameter_adjustment_map = {True: 40000, False: 100000}
-        self.advi_sampling_params.n_iterations = parameter_adjustment_map[self.debug]
-        return None

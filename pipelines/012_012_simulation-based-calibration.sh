@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#SBATCH --account=park
 #SBATCH -c 1
 #SBATCH -p priority
 #SBATCH -t 0-06:00
@@ -27,7 +28,7 @@ fi
 snakemake \
     --snakefile $SNAKEFILE \
     --jobs 20 \
-    --restart-times 1 \
+    --restart-times 0 \
     --latency-wait 120 \
     --use-conda \
     --keep-going \

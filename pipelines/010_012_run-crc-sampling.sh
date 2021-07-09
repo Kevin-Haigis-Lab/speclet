@@ -1,9 +1,10 @@
 #!/bin/bash
 
-#SBATCH -c 2
+#SBATCH --account=park
+#SBATCH -c 1
 #SBATCH -p priority
-#SBATCH -t 1-00:00
-#SBATCH --mem 8G
+#SBATCH -t 0-12:00
+#SBATCH --mem 4G
 #SBATCH -o logs/%j_sample-pipeline.log
 #SBATCH -e logs/%j_sample-pipeline.log
 

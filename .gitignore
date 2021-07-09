@@ -264,11 +264,13 @@ docs/.docs-env
 .testmondata
 
 # Specific files to except from the rules above
+!models/model-configs.yaml
 !modeling_data/depmap_modeling_dataframe_crc-subsample.csv
 !modeling_data/copy_number_data_samples.npy
 !data/download-data.sh
 !data/download-data.smk
 !data/README.md
+
 
 # Dask
 */dask-worker-space/*

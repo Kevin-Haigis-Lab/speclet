@@ -38,7 +38,7 @@ repos:
     hooks:
     -   id: mypy
         exclude: ".snakemake."
-        additional_dependencies: [pydantic]
+        additional_dependencies: [pydantic, types-PyYAML]
 -   repo: https://github.com/psf/black
     rev: 21.6b0
     hooks:
@@ -70,7 +70,7 @@ repos:
     rev: 0.13.1
     hooks:
     -   id: nbqa-isort
-        args: ["--nbqa-mutate", "--profile", "black"]
+        args: ["--nbqa-mutate", "--profile=black"]
         exclude: "munge/019_prepare-data-subsample.ipynb"
     -   id: nbqa-black
         args: ["--nbqa-mutate"]
