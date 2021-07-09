@@ -1,4 +1,3 @@
-
 from pathlib import Path
 from typing import Dict, List
 
@@ -56,30 +55,39 @@ ccle_downloads: Dict[str, str] = {
 
 rule all:
     input:
-        depmap_files = expand(depmap_dir / "{filename}", filename=list(depmap_downloads.keys())),
-        score_files = expand(score_dir / "{filename}", filename=list(score_downloads.keys())),
-        ccle_files = expand(ccle_dir / "{filename}", filename=list(ccle_downloads.keys())),
+        depmap_files=expand(
+            depmap_dir / "{filename}", filename=list(depmap_downloads.keys())
+        ),
+        score_files=expand(
+            score_dir / "{filename}", filename=list(score_downloads.keys())
+        ),
+        ccle_files=expand(
+            ccle_dir / "{filename}", filename=list(ccle_downloads.keys())
+        ),
+
 
 rule download_depmap:
     output:
-        filename = depmap_dir / "{filename}"
+        filename=depmap_dir / "{filename}",
     params:
-        url = lambda w: depmap_downloads[w.filename]
+        url=lambda w: depmap_downloads[w.filename],
     shell:
         "wget --output-document {output.filename} {params.url}"
+
 
 rule download_score:
     output:
-        filename = score_dir / "{filename}"
+        filename=score_dir / "{filename}",
     params:
-        url = lambda w: score_downloads[w.filename]
+        url=lambda w: score_downloads[w.filename],
     shell:
         "wget --output-document {output.filename} {params.url}"
 
+
 rule download_ccle:
     output:
-        filename = ccle_dir / "{filename}"
+        filename=ccle_dir / "{filename}",
     params:
-        url = lambda w: ccle_downloads[w.filename]
+        url=lambda w: ccle_downloads[w.filename],
     shell:
         "wget --output-document {output.filename} {params.url}"

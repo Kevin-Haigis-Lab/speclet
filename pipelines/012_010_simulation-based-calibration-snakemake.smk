@@ -29,6 +29,7 @@ model_configuration_lists = get_models_names_fit_methods(
 
 #### ---- Wildcard constrains ---- ####
 
+
 wildcard_constraints:
     model_name="|".join(set(model_configuration_lists.model_names)),
     fit_method="|".join(a.value for a in ModelFitMethod),
@@ -40,16 +41,25 @@ wildcard_constraints:
 root_perm_dir_template = ROOT_PERMUTATION_DIR + "{model_name}_{fit_method}"
 perm_dir_template = "sbc-perm{perm_num}"
 
+
 def make_root_permutation_directory(w: Wildcards) -> str:
     return root_perm_dir_template.format(
-        model_name=w.model_name,
-        fit_method=w.fit_method
+        model_name=w.model_name, fit_method=w.fit_method
     )
 
-def make_permutation_dir(w: Wildcards) -> str:
-    return make_root_permutation_directory(w) + "/" + perm_dir_template.format(perm_num=w.perm_num)
 
-collated_results_template = "cache/sbc-cache/{model_name}_{fit_method}_collated-posterior-summaries.pkl"
+def make_permutation_dir(w: Wildcards) -> str:
+    return (
+        make_root_permutation_directory(w)
+        + "/"
+        + perm_dir_template.format(perm_num=w.perm_num)
+    )
+
+
+collated_results_template = (
+    "cache/sbc-cache/{model_name}_{fit_method}_collated-posterior-summaries.pkl"
+)
+
 
 def make_collated_results_path(w: Wildcards) -> str:
     return collated_results_template.format(
@@ -57,11 +67,13 @@ def make_collated_results_path(w: Wildcards) -> str:
         fit_method=w.fit_method,
     )
 
+
 def create_resource_manager(w: Wildcards) -> RM:
     return RM(w.model_name, MOCK_DATA_SIZE, w.fit_method, MODEL_CONFIG)
 
 
 #### ---- Rules ---- ####
+
 
 rule all:
     input:
@@ -75,8 +87,12 @@ rule all:
 
 rule run_sbc:
     output:
-        netcdf_file=root_perm_dir_template + "/" + perm_dir_template + "/inference-data.netcdf",
-        posterior_file=root_perm_dir_template + "/" + perm_dir_template + "/posterior-summary.csv",
+        netcdf_file=(
+            root_perm_dir_template + "/" + perm_dir_template + "/inference-data.netcdf"
+        ),
+        posterior_file=(
+            root_perm_dir_template + "/" + perm_dir_template + "/posterior-summary.csv"
+        ),
         priors_file=root_perm_dir_template + "/" + perm_dir_template + "/priors.npz",
     conda:
         ENVIRONMENT_YAML
@@ -86,7 +102,7 @@ rule run_sbc:
         time=lambda w: create_resource_manager(w).time,
         partition=lambda w: create_resource_manager(w).partition,
         perm_dir=make_permutation_dir,
-        config_path=MODEL_CONFIG.as_posix()
+        config_path=MODEL_CONFIG.as_posix(),
     shell:
         "src/command_line_interfaces/simulation_based_calibration_cli.py"
         "  {wildcards.model_name}"
@@ -95,6 +111,7 @@ rule run_sbc:
         "  {params.perm_dir}"
         "  {wildcards.perm_num}"
         "  " + MOCK_DATA_SIZE.value
+
 
 rule collate_sbc:
     input:
@@ -114,6 +131,7 @@ rule collate_sbc:
         " {params.perm_dir} "
         " {output.collated_results} "
         " --num-permutations=" + str(NUM_SIMULATIONS)
+
 
 rule papermill_report:
     params:
@@ -140,7 +158,7 @@ rule papermill_report:
 rule execute_report:
     input:
         collated_results=rules.collate_sbc.output.collated_results,
-        notebook=rules.papermill_report.output.notebook
+        notebook=rules.papermill_report.output.notebook,
     output:
         markdown=REPORTS_DIR + "{model_name}_{fit_method}_sbc-results.md",
     conda:
