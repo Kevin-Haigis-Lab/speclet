@@ -60,6 +60,11 @@ def make_collated_results_path(w: Wildcards) -> str:
 def create_resource_manager(w: Wildcards) -> RM:
     return RM(w.model_name, MOCK_DATA_SIZE, w.fit_method, MODEL_CONFIG)
 
+
+#### ---- Helpers ---- ####
+
+slurm_resource_template = "SLURM resources > mem: {params.mem}, time: {params.time}, partition: {params.partition}, cores: {params.cores}"
+
 #### ---- Rules ---- ####
 
 rule all:
@@ -86,6 +91,7 @@ rule run_sbc:
         partition=lambda w: create_resource_manager(w).partition,
         perm_dir=make_permutation_dir,
         config_path=MODEL_CONFIG.as_posix()
+    message: slurm_resource_template
     shell:
         "src/command_line_interfaces/simulation_based_calibration_cli.py"
         "  {wildcards.model_name}"
@@ -138,8 +144,8 @@ rule papermill_report:
 
 rule execute_report:
     input:
-        collated_results=collated_results_template,
-        notebook=REPORTS_DIR + "{model_name}_{fit_method}_sbc-results.ipynb",
+        collated_results=rules.collate_sbc.output.collated_results,
+        notebook=rules.papermill_report.output.notebook
     output:
         markdown=REPORTS_DIR + "{model_name}_{fit_method}_sbc-results.md",
     conda:
