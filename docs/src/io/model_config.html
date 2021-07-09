@@ -124,7 +124,7 @@ def get_sampling_kwargs_from_config(
     config: ModelConfig,
     pipeline: SpecletPipeline,
     fit_method: ModelFitMethod,
-) -&gt; Dict[str, Union[float, str, int]]:
+) -&gt; Dict[str, Union[float, str, int, bool]]:
     &#34;&#34;&#34;Get the sampling keyword argument dictionary from a model configuration.
 
     Args:
@@ -401,7 +401,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
 </details>
 </dd>
 <dt id="src.io.model_config.get_sampling_kwargs_from_config"><code class="name flex">
-<span>def <span class="ident">get_sampling_kwargs_from_config</span></span>(<span>config: <a title="src.io.model_config.ModelConfig" href="#src.io.model_config.ModelConfig">ModelConfig</a>, pipeline: <a title="src.project_enums.SpecletPipeline" href="../project_enums.html#src.project_enums.SpecletPipeline">SpecletPipeline</a>, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>) -> Dict[str, Union[float, str, int]]</span>
+<span>def <span class="ident">get_sampling_kwargs_from_config</span></span>(<span>config: <a title="src.io.model_config.ModelConfig" href="#src.io.model_config.ModelConfig">ModelConfig</a>, pipeline: <a title="src.project_enums.SpecletPipeline" href="../project_enums.html#src.project_enums.SpecletPipeline">SpecletPipeline</a>, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>) -> Dict[str, Union[float, str, int, bool]]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the sampling keyword argument dictionary from a model configuration.</p>
@@ -428,7 +428,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
     config: ModelConfig,
     pipeline: SpecletPipeline,
     fit_method: ModelFitMethod,
-) -&gt; Dict[str, Union[float, str, int]]:
+) -&gt; Dict[str, Union[float, str, int, bool]]:
     &#34;&#34;&#34;Get the sampling keyword argument dictionary from a model configuration.
 
     Args:

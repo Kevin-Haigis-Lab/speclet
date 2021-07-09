@@ -30,13 +30,17 @@
 
 &#34;&#34;&#34;CLI for checking a model configuration file.&#34;&#34;&#34;
 
+import logging
 from pathlib import Path
 
 import typer
 
+from src.loggers import set_console_handler_level
 from src.io import model_config
 from src.models import configuration
 from src.project_enums import ModelFitMethod, SpecletPipeline
+
+set_console_handler_level(logging.WARNING)
 
 
 def check_model_configuration(path: Path) -&gt; None:
@@ -63,6 +67,9 @@ def check_model_configuration(path: Path) -&gt; None:
             config,
             root_cache_dir=Path(&#34;temp&#34;),
         )
+    typer.echo(&#34;All models can be instantiated and configured: ✔︎&#34;)
+
+    for config in configs.configurations:
         for fit_method in ModelFitMethod:
             for pipeline in SpecletPipeline:
                 sampling_kwargs = model_config.get_sampling_kwargs_from_config(
@@ -73,8 +80,7 @@ def check_model_configuration(path: Path) -&gt; None:
                 configuration.check_sampling_kwargs(
                     sampling_kwargs, fit_method=fit_method
                 )
-
-    typer.echo(&#34;All models can be instantiated and configured: ✔︎&#34;)
+    typer.echo(&#34;All sampling parameterizations use acceptable keywords: ✔︎&#34;)
 
     typer.secho(&#34;Configuration file looks good.&#34;, fg=typer.colors.GREEN)
     return None
@@ -134,6 +140,9 @@ if __name__ == &#34;__main__&#34;:
             config,
             root_cache_dir=Path(&#34;temp&#34;),
         )
+    typer.echo(&#34;All models can be instantiated and configured: ✔︎&#34;)
+
+    for config in configs.configurations:
         for fit_method in ModelFitMethod:
             for pipeline in SpecletPipeline:
                 sampling_kwargs = model_config.get_sampling_kwargs_from_config(
@@ -144,8 +153,7 @@ if __name__ == &#34;__main__&#34;:
                 configuration.check_sampling_kwargs(
                     sampling_kwargs, fit_method=fit_method
                 )
-
-    typer.echo(&#34;All models can be instantiated and configured: ✔︎&#34;)
+    typer.echo(&#34;All sampling parameterizations use acceptable keywords: ✔︎&#34;)
 
     typer.secho(&#34;Configuration file looks good.&#34;, fg=typer.colors.GREEN)
     return None</code></pre>
