@@ -18,9 +18,9 @@ conda activate speclet_snakemake
 SNAKEFILE="pipelines/010_010_run-crc-sampling-snakemake.smk"
 
 # Copy original env file and ammend import of speclet project modules
-ENV_PATH="pipelines/default_environment.yml"
+ENV_PATH="pipelines/default_environment.yaml"
 if [ ! -f "$ENV_PATH" ]; then
-    cp environment.yml $ENV_PATH
+    cp environment.yaml $ENV_PATH
     sed -i "s|-e .|-e $(pwd)/|" $ENV_PATH
     sed -i '/jupyter_contrib_nbextensions/d' $ENV_PATH
 fi
@@ -32,7 +32,7 @@ snakemake \
     --latency-wait 120 \
     --use-conda \
     --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
-    --cluster-config pipelines/010_011_smk-config.json \
+    --cluster-config pipelines/010_011_smk-config.yaml \
     --keep-going
 
 # --conda-cleanup-envs  # use to clean up old conda envs

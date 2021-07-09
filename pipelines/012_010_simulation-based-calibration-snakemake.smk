@@ -13,7 +13,7 @@ from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as R
 NUM_SIMULATIONS = 25
 
 REPORTS_DIR = "reports/crc_sbc_reports/"
-ENVIRONMENT_YAML = "default_environment.yml"
+ENVIRONMENT_YAML = "default_environment.yaml"
 ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
 
 MOCK_DATA_SIZE = MockDataSize.MEDIUM

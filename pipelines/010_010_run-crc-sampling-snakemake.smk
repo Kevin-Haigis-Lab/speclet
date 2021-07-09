@@ -16,7 +16,7 @@ from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
 SCRATCH_DIR = "/n/scratch3/users/j/jc604/speclet/fitting-mcmc/"
 PYMC3_MODEL_CACHE_DIR = "models/"
 REPORTS_DIR = "reports/crc_model_sampling_reports/"
-ENVIRONMENT_YAML = Path("default_environment.yml").as_posix()
+ENVIRONMENT_YAML = Path("default_environment.yaml").as_posix()
 
 N_CHAINS = 4
 
