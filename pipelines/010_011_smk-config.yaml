@@ -13,7 +13,7 @@ sample_mcmc:
   mem: "{params.mem}"
   time: "{params.time}"
   J: "mcmc"
-combine_mcmc":
+combine_mcmc:
   partition: "short"
   cores: 1
   mem: "32000"
