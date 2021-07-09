@@ -167,13 +167,15 @@ class SpecletSix(SpecletModel):
       ( \\(M \\in {0, 1}\\))
     &#34;&#34;&#34;
 
+    config: SpecletSixConfiguration
+
     def __init__(
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
-        config: SpecletSixConfiguration = SpecletSixConfiguration(),
+        config: Optional[SpecletSixConfiguration] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Instantiate a SpecletSix model.
 
@@ -201,7 +203,7 @@ class SpecletSix(SpecletModel):
             ]
         )
 
-        self.config = config
+        self.config = config if config is not None else SpecletSixConfiguration()
 
         super().__init__(
             name=name,
@@ -494,22 +496,7 @@ class SpecletSix(SpecletModel):
             self.shared_vars[&#34;lineage_idx_shared&#34;]: lineage_idx_batch,
             self.shared_vars[&#34;batch_idx_shared&#34;]: batch_idx_batch,
             self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
-        }
-
-    def update_mcmc_sampling_parameters(self) -&gt; None:
-        &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
-        logger.info(&#34;Updating the MCMC sampling parameters.&#34;)
-        self.mcmc_sampling_params.draws = 4000
-        self.mcmc_sampling_params.tune = 2000
-        self.mcmc_sampling_params.target_accept = 0.99
-        return None
-
-    def update_advi_sampling_parameters(self) -&gt; None:
-        &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
-        logger.info(&#34;Updating the ADVI fitting parameters.&#34;)
-        parameter_adjustment_map = {True: 40000, False: 100000}
-        self.advi_sampling_params.n_iterations = parameter_adjustment_map[self.debug]
-        return None</code></pre>
+        }</code></pre>
 </details>
 </section>
 <section>
@@ -671,7 +658,7 @@ class SpecletSix(SpecletModel):
 <dl>
 <dt id="src.models.speclet_six.SpecletSix"><code class="flex name class">
 <span>class <span class="ident">SpecletSix</span></span>
-<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = None, config: <a title="src.models.speclet_six.SpecletSixConfiguration" href="#src.models.speclet_six.SpecletSixConfiguration">SpecletSixConfiguration</a> = SpecletSixConfiguration(cell_line_cna_cov=False, gene_cna_cov=False, rna_cov=False, mutation_cov=False, a=&lt;ModelParameterization.CENTERED: &#x27;centered&#x27;&gt;, d=&lt;ModelParameterization.CENTERED: &#x27;centered&#x27;&gt;, h=&lt;ModelParameterization.CENTERED: &#x27;centered&#x27;&gt;, j=&lt;ModelParameterization.CENTERED: &#x27;centered&#x27;&gt;, k=&lt;ModelParameterization.CENTERED: &#x27;centered&#x27;&gt;, n=&lt;ModelParameterization.CENTERED: &#x27;centered&#x27;&gt;, q=&lt;ModelParameterization.CENTERED: &#x27;centered&#x27;&gt;, m=&lt;ModelParameterization.CENTERED: &#x27;centered&#x27;&gt;))</span>
+<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = None, config: Optional[<a title="src.models.speclet_six.SpecletSixConfiguration" href="#src.models.speclet_six.SpecletSixConfiguration">SpecletSixConfiguration</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>SpecletSix Model.</p>
@@ -773,13 +760,15 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
       ( \\(M \\in {0, 1}\\))
     &#34;&#34;&#34;
 
+    config: SpecletSixConfiguration
+
     def __init__(
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
-        config: SpecletSixConfiguration = SpecletSixConfiguration(),
+        config: Optional[SpecletSixConfiguration] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Instantiate a SpecletSix model.
 
@@ -807,7 +796,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             ]
         )
 
-        self.config = config
+        self.config = config if config is not None else SpecletSixConfiguration()
 
         super().__init__(
             name=name,
@@ -1100,22 +1089,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             self.shared_vars[&#34;lineage_idx_shared&#34;]: lineage_idx_batch,
             self.shared_vars[&#34;batch_idx_shared&#34;]: batch_idx_batch,
             self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
-        }
-
-    def update_mcmc_sampling_parameters(self) -&gt; None:
-        &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
-        logger.info(&#34;Updating the MCMC sampling parameters.&#34;)
-        self.mcmc_sampling_params.draws = 4000
-        self.mcmc_sampling_params.tune = 2000
-        self.mcmc_sampling_params.target_accept = 0.99
-        return None
-
-    def update_advi_sampling_parameters(self) -&gt; None:
-        &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
-        logger.info(&#34;Updating the ADVI fitting parameters.&#34;)
-        parameter_adjustment_map = {True: 40000, False: 100000}
-        self.advi_sampling_params.n_iterations = parameter_adjustment_map[self.debug]
-        return None</code></pre>
+        }</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1436,41 +1410,6 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
     return model, &#34;lfc&#34;</code></pre>
 </details>
 </dd>
-<dt id="src.models.speclet_six.SpecletSix.update_advi_sampling_parameters"><code class="name flex">
-<span>def <span class="ident">update_advi_sampling_parameters</span></span>(<span>self) -> NoneType</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Adjust the ADVI parameters depending on the state of the object.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def update_advi_sampling_parameters(self) -&gt; None:
-    &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
-    logger.info(&#34;Updating the ADVI fitting parameters.&#34;)
-    parameter_adjustment_map = {True: 40000, False: 100000}
-    self.advi_sampling_params.n_iterations = parameter_adjustment_map[self.debug]
-    return None</code></pre>
-</details>
-</dd>
-<dt id="src.models.speclet_six.SpecletSix.update_mcmc_sampling_parameters"><code class="name flex">
-<span>def <span class="ident">update_mcmc_sampling_parameters</span></span>(<span>self) -> NoneType</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Adjust the ADVI parameters depending on the state of the object.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def update_mcmc_sampling_parameters(self) -&gt; None:
-    &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
-    logger.info(&#34;Updating the MCMC sampling parameters.&#34;)
-    self.mcmc_sampling_params.draws = 4000
-    self.mcmc_sampling_params.tune = 2000
-    self.mcmc_sampling_params.target_accept = 0.99
-    return None</code></pre>
-</details>
-</dd>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
@@ -1486,6 +1425,8 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <li><code><a title="src.models.speclet_model.SpecletModel.mcmc_sample_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.mcmc_sample_model">mcmc_sample_model</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.run_simulation_based_calibration" href="speclet_model.html#src.models.speclet_model.SpecletModel.run_simulation_based_calibration">run_simulation_based_calibration</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.set_config" href="speclet_model.html#src.models.speclet_model.SpecletModel.set_config">set_config</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.update_advi_sampling_parameters" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.update_mcmc_sampling_parameters" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_mcmc_sampling_parameters">update_mcmc_sampling_parameters</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.update_observed_data" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_observed_data">update_observed_data</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.write_advi_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_advi_cache">write_advi_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.write_mcmc_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_mcmc_cache">write_mcmc_cache</a></code></li>
@@ -1556,8 +1497,6 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <ul class="">
 <li><code><a title="src.models.speclet_six.SpecletSix.get_replacement_parameters" href="#src.models.speclet_six.SpecletSix.get_replacement_parameters">get_replacement_parameters</a></code></li>
 <li><code><a title="src.models.speclet_six.SpecletSix.model_specification" href="#src.models.speclet_six.SpecletSix.model_specification">model_specification</a></code></li>
-<li><code><a title="src.models.speclet_six.SpecletSix.update_advi_sampling_parameters" href="#src.models.speclet_six.SpecletSix.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>
-<li><code><a title="src.models.speclet_six.SpecletSix.update_mcmc_sampling_parameters" href="#src.models.speclet_six.SpecletSix.update_mcmc_sampling_parameters">update_mcmc_sampling_parameters</a></code></li>
 </ul>
 </li>
 <li>

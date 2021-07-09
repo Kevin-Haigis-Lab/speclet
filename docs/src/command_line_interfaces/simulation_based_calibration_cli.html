@@ -38,7 +38,7 @@ from src.command_line_interfaces import cli_helpers
 from src.io import model_config
 from src.loggers import logger
 from src.models import configuration
-from src.project_enums import ModelFitMethod, SpecletPipeline
+from src.project_enums import MockDataSize, ModelFitMethod, SpecletPipeline
 
 cli_helpers.configure_pretty()
 
@@ -49,7 +49,7 @@ def run_sbc(
     fit_method: ModelFitMethod,
     cache_dir: Path,
     sim_number: int,
-    data_size: str,
+    data_size: MockDataSize,
 ) -&gt; None:
     &#34;&#34;&#34;CLI for running a round of simulation-based calibration for a model.
 
@@ -101,7 +101,7 @@ if __name__ == &#34;__main__&#34;:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.command_line_interfaces.simulation_based_calibration_cli.run_sbc"><code class="name flex">
-<span>def <span class="ident">run_sbc</span></span>(<span>name: str, config_path: pathlib.Path, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, cache_dir: pathlib.Path, sim_number: int, data_size: str) -> NoneType</span>
+<span>def <span class="ident">run_sbc</span></span>(<span>name: str, config_path: pathlib.Path, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, cache_dir: pathlib.Path, sim_number: int, data_size: <a title="src.project_enums.MockDataSize" href="../project_enums.html#src.project_enums.MockDataSize">MockDataSize</a>) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>CLI for running a round of simulation-based calibration for a model.</p>
@@ -136,7 +136,7 @@ for details and options.</dd>
     fit_method: ModelFitMethod,
     cache_dir: Path,
     sim_number: int,
-    data_size: str,
+    data_size: MockDataSize,
 ) -&gt; None:
     &#34;&#34;&#34;CLI for running a round of simulation-based calibration for a model.
 
