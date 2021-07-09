@@ -111,11 +111,6 @@ class SpecletFour(SpecletModel):
             μ_η = pm.Normal("μ_η", 0, 0.2)
             σ_η = pm.HalfNormal("σ_η", 0.5)
 
-            # Copy number varying effect.
-            if self.config.copy_number_cov:
-                μ_β = pm.Normal("μ_β", -0.5, 1)
-                σ_β = pm.Normal("σ_β", -0.5, 1)
-
             # Gene varying intercept.
             if self.config.h is MP.NONCENTERED:
                 h_offset = pm.Normal("h_offset", 0, 1, shape=co_idx.n_genes)
@@ -147,6 +142,8 @@ class SpecletFour(SpecletModel):
 
             # Copy number effect varying by cell line.
             if self.config.copy_number_cov:
+                μ_β = pm.Normal("μ_β", -0.5, 1)
+                σ_β = pm.HalfNormal("σ_β", 1)
                 if self.config.β is MP.NONCENTERED:
                     β_offset = pm.Normal("β_offset", 0, 1, shape=co_idx.n_celllines)
                     β = pm.Deterministic("β", μ_β + β_offset * σ_β)
