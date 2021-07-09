@@ -23,6 +23,10 @@
     - fitting
     - sbc
   debug: true
+  pipeline_sampling_parameters:
+    fitting:
+      MCMC:
+        target_accept: 0.95
 
 - name: sp4-default-fullrank
   description: Default settings for SpecletFour but fit with FullRank ADVI.
@@ -52,6 +56,10 @@
     - fitting
     - sbc
   debug: true
+  pipeline_sampling_parameters:
+    fitting:
+      MCMC:
+        target_accept: 0.95
 
 - name: sp4-noncentered-copynum
   description: SpecletFour with all covariates, including copy number, in non-centered parameterization.
@@ -69,6 +77,10 @@
     - fitting
     - sbc
   debug: true
+  pipeline_sampling_parameters:
+    fitting:
+      MCMC:
+        target_accept: 0.95
 
 - name: sp4-centered-copynum
   description: SpecletFour with all covariates, including copy number, in centered parameterization.
@@ -86,6 +98,10 @@
     - fitting
     - sbc
   debug: true
+  pipeline_sampling_parameters:
+    fitting:
+      MCMC:
+        target_accept: 0.95
 
 #### ---- SpecletFive ---- ####
 
@@ -99,6 +115,10 @@
     - fitting
     - sbc
   debug: true
+  pipeline_sampling_parameters:
+    fitting:
+      MCMC:
+        target_accept: 0.95
 
 - name: sp5-noncentered
   description: SpecletFive with all variables using the non-centered parameterization.
@@ -115,6 +135,10 @@
     - fitting
     - sbc
   debug: true
+  pipeline_sampling_parameters:
+    fitting:
+      MCMC:
+        target_accept: 0.95
 
 #### ---- SpecletSix ---- ####
 
@@ -128,6 +152,10 @@
     - fitting
     - sbc
   debug: true
+  pipeline_sampling_parameters:
+    fitting:
+      MCMC:
+        target_accept: 0.95
 
 #### ---- SpecletSeven ---- ####
 
@@ -141,3 +169,7 @@
     - fitting
     - sbc
   debug: true
+  pipeline_sampling_parameters:
+    fitting:
+      MCMC:
+        target_accept: 0.95
