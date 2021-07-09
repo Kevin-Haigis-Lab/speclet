@@ -269,6 +269,7 @@ docs/.docs-env
 !modeling_data/copy_number_data_samples.npy
 !data/download-data.sh
 !data/download-data.smk
+!data/all-depmap-ids.csv
 !data/README.md
 
 
