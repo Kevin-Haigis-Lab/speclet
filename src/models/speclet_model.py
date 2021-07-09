@@ -50,14 +50,14 @@ class MCMCSamplingParameters(PyMC3SamplingParameters):
     chains: int = 4
     init: str = "auto"
     n_init: int = 200000
-    target_accept: Optional[float] = None
+    target_accept: float = 0.8  # default for pm.NUTS
 
 
 class VISamplingParameters(PyMC3SamplingParameters):
     """Parameters for fitting by VI."""
 
     method: str = "advi"
-    n_iterations: int = 100000
+    n_iterations: int = 50000
 
 
 class SpecletModel:
