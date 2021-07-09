@@ -10,7 +10,7 @@ from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline, Mock
 from src.pipelines.snakemake_parsing_helpers import get_models_names_fit_methods
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
-NUM_SIMULATIONS = 2
+NUM_SIMULATIONS = 25
 
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yml"
