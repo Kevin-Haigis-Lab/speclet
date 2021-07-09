@@ -44,8 +44,6 @@ def create_resource_manager(w: Wildcards, fit_method: ModelFitMethod) -> RM:
     return RM(name=w.model_name, fit_method=fit_method, config_path=MODEL_CONFIG)
 
 
-slurm_resource_template = "SLURM resources > mem: {params.mem}, time: {params.time}, partition: {params.partition}"
-
 #### ---- Rules ---- ####
 
 
@@ -68,7 +66,6 @@ rule sample_mcmc:
         time=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).time,
         partition=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).partition,
         config_file=MODEL_CONFIG.as_posix(),
-    message: slurm_resource_template
     conda:
         ENVIRONMENT_YAML
     shell:
@@ -116,7 +113,6 @@ rule sample_advi:
         partition=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).partition,
         config_file=MODEL_CONFIG.as_posix(),
         cache_dir=PYMC3_MODEL_CACHE_DIR
-    message: slurm_resource_template
     conda:
         ENVIRONMENT_YAML
     shell:
