@@ -68,18 +68,18 @@ jobs:
             --snakefile pipelines/012_010_simulation-based-calibration-snakemake.smk \
             --dry-run \
             --forceall
-      - name: Data download pipeline
-        run: |
-          snakemake \
-            --snakefile data/download-data.smk \
-            --dry-run \
-            --forceall
-      - name: Data preparation pipeline
-        run: |
-          snakemake \
-            --snakefile munge/munge.smk \
-            --dry-run \
-            --forceall
+      # - name: Data download pipeline
+      #   run: |
+      #     snakemake \
+      #       --snakefile data/download-data.smk \
+      #       --dry-run \
+      #       --forceall
+      # - name: Data preparation pipeline
+      #   run: |
+      #     snakemake \
+      #       --snakefile munge/munge.smk \
+      #       --dry-run \
+      #       --forceall
 
   model-config-check:
     name: model configurations
