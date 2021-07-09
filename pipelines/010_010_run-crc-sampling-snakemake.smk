@@ -77,7 +77,7 @@ rule sample_mcmc:
         "  {output.chain_dir}"
         "  --mcmc-chains 1"
         "  --mcmc-cores 1"
-        "  --random-seed 7414"
+        "  --random-seed {wildcards.chain}"
         "  --touch {output.touch_file}"
 
 
