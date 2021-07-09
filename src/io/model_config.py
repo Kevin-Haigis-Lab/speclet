@@ -8,7 +8,22 @@ from typing import Dict, List, Optional, Set, Union
 import yaml
 from pydantic import BaseModel
 
+from src.io.data_io import project_root_dir
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
+
+#### ---- Files ---- ####
+
+
+def get_model_config() -> Path:
+    """Path to default model configuration file.
+
+    Returns:
+        Path: Path to a model configuration.
+    """
+    return project_root_dir() / "models" / "model-configs.yaml"
+
+
+#### ---- Configuration ---- ####
 
 BasicTypes = Union[float, str, int, bool]
 
@@ -96,7 +111,7 @@ def get_sampling_kwargs_from_config(
     config: ModelConfig,
     pipeline: SpecletPipeline,
     fit_method: ModelFitMethod,
-) -> Dict[str, Union[float, str, int, bool]]:
+) -> Dict[str, BasicTypes]:
     """Get the sampling keyword argument dictionary from a model configuration.
 
     Args:
@@ -105,7 +120,7 @@ def get_sampling_kwargs_from_config(
         fit_method (ModelFitMethod): Desired model fitting method.
 
     Returns:
-        Dict[str, Union[float, str, int]]: Keyword arguments for the model-fitting
+        Dict[str, BasicTypes]: Keyword arguments for the model-fitting
         method.
     """
     if (sampling_params := config.pipeline_sampling_parameters) is None:
@@ -119,7 +134,7 @@ def get_sampling_kwargs_from_config(
 
 def get_sampling_kwargs(
     config_path: Path, name: str, pipeline: SpecletPipeline, fit_method: ModelFitMethod
-) -> Dict[str, Union[float, str, int]]:
+) -> Dict[str, BasicTypes]:
     """Get the sampling keyword argument dictionary from a configuration file.
 
     Args:
@@ -133,7 +148,7 @@ def get_sampling_kwargs(
         not found.
 
     Returns:
-        Dict[str, Union[float, str, int]]: Keyword arguments for the model-fitting
+        Dict[str, BasicTypes]: Keyword arguments for the model-fitting
         method.
     """
     if (config := get_configuration_for_model(config_path, name)) is None:
