@@ -1,5 +1,20 @@
-- name: sp4-default-config
-  description: Default settings for SpecletFour
+#### ---- SpecletTwo ---- ####
+
+- name: sp2-default
+  description: Default SpecletTwo model.
+  model: speclet-two
+  fit_methods:
+    - MCMC
+    - ADVI
+  pipelines:
+    - fitting
+    - sbc
+  debug: true
+
+#### ---- SpecletFour ---- ####
+
+- name: sp4-default
+  description: Default settings for SpecletFour.
   model: speclet-four
   fit_methods:
     - MCMC
@@ -8,8 +23,9 @@
     - fitting
     - sbc
   debug: true
+
 - name: sp4-default-fullrank
-  description: Default settings for SpecletFour
+  description: Default settings for SpecletFour but fit with FullRank ADVI.
   model: speclet-four
   fit_methods:
     - ADVI
@@ -21,6 +37,7 @@
     fitting:
       ADVI:
         method: "fullrank_advi"
+
 - name: sp4-noncentered
   description: SpecletFour with all covariates in non-centered parameterization.
   model: speclet-four
@@ -30,9 +47,12 @@
     η: noncentered
   fit_methods:
     - ADVI
+    - MCMC
   pipelines:
     - fitting
+    - sbc
   debug: true
+
 - name: sp4-noncentered-copynum
   description: SpecletFour with all covariates, including copy number, in non-centered parameterization.
   model: speclet-four
@@ -44,6 +64,80 @@
     η: noncentered
   fit_methods:
     - ADVI
+    - MCMC
   pipelines:
     - fitting
+    - sbc
+  debug: true
+
+- name: sp4-centered-copynum
+  description: SpecletFour with all covariates, including copy number, in centered parameterization.
+  model: speclet-four
+  config:
+    copy_number_cov: true
+    h: centered
+    d: centered
+    β: centered
+    η: centered
+  fit_methods:
+    - ADVI
+    - MCMC
+  pipelines:
+    - fitting
+    - sbc
+  debug: true
+
+#### ---- SpecletFive ---- ####
+
+- name: sp5-default
+  description: Default settings for SpecletFive.
+  model: speclet-five
+  fit_methods:
+    - MCMC
+    - ADVI
+  pipelines:
+    - fitting
+    - sbc
+  debug: true
+
+- name: sp5-noncentered
+  description: SpecletFive with all variables using the non-centered parameterization.
+  model: speclet-five
+  config:
+    a: noncentered
+    d: noncentered
+    h: noncentered
+    j: noncentered
+  fit_methods:
+    - MCMC
+    - ADVI
+  pipelines:
+    - fitting
+    - sbc
+  debug: true
+
+#### ---- SpecletSix ---- ####
+
+- name: sp6-default
+  description: Default settings for SpecletSix.
+  model: speclet-six
+  fit_methods:
+    - MCMC
+    - ADVI
+  pipelines:
+    - fitting
+    - sbc
+  debug: true
+
+#### ---- SpecletSeven ---- ####
+
+- name: sp7-default
+  description: Default settings for SpecletSeven.
+  model: speclet-seven
+  fit_methods:
+    - MCMC
+    - ADVI
+  pipelines:
+    - fitting
+    - sbc
   debug: true
