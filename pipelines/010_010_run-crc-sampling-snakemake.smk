@@ -29,8 +29,8 @@ model_configuration_lists = get_models_names_fit_methods(
 )
 
 
-
 #### ---- Wildcard constrains ---- ####
+
 
 wildcard_constraints:
     model_name="|".join(set(model_configuration_lists.model_names)),
@@ -39,6 +39,7 @@ wildcard_constraints:
 
 
 #### ---- Helpers ---- ####
+
 
 def create_resource_manager(w: Wildcards, fit_method: ModelFitMethod) -> RM:
     return RM(name=w.model_name, fit_method=fit_method, config_path=MODEL_CONFIG)
@@ -79,11 +80,12 @@ rule sample_mcmc:
         "  --random-seed 7414"
         "  --touch {output.touch_file}"
 
+
 rule combine_mcmc:
     input:
         chains=expand(
             PYMC3_MODEL_CACHE_DIR + "_{{model_name}}_chain{chain}_MCMC.txt",
-            chain=list(range(N_CHAINS))
+            chain=list(range(N_CHAINS)),
         ),
     output:
         touch_file=PYMC3_MODEL_CACHE_DIR + "_{model_name}_MCMC.txt",
@@ -91,8 +93,10 @@ rule combine_mcmc:
         config_file=MODEL_CONFIG.as_posix(),
         combined_cache_dir=PYMC3_MODEL_CACHE_DIR,
         chain_dirs=directory(
-            expand(SCRATCH_DIR + "{{model_name}}_chain{chain}", chain=list(range(N_CHAINS)))
-        )
+            expand(
+                SCRATCH_DIR + "{{model_name}}_chain{chain}", chain=list(range(N_CHAINS))
+            )
+        ),
     conda:
         ENVIRONMENT_YAML
     shell:
@@ -112,7 +116,7 @@ rule sample_advi:
         time=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).time,
         partition=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).partition,
         config_file=MODEL_CONFIG.as_posix(),
-        cache_dir=PYMC3_MODEL_CACHE_DIR
+        cache_dir=PYMC3_MODEL_CACHE_DIR,
     conda:
         ENVIRONMENT_YAML
     shell:
@@ -146,7 +150,7 @@ rule papermill_report:
 rule execute_report:
     input:
         model_touch=PYMC3_MODEL_CACHE_DIR + "_{model_name}_{fit_method}.txt",
-        notebook=rules.papermill_report.output.notebook
+        notebook=rules.papermill_report.output.notebook,
     output:
         markdown=REPORTS_DIR + "{model_name}_{fit_method}.md",
     conda:
