@@ -80,7 +80,7 @@ speclet_model = configuration.get_config_and_instantiate_model(
 speclet_model.build_model()
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/09/21 12:00:33] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:250</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/09/21 22:09:07] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:250</span>
                              genes.
 </pre>
 
@@ -396,47 +396,47 @@ for var in vars_to_inspect:
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_20_0.png)
 
-    <ggplot: (8756629874848)>
+    <ggplot: (2961838727003)>
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_20_2.png)
 
-    <ggplot: (8756646066454)>
+    <ggplot: (2961838727277)>
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_20_4.png)
 
-    <ggplot: (8756646098312)>
+    <ggplot: (2961838725907)>
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_20_6.png)
 
-    <ggplot: (8756632817442)>
+    <ggplot: (2961838721244)>
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_20_8.png)
 
-    <ggplot: (8756655113888)>
+    <ggplot: (2961838698969)>
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_20_10.png)
 
-    <ggplot: (8756631936735)>
+    <ggplot: (2961838721247)>
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_20_12.png)
 
-    <ggplot: (8756646092942)>
+    <ggplot: (2961848836946)>
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_20_14.png)
 
-    <ggplot: (8756645447030)>
+    <ggplot: (2961840841972)>
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_20_16.png)
 
-    <ggplot: (8756641511494)>
+    <ggplot: (2961838710929)>
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_20_18.png)
 
-    <ggplot: (8756641511491)>
+    <ggplot: (2961849693317)>
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_20_20.png)
 
-    <ggplot: (8756646089798)>
+    <ggplot: (2961840297241)>
 
 ```python
 if isinstance(speclet_model, SpecletTestModel):
@@ -502,9 +502,9 @@ pred_summary.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.731067</td>
-      <td>-2.034797</td>
-      <td>0.386684</td>
+      <td>-0.704929</td>
+      <td>-1.929915</td>
+      <td>0.598241</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>LS513_c903R1</td>
       <td>-1.100620</td>
@@ -522,13 +522,13 @@ pred_summary.head()
       <td>primary</td>
       <td>True</td>
       <td>63.0</td>
-      <td>-0.369553</td>
+      <td>-0.395692</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.341261</td>
-      <td>-1.664514</td>
-      <td>0.814339</td>
+      <td>-0.320309</td>
+      <td>-1.515630</td>
+      <td>1.041401</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>CL11_c903R1</td>
       <td>-0.572939</td>
@@ -546,13 +546,13 @@ pred_summary.head()
       <td>primary</td>
       <td>True</td>
       <td>NaN</td>
-      <td>-0.231678</td>
+      <td>-0.252630</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.013715</td>
-      <td>-1.131228</td>
-      <td>1.330134</td>
+      <td>0.055424</td>
+      <td>-1.186957</td>
+      <td>1.360440</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>HT29_c904R1</td>
       <td>0.054573</td>
@@ -570,13 +570,13 @@ pred_summary.head()
       <td>primary</td>
       <td>False</td>
       <td>44.0</td>
-      <td>0.068287</td>
+      <td>-0.000851</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.351186</td>
-      <td>-0.926899</td>
-      <td>1.557683</td>
+      <td>0.338752</td>
+      <td>-0.958467</td>
+      <td>1.558499</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>SNUC1_c903R4</td>
       <td>0.700923</td>
@@ -594,13 +594,13 @@ pred_summary.head()
       <td>metastasis</td>
       <td>True</td>
       <td>71.0</td>
-      <td>0.349737</td>
+      <td>0.362172</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.694451</td>
-      <td>-2.026921</td>
-      <td>0.496968</td>
+      <td>-0.654260</td>
+      <td>-1.827918</td>
+      <td>0.647912</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>KM12_c908R1_100</td>
       <td>-1.123352</td>
@@ -618,7 +618,7 @@ pred_summary.head()
       <td>primary</td>
       <td>NaN</td>
       <td>NaN</td>
-      <td>-0.428901</td>
+      <td>-0.469092</td>
     </tr>
   </tbody>
 </table>
@@ -642,18 +642,18 @@ print(model_loo)
     Computed from 1000 by 1443 log-likelihood matrix
 
              Estimate       SE
-    elpd_loo -2066.26    23.41
-    p_loo     1006.41        -
+    elpd_loo -2066.06    23.02
+    p_loo     1010.76        -
 
     There has been a warning during the calculation. Please check the results.
     ------
 
     Pareto k diagnostic values:
                              Count   Pct.
-    (-Inf, 0.5]   (good)      122    8.5%
-     (0.5, 0.7]   (ok)        395   27.4%
-       (0.7, 1]   (bad)       685   47.5%
-       (1, Inf)   (very bad)  241   16.7%
+    (-Inf, 0.5]   (good)       90    6.2%
+     (0.5, 0.7]   (ok)        417   28.9%
+       (0.7, 1]   (bad)       715   49.5%
+       (1, Inf)   (very bad)  221   15.3%
 
 ```python
 sns.distplot(model_loo.loo_i.values);
@@ -687,7 +687,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_28_0.png)
 
-    <ggplot: (8756637065671)>
+    <ggplot: (2961855005690)>
 
 ```python
 (
@@ -701,7 +701,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_29_0.png)
 
-    <ggplot: (8756637065656)>
+    <ggplot: (2961838676556)>
 
 ```python
 (
@@ -713,7 +713,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_30_0.png)
 
-    <ggplot: (8756701372350)>
+    <ggplot: (2961840305812)>
 
 ```python
 (
@@ -727,7 +727,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_31_0.png)
 
-    <ggplot: (8756634819353)>
+    <ggplot: (2961840380224)>
 
 ```python
 (
@@ -741,7 +741,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_32_0.png)
 
-    <ggplot: (8756645610015)>
+    <ggplot: (2961849622673)>
 
 ```python
 (
@@ -757,7 +757,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_33_0.png)
 
-    <ggplot: (8756645627362)>
+    <ggplot: (2961839535457)>
 
 ```python
 # Remove samples without gene CN data.
@@ -776,7 +776,7 @@ ppc_df_no_missing["binned_copy_number"] = [
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_34_0.png)
 
-    <ggplot: (8756645627164)>
+    <ggplot: (2961849634711)>
 
 ```python
 gene_error = (
@@ -809,7 +809,7 @@ n_genes = 15
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_35_0.png)
 
-    <ggplot: (8756641543159)>
+    <ggplot: (2961838697975)>
 
 ```python
 (
@@ -823,7 +823,7 @@ n_genes = 15
 
 ![png](sp7-default_ADVI_files/sp7-default_ADVI_36_0.png)
 
-    <ggplot: (8756645468438)>
+    <ggplot: (2961840327819)>
 
 ---
 
@@ -832,7 +832,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 2.60 minutes
+    execution time: 3.22 minutes
 
 ```python
 %load_ext watermark
@@ -850,18 +850,18 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-229.o2.rc.hms.harvard.edu
+    Hostname: compute-h-17-50.o2.rc.hms.harvard.edu
 
     Git branch: fit-models
 
-    logging   : 0.5.1.2
-    pandas    : 1.2.3
-    pymc3     : 3.11.1
     numpy     : 1.20.1
-    arviz     : 0.11.2
+    pandas    : 1.2.3
     seaborn   : 0.11.1
     matplotlib: 3.3.4
+    pymc3     : 3.11.1
     plotnine  : 0.7.1
+    logging   : 0.5.1.2
+    arviz     : 0.11.2

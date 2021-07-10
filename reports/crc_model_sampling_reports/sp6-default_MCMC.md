@@ -80,7 +80,7 @@ speclet_model = configuration.get_config_and_instantiate_model(
 speclet_model.build_model()
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/09/21 12:33:53] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:250</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/09/21 22:33:46] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:250</span>
                              genes.
 </pre>
 
@@ -349,22 +349,22 @@ else:
       * μ_dim_0           (μ_dim_0) int64 0 1 2 3 4 5 ... 1438 1439 1440 1441 1442
       * σ_dim_0           (σ_dim_0) int64 0 1 2 3
     Data variables: (12/23)
-        μ_μ_j             float64 1.005
-        μ_j               (μ_j_dim_0) float64 1.003 1.002
-        j                 (j_dim_0) float64 1.002 1.003 1.003 1.003
-        μ_h               float64 1.048
-        h                 (h_dim_0, h_dim_1) float64 1.062 1.072 ... 1.13 1.127
-        μ_d               float64 1.008
+        μ_μ_j             float64 1.004
+        μ_j               (μ_j_dim_0) float64 1.009 1.009
+        j                 (j_dim_0) float64 1.01 1.009 1.009 1.01
+        μ_h               float64 2.32
+        h                 (h_dim_0, h_dim_1) float64 2.011 2.032 ... 1.987 2.036
+        μ_d               float64 1.035
         ...                ...
-        μ_a               (μ_a_dim_0) float64 1.07 1.068 1.071 ... 1.072 1.099 1.069
-        σ_σ_a             float64 1.003
-        σ_a               (σ_a_dim_0) float64 0.9997 1.001 0.9997 ... 1.005 1.005
-        μ                 (μ_dim_0) float64 0.9991 1.035 1.003 ... 1.002 1.005 1.014
-        σ_σ               float64 1.003
-        σ                 (σ_dim_0) float64 0.9997 1.013 1.005 1.009
+        μ_a               (μ_a_dim_0) float64 1.305 1.307 1.3 ... 1.295 1.3 1.299
+        σ_σ_a             float64 1.02
+        σ_a               (σ_a_dim_0) float64 1.006 1.008 1.001 ... 1.005 1.003
+        μ                 (μ_dim_0) float64 1.011 1.013 1.017 ... 1.006 1.003 1.007
+        σ_σ               float64 1.002
+        σ                 (σ_dim_0) float64 1.009 1.002 1.014 1.03
     ============================================================
     BFMI
-    [0.00354362 0.00354362 0.00354362 0.00354362]
+    [0.01672355 0.00878256 0.04019667 0.03213867]
 
 ## Model parameters
 
@@ -440,95 +440,95 @@ for var in vars_to_inspect:
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_0.png)
 
-    <ggplot: (8756847709320)>
+    <ggplot: (2998317961641)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_2.png)
 
-    <ggplot: (8756846534214)>
+    <ggplot: (2998321056383)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_4.png)
 
-    <ggplot: (8756850512204)>
+    <ggplot: (2998321056431)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_6.png)
 
-    <ggplot: (8756843736287)>
+    <ggplot: (2998321045794)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_8.png)
 
-    <ggplot: (8756846174992)>
+    <ggplot: (2998321056377)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_10.png)
 
-    <ggplot: (8756843767456)>
+    <ggplot: (2998321188952)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_12.png)
 
-    <ggplot: (8756846175025)>
+    <ggplot: (2998321056434)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_14.png)
 
-    <ggplot: (8756846531211)>
+    <ggplot: (2998317636741)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_16.png)
 
-    <ggplot: (8756846898655)>
+    <ggplot: (2998319983478)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_18.png)
 
-    <ggplot: (8756818608336)>
+    <ggplot: (2998320811252)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_20.png)
 
-    <ggplot: (8756843050132)>
+    <ggplot: (2998319638456)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_22.png)
 
-    <ggplot: (8756843278963)>
+    <ggplot: (2998344469164)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_24.png)
 
-    <ggplot: (8756846935083)>
+    <ggplot: (2998319638510)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_26.png)
 
-    <ggplot: (8756846242726)>
+    <ggplot: (2998320565815)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_28.png)
 
-    <ggplot: (8756843736826)>
+    <ggplot: (2998320616084)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_30.png)
 
-    <ggplot: (8756846899682)>
+    <ggplot: (2998321188934)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_32.png)
 
-    <ggplot: (8756846533084)>
+    <ggplot: (2998344469173)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_34.png)
 
-    <ggplot: (8756844157154)>
+    <ggplot: (2998319993420)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_36.png)
 
-    <ggplot: (8756846682932)>
+    <ggplot: (2998374914838)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_38.png)
 
-    <ggplot: (8756846704634)>
+    <ggplot: (2998318087985)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_40.png)
 
-    <ggplot: (8756788115800)>
+    <ggplot: (2998374915018)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_42.png)
 
-    <ggplot: (8756846664467)>
+    <ggplot: (2998320783457)>
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_20_44.png)
 
-    <ggplot: (8756788174855)>
+    <ggplot: (2998318098339)>
 
 ```python
 if isinstance(speclet_model, SpecletTestModel):
@@ -594,9 +594,9 @@ pred_summary.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.199665</td>
-      <td>-1.241369</td>
-      <td>0.886245</td>
+      <td>-0.216216</td>
+      <td>-1.286507</td>
+      <td>0.892608</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>LS513_c903R1</td>
       <td>-1.100620</td>
@@ -614,13 +614,13 @@ pred_summary.head()
       <td>-0.087325</td>
       <td>-0.001220</td>
       <td>-0.545585</td>
-      <td>-0.900955</td>
+      <td>-0.884404</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.124249</td>
-      <td>-1.285255</td>
-      <td>0.883569</td>
+      <td>-0.116922</td>
+      <td>-1.179924</td>
+      <td>0.978781</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>CL11_c903R1</td>
       <td>-0.572939</td>
@@ -638,13 +638,13 @@ pred_summary.head()
       <td>0.002392</td>
       <td>0.039414</td>
       <td>0.642603</td>
-      <td>-0.448690</td>
+      <td>-0.456017</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.101419</td>
-      <td>-1.208980</td>
-      <td>0.910028</td>
+      <td>-0.122377</td>
+      <td>-1.203813</td>
+      <td>0.971093</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>HT29_c904R1</td>
       <td>0.054573</td>
@@ -662,13 +662,13 @@ pred_summary.head()
       <td>-0.006563</td>
       <td>0.048779</td>
       <td>-0.949058</td>
-      <td>0.155992</td>
+      <td>0.176950</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.139583</td>
-      <td>-1.251114</td>
-      <td>0.888221</td>
+      <td>-0.175938</td>
+      <td>-1.261183</td>
+      <td>0.911149</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>SNUC1_c903R4</td>
       <td>0.700923</td>
@@ -686,13 +686,13 @@ pred_summary.head()
       <td>-0.122215</td>
       <td>-0.019446</td>
       <td>-0.949058</td>
-      <td>0.840506</td>
+      <td>0.876861</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.008066</td>
-      <td>-0.760702</td>
-      <td>0.721181</td>
+      <td>-0.004472</td>
+      <td>-0.780849</td>
+      <td>0.723030</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>KM12_c908R1_100</td>
       <td>-1.123352</td>
@@ -710,7 +710,7 @@ pred_summary.head()
       <td>0.002122</td>
       <td>0.083387</td>
       <td>0.844352</td>
-      <td>-1.131418</td>
+      <td>-1.118880</td>
     </tr>
   </tbody>
 </table>
@@ -734,17 +734,17 @@ print(model_loo)
     Computed from 4000 by 1443 log-likelihood matrix
 
              Estimate       SE
-    elpd_loo -1337.61    37.24
-    p_loo       81.52        -
+    elpd_loo -1337.47    37.42
+    p_loo       95.68        -
 
     There has been a warning during the calculation. Please check the results.
     ------
 
     Pareto k diagnostic values:
                              Count   Pct.
-    (-Inf, 0.5]   (good)     1428   99.0%
-     (0.5, 0.7]   (ok)         12    0.8%
-       (0.7, 1]   (bad)         3    0.2%
+    (-Inf, 0.5]   (good)     1438   99.7%
+     (0.5, 0.7]   (ok)          4    0.3%
+       (0.7, 1]   (bad)         1    0.1%
        (1, Inf)   (very bad)    0    0.0%
 
 ```python
@@ -779,7 +779,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_28_0.png)
 
-    <ggplot: (8756847308517)>
+    <ggplot: (2998319810196)>
 
 ```python
 (
@@ -793,7 +793,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_29_0.png)
 
-    <ggplot: (8756848555084)>
+    <ggplot: (2998317746038)>
 
 ```python
 (
@@ -805,7 +805,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_30_0.png)
 
-    <ggplot: (8756847715368)>
+    <ggplot: (2998271001438)>
 
 ```python
 (
@@ -819,7 +819,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_31_0.png)
 
-    <ggplot: (8756890627792)>
+    <ggplot: (2998271096206)>
 
 ```python
 (
@@ -833,7 +833,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_32_0.png)
 
-    <ggplot: (8756846708568)>
+    <ggplot: (2998316523587)>
 
 ```python
 (
@@ -849,7 +849,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_33_0.png)
 
-    <ggplot: (8756844195934)>
+    <ggplot: (2998317972002)>
 
 ```python
 # Remove samples without gene CN data.
@@ -868,7 +868,7 @@ ppc_df_no_missing["binned_copy_number"] = [
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_34_0.png)
 
-    <ggplot: (8756847210463)>
+    <ggplot: (2998316543046)>
 
 ```python
 gene_error = (
@@ -901,7 +901,7 @@ n_genes = 15
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_35_0.png)
 
-    <ggplot: (8756846972953)>
+    <ggplot: (2998317688311)>
 
 ```python
 (
@@ -915,7 +915,7 @@ n_genes = 15
 
 ![png](sp6-default_MCMC_files/sp6-default_MCMC_36_0.png)
 
-    <ggplot: (8756788197024)>
+    <ggplot: (2998374958373)>
 
 ---
 
@@ -924,7 +924,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 3.39 minutes
+    execution time: 4.10 minutes
 
 ```python
 %load_ext watermark
@@ -942,18 +942,18 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-229.o2.rc.hms.harvard.edu
+    Hostname: compute-h-17-54.o2.rc.hms.harvard.edu
 
     Git branch: fit-models
 
-    seaborn   : 0.11.1
-    pandas    : 1.2.3
-    plotnine  : 0.7.1
-    numpy     : 1.20.1
     logging   : 0.5.1.2
+    numpy     : 1.20.1
     pymc3     : 3.11.1
-    arviz     : 0.11.2
     matplotlib: 3.3.4
+    arviz     : 0.11.2
+    seaborn   : 0.11.1
+    plotnine  : 0.7.1
+    pandas    : 1.2.3

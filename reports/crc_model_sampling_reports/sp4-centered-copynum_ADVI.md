@@ -80,7 +80,7 @@ speclet_model = configuration.get_config_and_instantiate_model(
 speclet_model.build_model()
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/09/21 11:55:49] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:250</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/09/21 22:05:32] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:250</span>
                              genes.
 </pre>
 
@@ -400,63 +400,63 @@ for var in vars_to_inspect:
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_20_0.png)
 
-    <ggplot: (8788874708405)>
+    <ggplot: (2992325550800)>
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_20_2.png)
 
-    <ggplot: (8788875741977)>
+    <ggplot: (2992315933790)>
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_20_4.png)
 
-    <ggplot: (8788898444225)>
+    <ggplot: (2992316534640)>
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_20_6.png)
 
-    <ggplot: (8788875034447)>
+    <ggplot: (2992325051155)>
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_20_8.png)
 
-    <ggplot: (8788883554557)>
+    <ggplot: (2992326061288)>
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_20_10.png)
 
-    <ggplot: (8788874666168)>
+    <ggplot: (2992315927634)>
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_20_12.png)
 
-    <ggplot: (8788865199201)>
+    <ggplot: (2992325544915)>
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_20_14.png)
 
-    <ggplot: (8788874350686)>
+    <ggplot: (2992325899945)>
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_20_16.png)
 
-    <ggplot: (8788898444225)>
+    <ggplot: (2992326056452)>
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_20_18.png)
 
-    <ggplot: (8788874702035)>
+    <ggplot: (2992326391303)>
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_20_20.png)
 
-    <ggplot: (8788865199674)>
+    <ggplot: (2992326387688)>
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_20_22.png)
 
-    <ggplot: (8788876648319)>
+    <ggplot: (2992327486808)>
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_20_24.png)
 
-    <ggplot: (8788874614339)>
+    <ggplot: (2992315901046)>
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_20_26.png)
 
-    <ggplot: (8788866230601)>
+    <ggplot: (2992325909342)>
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_20_28.png)
 
-    <ggplot: (8788874674026)>
+    <ggplot: (2992325913622)>
 
 ```python
 if isinstance(speclet_model, SpecletTestModel):
@@ -522,9 +522,9 @@ pred_summary.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.276871</td>
-      <td>-1.597420</td>
-      <td>1.008121</td>
+      <td>-0.292904</td>
+      <td>-1.606026</td>
+      <td>1.096782</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>LS513_c903R1</td>
       <td>-1.100620</td>
@@ -542,13 +542,13 @@ pred_summary.head()
       <td>primary</td>
       <td>True</td>
       <td>63.0</td>
-      <td>-0.823749</td>
+      <td>-0.807716</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0.009566</td>
-      <td>-1.428625</td>
-      <td>1.262197</td>
+      <td>0.003400</td>
+      <td>-1.399333</td>
+      <td>1.331841</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>CL11_c903R1</td>
       <td>-0.572939</td>
@@ -566,13 +566,13 @@ pred_summary.head()
       <td>primary</td>
       <td>True</td>
       <td>NaN</td>
-      <td>-0.582505</td>
+      <td>-0.576339</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.006685</td>
-      <td>-1.277001</td>
-      <td>1.439355</td>
+      <td>0.012145</td>
+      <td>-1.315102</td>
+      <td>1.389438</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>HT29_c904R1</td>
       <td>0.054573</td>
@@ -590,13 +590,13 @@ pred_summary.head()
       <td>primary</td>
       <td>False</td>
       <td>44.0</td>
-      <td>0.047888</td>
+      <td>0.042427</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.013397</td>
-      <td>-1.351635</td>
-      <td>1.255295</td>
+      <td>-0.005813</td>
+      <td>-1.400490</td>
+      <td>1.272922</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>SNUC1_c903R4</td>
       <td>0.700923</td>
@@ -614,13 +614,13 @@ pred_summary.head()
       <td>metastasis</td>
       <td>True</td>
       <td>71.0</td>
-      <td>0.687526</td>
+      <td>0.706736</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.042829</td>
-      <td>-1.216542</td>
-      <td>1.367533</td>
+      <td>-0.034464</td>
+      <td>-1.234989</td>
+      <td>1.445028</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>KM12_c908R1_100</td>
       <td>-1.123352</td>
@@ -638,7 +638,7 @@ pred_summary.head()
       <td>primary</td>
       <td>NaN</td>
       <td>NaN</td>
-      <td>-1.080524</td>
+      <td>-1.088888</td>
     </tr>
   </tbody>
 </table>
@@ -662,18 +662,18 @@ print(model_loo)
     Computed from 1000 by 1443 log-likelihood matrix
 
              Estimate       SE
-    elpd_loo -2443.41    77.95
-    p_loo     1483.48        -
+    elpd_loo -2511.79    80.75
+    p_loo     1552.06        -
 
     There has been a warning during the calculation. Please check the results.
     ------
 
     Pareto k diagnostic values:
                              Count   Pct.
-    (-Inf, 0.5]   (good)      288   20.0%
-     (0.5, 0.7]   (ok)        230   15.9%
-       (0.7, 1]   (bad)       361   25.0%
-       (1, Inf)   (very bad)  564   39.1%
+    (-Inf, 0.5]   (good)      297   20.6%
+     (0.5, 0.7]   (ok)        213   14.8%
+       (0.7, 1]   (bad)       342   23.7%
+       (1, Inf)   (very bad)  591   41.0%
 
 ```python
 sns.distplot(model_loo.loo_i.values);
@@ -707,7 +707,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_28_0.png)
 
-    <ggplot: (8788875574336)>
+    <ggplot: (2992325771313)>
 
 ```python
 (
@@ -721,7 +721,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_29_0.png)
 
-    <ggplot: (8788878709140)>
+    <ggplot: (2992306275503)>
 
 ```python
 (
@@ -733,7 +733,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_30_0.png)
 
-    <ggplot: (8788883578679)>
+    <ggplot: (2992323292709)>
 
 ```python
 (
@@ -747,7 +747,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_31_0.png)
 
-    <ggplot: (8788878737387)>
+    <ggplot: (2992323421892)>
 
 ```python
 (
@@ -761,7 +761,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_32_0.png)
 
-    <ggplot: (8788883440144)>
+    <ggplot: (2992316937695)>
 
 ```python
 (
@@ -777,7 +777,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_33_0.png)
 
-    <ggplot: (8788883595376)>
+    <ggplot: (2992323291564)>
 
 ```python
 # Remove samples without gene CN data.
@@ -796,7 +796,7 @@ ppc_df_no_missing["binned_copy_number"] = [
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_34_0.png)
 
-    <ggplot: (8788883595316)>
+    <ggplot: (2992323321504)>
 
 ```python
 gene_error = (
@@ -829,7 +829,7 @@ n_genes = 15
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_35_0.png)
 
-    <ggplot: (8788883595370)>
+    <ggplot: (2992325770003)>
 
 ```python
 (
@@ -843,7 +843,7 @@ n_genes = 15
 
 ![png](sp4-centered-copynum_ADVI_files/sp4-centered-copynum_ADVI_36_0.png)
 
-    <ggplot: (8788883394934)>
+    <ggplot: (2992316994982)>
 
 ---
 
@@ -852,7 +852,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 2.25 minutes
+    execution time: 2.57 minutes
 
 ```python
 %load_ext watermark
@@ -870,18 +870,18 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-229.o2.rc.hms.harvard.edu
+    Hostname: compute-h-17-54.o2.rc.hms.harvard.edu
 
     Git branch: fit-models
 
-    arviz     : 0.11.2
-    plotnine  : 0.7.1
+    numpy     : 1.20.1
+    matplotlib: 3.3.4
     pandas    : 1.2.3
+    plotnine  : 0.7.1
     pymc3     : 3.11.1
     logging   : 0.5.1.2
-    numpy     : 1.20.1
+    arviz     : 0.11.2
     seaborn   : 0.11.1
-    matplotlib: 3.3.4
