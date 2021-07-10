@@ -18,6 +18,9 @@ PYMC3_MODEL_CACHE_DIR = "models/"
 REPORTS_DIR = "reports/crc_model_sampling_reports/"
 ENVIRONMENT_YAML = Path("default_environment.yaml").as_posix()
 BENCHMARK_DIR = Path("benchmarks", "010_010_run-crc-sampling-snakemake")
+if not BENCHMARK_DIR.exists():
+    BENCHMARK_DIR.mkdir(parents=True)
+
 N_CHAINS = 4
 
 
@@ -71,6 +74,7 @@ rule sample_mcmc:
         ENVIRONMENT_YAML
     benchmark:
         BENCHMARK_DIR / "sample_mcmc/{model_name}_chain{chain}.tsv"
+    priority: 20
     shell:
         "python3 src/command_line_interfaces/sampling_pymc3_models_cli.py"
         '  "{wildcards.model_name}"'
@@ -123,6 +127,7 @@ rule sample_advi:
         ENVIRONMENT_YAML
     benchmark:
         BENCHMARK_DIR / "sample_advi/{model_name}.tsv"
+    priority: 10
     shell:
         "python3 src/command_line_interfaces/sampling_pymc3_models_cli.py"
         '  "{wildcards.model_name}"'

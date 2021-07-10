@@ -96,6 +96,7 @@ rule run_sbc:
         priors_file=root_perm_dir_template + "/" + perm_dir_template + "/priors.npz",
     conda:
         ENVIRONMENT_YAML
+    priority: 20
     params:
         cores=lambda w: create_resource_manager(w).cores,
         mem=lambda w: create_resource_manager(w).memory,
@@ -126,6 +127,7 @@ rule collate_sbc:
         perm_dir=make_root_permutation_directory,
     output:
         collated_results=collated_results_template,
+    priority: 10
     shell:
         "src/command_line_interfaces/collate_sbc_cli.py "
         " {params.perm_dir} "
