@@ -174,8 +174,6 @@ rule execute_report:
 BENCHMARK_REPORT = "reports/benchmarks.ipynb"
 run_benchmark_nb_cmd = f"""
     jupyter nbconvert --to notebook --inplace --execute '{BENCHMARK_REPORT}' &&
-    nbqa isort '{BENCHMARK_REPORT}' --nbqa-mutate &&
-    nbqa black '{BENCHMARK_REPORT}' --nbqa-mutate &&
     jupyter nbconvert --to markdown '{BENCHMARK_REPORT}'
 """
 

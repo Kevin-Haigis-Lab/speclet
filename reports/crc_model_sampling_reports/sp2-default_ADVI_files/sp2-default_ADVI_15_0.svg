@@ -10,157 +10,157 @@
 <polygon fill="white" stroke="transparent" points="-4,4 -4,-464.81 551.79,-464.81 551.79,4 -4,4"/>
 <g id="clust1" class="cluster">
 <title>cluster64 x 10</title>
-<path fill="none" stroke="black" d="M139.79,-243.91C139.79,-243.91 229.79,-243.91 229.79,-243.91 235.79,-243.91 241.79,-249.91 241.79,-255.91 241.79,-255.91 241.79,-345.86 241.79,-345.86 241.79,-351.86 235.79,-357.86 229.79,-357.86 229.79,-357.86 139.79,-357.86 139.79,-357.86 133.79,-357.86 127.79,-351.86 127.79,-345.86 127.79,-345.86 127.79,-255.91 127.79,-255.91 127.79,-249.91 133.79,-243.91 139.79,-243.91"/>
-<text text-anchor="middle" x="206.79" y="-251.71" font-family="Times-Roman" font-size="14.00">64 x 10</text>
+<path fill="none" stroke="black" d="M182,-243.91C182,-243.91 272,-243.91 272,-243.91 278,-243.91 284,-249.91 284,-255.91 284,-255.91 284,-345.86 284,-345.86 284,-351.86 278,-357.86 272,-357.86 272,-357.86 182,-357.86 182,-357.86 176,-357.86 170,-351.86 170,-345.86 170,-345.86 170,-255.91 170,-255.91 170,-249.91 176,-243.91 182,-243.91"/>
+<text text-anchor="middle" x="249" y="-251.71" font-family="Times-Roman" font-size="14.00">64 x 10</text>
 </g>
 <g id="clust2" class="cluster">
 <title>cluster4</title>
-<path fill="none" stroke="black" d="M275.79,-243.91C275.79,-243.91 365.79,-243.91 365.79,-243.91 371.79,-243.91 377.79,-249.91 377.79,-255.91 377.79,-255.91 377.79,-345.86 377.79,-345.86 377.79,-351.86 371.79,-357.86 365.79,-357.86 365.79,-357.86 275.79,-357.86 275.79,-357.86 269.79,-357.86 263.79,-351.86 263.79,-345.86 263.79,-345.86 263.79,-255.91 263.79,-255.91 263.79,-249.91 269.79,-243.91 275.79,-243.91"/>
-<text text-anchor="middle" x="364.79" y="-251.71" font-family="Times-Roman" font-size="14.00">4</text>
+<path fill="none" stroke="black" d="M318,-243.91C318,-243.91 408,-243.91 408,-243.91 414,-243.91 420,-249.91 420,-255.91 420,-255.91 420,-345.86 420,-345.86 420,-351.86 414,-357.86 408,-357.86 408,-357.86 318,-357.86 318,-357.86 312,-357.86 306,-351.86 306,-345.86 306,-345.86 306,-255.91 306,-255.91 306,-249.91 312,-243.91 318,-243.91"/>
+<text text-anchor="middle" x="407" y="-251.71" font-family="Times-Roman" font-size="14.00">4</text>
 </g>
 <g id="clust3" class="cluster">
 <title>cluster1,443</title>
-<path fill="none" stroke="black" d="M261.79,-8C261.79,-8 365.79,-8 365.79,-8 371.79,-8 377.79,-14 377.79,-20 377.79,-20 377.79,-212.93 377.79,-212.93 377.79,-218.93 371.79,-224.93 365.79,-224.93 365.79,-224.93 261.79,-224.93 261.79,-224.93 255.79,-224.93 249.79,-218.93 249.79,-212.93 249.79,-212.93 249.79,-20 249.79,-20 249.79,-14 255.79,-8 261.79,-8"/>
-<text text-anchor="middle" x="349.29" y="-15.8" font-family="Times-Roman" font-size="14.00">1,443</text>
+<path fill="none" stroke="black" d="M182,-8C182,-8 286,-8 286,-8 292,-8 298,-14 298,-20 298,-20 298,-212.93 298,-212.93 298,-218.93 292,-224.93 286,-224.93 286,-224.93 182,-224.93 182,-224.93 176,-224.93 170,-218.93 170,-212.93 170,-212.93 170,-20 170,-20 170,-14 176,-8 182,-8"/>
+<text text-anchor="middle" x="269.5" y="-15.8" font-family="Times-Roman" font-size="14.00">1,443</text>
 </g>
 <g id="clust4" class="cluster">
 <title>cluster192</title>
-<path fill="none" stroke="black" d="M397.79,-121.95C397.79,-121.95 527.79,-121.95 527.79,-121.95 533.79,-121.95 539.79,-127.95 539.79,-133.95 539.79,-133.95 539.79,-223.91 539.79,-223.91 539.79,-229.91 533.79,-235.91 527.79,-235.91 527.79,-235.91 397.79,-235.91 397.79,-235.91 391.79,-235.91 385.79,-229.91 385.79,-223.91 385.79,-223.91 385.79,-133.95 385.79,-133.95 385.79,-127.95 391.79,-121.95 397.79,-121.95"/>
-<text text-anchor="middle" x="517.79" y="-129.75" font-family="Times-Roman" font-size="14.00">192</text>
-</g>
-<!-- μ_α -->
-<g id="node1" class="node">
-<title>μ_α</title>
-<ellipse fill="none" stroke="black" cx="48.79" cy="-423.34" rx="48.58" ry="37.45"/>
-<text text-anchor="middle" x="48.79" y="-434.64" font-family="Times-Roman" font-size="14.00">μ_α</text>
-<text text-anchor="middle" x="48.79" y="-419.64" font-family="Times-Roman" font-size="14.00">~</text>
-<text text-anchor="middle" x="48.79" y="-404.64" font-family="Times-Roman" font-size="14.00">Normal</text>
-</g>
-<!-- α -->
-<g id="node6" class="node">
-<title>α</title>
-<ellipse fill="none" stroke="black" cx="184.79" cy="-312.38" rx="48.58" ry="37.45"/>
-<text text-anchor="middle" x="184.79" y="-323.68" font-family="Times-Roman" font-size="14.00">α</text>
-<text text-anchor="middle" x="184.79" y="-308.68" font-family="Times-Roman" font-size="14.00">~</text>
-<text text-anchor="middle" x="184.79" y="-293.68" font-family="Times-Roman" font-size="14.00">Normal</text>
-</g>
-<!-- μ_α&#45;&gt;α -->
-<g id="edge1" class="edge">
-<title>μ_α&#45;&gt;α</title>
-<path fill="none" stroke="black" d="M82.06,-395.68C100.58,-380.84 123.81,-362.24 143.48,-346.48"/>
-<polygon fill="black" stroke="black" points="145.78,-349.12 151.39,-340.14 141.4,-343.66 145.78,-349.12"/>
-</g>
-<!-- σ_α -->
-<g id="node2" class="node">
-<title>σ_α</title>
-<ellipse fill="none" stroke="black" cx="184.79" cy="-423.34" rx="69.09" ry="37.45"/>
-<text text-anchor="middle" x="184.79" y="-434.64" font-family="Times-Roman" font-size="14.00">σ_α</text>
-<text text-anchor="middle" x="184.79" y="-419.64" font-family="Times-Roman" font-size="14.00">~</text>
-<text text-anchor="middle" x="184.79" y="-404.64" font-family="Times-Roman" font-size="14.00">HalfNormal</text>
-</g>
-<!-- σ_α&#45;&gt;α -->
-<g id="edge2" class="edge">
-<title>σ_α&#45;&gt;α</title>
-<path fill="none" stroke="black" d="M184.79,-385.75C184.79,-377.58 184.79,-368.8 184.79,-360.27"/>
-<polygon fill="black" stroke="black" points="188.29,-360.06 184.79,-350.06 181.29,-360.06 188.29,-360.06"/>
-</g>
-<!-- μ_η -->
-<g id="node3" class="node">
-<title>μ_η</title>
-<ellipse fill="none" stroke="black" cx="320.79" cy="-423.34" rx="48.58" ry="37.45"/>
-<text text-anchor="middle" x="320.79" y="-434.64" font-family="Times-Roman" font-size="14.00">μ_η</text>
-<text text-anchor="middle" x="320.79" y="-419.64" font-family="Times-Roman" font-size="14.00">~</text>
-<text text-anchor="middle" x="320.79" y="-404.64" font-family="Times-Roman" font-size="14.00">Normal</text>
-</g>
-<!-- η -->
-<g id="node7" class="node">
-<title>η</title>
-<ellipse fill="none" stroke="black" cx="320.79" cy="-312.38" rx="48.58" ry="37.45"/>
-<text text-anchor="middle" x="320.79" y="-323.68" font-family="Times-Roman" font-size="14.00">η</text>
-<text text-anchor="middle" x="320.79" y="-308.68" font-family="Times-Roman" font-size="14.00">~</text>
-<text text-anchor="middle" x="320.79" y="-293.68" font-family="Times-Roman" font-size="14.00">Normal</text>
-</g>
-<!-- μ_η&#45;&gt;η -->
-<g id="edge4" class="edge">
-<title>μ_η&#45;&gt;η</title>
-<path fill="none" stroke="black" d="M320.79,-385.75C320.79,-377.58 320.79,-368.8 320.79,-360.27"/>
-<polygon fill="black" stroke="black" points="324.29,-360.06 320.79,-350.06 317.29,-360.06 324.29,-360.06"/>
+<path fill="none" stroke="black" d="M20,-121.95C20,-121.95 150,-121.95 150,-121.95 156,-121.95 162,-127.95 162,-133.95 162,-133.95 162,-223.91 162,-223.91 162,-229.91 156,-235.91 150,-235.91 150,-235.91 20,-235.91 20,-235.91 14,-235.91 8,-229.91 8,-223.91 8,-223.91 8,-133.95 8,-133.95 8,-127.95 14,-121.95 20,-121.95"/>
+<text text-anchor="middle" x="140" y="-129.75" font-family="Times-Roman" font-size="14.00">192</text>
 </g>
 <!-- σ_σ -->
-<g id="node4" class="node">
+<g id="node1" class="node">
 <title>σ_σ</title>
-<ellipse fill="none" stroke="black" cx="462.79" cy="-312.38" rx="69.09" ry="37.45"/>
-<text text-anchor="middle" x="462.79" y="-323.68" font-family="Times-Roman" font-size="14.00">σ_σ</text>
-<text text-anchor="middle" x="462.79" y="-308.68" font-family="Times-Roman" font-size="14.00">~</text>
-<text text-anchor="middle" x="462.79" y="-293.68" font-family="Times-Roman" font-size="14.00">HalfNormal</text>
+<ellipse fill="none" stroke="black" cx="85" cy="-312.38" rx="69.09" ry="37.45"/>
+<text text-anchor="middle" x="85" y="-323.68" font-family="Times-Roman" font-size="14.00">σ_σ</text>
+<text text-anchor="middle" x="85" y="-308.68" font-family="Times-Roman" font-size="14.00">~</text>
+<text text-anchor="middle" x="85" y="-293.68" font-family="Times-Roman" font-size="14.00">HalfNormal</text>
 </g>
 <!-- σ -->
 <g id="node10" class="node">
 <title>σ</title>
-<ellipse fill="none" stroke="black" cx="462.79" cy="-190.43" rx="69.09" ry="37.45"/>
-<text text-anchor="middle" x="462.79" y="-201.73" font-family="Times-Roman" font-size="14.00">σ</text>
-<text text-anchor="middle" x="462.79" y="-186.73" font-family="Times-Roman" font-size="14.00">~</text>
-<text text-anchor="middle" x="462.79" y="-171.73" font-family="Times-Roman" font-size="14.00">HalfNormal</text>
+<ellipse fill="none" stroke="black" cx="85" cy="-190.43" rx="69.09" ry="37.45"/>
+<text text-anchor="middle" x="85" y="-201.73" font-family="Times-Roman" font-size="14.00">σ</text>
+<text text-anchor="middle" x="85" y="-186.73" font-family="Times-Roman" font-size="14.00">~</text>
+<text text-anchor="middle" x="85" y="-171.73" font-family="Times-Roman" font-size="14.00">HalfNormal</text>
 </g>
 <!-- σ_σ&#45;&gt;σ -->
 <g id="edge7" class="edge">
 <title>σ_σ&#45;&gt;σ</title>
-<path fill="none" stroke="black" d="M462.79,-274.74C462.79,-263.34 462.79,-250.6 462.79,-238.58"/>
-<polygon fill="black" stroke="black" points="466.29,-238.26 462.79,-228.26 459.29,-238.26 466.29,-238.26"/>
+<path fill="none" stroke="black" d="M85,-274.74C85,-263.34 85,-250.6 85,-238.58"/>
+<polygon fill="black" stroke="black" points="88.5,-238.26 85,-228.26 81.5,-238.26 88.5,-238.26"/>
+</g>
+<!-- σ_α -->
+<g id="node2" class="node">
+<title>σ_α</title>
+<ellipse fill="none" stroke="black" cx="91" cy="-423.34" rx="69.09" ry="37.45"/>
+<text text-anchor="middle" x="91" y="-434.64" font-family="Times-Roman" font-size="14.00">σ_α</text>
+<text text-anchor="middle" x="91" y="-419.64" font-family="Times-Roman" font-size="14.00">~</text>
+<text text-anchor="middle" x="91" y="-404.64" font-family="Times-Roman" font-size="14.00">HalfNormal</text>
+</g>
+<!-- α -->
+<g id="node6" class="node">
+<title>α</title>
+<ellipse fill="none" stroke="black" cx="227" cy="-312.38" rx="48.58" ry="37.45"/>
+<text text-anchor="middle" x="227" y="-323.68" font-family="Times-Roman" font-size="14.00">α</text>
+<text text-anchor="middle" x="227" y="-308.68" font-family="Times-Roman" font-size="14.00">~</text>
+<text text-anchor="middle" x="227" y="-293.68" font-family="Times-Roman" font-size="14.00">Normal</text>
+</g>
+<!-- σ_α&#45;&gt;α -->
+<g id="edge2" class="edge">
+<title>σ_α&#45;&gt;α</title>
+<path fill="none" stroke="black" d="M129.25,-391.7C146.82,-377.62 167.71,-360.89 185.65,-346.51"/>
+<polygon fill="black" stroke="black" points="188.05,-349.08 193.66,-340.09 183.67,-343.61 188.05,-349.08"/>
+</g>
+<!-- μ_α -->
+<g id="node3" class="node">
+<title>μ_α</title>
+<ellipse fill="none" stroke="black" cx="227" cy="-423.34" rx="48.58" ry="37.45"/>
+<text text-anchor="middle" x="227" y="-434.64" font-family="Times-Roman" font-size="14.00">μ_α</text>
+<text text-anchor="middle" x="227" y="-419.64" font-family="Times-Roman" font-size="14.00">~</text>
+<text text-anchor="middle" x="227" y="-404.64" font-family="Times-Roman" font-size="14.00">Normal</text>
+</g>
+<!-- μ_α&#45;&gt;α -->
+<g id="edge1" class="edge">
+<title>μ_α&#45;&gt;α</title>
+<path fill="none" stroke="black" d="M227,-385.75C227,-377.58 227,-368.8 227,-360.27"/>
+<polygon fill="black" stroke="black" points="230.5,-360.06 227,-350.06 223.5,-360.06 230.5,-360.06"/>
 </g>
 <!-- σ_η -->
-<g id="node5" class="node">
+<g id="node4" class="node">
 <title>σ_η</title>
-<ellipse fill="none" stroke="black" cx="456.79" cy="-423.34" rx="69.09" ry="37.45"/>
-<text text-anchor="middle" x="456.79" y="-434.64" font-family="Times-Roman" font-size="14.00">σ_η</text>
-<text text-anchor="middle" x="456.79" y="-419.64" font-family="Times-Roman" font-size="14.00">~</text>
-<text text-anchor="middle" x="456.79" y="-404.64" font-family="Times-Roman" font-size="14.00">HalfNormal</text>
+<ellipse fill="none" stroke="black" cx="363" cy="-423.34" rx="69.09" ry="37.45"/>
+<text text-anchor="middle" x="363" y="-434.64" font-family="Times-Roman" font-size="14.00">σ_η</text>
+<text text-anchor="middle" x="363" y="-419.64" font-family="Times-Roman" font-size="14.00">~</text>
+<text text-anchor="middle" x="363" y="-404.64" font-family="Times-Roman" font-size="14.00">HalfNormal</text>
+</g>
+<!-- η -->
+<g id="node7" class="node">
+<title>η</title>
+<ellipse fill="none" stroke="black" cx="363" cy="-312.38" rx="48.58" ry="37.45"/>
+<text text-anchor="middle" x="363" y="-323.68" font-family="Times-Roman" font-size="14.00">η</text>
+<text text-anchor="middle" x="363" y="-308.68" font-family="Times-Roman" font-size="14.00">~</text>
+<text text-anchor="middle" x="363" y="-293.68" font-family="Times-Roman" font-size="14.00">Normal</text>
 </g>
 <!-- σ_η&#45;&gt;η -->
-<g id="edge3" class="edge">
+<g id="edge4" class="edge">
 <title>σ_η&#45;&gt;η</title>
-<path fill="none" stroke="black" d="M418.54,-391.7C400.97,-377.62 380.09,-360.89 362.14,-346.51"/>
-<polygon fill="black" stroke="black" points="364.12,-343.61 354.13,-340.09 359.75,-349.08 364.12,-343.61"/>
+<path fill="none" stroke="black" d="M363,-385.75C363,-377.58 363,-368.8 363,-360.27"/>
+<polygon fill="black" stroke="black" points="366.5,-360.06 363,-350.06 359.5,-360.06 366.5,-360.06"/>
+</g>
+<!-- μ_η -->
+<g id="node5" class="node">
+<title>μ_η</title>
+<ellipse fill="none" stroke="black" cx="499" cy="-423.34" rx="48.58" ry="37.45"/>
+<text text-anchor="middle" x="499" y="-434.64" font-family="Times-Roman" font-size="14.00">μ_η</text>
+<text text-anchor="middle" x="499" y="-419.64" font-family="Times-Roman" font-size="14.00">~</text>
+<text text-anchor="middle" x="499" y="-404.64" font-family="Times-Roman" font-size="14.00">Normal</text>
+</g>
+<!-- μ_η&#45;&gt;η -->
+<g id="edge3" class="edge">
+<title>μ_η&#45;&gt;η</title>
+<path fill="none" stroke="black" d="M465.73,-395.68C447.21,-380.84 423.99,-362.24 404.31,-346.48"/>
+<polygon fill="black" stroke="black" points="406.39,-343.66 396.4,-340.14 402.01,-349.12 406.39,-343.66"/>
 </g>
 <!-- μ -->
 <g id="node9" class="node">
 <title>μ</title>
-<polygon fill="none" stroke="black" points="369.79,-216.93 257.79,-216.93 257.79,-163.93 369.79,-163.93 369.79,-216.93"/>
-<text text-anchor="middle" x="313.79" y="-201.73" font-family="Times-Roman" font-size="14.00">μ</text>
-<text text-anchor="middle" x="313.79" y="-186.73" font-family="Times-Roman" font-size="14.00">~</text>
-<text text-anchor="middle" x="313.79" y="-171.73" font-family="Times-Roman" font-size="14.00">Deterministic</text>
+<polygon fill="none" stroke="black" points="290,-216.93 178,-216.93 178,-163.93 290,-163.93 290,-216.93"/>
+<text text-anchor="middle" x="234" y="-201.73" font-family="Times-Roman" font-size="14.00">μ</text>
+<text text-anchor="middle" x="234" y="-186.73" font-family="Times-Roman" font-size="14.00">~</text>
+<text text-anchor="middle" x="234" y="-171.73" font-family="Times-Roman" font-size="14.00">Deterministic</text>
 </g>
 <!-- α&#45;&gt;μ -->
 <g id="edge6" class="edge">
 <title>α&#45;&gt;μ</title>
-<path fill="none" stroke="black" d="M215.36,-282.96C234.39,-265.26 258.92,-242.45 278.74,-224.03"/>
-<polygon fill="black" stroke="black" points="281.14,-226.57 286.08,-217.2 276.37,-221.45 281.14,-226.57"/>
+<path fill="none" stroke="black" d="M229.14,-274.74C230.01,-259.77 231.02,-242.51 231.89,-227.59"/>
+<polygon fill="black" stroke="black" points="235.41,-227.39 232.5,-217.2 228.42,-226.98 235.41,-227.39"/>
 </g>
 <!-- η&#45;&gt;μ -->
 <g id="edge5" class="edge">
 <title>η&#45;&gt;μ</title>
-<path fill="none" stroke="black" d="M318.65,-274.74C317.78,-259.77 316.77,-242.51 315.9,-227.59"/>
-<polygon fill="black" stroke="black" points="319.37,-226.98 315.29,-217.2 312.38,-227.39 319.37,-226.98"/>
+<path fill="none" stroke="black" d="M332.43,-282.96C313.4,-265.26 288.87,-242.45 269.05,-224.03"/>
+<polygon fill="black" stroke="black" points="271.42,-221.45 261.71,-217.2 266.65,-226.57 271.42,-221.45"/>
 </g>
 <!-- lfc -->
 <g id="node8" class="node">
 <title>lfc</title>
-<ellipse fill="lightgrey" stroke="black" cx="316.79" cy="-76.48" rx="48.58" ry="37.45"/>
-<text text-anchor="middle" x="316.79" y="-87.78" font-family="Times-Roman" font-size="14.00">lfc</text>
-<text text-anchor="middle" x="316.79" y="-72.78" font-family="Times-Roman" font-size="14.00">~</text>
-<text text-anchor="middle" x="316.79" y="-57.78" font-family="Times-Roman" font-size="14.00">Normal</text>
+<ellipse fill="lightgrey" stroke="black" cx="230" cy="-76.48" rx="48.58" ry="37.45"/>
+<text text-anchor="middle" x="230" y="-87.78" font-family="Times-Roman" font-size="14.00">lfc</text>
+<text text-anchor="middle" x="230" y="-72.78" font-family="Times-Roman" font-size="14.00">~</text>
+<text text-anchor="middle" x="230" y="-57.78" font-family="Times-Roman" font-size="14.00">Normal</text>
 </g>
 <!-- μ&#45;&gt;lfc -->
-<g id="edge9" class="edge">
+<g id="edge8" class="edge">
 <title>μ&#45;&gt;lfc</title>
-<path fill="none" stroke="black" d="M314.48,-163.75C314.79,-152.02 315.18,-137.75 315.54,-124.22"/>
-<polygon fill="black" stroke="black" points="319.04,-124.16 315.81,-114.07 312.04,-123.98 319.04,-124.16"/>
+<path fill="none" stroke="black" d="M233.08,-163.75C232.66,-152.02 232.15,-137.75 231.67,-124.22"/>
+<polygon fill="black" stroke="black" points="235.16,-123.94 231.31,-114.07 228.17,-124.19 235.16,-123.94"/>
 </g>
 <!-- σ&#45;&gt;lfc -->
-<g id="edge8" class="edge">
+<g id="edge9" class="edge">
 <title>σ&#45;&gt;lfc</title>
-<path fill="none" stroke="black" d="M426.69,-158.12C412.88,-146.47 396.83,-133.32 381.79,-121.95 375.42,-117.14 368.58,-112.21 361.81,-107.47"/>
-<polygon fill="black" stroke="black" points="363.53,-104.4 353.32,-101.58 359.55,-110.15 363.53,-104.4"/>
+<path fill="none" stroke="black" d="M121.14,-158.17C134.96,-146.53 151,-133.38 166,-121.95 172.21,-117.23 178.86,-112.37 185.45,-107.69"/>
+<polygon fill="black" stroke="black" points="187.56,-110.49 193.73,-101.87 183.53,-104.76 187.56,-110.49"/>
 </g>
 </g>
 </svg>
