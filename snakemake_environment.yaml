@@ -25,5 +25,6 @@ dependencies:
   - pydantic=1.8.1
   - pyjanitor=0.20.14
   - rich=10.4.0
+  - watermark=2.2.0
   - pip:
     - -e .  # install the source directory as a package (keep as last)
