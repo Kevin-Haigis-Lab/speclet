@@ -7,6 +7,7 @@ channels:
 dependencies:
   - python=3.8.8
   - snakemake=5.32.2
+  - altair=4.1.0
   - colorama
   - drmaa=0.7.9
   - future=0.18.2
@@ -22,6 +23,7 @@ dependencies:
   - pytest
   - papermill=2.3.3
   - pydantic=1.8.1
+  - pyjanitor=0.20.14
   - rich=10.4.0
   - pip:
     - -e .  # install the source directory as a package (keep as last)
