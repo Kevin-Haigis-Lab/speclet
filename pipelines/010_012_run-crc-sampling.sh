@@ -3,8 +3,8 @@
 #SBATCH --account=park
 #SBATCH -c 1
 #SBATCH -p priority
-#SBATCH -t 0-12:00
-#SBATCH --mem 4G
+#SBATCH -t 0-5:00
+#SBATCH --mem 2G
 #SBATCH -o logs/%j_sample-pipeline.log
 #SBATCH -e logs/%j_sample-pipeline.log
 
@@ -27,13 +27,14 @@ fi
 
 snakemake \
     --snakefile $SNAKEFILE \
-    --jobs 20 \
+    --jobs 25 \
     --restart-times 0 \
     --latency-wait 120 \
     --use-conda \
     --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
     --cluster-config pipelines/010_011_smk-config.yaml \
-    --keep-going
+    --keep-going \
+    --printshellcmds
 
 # --conda-cleanup-envs  # use to clean up old conda envs
 
