@@ -166,6 +166,23 @@ rule execute_report:
         ENVIRONMENT_YAML
     shell:
         "jupyter nbconvert --to notebook --inplace --execute {input.notebook} && "
-        "nbqa black {input.notebook} --nbqa-mutate && "
         "nbqa isort {input.notebook} --nbqa-mutate && "
+        "nbqa black {input.notebook} --nbqa-mutate && "
         "jupyter nbconvert --to markdown {input.notebook}"
+
+
+BENCHMARK_REPORT = "reports/benchmarks.ipynb"
+run_benchmark_nb_cmd = f"""
+    jupyter nbconvert --to notebook --inplace --execute '{BENCHMARK_REPORT}' &&
+    nbqa isort '{BENCHMARK_REPORT}' --nbqa-mutate &&
+    nbqa black '{BENCHMARK_REPORT}' --nbqa-mutate &&
+    jupyter nbconvert --to markdown '{BENCHMARK_REPORT}'
+"""
+
+
+onsuccess:
+    shell(run_benchmark_nb_cmd)
+
+
+onerror:
+    shell(run_benchmark_nb_cmd)
