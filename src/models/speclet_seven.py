@@ -101,17 +101,41 @@ class SpecletSeven(SpecletModel):
     def _model_specification(
         self,
         co_idx: achelp.CommonIndices,
+        b_idx: achelp.DataBatchIndices,
         sgrna_idx_shared: TTShared,
         sgrna_to_gene_idx_shared: TTShared,
         cellline_idx_shared: TTShared,
         cellline_to_lineage_idx_shared: TTShared,
+        batch_idx_shared: TTShared,
         lfc_shared: TTShared,
         total_size: int,
     ) -> Tuple[pm.Model, str]:
+        _k_shape = (1, co_idx.n_celllines)
         _mu_h_shape = (co_idx.n_genes, co_idx.n_lineages)
         _h_shape = (co_idx.n_genes, co_idx.n_celllines)
         _a_shape = (co_idx.n_sgrnas, co_idx.n_celllines)
+
+        multiple_lineages = co_idx.n_lineages > 1
+        if multiple_lineages:
+            logger.info("Multiple cell line lineages in data.")
+        else:
+            logger.info("Only a single cell line lineage in the data.")
+
         with pm.Model() as model:
+            if multiple_lineages:
+                μ_μ_k = pm.Normal("μ_μ_k", 0, 1)
+                σ_μ_k = pm.HalfNormal("σ_μ_k", 1)
+                μ_k = pm.Normal("μ_k", μ_μ_k, σ_μ_k, shape=co_idx.n_lineages)
+            else:
+                μ_k = pm.Normal("μ_k", 0, 1)
+            σ_σ_k = pm.HalfNormal("σ_σ_k", 1)
+            σ_k = pm.HalfNormal("σ_k", σ_σ_k, shape=co_idx.n_lineages)
+            k = pm.Normal(
+                "k",
+                μ_k[cellline_to_lineage_idx_shared],
+                σ_k[cellline_to_lineage_idx_shared],
+                shape=_k_shape,
+            )
 
             μ_μ_h = pm.Normal("μ_μ_h", 0, 2)
             σ_μ_h = pm.HalfNormal("σ_μ_h", 1)
@@ -125,7 +149,7 @@ class SpecletSeven(SpecletModel):
                 shape=_h_shape,
             )
 
-            μ_a = pm.Deterministic("μ_a", h)
+            μ_a = pm.Deterministic("μ_a", h + k)
             σ_σ_a = pm.HalfNormal("σ_σ_a", 1)
             σ_a = pm.HalfNormal("σ_a", σ_σ_a, shape=(co_idx.n_sgrnas, 1))
 
@@ -139,7 +163,13 @@ class SpecletSeven(SpecletModel):
                     "a", μ_a[sgrna_to_gene_idx_shared, :], σ_a, shape=_a_shape
                 )
 
-            μ = pm.Deterministic("μ", a[sgrna_idx_shared, cellline_idx_shared])
+            μ_j = pm.Normal("μ_j", 0, 0.5)
+            σ_j = pm.HalfNormal("σ_j", 1)
+            j = pm.Normal("j", μ_j, σ_j, shape=b_idx.n_batches)
+
+            μ = pm.Deterministic(
+                "μ", a[sgrna_idx_shared, cellline_idx_shared] + j[batch_idx_shared]
+            )
 
             # Standard deviation of log-fold change.
             σ = pm.HalfNormal("σ", 1)
@@ -161,6 +191,7 @@ class SpecletSeven(SpecletModel):
 
         total_size = data.shape[0]
         co_idx = achelp.common_indices(data)
+        b_idx = achelp.data_batch_indices(data)
 
         # Shared Theano variables
         logger.info("Getting Theano shared variables.")
@@ -168,6 +199,7 @@ class SpecletSeven(SpecletModel):
         sgrna_to_gene_idx_shared = ts(co_idx.sgrna_to_gene_idx)
         cellline_idx_shared = ts(co_idx.cellline_idx)
         cellline_to_lineage_idx_shared = ts(co_idx.cellline_to_lineage_idx)
+        batch_idx_shared = ts(b_idx.batch_idx)
         lfc_shared = ts(data.lfc.values)
 
         self.shared_vars = {
@@ -175,16 +207,19 @@ class SpecletSeven(SpecletModel):
             "sgrna_to_gene_idx_shared": sgrna_to_gene_idx_shared,
             "cellline_idx_shared": cellline_idx_shared,
             "cellline_to_lineage_idx_shared": cellline_to_lineage_idx_shared,
+            "batch_idx_shared": batch_idx_shared,
             "lfc_shared": lfc_shared,
         }
 
         logger.info("Creating PyMC3 model for SpecletSeven.")
         model, obs_var_name = self._model_specification(
             co_idx=co_idx,
+            b_idx=b_idx,
             sgrna_idx_shared=sgrna_idx_shared,
             sgrna_to_gene_idx_shared=sgrna_to_gene_idx_shared,
             cellline_idx_shared=cellline_idx_shared,
             cellline_to_lineage_idx_shared=cellline_to_lineage_idx_shared,
+            batch_idx_shared=batch_idx_shared,
             lfc_shared=lfc_shared,
             total_size=total_size,
         )
@@ -210,13 +245,16 @@ class SpecletSeven(SpecletModel):
         data = self.data_manager.get_data()
         mb_size = self.data_manager.get_batch_size()
         co_idx = achelp.common_indices(data)
+        b_idx = achelp.data_batch_indices(data)
 
         sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=mb_size)
         cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=mb_size)
+        batch_idx_batch = pm.Minibatch(b_idx.batch_idx, batch_size=mb_size)
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=mb_size)
 
         return {
             self.shared_vars["sgrna_idx_shared"]: sgrna_idx_batch,
             self.shared_vars["cellline_idx_shared"]: cellline_idx_batch,
             self.shared_vars["lfc_shared"]: lfc_data_batch,
+            self.shared_vars["batch_idx_shared"]: batch_idx_batch,
         }
