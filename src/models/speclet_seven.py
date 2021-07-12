@@ -108,7 +108,9 @@ class SpecletSeven(SpecletModel):
         lfc_shared: TTShared,
         total_size: int,
     ) -> Tuple[pm.Model, str]:
+        _mu_mu_a_shape = (co_idx.n_genes, co_idx.n_lineages)
         _mu_a_shape = (co_idx.n_genes, co_idx.n_celllines)
+        _a_shape = (co_idx.n_sgrnas, co_idx.n_celllines)
         with pm.Model() as model:
             μ_μ_μ_a = pm.Normal("μ_μ_μ_a", 0, 2)
             σ_μ_μ_a = pm.HalfNormal("σ_μ_μ_a", 2)
@@ -120,16 +122,14 @@ class SpecletSeven(SpecletModel):
             σ_a = pm.HalfNormal("σ_a", σ_σ_a, shape=(co_idx.n_sgrnas, 1))
 
             if self.config.μ_μ_a is MP.NONCENTERED:
-                μ_μ_a_offset = pm.Normal(
-                    "μ_μ_a_offset", 0, 1.0, shape=(co_idx.n_genes, co_idx.n_lineages)
-                )
+                μ_μ_a_offset = pm.Normal("μ_μ_a_offset", 0, 1.0, shape=_mu_mu_a_shape)
                 μ_μ_a = pm.Deterministic("μ_μ_a", μ_μ_μ_a + μ_μ_a_offset * σ_μ_μ_a)
             else:
                 μ_μ_a = pm.Normal(
                     "μ_μ_a",
                     μ_μ_μ_a,
                     σ_μ_μ_a,
-                    shape=(co_idx.n_genes, co_idx.n_lineages),
+                    shape=_mu_mu_a_shape,
                 )
 
             if self.config.μ_a is MP.NONCENTERED:
@@ -147,18 +147,13 @@ class SpecletSeven(SpecletModel):
                 )
 
             if self.config.a is MP.NONCENTERED:
-                a_offset = pm.Normal(
-                    "a_offset", 0, 1.0, shape=(co_idx.n_sgrnas, co_idx.n_celllines)
-                )
+                a_offset = pm.Normal("a_offset", 0, 1.0, shape=_a_shape)
                 a = pm.Deterministic(
                     "a", μ_a[sgrna_to_gene_idx_shared, :] + a_offset * σ_a
                 )
             else:
                 a = pm.Normal(
-                    "a",
-                    μ_a[sgrna_to_gene_idx_shared, :],
-                    σ_a,
-                    shape=(co_idx.n_sgrnas, co_idx.n_celllines),
+                    "a", μ_a[sgrna_to_gene_idx_shared, :], σ_a, shape=_a_shape
                 )
 
             μ = pm.Deterministic("μ", a[sgrna_idx_shared, cellline_idx_shared])
@@ -167,11 +162,7 @@ class SpecletSeven(SpecletModel):
             σ = pm.HalfNormal("σ", 1)
 
             lfc = pm.Normal(  # noqa: F841
-                "lfc",
-                μ,
-                σ,
-                observed=lfc_shared,
-                total_size=total_size,
+                "lfc", μ, σ, observed=lfc_shared, total_size=total_size
             )
 
         return model, "lfc"
