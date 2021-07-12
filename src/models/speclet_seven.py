@@ -108,43 +108,26 @@ class SpecletSeven(SpecletModel):
         lfc_shared: TTShared,
         total_size: int,
     ) -> Tuple[pm.Model, str]:
-        _mu_mu_a_shape = (co_idx.n_genes, co_idx.n_lineages)
-        _mu_a_shape = (co_idx.n_genes, co_idx.n_celllines)
+        _mu_h_shape = (co_idx.n_genes, co_idx.n_lineages)
+        _h_shape = (co_idx.n_genes, co_idx.n_celllines)
         _a_shape = (co_idx.n_sgrnas, co_idx.n_celllines)
         with pm.Model() as model:
-            μ_μ_μ_a = pm.Normal("μ_μ_μ_a", 0, 2)
-            σ_μ_μ_a = pm.HalfNormal("σ_μ_μ_a", 2)
 
-            σ_σ_μ_a = pm.HalfNormal("σ_σ_μ_a", 1)
-            σ_μ_a = pm.HalfNormal("σ_μ_a", σ_σ_μ_a, shape=(1, co_idx.n_celllines))
+            μ_μ_h = pm.Normal("μ_μ_h", 0, 2)
+            σ_μ_h = pm.HalfNormal("σ_μ_h", 1)
+            μ_h = pm.Normal("μ_h", μ_μ_h, σ_μ_h, shape=_mu_h_shape)
+            σ_σ_h = pm.HalfNormal("σ_σ_h", 1)
+            σ_h = pm.HalfNormal("σ_h", σ_σ_h, shape=co_idx.n_celllines)
+            h = pm.Normal(
+                "h",
+                μ_h[:, cellline_to_lineage_idx_shared],
+                tensor.ones(shape=_h_shape) * σ_h,
+                shape=_h_shape,
+            )
 
+            μ_a = pm.Deterministic("μ_a", h)
             σ_σ_a = pm.HalfNormal("σ_σ_a", 1)
             σ_a = pm.HalfNormal("σ_a", σ_σ_a, shape=(co_idx.n_sgrnas, 1))
-
-            if self.config.μ_μ_a is MP.NONCENTERED:
-                μ_μ_a_offset = pm.Normal("μ_μ_a_offset", 0, 1.0, shape=_mu_mu_a_shape)
-                μ_μ_a = pm.Deterministic("μ_μ_a", μ_μ_μ_a + μ_μ_a_offset * σ_μ_μ_a)
-            else:
-                μ_μ_a = pm.Normal(
-                    "μ_μ_a",
-                    μ_μ_μ_a,
-                    σ_μ_μ_a,
-                    shape=_mu_mu_a_shape,
-                )
-
-            if self.config.μ_a is MP.NONCENTERED:
-                μ_a_offset = pm.Normal("μ_a_offset", 0, 1.0, shape=_mu_a_shape)
-                μ_a = pm.Deterministic(
-                    "μ_a",
-                    μ_μ_a[:, cellline_to_lineage_idx_shared] + μ_a_offset * σ_μ_a,
-                )
-            else:
-                μ_a = pm.Normal(
-                    "μ_a",
-                    μ_μ_a[:, cellline_to_lineage_idx_shared],
-                    tensor.ones(shape=_mu_a_shape) * σ_μ_a,
-                    shape=_mu_a_shape,
-                )
 
             if self.config.a is MP.NONCENTERED:
                 a_offset = pm.Normal("a_offset", 0, 1.0, shape=_a_shape)
