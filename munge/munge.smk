@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Dict, Any
 
 import pandas as pd
+from colorama import init, Fore, Back, Style
+init(autoreset=True)
 
 DATA_DIR = Path("data")
 DEPMAP_DIR = DATA_DIR / "depmap_21q2"
@@ -64,11 +66,13 @@ def tidy_score_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
 #### ---- CI ---- ####
 
 if os.getenv("CI") is not None:
+    print(Style.BRIGHT + Fore.BLUE + "CI: touch input files")
     for input_dict_fxn in (tidy_ccle_input, tidy_depmap_input, tidy_score_input):
         input_dict = input_dict_fxn()
         for p in input_dict.values():
             if not p.exists():
                 p.touch()
+                print(Style.DIM + f"  touch: '{p.as_posix()}'")
 
 
 #### ---- Rules ---- ####
