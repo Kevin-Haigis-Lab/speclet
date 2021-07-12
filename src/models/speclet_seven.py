@@ -136,6 +136,17 @@ class SpecletSeven(SpecletModel):
             )
         return None
 
+    def _add_gene_copy_number_covariate(
+        self,
+        model: pm.Model,
+        co_idx: achelp.CommonIndices,
+    ) -> None:
+        with model:
+            μ_n = pm.Normal("μ_n", 0, 1)
+            σ_n = pm.HalfNormal("σ_n", 1)
+            n = pm.Normal("n", μ_n, σ_n, shape=(co_idx.n_genes, 1))  # noqa: F841
+        return None
+
     def _add_batch_covariate(
         self,
         model: pm.Model,
@@ -221,7 +232,7 @@ class SpecletSeven(SpecletModel):
         with model:
             _μ_a = model["h"]
 
-        # If config, introduce covariate `k` and multiple against cell line CNA.
+        # If config, introduce covariate `k` and multiply against cell line-scaled CNA.
         if self.config.cell_line_cna_cov:
             cellline_cna_shared = ts(data["copy_number_cellline"].values)
             self.shared_vars["cellline_cna_shared"] = cellline_cna_shared
@@ -233,6 +244,15 @@ class SpecletSeven(SpecletModel):
             # Add to the intermediate for `μ_a`.
             with model:
                 _μ_a += model["k"] * cellline_cna_shared
+
+        # If config, introduce covariate `n` and multiply against gene-scaled CNA.
+        if self.config.gene_cna_cov:
+            self._add_gene_copy_number_covariate(model, co_idx=co_idx)
+            gene_cna_shared = ts(data["copy_number_gene"].values)
+            self.shared_vars["gene_cna_shared"] = gene_cna_shared
+            # Add to the intermediate for `μ_a`.
+            with model:
+                _μ_a += model["n"] * gene_cna_shared
 
         ########################################
         # NOTE: Add other `μ_a` covariates here!
