@@ -20,14 +20,22 @@ def data_manager_use_test_data(monkeypatch: pytest.MonkeyPatch):
 
 class TestSpecletSeven:
     @pytest.fixture(scope="function")
-    def sp7(self, tmp_path: Path) -> SpecletSeven:
-        return SpecletSeven("test-model", root_cache_dir=tmp_path)
+    def sp7(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> SpecletSeven:
+        return SpecletSeven(
+            "test-model", root_cache_dir=tmp_path, data_manager=mock_crc_dm, debug=True
+        )
 
     def test_init(self, sp7: SpecletSeven):
         assert sp7.model is None
         assert sp7.mcmc_results is None
         assert sp7.advi_results is None
         assert sp7.data_manager is not None
+
+    @pytest.mark.DEV
+    def test_build_model(self, sp7: SpecletSeven):
+        assert sp7.model is None
+        sp7.build_model()
+        assert sp7.model is not None
 
     @pytest.mark.slow
     @pytest.mark.parametrize("fit_method", ["mcmc", "advi"])
@@ -61,6 +69,7 @@ class TestSpecletSeven:
             assert sp7.mcmc_results is None
             assert sp7.advi_results is not None
 
+    @pytest.mark.skip
     @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(config=st.builds(SpecletSevenConfiguration))
     def test_changing_configuration_resets_model(
@@ -80,9 +89,9 @@ class TestSpecletSeven:
             debug=True,
             data_manager=mock_crc_dm,
         )
-        # th.assert_changing_configuration_resets_model(
-        #     sp7, new_config=config, default_config=SpecletSevenConfiguration()
-        # )
+        th.assert_changing_configuration_resets_model(
+            sp7, new_config=config, default_config=SpecletSevenConfiguration()
+        )
 
     @settings(
         settings.get_profile("slow-adaptive"),
@@ -102,4 +111,4 @@ class TestSpecletSeven:
             data_manager=mock_crc_dm,
             config=config,
         )
-        # th.assert_model_reparameterization(sp7, config=config)
+        th.assert_model_reparameterization(sp7, config=config)
