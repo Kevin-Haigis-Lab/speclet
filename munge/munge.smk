@@ -65,14 +65,21 @@ def tidy_score_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
 
 #### ---- CI ---- ####
 
+def _touch_input_dict(input_dict: Dict[str, Path]) -> None:
+    for p in input_dict.values():
+        if not p.parent.exists():
+            print(Fore.YELLOW + f"  mkdir: '{p.parent.as_posix()}'")
+            p.parent.mkdir(parents=True)
+        if not p.exists():
+            print(Style.DIM + f"  touch: '{p.as_posix()}'")
+            p.touch()
+    return None
+
 if os.getenv("CI") is not None:
     print(Style.BRIGHT + Fore.BLUE + "CI: touch input files")
     for input_dict_fxn in (tidy_ccle_input, tidy_depmap_input, tidy_score_input):
         input_dict = input_dict_fxn()
-        for p in input_dict.values():
-            if not p.exists():
-                p.touch()
-                print(Style.DIM + f"  touch: '{p.as_posix()}'")
+        _touch_input_dict(input_dict)
 
 
 #### ---- Rules ---- ####
