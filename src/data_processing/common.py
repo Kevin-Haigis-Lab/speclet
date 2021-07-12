@@ -5,6 +5,7 @@
 import warnings
 from typing import Any, Iterable, List, Tuple, Union
 
+import janitor  # noqa: F401
 import numpy as np
 import pandas as pd
 
@@ -138,4 +139,30 @@ def center_column_grouped_dataframe(
         .assign(_new_centered_column=lambda d: d[val_col] - d[avg_val_col])
         .rename(columns={"_new_centered_column": new_col_name})
         .drop(columns=[avg_val_col])
+    )
+
+
+def dataframe_to_matrix(
+    df: pd.DataFrame, rows: str, cols: str, values: str, sort_cats: bool = True
+) -> np.ndarray:
+    """Create a matrix from two nominal columns of a data frame.
+
+    Args:
+        df (pd.DataFrame): Input data frame.
+        rows (str): Data frame column to place along the rows.
+        cols (str): Date fraome column to place along the columns.
+        values (str): Values for the matrix.
+
+    Returns:
+        np.ndarray: Matrix of shape [`rows`, `cols`].
+    """
+    if sort_cats:
+        sort_cols = [c for c in (rows, cols) if (df[c].dtype.name == "category")]
+        if len(sort_cols) > 0:
+            df = df.copy().sort_values(sort_cols)
+
+    return (
+        df.pivot_wider(index=rows, names_from=cols, values_from=values)
+        .drop(columns=[rows])
+        .values
     )
