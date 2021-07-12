@@ -7,6 +7,7 @@ from hypothesis import strategies as st
 
 from src.managers.model_data_managers import CrcDataManager
 from src.misc import test_helpers as th
+from src.modeling import pymc3_helpers as pmhelp
 from src.models.speclet_seven import SpecletSeven, SpecletSevenConfiguration
 
 
@@ -69,7 +70,7 @@ class TestSpecletSeven:
             assert sp7.mcmc_results is None
             assert sp7.advi_results is not None
 
-    @pytest.mark.skip
+    # @pytest.mark.skip
     @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(config=st.builds(SpecletSevenConfiguration))
     def test_changing_configuration_resets_model(
@@ -111,4 +112,10 @@ class TestSpecletSeven:
             data_manager=mock_crc_dm,
             config=config,
         )
-        th.assert_model_reparameterization(sp7, config=config)
+        sp7.build_model()
+        assert sp7.model is not None
+        all_vars = pmhelp.get_variable_names(sp7.model)
+        if config.batch_cov:
+            assert "j" in all_vars
+        if config.cell_line_cna_cov:
+            assert "k" in all_vars

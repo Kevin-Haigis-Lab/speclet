@@ -1,4 +1,4 @@
-"""Speclet Model Six."""
+"""Speclet Model Seven."""
 
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
@@ -12,16 +12,20 @@ from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 from src.data_processing import achilles as achelp
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
+from src.modeling import feature_engineering as feng
 from src.models.speclet_model import ReplacementsDict, SpecletModel
-from src.project_enums import ModelParameterization as MP
+
+# from src.project_enums import ModelParameterization as MP
 
 
 class SpecletSevenConfiguration(BaseModel):
     """Parameterizations for each covariate in SpecletSeven model."""
 
-    a: MP = MP.CENTERED
-    μ_a: MP = MP.CENTERED
-    μ_μ_a: MP = MP.CENTERED
+    cell_line_cna_cov: bool = False
+    gene_cna_cov: bool = False
+    rna_cov: bool = False
+    mutation_cov: bool = False
+    batch_cov: bool = False
 
 
 class SpecletSeven(SpecletModel):
@@ -81,6 +85,15 @@ class SpecletSeven(SpecletModel):
             logger.debug("Creating a data manager since none was supplied.")
             data_manager = CrcDataManager(debug=debug)
 
+        data_manager.add_transformations(
+            [
+                feng.centered_copynumber_by_cellline,
+                feng.centered_copynumber_by_gene,
+                feng.zscale_rna_expression_by_gene_and_lineage,
+                feng.convert_is_mutated_to_numeric,
+            ]
+        )
+
         self.config = config if config is not None else SpecletSevenConfiguration()
 
         super().__init__(
@@ -98,30 +111,15 @@ class SpecletSeven(SpecletModel):
             self.config = new_config
             self.model = None
 
-    def _model_specification(
+    def _add_cell_line_copy_number_covariate(
         self,
+        model: pm.Model,
         co_idx: achelp.CommonIndices,
-        b_idx: achelp.DataBatchIndices,
-        sgrna_idx_shared: TTShared,
-        sgrna_to_gene_idx_shared: TTShared,
-        cellline_idx_shared: TTShared,
         cellline_to_lineage_idx_shared: TTShared,
-        batch_idx_shared: TTShared,
-        lfc_shared: TTShared,
-        total_size: int,
-    ) -> Tuple[pm.Model, str]:
-        _k_shape = (1, co_idx.n_celllines)
-        _mu_h_shape = (co_idx.n_genes, co_idx.n_lineages)
-        _h_shape = (co_idx.n_genes, co_idx.n_celllines)
-        _a_shape = (co_idx.n_sgrnas, co_idx.n_celllines)
-
+    ) -> None:
         multiple_lineages = co_idx.n_lineages > 1
-        if multiple_lineages:
-            logger.info("Multiple cell line lineages in data.")
-        else:
-            logger.info("Only a single cell line lineage in the data.")
-
-        with pm.Model() as model:
+        k_shape = (1, co_idx.n_celllines)
+        with model:
             if multiple_lineages:
                 μ_μ_k = pm.Normal("μ_μ_k", 0, 1)
                 σ_μ_k = pm.HalfNormal("σ_μ_k", 1)
@@ -130,55 +128,46 @@ class SpecletSeven(SpecletModel):
                 μ_k = pm.Normal("μ_k", 0, 1)
             σ_σ_k = pm.HalfNormal("σ_σ_k", 1)
             σ_k = pm.HalfNormal("σ_k", σ_σ_k, shape=co_idx.n_lineages)
-            k = pm.Normal(
+            k = pm.Normal(  # noqa: F841
                 "k",
                 μ_k[cellline_to_lineage_idx_shared],
                 σ_k[cellline_to_lineage_idx_shared],
-                shape=_k_shape,
+                shape=k_shape,
             )
+        return None
 
-            μ_μ_h = pm.Normal("μ_μ_h", 0, 2)
-            σ_μ_h = pm.HalfNormal("σ_μ_h", 1)
-            μ_h = pm.Normal("μ_h", μ_μ_h, σ_μ_h, shape=_mu_h_shape)
-            σ_σ_h = pm.HalfNormal("σ_σ_h", 1)
-            σ_h = pm.HalfNormal("σ_h", σ_σ_h, shape=co_idx.n_celllines)
-            h = pm.Normal(
-                "h",
-                μ_h[:, cellline_to_lineage_idx_shared],
-                tensor.ones(shape=_h_shape) * σ_h,
-                shape=_h_shape,
-            )
-
-            μ_a = pm.Deterministic("μ_a", h + k)
-            σ_σ_a = pm.HalfNormal("σ_σ_a", 1)
-            σ_a = pm.HalfNormal("σ_a", σ_σ_a, shape=(co_idx.n_sgrnas, 1))
-
-            if self.config.a is MP.NONCENTERED:
-                a_offset = pm.Normal("a_offset", 0, 1.0, shape=_a_shape)
-                a = pm.Deterministic(
-                    "a", μ_a[sgrna_to_gene_idx_shared, :] + a_offset * σ_a
-                )
-            else:
-                a = pm.Normal(
-                    "a", μ_a[sgrna_to_gene_idx_shared, :], σ_a, shape=_a_shape
-                )
-
+    def _add_batch_covariate(
+        self,
+        model: pm.Model,
+        b_idx: achelp.DataBatchIndices,
+    ) -> None:
+        with model:
             μ_j = pm.Normal("μ_j", 0, 0.5)
             σ_j = pm.HalfNormal("σ_j", 1)
-            j = pm.Normal("j", μ_j, σ_j, shape=b_idx.n_batches)
+            j = pm.Normal("j", μ_j, σ_j, shape=b_idx.n_batches)  # noqa: F841
+        return None
 
-            μ = pm.Deterministic(
-                "μ", a[sgrna_idx_shared, cellline_idx_shared] + j[batch_idx_shared]
+    def _add_varying_gene_cell_line_intercept_covariate(
+        self,
+        model: pm.Model,
+        co_idx: achelp.CommonIndices,
+        cellline_to_lineage_idx_shared: TTShared,
+    ) -> None:
+        mu_h_shape = (co_idx.n_genes, co_idx.n_lineages)
+        h_shape = (co_idx.n_genes, co_idx.n_celllines)
+        with model:
+            μ_μ_h = pm.Normal("μ_μ_h", 0, 2)
+            σ_μ_h = pm.HalfNormal("σ_μ_h", 1)
+            μ_h = pm.Normal("μ_h", μ_μ_h, σ_μ_h, shape=mu_h_shape)
+            σ_σ_h = pm.HalfNormal("σ_σ_h", 1)
+            σ_h = pm.HalfNormal("σ_h", σ_σ_h, shape=co_idx.n_celllines)
+            h = pm.Normal(  # noqa: F841
+                "h",
+                μ_h[:, cellline_to_lineage_idx_shared],
+                tensor.ones(shape=h_shape) * σ_h,
+                shape=h_shape,
             )
-
-            # Standard deviation of log-fold change.
-            σ = pm.HalfNormal("σ", 1)
-
-            lfc = pm.Normal(  # noqa: F841
-                "lfc", μ, σ, observed=lfc_shared, total_size=total_size
-            )
-
-        return model, "lfc"
+        return None
 
     def model_specification(self) -> Tuple[pm.Model, str]:
         """Build SpecletSeven model.
@@ -199,7 +188,6 @@ class SpecletSeven(SpecletModel):
         sgrna_to_gene_idx_shared = ts(co_idx.sgrna_to_gene_idx)
         cellline_idx_shared = ts(co_idx.cellline_idx)
         cellline_to_lineage_idx_shared = ts(co_idx.cellline_to_lineage_idx)
-        batch_idx_shared = ts(b_idx.batch_idx)
         lfc_shared = ts(data.lfc.values)
 
         self.shared_vars = {
@@ -207,24 +195,77 @@ class SpecletSeven(SpecletModel):
             "sgrna_to_gene_idx_shared": sgrna_to_gene_idx_shared,
             "cellline_idx_shared": cellline_idx_shared,
             "cellline_to_lineage_idx_shared": cellline_to_lineage_idx_shared,
-            "batch_idx_shared": batch_idx_shared,
             "lfc_shared": lfc_shared,
         }
 
         logger.info("Creating PyMC3 model for SpecletSeven.")
-        model, obs_var_name = self._model_specification(
+
+        _a_shape = (co_idx.n_sgrnas, co_idx.n_celllines)
+
+        multiple_lineages = co_idx.n_lineages > 1
+        if multiple_lineages:
+            logger.info("Multiple cell line lineages in data.")
+        else:
+            logger.info("Only a single cell line lineage in the data.")
+
+        model = pm.Model()
+
+        # Introduce covariate `h`.
+        self._add_varying_gene_cell_line_intercept_covariate(
+            model,
             co_idx=co_idx,
-            b_idx=b_idx,
-            sgrna_idx_shared=sgrna_idx_shared,
-            sgrna_to_gene_idx_shared=sgrna_to_gene_idx_shared,
-            cellline_idx_shared=cellline_idx_shared,
             cellline_to_lineage_idx_shared=cellline_to_lineage_idx_shared,
-            batch_idx_shared=batch_idx_shared,
-            lfc_shared=lfc_shared,
-            total_size=total_size,
         )
+
+        # Create intermediate for `μ_a` and start with `h`.
+        with model:
+            _μ_a = model["h"]
+
+        # If config, introduce covariate `k` and multiple against cell line CNA.
+        if self.config.cell_line_cna_cov:
+            cellline_cna_shared = ts(data["copy_number_cellline"].values)
+            self.shared_vars["cellline_cna_shared"] = cellline_cna_shared
+            self._add_cell_line_copy_number_covariate(
+                model,
+                co_idx=co_idx,
+                cellline_to_lineage_idx_shared=cellline_to_lineage_idx_shared,
+            )
+            # Add to the intermediate for `μ_a`.
+            with model:
+                _μ_a += model["k"] * cellline_cna_shared
+
+        ########################################
+        # NOTE: Add other `μ_a` covariates here!
+        # >
+        ########################################
+
+        # With `μ_a` complete, finalize covariate `a`.
+        # Create intermediate for `μ` and start it with covariate `a`
+        with model:
+            μ_a = pm.Deterministic("μ_a", _μ_a)
+            σ_σ_a = pm.HalfNormal("σ_σ_a", 1)
+            σ_a = pm.HalfNormal("σ_a", σ_σ_a, shape=(co_idx.n_sgrnas, 1))
+            a = pm.Normal("a", μ_a[sgrna_to_gene_idx_shared, :], σ_a, shape=_a_shape)
+            _μ = a[sgrna_idx_shared, cellline_idx_shared]
+
+        # If config, introduce covariate `j` and add to the intermediate for `μ`.
+        if self.config.batch_cov:
+            batch_idx_shared = ts(b_idx.batch_idx)
+            self.shared_vars["batch_idx_shared"] = batch_idx_shared
+            self._add_batch_covariate(model, b_idx=b_idx)
+            with model:
+                _μ += model["j"][batch_idx_shared]
+
+        # With `μ` complete, finalize the model.
+        with model:
+            μ = pm.Deterministic("μ", _μ)
+            σ = pm.HalfNormal("σ", 1)
+            lfc = pm.Normal(  # noqa: F841
+                "lfc", μ, σ, observed=lfc_shared, total_size=total_size
+            )
+
         logger.debug("Finished building model.")
-        return model, obs_var_name
+        return model, "lfc"
 
     def get_replacement_parameters(self) -> ReplacementsDict:
         """Make a dictionary mapping the shared data variables to new data.
@@ -249,12 +290,16 @@ class SpecletSeven(SpecletModel):
 
         sgrna_idx_batch = pm.Minibatch(co_idx.sgrna_idx, batch_size=mb_size)
         cellline_idx_batch = pm.Minibatch(co_idx.cellline_idx, batch_size=mb_size)
-        batch_idx_batch = pm.Minibatch(b_idx.batch_idx, batch_size=mb_size)
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=mb_size)
 
-        return {
+        replacement_params: ReplacementsDict = {
             self.shared_vars["sgrna_idx_shared"]: sgrna_idx_batch,
             self.shared_vars["cellline_idx_shared"]: cellline_idx_batch,
             self.shared_vars["lfc_shared"]: lfc_data_batch,
-            self.shared_vars["batch_idx_shared"]: batch_idx_batch,
         }
+
+        if self.config.batch_cov:
+            batch_idx_batch = pm.Minibatch(b_idx.batch_idx, batch_size=mb_size)
+            replacement_params[self.shared_vars["batch_idx_shared"]] = batch_idx_batch
+
+        return replacement_params
