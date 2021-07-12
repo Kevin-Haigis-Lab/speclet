@@ -137,14 +137,23 @@ class SpecletSeven(SpecletModel):
         return None
 
     def _add_gene_copy_number_covariate(
-        self,
-        model: pm.Model,
-        co_idx: achelp.CommonIndices,
+        self, model: pm.Model, co_idx: achelp.CommonIndices
     ) -> None:
         with model:
             μ_n = pm.Normal("μ_n", 0, 1)
             σ_n = pm.HalfNormal("σ_n", 1)
             n = pm.Normal("n", μ_n, σ_n, shape=(co_idx.n_genes, 1))  # noqa: F841
+        return None
+
+    def _add_gene_expression_covariate(
+        self, model: pm.Model, co_idx: achelp.CommonIndices
+    ) -> None:
+        with model:
+            μ_q = pm.Normal("μ_q", 0, 5)
+            σ_q = pm.HalfNormal("σ_q", 5)
+            q = pm.Normal(  # noqa: F841
+                "q", μ_q, σ_q, shape=(co_idx.n_genes, co_idx.n_lineages)
+            )
         return None
 
     def _add_batch_covariate(
@@ -253,6 +262,16 @@ class SpecletSeven(SpecletModel):
             # Add to the intermediate for `μ_a`.
             with model:
                 _μ_a += model["n"] * gene_cna_shared
+
+        # If config, introduce covariate `q` and multiply against gene- and
+        # lineage-scaled CNA.
+        if self.config.rna_cov:
+            self._add_gene_expression_covariate(model, co_idx=co_idx)
+            rna_expr_shared = ts(data["rna_expr_gene_lineage"].values)
+            self.shared_vars["rna_expr_shared"] = rna_expr_shared
+            # Add to the intermediate for `μ_a`.
+            with model:
+                _μ_a += model["q"][:, cellline_to_lineage_idx_shared] * gene_cna_shared
 
         ########################################
         # NOTE: Add other `μ_a` covariates here!
