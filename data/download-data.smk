@@ -87,6 +87,7 @@ CI = os.getenv("CI")
 if CI is None:
     sanger_cgc_url = get_sanger_cgc_url()
 else:
+    print(colorama.Fore.YELLOW + f"CI: using fake URL for Sanger CGC file.")
     sanger_cgc_url = "www.mock-url.com"
 
 
@@ -104,7 +105,7 @@ rule all:
         ccle_files=expand(
             ccle_dir / "{filename}", filename=list(ccle_downloads.keys())
         ),
-        sanger_cgc=rules.download_sanger.output.cgc_filename,
+        sanger_cgc=sanger_cosmic_dir / "cancer_gene_census.tsv",
 
 
 rule download_depmap:
