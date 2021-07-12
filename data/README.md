@@ -3,6 +3,10 @@
 ## CRISPR/Cas9 screens
 
 The Achilles and Project SCORE CRISPR/Cas9 screen data were downloaded from the [DepMap data portal](https://depmap.org/portal/).
+
+To get the [Cancer Gene Census](https://cancer.sanger.ac.uk/cosmic/census) data from Sanger, you will need to set the environment variables `SANGER_EMAIL` and `SANGER_PASS` with the email address and password used to register on their [data portal](https://cancer.sanger.ac.uk/cosmic/download).
+If using a conda environment, follow these [instructions](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#macos-and-linux) to have the key set automatically when the environment with activated (and unset when deactivated).
+
 The data can be downloaded using the following command (from the root directory of the project).
 
 ```bash
