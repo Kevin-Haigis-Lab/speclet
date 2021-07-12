@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """Functions for handling common modifications and processing of the Achilles data."""
 
 from pathlib import Path
