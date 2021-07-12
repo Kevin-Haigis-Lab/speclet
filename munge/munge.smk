@@ -1,6 +1,8 @@
 # A Snakemake pipeline for preparing raw data for analysis.
 
+import os
 from pathlib import Path
+from typing import Dict, Any
 
 import pandas as pd
 
@@ -23,13 +25,57 @@ all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list(
 # all_depmap_ids += ["ACH-002227", "ACH-001738"]
 
 
+#### ---- Inputs ---- ####
+
+def tidy_ccle_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
+    return {
+        "rna_expr" : CCLE_DIR / "CCLE_expression.csv",
+        "segment_cn" : CCLE_DIR / "CCLE_segment_cn.csv",
+        "gene_cn" : CCLE_DIR / "CCLE_gene_cn.csv",
+        "gene_mutations" : CCLE_DIR / "CCLE_mutations.csv",
+        "sample_info" : CCLE_DIR / "CCLE_sample_info.csv",
+    }
+
+def tidy_depmap_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
+    return {
+        "common_essentials" : DEPMAP_DIR / "common_essentials.csv",
+        "nonessentials" : DEPMAP_DIR / "nonessentials.csv",
+        "achilles_dropped_guides" : DEPMAP_DIR / "Achilles_dropped_guides.csv",
+        "achilles_guide_efficacy" : DEPMAP_DIR / "Achilles_guide_efficacy.csv",
+        "achilles_guide_map" : DEPMAP_DIR / "Achilles_guide_map.csv",
+        "achilles_gene_effect" : DEPMAP_DIR / "Achilles_gene_effect.csv",
+        "achilles_gene_effect_unscaled" : DEPMAP_DIR / "Achilles_gene_effect_unscaled.csv",
+        "achilles_logfold_change" : DEPMAP_DIR / "Achilles_logfold_change.csv",
+        "achilles_replicate_map" : DEPMAP_DIR / "Achilles_replicate_map.csv",
+        "all_gene_effect_chronos" : DEPMAP_DIR / "CRISPR_gene_effect_Chronos.csv",
+    }
+
+def tidy_score_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
+    return {
+        "copy_number" : SCORE_DIR / "SCORE_copy_number.csv",
+        "gene_effect" : SCORE_DIR / "SCORE_gene_effect.csv",
+        "gene_effect_unscaled" : SCORE_DIR / "SCORE_gene_effect_unscaled.csv",
+        "log_fold_change" : SCORE_DIR / "SCORE_logfold_change.csv",
+        "guide_map" : SCORE_DIR / "SCORE_guide_gene_map.csv",
+        "replicate_map" : SCORE_DIR / "SCORE_replicate_map.csv",
+    }
+
+
+#### ---- CI ---- ####
+
+if os.getenv("CI") is not None:
+    for input_dict_fxn in (tidy_ccle_input, tidy_depmap_input, tidy_score_input):
+        input_dict = input_dict_fxn()
+        for p in input_dict.values():
+            if not p.exists():
+                p.touch()
+
+
+#### ---- Rules ---- ####
+
 rule tidy_ccle:
     input:
-        rna_expr = CCLE_DIR / "CCLE_expression.csv",
-        segment_cn = CCLE_DIR / "CCLE_segment_cn.csv",
-        gene_cn = CCLE_DIR / "CCLE_gene_cn.csv",
-        gene_mutations = CCLE_DIR / "CCLE_mutations.csv",
-        sample_info = CCLE_DIR / "CCLE_sample_info.csv",
+        **tidy_ccle_input(),
     output:
         rna_expr = MODELING_DATA_DIR / "ccle_expression.csv",
         segment_cn = MODELING_DATA_DIR / "ccle_segment_cn.csv",
@@ -41,16 +87,7 @@ rule tidy_ccle:
 
 rule tidy_depmap:
     input:
-        common_essentials = DEPMAP_DIR / "common_essentials.csv",
-        nonessentials = DEPMAP_DIR / "nonessentials.csv",
-        achilles_dropped_guides = DEPMAP_DIR / "Achilles_dropped_guides.csv",
-        achilles_guide_efficacy = DEPMAP_DIR / "Achilles_guide_efficacy.csv",
-        achilles_guide_map = DEPMAP_DIR / "Achilles_guide_map.csv",
-        achilles_gene_effect = DEPMAP_DIR / "Achilles_gene_effect.csv",
-        achilles_gene_effect_unscaled = DEPMAP_DIR / "Achilles_gene_effect_unscaled.csv",
-        achilles_logfold_change = DEPMAP_DIR / "Achilles_logfold_change.csv",
-        achilles_replicate_map = DEPMAP_DIR / "Achilles_replicate_map.csv",
-        all_gene_effect_chronos = DEPMAP_DIR / "CRISPR_gene_effect_Chronos.csv",
+        **tidy_depmap_input(),
     output:
         known_essentials = MODELING_DATA_DIR / "known_essentials.csv",
         achilles_log_fold_change = MODELING_DATA_DIR / "achilles_log_fold_change_filtered.csv",
@@ -61,12 +98,7 @@ rule tidy_depmap:
 
 rule tidy_score:
     input:
-        copy_number = SCORE_DIR / "SCORE_copy_number.csv",
-        gene_effect = SCORE_DIR / "SCORE_gene_effect.csv",
-        gene_effect_unscaled = SCORE_DIR / "SCORE_gene_effect_unscaled.csv",
-        log_fold_change = SCORE_DIR / "SCORE_logfold_change.csv",
-        guide_map = SCORE_DIR / "SCORE_guide_gene_map.csv",
-        replicate_map = SCORE_DIR / "SCORE_replicate_map.csv",
+        **tidy_score_input(),
     output:
         copy_number = MODELING_DATA_DIR / "score_segment_cn.csv",
         gene_effect = MODELING_DATA_DIR / "score_gene_effect.csv",
