@@ -121,3 +121,5 @@ class TestSpecletSeven:
             assert "k" in all_vars
         if config.gene_cna_cov:
             assert "n" in all_vars
+        if config.rna_cov:
+            assert "q" in all_vars
