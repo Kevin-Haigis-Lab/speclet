@@ -22,33 +22,6 @@ all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list(
 # all_depmap_ids = all_depmap_ids[:10] ### TESTING ###
 # all_depmap_ids += ["ACH-002227", "ACH-001738"]
 
-rule all:
-    input:
-        # Prep CCLE data
-        rna_expr = MODELING_DATA_DIR / "ccle_expression.csv",
-        segment_cn = MODELING_DATA_DIR / "ccle_segment_cn.csv",
-        gene_cn = MODELING_DATA_DIR / "ccle_gene_cn.csv",
-        gene_mutations = MODELING_DATA_DIR / "ccle_mutations.csv",
-        sample_info = MODELING_DATA_DIR / "ccle_sample_info.csv",
-        known_essentials = MODELING_DATA_DIR / "known_essentials.csv",
-        # Prep DepMap data
-        achilles_log_fold_change = MODELING_DATA_DIR / "achilles_log_fold_change_filtered.csv",
-        achilles_gene_effect = MODELING_DATA_DIR / "achilles_gene_effect.csv",
-        chronos_gene_effect = MODELING_DATA_DIR / "chronos_gene_effect.csv",
-        # Prep SCORE data.
-        copy_number = MODELING_DATA_DIR / "score_segment_cn.csv",
-        gene_effect = MODELING_DATA_DIR / "score_gene_effect.csv",
-        log_fold_change = MODELING_DATA_DIR / "score_log_fold_change_filtered.csv",
-        # Modeling data.
-        full_modeling_dataframe = MODELING_DATA_DIR / "depmap_modeling_dataframe.csv",
-        check_notebook_md = MUNGE_DIR / "017_check-depmap-modeling-data.md",
-        # modeling_data_subsets
-        crc_subset = MODELING_DATA_DIR / "depmap_modeling_dataframe_crc.csv",
-        crc_subsample = MODELING_DATA_DIR / "depmap_modeling_dataframe_crc-subsample.csv",
-        test_data = TESTS_DIR / "depmap_test_data.csv",
-        # auxillary_data_subsets
-        cna_sample = MODELING_DATA_DIR / "copy_number_data_samples.npy",
-
 
 rule tidy_ccle:
     input:
@@ -104,7 +77,7 @@ rule tidy_score:
 
 rule split_ccle_rna_expression:
     input:
-        data_file = MODELING_DATA_DIR / "ccle_expression.csv"
+        data_file = rules.tidy_ccle.output.rna_expr,
     output:
         out_files = expand(
             (TEMP_DIR / "ccle-rna_{depmapid}.qs").as_posix(),
@@ -116,7 +89,7 @@ rule split_ccle_rna_expression:
 
 rule split_ccle_gene_cn:
     input:
-        data_file = MODELING_DATA_DIR / "ccle_gene_cn.csv"
+        data_file = rules.tidy_ccle.output.gene_cn,
     output:
         out_files = expand(
             (TEMP_DIR / "ccle-genecn_{depmapid}.qs").as_posix(),
@@ -128,7 +101,7 @@ rule split_ccle_gene_cn:
 
 rule split_ccle_segment_cn:
     input:
-        data_file = MODELING_DATA_DIR / "ccle_segment_cn.csv"
+        data_file = rules.tidy_ccle.output.segment_cn,
     output:
         out_files = expand(
             (TEMP_DIR / "ccle-segmentcn_{depmapid}.qs").as_posix(),
@@ -140,7 +113,7 @@ rule split_ccle_segment_cn:
 
 rule split_ccle_mutations:
     input:
-        data_file = MODELING_DATA_DIR / "ccle_mutations.csv"
+        data_file = rules.tidy_ccle.output.gene_mutations,
     output:
         out_files = expand(
             (TEMP_DIR / "ccle-mut_{depmapid}.qs").as_posix(),
@@ -152,7 +125,7 @@ rule split_ccle_mutations:
 
 rule split_achilles_lfc:
     input:
-        data_file = MODELING_DATA_DIR / "achilles_log_fold_change_filtered.csv"
+        data_file = rules.tidy_depmap.output.achilles_log_fold_change,
     output:
         out_files = expand(
             (TEMP_DIR / "achilles-lfc_{depmapid}.qs").as_posix(),
@@ -164,7 +137,7 @@ rule split_achilles_lfc:
 
 rule split_score_cn:
     input:
-        data_file = MODELING_DATA_DIR / "score_segment_cn.csv"
+        data_file = rules.tidy_score.output.copy_number,
     output:
         out_files = expand(
             (TEMP_DIR / "score-segmentcn_{depmapid}.qs").as_posix(),
@@ -175,7 +148,7 @@ rule split_score_cn:
 
 rule split_score_lfc:
     input:
-        data_file = MODELING_DATA_DIR / "score_log_fold_change_filtered.csv"
+        data_file = rules.tidy_score.output.log_fold_change,
     output:
         out_files = expand(
             (TEMP_DIR / "score-lfc_{depmapid}.qs").as_posix(),
@@ -215,7 +188,7 @@ rule combine_data:
 
 rule check_depmap_modeling_data:
     input:
-        modeling_df = MODELING_DATA_DIR / "depmap_modeling_dataframe.csv",
+        modeling_df = rules.combine_data.output.out_file,
         check_nb = MUNGE_DIR / "017_check-depmap-modeling-data.ipynb",
     output:
         output_md = MUNGE_DIR / "017_check-depmap-modeling-data.md"
@@ -229,8 +202,8 @@ rule check_depmap_modeling_data:
 
 rule modeling_data_subsets:
     input:
-        check_output = MUNGE_DIR / "017_check-depmap-modeling-data.md",
-        modeling_df = MODELING_DATA_DIR / "depmap_modeling_dataframe.csv",
+        check_output = rules.check_depmap_modeling_data.output.output_md,
+        modeling_df = rules.combine_data.output.out_file
     output:
         crc_subset = MODELING_DATA_DIR / "depmap_modeling_dataframe_crc.csv",
         crc_subsample = MODELING_DATA_DIR / "depmap_modeling_dataframe_crc-subsample.csv",
@@ -240,11 +213,21 @@ rule modeling_data_subsets:
 
 rule auxillary_data_subsets:
     input:
-        check_output = MUNGE_DIR / "017_check-depmap-modeling-data.md",
-        crc_subset = MODELING_DATA_DIR / "depmap_modeling_dataframe_crc.csv",
+        check_output = rules.check_depmap_modeling_data.output.output_md,
+        crc_subset = rules.modeling_data_subsets.output.crc_subset,
     output:
         cna_sample = MODELING_DATA_DIR / "copy_number_data_samples.npy",
     conda:
         ENVIRONMENT_YAML
     script:
         "021_auxiliary-data-files.py"
+
+
+rule all:
+    input:
+        rules.tidy_ccle.output,
+        rules.tidy_depmap.output,
+        rules.tidy_score.output,
+        rules.combine_data.output,
+        rules.modeling_data_subsets.output,
+        rules.auxillary_data_subsets.output,

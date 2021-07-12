@@ -1,0 +1,48 @@
+name: test-munge-build
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - munge-pipeline-refactor
+  pull_request:
+    branches:
+      - master
+      - munge-pipeline-refactor
+defaults:
+  run:
+    shell: bash -l {0}
+jobs:
+
+  snakemake:
+    name: snakemake pipelines
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: speclet_snakemake
+          auto-activate-base: false
+          channel-priority: strict
+          environment-file: snakemake_environment.yml
+      - name: Activate conda environment
+        run: conda activate speclet_snakemake
+      - name: Describe virtual environment
+        run: |
+          python3 --version
+          which python3
+          conda env list
+          conda list
+      - name: Data download pipeline
+        run: |
+          snakemake \
+            --snakefile data/download-data.smk \
+            --dry-run \
+            --forceall
+      - name: Data preparation pipeline
+        run: |
+          snakemake \
+            --snakefile munge/munge.smk \
+            --dry-run \
+            --forceall
