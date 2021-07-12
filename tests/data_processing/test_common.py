@@ -138,3 +138,61 @@ def test_center_column_grouped_dataframe(df: pd.DataFrame):
     for g in df["group"].unique():
         vals = centered_df[centered_df["group"] == g]["centered_value"].values
         assert np.mean(vals) == pytest.approx(0.0, abs=0.001)
+
+
+#### ---- dataframe_to_matrix ---- ####
+
+
+def mock_df_for_df_to_mat(row_n: int, col_n: int) -> pd.DataFrame:
+    a = [f"row_{i}" for i in range(row_n)]
+    b = [f"col_{i}" for i in range(col_n)]
+    a_col = np.repeat(a, col_n)
+    b_col = np.tile(b, row_n)
+    df = pd.DataFrame(
+        {
+            "A": a_col,
+            "B": b_col,
+            "vals": np.random.randint(0, 10, len(a_col)),
+            "faker": "hi",
+        }
+    )
+    assert df[["A", "B"]].drop_duplicates().shape[0] == df.shape[0]
+    assert df.shape == (row_n * col_n, 4)
+    return df
+
+
+@pytest.mark.DEV
+@given(st.integers(1, 6), st.integers(1, 6))
+def test_dataframe_to_matrix(row_n: int, col_n: int):
+    df = mock_df_for_df_to_mat(row_n, col_n)
+    m = dphelp.dataframe_to_matrix(df, rows="A", cols="B", values="vals")
+
+    assert isinstance(m, np.ndarray)
+    assert m.shape == (row_n, col_n)
+    for i in range(row_n):
+        for j in range(col_n):
+            df_val = (
+                df.query(f"A == 'row_{i}'").query(f"B == 'col_{j}'")["vals"].values[0]
+            )
+            m_val = m[i, j]
+            assert df_val == m_val
+
+
+@pytest.mark.DEV
+@given(st.integers(1, 6), st.integers(1, 6))
+def test_dataframe_to_matrix_categorical(row_n: int, col_n: int):
+    df = mock_df_for_df_to_mat(row_n, col_n)
+    df["A"] = pd.Categorical(df["A"].values, categories=df["A"].unique(), ordered=True)
+    df["B"] = pd.Categorical(df["B"].values, categories=df["B"].unique(), ordered=True)
+    df = df.sample(frac=1.0).reset_index(drop=True)
+    m = dphelp.dataframe_to_matrix(df, rows="A", cols="B", values="vals")
+
+    assert isinstance(m, np.ndarray)
+    assert m.shape == (row_n, col_n)
+    for i in range(row_n):
+        for j in range(col_n):
+            df_val = (
+                df.query(f"A == 'row_{i}'").query(f"B == 'col_{j}'")["vals"].values[0]
+            )
+            m_val = m[i, j]
+            assert df_val == m_val
