@@ -77,3 +77,25 @@ class CacheDoesNotExistError(FileNotFoundError):
         self.dir = dir
         self.message = str(dir)
         super().__init__(self.message)
+
+
+class ShapeError(BaseException):
+    """Shape error."""
+
+    def __init__(
+        self,
+        expected_shape: Union[int, tuple[int, ...]],
+        actual_shape: Union[int, tuple[int, ...]],
+    ) -> None:
+        """Create a ShapeError error.
+
+        Args:
+            expected_shape (Union[int, tuple[int, ...]]): Expected shape.
+            actual_shape (Union[int, tuple[int, ...]]): Actual (observed) shape.
+        """
+        self.expected_shape = expected_shape
+        self.actual_shape = actual_shape
+        self.message = (
+            f"Expected shape {self.expected_shape} - actual shape {self.actual_shape}."
+        )
+        super().__init__(self.message)

@@ -1,8 +1,10 @@
 """Speclet Model Seven."""
 
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional, Union
 
+import numpy as np
+import pandas as pd
 import pymc3 as pm
 from pydantic import BaseModel
 from theano import shared as ts
@@ -10,12 +12,21 @@ from theano import tensor
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 from src.data_processing import achilles as achelp
+from src.data_processing import common as dphelp
+from src.exceptions import ShapeError
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
 from src.modeling import feature_engineering as feng
 from src.models.speclet_model import ReplacementsDict, SpecletModel
 
 # from src.project_enums import ModelParameterization as MP
+
+
+def _assert_shapes(
+    a: Union[int, tuple[int, ...]], b: Union[int, tuple[int, ...]]
+) -> None:
+    if not a == b:
+        raise ShapeError(a, b)
 
 
 class SpecletSevenConfiguration(BaseModel):
@@ -103,7 +114,7 @@ class SpecletSeven(SpecletModel):
             data_manager=data_manager,
         )
 
-    def set_config(self, info: Dict[Any, Any]) -> None:
+    def set_config(self, info: dict[Any, Any]) -> None:
         """Set model-specific configuration."""
         new_config = SpecletSevenConfiguration(**info)
         if self.config is not None and self.config != new_config:
@@ -116,7 +127,7 @@ class SpecletSeven(SpecletModel):
         model: pm.Model,
         co_idx: achelp.CommonIndices,
         cellline_to_lineage_idx_shared: TTShared,
-    ) -> None:
+    ) -> tuple[int, int]:
         multiple_lineages = co_idx.n_lineages > 1
         k_shape = (1, co_idx.n_celllines)
         with model:
@@ -134,27 +145,79 @@ class SpecletSeven(SpecletModel):
                 σ_k[cellline_to_lineage_idx_shared],
                 shape=k_shape,
             )
-        return None
+        return k_shape
 
     def _add_gene_copy_number_covariate(
         self, model: pm.Model, co_idx: achelp.CommonIndices
-    ) -> None:
+    ) -> tuple[int, int]:
+        n_shape = (co_idx.n_genes, 1)
         with model:
             μ_n = pm.Normal("μ_n", 0, 1)
             σ_n = pm.HalfNormal("σ_n", 1)
-            n = pm.Normal("n", μ_n, σ_n, shape=(co_idx.n_genes, 1))  # noqa: F841
-        return None
+            n = pm.Normal("n", μ_n, σ_n, shape=n_shape)  # noqa: F841
+        return n_shape
+
+    def _assert_shape_using_categories_in_df(
+        self, ary: np.ndarray, df: pd.DataFrame, cols: tuple[str, ...]
+    ) -> None:
+        expected_shape = tuple(dphelp.nunique(df[c].values) for c in cols)
+        if not ary.shape == expected_shape:
+            raise ShapeError(expected_shape, ary.shape)
+
+    def _get_gene_cellline_rna_expression_matrix(self, df: pd.DataFrame) -> np.ndarray:
+        rna_df = (
+            df[["hugo_symbol", "depmap_id", "lineage", "rna_expr"]]
+            .drop_duplicates()
+            .reset_index(drop=True)
+            .pipe(feng.zscale_rna_expression_by_gene_and_lineage)
+        )
+        rna_ary = dphelp.dataframe_to_matrix(
+            rna_df, rows="hugo_symbol", cols="depmap_id", values="rna_expr_gene_lineage"
+        )
+        self._assert_shape_using_categories_in_df(
+            rna_ary, df, ("hugo_symbol", "depmap_id")
+        )
+        return rna_ary
+
+    def _get_gene_scaled_copynumber_matrix(self, df: pd.DataFrame) -> np.ndarray:
+        cn_df = (
+            df[["hugo_symbol", "depmap_id", "copy_number"]]
+            .drop_duplicates()
+            .reset_index(drop=True)
+            .pipe(feng.centered_copynumber_by_gene)
+        )
+        cn_ary = dphelp.dataframe_to_matrix(
+            cn_df, rows="hugo_symbol", cols="depmap_id", values="copy_number_gene"
+        )
+        self._assert_shape_using_categories_in_df(
+            cn_ary, df, ("hugo_symbol", "depmap_id")
+        )
+        return cn_ary
+
+    def _get_cellline_scaled_copynumber_matrix(self, df: pd.DataFrame) -> np.ndarray:
+        cn_df = (
+            df[["hugo_symbol", "depmap_id", "copy_number"]]
+            .drop_duplicates()
+            .reset_index(drop=True)
+            .pipe(feng.centered_copynumber_by_cellline)
+        )
+        cn_ary = dphelp.dataframe_to_matrix(
+            cn_df, rows="hugo_symbol", cols="depmap_id", values="copy_number_cellline"
+        )
+        self._assert_shape_using_categories_in_df(
+            cn_ary, df, ("hugo_symbol", "depmap_id")
+        )
+        return cn_ary
 
     def _add_gene_expression_covariate(
         self, model: pm.Model, co_idx: achelp.CommonIndices
-    ) -> None:
+    ) -> tuple[int, int]:
+        q_shape = (co_idx.n_genes, co_idx.n_lineages)
         with model:
             μ_q = pm.Normal("μ_q", 0, 5)
             σ_q = pm.HalfNormal("σ_q", 5)
-            q = pm.Normal(  # noqa: F841
-                "q", μ_q, σ_q, shape=(co_idx.n_genes, co_idx.n_lineages)
-            )
-        return None
+            q = pm.Normal("q", μ_q, σ_q, shape=q_shape)  # noqa: F841
+        return q_shape
 
     def _add_batch_covariate(
         self,
@@ -172,7 +235,7 @@ class SpecletSeven(SpecletModel):
         model: pm.Model,
         co_idx: achelp.CommonIndices,
         cellline_to_lineage_idx_shared: TTShared,
-    ) -> None:
+    ) -> tuple[int, int]:
         mu_h_shape = (co_idx.n_genes, co_idx.n_lineages)
         h_shape = (co_idx.n_genes, co_idx.n_celllines)
         with model:
@@ -187,13 +250,13 @@ class SpecletSeven(SpecletModel):
                 tensor.ones(shape=h_shape) * σ_h,
                 shape=h_shape,
             )
-        return None
+        return h_shape
 
-    def model_specification(self) -> Tuple[pm.Model, str]:
+    def model_specification(self) -> tuple[pm.Model, str]:
         """Build SpecletSeven model.
 
         Returns:
-            Tuple[pm.Model, str]: The model and name of the observed variable.
+            tuple[pm.Model, str]: The model and name of the observed variable.
         """
         logger.info("Beginning PyMC3 model specification.")
         data = self.data_manager.get_data()
@@ -231,7 +294,7 @@ class SpecletSeven(SpecletModel):
         model = pm.Model()
 
         # Introduce covariate `h`.
-        self._add_varying_gene_cell_line_intercept_covariate(
+        h_shape = self._add_varying_gene_cell_line_intercept_covariate(
             model,
             co_idx=co_idx,
             cellline_to_lineage_idx_shared=cellline_to_lineage_idx_shared,
@@ -241,37 +304,46 @@ class SpecletSeven(SpecletModel):
         with model:
             _μ_a = model["h"]
 
-        # If config, introduce covariate `k` and multiply against cell line-scaled CNA.
+        # If config, introduce covariate `k` and multiply against cell line-scaled CN.
         if self.config.cell_line_cna_cov:
-            cellline_cna_shared = ts(data["copy_number_cellline"].values)
-            self.shared_vars["cellline_cna_shared"] = cellline_cna_shared
-            self._add_cell_line_copy_number_covariate(
+            k_shape = self._add_cell_line_copy_number_covariate(
                 model,
                 co_idx=co_idx,
                 cellline_to_lineage_idx_shared=cellline_to_lineage_idx_shared,
             )
+            cellline_cna_matrix = self._get_cellline_scaled_copynumber_matrix(data)
+            _assert_shapes(h_shape[1], k_shape[1])
+            _assert_shapes(h_shape, cellline_cna_matrix.shape)
+            cellline_cna_shared = ts(cellline_cna_matrix)
+            self.shared_vars["cellline_cna_shared"] = cellline_cna_shared
             # Add to the intermediate for `μ_a`.
             with model:
                 _μ_a += model["k"] * cellline_cna_shared
 
-        # If config, introduce covariate `n` and multiply against gene-scaled CNA.
+        # If config, introduce covariate `n` and multiply against gene-scaled CN.
         if self.config.gene_cna_cov:
-            self._add_gene_copy_number_covariate(model, co_idx=co_idx)
-            gene_cna_shared = ts(data["copy_number_gene"].values)
+            n_shape = self._add_gene_copy_number_covariate(model, co_idx=co_idx)
+            gene_cna_matrix = self._get_gene_scaled_copynumber_matrix(data)
+            _assert_shapes(n_shape[0], gene_cna_matrix.shape[0])
+            _assert_shapes(h_shape, gene_cna_matrix.shape)
+            gene_cna_shared = ts(gene_cna_matrix)
             self.shared_vars["gene_cna_shared"] = gene_cna_shared
             # Add to the intermediate for `μ_a`.
             with model:
                 _μ_a += model["n"] * gene_cna_shared
 
         # If config, introduce covariate `q` and multiply against gene- and
-        # lineage-scaled CNA.
+        # lineage-scaled RNA.
         if self.config.rna_cov:
-            self._add_gene_expression_covariate(model, co_idx=co_idx)
-            rna_expr_shared = ts(data["rna_expr_gene_lineage"].values)
+            q_shape = self._add_gene_expression_covariate(model, co_idx=co_idx)
+            rna_expr_matrix = self._get_gene_cellline_rna_expression_matrix(data)
+            _assert_shapes(q_shape[0], rna_expr_matrix.shape[0])
+            _assert_shapes(h_shape, rna_expr_matrix.shape)
+            rna_expr_shared = ts(rna_expr_matrix)
             self.shared_vars["rna_expr_shared"] = rna_expr_shared
             # Add to the intermediate for `μ_a`.
             with model:
-                _μ_a += model["q"][:, cellline_to_lineage_idx_shared] * gene_cna_shared
+                _μ_a += model["q"][:, cellline_to_lineage_idx_shared] * rna_expr_shared
 
         ########################################
         # NOTE: Add other `μ_a` covariates here!
