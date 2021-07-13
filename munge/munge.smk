@@ -6,6 +6,7 @@ from typing import Dict, Any
 
 import pandas as pd
 from colorama import init, Fore, Back, Style
+
 init(autoreset=True)
 
 DATA_DIR = Path("data")
@@ -29,41 +30,46 @@ all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list(
 
 #### ---- Inputs ---- ####
 
+
 def tidy_ccle_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
     return {
-        "rna_expr" : CCLE_DIR / "CCLE_expression.csv",
-        "segment_cn" : CCLE_DIR / "CCLE_segment_cn.csv",
-        "gene_cn" : CCLE_DIR / "CCLE_gene_cn.csv",
-        "gene_mutations" : CCLE_DIR / "CCLE_mutations.csv",
-        "sample_info" : CCLE_DIR / "CCLE_sample_info.csv",
+        "rna_expr": CCLE_DIR / "CCLE_expression.csv",
+        "segment_cn": CCLE_DIR / "CCLE_segment_cn.csv",
+        "gene_cn": CCLE_DIR / "CCLE_gene_cn.csv",
+        "gene_mutations": CCLE_DIR / "CCLE_mutations.csv",
+        "sample_info": CCLE_DIR / "CCLE_sample_info.csv",
     }
+
 
 def tidy_depmap_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
     return {
-        "common_essentials" : DEPMAP_DIR / "common_essentials.csv",
-        "nonessentials" : DEPMAP_DIR / "nonessentials.csv",
-        "achilles_dropped_guides" : DEPMAP_DIR / "Achilles_dropped_guides.csv",
-        "achilles_guide_efficacy" : DEPMAP_DIR / "Achilles_guide_efficacy.csv",
-        "achilles_guide_map" : DEPMAP_DIR / "Achilles_guide_map.csv",
-        "achilles_gene_effect" : DEPMAP_DIR / "Achilles_gene_effect.csv",
-        "achilles_gene_effect_unscaled" : DEPMAP_DIR / "Achilles_gene_effect_unscaled.csv",
-        "achilles_logfold_change" : DEPMAP_DIR / "Achilles_logfold_change.csv",
-        "achilles_replicate_map" : DEPMAP_DIR / "Achilles_replicate_map.csv",
-        "all_gene_effect_chronos" : DEPMAP_DIR / "CRISPR_gene_effect_Chronos.csv",
+        "common_essentials": DEPMAP_DIR / "common_essentials.csv",
+        "nonessentials": DEPMAP_DIR / "nonessentials.csv",
+        "achilles_dropped_guides": DEPMAP_DIR / "Achilles_dropped_guides.csv",
+        "achilles_guide_efficacy": DEPMAP_DIR / "Achilles_guide_efficacy.csv",
+        "achilles_guide_map": DEPMAP_DIR / "Achilles_guide_map.csv",
+        "achilles_gene_effect": DEPMAP_DIR / "Achilles_gene_effect.csv",
+        "achilles_gene_effect_unscaled": DEPMAP_DIR
+        / "Achilles_gene_effect_unscaled.csv",
+        "achilles_logfold_change": DEPMAP_DIR / "Achilles_logfold_change.csv",
+        "achilles_replicate_map": DEPMAP_DIR / "Achilles_replicate_map.csv",
+        "all_gene_effect_chronos": DEPMAP_DIR / "CRISPR_gene_effect_Chronos.csv",
     }
+
 
 def tidy_score_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
     return {
-        "copy_number" : SCORE_DIR / "SCORE_copy_number.csv",
-        "gene_effect" : SCORE_DIR / "SCORE_gene_effect.csv",
-        "gene_effect_unscaled" : SCORE_DIR / "SCORE_gene_effect_unscaled.csv",
-        "log_fold_change" : SCORE_DIR / "SCORE_logfold_change.csv",
-        "guide_map" : SCORE_DIR / "SCORE_guide_gene_map.csv",
-        "replicate_map" : SCORE_DIR / "SCORE_replicate_map.csv",
+        "copy_number": SCORE_DIR / "SCORE_copy_number.csv",
+        "gene_effect": SCORE_DIR / "SCORE_gene_effect.csv",
+        "gene_effect_unscaled": SCORE_DIR / "SCORE_gene_effect_unscaled.csv",
+        "log_fold_change": SCORE_DIR / "SCORE_logfold_change.csv",
+        "guide_map": SCORE_DIR / "SCORE_guide_gene_map.csv",
+        "replicate_map": SCORE_DIR / "SCORE_replicate_map.csv",
     }
 
 
 #### ---- CI ---- ####
+
 
 def _touch_input_dict(input_dict: Dict[str, Path]) -> None:
     for p in input_dict.values():
@@ -75,6 +81,7 @@ def _touch_input_dict(input_dict: Dict[str, Path]) -> None:
             p.touch()
     return None
 
+
 if os.getenv("CI") is not None:
     print(Style.BRIGHT + Fore.BLUE + "CI: touch input files")
     for input_dict_fxn in (tidy_ccle_input, tidy_depmap_input, tidy_score_input):
@@ -83,6 +90,7 @@ if os.getenv("CI") is not None:
 
 
 #### ---- Rules ---- ####
+
 
 rule tidy_ccle:
     input:
@@ -124,7 +132,7 @@ rule tidy_score:
 
 rule split_ccle_rna_expression:
     input:
-        data_file = rules.tidy_ccle.output.rna_expr,
+        data_file=rules.tidy_ccle.output.rna_expr,
     output:
         out_files=expand(
             (TEMP_DIR / "ccle-rna_{depmapid}.qs").as_posix(), depmapid=all_depmap_ids
@@ -135,7 +143,7 @@ rule split_ccle_rna_expression:
 
 rule split_ccle_gene_cn:
     input:
-        data_file = rules.tidy_ccle.output.gene_cn,
+        data_file=rules.tidy_ccle.output.gene_cn,
     output:
         out_files=expand(
             (TEMP_DIR / "ccle-genecn_{depmapid}.qs").as_posix(), depmapid=all_depmap_ids
@@ -146,7 +154,7 @@ rule split_ccle_gene_cn:
 
 rule split_ccle_segment_cn:
     input:
-        data_file = rules.tidy_ccle.output.segment_cn,
+        data_file=rules.tidy_ccle.output.segment_cn,
     output:
         out_files=expand(
             (TEMP_DIR / "ccle-segmentcn_{depmapid}.qs").as_posix(),
@@ -158,7 +166,7 @@ rule split_ccle_segment_cn:
 
 rule split_ccle_mutations:
     input:
-        data_file = rules.tidy_ccle.output.gene_mutations,
+        data_file=rules.tidy_ccle.output.gene_mutations,
     output:
         out_files=expand(
             (TEMP_DIR / "ccle-mut_{depmapid}.qs").as_posix(), depmapid=all_depmap_ids
@@ -169,7 +177,7 @@ rule split_ccle_mutations:
 
 rule split_achilles_lfc:
     input:
-        data_file = rules.tidy_depmap.output.achilles_log_fold_change,
+        data_file=rules.tidy_depmap.output.achilles_log_fold_change,
     output:
         out_files=expand(
             (TEMP_DIR / "achilles-lfc_{depmapid}.qs").as_posix(),
@@ -181,7 +189,7 @@ rule split_achilles_lfc:
 
 rule split_score_cn:
     input:
-        data_file = rules.tidy_score.output.copy_number,
+        data_file=rules.tidy_score.output.copy_number,
     output:
         out_files=expand(
             (TEMP_DIR / "score-segmentcn_{depmapid}.qs").as_posix(),
@@ -193,7 +201,7 @@ rule split_score_cn:
 
 rule split_score_lfc:
     input:
-        data_file = rules.tidy_score.output.log_fold_change,
+        data_file=rules.tidy_score.output.log_fold_change,
     output:
         out_files=expand(
             (TEMP_DIR / "score-lfc_{depmapid}.qs").as_posix(), depmapid=all_depmap_ids
@@ -232,8 +240,8 @@ rule combine_data:
 
 rule check_depmap_modeling_data:
     input:
-        modeling_df = rules.combine_data.output.out_file,
-        check_nb = MUNGE_DIR / "017_check-depmap-modeling-data.ipynb",
+        modeling_df=rules.combine_data.output.out_file,
+        check_nb=MUNGE_DIR / "017_check-depmap-modeling-data.ipynb",
     output:
         output_md=MUNGE_DIR / "017_check-depmap-modeling-data.md",
     conda:
@@ -247,8 +255,8 @@ rule check_depmap_modeling_data:
 
 rule modeling_data_subsets:
     input:
-        check_output = rules.check_depmap_modeling_data.output.output_md,
-        modeling_df = rules.combine_data.output.out_file
+        check_output=rules.check_depmap_modeling_data.output.output_md,
+        modeling_df=rules.combine_data.output.out_file,
     output:
         crc_subset=MODELING_DATA_DIR / "depmap_modeling_dataframe_crc.csv",
         crc_subsample=(
@@ -261,8 +269,8 @@ rule modeling_data_subsets:
 
 rule auxillary_data_subsets:
     input:
-        check_output = rules.check_depmap_modeling_data.output.output_md,
-        crc_subset = rules.modeling_data_subsets.output.crc_subset,
+        check_output=rules.check_depmap_modeling_data.output.output_md,
+        crc_subset=rules.modeling_data_subsets.output.crc_subset,
     output:
         cna_sample=MODELING_DATA_DIR / "copy_number_data_samples.npy",
     conda:
