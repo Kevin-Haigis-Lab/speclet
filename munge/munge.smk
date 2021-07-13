@@ -13,6 +13,7 @@ DATA_DIR = Path("data")
 DEPMAP_DIR = DATA_DIR / "depmap_21q2"
 SCORE_DIR = DATA_DIR / "score_21q2"
 CCLE_DIR = DATA_DIR / "ccle_21q2"
+SANGER_COSMIC_DIR = DATA_DIR / "sanger-cosmic"
 
 MODELING_DATA_DIR = Path("modeling_data")
 MUNGE_DIR = Path("munge")
@@ -68,6 +69,10 @@ def tidy_score_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
     }
 
 
+def clean_sanger_cgc_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
+    return {"cgc_input": SANGER_COSMIC_DIR / "cancer_gene_census.tsv"}
+
+
 #### ---- CI ---- ####
 
 
@@ -84,12 +89,27 @@ def _touch_input_dict(input_dict: Dict[str, Path]) -> None:
 
 if os.getenv("CI") is not None:
     print(Style.BRIGHT + Fore.BLUE + "CI: touch input files")
-    for input_dict_fxn in (tidy_ccle_input, tidy_depmap_input, tidy_score_input):
+    input_dict_fxns = (
+        tidy_ccle_input,
+        tidy_depmap_input,
+        tidy_score_input,
+        clean_sanger_cgc_input,
+    )
+    for input_dict_fxn in input_dict_fxns:
         input_dict = input_dict_fxn()
         _touch_input_dict(input_dict)
 
 
 #### ---- Rules ---- ####
+
+
+rule clean_sanger_cgc:
+    input:
+        **clean_sanger_cgc_input(),
+    output:
+        cgc_output=MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",
+    script:
+        "025_prep-sanger-cgc.R"
 
 
 rule tidy_ccle:
@@ -287,3 +307,4 @@ rule all:
         rules.combine_data.output,
         rules.modeling_data_subsets.output,
         rules.auxillary_data_subsets.output,
+        rules.clean_sanger_cgc.output,
