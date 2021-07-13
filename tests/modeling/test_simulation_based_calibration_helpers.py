@@ -1,5 +1,5 @@
 from pathlib import Path
-from string import ascii_letters
+from string import ascii_letters, ascii_lowercase
 from typing import Any, Dict, List
 
 import arviz as az
@@ -344,7 +344,7 @@ def test_add_mock_rna_expression_data_grouped():
         n_batches=1,
         n_screens=1,
     )
-    mod_df = sbc.add_mock_rna_expression_data(df, groups=["hugo_symbol"])
+    mod_df = sbc.add_mock_rna_expression_data(df, subgroups=["hugo_symbol"])
     assert "rna_expr" in mod_df.columns.to_list()
     assert np.all(mod_df["rna_expr"] >= 0.0)
     assert not np.any(mod_df["rna_expr"].isna())
@@ -367,11 +367,45 @@ def test_add_mock_rna_expression_data_grouped():
     assert not np.allclose(np.array(gene_avgs) - np.mean(gene_avgs), 0.0, atol=1.0)
 
 
+def test_add_mock_rna_expression_data_grouping_cols():
+    df = sbc.generate_mock_achilles_categorical_groups(
+        n_genes=10,
+        n_sgrnas_per_gene=100,
+        n_cell_lines=4,
+        n_lineages=2,
+        n_batches=1,
+        n_screens=1,
+    )
+    mod_df = sbc.add_mock_rna_expression_data(
+        df, grouping_cols=["hugo_symbol", "depmap_id"]
+    )
+    assert "rna_expr" in mod_df.columns.to_list()
+    assert np.all(mod_df["rna_expr"] >= 0.0)
+    assert not np.any(mod_df["rna_expr"].isna())
+    assert np.all(np.isfinite(mod_df["rna_expr"].values))
+    rna_df = mod_df.drop_duplicates(["hugo_symbol", "depmap_id", "rna_expr"])
+    gene_cellline_df = mod_df.drop_duplicates(["hugo_symbol", "depmap_id"])
+    assert rna_df.shape[0] == gene_cellline_df.shape[0]
+
+
 @given(st.floats(0, 1, allow_nan=False, allow_infinity=False))
 def test_add_mock_is_mutated_data(prob: float):
     df = pd.DataFrame({"A": np.zeros(10000)})
     df = sbc.add_mock_is_mutated_data(df, prob=prob)
     assert df["is_mutated"].mean() == pytest.approx(prob, abs=0.1)
+
+
+@given(st.floats(0, 1, allow_nan=False, allow_infinity=False))
+def test_add_mock_is_mutated_data_grouped(prob: float):
+    letters = list(ascii_lowercase)
+    grp_a = np.random.choice(letters, size=5, replace=False)
+    grp_b = np.random.choice(letters, size=5, replace=False)
+    df = pd.DataFrame(
+        {"A": np.random.choice(grp_a, size=100), "B": np.random.choice(grp_b, size=100)}
+    )
+    df = sbc.add_mock_is_mutated_data(df, grouping_cols=["A", "B"], prob=prob)
+    assert df["is_mutated"].mean() == pytest.approx(prob, abs=0.1)
+    assert df[["A", "B"]].drop_duplicates().shape[0] == df.drop_duplicates().shape[0]
 
 
 @given(
