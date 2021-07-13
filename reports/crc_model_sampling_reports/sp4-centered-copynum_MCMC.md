@@ -80,7 +80,7 @@ speclet_model = configuration.get_config_and_instantiate_model(
 speclet_model.build_model()
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/10/21 12:12:45] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:250</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/11/21 17:37:05] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:250</span>
                              genes.
 </pre>
 
@@ -423,63 +423,63 @@ for var in vars_to_inspect:
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_20_0.png)
 
-    <ggplot: (2945520640961)>
+    <ggplot: (2957084456277)>
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_20_2.png)
 
-    <ggplot: (2945521995508)>
+    <ggplot: (2957142907040)>
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_20_4.png)
 
-    <ggplot: (2945535791367)>
+    <ggplot: (2957144494809)>
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_20_6.png)
 
-    <ggplot: (2945520640832)>
+    <ggplot: (2957152388536)>
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_20_8.png)
 
-    <ggplot: (2945522145202)>
+    <ggplot: (2957144492216)>
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_20_10.png)
 
-    <ggplot: (2945521672750)>
+    <ggplot: (2957144497933)>
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_20_12.png)
 
-    <ggplot: (2945522203281)>
+    <ggplot: (2957142887012)>
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_20_14.png)
 
-    <ggplot: (2945535110458)>
+    <ggplot: (2957144495734)>
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_20_16.png)
 
-    <ggplot: (2945522267829)>
+    <ggplot: (2957142887015)>
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_20_18.png)
 
-    <ggplot: (2945522203266)>
+    <ggplot: (2957154920828)>
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_20_20.png)
 
-    <ggplot: (2945526081344)>
+    <ggplot: (2957151219842)>
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_20_22.png)
 
-    <ggplot: (2945532282320)>
+    <ggplot: (2957199934931)>
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_20_24.png)
 
-    <ggplot: (2945525775282)>
+    <ggplot: (2957144638507)>
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_20_26.png)
 
-    <ggplot: (2945579310951)>
+    <ggplot: (2957199920165)>
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_20_28.png)
 
-    <ggplot: (2945524426069)>
+    <ggplot: (2957146656350)>
 
 ```python
 if isinstance(speclet_model, SpecletTestModel):
@@ -730,7 +730,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_28_0.png)
 
-    <ggplot: (2945524342242)>
+    <ggplot: (2957138794418)>
 
 ```python
 (
@@ -744,7 +744,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_29_0.png)
 
-    <ggplot: (2945520963922)>
+    <ggplot: (2957142765891)>
 
 ```python
 (
@@ -756,7 +756,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_30_0.png)
 
-    <ggplot: (2945524663920)>
+    <ggplot: (2957142492248)>
 
 ```python
 (
@@ -770,7 +770,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_31_0.png)
 
-    <ggplot: (2945526051913)>
+    <ggplot: (2957142771640)>
 
 ```python
 (
@@ -784,7 +784,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_32_0.png)
 
-    <ggplot: (2945521394845)>
+    <ggplot: (2957142063101)>
 
 ```python
 (
@@ -800,7 +800,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_33_0.png)
 
-    <ggplot: (2945520958519)>
+    <ggplot: (2957142762689)>
 
 ```python
 # Remove samples without gene CN data.
@@ -819,7 +819,7 @@ ppc_df_no_missing["binned_copy_number"] = [
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_34_0.png)
 
-    <ggplot: (2945520970165)>
+    <ggplot: (2957142762530)>
 
 ```python
 gene_error = (
@@ -852,7 +852,7 @@ n_genes = 15
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_35_0.png)
 
-    <ggplot: (2945521999074)>
+    <ggplot: (2957142577686)>
 
 ```python
 (
@@ -866,7 +866,7 @@ n_genes = 15
 
 ![png](sp4-centered-copynum_MCMC_files/sp4-centered-copynum_MCMC_36_0.png)
 
-    <ggplot: (2945521408919)>
+    <ggplot: (2957142589200)>
 
 ---
 
@@ -875,14 +875,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 8.57 minutes
+    execution time: 16.12 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-10
+    Last updated: 2021-07-11
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -896,15 +896,15 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-h-17-50.o2.rc.hms.harvard.edu
+    Hostname: compute-h-17-51.o2.rc.hms.harvard.edu
 
     Git branch: fit-models
 
+    logging   : 0.5.1.2
     matplotlib: 3.3.4
     plotnine  : 0.7.1
-    pymc3     : 3.11.1
     arviz     : 0.11.2
+    pymc3     : 3.11.1
     pandas    : 1.2.3
-    seaborn   : 0.11.1
     numpy     : 1.20.1
-    logging   : 0.5.1.2
+    seaborn   : 0.11.1

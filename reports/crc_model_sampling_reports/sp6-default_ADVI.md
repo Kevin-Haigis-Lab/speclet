@@ -80,7 +80,7 @@ speclet_model = configuration.get_config_and_instantiate_model(
 speclet_model.build_model()
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/10/21 12:13:00] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:250</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/12/21 06:24:36] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:250</span>
                              genes.
 </pre>
 
@@ -412,95 +412,95 @@ for var in vars_to_inspect:
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_0.png)
 
-    <ggplot: (2968531323823)>
+    <ggplot: (2979981074773)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_2.png)
 
-    <ggplot: (2968526641451)>
+    <ggplot: (2979980571736)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_4.png)
 
-    <ggplot: (2968513714008)>
+    <ggplot: (2979980567510)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_6.png)
 
-    <ggplot: (2968531337933)>
+    <ggplot: (2979981075743)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_8.png)
 
-    <ggplot: (2968526643514)>
+    <ggplot: (2979981075282)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_10.png)
 
-    <ggplot: (2968513714002)>
+    <ggplot: (2979981075622)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_12.png)
 
-    <ggplot: (2968533202463)>
+    <ggplot: (2979980565258)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_14.png)
 
-    <ggplot: (2968531324010)>
+    <ggplot: (2979980854077)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_16.png)
 
-    <ggplot: (2968531270937)>
+    <ggplot: (2979978061478)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_18.png)
 
-    <ggplot: (2968524849674)>
+    <ggplot: (2979978867556)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_20.png)
 
-    <ggplot: (2968524826847)>
+    <ggplot: (2979987152999)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_22.png)
 
-    <ggplot: (2968536499315)>
+    <ggplot: (2979990459194)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_24.png)
 
-    <ggplot: (2968531322956)>
+    <ggplot: (2979990477903)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_26.png)
 
-    <ggplot: (2968524856829)>
+    <ggplot: (2979988196681)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_28.png)
 
-    <ggplot: (2968526641604)>
+    <ggplot: (2979980853116)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_30.png)
 
-    <ggplot: (2968536503372)>
+    <ggplot: (2979967659454)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_32.png)
 
-    <ggplot: (2968532087887)>
+    <ggplot: (2979978061343)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_34.png)
 
-    <ggplot: (2968526539773)>
+    <ggplot: (2979980557617)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_36.png)
 
-    <ggplot: (2968533905294)>
+    <ggplot: (2979980486446)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_38.png)
 
-    <ggplot: (2968536503884)>
+    <ggplot: (2979987148066)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_40.png)
 
-    <ggplot: (2968532689017)>
+    <ggplot: (2979980566809)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_42.png)
 
-    <ggplot: (2968524847288)>
+    <ggplot: (2979981059967)>
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_20_44.png)
 
-    <ggplot: (2968526524281)>
+    <ggplot: (2979986857084)>
 
 ```python
 if isinstance(speclet_model, SpecletTestModel):
@@ -751,7 +751,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_28_0.png)
 
-    <ggplot: (2968526580303)>
+    <ggplot: (2979980618409)>
 
 ```python
 (
@@ -765,7 +765,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_29_0.png)
 
-    <ggplot: (2968524866765)>
+    <ggplot: (2979980673154)>
 
 ```python
 (
@@ -777,7 +777,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_30_0.png)
 
-    <ggplot: (2968526552113)>
+    <ggplot: (2979969065108)>
 
 ```python
 (
@@ -791,7 +791,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_31_0.png)
 
-    <ggplot: (2968469379560)>
+    <ggplot: (2979981626119)>
 
 ```python
 (
@@ -805,7 +805,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_32_0.png)
 
-    <ggplot: (2968526741818)>
+    <ggplot: (2979987148807)>
 
 ```python
 (
@@ -821,7 +821,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_33_0.png)
 
-    <ggplot: (2968526666111)>
+    <ggplot: (2979980699552)>
 
 ```python
 # Remove samples without gene CN data.
@@ -840,7 +840,7 @@ ppc_df_no_missing["binned_copy_number"] = [
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_34_0.png)
 
-    <ggplot: (2968526665683)>
+    <ggplot: (2979980698968)>
 
 ```python
 gene_error = (
@@ -873,7 +873,7 @@ n_genes = 15
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_35_0.png)
 
-    <ggplot: (2968531425223)>
+    <ggplot: (2979981284057)>
 
 ```python
 (
@@ -887,7 +887,7 @@ n_genes = 15
 
 ![png](sp6-default_ADVI_files/sp6-default_ADVI_36_0.png)
 
-    <ggplot: (2968526800490)>
+    <ggplot: (2979980834768)>
 
 ---
 
@@ -896,14 +896,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 7.22 minutes
+    execution time: 10.85 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-10
+    Last updated: 2021-07-12
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -917,15 +917,15 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-h-17-55.o2.rc.hms.harvard.edu
+    Hostname: compute-h-17-54.o2.rc.hms.harvard.edu
 
     Git branch: fit-models
 
-    pandas    : 1.2.3
-    numpy     : 1.20.1
     arviz     : 0.11.2
     plotnine  : 0.7.1
+    pandas    : 1.2.3
     pymc3     : 3.11.1
-    matplotlib: 3.3.4
-    logging   : 0.5.1.2
     seaborn   : 0.11.1
+    numpy     : 1.20.1
+    logging   : 0.5.1.2
+    matplotlib: 3.3.4

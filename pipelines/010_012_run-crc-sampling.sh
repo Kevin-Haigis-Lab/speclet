@@ -3,7 +3,7 @@
 #SBATCH --account=park
 #SBATCH -c 1
 #SBATCH -p priority
-#SBATCH -t 0-5:00
+#SBATCH -t 1-00:00
 #SBATCH --mem 2G
 #SBATCH -o logs/%j_sample-pipeline.log
 #SBATCH -e logs/%j_sample-pipeline.log

@@ -80,7 +80,7 @@ speclet_model = configuration.get_config_and_instantiate_model(
 speclet_model.build_model()
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/10/21 12:13:04] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:250</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/12/21 06:24:36] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:250</span>
                              genes.
 </pre>
 
@@ -392,39 +392,39 @@ for var in vars_to_inspect:
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_20_0.png)
 
-    <ggplot: (2978963745247)>
+    <ggplot: (2999209842932)>
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_20_2.png)
 
-    <ggplot: (2978964337936)>
+    <ggplot: (2999190790364)>
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_20_4.png)
 
-    <ggplot: (2978954996240)>
+    <ggplot: (2999209842938)>
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_20_6.png)
 
-    <ggplot: (2978963745214)>
+    <ggplot: (2999208866624)>
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_20_8.png)
 
-    <ggplot: (2978964291633)>
+    <ggplot: (2999209842749)>
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_20_10.png)
 
-    <ggplot: (2978964080565)>
+    <ggplot: (2999199782045)>
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_20_12.png)
 
-    <ggplot: (2978969003740)>
+    <ggplot: (2999214050491)>
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_20_14.png)
 
-    <ggplot: (2978963719979)>
+    <ggplot: (2999214030237)>
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_20_16.png)
 
-    <ggplot: (2978954996249)>
+    <ggplot: (2999209516481)>
 
 ```python
 if isinstance(speclet_model, SpecletTestModel):
@@ -675,7 +675,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_28_0.png)
 
-    <ggplot: (2978963730737)>
+    <ggplot: (2999191064908)>
 
 ```python
 (
@@ -689,7 +689,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_29_0.png)
 
-    <ggplot: (2978955019590)>
+    <ggplot: (2999209996529)>
 
 ```python
 (
@@ -701,7 +701,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_30_0.png)
 
-    <ggplot: (2978969003653)>
+    <ggplot: (2999131628487)>
 
 ```python
 (
@@ -715,7 +715,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_31_0.png)
 
-    <ggplot: (2978901620366)>
+    <ggplot: (2999209511735)>
 
 ```python
 (
@@ -729,7 +729,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_32_0.png)
 
-    <ggplot: (2978962491326)>
+    <ggplot: (2999209876345)>
 
 ```python
 (
@@ -745,7 +745,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_33_0.png)
 
-    <ggplot: (2978963994242)>
+    <ggplot: (2999212630971)>
 
 ```python
 # Remove samples without gene CN data.
@@ -764,7 +764,7 @@ ppc_df_no_missing["binned_copy_number"] = [
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_34_0.png)
 
-    <ggplot: (2978955233205)>
+    <ggplot: (2999212630863)>
 
 ```python
 gene_error = (
@@ -797,7 +797,7 @@ n_genes = 15
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_35_0.png)
 
-    <ggplot: (2978962548240)>
+    <ggplot: (2999203391401)>
 
 ```python
 (
@@ -811,7 +811,7 @@ n_genes = 15
 
 ![png](sp2-default_ADVI_files/sp2-default_ADVI_36_0.png)
 
-    <ggplot: (2978955256074)>
+    <ggplot: (2999202703644)>
 
 ---
 
@@ -820,14 +820,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 7.04 minutes
+    execution time: 10.15 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-10
+    Last updated: 2021-07-12
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -845,11 +845,11 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Git branch: fit-models
 
-    plotnine  : 0.7.1
-    arviz     : 0.11.2
-    seaborn   : 0.11.1
-    pandas    : 1.2.3
-    logging   : 0.5.1.2
-    pymc3     : 3.11.1
-    numpy     : 1.20.1
     matplotlib: 3.3.4
+    numpy     : 1.20.1
+    logging   : 0.5.1.2
+    arviz     : 0.11.2
+    plotnine  : 0.7.1
+    seaborn   : 0.11.1
+    pymc3     : 3.11.1
+    pandas    : 1.2.3
