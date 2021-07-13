@@ -80,7 +80,7 @@ speclet_model = configuration.get_config_and_instantiate_model(
 speclet_model.build_model()
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/10/21 12:12:45] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:250</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/12/21 06:24:36] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:250</span>
                              genes.
 </pre>
 
@@ -417,51 +417,51 @@ for var in vars_to_inspect:
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_20_0.png)
 
-    <ggplot: (2951026602412)>
+    <ggplot: (2953400904973)>
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_20_2.png)
 
-    <ggplot: (2951014014356)>
+    <ggplot: (2953388256172)>
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_20_4.png)
 
-    <ggplot: (2951022182638)>
+    <ggplot: (2953388679156)>
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_20_6.png)
 
-    <ggplot: (2951014014296)>
+    <ggplot: (2953388678973)>
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_20_8.png)
 
-    <ggplot: (2951016268560)>
+    <ggplot: (2953387574848)>
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_20_10.png)
 
-    <ggplot: (2951026028279)>
+    <ggplot: (2953392846484)>
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_20_12.png)
 
-    <ggplot: (2951022182572)>
+    <ggplot: (2953385372748)>
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_20_14.png)
 
-    <ggplot: (2951014419261)>
+    <ggplot: (2953399318194)>
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_20_16.png)
 
-    <ggplot: (2951013896087)>
+    <ggplot: (2953388813590)>
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_20_18.png)
 
-    <ggplot: (2951017871869)>
+    <ggplot: (2953445856422)>
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_20_20.png)
 
-    <ggplot: (2951071540372)>
+    <ggplot: (2953392546386)>
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_20_22.png)
 
-    <ggplot: (2951028057881)>
+    <ggplot: (2953399319890)>
 
 ```python
 if isinstance(speclet_model, SpecletTestModel):
@@ -712,7 +712,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_28_0.png)
 
-    <ggplot: (2951014042085)>
+    <ggplot: (2953388084715)>
 
 ```python
 (
@@ -726,7 +726,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_29_0.png)
 
-    <ggplot: (2951013532507)>
+    <ggplot: (2953388487533)>
 
 ```python
 (
@@ -738,7 +738,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_30_0.png)
 
-    <ggplot: (2951016934437)>
+    <ggplot: (2953388257747)>
 
 ```python
 (
@@ -752,7 +752,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_31_0.png)
 
-    <ggplot: (2950924301216)>
+    <ggplot: (2953388487626)>
 
 ```python
 (
@@ -766,7 +766,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_32_0.png)
 
-    <ggplot: (2950968846090)>
+    <ggplot: (2953388080680)>
 
 ```python
 (
@@ -782,7 +782,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_33_0.png)
 
-    <ggplot: (2951013562359)>
+    <ggplot: (2953388211959)>
 
 ```python
 # Remove samples without gene CN data.
@@ -801,7 +801,7 @@ ppc_df_no_missing["binned_copy_number"] = [
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_34_0.png)
 
-    <ggplot: (2951013522842)>
+    <ggplot: (2953384113984)>
 
 ```python
 gene_error = (
@@ -834,7 +834,7 @@ n_genes = 15
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_35_0.png)
 
-    <ggplot: (2951013983693)>
+    <ggplot: (2953388315100)>
 
 ```python
 (
@@ -848,7 +848,7 @@ n_genes = 15
 
 ![png](sp4-default_MCMC_files/sp4-default_MCMC_36_0.png)
 
-    <ggplot: (2951013979579)>
+    <ggplot: (2953388395063)>
 
 ---
 
@@ -857,14 +857,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 8.36 minutes
+    execution time: 8.06 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-10
+    Last updated: 2021-07-12
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -878,15 +878,15 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-h-17-50.o2.rc.hms.harvard.edu
+    Hostname: compute-h-17-54.o2.rc.hms.harvard.edu
 
     Git branch: fit-models
 
-    logging   : 0.5.1.2
-    numpy     : 1.20.1
-    pandas    : 1.2.3
-    seaborn   : 0.11.1
-    matplotlib: 3.3.4
-    plotnine  : 0.7.1
     arviz     : 0.11.2
     pymc3     : 3.11.1
+    matplotlib: 3.3.4
+    plotnine  : 0.7.1
+    numpy     : 1.20.1
+    pandas    : 1.2.3
+    logging   : 0.5.1.2
+    seaborn   : 0.11.1

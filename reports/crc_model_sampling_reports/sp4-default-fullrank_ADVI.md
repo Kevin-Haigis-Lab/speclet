@@ -80,7 +80,7 @@ speclet_model = configuration.get_config_and_instantiate_model(
 speclet_model.build_model()
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/10/21 12:13:00] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:250</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/12/21 06:24:36] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:250</span>
                              genes.
 </pre>
 
@@ -396,51 +396,51 @@ for var in vars_to_inspect:
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_20_0.png)
 
-    <ggplot: (2991862285605)>
+    <ggplot: (2981617896307)>
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_20_2.png)
 
-    <ggplot: (2991862272609)>
+    <ggplot: (2981618366468)>
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_20_4.png)
 
-    <ggplot: (2991853971191)>
+    <ggplot: (2981609634452)>
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_20_6.png)
 
-    <ggplot: (2991855718455)>
+    <ggplot: (2981612942818)>
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_20_8.png)
 
-    <ggplot: (2991862274142)>
+    <ggplot: (2981600921823)>
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_20_10.png)
 
-    <ggplot: (2991862272591)>
+    <ggplot: (2981600930801)>
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_20_12.png)
 
-    <ggplot: (2991855271268)>
+    <ggplot: (2981618370088)>
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_20_14.png)
 
-    <ggplot: (2991854075528)>
+    <ggplot: (2981623428648)>
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_20_16.png)
 
-    <ggplot: (2991862279446)>
+    <ggplot: (2981623432783)>
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_20_18.png)
 
-    <ggplot: (2991862283484)>
+    <ggplot: (2981619633643)>
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_20_20.png)
 
-    <ggplot: (2991867208452)>
+    <ggplot: (2981613085085)>
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_20_22.png)
 
-    <ggplot: (2991855718548)>
+    <ggplot: (2981610378692)>
 
 ```python
 if isinstance(speclet_model, SpecletTestModel):
@@ -691,7 +691,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_28_0.png)
 
-    <ggplot: (2991863386609)>
+    <ggplot: (2981618627283)>
 
 ```python
 (
@@ -705,7 +705,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_29_0.png)
 
-    <ggplot: (2991863252815)>
+    <ggplot: (2981618637421)>
 
 ```python
 (
@@ -717,7 +717,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_30_0.png)
 
-    <ggplot: (2991799428136)>
+    <ggplot: (2981621244781)>
 
 ```python
 (
@@ -731,7 +731,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_31_0.png)
 
-    <ggplot: (2991862710492)>
+    <ggplot: (2981609656215)>
 
 ```python
 (
@@ -745,7 +745,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_32_0.png)
 
-    <ggplot: (2991854421264)>
+    <ggplot: (2981618369238)>
 
 ```python
 (
@@ -761,7 +761,7 @@ pred_summary["loo"] = model_loo.loo_i.values
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_33_0.png)
 
-    <ggplot: (2991862535277)>
+    <ggplot: (2981612837042)>
 
 ```python
 # Remove samples without gene CN data.
@@ -780,7 +780,7 @@ ppc_df_no_missing["binned_copy_number"] = [
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_34_0.png)
 
-    <ggplot: (2991862547676)>
+    <ggplot: (2981612836886)>
 
 ```python
 gene_error = (
@@ -813,7 +813,7 @@ n_genes = 15
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_35_0.png)
 
-    <ggplot: (2991855120535)>
+    <ggplot: (2981612989444)>
 
 ```python
 (
@@ -827,7 +827,7 @@ n_genes = 15
 
 ![png](sp4-default-fullrank_ADVI_files/sp4-default-fullrank_ADVI_36_0.png)
 
-    <ggplot: (2991854419920)>
+    <ggplot: (2981613010692)>
 
 ---
 
@@ -836,14 +836,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 7.33 minutes
+    execution time: 10.14 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-10
+    Last updated: 2021-07-12
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -857,15 +857,15 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-h-17-55.o2.rc.hms.harvard.edu
+    Hostname: compute-h-17-54.o2.rc.hms.harvard.edu
 
     Git branch: fit-models
 
+    numpy     : 1.20.1
+    matplotlib: 3.3.4
     arviz     : 0.11.2
     pandas    : 1.2.3
-    pymc3     : 3.11.1
-    numpy     : 1.20.1
-    seaborn   : 0.11.1
-    logging   : 0.5.1.2
     plotnine  : 0.7.1
-    matplotlib: 3.3.4
+    seaborn   : 0.11.1
+    pymc3     : 3.11.1
+    logging   : 0.5.1.2
