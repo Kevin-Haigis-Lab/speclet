@@ -122,41 +122,6 @@ class SpecletSeven(SpecletModel):
             self.config = new_config
             self.model = None
 
-    def _add_cell_line_copy_number_covariate(
-        self,
-        model: pm.Model,
-        co_idx: achelp.CommonIndices,
-        cellline_to_lineage_idx_shared: TTShared,
-    ) -> tuple[int, int]:
-        multiple_lineages = co_idx.n_lineages > 1
-        k_shape = (1, co_idx.n_celllines)
-        with model:
-            if multiple_lineages:
-                μ_μ_k = pm.Normal("μ_μ_k", 0, 1)
-                σ_μ_k = pm.HalfNormal("σ_μ_k", 1)
-                μ_k = pm.Normal("μ_k", μ_μ_k, σ_μ_k, shape=co_idx.n_lineages)
-            else:
-                μ_k = pm.Normal("μ_k", 0, 1)
-            σ_σ_k = pm.HalfNormal("σ_σ_k", 1)
-            σ_k = pm.HalfNormal("σ_k", σ_σ_k, shape=co_idx.n_lineages)
-            k = pm.Normal(  # noqa: F841
-                "k",
-                μ_k[cellline_to_lineage_idx_shared],
-                σ_k[cellline_to_lineage_idx_shared],
-                shape=k_shape,
-            )
-        return k_shape
-
-    def _add_gene_copy_number_covariate(
-        self, model: pm.Model, co_idx: achelp.CommonIndices
-    ) -> tuple[int, int]:
-        n_shape = (co_idx.n_genes, 1)
-        with model:
-            μ_n = pm.Normal("μ_n", 0, 1)
-            σ_n = pm.HalfNormal("σ_n", 1)
-            n = pm.Normal("n", μ_n, σ_n, shape=n_shape)  # noqa: F841
-        return n_shape
-
     def _assert_shape_using_categories_in_df(
         self, ary: np.ndarray, df: pd.DataFrame, cols: tuple[str, ...]
     ) -> None:
@@ -223,6 +188,41 @@ class SpecletSeven(SpecletModel):
         )
         return mut_ary
 
+    def _add_cell_line_copy_number_covariate(
+        self,
+        model: pm.Model,
+        co_idx: achelp.CommonIndices,
+        cellline_to_lineage_idx_shared: TTShared,
+    ) -> tuple[int, int]:
+        multiple_lineages = co_idx.n_lineages > 1
+        k_shape = (1, co_idx.n_celllines)
+        with model:
+            if multiple_lineages:
+                μ_μ_k = pm.Normal("μ_μ_k", 0, 1)
+                σ_μ_k = pm.HalfNormal("σ_μ_k", 1)
+                μ_k = pm.Normal("μ_k", μ_μ_k, σ_μ_k, shape=co_idx.n_lineages)
+            else:
+                μ_k = pm.Normal("μ_k", 0, 1)
+            σ_σ_k = pm.HalfNormal("σ_σ_k", 1)
+            σ_k = pm.HalfNormal("σ_k", σ_σ_k, shape=co_idx.n_lineages)
+            k = pm.Normal(  # noqa: F841
+                "k",
+                μ_k[cellline_to_lineage_idx_shared],
+                σ_k[cellline_to_lineage_idx_shared],
+                shape=k_shape,
+            )
+        return k_shape
+
+    def _add_gene_copy_number_covariate(
+        self, model: pm.Model, co_idx: achelp.CommonIndices
+    ) -> tuple[int, int]:
+        n_shape = (co_idx.n_genes, 1)
+        with model:
+            μ_n = pm.Normal("μ_n", 0, 1)
+            σ_n = pm.HalfNormal("σ_n", 1)
+            n = pm.Normal("n", μ_n, σ_n, shape=n_shape)  # noqa: F841
+        return n_shape
+
     def _add_gene_expression_covariate(
         self, model: pm.Model, co_idx: achelp.CommonIndices
     ) -> tuple[int, int]:
@@ -243,6 +243,26 @@ class SpecletSeven(SpecletModel):
             σ_j = pm.HalfNormal("σ_j", 1)
             j = pm.Normal("j", μ_j, σ_j, shape=b_idx.n_batches)  # noqa: F841
         return None
+
+    def _add_gene_mutation_covariate(
+        self, model: pm.Model, co_idx: achelp.CommonIndices
+    ) -> tuple[int, int]:
+        m_shape = (co_idx.n_genes, co_idx.n_lineages)
+        mult_lineages = co_idx.n_lineages > 1
+        with model:
+            if mult_lineages:
+                μ_μ_m = pm.Normal("μ_μ_m", 0, 1)
+                σ_μ_m = pm.HalfNormal("σ_μ_m", 1)
+                μ_m = pm.Normal("μ_m", μ_μ_m, σ_μ_m, shape=(co_idx.n_genes, 1))
+                σ_m = pm.HalfNormal("σ_m", 1)
+                m = pm.Normal(  # noqa: F841
+                    "m", tensor.ones(shape=m_shape) * μ_m, σ_m, shape=m_shape
+                )
+            else:
+                μ_m = pm.Normal("μ_m", 0, 1)
+                σ_m = pm.HalfNormal("σ_m", 1)
+                m = pm.Normal("m", μ_m, σ_m, shape=m_shape)  # noqa: F841
+        return m_shape
 
     def _add_varying_gene_cell_line_intercept_covariate(
         self,
@@ -265,20 +285,6 @@ class SpecletSeven(SpecletModel):
                 shape=h_shape,
             )
         return h_shape
-
-    def _add_gene_mutation_covariate(
-        self, model: pm.Model, co_idx: achelp.CommonIndices
-    ) -> tuple[int, int]:
-        m_shape = (co_idx.n_genes, co_idx.n_lineages)
-        with model:
-            μ_μ_m = pm.Normal("μ_μ_m", 0, 1)
-            σ_μ_m = pm.HalfNormal("σ_μ_m", 1)
-            μ_m = pm.Normal("μ_m", μ_μ_m, σ_μ_m, shape=(co_idx.n_genes, 1))
-            σ_m = pm.HalfNormal("σ_m", 1)
-            m = pm.Normal(  # noqa: F841
-                "m", tensor.ones(shape=m_shape) * μ_m, σ_m, shape=m_shape
-            )
-        return m_shape
 
     def model_specification(self) -> tuple[pm.Model, str]:
         """Build SpecletSeven model.
