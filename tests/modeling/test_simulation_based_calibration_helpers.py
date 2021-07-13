@@ -309,7 +309,8 @@ def test_add_mock_copynumber_data_with_groups():
     df = sns.load_dataset("iris")
     for _ in range(10):
         df_cna = sbc.add_mock_copynumber_data(df.copy(), grouping_cols=["species"])
-        assert "copy_number" in df_cna.columns.to_list()
+        for c in ("copy_number", "species"):
+            assert c in df_cna.columns.to_list()
         assert all(df_cna["copy_number"] >= 0.0)
         assert not any(df_cna["copy_number"].isna())
         for species in df["species"].unique():
@@ -379,7 +380,8 @@ def test_add_mock_rna_expression_data_grouping_cols():
     mod_df = sbc.add_mock_rna_expression_data(
         df, grouping_cols=["hugo_symbol", "depmap_id"]
     )
-    assert "rna_expr" in mod_df.columns.to_list()
+    for col in ("hugo_symbol", "depmap_id", "rna_expr"):
+        assert col in mod_df.columns.to_list()
     assert np.all(mod_df["rna_expr"] >= 0.0)
     assert not np.any(mod_df["rna_expr"].isna())
     assert np.all(np.isfinite(mod_df["rna_expr"].values))
@@ -403,9 +405,13 @@ def test_add_mock_is_mutated_data_grouped(prob: float):
     df = pd.DataFrame(
         {"A": np.random.choice(grp_a, size=100), "B": np.random.choice(grp_b, size=100)}
     )
-    df = sbc.add_mock_is_mutated_data(df, grouping_cols=["A", "B"], prob=prob)
-    assert df["is_mutated"].mean() == pytest.approx(prob, abs=0.1)
-    assert df[["A", "B"]].drop_duplicates().shape[0] == df.drop_duplicates().shape[0]
+    df_mut = sbc.add_mock_is_mutated_data(df, grouping_cols=["A", "B"], prob=prob)
+    for col in ("A", "B", "is_mutated"):
+        assert col in df_mut.columns.tolist()
+    assert df_mut["is_mutated"].mean() == pytest.approx(prob, abs=0.1)
+    assert (
+        df[["A", "B"]].drop_duplicates().shape[0] == df_mut.drop_duplicates().shape[0]
+    )
 
 
 @given(
@@ -448,6 +454,7 @@ def test_mock_data_has_correct_categories_sizes(data):
     assert n_batches >= dphelp.nunique(mock_data.p_dna_batch)
 
 
+@pytest.mark.DEV
 @settings(settings.load_profile("slow-adaptive"))
 @given(mock_data=generate_data_with_random_params())
 def test_sgrnas_uniquely_map_to_genes(mock_data: pd.DataFrame):

@@ -418,12 +418,17 @@ def add_mock_rna_expression_data(
         rna_expr = np.random.normal(mu, sd, size=df_copy.shape[0])
         rna_expr = vhelp.squish_array(rna_expr, lower=0.0, upper=np.inf)
         df_copy["rna_expr"] = rna_expr
-        return _merge_mock_and_grouped_copy(df, df_copy, grouping_cols)
+        df_copy = _merge_mock_and_grouped_copy(df, df_copy, grouping_cols)
+        return df_copy
 
     if subgroups is None:
         mock_df = _rna_normal_distribution(mock_df)
     else:
-        mock_df = mock_df.groupby(subgroups).apply(_rna_normal_distribution)
+        mock_df = (
+            mock_df.groupby(subgroups)
+            .apply(_rna_normal_distribution)
+            .reset_index(drop=True)
+        )
     return mock_df
 
 
@@ -508,6 +513,6 @@ def generate_mock_achilles_data(
             grouping_cols=["hugo_symbol", "depmap_id"],
             subgroups=["hugo_symbol", "lineage"],
         )
-        .pipe(add_mock_is_mutated_data)
+        .pipe(add_mock_is_mutated_data, grouping_cols=["hugo_symbol", "depmap_id"])
         .pipe(add_mock_zero_effect_lfc_data)
     )
