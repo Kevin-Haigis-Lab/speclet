@@ -285,12 +285,12 @@ benchmark_df_long = benchmark_df[
 )
 ```
 
-<div id="altair-viz-ee4ee9aecc31423d9c86ff3af81d21fb"></div>
+<div id="altair-viz-03448314dae244cc90553e528e662436"></div>
 <script type="text/javascript">
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-ee4ee9aecc31423d9c86ff3af81d21fb") {
-      outputDiv = document.getElementById("altair-viz-ee4ee9aecc31423d9c86ff3af81d21fb");
+    if (outputDiv.id !== "altair-viz-03448314dae244cc90553e528e662436") {
+      outputDiv = document.getElementById("altair-viz-03448314dae244cc90553e528e662436");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
@@ -366,7 +366,7 @@ benchmark_df_long = benchmark_df[
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-12
+    Last updated: 2021-07-13
 
     Python implementation: CPython
     Python version       : 3.8.8
@@ -385,5 +385,5 @@ benchmark_df_long = benchmark_df[
     Git branch: fit-models
 
     pandas : 1.2.3
-    altair : 4.1.0
     janitor: 0.20.14
+    altair : 4.1.0

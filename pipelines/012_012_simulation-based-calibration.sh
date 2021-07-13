@@ -2,7 +2,7 @@
 
 #SBATCH --account=park
 #SBATCH -c 1
-#SBATCH -p priority
+#SBATCH -p short
 #SBATCH -t 0-12:00
 #SBATCH --mem 2G
 #SBATCH -o logs/%j-sbc-snakemake.log
@@ -28,7 +28,7 @@ fi
 snakemake \
     --snakefile $SNAKEFILE \
     --jobs 20 \
-    --restart-times 0 \
+    --restart-times 1 \
     --latency-wait 120 \
     --use-conda \
     --keep-going \
