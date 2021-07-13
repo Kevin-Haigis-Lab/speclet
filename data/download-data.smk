@@ -108,7 +108,7 @@ rule all:
         ccle_files=expand(
             ccle_dir / "{filename}", filename=list(ccle_downloads.keys())
         ),
-        sanger_cgc=sanger_cosmic_dir / "cancer_gene_census.tsv",
+        sanger_cgc=sanger_cosmic_dir / "cancer_gene_census.csv",
 
 
 rule download_depmap:

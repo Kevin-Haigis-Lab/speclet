@@ -70,7 +70,7 @@ def tidy_score_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
 
 
 def clean_sanger_cgc_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
-    return {"cgc_input": SANGER_COSMIC_DIR / "cancer_gene_census.tsv"}
+    return {"cgc_input": SANGER_COSMIC_DIR / "cancer_gene_census.csv"}
 
 
 #### ---- CI ---- ####
