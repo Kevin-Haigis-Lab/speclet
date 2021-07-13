@@ -36,7 +36,22 @@ from typing import Dict, List, Optional, Set, Union
 import yaml
 from pydantic import BaseModel
 
+from src.io.data_io import project_root_dir
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
+
+#### ---- Files ---- ####
+
+
+def get_model_config() -&gt; Path:
+    &#34;&#34;&#34;Path to default model configuration file.
+
+    Returns:
+        Path: Path to a model configuration.
+    &#34;&#34;&#34;
+    return project_root_dir() / &#34;models&#34; / &#34;model-configs.yaml&#34;
+
+
+#### ---- Configuration ---- ####
 
 BasicTypes = Union[float, str, int, bool]
 
@@ -124,7 +139,7 @@ def get_sampling_kwargs_from_config(
     config: ModelConfig,
     pipeline: SpecletPipeline,
     fit_method: ModelFitMethod,
-) -&gt; Dict[str, Union[float, str, int, bool]]:
+) -&gt; Dict[str, BasicTypes]:
     &#34;&#34;&#34;Get the sampling keyword argument dictionary from a model configuration.
 
     Args:
@@ -133,7 +148,7 @@ def get_sampling_kwargs_from_config(
         fit_method (ModelFitMethod): Desired model fitting method.
 
     Returns:
-        Dict[str, Union[float, str, int]]: Keyword arguments for the model-fitting
+        Dict[str, BasicTypes]: Keyword arguments for the model-fitting
         method.
     &#34;&#34;&#34;
     if (sampling_params := config.pipeline_sampling_parameters) is None:
@@ -147,7 +162,7 @@ def get_sampling_kwargs_from_config(
 
 def get_sampling_kwargs(
     config_path: Path, name: str, pipeline: SpecletPipeline, fit_method: ModelFitMethod
-) -&gt; Dict[str, Union[float, str, int]]:
+) -&gt; Dict[str, BasicTypes]:
     &#34;&#34;&#34;Get the sampling keyword argument dictionary from a configuration file.
 
     Args:
@@ -161,7 +176,7 @@ def get_sampling_kwargs(
         not found.
 
     Returns:
-        Dict[str, Union[float, str, int]]: Keyword arguments for the model-fitting
+        Dict[str, BasicTypes]: Keyword arguments for the model-fitting
         method.
     &#34;&#34;&#34;
     if (config := get_configuration_for_model(config_path, name)) is None:
@@ -310,6 +325,29 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
     return configs[0]</code></pre>
 </details>
 </dd>
+<dt id="src.io.model_config.get_model_config"><code class="name flex">
+<span>def <span class="ident">get_model_config</span></span>(<span>) -> pathlib.Path</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Path to default model configuration file.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Path</code></dt>
+<dd>Path to a model configuration.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_model_config() -&gt; Path:
+    &#34;&#34;&#34;Path to default model configuration file.
+
+    Returns:
+        Path: Path to a model configuration.
+    &#34;&#34;&#34;
+    return project_root_dir() / &#34;models&#34; / &#34;model-configs.yaml&#34;</code></pre>
+</details>
+</dd>
 <dt id="src.io.model_config.get_model_configurations"><code class="name flex">
 <span>def <span class="ident">get_model_configurations</span></span>(<span>path: pathlib.Path) -> <a title="src.io.model_config.ModelConfigs" href="#src.io.model_config.ModelConfigs">ModelConfigs</a></span>
 </code></dt>
@@ -343,7 +381,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
 </details>
 </dd>
 <dt id="src.io.model_config.get_sampling_kwargs"><code class="name flex">
-<span>def <span class="ident">get_sampling_kwargs</span></span>(<span>config_path: pathlib.Path, name: str, pipeline: <a title="src.project_enums.SpecletPipeline" href="../project_enums.html#src.project_enums.SpecletPipeline">SpecletPipeline</a>, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>) -> Dict[str, Union[float, str, int]]</span>
+<span>def <span class="ident">get_sampling_kwargs</span></span>(<span>config_path: pathlib.Path, name: str, pipeline: <a title="src.project_enums.SpecletPipeline" href="../project_enums.html#src.project_enums.SpecletPipeline">SpecletPipeline</a>, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>) -> Dict[str, Union[float, str, int, bool]]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the sampling keyword argument dictionary from a configuration file.</p>
@@ -366,7 +404,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
 <p>not found.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Dict[str, Union[float, str, int]]</code></dt>
+<dt><code>Dict[str, BasicTypes]</code></dt>
 <dd>Keyword arguments for the model-fitting</dd>
 </dl>
 <p>method.</p></div>
@@ -376,7 +414,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
 </summary>
 <pre><code class="python">def get_sampling_kwargs(
     config_path: Path, name: str, pipeline: SpecletPipeline, fit_method: ModelFitMethod
-) -&gt; Dict[str, Union[float, str, int]]:
+) -&gt; Dict[str, BasicTypes]:
     &#34;&#34;&#34;Get the sampling keyword argument dictionary from a configuration file.
 
     Args:
@@ -390,7 +428,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
         not found.
 
     Returns:
-        Dict[str, Union[float, str, int]]: Keyword arguments for the model-fitting
+        Dict[str, BasicTypes]: Keyword arguments for the model-fitting
         method.
     &#34;&#34;&#34;
     if (config := get_configuration_for_model(config_path, name)) is None:
@@ -416,7 +454,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Dict[str, Union[float, str, int]]</code></dt>
+<dt><code>Dict[str, BasicTypes]</code></dt>
 <dd>Keyword arguments for the model-fitting</dd>
 </dl>
 <p>method.</p></div>
@@ -428,7 +466,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
     config: ModelConfig,
     pipeline: SpecletPipeline,
     fit_method: ModelFitMethod,
-) -&gt; Dict[str, Union[float, str, int, bool]]:
+) -&gt; Dict[str, BasicTypes]:
     &#34;&#34;&#34;Get the sampling keyword argument dictionary from a model configuration.
 
     Args:
@@ -437,7 +475,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
         fit_method (ModelFitMethod): Desired model fitting method.
 
     Returns:
-        Dict[str, Union[float, str, int]]: Keyword arguments for the model-fitting
+        Dict[str, BasicTypes]: Keyword arguments for the model-fitting
         method.
     &#34;&#34;&#34;
     if (sampling_params := config.pipeline_sampling_parameters) is None:
@@ -631,6 +669,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
 <ul class="">
 <li><code><a title="src.io.model_config.check_model_names_are_unique" href="#src.io.model_config.check_model_names_are_unique">check_model_names_are_unique</a></code></li>
 <li><code><a title="src.io.model_config.get_configuration_for_model" href="#src.io.model_config.get_configuration_for_model">get_configuration_for_model</a></code></li>
+<li><code><a title="src.io.model_config.get_model_config" href="#src.io.model_config.get_model_config">get_model_config</a></code></li>
 <li><code><a title="src.io.model_config.get_model_configurations" href="#src.io.model_config.get_model_configurations">get_model_configurations</a></code></li>
 <li><code><a title="src.io.model_config.get_sampling_kwargs" href="#src.io.model_config.get_sampling_kwargs">get_sampling_kwargs</a></code></li>
 <li><code><a title="src.io.model_config.get_sampling_kwargs_from_config" href="#src.io.model_config.get_sampling_kwargs_from_config">get_sampling_kwargs_from_config</a></code></li>

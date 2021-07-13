@@ -104,6 +104,28 @@ class CacheDoesNotExistError(FileNotFoundError):
         &#34;&#34;&#34;
         self.dir = dir
         self.message = str(dir)
+        super().__init__(self.message)
+
+
+class ShapeError(BaseException):
+    &#34;&#34;&#34;Shape error.&#34;&#34;&#34;
+
+    def __init__(
+        self,
+        expected_shape: Union[int, tuple[int, ...]],
+        actual_shape: Union[int, tuple[int, ...]],
+    ) -&gt; None:
+        &#34;&#34;&#34;Create a ShapeError error.
+
+        Args:
+            expected_shape (Union[int, tuple[int, ...]]): Expected shape.
+            actual_shape (Union[int, tuple[int, ...]]): Actual (observed) shape.
+        &#34;&#34;&#34;
+        self.expected_shape = expected_shape
+        self.actual_shape = actual_shape
+        self.message = (
+            f&#34;Expected shape {self.expected_shape} - actual shape {self.actual_shape}.&#34;
+        )
         super().__init__(self.message)</code></pre>
 </details>
 </section>
@@ -254,6 +276,50 @@ class CacheDoesNotExistError(FileNotFoundError):
 <li>builtins.BaseException</li>
 </ul>
 </dd>
+<dt id="src.exceptions.ShapeError"><code class="flex name class">
+<span>class <span class="ident">ShapeError</span></span>
+<span>(</span><span>expected_shape: Union[int, tuple[int, ...]], actual_shape: Union[int, tuple[int, ...]])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Shape error.</p>
+<p>Create a ShapeError error.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>expected_shape</code></strong> :&ensp;<code>Union[int, tuple[int, &hellip;]]</code></dt>
+<dd>Expected shape.</dd>
+<dt><strong><code>actual_shape</code></strong> :&ensp;<code>Union[int, tuple[int, &hellip;]]</code></dt>
+<dd>Actual (observed) shape.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ShapeError(BaseException):
+    &#34;&#34;&#34;Shape error.&#34;&#34;&#34;
+
+    def __init__(
+        self,
+        expected_shape: Union[int, tuple[int, ...]],
+        actual_shape: Union[int, tuple[int, ...]],
+    ) -&gt; None:
+        &#34;&#34;&#34;Create a ShapeError error.
+
+        Args:
+            expected_shape (Union[int, tuple[int, ...]]): Expected shape.
+            actual_shape (Union[int, tuple[int, ...]]): Actual (observed) shape.
+        &#34;&#34;&#34;
+        self.expected_shape = expected_shape
+        self.actual_shape = actual_shape
+        self.message = (
+            f&#34;Expected shape {self.expected_shape} - actual shape {self.actual_shape}.&#34;
+        )
+        super().__init__(self.message)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.BaseException</li>
+</ul>
+</dd>
 <dt id="src.exceptions.UnsupportedFileTypeError"><code class="flex name class">
 <span>class <span class="ident">UnsupportedFileTypeError</span></span>
 <span>(</span><span>suffix: str)</span>
@@ -337,6 +403,9 @@ class CacheDoesNotExistError(FileNotFoundError):
 </li>
 <li>
 <h4><code><a title="src.exceptions.ResourceRequestUnkown" href="#src.exceptions.ResourceRequestUnkown">ResourceRequestUnkown</a></code></h4>
+</li>
+<li>
+<h4><code><a title="src.exceptions.ShapeError" href="#src.exceptions.ShapeError">ShapeError</a></code></h4>
 </li>
 <li>
 <h4><code><a title="src.exceptions.UnsupportedFileTypeError" href="#src.exceptions.UnsupportedFileTypeError">UnsupportedFileTypeError</a></code></h4>

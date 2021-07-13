@@ -369,7 +369,9 @@ def generate_mock_achilles_categorical_groups(
     )
 
 
-def add_mock_copynumber_data(mock_df: pd.DataFrame) -&gt; pd.DataFrame:
+def add_mock_copynumber_data(
+    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]] = None
+) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Add mock copy number data to mock Achilles data.
 
     The mock CNA values actually come from real copy number values from CRC cancer cell
@@ -378,16 +380,29 @@ def add_mock_copynumber_data(mock_df: pd.DataFrame) -&gt; pd.DataFrame:
 
     Args:
         mock_df (pd.DataFrame): Mock Achilles data frame.
+        grouping_cols (Optional[list[str]]): Columns to group by where every appearance
+          of the same combination will have the same CN value. Defaults to None for no
+          group effect.
 
     Returns:
         pd.DataFrame: Same mock Achilles data frame with a new &#34;copy_number&#34; column.
     &#34;&#34;&#34;
     real_cna_values = np.load(data_path(DataFile.copy_number_sample))
-    mock_cn = np.random.choice(real_cna_values, size=mock_df.shape[0], replace=True)
+
+    if grouping_cols is None:
+        df_copy = mock_df.copy()
+    else:
+        df_copy = mock_df.copy()[grouping_cols].drop_duplicates()
+
+    mock_cn = np.random.choice(real_cna_values, size=df_copy.shape[0], replace=True)
     mock_cn = mock_cn + np.random.normal(0, 0.1, size=mock_cn.shape)
-    mock_cn = vhelp.squish_array(mock_cn, lower=0.0, upper=np.inf)
-    mock_df[&#34;copy_number&#34;] = mock_cn.flatten()
-    return mock_df
+    mock_cn = vhelp.squish_array(mock_cn, lower=0.0, upper=20.0)
+    df_copy[&#34;copy_number&#34;] = mock_cn.flatten()
+
+    if grouping_cols is None:
+        return df_copy
+    else:
+        return mock_df.merge(df_copy, left_index=False, right_index=False)
 
 
 def add_mock_rna_expression_data(
@@ -494,7 +509,7 @@ def generate_mock_achilles_data(
             n_batches=n_batches,
             n_screens=n_screens,
         )
-        .pipe(add_mock_copynumber_data)
+        .pipe(add_mock_copynumber_data, grouping_cols=[&#34;hugo_symbol&#34;, &#34;depmap_id&#34;])
         .pipe(add_mock_rna_expression_data, groups=[&#34;hugo_symbol&#34;, &#34;lineage&#34;])
         .pipe(add_mock_is_mutated_data)
         .pipe(add_mock_zero_effect_lfc_data)
@@ -509,7 +524,7 @@ def generate_mock_achilles_data(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.modeling.simulation_based_calibration_helpers.add_mock_copynumber_data"><code class="name flex">
-<span>def <span class="ident">add_mock_copynumber_data</span></span>(<span>mock_df: pandas.core.frame.DataFrame) -> pandas.core.frame.DataFrame</span>
+<span>def <span class="ident">add_mock_copynumber_data</span></span>(<span>mock_df: pandas.core.frame.DataFrame, grouping_cols: Optional[list[str]] = None) -> pandas.core.frame.DataFrame</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add mock copy number data to mock Achilles data.</p>
@@ -520,6 +535,10 @@ each value.</p>
 <dl>
 <dt><strong><code>mock_df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
 <dd>Mock Achilles data frame.</dd>
+<dt><strong><code>grouping_cols</code></strong> :&ensp;<code>Optional[list[str]]</code></dt>
+<dd>Columns to group by where every appearance
+of the same combination will have the same CN value. Defaults to None for no
+group effect.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -530,7 +549,9 @@ each value.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_mock_copynumber_data(mock_df: pd.DataFrame) -&gt; pd.DataFrame:
+<pre><code class="python">def add_mock_copynumber_data(
+    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]] = None
+) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Add mock copy number data to mock Achilles data.
 
     The mock CNA values actually come from real copy number values from CRC cancer cell
@@ -539,16 +560,29 @@ each value.</p>
 
     Args:
         mock_df (pd.DataFrame): Mock Achilles data frame.
+        grouping_cols (Optional[list[str]]): Columns to group by where every appearance
+          of the same combination will have the same CN value. Defaults to None for no
+          group effect.
 
     Returns:
         pd.DataFrame: Same mock Achilles data frame with a new &#34;copy_number&#34; column.
     &#34;&#34;&#34;
     real_cna_values = np.load(data_path(DataFile.copy_number_sample))
-    mock_cn = np.random.choice(real_cna_values, size=mock_df.shape[0], replace=True)
+
+    if grouping_cols is None:
+        df_copy = mock_df.copy()
+    else:
+        df_copy = mock_df.copy()[grouping_cols].drop_duplicates()
+
+    mock_cn = np.random.choice(real_cna_values, size=df_copy.shape[0], replace=True)
     mock_cn = mock_cn + np.random.normal(0, 0.1, size=mock_cn.shape)
-    mock_cn = vhelp.squish_array(mock_cn, lower=0.0, upper=np.inf)
-    mock_df[&#34;copy_number&#34;] = mock_cn.flatten()
-    return mock_df</code></pre>
+    mock_cn = vhelp.squish_array(mock_cn, lower=0.0, upper=20.0)
+    df_copy[&#34;copy_number&#34;] = mock_cn.flatten()
+
+    if grouping_cols is None:
+        return df_copy
+    else:
+        return mock_df.merge(df_copy, left_index=False, right_index=False)</code></pre>
 </details>
 </dd>
 <dt id="src.modeling.simulation_based_calibration_helpers.add_mock_is_mutated_data"><code class="name flex">
@@ -855,7 +889,7 @@ equal to the number of batches.</dd>
             n_batches=n_batches,
             n_screens=n_screens,
         )
-        .pipe(add_mock_copynumber_data)
+        .pipe(add_mock_copynumber_data, grouping_cols=[&#34;hugo_symbol&#34;, &#34;depmap_id&#34;])
         .pipe(add_mock_rna_expression_data, groups=[&#34;hugo_symbol&#34;, &#34;lineage&#34;])
         .pipe(add_mock_is_mutated_data)
         .pipe(add_mock_zero_effect_lfc_data)

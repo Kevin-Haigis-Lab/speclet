@@ -139,11 +139,6 @@ class SpecletFour(SpecletModel):
             μ_η = pm.Normal(&#34;μ_η&#34;, 0, 0.2)
             σ_η = pm.HalfNormal(&#34;σ_η&#34;, 0.5)
 
-            # Copy number varying effect.
-            if self.config.copy_number_cov:
-                μ_β = pm.Normal(&#34;μ_β&#34;, -0.5, 1)
-                σ_β = pm.Normal(&#34;σ_β&#34;, -0.5, 1)
-
             # Gene varying intercept.
             if self.config.h is MP.NONCENTERED:
                 h_offset = pm.Normal(&#34;h_offset&#34;, 0, 1, shape=co_idx.n_genes)
@@ -175,6 +170,8 @@ class SpecletFour(SpecletModel):
 
             # Copy number effect varying by cell line.
             if self.config.copy_number_cov:
+                μ_β = pm.Normal(&#34;μ_β&#34;, -0.5, 1)
+                σ_β = pm.HalfNormal(&#34;σ_β&#34;, 1)
                 if self.config.β is MP.NONCENTERED:
                     β_offset = pm.Normal(&#34;β_offset&#34;, 0, 1, shape=co_idx.n_celllines)
                     β = pm.Deterministic(&#34;β&#34;, μ_β + β_offset * σ_β)
@@ -437,11 +434,6 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             μ_η = pm.Normal(&#34;μ_η&#34;, 0, 0.2)
             σ_η = pm.HalfNormal(&#34;σ_η&#34;, 0.5)
 
-            # Copy number varying effect.
-            if self.config.copy_number_cov:
-                μ_β = pm.Normal(&#34;μ_β&#34;, -0.5, 1)
-                σ_β = pm.Normal(&#34;σ_β&#34;, -0.5, 1)
-
             # Gene varying intercept.
             if self.config.h is MP.NONCENTERED:
                 h_offset = pm.Normal(&#34;h_offset&#34;, 0, 1, shape=co_idx.n_genes)
@@ -473,6 +465,8 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 
             # Copy number effect varying by cell line.
             if self.config.copy_number_cov:
+                μ_β = pm.Normal(&#34;μ_β&#34;, -0.5, 1)
+                σ_β = pm.HalfNormal(&#34;σ_β&#34;, 1)
                 if self.config.β is MP.NONCENTERED:
                     β_offset = pm.Normal(&#34;β_offset&#34;, 0, 1, shape=co_idx.n_celllines)
                     β = pm.Deterministic(&#34;β&#34;, μ_β + β_offset * σ_β)

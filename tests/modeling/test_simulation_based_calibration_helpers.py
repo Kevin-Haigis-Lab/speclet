@@ -305,6 +305,20 @@ def test_add_mock_copynumber_data():
         assert not any(df_cna["copy_number"].isna())
 
 
+def test_add_mock_copynumber_data_with_groups():
+    df = sns.load_dataset("iris")
+    for _ in range(10):
+        df_cna = sbc.add_mock_copynumber_data(df.copy(), grouping_cols=["species"])
+        assert "copy_number" in df_cna.columns.to_list()
+        assert all(df_cna["copy_number"] >= 0.0)
+        assert not any(df_cna["copy_number"].isna())
+        for species in df["species"].unique():
+            n_unique_vals = len(
+                np.unique(df_cna[df_cna.species == species]["copy_number"].values)
+            )
+            assert n_unique_vals == 1
+
+
 def test_add_mock_rna_expression_data():
     df = sbc.generate_mock_achilles_categorical_groups(
         n_genes=5,
@@ -430,3 +444,12 @@ def test_sgrna_for_each_cellline(mock_data: pd.DataFrame):
         # Confirm that each combo happens  exactly once.
         assert len(all_sgrnas) == len(cell_line_sgrnas)
         assert len(all_sgrnas.difference(set(cell_line_sgrnas))) == 0
+
+
+@given(mock_data=generate_data_with_random_params())
+def test_cn_same_for_gene_cellline_combination(mock_data: pd.DataFrame):
+    assert "copy_number" in mock_data.columns.tolist()
+    n_genes = len(mock_data.hugo_symbol.unique())
+    n_celllines = len(mock_data.depmap_id.unique())
+    cn_df = mock_data[["hugo_symbol", "depmap_id", "copy_number"]].drop_duplicates()
+    assert cn_df.shape[0] == (n_genes * n_celllines)

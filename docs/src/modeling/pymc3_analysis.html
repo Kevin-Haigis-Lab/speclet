@@ -173,6 +173,7 @@ def summarize_posterior_predictions(
 def _plot_vi_axes_limits(
     yvals: np.ndarray, x_start: Optional[Union[int, float]]
 ) -&gt; Tuple[List[int], List[float]]:
+    yvals = yvals.copy()[np.isfinite(yvals)]
     x_lims: List[int] = [0, len(yvals)]
     if x_start is None:
         pass

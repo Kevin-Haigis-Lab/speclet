@@ -341,7 +341,9 @@ def generate_mock_achilles_categorical_groups(
     )
 
 
-def add_mock_copynumber_data(mock_df: pd.DataFrame) -> pd.DataFrame:
+def add_mock_copynumber_data(
+    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]] = None
+) -> pd.DataFrame:
     """Add mock copy number data to mock Achilles data.
 
     The mock CNA values actually come from real copy number values from CRC cancer cell
@@ -350,16 +352,29 @@ def add_mock_copynumber_data(mock_df: pd.DataFrame) -> pd.DataFrame:
 
     Args:
         mock_df (pd.DataFrame): Mock Achilles data frame.
+        grouping_cols (Optional[list[str]]): Columns to group by where every appearance
+          of the same combination will have the same CN value. Defaults to None for no
+          group effect.
 
     Returns:
         pd.DataFrame: Same mock Achilles data frame with a new "copy_number" column.
     """
     real_cna_values = np.load(data_path(DataFile.copy_number_sample))
-    mock_cn = np.random.choice(real_cna_values, size=mock_df.shape[0], replace=True)
+
+    if grouping_cols is None:
+        df_copy = mock_df.copy()
+    else:
+        df_copy = mock_df.copy()[grouping_cols].drop_duplicates()
+
+    mock_cn = np.random.choice(real_cna_values, size=df_copy.shape[0], replace=True)
     mock_cn = mock_cn + np.random.normal(0, 0.1, size=mock_cn.shape)
-    mock_cn = vhelp.squish_array(mock_cn, lower=0.0, upper=np.inf)
-    mock_df["copy_number"] = mock_cn.flatten()
-    return mock_df
+    mock_cn = vhelp.squish_array(mock_cn, lower=0.0, upper=20.0)
+    df_copy["copy_number"] = mock_cn.flatten()
+
+    if grouping_cols is None:
+        return df_copy
+    else:
+        return mock_df.merge(df_copy, left_index=False, right_index=False)
 
 
 def add_mock_rna_expression_data(
@@ -466,7 +481,7 @@ def generate_mock_achilles_data(
             n_batches=n_batches,
             n_screens=n_screens,
         )
-        .pipe(add_mock_copynumber_data)
+        .pipe(add_mock_copynumber_data, grouping_cols=["hugo_symbol", "depmap_id"])
         .pipe(add_mock_rna_expression_data, groups=["hugo_symbol", "lineage"])
         .pipe(add_mock_is_mutated_data)
         .pipe(add_mock_zero_effect_lfc_data)

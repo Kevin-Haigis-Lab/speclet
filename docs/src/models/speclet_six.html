@@ -31,86 +31,16 @@
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
-import pandas as pd
 import pymc3 as pm
 from pydantic import BaseModel
 from theano import shared as ts
 
 from src.data_processing import achilles as achelp
-from src.data_processing import common as dphelp
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
+from src.modeling import feature_engineering as feng
 from src.models.speclet_model import ReplacementsDict, SpecletModel
 from src.project_enums import ModelParameterization as MP
-
-
-def centered_copynumber_by_cellline(df: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;Add a column of centered copy number values by cell line.
-
-    Args:
-        df (pd.DataFrame): Achilles data frame.
-
-    Returns:
-        pd.DataFrame: Same data frame with a new column `&#34;copy_number_cellline&#34;`.
-    &#34;&#34;&#34;
-    logger.info(&#34;Adding &#39;copy_number_cellline&#39; column.&#34;)
-    return dphelp.center_column_grouped_dataframe(
-        df,
-        grp_col=&#34;depmap_id&#34;,
-        val_col=&#34;copy_number&#34;,
-        new_col_name=&#34;copy_number_cellline&#34;,
-    )
-
-
-def centered_copynumber_by_gene(df: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;Add a column of centered copy number values by gene.
-
-    Args:
-        df (pd.DataFrame): Achilles data frame.
-
-    Returns:
-        pd.DataFrame: Same data frame with a new column `&#34;copy_number_gene&#34;`.
-    &#34;&#34;&#34;
-    logger.info(&#34;Adding &#39;copy_number_gene&#39; column.&#34;)
-    return dphelp.center_column_grouped_dataframe(
-        df,
-        grp_col=&#34;hugo_symbol&#34;,
-        val_col=&#34;copy_number&#34;,
-        new_col_name=&#34;copy_number_gene&#34;,
-    )
-
-
-def zscale_rna_expression_by_gene_and_lineage(df: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;Z-scale the RNA expression per gene in each lineage.
-
-    Args:
-        df (pd.DataFrame): Achilles data frame.
-
-    Returns:
-        pd.DataFrame: Same data frame with a new column `&#34;rna_expr_gene_lineage&#34;`.
-    &#34;&#34;&#34;
-    logger.info(&#34;Adding &#39;rna_expr_gene_lineage&#39; column.&#34;)
-    return achelp.zscale_rna_expression_by_gene_lineage(
-        df,
-        rna_col=&#34;rna_expr&#34;,
-        new_col=&#34;rna_expr_gene_lineage&#34;,
-        lower_bound=-5.0,
-        upper_bound=5.0,
-    )
-
-
-def convert_is_mutated_to_numeric(df: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;Convert the boolean column for gene mutation status to type integer.
-
-    Args:
-        df (pd.DataFrame): Achilles data frame.
-
-    Returns:
-        pd.DataFrame: Same data frame with the column `&#34;is_mutated&#34;` as type integer.
-    &#34;&#34;&#34;
-    logger.info(&#34;Converting &#39;is_mutated&#39; column to &#39;int&#39;.&#34;)
-    df[&#34;is_mutated&#34;] = df[&#34;is_mutated&#34;].astype(int)
-    return df
 
 
 class SpecletSixConfiguration(BaseModel):
@@ -196,10 +126,10 @@ class SpecletSix(SpecletModel):
 
         data_manager.add_transformations(
             [
-                centered_copynumber_by_cellline,
-                centered_copynumber_by_gene,
-                zscale_rna_expression_by_gene_and_lineage,
-                convert_is_mutated_to_numeric,
+                feng.centered_copynumber_by_cellline,
+                feng.centered_copynumber_by_gene,
+                feng.zscale_rna_expression_by_gene_and_lineage,
+                feng.convert_is_mutated_to_numeric,
             ]
         )
 
@@ -504,154 +434,6 @@ class SpecletSix(SpecletModel):
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="src.models.speclet_six.centered_copynumber_by_cellline"><code class="name flex">
-<span>def <span class="ident">centered_copynumber_by_cellline</span></span>(<span>df: pandas.core.frame.DataFrame) -> pandas.core.frame.DataFrame</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Add a column of centered copy number values by cell line.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
-<dd>Achilles data frame.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>pd.DataFrame</code></dt>
-<dd>Same data frame with a new column <code>"copy_number_cellline"</code>.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def centered_copynumber_by_cellline(df: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;Add a column of centered copy number values by cell line.
-
-    Args:
-        df (pd.DataFrame): Achilles data frame.
-
-    Returns:
-        pd.DataFrame: Same data frame with a new column `&#34;copy_number_cellline&#34;`.
-    &#34;&#34;&#34;
-    logger.info(&#34;Adding &#39;copy_number_cellline&#39; column.&#34;)
-    return dphelp.center_column_grouped_dataframe(
-        df,
-        grp_col=&#34;depmap_id&#34;,
-        val_col=&#34;copy_number&#34;,
-        new_col_name=&#34;copy_number_cellline&#34;,
-    )</code></pre>
-</details>
-</dd>
-<dt id="src.models.speclet_six.centered_copynumber_by_gene"><code class="name flex">
-<span>def <span class="ident">centered_copynumber_by_gene</span></span>(<span>df: pandas.core.frame.DataFrame) -> pandas.core.frame.DataFrame</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Add a column of centered copy number values by gene.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
-<dd>Achilles data frame.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>pd.DataFrame</code></dt>
-<dd>Same data frame with a new column <code>"copy_number_gene"</code>.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def centered_copynumber_by_gene(df: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;Add a column of centered copy number values by gene.
-
-    Args:
-        df (pd.DataFrame): Achilles data frame.
-
-    Returns:
-        pd.DataFrame: Same data frame with a new column `&#34;copy_number_gene&#34;`.
-    &#34;&#34;&#34;
-    logger.info(&#34;Adding &#39;copy_number_gene&#39; column.&#34;)
-    return dphelp.center_column_grouped_dataframe(
-        df,
-        grp_col=&#34;hugo_symbol&#34;,
-        val_col=&#34;copy_number&#34;,
-        new_col_name=&#34;copy_number_gene&#34;,
-    )</code></pre>
-</details>
-</dd>
-<dt id="src.models.speclet_six.convert_is_mutated_to_numeric"><code class="name flex">
-<span>def <span class="ident">convert_is_mutated_to_numeric</span></span>(<span>df: pandas.core.frame.DataFrame) -> pandas.core.frame.DataFrame</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Convert the boolean column for gene mutation status to type integer.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
-<dd>Achilles data frame.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>pd.DataFrame</code></dt>
-<dd>Same data frame with the column <code>"is_mutated"</code> as type integer.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def convert_is_mutated_to_numeric(df: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;Convert the boolean column for gene mutation status to type integer.
-
-    Args:
-        df (pd.DataFrame): Achilles data frame.
-
-    Returns:
-        pd.DataFrame: Same data frame with the column `&#34;is_mutated&#34;` as type integer.
-    &#34;&#34;&#34;
-    logger.info(&#34;Converting &#39;is_mutated&#39; column to &#39;int&#39;.&#34;)
-    df[&#34;is_mutated&#34;] = df[&#34;is_mutated&#34;].astype(int)
-    return df</code></pre>
-</details>
-</dd>
-<dt id="src.models.speclet_six.zscale_rna_expression_by_gene_and_lineage"><code class="name flex">
-<span>def <span class="ident">zscale_rna_expression_by_gene_and_lineage</span></span>(<span>df: pandas.core.frame.DataFrame) -> pandas.core.frame.DataFrame</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Z-scale the RNA expression per gene in each lineage.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
-<dd>Achilles data frame.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>pd.DataFrame</code></dt>
-<dd>Same data frame with a new column <code>"rna_expr_gene_lineage"</code>.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def zscale_rna_expression_by_gene_and_lineage(df: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;Z-scale the RNA expression per gene in each lineage.
-
-    Args:
-        df (pd.DataFrame): Achilles data frame.
-
-    Returns:
-        pd.DataFrame: Same data frame with a new column `&#34;rna_expr_gene_lineage&#34;`.
-    &#34;&#34;&#34;
-    logger.info(&#34;Adding &#39;rna_expr_gene_lineage&#39; column.&#34;)
-    return achelp.zscale_rna_expression_by_gene_lineage(
-        df,
-        rna_col=&#34;rna_expr&#34;,
-        new_col=&#34;rna_expr_gene_lineage&#34;,
-        lower_bound=-5.0,
-        upper_bound=5.0,
-    )</code></pre>
-</details>
-</dd>
-</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -789,10 +571,10 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 
         data_manager.add_transformations(
             [
-                centered_copynumber_by_cellline,
-                centered_copynumber_by_gene,
-                zscale_rna_expression_by_gene_and_lineage,
-                convert_is_mutated_to_numeric,
+                feng.centered_copynumber_by_cellline,
+                feng.centered_copynumber_by_gene,
+                feng.zscale_rna_expression_by_gene_and_lineage,
+                feng.convert_is_mutated_to_numeric,
             ]
         )
 
@@ -1480,14 +1262,6 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="src.models" href="index.html">src.models</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="src.models.speclet_six.centered_copynumber_by_cellline" href="#src.models.speclet_six.centered_copynumber_by_cellline">centered_copynumber_by_cellline</a></code></li>
-<li><code><a title="src.models.speclet_six.centered_copynumber_by_gene" href="#src.models.speclet_six.centered_copynumber_by_gene">centered_copynumber_by_gene</a></code></li>
-<li><code><a title="src.models.speclet_six.convert_is_mutated_to_numeric" href="#src.models.speclet_six.convert_is_mutated_to_numeric">convert_is_mutated_to_numeric</a></code></li>
-<li><code><a title="src.models.speclet_six.zscale_rna_expression_by_gene_and_lineage" href="#src.models.speclet_six.zscale_rna_expression_by_gene_and_lineage">zscale_rna_expression_by_gene_and_lineage</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
