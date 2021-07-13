@@ -77,8 +77,11 @@ def get_sanger_cgc_url() -> str:
             + colorama.Style.BRIGHT
             + "Successfully recieved a unique Cancer Gene Census URL."
         )
-        return sanger_cgc_response.json()["url"]
-
+        url = sanger_cgc_response.json()["url"]
+        if url is None:
+            print(sanger_cgc_response.json())
+            BaseException("Successul request, but no URL was returned.")
+        return url
     BaseException("Unable to retrieve a unique Cancer Gene Census URL.")
 
 
