@@ -209,6 +209,20 @@ class SpecletSeven(SpecletModel):
         )
         return cn_ary
 
+    def _get_mutation__matrix(self, df: pd.DataFrame) -> np.ndarray:
+        mut_df = (
+            df[["hugo_symbol", "depmap_id", "is_mutated"]]
+            .drop_duplicates()
+            .reset_index(drop=True)
+        )
+        mut_ary = dphelp.dataframe_to_matrix(
+            mut_df, rows="hugo_symbol", cols="depmap_id", values="is_mutated"
+        )
+        self._assert_shape_using_categories_in_df(
+            mut_ary, df, ("hugo_symbol", "depmap_id")
+        )
+        return mut_ary
+
     def _add_gene_expression_covariate(
         self, model: pm.Model, co_idx: achelp.CommonIndices
     ) -> tuple[int, int]:
@@ -243,7 +257,7 @@ class SpecletSeven(SpecletModel):
             σ_μ_h = pm.HalfNormal("σ_μ_h", 1)
             μ_h = pm.Normal("μ_h", μ_μ_h, σ_μ_h, shape=mu_h_shape)
             σ_σ_h = pm.HalfNormal("σ_σ_h", 1)
-            σ_h = pm.HalfNormal("σ_h", σ_σ_h, shape=co_idx.n_celllines)
+            σ_h = pm.HalfNormal("σ_h", σ_σ_h, shape=(1, co_idx.n_celllines))
             h = pm.Normal(  # noqa: F841
                 "h",
                 μ_h[:, cellline_to_lineage_idx_shared],
@@ -251,6 +265,20 @@ class SpecletSeven(SpecletModel):
                 shape=h_shape,
             )
         return h_shape
+
+    def _add_gene_mutation_covariate(
+        self, model: pm.Model, co_idx: achelp.CommonIndices
+    ) -> tuple[int, int]:
+        m_shape = (co_idx.n_genes, co_idx.n_lineages)
+        with model:
+            μ_μ_m = pm.Normal("μ_μ_m", 0, 1)
+            σ_μ_m = pm.HalfNormal("σ_μ_m", 1)
+            μ_m = pm.Normal("μ_m", μ_μ_m, σ_μ_m, shape=(co_idx.n_genes, 1))
+            σ_m = pm.HalfNormal("σ_m", 1)
+            m = pm.Normal(  # noqa: F841
+                "m", tensor.ones(shape=m_shape) * μ_m, σ_m, shape=m_shape
+            )
+        return m_shape
 
     def model_specification(self) -> tuple[pm.Model, str]:
         """Build SpecletSeven model.
@@ -344,6 +372,18 @@ class SpecletSeven(SpecletModel):
             # Add to the intermediate for `μ_a`.
             with model:
                 _μ_a += model["q"][:, cellline_to_lineage_idx_shared] * rna_expr_shared
+
+        # If config, introduce covariate `m` and multiply against mutation status.
+        if self.config.mutation_cov:
+            m_shape = self._add_gene_mutation_covariate(model, co_idx=co_idx)
+            mut_matrix = self._get_mutation__matrix(data)
+            _assert_shapes(m_shape[0], mut_matrix.shape[0])
+            _assert_shapes(h_shape, mut_matrix.shape)
+            mut_shared = ts(mut_matrix)
+            self.shared_vars["mut_shared"] = mut_shared
+            # Add to the intermediate for `μ_a`.
+            with model:
+                _μ_a += model["m"][:, cellline_to_lineage_idx_shared] * mut_shared
 
         ########################################
         # NOTE: Add other `μ_a` covariates here!

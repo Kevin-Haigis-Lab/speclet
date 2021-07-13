@@ -32,7 +32,6 @@ class TestSpecletSeven:
         assert sp7.advi_results is None
         assert sp7.data_manager is not None
 
-    @pytest.mark.DEV
     def test_build_model(self, sp7: SpecletSeven):
         assert sp7.model is None
         sp7.build_model()
@@ -70,7 +69,6 @@ class TestSpecletSeven:
             assert sp7.mcmc_results is None
             assert sp7.advi_results is not None
 
-    # @pytest.mark.skip
     @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(config=st.builds(SpecletSevenConfiguration))
     def test_changing_configuration_resets_model(
@@ -123,3 +121,5 @@ class TestSpecletSeven:
             assert "n" in all_vars
         if config.rna_cov:
             assert "q" in all_vars
+        if config.mutation_cov:
+            assert "m" in all_vars
