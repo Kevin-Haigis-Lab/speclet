@@ -86,9 +86,9 @@ class SBCFileManager:
         Returns:
             pd.DataFrame: Saved simulated data frame.
         """
-        if self.sbc_data is not None and not re_read:
-            return self.sbc_data
-        return pd.read_csv(self.sbc_data_path)
+        if self.sbc_data is None or re_read:
+            self.sbc_data = pd.read_csv(self.sbc_data_path)
+        return self.sbc_data
 
     def save_sbc_data(
         self, data: pd.DataFrame, index: bool = False, **kwargs: dict[str, Any]

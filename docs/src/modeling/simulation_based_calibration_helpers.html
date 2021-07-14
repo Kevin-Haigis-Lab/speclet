@@ -114,9 +114,9 @@ class SBCFileManager:
         Returns:
             pd.DataFrame: Saved simulated data frame.
         &#34;&#34;&#34;
-        if self.sbc_data is not None and not re_read:
-            return self.sbc_data
-        return pd.read_csv(self.sbc_data_path)
+        if self.sbc_data is None or re_read:
+            self.sbc_data = pd.read_csv(self.sbc_data_path)
+        return self.sbc_data
 
     def save_sbc_data(
         self, data: pd.DataFrame, index: bool = False, **kwargs: dict[str, Any]
@@ -1281,9 +1281,9 @@ to it.</dd>
         Returns:
             pd.DataFrame: Saved simulated data frame.
         &#34;&#34;&#34;
-        if self.sbc_data is not None and not re_read:
-            return self.sbc_data
-        return pd.read_csv(self.sbc_data_path)
+        if self.sbc_data is None or re_read:
+            self.sbc_data = pd.read_csv(self.sbc_data_path)
+        return self.sbc_data
 
     def save_sbc_data(
         self, data: pd.DataFrame, index: bool = False, **kwargs: dict[str, Any]
@@ -1495,9 +1495,9 @@ to it.</dd>
     Returns:
         pd.DataFrame: Saved simulated data frame.
     &#34;&#34;&#34;
-    if self.sbc_data is not None and not re_read:
-        return self.sbc_data
-    return pd.read_csv(self.sbc_data_path)</code></pre>
+    if self.sbc_data is None or re_read:
+        self.sbc_data = pd.read_csv(self.sbc_data_path)
+    return self.sbc_data</code></pre>
 </details>
 </dd>
 <dt id="src.modeling.simulation_based_calibration_helpers.SBCFileManager.get_sbc_results"><code class="name flex">

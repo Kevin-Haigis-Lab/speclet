@@ -1,6 +1,6 @@
 from pathlib import Path
 from time import time
-from typing import Dict, Tuple, Union
+from typing import Any, Dict, Tuple, Union
 
 import arviz as az
 import numpy as np
@@ -201,6 +201,8 @@ class TestSpecletModel:
         monkeypatch: pytest.MonkeyPatch,
         mock_crc_dm: CrcDataManager,
         iris: pd.DataFrame,
+        centered_eight: az.InferenceData,
+        centered_eight_post: pd.DataFrame,
     ):
         # setup SBC results
         sbc_dir = tmp_path / "sbc-results-dir"
@@ -209,16 +211,25 @@ class TestSpecletModel:
         sbc_fm = sbc.SBCFileManager(sbc_dir)
         sbc_fm.save_sbc_data(iris)
         self._touch_sbc_results_files(sbc_fm)
-        monkeypatch.setattr(sbc.SBCFileManager, "get_sbc_results", do_nothing)
+
+        def mock_get_sbc_results(*args: Any, **kwargs: Any) -> sbc.SBCResults:
+            return sbc.SBCResults(
+                priors={},
+                inference_obj=centered_eight,
+                posterior_summary=centered_eight_post,
+            )
+
+        monkeypatch.setattr(sbc.SBCFileManager, "get_sbc_results", mock_get_sbc_results)
         monkeypatch.setattr(speclet_model.SpecletModel, "build_model", do_nothing)
         monkeypatch.setattr(CrcDataManager, "set_data", do_nothing)
 
         sp = speclet_model.SpecletModel(
             "testing-get-sbc", mock_crc_dm, root_cache_dir=tmp_path, debug=True
         )
-        sim_df, sim_sbc_fm = sp.get_sbc(sbc_dir)
+        sim_df, sbc_res, sim_sbc_fm = sp.get_sbc(sbc_dir)
         assert isinstance(sim_df, pd.DataFrame)
         assert sim_df.shape == iris.shape
+        assert isinstance(sbc_res, sbc.SBCResults)
         assert isinstance(sim_sbc_fm, sbc.SBCFileManager)
         assert sim_sbc_fm.dir == sbc_fm.dir
 

@@ -506,7 +506,9 @@ class SpecletModel:
         else:
             logger.warning("Did not cache MCMC samples because they do not exist.")
 
-    def get_sbc(self, results_path: Path) -> tuple[pd.DataFrame, sbc.SBCFileManager]:
+    def get_sbc(
+        self, results_path: Path
+    ) -> tuple[pd.DataFrame, sbc.SBCResults, sbc.SBCFileManager]:
         """Retrieve the data and results of an SBC.
 
         Args:
@@ -516,8 +518,8 @@ class SpecletModel:
             CacheDoesNotExistError: Raised if the cache does not exist.
 
         Returns:
-            tuple[pd.DataFrame, sbc.SBCFileManager]: Both the simulated data and the
-            results of the simulation-based calibration.
+            tuple[pd.DataFrame, sbc.SBCResults, sbc.SBCFileManager]: The simulated data,
+            the SBC results, and the file manager for the SBC.
         """
         sbc_fm = sbc.SBCFileManager(results_path)
 
@@ -528,10 +530,11 @@ class SpecletModel:
             raise CacheDoesNotExistError(sbc_fm.dir)
 
         simulated_data = sbc_fm.get_sbc_data()
+        sbc_results = sbc_fm.get_sbc_results()
         self.data_manager.set_data(simulated_data)
         if self.model is None:
             self.build_model()
-        return simulated_data, sbc_fm
+        return simulated_data, sbc_results, sbc_fm
 
     def load_mcmc_cache(self) -> az.InferenceData:
         """Load MCMC from cache.

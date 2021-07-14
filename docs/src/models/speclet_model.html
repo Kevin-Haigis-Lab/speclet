@@ -534,7 +534,9 @@ class SpecletModel:
         else:
             logger.warning(&#34;Did not cache MCMC samples because they do not exist.&#34;)
 
-    def get_sbc(self, results_path: Path) -&gt; tuple[pd.DataFrame, sbc.SBCFileManager]:
+    def get_sbc(
+        self, results_path: Path
+    ) -&gt; tuple[pd.DataFrame, sbc.SBCResults, sbc.SBCFileManager]:
         &#34;&#34;&#34;Retrieve the data and results of an SBC.
 
         Args:
@@ -544,8 +546,8 @@ class SpecletModel:
             CacheDoesNotExistError: Raised if the cache does not exist.
 
         Returns:
-            tuple[pd.DataFrame, sbc.SBCFileManager]: Both the simulated data and the
-            results of the simulation-based calibration.
+            tuple[pd.DataFrame, sbc.SBCResults, sbc.SBCFileManager]: The simulated data,
+            the SBC results, and the file manager for the SBC.
         &#34;&#34;&#34;
         sbc_fm = sbc.SBCFileManager(results_path)
 
@@ -556,10 +558,11 @@ class SpecletModel:
             raise CacheDoesNotExistError(sbc_fm.dir)
 
         simulated_data = sbc_fm.get_sbc_data()
+        sbc_results = sbc_fm.get_sbc_results()
         self.data_manager.set_data(simulated_data)
         if self.model is None:
             self.build_model()
-        return simulated_data, sbc_fm
+        return simulated_data, sbc_results, sbc_fm
 
     def load_mcmc_cache(self) -&gt; az.InferenceData:
         &#34;&#34;&#34;Load MCMC from cache.
@@ -1186,7 +1189,9 @@ data. Defaults to None.</dd>
         else:
             logger.warning(&#34;Did not cache MCMC samples because they do not exist.&#34;)
 
-    def get_sbc(self, results_path: Path) -&gt; tuple[pd.DataFrame, sbc.SBCFileManager]:
+    def get_sbc(
+        self, results_path: Path
+    ) -&gt; tuple[pd.DataFrame, sbc.SBCResults, sbc.SBCFileManager]:
         &#34;&#34;&#34;Retrieve the data and results of an SBC.
 
         Args:
@@ -1196,8 +1201,8 @@ data. Defaults to None.</dd>
             CacheDoesNotExistError: Raised if the cache does not exist.
 
         Returns:
-            tuple[pd.DataFrame, sbc.SBCFileManager]: Both the simulated data and the
-            results of the simulation-based calibration.
+            tuple[pd.DataFrame, sbc.SBCResults, sbc.SBCFileManager]: The simulated data,
+            the SBC results, and the file manager for the SBC.
         &#34;&#34;&#34;
         sbc_fm = sbc.SBCFileManager(results_path)
 
@@ -1208,10 +1213,11 @@ data. Defaults to None.</dd>
             raise CacheDoesNotExistError(sbc_fm.dir)
 
         simulated_data = sbc_fm.get_sbc_data()
+        sbc_results = sbc_fm.get_sbc_results()
         self.data_manager.set_data(simulated_data)
         if self.model is None:
             self.build_model()
-        return simulated_data, sbc_fm
+        return simulated_data, sbc_results, sbc_fm
 
     def load_mcmc_cache(self) -&gt; az.InferenceData:
         &#34;&#34;&#34;Load MCMC from cache.
@@ -1635,15 +1641,17 @@ this method returns None and has no effect on ADVI.</p>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>tuple[pd.DataFrame, sbc.SBCFileManager]</code></dt>
-<dd>Both the simulated data and the</dd>
+<dt><code>tuple[pd.DataFrame, sbc.SBCResults, sbc.SBCFileManager]</code></dt>
+<dd>The simulated data,</dd>
 </dl>
-<p>results of the simulation-based calibration.</p></div>
+<p>the SBC results, and the file manager for the SBC.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_sbc(self, results_path: Path) -&gt; tuple[pd.DataFrame, sbc.SBCFileManager]:
+<pre><code class="python">def get_sbc(
+    self, results_path: Path
+) -&gt; tuple[pd.DataFrame, sbc.SBCResults, sbc.SBCFileManager]:
     &#34;&#34;&#34;Retrieve the data and results of an SBC.
 
     Args:
@@ -1653,8 +1661,8 @@ this method returns None and has no effect on ADVI.</p>
         CacheDoesNotExistError: Raised if the cache does not exist.
 
     Returns:
-        tuple[pd.DataFrame, sbc.SBCFileManager]: Both the simulated data and the
-        results of the simulation-based calibration.
+        tuple[pd.DataFrame, sbc.SBCResults, sbc.SBCFileManager]: The simulated data,
+        the SBC results, and the file manager for the SBC.
     &#34;&#34;&#34;
     sbc_fm = sbc.SBCFileManager(results_path)
 
@@ -1665,10 +1673,11 @@ this method returns None and has no effect on ADVI.</p>
         raise CacheDoesNotExistError(sbc_fm.dir)
 
     simulated_data = sbc_fm.get_sbc_data()
+    sbc_results = sbc_fm.get_sbc_results()
     self.data_manager.set_data(simulated_data)
     if self.model is None:
         self.build_model()
-    return simulated_data, sbc_fm</code></pre>
+    return simulated_data, sbc_results, sbc_fm</code></pre>
 </details>
 </dd>
 <dt id="src.models.speclet_model.SpecletModel.load_advi_cache"><code class="name flex">
