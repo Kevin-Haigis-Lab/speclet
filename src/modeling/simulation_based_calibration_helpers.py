@@ -45,11 +45,13 @@ class SBCFileManager:
     """Manages the results from a round of simulation-based calibration."""
 
     dir: Path
+    sbc_data_path: Path
     inference_data_path: Path
     priors_path_set: Path
     priors_path_get: Path
     posterior_summary_path: Path
 
+    sbc_data: Optional[pd.DataFrame] = None
     sbc_results: Optional[SBCResults] = None
 
     def __init__(self, dir: Path):
@@ -61,6 +63,7 @@ class SBCFileManager:
         if not dir.is_dir():
             raise NotADirectoryError(dir)
         self.dir = dir
+        self.sbc_data_path = dir / "sbc-data.csv"
         self.inference_data_path = dir / "inference-data.netcdf"
         self.priors_path_set = dir / "priors"
         self.priors_path_get = dir / "priors.npz"
@@ -73,6 +76,46 @@ class SBCFileManager:
         else:
             self.dir.mkdir()
             return False
+
+    def get_sbc_data(self, re_read: bool = False) -> pd.DataFrame:
+        """Get the simulated data for the SBC.
+
+        Args:
+            re_read (bool, optional): Force re-reading from file. Defaults to False.
+
+        Returns:
+            pd.DataFrame: Saved simulated data frame.
+        """
+        if self.sbc_data is not None and not re_read:
+            return self.sbc_data
+        return pd.read_csv(self.sbc_data_path)
+
+    def save_sbc_data(
+        self, data: pd.DataFrame, index: bool = False, **kwargs: dict[str, Any]
+    ) -> None:
+        """Save SBC dataframe to disk.
+
+        Args:
+            data (pd.DataFrame): Simulated data used for the SBC.
+            index (bool, optional): Should the index be included in the file (CSV).
+              Defaults to False.
+            kwargs (dict[str, Any]): Additional keyword arguments for `data.to_csv()`.
+        """
+        self.sbc_data = data
+        data.to_csv(self.sbc_data_path, index=index)
+
+    def simulation_data_exists(self) -> bool:
+        """Does the simulation dataframe file exist?
+
+        Returns:
+            bool: True if the dataframe file exists.
+        """
+        return self.sbc_data_path.exists()
+
+    def clear_saved_data(self) -> None:
+        """Clear save SBC dataframe file."""
+        if self.simulation_data_exists():
+            self.sbc_data_path.unlink()
 
     def save_sbc_results(
         self,
@@ -143,8 +186,13 @@ class SBCFileManager:
 
     def clear_results(self) -> None:
         """Clear the stored SBC results (if they exist)."""
-        if self.dir.exists():
-            self.dir.rmdir()
+        for f in (
+            self.inference_data_path,
+            self.priors_path_get,
+            self.posterior_summary_path,
+        ):
+            if f.exists():
+                f.unlink()
 
 
 def generate_mock_sgrna_gene_map(n_genes: int, n_sgrnas_per_gene: int) -> pd.DataFrame:

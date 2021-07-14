@@ -5,6 +5,7 @@ from pathlib import Path
 import arviz as az
 import pandas as pd
 import pytest
+import seaborn as sns
 from hypothesis import Verbosity, settings
 
 from src.managers.model_data_managers import CrcDataManager
@@ -24,6 +25,14 @@ def mock_crc_dm(monkeypatch: pytest.MonkeyPatch) -> CrcDataManager:
     monkeypatch.setattr(CrcDataManager, "get_data_path", monkey_get_data_path)
     dm = CrcDataManager(debug=True)
     return dm
+
+
+#### ---- Data frames ---- ####
+
+
+@pytest.fixture
+def iris() -> pd.DataFrame:
+    return sns.load_dataset("iris")
 
 
 #### ---- PyMC3 fixtures ---- ####

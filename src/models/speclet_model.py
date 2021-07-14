@@ -447,7 +447,9 @@ class SpecletModel:
         if fit_kwargs is None:
             fit_kwargs = {}
 
-        assert self.data_manager is not None
+        sbc_fm = sbc.SBCFileManager(dir=results_path)
+
+        logger.info("Creating new simulation data.")
         mock_data = self.data_manager.generate_mock_data(
             size=size, random_seed=random_seed
         )
@@ -463,6 +465,7 @@ class SpecletModel:
 
         mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
         self.data_manager.set_data(mock_data)
+        sbc_fm.save_sbc_data(mock_data)
 
         # Update shared variable with adjusted observed data.
         logger.info("Updating observed value with prior-sampled values.")
@@ -481,8 +484,7 @@ class SpecletModel:
         assert isinstance(posterior_summary, pd.DataFrame)
 
         logger.info("Using a SBC file manager to save SBC results.")
-        results_manager = sbc.SBCFileManager(dir=results_path)
-        results_manager.save_sbc_results(
+        sbc_fm.save_sbc_results(
             priors=priors,
             inference_obj=res,
             posterior_summary=posterior_summary,
@@ -503,6 +505,33 @@ class SpecletModel:
             )
         else:
             logger.warning("Did not cache MCMC samples because they do not exist.")
+
+    def get_sbc(self, results_path: Path) -> tuple[pd.DataFrame, sbc.SBCFileManager]:
+        """Retrieve the data and results of an SBC.
+
+        Args:
+            results_path (Path): Directory containing the SBC results.
+
+        Raises:
+            CacheDoesNotExistError: Raised if the cache does not exist.
+
+        Returns:
+            tuple[pd.DataFrame, sbc.SBCFileManager]: Both the simulated data and the
+            results of the simulation-based calibration.
+        """
+        sbc_fm = sbc.SBCFileManager(results_path)
+
+        # Checks that data and results exist.
+        if not sbc_fm.simulation_data_exists():
+            raise CacheDoesNotExistError(sbc_fm.sbc_data_path)
+        if not sbc_fm.all_data_exists():
+            raise CacheDoesNotExistError(sbc_fm.dir)
+
+        simulated_data = sbc_fm.get_sbc_data()
+        self.data_manager.set_data(simulated_data)
+        if self.model is None:
+            self.build_model()
+        return simulated_data, sbc_fm
 
     def load_mcmc_cache(self) -> az.InferenceData:
         """Load MCMC from cache.

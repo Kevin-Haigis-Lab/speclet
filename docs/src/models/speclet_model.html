@@ -475,7 +475,9 @@ class SpecletModel:
         if fit_kwargs is None:
             fit_kwargs = {}
 
-        assert self.data_manager is not None
+        sbc_fm = sbc.SBCFileManager(dir=results_path)
+
+        logger.info(&#34;Creating new simulation data.&#34;)
         mock_data = self.data_manager.generate_mock_data(
             size=size, random_seed=random_seed
         )
@@ -491,6 +493,7 @@ class SpecletModel:
 
         mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
         self.data_manager.set_data(mock_data)
+        sbc_fm.save_sbc_data(mock_data)
 
         # Update shared variable with adjusted observed data.
         logger.info(&#34;Updating observed value with prior-sampled values.&#34;)
@@ -509,8 +512,7 @@ class SpecletModel:
         assert isinstance(posterior_summary, pd.DataFrame)
 
         logger.info(&#34;Using a SBC file manager to save SBC results.&#34;)
-        results_manager = sbc.SBCFileManager(dir=results_path)
-        results_manager.save_sbc_results(
+        sbc_fm.save_sbc_results(
             priors=priors,
             inference_obj=res,
             posterior_summary=posterior_summary,
@@ -531,6 +533,33 @@ class SpecletModel:
             )
         else:
             logger.warning(&#34;Did not cache MCMC samples because they do not exist.&#34;)
+
+    def get_sbc(self, results_path: Path) -&gt; tuple[pd.DataFrame, sbc.SBCFileManager]:
+        &#34;&#34;&#34;Retrieve the data and results of an SBC.
+
+        Args:
+            results_path (Path): Directory containing the SBC results.
+
+        Raises:
+            CacheDoesNotExistError: Raised if the cache does not exist.
+
+        Returns:
+            tuple[pd.DataFrame, sbc.SBCFileManager]: Both the simulated data and the
+            results of the simulation-based calibration.
+        &#34;&#34;&#34;
+        sbc_fm = sbc.SBCFileManager(results_path)
+
+        # Checks that data and results exist.
+        if not sbc_fm.simulation_data_exists():
+            raise CacheDoesNotExistError(sbc_fm.sbc_data_path)
+        if not sbc_fm.all_data_exists():
+            raise CacheDoesNotExistError(sbc_fm.dir)
+
+        simulated_data = sbc_fm.get_sbc_data()
+        self.data_manager.set_data(simulated_data)
+        if self.model is None:
+            self.build_model()
+        return simulated_data, sbc_fm
 
     def load_mcmc_cache(self) -&gt; az.InferenceData:
         &#34;&#34;&#34;Load MCMC from cache.
@@ -1098,7 +1127,9 @@ data. Defaults to None.</dd>
         if fit_kwargs is None:
             fit_kwargs = {}
 
-        assert self.data_manager is not None
+        sbc_fm = sbc.SBCFileManager(dir=results_path)
+
+        logger.info(&#34;Creating new simulation data.&#34;)
         mock_data = self.data_manager.generate_mock_data(
             size=size, random_seed=random_seed
         )
@@ -1114,6 +1145,7 @@ data. Defaults to None.</dd>
 
         mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
         self.data_manager.set_data(mock_data)
+        sbc_fm.save_sbc_data(mock_data)
 
         # Update shared variable with adjusted observed data.
         logger.info(&#34;Updating observed value with prior-sampled values.&#34;)
@@ -1132,8 +1164,7 @@ data. Defaults to None.</dd>
         assert isinstance(posterior_summary, pd.DataFrame)
 
         logger.info(&#34;Using a SBC file manager to save SBC results.&#34;)
-        results_manager = sbc.SBCFileManager(dir=results_path)
-        results_manager.save_sbc_results(
+        sbc_fm.save_sbc_results(
             priors=priors,
             inference_obj=res,
             posterior_summary=posterior_summary,
@@ -1154,6 +1185,33 @@ data. Defaults to None.</dd>
             )
         else:
             logger.warning(&#34;Did not cache MCMC samples because they do not exist.&#34;)
+
+    def get_sbc(self, results_path: Path) -&gt; tuple[pd.DataFrame, sbc.SBCFileManager]:
+        &#34;&#34;&#34;Retrieve the data and results of an SBC.
+
+        Args:
+            results_path (Path): Directory containing the SBC results.
+
+        Raises:
+            CacheDoesNotExistError: Raised if the cache does not exist.
+
+        Returns:
+            tuple[pd.DataFrame, sbc.SBCFileManager]: Both the simulated data and the
+            results of the simulation-based calibration.
+        &#34;&#34;&#34;
+        sbc_fm = sbc.SBCFileManager(results_path)
+
+        # Checks that data and results exist.
+        if not sbc_fm.simulation_data_exists():
+            raise CacheDoesNotExistError(sbc_fm.sbc_data_path)
+        if not sbc_fm.all_data_exists():
+            raise CacheDoesNotExistError(sbc_fm.dir)
+
+        simulated_data = sbc_fm.get_sbc_data()
+        self.data_manager.set_data(simulated_data)
+        if self.model is None:
+            self.build_model()
+        return simulated_data, sbc_fm
 
     def load_mcmc_cache(self) -&gt; az.InferenceData:
         &#34;&#34;&#34;Load MCMC from cache.
@@ -1560,6 +1618,59 @@ this method returns None and has no effect on ADVI.</p>
     return None</code></pre>
 </details>
 </dd>
+<dt id="src.models.speclet_model.SpecletModel.get_sbc"><code class="name flex">
+<span>def <span class="ident">get_sbc</span></span>(<span>self, results_path: pathlib.Path) -> tuple</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve the data and results of an SBC.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>results_path</code></strong> :&ensp;<code>Path</code></dt>
+<dd>Directory containing the SBC results.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>CacheDoesNotExistError</code></dt>
+<dd>Raised if the cache does not exist.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[pd.DataFrame, sbc.SBCFileManager]</code></dt>
+<dd>Both the simulated data and the</dd>
+</dl>
+<p>results of the simulation-based calibration.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_sbc(self, results_path: Path) -&gt; tuple[pd.DataFrame, sbc.SBCFileManager]:
+    &#34;&#34;&#34;Retrieve the data and results of an SBC.
+
+    Args:
+        results_path (Path): Directory containing the SBC results.
+
+    Raises:
+        CacheDoesNotExistError: Raised if the cache does not exist.
+
+    Returns:
+        tuple[pd.DataFrame, sbc.SBCFileManager]: Both the simulated data and the
+        results of the simulation-based calibration.
+    &#34;&#34;&#34;
+    sbc_fm = sbc.SBCFileManager(results_path)
+
+    # Checks that data and results exist.
+    if not sbc_fm.simulation_data_exists():
+        raise CacheDoesNotExistError(sbc_fm.sbc_data_path)
+    if not sbc_fm.all_data_exists():
+        raise CacheDoesNotExistError(sbc_fm.dir)
+
+    simulated_data = sbc_fm.get_sbc_data()
+    self.data_manager.set_data(simulated_data)
+    if self.model is None:
+        self.build_model()
+    return simulated_data, sbc_fm</code></pre>
+</details>
+</dd>
 <dt id="src.models.speclet_model.SpecletModel.load_advi_cache"><code class="name flex">
 <span>def <span class="ident">load_advi_cache</span></span>(<span>self) -> Tuple[arviz.data.inference_data.InferenceData, pymc3.variational.opvi.Approximation]</span>
 </code></dt>
@@ -1876,7 +1987,9 @@ passed to the fitting method. Default is None.</dd>
     if fit_kwargs is None:
         fit_kwargs = {}
 
-    assert self.data_manager is not None
+    sbc_fm = sbc.SBCFileManager(dir=results_path)
+
+    logger.info(&#34;Creating new simulation data.&#34;)
     mock_data = self.data_manager.generate_mock_data(
         size=size, random_seed=random_seed
     )
@@ -1892,6 +2005,7 @@ passed to the fitting method. Default is None.</dd>
 
     mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
     self.data_manager.set_data(mock_data)
+    sbc_fm.save_sbc_data(mock_data)
 
     # Update shared variable with adjusted observed data.
     logger.info(&#34;Updating observed value with prior-sampled values.&#34;)
@@ -1910,8 +2024,7 @@ passed to the fitting method. Default is None.</dd>
     assert isinstance(posterior_summary, pd.DataFrame)
 
     logger.info(&#34;Using a SBC file manager to save SBC results.&#34;)
-    results_manager = sbc.SBCFileManager(dir=results_path)
-    results_manager.save_sbc_results(
+    sbc_fm.save_sbc_results(
         priors=priors,
         inference_obj=res,
         posterior_summary=posterior_summary,
@@ -2115,6 +2228,7 @@ passed to the fitting method. Default is None.</dd>
 <li><code><a title="src.models.speclet_model.SpecletModel.debug" href="#src.models.speclet_model.SpecletModel.debug">debug</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_advi_callbacks" href="#src.models.speclet_model.SpecletModel.get_advi_callbacks">get_advi_callbacks</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_replacement_parameters" href="#src.models.speclet_model.SpecletModel.get_replacement_parameters">get_replacement_parameters</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.get_sbc" href="#src.models.speclet_model.SpecletModel.get_sbc">get_sbc</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.load_advi_cache" href="#src.models.speclet_model.SpecletModel.load_advi_cache">load_advi_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.load_mcmc_cache" href="#src.models.speclet_model.SpecletModel.load_mcmc_cache">load_mcmc_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.mcmc_results" href="#src.models.speclet_model.SpecletModel.mcmc_results">mcmc_results</a></code></li>
