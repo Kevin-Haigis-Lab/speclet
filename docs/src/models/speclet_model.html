@@ -562,7 +562,7 @@ class SpecletModel:
         self.data_manager.set_data(simulated_data)
         if self.model is None:
             self.build_model()
-        return simulated_data, sbc_results, sbc_fm
+        return self.data_manager.get_data(), sbc_results, sbc_fm
 
     def load_mcmc_cache(self) -&gt; az.InferenceData:
         &#34;&#34;&#34;Load MCMC from cache.
@@ -1217,7 +1217,7 @@ data. Defaults to None.</dd>
         self.data_manager.set_data(simulated_data)
         if self.model is None:
             self.build_model()
-        return simulated_data, sbc_results, sbc_fm
+        return self.data_manager.get_data(), sbc_results, sbc_fm
 
     def load_mcmc_cache(self) -&gt; az.InferenceData:
         &#34;&#34;&#34;Load MCMC from cache.
@@ -1677,7 +1677,7 @@ this method returns None and has no effect on ADVI.</p>
     self.data_manager.set_data(simulated_data)
     if self.model is None:
         self.build_model()
-    return simulated_data, sbc_results, sbc_fm</code></pre>
+    return self.data_manager.get_data(), sbc_results, sbc_fm</code></pre>
 </details>
 </dd>
 <dt id="src.models.speclet_model.SpecletModel.load_advi_cache"><code class="name flex">

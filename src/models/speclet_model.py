@@ -534,7 +534,7 @@ class SpecletModel:
         self.data_manager.set_data(simulated_data)
         if self.model is None:
             self.build_model()
-        return simulated_data, sbc_results, sbc_fm
+        return self.data_manager.get_data(), sbc_results, sbc_fm
 
     def load_mcmc_cache(self) -> az.InferenceData:
         """Load MCMC from cache.
