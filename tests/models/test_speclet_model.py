@@ -219,9 +219,12 @@ class TestSpecletModel:
                 posterior_summary=centered_eight_post,
             )
 
+        def just_return(x: Any, df: pd.DataFrame) -> pd.DataFrame:
+            return df
+
         monkeypatch.setattr(sbc.SBCFileManager, "get_sbc_results", mock_get_sbc_results)
         monkeypatch.setattr(speclet_model.SpecletModel, "build_model", do_nothing)
-        monkeypatch.setattr(CrcDataManager, "set_data", do_nothing)
+        monkeypatch.setattr(CrcDataManager, "apply_transformations", just_return)
 
         sp = speclet_model.SpecletModel(
             "testing-get-sbc", mock_crc_dm, root_cache_dir=tmp_path, debug=True
