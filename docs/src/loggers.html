@@ -33,6 +33,7 @@
 
 import logging
 import pathlib
+from typing import Union
 
 from rich.logging import RichHandler
 
@@ -73,7 +74,23 @@ logger.setLevel(logging.DEBUG)
 if len(logger.handlers) == 0:
     # logger.addHandler(_get_console_handler())
     logger.addHandler(_get_rich_console_handler())
-    logger.addHandler(_get_file_handler())</code></pre>
+    logger.addHandler(_get_file_handler())
+    # Update `_idx_console_loggers` in `set_console_handler_level()` if needed.
+
+
+def set_console_handler_level(to: Union[int, str]) -&gt; None:
+    &#34;&#34;&#34;Set the consle handler level.
+
+    Args:
+        to (Union[int, str]): New log level for console handlers.
+
+    Returns:
+        None: None
+    &#34;&#34;&#34;
+    _idx_console_loggers = [0]  #
+    for idx in _idx_console_loggers:
+        handler = logger.handlers[idx]
+        handler.setLevel(to)</code></pre>
 </details>
 </section>
 <section>
@@ -81,6 +98,43 @@ if len(logger.handlers) == 0:
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="src.loggers.set_console_handler_level"><code class="name flex">
+<span>def <span class="ident">set_console_handler_level</span></span>(<span>to: Union[int, str]) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the consle handler level.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>to</code></strong> :&ensp;<code>Union[int, str]</code></dt>
+<dd>New log level for console handlers.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>None</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_console_handler_level(to: Union[int, str]) -&gt; None:
+    &#34;&#34;&#34;Set the consle handler level.
+
+    Args:
+        to (Union[int, str]): New log level for console handlers.
+
+    Returns:
+        None: None
+    &#34;&#34;&#34;
+    _idx_console_loggers = [0]  #
+    for idx in _idx_console_loggers:
+        handler = logger.handlers[idx]
+        handler.setLevel(to)</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -94,6 +148,11 @@ if len(logger.handlers) == 0:
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="src" href="index.html">src</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="src.loggers.set_console_handler_level" href="#src.loggers.set_console_handler_level">set_console_handler_level</a></code></li>
 </ul>
 </li>
 </ul>

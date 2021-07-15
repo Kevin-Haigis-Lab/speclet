@@ -2,13 +2,17 @@
 
 """CLI for checking a model configuration file."""
 
+import logging
 from pathlib import Path
 
 import typer
 
 from src.io import model_config
+from src.loggers import set_console_handler_level
 from src.models import configuration
 from src.project_enums import ModelFitMethod, SpecletPipeline
+
+set_console_handler_level(logging.WARNING)
 
 
 def check_model_configuration(path: Path) -> None:
@@ -35,6 +39,9 @@ def check_model_configuration(path: Path) -> None:
             config,
             root_cache_dir=Path("temp"),
         )
+    typer.echo("All models can be instantiated and configured: ✔︎")
+
+    for config in configs.configurations:
         for fit_method in ModelFitMethod:
             for pipeline in SpecletPipeline:
                 sampling_kwargs = model_config.get_sampling_kwargs_from_config(
@@ -45,8 +52,7 @@ def check_model_configuration(path: Path) -> None:
                 configuration.check_sampling_kwargs(
                     sampling_kwargs, fit_method=fit_method
                 )
-
-    typer.echo("All models can be instantiated and configured: ✔︎")
+    typer.echo("All sampling parameterizations use acceptable keywords: ✔︎")
 
     typer.secho("Configuration file looks good.", fg=typer.colors.GREEN)
     return None

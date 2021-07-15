@@ -23,9 +23,9 @@ help:
 
 install:
 	@echo "Installing speclet conda environment."
-	($(CONDA_SETUP) conda env create -f environment.yml)
+	($(CONDA_SETUP) conda env create -f environment.yaml)
 	@echo "Installing snakemake conda environment."
-	($(CONDA_SETUP) conda env create -f snakemake_environment.yml)
+	($(CONDA_SETUP) conda env create -f snakemake_environment.yaml)
 	@echo "Preparing R environment."
 	Rscript -e "renv::restore()"
 

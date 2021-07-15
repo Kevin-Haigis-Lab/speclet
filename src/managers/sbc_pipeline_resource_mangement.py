@@ -29,13 +29,13 @@ sbc_pipeline_memory_lookup: MemoryLookupDict = {
     ModelOption.SPECLET_FOUR: {
         ModelFitMethod.ADVI: {
             MockDataSize.SMALL: 2,
-            MockDataSize.MEDIUM: 2,
+            MockDataSize.MEDIUM: 4,
             MockDataSize.LARGE: 16,
         },
         ModelFitMethod.MCMC: {
             MockDataSize.SMALL: 2,
-            MockDataSize.MEDIUM: 4,
-            MockDataSize.LARGE: 8,
+            MockDataSize.MEDIUM: 8,
+            MockDataSize.LARGE: 16,
         },
     }
 }
@@ -44,15 +44,51 @@ sbc_pipeline_time_lookup: TimeLookupDict = {
     ModelOption.SPECLET_FOUR: {
         ModelFitMethod.ADVI: {
             MockDataSize.SMALL: td(minutes=5),
-            MockDataSize.MEDIUM: td(minutes=6),
-            MockDataSize.LARGE: td(minutes=20),
+            MockDataSize.MEDIUM: td(minutes=40),
+            MockDataSize.LARGE: td(hours=2),
         },
         ModelFitMethod.MCMC: {
             MockDataSize.SMALL: td(minutes=5),
-            MockDataSize.MEDIUM: td(minutes=10),
-            MockDataSize.LARGE: td(minutes=40),
+            MockDataSize.MEDIUM: td(hours=1),
+            MockDataSize.LARGE: td(hours=3),
         },
-    }
+    },
+    ModelOption.SPECLET_FIVE: {
+        ModelFitMethod.ADVI: {
+            MockDataSize.SMALL: td(minutes=10),
+            MockDataSize.MEDIUM: td(minutes=30),
+            MockDataSize.LARGE: td(hours=1),
+        },
+        ModelFitMethod.MCMC: {
+            MockDataSize.SMALL: td(minutes=15),
+            MockDataSize.MEDIUM: td(hours=1),
+            MockDataSize.LARGE: td(hours=2),
+        },
+    },
+    ModelOption.SPECLET_SIX: {
+        ModelFitMethod.ADVI: {
+            MockDataSize.SMALL: td(minutes=10),
+            MockDataSize.MEDIUM: td(minutes=20),
+            MockDataSize.LARGE: td(minutes=30),
+        },
+        ModelFitMethod.MCMC: {
+            MockDataSize.SMALL: td(minutes=20),
+            MockDataSize.MEDIUM: td(hours=1),
+            MockDataSize.LARGE: td(hours=2),
+        },
+    },
+    ModelOption.SPECLET_SEVEN: {
+        ModelFitMethod.ADVI: {
+            MockDataSize.SMALL: td(minutes=10),
+            MockDataSize.MEDIUM: td(hours=1),
+            MockDataSize.LARGE: td(hours=3),
+        },
+        ModelFitMethod.MCMC: {
+            MockDataSize.SMALL: td(minutes=15),
+            MockDataSize.MEDIUM: td(hours=1),
+            MockDataSize.LARGE: td(hours=2),
+        },
+    },
 }
 
 
@@ -131,8 +167,8 @@ class SBCResourceManager(PipelineResourceManager):
             },
             ModelFitMethod.MCMC: {
                 MockDataSize.SMALL: td(minutes=15),
-                MockDataSize.MEDIUM: td(minutes=30),
-                MockDataSize.LARGE: td(minutes=45),
+                MockDataSize.MEDIUM: td(hours=1),
+                MockDataSize.LARGE: td(hours=2),
             },
         }
         return self._lookup_value_with_default(

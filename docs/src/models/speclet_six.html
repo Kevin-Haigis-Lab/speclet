@@ -31,86 +31,16 @@
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
-import pandas as pd
 import pymc3 as pm
 from pydantic import BaseModel
 from theano import shared as ts
 
 from src.data_processing import achilles as achelp
-from src.data_processing import common as dphelp
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
+from src.modeling import feature_engineering as feng
 from src.models.speclet_model import ReplacementsDict, SpecletModel
 from src.project_enums import ModelParameterization as MP
-
-
-def centered_copynumber_by_cellline(df: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;Add a column of centered copy number values by cell line.
-
-    Args:
-        df (pd.DataFrame): Achilles data frame.
-
-    Returns:
-        pd.DataFrame: Same data frame with a new column `&#34;copy_number_cellline&#34;`.
-    &#34;&#34;&#34;
-    logger.info(&#34;Adding &#39;copy_number_cellline&#39; column.&#34;)
-    return dphelp.center_column_grouped_dataframe(
-        df,
-        grp_col=&#34;depmap_id&#34;,
-        val_col=&#34;copy_number&#34;,
-        new_col_name=&#34;copy_number_cellline&#34;,
-    )
-
-
-def centered_copynumber_by_gene(df: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;Add a column of centered copy number values by gene.
-
-    Args:
-        df (pd.DataFrame): Achilles data frame.
-
-    Returns:
-        pd.DataFrame: Same data frame with a new column `&#34;copy_number_gene&#34;`.
-    &#34;&#34;&#34;
-    logger.info(&#34;Adding &#39;copy_number_gene&#39; column.&#34;)
-    return dphelp.center_column_grouped_dataframe(
-        df,
-        grp_col=&#34;hugo_symbol&#34;,
-        val_col=&#34;copy_number&#34;,
-        new_col_name=&#34;copy_number_gene&#34;,
-    )
-
-
-def zscale_rna_expression_by_gene_and_lineage(df: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;Z-scale the RNA expression per gene in each lineage.
-
-    Args:
-        df (pd.DataFrame): Achilles data frame.
-
-    Returns:
-        pd.DataFrame: Same data frame with a new column `&#34;rna_expr_gene_lineage&#34;`.
-    &#34;&#34;&#34;
-    logger.info(&#34;Adding &#39;rna_expr_gene_lineage&#39; column.&#34;)
-    return achelp.zscale_rna_expression_by_gene_lineage(
-        df,
-        rna_col=&#34;rna_expr&#34;,
-        new_col=&#34;rna_expr_gene_lineage&#34;,
-        lower_bound=-5.0,
-        upper_bound=5.0,
-    )
-
-
-def convert_is_mutated_to_numeric(df: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;Convert the boolean column for gene mutation status to type integer.
-
-    Args:
-        df (pd.DataFrame): Achilles data frame.
-
-    Returns:
-        pd.DataFrame: Same data frame with the column `&#34;is_mutated&#34;` as type integer.
-    &#34;&#34;&#34;
-    logger.info(&#34;Converting &#39;is_mutated&#39; column to &#39;int&#39;.&#34;)
-    df[&#34;is_mutated&#34;] = df[&#34;is_mutated&#34;].astype(int)
-    return df
 
 
 class SpecletSixConfiguration(BaseModel):
@@ -167,13 +97,15 @@ class SpecletSix(SpecletModel):
       ( \\(M \\in {0, 1}\\))
     &#34;&#34;&#34;
 
+    config: SpecletSixConfiguration
+
     def __init__(
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
-        config: SpecletSixConfiguration = SpecletSixConfiguration(),
+        config: Optional[SpecletSixConfiguration] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Instantiate a SpecletSix model.
 
@@ -194,14 +126,14 @@ class SpecletSix(SpecletModel):
 
         data_manager.add_transformations(
             [
-                centered_copynumber_by_cellline,
-                centered_copynumber_by_gene,
-                zscale_rna_expression_by_gene_and_lineage,
-                convert_is_mutated_to_numeric,
+                feng.centered_copynumber_by_cellline,
+                feng.centered_copynumber_by_gene,
+                feng.zscale_rna_expression_by_gene_and_lineage,
+                feng.convert_is_mutated_to_numeric,
             ]
         )
 
-        self.config = config
+        self.config = config if config is not None else SpecletSixConfiguration()
 
         super().__init__(
             name=name,
@@ -494,22 +426,7 @@ class SpecletSix(SpecletModel):
             self.shared_vars[&#34;lineage_idx_shared&#34;]: lineage_idx_batch,
             self.shared_vars[&#34;batch_idx_shared&#34;]: batch_idx_batch,
             self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
-        }
-
-    def update_mcmc_sampling_parameters(self) -&gt; None:
-        &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
-        logger.info(&#34;Updating the MCMC sampling parameters.&#34;)
-        self.mcmc_sampling_params.draws = 4000
-        self.mcmc_sampling_params.tune = 2000
-        self.mcmc_sampling_params.target_accept = 0.99
-        return None
-
-    def update_advi_sampling_parameters(self) -&gt; None:
-        &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
-        logger.info(&#34;Updating the ADVI fitting parameters.&#34;)
-        parameter_adjustment_map = {True: 40000, False: 100000}
-        self.advi_sampling_params.n_iterations = parameter_adjustment_map[self.debug]
-        return None</code></pre>
+        }</code></pre>
 </details>
 </section>
 <section>
@@ -517,161 +434,13 @@ class SpecletSix(SpecletModel):
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="src.models.speclet_six.centered_copynumber_by_cellline"><code class="name flex">
-<span>def <span class="ident">centered_copynumber_by_cellline</span></span>(<span>df: pandas.core.frame.DataFrame) -> pandas.core.frame.DataFrame</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Add a column of centered copy number values by cell line.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
-<dd>Achilles data frame.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>pd.DataFrame</code></dt>
-<dd>Same data frame with a new column <code>"copy_number_cellline"</code>.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def centered_copynumber_by_cellline(df: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;Add a column of centered copy number values by cell line.
-
-    Args:
-        df (pd.DataFrame): Achilles data frame.
-
-    Returns:
-        pd.DataFrame: Same data frame with a new column `&#34;copy_number_cellline&#34;`.
-    &#34;&#34;&#34;
-    logger.info(&#34;Adding &#39;copy_number_cellline&#39; column.&#34;)
-    return dphelp.center_column_grouped_dataframe(
-        df,
-        grp_col=&#34;depmap_id&#34;,
-        val_col=&#34;copy_number&#34;,
-        new_col_name=&#34;copy_number_cellline&#34;,
-    )</code></pre>
-</details>
-</dd>
-<dt id="src.models.speclet_six.centered_copynumber_by_gene"><code class="name flex">
-<span>def <span class="ident">centered_copynumber_by_gene</span></span>(<span>df: pandas.core.frame.DataFrame) -> pandas.core.frame.DataFrame</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Add a column of centered copy number values by gene.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
-<dd>Achilles data frame.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>pd.DataFrame</code></dt>
-<dd>Same data frame with a new column <code>"copy_number_gene"</code>.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def centered_copynumber_by_gene(df: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;Add a column of centered copy number values by gene.
-
-    Args:
-        df (pd.DataFrame): Achilles data frame.
-
-    Returns:
-        pd.DataFrame: Same data frame with a new column `&#34;copy_number_gene&#34;`.
-    &#34;&#34;&#34;
-    logger.info(&#34;Adding &#39;copy_number_gene&#39; column.&#34;)
-    return dphelp.center_column_grouped_dataframe(
-        df,
-        grp_col=&#34;hugo_symbol&#34;,
-        val_col=&#34;copy_number&#34;,
-        new_col_name=&#34;copy_number_gene&#34;,
-    )</code></pre>
-</details>
-</dd>
-<dt id="src.models.speclet_six.convert_is_mutated_to_numeric"><code class="name flex">
-<span>def <span class="ident">convert_is_mutated_to_numeric</span></span>(<span>df: pandas.core.frame.DataFrame) -> pandas.core.frame.DataFrame</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Convert the boolean column for gene mutation status to type integer.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
-<dd>Achilles data frame.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>pd.DataFrame</code></dt>
-<dd>Same data frame with the column <code>"is_mutated"</code> as type integer.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def convert_is_mutated_to_numeric(df: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;Convert the boolean column for gene mutation status to type integer.
-
-    Args:
-        df (pd.DataFrame): Achilles data frame.
-
-    Returns:
-        pd.DataFrame: Same data frame with the column `&#34;is_mutated&#34;` as type integer.
-    &#34;&#34;&#34;
-    logger.info(&#34;Converting &#39;is_mutated&#39; column to &#39;int&#39;.&#34;)
-    df[&#34;is_mutated&#34;] = df[&#34;is_mutated&#34;].astype(int)
-    return df</code></pre>
-</details>
-</dd>
-<dt id="src.models.speclet_six.zscale_rna_expression_by_gene_and_lineage"><code class="name flex">
-<span>def <span class="ident">zscale_rna_expression_by_gene_and_lineage</span></span>(<span>df: pandas.core.frame.DataFrame) -> pandas.core.frame.DataFrame</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Z-scale the RNA expression per gene in each lineage.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
-<dd>Achilles data frame.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>pd.DataFrame</code></dt>
-<dd>Same data frame with a new column <code>"rna_expr_gene_lineage"</code>.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def zscale_rna_expression_by_gene_and_lineage(df: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;Z-scale the RNA expression per gene in each lineage.
-
-    Args:
-        df (pd.DataFrame): Achilles data frame.
-
-    Returns:
-        pd.DataFrame: Same data frame with a new column `&#34;rna_expr_gene_lineage&#34;`.
-    &#34;&#34;&#34;
-    logger.info(&#34;Adding &#39;rna_expr_gene_lineage&#39; column.&#34;)
-    return achelp.zscale_rna_expression_by_gene_lineage(
-        df,
-        rna_col=&#34;rna_expr&#34;,
-        new_col=&#34;rna_expr_gene_lineage&#34;,
-        lower_bound=-5.0,
-        upper_bound=5.0,
-    )</code></pre>
-</details>
-</dd>
-</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
 <dt id="src.models.speclet_six.SpecletSix"><code class="flex name class">
 <span>class <span class="ident">SpecletSix</span></span>
-<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = None, config: <a title="src.models.speclet_six.SpecletSixConfiguration" href="#src.models.speclet_six.SpecletSixConfiguration">SpecletSixConfiguration</a> = SpecletSixConfiguration(cell_line_cna_cov=False, gene_cna_cov=False, rna_cov=False, mutation_cov=False, a=&lt;ModelParameterization.CENTERED: &#x27;centered&#x27;&gt;, d=&lt;ModelParameterization.CENTERED: &#x27;centered&#x27;&gt;, h=&lt;ModelParameterization.CENTERED: &#x27;centered&#x27;&gt;, j=&lt;ModelParameterization.CENTERED: &#x27;centered&#x27;&gt;, k=&lt;ModelParameterization.CENTERED: &#x27;centered&#x27;&gt;, n=&lt;ModelParameterization.CENTERED: &#x27;centered&#x27;&gt;, q=&lt;ModelParameterization.CENTERED: &#x27;centered&#x27;&gt;, m=&lt;ModelParameterization.CENTERED: &#x27;centered&#x27;&gt;))</span>
+<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = None, config: Optional[<a title="src.models.speclet_six.SpecletSixConfiguration" href="#src.models.speclet_six.SpecletSixConfiguration">SpecletSixConfiguration</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>SpecletSix Model.</p>
@@ -773,13 +542,15 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
       ( \\(M \\in {0, 1}\\))
     &#34;&#34;&#34;
 
+    config: SpecletSixConfiguration
+
     def __init__(
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
-        config: SpecletSixConfiguration = SpecletSixConfiguration(),
+        config: Optional[SpecletSixConfiguration] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Instantiate a SpecletSix model.
 
@@ -800,14 +571,14 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 
         data_manager.add_transformations(
             [
-                centered_copynumber_by_cellline,
-                centered_copynumber_by_gene,
-                zscale_rna_expression_by_gene_and_lineage,
-                convert_is_mutated_to_numeric,
+                feng.centered_copynumber_by_cellline,
+                feng.centered_copynumber_by_gene,
+                feng.zscale_rna_expression_by_gene_and_lineage,
+                feng.convert_is_mutated_to_numeric,
             ]
         )
 
-        self.config = config
+        self.config = config if config is not None else SpecletSixConfiguration()
 
         super().__init__(
             name=name,
@@ -1100,22 +871,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             self.shared_vars[&#34;lineage_idx_shared&#34;]: lineage_idx_batch,
             self.shared_vars[&#34;batch_idx_shared&#34;]: batch_idx_batch,
             self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
-        }
-
-    def update_mcmc_sampling_parameters(self) -&gt; None:
-        &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
-        logger.info(&#34;Updating the MCMC sampling parameters.&#34;)
-        self.mcmc_sampling_params.draws = 4000
-        self.mcmc_sampling_params.tune = 2000
-        self.mcmc_sampling_params.target_accept = 0.99
-        return None
-
-    def update_advi_sampling_parameters(self) -&gt; None:
-        &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
-        logger.info(&#34;Updating the ADVI fitting parameters.&#34;)
-        parameter_adjustment_map = {True: 40000, False: 100000}
-        self.advi_sampling_params.n_iterations = parameter_adjustment_map[self.debug]
-        return None</code></pre>
+        }</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1436,41 +1192,6 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
     return model, &#34;lfc&#34;</code></pre>
 </details>
 </dd>
-<dt id="src.models.speclet_six.SpecletSix.update_advi_sampling_parameters"><code class="name flex">
-<span>def <span class="ident">update_advi_sampling_parameters</span></span>(<span>self) -> NoneType</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Adjust the ADVI parameters depending on the state of the object.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def update_advi_sampling_parameters(self) -&gt; None:
-    &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
-    logger.info(&#34;Updating the ADVI fitting parameters.&#34;)
-    parameter_adjustment_map = {True: 40000, False: 100000}
-    self.advi_sampling_params.n_iterations = parameter_adjustment_map[self.debug]
-    return None</code></pre>
-</details>
-</dd>
-<dt id="src.models.speclet_six.SpecletSix.update_mcmc_sampling_parameters"><code class="name flex">
-<span>def <span class="ident">update_mcmc_sampling_parameters</span></span>(<span>self) -> NoneType</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Adjust the ADVI parameters depending on the state of the object.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def update_mcmc_sampling_parameters(self) -&gt; None:
-    &#34;&#34;&#34;Adjust the ADVI parameters depending on the state of the object.&#34;&#34;&#34;
-    logger.info(&#34;Updating the MCMC sampling parameters.&#34;)
-    self.mcmc_sampling_params.draws = 4000
-    self.mcmc_sampling_params.tune = 2000
-    self.mcmc_sampling_params.target_accept = 0.99
-    return None</code></pre>
-</details>
-</dd>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
@@ -1481,11 +1202,14 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <li><code><a title="src.models.speclet_model.SpecletModel.clear_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.clear_cache">clear_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.debug" href="speclet_model.html#src.models.speclet_model.SpecletModel.debug">debug</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_advi_callbacks" href="speclet_model.html#src.models.speclet_model.SpecletModel.get_advi_callbacks">get_advi_callbacks</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.get_sbc" href="speclet_model.html#src.models.speclet_model.SpecletModel.get_sbc">get_sbc</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.load_advi_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.load_advi_cache">load_advi_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.load_mcmc_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.load_mcmc_cache">load_mcmc_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.mcmc_sample_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.mcmc_sample_model">mcmc_sample_model</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.run_simulation_based_calibration" href="speclet_model.html#src.models.speclet_model.SpecletModel.run_simulation_based_calibration">run_simulation_based_calibration</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.set_config" href="speclet_model.html#src.models.speclet_model.SpecletModel.set_config">set_config</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.update_advi_sampling_parameters" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.update_mcmc_sampling_parameters" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_mcmc_sampling_parameters">update_mcmc_sampling_parameters</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.update_observed_data" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_observed_data">update_observed_data</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.write_advi_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_advi_cache">write_advi_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.write_mcmc_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_mcmc_cache">write_mcmc_cache</a></code></li>
@@ -1541,14 +1265,6 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <li><code><a title="src.models" href="index.html">src.models</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="src.models.speclet_six.centered_copynumber_by_cellline" href="#src.models.speclet_six.centered_copynumber_by_cellline">centered_copynumber_by_cellline</a></code></li>
-<li><code><a title="src.models.speclet_six.centered_copynumber_by_gene" href="#src.models.speclet_six.centered_copynumber_by_gene">centered_copynumber_by_gene</a></code></li>
-<li><code><a title="src.models.speclet_six.convert_is_mutated_to_numeric" href="#src.models.speclet_six.convert_is_mutated_to_numeric">convert_is_mutated_to_numeric</a></code></li>
-<li><code><a title="src.models.speclet_six.zscale_rna_expression_by_gene_and_lineage" href="#src.models.speclet_six.zscale_rna_expression_by_gene_and_lineage">zscale_rna_expression_by_gene_and_lineage</a></code></li>
-</ul>
-</li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
@@ -1556,8 +1272,6 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <ul class="">
 <li><code><a title="src.models.speclet_six.SpecletSix.get_replacement_parameters" href="#src.models.speclet_six.SpecletSix.get_replacement_parameters">get_replacement_parameters</a></code></li>
 <li><code><a title="src.models.speclet_six.SpecletSix.model_specification" href="#src.models.speclet_six.SpecletSix.model_specification">model_specification</a></code></li>
-<li><code><a title="src.models.speclet_six.SpecletSix.update_advi_sampling_parameters" href="#src.models.speclet_six.SpecletSix.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>
-<li><code><a title="src.models.speclet_six.SpecletSix.update_mcmc_sampling_parameters" href="#src.models.speclet_six.SpecletSix.update_mcmc_sampling_parameters">update_mcmc_sampling_parameters</a></code></li>
 </ul>
 </li>
 <li>

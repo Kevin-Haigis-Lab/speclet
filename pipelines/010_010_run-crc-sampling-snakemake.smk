@@ -16,7 +16,10 @@ from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
 SCRATCH_DIR = "/n/scratch3/users/j/jc604/speclet/fitting-mcmc/"
 PYMC3_MODEL_CACHE_DIR = "models/"
 REPORTS_DIR = "reports/crc_model_sampling_reports/"
-ENVIRONMENT_YAML = Path("default_environment.yml").as_posix()
+ENVIRONMENT_YAML = Path("default_environment.yaml").as_posix()
+BENCHMARK_DIR = Path("benchmarks", "010_010_run-crc-sampling-snakemake")
+if not BENCHMARK_DIR.exists():
+    BENCHMARK_DIR.mkdir(parents=True)
 
 N_CHAINS = 4
 
@@ -29,8 +32,8 @@ model_configuration_lists = get_models_names_fit_methods(
 )
 
 
-
 #### ---- Wildcard constrains ---- ####
+
 
 wildcard_constraints:
     model_name="|".join(set(model_configuration_lists.model_names)),
@@ -39,6 +42,7 @@ wildcard_constraints:
 
 
 #### ---- Helpers ---- ####
+
 
 def create_resource_manager(w: Wildcards, fit_method: ModelFitMethod) -> RM:
     return RM(name=w.model_name, fit_method=fit_method, config_path=MODEL_CONFIG)
@@ -68,6 +72,9 @@ rule sample_mcmc:
         config_file=MODEL_CONFIG.as_posix(),
     conda:
         ENVIRONMENT_YAML
+    benchmark:
+        BENCHMARK_DIR / "sample_mcmc/{model_name}_chain{chain}.tsv"
+    priority: 20
     shell:
         "python3 src/command_line_interfaces/sampling_pymc3_models_cli.py"
         '  "{wildcards.model_name}"'
@@ -76,14 +83,15 @@ rule sample_mcmc:
         "  {output.chain_dir}"
         "  --mcmc-chains 1"
         "  --mcmc-cores 1"
-        "  --random-seed 7414"
+        "  --random-seed {wildcards.chain}"
         "  --touch {output.touch_file}"
+
 
 rule combine_mcmc:
     input:
         chains=expand(
             PYMC3_MODEL_CACHE_DIR + "_{{model_name}}_chain{chain}_MCMC.txt",
-            chain=list(range(N_CHAINS))
+            chain=list(range(N_CHAINS)),
         ),
     output:
         touch_file=PYMC3_MODEL_CACHE_DIR + "_{model_name}_MCMC.txt",
@@ -91,8 +99,10 @@ rule combine_mcmc:
         config_file=MODEL_CONFIG.as_posix(),
         combined_cache_dir=PYMC3_MODEL_CACHE_DIR,
         chain_dirs=directory(
-            expand(SCRATCH_DIR + "{{model_name}}_chain{chain}", chain=list(range(N_CHAINS)))
-        )
+            expand(
+                SCRATCH_DIR + "{{model_name}}_chain{chain}", chain=list(range(N_CHAINS))
+            )
+        ),
     conda:
         ENVIRONMENT_YAML
     shell:
@@ -112,9 +122,12 @@ rule sample_advi:
         time=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).time,
         partition=lambda w: create_resource_manager(w, ModelFitMethod.ADVI).partition,
         config_file=MODEL_CONFIG.as_posix(),
-        cache_dir=PYMC3_MODEL_CACHE_DIR
+        cache_dir=PYMC3_MODEL_CACHE_DIR,
     conda:
         ENVIRONMENT_YAML
+    benchmark:
+        BENCHMARK_DIR / "sample_advi/{model_name}.tsv"
+    priority: 10
     shell:
         "python3 src/command_line_interfaces/sampling_pymc3_models_cli.py"
         '  "{wildcards.model_name}"'
@@ -146,13 +159,28 @@ rule papermill_report:
 rule execute_report:
     input:
         model_touch=PYMC3_MODEL_CACHE_DIR + "_{model_name}_{fit_method}.txt",
-        notebook=REPORTS_DIR + "{model_name}_{fit_method}.ipynb",
+        notebook=rules.papermill_report.output.notebook,
     output:
         markdown=REPORTS_DIR + "{model_name}_{fit_method}.md",
     conda:
         ENVIRONMENT_YAML
     shell:
         "jupyter nbconvert --to notebook --inplace --execute {input.notebook} && "
-        "nbqa black {input.notebook} --nbqa-mutate && "
         "nbqa isort {input.notebook} --nbqa-mutate && "
+        "nbqa black {input.notebook} --nbqa-mutate && "
         "jupyter nbconvert --to markdown {input.notebook}"
+
+
+BENCHMARK_REPORT = "reports/benchmarks.ipynb"
+run_benchmark_nb_cmd = f"""
+    jupyter nbconvert --to notebook --inplace --execute '{BENCHMARK_REPORT}' &&
+    jupyter nbconvert --to markdown '{BENCHMARK_REPORT}'
+"""
+
+
+onsuccess:
+    shell(run_benchmark_nb_cmd)
+
+
+onerror:
+    shell(run_benchmark_nb_cmd)

@@ -3,7 +3,7 @@
 
 from typing import TypeVar, Union
 
-from src.models.ceres_mimic import CeresMimic
+from src.models.ceres_mimic import CeresMimic, CeresMimicConfiguration
 from src.models.speclet_five import SpecletFive, SpecletFiveConfiguration
 from src.models.speclet_four import SpecletFour, SpecletFourConfiguration
 from src.models.speclet_one import SpecletOne
@@ -25,6 +25,7 @@ SpecletProjectModelTypes = Union[
 
 ModelConfigurationT = TypeVar(
     "ModelConfigurationT",
+    CeresMimicConfiguration,
     SpecletFiveConfiguration,
     SpecletFourConfiguration,
     SpecletSixConfiguration,

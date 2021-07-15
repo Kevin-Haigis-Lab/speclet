@@ -1,14 +1,17 @@
 from pathlib import Path
 from time import time
-from typing import Dict, Tuple, Union
+from typing import Any, Dict, Tuple, Union
 
 import arviz as az
 import numpy as np
+import pandas as pd
 import pymc3 as pm
 import pytest
 
-from src.managers.model_data_managers import MockDataManager
+from src.exceptions import CacheDoesNotExistError
+from src.managers.model_data_managers import CrcDataManager, MockDataManager
 from src.misc.test_helpers import do_nothing
+from src.modeling import simulation_based_calibration_helpers as sbc
 from src.models import speclet_model
 from src.project_enums import MockDataSize, ModelFitMethod
 
@@ -183,6 +186,76 @@ class TestSpecletModel:
         )
         assert sp.model is not None
         assert (tmp_path / "inference-data.netcdf").exists()
+
+    def _touch_sbc_results_files(self, sbc_fm: sbc.SBCFileManager) -> None:
+        for f in (
+            sbc_fm.inference_data_path,
+            sbc_fm.priors_path_get,
+            sbc_fm.posterior_summary_path,
+        ):
+            f.touch()
+
+    def test_get_sbc(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        mock_crc_dm: CrcDataManager,
+        iris: pd.DataFrame,
+        centered_eight: az.InferenceData,
+        centered_eight_post: pd.DataFrame,
+    ):
+        # setup SBC results
+        sbc_dir = tmp_path / "sbc-results-dir"
+        if not sbc_dir.exists():
+            sbc_dir.mkdir()
+        sbc_fm = sbc.SBCFileManager(sbc_dir)
+        sbc_fm.save_sbc_data(iris)
+        self._touch_sbc_results_files(sbc_fm)
+
+        def mock_get_sbc_results(*args: Any, **kwargs: Any) -> sbc.SBCResults:
+            return sbc.SBCResults(
+                priors={},
+                inference_obj=centered_eight,
+                posterior_summary=centered_eight_post,
+            )
+
+        def just_return(x: Any, df: pd.DataFrame) -> pd.DataFrame:
+            return df
+
+        monkeypatch.setattr(sbc.SBCFileManager, "get_sbc_results", mock_get_sbc_results)
+        monkeypatch.setattr(speclet_model.SpecletModel, "build_model", do_nothing)
+        monkeypatch.setattr(CrcDataManager, "apply_transformations", just_return)
+
+        sp = speclet_model.SpecletModel(
+            "testing-get-sbc", mock_crc_dm, root_cache_dir=tmp_path, debug=True
+        )
+        sim_df, sbc_res, sim_sbc_fm = sp.get_sbc(sbc_dir)
+        assert isinstance(sim_df, pd.DataFrame)
+        assert sim_df.shape == iris.shape
+        assert isinstance(sbc_res, sbc.SBCResults)
+        assert isinstance(sim_sbc_fm, sbc.SBCFileManager)
+        assert sim_sbc_fm.dir == sbc_fm.dir
+
+    def test_get_sbc_errors(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
+        sp_model = speclet_model.SpecletModel(
+            "testing-model", mock_crc_dm, root_cache_dir=tmp_path
+        )
+        sbc_dir = tmp_path / "sbc-results"
+        if not sbc_dir.exists():
+            sbc_dir.mkdir()
+        sbc_fm = sbc.SBCFileManager(sbc_dir)
+
+        with pytest.raises(CacheDoesNotExistError):
+            _ = sp_model.get_sbc(sbc_dir)
+
+        sbc_fm.sbc_data_path.touch()
+        with pytest.raises(CacheDoesNotExistError):
+            _ = sp_model.get_sbc(sbc_dir)
+
+        sbc_fm.sbc_data_path.unlink()
+        self._touch_sbc_results_files(sbc_fm)
+        with pytest.raises(CacheDoesNotExistError):
+            _ = sp_model.get_sbc(sbc_dir)
 
     def test_changing_debug_status(self, mock_sp_model: MockSpecletModelClass):
         assert mock_sp_model.data_manager is not None

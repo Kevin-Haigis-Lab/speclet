@@ -1,5 +1,5 @@
 from pathlib import Path
-from string import ascii_letters
+from string import ascii_letters, ascii_lowercase
 from typing import Any, Dict, List
 
 import arviz as az
@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import seaborn as sns
-from hypothesis import given, settings
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
 from src.data_processing import common as dphelp
@@ -31,6 +31,10 @@ class TestSBCFileManager:
     @pytest.fixture
     def posterior_summary(self) -> pd.DataFrame:
         return pd.DataFrame({"x": [5, 6, 7], "y": ["a", "b", "c"]})
+
+    @pytest.fixture
+    def iris(self) -> pd.DataFrame:
+        return sns.load_dataset("iris")
 
     def test_saving(
         self, tmp_path: Path, priors: Dict[str, Any], posterior_summary: pd.DataFrame
@@ -64,6 +68,25 @@ class TestSBCFileManager:
             np.testing.assert_array_equal(
                 read_results.posterior_summary[c].values, posterior_summary[c].values
             )
+
+    def test_saving_simulation_dataframe(self, tmp_path: Path, iris: pd.DataFrame):
+        fm = sbc.SBCFileManager(tmp_path)
+        fm.save_sbc_data(iris)
+        assert fm.get_sbc_data() is iris
+        fm.sbc_data = None
+        assert fm.get_sbc_data() is not iris
+        assert fm.get_sbc_data().shape == iris.shape
+
+    def test_clearing_saved_simulation_dataframe(
+        self, tmp_path: Path, iris: pd.DataFrame
+    ):
+        fm = sbc.SBCFileManager(tmp_path)
+        fm.save_sbc_data(iris)
+        assert fm.sbc_data_path.exists()
+        fm.clear_results()
+        assert fm.sbc_data_path.exists()
+        fm.clear_saved_data()
+        assert not fm.sbc_data_path.exists()
 
 
 #### ---- Test mock data generation ---- ####
@@ -305,6 +328,21 @@ def test_add_mock_copynumber_data():
         assert not any(df_cna["copy_number"].isna())
 
 
+def test_add_mock_copynumber_data_with_groups():
+    df = sns.load_dataset("iris")
+    for _ in range(10):
+        df_cna = sbc.add_mock_copynumber_data(df.copy(), grouping_cols=["species"])
+        for c in ("copy_number", "species"):
+            assert c in df_cna.columns.to_list()
+        assert all(df_cna["copy_number"] >= 0.0)
+        assert not any(df_cna["copy_number"].isna())
+        for species in df["species"].unique():
+            n_unique_vals = len(
+                np.unique(df_cna[df_cna.species == species]["copy_number"].values)
+            )
+            assert n_unique_vals == 1
+
+
 def test_add_mock_rna_expression_data():
     df = sbc.generate_mock_achilles_categorical_groups(
         n_genes=5,
@@ -330,7 +368,7 @@ def test_add_mock_rna_expression_data_grouped():
         n_batches=1,
         n_screens=1,
     )
-    mod_df = sbc.add_mock_rna_expression_data(df, groups=["hugo_symbol"])
+    mod_df = sbc.add_mock_rna_expression_data(df, subgroups=["hugo_symbol"])
     assert "rna_expr" in mod_df.columns.to_list()
     assert np.all(mod_df["rna_expr"] >= 0.0)
     assert not np.any(mod_df["rna_expr"].isna())
@@ -353,11 +391,51 @@ def test_add_mock_rna_expression_data_grouped():
     assert not np.allclose(np.array(gene_avgs) - np.mean(gene_avgs), 0.0, atol=1.0)
 
 
+def test_add_mock_rna_expression_data_grouping_cols():
+    df = sbc.generate_mock_achilles_categorical_groups(
+        n_genes=10,
+        n_sgrnas_per_gene=100,
+        n_cell_lines=4,
+        n_lineages=2,
+        n_batches=1,
+        n_screens=1,
+    )
+    mod_df = sbc.add_mock_rna_expression_data(
+        df, grouping_cols=["hugo_symbol", "depmap_id"]
+    )
+    for col in ("hugo_symbol", "depmap_id", "rna_expr"):
+        assert col in mod_df.columns.to_list()
+    assert np.all(mod_df["rna_expr"] >= 0.0)
+    assert not np.any(mod_df["rna_expr"].isna())
+    assert np.all(np.isfinite(mod_df["rna_expr"].values))
+    rna_df = mod_df.drop_duplicates(["hugo_symbol", "depmap_id", "rna_expr"])
+    gene_cellline_df = mod_df.drop_duplicates(["hugo_symbol", "depmap_id"])
+    assert rna_df.shape[0] == gene_cellline_df.shape[0]
+
+
 @given(st.floats(0, 1, allow_nan=False, allow_infinity=False))
 def test_add_mock_is_mutated_data(prob: float):
     df = pd.DataFrame({"A": np.zeros(10000)})
     df = sbc.add_mock_is_mutated_data(df, prob=prob)
     assert df["is_mutated"].mean() == pytest.approx(prob, abs=0.1)
+
+
+@given(st.floats(0, 1, allow_nan=False, allow_infinity=False))
+def test_add_mock_is_mutated_data_grouped(prob: float):
+    letters = list(ascii_lowercase)
+    grp_a = np.random.choice(letters, size=5, replace=False)
+    grp_b = np.random.choice(letters, size=5, replace=False)
+    N = 1000
+    df = pd.DataFrame(
+        {"A": np.random.choice(grp_a, size=N), "B": np.random.choice(grp_b, size=N)}
+    )
+    df_mut = sbc.add_mock_is_mutated_data(df, grouping_cols=["A", "B"], prob=prob)
+    for col in ("A", "B", "is_mutated"):
+        assert col in df_mut.columns.tolist()
+    assert df_mut["is_mutated"].mean() == pytest.approx(prob, abs=0.1)
+    assert (
+        df[["A", "B"]].drop_duplicates().shape[0] == df_mut.drop_duplicates().shape[0]
+    )
 
 
 @given(
@@ -400,6 +478,7 @@ def test_mock_data_has_correct_categories_sizes(data):
     assert n_batches >= dphelp.nunique(mock_data.p_dna_batch)
 
 
+@pytest.mark.DEV
 @settings(settings.load_profile("slow-adaptive"))
 @given(mock_data=generate_data_with_random_params())
 def test_sgrnas_uniquely_map_to_genes(mock_data: pd.DataFrame):
@@ -410,7 +489,9 @@ def test_sgrnas_uniquely_map_to_genes(mock_data: pd.DataFrame):
     assert len(sgrnas) == len(np.unique(sgrnas))
 
 
-@settings(settings.get_profile("slow-adaptive"))
+@settings(
+    settings.get_profile("slow-adaptive"), suppress_health_check=[HealthCheck.too_slow]
+)
 @given(mock_data=generate_data_with_random_params())
 def test_cellline_in_one_batch(mock_data: pd.DataFrame):
     cellline_to_batch = (
@@ -427,6 +508,15 @@ def test_sgrna_for_each_cellline(mock_data: pd.DataFrame):
         cell_line_sgrnas = mock_data[
             mock_data.depmap_id == cell_line
         ].sgrna.values.to_list()
-        # Confirm that each combo happens  exactly once.
+        # Confirm that each combo happens exactly once.
         assert len(all_sgrnas) == len(cell_line_sgrnas)
         assert len(all_sgrnas.difference(set(cell_line_sgrnas))) == 0
+
+
+@given(mock_data=generate_data_with_random_params())
+def test_cn_same_for_gene_cellline_combination(mock_data: pd.DataFrame):
+    assert "copy_number" in mock_data.columns.tolist()
+    n_genes = len(mock_data.hugo_symbol.unique())
+    n_celllines = len(mock_data.depmap_id.unique())
+    cn_df = mock_data[["hugo_symbol", "depmap_id", "copy_number"]].drop_duplicates()
+    assert cn_df.shape[0] == (n_genes * n_celllines)

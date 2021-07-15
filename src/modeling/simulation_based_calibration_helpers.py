@@ -45,11 +45,13 @@ class SBCFileManager:
     """Manages the results from a round of simulation-based calibration."""
 
     dir: Path
+    sbc_data_path: Path
     inference_data_path: Path
     priors_path_set: Path
     priors_path_get: Path
     posterior_summary_path: Path
 
+    sbc_data: Optional[pd.DataFrame] = None
     sbc_results: Optional[SBCResults] = None
 
     def __init__(self, dir: Path):
@@ -61,6 +63,7 @@ class SBCFileManager:
         if not dir.is_dir():
             raise NotADirectoryError(dir)
         self.dir = dir
+        self.sbc_data_path = dir / "sbc-data.csv"
         self.inference_data_path = dir / "inference-data.netcdf"
         self.priors_path_set = dir / "priors"
         self.priors_path_get = dir / "priors.npz"
@@ -73,6 +76,46 @@ class SBCFileManager:
         else:
             self.dir.mkdir()
             return False
+
+    def get_sbc_data(self, re_read: bool = False) -> pd.DataFrame:
+        """Get the simulated data for the SBC.
+
+        Args:
+            re_read (bool, optional): Force re-reading from file. Defaults to False.
+
+        Returns:
+            pd.DataFrame: Saved simulated data frame.
+        """
+        if self.sbc_data is None or re_read:
+            self.sbc_data = pd.read_csv(self.sbc_data_path)
+        return self.sbc_data
+
+    def save_sbc_data(
+        self, data: pd.DataFrame, index: bool = False, **kwargs: dict[str, Any]
+    ) -> None:
+        """Save SBC dataframe to disk.
+
+        Args:
+            data (pd.DataFrame): Simulated data used for the SBC.
+            index (bool, optional): Should the index be included in the file (CSV).
+              Defaults to False.
+            kwargs (dict[str, Any]): Additional keyword arguments for `data.to_csv()`.
+        """
+        self.sbc_data = data
+        data.to_csv(self.sbc_data_path, index=index)
+
+    def simulation_data_exists(self) -> bool:
+        """Does the simulation dataframe file exist?
+
+        Returns:
+            bool: True if the dataframe file exists.
+        """
+        return self.sbc_data_path.exists()
+
+    def clear_saved_data(self) -> None:
+        """Clear save SBC dataframe file."""
+        if self.simulation_data_exists():
+            self.sbc_data_path.unlink()
 
     def save_sbc_results(
         self,
@@ -143,8 +186,13 @@ class SBCFileManager:
 
     def clear_results(self) -> None:
         """Clear the stored SBC results (if they exist)."""
-        if self.dir.exists():
-            self.dir.rmdir()
+        for f in (
+            self.inference_data_path,
+            self.priors_path_get,
+            self.posterior_summary_path,
+        ):
+            if f.exists():
+                f.unlink()
 
 
 def generate_mock_sgrna_gene_map(n_genes: int, n_sgrnas_per_gene: int) -> pd.DataFrame:
@@ -341,7 +389,26 @@ def generate_mock_achilles_categorical_groups(
     )
 
 
-def add_mock_copynumber_data(mock_df: pd.DataFrame) -> pd.DataFrame:
+def _make_mock_grouped_copy(
+    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]]
+) -> pd.DataFrame:
+    df_copy = mock_df.copy()
+    if grouping_cols is not None:
+        df_copy = df_copy[grouping_cols].drop_duplicates()
+    return df_copy
+
+
+def _merge_mock_and_grouped_copy(
+    mock_df: pd.DataFrame, df_copy: pd.DataFrame, grouping_cols: Optional[list[str]]
+) -> pd.DataFrame:
+    if grouping_cols is not None:
+        return mock_df.merge(df_copy, left_index=False, right_index=False)
+    return df_copy
+
+
+def add_mock_copynumber_data(
+    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]] = None
+) -> pd.DataFrame:
     """Add mock copy number data to mock Achilles data.
 
     The mock CNA values actually come from real copy number values from CRC cancer cell
@@ -350,20 +417,27 @@ def add_mock_copynumber_data(mock_df: pd.DataFrame) -> pd.DataFrame:
 
     Args:
         mock_df (pd.DataFrame): Mock Achilles data frame.
+        grouping_cols (Optional[list[str]], optional): Columns to group by where every
+          appearance of the same combination will have the same CN value. Defaults to
+          None for no group effect.
 
     Returns:
         pd.DataFrame: Same mock Achilles data frame with a new "copy_number" column.
     """
     real_cna_values = np.load(data_path(DataFile.copy_number_sample))
-    mock_cn = np.random.choice(real_cna_values, size=mock_df.shape[0], replace=True)
+
+    df_copy = _make_mock_grouped_copy(mock_df, grouping_cols)
+    mock_cn = np.random.choice(real_cna_values, size=df_copy.shape[0], replace=True)
     mock_cn = mock_cn + np.random.normal(0, 0.1, size=mock_cn.shape)
-    mock_cn = vhelp.squish_array(mock_cn, lower=0.0, upper=np.inf)
-    mock_df["copy_number"] = mock_cn.flatten()
-    return mock_df
+    mock_cn = vhelp.squish_array(mock_cn, lower=0.0, upper=20.0)
+    df_copy["copy_number"] = mock_cn.flatten()
+    return _merge_mock_and_grouped_copy(mock_df, df_copy, grouping_cols)
 
 
 def add_mock_rna_expression_data(
-    mock_df: pd.DataFrame, groups: Optional[List[str]] = None
+    mock_df: pd.DataFrame,
+    grouping_cols: Optional[list[str]] = None,
+    subgroups: Optional[list[str]] = None,
 ) -> pd.DataFrame:
     """Add fake RNA expression data to a mock Achilles data frame.
 
@@ -374,42 +448,57 @@ def add_mock_rna_expression_data(
 
     Args:
         mock_df (pd.DataFrame): Mock Achilles data frame.
-        groups (Optional[List[str]], optional): List of columns to group by. Each group
-          will have the same mean and standard deviation for the sampling distribution.
-          Defaults to None.
+        grouping_cols (Optional[list[str]], optional): Columns to group by where every
+          appearance of the same combination will have the same RNA value. Defaults to
+          None for no group effect.
+        subgroups (Optional[list[str]], optional): List of columns to group by. Each
+          group will have the same mean and standard deviation for the sampling
+          distribution. Defaults to None.
 
     Returns:
         pd.DataFrame: [description]
     """
 
     def _rna_normal_distribution(df: pd.DataFrame) -> pd.DataFrame:
+        df_copy = _make_mock_grouped_copy(df, grouping_cols)
         mu = np.abs(np.random.normal(10.0, 3))
         sd = np.abs(np.random.normal(0.0, 3))
-        rna_expr = np.random.normal(mu, sd, size=df.shape[0])
+        rna_expr = np.random.normal(mu, sd, size=df_copy.shape[0])
         rna_expr = vhelp.squish_array(rna_expr, lower=0.0, upper=np.inf)
-        df["rna_expr"] = rna_expr
-        return df
+        df_copy["rna_expr"] = rna_expr
+        df_copy = _merge_mock_and_grouped_copy(df, df_copy, grouping_cols)
+        return df_copy
 
-    if groups is None:
+    if subgroups is None:
         mock_df = _rna_normal_distribution(mock_df)
     else:
-        mock_df = mock_df.groupby(groups).apply(_rna_normal_distribution)
+        mock_df = (
+            mock_df.groupby(subgroups)
+            .apply(_rna_normal_distribution)
+            .reset_index(drop=True)
+        )
     return mock_df
 
 
-def add_mock_is_mutated_data(mock_df: pd.DataFrame, prob: float = 0.01) -> pd.DataFrame:
+def add_mock_is_mutated_data(
+    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]] = None, prob: float = 0.01
+) -> pd.DataFrame:
     """Add a mutation column to mock Achilles data.
 
     Args:
         mock_df (pd.DataFrame): Mock Achilles data frame.
+        grouping_cols (Optional[list[str]], optional): Columns to group by where every
+          appearance of the same combination will have the same mutation value. Defaults
+          to None for no group effect.
         prob (float, optional): The probability of a gene being mutated. All mutations
           are indpendent of each other. Defaults to 0.01.
 
     Returns:
         pd.DataFrame: The same mock Achilles data frame with an "is_mutated" columns.
     """
-    mock_df["is_mutated"] = np.random.uniform(0, 1, size=mock_df.shape[0]) < prob
-    return mock_df
+    df_copy = _make_mock_grouped_copy(mock_df, grouping_cols)
+    df_copy["is_mutated"] = np.random.uniform(0, 1, size=df_copy.shape[0]) < prob
+    return _merge_mock_and_grouped_copy(mock_df, df_copy, grouping_cols)
 
 
 def add_mock_zero_effect_lfc_data(
@@ -466,8 +555,12 @@ def generate_mock_achilles_data(
             n_batches=n_batches,
             n_screens=n_screens,
         )
-        .pipe(add_mock_copynumber_data)
-        .pipe(add_mock_rna_expression_data, groups=["hugo_symbol", "lineage"])
-        .pipe(add_mock_is_mutated_data)
+        .pipe(add_mock_copynumber_data, grouping_cols=["hugo_symbol", "depmap_id"])
+        .pipe(
+            add_mock_rna_expression_data,
+            grouping_cols=["hugo_symbol", "depmap_id"],
+            subgroups=["hugo_symbol", "lineage"],
+        )
+        .pipe(add_mock_is_mutated_data, grouping_cols=["hugo_symbol", "depmap_id"])
         .pipe(add_mock_zero_effect_lfc_data)
     )

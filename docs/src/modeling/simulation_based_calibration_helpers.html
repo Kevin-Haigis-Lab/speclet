@@ -73,11 +73,13 @@ class SBCFileManager:
     &#34;&#34;&#34;Manages the results from a round of simulation-based calibration.&#34;&#34;&#34;
 
     dir: Path
+    sbc_data_path: Path
     inference_data_path: Path
     priors_path_set: Path
     priors_path_get: Path
     posterior_summary_path: Path
 
+    sbc_data: Optional[pd.DataFrame] = None
     sbc_results: Optional[SBCResults] = None
 
     def __init__(self, dir: Path):
@@ -89,6 +91,7 @@ class SBCFileManager:
         if not dir.is_dir():
             raise NotADirectoryError(dir)
         self.dir = dir
+        self.sbc_data_path = dir / &#34;sbc-data.csv&#34;
         self.inference_data_path = dir / &#34;inference-data.netcdf&#34;
         self.priors_path_set = dir / &#34;priors&#34;
         self.priors_path_get = dir / &#34;priors.npz&#34;
@@ -101,6 +104,46 @@ class SBCFileManager:
         else:
             self.dir.mkdir()
             return False
+
+    def get_sbc_data(self, re_read: bool = False) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Get the simulated data for the SBC.
+
+        Args:
+            re_read (bool, optional): Force re-reading from file. Defaults to False.
+
+        Returns:
+            pd.DataFrame: Saved simulated data frame.
+        &#34;&#34;&#34;
+        if self.sbc_data is None or re_read:
+            self.sbc_data = pd.read_csv(self.sbc_data_path)
+        return self.sbc_data
+
+    def save_sbc_data(
+        self, data: pd.DataFrame, index: bool = False, **kwargs: dict[str, Any]
+    ) -&gt; None:
+        &#34;&#34;&#34;Save SBC dataframe to disk.
+
+        Args:
+            data (pd.DataFrame): Simulated data used for the SBC.
+            index (bool, optional): Should the index be included in the file (CSV).
+              Defaults to False.
+            kwargs (dict[str, Any]): Additional keyword arguments for `data.to_csv()`.
+        &#34;&#34;&#34;
+        self.sbc_data = data
+        data.to_csv(self.sbc_data_path, index=index)
+
+    def simulation_data_exists(self) -&gt; bool:
+        &#34;&#34;&#34;Does the simulation dataframe file exist?
+
+        Returns:
+            bool: True if the dataframe file exists.
+        &#34;&#34;&#34;
+        return self.sbc_data_path.exists()
+
+    def clear_saved_data(self) -&gt; None:
+        &#34;&#34;&#34;Clear save SBC dataframe file.&#34;&#34;&#34;
+        if self.simulation_data_exists():
+            self.sbc_data_path.unlink()
 
     def save_sbc_results(
         self,
@@ -171,8 +214,13 @@ class SBCFileManager:
 
     def clear_results(self) -&gt; None:
         &#34;&#34;&#34;Clear the stored SBC results (if they exist).&#34;&#34;&#34;
-        if self.dir.exists():
-            self.dir.rmdir()
+        for f in (
+            self.inference_data_path,
+            self.priors_path_get,
+            self.posterior_summary_path,
+        ):
+            if f.exists():
+                f.unlink()
 
 
 def generate_mock_sgrna_gene_map(n_genes: int, n_sgrnas_per_gene: int) -&gt; pd.DataFrame:
@@ -369,7 +417,26 @@ def generate_mock_achilles_categorical_groups(
     )
 
 
-def add_mock_copynumber_data(mock_df: pd.DataFrame) -&gt; pd.DataFrame:
+def _make_mock_grouped_copy(
+    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]]
+) -&gt; pd.DataFrame:
+    df_copy = mock_df.copy()
+    if grouping_cols is not None:
+        df_copy = df_copy[grouping_cols].drop_duplicates()
+    return df_copy
+
+
+def _merge_mock_and_grouped_copy(
+    mock_df: pd.DataFrame, df_copy: pd.DataFrame, grouping_cols: Optional[list[str]]
+) -&gt; pd.DataFrame:
+    if grouping_cols is not None:
+        return mock_df.merge(df_copy, left_index=False, right_index=False)
+    return df_copy
+
+
+def add_mock_copynumber_data(
+    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]] = None
+) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Add mock copy number data to mock Achilles data.
 
     The mock CNA values actually come from real copy number values from CRC cancer cell
@@ -378,20 +445,27 @@ def add_mock_copynumber_data(mock_df: pd.DataFrame) -&gt; pd.DataFrame:
 
     Args:
         mock_df (pd.DataFrame): Mock Achilles data frame.
+        grouping_cols (Optional[list[str]], optional): Columns to group by where every
+          appearance of the same combination will have the same CN value. Defaults to
+          None for no group effect.
 
     Returns:
         pd.DataFrame: Same mock Achilles data frame with a new &#34;copy_number&#34; column.
     &#34;&#34;&#34;
     real_cna_values = np.load(data_path(DataFile.copy_number_sample))
-    mock_cn = np.random.choice(real_cna_values, size=mock_df.shape[0], replace=True)
+
+    df_copy = _make_mock_grouped_copy(mock_df, grouping_cols)
+    mock_cn = np.random.choice(real_cna_values, size=df_copy.shape[0], replace=True)
     mock_cn = mock_cn + np.random.normal(0, 0.1, size=mock_cn.shape)
-    mock_cn = vhelp.squish_array(mock_cn, lower=0.0, upper=np.inf)
-    mock_df[&#34;copy_number&#34;] = mock_cn.flatten()
-    return mock_df
+    mock_cn = vhelp.squish_array(mock_cn, lower=0.0, upper=20.0)
+    df_copy[&#34;copy_number&#34;] = mock_cn.flatten()
+    return _merge_mock_and_grouped_copy(mock_df, df_copy, grouping_cols)
 
 
 def add_mock_rna_expression_data(
-    mock_df: pd.DataFrame, groups: Optional[List[str]] = None
+    mock_df: pd.DataFrame,
+    grouping_cols: Optional[list[str]] = None,
+    subgroups: Optional[list[str]] = None,
 ) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Add fake RNA expression data to a mock Achilles data frame.
 
@@ -402,42 +476,57 @@ def add_mock_rna_expression_data(
 
     Args:
         mock_df (pd.DataFrame): Mock Achilles data frame.
-        groups (Optional[List[str]], optional): List of columns to group by. Each group
-          will have the same mean and standard deviation for the sampling distribution.
-          Defaults to None.
+        grouping_cols (Optional[list[str]], optional): Columns to group by where every
+          appearance of the same combination will have the same RNA value. Defaults to
+          None for no group effect.
+        subgroups (Optional[list[str]], optional): List of columns to group by. Each
+          group will have the same mean and standard deviation for the sampling
+          distribution. Defaults to None.
 
     Returns:
         pd.DataFrame: [description]
     &#34;&#34;&#34;
 
     def _rna_normal_distribution(df: pd.DataFrame) -&gt; pd.DataFrame:
+        df_copy = _make_mock_grouped_copy(df, grouping_cols)
         mu = np.abs(np.random.normal(10.0, 3))
         sd = np.abs(np.random.normal(0.0, 3))
-        rna_expr = np.random.normal(mu, sd, size=df.shape[0])
+        rna_expr = np.random.normal(mu, sd, size=df_copy.shape[0])
         rna_expr = vhelp.squish_array(rna_expr, lower=0.0, upper=np.inf)
-        df[&#34;rna_expr&#34;] = rna_expr
-        return df
+        df_copy[&#34;rna_expr&#34;] = rna_expr
+        df_copy = _merge_mock_and_grouped_copy(df, df_copy, grouping_cols)
+        return df_copy
 
-    if groups is None:
+    if subgroups is None:
         mock_df = _rna_normal_distribution(mock_df)
     else:
-        mock_df = mock_df.groupby(groups).apply(_rna_normal_distribution)
+        mock_df = (
+            mock_df.groupby(subgroups)
+            .apply(_rna_normal_distribution)
+            .reset_index(drop=True)
+        )
     return mock_df
 
 
-def add_mock_is_mutated_data(mock_df: pd.DataFrame, prob: float = 0.01) -&gt; pd.DataFrame:
+def add_mock_is_mutated_data(
+    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]] = None, prob: float = 0.01
+) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Add a mutation column to mock Achilles data.
 
     Args:
         mock_df (pd.DataFrame): Mock Achilles data frame.
+        grouping_cols (Optional[list[str]], optional): Columns to group by where every
+          appearance of the same combination will have the same mutation value. Defaults
+          to None for no group effect.
         prob (float, optional): The probability of a gene being mutated. All mutations
           are indpendent of each other. Defaults to 0.01.
 
     Returns:
         pd.DataFrame: The same mock Achilles data frame with an &#34;is_mutated&#34; columns.
     &#34;&#34;&#34;
-    mock_df[&#34;is_mutated&#34;] = np.random.uniform(0, 1, size=mock_df.shape[0]) &lt; prob
-    return mock_df
+    df_copy = _make_mock_grouped_copy(mock_df, grouping_cols)
+    df_copy[&#34;is_mutated&#34;] = np.random.uniform(0, 1, size=df_copy.shape[0]) &lt; prob
+    return _merge_mock_and_grouped_copy(mock_df, df_copy, grouping_cols)
 
 
 def add_mock_zero_effect_lfc_data(
@@ -494,9 +583,13 @@ def generate_mock_achilles_data(
             n_batches=n_batches,
             n_screens=n_screens,
         )
-        .pipe(add_mock_copynumber_data)
-        .pipe(add_mock_rna_expression_data, groups=[&#34;hugo_symbol&#34;, &#34;lineage&#34;])
-        .pipe(add_mock_is_mutated_data)
+        .pipe(add_mock_copynumber_data, grouping_cols=[&#34;hugo_symbol&#34;, &#34;depmap_id&#34;])
+        .pipe(
+            add_mock_rna_expression_data,
+            grouping_cols=[&#34;hugo_symbol&#34;, &#34;depmap_id&#34;],
+            subgroups=[&#34;hugo_symbol&#34;, &#34;lineage&#34;],
+        )
+        .pipe(add_mock_is_mutated_data, grouping_cols=[&#34;hugo_symbol&#34;, &#34;depmap_id&#34;])
         .pipe(add_mock_zero_effect_lfc_data)
     )</code></pre>
 </details>
@@ -509,7 +602,7 @@ def generate_mock_achilles_data(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.modeling.simulation_based_calibration_helpers.add_mock_copynumber_data"><code class="name flex">
-<span>def <span class="ident">add_mock_copynumber_data</span></span>(<span>mock_df: pandas.core.frame.DataFrame) -> pandas.core.frame.DataFrame</span>
+<span>def <span class="ident">add_mock_copynumber_data</span></span>(<span>mock_df: pandas.core.frame.DataFrame, grouping_cols: Optional[list[str]] = None) -> pandas.core.frame.DataFrame</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add mock copy number data to mock Achilles data.</p>
@@ -520,6 +613,10 @@ each value.</p>
 <dl>
 <dt><strong><code>mock_df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
 <dd>Mock Achilles data frame.</dd>
+<dt><strong><code>grouping_cols</code></strong> :&ensp;<code>Optional[list[str]]</code>, optional</dt>
+<dd>Columns to group by where every
+appearance of the same combination will have the same CN value. Defaults to
+None for no group effect.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -530,7 +627,9 @@ each value.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_mock_copynumber_data(mock_df: pd.DataFrame) -&gt; pd.DataFrame:
+<pre><code class="python">def add_mock_copynumber_data(
+    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]] = None
+) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Add mock copy number data to mock Achilles data.
 
     The mock CNA values actually come from real copy number values from CRC cancer cell
@@ -539,20 +638,25 @@ each value.</p>
 
     Args:
         mock_df (pd.DataFrame): Mock Achilles data frame.
+        grouping_cols (Optional[list[str]], optional): Columns to group by where every
+          appearance of the same combination will have the same CN value. Defaults to
+          None for no group effect.
 
     Returns:
         pd.DataFrame: Same mock Achilles data frame with a new &#34;copy_number&#34; column.
     &#34;&#34;&#34;
     real_cna_values = np.load(data_path(DataFile.copy_number_sample))
-    mock_cn = np.random.choice(real_cna_values, size=mock_df.shape[0], replace=True)
+
+    df_copy = _make_mock_grouped_copy(mock_df, grouping_cols)
+    mock_cn = np.random.choice(real_cna_values, size=df_copy.shape[0], replace=True)
     mock_cn = mock_cn + np.random.normal(0, 0.1, size=mock_cn.shape)
-    mock_cn = vhelp.squish_array(mock_cn, lower=0.0, upper=np.inf)
-    mock_df[&#34;copy_number&#34;] = mock_cn.flatten()
-    return mock_df</code></pre>
+    mock_cn = vhelp.squish_array(mock_cn, lower=0.0, upper=20.0)
+    df_copy[&#34;copy_number&#34;] = mock_cn.flatten()
+    return _merge_mock_and_grouped_copy(mock_df, df_copy, grouping_cols)</code></pre>
 </details>
 </dd>
 <dt id="src.modeling.simulation_based_calibration_helpers.add_mock_is_mutated_data"><code class="name flex">
-<span>def <span class="ident">add_mock_is_mutated_data</span></span>(<span>mock_df: pandas.core.frame.DataFrame, prob: float = 0.01) -> pandas.core.frame.DataFrame</span>
+<span>def <span class="ident">add_mock_is_mutated_data</span></span>(<span>mock_df: pandas.core.frame.DataFrame, grouping_cols: Optional[list[str]] = None, prob: float = 0.01) -> pandas.core.frame.DataFrame</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add a mutation column to mock Achilles data.</p>
@@ -560,6 +664,10 @@ each value.</p>
 <dl>
 <dt><strong><code>mock_df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
 <dd>Mock Achilles data frame.</dd>
+<dt><strong><code>grouping_cols</code></strong> :&ensp;<code>Optional[list[str]]</code>, optional</dt>
+<dd>Columns to group by where every
+appearance of the same combination will have the same mutation value. Defaults
+to None for no group effect.</dd>
 <dt><strong><code>prob</code></strong> :&ensp;<code>float</code>, optional</dt>
 <dd>The probability of a gene being mutated. All mutations
 are indpendent of each other. Defaults to 0.01.</dd>
@@ -573,23 +681,29 @@ are indpendent of each other. Defaults to 0.01.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_mock_is_mutated_data(mock_df: pd.DataFrame, prob: float = 0.01) -&gt; pd.DataFrame:
+<pre><code class="python">def add_mock_is_mutated_data(
+    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]] = None, prob: float = 0.01
+) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Add a mutation column to mock Achilles data.
 
     Args:
         mock_df (pd.DataFrame): Mock Achilles data frame.
+        grouping_cols (Optional[list[str]], optional): Columns to group by where every
+          appearance of the same combination will have the same mutation value. Defaults
+          to None for no group effect.
         prob (float, optional): The probability of a gene being mutated. All mutations
           are indpendent of each other. Defaults to 0.01.
 
     Returns:
         pd.DataFrame: The same mock Achilles data frame with an &#34;is_mutated&#34; columns.
     &#34;&#34;&#34;
-    mock_df[&#34;is_mutated&#34;] = np.random.uniform(0, 1, size=mock_df.shape[0]) &lt; prob
-    return mock_df</code></pre>
+    df_copy = _make_mock_grouped_copy(mock_df, grouping_cols)
+    df_copy[&#34;is_mutated&#34;] = np.random.uniform(0, 1, size=df_copy.shape[0]) &lt; prob
+    return _merge_mock_and_grouped_copy(mock_df, df_copy, grouping_cols)</code></pre>
 </details>
 </dd>
 <dt id="src.modeling.simulation_based_calibration_helpers.add_mock_rna_expression_data"><code class="name flex">
-<span>def <span class="ident">add_mock_rna_expression_data</span></span>(<span>mock_df: pandas.core.frame.DataFrame, groups: Optional[List[str]] = None) -> pandas.core.frame.DataFrame</span>
+<span>def <span class="ident">add_mock_rna_expression_data</span></span>(<span>mock_df: pandas.core.frame.DataFrame, grouping_cols: Optional[list[str]] = None, subgroups: Optional[list[str]] = None) -> pandas.core.frame.DataFrame</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add fake RNA expression data to a mock Achilles data frame.</p>
@@ -601,10 +715,14 @@ distribution (i.e. same mean and standard deviation).</p>
 <dl>
 <dt><strong><code>mock_df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
 <dd>Mock Achilles data frame.</dd>
-<dt><strong><code>groups</code></strong> :&ensp;<code>Optional[List[str]]</code>, optional</dt>
-<dd>List of columns to group by. Each group
-will have the same mean and standard deviation for the sampling distribution.
-Defaults to None.</dd>
+<dt><strong><code>grouping_cols</code></strong> :&ensp;<code>Optional[list[str]]</code>, optional</dt>
+<dd>Columns to group by where every
+appearance of the same combination will have the same RNA value. Defaults to
+None for no group effect.</dd>
+<dt><strong><code>subgroups</code></strong> :&ensp;<code>Optional[list[str]]</code>, optional</dt>
+<dd>List of columns to group by. Each
+group will have the same mean and standard deviation for the sampling
+distribution. Defaults to None.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -616,7 +734,9 @@ Defaults to None.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_mock_rna_expression_data(
-    mock_df: pd.DataFrame, groups: Optional[List[str]] = None
+    mock_df: pd.DataFrame,
+    grouping_cols: Optional[list[str]] = None,
+    subgroups: Optional[list[str]] = None,
 ) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Add fake RNA expression data to a mock Achilles data frame.
 
@@ -627,26 +747,35 @@ Defaults to None.</dd>
 
     Args:
         mock_df (pd.DataFrame): Mock Achilles data frame.
-        groups (Optional[List[str]], optional): List of columns to group by. Each group
-          will have the same mean and standard deviation for the sampling distribution.
-          Defaults to None.
+        grouping_cols (Optional[list[str]], optional): Columns to group by where every
+          appearance of the same combination will have the same RNA value. Defaults to
+          None for no group effect.
+        subgroups (Optional[list[str]], optional): List of columns to group by. Each
+          group will have the same mean and standard deviation for the sampling
+          distribution. Defaults to None.
 
     Returns:
         pd.DataFrame: [description]
     &#34;&#34;&#34;
 
     def _rna_normal_distribution(df: pd.DataFrame) -&gt; pd.DataFrame:
+        df_copy = _make_mock_grouped_copy(df, grouping_cols)
         mu = np.abs(np.random.normal(10.0, 3))
         sd = np.abs(np.random.normal(0.0, 3))
-        rna_expr = np.random.normal(mu, sd, size=df.shape[0])
+        rna_expr = np.random.normal(mu, sd, size=df_copy.shape[0])
         rna_expr = vhelp.squish_array(rna_expr, lower=0.0, upper=np.inf)
-        df[&#34;rna_expr&#34;] = rna_expr
-        return df
+        df_copy[&#34;rna_expr&#34;] = rna_expr
+        df_copy = _merge_mock_and_grouped_copy(df, df_copy, grouping_cols)
+        return df_copy
 
-    if groups is None:
+    if subgroups is None:
         mock_df = _rna_normal_distribution(mock_df)
     else:
-        mock_df = mock_df.groupby(groups).apply(_rna_normal_distribution)
+        mock_df = (
+            mock_df.groupby(subgroups)
+            .apply(_rna_normal_distribution)
+            .reset_index(drop=True)
+        )
     return mock_df</code></pre>
 </details>
 </dd>
@@ -855,9 +984,13 @@ equal to the number of batches.</dd>
             n_batches=n_batches,
             n_screens=n_screens,
         )
-        .pipe(add_mock_copynumber_data)
-        .pipe(add_mock_rna_expression_data, groups=[&#34;hugo_symbol&#34;, &#34;lineage&#34;])
-        .pipe(add_mock_is_mutated_data)
+        .pipe(add_mock_copynumber_data, grouping_cols=[&#34;hugo_symbol&#34;, &#34;depmap_id&#34;])
+        .pipe(
+            add_mock_rna_expression_data,
+            grouping_cols=[&#34;hugo_symbol&#34;, &#34;depmap_id&#34;],
+            subgroups=[&#34;hugo_symbol&#34;, &#34;lineage&#34;],
+        )
+        .pipe(add_mock_is_mutated_data, grouping_cols=[&#34;hugo_symbol&#34;, &#34;depmap_id&#34;])
         .pipe(add_mock_zero_effect_lfc_data)
     )</code></pre>
 </details>
@@ -1107,11 +1240,13 @@ to it.</dd>
     &#34;&#34;&#34;Manages the results from a round of simulation-based calibration.&#34;&#34;&#34;
 
     dir: Path
+    sbc_data_path: Path
     inference_data_path: Path
     priors_path_set: Path
     priors_path_get: Path
     posterior_summary_path: Path
 
+    sbc_data: Optional[pd.DataFrame] = None
     sbc_results: Optional[SBCResults] = None
 
     def __init__(self, dir: Path):
@@ -1123,6 +1258,7 @@ to it.</dd>
         if not dir.is_dir():
             raise NotADirectoryError(dir)
         self.dir = dir
+        self.sbc_data_path = dir / &#34;sbc-data.csv&#34;
         self.inference_data_path = dir / &#34;inference-data.netcdf&#34;
         self.priors_path_set = dir / &#34;priors&#34;
         self.priors_path_get = dir / &#34;priors.npz&#34;
@@ -1135,6 +1271,46 @@ to it.</dd>
         else:
             self.dir.mkdir()
             return False
+
+    def get_sbc_data(self, re_read: bool = False) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Get the simulated data for the SBC.
+
+        Args:
+            re_read (bool, optional): Force re-reading from file. Defaults to False.
+
+        Returns:
+            pd.DataFrame: Saved simulated data frame.
+        &#34;&#34;&#34;
+        if self.sbc_data is None or re_read:
+            self.sbc_data = pd.read_csv(self.sbc_data_path)
+        return self.sbc_data
+
+    def save_sbc_data(
+        self, data: pd.DataFrame, index: bool = False, **kwargs: dict[str, Any]
+    ) -&gt; None:
+        &#34;&#34;&#34;Save SBC dataframe to disk.
+
+        Args:
+            data (pd.DataFrame): Simulated data used for the SBC.
+            index (bool, optional): Should the index be included in the file (CSV).
+              Defaults to False.
+            kwargs (dict[str, Any]): Additional keyword arguments for `data.to_csv()`.
+        &#34;&#34;&#34;
+        self.sbc_data = data
+        data.to_csv(self.sbc_data_path, index=index)
+
+    def simulation_data_exists(self) -&gt; bool:
+        &#34;&#34;&#34;Does the simulation dataframe file exist?
+
+        Returns:
+            bool: True if the dataframe file exists.
+        &#34;&#34;&#34;
+        return self.sbc_data_path.exists()
+
+    def clear_saved_data(self) -&gt; None:
+        &#34;&#34;&#34;Clear save SBC dataframe file.&#34;&#34;&#34;
+        if self.simulation_data_exists():
+            self.sbc_data_path.unlink()
 
     def save_sbc_results(
         self,
@@ -1205,11 +1381,20 @@ to it.</dd>
 
     def clear_results(self) -&gt; None:
         &#34;&#34;&#34;Clear the stored SBC results (if they exist).&#34;&#34;&#34;
-        if self.dir.exists():
-            self.dir.rmdir()</code></pre>
+        for f in (
+            self.inference_data_path,
+            self.priors_path_get,
+            self.posterior_summary_path,
+        ):
+            if f.exists():
+                f.unlink()</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
+<dt id="src.modeling.simulation_based_calibration_helpers.SBCFileManager.sbc_data"><code class="name">var <span class="ident">sbc_data</span> : Optional[pandas.core.frame.DataFrame]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="src.modeling.simulation_based_calibration_helpers.SBCFileManager.sbc_results"><code class="name">var <span class="ident">sbc_results</span> : Optional[<a title="src.modeling.simulation_based_calibration_helpers.SBCResults" href="#src.modeling.simulation_based_calibration_helpers.SBCResults">SBCResults</a>]</code></dt>
 <dd>
 <div class="desc"></div>
@@ -1258,8 +1443,61 @@ to it.</dd>
 </summary>
 <pre><code class="python">def clear_results(self) -&gt; None:
     &#34;&#34;&#34;Clear the stored SBC results (if they exist).&#34;&#34;&#34;
-    if self.dir.exists():
-        self.dir.rmdir()</code></pre>
+    for f in (
+        self.inference_data_path,
+        self.priors_path_get,
+        self.posterior_summary_path,
+    ):
+        if f.exists():
+            f.unlink()</code></pre>
+</details>
+</dd>
+<dt id="src.modeling.simulation_based_calibration_helpers.SBCFileManager.clear_saved_data"><code class="name flex">
+<span>def <span class="ident">clear_saved_data</span></span>(<span>self) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Clear save SBC dataframe file.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clear_saved_data(self) -&gt; None:
+    &#34;&#34;&#34;Clear save SBC dataframe file.&#34;&#34;&#34;
+    if self.simulation_data_exists():
+        self.sbc_data_path.unlink()</code></pre>
+</details>
+</dd>
+<dt id="src.modeling.simulation_based_calibration_helpers.SBCFileManager.get_sbc_data"><code class="name flex">
+<span>def <span class="ident">get_sbc_data</span></span>(<span>self, re_read: bool = False) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the simulated data for the SBC.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>re_read</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Force re-reading from file. Defaults to False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>Saved simulated data frame.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_sbc_data(self, re_read: bool = False) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Get the simulated data for the SBC.
+
+    Args:
+        re_read (bool, optional): Force re-reading from file. Defaults to False.
+
+    Returns:
+        pd.DataFrame: Saved simulated data frame.
+    &#34;&#34;&#34;
+    if self.sbc_data is None or re_read:
+        self.sbc_data = pd.read_csv(self.sbc_data_path)
+    return self.sbc_data</code></pre>
 </details>
 </dd>
 <dt id="src.modeling.simulation_based_calibration_helpers.SBCFileManager.get_sbc_results"><code class="name flex">
@@ -1310,6 +1548,40 @@ Defaults to False.</dd>
     return self.sbc_results</code></pre>
 </details>
 </dd>
+<dt id="src.modeling.simulation_based_calibration_helpers.SBCFileManager.save_sbc_data"><code class="name flex">
+<span>def <span class="ident">save_sbc_data</span></span>(<span>self, data: pandas.core.frame.DataFrame, index: bool = False, **kwargs: dict) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Save SBC dataframe to disk.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>Simulated data used for the SBC.</dd>
+<dt><strong><code>index</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the index be included in the file (CSV).
+Defaults to False.</dd>
+<dt><strong><code>kwargs</code></strong> :&ensp;<code>dict[str, Any]</code></dt>
+<dd>Additional keyword arguments for <code>data.to_csv()</code>.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_sbc_data(
+    self, data: pd.DataFrame, index: bool = False, **kwargs: dict[str, Any]
+) -&gt; None:
+    &#34;&#34;&#34;Save SBC dataframe to disk.
+
+    Args:
+        data (pd.DataFrame): Simulated data used for the SBC.
+        index (bool, optional): Should the index be included in the file (CSV).
+          Defaults to False.
+        kwargs (dict[str, Any]): Additional keyword arguments for `data.to_csv()`.
+    &#34;&#34;&#34;
+    self.sbc_data = data
+    data.to_csv(self.sbc_data_path, index=index)</code></pre>
+</details>
+</dd>
 <dt id="src.modeling.simulation_based_calibration_helpers.SBCFileManager.save_sbc_results"><code class="name flex">
 <span>def <span class="ident">save_sbc_results</span></span>(<span>self, priors: Dict[str, Any], inference_obj: arviz.data.inference_data.InferenceData, posterior_summary: pandas.core.frame.DataFrame) -> NoneType</span>
 </code></dt>
@@ -1346,6 +1618,29 @@ Defaults to False.</dd>
     posterior_summary.to_csv(
         self.posterior_summary_path.as_posix(), index_label=&#34;parameter&#34;
     )</code></pre>
+</details>
+</dd>
+<dt id="src.modeling.simulation_based_calibration_helpers.SBCFileManager.simulation_data_exists"><code class="name flex">
+<span>def <span class="ident">simulation_data_exists</span></span>(<span>self) -> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Does the simulation dataframe file exist?</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>True if the dataframe file exists.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def simulation_data_exists(self) -&gt; bool:
+    &#34;&#34;&#34;Does the simulation dataframe file exist?
+
+    Returns:
+        bool: True if the dataframe file exists.
+    &#34;&#34;&#34;
+    return self.sbc_data_path.exists()</code></pre>
 </details>
 </dd>
 </dl>
@@ -1473,9 +1768,14 @@ class SelectionMethod(str, Enum):
 <ul class="">
 <li><code><a title="src.modeling.simulation_based_calibration_helpers.SBCFileManager.all_data_exists" href="#src.modeling.simulation_based_calibration_helpers.SBCFileManager.all_data_exists">all_data_exists</a></code></li>
 <li><code><a title="src.modeling.simulation_based_calibration_helpers.SBCFileManager.clear_results" href="#src.modeling.simulation_based_calibration_helpers.SBCFileManager.clear_results">clear_results</a></code></li>
+<li><code><a title="src.modeling.simulation_based_calibration_helpers.SBCFileManager.clear_saved_data" href="#src.modeling.simulation_based_calibration_helpers.SBCFileManager.clear_saved_data">clear_saved_data</a></code></li>
+<li><code><a title="src.modeling.simulation_based_calibration_helpers.SBCFileManager.get_sbc_data" href="#src.modeling.simulation_based_calibration_helpers.SBCFileManager.get_sbc_data">get_sbc_data</a></code></li>
 <li><code><a title="src.modeling.simulation_based_calibration_helpers.SBCFileManager.get_sbc_results" href="#src.modeling.simulation_based_calibration_helpers.SBCFileManager.get_sbc_results">get_sbc_results</a></code></li>
+<li><code><a title="src.modeling.simulation_based_calibration_helpers.SBCFileManager.save_sbc_data" href="#src.modeling.simulation_based_calibration_helpers.SBCFileManager.save_sbc_data">save_sbc_data</a></code></li>
 <li><code><a title="src.modeling.simulation_based_calibration_helpers.SBCFileManager.save_sbc_results" href="#src.modeling.simulation_based_calibration_helpers.SBCFileManager.save_sbc_results">save_sbc_results</a></code></li>
+<li><code><a title="src.modeling.simulation_based_calibration_helpers.SBCFileManager.sbc_data" href="#src.modeling.simulation_based_calibration_helpers.SBCFileManager.sbc_data">sbc_data</a></code></li>
 <li><code><a title="src.modeling.simulation_based_calibration_helpers.SBCFileManager.sbc_results" href="#src.modeling.simulation_based_calibration_helpers.SBCFileManager.sbc_results">sbc_results</a></code></li>
+<li><code><a title="src.modeling.simulation_based_calibration_helpers.SBCFileManager.simulation_data_exists" href="#src.modeling.simulation_based_calibration_helpers.SBCFileManager.simulation_data_exists">simulation_data_exists</a></code></li>
 </ul>
 </li>
 <li>

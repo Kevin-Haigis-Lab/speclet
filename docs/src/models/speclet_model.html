@@ -45,7 +45,7 @@ from src.loggers import logger
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.managers.model_data_managers import DataManager
 from src.modeling import pymc3_sampling_api as pmapi
-from src.project_enums import ModelFitMethod, assert_never
+from src.project_enums import MockDataSize, ModelFitMethod, assert_never
 
 ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
@@ -67,7 +67,7 @@ class PyMC3SamplingParameters(BaseModel):
 
     draws: int = 1000
     prior_pred_samples: int = 1000
-    post_pred_samples: Optional[int] = None
+    post_pred_samples: int = 1000
 
 
 class MCMCSamplingParameters(PyMC3SamplingParameters):
@@ -78,14 +78,14 @@ class MCMCSamplingParameters(PyMC3SamplingParameters):
     chains: int = 4
     init: str = &#34;auto&#34;
     n_init: int = 200000
-    target_accept: float = 0.9
+    target_accept: float = 0.8  # default for pm.NUTS
 
 
 class VISamplingParameters(PyMC3SamplingParameters):
     &#34;&#34;&#34;Parameters for fitting by VI.&#34;&#34;&#34;
 
     method: str = &#34;advi&#34;
-    n_iterations: int = 100000
+    n_iterations: int = 50000
 
 
 class SpecletModel:
@@ -457,8 +457,8 @@ class SpecletModel:
         self,
         results_path: Path,
         fit_method: ModelFitMethod,
+        size: MockDataSize,
         random_seed: Optional[int] = None,
-        size: str = &#34;large&#34;,
         fit_kwargs: Optional[Dict[Any, Any]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Run a round of simulation-based calibration.
@@ -468,14 +468,16 @@ class SpecletModel:
             fit_method (ModelFitMethod): Which method to use for fitting.
             random_seed (Optional[int], optional): Random seed (for reproducibility).
               Defaults to None.
-            size (str, optional): Size of the data set to mock. Defaults to &#34;large&#34;.
+            size (MockDataSize): Size of the data set to mock. Defaults to &#34;large&#34;.
             fit_kwargs (Optional[Dict[Any, Any]], optional): Keyword arguments to be
               passed to the fitting method. Default is None.
         &#34;&#34;&#34;
         if fit_kwargs is None:
             fit_kwargs = {}
 
-        assert self.data_manager is not None
+        sbc_fm = sbc.SBCFileManager(dir=results_path)
+
+        logger.info(&#34;Creating new simulation data.&#34;)
         mock_data = self.data_manager.generate_mock_data(
             size=size, random_seed=random_seed
         )
@@ -491,6 +493,7 @@ class SpecletModel:
 
         mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
         self.data_manager.set_data(mock_data)
+        sbc_fm.save_sbc_data(mock_data)
 
         # Update shared variable with adjusted observed data.
         logger.info(&#34;Updating observed value with prior-sampled values.&#34;)
@@ -509,8 +512,7 @@ class SpecletModel:
         assert isinstance(posterior_summary, pd.DataFrame)
 
         logger.info(&#34;Using a SBC file manager to save SBC results.&#34;)
-        results_manager = sbc.SBCFileManager(dir=results_path)
-        results_manager.save_sbc_results(
+        sbc_fm.save_sbc_results(
             priors=priors,
             inference_obj=res,
             posterior_summary=posterior_summary,
@@ -531,6 +533,36 @@ class SpecletModel:
             )
         else:
             logger.warning(&#34;Did not cache MCMC samples because they do not exist.&#34;)
+
+    def get_sbc(
+        self, results_path: Path
+    ) -&gt; tuple[pd.DataFrame, sbc.SBCResults, sbc.SBCFileManager]:
+        &#34;&#34;&#34;Retrieve the data and results of an SBC.
+
+        Args:
+            results_path (Path): Directory containing the SBC results.
+
+        Raises:
+            CacheDoesNotExistError: Raised if the cache does not exist.
+
+        Returns:
+            tuple[pd.DataFrame, sbc.SBCResults, sbc.SBCFileManager]: The simulated data,
+            the SBC results, and the file manager for the SBC.
+        &#34;&#34;&#34;
+        sbc_fm = sbc.SBCFileManager(results_path)
+
+        # Checks that data and results exist.
+        if not sbc_fm.simulation_data_exists():
+            raise CacheDoesNotExistError(sbc_fm.sbc_data_path)
+        if not sbc_fm.all_data_exists():
+            raise CacheDoesNotExistError(sbc_fm.dir)
+
+        simulated_data = sbc_fm.get_sbc_data()
+        sbc_results = sbc_fm.get_sbc_results()
+        self.data_manager.set_data(simulated_data)
+        if self.model is None:
+            self.build_model()
+        return self.data_manager.get_data(), sbc_results, sbc_fm
 
     def load_mcmc_cache(self) -&gt; az.InferenceData:
         &#34;&#34;&#34;Load MCMC from cache.
@@ -607,7 +639,7 @@ class SpecletModel:
 <dl>
 <dt id="src.models.speclet_model.MCMCSamplingParameters"><code class="flex name class">
 <span>class <span class="ident">MCMCSamplingParameters</span></span>
-<span>(</span><span>*, draws: int = 1000, prior_pred_samples: int = 1000, post_pred_samples: int = None, tune: int = 2000, cores: int = 4, chains: int = 4, init: str = 'auto', n_init: int = 200000, target_accept: float = 0.9)</span>
+<span>(</span><span>*, draws: int = 1000, prior_pred_samples: int = 1000, post_pred_samples: int = 1000, tune: int = 2000, cores: int = 4, chains: int = 4, init: str = 'auto', n_init: int = 200000, target_accept: float = 0.8)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Parameters for MCMC sampling.</p>
@@ -625,7 +657,7 @@ class SpecletModel:
     chains: int = 4
     init: str = &#34;auto&#34;
     n_init: int = 200000
-    target_accept: float = 0.9</code></pre>
+    target_accept: float = 0.8  # default for pm.NUTS</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -636,7 +668,7 @@ class SpecletModel:
 </dd>
 <dt id="src.models.speclet_model.PyMC3SamplingParameters"><code class="flex name class">
 <span>class <span class="ident">PyMC3SamplingParameters</span></span>
-<span>(</span><span>*, draws: int = 1000, prior_pred_samples: int = 1000, post_pred_samples: int = None)</span>
+<span>(</span><span>*, draws: int = 1000, prior_pred_samples: int = 1000, post_pred_samples: int = 1000)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Paramerers common to fitting a model in PyMC3.</p>
@@ -651,7 +683,7 @@ class SpecletModel:
 
     draws: int = 1000
     prior_pred_samples: int = 1000
-    post_pred_samples: Optional[int] = None</code></pre>
+    post_pred_samples: int = 1000</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1080,8 +1112,8 @@ data. Defaults to None.</dd>
         self,
         results_path: Path,
         fit_method: ModelFitMethod,
+        size: MockDataSize,
         random_seed: Optional[int] = None,
-        size: str = &#34;large&#34;,
         fit_kwargs: Optional[Dict[Any, Any]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Run a round of simulation-based calibration.
@@ -1091,14 +1123,16 @@ data. Defaults to None.</dd>
             fit_method (ModelFitMethod): Which method to use for fitting.
             random_seed (Optional[int], optional): Random seed (for reproducibility).
               Defaults to None.
-            size (str, optional): Size of the data set to mock. Defaults to &#34;large&#34;.
+            size (MockDataSize): Size of the data set to mock. Defaults to &#34;large&#34;.
             fit_kwargs (Optional[Dict[Any, Any]], optional): Keyword arguments to be
               passed to the fitting method. Default is None.
         &#34;&#34;&#34;
         if fit_kwargs is None:
             fit_kwargs = {}
 
-        assert self.data_manager is not None
+        sbc_fm = sbc.SBCFileManager(dir=results_path)
+
+        logger.info(&#34;Creating new simulation data.&#34;)
         mock_data = self.data_manager.generate_mock_data(
             size=size, random_seed=random_seed
         )
@@ -1114,6 +1148,7 @@ data. Defaults to None.</dd>
 
         mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
         self.data_manager.set_data(mock_data)
+        sbc_fm.save_sbc_data(mock_data)
 
         # Update shared variable with adjusted observed data.
         logger.info(&#34;Updating observed value with prior-sampled values.&#34;)
@@ -1132,8 +1167,7 @@ data. Defaults to None.</dd>
         assert isinstance(posterior_summary, pd.DataFrame)
 
         logger.info(&#34;Using a SBC file manager to save SBC results.&#34;)
-        results_manager = sbc.SBCFileManager(dir=results_path)
-        results_manager.save_sbc_results(
+        sbc_fm.save_sbc_results(
             priors=priors,
             inference_obj=res,
             posterior_summary=posterior_summary,
@@ -1154,6 +1188,36 @@ data. Defaults to None.</dd>
             )
         else:
             logger.warning(&#34;Did not cache MCMC samples because they do not exist.&#34;)
+
+    def get_sbc(
+        self, results_path: Path
+    ) -&gt; tuple[pd.DataFrame, sbc.SBCResults, sbc.SBCFileManager]:
+        &#34;&#34;&#34;Retrieve the data and results of an SBC.
+
+        Args:
+            results_path (Path): Directory containing the SBC results.
+
+        Raises:
+            CacheDoesNotExistError: Raised if the cache does not exist.
+
+        Returns:
+            tuple[pd.DataFrame, sbc.SBCResults, sbc.SBCFileManager]: The simulated data,
+            the SBC results, and the file manager for the SBC.
+        &#34;&#34;&#34;
+        sbc_fm = sbc.SBCFileManager(results_path)
+
+        # Checks that data and results exist.
+        if not sbc_fm.simulation_data_exists():
+            raise CacheDoesNotExistError(sbc_fm.sbc_data_path)
+        if not sbc_fm.all_data_exists():
+            raise CacheDoesNotExistError(sbc_fm.dir)
+
+        simulated_data = sbc_fm.get_sbc_data()
+        sbc_results = sbc_fm.get_sbc_results()
+        self.data_manager.set_data(simulated_data)
+        if self.model is None:
+            self.build_model()
+        return self.data_manager.get_data(), sbc_results, sbc_fm
 
     def load_mcmc_cache(self) -&gt; az.InferenceData:
         &#34;&#34;&#34;Load MCMC from cache.
@@ -1560,6 +1624,62 @@ this method returns None and has no effect on ADVI.</p>
     return None</code></pre>
 </details>
 </dd>
+<dt id="src.models.speclet_model.SpecletModel.get_sbc"><code class="name flex">
+<span>def <span class="ident">get_sbc</span></span>(<span>self, results_path: pathlib.Path) -> tuple</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve the data and results of an SBC.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>results_path</code></strong> :&ensp;<code>Path</code></dt>
+<dd>Directory containing the SBC results.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>CacheDoesNotExistError</code></dt>
+<dd>Raised if the cache does not exist.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[pd.DataFrame, sbc.SBCResults, sbc.SBCFileManager]</code></dt>
+<dd>The simulated data,</dd>
+</dl>
+<p>the SBC results, and the file manager for the SBC.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_sbc(
+    self, results_path: Path
+) -&gt; tuple[pd.DataFrame, sbc.SBCResults, sbc.SBCFileManager]:
+    &#34;&#34;&#34;Retrieve the data and results of an SBC.
+
+    Args:
+        results_path (Path): Directory containing the SBC results.
+
+    Raises:
+        CacheDoesNotExistError: Raised if the cache does not exist.
+
+    Returns:
+        tuple[pd.DataFrame, sbc.SBCResults, sbc.SBCFileManager]: The simulated data,
+        the SBC results, and the file manager for the SBC.
+    &#34;&#34;&#34;
+    sbc_fm = sbc.SBCFileManager(results_path)
+
+    # Checks that data and results exist.
+    if not sbc_fm.simulation_data_exists():
+        raise CacheDoesNotExistError(sbc_fm.sbc_data_path)
+    if not sbc_fm.all_data_exists():
+        raise CacheDoesNotExistError(sbc_fm.dir)
+
+    simulated_data = sbc_fm.get_sbc_data()
+    sbc_results = sbc_fm.get_sbc_results()
+    self.data_manager.set_data(simulated_data)
+    if self.model is None:
+        self.build_model()
+    return self.data_manager.get_data(), sbc_results, sbc_fm</code></pre>
+</details>
+</dd>
 <dt id="src.models.speclet_model.SpecletModel.load_advi_cache"><code class="name flex">
 <span>def <span class="ident">load_advi_cache</span></span>(<span>self) -> Tuple[arviz.data.inference_data.InferenceData, pymc3.variational.opvi.Approximation]</span>
 </code></dt>
@@ -1831,7 +1951,7 @@ def model_specification(self) -&gt; Tuple[pm.Model, str]:
 </details>
 </dd>
 <dt id="src.models.speclet_model.SpecletModel.run_simulation_based_calibration"><code class="name flex">
-<span>def <span class="ident">run_simulation_based_calibration</span></span>(<span>self, results_path: pathlib.Path, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, random_seed: Optional[int] = None, size: str = 'large', fit_kwargs: Optional[Dict[Any, Any]] = None) -> NoneType</span>
+<span>def <span class="ident">run_simulation_based_calibration</span></span>(<span>self, results_path: pathlib.Path, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, size: <a title="src.project_enums.MockDataSize" href="../project_enums.html#src.project_enums.MockDataSize">MockDataSize</a>, random_seed: Optional[int] = None, fit_kwargs: Optional[Dict[Any, Any]] = None) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Run a round of simulation-based calibration.</p>
@@ -1844,7 +1964,7 @@ def model_specification(self) -&gt; Tuple[pm.Model, str]:
 <dt><strong><code>random_seed</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
 <dd>Random seed (for reproducibility).
 Defaults to None.</dd>
-<dt><strong><code>size</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dt><strong><code>size</code></strong> :&ensp;<code>MockDataSize</code></dt>
 <dd>Size of the data set to mock. Defaults to "large".</dd>
 <dt><strong><code>fit_kwargs</code></strong> :&ensp;<code>Optional[Dict[Any, Any]]</code>, optional</dt>
 <dd>Keyword arguments to be
@@ -1858,8 +1978,8 @@ passed to the fitting method. Default is None.</dd>
     self,
     results_path: Path,
     fit_method: ModelFitMethod,
+    size: MockDataSize,
     random_seed: Optional[int] = None,
-    size: str = &#34;large&#34;,
     fit_kwargs: Optional[Dict[Any, Any]] = None,
 ) -&gt; None:
     &#34;&#34;&#34;Run a round of simulation-based calibration.
@@ -1869,14 +1989,16 @@ passed to the fitting method. Default is None.</dd>
         fit_method (ModelFitMethod): Which method to use for fitting.
         random_seed (Optional[int], optional): Random seed (for reproducibility).
           Defaults to None.
-        size (str, optional): Size of the data set to mock. Defaults to &#34;large&#34;.
+        size (MockDataSize): Size of the data set to mock. Defaults to &#34;large&#34;.
         fit_kwargs (Optional[Dict[Any, Any]], optional): Keyword arguments to be
           passed to the fitting method. Default is None.
     &#34;&#34;&#34;
     if fit_kwargs is None:
         fit_kwargs = {}
 
-    assert self.data_manager is not None
+    sbc_fm = sbc.SBCFileManager(dir=results_path)
+
+    logger.info(&#34;Creating new simulation data.&#34;)
     mock_data = self.data_manager.generate_mock_data(
         size=size, random_seed=random_seed
     )
@@ -1892,6 +2014,7 @@ passed to the fitting method. Default is None.</dd>
 
     mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
     self.data_manager.set_data(mock_data)
+    sbc_fm.save_sbc_data(mock_data)
 
     # Update shared variable with adjusted observed data.
     logger.info(&#34;Updating observed value with prior-sampled values.&#34;)
@@ -1910,8 +2033,7 @@ passed to the fitting method. Default is None.</dd>
     assert isinstance(posterior_summary, pd.DataFrame)
 
     logger.info(&#34;Using a SBC file manager to save SBC results.&#34;)
-    results_manager = sbc.SBCFileManager(dir=results_path)
-    results_manager.save_sbc_results(
+    sbc_fm.save_sbc_results(
         priors=priors,
         inference_obj=res,
         posterior_summary=posterior_summary,
@@ -2056,7 +2178,7 @@ passed to the fitting method. Default is None.</dd>
 </dd>
 <dt id="src.models.speclet_model.VISamplingParameters"><code class="flex name class">
 <span>class <span class="ident">VISamplingParameters</span></span>
-<span>(</span><span>*, draws: int = 1000, prior_pred_samples: int = 1000, post_pred_samples: int = None, method: str = 'advi', n_iterations: int = 100000)</span>
+<span>(</span><span>*, draws: int = 1000, prior_pred_samples: int = 1000, post_pred_samples: int = 1000, method: str = 'advi', n_iterations: int = 50000)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Parameters for fitting by VI.</p>
@@ -2070,7 +2192,7 @@ passed to the fitting method. Default is None.</dd>
     &#34;&#34;&#34;Parameters for fitting by VI.&#34;&#34;&#34;
 
     method: str = &#34;advi&#34;
-    n_iterations: int = 100000</code></pre>
+    n_iterations: int = 50000</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -2115,6 +2237,7 @@ passed to the fitting method. Default is None.</dd>
 <li><code><a title="src.models.speclet_model.SpecletModel.debug" href="#src.models.speclet_model.SpecletModel.debug">debug</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_advi_callbacks" href="#src.models.speclet_model.SpecletModel.get_advi_callbacks">get_advi_callbacks</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_replacement_parameters" href="#src.models.speclet_model.SpecletModel.get_replacement_parameters">get_replacement_parameters</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.get_sbc" href="#src.models.speclet_model.SpecletModel.get_sbc">get_sbc</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.load_advi_cache" href="#src.models.speclet_model.SpecletModel.load_advi_cache">load_advi_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.load_mcmc_cache" href="#src.models.speclet_model.SpecletModel.load_mcmc_cache">load_mcmc_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.mcmc_results" href="#src.models.speclet_model.SpecletModel.mcmc_results">mcmc_results</a></code></li>

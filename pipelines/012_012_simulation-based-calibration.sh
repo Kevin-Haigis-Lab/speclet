@@ -2,8 +2,8 @@
 
 #SBATCH --account=park
 #SBATCH -c 1
-#SBATCH -p priority
-#SBATCH -t 0-06:00
+#SBATCH -p short
+#SBATCH -t 0-12:00
 #SBATCH --mem 2G
 #SBATCH -o logs/%j-sbc-snakemake.log
 #SBATCH -e logs/%j-sbc-snakemake.log
@@ -18,9 +18,9 @@ conda activate speclet_snakemake
 SNAKEFILE="pipelines/012_010_simulation-based-calibration-snakemake.smk"
 
 # Copy original env file and ammend import of speclet project modules
-ENV_PATH="pipelines/default_environment.yml"
+ENV_PATH="pipelines/default_environment.yaml"
 if [ ! -f "$ENV_PATH" ]; then
-    cp environment.yml $ENV_PATH
+    cp environment.yaml $ENV_PATH
     sed -i "s|-e .|-e $(pwd)/|" $ENV_PATH
     sed -i '/jupyter_contrib_nbextensions/d' $ENV_PATH
 fi
@@ -28,11 +28,11 @@ fi
 snakemake \
     --snakefile $SNAKEFILE \
     --jobs 20 \
-    --restart-times 0 \
+    --restart-times 1 \
     --latency-wait 120 \
     --use-conda \
     --keep-going \
-    --cluster-config pipelines/012_011_smk-config.json \
+    --cluster-config pipelines/012_011_smk-config.yaml \
     --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}"
 
 # --conda-cleanup-envs  # use to clean up old conda envs

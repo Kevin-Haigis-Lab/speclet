@@ -1,11 +1,18 @@
-
 from pathlib import Path
 from typing import Dict, List
+import os
+
+import requests
+from requests.auth import HTTPBasicAuth
+import colorama
+
+colorama.init(autoreset=True)
 
 data_dir = Path("data")
 depmap_dir = data_dir / "depmap_21q2"
 score_dir = data_dir / "score_21q2"
 ccle_dir = data_dir / "ccle_21q2"
+sanger_cosmic_dir = data_dir / "sanger-cosmic"
 
 depmap_downloads: Dict[str, str] = {
     "Achilles_gene_effect_unscaled.csv": "https://ndownloader.figshare.com/files/27902055",
@@ -54,32 +61,87 @@ ccle_downloads: Dict[str, str] = {
 }
 
 
+#### ---- Get URL for Sanger's CGC ---- ####
+
+
+def get_sanger_cgc_url() -> str:
+    sanger_email = os.getenv("SANGER_EMAIL")
+    sanger_pass = os.getenv("SANGER_PASS")
+    sanger_cgc_response = requests.get(
+        "https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v94/cancer_gene_census.csv",
+        auth=HTTPBasicAuth(sanger_email, sanger_pass),
+    )
+    if sanger_cgc_response.status_code == 200:
+        print(
+            colorama.Fore.BLUE
+            + colorama.Style.BRIGHT
+            + "Successfully recieved a unique Cancer Gene Census URL."
+        )
+        url = sanger_cgc_response.json()["url"]
+        if url is None:
+            print(sanger_cgc_response.json())
+            BaseException("Successul request, but no URL was returned.")
+        return url
+    BaseException("Unable to retrieve a unique Cancer Gene Census URL.")
+
+
+CI = os.getenv("CI")
+
+if CI is None:
+    sanger_cgc_url = get_sanger_cgc_url()
+else:
+    print(colorama.Fore.YELLOW + f"CI: using fake URL for Sanger CGC file.")
+    sanger_cgc_url = "www.mock-url.com"
+
+
+#### ---- Rules ---- ####
+
+
 rule all:
     input:
-        depmap_files = expand(depmap_dir / "{filename}", filename=list(depmap_downloads.keys())),
-        score_files = expand(score_dir / "{filename}", filename=list(score_downloads.keys())),
-        ccle_files = expand(ccle_dir / "{filename}", filename=list(ccle_downloads.keys())),
+        depmap_files=expand(
+            depmap_dir / "{filename}", filename=list(depmap_downloads.keys())
+        ),
+        score_files=expand(
+            score_dir / "{filename}", filename=list(score_downloads.keys())
+        ),
+        ccle_files=expand(
+            ccle_dir / "{filename}", filename=list(ccle_downloads.keys())
+        ),
+        sanger_cgc=sanger_cosmic_dir / "cancer_gene_census.csv",
+
 
 rule download_depmap:
     output:
-        filename = depmap_dir / "{filename}"
+        filename=depmap_dir / "{filename}",
     params:
-        url = lambda w: depmap_downloads[w.filename]
+        url=lambda w: depmap_downloads[w.filename],
     shell:
         "wget --output-document {output.filename} {params.url}"
+
 
 rule download_score:
     output:
-        filename = score_dir / "{filename}"
+        filename=score_dir / "{filename}",
     params:
-        url = lambda w: score_downloads[w.filename]
+        url=lambda w: score_downloads[w.filename],
     shell:
         "wget --output-document {output.filename} {params.url}"
 
+
 rule download_ccle:
     output:
-        filename = ccle_dir / "{filename}"
+        filename=ccle_dir / "{filename}",
     params:
-        url = lambda w: ccle_downloads[w.filename]
+        url=lambda w: ccle_downloads[w.filename],
     shell:
         "wget --output-document {output.filename} {params.url}"
+
+
+rule download_sanger:
+    output:
+        cgc_filename=sanger_cosmic_dir / "cancer_gene_census.tsv",
+    params:
+        url=sanger_cgc_url,
+    shell:
+        "wget --output-document {output.cgc_filename} {params.url}"

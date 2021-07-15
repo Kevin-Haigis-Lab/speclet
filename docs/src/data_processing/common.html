@@ -33,6 +33,7 @@
 import warnings
 from typing import Any, Iterable, List, Tuple, Union
 
+import janitor  # noqa: F401
 import numpy as np
 import pandas as pd
 
@@ -166,6 +167,32 @@ def center_column_grouped_dataframe(
         .assign(_new_centered_column=lambda d: d[val_col] - d[avg_val_col])
         .rename(columns={&#34;_new_centered_column&#34;: new_col_name})
         .drop(columns=[avg_val_col])
+    )
+
+
+def dataframe_to_matrix(
+    df: pd.DataFrame, rows: str, cols: str, values: str, sort_cats: bool = True
+) -&gt; np.ndarray:
+    &#34;&#34;&#34;Create a matrix from two nominal columns of a data frame.
+
+    Args:
+        df (pd.DataFrame): Input data frame.
+        rows (str): Data frame column to place along the rows.
+        cols (str): Date fraome column to place along the columns.
+        values (str): Values for the matrix.
+
+    Returns:
+        np.ndarray: Matrix of shape [`rows`, `cols`].
+    &#34;&#34;&#34;
+    if sort_cats:
+        sort_cols = [c for c in (rows, cols) if (df[c].dtype.name == &#34;category&#34;)]
+        if len(sort_cols) &gt; 0:
+            df = df.copy().sort_values(sort_cols)
+
+    return (
+        df.pivot_wider(index=rows, names_from=cols, values_from=values)
+        .drop(columns=[rows])
+        .values
     )</code></pre>
 </details>
 </section>
@@ -234,6 +261,57 @@ def center_column_grouped_dataframe(
         .assign(_new_centered_column=lambda d: d[val_col] - d[avg_val_col])
         .rename(columns={&#34;_new_centered_column&#34;: new_col_name})
         .drop(columns=[avg_val_col])
+    )</code></pre>
+</details>
+</dd>
+<dt id="src.data_processing.common.dataframe_to_matrix"><code class="name flex">
+<span>def <span class="ident">dataframe_to_matrix</span></span>(<span>df: pandas.core.frame.DataFrame, rows: str, cols: str, values: str, sort_cats: bool = True) -> numpy.ndarray</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a matrix from two nominal columns of a data frame.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>Input data frame.</dd>
+<dt><strong><code>rows</code></strong> :&ensp;<code>str</code></dt>
+<dd>Data frame column to place along the rows.</dd>
+<dt><strong><code>cols</code></strong> :&ensp;<code>str</code></dt>
+<dd>Date fraome column to place along the columns.</dd>
+<dt><strong><code>values</code></strong> :&ensp;<code>str</code></dt>
+<dd>Values for the matrix.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>np.ndarray</code></dt>
+<dd>Matrix of shape [<code>rows</code>, <code>cols</code>].</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def dataframe_to_matrix(
+    df: pd.DataFrame, rows: str, cols: str, values: str, sort_cats: bool = True
+) -&gt; np.ndarray:
+    &#34;&#34;&#34;Create a matrix from two nominal columns of a data frame.
+
+    Args:
+        df (pd.DataFrame): Input data frame.
+        rows (str): Data frame column to place along the rows.
+        cols (str): Date fraome column to place along the columns.
+        values (str): Values for the matrix.
+
+    Returns:
+        np.ndarray: Matrix of shape [`rows`, `cols`].
+    &#34;&#34;&#34;
+    if sort_cats:
+        sort_cols = [c for c in (rows, cols) if (df[c].dtype.name == &#34;category&#34;)]
+        if len(sort_cols) &gt; 0:
+            df = df.copy().sort_values(sort_cols)
+
+    return (
+        df.pivot_wider(index=rows, names_from=cols, values_from=values)
+        .drop(columns=[rows])
+        .values
     )</code></pre>
 </details>
 </dd>
@@ -482,6 +560,7 @@ needs to be binary (is mutated/is not mutated).</dd>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="src.data_processing.common.center_column_grouped_dataframe" href="#src.data_processing.common.center_column_grouped_dataframe">center_column_grouped_dataframe</a></code></li>
+<li><code><a title="src.data_processing.common.dataframe_to_matrix" href="#src.data_processing.common.dataframe_to_matrix">dataframe_to_matrix</a></code></li>
 <li><code><a title="src.data_processing.common.extract_flat_ary" href="#src.data_processing.common.extract_flat_ary">extract_flat_ary</a></code></li>
 <li><code><a title="src.data_processing.common.get_indices" href="#src.data_processing.common.get_indices">get_indices</a></code></li>
 <li><code><a title="src.data_processing.common.get_indices_and_count" href="#src.data_processing.common.get_indices_and_count">get_indices_and_count</a></code></li>

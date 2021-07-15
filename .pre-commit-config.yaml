@@ -58,6 +58,10 @@ repos:
     -   id: flake8
         types: [python]
         exclude: ".snakemake."
+-   repo: https://github.com/snakemake/snakefmt
+    rev: 0.4.1
+    hooks:
+    -   id: snakefmt
 -   repo: https://github.com/lorenzwalthert/precommit
     rev: v0.1.3
     hooks:

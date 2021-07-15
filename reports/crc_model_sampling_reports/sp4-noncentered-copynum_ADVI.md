@@ -1,6 +1,7 @@
 # Model Report
 
 ```python
+import logging
 import warnings
 from pathlib import Path
 from time import time
@@ -14,15 +15,19 @@ import pymc3 as pm
 import seaborn as sns
 from src.command_line_interfaces import sampling_pymc3_models_cli as sampling
 from src.data_processing import common as dphelp
+from src.loggers import set_console_handler_level
 from src.modeling import pymc3_analysis as pmanal
 from src.modeling import pymc3_sampling_api as pmapi
 from src.models import configuration
 from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.plot.color_pal import SeabornColor
 from src.project_enums import ModelFitMethod
+```
 
+```python
 notebook_tic = time()
 
+set_console_handler_level(logging.WARNING)
 warnings.simplefilter(action="ignore", category=UserWarning)
 
 gg.theme_set(gg.theme_classic())
@@ -75,45 +80,12 @@ speclet_model = configuration.get_config_and_instantiate_model(
 speclet_model.build_model()
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/08/21 07:59:52] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Instantiating and configuring a speclet      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/configuration.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">configuration.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:79</span>
-                             model from config.
-</pre>
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Setting model-specific configuration.         <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/speclet_four.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_four.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:88</span>
-</pre>
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Calling `model_specification<span style="font-weight: bold">()</span>` method.     <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/speclet_model.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_model.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:181</span>
-</pre>
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Beginning PyMC3 model specification.         <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/speclet_four.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_four.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:183</span>
-</pre>
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Applying <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> data transformations.      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:131</span>
-</pre>
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Applying transformation: <span style="color: #008000; text-decoration-color: #008000">'_drop_sgrna</span> <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:118</span>
-                             <span style="color: #008000; text-decoration-color: #008000">s_that_map_to_multiple_genes'</span>
-</pre>
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:251</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/12/21 06:24:36] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:250</span>
                              genes.
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Applying transformation:              <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:118</span>
-                             <span style="color: #008000; text-decoration-color: #008000">'_drop_missing_copynumber'</span>
-</pre>
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> data points with missing   <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:261</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> data points with missing   <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/model_data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:260</span>
                              copy number.
-</pre>
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/08/21 07:59:53] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Getting Theano shared variables.             <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/speclet_four.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_four.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:193</span>
-</pre>
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Saving shared variables to dictionary.       <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/speclet_four.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_four.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:201</span>
-</pre>
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Creating PyMC3 model.                        <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/models/speclet_four.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_four.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:211</span>
 </pre>
 
 ```python
@@ -122,12 +94,6 @@ if FIT_METHOD == "ADVI":
 else:
     model_az = speclet_model.load_mcmc_cache()
 ```
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/08/21 08:00:26] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> ArvizCacheManager: ADVI cache exists.      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/cache_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">cache_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:261</span>
-</pre>
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> ArvizCacheManager: ADVI cache exists.      <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/src/managers/cache_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">cache_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:261</span>
-</pre>
 
 ### Data
 
@@ -315,11 +281,11 @@ print(speclet_model.model)
     σ_d_log__ ~ TransformedDistribution
           μ_η ~ Normal
     σ_η_log__ ~ TransformedDistribution
-          μ_β ~ Normal
-          σ_β ~ Normal
      h_offset ~ Normal
      d_offset ~ Normal
      η_offset ~ Normal
+          μ_β ~ Normal
+    σ_β_log__ ~ TransformedDistribution
      β_offset ~ Normal
     σ_σ_log__ ~ TransformedDistribution
       σ_log__ ~ TransformedDistribution
@@ -329,6 +295,7 @@ print(speclet_model.model)
             h ~ Deterministic
             d ~ Deterministic
             η ~ Deterministic
+          σ_β ~ HalfNormal
             β ~ Deterministic
             μ ~ Deterministic
           σ_σ ~ HalfNormal
@@ -339,7 +306,7 @@ print(speclet_model.model)
 pm.model_to_graphviz(speclet_model.model)
 ```
 
-![svg](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_14_0.svg)
+![svg](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_15_0.svg)
 
 ## Fit diagnostics
 
@@ -357,11 +324,11 @@ else:
     print(az.bfmi(model_az))
 ```
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_16_0.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_17_0.png)
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_16_1.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_17_1.png)
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_16_2.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_17_2.png)
 
 ## Model parameters
 
@@ -435,81 +402,81 @@ for var in vars_to_inspect:
         print(err)
 ```
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_0.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_0.png)
 
-    <ggplot: (8740089121648)>
+    <ggplot: (2997970324357)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_2.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_2.png)
 
-    <ggplot: (8740099634195)>
+    <ggplot: (2997949749447)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_4.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_4.png)
 
-    <ggplot: (8740089361177)>
+    <ggplot: (2997961354298)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_6.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_6.png)
 
-    <ggplot: (8740108650503)>
+    <ggplot: (2997969517117)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_8.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_8.png)
 
-    <ggplot: (8740089361240)>
+    <ggplot: (2997961383976)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_10.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_10.png)
 
-    <ggplot: (8740089361399)>
+    <ggplot: (2997969675048)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_12.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_12.png)
 
-    <ggplot: (8740088748126)>
+    <ggplot: (2997971449351)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_14.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_14.png)
 
-    <ggplot: (8740088991236)>
+    <ggplot: (2997970201046)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_16.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_16.png)
 
-    <ggplot: (8740089112333)>
+    <ggplot: (2997969513689)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_18.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_18.png)
 
-    <ggplot: (8740098865306)>
+    <ggplot: (2997971560822)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_20.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_20.png)
 
-    <ggplot: (8740088585253)>
+    <ggplot: (2997971450980)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_22.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_22.png)
 
-    <ggplot: (8740089121630)>
+    <ggplot: (2997970387502)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_24.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_24.png)
 
-    <ggplot: (8740085781366)>
+    <ggplot: (2997974935456)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_26.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_26.png)
 
-    <ggplot: (8740098950629)>
+    <ggplot: (2997970868231)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_28.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_28.png)
 
-    <ggplot: (8740098948994)>
+    <ggplot: (2997970873200)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_30.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_30.png)
 
-    <ggplot: (8740085180094)>
+    <ggplot: (2997961354286)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_32.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_32.png)
 
-    <ggplot: (8740085276558)>
+    <ggplot: (2997971213361)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_34.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_34.png)
 
-    <ggplot: (8740099359525)>
+    <ggplot: (2997974319367)>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_19_36.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_20_36.png)
 
-    <ggplot: (8740099439610)>
+    <ggplot: (2997969474232)>
 
 ```python
 if isinstance(speclet_model, SpecletTestModel):
@@ -575,9 +542,9 @@ pred_summary.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.073466</td>
-      <td>-1.395708</td>
-      <td>1.157594</td>
+      <td>-0.124475</td>
+      <td>-1.294582</td>
+      <td>1.288210</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>LS513_c903R1</td>
       <td>-1.100620</td>
@@ -595,13 +562,13 @@ pred_summary.head()
       <td>primary</td>
       <td>True</td>
       <td>63.0</td>
-      <td>-1.027154</td>
+      <td>-0.976145</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.057908</td>
-      <td>-1.286237</td>
-      <td>1.387705</td>
+      <td>-0.076418</td>
+      <td>-1.400953</td>
+      <td>1.247260</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>CL11_c903R1</td>
       <td>-0.572939</td>
@@ -619,13 +586,13 @@ pred_summary.head()
       <td>primary</td>
       <td>True</td>
       <td>NaN</td>
-      <td>-0.515031</td>
+      <td>-0.496521</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.049378</td>
-      <td>-1.451902</td>
-      <td>1.148832</td>
+      <td>-0.020623</td>
+      <td>-1.307020</td>
+      <td>1.352926</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>HT29_c904R1</td>
       <td>0.054573</td>
@@ -643,13 +610,13 @@ pred_summary.head()
       <td>primary</td>
       <td>False</td>
       <td>44.0</td>
-      <td>0.103951</td>
+      <td>0.075196</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.027305</td>
-      <td>-1.316227</td>
-      <td>1.212194</td>
+      <td>-0.006597</td>
+      <td>-1.341459</td>
+      <td>1.246580</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>SNUC1_c903R4</td>
       <td>0.700923</td>
@@ -667,13 +634,13 @@ pred_summary.head()
       <td>metastasis</td>
       <td>True</td>
       <td>71.0</td>
-      <td>0.728228</td>
+      <td>0.707520</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.024412</td>
-      <td>-1.282731</td>
-      <td>1.301807</td>
+      <td>-0.022711</td>
+      <td>-1.336838</td>
+      <td>1.164198</td>
       <td>CTTGTTAGATAATGGAACT</td>
       <td>KM12_c908R1_100</td>
       <td>-1.123352</td>
@@ -691,7 +658,7 @@ pred_summary.head()
       <td>primary</td>
       <td>NaN</td>
       <td>NaN</td>
-      <td>-1.098940</td>
+      <td>-1.100641</td>
     </tr>
   </tbody>
 </table>
@@ -705,7 +672,7 @@ except Exception as e:
     print(e)
 ```
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_23_0.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_24_0.png)
 
 ```python
 model_loo = az.loo(model_az, pointwise=True)
@@ -715,18 +682,18 @@ print(model_loo)
     Computed from 1000 by 1443 log-likelihood matrix
 
              Estimate       SE
-    elpd_loo -1815.04    64.99
-    p_loo      702.98        -
+    elpd_loo -1825.27    67.10
+    p_loo      725.03        -
 
     There has been a warning during the calculation. Please check the results.
     ------
 
     Pareto k diagnostic values:
                              Count   Pct.
-    (-Inf, 0.5]   (good)      830   57.5%
-     (0.5, 0.7]   (ok)        216   15.0%
-       (0.7, 1]   (bad)       194   13.4%
-       (1, Inf)   (very bad)  203   14.1%
+    (-Inf, 0.5]   (good)      825   57.2%
+     (0.5, 0.7]   (ok)        220   15.2%
+       (0.7, 1]   (bad)       191   13.2%
+       (1, Inf)   (very bad)  207   14.3%
 
 ```python
 sns.distplot(model_loo.loo_i.values);
@@ -740,7 +707,7 @@ sns.distplot(model_loo.loo_i.values);
 
     <AxesSubplot:ylabel='Density'>
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_25_2.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_26_2.png)
 
 ```python
 pred_summary["loo"] = model_loo.loo_i.values
@@ -758,9 +725,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_27_0.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_28_0.png)
 
-    <ggplot: (8740089278814)>
+    <ggplot: (2997970997974)>
 
 ```python
 (
@@ -772,9 +739,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_28_0.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_29_0.png)
 
-    <ggplot: (8740090363516)>
+    <ggplot: (2997969831473)>
 
 ```python
 (
@@ -784,9 +751,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_29_0.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_30_0.png)
 
-    <ggplot: (8740089765858)>
+    <ggplot: (2997891805778)>
 
 ```python
 (
@@ -798,9 +765,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_30_0.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_31_0.png)
 
-    <ggplot: (8740098887524)>
+    <ggplot: (2997891805700)>
 
 ```python
 (
@@ -812,9 +779,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_31_0.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_32_0.png)
 
-    <ggplot: (8740108646385)>
+    <ggplot: (2997961549843)>
 
 ```python
 (
@@ -828,9 +795,9 @@ pred_summary["loo"] = model_loo.loo_i.values
 )
 ```
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_32_0.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_33_0.png)
 
-    <ggplot: (8740098882485)>
+    <ggplot: (2997962511737)>
 
 ```python
 # Remove samples without gene CN data.
@@ -847,9 +814,9 @@ ppc_df_no_missing["binned_copy_number"] = [
 )
 ```
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_33_0.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_34_0.png)
 
-    <ggplot: (8740089371094)>
+    <ggplot: (2997962511773)>
 
 ```python
 gene_error = (
@@ -880,9 +847,9 @@ n_genes = 15
 )
 ```
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_34_0.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_35_0.png)
 
-    <ggplot: (8740095429298)>
+    <ggplot: (2997969559941)>
 
 ```python
 (
@@ -894,9 +861,9 @@ n_genes = 15
 )
 ```
 
-![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_35_0.png)
+![png](sp4-noncentered-copynum_ADVI_files/sp4-noncentered-copynum_ADVI_36_0.png)
 
-    <ggplot: (8740095425187)>
+    <ggplot: (2997961565447)>
 
 ---
 
@@ -905,14 +872,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 2.69 minutes
+    execution time: 10.85 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-08
+    Last updated: 2021-07-12
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -923,17 +890,18 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-236.o2.rc.hms.harvard.edu
+    Hostname: compute-h-17-54.o2.rc.hms.harvard.edu
 
-    Git branch: pipeline-confg
+    Git branch: fit-models
 
-    arviz     : 0.11.2
-    matplotlib: 3.3.4
+    pandas    : 1.2.3
     pymc3     : 3.11.1
     seaborn   : 0.11.1
-    pandas    : 1.2.3
     numpy     : 1.20.1
+    matplotlib: 3.3.4
     plotnine  : 0.7.1
+    logging   : 0.5.1.2
+    arviz     : 0.11.2

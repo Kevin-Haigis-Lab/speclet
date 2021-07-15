@@ -267,6 +267,7 @@ docs/.docs-env
 !models/model-configs.yaml
 !modeling_data/depmap_modeling_dataframe_crc-subsample.csv
 !modeling_data/copy_number_data_samples.npy
+!modeling_data/sanger_cancer-gene-census.csv
 !data/download-data.sh
 !data/download-data.smk
 !data/all-depmap-ids.csv

@@ -7,6 +7,7 @@ from hypothesis import strategies as st
 
 from src.managers.model_data_managers import CrcDataManager
 from src.misc import test_helpers as th
+from src.modeling import pymc3_helpers as pmhelp
 from src.models.speclet_seven import SpecletSeven, SpecletSevenConfiguration
 
 
@@ -20,8 +21,10 @@ def data_manager_use_test_data(monkeypatch: pytest.MonkeyPatch):
 
 class TestSpecletSeven:
     @pytest.fixture(scope="function")
-    def sp7(self, tmp_path: Path) -> SpecletSeven:
-        return SpecletSeven("test-model", root_cache_dir=tmp_path)
+    def sp7(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> SpecletSeven:
+        return SpecletSeven(
+            "test-model", root_cache_dir=tmp_path, data_manager=mock_crc_dm, debug=True
+        )
 
     def test_init(self, sp7: SpecletSeven):
         assert sp7.model is None
@@ -29,7 +32,10 @@ class TestSpecletSeven:
         assert sp7.advi_results is None
         assert sp7.data_manager is not None
 
-    top_priors = ["μ_μ_μ_a", "σ_μ_μ_a", "σ_σ_μ_a", "σ_σ_a", "σ"]
+    def test_build_model(self, sp7: SpecletSeven):
+        assert sp7.model is None
+        sp7.build_model()
+        assert sp7.model is not None
 
     @pytest.mark.slow
     @pytest.mark.parametrize("fit_method", ["mcmc", "advi"])
@@ -40,7 +46,7 @@ class TestSpecletSeven:
         n_draws, n_chains = 10, 1
 
         if fit_method == "mcmc":
-            fit_res = sp7.mcmc_sample_model(
+            _ = sp7.mcmc_sample_model(
                 draws=n_draws,
                 tune=10,
                 chains=n_chains,
@@ -53,7 +59,7 @@ class TestSpecletSeven:
             assert sp7.mcmc_results is not None
             assert sp7.advi_results is None
         else:
-            fit_res, _ = sp7.advi_sample_model(
+            _, _ = sp7.advi_sample_model(
                 n_iterations=20,
                 draws=n_draws,
                 prior_pred_samples=10,
@@ -62,9 +68,6 @@ class TestSpecletSeven:
             )
             assert sp7.mcmc_results is None
             assert sp7.advi_results is not None
-
-        for p in self.top_priors:
-            assert fit_res.posterior[p].shape == (n_chains, n_draws)
 
     @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(config=st.builds(SpecletSevenConfiguration))
@@ -107,4 +110,16 @@ class TestSpecletSeven:
             data_manager=mock_crc_dm,
             config=config,
         )
-        th.assert_model_reparameterization(sp7, config=config)
+        sp7.build_model()
+        assert sp7.model is not None
+        all_vars = pmhelp.get_variable_names(sp7.model)
+        if config.batch_cov:
+            assert "j" in all_vars
+        if config.cell_line_cna_cov:
+            assert "k" in all_vars
+        if config.gene_cna_cov:
+            assert "n" in all_vars
+        if config.rna_cov:
+            assert "q" in all_vars
+        if config.mutation_cov:
+            assert "m" in all_vars

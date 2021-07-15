@@ -1,5 +1,4 @@
 from pathlib import Path
-from string import ascii_letters
 from typing import Any, Dict, List, Set, Tuple
 
 import numpy as np
@@ -12,14 +11,7 @@ from src.data_processing import achilles as achelp
 from src.managers.model_data_managers import CrcDataManager
 from src.misc import test_helpers as th
 from src.modeling import pymc3_helpers as pmhelp
-from src.models import speclet_six
 from src.models.speclet_six import SpecletSix, SpecletSixConfiguration
-
-chars = [str(i) for i in range(10)] + list(ascii_letters)
-
-
-def monkey_get_data_path(*args: Any, **kwargs: Any) -> Path:
-    return Path("tests", "depmap_test_data.csv")
 
 
 def make_column_tiled(
@@ -49,54 +41,7 @@ def make_data_multiple_screens(dm: CrcDataManager):
     dm.data = make_column_tiled(data, batch_map, "screen", new_screens)
 
 
-@st.composite
-def copynumber_dataframe(draw, group_name: str) -> pd.DataFrame:
-    groups = draw(st.lists(st.text(alphabet=chars), min_size=1))
-    values = [
-        draw(
-            st.lists(
-                st.floats(
-                    min_value=-1000.0,
-                    max_value=1000.0,
-                    allow_nan=False,
-                    allow_infinity=False,
-                ),
-                min_size=1,
-            )
-        )
-        for _ in groups
-    ]
-    return (
-        pd.DataFrame({group_name: groups, "copy_number": values})
-        .explode("copy_number")
-        .astype({"copy_number": float})
-        .reset_index(drop=True)
-    )
-
-
 class TestSpecletSix:
-    @given(copynumber_dataframe(group_name="depmap_id"))
-    def test_centered_copynumber_by_cellline(self, df: pd.DataFrame):
-        mod_df = speclet_six.centered_copynumber_by_cellline(df.copy())
-        for cell_line in mod_df["depmap_id"].unique():
-            avg = mod_df.query(f"depmap_id == '{cell_line}'")[
-                "copy_number_cellline"
-            ].mean()
-            assert avg == pytest.approx(0.0, abs=0.001)
-
-    @given(copynumber_dataframe(group_name="hugo_symbol"))
-    def test_centered_copynumber_by_gene(self, df: pd.DataFrame):
-        mod_df = speclet_six.centered_copynumber_by_gene(df.copy())
-        for gene in mod_df["hugo_symbol"].unique():
-            avg = mod_df.query(f"hugo_symbol == '{gene}'")["copy_number_gene"].mean()
-            assert avg == pytest.approx(0.0, abs=0.001)
-
-    @given(st.lists(st.booleans(), max_size=100))
-    def test_converting_is_mutated_column(self, is_mutated: List[bool]):
-        df = pd.DataFrame({"is_mutated": is_mutated})
-        mod_df = speclet_six.convert_is_mutated_to_numeric(df)
-        assert mod_df["is_mutated"].dtype == np.int64
-
     def test_instantiation(self, tmp_path: Path):
         sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path, debug=True)
         assert sp6.model is None

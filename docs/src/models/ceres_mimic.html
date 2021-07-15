@@ -31,17 +31,26 @@
 &#34;&#34;&#34;Builders for CRC CERES Mimic model.&#34;&#34;&#34;
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import pymc3 as pm
 import theano
+from pydantic import BaseModel
 
 from src.data_processing import achilles as achelp
+from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
 from src.models.speclet_model import ReplacementsDict, SpecletModel
 
 #### ---- CERES Mimic ---- ####
+
+
+class CeresMimicConfiguration(BaseModel):
+    &#34;&#34;&#34;Parameterizations for each covariate in CeresMimic model.&#34;&#34;&#34;
+
+    copynumber_cov: bool = False
+    sgrna_intercept_cov: bool = False
 
 
 class CeresMimic(SpecletModel):
@@ -65,14 +74,9 @@ class CeresMimic(SpecletModel):
     This is a mimic of the CERES model with an additional parameter for pDNA batch.
     There are two optional parameters, `copynumber_cov` and `sgrna_intercept_cov`, to
     control the inclusion of \\(\\beta_c\\) and \\(o_s\\), respectively.
-
-    Attributes:
-        copynumber_cov (bool): Include the copy number covariate \\(\\beta_c\\).
-        sgrna_intercept_cov (bool): Include the varying intercept for sgRNA \\(o_s\\).
     &#34;&#34;&#34;
 
-    _copynumber_cov: bool
-    _sgrna_intercept_cov: bool
+    config: CeresMimicConfiguration
 
     def __init__(
         self,
@@ -80,8 +84,7 @@ class CeresMimic(SpecletModel):
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
-        copynumber_cov: bool = False,
-        sgrna_intercept_cov: bool = False,
+        config: Optional[CeresMimicConfiguration] = None,
     ):
         &#34;&#34;&#34;Create a CeresMimic object.
 
@@ -93,13 +96,12 @@ class CeresMimic(SpecletModel):
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. If None (default), a `CrcDataManager` is created automatically.
-            copynumber_cov (bool, optional): Should the gene copy number covariate be
-              included in the model? Default to False.
-            sgrna_intercept_cov (bool, optional): Should a varying intercept for
-              `sgRNA|gene` be included in the model? Default to False.
+            config (SpecletSixConfiguration, optional): Model configurations.
         &#34;&#34;&#34;
         if data_manager is None:
             data_manager = CrcDataManager(debug=debug)
+
+        self.config = config if config is not None else CeresMimicConfiguration()
 
         super().__init__(
             name=name,
@@ -107,21 +109,27 @@ class CeresMimic(SpecletModel):
             debug=debug,
             data_manager=data_manager,
         )
-        self._copynumber_cov = copynumber_cov
-        self._sgrna_intercept_cov = sgrna_intercept_cov
+
+    def set_config(self, info: Dict[Any, Any]) -&gt; None:
+        &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
+        new_config = CeresMimicConfiguration(**info)
+        if self.config is not None and self.config != new_config:
+            logger.info(&#34;Setting model-specific configuration.&#34;)
+            self.config = new_config
+            self.model = None
 
     @property
     def copynumber_cov(self) -&gt; bool:
-        &#34;&#34;&#34;Get the current value of `copynumber_cov` attribute.
+        &#34;&#34;&#34;Whether or not the copy number covariate is included in the model.
 
         Returns:
             bool: Whether or not the copy number covariate is included in the model.
         &#34;&#34;&#34;
-        return self._copynumber_cov
+        return self.config.copynumber_cov
 
     @copynumber_cov.setter
     def copynumber_cov(self, new_value: bool):
-        &#34;&#34;&#34;Set the value for the `copynumber_cov` attribute.
+        &#34;&#34;&#34;Setter to control whether the copy number covariate should be in the model.
 
         If the value changes, then the `model` attribute and model results attributes
         `advi_results` and `mcmc_results` are all reset to None.
@@ -130,23 +138,23 @@ class CeresMimic(SpecletModel):
             new_value (bool): Whether or not the copy number covariate should be
               included in the model.
         &#34;&#34;&#34;
-        if new_value != self._copynumber_cov:
+        if new_value != self.config.copynumber_cov:
             self._reset_model_and_results()
-            self._copynumber_cov = new_value
+            self.config.copynumber_cov = new_value
 
     @property
     def sgrna_intercept_cov(self) -&gt; bool:
-        &#34;&#34;&#34;Get the current value of `sgrna_intercept_cov` attribute.
+        &#34;&#34;&#34;Whether or not the `sgRNA|gene` varying intercept covariate is in the model.
 
         Returns:
             bool: Whether or not the `sgRNA|gene` varying intercept covariate is
               included in the model.
         &#34;&#34;&#34;
-        return self._sgrna_intercept_cov
+        return self.config.sgrna_intercept_cov
 
     @sgrna_intercept_cov.setter
     def sgrna_intercept_cov(self, new_value: bool):
-        &#34;&#34;&#34;Set the value for the `sgrna_intercept_cov` attribute.
+        &#34;&#34;&#34;Control if the `sgRNA|gene` varying intercept covariate is in the model.
 
         If the value changes, then the `model` attribute and model results attributes
         `advi_results` and `mcmc_results` are all reset to None.
@@ -155,9 +163,9 @@ class CeresMimic(SpecletModel):
             new_value (bool): Whether or not the `sgRNA|gene` varying intercept
               covariate is included in the model.
         &#34;&#34;&#34;
-        if new_value != self._sgrna_intercept_cov:
+        if new_value != self.config.sgrna_intercept_cov:
             self._reset_model_and_results()
-            self._sgrna_intercept_cov = new_value
+            self.config.sgrna_intercept_cov = new_value
 
     def model_specification(self) -&gt; Tuple[pm.Model, str]:
         &#34;&#34;&#34;Build CRC CERES Mimic One.
@@ -309,7 +317,7 @@ class CeresMimic(SpecletModel):
 <dl>
 <dt id="src.models.ceres_mimic.CeresMimic"><code class="flex name class">
 <span>class <span class="ident">CeresMimic</span></span>
-<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = None, copynumber_cov: bool = False, sgrna_intercept_cov: bool = False)</span>
+<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = None, config: Optional[<a title="src.models.ceres_mimic.CeresMimicConfiguration" href="#src.models.ceres_mimic.CeresMimicConfiguration">CeresMimicConfiguration</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>CERES Mimic.</p>
@@ -335,13 +343,6 @@ o_s &\sim N(\mu_o, \sigma_o)[\text{gene}] \\
 <p>This is a mimic of the CERES model with an additional parameter for pDNA batch.
 There are two optional parameters, <code>copynumber_cov</code> and <code>sgrna_intercept_cov</code>, to
 control the inclusion of <span><span class="MathJax_Preview">\beta_c</span><script type="math/tex">\beta_c</script></span> and <span><span class="MathJax_Preview">o_s</span><script type="math/tex">o_s</script></span>, respectively.</p>
-<h2 id="attributes">Attributes</h2>
-<dl>
-<dt><strong><code>copynumber_cov</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Include the copy number covariate <span><span class="MathJax_Preview">\beta_c</span><script type="math/tex">\beta_c</script></span>.</dd>
-<dt><strong><code>sgrna_intercept_cov</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Include the varying intercept for sgRNA <span><span class="MathJax_Preview">o_s</span><script type="math/tex">o_s</script></span>.</dd>
-</dl>
 <p>Create a CeresMimic object.</p>
 <h2 id="args">Args</h2>
 <dl>
@@ -356,12 +357,8 @@ sampling/fitting results. Defaults to None.</dd>
 <dt><strong><code>data_manager</code></strong> :&ensp;<code>Optional[DataManager]</code>, optional</dt>
 <dd>Object that will manage the
 data. If None (default), a <code>CrcDataManager</code> is created automatically.</dd>
-<dt><strong><code>copynumber_cov</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>Should the gene copy number covariate be
-included in the model? Default to False.</dd>
-<dt><strong><code>sgrna_intercept_cov</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>Should a varying intercept for
-<code>sgRNA|gene</code> be included in the model? Default to False.</dd>
+<dt><strong><code>config</code></strong> :&ensp;<code>SpecletSixConfiguration</code>, optional</dt>
+<dd>Model configurations.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -388,14 +385,9 @@ included in the model? Default to False.</dd>
     This is a mimic of the CERES model with an additional parameter for pDNA batch.
     There are two optional parameters, `copynumber_cov` and `sgrna_intercept_cov`, to
     control the inclusion of \\(\\beta_c\\) and \\(o_s\\), respectively.
-
-    Attributes:
-        copynumber_cov (bool): Include the copy number covariate \\(\\beta_c\\).
-        sgrna_intercept_cov (bool): Include the varying intercept for sgRNA \\(o_s\\).
     &#34;&#34;&#34;
 
-    _copynumber_cov: bool
-    _sgrna_intercept_cov: bool
+    config: CeresMimicConfiguration
 
     def __init__(
         self,
@@ -403,8 +395,7 @@ included in the model? Default to False.</dd>
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
         data_manager: Optional[DataManager] = None,
-        copynumber_cov: bool = False,
-        sgrna_intercept_cov: bool = False,
+        config: Optional[CeresMimicConfiguration] = None,
     ):
         &#34;&#34;&#34;Create a CeresMimic object.
 
@@ -416,13 +407,12 @@ included in the model? Default to False.</dd>
             debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[DataManager], optional): Object that will manage the
               data. If None (default), a `CrcDataManager` is created automatically.
-            copynumber_cov (bool, optional): Should the gene copy number covariate be
-              included in the model? Default to False.
-            sgrna_intercept_cov (bool, optional): Should a varying intercept for
-              `sgRNA|gene` be included in the model? Default to False.
+            config (SpecletSixConfiguration, optional): Model configurations.
         &#34;&#34;&#34;
         if data_manager is None:
             data_manager = CrcDataManager(debug=debug)
+
+        self.config = config if config is not None else CeresMimicConfiguration()
 
         super().__init__(
             name=name,
@@ -430,21 +420,27 @@ included in the model? Default to False.</dd>
             debug=debug,
             data_manager=data_manager,
         )
-        self._copynumber_cov = copynumber_cov
-        self._sgrna_intercept_cov = sgrna_intercept_cov
+
+    def set_config(self, info: Dict[Any, Any]) -&gt; None:
+        &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
+        new_config = CeresMimicConfiguration(**info)
+        if self.config is not None and self.config != new_config:
+            logger.info(&#34;Setting model-specific configuration.&#34;)
+            self.config = new_config
+            self.model = None
 
     @property
     def copynumber_cov(self) -&gt; bool:
-        &#34;&#34;&#34;Get the current value of `copynumber_cov` attribute.
+        &#34;&#34;&#34;Whether or not the copy number covariate is included in the model.
 
         Returns:
             bool: Whether or not the copy number covariate is included in the model.
         &#34;&#34;&#34;
-        return self._copynumber_cov
+        return self.config.copynumber_cov
 
     @copynumber_cov.setter
     def copynumber_cov(self, new_value: bool):
-        &#34;&#34;&#34;Set the value for the `copynumber_cov` attribute.
+        &#34;&#34;&#34;Setter to control whether the copy number covariate should be in the model.
 
         If the value changes, then the `model` attribute and model results attributes
         `advi_results` and `mcmc_results` are all reset to None.
@@ -453,23 +449,23 @@ included in the model? Default to False.</dd>
             new_value (bool): Whether or not the copy number covariate should be
               included in the model.
         &#34;&#34;&#34;
-        if new_value != self._copynumber_cov:
+        if new_value != self.config.copynumber_cov:
             self._reset_model_and_results()
-            self._copynumber_cov = new_value
+            self.config.copynumber_cov = new_value
 
     @property
     def sgrna_intercept_cov(self) -&gt; bool:
-        &#34;&#34;&#34;Get the current value of `sgrna_intercept_cov` attribute.
+        &#34;&#34;&#34;Whether or not the `sgRNA|gene` varying intercept covariate is in the model.
 
         Returns:
             bool: Whether or not the `sgRNA|gene` varying intercept covariate is
               included in the model.
         &#34;&#34;&#34;
-        return self._sgrna_intercept_cov
+        return self.config.sgrna_intercept_cov
 
     @sgrna_intercept_cov.setter
     def sgrna_intercept_cov(self, new_value: bool):
-        &#34;&#34;&#34;Set the value for the `sgrna_intercept_cov` attribute.
+        &#34;&#34;&#34;Control if the `sgRNA|gene` varying intercept covariate is in the model.
 
         If the value changes, then the `model` attribute and model results attributes
         `advi_results` and `mcmc_results` are all reset to None.
@@ -478,9 +474,9 @@ included in the model? Default to False.</dd>
             new_value (bool): Whether or not the `sgRNA|gene` varying intercept
               covariate is included in the model.
         &#34;&#34;&#34;
-        if new_value != self._sgrna_intercept_cov:
+        if new_value != self.config.sgrna_intercept_cov:
             self._reset_model_and_results()
-            self._sgrna_intercept_cov = new_value
+            self.config.sgrna_intercept_cov = new_value
 
     def model_specification(self) -&gt; Tuple[pm.Model, str]:
         &#34;&#34;&#34;Build CRC CERES Mimic One.
@@ -628,7 +624,7 @@ included in the model? Default to False.</dd>
 <dl>
 <dt id="src.models.ceres_mimic.CeresMimic.copynumber_cov"><code class="name">var <span class="ident">copynumber_cov</span> : bool</code></dt>
 <dd>
-<div class="desc"><p>Get the current value of <code>copynumber_cov</code> attribute.</p>
+<div class="desc"><p>Whether or not the copy number covariate is included in the model.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>bool</code></dt>
@@ -640,17 +636,17 @@ included in the model? Default to False.</dd>
 </summary>
 <pre><code class="python">@property
 def copynumber_cov(self) -&gt; bool:
-    &#34;&#34;&#34;Get the current value of `copynumber_cov` attribute.
+    &#34;&#34;&#34;Whether or not the copy number covariate is included in the model.
 
     Returns:
         bool: Whether or not the copy number covariate is included in the model.
     &#34;&#34;&#34;
-    return self._copynumber_cov</code></pre>
+    return self.config.copynumber_cov</code></pre>
 </details>
 </dd>
 <dt id="src.models.ceres_mimic.CeresMimic.sgrna_intercept_cov"><code class="name">var <span class="ident">sgrna_intercept_cov</span> : bool</code></dt>
 <dd>
-<div class="desc"><p>Get the current value of <code>sgrna_intercept_cov</code> attribute.</p>
+<div class="desc"><p>Whether or not the <code>sgRNA|gene</code> varying intercept covariate is in the model.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>bool</code></dt>
@@ -663,13 +659,13 @@ included in the model.</dd>
 </summary>
 <pre><code class="python">@property
 def sgrna_intercept_cov(self) -&gt; bool:
-    &#34;&#34;&#34;Get the current value of `sgrna_intercept_cov` attribute.
+    &#34;&#34;&#34;Whether or not the `sgRNA|gene` varying intercept covariate is in the model.
 
     Returns:
         bool: Whether or not the `sgRNA|gene` varying intercept covariate is
           included in the model.
     &#34;&#34;&#34;
-    return self._sgrna_intercept_cov</code></pre>
+    return self.config.sgrna_intercept_cov</code></pre>
 </details>
 </dd>
 </dl>
@@ -858,6 +854,7 @@ def sgrna_intercept_cov(self) -&gt; bool:
 <li><code><a title="src.models.speclet_model.SpecletModel.clear_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.clear_cache">clear_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.debug" href="speclet_model.html#src.models.speclet_model.SpecletModel.debug">debug</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_advi_callbacks" href="speclet_model.html#src.models.speclet_model.SpecletModel.get_advi_callbacks">get_advi_callbacks</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.get_sbc" href="speclet_model.html#src.models.speclet_model.SpecletModel.get_sbc">get_sbc</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.load_advi_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.load_advi_cache">load_advi_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.load_mcmc_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.load_mcmc_cache">load_mcmc_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.mcmc_sample_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.mcmc_sample_model">mcmc_sample_model</a></code></li>
@@ -870,6 +867,30 @@ def sgrna_intercept_cov(self) -&gt; bool:
 <li><code><a title="src.models.speclet_model.SpecletModel.write_mcmc_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_mcmc_cache">write_mcmc_cache</a></code></li>
 </ul>
 </li>
+</ul>
+</dd>
+<dt id="src.models.ceres_mimic.CeresMimicConfiguration"><code class="flex name class">
+<span>class <span class="ident">CeresMimicConfiguration</span></span>
+<span>(</span><span>*, copynumber_cov: bool = False, sgrna_intercept_cov: bool = False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Parameterizations for each covariate in CeresMimic model.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CeresMimicConfiguration(BaseModel):
+    &#34;&#34;&#34;Parameterizations for each covariate in CeresMimic model.&#34;&#34;&#34;
+
+    copynumber_cov: bool = False
+    sgrna_intercept_cov: bool = False</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
 </ul>
 </dd>
 </dl>
@@ -896,6 +917,9 @@ def sgrna_intercept_cov(self) -&gt; bool:
 <li><code><a title="src.models.ceres_mimic.CeresMimic.model_specification" href="#src.models.ceres_mimic.CeresMimic.model_specification">model_specification</a></code></li>
 <li><code><a title="src.models.ceres_mimic.CeresMimic.sgrna_intercept_cov" href="#src.models.ceres_mimic.CeresMimic.sgrna_intercept_cov">sgrna_intercept_cov</a></code></li>
 </ul>
+</li>
+<li>
+<h4><code><a title="src.models.ceres_mimic.CeresMimicConfiguration" href="#src.models.ceres_mimic.CeresMimicConfiguration">CeresMimicConfiguration</a></code></h4>
 </li>
 </ul>
 </li>
