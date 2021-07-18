@@ -1130,7 +1130,7 @@ def mixed_parameterization(
         eta_ncp = pm.Normal("eta_ncp", 0, 1, shape=n_ncp)
         theta_ncp = pm.Deterministic("theta_ncp", mu + tau * eta_ncp)
 
-        _theta = list(range(data["K"]))
+        _theta = list(range(d["K"]))
         for i, t in enumerate(cp_idx):
             _theta[t] = theta_cp[i]
         for i, t in enumerate(ncp_idx):
