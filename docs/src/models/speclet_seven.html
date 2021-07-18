@@ -46,8 +46,8 @@ from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
 from src.modeling import feature_engineering as feng
 from src.models.speclet_model import ReplacementsDict, SpecletModel
-
-# from src.project_enums import ModelParameterization as MP
+from src.project_enums import ModelParameterization as MP
+from src.project_enums import assert_never
 
 
 def _assert_shapes(
@@ -65,6 +65,15 @@ class SpecletSevenConfiguration(BaseModel):
     rna_cov: bool = False
     mutation_cov: bool = False
     batch_cov: bool = False
+    n: MP = MP.CENTERED
+    q: MP = MP.CENTERED
+    j: MP = MP.CENTERED
+    m: MP = MP.CENTERED
+    μ_m: MP = MP.CENTERED
+    k: MP = MP.CENTERED
+    μ_k: MP = MP.CENTERED
+    h: MP = MP.CENTERED
+    μ_h: MP = MP.CENTERED
 
 
 class SpecletSeven(SpecletModel):
@@ -226,19 +235,35 @@ class SpecletSeven(SpecletModel):
         k_shape = (1, co_idx.n_celllines)
         with model:
             if multiple_lineages:
-                μ_μ_k = pm.Normal(&#34;μ_μ_k&#34;, 0, 1)
-                σ_μ_k = pm.HalfNormal(&#34;σ_μ_k&#34;, 1)
-                μ_k = pm.Normal(&#34;μ_k&#34;, μ_μ_k, σ_μ_k, shape=co_idx.n_lineages)
+                μ_μ_k = pm.Normal(&#34;μ_μ_k&#34;, 0, 5)
+                σ_μ_k = pm.HalfNormal(&#34;σ_μ_k&#34;, 5)
+                if self.config.μ_k is MP.NONCENTERED:
+                    μ_k_offset = pm.Normal(&#34;μ_k_offset&#34;, 0, 1, shape=co_idx.n_lineages)
+                    μ_k = pm.Deterministic(&#34;μ_k&#34;, μ_μ_k + σ_μ_k * μ_k_offset)
+                elif self.config.μ_k is MP.CENTERED:
+                    μ_k = pm.Normal(&#34;μ_k&#34;, μ_μ_k, σ_μ_k, shape=co_idx.n_lineages)
+                else:
+                    assert_never(self.config.μ_k)
             else:
                 μ_k = pm.Normal(&#34;μ_k&#34;, 0, 1)
             σ_σ_k = pm.HalfNormal(&#34;σ_σ_k&#34;, 1)
             σ_k = pm.HalfNormal(&#34;σ_k&#34;, σ_σ_k, shape=co_idx.n_lineages)
-            k = pm.Normal(  # noqa: F841
-                &#34;k&#34;,
-                μ_k[cellline_to_lineage_idx_shared],
-                σ_k[cellline_to_lineage_idx_shared],
-                shape=k_shape,
-            )
+            if self.config.k is MP.NONCENTERED:
+                k_offset = pm.Normal(&#34;k_offset&#34;, 0, 1, shape=k_shape)
+                k = pm.Deterministic(  # noqa: F841
+                    &#34;k&#34;,
+                    μ_k[cellline_to_lineage_idx_shared]
+                    + σ_k[cellline_to_lineage_idx_shared] * k_offset,
+                )
+            elif self.config.k is MP.CENTERED:
+                k = pm.Normal(  # noqa: F841
+                    &#34;k&#34;,
+                    μ_k[cellline_to_lineage_idx_shared],
+                    σ_k[cellline_to_lineage_idx_shared],
+                    shape=k_shape,
+                )
+            else:
+                assert_never(self.config.k)
         return k_shape
 
     def _add_gene_copy_number_covariate(
@@ -246,9 +271,15 @@ class SpecletSeven(SpecletModel):
     ) -&gt; tuple[int, int]:
         n_shape = (co_idx.n_genes, 1)
         with model:
-            μ_n = pm.Normal(&#34;μ_n&#34;, 0, 1)
-            σ_n = pm.HalfNormal(&#34;σ_n&#34;, 1)
-            n = pm.Normal(&#34;n&#34;, μ_n, σ_n, shape=n_shape)  # noqa: F841
+            μ_n = pm.Normal(&#34;μ_n&#34;, -1, 5)
+            σ_n = pm.HalfNormal(&#34;σ_n&#34;, 5)
+            if self.config.n is MP.NONCENTERED:
+                n_offset = pm.Normal(&#34;n_offset&#34;, 0, 1, shape=n_shape)
+                n = pm.Deterministic(&#34;n&#34;, μ_n + σ_n * n_offset)  # noqa: F841
+            elif self.config.n is MP.CENTERED:
+                n = pm.Normal(&#34;n&#34;, μ_n, σ_n, shape=n_shape)  # noqa: F841
+            else:
+                assert_never(self.config.n)
         return n_shape
 
     def _add_gene_expression_covariate(
@@ -258,7 +289,13 @@ class SpecletSeven(SpecletModel):
         with model:
             μ_q = pm.Normal(&#34;μ_q&#34;, 0, 5)
             σ_q = pm.HalfNormal(&#34;σ_q&#34;, 5)
-            q = pm.Normal(&#34;q&#34;, μ_q, σ_q, shape=q_shape)  # noqa: F841
+            if self.config.q is MP.NONCENTERED:
+                q_offset = pm.Normal(&#34;q_offset&#34;, 0, 1, shape=q_shape)
+                q = pm.Deterministic(&#34;q&#34;, μ_q + σ_q * q_offset)  # noqa: F841
+            elif self.config.q is MP.CENTERED:
+                q = pm.Normal(&#34;q&#34;, μ_q, σ_q, shape=q_shape)  # noqa: F841
+            else:
+                assert_never(self.config.q)
         return q_shape
 
     def _add_batch_covariate(
@@ -266,30 +303,61 @@ class SpecletSeven(SpecletModel):
         model: pm.Model,
         b_idx: achelp.DataBatchIndices,
     ) -&gt; None:
+        j_shape = b_idx.n_batches
         with model:
-            μ_j = pm.Normal(&#34;μ_j&#34;, 0, 0.5)
-            σ_j = pm.HalfNormal(&#34;σ_j&#34;, 1)
-            j = pm.Normal(&#34;j&#34;, μ_j, σ_j, shape=b_idx.n_batches)  # noqa: F841
+            μ_j = pm.Normal(&#34;μ_j&#34;, 0, 5)
+            σ_j = pm.HalfNormal(&#34;σ_j&#34;, 5)
+            if self.config.j is MP.NONCENTERED:
+                j_offset = pm.Normal(&#34;j_offset&#34;, 0, 1, shape=j_shape)
+                j = pm.Deterministic(&#34;j&#34;, μ_j + σ_j * j_offset)  # noqa: F841
+            elif self.config.j is MP.CENTERED:
+                j = pm.Normal(&#34;j&#34;, μ_j, σ_j, shape=j_shape)  # noqa: F841
+            else:
+                assert_never(self.config.j)
         return None
 
     def _add_gene_mutation_covariate(
         self, model: pm.Model, co_idx: achelp.CommonIndices
     ) -&gt; tuple[int, int]:
+        μ_m_shape = (co_idx.n_genes, 1)
         m_shape = (co_idx.n_genes, co_idx.n_lineages)
         mult_lineages = co_idx.n_lineages &gt; 1
         with model:
             if mult_lineages:
                 μ_μ_m = pm.Normal(&#34;μ_μ_m&#34;, 0, 1)
-                σ_μ_m = pm.HalfNormal(&#34;σ_μ_m&#34;, 1)
-                μ_m = pm.Normal(&#34;μ_m&#34;, μ_μ_m, σ_μ_m, shape=(co_idx.n_genes, 1))
-                σ_m = pm.HalfNormal(&#34;σ_m&#34;, 1)
-                m = pm.Normal(  # noqa: F841
-                    &#34;m&#34;, tensor.ones(shape=m_shape) * μ_m, σ_m, shape=m_shape
-                )
+                σ_μ_m = pm.HalfNormal(&#34;σ_μ_m&#34;, 5)
+                if self.config.μ_m is MP.NONCENTERED:
+                    μ_m_offset = pm.Normal(&#34;μ_m_offset&#34;, 0, 1, shape=μ_m_shape)
+                    μ_m = pm.Deterministic(&#34;μ_m&#34;, μ_μ_m + σ_μ_m * μ_m_offset)
+                elif self.config.μ_m is MP.CENTERED:
+                    μ_m = pm.Normal(&#34;μ_m&#34;, μ_μ_m, σ_μ_m, shape=μ_m_shape)
+                else:
+                    assert_never(self.config.μ_m)
+
+                σ_m = pm.HalfNormal(&#34;σ_m&#34;, 5)
+
+                if self.config.m is MP.NONCENTERED:
+                    m_offset = pm.Normal(&#34;m_offset&#34;, 0, 1, shape=m_shape)
+                    m = pm.Deterministic(  # noqa: F841
+                        &#34;m&#34;, (tensor.ones(shape=m_shape) * μ_m) + (σ_m * m_offset)
+                    )
+                elif self.config.m is MP.CENTERED:
+                    m = pm.Normal(  # noqa: F841
+                        &#34;m&#34;, tensor.ones(shape=m_shape) * μ_m, σ_m, shape=m_shape
+                    )
+                else:
+                    assert_never(self.config.m)
+
             else:
-                μ_m = pm.Normal(&#34;μ_m&#34;, 0, 1)
-                σ_m = pm.HalfNormal(&#34;σ_m&#34;, 1)
-                m = pm.Normal(&#34;m&#34;, μ_m, σ_m, shape=m_shape)  # noqa: F841
+                μ_m = pm.Normal(&#34;μ_m&#34;, 0, 5)
+                σ_m = pm.HalfNormal(&#34;σ_m&#34;, 5)
+                if self.config.m is MP.NONCENTERED:
+                    m_offset = pm.Normal(&#34;m_offset&#34;, 0, 1, shape=m_shape)
+                    m = pm.Deterministic(&#34;m&#34;, μ_m + σ_m * m_offset)  # noqa: F841
+                elif self.config.m is MP.CENTERED:
+                    m = pm.Normal(&#34;m&#34;, μ_m, σ_m, shape=m_shape)  # noqa: F841
+                else:
+                    assert_never(self.config.m)
         return m_shape
 
     def _add_varying_gene_cell_line_intercept_covariate(
@@ -302,16 +370,34 @@ class SpecletSeven(SpecletModel):
         h_shape = (co_idx.n_genes, co_idx.n_celllines)
         with model:
             μ_μ_h = pm.Normal(&#34;μ_μ_h&#34;, 0, 2)
-            σ_μ_h = pm.HalfNormal(&#34;σ_μ_h&#34;, 1)
-            μ_h = pm.Normal(&#34;μ_h&#34;, μ_μ_h, σ_μ_h, shape=mu_h_shape)
-            σ_σ_h = pm.HalfNormal(&#34;σ_σ_h&#34;, 1)
+            σ_μ_h = pm.HalfNormal(&#34;σ_μ_h&#34;, 5)
+
+            if self.config.μ_h is MP.NONCENTERED:
+                μ_h_offset = pm.Normal(&#34;μ_h_offset&#34;, 0, 1, shape=mu_h_shape)
+                μ_h = pm.Deterministic(&#34;μ_h&#34;, μ_μ_h * σ_μ_h + μ_h_offset)
+            elif self.config.μ_h is MP.CENTERED:
+                μ_h = pm.Normal(&#34;μ_h&#34;, μ_μ_h, σ_μ_h, shape=mu_h_shape)
+            else:
+                assert_never(self.config.μ_h)
+
+            σ_σ_h = pm.HalfNormal(&#34;σ_σ_h&#34;, 5)
             σ_h = pm.HalfNormal(&#34;σ_h&#34;, σ_σ_h, shape=(1, co_idx.n_celllines))
-            h = pm.Normal(  # noqa: F841
-                &#34;h&#34;,
-                μ_h[:, cellline_to_lineage_idx_shared],
-                tensor.ones(shape=h_shape) * σ_h,
-                shape=h_shape,
-            )
+            if self.config.h is MP.NONCENTERED:
+                h_offset = pm.Normal(&#34;h_offset&#34;, 0, 1, shape=h_shape)
+                h = pm.Deterministic(  # noqa: F841
+                    &#34;h&#34;,
+                    μ_h[:, cellline_to_lineage_idx_shared]
+                    + (tensor.ones(shape=h_shape) * σ_h) * h_offset,
+                )
+            elif self.config.h is MP.CENTERED:
+                h = pm.Normal(  # noqa: F841
+                    &#34;h&#34;,
+                    μ_h[:, cellline_to_lineage_idx_shared],
+                    tensor.ones(shape=h_shape) * σ_h,
+                    shape=h_shape,
+                )
+            else:
+                assert_never(self.config.h)
         return h_shape
 
     def model_specification(self) -&gt; tuple[pm.Model, str]:
@@ -421,7 +507,6 @@ class SpecletSeven(SpecletModel):
 
         ########################################
         # NOTE: Add other `μ_a` covariates here!
-        # &gt;
         ########################################
 
         # With `μ_a` complete, finalize covariate `a`.
@@ -723,19 +808,35 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
         k_shape = (1, co_idx.n_celllines)
         with model:
             if multiple_lineages:
-                μ_μ_k = pm.Normal(&#34;μ_μ_k&#34;, 0, 1)
-                σ_μ_k = pm.HalfNormal(&#34;σ_μ_k&#34;, 1)
-                μ_k = pm.Normal(&#34;μ_k&#34;, μ_μ_k, σ_μ_k, shape=co_idx.n_lineages)
+                μ_μ_k = pm.Normal(&#34;μ_μ_k&#34;, 0, 5)
+                σ_μ_k = pm.HalfNormal(&#34;σ_μ_k&#34;, 5)
+                if self.config.μ_k is MP.NONCENTERED:
+                    μ_k_offset = pm.Normal(&#34;μ_k_offset&#34;, 0, 1, shape=co_idx.n_lineages)
+                    μ_k = pm.Deterministic(&#34;μ_k&#34;, μ_μ_k + σ_μ_k * μ_k_offset)
+                elif self.config.μ_k is MP.CENTERED:
+                    μ_k = pm.Normal(&#34;μ_k&#34;, μ_μ_k, σ_μ_k, shape=co_idx.n_lineages)
+                else:
+                    assert_never(self.config.μ_k)
             else:
                 μ_k = pm.Normal(&#34;μ_k&#34;, 0, 1)
             σ_σ_k = pm.HalfNormal(&#34;σ_σ_k&#34;, 1)
             σ_k = pm.HalfNormal(&#34;σ_k&#34;, σ_σ_k, shape=co_idx.n_lineages)
-            k = pm.Normal(  # noqa: F841
-                &#34;k&#34;,
-                μ_k[cellline_to_lineage_idx_shared],
-                σ_k[cellline_to_lineage_idx_shared],
-                shape=k_shape,
-            )
+            if self.config.k is MP.NONCENTERED:
+                k_offset = pm.Normal(&#34;k_offset&#34;, 0, 1, shape=k_shape)
+                k = pm.Deterministic(  # noqa: F841
+                    &#34;k&#34;,
+                    μ_k[cellline_to_lineage_idx_shared]
+                    + σ_k[cellline_to_lineage_idx_shared] * k_offset,
+                )
+            elif self.config.k is MP.CENTERED:
+                k = pm.Normal(  # noqa: F841
+                    &#34;k&#34;,
+                    μ_k[cellline_to_lineage_idx_shared],
+                    σ_k[cellline_to_lineage_idx_shared],
+                    shape=k_shape,
+                )
+            else:
+                assert_never(self.config.k)
         return k_shape
 
     def _add_gene_copy_number_covariate(
@@ -743,9 +844,15 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
     ) -&gt; tuple[int, int]:
         n_shape = (co_idx.n_genes, 1)
         with model:
-            μ_n = pm.Normal(&#34;μ_n&#34;, 0, 1)
-            σ_n = pm.HalfNormal(&#34;σ_n&#34;, 1)
-            n = pm.Normal(&#34;n&#34;, μ_n, σ_n, shape=n_shape)  # noqa: F841
+            μ_n = pm.Normal(&#34;μ_n&#34;, -1, 5)
+            σ_n = pm.HalfNormal(&#34;σ_n&#34;, 5)
+            if self.config.n is MP.NONCENTERED:
+                n_offset = pm.Normal(&#34;n_offset&#34;, 0, 1, shape=n_shape)
+                n = pm.Deterministic(&#34;n&#34;, μ_n + σ_n * n_offset)  # noqa: F841
+            elif self.config.n is MP.CENTERED:
+                n = pm.Normal(&#34;n&#34;, μ_n, σ_n, shape=n_shape)  # noqa: F841
+            else:
+                assert_never(self.config.n)
         return n_shape
 
     def _add_gene_expression_covariate(
@@ -755,7 +862,13 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
         with model:
             μ_q = pm.Normal(&#34;μ_q&#34;, 0, 5)
             σ_q = pm.HalfNormal(&#34;σ_q&#34;, 5)
-            q = pm.Normal(&#34;q&#34;, μ_q, σ_q, shape=q_shape)  # noqa: F841
+            if self.config.q is MP.NONCENTERED:
+                q_offset = pm.Normal(&#34;q_offset&#34;, 0, 1, shape=q_shape)
+                q = pm.Deterministic(&#34;q&#34;, μ_q + σ_q * q_offset)  # noqa: F841
+            elif self.config.q is MP.CENTERED:
+                q = pm.Normal(&#34;q&#34;, μ_q, σ_q, shape=q_shape)  # noqa: F841
+            else:
+                assert_never(self.config.q)
         return q_shape
 
     def _add_batch_covariate(
@@ -763,30 +876,61 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
         model: pm.Model,
         b_idx: achelp.DataBatchIndices,
     ) -&gt; None:
+        j_shape = b_idx.n_batches
         with model:
-            μ_j = pm.Normal(&#34;μ_j&#34;, 0, 0.5)
-            σ_j = pm.HalfNormal(&#34;σ_j&#34;, 1)
-            j = pm.Normal(&#34;j&#34;, μ_j, σ_j, shape=b_idx.n_batches)  # noqa: F841
+            μ_j = pm.Normal(&#34;μ_j&#34;, 0, 5)
+            σ_j = pm.HalfNormal(&#34;σ_j&#34;, 5)
+            if self.config.j is MP.NONCENTERED:
+                j_offset = pm.Normal(&#34;j_offset&#34;, 0, 1, shape=j_shape)
+                j = pm.Deterministic(&#34;j&#34;, μ_j + σ_j * j_offset)  # noqa: F841
+            elif self.config.j is MP.CENTERED:
+                j = pm.Normal(&#34;j&#34;, μ_j, σ_j, shape=j_shape)  # noqa: F841
+            else:
+                assert_never(self.config.j)
         return None
 
     def _add_gene_mutation_covariate(
         self, model: pm.Model, co_idx: achelp.CommonIndices
     ) -&gt; tuple[int, int]:
+        μ_m_shape = (co_idx.n_genes, 1)
         m_shape = (co_idx.n_genes, co_idx.n_lineages)
         mult_lineages = co_idx.n_lineages &gt; 1
         with model:
             if mult_lineages:
                 μ_μ_m = pm.Normal(&#34;μ_μ_m&#34;, 0, 1)
-                σ_μ_m = pm.HalfNormal(&#34;σ_μ_m&#34;, 1)
-                μ_m = pm.Normal(&#34;μ_m&#34;, μ_μ_m, σ_μ_m, shape=(co_idx.n_genes, 1))
-                σ_m = pm.HalfNormal(&#34;σ_m&#34;, 1)
-                m = pm.Normal(  # noqa: F841
-                    &#34;m&#34;, tensor.ones(shape=m_shape) * μ_m, σ_m, shape=m_shape
-                )
+                σ_μ_m = pm.HalfNormal(&#34;σ_μ_m&#34;, 5)
+                if self.config.μ_m is MP.NONCENTERED:
+                    μ_m_offset = pm.Normal(&#34;μ_m_offset&#34;, 0, 1, shape=μ_m_shape)
+                    μ_m = pm.Deterministic(&#34;μ_m&#34;, μ_μ_m + σ_μ_m * μ_m_offset)
+                elif self.config.μ_m is MP.CENTERED:
+                    μ_m = pm.Normal(&#34;μ_m&#34;, μ_μ_m, σ_μ_m, shape=μ_m_shape)
+                else:
+                    assert_never(self.config.μ_m)
+
+                σ_m = pm.HalfNormal(&#34;σ_m&#34;, 5)
+
+                if self.config.m is MP.NONCENTERED:
+                    m_offset = pm.Normal(&#34;m_offset&#34;, 0, 1, shape=m_shape)
+                    m = pm.Deterministic(  # noqa: F841
+                        &#34;m&#34;, (tensor.ones(shape=m_shape) * μ_m) + (σ_m * m_offset)
+                    )
+                elif self.config.m is MP.CENTERED:
+                    m = pm.Normal(  # noqa: F841
+                        &#34;m&#34;, tensor.ones(shape=m_shape) * μ_m, σ_m, shape=m_shape
+                    )
+                else:
+                    assert_never(self.config.m)
+
             else:
-                μ_m = pm.Normal(&#34;μ_m&#34;, 0, 1)
-                σ_m = pm.HalfNormal(&#34;σ_m&#34;, 1)
-                m = pm.Normal(&#34;m&#34;, μ_m, σ_m, shape=m_shape)  # noqa: F841
+                μ_m = pm.Normal(&#34;μ_m&#34;, 0, 5)
+                σ_m = pm.HalfNormal(&#34;σ_m&#34;, 5)
+                if self.config.m is MP.NONCENTERED:
+                    m_offset = pm.Normal(&#34;m_offset&#34;, 0, 1, shape=m_shape)
+                    m = pm.Deterministic(&#34;m&#34;, μ_m + σ_m * m_offset)  # noqa: F841
+                elif self.config.m is MP.CENTERED:
+                    m = pm.Normal(&#34;m&#34;, μ_m, σ_m, shape=m_shape)  # noqa: F841
+                else:
+                    assert_never(self.config.m)
         return m_shape
 
     def _add_varying_gene_cell_line_intercept_covariate(
@@ -799,16 +943,34 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
         h_shape = (co_idx.n_genes, co_idx.n_celllines)
         with model:
             μ_μ_h = pm.Normal(&#34;μ_μ_h&#34;, 0, 2)
-            σ_μ_h = pm.HalfNormal(&#34;σ_μ_h&#34;, 1)
-            μ_h = pm.Normal(&#34;μ_h&#34;, μ_μ_h, σ_μ_h, shape=mu_h_shape)
-            σ_σ_h = pm.HalfNormal(&#34;σ_σ_h&#34;, 1)
+            σ_μ_h = pm.HalfNormal(&#34;σ_μ_h&#34;, 5)
+
+            if self.config.μ_h is MP.NONCENTERED:
+                μ_h_offset = pm.Normal(&#34;μ_h_offset&#34;, 0, 1, shape=mu_h_shape)
+                μ_h = pm.Deterministic(&#34;μ_h&#34;, μ_μ_h * σ_μ_h + μ_h_offset)
+            elif self.config.μ_h is MP.CENTERED:
+                μ_h = pm.Normal(&#34;μ_h&#34;, μ_μ_h, σ_μ_h, shape=mu_h_shape)
+            else:
+                assert_never(self.config.μ_h)
+
+            σ_σ_h = pm.HalfNormal(&#34;σ_σ_h&#34;, 5)
             σ_h = pm.HalfNormal(&#34;σ_h&#34;, σ_σ_h, shape=(1, co_idx.n_celllines))
-            h = pm.Normal(  # noqa: F841
-                &#34;h&#34;,
-                μ_h[:, cellline_to_lineage_idx_shared],
-                tensor.ones(shape=h_shape) * σ_h,
-                shape=h_shape,
-            )
+            if self.config.h is MP.NONCENTERED:
+                h_offset = pm.Normal(&#34;h_offset&#34;, 0, 1, shape=h_shape)
+                h = pm.Deterministic(  # noqa: F841
+                    &#34;h&#34;,
+                    μ_h[:, cellline_to_lineage_idx_shared]
+                    + (tensor.ones(shape=h_shape) * σ_h) * h_offset,
+                )
+            elif self.config.h is MP.CENTERED:
+                h = pm.Normal(  # noqa: F841
+                    &#34;h&#34;,
+                    μ_h[:, cellline_to_lineage_idx_shared],
+                    tensor.ones(shape=h_shape) * σ_h,
+                    shape=h_shape,
+                )
+            else:
+                assert_never(self.config.h)
         return h_shape
 
     def model_specification(self) -&gt; tuple[pm.Model, str]:
@@ -918,7 +1080,6 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 
         ########################################
         # NOTE: Add other `μ_a` covariates here!
-        # &gt;
         ########################################
 
         # With `μ_a` complete, finalize covariate `a`.
@@ -1170,7 +1331,6 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 
     ########################################
     # NOTE: Add other `μ_a` covariates here!
-    # &gt;
     ########################################
 
     # With `μ_a` complete, finalize covariate `a`.
@@ -1229,7 +1389,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 </dd>
 <dt id="src.models.speclet_seven.SpecletSevenConfiguration"><code class="flex name class">
 <span>class <span class="ident">SpecletSevenConfiguration</span></span>
-<span>(</span><span>*, cell_line_cna_cov: bool = False, gene_cna_cov: bool = False, rna_cov: bool = False, mutation_cov: bool = False, batch_cov: bool = False)</span>
+<span>(</span><span>*, cell_line_cna_cov: bool = False, gene_cna_cov: bool = False, rna_cov: bool = False, mutation_cov: bool = False, batch_cov: bool = False, n: <a title="src.project_enums.ModelParameterization" href="../project_enums.html#src.project_enums.ModelParameterization">ModelParameterization</a> = ModelParameterization.CENTERED, q: <a title="src.project_enums.ModelParameterization" href="../project_enums.html#src.project_enums.ModelParameterization">ModelParameterization</a> = ModelParameterization.CENTERED, j: <a title="src.project_enums.ModelParameterization" href="../project_enums.html#src.project_enums.ModelParameterization">ModelParameterization</a> = ModelParameterization.CENTERED, m: <a title="src.project_enums.ModelParameterization" href="../project_enums.html#src.project_enums.ModelParameterization">ModelParameterization</a> = ModelParameterization.CENTERED, μ_m: <a title="src.project_enums.ModelParameterization" href="../project_enums.html#src.project_enums.ModelParameterization">ModelParameterization</a> = ModelParameterization.CENTERED, k: <a title="src.project_enums.ModelParameterization" href="../project_enums.html#src.project_enums.ModelParameterization">ModelParameterization</a> = ModelParameterization.CENTERED, μ_k: <a title="src.project_enums.ModelParameterization" href="../project_enums.html#src.project_enums.ModelParameterization">ModelParameterization</a> = ModelParameterization.CENTERED, h: <a title="src.project_enums.ModelParameterization" href="../project_enums.html#src.project_enums.ModelParameterization">ModelParameterization</a> = ModelParameterization.CENTERED, μ_h: <a title="src.project_enums.ModelParameterization" href="../project_enums.html#src.project_enums.ModelParameterization">ModelParameterization</a> = ModelParameterization.CENTERED)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Parameterizations for each covariate in SpecletSeven model.</p>
@@ -1246,7 +1406,16 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
     gene_cna_cov: bool = False
     rna_cov: bool = False
     mutation_cov: bool = False
-    batch_cov: bool = False</code></pre>
+    batch_cov: bool = False
+    n: MP = MP.CENTERED
+    q: MP = MP.CENTERED
+    j: MP = MP.CENTERED
+    m: MP = MP.CENTERED
+    μ_m: MP = MP.CENTERED
+    k: MP = MP.CENTERED
+    μ_k: MP = MP.CENTERED
+    h: MP = MP.CENTERED
+    μ_h: MP = MP.CENTERED</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
