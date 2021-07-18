@@ -38,7 +38,7 @@ repos:
     hooks:
     -   id: mypy
         exclude: ".snakemake."
-        additional_dependencies: [pydantic, types-PyYAML]
+        additional_dependencies: [pydantic, types-PyYAML, types-python-dateutil]
 -   repo: https://github.com/psf/black
     rev: 21.6b0
     hooks:
@@ -84,6 +84,6 @@ repos:
         exclude: "munge/019_prepare-data-subsample.ipynb"
     -   id: nbqa-mypy
         args: ["--nbqa-mutate"]
-        additional_dependencies: [pydantic, mypy]
+        additional_dependencies: [pydantic, mypy, types-python-dateutil]
         types: [jupyter]
         exclude: "munge/019_prepare-data-subsample.ipynb"

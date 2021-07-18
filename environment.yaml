@@ -65,4 +65,5 @@ dependencies:
     - pytest-pythonpath==0.7.3
     - pytest-testmon==1.1.1
     - pytest-watch==4.2.0
+    - types-python-dateutil==0.1.4
     - -e .  # install the source directory as a package (keep as last)
