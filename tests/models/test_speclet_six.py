@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Set
 
 import numpy as np
 import pandas as pd
@@ -15,7 +15,7 @@ from src.models.speclet_six import SpecletSix, SpecletSixConfiguration
 
 
 def make_column_tiled(
-    df: pd.DataFrame, df_map: pd.DataFrame, col: str, val: List[str]
+    df: pd.DataFrame, df_map: pd.DataFrame, col: str, val: list[str]
 ) -> pd.DataFrame:
     new_assignemnts = np.tile(val, int(len(df_map) // 2 + 1))
     df_map[col] = new_assignemnts[0 : len(df_map)]
@@ -63,7 +63,7 @@ class TestSpecletSix:
         config: SpecletSixConfiguration,
         monkeypatch: pytest.MonkeyPatch,
     ):
-        def mock_build_model(*args, **kwargs) -> Tuple[str, str]:
+        def mock_build_model(*args, **kwargs) -> tuple[str, str]:
             return "my-test-model", "another-string"
 
         monkeypatch.setattr(SpecletSix, "model_specification", mock_build_model)
@@ -274,7 +274,7 @@ class TestSpecletSix:
             config=config,
         )
 
-        optional_param_to_name: Dict[str, str] = {
+        optional_param_to_name: dict[str, str] = {
             "k": "cell_line_cna_cov",
             "n": "gene_cna_cov",
             "q": "rna_cov",

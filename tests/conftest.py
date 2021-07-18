@@ -6,7 +6,7 @@ import arviz as az
 import pandas as pd
 import pytest
 import seaborn as sns
-from hypothesis import Verbosity, settings
+from hypothesis import HealthCheck, Verbosity, settings
 
 from src.managers.model_data_managers import CrcDataManager
 
@@ -54,13 +54,16 @@ def centered_eight_post(centered_eight: az.InferenceData) -> pd.DataFrame:
 
 #### ---- Hypothesis profiles ---- ####
 
-settings.register_profile("ci", deadline=None, max_examples=1000)
+settings.register_profile(
+    "ci", deadline=None, max_examples=1000, suppress_health_check=[HealthCheck.too_slow]
+)
 settings.register_profile("debug", max_examples=10, verbosity=Verbosity.verbose)
 settings.register_profile("dev", max_examples=2)
 
 IS_CI = os.getenv("CI") is not None
 settings.register_profile(
     "slow-adaptive",
+    parent=settings.get_profile("CI") if IS_CI else settings.get_profile("default"),
     max_examples=100 if IS_CI else 5,
     deadline=None if IS_CI else timedelta(minutes=0.5),
 )
