@@ -128,7 +128,7 @@ except Exception as err:
 pm.model_to_graphviz(sp7.model)
 ```
 
-![svg](020_015_experimentation_speclet7_files/020_015_experimentation_speclet7_7_0.svg)
+![svg](020_015_experimentation-speclet7_files/020_015_experimentation-speclet7_7_0.svg)
 
 ## Visualization of the mock data
 
@@ -284,9 +284,9 @@ for x in ["hugo_symbol", "depmap_id"]:
     ).draw()
 ```
 
-![png](020_015_experimentation_speclet7_files/020_015_experimentation_speclet7_10_0.png)
+![png](020_015_experimentation-speclet7_files/020_015_experimentation-speclet7_10_0.png)
 
-![png](020_015_experimentation_speclet7_files/020_015_experimentation_speclet7_10_1.png)
+![png](020_015_experimentation-speclet7_files/020_015_experimentation-speclet7_10_1.png)
 
 ## Model priors
 
@@ -299,7 +299,7 @@ with sp7.model:
 pmanal.plot_all_priors(prior_dist, (4, 3), (8, 8), rm_var_regex="log__|logodds_|offset");
 ```
 
-![png](020_015_experimentation_speclet7_files/020_015_experimentation_speclet7_13_0.png)
+![png](020_015_experimentation-speclet7_files/020_015_experimentation-speclet7_13_0.png)
 
 ## Model posterior estimates
 
@@ -312,7 +312,7 @@ top_h_var_names = ["μ_μ_h", "σ_μ_h"]
 az.plot_trace(sp7_mcmc, var_names=top_h_var_names, compact=False);
 ```
 
-![png](020_015_experimentation_speclet7_files/020_015_experimentation_speclet7_16_0.png)
+![png](020_015_experimentation-speclet7_files/020_015_experimentation-speclet7_16_0.png)
 
 ```python
 az.summary(sp7_mcmc, var_names=top_h_var_names, hdi_prob=PYMC3.HDI_PROB).assign(
@@ -416,7 +416,7 @@ pos = gg.position_jitterdodge(jitter_height=0, jitter_width=0.5, random_state=0)
 )
 ```
 
-![png](020_015_experimentation_speclet7_files/020_015_experimentation_speclet7_20_0.png)
+![png](020_015_experimentation-speclet7_files/020_015_experimentation-speclet7_20_0.png)
 
     <ggplot: (8734092754815)>
 
@@ -429,7 +429,7 @@ for ax, known_val in zip(axes[:, 0], known_values):
 plt.show()
 ```
 
-![png](020_015_experimentation_speclet7_files/020_015_experimentation_speclet7_21_0.png)
+![png](020_015_experimentation-speclet7_files/020_015_experimentation-speclet7_21_0.png)
 
 ```python
 az.summary(sp7_mcmc, var_names=["σ_h"]).assign(
@@ -775,7 +775,7 @@ mu_a_posterior.head()
 )
 ```
 
-![png](020_015_experimentation_speclet7_files/020_015_experimentation_speclet7_24_0.png)
+![png](020_015_experimentation-speclet7_files/020_015_experimentation-speclet7_24_0.png)
 
     <ggplot: (8734092558797)>
 
@@ -785,7 +785,7 @@ mu_a_posterior.head()
 az.plot_ppc(sp7_mcmc, num_pp_samples=50);
 ```
 
-![png](020_015_experimentation_speclet7_files/020_015_experimentation_speclet7_26_0.png)
+![png](020_015_experimentation-speclet7_files/020_015_experimentation-speclet7_26_0.png)
 
 ```python
 sp7_ppc_values = sp7_mcmc.posterior_predictive["lfc"].values.squeeze()
@@ -871,7 +871,7 @@ mock_data_ppc = mock_data.merge(sp7_ppc, left_index=True, right_index=True)
 )
 ```
 
-![png](020_015_experimentation_speclet7_files/020_015_experimentation_speclet7_28_0.png)
+![png](020_015_experimentation-speclet7_files/020_015_experimentation-speclet7_28_0.png)
 
     <ggplot: (8734092711789)>
 
@@ -957,7 +957,7 @@ except Exception as err:
 pm.model_to_graphviz(sp7_covs.model)
 ```
 
-![svg](020_015_experimentation_speclet7_files/020_015_experimentation_speclet7_33_0.svg)
+![svg](020_015_experimentation-speclet7_files/020_015_experimentation-speclet7_33_0.svg)
 
 ```python
 with sp7_covs.model:
@@ -976,7 +976,7 @@ fig.tight_layout()
 plt.show()
 ```
 
-![png](020_015_experimentation_speclet7_files/020_015_experimentation_speclet7_35_0.png)
+![png](020_015_experimentation-speclet7_files/020_015_experimentation-speclet7_35_0.png)
 
 ```python
 sp7_covs_mock_data_cellline_info = (
@@ -1116,7 +1116,7 @@ sp7_covs_mock_data_cellline_info.head()
 )
 ```
 
-![png](020_015_experimentation_speclet7_files/020_015_experimentation_speclet7_37_0.png)
+![png](020_015_experimentation-speclet7_files/020_015_experimentation-speclet7_37_0.png)
 
     <ggplot: (8734086019106)>
 
@@ -1139,7 +1139,7 @@ sp7_covs_mock_data_cellline_info.head()
 )
 ```
 
-![png](020_015_experimentation_speclet7_files/020_015_experimentation_speclet7_38_0.png)
+![png](020_015_experimentation-speclet7_files/020_015_experimentation-speclet7_38_0.png)
 
     <ggplot: (8734085380699)>
 
@@ -1348,7 +1348,7 @@ az.summary(sp7_covs_mcmc, var_names="k", hdi_prob=PYMC3.HDI_PROB).assign(
 az.plot_forest(sp7_covs_mcmc, var_names="k", hdi_prob=PYMC3.HDI_PROB);
 ```
 
-![png](020_015_experimentation_speclet7_files/020_015_experimentation_speclet7_41_0.png)
+![png](020_015_experimentation-speclet7_files/020_015_experimentation-speclet7_41_0.png)
 
 ```python
 plot_vars = ["μ_μ_k", "μ_k", "σ_k"]
@@ -1365,7 +1365,7 @@ for ax, v in zip(axes[:, 0], known_values):
 plt.show();
 ```
 
-![png](020_015_experimentation_speclet7_files/020_015_experimentation_speclet7_42_0.png)
+![png](020_015_experimentation-speclet7_files/020_015_experimentation-speclet7_42_0.png)
 
 ```python
 plot_vars = ["μ_q", "σ_q"]
@@ -1382,7 +1382,7 @@ for ax, v in zip(axes[:, 0], known_values):
 plt.show();
 ```
 
-![png](020_015_experimentation_speclet7_files/020_015_experimentation_speclet7_43_0.png)
+![png](020_015_experimentation-speclet7_files/020_015_experimentation-speclet7_43_0.png)
 
 ---
 
