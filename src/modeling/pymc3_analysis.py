@@ -245,7 +245,20 @@ def _pretty_step_size(data: az.InferenceData, decimals: int = 3) -> list[str]:
     return np.round(get_average_step_size(data), decimals).astype(str).tolist()
 
 
-def get_divergences(data: az.InferenceData) -> tuple[list[int], list[float]]:
+def get_divergences(data: az.InferenceData) -> np.ndarray:
+    """Get the number and percent of steps that were divergences of each MCMC chain.
+
+    Args:
+        data (az.InferenceData): Data object.
+
+    Returns:
+        tuple[list[int], list[float]]: A list of the number of divergent steps and a
+        list of the percent of steps that were divergent.
+    """
+    return data.sample_stats.diverging.values
+
+
+def get_divergence_summary(data: az.InferenceData) -> tuple[list[int], list[float]]:
     """Get the number and percent of steps that were divergences of each MCMC chain.
 
     Args:
@@ -340,7 +353,7 @@ def describe_mcmc(
     n_chains: int = len(sample_stats.chain)
 
     # Divergences
-    n_divergences, pct_divergences = get_divergences(data)
+    n_divergences, pct_divergences = get_divergence_summary(data)
 
     # BFMI.
     bfmi = az.bfmi(data).tolist()

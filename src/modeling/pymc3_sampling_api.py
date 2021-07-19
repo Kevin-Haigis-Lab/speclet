@@ -91,6 +91,9 @@ def pymc3_sampling_procedure(
 ) -> MCMCSamplingResults:
     """Run a standard PyMC3 sampling procedure.
 
+    TODO: Remove `post_pred_samples` from argument list and modeling
+    options.
+
     Args:
         model (pm.Model): PyMC3 model.
         mcmc_draws (int, optional): Number of MCMC draws. Defaults to 1000.
@@ -113,8 +116,6 @@ def pymc3_sampling_procedure(
     if sample_kwargs is None:
         sample_kwargs = {}
 
-    keep_size = True if post_pred_samples is None else None
-
     with model:
         prior_pred = pm.sample_prior_predictive(
             prior_pred_samples, random_seed=random_seed
@@ -125,13 +126,12 @@ def pymc3_sampling_procedure(
             chains=chains,
             cores=cores,
             random_seed=random_seed,
+            return_inferencedata=False,
             **sample_kwargs,
         )
 
         post_pred = pm.sample_posterior_predictive(
             trace,
-            samples=post_pred_samples,
-            keep_size=keep_size,
             random_seed=random_seed,
         )
 

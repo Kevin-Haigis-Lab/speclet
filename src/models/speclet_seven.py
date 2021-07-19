@@ -342,7 +342,7 @@ class SpecletSeven(SpecletModel):
         h_shape = (co_idx.n_genes, co_idx.n_celllines)
         with model:
             μ_μ_h = pm.Normal("μ_μ_h", 0, 2)
-            σ_μ_h = pm.HalfNormal("σ_μ_h", 5)
+            σ_μ_h = pm.HalfNormal("σ_μ_h", 2)
 
             if self.config.μ_h is MP.NONCENTERED:
                 μ_h_offset = pm.Normal("μ_h_offset", 0, 1, shape=mu_h_shape)
@@ -352,7 +352,7 @@ class SpecletSeven(SpecletModel):
             else:
                 assert_never(self.config.μ_h)
 
-            σ_σ_h = pm.HalfNormal("σ_σ_h", 5)
+            σ_σ_h = pm.HalfNormal("σ_σ_h", 1)
             σ_h = pm.HalfNormal("σ_h", σ_σ_h, shape=(1, co_idx.n_celllines))
             if self.config.h is MP.NONCENTERED:
                 h_offset = pm.Normal("h_offset", 0, 1, shape=h_shape)
