@@ -58,7 +58,7 @@ settings.register_profile(
     "ci", deadline=None, max_examples=1000, suppress_health_check=[HealthCheck.too_slow]
 )
 settings.register_profile("debug", max_examples=10, verbosity=Verbosity.verbose)
-settings.register_profile("dev", max_examples=2)
+settings.register_profile("dev", max_examples=5)
 
 IS_CI = os.getenv("CI") is not None
 settings.register_profile(

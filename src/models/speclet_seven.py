@@ -346,7 +346,7 @@ class SpecletSeven(SpecletModel):
 
             if self.config.μ_h is MP.NONCENTERED:
                 μ_h_offset = pm.Normal("μ_h_offset", 0, 1, shape=mu_h_shape)
-                μ_h = pm.Deterministic("μ_h", μ_μ_h * σ_μ_h + μ_h_offset)
+                μ_h = pm.Deterministic("μ_h", μ_μ_h + σ_μ_h * μ_h_offset)
             elif self.config.μ_h is MP.CENTERED:
                 μ_h = pm.Normal("μ_h", μ_μ_h, σ_μ_h, shape=mu_h_shape)
             else:
