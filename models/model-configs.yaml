@@ -186,3 +186,55 @@
     fitting:
       ADVI:
         method: "fullrank_advi"
+- name: sp7-intercept-noncentered
+  description: SpecletSeven with everything default except for a non-centered parameterization of μ_h.
+  model: speclet-seven
+  config:
+    μ_h: noncentered
+  fit_methods:
+    - MCMC
+    - ADVI
+  pipelines:
+    - fitting
+    - sbc
+  debug: true
+  pipeline_sampling_parameters:
+    fitting:
+      MCMC:
+        target_accept: 0.95
+- name: sp7-cellline-cn
+  description: SpecletSeven with the cell line copy number covariate.
+  model: speclet-seven
+  config:
+    cell_line_cna_cov: true
+  fit_methods:
+    - MCMC
+    - ADVI
+  pipelines:
+    - fitting
+    - sbc
+  debug: true
+  pipeline_sampling_parameters:
+    fitting:
+      MCMC:
+        target_accept: 0.95
+- name: sp7-cellline-cn-ncp
+  description: |
+    SpecletSeven with the cell line copy number covariate with non-centered
+    parameterizations for μ_k and μ_h.
+  model: speclet-seven
+  config:
+    cell_line_cna_cov: true
+    μ_k: noncentered
+    μ_h: noncentered
+  fit_methods:
+    - MCMC
+    - ADVI
+  pipelines:
+    - fitting
+    - sbc
+  debug: true
+  pipeline_sampling_parameters:
+    fitting:
+      MCMC:
+        target_accept: 0.95
