@@ -62,7 +62,6 @@ class TestMCMCSampling(TestPyMC3SamplingAPI):
             mcmc_draws=100,
             tune=100,
             prior_pred_samples=100,
-            post_pred_samples=100,
             chains=2,
             cores=2,
             random_seed=123,
@@ -107,7 +106,6 @@ class TestADVISampling(TestPyMC3SamplingAPI):
             n_iterations=100,
             draws=100,
             prior_pred_samples=100,
-            post_pred_samples=100,
             random_seed=123,
         )
         assert isinstance(sampling_res, pmapi.ApproximationSamplingResults)

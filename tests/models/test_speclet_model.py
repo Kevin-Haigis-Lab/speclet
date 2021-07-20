@@ -72,7 +72,6 @@ class TestSpecletModel:
             chains=2,
             cores=2,
             prior_pred_samples=25,
-            post_pred_samples=50,
             random_seed=1,
         )
         assert isinstance(mcmc_res, az.InferenceData)
@@ -87,7 +86,6 @@ class TestSpecletModel:
             chains=2,
             cores=2,
             prior_pred_samples=25,
-            post_pred_samples=50,
             random_seed=1,
         )
         toc = time()
@@ -113,7 +111,6 @@ class TestSpecletModel:
             n_iterations=100,
             draws=100,
             prior_pred_samples=25,
-            post_pred_samples=50,
             random_seed=1,
         )
         assert isinstance(advi_res, az.InferenceData)
@@ -126,7 +123,6 @@ class TestSpecletModel:
             n_iterations=100,
             draws=100,
             prior_pred_samples=25,
-            post_pred_samples=50,
             random_seed=1,
         )
         toc = time()
@@ -176,7 +172,6 @@ class TestSpecletModel:
             }
 
         fit_kwargs["prior_pred_samples"] = 10
-        fit_kwargs["post_pred_samples"] = 10
 
         sp.run_simulation_based_calibration(
             results_path=tmp_path,
@@ -269,21 +264,17 @@ class TestSpecletModel:
         mock_sp_model.mcmc_sampling_params.cores = 2
         mock_sp_model.mcmc_sampling_params.tune = 13
         mock_sp_model.mcmc_sampling_params.prior_pred_samples = 14
-        mock_sp_model.mcmc_sampling_params.post_pred_samples = 3
         mock_sp_model.build_model()
         mcmc_res = mock_sp_model.mcmc_sample_model()
         assert mcmc_res.posterior["a"].shape == (2, 12)
-        assert mcmc_res.posterior_predictive["y"].shape == (1, 3, 100)
         assert mcmc_res.prior["a"].shape == (1, 14)
 
     def test_changing_advi_sampling_params(self, mock_sp_model: MockSpecletModelClass):
         mock_sp_model.advi_sampling_params.draws = 17
         mock_sp_model.advi_sampling_params.n_iterations = 103
         mock_sp_model.advi_sampling_params.prior_pred_samples = 14
-        mock_sp_model.advi_sampling_params.post_pred_samples = 3
         mock_sp_model.build_model()
         advi_res, approx = mock_sp_model.advi_sample_model()
         assert len(approx.hist) == 103
         assert advi_res.posterior["a"].shape == (1, 17)
-        assert advi_res.posterior_predictive["y"].shape == (1, 3, 100)
         assert advi_res.prior["a"].shape == (1, 14)

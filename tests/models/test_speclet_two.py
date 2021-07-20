@@ -45,7 +45,6 @@ class TestSpecletTwo:
             chains=2,
             cores=2,
             prior_pred_samples=10,
-            post_pred_samples=10,
             random_seed=1,
         )
         assert sp_two.mcmc_results is not None
@@ -64,7 +63,6 @@ class TestSpecletTwo:
             n_iterations=100,
             draws=10,
             prior_pred_samples=10,
-            post_pred_samples=10,
             random_seed=1,
         )
         assert sp_two.advi_results is not None

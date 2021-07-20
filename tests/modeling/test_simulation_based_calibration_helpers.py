@@ -513,6 +513,7 @@ def test_sgrna_for_each_cellline(mock_data: pd.DataFrame):
         assert len(all_sgrnas.difference(set(cell_line_sgrnas))) == 0
 
 
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(mock_data=generate_data_with_random_params())
 def test_cn_same_for_gene_cellline_combination(mock_data: pd.DataFrame):
     assert "copy_number" in mock_data.columns.tolist()

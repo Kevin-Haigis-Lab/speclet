@@ -154,8 +154,8 @@ def test_check_sampling_kwargs_empty_always_passes(fit_method: ModelFitMethod):
 @pytest.mark.parametrize(
     "sampling_kwargs",
     [
-        {"draws": 100, "prior_pred_samples": "hi", "post_pred_samples": 20},
-        {"prior_pred_samples": 10, "post_pred_samples": True},
+        {"draws": 100, "prior_pred_samples": "hi"},
+        {"prior_pred_samples": 10},
         {"draws": 100.0001, "prior_pred_samples": False},
     ],
 )

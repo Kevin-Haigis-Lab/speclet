@@ -53,7 +53,6 @@ class TestSpecletSeven:
                 cores=n_chains,
                 target_accept=0.8,
                 prior_pred_samples=10,
-                post_pred_samples=10,
                 ignore_cache=True,
             )
             assert sp7.mcmc_results is not None
@@ -63,7 +62,6 @@ class TestSpecletSeven:
                 n_iterations=20,
                 draws=n_draws,
                 prior_pred_samples=10,
-                post_pred_samples=10,
                 ignore_cache=True,
             )
             assert sp7.mcmc_results is None

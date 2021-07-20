@@ -39,7 +39,6 @@ class PyMC3SamplingParameters(BaseModel):
 
     draws: int = 1000
     prior_pred_samples: int = 1000
-    post_pred_samples: int = 1000
 
 
 class MCMCSamplingParameters(PyMC3SamplingParameters):
@@ -207,7 +206,6 @@ class SpecletModel:
         cores: Optional[int] = None,
         target_accept: Optional[float] = None,
         prior_pred_samples: Optional[int] = None,
-        post_pred_samples: Optional[int] = None,
         random_seed: Optional[int] = None,
         sample_kwargs: Optional[Dict[str, Any]] = None,
         ignore_cache: bool = False,
@@ -231,9 +229,6 @@ class SpecletModel:
               to None.
             prior_pred_samples (Optional[int], optional): Number of samples from the
               prior distributions. Defaults to None.
-            post_pred_samples (Optional[int], optional): Number of samples for posterior
-              predictions.
-            Defaults to None.
             random_seed (Optional[int], optional): The random seed for sampling.
             Defaults to None.
             sample_kwargs (Dict[str, Any], optional): Kwargs for the sampling method.
@@ -261,8 +256,6 @@ class SpecletModel:
             target_accept = self.mcmc_sampling_params.target_accept
         if prior_pred_samples is None:
             prior_pred_samples = self.mcmc_sampling_params.prior_pred_samples
-        if post_pred_samples is None:
-            post_pred_samples = self.mcmc_sampling_params.post_pred_samples
 
         if self.model is None:
             raise AttributeError(
@@ -291,7 +284,6 @@ class SpecletModel:
             chains=chains,
             cores=cores,
             prior_pred_samples=prior_pred_samples,
-            post_pred_samples=post_pred_samples,
             random_seed=random_seed,
             sample_kwargs=sample_kwargs,
         )
@@ -335,7 +327,6 @@ class SpecletModel:
         n_iterations: Optional[int] = None,
         draws: Optional[int] = None,
         prior_pred_samples: Optional[int] = None,
-        post_pred_samples: Optional[int] = None,
         random_seed: Optional[int] = None,
         ignore_cache: bool = False,
     ) -> Tuple[az.InferenceData, pm.Approximation]:
@@ -356,8 +347,6 @@ class SpecletModel:
               model. Defaults to None.
             prior_pred_samples (Optional[int], optional): Number of samples from the
               prior distributions. Defaults to None.
-            post_pred_samples (Optional[int], optional): Number of samples for posterior
-              predictions. Defaults to None.
             callbacks (List[Callable], optional): List of fitting callbacks. Default is
               None.
             random_seed (Optional[int], optional): The random seed for sampling.
@@ -382,8 +371,6 @@ class SpecletModel:
             draws = self.advi_sampling_params.draws
         if prior_pred_samples is None:
             prior_pred_samples = self.advi_sampling_params.prior_pred_samples
-        if post_pred_samples is None:
-            post_pred_samples = self.advi_sampling_params.post_pred_samples
 
         if self.model is None:
             raise AttributeError(
@@ -412,7 +399,6 @@ class SpecletModel:
             n_iterations=n_iterations,
             draws=draws,
             prior_pred_samples=prior_pred_samples,
-            post_pred_samples=post_pred_samples,
             callbacks=self.get_advi_callbacks(),
             random_seed=random_seed,
             fit_kwargs=fit_kwargs,

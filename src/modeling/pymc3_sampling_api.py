@@ -85,7 +85,6 @@ def pymc3_sampling_procedure(
     chains: int = 3,
     cores: Optional[int] = None,
     prior_pred_samples: int = 1000,
-    post_pred_samples: Optional[int] = None,
     random_seed: Optional[int] = None,
     sample_kwargs: Optional[Dict[str, Any]] = None,
 ) -> MCMCSamplingResults:
@@ -102,9 +101,6 @@ def pymc3_sampling_procedure(
         cores (Optional[int], optional): Number of cores. Defaults to None.
         prior_pred_samples (int, optional): Number of samples from the prior
           distributions. Defaults to 1000.
-        post_pred_samples (Optional[int], optional): Number of samples for posterior
-          predictions. The default behavior (None) to keep the same size as the MCMC
-          trace. Defaults to None.
         random_seed (Optional[int], optional): The random seed for sampling.
           Defaults to None.
         sample_kwargs (Dict[str, Any], optional): Kwargs for the sampling method.
@@ -130,15 +126,10 @@ def pymc3_sampling_procedure(
             **sample_kwargs,
         )
 
-        post_pred = pm.sample_posterior_predictive(
-            trace,
-            random_seed=random_seed,
-        )
+        post_pred = pm.sample_posterior_predictive(trace, random_seed=random_seed)
 
     return MCMCSamplingResults(
-        trace=trace,
-        prior_predictive=prior_pred,
-        posterior_predictive=post_pred,
+        trace=trace, prior_predictive=prior_pred, posterior_predictive=post_pred
     )
 
 
@@ -148,7 +139,6 @@ def pymc3_advi_approximation_procedure(
     n_iterations: int = 100000,
     draws: int = 1000,
     prior_pred_samples: int = 1000,
-    post_pred_samples: int = 1000,
     callbacks: Optional[List[Callable]] = None,
     random_seed: Optional[int] = None,
     fit_kwargs: Optional[Dict[Any, Any]] = None,
@@ -163,8 +153,6 @@ def pymc3_advi_approximation_procedure(
           Defaults to 1000.
         prior_pred_samples (int, optional): Number of samples from the prior
           distributions. Defaults to 1000.
-        post_pred_samples (int, optional): Number of samples for posterior predictions.
-          Defaults to 1000.
         callbacks (List[Callable], optional): List of fitting callbacks.
           Default is None.
         random_seed (Optional[int], optional): The random seed for sampling.
@@ -185,7 +173,7 @@ def pymc3_advi_approximation_procedure(
         approx = pm.fit(n_iterations, method=method, callbacks=callbacks, **fit_kwargs)
         advi_trace = approx.sample(draws)
         post_pred = pm.sample_posterior_predictive(
-            trace=advi_trace, samples=post_pred_samples, random_seed=random_seed
+            trace=advi_trace, random_seed=random_seed
         )
 
     return ApproximationSamplingResults(

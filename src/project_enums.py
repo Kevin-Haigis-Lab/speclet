@@ -79,4 +79,4 @@ def assert_never(value: NoReturn) -> NoReturn:
     Returns:
         NoReturn: Nothing.
     """
-    assert False, f"Unhandled value: {value} ({type(value).__name__})"
+    assert False, f"Unhandled value: {value} ({type(value).__name__})"  # noqa: B011
