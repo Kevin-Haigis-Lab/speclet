@@ -285,12 +285,12 @@ benchmark_df_long = benchmark_df[
 )
 ```
 
-<div id="altair-viz-03448314dae244cc90553e528e662436"></div>
+<div id="altair-viz-b52f1700f89b4f989474e081b1cf12aa"></div>
 <script type="text/javascript">
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-03448314dae244cc90553e528e662436") {
-      outputDiv = document.getElementById("altair-viz-03448314dae244cc90553e528e662436");
+    if (outputDiv.id !== "altair-viz-b52f1700f89b4f989474e081b1cf12aa") {
+      outputDiv = document.getElementById("altair-viz-b52f1700f89b4f989474e081b1cf12aa");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
@@ -366,7 +366,7 @@ benchmark_df_long = benchmark_df[
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-13
+    Last updated: 2021-07-20
 
     Python implementation: CPython
     Python version       : 3.8.8
@@ -377,13 +377,13 @@ benchmark_df_long = benchmark_df[
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-171.o2.rc.hms.harvard.edu
 
-    Git branch: fit-models
+    Git branch: sp7-parameterizations
 
-    pandas : 1.2.3
     janitor: 0.20.14
+    pandas : 1.2.3
     altair : 4.1.0
