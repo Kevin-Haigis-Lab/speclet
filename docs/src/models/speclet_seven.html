@@ -370,17 +370,17 @@ class SpecletSeven(SpecletModel):
         h_shape = (co_idx.n_genes, co_idx.n_celllines)
         with model:
             μ_μ_h = pm.Normal(&#34;μ_μ_h&#34;, 0, 2)
-            σ_μ_h = pm.HalfNormal(&#34;σ_μ_h&#34;, 5)
+            σ_μ_h = pm.HalfNormal(&#34;σ_μ_h&#34;, 2)
 
             if self.config.μ_h is MP.NONCENTERED:
                 μ_h_offset = pm.Normal(&#34;μ_h_offset&#34;, 0, 1, shape=mu_h_shape)
-                μ_h = pm.Deterministic(&#34;μ_h&#34;, μ_μ_h * σ_μ_h + μ_h_offset)
+                μ_h = pm.Deterministic(&#34;μ_h&#34;, μ_μ_h + σ_μ_h * μ_h_offset)
             elif self.config.μ_h is MP.CENTERED:
                 μ_h = pm.Normal(&#34;μ_h&#34;, μ_μ_h, σ_μ_h, shape=mu_h_shape)
             else:
                 assert_never(self.config.μ_h)
 
-            σ_σ_h = pm.HalfNormal(&#34;σ_σ_h&#34;, 5)
+            σ_σ_h = pm.HalfNormal(&#34;σ_σ_h&#34;, 1)
             σ_h = pm.HalfNormal(&#34;σ_h&#34;, σ_σ_h, shape=(1, co_idx.n_celllines))
             if self.config.h is MP.NONCENTERED:
                 h_offset = pm.Normal(&#34;h_offset&#34;, 0, 1, shape=h_shape)
@@ -943,17 +943,17 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
         h_shape = (co_idx.n_genes, co_idx.n_celllines)
         with model:
             μ_μ_h = pm.Normal(&#34;μ_μ_h&#34;, 0, 2)
-            σ_μ_h = pm.HalfNormal(&#34;σ_μ_h&#34;, 5)
+            σ_μ_h = pm.HalfNormal(&#34;σ_μ_h&#34;, 2)
 
             if self.config.μ_h is MP.NONCENTERED:
                 μ_h_offset = pm.Normal(&#34;μ_h_offset&#34;, 0, 1, shape=mu_h_shape)
-                μ_h = pm.Deterministic(&#34;μ_h&#34;, μ_μ_h * σ_μ_h + μ_h_offset)
+                μ_h = pm.Deterministic(&#34;μ_h&#34;, μ_μ_h + σ_μ_h * μ_h_offset)
             elif self.config.μ_h is MP.CENTERED:
                 μ_h = pm.Normal(&#34;μ_h&#34;, μ_μ_h, σ_μ_h, shape=mu_h_shape)
             else:
                 assert_never(self.config.μ_h)
 
-            σ_σ_h = pm.HalfNormal(&#34;σ_σ_h&#34;, 5)
+            σ_σ_h = pm.HalfNormal(&#34;σ_σ_h&#34;, 1)
             σ_h = pm.HalfNormal(&#34;σ_h&#34;, σ_σ_h, shape=(1, co_idx.n_celllines))
             if self.config.h is MP.NONCENTERED:
                 h_offset = pm.Normal(&#34;h_offset&#34;, 0, 1, shape=h_shape)

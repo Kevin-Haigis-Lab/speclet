@@ -67,7 +67,6 @@ class PyMC3SamplingParameters(BaseModel):
 
     draws: int = 1000
     prior_pred_samples: int = 1000
-    post_pred_samples: int = 1000
 
 
 class MCMCSamplingParameters(PyMC3SamplingParameters):
@@ -235,7 +234,6 @@ class SpecletModel:
         cores: Optional[int] = None,
         target_accept: Optional[float] = None,
         prior_pred_samples: Optional[int] = None,
-        post_pred_samples: Optional[int] = None,
         random_seed: Optional[int] = None,
         sample_kwargs: Optional[Dict[str, Any]] = None,
         ignore_cache: bool = False,
@@ -259,9 +257,6 @@ class SpecletModel:
               to None.
             prior_pred_samples (Optional[int], optional): Number of samples from the
               prior distributions. Defaults to None.
-            post_pred_samples (Optional[int], optional): Number of samples for posterior
-              predictions.
-            Defaults to None.
             random_seed (Optional[int], optional): The random seed for sampling.
             Defaults to None.
             sample_kwargs (Dict[str, Any], optional): Kwargs for the sampling method.
@@ -289,8 +284,6 @@ class SpecletModel:
             target_accept = self.mcmc_sampling_params.target_accept
         if prior_pred_samples is None:
             prior_pred_samples = self.mcmc_sampling_params.prior_pred_samples
-        if post_pred_samples is None:
-            post_pred_samples = self.mcmc_sampling_params.post_pred_samples
 
         if self.model is None:
             raise AttributeError(
@@ -319,7 +312,6 @@ class SpecletModel:
             chains=chains,
             cores=cores,
             prior_pred_samples=prior_pred_samples,
-            post_pred_samples=post_pred_samples,
             random_seed=random_seed,
             sample_kwargs=sample_kwargs,
         )
@@ -363,7 +355,6 @@ class SpecletModel:
         n_iterations: Optional[int] = None,
         draws: Optional[int] = None,
         prior_pred_samples: Optional[int] = None,
-        post_pred_samples: Optional[int] = None,
         random_seed: Optional[int] = None,
         ignore_cache: bool = False,
     ) -&gt; Tuple[az.InferenceData, pm.Approximation]:
@@ -384,8 +375,6 @@ class SpecletModel:
               model. Defaults to None.
             prior_pred_samples (Optional[int], optional): Number of samples from the
               prior distributions. Defaults to None.
-            post_pred_samples (Optional[int], optional): Number of samples for posterior
-              predictions. Defaults to None.
             callbacks (List[Callable], optional): List of fitting callbacks. Default is
               None.
             random_seed (Optional[int], optional): The random seed for sampling.
@@ -410,8 +399,6 @@ class SpecletModel:
             draws = self.advi_sampling_params.draws
         if prior_pred_samples is None:
             prior_pred_samples = self.advi_sampling_params.prior_pred_samples
-        if post_pred_samples is None:
-            post_pred_samples = self.advi_sampling_params.post_pred_samples
 
         if self.model is None:
             raise AttributeError(
@@ -440,7 +427,6 @@ class SpecletModel:
             n_iterations=n_iterations,
             draws=draws,
             prior_pred_samples=prior_pred_samples,
-            post_pred_samples=post_pred_samples,
             callbacks=self.get_advi_callbacks(),
             random_seed=random_seed,
             fit_kwargs=fit_kwargs,
@@ -639,7 +625,7 @@ class SpecletModel:
 <dl>
 <dt id="src.models.speclet_model.MCMCSamplingParameters"><code class="flex name class">
 <span>class <span class="ident">MCMCSamplingParameters</span></span>
-<span>(</span><span>*, draws: int = 1000, prior_pred_samples: int = 1000, post_pred_samples: int = 1000, tune: int = 2000, cores: int = 4, chains: int = 4, init: str = 'auto', n_init: int = 200000, target_accept: float = 0.8)</span>
+<span>(</span><span>*, draws: int = 1000, prior_pred_samples: int = 1000, tune: int = 2000, cores: int = 4, chains: int = 4, init: str = 'auto', n_init: int = 200000, target_accept: float = 0.8)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Parameters for MCMC sampling.</p>
@@ -668,7 +654,7 @@ class SpecletModel:
 </dd>
 <dt id="src.models.speclet_model.PyMC3SamplingParameters"><code class="flex name class">
 <span>class <span class="ident">PyMC3SamplingParameters</span></span>
-<span>(</span><span>*, draws: int = 1000, prior_pred_samples: int = 1000, post_pred_samples: int = 1000)</span>
+<span>(</span><span>*, draws: int = 1000, prior_pred_samples: int = 1000)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Paramerers common to fitting a model in PyMC3.</p>
@@ -682,8 +668,7 @@ class SpecletModel:
     &#34;&#34;&#34;Paramerers common to fitting a model in PyMC3.&#34;&#34;&#34;
 
     draws: int = 1000
-    prior_pred_samples: int = 1000
-    post_pred_samples: int = 1000</code></pre>
+    prior_pred_samples: int = 1000</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -890,7 +875,6 @@ data. Defaults to None.</dd>
         cores: Optional[int] = None,
         target_accept: Optional[float] = None,
         prior_pred_samples: Optional[int] = None,
-        post_pred_samples: Optional[int] = None,
         random_seed: Optional[int] = None,
         sample_kwargs: Optional[Dict[str, Any]] = None,
         ignore_cache: bool = False,
@@ -914,9 +898,6 @@ data. Defaults to None.</dd>
               to None.
             prior_pred_samples (Optional[int], optional): Number of samples from the
               prior distributions. Defaults to None.
-            post_pred_samples (Optional[int], optional): Number of samples for posterior
-              predictions.
-            Defaults to None.
             random_seed (Optional[int], optional): The random seed for sampling.
             Defaults to None.
             sample_kwargs (Dict[str, Any], optional): Kwargs for the sampling method.
@@ -944,8 +925,6 @@ data. Defaults to None.</dd>
             target_accept = self.mcmc_sampling_params.target_accept
         if prior_pred_samples is None:
             prior_pred_samples = self.mcmc_sampling_params.prior_pred_samples
-        if post_pred_samples is None:
-            post_pred_samples = self.mcmc_sampling_params.post_pred_samples
 
         if self.model is None:
             raise AttributeError(
@@ -974,7 +953,6 @@ data. Defaults to None.</dd>
             chains=chains,
             cores=cores,
             prior_pred_samples=prior_pred_samples,
-            post_pred_samples=post_pred_samples,
             random_seed=random_seed,
             sample_kwargs=sample_kwargs,
         )
@@ -1018,7 +996,6 @@ data. Defaults to None.</dd>
         n_iterations: Optional[int] = None,
         draws: Optional[int] = None,
         prior_pred_samples: Optional[int] = None,
-        post_pred_samples: Optional[int] = None,
         random_seed: Optional[int] = None,
         ignore_cache: bool = False,
     ) -&gt; Tuple[az.InferenceData, pm.Approximation]:
@@ -1039,8 +1016,6 @@ data. Defaults to None.</dd>
               model. Defaults to None.
             prior_pred_samples (Optional[int], optional): Number of samples from the
               prior distributions. Defaults to None.
-            post_pred_samples (Optional[int], optional): Number of samples for posterior
-              predictions. Defaults to None.
             callbacks (List[Callable], optional): List of fitting callbacks. Default is
               None.
             random_seed (Optional[int], optional): The random seed for sampling.
@@ -1065,8 +1040,6 @@ data. Defaults to None.</dd>
             draws = self.advi_sampling_params.draws
         if prior_pred_samples is None:
             prior_pred_samples = self.advi_sampling_params.prior_pred_samples
-        if post_pred_samples is None:
-            post_pred_samples = self.advi_sampling_params.post_pred_samples
 
         if self.model is None:
             raise AttributeError(
@@ -1095,7 +1068,6 @@ data. Defaults to None.</dd>
             n_iterations=n_iterations,
             draws=draws,
             prior_pred_samples=prior_pred_samples,
-            post_pred_samples=post_pred_samples,
             callbacks=self.get_advi_callbacks(),
             random_seed=random_seed,
             fit_kwargs=fit_kwargs,
@@ -1352,7 +1324,7 @@ def debug(self) -&gt; bool:
 <h3>Methods</h3>
 <dl>
 <dt id="src.models.speclet_model.SpecletModel.advi_sample_model"><code class="name flex">
-<span>def <span class="ident">advi_sample_model</span></span>(<span>self, method: Optional[str] = None, n_iterations: Optional[int] = None, draws: Optional[int] = None, prior_pred_samples: Optional[int] = None, post_pred_samples: Optional[int] = None, random_seed: Optional[int] = None, ignore_cache: bool = False) -> Tuple[arviz.data.inference_data.InferenceData, pymc3.variational.opvi.Approximation]</span>
+<span>def <span class="ident">advi_sample_model</span></span>(<span>self, method: Optional[str] = None, n_iterations: Optional[int] = None, draws: Optional[int] = None, prior_pred_samples: Optional[int] = None, random_seed: Optional[int] = None, ignore_cache: bool = False) -> Tuple[arviz.data.inference_data.InferenceData, pymc3.variational.opvi.Approximation]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ADVI fit the model.</p>
@@ -1375,9 +1347,6 @@ model. Defaults to None.</dd>
 <dt><strong><code>prior_pred_samples</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
 <dd>Number of samples from the
 prior distributions. Defaults to None.</dd>
-<dt><strong><code>post_pred_samples</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
-<dd>Number of samples for posterior
-predictions. Defaults to None.</dd>
 <dt><strong><code>callbacks</code></strong> :&ensp;<code>List[Callable]</code>, optional</dt>
 <dd>List of fitting callbacks. Default is
 None.</dd>
@@ -1409,7 +1378,6 @@ and the approximation object.</dd>
     n_iterations: Optional[int] = None,
     draws: Optional[int] = None,
     prior_pred_samples: Optional[int] = None,
-    post_pred_samples: Optional[int] = None,
     random_seed: Optional[int] = None,
     ignore_cache: bool = False,
 ) -&gt; Tuple[az.InferenceData, pm.Approximation]:
@@ -1430,8 +1398,6 @@ and the approximation object.</dd>
           model. Defaults to None.
         prior_pred_samples (Optional[int], optional): Number of samples from the
           prior distributions. Defaults to None.
-        post_pred_samples (Optional[int], optional): Number of samples for posterior
-          predictions. Defaults to None.
         callbacks (List[Callable], optional): List of fitting callbacks. Default is
           None.
         random_seed (Optional[int], optional): The random seed for sampling.
@@ -1456,8 +1422,6 @@ and the approximation object.</dd>
         draws = self.advi_sampling_params.draws
     if prior_pred_samples is None:
         prior_pred_samples = self.advi_sampling_params.prior_pred_samples
-    if post_pred_samples is None:
-        post_pred_samples = self.advi_sampling_params.post_pred_samples
 
     if self.model is None:
         raise AttributeError(
@@ -1486,7 +1450,6 @@ and the approximation object.</dd>
         n_iterations=n_iterations,
         draws=draws,
         prior_pred_samples=prior_pred_samples,
-        post_pred_samples=post_pred_samples,
         callbacks=self.get_advi_callbacks(),
         random_seed=random_seed,
         fit_kwargs=fit_kwargs,
@@ -1762,7 +1725,7 @@ this method returns None and has no effect on ADVI.</p>
 </details>
 </dd>
 <dt id="src.models.speclet_model.SpecletModel.mcmc_sample_model"><code class="name flex">
-<span>def <span class="ident">mcmc_sample_model</span></span>(<span>self, draws: Optional[int] = None, tune: Optional[int] = None, chains: Optional[int] = None, cores: Optional[int] = None, target_accept: Optional[float] = None, prior_pred_samples: Optional[int] = None, post_pred_samples: Optional[int] = None, random_seed: Optional[int] = None, sample_kwargs: Optional[Dict[str, Any]] = None, ignore_cache: bool = False) -> arviz.data.inference_data.InferenceData</span>
+<span>def <span class="ident">mcmc_sample_model</span></span>(<span>self, draws: Optional[int] = None, tune: Optional[int] = None, chains: Optional[int] = None, cores: Optional[int] = None, target_accept: Optional[float] = None, prior_pred_samples: Optional[int] = None, random_seed: Optional[int] = None, sample_kwargs: Optional[Dict[str, Any]] = None, ignore_cache: bool = False) -> arviz.data.inference_data.InferenceData</span>
 </code></dt>
 <dd>
 <div class="desc"><p>MCMC sample the model.</p>
@@ -1788,10 +1751,6 @@ to None.</dd>
 <dt><strong><code>prior_pred_samples</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
 <dd>Number of samples from the
 prior distributions. Defaults to None.</dd>
-<dt><strong><code>post_pred_samples</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
-<dd>Number of samples for posterior
-predictions.</dd>
-<dt>Defaults to None.</dt>
 <dt><strong><code>random_seed</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
 <dd>The random seed for sampling.</dd>
 <dt>Defaults to None.</dt>
@@ -1824,7 +1783,6 @@ Defaults to False.</dd>
     cores: Optional[int] = None,
     target_accept: Optional[float] = None,
     prior_pred_samples: Optional[int] = None,
-    post_pred_samples: Optional[int] = None,
     random_seed: Optional[int] = None,
     sample_kwargs: Optional[Dict[str, Any]] = None,
     ignore_cache: bool = False,
@@ -1848,9 +1806,6 @@ Defaults to False.</dd>
           to None.
         prior_pred_samples (Optional[int], optional): Number of samples from the
           prior distributions. Defaults to None.
-        post_pred_samples (Optional[int], optional): Number of samples for posterior
-          predictions.
-        Defaults to None.
         random_seed (Optional[int], optional): The random seed for sampling.
         Defaults to None.
         sample_kwargs (Dict[str, Any], optional): Kwargs for the sampling method.
@@ -1878,8 +1833,6 @@ Defaults to False.</dd>
         target_accept = self.mcmc_sampling_params.target_accept
     if prior_pred_samples is None:
         prior_pred_samples = self.mcmc_sampling_params.prior_pred_samples
-    if post_pred_samples is None:
-        post_pred_samples = self.mcmc_sampling_params.post_pred_samples
 
     if self.model is None:
         raise AttributeError(
@@ -1908,7 +1861,6 @@ Defaults to False.</dd>
         chains=chains,
         cores=cores,
         prior_pred_samples=prior_pred_samples,
-        post_pred_samples=post_pred_samples,
         random_seed=random_seed,
         sample_kwargs=sample_kwargs,
     )
@@ -2178,7 +2130,7 @@ passed to the fitting method. Default is None.</dd>
 </dd>
 <dt id="src.models.speclet_model.VISamplingParameters"><code class="flex name class">
 <span>class <span class="ident">VISamplingParameters</span></span>
-<span>(</span><span>*, draws: int = 1000, prior_pred_samples: int = 1000, post_pred_samples: int = 1000, method: str = 'advi', n_iterations: int = 50000)</span>
+<span>(</span><span>*, draws: int = 1000, prior_pred_samples: int = 1000, method: str = 'advi', n_iterations: int = 50000)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Parameters for fitting by VI.</p>

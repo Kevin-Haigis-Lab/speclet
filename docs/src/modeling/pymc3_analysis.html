@@ -30,8 +30,9 @@
 
 &#34;&#34;&#34;Functions to aid in the analysis of PyMC3 models.&#34;&#34;&#34;
 
+import datetime
 import re
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Optional, Sequence, Union
 
 import arviz as az
 import matplotlib
@@ -41,24 +42,26 @@ import pandas as pd
 import plotnine as gg
 import pymc3 as pm
 import seaborn as sns
+from pydantic import BaseModel
+from xarray import Dataset
 
 from src.plot.color_pal import SeabornColor
 
 
 def plot_all_priors(
-    prior_predictive: Dict[str, np.ndarray],
-    subplots: Tuple[int, int],
-    figsize: Tuple[float, float],
+    prior_predictive: dict[str, np.ndarray],
+    subplots: tuple[int, int],
+    figsize: tuple[float, float],
     samples: int = 1000,
     rm_var_regex: str = &#34;log__|logodds_&#34;,
-) -&gt; Tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]:
+) -&gt; tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]:
     &#34;&#34;&#34;Plot all priors of a PyMC3 model.
 
     Args:
-        prior_predictive (Dict[str, np.ndarray]): The results of sampling from the
+        prior_predictive (dict[str, np.ndarray]): The results of sampling from the
           priors of a PyMC3 model.
-        subplots (Tuple[int, int]): How many subplots to create.
-        figsize (Tuple[float, float]): The size of the final figure.
+        subplots (tuple[int, int]): How many subplots to create.
+        figsize (tuple[float, float]): The size of the final figure.
         samples (int, optional): The number of samples from the distributions to use.
           This can help the performance of the plotting if there are many samples.
           Defaults to 1000.
@@ -66,10 +69,10 @@ def plot_all_priors(
           Defaults to &#34;log__|logodds_&#34;.
 
     Returns:
-        Tuple[matplotlib.figure.Figure, np.ndarray]: The matplotlib figure and array
+        tuple[matplotlib.figure.Figure, np.ndarray]: The matplotlib figure and array
           of axes.
     &#34;&#34;&#34;
-    model_vars: List[str] = []
+    model_vars: list[str] = []
     for x in prior_predictive:
         if not re.search(rm_var_regex, x):
             model_vars.append(x)
@@ -172,9 +175,9 @@ def summarize_posterior_predictions(
 
 def _plot_vi_axes_limits(
     yvals: np.ndarray, x_start: Optional[Union[int, float]]
-) -&gt; Tuple[List[int], List[float]]:
+) -&gt; tuple[list[int], list[float]]:
     yvals = yvals.copy()[np.isfinite(yvals)]
-    x_lims: List[int] = [0, len(yvals)]
+    x_lims: list[int] = [0, len(yvals)]
     if x_start is None:
         pass
     elif isinstance(x_start, float) and x_start &lt;= 1.0:
@@ -182,7 +185,7 @@ def _plot_vi_axes_limits(
     else:
         x_lims[0] = int(x_start)
 
-    y_lims: List[float] = [min(yvals), max(yvals[x_lims[0] :])]
+    y_lims: list[float] = [min(yvals), max(yvals[x_lims[0] :])]
 
     return x_lims, y_lims
 
@@ -235,19 +238,177 @@ def plot_vi_hist(
     )
 
 
-def get_hdi_colnames_from_az_summary(df: pd.DataFrame) -&gt; Tuple[str, str]:
+def get_hdi_colnames_from_az_summary(df: pd.DataFrame) -&gt; tuple[str, str]:
     &#34;&#34;&#34;Get the column names corresponding to the HDI from an ArviZ summary.
 
     Args:
         df (pd.DataFrame): ArviZ posterior summary data frame.
 
     Returns:
-        Tuple[str, str]: The two column names.
+        tuple[str, str]: The two column names.
     &#34;&#34;&#34;
-    cols: List[str] = [c for c in df.columns if &#34;hdi_&#34; in c]
+    cols: list[str] = [c for c in df.columns if &#34;hdi_&#34; in c]
     cols = [c for c in cols if &#34;%&#34; in c]
     assert len(cols) == 2
-    return cols[0], cols[1]</code></pre>
+    return cols[0], cols[1]
+
+
+def _pretty_bfmi(data: az.InferenceData, decimals: int = 3) -&gt; list[str]:
+    return np.round(az.bfmi(data), decimals).astype(str).tolist()
+
+
+def get_average_step_size(data: az.InferenceData) -&gt; list[float]:
+    &#34;&#34;&#34;Get the average step size for each chain of MCMC.
+
+    Args:
+        data (az.InferenceData): Data object.
+
+    Returns:
+        list[float]: list of average step sizes for each chain.
+    &#34;&#34;&#34;
+    return data.sample_stats.step_size.mean(axis=1).values.tolist()
+
+
+def _pretty_step_size(data: az.InferenceData, decimals: int = 3) -&gt; list[str]:
+    return np.round(get_average_step_size(data), decimals).astype(str).tolist()
+
+
+def get_divergences(data: az.InferenceData) -&gt; np.ndarray:
+    &#34;&#34;&#34;Get the number and percent of steps that were divergences of each MCMC chain.
+
+    Args:
+        data (az.InferenceData): Data object.
+
+    Returns:
+        tuple[list[int], list[float]]: A list of the number of divergent steps and a
+        list of the percent of steps that were divergent.
+    &#34;&#34;&#34;
+    return data.sample_stats.diverging.values
+
+
+def get_divergence_summary(data: az.InferenceData) -&gt; tuple[list[int], list[float]]:
+    &#34;&#34;&#34;Get the number and percent of steps that were divergences of each MCMC chain.
+
+    Args:
+        data (az.InferenceData): Data object.
+
+    Returns:
+        tuple[list[int], list[float]]: A list of the number of divergent steps and a
+        list of the percent of steps that were divergent.
+    &#34;&#34;&#34;
+    divs = data.sample_stats.diverging.values
+    return divs.sum(axis=1).tolist(), divs.mean(axis=1).tolist()
+
+
+class MCMCDescription(BaseModel):
+    &#34;&#34;&#34;Descriptive information for a MCMC.&#34;&#34;&#34;
+
+    created: Optional[datetime.datetime]
+    duration: Optional[datetime.timedelta]
+    n_chains: int
+    n_tuning_steps: Optional[int]
+    n_draws: int
+    n_divergences: list[int]
+    pct_divergences: list[float]
+    bfmi: list[float]
+    avg_step_size: list[float]
+
+    def _pretty_list(self, vals: Sequence[Union[int, float]], round: int = 3) -&gt; str:
+        return &#34;, &#34;.join(np.round(vals, round).astype(str).tolist())
+
+    def __str__(self) -&gt; str:
+        &#34;&#34;&#34;Nifty ol&#39; string.&#34;&#34;&#34;
+        messages: list[str] = []
+        if self.created is not None:
+            messages.append(f&#34;date created: {self.created:%Y-%m-%d %H:%M}&#34;)
+        if self.duration is not None:
+            _d_min = self.duration / datetime.timedelta(minutes=1)
+            messages.append(f&#34;time required: {_d_min:0.2f} minutes&#34;)
+        _n_tuning_steps = (
+            f&#34;{self.n_tuning_steps:,}&#34;
+            if (self.n_tuning_steps is not None)
+            else &#34;(unknown)&#34;
+        )
+        messages.append(
+            f&#34;sampled {self.n_chains} chains with {_n_tuning_steps} &#34;
+            + f&#34;tuning steps and {self.n_draws:,} draws&#34;
+        )
+        messages.append(f&#34;num. divergences: {self._pretty_list(self.n_divergences)}&#34;)
+        messages.append(
+            f&#34;percent divergences: {self._pretty_list(self.pct_divergences)}&#34;
+        )
+        messages.append(f&#34;BFMI: {self._pretty_list(self.bfmi)}&#34;)
+        messages.append(f&#34;avg. step size: {self._pretty_list(self.avg_step_size)}&#34;)
+        return &#34;\n&#34;.join(messages)
+
+
+def describe_mcmc(
+    data: az.InferenceData, plot: bool = True
+) -&gt; Optional[MCMCDescription]:
+    &#34;&#34;&#34;Descriptive statistics and plots for MCMC.
+
+    Prints out the following:
+
+    1. Date of creation and how long the sampling took. ***
+    2. The number of tuning and sampling steps. ***
+    3. BFMI of each chain.
+    4. Average step size of each chain.
+    5. Number of divergences in each chain.
+    6. Plot the energy transition distribution and marginal energy distribution.
+
+    Args:
+        data (az.InferenceData): Data object.
+        plot (bool): Include any plots? Default is True.
+    &#34;&#34;&#34;
+    if not hasattr(data, &#34;sample_stats&#34;):
+        print(&#34;Unable to get sampling stats.&#34;)
+        return None
+
+    sample_stats = data.get(&#34;sample_stats&#34;)
+    if not isinstance(sample_stats, Dataset):
+        print(&#34;`sample_stats` attribute is not of type `xarray.Dataset`&#34;)
+        return None
+
+    # Date and duration.
+    created_at = sample_stats.get(&#34;created_at&#34;)
+    duration: Optional[datetime.timedelta] = None
+    if (duration_sec := sample_stats.get(&#34;sampling_time&#34;)) is not None:
+        duration = datetime.timedelta(seconds=duration_sec)
+
+    # Sampling dimensions
+    n_tuning_steps: Optional[int] = sample_stats.get(&#34;tuning_steps&#34;)
+    n_draws: int = len(sample_stats.draw)
+    n_chains: int = len(sample_stats.chain)
+
+    # Divergences
+    n_divergences, pct_divergences = get_divergence_summary(data)
+
+    # BFMI.
+    bfmi = az.bfmi(data).tolist()
+
+    # Average step size.
+    avg_step_size = get_average_step_size(data)
+
+    mcmc_descr = MCMCDescription(
+        created=created_at,
+        duration=duration,
+        n_tuning_steps=n_tuning_steps,
+        n_chains=n_chains,
+        n_draws=n_draws,
+        n_divergences=n_divergences,
+        pct_divergences=pct_divergences,
+        bfmi=bfmi,
+        avg_step_size=avg_step_size,
+    )
+
+    print(mcmc_descr)
+
+    if plot:
+        # Plot energy.
+        az.plot_energy(data)
+        plt.show()
+
+    return mcmc_descr</code></pre>
 </details>
 </section>
 <section>
@@ -257,6 +418,100 @@ def get_hdi_colnames_from_az_summary(df: pd.DataFrame) -&gt; Tuple[str, str]:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="src.modeling.pymc3_analysis.describe_mcmc"><code class="name flex">
+<span>def <span class="ident">describe_mcmc</span></span>(<span>data: arviz.data.inference_data.InferenceData, plot: bool = True) -> Optional[<a title="src.modeling.pymc3_analysis.MCMCDescription" href="#src.modeling.pymc3_analysis.MCMCDescription">MCMCDescription</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Descriptive statistics and plots for MCMC.</p>
+<p>Prints out the following:</p>
+<ol>
+<li>Date of creation and how long the sampling took. ***</li>
+<li>The number of tuning and sampling steps. ***</li>
+<li>BFMI of each chain.</li>
+<li>Average step size of each chain.</li>
+<li>Number of divergences in each chain.</li>
+<li>Plot the energy transition distribution and marginal energy distribution.</li>
+</ol>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>az.InferenceData</code></dt>
+<dd>Data object.</dd>
+<dt><strong><code>plot</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include any plots? Default is True.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def describe_mcmc(
+    data: az.InferenceData, plot: bool = True
+) -&gt; Optional[MCMCDescription]:
+    &#34;&#34;&#34;Descriptive statistics and plots for MCMC.
+
+    Prints out the following:
+
+    1. Date of creation and how long the sampling took. ***
+    2. The number of tuning and sampling steps. ***
+    3. BFMI of each chain.
+    4. Average step size of each chain.
+    5. Number of divergences in each chain.
+    6. Plot the energy transition distribution and marginal energy distribution.
+
+    Args:
+        data (az.InferenceData): Data object.
+        plot (bool): Include any plots? Default is True.
+    &#34;&#34;&#34;
+    if not hasattr(data, &#34;sample_stats&#34;):
+        print(&#34;Unable to get sampling stats.&#34;)
+        return None
+
+    sample_stats = data.get(&#34;sample_stats&#34;)
+    if not isinstance(sample_stats, Dataset):
+        print(&#34;`sample_stats` attribute is not of type `xarray.Dataset`&#34;)
+        return None
+
+    # Date and duration.
+    created_at = sample_stats.get(&#34;created_at&#34;)
+    duration: Optional[datetime.timedelta] = None
+    if (duration_sec := sample_stats.get(&#34;sampling_time&#34;)) is not None:
+        duration = datetime.timedelta(seconds=duration_sec)
+
+    # Sampling dimensions
+    n_tuning_steps: Optional[int] = sample_stats.get(&#34;tuning_steps&#34;)
+    n_draws: int = len(sample_stats.draw)
+    n_chains: int = len(sample_stats.chain)
+
+    # Divergences
+    n_divergences, pct_divergences = get_divergence_summary(data)
+
+    # BFMI.
+    bfmi = az.bfmi(data).tolist()
+
+    # Average step size.
+    avg_step_size = get_average_step_size(data)
+
+    mcmc_descr = MCMCDescription(
+        created=created_at,
+        duration=duration,
+        n_tuning_steps=n_tuning_steps,
+        n_chains=n_chains,
+        n_draws=n_draws,
+        n_divergences=n_divergences,
+        pct_divergences=pct_divergences,
+        bfmi=bfmi,
+        avg_step_size=avg_step_size,
+    )
+
+    print(mcmc_descr)
+
+    if plot:
+        # Plot energy.
+        az.plot_energy(data)
+        plt.show()
+
+    return mcmc_descr</code></pre>
+</details>
+</dd>
 <dt id="src.modeling.pymc3_analysis.extract_matrix_variable_indices"><code class="name flex">
 <span>def <span class="ident">extract_matrix_variable_indices</span></span>(<span>d: pandas.core.frame.DataFrame, col: str, idx1: numpy.ndarray, idx2: numpy.ndarray, idx1name: str, idx2name: str) -> pandas.core.frame.DataFrame</span>
 </code></dt>
@@ -318,8 +573,106 @@ PyMC3 model.</dd>
     return d</code></pre>
 </details>
 </dd>
+<dt id="src.modeling.pymc3_analysis.get_average_step_size"><code class="name flex">
+<span>def <span class="ident">get_average_step_size</span></span>(<span>data: arviz.data.inference_data.InferenceData) -> list</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the average step size for each chain of MCMC.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>az.InferenceData</code></dt>
+<dd>Data object.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[float]</code></dt>
+<dd>list of average step sizes for each chain.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_average_step_size(data: az.InferenceData) -&gt; list[float]:
+    &#34;&#34;&#34;Get the average step size for each chain of MCMC.
+
+    Args:
+        data (az.InferenceData): Data object.
+
+    Returns:
+        list[float]: list of average step sizes for each chain.
+    &#34;&#34;&#34;
+    return data.sample_stats.step_size.mean(axis=1).values.tolist()</code></pre>
+</details>
+</dd>
+<dt id="src.modeling.pymc3_analysis.get_divergence_summary"><code class="name flex">
+<span>def <span class="ident">get_divergence_summary</span></span>(<span>data: arviz.data.inference_data.InferenceData) -> tuple</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the number and percent of steps that were divergences of each MCMC chain.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>az.InferenceData</code></dt>
+<dd>Data object.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[list[int], list[float]]</code></dt>
+<dd>A list of the number of divergent steps and a</dd>
+</dl>
+<p>list of the percent of steps that were divergent.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_divergence_summary(data: az.InferenceData) -&gt; tuple[list[int], list[float]]:
+    &#34;&#34;&#34;Get the number and percent of steps that were divergences of each MCMC chain.
+
+    Args:
+        data (az.InferenceData): Data object.
+
+    Returns:
+        tuple[list[int], list[float]]: A list of the number of divergent steps and a
+        list of the percent of steps that were divergent.
+    &#34;&#34;&#34;
+    divs = data.sample_stats.diverging.values
+    return divs.sum(axis=1).tolist(), divs.mean(axis=1).tolist()</code></pre>
+</details>
+</dd>
+<dt id="src.modeling.pymc3_analysis.get_divergences"><code class="name flex">
+<span>def <span class="ident">get_divergences</span></span>(<span>data: arviz.data.inference_data.InferenceData) -> numpy.ndarray</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the number and percent of steps that were divergences of each MCMC chain.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>az.InferenceData</code></dt>
+<dd>Data object.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[list[int], list[float]]</code></dt>
+<dd>A list of the number of divergent steps and a</dd>
+</dl>
+<p>list of the percent of steps that were divergent.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_divergences(data: az.InferenceData) -&gt; np.ndarray:
+    &#34;&#34;&#34;Get the number and percent of steps that were divergences of each MCMC chain.
+
+    Args:
+        data (az.InferenceData): Data object.
+
+    Returns:
+        tuple[list[int], list[float]]: A list of the number of divergent steps and a
+        list of the percent of steps that were divergent.
+    &#34;&#34;&#34;
+    return data.sample_stats.diverging.values</code></pre>
+</details>
+</dd>
 <dt id="src.modeling.pymc3_analysis.get_hdi_colnames_from_az_summary"><code class="name flex">
-<span>def <span class="ident">get_hdi_colnames_from_az_summary</span></span>(<span>df: pandas.core.frame.DataFrame) -> Tuple[str, str]</span>
+<span>def <span class="ident">get_hdi_colnames_from_az_summary</span></span>(<span>df: pandas.core.frame.DataFrame) -> tuple</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the column names corresponding to the HDI from an ArviZ summary.</p>
@@ -330,41 +683,41 @@ PyMC3 model.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Tuple[str, str]</code></dt>
+<dt><code>tuple[str, str]</code></dt>
 <dd>The two column names.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_hdi_colnames_from_az_summary(df: pd.DataFrame) -&gt; Tuple[str, str]:
+<pre><code class="python">def get_hdi_colnames_from_az_summary(df: pd.DataFrame) -&gt; tuple[str, str]:
     &#34;&#34;&#34;Get the column names corresponding to the HDI from an ArviZ summary.
 
     Args:
         df (pd.DataFrame): ArviZ posterior summary data frame.
 
     Returns:
-        Tuple[str, str]: The two column names.
+        tuple[str, str]: The two column names.
     &#34;&#34;&#34;
-    cols: List[str] = [c for c in df.columns if &#34;hdi_&#34; in c]
+    cols: list[str] = [c for c in df.columns if &#34;hdi_&#34; in c]
     cols = [c for c in cols if &#34;%&#34; in c]
     assert len(cols) == 2
     return cols[0], cols[1]</code></pre>
 </details>
 </dd>
 <dt id="src.modeling.pymc3_analysis.plot_all_priors"><code class="name flex">
-<span>def <span class="ident">plot_all_priors</span></span>(<span>prior_predictive: Dict[str, numpy.ndarray], subplots: Tuple[int, int], figsize: Tuple[float, float], samples: int = 1000, rm_var_regex: str = 'log__|logodds_') -> Tuple[matplotlib.figure.Figure, matplotlib.axes._axes.Axes]</span>
+<span>def <span class="ident">plot_all_priors</span></span>(<span>prior_predictive: dict, subplots: tuple, figsize: tuple, samples: int = 1000, rm_var_regex: str = 'log__|logodds_') -> tuple</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Plot all priors of a PyMC3 model.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>prior_predictive</code></strong> :&ensp;<code>Dict[str, np.ndarray]</code></dt>
+<dt><strong><code>prior_predictive</code></strong> :&ensp;<code>dict[str, np.ndarray]</code></dt>
 <dd>The results of sampling from the
 priors of a PyMC3 model.</dd>
-<dt><strong><code>subplots</code></strong> :&ensp;<code>Tuple[int, int]</code></dt>
+<dt><strong><code>subplots</code></strong> :&ensp;<code>tuple[int, int]</code></dt>
 <dd>How many subplots to create.</dd>
-<dt><strong><code>figsize</code></strong> :&ensp;<code>Tuple[float, float]</code></dt>
+<dt><strong><code>figsize</code></strong> :&ensp;<code>tuple[float, float]</code></dt>
 <dd>The size of the final figure.</dd>
 <dt><strong><code>samples</code></strong> :&ensp;<code>int</code>, optional</dt>
 <dd>The number of samples from the distributions to use.
@@ -376,7 +729,7 @@ Defaults to "log__|logodds_".</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Tuple[matplotlib.figure.Figure, np.ndarray]</code></dt>
+<dt><code>tuple[matplotlib.figure.Figure, np.ndarray]</code></dt>
 <dd>The matplotlib figure and array
 of axes.</dd>
 </dl></div>
@@ -385,19 +738,19 @@ of axes.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def plot_all_priors(
-    prior_predictive: Dict[str, np.ndarray],
-    subplots: Tuple[int, int],
-    figsize: Tuple[float, float],
+    prior_predictive: dict[str, np.ndarray],
+    subplots: tuple[int, int],
+    figsize: tuple[float, float],
     samples: int = 1000,
     rm_var_regex: str = &#34;log__|logodds_&#34;,
-) -&gt; Tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]:
+) -&gt; tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]:
     &#34;&#34;&#34;Plot all priors of a PyMC3 model.
 
     Args:
-        prior_predictive (Dict[str, np.ndarray]): The results of sampling from the
+        prior_predictive (dict[str, np.ndarray]): The results of sampling from the
           priors of a PyMC3 model.
-        subplots (Tuple[int, int]): How many subplots to create.
-        figsize (Tuple[float, float]): The size of the final figure.
+        subplots (tuple[int, int]): How many subplots to create.
+        figsize (tuple[float, float]): The size of the final figure.
         samples (int, optional): The number of samples from the distributions to use.
           This can help the performance of the plotting if there are many samples.
           Defaults to 1000.
@@ -405,10 +758,10 @@ of axes.</dd>
           Defaults to &#34;log__|logodds_&#34;.
 
     Returns:
-        Tuple[matplotlib.figure.Figure, np.ndarray]: The matplotlib figure and array
+        tuple[matplotlib.figure.Figure, np.ndarray]: The matplotlib figure and array
           of axes.
     &#34;&#34;&#34;
-    model_vars: List[str] = []
+    model_vars: list[str] = []
     for x in prior_predictive:
         if not re.search(rm_var_regex, x):
             model_vars.append(x)
@@ -569,6 +922,68 @@ the posterior predictions.</dd>
 </dl>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="src.modeling.pymc3_analysis.MCMCDescription"><code class="flex name class">
+<span>class <span class="ident">MCMCDescription</span></span>
+<span>(</span><span>*, created: datetime.datetime = None, duration: datetime.timedelta = None, n_chains: int, n_tuning_steps: int = None, n_draws: int, n_divergences: list, pct_divergences: list, bfmi: list, avg_step_size: list)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Descriptive information for a MCMC.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MCMCDescription(BaseModel):
+    &#34;&#34;&#34;Descriptive information for a MCMC.&#34;&#34;&#34;
+
+    created: Optional[datetime.datetime]
+    duration: Optional[datetime.timedelta]
+    n_chains: int
+    n_tuning_steps: Optional[int]
+    n_draws: int
+    n_divergences: list[int]
+    pct_divergences: list[float]
+    bfmi: list[float]
+    avg_step_size: list[float]
+
+    def _pretty_list(self, vals: Sequence[Union[int, float]], round: int = 3) -&gt; str:
+        return &#34;, &#34;.join(np.round(vals, round).astype(str).tolist())
+
+    def __str__(self) -&gt; str:
+        &#34;&#34;&#34;Nifty ol&#39; string.&#34;&#34;&#34;
+        messages: list[str] = []
+        if self.created is not None:
+            messages.append(f&#34;date created: {self.created:%Y-%m-%d %H:%M}&#34;)
+        if self.duration is not None:
+            _d_min = self.duration / datetime.timedelta(minutes=1)
+            messages.append(f&#34;time required: {_d_min:0.2f} minutes&#34;)
+        _n_tuning_steps = (
+            f&#34;{self.n_tuning_steps:,}&#34;
+            if (self.n_tuning_steps is not None)
+            else &#34;(unknown)&#34;
+        )
+        messages.append(
+            f&#34;sampled {self.n_chains} chains with {_n_tuning_steps} &#34;
+            + f&#34;tuning steps and {self.n_draws:,} draws&#34;
+        )
+        messages.append(f&#34;num. divergences: {self._pretty_list(self.n_divergences)}&#34;)
+        messages.append(
+            f&#34;percent divergences: {self._pretty_list(self.pct_divergences)}&#34;
+        )
+        messages.append(f&#34;BFMI: {self._pretty_list(self.bfmi)}&#34;)
+        messages.append(f&#34;avg. step size: {self._pretty_list(self.avg_step_size)}&#34;)
+        return &#34;\n&#34;.join(messages)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -584,11 +999,22 @@ the posterior predictions.</dd>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="src.modeling.pymc3_analysis.describe_mcmc" href="#src.modeling.pymc3_analysis.describe_mcmc">describe_mcmc</a></code></li>
 <li><code><a title="src.modeling.pymc3_analysis.extract_matrix_variable_indices" href="#src.modeling.pymc3_analysis.extract_matrix_variable_indices">extract_matrix_variable_indices</a></code></li>
+<li><code><a title="src.modeling.pymc3_analysis.get_average_step_size" href="#src.modeling.pymc3_analysis.get_average_step_size">get_average_step_size</a></code></li>
+<li><code><a title="src.modeling.pymc3_analysis.get_divergence_summary" href="#src.modeling.pymc3_analysis.get_divergence_summary">get_divergence_summary</a></code></li>
+<li><code><a title="src.modeling.pymc3_analysis.get_divergences" href="#src.modeling.pymc3_analysis.get_divergences">get_divergences</a></code></li>
 <li><code><a title="src.modeling.pymc3_analysis.get_hdi_colnames_from_az_summary" href="#src.modeling.pymc3_analysis.get_hdi_colnames_from_az_summary">get_hdi_colnames_from_az_summary</a></code></li>
 <li><code><a title="src.modeling.pymc3_analysis.plot_all_priors" href="#src.modeling.pymc3_analysis.plot_all_priors">plot_all_priors</a></code></li>
 <li><code><a title="src.modeling.pymc3_analysis.plot_vi_hist" href="#src.modeling.pymc3_analysis.plot_vi_hist">plot_vi_hist</a></code></li>
 <li><code><a title="src.modeling.pymc3_analysis.summarize_posterior_predictions" href="#src.modeling.pymc3_analysis.summarize_posterior_predictions">summarize_posterior_predictions</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="src.modeling.pymc3_analysis.MCMCDescription" href="#src.modeling.pymc3_analysis.MCMCDescription">MCMCDescription</a></code></h4>
+</li>
 </ul>
 </li>
 </ul>
