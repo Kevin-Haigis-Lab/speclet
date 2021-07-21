@@ -206,6 +206,7 @@ class CrcDataManager(DataManager):
         self.debug = debug
 
         self.transformations = [
+            CrcDataManager._filter_for_broad_source_only,
             CrcDataManager._drop_sgrnas_that_map_to_multiple_genes,
             CrcDataManager._drop_missing_copynumber,
         ]
@@ -232,6 +233,10 @@ class CrcDataManager(DataManager):
             return 1000
         else:
             return 10000
+
+    @staticmethod
+    def _filter_for_broad_source_only(df: pd.DataFrame) -> pd.DataFrame:
+        return df[df["screen"] == "broad"].reset_index(drop=True)
 
     @staticmethod
     def _get_sgrnas_that_map_to_multiple_genes(df: pd.DataFrame) -> np.ndarray:
