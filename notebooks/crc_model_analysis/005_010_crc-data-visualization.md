@@ -1,3 +1,8 @@
+# Exploration and visualization of the CRC data
+
+The purpose of this notebook is to increase my understanding of the data used for modeling.
+This includes the data collected by the DepMap consortium and cell line information from the CCLE.
+
 ```python
 %load_ext autoreload
 %autoreload 2
@@ -22,12 +27,14 @@ import plotnine as gg
 import pymc3 as pm
 import seaborn as sns
 from dask.distributed import Client, progress
+from scipy import stats
 from sklearn.decomposition import PCA
 from theano import tensor as tt
 ```
 
 ```python
 from src.data_processing import achilles as achelp
+from src.data_processing import biology as biohelp
 from src.data_processing import common as dphelp
 from src.data_processing import vectors as vhelp
 from src.globals import PYMC3
@@ -60,6 +67,8 @@ np.random.seed(RANDOM_SEED)
 
 ## Setup
 
+Because of the size of the data, I relied heavily on Dask for running data frame computation and manipulations.
+
 ```python
 client = Client(n_workers=2, threads_per_worker=2, memory_limit="1GB")
 client
@@ -75,7 +84,7 @@ client
             position: absolute;"> </div>
         <div style="margin-left: 48px;">
             <h3 style="margin-bottom: 0px;">Client</h3>
-            <p style="color: #9D9D9D; margin-bottom: 0px;">Client-4d412b5a-e95b-11eb-a86a-784f4375388f</p>
+            <p style="color: #9D9D9D; margin-bottom: 0px;">Client-2cfdc462-ea1d-11eb-a96c-784f4375388f</p>
             <table style="width: 100%; text-align: left;">
 
         <tr>
@@ -106,7 +115,7 @@ client
             position: absolute;"> </div>
         <div style="margin-left: 48px;">
             <h3 style="margin-bottom: 0px; margin-top: 0px;">LocalCluster</h3>
-            <p style="color: #9D9D9D; margin-bottom: 0px;">d317f63a</p>
+            <p style="color: #9D9D9D; margin-bottom: 0px;">0f435873</p>
             <table style="width: 100%; text-align: left;">
 
     <tr>
@@ -147,10 +156,10 @@ client
             position: absolute;"> </div>
         <div style="margin-left: 48px;">
             <h3 style="margin-bottom: 0px;">Scheduler</h3>
-            <p style="color: #9D9D9D; margin-bottom: 0px;">Scheduler-98278fe3-dc2a-4c37-b5e9-f208171eec5a</p>
+            <p style="color: #9D9D9D; margin-bottom: 0px;">Scheduler-e56cbaf3-25f4-4f18-a2b5-0e19869a01b9</p>
             <table style="width: 100%; text-align: left;">
                 <tr>
-                    <td style="text-align: left;"><strong>Comm:</strong> tcp://127.0.0.1:62431</td>
+                    <td style="text-align: left;"><strong>Comm:</strong> tcp://127.0.0.1:51265</td>
                     <td style="text-align: left;"><strong>Workers:</strong> 2</td>
                 </tr>
                 <tr>
@@ -193,13 +202,13 @@ client
             </summary>
             <table style="width: 100%; text-align: left;">
                 <tr>
-                    <td style="text-align: left;"><strong>Comm: </strong> tcp://127.0.0.1:62436</td>
+                    <td style="text-align: left;"><strong>Comm: </strong> tcp://127.0.0.1:51272</td>
                     <td style="text-align: left;"><strong>Total threads: </strong> 2</td>
                 </tr>
                 <tr>
                     <td style="text-align: left;">
                         <strong>Dashboard: </strong>
-                        <a href="http://127.0.0.1:62438/status">http://127.0.0.1:62438/status</a>
+                        <a href="http://127.0.0.1:51273/status">http://127.0.0.1:51273/status</a>
                     </td>
                     <td style="text-align: left;">
                         <strong>Memory: </strong>
@@ -207,13 +216,13 @@ client
                     </td>
                 </tr>
                 <tr>
-                    <td style="text-align: left;"><strong>Nanny: </strong> tcp://127.0.0.1:62434</td>
+                    <td style="text-align: left;"><strong>Nanny: </strong> tcp://127.0.0.1:51268</td>
                     <td style="text-align: left;"></td>
                 </tr>
                 <tr>
                     <td colspan="2" style="text-align: left;">
                         <strong>Local directory: </strong>
-                        /Users/admin/Lab_Projects/speclet/notebooks/crc_model_analysis/dask-worker-space/worker-8ip33be1
+                        /Users/admin/Lab_Projects/speclet/notebooks/crc_model_analysis/dask-worker-space/worker-9_p2rkps
                     </td>
                 </tr>
 
@@ -237,13 +246,13 @@ client
             </summary>
             <table style="width: 100%; text-align: left;">
                 <tr>
-                    <td style="text-align: left;"><strong>Comm: </strong> tcp://127.0.0.1:62435</td>
+                    <td style="text-align: left;"><strong>Comm: </strong> tcp://127.0.0.1:51269</td>
                     <td style="text-align: left;"><strong>Total threads: </strong> 2</td>
                 </tr>
                 <tr>
                     <td style="text-align: left;">
                         <strong>Dashboard: </strong>
-                        <a href="http://127.0.0.1:62437/status">http://127.0.0.1:62437/status</a>
+                        <a href="http://127.0.0.1:51270/status">http://127.0.0.1:51270/status</a>
                     </td>
                     <td style="text-align: left;">
                         <strong>Memory: </strong>
@@ -251,13 +260,13 @@ client
                     </td>
                 </tr>
                 <tr>
-                    <td style="text-align: left;"><strong>Nanny: </strong> tcp://127.0.0.1:62433</td>
+                    <td style="text-align: left;"><strong>Nanny: </strong> tcp://127.0.0.1:51267</td>
                     <td style="text-align: left;"></td>
                 </tr>
                 <tr>
                     <td colspan="2" style="text-align: left;">
                         <strong>Local directory: </strong>
-                        /Users/admin/Lab_Projects/speclet/notebooks/crc_model_analysis/dask-worker-space/worker-m53aumen
+                        /Users/admin/Lab_Projects/speclet/notebooks/crc_model_analysis/dask-worker-space/worker-jn7ju6uj
                     </td>
                 </tr>
 
@@ -294,10 +303,6 @@ data_types: dict[str, str] = {"age": "float64"}
 for a in [
     "p_dna_batch",
     "replicate_id",
-    "depmap_id",
-    "hugo_symbol",
-    "screen",
-    "lineage",
 ]:
     data_types[a] = "category"
 
@@ -488,6 +493,8 @@ crc_data.columns
 
 ### Overview
 
+Below is a print-out of the number of unique values in some of the more important columns.
+
 ```python
 for col, lbl in {
     "sgrna": "sgRNA",
@@ -505,6 +512,9 @@ for col, lbl in {
     num cell lines: 54
     num lineages: 1
     num data sources: 2
+
+The two data sources are the DepMap data from the Broad and the Project SCORE data from the Sanger.
+The first analysis I did was to compare the data from the two institutes that were collected on the same cell lines.
 
 ```python
 crc_data[["screen", "depmap_id"]].drop_duplicates().groupby("screen").count().compute()
@@ -550,6 +560,8 @@ crc_data[["screen", "depmap_id"]].drop_duplicates().groupby("screen").count().co
 
 ### Comparing cell lines included in both screens
 
+There were 16 cell lines that were included in both screens.
+
 ```python
 celllines_in_both_screens = (
     crc_data[["screen", "depmap_id"]]
@@ -562,25 +574,10 @@ celllines_in_both_screens = (
     .tolist()
 )
 
-celllines_in_both_screens
+print(f"number of cell lines in both screens: {len(celllines_in_both_screens)}")
 ```
 
-    ['ACH-000007',
-     'ACH-000009',
-     'ACH-000249',
-     'ACH-000350',
-     'ACH-000381',
-     'ACH-000421',
-     'ACH-000552',
-     'ACH-000651',
-     'ACH-000926',
-     'ACH-000935',
-     'ACH-000943',
-     'ACH-000950',
-     'ACH-000957',
-     'ACH-000958',
-     'ACH-000969',
-     'ACH-001345']
+    number of cell lines in both screens: 16
 
 ```python
 double_screen_data = crc_data[
@@ -590,6 +587,9 @@ double_screen_data.shape
 ```
 
     (2524928, 22)
+
+The plot below shows the distribution of log-fold change (LFC) values for each cell line included in both screens.
+Already we can see that there may be some large discrepencies.
 
 ```python
 plt.figure(figsize=(12, 5))
@@ -606,7 +606,10 @@ ax.set_ylabel("log fold change")
 plt.show()
 ```
 
-![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_16_0.png)
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_22_0.png)
+
+I was curious about the correlation between the LFC of the genes in each cell line.
+I calculated the correlation between the mean LFC for each gene of each cell line between the two screens.
 
 ```python
 double_screen_avg_lfc = (
@@ -680,6 +683,10 @@ double_screen_gene_corr.head()
 </table>
 </div>
 
+These correlations are plotted against the mean LFC of the gene in the Broad (top) and Sanger (bottom).
+There are a *very* large distribution of correlation values, including strong negative correlations.
+Interestingly, there seems to be an association between the correlation values and the LFC values: for more negative LFC genes, the correlations tend to be smaller.
+
 ```python
 screen_averages = (
     double_screen_avg_lfc.groupby(["hugo_symbol", "screen"])["lfc"]
@@ -697,11 +704,15 @@ for screen in ("broad", "sanger"):
     plt.show()
 ```
 
-![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_18_0.png)
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_26_0.png)
 
-![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_18_1.png)
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_26_1.png)
+
+**Moving forward, I only used the Broad data to avoid these very strong datasource biases.**
 
 ### Correlations of LFC and other factors
+
+The next section of this analysis focused on looking at associations between LFC values and other data.
 
 ```python
 crc_data_avgs = (
@@ -716,6 +727,10 @@ crc_data_avgs = (
 ```
 
 #### RNA expression
+
+First, I plotted the LFC values for genes binned by their RNA expression.
+It is very clear that more negative LFC values tend to be found for more highly-expressed genes.
+This is not suprising and indicates that RNA expression can be an important covariate in the model.
 
 ```python
 df = crc_data_avgs.assign(
@@ -739,9 +754,13 @@ fg.set_axis_labels(r"RNA expression ($\log$ TPM+1)", "log fold change")
 plt.show()
 ```
 
-![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_22_0.png)
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_32_0.png)
 
 #### Gene copy number
+
+We can do the same with copy number.
+Again, we see that there is frequently a negative correlation between this factor and LFC, but it is not as consistent as the trend with RNA expression.
+Importantly, the trend has drastically different strengths in each cell line.
 
 ```python
 df = crc_data_avgs.assign(
@@ -767,9 +786,140 @@ fg.set_axis_labels("copy number (max. 10)")
 plt.show()
 ```
 
-![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_24_0.png)
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_34_0.png)
+
+#### Correlation with copy number for essential genes
+
+In their publication introducing Chronos, the DepMap consortium demonstrated that the correlation between copy number and LFC was different for essential and nono-essential genes.
+For essential genes, there was a positive correlation between CN and LFC, whereas it would be expected to be a negative correlation as shown above.
+Their proposed explination is that because these genes are essential, true KO should lead to death.
+Thus, what we are actually seeing are incomplete loss-of-function hits.
+
+```python
+crc_data_avgs.head()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>depmap_id</th>
+      <th>hugo_symbol</th>
+      <th>lfc</th>
+      <th>rna_expr</th>
+      <th>copy_number</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACH-000007</td>
+      <td>A1BG</td>
+      <td>0.263330</td>
+      <td>0.137504</td>
+      <td>0.954248</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ACH-000007</td>
+      <td>A1CF</td>
+      <td>0.067489</td>
+      <td>1.510962</td>
+      <td>0.964005</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-000007</td>
+      <td>A2M</td>
+      <td>-0.328769</td>
+      <td>0.214125</td>
+      <td>0.963609</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-000007</td>
+      <td>A2ML1</td>
+      <td>0.060252</td>
+      <td>0.000000</td>
+      <td>0.963609</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-000007</td>
+      <td>A3GALT2</td>
+      <td>-0.152007</td>
+      <td>0.000000</td>
+      <td>0.971692</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+cn_lfc_corr = (
+    crc_data_avgs.groupby("hugo_symbol")
+    .corr()
+    .reset_index()[["hugo_symbol", "level_1", "lfc"]]
+    .query("level_1 != 'lfc'")
+    .rename(columns={"level_1": "variable"})
+)
+```
+
+```python
+gene_essentiality_df = pd.read_csv(
+    data_io.data_path(data_io.DataFile.achilles_essentials)
+)
+essential_genes = gene_essentiality_df[gene_essentiality_df.is_essential].gene.tolist()
+nonessential_genes = gene_essentiality_df[
+    ~gene_essentiality_df.is_essential
+].gene.tolist()
+print(
+    f"num. essential/non-essential genes: {len(essential_genes):,} / {len(nonessential_genes):,}"
+)
+```
+
+    num. essential/non-essential genes: 1,246 / 758
+
+```python
+essential_comp_df = cn_lfc_corr[
+    cn_lfc_corr.hugo_symbol.isin(essential_genes + nonessential_genes)
+].assign(
+    essential=lambda d: [
+        "essential" if g in essential_genes else "non-essential" for g in d.hugo_symbol
+    ]
+)
+
+fg = sns.displot(
+    data=essential_comp_df, x="lfc", hue="essential", kde=True, col="variable"
+)
+
+for ax in fg.axes.flatten():
+    ax.axvline(x=0, color="k", linestyle="--")
+
+plt.show()
+```
+
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_39_0.png)
 
 #### Mutations
+
+I next looked at associations between mutation status and LFC.
+We expect mutant oncogenes to have more negative LFC values than non-mutated oncogenes.
+For example, cell lines with activating *KRAS* mutations should be more dependent upon *KRAS* that cell lines with WT *KRAS*.
 
 ```python
 mutation_counts = (
@@ -960,6 +1110,9 @@ mutation_counts.sort_values("is_mutated", ascending=False).head(10)
 </table>
 </div>
 
+I first compared the LFC for the 20 most frequently mutated genes in the data set.
+This includes many uninteresting genes including *TTN*, *NEB*, and some mucins.
+
 ```python
 top_mut_genes = (
     mutation_counts.sort_values("is_mutated", ascending=False)
@@ -984,7 +1137,10 @@ plt.title("Most frequently mutated")
 plt.show()
 ```
 
-![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_29_0.png)
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_45_0.png)
+
+I also plotted the results for genes listed as oncogenes in colorectal cancer by COSMIC's Cancer Gene Census (CGC).
+Other than for *KRAS*, the different in LFC values is not as striking as I would expect.
 
 ```python
 cgc_genes = (
@@ -1013,9 +1169,13 @@ plt.title("CGC oncogenes")
 plt.show()
 ```
 
-![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_31_0.png)
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_48_0.png)
 
 #### Batches
+
+I next wanted to analyse the effects of different batches on the data.
+There were mutliple sources of batch effects including the `replicate_id` and `p_dna_batch` identifiers.
+However, each cell line was in a different `replicate_id`, so that source of variation can be ignored because it is inseparable from cell-line-to-cell-line variation.
 
 ```python
 crc_depmap_batches = (
@@ -1027,14 +1187,12 @@ crc_depmap_batches = (
 )
 ```
 
+I decided to look for clusters of cell lines by their batch, so I conducted PCA on the top 10% most variable genes.
+
 ```python
 lfc_matrix = (
     crc_data[crc_data.screen == "broad"][["depmap_id", "hugo_symbol", "lfc"]]
     .dropna()
-    .assign(
-        depmap_id=lambda d: d.depmap_id.astype(str).astype("category"),
-        hugo_symbol=lambda d: d.hugo_symbol.astype(str).astype("category"),
-    )
     .groupby(["depmap_id", "hugo_symbol"])["lfc"]
     .mean()
     .reset_index(drop=False)
@@ -1043,197 +1201,6 @@ lfc_matrix = (
     .set_index("hugo_symbol")
 )
 ```
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>ACH-000007</th>
-      <th>ACH-000009</th>
-      <th>ACH-000202</th>
-      <th>ACH-000249</th>
-      <th>ACH-000253</th>
-      <th>ACH-000286</th>
-      <th>ACH-000296</th>
-      <th>ACH-000350</th>
-      <th>ACH-000381</th>
-      <th>ACH-000403</th>
-      <th>...</th>
-      <th>ACH-001061</th>
-      <th>ACH-001345</th>
-      <th>ACH-001454</th>
-      <th>ACH-001458</th>
-      <th>ACH-001459</th>
-      <th>ACH-001460</th>
-      <th>ACH-001461</th>
-      <th>ACH-001786</th>
-      <th>ACH-002024</th>
-      <th>ACH-002025</th>
-    </tr>
-    <tr>
-      <th>hugo_symbol</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>A1BG</th>
-      <td>0.263330</td>
-      <td>0.117063</td>
-      <td>0.043549</td>
-      <td>0.197158</td>
-      <td>0.085684</td>
-      <td>-0.005583</td>
-      <td>0.264494</td>
-      <td>-0.124022</td>
-      <td>0.191794</td>
-      <td>-0.057930</td>
-      <td>...</td>
-      <td>-0.058944</td>
-      <td>0.179750</td>
-      <td>0.336333</td>
-      <td>0.127735</td>
-      <td>0.164985</td>
-      <td>0.185749</td>
-      <td>0.093007</td>
-      <td>0.246758</td>
-      <td>0.049979</td>
-      <td>0.186511</td>
-    </tr>
-    <tr>
-      <th>A1CF</th>
-      <td>0.067489</td>
-      <td>-0.191944</td>
-      <td>0.019997</td>
-      <td>0.472816</td>
-      <td>0.276590</td>
-      <td>-0.069105</td>
-      <td>-0.108203</td>
-      <td>-0.088249</td>
-      <td>0.287866</td>
-      <td>0.130719</td>
-      <td>...</td>
-      <td>0.226356</td>
-      <td>0.027765</td>
-      <td>0.029871</td>
-      <td>-0.064838</td>
-      <td>0.085629</td>
-      <td>0.181699</td>
-      <td>0.111500</td>
-      <td>-0.070128</td>
-      <td>0.094714</td>
-      <td>0.104698</td>
-    </tr>
-    <tr>
-      <th>A2M</th>
-      <td>-0.328769</td>
-      <td>-0.228030</td>
-      <td>-0.056109</td>
-      <td>-0.338420</td>
-      <td>0.203810</td>
-      <td>-0.253921</td>
-      <td>-0.251849</td>
-      <td>-0.059703</td>
-      <td>0.155701</td>
-      <td>0.074438</td>
-      <td>...</td>
-      <td>0.142748</td>
-      <td>-0.121233</td>
-      <td>-1.058760</td>
-      <td>-0.236498</td>
-      <td>-0.160679</td>
-      <td>-0.082952</td>
-      <td>-0.038935</td>
-      <td>0.177989</td>
-      <td>0.013819</td>
-      <td>-0.361081</td>
-    </tr>
-    <tr>
-      <th>A2ML1</th>
-      <td>0.060252</td>
-      <td>-0.033755</td>
-      <td>0.026995</td>
-      <td>0.189971</td>
-      <td>0.424612</td>
-      <td>0.379364</td>
-      <td>-0.076107</td>
-      <td>0.074040</td>
-      <td>0.301678</td>
-      <td>-0.110775</td>
-      <td>...</td>
-      <td>0.091930</td>
-      <td>0.167014</td>
-      <td>-0.285079</td>
-      <td>0.283701</td>
-      <td>-0.075642</td>
-      <td>0.276590</td>
-      <td>0.145096</td>
-      <td>0.102807</td>
-      <td>0.144290</td>
-      <td>-0.010408</td>
-    </tr>
-    <tr>
-      <th>A3GALT2</th>
-      <td>-0.152007</td>
-      <td>0.230585</td>
-      <td>0.147042</td>
-      <td>-0.304506</td>
-      <td>0.117917</td>
-      <td>-0.545455</td>
-      <td>-0.208200</td>
-      <td>0.015848</td>
-      <td>-0.216646</td>
-      <td>0.296448</td>
-      <td>...</td>
-      <td>0.108060</td>
-      <td>0.010429</td>
-      <td>-0.318113</td>
-      <td>0.298646</td>
-      <td>-0.108762</td>
-      <td>-0.538204</td>
-      <td>0.083982</td>
-      <td>0.290878</td>
-      <td>-0.139611</td>
-      <td>0.224688</td>
-    </tr>
-  </tbody>
-</table>
-<p>5 rows × 39 columns</p>
-</div>
 
 ```python
 def head_frac(df: pd.DataFrame, frac: float = 0.1) -> pd.DataFrame:
@@ -1260,6 +1227,8 @@ pca = PCA(n_components=10)
 pca_lfc_matrix = pca.fit_transform(lfc_matrix.loc[top_var_genes].values.T)
 ```
 
+Principal component 1 accounts for most of the variation.
+
 ```python
 ax = sns.barplot(
     x=list(range(1, 11)), y=pca.explained_variance_ratio_, color=SeabornColor.BLUE
@@ -1269,7 +1238,7 @@ ax.set_ylabel("explained variance ratio")
 plt.show()
 ```
 
-![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_37_0.png)
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_56_0.png)
 
 ```python
 cellline_info = (
@@ -1284,6 +1253,7 @@ cellline_info = (
         ]
     ]
     .drop_duplicates()
+    .assign(p_dna_batch=lambda d: d.p_dna_batch.astype(str).astype("category"))
     .compute()
 )
 ```
@@ -1293,72 +1263,439 @@ pca_transform_df = (
     pd.DataFrame(pca_lfc_matrix, columns=[f"PC{i+1}" for i in range(10)])
     .assign(depmap_id=lfc_matrix.columns)
     .merge(cellline_info, on="depmap_id")
-    .assign(p_dna_batch=lambda d: d.p_dna_batch.astype(str).astype("category"))
 )
 ```
+
+The following plots look for assoications between known factors of the cell lines (batch, sex, age, and primary vs. metastasis) and the first two PCs, but no strong associations were found.
 
 ```python
 sns.scatterplot(data=pca_transform_df, x="PC1", y="PC2", hue="p_dna_batch");
 ```
 
-![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_40_0.png)
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_60_0.png)
 
 ```python
 sns.scatterplot(data=pca_transform_df, x="PC1", y="PC2", hue="is_male");
 ```
 
-![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_41_0.png)
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_61_0.png)
 
 ```python
 sns.scatterplot(data=pca_transform_df, x="PC1", y="PC2", hue="primary_or_metastasis");
 ```
 
-![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_42_0.png)
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_62_0.png)
 
 ```python
 sns.scatterplot(data=pca_transform_df, x="PC1", y="PC2", hue="age");
 ```
 
-![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_43_0.png)
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_63_0.png)
 
 ```python
 sns.scatterplot(data=pca_transform_df, x="PC1", y="age", hue="primary_or_metastasis");
 ```
 
-![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_44_0.png)
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_64_0.png)
+
+#### Multiple hits on the target gene
+
+Guides that target multiple genes have already been removed from the data set.
+However, one interesting note is that some sgRNA target the same gene in muiltiple locations.
+I was curious if there was a systematic difference between guides that hit a gene once versus those that hit mutliple locations.
+
+Overall, over 90% of the guides appear to hit their target gene in mutliple locations.
 
 ```python
+(crc_data[crc_data.screen == "broad"][["multiple_hits_on_gene"]].mean().compute())
+```
 
+    multiple_hits_on_gene    0.923131
+    dtype: float64
+
+I extracted only the data where there exist guides that have a single target locus and guides that have multiple target locii for a given gene in a given cell line.
+
+```python
+mulitple_hit_groups = (
+    crc_data[crc_data.screen == "broad"][
+        ["multiple_hits_on_gene", "hugo_symbol", "depmap_id"]
+    ]
+    .groupby(["hugo_symbol", "depmap_id"])["multiple_hits_on_gene"]
+    .mean()
+    .reset_index(drop=False)
+    .query("multiple_hits_on_gene < 1.0")
+    .query("multiple_hits_on_gene > 0.0")
+    .compute()
+    .reset_index(drop=True)
+)
+
+mulitple_hit_groups.head()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>hugo_symbol</th>
+      <th>depmap_id</th>
+      <th>multiple_hits_on_gene</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>AHNAK2</td>
+      <td>ACH-000249</td>
+      <td>0.25</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>AMBN</td>
+      <td>ACH-000249</td>
+      <td>0.25</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ANKRD30A</td>
+      <td>ACH-000249</td>
+      <td>0.50</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ANKRD36B</td>
+      <td>ACH-000249</td>
+      <td>0.50</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>C9orf57</td>
+      <td>ACH-000249</td>
+      <td>0.25</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+def zscore(df: pd.DataFrame) -> pd.DataFrame:
+    df["lfc_z"] = stats.zscore(df.lfc.values)
+    return df
+
+
+multiple_hits_data = (
+    crc_data[crc_data.screen == "broad"][
+        ["multiple_hits_on_gene", "hugo_symbol", "depmap_id", "lfc", "sgrna"]
+    ]
+    .merge(mulitple_hit_groups[["depmap_id", "hugo_symbol"]])
+    .compute()
+    .groupby(["hugo_symbol", "depmap_id"])
+    .apply(zscore)
+    .reset_index()
+)
+
+multiple_hits_data.head()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>index</th>
+      <th>multiple_hits_on_gene</th>
+      <th>hugo_symbol</th>
+      <th>depmap_id</th>
+      <th>lfc</th>
+      <th>sgrna</th>
+      <th>lfc_z</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>True</td>
+      <td>ANKRD30A</td>
+      <td>ACH-000249</td>
+      <td>-0.303036</td>
+      <td>AACATCTGAGAAATTTACGT</td>
+      <td>-0.926411</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0</td>
+      <td>True</td>
+      <td>ANKRD30A</td>
+      <td>ACH-000680</td>
+      <td>-1.304264</td>
+      <td>AACATCTGAGAAATTTACGT</td>
+      <td>-1.277391</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0</td>
+      <td>False</td>
+      <td>ZNF880</td>
+      <td>ACH-000820</td>
+      <td>0.136020</td>
+      <td>GACATTTCCACTCCTCCTGA</td>
+      <td>-1.159560</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1</td>
+      <td>True</td>
+      <td>ANKRD30A</td>
+      <td>ACH-000249</td>
+      <td>-0.351390</td>
+      <td>AAGACCTAGGAAGATCGCAT</td>
+      <td>-1.006461</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1</td>
+      <td>True</td>
+      <td>ANKRD30A</td>
+      <td>ACH-000680</td>
+      <td>-0.234602</td>
+      <td>AAGACCTAGGAAGATCGCAT</td>
+      <td>0.397502</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+The following plots shows the LFC values in each cell line separating between guides with multiple hits and those with only one.
+By eye, there does seem to be a slight decrease on average in LFC for guides that hit the gene multiple times.
+
+```python
+fig = plt.figure(figsize=(9, 5))
+ax = sns.boxplot(
+    data=multiple_hits_data,
+    x="depmap_id",
+    y="lfc",
+    hue="multiple_hits_on_gene",
+    boxprops={"alpha": 0.5},
+)
+sns.stripplot(
+    data=multiple_hits_data,
+    x="depmap_id",
+    y="lfc",
+    hue="multiple_hits_on_gene",
+    dodge=True,
+    ax=ax,
+)
+
+ax.set_xlabel("cell line")
+ax.set_ylabel("log fold change")
+ax.legend(bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.0, title="multiple hits")
+plt.show()
+```
+
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_71_0.png)
+
+However, if the data is standardized by gene and cell line, the effect is not as visible.
+
+```python
+fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(9, 9))
+
+sns.boxenplot(
+    data=multiple_hits_data,
+    x="depmap_id",
+    hue="multiple_hits_on_gene",
+    y="lfc_z",
+    width=0.5,
+    ax=axes[0],
+)
+sns.violinplot(
+    data=multiple_hits_data,
+    x="depmap_id",
+    hue="multiple_hits_on_gene",
+    y="lfc_z",
+    ax=axes[1],
+)
+
+for ax in axes:
+    ax.legend(bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.0, title="multiple hits")
+    ax.set_xlabel("cell line")
+    ax.set_ylabel("log fold change (z-scaled)")
+
+fig.tight_layout()
+plt.show()
+```
+
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_73_0.png)
+
+#### Visualizing copy number along chromosomes
+
+The last analysis I conducted was just to visualize the copy number data along the chromosomes.
+This diesn't provide any interesting insight, I just want to see what it looks like.
+
+```python
+CELL_LINE = "ACH-000680"
+cell_chromosome_df = crc_data[crc_data.screen == "broad"].query(
+    f"depmap_id == '{CELL_LINE}'"
+)[
+    [
+        "hugo_symbol",
+        "sgrna",
+        "depmap_id",
+        "lfc",
+        "copy_number",
+        "rna_expr",
+        "sgrna_target_chr",
+        "genome_alignment",
+    ]
+]
 ```
 
 ```python
+cell_cn_df = (
+    cell_chromosome_df[["copy_number", "sgrna_target_chr", "genome_alignment", "lfc"]]
+    .drop_duplicates()
+    .reset_index(drop=True)
+    .compute()
+    .pipe(biohelp.extract_chromosome_location_to_df, col_name="genome_alignment")
+    .pipe(biohelp.make_chromosome_categorical, chr_col="chr")
+)
 
+cell_cn_df.head()
 ```
+
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/numpy/core/numeric.py:2453: FutureWarning: elementwise comparison failed; returning scalar instead, but in the future will perform elementwise comparison
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>copy_number</th>
+      <th>sgrna_target_chr</th>
+      <th>genome_alignment</th>
+      <th>lfc</th>
+      <th>chr</th>
+      <th>pos</th>
+      <th>strand</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1.456644</td>
+      <td>2</td>
+      <td>chr2_130522105_-</td>
+      <td>-0.067602</td>
+      <td>2</td>
+      <td>130522105</td>
+      <td>-1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1.132130</td>
+      <td>11</td>
+      <td>chr11_89916950_-</td>
+      <td>0.531739</td>
+      <td>11</td>
+      <td>89916950</td>
+      <td>-1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.763323</td>
+      <td>5</td>
+      <td>chr5_71055421_-</td>
+      <td>-0.903544</td>
+      <td>5</td>
+      <td>71055421</td>
+      <td>-1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.763323</td>
+      <td>5</td>
+      <td>chr5_69572480_+</td>
+      <td>-0.758697</td>
+      <td>5</td>
+      <td>69572480</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.987681</td>
+      <td>X</td>
+      <td>chrX_155898173_+</td>
+      <td>0.327171</td>
+      <td>X</td>
+      <td>155898173</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ```python
-
+fg = sns.relplot(
+    data=cell_cn_df,
+    x="pos",
+    y="copy_number",
+    color="k",
+    col="chr",
+    col_wrap=4,
+    kind="scatter",
+    facet_kws={"sharex": False, "sharey": False},
+)
+fg.set_axis_labels("position", "copy number")
+plt.show()
 ```
+
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_77_0.png)
 
 ```python
-
+fig = plt.figure(figsize=(9, 5))
+sns.violinplot(data=cell_cn_df, x="chr", y="lfc", color="0.6");
 ```
 
-```python
-
-```
-
-```python
-
-```
-
-```python
-
-```
-
-to look into:
-
-- effectss of "multiple_hits_on_gene"
-- effects of chromosome holding the gene and location on chromosome
+![png](005_010_crc-data-visualization_files/005_010_crc-data-visualization_78_0.png)
 
 ---
 
@@ -1367,14 +1704,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 2.68 minutes
+    execution time: 7.26 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-20
+    Last updated: 2021-07-21
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -1392,14 +1729,15 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Git branch: sp7-parameterizations
 
-    pymc3     : 3.11.1
-    janitor   : 0.20.14
-    matplotlib: 3.3.4
-    seaborn   : 0.11.1
-    theano    : 1.0.5
-    dask      : 2021.7.0
-    numpy     : 1.20.1
     arviz     : 0.11.2
+    re        : 2.2.1
+    numpy     : 1.20.1
+    matplotlib: 3.3.4
+    pymc3     : 3.11.1
+    dask      : 2021.7.0
+    theano    : 1.0.5
     plotnine  : 0.8.0
     pandas    : 1.2.3
-    re        : 2.2.1
+    seaborn   : 0.11.1
+    janitor   : 0.20.14
+    scipy     : 1.6.0
