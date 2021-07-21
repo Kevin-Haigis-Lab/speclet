@@ -12,6 +12,7 @@ dependencies:
   - future=0.18.*
   - graphviz=2.47.*
   - ipython=7.25.*
+  - mamba=0.15.*
   - nbconvert=6.1.*
   - networkx=2.6.*
   - numpy=1.21.*
