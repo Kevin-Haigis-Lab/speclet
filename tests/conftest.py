@@ -16,6 +16,11 @@ def mock_model_config() -> Path:
     return Path("tests/models/mock-model-config.yaml")
 
 
+@pytest.fixture
+def depmap_test_data() -> Path:
+    return Path("tests", "depmap_test_data.csv")
+
+
 def monkey_get_data_path(*args, **kwargs) -> Path:
     return Path("tests", "depmap_test_data.csv")
 
@@ -24,6 +29,13 @@ def monkey_get_data_path(*args, **kwargs) -> Path:
 def mock_crc_dm(monkeypatch: pytest.MonkeyPatch) -> CrcDataManager:
     monkeypatch.setattr(CrcDataManager, "get_data_path", monkey_get_data_path)
     dm = CrcDataManager(debug=True)
+    return dm
+
+
+@pytest.fixture(scope="function")
+def mock_crc_dm_multiscreen(monkeypatch: pytest.MonkeyPatch) -> CrcDataManager:
+    monkeypatch.setattr(CrcDataManager, "get_data_path", monkey_get_data_path)
+    dm = CrcDataManager(debug=True, broad_only=False)
     return dm
 
 

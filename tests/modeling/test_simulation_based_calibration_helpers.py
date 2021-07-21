@@ -425,7 +425,7 @@ def test_add_mock_is_mutated_data_grouped(prob: float):
     letters = list(ascii_lowercase)
     grp_a = np.random.choice(letters, size=5, replace=False)
     grp_b = np.random.choice(letters, size=5, replace=False)
-    N = 1000
+    N = 5000
     df = pd.DataFrame(
         {"A": np.random.choice(grp_a, size=N), "B": np.random.choice(grp_b, size=N)}
     )

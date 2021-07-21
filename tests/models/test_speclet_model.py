@@ -258,6 +258,7 @@ class TestSpecletModel:
         mock_sp_model.debug = True
         assert mock_sp_model.debug and mock_sp_model.data_manager.debug
 
+    @pytest.mark.slow
     def test_changing_mcmc_sampling_params(self, mock_sp_model: MockSpecletModelClass):
         mock_sp_model.mcmc_sampling_params.draws = 12
         mock_sp_model.mcmc_sampling_params.chains = 2
@@ -269,6 +270,7 @@ class TestSpecletModel:
         assert mcmc_res.posterior["a"].shape == (2, 12)
         assert mcmc_res.prior["a"].shape == (1, 14)
 
+    @pytest.mark.slow
     def test_changing_advi_sampling_params(self, mock_sp_model: MockSpecletModelClass):
         mock_sp_model.advi_sampling_params.draws = 17
         mock_sp_model.advi_sampling_params.n_iterations = 103

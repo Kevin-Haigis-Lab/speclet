@@ -91,15 +91,20 @@ class TestSpecletSix:
             assert expected_v in model_vars
 
     def test_model_with_multiple_screens(
-        self, tmp_path: Path, mock_crc_dm: CrcDataManager
+        self,
+        tmp_path: Path,
+        mock_crc_dm_multiscreen: CrcDataManager,
     ):
-        d = mock_crc_dm.get_data().copy()
+        d = mock_crc_dm_multiscreen.get_data().copy()
         d["screen"] = "screen_A"
         d = achelp.set_achilles_categorical_columns(d)
-        mock_crc_dm.data = d
+        mock_crc_dm_multiscreen.data = d
 
         sp6 = SpecletSix(
-            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=mock_crc_dm
+            "TEST-MODEL",
+            root_cache_dir=tmp_path,
+            debug=True,
+            data_manager=mock_crc_dm_multiscreen,
         )
 
         multi_screen_vars = ["μ_μ_j", "σ_μ_j", "σ_σ_j"]
@@ -111,7 +116,7 @@ class TestSpecletSix:
         for var in multi_screen_vars:
             assert var not in model_vars
 
-        make_data_multiple_screens(dm=mock_crc_dm)
+        make_data_multiple_screens(dm=mock_crc_dm_multiscreen)
         sp6.build_model()
         assert sp6.model is not None
         model_vars = pmhelp.get_variable_names(sp6.model, rm_log=True)

@@ -194,6 +194,7 @@ class CrcDataManager(DataManager):
         self,
         debug: bool = False,
         transformations: Optional[DataFrameTransformations] = None,
+        broad_only: bool = True,
     ) -> None:
         """Create a CRC data manager.
 
@@ -202,16 +203,22 @@ class CrcDataManager(DataManager):
             transformations (Optional[DataFrameTransformations], optional): List of
               callable functions or classes for transforming the data. Defaults to None
               (an empty list).
+            broad_only (bool, optional): Should a filter be applied to only used screen
+              data from the Broad? Defaults to True.
         """
         self.debug = debug
+        self.broad_only = broad_only
 
         self.transformations = [
-            CrcDataManager._filter_for_broad_source_only,
             CrcDataManager._drop_sgrnas_that_map_to_multiple_genes,
             CrcDataManager._drop_missing_copynumber,
         ]
+
         if transformations is not None:
             self.transformations += transformations
+
+        if broad_only:
+            self.transformations.insert(0, CrcDataManager._filter_for_broad_source_only)
 
     def get_data_path(self) -> Path:
         """Get the path for the data set to use.
