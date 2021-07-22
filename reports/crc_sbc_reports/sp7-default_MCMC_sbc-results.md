@@ -1,4 +1,4 @@
-# Model SBC Report
+# Model Report
 
 ```python
 import logging
@@ -62,6 +62,18 @@ CONFIG_PATH = ""
 FIT_METHOD_STR = ""
 ```
 
+```python
+# Parameters
+MODEL_NAME = "sp7-default"
+SBC_RESULTS_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/sp7-default_MCMC"
+SBC_COLLATED_RESULTS = (
+    "cache/sbc-cache/sp7-default_MCMC_collated-posterior-summaries.pkl"
+)
+NUM_SIMULATIONS = 25
+CONFIG_PATH = "models/model-configs.yaml"
+FIT_METHOD_STR = "MCMC"
+```
+
 ### Prepare and validate papermill parameters
 
 Check values passed as the directory with results of the rounds of SBC.
@@ -94,6 +106,140 @@ FIT_METHOD = ModelFitMethod(FIT_METHOD_STR)
 simulation_posteriors_df = pd.read_pickle(sbc_collated_results_path)
 simulation_posteriors_df.head()
 ```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>true_value</th>
+      <th>simulation_id</th>
+      <th>within_hdi</th>
+    </tr>
+    <tr>
+      <th>parameter</th>
+      <th>parameter_name</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>μ_μ_h</th>
+      <th>μ_μ_h</th>
+      <td>3.531</td>
+      <td>0.074</td>
+      <td>3.421</td>
+      <td>3.655</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3280.0</td>
+      <td>1559.0</td>
+      <td>1.01</td>
+      <td>3.528105</td>
+      <td>sim_id_0000</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>μ_h[0,0]</th>
+      <th>μ_h</th>
+      <td>3.702</td>
+      <td>0.165</td>
+      <td>3.445</td>
+      <td>3.970</td>
+      <td>0.005</td>
+      <td>0.003</td>
+      <td>1185.0</td>
+      <td>1713.0</td>
+      <td>1.00</td>
+      <td>3.919754</td>
+      <td>sim_id_0000</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>μ_h[0,1]</th>
+      <th>μ_h</th>
+      <td>4.397</td>
+      <td>0.170</td>
+      <td>4.124</td>
+      <td>4.666</td>
+      <td>0.005</td>
+      <td>0.004</td>
+      <td>1017.0</td>
+      <td>1103.0</td>
+      <td>1.00</td>
+      <td>4.424814</td>
+      <td>sim_id_0000</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>μ_h[1,0]</th>
+      <th>μ_h</th>
+      <td>4.487</td>
+      <td>0.165</td>
+      <td>4.219</td>
+      <td>4.749</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>1352.0</td>
+      <td>1128.0</td>
+      <td>1.00</td>
+      <td>4.275421</td>
+      <td>sim_id_0000</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>μ_h[1,1]</th>
+      <th>μ_h</th>
+      <td>3.193</td>
+      <td>0.175</td>
+      <td>2.919</td>
+      <td>3.472</td>
+      <td>0.005</td>
+      <td>0.004</td>
+      <td>1072.0</td>
+      <td>1055.0</td>
+      <td>1.01</td>
+      <td>3.137040</td>
+      <td>sim_id_0000</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ## Analysis
 
@@ -165,7 +311,55 @@ for perm_dir in np.random.choice(
         )
 ```
 
-### Estimate accuracy
+    sbc-perm15
+    ------------------------------
+    sampled 4 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 24, 34, 26, 15
+    percent divergences: 0.024, 0.034, 0.026, 0.015
+    BFMI: 0.014, 0.046, 0.036, 0.066
+    avg. step size: 0.002, 0.005, 0.008, 0.008
+
+![png](sp7-default_MCMC_sbc-results_files/sp7-default_MCMC_sbc-results_20_1.png)
+
+    sbc-perm8
+    ------------------------------
+    sampled 4 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 27, 21, 28, 94
+    percent divergences: 0.027, 0.021, 0.028, 0.094
+    BFMI: 0.026, 0.089, 0.106, 0.064
+    avg. step size: 0.015, 0.016, 0.011, 0.01
+
+![png](sp7-default_MCMC_sbc-results_files/sp7-default_MCMC_sbc-results_20_3.png)
+
+    sbc-perm20
+    ------------------------------
+    sampled 4 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 1000, 105, 27, 13
+    percent divergences: 1.0, 0.105, 0.027, 0.013
+    BFMI: 2.075, 0.145, 0.154, 0.067
+    avg. step size: 0.004, 0.012, 0.035, 0.016
+
+![png](sp7-default_MCMC_sbc-results_files/sp7-default_MCMC_sbc-results_20_5.png)
+
+    sbc-perm5
+    ------------------------------
+    sampled 4 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 1, 4, 124, 123
+    percent divergences: 0.001, 0.004, 0.124, 0.123
+    BFMI: 0.082, 0.055, 0.076, 0.076
+    avg. step size: 0.026, 0.031, 0.043, 0.097
+
+![png](sp7-default_MCMC_sbc-results_files/sp7-default_MCMC_sbc-results_20_7.png)
+
+    sbc-perm14
+    ------------------------------
+    sampled 4 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 37, 43, 45, 20
+    percent divergences: 0.037, 0.043, 0.045, 0.02
+    BFMI: 0.238, 0.15, 0.132, 0.183
+    avg. step size: 0.021, 0.008, 0.032, 0.027
+
+![png](sp7-default_MCMC_sbc-results_files/sp7-default_MCMC_sbc-results_20_9.png)
 
 ```python
 accuracy_per_parameter = (
@@ -194,6 +388,10 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
     + gg.theme(axis_ticks_major_x=gg.element_blank(), figure_size=(6, 4))
 )
 ```
+
+![png](sp7-default_MCMC_sbc-results_files/sp7-default_MCMC_sbc-results_21_0.png)
+
+    <ggplot: (2962182129460)>
 
 ```python
 hdi_low, hdi_high = pmanal.get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -238,6 +436,10 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 )
 ```
 
+![png](sp7-default_MCMC_sbc-results_files/sp7-default_MCMC_sbc-results_22_0.png)
+
+    <ggplot: (2962182120858)>
+
 ---
 
 ```python
@@ -245,7 +447,38 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
+    execution time: 0.25 minutes
+
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
+
+    Last updated: 2021-07-21
+
+    Python implementation: CPython
+    Python version       : 3.9.2
+    IPython version      : 7.21.0
+
+    Compiler    : GCC 9.3.0
+    OS          : Linux
+    Release     : 3.10.0-1062.el7.x86_64
+    Machine     : x86_64
+    Processor   : x86_64
+    CPU cores   : 28
+    Architecture: 64bit
+
+    Hostname: compute-e-16-193.o2.rc.hms.harvard.edu
+
+    Git branch: sp7-parameterizations
+
+    pandas    : 1.2.3
+    re        : 2.2.1
+    pymc3     : 3.11.1
+    seaborn   : 0.11.1
+    plotnine  : 0.7.1
+    numpy     : 1.20.1
+    arviz     : 0.11.2
+    logging   : 0.5.1.2
+    janitor   : 0.20.14
+    matplotlib: 3.3.4

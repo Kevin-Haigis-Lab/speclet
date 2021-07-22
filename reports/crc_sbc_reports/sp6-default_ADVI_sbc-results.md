@@ -1,4 +1,4 @@
-# Model SBC Report
+# Model Report
 
 ```python
 import logging
@@ -20,7 +20,7 @@ import seaborn as sns
 from src.command_line_interfaces import cli_helpers
 from src.loggers import set_console_handler_level
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
-from src.modeling import pymc3_analysis as pmanal
+from src.modeling.pymc3_analysis import get_hdi_colnames_from_az_summary
 from src.modeling.simulation_based_calibration_helpers import SBCFileManager
 from src.project_enums import ModelFitMethod
 ```
@@ -62,6 +62,19 @@ CONFIG_PATH = ""
 FIT_METHOD_STR = ""
 ```
 
+```python
+# Parameters
+MODEL_NAME = "sp6-default"
+SBC_RESULTS_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/sp6-default_ADVI"
+SBC_COLLATED_RESULTS = (
+    "cache/sbc-cache/sp6-default_ADVI_collated-posterior-summaries.pkl"
+)
+NUM_SIMULATIONS = 25
+CONFIG_PATH = "models/model-configs.yaml"
+FIT_METHOD_STR = "ADVI"
+
+```
+
 ### Prepare and validate papermill parameters
 
 Check values passed as the directory with results of the rounds of SBC.
@@ -94,6 +107,140 @@ FIT_METHOD = ModelFitMethod(FIT_METHOD_STR)
 simulation_posteriors_df = pd.read_pickle(sbc_collated_results_path)
 simulation_posteriors_df.head()
 ```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>true_value</th>
+      <th>simulation_id</th>
+      <th>within_hdi</th>
+    </tr>
+    <tr>
+      <th>parameter</th>
+      <th>parameter_name</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>μ_μ_j</th>
+      <th>μ_μ_j</th>
+      <td>0.199</td>
+      <td>0.329</td>
+      <td>-0.370</td>
+      <td>0.684</td>
+      <td>0.011</td>
+      <td>0.008</td>
+      <td>918.0</td>
+      <td>880.0</td>
+      <td>NaN</td>
+      <td>-0.406496</td>
+      <td>sim_id_0000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>μ_j[0]</th>
+      <th>μ_j</th>
+      <td>0.264</td>
+      <td>0.234</td>
+      <td>-0.080</td>
+      <td>0.667</td>
+      <td>0.007</td>
+      <td>0.005</td>
+      <td>1053.0</td>
+      <td>847.0</td>
+      <td>NaN</td>
+      <td>-0.651067</td>
+      <td>sim_id_0000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>μ_j[1]</th>
+      <th>μ_j</th>
+      <td>0.380</td>
+      <td>0.361</td>
+      <td>-0.131</td>
+      <td>0.998</td>
+      <td>0.011</td>
+      <td>0.008</td>
+      <td>982.0</td>
+      <td>906.0</td>
+      <td>NaN</td>
+      <td>-0.724209</td>
+      <td>sim_id_0000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>j[0]</th>
+      <th>j</th>
+      <td>0.185</td>
+      <td>0.045</td>
+      <td>0.115</td>
+      <td>0.255</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>912.0</td>
+      <td>983.0</td>
+      <td>NaN</td>
+      <td>-0.685765</td>
+      <td>sim_id_0000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>j[1]</th>
+      <th>j</th>
+      <td>0.296</td>
+      <td>0.044</td>
+      <td>0.228</td>
+      <td>0.365</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>1002.0</td>
+      <td>908.0</td>
+      <td>NaN</td>
+      <td>-0.604623</td>
+      <td>sim_id_0000</td>
+      <td>False</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ## Analysis
 
@@ -140,32 +287,9 @@ if FIT_METHOD is ModelFitMethod.ADVI:
     plt.show()
 ```
 
-### MCMC diagnostics
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/pandas/core/arraylike.py:358: RuntimeWarning: invalid value encountered in log
 
-```python
-class IncompleteCachedResultsWarning(UserWarning):
-    pass
-
-
-all_sbc_perm_dirs = list(sbc_results_dir.iterdir())
-
-for perm_dir in np.random.choice(
-    all_sbc_perm_dirs, size=min([5, len(all_sbc_perm_dirs)]), replace=False
-):
-    print(perm_dir.name)
-    print("-" * 30)
-    sbc_fm = SBCFileManager(perm_dir)
-    if sbc_fm.all_data_exists():
-        sbc_res = sbc_fm.get_sbc_results()
-        _ = pmanal.describe_mcmc(sbc_res.inference_obj)
-    else:
-        warnings.warn(
-            "Cannot find all components of the SBC results.",
-            IncompleteCachedResultsWarning,
-        )
-```
-
-### Estimate accuracy
+![png](sp6-default_ADVI_sbc-results_files/sp6-default_ADVI_sbc-results_18_1.png)
 
 ```python
 accuracy_per_parameter = (
@@ -195,8 +319,12 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 )
 ```
 
+![png](sp6-default_ADVI_sbc-results_files/sp6-default_ADVI_sbc-results_19_0.png)
+
+    <ggplot: (2964210833071)>
+
 ```python
-hdi_low, hdi_high = pmanal.get_hdi_colnames_from_az_summary(simulation_posteriors_df)
+hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
 
 
 def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
@@ -238,6 +366,10 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 )
 ```
 
+![png](sp6-default_ADVI_sbc-results_files/sp6-default_ADVI_sbc-results_20_0.png)
+
+    <ggplot: (2964208493538)>
+
 ---
 
 ```python
@@ -245,7 +377,38 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
+    execution time: 0.75 minutes
+
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
+
+    Last updated: 2021-07-21
+
+    Python implementation: CPython
+    Python version       : 3.9.2
+    IPython version      : 7.21.0
+
+    Compiler    : GCC 9.3.0
+    OS          : Linux
+    Release     : 3.10.0-1062.el7.x86_64
+    Machine     : x86_64
+    Processor   : x86_64
+    CPU cores   : 28
+    Architecture: 64bit
+
+    Hostname: compute-e-16-188.o2.rc.hms.harvard.edu
+
+    Git branch: sp7-parameterizations
+
+    arviz     : 0.11.2
+    numpy     : 1.20.1
+    logging   : 0.5.1.2
+    janitor   : 0.20.14
+    pymc3     : 3.11.1
+    pandas    : 1.2.3
+    matplotlib: 3.3.4
+    plotnine  : 0.7.1
+    seaborn   : 0.11.1
+    re        : 2.2.1

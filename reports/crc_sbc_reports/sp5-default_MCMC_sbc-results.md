@@ -1,4 +1,4 @@
-# Model SBC Report
+# Model Report
 
 ```python
 import logging
@@ -20,7 +20,7 @@ import seaborn as sns
 from src.command_line_interfaces import cli_helpers
 from src.loggers import set_console_handler_level
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
-from src.modeling import pymc3_analysis as pmanal
+from src.modeling.pymc3_analysis import get_hdi_colnames_from_az_summary
 from src.modeling.simulation_based_calibration_helpers import SBCFileManager
 from src.project_enums import ModelFitMethod
 ```
@@ -62,6 +62,19 @@ CONFIG_PATH = ""
 FIT_METHOD_STR = ""
 ```
 
+```python
+# Parameters
+MODEL_NAME = "sp5-default"
+SBC_RESULTS_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/sp5-default_MCMC"
+SBC_COLLATED_RESULTS = (
+    "cache/sbc-cache/sp5-default_MCMC_collated-posterior-summaries.pkl"
+)
+NUM_SIMULATIONS = 25
+CONFIG_PATH = "models/model-configs.yaml"
+FIT_METHOD_STR = "MCMC"
+
+```
+
 ### Prepare and validate papermill parameters
 
 Check values passed as the directory with results of the rounds of SBC.
@@ -94,6 +107,140 @@ FIT_METHOD = ModelFitMethod(FIT_METHOD_STR)
 simulation_posteriors_df = pd.read_pickle(sbc_collated_results_path)
 simulation_posteriors_df.head()
 ```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>true_value</th>
+      <th>simulation_id</th>
+      <th>within_hdi</th>
+    </tr>
+    <tr>
+      <th>parameter</th>
+      <th>parameter_name</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>μ_j</th>
+      <th>μ_j</th>
+      <td>-0.000</td>
+      <td>0.198</td>
+      <td>-0.322</td>
+      <td>0.306</td>
+      <td>0.003</td>
+      <td>0.003</td>
+      <td>3915.0</td>
+      <td>3327.0</td>
+      <td>1.00</td>
+      <td>-0.136036</td>
+      <td>sim_id_0000</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>j[0]</th>
+      <th>j</th>
+      <td>-0.502</td>
+      <td>0.607</td>
+      <td>-1.442</td>
+      <td>0.417</td>
+      <td>0.013</td>
+      <td>0.010</td>
+      <td>2101.0</td>
+      <td>2224.0</td>
+      <td>1.00</td>
+      <td>-0.238279</td>
+      <td>sim_id_0000</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>j[1]</th>
+      <th>j</th>
+      <td>0.584</td>
+      <td>0.603</td>
+      <td>-0.330</td>
+      <td>1.535</td>
+      <td>0.015</td>
+      <td>0.010</td>
+      <td>1732.0</td>
+      <td>2120.0</td>
+      <td>1.00</td>
+      <td>-0.092103</td>
+      <td>sim_id_0000</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>j[2]</th>
+      <th>j</th>
+      <td>-0.032</td>
+      <td>0.594</td>
+      <td>-0.987</td>
+      <td>0.849</td>
+      <td>0.014</td>
+      <td>0.011</td>
+      <td>1792.0</td>
+      <td>1706.0</td>
+      <td>1.00</td>
+      <td>0.026156</td>
+      <td>sim_id_0000</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>μ_h</th>
+      <th>μ_h</th>
+      <td>-0.022</td>
+      <td>0.200</td>
+      <td>-0.342</td>
+      <td>0.308</td>
+      <td>0.030</td>
+      <td>0.021</td>
+      <td>48.0</td>
+      <td>66.0</td>
+      <td>1.07</td>
+      <td>0.352810</td>
+      <td>sim_id_0000</td>
+      <td>False</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ## Analysis
 
@@ -140,33 +287,6 @@ if FIT_METHOD is ModelFitMethod.ADVI:
     plt.show()
 ```
 
-### MCMC diagnostics
-
-```python
-class IncompleteCachedResultsWarning(UserWarning):
-    pass
-
-
-all_sbc_perm_dirs = list(sbc_results_dir.iterdir())
-
-for perm_dir in np.random.choice(
-    all_sbc_perm_dirs, size=min([5, len(all_sbc_perm_dirs)]), replace=False
-):
-    print(perm_dir.name)
-    print("-" * 30)
-    sbc_fm = SBCFileManager(perm_dir)
-    if sbc_fm.all_data_exists():
-        sbc_res = sbc_fm.get_sbc_results()
-        _ = pmanal.describe_mcmc(sbc_res.inference_obj)
-    else:
-        warnings.warn(
-            "Cannot find all components of the SBC results.",
-            IncompleteCachedResultsWarning,
-        )
-```
-
-### Estimate accuracy
-
 ```python
 accuracy_per_parameter = (
     simulation_posteriors_df.copy()
@@ -195,8 +315,12 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 )
 ```
 
+![png](sp5-default_MCMC_sbc-results_files/sp5-default_MCMC_sbc-results_19_0.png)
+
+    <ggplot: (2962807221477)>
+
 ```python
-hdi_low, hdi_high = pmanal.get_hdi_colnames_from_az_summary(simulation_posteriors_df)
+hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
 
 
 def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
@@ -238,6 +362,10 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 )
 ```
 
+![png](sp5-default_MCMC_sbc-results_files/sp5-default_MCMC_sbc-results_20_0.png)
+
+    <ggplot: (2962807195543)>
+
 ---
 
 ```python
@@ -245,7 +373,38 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
+    execution time: 0.12 minutes
+
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
+
+    Last updated: 2021-07-21
+
+    Python implementation: CPython
+    Python version       : 3.9.2
+    IPython version      : 7.21.0
+
+    Compiler    : GCC 9.3.0
+    OS          : Linux
+    Release     : 3.10.0-1062.el7.x86_64
+    Machine     : x86_64
+    Processor   : x86_64
+    CPU cores   : 32
+    Architecture: 64bit
+
+    Hostname: compute-a-16-163.o2.rc.hms.harvard.edu
+
+    Git branch: sp7-parameterizations
+
+    janitor   : 0.20.14
+    pymc3     : 3.11.1
+    logging   : 0.5.1.2
+    arviz     : 0.11.2
+    numpy     : 1.20.1
+    re        : 2.2.1
+    pandas    : 1.2.3
+    seaborn   : 0.11.1
+    plotnine  : 0.7.1
+    matplotlib: 3.3.4

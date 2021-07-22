@@ -62,6 +62,19 @@ CONFIG_PATH = ""
 FIT_METHOD_STR = ""
 ```
 
+```python
+# Parameters
+MODEL_NAME = "sp4-default-fullrank"
+SBC_RESULTS_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/sp4-default-fullrank_ADVI"
+SBC_COLLATED_RESULTS = (
+    "cache/sbc-cache/sp4-default-fullrank_ADVI_collated-posterior-summaries.pkl"
+)
+NUM_SIMULATIONS = 25
+CONFIG_PATH = "models/model-configs.yaml"
+FIT_METHOD_STR = "ADVI"
+
+```
+
 ### Prepare and validate papermill parameters
 
 Check values passed as the directory with results of the rounds of SBC.
@@ -94,6 +107,140 @@ FIT_METHOD = ModelFitMethod(FIT_METHOD_STR)
 simulation_posteriors_df = pd.read_pickle(sbc_collated_results_path)
 simulation_posteriors_df.head()
 ```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>true_value</th>
+      <th>simulation_id</th>
+      <th>within_hdi</th>
+    </tr>
+    <tr>
+      <th>parameter</th>
+      <th>parameter_name</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>μ_h</th>
+      <th>μ_h</th>
+      <td>1.045</td>
+      <td>0.092</td>
+      <td>0.913</td>
+      <td>1.205</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>986.0</td>
+      <td>943.0</td>
+      <td>NaN</td>
+      <td>1.764052</td>
+      <td>sim_id_0000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>μ_d</th>
+      <th>μ_d</th>
+      <td>0.552</td>
+      <td>0.104</td>
+      <td>0.403</td>
+      <td>0.738</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>926.0</td>
+      <td>905.0</td>
+      <td>NaN</td>
+      <td>1.532779</td>
+      <td>sim_id_0000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>μ_η</th>
+      <th>μ_η</th>
+      <td>0.144</td>
+      <td>0.213</td>
+      <td>-0.183</td>
+      <td>0.480</td>
+      <td>0.006</td>
+      <td>0.005</td>
+      <td>1093.0</td>
+      <td>943.0</td>
+      <td>NaN</td>
+      <td>-0.037437</td>
+      <td>sim_id_0000</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>h[0]</th>
+      <th>h</th>
+      <td>1.186</td>
+      <td>0.032</td>
+      <td>1.135</td>
+      <td>1.234</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>972.0</td>
+      <td>1024.0</td>
+      <td>NaN</td>
+      <td>2.155701</td>
+      <td>sim_id_0000</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>h[1]</th>
+      <th>h</th>
+      <td>1.218</td>
+      <td>0.014</td>
+      <td>1.198</td>
+      <td>1.241</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>1026.0</td>
+      <td>818.0</td>
+      <td>NaN</td>
+      <td>2.660762</td>
+      <td>sim_id_0000</td>
+      <td>False</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ## Analysis
 
@@ -140,6 +287,10 @@ if FIT_METHOD is ModelFitMethod.ADVI:
     plt.show()
 ```
 
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/pandas/core/arraylike.py:358: RuntimeWarning: invalid value encountered in log
+
+![png](sp4-default-fullrank_ADVI_sbc-results_files/sp4-default-fullrank_ADVI_sbc-results_18_1.png)
+
 ### MCMC diagnostics
 
 ```python
@@ -164,6 +315,22 @@ for perm_dir in np.random.choice(
             IncompleteCachedResultsWarning,
         )
 ```
+
+    sbc-perm21
+    ------------------------------
+    Unable to get sampling stats.
+    sbc-perm20
+    ------------------------------
+    Unable to get sampling stats.
+    sbc-perm13
+    ------------------------------
+    Unable to get sampling stats.
+    sbc-perm3
+    ------------------------------
+    Unable to get sampling stats.
+    sbc-perm18
+    ------------------------------
+    Unable to get sampling stats.
 
 ### Estimate accuracy
 
@@ -194,6 +361,10 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
     + gg.theme(axis_ticks_major_x=gg.element_blank(), figure_size=(6, 4))
 )
 ```
+
+![png](sp4-default-fullrank_ADVI_sbc-results_files/sp4-default-fullrank_ADVI_sbc-results_22_0.png)
+
+    <ggplot: (2956729153624)>
 
 ```python
 hdi_low, hdi_high = pmanal.get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -238,6 +409,10 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 )
 ```
 
+![png](sp4-default-fullrank_ADVI_sbc-results_files/sp4-default-fullrank_ADVI_sbc-results_23_0.png)
+
+    <ggplot: (2956728984715)>
+
 ---
 
 ```python
@@ -245,7 +420,38 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
+    execution time: 0.48 minutes
+
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
+
+    Last updated: 2021-07-22
+
+    Python implementation: CPython
+    Python version       : 3.9.2
+    IPython version      : 7.21.0
+
+    Compiler    : GCC 9.3.0
+    OS          : Linux
+    Release     : 3.10.0-1062.el7.x86_64
+    Machine     : x86_64
+    Processor   : x86_64
+    CPU cores   : 32
+    Architecture: 64bit
+
+    Hostname: compute-a-16-170.o2.rc.hms.harvard.edu
+
+    Git branch: sp7-parameterizations
+
+    pymc3     : 3.11.1
+    arviz     : 0.11.2
+    seaborn   : 0.11.1
+    janitor   : 0.20.14
+    numpy     : 1.20.1
+    pandas    : 1.2.3
+    logging   : 0.5.1.2
+    re        : 2.2.1
+    plotnine  : 0.7.1
+    matplotlib: 3.3.4
