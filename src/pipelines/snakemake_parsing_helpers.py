@@ -52,6 +52,16 @@ def get_models_names_fit_methods(
 
 
 def get_model_config_hashes(config_path: Path) -> dict[str, int]:
+    """Create a dictionary of hashes for each model's configuration.
+
+    The description is removed before serializing.
+
+    Args:
+        config_path (Path): Path to the configuration file.
+
+    Returns:
+        dict[str, int]: A dictionary where the key is the model names and the value is the hash of the JSON serialization of the model's configuration.
+    """
     model_configurations = model_config.get_model_configurations(config_path)
     hashes: dict[str, int] = {}
     for config in model_configurations.configurations:
