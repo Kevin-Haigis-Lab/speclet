@@ -49,3 +49,12 @@ def get_models_names_fit_methods(
         model_names=[pi.model_name for pi in pipeline_informations],
         fit_methods=[pi.fit_method.value for pi in pipeline_informations],
     )
+
+
+def get_model_config_hashes(config_path: Path) -> dict[str, int]:
+    model_configurations = model_config.get_model_configurations(config_path)
+    hashes: dict[str, int] = {}
+    for config in model_configurations.configurations:
+        config.description = ""
+        hashes[config.name] = hash(config.json().strip())
+    return hashes
