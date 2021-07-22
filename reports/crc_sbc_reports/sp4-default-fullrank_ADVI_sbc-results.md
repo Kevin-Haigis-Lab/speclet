@@ -287,7 +287,7 @@ if FIT_METHOD is ModelFitMethod.ADVI:
     plt.show()
 ```
 
-    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac5/lib/python3.9/site-packages/pandas/core/arraylike.py:358: RuntimeWarning: invalid value encountered in log
+    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/daab5ac56849df6113f96e98614e98ee/lib/python3.9/site-packages/pandas/core/arraylike.py:358: RuntimeWarning: invalid value encountered in log
 
 ![png](sp4-default-fullrank_ADVI_sbc-results_files/sp4-default-fullrank_ADVI_sbc-results_18_1.png)
 
@@ -364,7 +364,7 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 
 ![png](sp4-default-fullrank_ADVI_sbc-results_files/sp4-default-fullrank_ADVI_sbc-results_22_0.png)
 
-    <ggplot: (2956729153624)>
+    <ggplot: (2949178104188)>
 
 ```python
 hdi_low, hdi_high = pmanal.get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -411,7 +411,7 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 
 ![png](sp4-default-fullrank_ADVI_sbc-results_files/sp4-default-fullrank_ADVI_sbc-results_23_0.png)
 
-    <ggplot: (2956728984715)>
+    <ggplot: (2949177394252)>
 
 ---
 
@@ -420,7 +420,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.48 minutes
+    execution time: 0.67 minutes
 
 ```python
 %load_ext watermark
@@ -441,17 +441,17 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-a-16-170.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-78.o2.rc.hms.harvard.edu
 
     Git branch: sp7-parameterizations
 
-    pymc3     : 3.11.1
-    arviz     : 0.11.2
+    re        : 2.2.1
     seaborn   : 0.11.1
+    pymc3     : 3.11.1
     janitor   : 0.20.14
     numpy     : 1.20.1
-    pandas    : 1.2.3
-    logging   : 0.5.1.2
-    re        : 2.2.1
     plotnine  : 0.7.1
+    arviz     : 0.11.2
+    logging   : 0.5.1.2
     matplotlib: 3.3.4
+    pandas    : 1.2.3

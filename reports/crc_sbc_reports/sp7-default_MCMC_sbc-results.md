@@ -1,4 +1,4 @@
-# Model Report
+# Model SBC Report
 
 ```python
 import logging
@@ -72,6 +72,7 @@ SBC_COLLATED_RESULTS = (
 NUM_SIMULATIONS = 25
 CONFIG_PATH = "models/model-configs.yaml"
 FIT_METHOD_STR = "MCMC"
+
 ```
 
 ### Prepare and validate papermill parameters
@@ -361,6 +362,8 @@ for perm_dir in np.random.choice(
 
 ![png](sp7-default_MCMC_sbc-results_files/sp7-default_MCMC_sbc-results_20_9.png)
 
+### Estimate accuracy
+
 ```python
 accuracy_per_parameter = (
     simulation_posteriors_df.copy()
@@ -389,9 +392,9 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 )
 ```
 
-![png](sp7-default_MCMC_sbc-results_files/sp7-default_MCMC_sbc-results_21_0.png)
+![png](sp7-default_MCMC_sbc-results_files/sp7-default_MCMC_sbc-results_22_0.png)
 
-    <ggplot: (2962182129460)>
+    <ggplot: (2988652513533)>
 
 ```python
 hdi_low, hdi_high = pmanal.get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -436,9 +439,9 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 )
 ```
 
-![png](sp7-default_MCMC_sbc-results_files/sp7-default_MCMC_sbc-results_22_0.png)
+![png](sp7-default_MCMC_sbc-results_files/sp7-default_MCMC_sbc-results_23_0.png)
 
-    <ggplot: (2962182120858)>
+    <ggplot: (2988652547687)>
 
 ---
 
@@ -447,14 +450,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.25 minutes
+    execution time: 0.36 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-21
+    Last updated: 2021-07-22
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -465,20 +468,20 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-193.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-78.o2.rc.hms.harvard.edu
 
     Git branch: sp7-parameterizations
 
-    pandas    : 1.2.3
-    re        : 2.2.1
-    pymc3     : 3.11.1
-    seaborn   : 0.11.1
-    plotnine  : 0.7.1
-    numpy     : 1.20.1
-    arviz     : 0.11.2
     logging   : 0.5.1.2
+    re        : 2.2.1
     janitor   : 0.20.14
+    pymc3     : 3.11.1
     matplotlib: 3.3.4
+    pandas    : 1.2.3
+    arviz     : 0.11.2
+    seaborn   : 0.11.1
+    numpy     : 1.20.1
+    plotnine  : 0.7.1

@@ -151,7 +151,7 @@ rule collate_sbc:
 
 rule papermill_report:
     version:
-        "1"
+        "2"
     params:
         root_perm_dir=make_root_permutation_directory,
         collated_results=make_collated_results_path,
@@ -174,6 +174,8 @@ rule papermill_report:
 
 
 rule execute_report:
+    version:
+        "2"
     input:
         collated_results=rules.collate_sbc.output.collated_results,
         notebook=rules.papermill_report.output.notebook,

@@ -1,4 +1,4 @@
-# Model Report
+# Model SBC Report
 
 ```python
 import logging
@@ -20,7 +20,7 @@ import seaborn as sns
 from src.command_line_interfaces import cli_helpers
 from src.loggers import set_console_handler_level
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
-from src.modeling.pymc3_analysis import get_hdi_colnames_from_az_summary
+from src.modeling import pymc3_analysis as pmanal
 from src.modeling.simulation_based_calibration_helpers import SBCFileManager
 from src.project_enums import ModelFitMethod
 ```
@@ -287,6 +287,83 @@ if FIT_METHOD is ModelFitMethod.ADVI:
     plt.show()
 ```
 
+### MCMC diagnostics
+
+```python
+class IncompleteCachedResultsWarning(UserWarning):
+    pass
+
+
+all_sbc_perm_dirs = list(sbc_results_dir.iterdir())
+
+for perm_dir in np.random.choice(
+    all_sbc_perm_dirs, size=min([5, len(all_sbc_perm_dirs)]), replace=False
+):
+    print(perm_dir.name)
+    print("-" * 30)
+    sbc_fm = SBCFileManager(perm_dir)
+    if sbc_fm.all_data_exists():
+        sbc_res = sbc_fm.get_sbc_results()
+        _ = pmanal.describe_mcmc(sbc_res.inference_obj)
+    else:
+        warnings.warn(
+            "Cannot find all components of the SBC results.",
+            IncompleteCachedResultsWarning,
+        )
+```
+
+    sbc-perm15
+    ------------------------------
+    sampled 4 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 356, 441, 371, 628
+    percent divergences: 0.356, 0.441, 0.371, 0.628
+    BFMI: 0.038, 0.025, 0.078, 0.137
+    avg. step size: 0.006, 0.016, 0.012, 0.008
+
+![png](sp7-cellcn-genecn_MCMC_sbc-results_files/sp7-cellcn-genecn_MCMC_sbc-results_20_1.png)
+
+    sbc-perm8
+    ------------------------------
+    sampled 4 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 253, 307, 210, 208
+    percent divergences: 0.253, 0.307, 0.21, 0.208
+    BFMI: 0.055, 0.039, 0.073, 0.053
+    avg. step size: 0.008, 0.02, 0.009, 0.021
+
+![png](sp7-cellcn-genecn_MCMC_sbc-results_files/sp7-cellcn-genecn_MCMC_sbc-results_20_3.png)
+
+    sbc-perm20
+    ------------------------------
+    sampled 4 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 416, 247, 228, 196
+    percent divergences: 0.416, 0.247, 0.228, 0.196
+    BFMI: 0.021, 0.031, 0.009, 0.009
+    avg. step size: 0.004, 0.004, 0.002, 0.006
+
+![png](sp7-cellcn-genecn_MCMC_sbc-results_files/sp7-cellcn-genecn_MCMC_sbc-results_20_5.png)
+
+    sbc-perm5
+    ------------------------------
+    sampled 4 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 339, 292, 291, 1000
+    percent divergences: 0.339, 0.292, 0.291, 1.0
+    BFMI: 0.165, 0.077, 0.099, 1.784
+    avg. step size: 0.02, 0.008, 0.026, 0.007
+
+![png](sp7-cellcn-genecn_MCMC_sbc-results_files/sp7-cellcn-genecn_MCMC_sbc-results_20_7.png)
+
+    sbc-perm14
+    ------------------------------
+    sampled 4 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 237, 470, 627, 1000
+    percent divergences: 0.237, 0.47, 0.627, 1.0
+    BFMI: 0.009, 0.025, 0.041, 2.018
+    avg. step size: 0.003, 0.011, 0.007, 0.002
+
+![png](sp7-cellcn-genecn_MCMC_sbc-results_files/sp7-cellcn-genecn_MCMC_sbc-results_20_9.png)
+
+### Estimate accuracy
+
 ```python
 accuracy_per_parameter = (
     simulation_posteriors_df.copy()
@@ -315,12 +392,12 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 )
 ```
 
-![png](sp7-cellcn-genecn_MCMC_sbc-results_files/sp7-cellcn-genecn_MCMC_sbc-results_19_0.png)
+![png](sp7-cellcn-genecn_MCMC_sbc-results_files/sp7-cellcn-genecn_MCMC_sbc-results_22_0.png)
 
-    <ggplot: (2990523048819)>
+    <ggplot: (2991706202359)>
 
 ```python
-hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
+hdi_low, hdi_high = pmanal.get_hdi_colnames_from_az_summary(simulation_posteriors_df)
 
 
 def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
@@ -362,9 +439,9 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 )
 ```
 
-![png](sp7-cellcn-genecn_MCMC_sbc-results_files/sp7-cellcn-genecn_MCMC_sbc-results_20_0.png)
+![png](sp7-cellcn-genecn_MCMC_sbc-results_files/sp7-cellcn-genecn_MCMC_sbc-results_23_0.png)
 
-    <ggplot: (2990523391967)>
+    <ggplot: (2991715219914)>
 
 ---
 
@@ -373,14 +450,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.20 minutes
+    execution time: 0.40 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-21
+    Last updated: 2021-07-22
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -394,17 +471,17 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-e-16-187.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-192.o2.rc.hms.harvard.edu
 
     Git branch: sp7-parameterizations
 
-    pandas    : 1.2.3
-    numpy     : 1.20.1
-    seaborn   : 0.11.1
-    janitor   : 0.20.14
     logging   : 0.5.1.2
+    pandas    : 1.2.3
     pymc3     : 3.11.1
-    matplotlib: 3.3.4
-    arviz     : 0.11.2
     plotnine  : 0.7.1
+    matplotlib: 3.3.4
+    seaborn   : 0.11.1
+    numpy     : 1.20.1
+    arviz     : 0.11.2
+    janitor   : 0.20.14
     re        : 2.2.1
