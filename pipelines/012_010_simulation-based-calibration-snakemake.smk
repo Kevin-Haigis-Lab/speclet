@@ -1,5 +1,6 @@
 """ Run a simulation-based calibration for a PyMC3 model."""
 
+import os
 from pathlib import Path
 from typing import List
 
@@ -30,7 +31,6 @@ model_configuration_lists = smk_help.get_models_names_fit_methods(
     MODEL_CONFIG, pipeline=SpecletPipeline.SBC
 )
 
-MODEL_CONFIG_HASHES = smk_help.get_model_config_hashes(MODEL_CONFIG)
 
 #### ---- Wildcard constrains ---- ####
 
@@ -95,13 +95,7 @@ rule all:
         ),
 
 
-def get_version_cmd(w: Wildcards) -> str:
-    return str(MODEL_CONFIG_HASHES[w.model_name])
-
-
 rule run_sbc:
-    version:
-        get_version_cmd
     output:
         netcdf_file=(
             root_perm_dir_template + "/" + perm_dir_template + "/inference-data.netcdf"
@@ -139,8 +133,6 @@ rule collate_sbc:
             perm_num=list(range(NUM_SIMULATIONS)),
             allow_missing=True,
         ),
-    version:
-        get_version_cmd
     conda:
         ENVIRONMENT_YAML
     params:
@@ -159,7 +151,7 @@ rule collate_sbc:
 
 rule papermill_report:
     version:
-        get_version_cmd
+        "1"
     params:
         root_perm_dir=make_root_permutation_directory,
         collated_results=make_collated_results_path,
@@ -182,8 +174,6 @@ rule papermill_report:
 
 
 rule execute_report:
-    version:
-        get_version_cmd
     input:
         collated_results=rules.collate_sbc.output.collated_results,
         notebook=rules.papermill_report.output.notebook,

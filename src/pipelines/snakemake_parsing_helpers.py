@@ -29,6 +29,16 @@ class _PipelineIntermediateInformation(BaseModel):
 def get_models_names_fit_methods(
     config_path: Path, pipeline: SpecletPipeline
 ) -> ParsedPipelineInformation:
+    """Get model names and fit methods for ease-of-use in snakemake workflow.
+
+    Args:
+        config_path (Path): Path to a configuration file.
+        pipeline (SpecletPipeline): Name of the pipeline.
+
+    Returns:
+        ParsedPipelineInformation: The information in a useful format for use in a
+        snakemake workflow.
+    """
     model_configurations = model_config.get_model_configurations(config_path)
     model_config.check_model_names_are_unique(model_configurations)
 
