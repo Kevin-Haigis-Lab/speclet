@@ -3,6 +3,7 @@
 from itertools import product
 from typing import Dict, Tuple
 
+import arviz as az
 import matplotlib
 import numpy as np
 import pandas as pd
@@ -188,3 +189,13 @@ class TestPlottingOfPriors:
 def test_get_hdi_colnames_from_az_summary(centered_eight_post: pd.DataFrame) -> None:
     hdi_cols = pmanal.get_hdi_colnames_from_az_summary(centered_eight_post)
     assert hdi_cols == ("hdi_3%", "hdi_97%")
+
+
+@pytest.mark.parametrize(
+    "az_obj_name", ["centered_eight", "non_centered_eight", "radon", "rugby"]
+)
+def test_describe_mcmc(az_obj_name: str):
+    az_obj = az.load_arviz_data(az_obj_name)
+    assert isinstance(az_obj, az.InferenceData)
+    mcmc_desc = pmanal.describe_mcmc(az_obj, plot=False)
+    assert mcmc_desc is not None

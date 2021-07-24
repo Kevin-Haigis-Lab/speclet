@@ -1,5 +1,6 @@
 """ Run a simulation-based calibration for a PyMC3 model."""
 
+import os
 from pathlib import Path
 from typing import List
 
@@ -7,7 +8,7 @@ import papermill
 from snakemake.io import Wildcards
 
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline, MockDataSize
-from src.pipelines.snakemake_parsing_helpers import get_models_names_fit_methods
+from src.pipelines import snakemake_parsing_helpers as smk_help
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
 NUM_SIMULATIONS = 25
@@ -18,11 +19,15 @@ ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
 
 MOCK_DATA_SIZE = MockDataSize.MEDIUM
 
+BENCHMARK_DIR = Path("benchmarks", "012_010_simulation-based-calibration-snakemake")
+if not BENCHMARK_DIR.exists():
+    BENCHMARK_DIR.mkdir(parents=True)
+
 
 #### ---- Model Configurations ---- ####
 
 MODEL_CONFIG = Path("models", "model-configs.yaml")
-model_configuration_lists = get_models_names_fit_methods(
+model_configuration_lists = smk_help.get_models_names_fit_methods(
     MODEL_CONFIG, pipeline=SpecletPipeline.SBC
 )
 
@@ -75,6 +80,11 @@ def create_resource_manager(w: Wildcards) -> RM:
 #### ---- Rules ---- ####
 
 
+localrules:
+    all,
+    papermill_report,
+
+
 rule all:
     input:
         expand(
@@ -104,6 +114,8 @@ rule run_sbc:
         partition=lambda w: create_resource_manager(w).partition,
         perm_dir=make_permutation_dir,
         config_path=MODEL_CONFIG.as_posix(),
+    benchmark:
+        BENCHMARK_DIR / "run_sbc/{model_name}_{fit_method}_perm{perm_num}.tsv"
     shell:
         "src/command_line_interfaces/simulation_based_calibration_cli.py"
         "  {wildcards.model_name}"
@@ -128,6 +140,8 @@ rule collate_sbc:
     output:
         collated_results=collated_results_template,
     priority: 10
+    benchmark:
+        BENCHMARK_DIR / "collate_sbc/{model_name}_{fit_method}.tsv"
     shell:
         "src/command_line_interfaces/collate_sbc_cli.py "
         " {params.perm_dir} "
@@ -136,6 +150,8 @@ rule collate_sbc:
 
 
 rule papermill_report:
+    version:
+        "2"
     params:
         root_perm_dir=make_root_permutation_directory,
         collated_results=make_collated_results_path,
@@ -158,6 +174,8 @@ rule papermill_report:
 
 
 rule execute_report:
+    version:
+        "2"
     input:
         collated_results=rules.collate_sbc.output.collated_results,
         notebook=rules.papermill_report.output.notebook,

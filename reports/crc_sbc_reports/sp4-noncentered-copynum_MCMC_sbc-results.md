@@ -1,4 +1,4 @@
-# Model Report
+# Model SBC Report
 
 ```python
 import logging
@@ -20,7 +20,7 @@ import seaborn as sns
 from src.command_line_interfaces import cli_helpers
 from src.loggers import set_console_handler_level
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
-from src.modeling.pymc3_analysis import get_hdi_colnames_from_az_summary
+from src.modeling import pymc3_analysis as pmanal
 from src.modeling.simulation_based_calibration_helpers import SBCFileManager
 from src.project_enums import ModelFitMethod
 ```
@@ -287,6 +287,83 @@ if FIT_METHOD is ModelFitMethod.ADVI:
     plt.show()
 ```
 
+### MCMC diagnostics
+
+```python
+class IncompleteCachedResultsWarning(UserWarning):
+    pass
+
+
+all_sbc_perm_dirs = list(sbc_results_dir.iterdir())
+
+for perm_dir in np.random.choice(
+    all_sbc_perm_dirs, size=min([5, len(all_sbc_perm_dirs)]), replace=False
+):
+    print(perm_dir.name)
+    print("-" * 30)
+    sbc_fm = SBCFileManager(perm_dir)
+    if sbc_fm.all_data_exists():
+        sbc_res = sbc_fm.get_sbc_results()
+        _ = pmanal.describe_mcmc(sbc_res.inference_obj)
+    else:
+        warnings.warn(
+            "Cannot find all components of the SBC results.",
+            IncompleteCachedResultsWarning,
+        )
+```
+
+    sbc-perm15
+    ------------------------------
+    sampled 4 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 336, 303, 151, 281
+    percent divergences: 0.336, 0.303, 0.151, 0.281
+    BFMI: 0.416, 0.392, 0.364, 0.39
+    avg. step size: 0.002, 0.002, 0.002, 0.002
+
+![png](sp4-noncentered-copynum_MCMC_sbc-results_files/sp4-noncentered-copynum_MCMC_sbc-results_20_1.png)
+
+    sbc-perm8
+    ------------------------------
+    sampled 4 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 373, 1000, 1000, 1000
+    percent divergences: 0.373, 1.0, 1.0, 1.0
+    BFMI: 0.478, 1.951, 1.909, 1.936
+    avg. step size: 0.002, 0.002, 0.002, 0.001
+
+![png](sp4-noncentered-copynum_MCMC_sbc-results_files/sp4-noncentered-copynum_MCMC_sbc-results_20_3.png)
+
+    sbc-perm20
+    ------------------------------
+    sampled 4 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 427, 259, 185, 201
+    percent divergences: 0.427, 0.259, 0.185, 0.201
+    BFMI: 0.387, 0.493, 0.326, 0.376
+    avg. step size: 0.002, 0.002, 0.002, 0.002
+
+![png](sp4-noncentered-copynum_MCMC_sbc-results_files/sp4-noncentered-copynum_MCMC_sbc-results_20_5.png)
+
+    sbc-perm5
+    ------------------------------
+    sampled 4 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 183, 119, 1000, 1000
+    percent divergences: 0.183, 0.119, 1.0, 1.0
+    BFMI: 0.632, 0.452, 1.759, 1.965
+    avg. step size: 0.001, 0.001, 0.001, 0.001
+
+![png](sp4-noncentered-copynum_MCMC_sbc-results_files/sp4-noncentered-copynum_MCMC_sbc-results_20_7.png)
+
+    sbc-perm14
+    ------------------------------
+    sampled 4 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 517, 45, 44, 129
+    percent divergences: 0.517, 0.045, 0.044, 0.129
+    BFMI: 0.71, 0.475, 0.328, 0.625
+    avg. step size: 0.001, 0.001, 0.001, 0.001
+
+![png](sp4-noncentered-copynum_MCMC_sbc-results_files/sp4-noncentered-copynum_MCMC_sbc-results_20_9.png)
+
+### Estimate accuracy
+
 ```python
 accuracy_per_parameter = (
     simulation_posteriors_df.copy()
@@ -315,12 +392,12 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 )
 ```
 
-![png](sp4-noncentered-copynum_MCMC_sbc-results_files/sp4-noncentered-copynum_MCMC_sbc-results_19_0.png)
+![png](sp4-noncentered-copynum_MCMC_sbc-results_files/sp4-noncentered-copynum_MCMC_sbc-results_22_0.png)
 
-    <ggplot: (2949022304552)>
+    <ggplot: (2946470769716)>
 
 ```python
-hdi_low, hdi_high = get_hdi_colnames_from_az_summary(simulation_posteriors_df)
+hdi_low, hdi_high = pmanal.get_hdi_colnames_from_az_summary(simulation_posteriors_df)
 
 
 def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
@@ -362,9 +439,9 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 )
 ```
 
-![png](sp4-noncentered-copynum_MCMC_sbc-results_files/sp4-noncentered-copynum_MCMC_sbc-results_20_0.png)
+![png](sp4-noncentered-copynum_MCMC_sbc-results_files/sp4-noncentered-copynum_MCMC_sbc-results_23_0.png)
 
-    <ggplot: (2949030826063)>
+    <ggplot: (2946479855601)>
 
 ---
 
@@ -373,14 +450,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.11 minutes
+    execution time: 0.50 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-13
+    Last updated: 2021-07-22
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -391,20 +468,20 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-180.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-81.o2.rc.hms.harvard.edu
 
-    Git branch: fit-models
+    Git branch: sp7-parameterizations
 
-    seaborn   : 0.11.1
-    pandas    : 1.2.3
-    arviz     : 0.11.2
-    re        : 2.2.1
     numpy     : 1.20.1
-    pymc3     : 3.11.1
-    plotnine  : 0.7.1
-    janitor   : 0.20.14
-    logging   : 0.5.1.2
+    re        : 2.2.1
     matplotlib: 3.3.4
+    seaborn   : 0.11.1
+    logging   : 0.5.1.2
+    janitor   : 0.20.14
+    plotnine  : 0.7.1
+    pandas    : 1.2.3
+    pymc3     : 3.11.1
+    arviz     : 0.11.2

@@ -2,7 +2,7 @@
 
 #SBATCH --account=park
 #SBATCH -c 1
-#SBATCH -p short
+#SBATCH -p priority
 #SBATCH -t 0-12:00
 #SBATCH --mem 2G
 #SBATCH -o logs/%j-sbc-snakemake.log

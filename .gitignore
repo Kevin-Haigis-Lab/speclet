@@ -276,3 +276,4 @@ docs/.docs-env
 
 # Dask
 */dask-worker-space/*
+dask-worker-space

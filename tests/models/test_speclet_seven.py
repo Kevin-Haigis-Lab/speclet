@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Tuple
+from typing import Any
 
 import pytest
 from hypothesis import HealthCheck, given, settings
@@ -53,7 +53,6 @@ class TestSpecletSeven:
                 cores=n_chains,
                 target_accept=0.8,
                 prior_pred_samples=10,
-                post_pred_samples=10,
                 ignore_cache=True,
             )
             assert sp7.mcmc_results is not None
@@ -63,7 +62,6 @@ class TestSpecletSeven:
                 n_iterations=20,
                 draws=n_draws,
                 prior_pred_samples=10,
-                post_pred_samples=10,
                 ignore_cache=True,
             )
             assert sp7.mcmc_results is None
@@ -78,7 +76,7 @@ class TestSpecletSeven:
         config: SpecletSevenConfiguration,
         monkeypatch: pytest.MonkeyPatch,
     ):
-        def mock_build_model(*args, **kwargs) -> Tuple[str, str]:
+        def mock_build_model(*args, **kwargs) -> tuple[str, str]:
             return "my-test-model", "another-string"
 
         monkeypatch.setattr(SpecletSeven, "model_specification", mock_build_model)
@@ -110,7 +108,29 @@ class TestSpecletSeven:
             data_manager=mock_crc_dm,
             config=config,
         )
-        sp7.build_model()
+
+        optional_param_to_name: dict[str, str] = {
+            "k": "cell_line_cna_cov",
+            "n": "gene_cna_cov",
+            "q": "rna_cov",
+            "m": "mutation_cov",
+            "j": "batch_cov",
+        }
+
+        def pre_check_callback(param_name: str, *args: Any, **kwargs: Any) -> bool:
+            if len(param_name) > 1:
+                return True
+            if (
+                param_name in optional_param_to_name.keys()
+                and not config.dict()[optional_param_to_name[param_name]]
+            ):
+                return True
+            return False
+
+        th.assert_model_reparameterization(
+            sp7, config=config, pre_check_callback=pre_check_callback
+        )
+
         assert sp7.model is not None
         all_vars = pmhelp.get_variable_names(sp7.model)
         if config.batch_cov:

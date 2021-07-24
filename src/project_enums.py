@@ -7,7 +7,7 @@ from typing import NoReturn
 
 
 @unique
-class ModelFitMethod(Enum):
+class ModelFitMethod(str, Enum):
     """Available fit methods."""
 
     ADVI = "ADVI"
@@ -15,7 +15,7 @@ class ModelFitMethod(Enum):
 
 
 @unique
-class ModelParameterization(Enum):
+class ModelParameterization(str, Enum):
     """Possible model parameterization methods."""
 
     CENTERED = "centered"
@@ -23,7 +23,7 @@ class ModelParameterization(Enum):
 
 
 @unique
-class ModelOption(Enum):
+class ModelOption(str, Enum):
     """Model options."""
 
     SPECLET_TEST_MODEL = "speclet-test-model"
@@ -40,7 +40,7 @@ class ModelOption(Enum):
 
 
 @unique
-class SlurmPartitions(Enum):
+class SlurmPartitions(str, Enum):
     """Partitions of the HPC available through SLURM."""
 
     PRIORITY = "priority"
@@ -51,7 +51,7 @@ class SlurmPartitions(Enum):
 
 
 @unique
-class SpecletPipeline(Enum):
+class SpecletPipeline(str, Enum):
     """Pipelines available in this project."""
 
     FITTING = "fitting"
@@ -59,7 +59,7 @@ class SpecletPipeline(Enum):
 
 
 @unique
-class MockDataSize(Enum):
+class MockDataSize(str, Enum):
     """Options for dataset seizes when generating mock data."""
 
     SMALL = "small"
@@ -79,4 +79,4 @@ def assert_never(value: NoReturn) -> NoReturn:
     Returns:
         NoReturn: Nothing.
     """
-    assert False, f"Unhandled value: {value} ({type(value).__name__})"
+    assert False, f"Unhandled value: {value} ({type(value).__name__})"  # noqa: B011

@@ -315,7 +315,12 @@ def generate_mock_cell_line_information(
         }
     )
 
-    screens = prefixed_count("screen", n=n_screens)
+    screens = ["broad"]
+    if n_screens == 2:
+        screens += ["sanger"]
+    if n_screens > 2:
+        screens += prefixed_count("screen", n=n_screens - 2)
+
     screen_map = pd.DataFrame(
         {
             "p_dna_batch": batches,

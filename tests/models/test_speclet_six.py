@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Set
 
 import numpy as np
 import pandas as pd
@@ -15,7 +15,7 @@ from src.models.speclet_six import SpecletSix, SpecletSixConfiguration
 
 
 def make_column_tiled(
-    df: pd.DataFrame, df_map: pd.DataFrame, col: str, val: List[str]
+    df: pd.DataFrame, df_map: pd.DataFrame, col: str, val: list[str]
 ) -> pd.DataFrame:
     new_assignemnts = np.tile(val, int(len(df_map) // 2 + 1))
     df_map[col] = new_assignemnts[0 : len(df_map)]
@@ -63,7 +63,7 @@ class TestSpecletSix:
         config: SpecletSixConfiguration,
         monkeypatch: pytest.MonkeyPatch,
     ):
-        def mock_build_model(*args, **kwargs) -> Tuple[str, str]:
+        def mock_build_model(*args, **kwargs) -> tuple[str, str]:
             return "my-test-model", "another-string"
 
         monkeypatch.setattr(SpecletSix, "model_specification", mock_build_model)
@@ -91,15 +91,20 @@ class TestSpecletSix:
             assert expected_v in model_vars
 
     def test_model_with_multiple_screens(
-        self, tmp_path: Path, mock_crc_dm: CrcDataManager
+        self,
+        tmp_path: Path,
+        mock_crc_dm_multiscreen: CrcDataManager,
     ):
-        d = mock_crc_dm.get_data().copy()
+        d = mock_crc_dm_multiscreen.get_data().copy()
         d["screen"] = "screen_A"
         d = achelp.set_achilles_categorical_columns(d)
-        mock_crc_dm.data = d
+        mock_crc_dm_multiscreen.data = d
 
         sp6 = SpecletSix(
-            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=mock_crc_dm
+            "TEST-MODEL",
+            root_cache_dir=tmp_path,
+            debug=True,
+            data_manager=mock_crc_dm_multiscreen,
         )
 
         multi_screen_vars = ["μ_μ_j", "σ_μ_j", "σ_σ_j"]
@@ -111,7 +116,7 @@ class TestSpecletSix:
         for var in multi_screen_vars:
             assert var not in model_vars
 
-        make_data_multiple_screens(dm=mock_crc_dm)
+        make_data_multiple_screens(dm=mock_crc_dm_multiscreen)
         sp6.build_model()
         assert sp6.model is not None
         model_vars = pmhelp.get_variable_names(sp6.model, rm_log=True)
@@ -170,7 +175,6 @@ class TestSpecletSix:
             chains=2,
             cores=2,
             prior_pred_samples=10,
-            post_pred_samples=10,
             random_seed=1,
         )
         assert sp6.mcmc_results is not None
@@ -197,7 +201,6 @@ class TestSpecletSix:
             chains=2,
             cores=2,
             prior_pred_samples=10,
-            post_pred_samples=10,
             random_seed=1,
         )
         assert sp6.mcmc_results is not None
@@ -231,7 +234,6 @@ class TestSpecletSix:
             chains=2,
             cores=2,
             prior_pred_samples=10,
-            post_pred_samples=10,
             random_seed=1,
         )
         assert sp6.mcmc_results is not None
@@ -250,7 +252,6 @@ class TestSpecletSix:
             n_iterations=100,
             draws=10,
             prior_pred_samples=10,
-            post_pred_samples=10,
             random_seed=1,
         )
         assert sp6.advi_results is not None
@@ -274,7 +275,7 @@ class TestSpecletSix:
             config=config,
         )
 
-        optional_param_to_name: Dict[str, str] = {
+        optional_param_to_name: dict[str, str] = {
             "k": "cell_line_cna_cov",
             "n": "gene_cna_cov",
             "q": "rna_cov",

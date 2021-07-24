@@ -197,5 +197,5 @@ def check_model_names_are_unique(configs: ModelConfigs) -> None:
     """
     counter = Counter([config.name for config in configs.configurations])
     if not all(i == 1 for i in counter.values()):
-        nonunique_ids = set([v for v, c in counter.items() if c != 1])
+        nonunique_ids = set([v for v, c in counter.items() if c != 1])  # noqa: C403
         raise ModelNamesAreNotAllUnique(nonunique_ids)

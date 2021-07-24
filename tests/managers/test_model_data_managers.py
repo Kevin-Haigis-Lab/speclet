@@ -35,6 +35,7 @@ def no_standard_crc_transformations(monkeypatch: pytest.MonkeyPatch):
         CrcDataManager, "_drop_sgrnas_that_map_to_multiple_genes", identity
     )
     monkeypatch.setattr(CrcDataManager, "_drop_missing_copynumber", identity)
+    monkeypatch.setattr(CrcDataManager, "_filter_for_broad_source_only", identity)
 
 
 @pytest.fixture
@@ -278,6 +279,22 @@ class TestCrcDataManager:
         assert mock_crc_dm.data is not None
         assert original_df.shape[0] > mock_crc_dm.data.shape[0]
         assert check_achilles_cat_columns_correct_indexing(mock_crc_dm.data, col)
+
+    @pytest.mark.DEV
+    def test_filter_only_broad(
+        self, monkeypatch: pytest.MonkeyPatch, depmap_test_data: Path
+    ):
+        def monkey_get_data_path(*args, **kwargs) -> Path:
+            return depmap_test_data
+
+        monkeypatch.setattr(CrcDataManager, "get_data_path", monkey_get_data_path)
+        dm = CrcDataManager(broad_only=False)
+        data = dm.get_data()
+        assert data["screen"].nunique() >= 1
+        dm2 = CrcDataManager(broad_only=True)
+        data = dm2.get_data()
+        assert data["screen"].nunique() == 1
+        assert data["screen"].unique()[0] == "broad"
 
 
 def remove_random_cat(df: pd.DataFrame, col: str) -> pd.DataFrame:

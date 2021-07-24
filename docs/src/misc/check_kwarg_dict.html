@@ -29,36 +29,36 @@
 <pre><code class="python">&#34;&#34;&#34;Check a dictionary of keyword arguments against the parameters of a function.&#34;&#34;&#34;
 
 import inspect
-from typing import Callable, List, Tuple
+from typing import Callable
 
 
 class KeywordsNotInCallableParametersError(BaseException):
     &#34;&#34;&#34;Keywords are not in a callable&#39;s available parameters.&#34;&#34;&#34;
 
-    def __init__(self, extra_keys: List[str]) -&gt; None:
+    def __init__(self, extra_keys: list[str]) -&gt; None:
         &#34;&#34;&#34;Create a error.
 
         Args:
-            extra_keys (List[str]): Extra keys found.
+            extra_keys (list[str]): Extra keys found.
         &#34;&#34;&#34;
         self.extra_keys = extra_keys
         self.message = f&#34;Spare keys: {self.extra_keys}&#34;
         super().__init__(self.message)
 
 
-def _get_parameter_names(f: Callable) -&gt; List[str]:
-    return [x for x in inspect.signature(f).parameters]
+def _get_parameter_names(f: Callable) -&gt; list[str]:
+    return list(inspect.signature(f).parameters)
 
 
 def check_kwarg_dict(
-    keywords: List[str], f: Callable, blacklist: Tuple[str, ...] = tuple()
+    keywords: list[str], f: Callable, blacklist: tuple[str, ...] = ()
 ) -&gt; None:
     &#34;&#34;&#34;Check a list of keywords against the parameters in a callable (e.g. function).
 
     Args:
-        keywords (List[str]): List of expected keywords.
+        keywords (list[str]): List of expected keywords.
         f (Callable): Callable object that will be passed they keyword arguments.
-        blacklist (Tuple[str]): Parameters to ignore (e.g. `(&#34;self&#34;,)`)
+        blacklist (tuple[str]): Parameters to ignore (e.g. `(&#34;self&#34;,)`)
 
     Raises:
         KeywordsNotInCallableParametersError: Raised if spare keywords are found.
@@ -83,17 +83,17 @@ def check_kwarg_dict(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.misc.check_kwarg_dict.check_kwarg_dict"><code class="name flex">
-<span>def <span class="ident">check_kwarg_dict</span></span>(<span>keywords: List[str], f: Callable, blacklist: Tuple[str, ...] = ()) -> NoneType</span>
+<span>def <span class="ident">check_kwarg_dict</span></span>(<span>keywords: list, f: Callable, blacklist: tuple = ()) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Check a list of keywords against the parameters in a callable (e.g. function).</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>keywords</code></strong> :&ensp;<code>List[str]</code></dt>
+<dt><strong><code>keywords</code></strong> :&ensp;<code>list[str]</code></dt>
 <dd>List of expected keywords.</dd>
 <dt><strong><code>f</code></strong> :&ensp;<code>Callable</code></dt>
 <dd>Callable object that will be passed they keyword arguments.</dd>
-<dt><strong><code>blacklist</code></strong> :&ensp;<code>Tuple[str]</code></dt>
+<dt><strong><code>blacklist</code></strong> :&ensp;<code>tuple[str]</code></dt>
 <dd>Parameters to ignore (e.g. <code>("self",)</code>)</dd>
 </dl>
 <h2 id="raises">Raises</h2>
@@ -111,14 +111,14 @@ def check_kwarg_dict(
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def check_kwarg_dict(
-    keywords: List[str], f: Callable, blacklist: Tuple[str, ...] = tuple()
+    keywords: list[str], f: Callable, blacklist: tuple[str, ...] = ()
 ) -&gt; None:
     &#34;&#34;&#34;Check a list of keywords against the parameters in a callable (e.g. function).
 
     Args:
-        keywords (List[str]): List of expected keywords.
+        keywords (list[str]): List of expected keywords.
         f (Callable): Callable object that will be passed they keyword arguments.
-        blacklist (Tuple[str]): Parameters to ignore (e.g. `(&#34;self&#34;,)`)
+        blacklist (tuple[str]): Parameters to ignore (e.g. `(&#34;self&#34;,)`)
 
     Raises:
         KeywordsNotInCallableParametersError: Raised if spare keywords are found.
@@ -142,14 +142,14 @@ def check_kwarg_dict(
 <dl>
 <dt id="src.misc.check_kwarg_dict.KeywordsNotInCallableParametersError"><code class="flex name class">
 <span>class <span class="ident">KeywordsNotInCallableParametersError</span></span>
-<span>(</span><span>extra_keys: List[str])</span>
+<span>(</span><span>extra_keys: list)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Keywords are not in a callable's available parameters.</p>
 <p>Create a error.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>extra_keys</code></strong> :&ensp;<code>List[str]</code></dt>
+<dt><strong><code>extra_keys</code></strong> :&ensp;<code>list[str]</code></dt>
 <dd>Extra keys found.</dd>
 </dl></div>
 <details class="source">
@@ -159,11 +159,11 @@ def check_kwarg_dict(
 <pre><code class="python">class KeywordsNotInCallableParametersError(BaseException):
     &#34;&#34;&#34;Keywords are not in a callable&#39;s available parameters.&#34;&#34;&#34;
 
-    def __init__(self, extra_keys: List[str]) -&gt; None:
+    def __init__(self, extra_keys: list[str]) -&gt; None:
         &#34;&#34;&#34;Create a error.
 
         Args:
-            extra_keys (List[str]): Extra keys found.
+            extra_keys (list[str]): Extra keys found.
         &#34;&#34;&#34;
         self.extra_keys = extra_keys
         self.message = f&#34;Spare keys: {self.extra_keys}&#34;

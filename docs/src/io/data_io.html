@@ -50,6 +50,7 @@ class DataFile(str, Enum):
     ccle_mutations = &#34;ccle_mutations.csv&#34;
     ccle_copynumber = &#34;ccle_gene_cn.csv&#34;
     copy_number_sample = &#34;copy_number_data_samples.npy&#34;
+    cgc = &#34;sanger_cancer-gene-census.csv&#34;
 
 
 #### ---- Basics ---- ####
@@ -203,7 +204,8 @@ def data_path(to: Union[str, DataFile]) -&gt; Path:
     achilles_gene_effect = &#34;achilles_gene_effect.csv&#34;
     ccle_mutations = &#34;ccle_mutations.csv&#34;
     ccle_copynumber = &#34;ccle_gene_cn.csv&#34;
-    copy_number_sample = &#34;copy_number_data_samples.npy&#34;</code></pre>
+    copy_number_sample = &#34;copy_number_data_samples.npy&#34;
+    cgc = &#34;sanger_cancer-gene-census.csv&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -229,6 +231,10 @@ def data_path(to: Union[str, DataFile]) -&gt; Path:
 <div class="desc"></div>
 </dd>
 <dt id="src.io.data_io.DataFile.ccle_mutations"><code class="name">var <span class="ident">ccle_mutations</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="src.io.data_io.DataFile.cgc"><code class="name">var <span class="ident">cgc</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -277,6 +283,7 @@ def data_path(to: Union[str, DataFile]) -&gt; Path:
 <li><code><a title="src.io.data_io.DataFile.achilles_gene_effect" href="#src.io.data_io.DataFile.achilles_gene_effect">achilles_gene_effect</a></code></li>
 <li><code><a title="src.io.data_io.DataFile.ccle_copynumber" href="#src.io.data_io.DataFile.ccle_copynumber">ccle_copynumber</a></code></li>
 <li><code><a title="src.io.data_io.DataFile.ccle_mutations" href="#src.io.data_io.DataFile.ccle_mutations">ccle_mutations</a></code></li>
+<li><code><a title="src.io.data_io.DataFile.cgc" href="#src.io.data_io.DataFile.cgc">cgc</a></code></li>
 <li><code><a title="src.io.data_io.DataFile.copy_number_sample" href="#src.io.data_io.DataFile.copy_number_sample">copy_number_sample</a></code></li>
 <li><code><a title="src.io.data_io.DataFile.crc_data" href="#src.io.data_io.DataFile.crc_data">crc_data</a></code></li>
 <li><code><a title="src.io.data_io.DataFile.crc_subsample" href="#src.io.data_io.DataFile.crc_subsample">crc_subsample</a></code></li>

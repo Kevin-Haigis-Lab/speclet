@@ -51,6 +51,11 @@ def create_resource_manager(w: Wildcards, fit_method: ModelFitMethod) -> RM:
 #### ---- Rules ---- ####
 
 
+localrules:
+    all,
+    papermill_report,
+
+
 rule all:
     input:
         expand(
