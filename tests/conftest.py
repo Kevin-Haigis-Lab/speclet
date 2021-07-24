@@ -75,7 +75,7 @@ settings.register_profile("dev", max_examples=5)
 IS_CI = os.getenv("CI") is not None
 settings.register_profile(
     "slow-adaptive",
-    parent=settings.get_profile("CI") if IS_CI else settings.get_profile("default"),
+    parent=settings.get_profile("ci") if IS_CI else settings.get_profile("default"),
     max_examples=100 if IS_CI else 5,
     deadline=None if IS_CI else timedelta(minutes=0.5),
 )
