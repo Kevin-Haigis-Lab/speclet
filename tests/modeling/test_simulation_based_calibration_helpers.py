@@ -89,6 +89,9 @@ class TestSBCFileManager:
         assert not fm.sbc_data_path.exists()
 
 
+# class TestSBCAnalysis:
+
+
 #### ---- Test mock data generation ---- ####
 
 selection_methods = [a.value for a in sbc.SelectionMethod]

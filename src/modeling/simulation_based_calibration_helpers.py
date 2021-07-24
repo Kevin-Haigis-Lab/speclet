@@ -4,16 +4,20 @@ import math
 from enum import Enum, unique
 from pathlib import Path
 from random import choices
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 import arviz as az
 import numpy as np
 import pandas as pd
 
+import src.exceptions
 from src.data_processing import achilles as achelp
 from src.data_processing import vectors as vhelp
 from src.io.data_io import DataFile, data_path
+from src.pipelines import collate_sbc
 from src.string_functions import prefixed_count
+
+#### ---- File management ---- ####
 
 
 class SBCResults:
@@ -193,6 +197,183 @@ class SBCFileManager:
         ):
             if f.exists():
                 f.unlink()
+
+
+#### ---- Results analysis ---- ####
+
+
+class SBCAnalysis:
+    """Analysis of SBC results."""
+
+    root_dir: Path
+    pattern: str
+    n_simulations: Optional[int]
+
+    def __init__(
+        self, root_dir: Path, pattern: str, n_simulations: Optional[int] = None
+    ) -> None:
+        """Create a `SBCAnalysis` object.
+
+        Args:
+            root_dir (Path): Path to the directory containing the results of all of
+              the simulations.
+            pattern (str): Pattern used for naming the simulations.
+            n_simulations (Optional[int], optional): Number of simulations expected. If
+              supplied, this number will be used to check the root dir for all of the
+              results. Defaults to None.
+        """
+        self.root_dir = root_dir
+        self.pattern = pattern
+        self.n_simulations = n_simulations
+
+    def _check_n_sims(self, ls: Sequence[Any]) -> None:
+        if self.n_simulations is not None and self.n_simulations != len(ls):
+            raise src.exceptions.IncorrectNumberOfFilesFoundError(
+                expected=self.n_simulations, found=len(ls)
+            )
+
+    def get_simulation_directories(self) -> list[Path]:
+        """Get the directories of all of the simulation results.
+
+        Returns:
+            list[Path]: List of paths.
+        """
+        return [p for p in self.root_dir.iterdir() if self.pattern in p.name]
+
+    def get_simulation_file_managers(self) -> list[SBCFileManager]:
+        """Get the file managers for each simulation.
+
+        Returns:
+            list[SBCFileManager]: List of SBC file managers.
+        """
+        return [SBCFileManager(p) for p in self.get_simulation_directories()]
+
+    def get_simulation_results(self) -> list[SBCResults]:
+        """Get all of the simulation results.
+
+        Raises:
+            src.exceptions.CacheDoesNotExistError: Raised if the results do not exist
+            for a simulation.
+
+        Returns:
+            list[SBCResults]: List of all simulation results.
+        """
+        fms = self.get_simulation_file_managers()
+        results: list[SBCResults] = []
+        for fm in fms:
+            if fm.all_data_exists():
+                results.append(fm.get_sbc_results())
+            else:
+                raise src.exceptions.CacheDoesNotExistError(fm.dir)
+
+        self._check_n_sims(results)
+        return results
+
+    def posterior_accuracy(
+        self,
+        simulation_posteriors_df: Optional[pd.DataFrame] = None,
+    ) -> pd.DataFrame:
+        """Get the accuracy of the simulation results.
+
+        Args:
+            simulation_posteriors_df (Optional[pd.DataFrame], optional): Data frame of
+            the summaries of the posterior summaries. If None is provided, then the data
+            frame will be made first. Defaults to None.
+
+        Returns:
+            pd.DataFrame: Data frame of the accuracy of each parameter in the model.
+        """
+        if simulation_posteriors_df is None:
+            simulation_posteriors_df = collate_sbc.collate_sbc_posteriors(
+                posterior_dirs=self.get_simulation_directories(),
+                num_permutations=self.n_simulations,
+            )
+        return (
+            simulation_posteriors_df.copy()
+            .groupby(["parameter_name"])["within_hdi"]
+            .mean()
+            .reset_index(drop=False)
+            .sort_values("within_hdi", ascending=False)
+            .reset_index(drop=True)
+        )
+
+    def uniformity_test(self) -> pd.DataFrame:
+        """Perform the uniformity SBC analysis.
+
+        Returns:
+            pd.DataFrame: Rank statistics for each parameter.
+        """
+        sbc_file_managers = self.get_simulation_file_managers()
+        self._check_n_sims(sbc_file_managers)
+        unformity_results: list[pd.DataFrame] = []
+        for sbc_fm in sbc_file_managers:
+            unformity_results.append(
+                calculate_parameter_rank_statistic(sbc_fm.get_sbc_results())
+            )
+
+        return pd.DataFrame()
+
+
+def _thin_posterior(ary: np.ndarray, every_other: int) -> np.ndarray:
+    _s = ary.shape
+    if len(_s) == 1:
+        return ary[::every_other]
+    elif len(_s) == 2:
+        return ary[::every_other, ::every_other]
+    else:
+        raise NotImplementedError(
+            f"Thinning not implemented for a variable with {_s} dimensions."
+        )
+
+
+def _array_to_indexed_dataframe(ary: np.ndarray, name: str) -> pd.DataFrame:
+    p: list[str] = []
+    v: list[int] = []
+    if ary.shape == (1,):
+        p.append(name)
+        v.append(ary[0])
+    elif len(ary.shape) == 1:
+        for i in range(ary.shape[0]):
+            p.append(f"{name}[{i}]")
+            v.append(ary[i])
+    elif len(ary.shape) == 2:
+        for i in range(ary.shape[0]):
+            for j in range(ary.shape[1]):
+                p.append(f"{name}[{i},{j}]")
+                v.append(ary[i, j])
+    else:
+        raise NotImplementedError(
+            "Turning an array into a data frame is not implemented for >2D arrays."
+        )
+
+    return pd.DataFrame({"parameter": p, "rank_stat": v})
+
+
+def calculate_parameter_rank_statistic(
+    sbc_res: SBCResults, thinning: int = 1
+) -> pd.DataFrame:
+    """Calculate the rank statistics for SBC uniformity analysis.
+
+    Args:
+        sbc_res (SBCResults): The results of an SBC simulation.
+        thinning (int, optional): How to thin the posterior estimates. A value of 1
+          results in no thinning, a value of 2 results in thinning to every other value,
+          etc. Defaults to 1.
+
+    Returns:
+        pd.DataFrame: A data frame with the rank statistics for each parameter.
+    """
+    rank_df = pd.DataFrame()
+    for name, theta in sbc_res.priors.items():
+        theta_tilde = sbc_res.inference_obj["posterior"][name].values
+        theta_tilde = _thin_posterior(theta_tilde, every_other=thinning)
+        rank_scores = (theta < theta_tilde).sum(axis=0)
+        df = _array_to_indexed_dataframe(rank_scores, name=name)
+        rank_df = pd.concat([rank_df, df])
+    return rank_df
+
+
+#### ---- Mock data generation ---- ####
 
 
 def generate_mock_sgrna_gene_map(n_genes: int, n_sgrnas_per_gene: int) -> pd.DataFrame:
