@@ -428,7 +428,7 @@ sns.catplot(
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-22
+    Last updated: 2021-07-25
 
     Python implementation: CPython
     Python version       : 3.9.6
@@ -439,14 +439,14 @@ sns.catplot(
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-230.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-161.o2.rc.hms.harvard.edu
 
-    Git branch: sp7-parameterizations
+    Git branch: sbc-uniform-check
 
     plotnine: 0.8.0
     pandas  : 1.3.0
-    janitor : 0.21.0
     seaborn : 0.11.1
+    janitor : 0.21.0

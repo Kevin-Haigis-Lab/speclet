@@ -150,6 +150,8 @@ rule collate_sbc:
 
 
 rule papermill_report:
+    input:
+        REPORTS_DIR + "sbc-results-template.ipynb",
     version:
         "2"
     params:

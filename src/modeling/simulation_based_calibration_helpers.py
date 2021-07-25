@@ -9,10 +9,10 @@ from random import choices
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Union
 
 import arviz as az
+import matplotlib
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 import src.exceptions
@@ -335,7 +335,7 @@ class SBCAnalysis:
         rank_stats: pd.DataFrame,
         n_sims: Optional[int] = None,
         k_draws: int = SBC_UNIFORMITY_THINNING_DRAWS,
-    ) -> None:
+    ) -> matplotlib.axes.Axes:
         """Plot the results of the uniformity test.
 
         Args:
@@ -352,18 +352,18 @@ class SBCAnalysis:
             self._check_n_sims(_sim_dirs)
             n_sims = len(_sim_dirs)
 
-        sns.histplot(data=rank_stats, x="rank_stat", binwidth=1)
+        ax = sns.histplot(data=rank_stats, x="rank_stat", binwidth=1)
         expected, lower, upper = expected_range_under_uniform(
             n_sims=n_sims, k_draws=k_draws
         )
-        plt.fill_between(
+        ax.fill_between(
             x=list(range(k_draws + 1)),
             y1=[lower] * (k_draws + 1),
             y2=[upper] * (k_draws + 1),
             color="#D3D3D3",
         )
-        plt.axhline(expected, color="k", linestyle="-")
-        plt.show()
+        ax.axhline(expected, color="k", linestyle="-")
+        return ax
 
 
 def expected_range_under_uniform(
