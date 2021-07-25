@@ -1,5 +1,6 @@
 """Helpers for organizing simualtaion-based calibrations."""
 
+
 import math
 import re
 from enum import Enum, unique
@@ -10,12 +11,15 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Union
 import arviz as az
 import numpy as np
 import pandas as pd
+import seaborn as sns
+from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 import src.exceptions
 from src.data_processing import achilles as achelp
 from src.data_processing import vectors as vhelp
 from src.io.data_io import DataFile, data_path
+from src.modeling import pymc3_helpers as pmhelp
 from src.modeling.pymc3_analysis import get_hdi_colnames_from_az_summary
 from src.string_functions import prefixed_count
 
@@ -203,6 +207,8 @@ class SBCFileManager:
 
 #### ---- Results analysis ---- ####
 
+SBC_UNIFORMITY_THINNING_DRAWS = 100
+
 
 class SBCAnalysis:
     """Analysis of SBC results."""
@@ -299,80 +305,128 @@ class SBCAnalysis:
             .reset_index(drop=True)
         )
 
-    def uniformity_test(self) -> pd.DataFrame:
-        """Perform the uniformity SBC analysis.
+    def uniformity_test(
+        self, k_draws: int = SBC_UNIFORMITY_THINNING_DRAWS
+    ) -> pd.DataFrame:
+        """Perform the SBC uniformity analysis.
+
+        Args:
+            k_draws (int, optional): Number of draws to thin the posterior samples down
+              to. Defaults to 100.
 
         Returns:
-            pd.DataFrame: Rank statistics for each parameter.
+            pd.DataFrame: A data frame of the rank statistic of each variable in each
+            simulation.
         """
         sbc_file_managers = self.get_simulation_file_managers()
         self._check_n_sims(sbc_file_managers)
-        unformity_results: list[pd.DataFrame] = []
-        for sbc_fm in sbc_file_managers:
-            unformity_results.append(
-                calculate_parameter_rank_statistic(sbc_fm.get_sbc_results())
-            )
-
-        return pd.DataFrame()
-
-
-def _thin_posterior(ary: np.ndarray, every_other: int) -> np.ndarray:
-    _s = ary.shape
-    if len(_s) == 1:
-        return ary[::every_other]
-    elif len(_s) == 2:
-        return ary[::every_other, ::every_other]
-    else:
-        raise NotImplementedError(
-            f"Thinning not implemented for a variable with {_s} dimensions."
+        rank_statistics = pd.concat(
+            [
+                calculate_parameter_rank_statistic(
+                    sbc_fm.get_sbc_results(), thin_to=k_draws
+                )
+                for sbc_fm in sbc_file_managers
+            ]
         )
+        return rank_statistics
 
+    def plot_uniformity(
+        self,
+        rank_stats: pd.DataFrame,
+        n_sims: Optional[int] = None,
+        k_draws: int = SBC_UNIFORMITY_THINNING_DRAWS,
+    ) -> None:
+        """Plot the results of the uniformity test.
 
-def _array_to_indexed_dataframe(ary: np.ndarray, name: str) -> pd.DataFrame:
-    p: list[str] = []
-    v: list[int] = []
-    if ary.shape == (1,):
-        p.append(name)
-        v.append(ary[0])
-    elif len(ary.shape) == 1:
-        for i in range(ary.shape[0]):
-            p.append(f"{name}[{i}]")
-            v.append(ary[i])
-    elif len(ary.shape) == 2:
-        for i in range(ary.shape[0]):
-            for j in range(ary.shape[1]):
-                p.append(f"{name}[{i},{j}]")
-                v.append(ary[i, j])
-    else:
-        raise NotImplementedError(
-            "Turning an array into a data frame is not implemented for >2D arrays."
+        Args:
+            rank_stats (pd.DataFrame): Results of the uniformity test with the rank
+            statistics for each variable.
+            n_sims (Optional[int], optional): Number of simulations performed If None
+            (the default), then the value will be assumed to be the number of simulation
+            directories. Defaults to None.
+            k_draws (int, optional): Number of draws the posterior was thinned down to.
+            Defaults to 100.
+        """
+        if n_sims is None:
+            _sim_dirs = self.get_simulation_directories()
+            self._check_n_sims(_sim_dirs)
+            n_sims = len(_sim_dirs)
+
+        sns.histplot(data=rank_stats, x="rank_stat", binwidth=1)
+        expected, lower, upper = expected_range_under_uniform(
+            n_sims=n_sims, k_draws=k_draws
         )
+        plt.fill_between(
+            x=list(range(k_draws + 1)),
+            y1=[lower] * (k_draws + 1),
+            y2=[upper] * (k_draws + 1),
+            color="#D3D3D3",
+        )
+        plt.axhline(expected, color="k", linestyle="-")
+        plt.show()
 
-    return pd.DataFrame({"parameter": p, "rank_stat": v})
+
+def expected_range_under_uniform(
+    n_sims: int, k_draws: int
+) -> tuple[float, float, float]:
+    """Use the expected distribution of rank statistics under a random binomial.
+
+    Args:
+        n_sims (int): Number of simulations.
+        k_draws (int): Number of draws from the posterior.
+
+    Returns:
+        tuple[float, float, float]: The expected value and upper and lower 95% CI.
+    """
+    # Expected value.
+    expected = n_sims / k_draws
+    sd = np.sqrt((1 / k_draws) * (1 - 1 / k_draws) * n_sims)
+    # 95% CI.
+    upper = expected + 1.96 * sd
+    lower = expected - 1.96 * sd
+    return expected, lower, upper
+
+
+def _fmt_tuple_to_label(tpl: tuple[int, ...]) -> str:
+    if len(tpl) > 0:
+        return "[" + ",".join([str(i) for i in tpl]) + "]"
+    else:
+        return ""
+
+
+def _rank_statistic_to_dataframe(var_name: str, rank_stats: np.ndarray) -> pd.DataFrame:
+    params: list[str] = []
+    values: list[float] = []
+    for idx, value in np.ndenumerate(rank_stats.squeeze()):
+        params.append(var_name + _fmt_tuple_to_label(idx))
+        values.append(value)
+    return pd.DataFrame({"parameter": params, "rank_stat": values})
 
 
 def calculate_parameter_rank_statistic(
-    sbc_res: SBCResults, thinning: int = 1
+    sbc_res: SBCResults, thin_to: int = 100
 ) -> pd.DataFrame:
     """Calculate the rank statistics for SBC uniformity analysis.
 
     Args:
         sbc_res (SBCResults): The results of an SBC simulation.
-        thinning (int, optional): How to thin the posterior estimates. A value of 1
-          results in no thinning, a value of 2 results in thinning to every other value,
-          etc. Defaults to 1.
+        thin_to (int, optional): How many draws to thin down to. Defaults to 100.
 
     Returns:
         pd.DataFrame: A data frame with the rank statistics for each parameter.
     """
-    rank_df = pd.DataFrame()
-    for name, theta in sbc_res.priors.items():
-        theta_tilde = sbc_res.inference_obj["posterior"][name].values
-        theta_tilde = _thin_posterior(theta_tilde, every_other=thinning)
-        rank_scores = (theta < theta_tilde).sum(axis=0)
-        df = _array_to_indexed_dataframe(rank_scores, name=name)
-        rank_df = pd.concat([rank_df, df])
-    return rank_df
+    rank_stats_df = pd.DataFrame()
+    var_names = pmhelp.get_posterior_names(sbc_res.inference_obj)
+    for var_name in var_names:
+        theta = sbc_res.priors[var_name]
+        theta_prime = sbc_res.inference_obj["posterior"][var_name]
+        theta_prime = pmhelp.thin_posterior(theta_prime, thin_to=thin_to)
+        theta_prime = pmhelp.get_one_chain(theta_prime)
+        rank_stat = (theta < theta_prime).values.sum(axis=0, keepdims=True)
+        stat_df = _rank_statistic_to_dataframe(var_name, rank_stat)
+        rank_stats_df = pd.concat([rank_stats_df, stat_df])
+    rank_stats_df = rank_stats_df.reset_index(drop=True)
+    return rank_stats_df
 
 
 #### ---- Mock data generation ---- ####
