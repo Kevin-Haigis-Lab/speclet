@@ -10,7 +10,7 @@ import typer
 from src.command_line_interfaces import cli_helpers
 from src.exceptions import UnsupportedFileTypeError
 from src.loggers import logger
-from src.pipelines import collate_sbc
+from src.modeling import simulation_based_calibration_helpers as sbc
 
 cli_helpers.configure_pretty()
 
@@ -41,7 +41,7 @@ def collate_sbc_posteriors_cli(
     logger.info(
         f"Collating {num_permutations} SBC simulations in '{root_perm_dir.as_posix()}'."
     )
-    df = collate_sbc.collate_sbc_posteriors(
+    df = sbc.collate_sbc_posteriors(
         posterior_dirs=root_perm_dir.iterdir(), num_permutations=num_permutations
     )
     if output_path.suffix == ".pkl":

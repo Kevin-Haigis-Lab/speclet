@@ -1,16 +1,18 @@
 from pathlib import Path
 from string import ascii_letters, ascii_lowercase
-from typing import Any, Dict, List
+from typing import Any
 
 import arviz as az
 import numpy as np
 import pandas as pd
+import pymc3 as pm
 import pytest
 import seaborn as sns
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
 from src.data_processing import common as dphelp
+from src.exceptions import IncorrectNumberOfFilesFoundError
 from src.modeling import simulation_based_calibration_helpers as sbc
 
 chars = list(ascii_letters) + [str(i) for i in (range(10))]
@@ -22,7 +24,7 @@ class TestSBCFileManager:
         assert not fm.all_data_exists()
 
     @pytest.fixture()
-    def priors(self) -> Dict[str, Any]:
+    def priors(self) -> dict[str, Any]:
         return {
             "alpha": np.random.uniform(0, 100, size=3),
             "beta_log": np.random.uniform(0, 100, size=(10, 15)),
@@ -37,7 +39,7 @@ class TestSBCFileManager:
         return sns.load_dataset("iris")
 
     def test_saving(
-        self, tmp_path: Path, priors: Dict[str, Any], posterior_summary: pd.DataFrame
+        self, tmp_path: Path, priors: dict[str, Any], posterior_summary: pd.DataFrame
     ):
         fm = sbc.SBCFileManager(dir=tmp_path)
         fm.save_sbc_results(
@@ -48,7 +50,7 @@ class TestSBCFileManager:
         assert fm.all_data_exists()
 
     def test_reading(
-        self, tmp_path: Path, priors: Dict[str, Any], posterior_summary: pd.DataFrame
+        self, tmp_path: Path, priors: dict[str, Any], posterior_summary: pd.DataFrame
     ):
         fm = sbc.SBCFileManager(dir=tmp_path)
 
@@ -102,7 +104,7 @@ selection_methods = [a.value for a in sbc.SelectionMethod]
     n=st.integers(0, 100),
     list=st.lists(st.text(chars, min_size=1), min_size=1),
 )
-def test_select_n_elements_from_l_strings(method: str, n: int, list: List[str]):
+def test_select_n_elements_from_l_strings(method: str, n: int, list: list[str]):
     selection = sbc.select_n_elements_from_l(n, list, method=method)
     assert len(selection) == n
     for a in selection:
@@ -114,7 +116,7 @@ def test_select_n_elements_from_l_strings(method: str, n: int, list: List[str]):
     n=st.integers(0, 100),
     list=st.lists(st.integers(), min_size=1),
 )
-def test_select_n_elements_from_l_integers(method: str, n: int, list: List[int]):
+def test_select_n_elements_from_l_integers(method: str, n: int, list: list[int]):
     selection = sbc.select_n_elements_from_l(n, list, method=method)
     assert len(selection) == n
     for a in selection:
@@ -141,7 +143,7 @@ def test_select_n_elements_from_l_repeated():
     n=st.integers(5, 100),
     list=st.lists(st.text(chars, min_size=1), min_size=2, unique=True),
 )
-def test_select_n_elements_from_l_random_are_different(n: int, list: List[str]):
+def test_select_n_elements_from_l_random_are_different(n: int, list: list[str]):
     n_same = 0
     for _ in range(10):
         a = sbc.select_n_elements_from_l(n, list, method="random")
@@ -154,7 +156,7 @@ def test_select_n_elements_from_l_random_are_different(n: int, list: List[str]):
     n=st.integers(5, 100),
     list=st.lists(st.text(chars, min_size=1), min_size=2, unique=True),
 )
-def test_select_n_elements_from_l_shuffled_are_different(n: int, list: List[str]):
+def test_select_n_elements_from_l_shuffled_are_different(n: int, list: list[str]):
     n_same = 0
     for _ in range(10):
         a = sbc.select_n_elements_from_l(n, list, method="shuffled")
@@ -167,7 +169,7 @@ def test_select_n_elements_from_l_shuffled_are_different(n: int, list: List[str]
     n=st.integers(5, 100),
     list=st.lists(st.text(chars, min_size=1), min_size=2, unique=True),
 )
-def test_select_n_elements_from_l_shuffled_have_even_coverage(n: int, list: List[str]):
+def test_select_n_elements_from_l_shuffled_have_even_coverage(n: int, list: list[str]):
     a = sbc.select_n_elements_from_l(n, list, method="shuffled")
     b = sbc.select_n_elements_from_l(n, list, method="shuffled")
     for element in list:
@@ -524,3 +526,183 @@ def test_cn_same_for_gene_cellline_combination(mock_data: pd.DataFrame):
     n_celllines = len(mock_data.depmap_id.unique())
     cn_df = mock_data[["hugo_symbol", "depmap_id", "copy_number"]].drop_duplicates()
     assert cn_df.shape[0] == (n_genes * n_celllines)
+
+
+#### ---- Test SBC collation ---- ####
+
+
+# Fixtures and helpers
+
+
+@pytest.fixture
+def centered_eight() -> az.InferenceData:
+    x = az.load_arviz_data("centered_eight")
+    assert isinstance(x, az.InferenceData)
+    return x
+
+
+@pytest.fixture
+def centered_eight_post(centered_eight: az.InferenceData) -> pd.DataFrame:
+    x = az.summary(centered_eight)
+    assert isinstance(x, pd.DataFrame)
+    return x
+
+
+def return_iris(*args, **kwargs) -> pd.DataFrame:
+    return sns.load_dataset("iris")
+
+
+@pytest.fixture(scope="module")
+def simple_model() -> pm.Model:
+    with pm.Model() as model:
+        mu = pm.Normal("mu", 0, 1)
+        sigma = pm.HalfNormal("sigma", 1)
+        y = pm.Normal("y", mu, sigma, observed=[1, 2, 3])  # noqa: F841
+    return model
+
+
+@pytest.fixture(scope="module")
+def hierarchical_model() -> pm.Model:
+    with pm.Model() as model:
+        mu_alpha = pm.Normal("mu_alpha", 0, 1)
+        sigma_alpha = pm.HalfCauchy("sigma_alpha", 1)
+        alpha = pm.Normal("alpha", mu_alpha, sigma_alpha, shape=2)
+        sigma = pm.HalfNormal("sigma", 1)
+        y = pm.Normal(  # noqa: F841
+            "y", alpha[np.array([0, 0, 1, 1])], sigma, observed=[1, 2, 3, 4]
+        )
+    return model
+
+
+# Tests
+
+
+def test_is_true_value_within_hdi_lower_limit():
+    n = 100
+    low = pd.Series(list(range(0, n)))
+    high = pd.Series([200] * n)
+    vals = pd.Series([50] * n)
+    is_within = sbc._is_true_value_within_hdi(low, vals, high)
+    assert np.all(is_within[:50])
+    assert not np.any(is_within[50:])
+
+
+def test_is_true_value_within_hdi_upper_limit():
+    n = 100
+    low = pd.Series([0] * n)
+    high = pd.Series(list(range(100)))
+    vals = pd.Series([50] * n)
+    is_within = sbc._is_true_value_within_hdi(low, vals, high)
+    assert not np.any(is_within[:51])
+    assert np.all(is_within[51:])
+
+
+def test_get_prior_value_using_index_list_mismatch_index_size():
+    a = np.array([4, 3, 2, 1])
+    idx: list[int] = []
+    with pytest.raises(AssertionError):
+        _ = sbc._get_prior_value_using_index_list(a, idx)
+
+
+def test_get_prior_value_using_index_list_empty_idx():
+    a = np.array(4)
+    idx: list[int] = []
+    b = sbc._get_prior_value_using_index_list(a, idx)
+    assert b == 4.0
+
+
+def test_get_prior_value_using_index_list_empty_idx_but_not_flat_array():
+    a = np.array([4])
+    idx: list[int] = []
+    b = sbc._get_prior_value_using_index_list(a, idx)
+    assert b == 4.0
+
+
+def test_get_prior_value_using_index_list_1d():
+    a = np.array([4, 3, 2, 1])
+    idx = [0]
+    b = sbc._get_prior_value_using_index_list(a, idx)
+    assert b == 4
+    idx = [1]
+    b = sbc._get_prior_value_using_index_list(a, idx)
+    assert b == 3
+
+
+def test_get_prior_value_using_index_list_2d():
+    a = np.arange(9).reshape((3, 3))
+    idx = [1, 2]
+    b = sbc._get_prior_value_using_index_list(a, idx)
+    assert b == a[1, 2]
+
+
+@pytest.mark.parametrize(
+    "p, res",
+    [
+        ("a", ["a"]),
+        ("abc", ["abc"]),
+        ("abc[0]", ["abc", "0"]),
+        ("abc[0,2,5]", ["abc", "0", "2", "5"]),
+        ("abc[ x, y, z]", ["abc", " x", " y", " z"]),
+        ("abc[x,y,z]", ["abc", "x", "y", "z"]),
+    ],
+)
+def test_split_parameter(p: str, res: str):
+    assert res == sbc._split_parameter(p)
+
+
+def test_error_when_incorrect_number_of_results_found(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(sbc, "get_posterior_summary_for_file_manager", return_iris)
+
+    n_paths = 20
+    fake_paths = [Path(f"fake-path-{i}") for i in range(n_paths)]
+
+    with pytest.raises(IncorrectNumberOfFilesFoundError) as err1:
+        sbc.collate_sbc_posteriors(fake_paths, num_permutations=n_paths - 1)
+
+    assert err1.value.expected == n_paths - 1
+    assert err1.value.found == n_paths
+
+    with pytest.raises(IncorrectNumberOfFilesFoundError) as err2:
+        sbc.collate_sbc_posteriors(fake_paths, num_permutations=n_paths + 1)
+
+    assert err2.value.expected == n_paths + 1
+    assert err2.value.found == n_paths
+
+
+@pytest.mark.slow
+def test_make_priors_dataframe_simple(simple_model: pm.Model):
+    with simple_model:
+        priors = pm.sample_prior_predictive(samples=1)
+
+    parameters = ["mu", "sigma"]
+    prior_df = sbc._make_priors_dataframe(priors, parameters=parameters)
+    assert isinstance(prior_df, pd.DataFrame)
+    assert set(parameters) == set(prior_df.index.tolist())
+
+
+@pytest.mark.slow
+def test_make_priors_dataframe_hierarchical(hierarchical_model: pm.Model):
+    with hierarchical_model:
+        priors = pm.sample_prior_predictive(samples=1)
+
+    parameters = ["mu_alpha", "sigma_alpha", "alpha[0]", "alpha[1]", "sigma"]
+    prior_df = sbc._make_priors_dataframe(priors, parameters=parameters)
+    assert isinstance(prior_df, pd.DataFrame)
+    assert set(parameters) == set(prior_df.index.tolist())
+
+
+@pytest.mark.slow
+def test_make_priors_dataframe_hierarchical_with_post(hierarchical_model: pm.Model):
+    with hierarchical_model:
+        priors = pm.sample_prior_predictive(samples=1)
+        trace = pm.sample(10, tune=10, cores=1, chains=2, return_inferencedata=True)
+
+    parameters: list[str] = az.summary(trace).index.tolist()
+    prior_df = sbc._make_priors_dataframe(priors, parameters=parameters)
+    assert isinstance(prior_df, pd.DataFrame)
+    assert set(parameters) == set(prior_df.index.tolist())
+
+
+def test_failure_if_data_does_not_exist(tmp_path: Path):
+    with pytest.raises(sbc.SBCResultsNotFoundError):
+        sbc.get_posterior_summary_for_file_manager(tmp_path)
