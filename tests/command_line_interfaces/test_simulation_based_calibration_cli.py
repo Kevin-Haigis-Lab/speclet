@@ -1,8 +1,7 @@
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import pytest
-import typer
 from typer.testing import CliRunner
 
 from src import project_enums
@@ -10,14 +9,6 @@ from src.command_line_interfaces import simulation_based_calibration_cli as sbc_
 from src.io import model_config
 from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
-
-
-@pytest.fixture(scope="class")
-def run_sbc_app() -> typer.Typer:
-    app = typer.Typer()
-    app.command()(sbc_cli.run_sbc)
-    return app
-
 
 runner = CliRunner()
 
@@ -29,7 +20,6 @@ runner = CliRunner()
 def test_run_sbc_with_sampling(
     model_name: str,
     fit_method: str,
-    run_sbc_app: typer.Typer,
     mock_model_config: Path,
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -42,38 +32,42 @@ def test_run_sbc_with_sampling(
     )
 
     result = runner.invoke(
-        run_sbc_app,
+        sbc_cli.app,
         [
+            "run-sbc",
             model_name,
             mock_model_config.as_posix(),
             fit_method,
             tmp_path.as_posix(),
             "111",
+            "--data-size",
             "small",
         ],
     )
     assert result.exit_code == 0
 
 
-@pytest.mark.DEV
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 def test_uses_configuration_fitting_parameters(
-    run_sbc_app: typer.Typer,
-    # mock_model_config: Path,
     monkeypatch: pytest.MonkeyPatch,
     fit_method: ModelFitMethod,
     tmp_path: Path,
 ):
 
     advi_kwargs = {"n_iterations": 42, "draws": 23, "post_pred_samples": 12}
-    mcmc_kwargs = {"tune": 33, "target_accept": 0.2, "prior_pred_samples": 121}
+    mcmc_kwargs = {
+        "tune": 33,
+        "target_accept": 0.2,
+        "prior_pred_samples": 121,
+        "cores": 1,
+    }
 
-    def _compare_dicts(d1: Dict[str, Any], d2: Dict[str, Any]) -> None:
+    def _compare_dicts(d1: dict[str, Any], d2: dict[str, Any]) -> None:
         for k, v in d1.items():
             assert v == d2[k]
 
     def intercept_fit_kwargs_dict(*args, **kwargs) -> None:
-        fit_kwargs: Optional[Dict[Any, Any]] = kwargs["fit_kwargs"]
+        fit_kwargs: Optional[dict[Any, Any]] = kwargs["fit_kwargs"]
         assert fit_kwargs is not None
         if fit_method is ModelFitMethod.ADVI:
             _compare_dicts(advi_kwargs, fit_kwargs)
@@ -113,14 +107,17 @@ def test_uses_configuration_fitting_parameters(
     )
 
     result = runner.invoke(
-        run_sbc_app,
+        sbc_cli.app,
         [
+            "run-sbc",
             model_name,
             "not-real-config.yaml",
             fit_method.value,
             tmp_path.as_posix(),
             "111",
+            "--data-size",
             "small",
         ],
     )
+    print(result.stdout)
     assert result.exit_code == 0

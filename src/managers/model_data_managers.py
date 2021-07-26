@@ -71,11 +71,15 @@ class DataManager(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def set_data(self, new_data: Optional[pd.DataFrame]) -> None:
+    def set_data(
+        self, new_data: Optional[pd.DataFrame], apply_transformations: bool = True
+    ) -> None:
         """Set the data object (can be `None`).
 
         Args:
             new_data (Optional[pd.DataFrame]): New data object.
+            apply_transformations (bool, optional): Should the transformations be
+              applied? Defaults to True.
         """
         pass
 
@@ -291,16 +295,22 @@ class CrcDataManager(DataManager):
             assert isinstance(self._data, pd.DataFrame)
         return self._data
 
-    def set_data(self, new_data: Optional[pd.DataFrame]) -> None:
+    def set_data(
+        self, new_data: Optional[pd.DataFrame], apply_transformations: bool = True
+    ) -> None:
         """Set the new data set and apply the transformations automatically.
 
         Args:
             new_data (Optional[pd.DataFrame]): New data set.
+            apply_transformations (bool, optional): Should the transformations be
+              applied? Defaults to True.
         """
         if new_data is None:
             self._data = None
-        else:
+        elif apply_transformations:
             self._data = self.apply_transformations(new_data)
+        else:
+            self._data = new_data
 
     def apply_transformations(self, df: pd.DataFrame) -> pd.DataFrame:
         """Apply the stored transformations to the data set.
@@ -428,16 +438,22 @@ class MockDataManager(DataManager):
             self.data = pd.DataFrame({"x": x, "y": y})
         return self.data
 
-    def set_data(self, new_data: Optional[pd.DataFrame]) -> None:
+    def set_data(
+        self, new_data: Optional[pd.DataFrame], apply_transformations: bool = True
+    ) -> None:
         """Set the new data set and apply the transformations automatically.
 
         Args:
             new_data (Optional[pd.DataFrame]): New data set.
+            apply_transformations (bool, optional): Should the transformations be
+              applied? Defaults to True.
         """
         if new_data is None:
             self._data = None
-        else:
+        elif apply_transformations:
             self._data = self.apply_transformations(new_data)
+        else:
+            self._data = new_data
 
     def generate_mock_data(
         self, size: Union[MockDataSize, str], random_seed: Optional[int] = None

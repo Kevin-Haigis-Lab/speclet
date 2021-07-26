@@ -16,6 +16,7 @@ NUM_SIMULATIONS = 25
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yaml"
 ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
+CACHE_DIR = "cache/sbc-cache/"
 
 MOCK_DATA_SIZE = MockDataSize.MEDIUM
 
@@ -62,7 +63,7 @@ def make_permutation_dir(w: Wildcards) -> str:
 
 
 collated_results_template = (
-    "cache/sbc-cache/{model_name}_{fit_method}_collated-posterior-summaries.pkl"
+    CACHE_DIR + "{model_name}_{fit_method}_collated-posterior-summaries.pkl"
 )
 
 
@@ -95,7 +96,30 @@ rule all:
         ),
 
 
+rule generate_mockdata:
+    version:
+        "1"
+    output:
+        mock_data_path=CACHE_DIR + "{model_name}_mockdata.csv",
+    conda:
+        ENVIRONMENT_YAML
+    params:
+        config_path=MODEL_CONFIG.as_posix(),
+    benchmark:
+        BENCHMARK_DIR / "generate_mockdata/{model_name}.tsv"
+    shell:
+        "src/command_line_interfaces/simulation_based_calibration_cli.py"
+        "  make-mock-data"
+        "  {wildcards.model_name}"
+        "  {params.config_path}"
+        "  {output.mock_data_path}"
+        f"  {MOCK_DATA_SIZE.value}"
+        "  --random-seed 1234"
+
+
 rule run_sbc:
+    input:
+        mock_data_path=rules.generate_mockdata.output.mock_data_path,
     output:
         netcdf_file=(
             root_perm_dir_template + "/" + perm_dir_template + "/inference-data.netcdf"
@@ -118,12 +142,13 @@ rule run_sbc:
         BENCHMARK_DIR / "run_sbc/{model_name}_{fit_method}_perm{perm_num}.tsv"
     shell:
         "src/command_line_interfaces/simulation_based_calibration_cli.py"
+        "  run-sbc"
         "  {wildcards.model_name}"
         "  {params.config_path}"
         "  {wildcards.fit_method}"
         "  {params.perm_dir}"
         "  {wildcards.perm_num}"
-        "  " + MOCK_DATA_SIZE.value
+        "  --mock-data-path {input.mock_data_path}"
 
 
 rule collate_sbc:
