@@ -266,3 +266,19 @@ def test_make_priors_dataframe_hierarchical_with_post(hierarchical_model: pm.Mod
 def test_failure_if_data_does_not_exist(tmp_path: Path):
     with pytest.raises(sbc.SBCResultsNotFoundError):
         sbc.get_posterior_summary_for_file_manager(tmp_path)
+
+
+#### ---- Results analysis ---- ####
+
+
+@pytest.mark.DEV
+@pytest.mark.parametrize(
+    "k_draws, exp, low, high", [(2, 50, 25, 75), (3, 100 / 3, 20, 50)]
+)
+def test_expected_range_under_uniform(
+    k_draws: int, exp: float, low: float, high: float
+):
+    _exp, _lower, _upper = sbc.expected_range_under_uniform(n_sims=100, k_draws=k_draws)
+    assert _exp == exp
+    assert low < _lower < exp
+    assert exp < _upper < high
