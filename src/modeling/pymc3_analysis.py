@@ -269,7 +269,9 @@ def get_divergence_summary(data: az.InferenceData) -> tuple[list[int], list[floa
         list of the percent of steps that were divergent.
     """
     divs = data.sample_stats.diverging.values
-    return divs.sum(axis=1).tolist(), divs.mean(axis=1).tolist()
+    totals = divs.sum(axis=1)
+    pct = divs.mean(axis=1) * 100
+    return totals.tolist(), pct.tolist()
 
 
 class MCMCDescription(BaseModel):

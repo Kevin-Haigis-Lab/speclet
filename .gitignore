@@ -262,6 +262,7 @@ modeling_data/*
 .vscode/settings.json
 docs/.docs-env
 .testmondata
+benchmarks/*
 
 # Specific files to except from the rules above
 !models/model-configs.yaml

@@ -1,5 +1,6 @@
 ```python
 from pathlib import Path
+from typing import Optional
 
 import janitor
 import pandas as pd
@@ -27,16 +28,26 @@ Organization of benchmarks directory:
 > For instance, including the date would be useful or metadata such as the data size for SBC or debug status for the fitting pipeline.
 
 ```python
+list(benchmark_dir.iterdir())
+```
+
+    [PosixPath('../benchmarks/010_010_run-crc-sampling-snakemake'),
+     PosixPath('../benchmarks/012_010_simulation-based-calibration-snakemake')]
+
+```python
 def process_benchmark_file(bench_f: Path) -> pd.DataFrame:
     return pd.read_csv(bench_f, sep="\t").assign(
         step=bench_f.name.replace(bench_f.suffix, "")
     )
 
 
-def get_benchmark_data_for_rule_dir(rule_d: Path, pipeline_name: str) -> pd.DataFrame:
+def get_benchmark_data_for_rule_dir(rule_d: Path, pipeline_name: str) -> Optional[pd.DataFrame]:
     bench_dfs: list[pd.DataFrame] = [
         process_benchmark_file(b) for b in rule_d.iterdir()
     ]
+    if len(bench_dfs) == 0:
+        return None
+
     return (
         pd.concat(bench_dfs)
         .assign(rule=rule_d.name, pipeline=pipeline_name)
@@ -48,9 +59,9 @@ benchmark_df_list: list[pd.DataFrame] = []
 
 for pipeline_dir in benchmark_dir.iterdir():
     for rule_dir in pipeline_dir.iterdir():
-        benchmark_df_list.append(
-            get_benchmark_data_for_rule_dir(rule_dir, pipeline_name=pipeline_dir.name)
-        )
+        df = get_benchmark_data_for_rule_dir(rule_dir, pipeline_name=pipeline_dir.name)
+        if df is not None:
+            benchmark_df_list.append(df)
 
 benchmark_df = pd.concat(benchmark_df_list).reset_index(drop=True)
 benchmark_df.head()
@@ -92,81 +103,81 @@ benchmark_df.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>1450.1557</td>
-      <td>0:24:10</td>
-      <td>2632.42</td>
-      <td>3493.61</td>
-      <td>2584.99</td>
-      <td>2607.41</td>
-      <td>725.83</td>
-      <td>95.04</td>
-      <td>10.12</td>
-      <td>146.76</td>
-      <td>sp4-default-fullrank_ADVI_perm12</td>
+      <td>900.0916</td>
+      <td>0:15:00</td>
+      <td>11876.86</td>
+      <td>16598.31</td>
+      <td>2643.14</td>
+      <td>2643.29</td>
+      <td>8.54</td>
+      <td>144.07</td>
+      <td>80.96</td>
+      <td>138.08</td>
+      <td>sp2-default_MCMC_perm106</td>
       <td>run_sbc</td>
       <td>012_010_simulation-based-calibration-snakemake</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>1438.7806</td>
-      <td>0:23:58</td>
-      <td>2626.87</td>
-      <td>3491.89</td>
-      <td>2624.31</td>
-      <td>2624.38</td>
-      <td>1881.28</td>
-      <td>97.78</td>
-      <td>10.29</td>
-      <td>148.10</td>
-      <td>sp4-default-fullrank_ADVI_perm6</td>
+      <td>681.0140</td>
+      <td>0:11:21</td>
+      <td>11834.54</td>
+      <td>16552.55</td>
+      <td>2673.76</td>
+      <td>2698.16</td>
+      <td>8.98</td>
+      <td>149.32</td>
+      <td>67.21</td>
+      <td>156.21</td>
+      <td>sp2-default_MCMC_perm447</td>
       <td>run_sbc</td>
       <td>012_010_simulation-based-calibration-snakemake</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>187.0007</td>
-      <td>0:03:07</td>
-      <td>2626.96</td>
-      <td>3567.98</td>
-      <td>2624.25</td>
-      <td>2624.31</td>
-      <td>44.03</td>
-      <td>91.66</td>
-      <td>63.26</td>
-      <td>118.45</td>
-      <td>sp4-default-fullrank_ADVI_perm0</td>
+      <td>745.1272</td>
+      <td>0:12:25</td>
+      <td>12174.35</td>
+      <td>16889.28</td>
+      <td>2686.37</td>
+      <td>2686.53</td>
+      <td>15.43</td>
+      <td>160.75</td>
+      <td>82.28</td>
+      <td>131.27</td>
+      <td>sp2-default_MCMC_perm10</td>
       <td>run_sbc</td>
       <td>012_010_simulation-based-calibration-snakemake</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>1500.0513</td>
-      <td>0:25:00</td>
-      <td>2659.00</td>
-      <td>3522.06</td>
-      <td>2656.29</td>
-      <td>2656.37</td>
-      <td>883.85</td>
-      <td>93.74</td>
-      <td>12.76</td>
-      <td>191.67</td>
-      <td>sp4-default-fullrank_ADVI_perm15</td>
+      <td>609.5455</td>
+      <td>0:10:09</td>
+      <td>12045.56</td>
+      <td>16742.46</td>
+      <td>2615.14</td>
+      <td>2637.87</td>
+      <td>4.54</td>
+      <td>92.44</td>
+      <td>133.23</td>
+      <td>115.00</td>
+      <td>sp2-default_MCMC_perm82</td>
       <td>run_sbc</td>
       <td>012_010_simulation-based-calibration-snakemake</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>242.4990</td>
-      <td>0:04:02</td>
-      <td>2744.32</td>
-      <td>3586.09</td>
-      <td>2741.89</td>
-      <td>2741.96</td>
-      <td>1889.93</td>
-      <td>102.59</td>
-      <td>45.52</td>
-      <td>110.58</td>
-      <td>sp4-default-fullrank_ADVI_perm19</td>
+      <td>605.5162</td>
+      <td>0:10:05</td>
+      <td>11209.66</td>
+      <td>15945.14</td>
+      <td>2464.32</td>
+      <td>2477.39</td>
+      <td>8.06</td>
+      <td>84.99</td>
+      <td>79.81</td>
+      <td>119.25</td>
+      <td>sp2-default_MCMC_perm24</td>
       <td>run_sbc</td>
       <td>012_010_simulation-based-calibration-snakemake</td>
     </tr>
@@ -240,29 +251,41 @@ benchmark_df.groupby(["pipeline", "rule"]).mean().round(2)
   </thead>
   <tbody>
     <tr>
-      <th rowspan="2" valign="top">012_010_simulation-based-calibration-snakemake</th>
+      <th rowspan="3" valign="top">012_010_simulation-based-calibration-snakemake</th>
       <th>collate_sbc</th>
-      <td>19.85</td>
-      <td>226.52</td>
-      <td>1084.56</td>
-      <td>224.15</td>
-      <td>224.22</td>
-      <td>281.31</td>
-      <td>0.16</td>
-      <td>36.01</td>
-      <td>7.53</td>
+      <td>272.46</td>
+      <td>288.61</td>
+      <td>1013.56</td>
+      <td>286.13</td>
+      <td>286.20</td>
+      <td>2269.80</td>
+      <td>0.22</td>
+      <td>35.53</td>
+      <td>95.78</td>
+    </tr>
+    <tr>
+      <th>generate_mockdata</th>
+      <td>8.94</td>
+      <td>216.96</td>
+      <td>929.21</td>
+      <td>214.40</td>
+      <td>214.44</td>
+      <td>259.24</td>
+      <td>0.29</td>
+      <td>40.41</td>
+      <td>3.72</td>
     </tr>
     <tr>
       <th>run_sbc</th>
-      <td>1134.71</td>
-      <td>2667.23</td>
-      <td>3535.64</td>
-      <td>2655.57</td>
-      <td>2659.89</td>
-      <td>1137.86</td>
-      <td>85.91</td>
-      <td>17.27</td>
-      <td>128.89</td>
+      <td>655.81</td>
+      <td>11195.34</td>
+      <td>15717.18</td>
+      <td>2582.34</td>
+      <td>2592.93</td>
+      <td>244.20</td>
+      <td>122.06</td>
+      <td>114.10</td>
+      <td>128.91</td>
     </tr>
   </tbody>
 </table>
@@ -273,19 +296,7 @@ benchmark_df_long = benchmark_df[
     ["pipeline", "rule", "step", "cpu_time", "max_rss", "mean_load", "cpu_time"]
 ].pivot_longer(["pipeline", "rule", "step"])
 
-benchmark_df_long
-# (
-#     alt.Chart(benchmark_df_long)
-#     .mark_boxplot(size=50)
-#     .encode(
-#         x="rule",
-#         y=alt.Y("value", title=""),
-#         row=alt.Row("variable", title=""),
-#         column=alt.Column("pipeline"),
-#     )
-#     .properties(width=200, height=100)
-#     .resolve_scale(y="independent")
-# )
+benchmark_df_long.head()
 ```
 
 <div>
@@ -318,93 +329,44 @@ benchmark_df_long
       <th>0</th>
       <td>012_010_simulation-based-calibration-snakemake</td>
       <td>run_sbc</td>
-      <td>sp4-default-fullrank_ADVI_perm12</td>
+      <td>sp2-default_MCMC_perm106</td>
       <td>cpu_time</td>
-      <td>146.76</td>
+      <td>138.08</td>
     </tr>
     <tr>
       <th>1</th>
       <td>012_010_simulation-based-calibration-snakemake</td>
       <td>run_sbc</td>
-      <td>sp4-default-fullrank_ADVI_perm6</td>
+      <td>sp2-default_MCMC_perm447</td>
       <td>cpu_time</td>
-      <td>148.10</td>
+      <td>156.21</td>
     </tr>
     <tr>
       <th>2</th>
       <td>012_010_simulation-based-calibration-snakemake</td>
       <td>run_sbc</td>
-      <td>sp4-default-fullrank_ADVI_perm0</td>
+      <td>sp2-default_MCMC_perm10</td>
       <td>cpu_time</td>
-      <td>118.45</td>
+      <td>131.27</td>
     </tr>
     <tr>
       <th>3</th>
       <td>012_010_simulation-based-calibration-snakemake</td>
       <td>run_sbc</td>
-      <td>sp4-default-fullrank_ADVI_perm15</td>
+      <td>sp2-default_MCMC_perm82</td>
       <td>cpu_time</td>
-      <td>191.67</td>
+      <td>115.00</td>
     </tr>
     <tr>
       <th>4</th>
       <td>012_010_simulation-based-calibration-snakemake</td>
       <td>run_sbc</td>
-      <td>sp4-default-fullrank_ADVI_perm19</td>
+      <td>sp2-default_MCMC_perm24</td>
       <td>cpu_time</td>
-      <td>110.58</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>99</th>
-      <td>012_010_simulation-based-calibration-snakemake</td>
-      <td>run_sbc</td>
-      <td>sp4-default-fullrank_ADVI_perm17</td>
-      <td>cpu_time</td>
-      <td>119.68</td>
-    </tr>
-    <tr>
-      <th>100</th>
-      <td>012_010_simulation-based-calibration-snakemake</td>
-      <td>run_sbc</td>
-      <td>sp4-default-fullrank_ADVI_perm4</td>
-      <td>cpu_time</td>
-      <td>108.73</td>
-    </tr>
-    <tr>
-      <th>101</th>
-      <td>012_010_simulation-based-calibration-snakemake</td>
-      <td>run_sbc</td>
-      <td>sp4-default-fullrank_ADVI_perm18</td>
-      <td>cpu_time</td>
-      <td>129.75</td>
-    </tr>
-    <tr>
-      <th>102</th>
-      <td>012_010_simulation-based-calibration-snakemake</td>
-      <td>run_sbc</td>
-      <td>sp4-default-fullrank_ADVI_perm5</td>
-      <td>cpu_time</td>
-      <td>138.75</td>
-    </tr>
-    <tr>
-      <th>103</th>
-      <td>012_010_simulation-based-calibration-snakemake</td>
-      <td>collate_sbc</td>
-      <td>sp4-default-fullrank_ADVI</td>
-      <td>cpu_time</td>
-      <td>7.53</td>
+      <td>119.25</td>
     </tr>
   </tbody>
 </table>
-<p>104 rows × 5 columns</p>
 </div>
 
 ```python
@@ -419,7 +381,9 @@ sns.catplot(
 );
 ```
 
-![png](benchmarks_files/benchmarks_9_0.png)
+    <seaborn.axisgrid.FacetGrid at 0x7fb62c7ed790>
+
+![png](benchmarks_files/benchmarks_10_1.png)
 
 ---
 
@@ -428,11 +392,11 @@ sns.catplot(
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-25
+    Last updated: 2021-07-26
 
     Python implementation: CPython
-    Python version       : 3.9.6
-    IPython version      : 7.25.0
+    Python version       : 3.9.2
+    IPython version      : 7.21.0
 
     Compiler    : GCC 9.3.0
     OS          : Linux
@@ -442,11 +406,11 @@ sns.catplot(
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-a-16-161.o2.rc.hms.harvard.edu
+    Hostname: compute-a-17-126.o2.rc.hms.harvard.edu
 
     Git branch: sbc-uniform-check
 
-    plotnine: 0.8.0
-    pandas  : 1.3.0
     seaborn : 0.11.1
-    janitor : 0.21.0
+    pandas  : 1.2.3
+    janitor : 0.20.14
+    plotnine: 0.7.1

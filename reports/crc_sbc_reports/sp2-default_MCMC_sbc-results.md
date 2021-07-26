@@ -65,7 +65,7 @@ SBC_RESULTS_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/sp2-default_MCMC"
 SBC_COLLATED_RESULTS = (
     "cache/sbc-cache/sp2-default_MCMC_collated-posterior-summaries.pkl"
 )
-NUM_SIMULATIONS = 25
+NUM_SIMULATIONS = 500
 CONFIG_PATH = "models/model-configs.yaml"
 FIT_METHOD_STR = "MCMC"
 
@@ -157,82 +157,82 @@ simulation_posteriors_df.head()
     <tr>
       <th>μ_α</th>
       <th>μ_α</th>
-      <td>0.768</td>
-      <td>0.103</td>
-      <td>0.590</td>
-      <td>0.919</td>
-      <td>0.020</td>
-      <td>0.014</td>
-      <td>27.0</td>
-      <td>30.0</td>
-      <td>1.61</td>
+      <td>0.064</td>
+      <td>0.099</td>
+      <td>-0.011</td>
+      <td>0.250</td>
+      <td>0.048</td>
+      <td>0.037</td>
+      <td>6.0</td>
+      <td>28.0</td>
+      <td>2.39</td>
       <td>0.882026</td>
       <td>sim_id_0000</td>
-      <td>True</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>α[0,0]</th>
       <th>α</th>
-      <td>1.151</td>
-      <td>0.134</td>
-      <td>0.926</td>
-      <td>1.355</td>
-      <td>0.022</td>
-      <td>0.016</td>
-      <td>36.0</td>
-      <td>50.0</td>
-      <td>1.49</td>
+      <td>0.470</td>
+      <td>0.100</td>
+      <td>0.373</td>
+      <td>0.632</td>
+      <td>0.050</td>
+      <td>0.038</td>
+      <td>5.0</td>
+      <td>15.0</td>
+      <td>3.23</td>
       <td>1.273675</td>
       <td>sim_id_0000</td>
-      <td>True</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>α[0,1]</th>
       <th>α</th>
-      <td>1.627</td>
-      <td>0.130</td>
-      <td>1.449</td>
-      <td>1.865</td>
-      <td>0.024</td>
-      <td>0.017</td>
-      <td>34.0</td>
-      <td>58.0</td>
-      <td>1.08</td>
+      <td>0.921</td>
+      <td>0.085</td>
+      <td>0.829</td>
+      <td>1.068</td>
+      <td>0.042</td>
+      <td>0.032</td>
+      <td>4.0</td>
+      <td>12.0</td>
+      <td>3.55</td>
       <td>1.778736</td>
       <td>sim_id_0000</td>
-      <td>True</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>α[0,2]</th>
       <th>α</th>
-      <td>1.617</td>
-      <td>0.177</td>
-      <td>1.408</td>
-      <td>1.867</td>
-      <td>0.064</td>
-      <td>0.049</td>
-      <td>9.0</td>
-      <td>23.0</td>
-      <td>1.37</td>
+      <td>0.769</td>
+      <td>0.085</td>
+      <td>0.676</td>
+      <td>0.916</td>
+      <td>0.042</td>
+      <td>0.032</td>
+      <td>4.0</td>
+      <td>12.0</td>
+      <td>3.60</td>
       <td>1.629343</td>
       <td>sim_id_0000</td>
-      <td>True</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>α[0,3]</th>
       <th>α</th>
-      <td>0.385</td>
-      <td>0.133</td>
-      <td>0.162</td>
-      <td>0.559</td>
-      <td>0.031</td>
-      <td>0.022</td>
-      <td>23.0</td>
-      <td>65.0</td>
-      <td>1.13</td>
+      <td>-0.310</td>
+      <td>0.101</td>
+      <td>-0.409</td>
+      <td>-0.147</td>
+      <td>0.050</td>
+      <td>0.038</td>
+      <td>4.0</td>
+      <td>15.0</td>
+      <td>3.33</td>
       <td>0.490961</td>
       <td>sim_id_0000</td>
-      <td>True</td>
+      <td>False</td>
     </tr>
   </tbody>
 </table>
@@ -308,53 +308,53 @@ for perm_dir in np.random.choice(
         )
 ```
 
-    sbc-perm15
+    sbc-perm435
     ------------------------------
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 70, 226, 45, 265
-    percent divergences: 0.07, 0.226, 0.045, 0.265
-    BFMI: 0.305, 0.381, 0.274, 0.405
-    avg. step size: 0.094, 0.061, 0.055, 0.059
+    num. divergences: 138, 97, 72, 79
+    percent divergences: 0.138, 0.097, 0.072, 0.079
+    BFMI: 0.346, 0.404, 0.34, 0.482
+    avg. step size: 0.044, 0.01, 0.055, 0.031
 
 ![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_20_1.png)
 
-    sbc-perm8
+    sbc-perm56
     ------------------------------
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 1000, 135, 170, 215
-    percent divergences: 1.0, 0.135, 0.17, 0.215
-    BFMI: 1.255, 0.233, 0.254, 0.263
-    avg. step size: 0.024, 0.057, 0.014, 0.03
+    num. divergences: 110, 86, 168, 119
+    percent divergences: 0.11, 0.086, 0.168, 0.119
+    BFMI: 0.339, 0.42, 0.445, 0.465
+    avg. step size: 0.054, 0.049, 0.053, 0.047
 
 ![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_20_3.png)
 
-    sbc-perm20
+    sbc-perm439
     ------------------------------
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 65, 66, 79, 160
-    percent divergences: 0.065, 0.066, 0.079, 0.16
-    BFMI: 0.378, 0.332, 0.294, 0.272
-    avg. step size: 0.051, 0.051, 0.111, 0.088
+    num. divergences: 901, 190, 123, 334
+    percent divergences: 0.901, 0.19, 0.123, 0.334
+    BFMI: 1.158, 0.569, 0.497, 0.529
+    avg. step size: 0.04, 0.069, 0.028, 0.035
 
 ![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_20_5.png)
 
-    sbc-perm5
+    sbc-perm67
     ------------------------------
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 24, 67, 66, 43
-    percent divergences: 0.024, 0.067, 0.066, 0.043
-    BFMI: 0.264, 0.429, 0.303, 0.339
-    avg. step size: 0.012, 0.037, 0.059, 0.067
+    num. divergences: 253, 121, 163, 1000
+    percent divergences: 0.253, 0.121, 0.163, 1.0
+    BFMI: 0.509, 0.457, 0.376, 1.489
+    avg. step size: 0.035, 0.034, 0.022, 0.019
 
 ![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_20_7.png)
 
-    sbc-perm14
+    sbc-perm417
     ------------------------------
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 1000, 731, 278, 47
-    percent divergences: 1.0, 0.731, 0.278, 0.047
-    BFMI: 1.646, 0.383, 0.303, 0.292
-    avg. step size: 0.006, 0.012, 0.017, 0.021
+    num. divergences: 263, 575, 606, 33
+    percent divergences: 0.263, 0.575, 0.606, 0.033
+    BFMI: 0.551, 0.578, 0.699, 0.337
+    avg. step size: 0.072, 0.029, 0.05, 0.046
 
 ![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_20_9.png)
 
@@ -390,7 +390,7 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 
 ![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_22_0.png)
 
-    <ggplot: (2970395675642)>
+    <ggplot: (2986864610895)>
 
 ```python
 hdi_low, hdi_high = pmanal.get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -437,7 +437,7 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 
 ![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_23_0.png)
 
-    <ggplot: (2970395731179)>
+    <ggplot: (2986864897811)>
 
 ### SBC Uniformity Test
 
@@ -479,27 +479,27 @@ sbc_uniformity_test.head()
     <tr>
       <th>0</th>
       <td>μ_α</td>
-      <td>14</td>
+      <td>0</td>
     </tr>
     <tr>
       <th>1</th>
       <td>α[0,0]</td>
-      <td>17</td>
+      <td>0</td>
     </tr>
     <tr>
       <th>2</th>
       <td>α[0,1]</td>
-      <td>10</td>
+      <td>0</td>
     </tr>
     <tr>
       <th>3</th>
       <td>α[0,2]</td>
-      <td>21</td>
+      <td>0</td>
     </tr>
     <tr>
       <th>4</th>
       <td>α[0,3]</td>
-      <td>10</td>
+      <td>0</td>
     </tr>
   </tbody>
 </table>
@@ -543,14 +543,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 1.18 minutes
+    execution time: 8.63 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-25
+    Last updated: 2021-07-26
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -561,17 +561,17 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-a-17-60.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-185.o2.rc.hms.harvard.edu
 
     Git branch: sbc-uniform-check
 
-    pandas    : 1.2.3
     numpy     : 1.20.1
     arviz     : 0.11.2
-    matplotlib: 3.3.4
-    logging   : 0.5.1.2
     plotnine  : 0.7.1
+    pandas    : 1.2.3
+    matplotlib: 3.3.4
     janitor   : 0.20.14
+    logging   : 0.5.1.2
