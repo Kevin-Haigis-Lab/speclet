@@ -2,6 +2,7 @@
 
 """A helpful command line interface for simulation-based calibration."""
 
+import tempfile
 from pathlib import Path
 from typing import Optional
 
@@ -23,7 +24,6 @@ app = typer.Typer()
 def make_mock_data(
     name: str,
     config_path: Path,
-    cache_dir: Path,
     data_size: MockDataSize,
     save_path: Path,
     random_seed: Optional[int] = None,
@@ -33,7 +33,6 @@ def make_mock_data(
     Args:
         name (str): Unique identifiable name for the model.
         config_path (Path): Path to the model configuration file.
-        cache_dir (Path): Where to store the results.
         save_path (Optional[Path]): Path to save the data frame to as a CSV.
         data_size (Optional[MockDataSize]): What size of mock data should be generated?
           Is ignored if a path is supplied to pre-existing mock data in the
@@ -42,7 +41,7 @@ def make_mock_data(
         random_seed (Optional[int]): Random seed for data generation process.
     """
     sp_model = configuration.get_config_and_instantiate_model(
-        config_path=config_path, name=name, root_cache_dir=cache_dir
+        config_path=config_path, name=name, root_cache_dir=Path(tempfile.gettempdir())
     )
     mock_data = sp_model.generate_mock_data(size=data_size, random_seed=random_seed)
     mock_data.to_csv(save_path)

@@ -112,8 +112,8 @@ rule generate_mockdata:
         "  make-mock-data"
         "  {wildcards.model_name}"
         "  {params.config_path}"
-        "  {output.mock_data_path}"
         f"  {MOCK_DATA_SIZE.value}"
+        "  {output.mock_data_path}"
         "  --random-seed 1234"
 
 
