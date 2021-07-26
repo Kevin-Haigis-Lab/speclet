@@ -74,6 +74,18 @@ def make_collated_results_path(w: Wildcards) -> str:
     )
 
 
+uniformity_results_template = (
+    CACHE_DIR + "{model_name}_{fit_method}_uniformity-test-results.pkl"
+)
+
+
+def make_uniformity_results_path(w: Wildcards) -> str:
+    return uniformity_results_template.format(
+        model_name=w.model_name,
+        fit_method=w.fit_method,
+    )
+
+
 def create_resource_manager(w: Wildcards, attempt: int) -> RM:
     return RM(w.model_name, MOCK_DATA_SIZE, w.fit_method, MODEL_CONFIG, attempt=attempt)
 
@@ -178,8 +190,33 @@ rule collate_sbc:
         BENCHMARK_DIR / "collate_sbc/{model_name}_{fit_method}.tsv"
     shell:
         "src/command_line_interfaces/collate_sbc_cli.py "
+        " collate-sbc-posteriors-cli"
         " {params.perm_dir} "
         " {output.collated_results} "
+        " --num-permutations=" + str(NUM_SIMULATIONS)
+
+
+rule sbc_uniformity_test:
+    input:
+        sbc_results_csvs=expand(
+            root_perm_dir_template + "/" + perm_dir_template + "/posterior-summary.csv",
+            perm_num=list(range(NUM_SIMULATIONS)),
+            allow_missing=True,
+        ),
+    conda:
+        ENVIRONMENT_YAML
+    params:
+        perm_dir=make_root_permutation_directory,
+    output:
+        uniformity_results=uniformity_results_template,
+    priority: 10
+    benchmark:
+        BENCHMARK_DIR / "sbc_uniformity_test/{model_name}_{fit_method}.tsv"
+    shell:
+        "src/command_line_interfaces/collate_sbc_cli.py "
+        " uniformity-test-results"
+        " {params.perm_dir} "
+        " {output.uniformity_results} "
         " --num-permutations=" + str(NUM_SIMULATIONS)
 
 
@@ -191,6 +228,7 @@ rule papermill_report:
     params:
         root_perm_dir=make_root_permutation_directory,
         collated_results=make_collated_results_path,
+        uniformity_results=make_uniformity_results_path,
     output:
         notebook=REPORTS_DIR + "{model_name}_{fit_method}_sbc-results.ipynb",
     run:
@@ -201,6 +239,7 @@ rule papermill_report:
                 "MODEL_NAME": wildcards.model_name,
                 "SBC_RESULTS_DIR": params.root_perm_dir,
                 "SBC_COLLATED_RESULTS": params.collated_results,
+                "SBC_UNIFORMITY_RESULTS": params.uniformity_results,
                 "NUM_SIMULATIONS": NUM_SIMULATIONS,
                 "CONFIG_PATH": MODEL_CONFIG.as_posix(),
                 "FIT_METHOD_STR": wildcards.fit_method,
@@ -214,6 +253,7 @@ rule execute_report:
         "2"
     input:
         collated_results=rules.collate_sbc.output.collated_results,
+        uniformity_results=rules.sbc_uniformity_test.output.uniformity_results,
         notebook=rules.papermill_report.output.notebook,
     output:
         markdown=REPORTS_DIR + "{model_name}_{fit_method}_sbc-results.md",
