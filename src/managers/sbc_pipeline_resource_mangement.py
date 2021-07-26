@@ -157,9 +157,9 @@ class SBCResourceManager(PipelineResourceManager):
             str: Amount of RAM required.
         """
         mem = float(self._retrieve_memory_requirement())
-        mem *= 1 + self.attempt / 3
+        mem = mem * (1 + (self.attempt - 1) / 3)
         mem = min((mem, 250))  # So cannot request more than O2 can give.
-        return str(mem * 1000)
+        return str(int(mem * 1000))
 
     def _retrieve_memory_requirement(self) -> int:
         default_memory_tbl: ResourceLookupDict[int] = {
@@ -186,7 +186,7 @@ class SBCResourceManager(PipelineResourceManager):
             str: Amount of time required.
         """
         _time = self._retrieve_time_requirement()
-        _time *= 1 + self.attempt / 3
+        _time = _time * (1 + (self.attempt - 1) / 3)
         return formatting.format_timedelta(_time, formatting.TimeDeltaFormat.DRMAA)
 
     def _retrieve_time_requirement(self) -> td:
