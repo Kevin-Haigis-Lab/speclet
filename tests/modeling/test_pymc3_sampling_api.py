@@ -62,7 +62,7 @@ class TestMCMCSampling(TestPyMC3SamplingAPI):
             mcmc_draws=100,
             tune=100,
             prior_pred_samples=100,
-            chains=2,
+            chains=1,
             cores=2,
             random_seed=123,
         )
@@ -75,7 +75,7 @@ class TestMCMCSampling(TestPyMC3SamplingAPI):
             model=model,
             mcmc_draws=1000,
             tune=1000,
-            chains=2,
+            chains=1,
             cores=2,
             random_seed=123,
         )

@@ -70,7 +70,7 @@ class TestSpecletModel:
             draws=50,
             tune=50,
             chains=2,
-            cores=2,
+            cores=1,
             prior_pred_samples=25,
             random_seed=1,
         )
@@ -84,7 +84,7 @@ class TestSpecletModel:
             draws=50,
             tune=50,
             chains=2,
-            cores=2,
+            cores=1,
             prior_pred_samples=25,
             random_seed=1,
         )
@@ -167,7 +167,7 @@ class TestSpecletModel:
                 "draws": 10,
                 "tune": 10,
                 "chains": 2,
-                "cores": 2,
+                "cores": 1,
                 "target_accept": 0.8,
             }
 
@@ -262,7 +262,7 @@ class TestSpecletModel:
     def test_changing_mcmc_sampling_params(self, mock_sp_model: MockSpecletModelClass):
         mock_sp_model.mcmc_sampling_params.draws = 12
         mock_sp_model.mcmc_sampling_params.chains = 2
-        mock_sp_model.mcmc_sampling_params.cores = 2
+        mock_sp_model.mcmc_sampling_params.cores = 1
         mock_sp_model.mcmc_sampling_params.tune = 13
         mock_sp_model.mcmc_sampling_params.prior_pred_samples = 14
         mock_sp_model.build_model()

@@ -32,7 +32,7 @@ def mcmc_results(pm_model: pm.Model) -> pmapi.MCMCSamplingResults:
         trace = pm.sample(
             100,
             tune=100,
-            cores=2,
+            cores=1,
             chains=2,
             random_seed=123,
             return_inferencedata=False,

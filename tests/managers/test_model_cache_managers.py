@@ -45,7 +45,7 @@ class TestPymc3ModelCacheManager:
             trace = pm.sample(
                 100,
                 tune=100,
-                cores=2,
+                cores=1,
                 chains=2,
                 random_seed=123,
                 return_inferencedata=False,
