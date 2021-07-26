@@ -41,7 +41,9 @@ def process_benchmark_file(bench_f: Path) -> pd.DataFrame:
     )
 
 
-def get_benchmark_data_for_rule_dir(rule_d: Path, pipeline_name: str) -> Optional[pd.DataFrame]:
+def get_benchmark_data_for_rule_dir(
+    rule_d: Path, pipeline_name: str
+) -> Optional[pd.DataFrame]:
     bench_dfs: list[pd.DataFrame] = [
         process_benchmark_file(b) for b in rule_d.iterdir()
     ]
@@ -251,7 +253,7 @@ benchmark_df.groupby(["pipeline", "rule"]).mean().round(2)
   </thead>
   <tbody>
     <tr>
-      <th rowspan="3" valign="top">012_010_simulation-based-calibration-snakemake</th>
+      <th rowspan="4" valign="top">012_010_simulation-based-calibration-snakemake</th>
       <th>collate_sbc</th>
       <td>272.46</td>
       <td>288.61</td>
@@ -286,6 +288,18 @@ benchmark_df.groupby(["pipeline", "rule"]).mean().round(2)
       <td>122.06</td>
       <td>114.10</td>
       <td>128.91</td>
+    </tr>
+    <tr>
+      <th>sbc_uniformity_test</th>
+      <td>489.33</td>
+      <td>4700.20</td>
+      <td>5230.52</td>
+      <td>4697.61</td>
+      <td>4697.64</td>
+      <td>15881.41</td>
+      <td>0.16</td>
+      <td>38.39</td>
+      <td>188.09</td>
     </tr>
   </tbody>
 </table>
@@ -381,9 +395,7 @@ sns.catplot(
 );
 ```
 
-    <seaborn.axisgrid.FacetGrid at 0x7fb62c7ed790>
-
-![png](benchmarks_files/benchmarks_10_1.png)
+![png](benchmarks_files/benchmarks_10_0.png)
 
 ---
 
@@ -395,8 +407,8 @@ sns.catplot(
     Last updated: 2021-07-26
 
     Python implementation: CPython
-    Python version       : 3.9.2
-    IPython version      : 7.21.0
+    Python version       : 3.9.6
+    IPython version      : 7.25.0
 
     Compiler    : GCC 9.3.0
     OS          : Linux
@@ -406,11 +418,11 @@ sns.catplot(
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-a-17-126.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-165.o2.rc.hms.harvard.edu
 
     Git branch: sbc-uniform-check
 
+    pandas  : 1.3.0
     seaborn : 0.11.1
-    pandas  : 1.2.3
-    janitor : 0.20.14
-    plotnine: 0.7.1
+    plotnine: 0.8.0
+    janitor : 0.21.0

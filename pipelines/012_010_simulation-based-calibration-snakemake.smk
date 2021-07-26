@@ -224,7 +224,7 @@ rule papermill_report:
     input:
         REPORTS_DIR + "sbc-results-template.ipynb",
     version:
-        "2"
+        "3"
     params:
         root_perm_dir=make_root_permutation_directory,
         collated_results=make_collated_results_path,

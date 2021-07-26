@@ -41,6 +41,7 @@ Parameters for papermill:
 - `MODEL_NAME`: unique, identifiable name of the model
 - `SBC_RESULTS_DIR`: directory containing results of many rounds of SBC
 - `SBC_COLLATED_RESULTS`: path to collated simulation posteriors
+- `SBC_UNIFORMITY_RESULTS`: path to results of the uniformity test
 - `NUM_SIMULATIONS`: the number of simiulations; will be used to check that all results are found
 - `CONFIG_PATH`: path to the model configuration file
 - `FIT_METHOD`: model fitting method used for this SBC
@@ -53,6 +54,7 @@ Parameters for papermill:
 MODEL_NAME = ""
 SBC_RESULTS_DIR = ""
 SBC_COLLATED_RESULTS = ""
+SBC_UNIFORMITY_RESULTS = ""
 NUM_SIMULATIONS = -1
 CONFIG_PATH = ""
 FIT_METHOD_STR = ""
@@ -65,6 +67,7 @@ SBC_RESULTS_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/sp2-default_MCMC"
 SBC_COLLATED_RESULTS = (
     "cache/sbc-cache/sp2-default_MCMC_collated-posterior-summaries.pkl"
 )
+SBC_UNIFORMITY_RESULTS = "cache/sbc-cache/sp2-default_MCMC_uniformity-test-results.pkl"
 NUM_SIMULATIONS = 500
 CONFIG_PATH = "models/model-configs.yaml"
 FIT_METHOD_STR = "MCMC"
@@ -85,6 +88,10 @@ assert sbc_results_dir.exists()
 sbc_collated_results_path = Path(path_addition, SBC_COLLATED_RESULTS)
 assert sbc_collated_results_path.is_file()
 assert sbc_collated_results_path.exists()
+
+sbc_uniformity_results_path = Path(path_addition, SBC_UNIFORMITY_RESULTS)
+assert sbc_uniformity_results_path.is_file()
+assert sbc_uniformity_results_path.exists()
 ```
 
 Confirm that there is a positive number of simulations.
@@ -312,7 +319,7 @@ for perm_dir in np.random.choice(
     ------------------------------
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 138, 97, 72, 79
-    percent divergences: 0.138, 0.097, 0.072, 0.079
+    percent divergences: 13.8, 9.7, 7.2, 7.9
     BFMI: 0.346, 0.404, 0.34, 0.482
     avg. step size: 0.044, 0.01, 0.055, 0.031
 
@@ -322,7 +329,7 @@ for perm_dir in np.random.choice(
     ------------------------------
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 110, 86, 168, 119
-    percent divergences: 0.11, 0.086, 0.168, 0.119
+    percent divergences: 11.0, 8.6, 16.8, 11.9
     BFMI: 0.339, 0.42, 0.445, 0.465
     avg. step size: 0.054, 0.049, 0.053, 0.047
 
@@ -332,7 +339,7 @@ for perm_dir in np.random.choice(
     ------------------------------
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 901, 190, 123, 334
-    percent divergences: 0.901, 0.19, 0.123, 0.334
+    percent divergences: 90.1, 19.0, 12.3, 33.4
     BFMI: 1.158, 0.569, 0.497, 0.529
     avg. step size: 0.04, 0.069, 0.028, 0.035
 
@@ -342,7 +349,7 @@ for perm_dir in np.random.choice(
     ------------------------------
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 253, 121, 163, 1000
-    percent divergences: 0.253, 0.121, 0.163, 1.0
+    percent divergences: 25.3, 12.1, 16.3, 100.0
     BFMI: 0.509, 0.457, 0.376, 1.489
     avg. step size: 0.035, 0.034, 0.022, 0.019
 
@@ -352,7 +359,7 @@ for perm_dir in np.random.choice(
     ------------------------------
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 263, 575, 606, 33
-    percent divergences: 0.263, 0.575, 0.606, 0.033
+    percent divergences: 26.3, 57.5, 60.6, 3.3
     BFMI: 0.551, 0.578, 0.699, 0.337
     avg. step size: 0.072, 0.029, 0.05, 0.046
 
@@ -390,7 +397,7 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 
 ![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_22_0.png)
 
-    <ggplot: (2986864610895)>
+    <ggplot: (2975434951554)>
 
 ```python
 hdi_low, hdi_high = pmanal.get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -437,7 +444,7 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 
 ![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_23_0.png)
 
-    <ggplot: (2986864897811)>
+    <ggplot: (2975438602518)>
 
 ### SBC Uniformity Test
 
@@ -448,8 +455,12 @@ sbc_analyzer = sbc.SBCAnalysis(
 ```
 
 ```python
-K_DRAWS = 100
-sbc_uniformity_test = sbc_analyzer.uniformity_test(k_draws=K_DRAWS)
+sbc_uniformity_test = pd.read_pickle(sbc_uniformity_results_path)
+
+var_names = sbc_uniformity_test.parameter.tolist()
+parameter_names = [x.split("[")[0] for x in var_names]
+sbc_uniformity_test["parameter_name"] = parameter_names
+
 sbc_uniformity_test.head()
 ```
 
@@ -473,6 +484,7 @@ sbc_uniformity_test.head()
       <th></th>
       <th>parameter</th>
       <th>rank_stat</th>
+      <th>parameter_name</th>
     </tr>
   </thead>
   <tbody>
@@ -480,61 +492,87 @@ sbc_uniformity_test.head()
       <th>0</th>
       <td>μ_α</td>
       <td>0</td>
+      <td>μ_α</td>
     </tr>
     <tr>
       <th>1</th>
       <td>α[0,0]</td>
       <td>0</td>
+      <td>α</td>
     </tr>
     <tr>
       <th>2</th>
       <td>α[0,1]</td>
       <td>0</td>
+      <td>α</td>
     </tr>
     <tr>
       <th>3</th>
       <td>α[0,2]</td>
       <td>0</td>
+      <td>α</td>
     </tr>
     <tr>
       <th>4</th>
       <td>α[0,3]</td>
       <td>0</td>
+      <td>α</td>
     </tr>
   </tbody>
 </table>
 </div>
 
 ```python
-var_names = sbc_uniformity_test.parameter.unique().tolist()
-var_names = [v for v in var_names if "μ" not in v]
-for v in np.random.choice(var_names, size=min((10, len(var_names))), replace=False):
-    ax = sbc_analyzer.plot_uniformity(
-        sbc_uniformity_test.query(f"parameter == '{v}'"), k_draws=K_DRAWS
-    )
+var_names_to_plot = (
+    sbc_uniformity_test[["parameter", "parameter_name"]]
+    .drop_duplicates()
+    .reset_index(drop=True)
+    .sort_values(["parameter_name", "parameter"])
+    .groupby("parameter_name")
+    .head(3)
+    .reset_index(drop=True)
+    .parameter.tolist()
+)
+```
+
+```python
+for v in var_names_to_plot:
+    ax = sbc_analyzer.plot_uniformity(sbc_uniformity_test.query(f"parameter == '{v}'"))
     ax.set_title(v)
     plt.show()
 ```
 
-![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_27_0.png)
+![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_28_0.png)
 
-![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_27_1.png)
+![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_28_1.png)
 
-![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_27_2.png)
+![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_28_2.png)
 
-![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_27_3.png)
+![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_28_3.png)
 
-![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_27_4.png)
+![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_28_4.png)
 
-![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_27_5.png)
+![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_28_5.png)
 
-![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_27_6.png)
+![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_28_6.png)
 
-![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_27_7.png)
+![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_28_7.png)
 
-![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_27_8.png)
+![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_28_8.png)
 
-![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_27_9.png)
+![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_28_9.png)
+
+![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_28_10.png)
+
+![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_28_11.png)
+
+![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_28_12.png)
+
+![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_28_13.png)
+
+![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_28_14.png)
+
+![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_28_15.png)
 
 ---
 
@@ -543,7 +581,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 8.63 minutes
+    execution time: 0.64 minutes
 
 ```python
 %load_ext watermark
@@ -561,17 +599,17 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-185.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-167.o2.rc.hms.harvard.edu
 
     Git branch: sbc-uniform-check
 
-    numpy     : 1.20.1
-    arviz     : 0.11.2
-    plotnine  : 0.7.1
     pandas    : 1.2.3
+    arviz     : 0.11.2
+    logging   : 0.5.1.2
+    numpy     : 1.20.1
     matplotlib: 3.3.4
     janitor   : 0.20.14
-    logging   : 0.5.1.2
+    plotnine  : 0.7.1

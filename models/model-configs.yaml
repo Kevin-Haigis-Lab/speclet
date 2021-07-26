@@ -9,6 +9,13 @@
     - fitting
     - sbc
   debug: true
+  pipeline_sampling_parameters:
+    fitting:
+      MCMC:
+        target_accept: 0.95
+    sbc:
+      MCMC:
+        target_accept: 0.95
 
 #### ---- SpecletFour ---- ####
 
