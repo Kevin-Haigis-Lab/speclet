@@ -3,7 +3,7 @@
 """Foundational model object and related functions for the Speclet project."""
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 import arviz as az
 import pymc3 as pm
@@ -60,7 +60,7 @@ class Pymc3ModelCacheManager:
         """
         return self.mcmc_cache_delegate.read_cached_sampling()
 
-    def get_advi_cache(self) -> Tuple[az.InferenceData, pm.Approximation]:
+    def get_advi_cache(self) -> tuple[az.InferenceData, pm.Approximation]:
         """Get ADVI fitting results from cache.
 
         Args:

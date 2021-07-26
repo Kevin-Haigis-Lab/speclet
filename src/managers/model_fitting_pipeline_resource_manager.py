@@ -2,7 +2,7 @@
 
 from datetime import timedelta as td
 from pathlib import Path
-from typing import Dict, TypeVar
+from typing import TypeVar
 
 from pydantic import validate_arguments
 
@@ -14,7 +14,7 @@ from src.managers.pipeline_resource_manager import PipelineResourceManager
 from src.project_enums import ModelFitMethod, ModelOption
 
 T = TypeVar("T")
-ResourceLookupDict = Dict[ModelOption, Dict[bool, Dict[ModelFitMethod, T]]]
+ResourceLookupDict = dict[ModelOption, dict[bool, dict[ModelFitMethod, T]]]
 
 # RAM required for each configuration (in GB -> mult by 1000).
 #   key: [model][debug][fit_method]

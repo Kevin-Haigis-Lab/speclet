@@ -11,7 +11,7 @@ from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline, Mock
 from src.pipelines import snakemake_parsing_helpers as smk_help
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
-NUM_SIMULATIONS = 500
+NUM_SIMULATIONS = 5  # 00
 
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yaml"
@@ -74,8 +74,8 @@ def make_collated_results_path(w: Wildcards) -> str:
     )
 
 
-def create_resource_manager(w: Wildcards) -> RM:
-    return RM(w.model_name, MOCK_DATA_SIZE, w.fit_method, MODEL_CONFIG)
+def create_resource_manager(w: Wildcards, attempt: int) -> RM:
+    return RM(w.model_name, MOCK_DATA_SIZE, w.fit_method, MODEL_CONFIG, attempt=attempt)
 
 
 #### ---- Rules ---- ####
@@ -132,12 +132,21 @@ rule run_sbc:
         ENVIRONMENT_YAML
     priority: 20
     params:
-        cores=lambda w: create_resource_manager(w).cores,
-        mem=lambda w: create_resource_manager(w).memory,
-        time=lambda w: create_resource_manager(w).time,
-        partition=lambda w: create_resource_manager(w).partition,
         perm_dir=make_permutation_dir,
         config_path=MODEL_CONFIG.as_posix(),
+    resources:
+        cores=lambda wildcards, attempt: create_resource_manager(
+            wildcards, attempt=attempt
+        ).cores,
+        mem=lambda wildcards, attempt: create_resource_manager(
+            wildcards, attempt=attempt
+        ).memory,
+        time=lambda wildcards, attempt: create_resource_manager(
+            wildcards, attempt=attempt
+        ).time,
+        partition=lambda wildcards, attempt: create_resource_manager(
+            wildcards, attempt=attempt
+        ).partition,
     benchmark:
         BENCHMARK_DIR / "run_sbc/{model_name}_{fit_method}_perm{perm_num}.tsv"
     shell:

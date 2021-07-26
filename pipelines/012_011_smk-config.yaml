@@ -14,10 +14,10 @@ generate_mockdata:
   time: "00:10:00"
   J: "mockdf"
 run_sbc:
-  partition: "{params.partition}"
-  cores: "{params.cores}"
-  mem: "{params.mem}"
-  time: "{params.time}"
+  partition: "{resources.partition}"
+  cores: "{resources.cores}"
+  mem: "{resources.mem}"
+  time: "{resources.time}"
   J: "run-sbc"
 collate_sbc:
   partition: "short"

@@ -2,7 +2,7 @@
 
 from datetime import timedelta as td
 from pathlib import Path
-from typing import Dict, TypeVar
+from typing import TypeVar
 
 from pydantic import validate_arguments
 
@@ -13,8 +13,8 @@ from src.managers.pipeline_resource_manager import PipelineResourceManager
 from src.project_enums import MockDataSize, ModelFitMethod, ModelOption
 
 T = TypeVar("T")
-ResourceLookupDict = Dict[ModelFitMethod, Dict[MockDataSize, T]]
-ModelResourceLookupDict = Dict[ModelOption, ResourceLookupDict[T]]
+ResourceLookupDict = dict[ModelFitMethod, dict[MockDataSize, T]]
+ModelResourceLookupDict = dict[ModelOption, ResourceLookupDict[T]]
 
 # RAM required for each configuration (in GB -> mult by 1000).
 #   key: [model][debug][fit_method]
@@ -26,6 +26,18 @@ TimeLookupDict = ModelResourceLookupDict[td]
 
 
 sbc_pipeline_memory_lookup: MemoryLookupDict = {
+    ModelOption.SPECLET_TWO: {
+        ModelFitMethod.ADVI: {
+            MockDataSize.SMALL: 2,
+            MockDataSize.MEDIUM: 4,
+            MockDataSize.LARGE: 16,
+        },
+        ModelFitMethod.MCMC: {
+            MockDataSize.SMALL: 2,
+            MockDataSize.MEDIUM: 4,
+            MockDataSize.LARGE: 8,
+        },
+    },
     ModelOption.SPECLET_FOUR: {
         ModelFitMethod.ADVI: {
             MockDataSize.SMALL: 2,
@@ -37,10 +49,22 @@ sbc_pipeline_memory_lookup: MemoryLookupDict = {
             MockDataSize.MEDIUM: 8,
             MockDataSize.LARGE: 16,
         },
-    }
+    },
 }
 
 sbc_pipeline_time_lookup: TimeLookupDict = {
+    ModelOption.SPECLET_TWO: {
+        ModelFitMethod.ADVI: {
+            MockDataSize.SMALL: td(minutes=5),
+            MockDataSize.MEDIUM: td(minutes=20),
+            MockDataSize.LARGE: td(hours=1),
+        },
+        ModelFitMethod.MCMC: {
+            MockDataSize.SMALL: td(minutes=10),
+            MockDataSize.MEDIUM: td(minutes=20),
+            MockDataSize.LARGE: td(hours=1),
+        },
+    },
     ModelOption.SPECLET_FOUR: {
         ModelFitMethod.ADVI: {
             MockDataSize.SMALL: td(minutes=5),
@@ -102,6 +126,7 @@ class SBCResourceManager(PipelineResourceManager):
         mock_data_size: MockDataSize,
         fit_method: ModelFitMethod,
         config_path: Path,
+        attempt: int = 1,
     ) -> None:
         """Create a resource manager.
 
@@ -110,6 +135,7 @@ class SBCResourceManager(PipelineResourceManager):
             mock_data_size (str): Size of the mock data.
             fit_method (ModelFitMethod): Method used to fit the model.
             config_path (Path): Path to a model configuration file.
+            attempt (int, optional): Attempt number for the job. Defaults to 1.
         """
         self.name = name
         self.mock_data_size = mock_data_size
@@ -121,6 +147,7 @@ class SBCResourceManager(PipelineResourceManager):
         if _config is None:
             raise model_config.ModelConfigurationNotFound(self.name)
         self.config = _config
+        self.attempt = attempt
 
     @property
     def memory(self) -> str:
@@ -129,17 +156,10 @@ class SBCResourceManager(PipelineResourceManager):
         Returns:
             str: Amount of RAM required.
         """
-        return str(self._retrieve_memory_requirement() * 1000)
-
-    @property
-    def time(self) -> str:
-        """Time request.
-
-        Returns:
-            str: Amount of time required.
-        """
-        _time = self._retrieve_time_requirement()
-        return formatting.format_timedelta(_time, formatting.TimeDeltaFormat.DRMAA)
+        mem = float(self._retrieve_memory_requirement())
+        mem *= 1 + self.attempt / 3
+        mem = min((mem, 250))  # So cannot request more than O2 can give.
+        return str(mem * 1000)
 
     def _retrieve_memory_requirement(self) -> int:
         default_memory_tbl: ResourceLookupDict[int] = {
@@ -157,6 +177,17 @@ class SBCResourceManager(PipelineResourceManager):
         return self._lookup_value_with_default(
             sbc_pipeline_memory_lookup, default_memory_tbl
         )
+
+    @property
+    def time(self) -> str:
+        """Time request.
+
+        Returns:
+            str: Amount of time required.
+        """
+        _time = self._retrieve_time_requirement()
+        _time *= 1 + self.attempt / 3
+        return formatting.format_timedelta(_time, formatting.TimeDeltaFormat.DRMAA)
 
     def _retrieve_time_requirement(self) -> td:
         default_time_tbl: ResourceLookupDict[td] = {
