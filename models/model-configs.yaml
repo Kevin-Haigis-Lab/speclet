@@ -5,7 +5,6 @@
   model: speclet-two
   fit_methods:
     - MCMC
-    - ADVI
   pipelines:
     - fitting
     - sbc
@@ -21,7 +20,6 @@
     - ADVI
   pipelines:
     - fitting
-    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -35,7 +33,6 @@
     - ADVI
   pipelines:
     - fitting
-    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -54,7 +51,6 @@
     - MCMC
   pipelines:
     - fitting
-    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -75,7 +71,6 @@
     - MCMC
   pipelines:
     - fitting
-    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -96,7 +91,6 @@
     - MCMC
   pipelines:
     - fitting
-    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -113,7 +107,6 @@
     - ADVI
   pipelines:
     - fitting
-    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -133,7 +126,6 @@
     - ADVI
   pipelines:
     - fitting
-    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -150,7 +142,6 @@
     - ADVI
   pipelines:
     - fitting
-    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -167,7 +158,6 @@
     - ADVI
   pipelines:
     - fitting
-    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -180,7 +170,6 @@
     - ADVI
   pipelines:
     - fitting
-    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -197,7 +186,6 @@
     - ADVI
   pipelines:
     - fitting
-    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -214,7 +202,6 @@
     - ADVI
   pipelines:
     - fitting
-    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -235,7 +222,6 @@
     - ADVI
   pipelines:
     - fitting
-    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -255,7 +241,6 @@
     - ADVI
   pipelines:
     - fitting
-    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -276,7 +261,6 @@
     - ADVI
   pipelines:
     - fitting
-    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -298,7 +282,6 @@
     - ADVI
   pipelines:
     - fitting
-    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -321,7 +304,6 @@
     - ADVI
   pipelines:
     - fitting
-    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:

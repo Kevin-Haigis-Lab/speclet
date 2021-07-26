@@ -28,12 +28,13 @@ fi
 snakemake \
     --snakefile $SNAKEFILE \
     --jobs 20 \
-    --restart-times 1 \
+    --restart-times 3 \
     --latency-wait 120 \
     --use-conda \
     --keep-going \
     --cluster-config pipelines/012_011_smk-config.yaml \
-    --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}"
+    --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
+    --forceall
 
 # --conda-cleanup-envs  # use to clean up old conda envs
 
