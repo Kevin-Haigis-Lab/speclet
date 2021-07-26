@@ -266,6 +266,7 @@ benchmarks/*
 
 # Specific files to except from the rules above
 !models/model-configs.yaml
+!models/model-graph-images/
 !modeling_data/depmap_modeling_dataframe_crc-subsample.csv
 !modeling_data/copy_number_data_samples.npy
 !modeling_data/sanger_cancer-gene-census.csv
