@@ -71,7 +71,6 @@ SBC_UNIFORMITY_RESULTS = "cache/sbc-cache/sp2-default_MCMC_uniformity-test-resul
 NUM_SIMULATIONS = 500
 CONFIG_PATH = "models/model-configs.yaml"
 FIT_METHOD_STR = "MCMC"
-
 ```
 
 ### Prepare and validate papermill parameters
@@ -164,80 +163,80 @@ simulation_posteriors_df.head()
     <tr>
       <th>μ_α</th>
       <th>μ_α</th>
-      <td>0.064</td>
-      <td>0.099</td>
-      <td>-0.011</td>
-      <td>0.250</td>
-      <td>0.048</td>
-      <td>0.037</td>
+      <td>0.050</td>
+      <td>0.109</td>
+      <td>-0.141</td>
+      <td>0.194</td>
+      <td>0.046</td>
+      <td>0.034</td>
       <td>6.0</td>
-      <td>28.0</td>
-      <td>2.39</td>
-      <td>0.882026</td>
+      <td>24.0</td>
+      <td>1.73</td>
+      <td>0.800314</td>
       <td>sim_id_0000</td>
       <td>False</td>
     </tr>
     <tr>
       <th>α[0,0]</th>
       <th>α</th>
-      <td>0.470</td>
-      <td>0.100</td>
-      <td>0.373</td>
-      <td>0.632</td>
-      <td>0.050</td>
-      <td>0.038</td>
-      <td>5.0</td>
-      <td>15.0</td>
-      <td>3.23</td>
-      <td>1.273675</td>
+      <td>2.131</td>
+      <td>0.138</td>
+      <td>1.945</td>
+      <td>2.330</td>
+      <td>0.068</td>
+      <td>0.052</td>
+      <td>4.0</td>
+      <td>14.0</td>
+      <td>3.75</td>
+      <td>2.993562</td>
       <td>sim_id_0000</td>
       <td>False</td>
     </tr>
     <tr>
       <th>α[0,1]</th>
       <th>α</th>
-      <td>0.921</td>
-      <td>0.085</td>
-      <td>0.829</td>
-      <td>1.068</td>
-      <td>0.042</td>
-      <td>0.032</td>
+      <td>1.901</td>
+      <td>0.098</td>
+      <td>1.753</td>
+      <td>2.057</td>
+      <td>0.048</td>
+      <td>0.037</td>
       <td>4.0</td>
-      <td>12.0</td>
-      <td>3.55</td>
-      <td>1.778736</td>
+      <td>11.0</td>
+      <td>4.32</td>
+      <td>2.628164</td>
       <td>sim_id_0000</td>
       <td>False</td>
     </tr>
     <tr>
       <th>α[0,2]</th>
       <th>α</th>
-      <td>0.769</td>
-      <td>0.085</td>
-      <td>0.676</td>
-      <td>0.916</td>
-      <td>0.042</td>
-      <td>0.032</td>
+      <td>-0.889</td>
+      <td>0.098</td>
+      <td>-1.038</td>
+      <td>-0.733</td>
+      <td>0.048</td>
+      <td>0.037</td>
       <td>4.0</td>
-      <td>12.0</td>
-      <td>3.60</td>
-      <td>1.629343</td>
+      <td>11.0</td>
+      <td>4.13</td>
+      <td>-0.156185</td>
       <td>sim_id_0000</td>
       <td>False</td>
     </tr>
     <tr>
       <th>α[0,3]</th>
       <th>α</th>
-      <td>-0.310</td>
-      <td>0.101</td>
-      <td>-0.409</td>
-      <td>-0.147</td>
-      <td>0.050</td>
-      <td>0.038</td>
+      <td>0.874</td>
+      <td>0.137</td>
+      <td>0.689</td>
+      <td>1.073</td>
+      <td>0.068</td>
+      <td>0.052</td>
       <td>4.0</td>
-      <td>15.0</td>
-      <td>3.33</td>
-      <td>0.490961</td>
+      <td>16.0</td>
+      <td>3.55</td>
+      <td>1.730202</td>
       <td>sim_id_0000</td>
       <td>False</td>
     </tr>
@@ -318,50 +317,50 @@ for perm_dir in np.random.choice(
     sbc-perm435
     ------------------------------
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 138, 97, 72, 79
-    percent divergences: 13.8, 9.7, 7.2, 7.9
-    BFMI: 0.346, 0.404, 0.34, 0.482
-    avg. step size: 0.044, 0.01, 0.055, 0.031
+    num. divergences: 6, 101, 51, 34
+    percent divergences: 0.6, 10.1, 5.1, 3.4
+    BFMI: 0.366, 0.36, 0.39, 0.377
+    avg. step size: 0.013, 0.01, 0.006, 0.02
 
 ![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_20_1.png)
 
     sbc-perm56
     ------------------------------
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 110, 86, 168, 119
-    percent divergences: 11.0, 8.6, 16.8, 11.9
-    BFMI: 0.339, 0.42, 0.445, 0.465
-    avg. step size: 0.054, 0.049, 0.053, 0.047
+    num. divergences: 49, 14, 38, 20
+    percent divergences: 4.9, 1.4, 3.8, 2.0
+    BFMI: 0.289, 0.282, 0.372, 0.249
+    avg. step size: 0.016, 0.009, 0.004, 0.005
 
 ![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_20_3.png)
 
     sbc-perm439
     ------------------------------
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 901, 190, 123, 334
-    percent divergences: 90.1, 19.0, 12.3, 33.4
-    BFMI: 1.158, 0.569, 0.497, 0.529
-    avg. step size: 0.04, 0.069, 0.028, 0.035
+    num. divergences: 23, 15, 30, 3
+    percent divergences: 2.3, 1.5, 3.0, 0.3
+    BFMI: 0.317, 0.468, 0.428, 0.333
+    avg. step size: 0.014, 0.018, 0.014, 0.003
 
 ![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_20_5.png)
 
     sbc-perm67
     ------------------------------
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 253, 121, 163, 1000
-    percent divergences: 25.3, 12.1, 16.3, 100.0
-    BFMI: 0.509, 0.457, 0.376, 1.489
-    avg. step size: 0.035, 0.034, 0.022, 0.019
+    num. divergences: 55, 169, 124, 0
+    percent divergences: 5.5, 16.9, 12.4, 0.0
+    BFMI: 0.331, 0.243, 0.383, 0.347
+    avg. step size: 0.015, 0.006, 0.003, 0.006
 
 ![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_20_7.png)
 
     sbc-perm417
     ------------------------------
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 263, 575, 606, 33
-    percent divergences: 26.3, 57.5, 60.6, 3.3
-    BFMI: 0.551, 0.578, 0.699, 0.337
-    avg. step size: 0.072, 0.029, 0.05, 0.046
+    num. divergences: 32, 12, 35, 106
+    percent divergences: 3.2, 1.2, 3.5, 10.6
+    BFMI: 0.278, 0.365, 0.308, 0.302
+    avg. step size: 0.008, 0.018, 0.019, 0.011
 
 ![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_20_9.png)
 
@@ -397,7 +396,7 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 
 ![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_22_0.png)
 
-    <ggplot: (2975434951554)>
+    <ggplot: (2995831021689)>
 
 ```python
 hdi_low, hdi_high = pmanal.get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -444,7 +443,7 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 
 ![png](sp2-default_MCMC_sbc-results_files/sp2-default_MCMC_sbc-results_23_0.png)
 
-    <ggplot: (2975438602518)>
+    <ggplot: (2995831143000)>
 
 ### SBC Uniformity Test
 
@@ -581,14 +580,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.64 minutes
+    execution time: 0.52 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-26
+    Last updated: 2021-07-27
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -602,14 +601,14 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-a-16-167.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-160.o2.rc.hms.harvard.edu
 
     Git branch: sbc-uniform-check
 
     pandas    : 1.2.3
     arviz     : 0.11.2
-    logging   : 0.5.1.2
-    numpy     : 1.20.1
-    matplotlib: 3.3.4
-    janitor   : 0.20.14
     plotnine  : 0.7.1
+    matplotlib: 3.3.4
+    numpy     : 1.20.1
+    janitor   : 0.20.14
+    logging   : 0.5.1.2

@@ -61,8 +61,8 @@ sbc_pipeline_time_lookup: TimeLookupDict = {
         },
         ModelFitMethod.MCMC: {
             MockDataSize.SMALL: td(minutes=10),
-            MockDataSize.MEDIUM: td(minutes=20),
-            MockDataSize.LARGE: td(hours=1),
+            MockDataSize.MEDIUM: td(minutes=40),
+            MockDataSize.LARGE: td(hours=1.5),
         },
     },
     ModelOption.SPECLET_FOUR: {
