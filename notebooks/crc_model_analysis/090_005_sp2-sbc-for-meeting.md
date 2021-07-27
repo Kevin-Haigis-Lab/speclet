@@ -7,6 +7,9 @@
 %autoreload 2
 ```
 
+    The autoreload extension is already loaded. To reload it, use:
+      %reload_ext autoreload
+
 ```python
 import logging
 import re
@@ -309,6 +312,26 @@ plt.show()
 ```
 
 ![png](090_005_sp2-sbc-for-meeting_files/090_005_sp2-sbc-for-meeting_14_0.png)
+
+---
+
+### Misc.
+
+```python
+data = az.load_arviz_data("non_centered_eight")
+az.plot_trace(data, var_names=("mu"), compact=False)
+plt.show()
+```
+
+![png](090_005_sp2-sbc-for-meeting_files/090_005_sp2-sbc-for-meeting_17_0.png)
+
+```python
+
+```
+
+```python
+
+```
 
 ---
 
