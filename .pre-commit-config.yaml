@@ -74,16 +74,13 @@ repos:
     rev: 1.1.0
     hooks:
     -   id: nbqa-isort
-        args: ["--nbqa-mutate", "--profile=black"]
+        args: ["--profile=black"]
         exclude: "munge/019_prepare-data-subsample.ipynb"
     -   id: nbqa-black
-        args: ["--nbqa-mutate"]
         exclude: "munge/019_prepare-data-subsample.ipynb"
     -   id: nbqa-pyupgrade
-        args: ["--nbqa-mutate"]
         exclude: "munge/019_prepare-data-subsample.ipynb"
     -   id: nbqa-mypy
-        args: ["--nbqa-mutate"]
         additional_dependencies: [pydantic, mypy, types-python-dateutil]
         types: [jupyter]
         exclude: "munge/019_prepare-data-subsample.ipynb"
