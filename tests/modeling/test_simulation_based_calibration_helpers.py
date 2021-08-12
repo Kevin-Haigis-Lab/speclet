@@ -91,50 +91,8 @@ class TestSBCFileManager:
 #### ---- Test SBC collation ---- ####
 
 
-# Fixtures and helpers
-
-
-@pytest.fixture
-def centered_eight() -> az.InferenceData:
-    x = az.load_arviz_data("centered_eight")
-    assert isinstance(x, az.InferenceData)
-    return x
-
-
-@pytest.fixture
-def centered_eight_post(centered_eight: az.InferenceData) -> pd.DataFrame:
-    x = az.summary(centered_eight)
-    assert isinstance(x, pd.DataFrame)
-    return x
-
-
 def return_iris(*args, **kwargs) -> pd.DataFrame:
     return sns.load_dataset("iris")
-
-
-@pytest.fixture(scope="module")
-def simple_model() -> pm.Model:
-    with pm.Model() as model:
-        mu = pm.Normal("mu", 0, 1)
-        sigma = pm.HalfNormal("sigma", 1)
-        y = pm.Normal("y", mu, sigma, observed=[1, 2, 3])  # noqa: F841
-    return model
-
-
-@pytest.fixture(scope="module")
-def hierarchical_model() -> pm.Model:
-    with pm.Model() as model:
-        mu_alpha = pm.Normal("mu_alpha", 0, 1)
-        sigma_alpha = pm.HalfCauchy("sigma_alpha", 1)
-        alpha = pm.Normal("alpha", mu_alpha, sigma_alpha, shape=2)
-        sigma = pm.HalfNormal("sigma", 1)
-        y = pm.Normal(  # noqa: F841
-            "y", alpha[np.array([0, 0, 1, 1])], sigma, observed=[1, 2, 3, 4]
-        )
-    return model
-
-
-# Tests
 
 
 def test_is_true_value_within_hdi_lower_limit():
@@ -266,19 +224,3 @@ def test_make_priors_dataframe_hierarchical_with_post(hierarchical_model: pm.Mod
 def test_failure_if_data_does_not_exist(tmp_path: Path):
     with pytest.raises(sbc.SBCResultsNotFoundError):
         sbc.get_posterior_summary_for_file_manager(tmp_path)
-
-
-#### ---- Results analysis ---- ####
-
-
-@pytest.mark.DEV
-@pytest.mark.parametrize(
-    "k_draws, exp, low, high", [(2, 50, 25, 75), (3, 100 / 3, 20, 50)]
-)
-def test_expected_range_under_uniform(
-    k_draws: int, exp: float, low: float, high: float
-):
-    _exp, _lower, _upper = sbc.expected_range_under_uniform(n_sims=100, k_draws=k_draws)
-    assert _exp == exp
-    assert low < _lower < exp
-    assert exp < _upper < high
