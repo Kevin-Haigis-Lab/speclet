@@ -1,6 +1,7 @@
 """Helpers for organizing simulation-based calibrations."""
 
 import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Iterable, Optional
 
@@ -298,8 +299,33 @@ def _extract_parameter_names(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def _collate_sbc_posteriors_singlethreaded(
+    posterior_dirs: Iterable[Path], n_perms: Optional[int]
+) -> list[pd.DataFrame]:
+    tqdm_posterior_dirs = tqdm(posterior_dirs, total=n_perms)
+    return [get_posterior_summary_for_file_manager(d) for d in tqdm_posterior_dirs]
+
+
+def _collate_sbc_posteriors_multithreaded(
+    posterior_dirs: Iterable[Path], n_perms: Optional[int]
+) -> list[pd.DataFrame]:
+    simulation_posteriors = []
+    with tqdm(total=n_perms) as pbar:
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(get_posterior_summary_for_file_manager, d)
+                for d in posterior_dirs
+            ]
+            for future in as_completed(futures):
+                simulation_posteriors.append(future.result())
+                pbar.update(1)
+    return simulation_posteriors
+
+
 def collate_sbc_posteriors(
-    posterior_dirs: Iterable[Path], num_permutations: Optional[int] = None
+    posterior_dirs: Iterable[Path],
+    num_permutations: Optional[int] = None,
+    multithreaded: bool = True,
 ) -> pd.DataFrame:
     """Collate many SBC posteriors.
 
@@ -309,6 +335,8 @@ def collate_sbc_posteriors(
         num_permutations (Optional[int], optional): Number of permutations expected. If
           supplied, this will be checked against the number of found simulations.
           Defaults to None.
+        multithreaded (bool, optional): Should the results be collected using multiple
+          threads? Defaults to True.
 
     Raises:
         IncorrectNumberOfFilesFoundError: Raised if the number of found simulations is
@@ -317,10 +345,16 @@ def collate_sbc_posteriors(
     Returns:
         pd.DataFrame: A single data frame with all of the results of the simulations.
     """
-    tqdm_posterior_dirs = tqdm(posterior_dirs, total=num_permutations)
-    simulation_posteriors: list[pd.DataFrame] = [
-        get_posterior_summary_for_file_manager(d) for d in tqdm_posterior_dirs
-    ]
+    simulation_posteriors: list[pd.DataFrame]
+
+    if multithreaded:
+        simulation_posteriors = _collate_sbc_posteriors_multithreaded(
+            posterior_dirs, n_perms=num_permutations
+        )
+    else:
+        simulation_posteriors = _collate_sbc_posteriors_singlethreaded(
+            posterior_dirs, n_perms=num_permutations
+        )
 
     if num_permutations is not None and len(simulation_posteriors) != num_permutations:
         raise src.exceptions.IncorrectNumberOfFilesFoundError(

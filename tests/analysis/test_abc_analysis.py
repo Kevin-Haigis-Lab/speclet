@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Callable
 
+import pandas as pd
 import pytest
 
 from src.analysis import sbc_analysis as sbcanal
@@ -66,6 +67,43 @@ class TestSBCAnalysis:
         )
         sbc_results = sbc_analyzer.get_simulation_results(multithreaded=multithreaded)
         assert len(sbc_results) == n_simulations
+
+    def test_posterior_accuracy_simple(self, tmp_path: Path):
+        sbc_analyzer = sbcanal.SBCAnalysis(
+            root_dir=tmp_path, pattern="pattern", n_simulations=100
+        )
+        sim_posteriors_df = pd.DataFrame(
+            {
+                "parameter_name": ["a", "a", "a", "a"],
+                "within_hdi": [True, False, True, False],
+            }
+        )
+        acc_results = sbc_analyzer.posterior_accuracy(sim_posteriors_df)
+        assert pytest.approx(
+            acc_results[acc_results.parameter_name == "a"].within_hdi[0], 0.5
+        )
+
+    def test_posterior_accuracy_multiple(self, tmp_path: Path):
+        sbc_analyzer = sbcanal.SBCAnalysis(
+            root_dir=tmp_path, pattern="pattern", n_simulations=100
+        )
+        sim_posteriors_df = pd.DataFrame(
+            {
+                "parameter_name": ["a", "a", "a", "a", "b", "b", "b"],
+                "within_hdi": [True, False, True, False, True, False, False],
+            }
+        )
+        acc_results = sbc_analyzer.posterior_accuracy(sim_posteriors_df)
+
+        for p in sim_posteriors_df.parameter_name.unique():
+            assert len(acc_results[acc_results.parameter_name == p]) == 1
+        assert pytest.approx(
+            acc_results[acc_results.parameter_name == "a"].within_hdi.values[0], 0.5
+        )
+        assert pytest.approx(
+            acc_results[acc_results.parameter_name == "b"].within_hdi.values[0],
+            1.0 / 3.0,
+        )
 
 
 #### ---- Uniformity test ---- ####

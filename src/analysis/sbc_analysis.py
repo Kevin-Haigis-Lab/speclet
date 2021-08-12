@@ -1,6 +1,6 @@
 """Analyze simulation-based calibration results."""
 
-import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, Optional, Sequence
 
@@ -22,6 +22,10 @@ class SBCAnalysis:
     root_dir: Path
     pattern: str
     n_simulations: Optional[int]
+
+    simulation_results: Optional[list[sbc.SBCResults]] = None
+    accuracy_test_results: Optional[pd.DataFrame] = None
+    uniformity_test_results: Optional[pd.DataFrame] = None
 
     def __init__(
         self, root_dir: Path, pattern: str, n_simulations: Optional[int] = None
@@ -84,6 +88,7 @@ class SBCAnalysis:
         else:
             results = self._get_simulation_results_singlethreaded(fms)
         self._check_n_sims(results)
+        self.simulation_results = results
         return results
 
     @staticmethod
@@ -102,7 +107,7 @@ class SBCAnalysis:
     def _get_simulation_results_multithreaded(
         self, fms: list[sbc.SBCFileManager]
     ) -> list[sbc.SBCResults]:
-        with concurrent.futures.ThreadPoolExecutor() as executor:
+        with ThreadPoolExecutor() as executor:
             results_iter = executor.map(SBCAnalysis._get_single_simulation_result, fms)
 
         return list(results_iter)
@@ -114,7 +119,7 @@ class SBCAnalysis:
         """Get the accuracy of the simulation results.
 
         Args:
-            simulation_posteriors_df (Optional[pd.DataFrame], optional): Data frame of
+          simulation_posteriors_df (Optional[pd.DataFrame], optional): Data frame of
             the summaries of the posterior summaries. If None is provided, then the data
             frame will be made first. Defaults to None.
 
@@ -126,7 +131,8 @@ class SBCAnalysis:
                 posterior_dirs=self.get_simulation_directories(),
                 num_permutations=self.n_simulations,
             )
-        return (
+
+        self.accuracy_test_results = (
             simulation_posteriors_df.copy()
             .groupby(["parameter_name"])["within_hdi"]
             .mean()
@@ -134,15 +140,18 @@ class SBCAnalysis:
             .sort_values("within_hdi", ascending=False)
             .reset_index(drop=True)
         )
+        return self.accuracy_test_results
 
     def uniformity_test(
-        self, k_draws: int = SBC_UNIFORMITY_THINNING_DRAWS
+        self, k_draws: int = SBC_UNIFORMITY_THINNING_DRAWS, multithreaded: bool = True
     ) -> pd.DataFrame:
         """Perform the SBC uniformity analysis.
 
         Args:
             k_draws (int, optional): Number of draws to thin the posterior samples down
               to. Defaults to 100.
+            multithreaded (bool, optional): Should the data processing use multiple
+              threads? Defaults to True.
 
         Returns:
             pd.DataFrame: A data frame of the rank statistic of each variable in each
@@ -150,33 +159,48 @@ class SBCAnalysis:
         """
         sbc_file_managers = self.get_simulation_file_managers()
         self._check_n_sims(sbc_file_managers)
-        rank_statistics = pd.concat(
-            [
-                calculate_parameter_rank_statistic(
-                    sbc_fm.get_sbc_results(), thin_to=k_draws
-                )
-                for sbc_fm in sbc_file_managers
-            ]
-        )
-        return rank_statistics
+
+        def _calc_rank_stat(sbc_fm: sbc.SBCFileManager) -> pd.DataFrame:
+            return calculate_parameter_rank_statistic(
+                sbc_fm.get_sbc_results(), thin_to=k_draws
+            )
+
+        if multithreaded:
+            with ThreadPoolExecutor() as executor:
+                results = executor.map(_calc_rank_stat, sbc_file_managers)
+            self.uniformity_test_results = pd.concat(list(results))
+        else:
+            self.uniformity_test_results = pd.concat(
+                [_calc_rank_stat(fm) for fm in sbc_file_managers]
+            )
+        return self.uniformity_test_results
 
     def plot_uniformity(
         self,
-        rank_stats: pd.DataFrame,
+        rank_stats: Optional[pd.DataFrame] = None,
         n_sims: Optional[int] = None,
         k_draws: int = SBC_UNIFORMITY_THINNING_DRAWS,
     ) -> matplotlib.axes.Axes:
         """Plot the results of the uniformity test.
 
         Args:
-            rank_stats (pd.DataFrame): Results of the uniformity test with the rank
-            statistics for each variable.
-            n_sims (Optional[int], optional): Number of simulations performed If None
+          rank_stats (Optional[pd.DataFrame]): Results of the uniformity test with the
+            rank statistics for each variable. Defaults to None.
+          n_sims (Optional[int], optional): Number of simulations performed If None
             (the default), then the value will be assumed to be the number of simulation
             directories. Defaults to None.
-            k_draws (int, optional): Number of draws the posterior was thinned down to.
+          k_draws (int, optional): Number of draws the posterior was thinned down to.
             Defaults to 100.
         """
+        if rank_stats is None:
+            if self.uniformity_test_results is None:
+                raise src.exceptions.RequiredArgumentError(
+                    "Parameter `rank_stats` must be passed because "
+                    + "`self.uniformity_test_results` is None."
+                )
+            else:
+                rank_stats = self.uniformity_test_results
+
         if n_sims is None:
             _sim_dirs = self.get_simulation_directories()
             self._check_n_sims(_sim_dirs)
