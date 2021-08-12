@@ -11,8 +11,8 @@ import pandas as pd
 from tqdm import tqdm
 
 import src.exceptions
+from src.analysis.pymc3_analysis import get_hdi_colnames_from_az_summary
 from src.data_processing import vectors as vhelp
-from src.modeling.pymc3_analysis import get_hdi_colnames_from_az_summary
 
 #### ---- File management ---- ####
 

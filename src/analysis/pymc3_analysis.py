@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """Functions to aid in the analysis of PyMC3 models."""
 
 import datetime
@@ -317,8 +315,8 @@ class MCMCDescription(BaseModel):
 
 
 def describe_mcmc(
-    data: az.InferenceData, plot: bool = True
-) -> Optional[MCMCDescription]:
+    data: az.InferenceData, silent: bool = False, plot: bool = True
+) -> MCMCDescription:
     """Descriptive statistics and plots for MCMC.
 
     Prints out the following:
@@ -332,16 +330,17 @@ def describe_mcmc(
 
     Args:
         data (az.InferenceData): Data object.
-        plot (bool): Include any plots? Default is True.
+        silent (bool, optional): Silence the printing of the description? Defaults to
+          False.
+        plot (bool, optional): Include any plots? Default is True.
     """
     if not hasattr(data, "sample_stats"):
         print("Unable to get sampling stats.")
-        return None
+        raise AttributeError("Input data does not have a `sample_stats` attribute.")
 
     sample_stats = data.get("sample_stats")
     if not isinstance(sample_stats, Dataset):
-        print("`sample_stats` attribute is not of type `xarray.Dataset`")
-        return None
+        raise AttributeError("`sample_stats` attribute is not of type `xarray.Dataset`")
 
     # Date and duration.
     created_at = sample_stats.get("created_at")
@@ -375,10 +374,10 @@ def describe_mcmc(
         avg_step_size=avg_step_size,
     )
 
-    print(mcmc_descr)
+    if not silent:
+        print(mcmc_descr)
 
     if plot:
-        # Plot energy.
         az.plot_energy(data)
         plt.show()
 

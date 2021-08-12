@@ -1,5 +1,6 @@
 """Analyze simulation-based calibration results."""
 
+import statistics
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, Optional, Sequence
@@ -9,6 +10,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
+import src.analysis.pymc3_analysis as pmanal
 import src.exceptions
 import src.modeling.simulation_based_calibration_helpers as sbc
 from src.modeling import pymc3_helpers as pmhelp
@@ -111,6 +113,48 @@ class SBCAnalysis:
             results_iter = executor.map(SBCAnalysis._get_single_simulation_result, fms)
 
         return list(results_iter)
+
+    def mcmc_diagnostics(self) -> dict[str, float]:
+        """Collect diagnostic information on all simulations (that used MCMC).
+
+        Returns:
+            dict[str, float]: Summary statistics on key diagnostics of MCMC.
+        """
+
+        def read_mcmc_diagnostics(sbc_fm: sbc.SBCFileManager) -> pmanal.MCMCDescription:
+            results = sbc_fm.get_sbc_results()
+            return pmanal.describe_mcmc(results.inference_obj, silent=True, plot=False)
+
+        sbc_file_managers = self.get_simulation_file_managers()
+        with ThreadPoolExecutor() as executor:
+            mcmc_diagnostics = executor.map(read_mcmc_diagnostics, sbc_file_managers)
+
+        pct_divergences: list[float] = []
+        bfmis: list[float] = []
+        step_sizes: list[float] = []
+        durations: list[float] = []
+
+        for diagnostic in mcmc_diagnostics:
+            pct_divergences += diagnostic.pct_divergences
+            bfmis += diagnostic.bfmi
+            step_sizes += diagnostic.avg_step_size
+            if (d := diagnostic.duration) is not None:
+                durations.append(d.total_seconds())
+
+        data: dict[str, float] = {}
+        for data_name, values in zip(
+            ("pct_divegences", "bfmi", "step_size", "duration"),
+            (pct_divergences, bfmis, step_sizes, durations),
+        ):
+            for fxn_name, fxn in zip(
+                ("mean", "median", "std_dev"),
+                (statistics.mean, statistics.median, statistics.stdev),
+            ):
+                if len(values) > 0:
+                    key = data_name + "_" + fxn_name
+                    data[key] = fxn(values)  # type: ignore
+
+        return data
 
     def posterior_accuracy(
         self,

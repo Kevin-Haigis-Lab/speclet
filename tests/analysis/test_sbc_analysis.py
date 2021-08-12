@@ -1,10 +1,12 @@
 from pathlib import Path
 from typing import Callable
 
+import arviz as az
 import pandas as pd
 import pytest
 
 from src.analysis import sbc_analysis as sbcanal
+from src.modeling import simulation_based_calibration_helpers as sbchelp
 
 #### ---- SBCAnalysis ---- ####
 
@@ -104,6 +106,25 @@ class TestSBCAnalysis:
             acc_results[acc_results.parameter_name == "b"].within_hdi.values[0],
             1.0 / 3.0,
         )
+
+    def test_mcmc_diagnostics(self, tmp_path: Path, centered_eight: az.InferenceData):
+        n_sims = 10
+        pattern = "perm"
+        for i in range(n_sims):
+            dir = tmp_path / f"{pattern}{i}"
+            dir.mkdir()
+            sbchelp.SBCFileManager(dir).save_sbc_results(
+                priors={},
+                inference_obj=centered_eight,
+                posterior_summary=pd.DataFrame(),
+            )
+
+        sbc_analyzer = sbcanal.SBCAnalysis(
+            root_dir=tmp_path, pattern=pattern, n_simulations=n_sims
+        )
+        mcmc_diagnostics = sbc_analyzer.mcmc_diagnostics()
+        assert isinstance(mcmc_diagnostics, dict)
+        assert len(mcmc_diagnostics.keys()) > 0
 
 
 #### ---- Uniformity test ---- ####
