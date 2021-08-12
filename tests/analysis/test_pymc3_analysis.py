@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from itertools import product
-from typing import Dict, Tuple
 
 import arviz as az
 import matplotlib
@@ -12,13 +11,13 @@ import pymc3 as pm
 import pytest
 from numpy.random import standard_normal
 
-from src.modeling import pymc3_analysis as pmanal
+from src.analysis import pymc3_analysis as pmanal
 
-MCMCResults = Tuple[pm.backends.base.MultiTrace, Dict[str, np.ndarray]]
-ADVIResults = Tuple[
-    pm.backends.base.MultiTrace, Dict[str, np.ndarray], pm.Approximation
+MCMCResults = tuple[pm.backends.base.MultiTrace, dict[str, np.ndarray]]
+ADVIResults = tuple[
+    pm.backends.base.MultiTrace, dict[str, np.ndarray], pm.Approximation
 ]
-PriorPrediction = Dict[str, np.ndarray]
+PriorPrediction = dict[str, np.ndarray]
 
 
 @pytest.fixture(scope="module")
