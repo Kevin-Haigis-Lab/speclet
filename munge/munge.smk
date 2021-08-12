@@ -166,7 +166,8 @@ rule split_ccle_gene_cn:
         data_file=rules.tidy_ccle.output.gene_cn,
     output:
         out_files=expand(
-            (TEMP_DIR / "ccle-genecn_{depmapid}.qs").as_posix(), depmapid=all_depmap_ids
+            (TEMP_DIR / "ccle-genecn_{depmapid}.qs").as_posix(),
+            depmapid=all_depmap_ids,
         ),
     script:
         "011_split-file-by-depmapid.R"

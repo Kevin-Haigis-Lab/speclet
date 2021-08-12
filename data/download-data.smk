@@ -105,9 +105,7 @@ rule all:
         score_files=expand(
             score_dir / "{filename}", filename=list(score_downloads.keys())
         ),
-        ccle_files=expand(
-            ccle_dir / "{filename}", filename=list(ccle_downloads.keys())
-        ),
+        ccle_files=expand(ccle_dir / "{filename}", filename=list(ccle_downloads.keys())),
         sanger_cgc=sanger_cosmic_dir / "cancer_gene_census.csv",
 
 

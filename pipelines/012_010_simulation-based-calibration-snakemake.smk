@@ -175,7 +175,10 @@ rule run_sbc:
 rule collate_sbc:
     input:
         sbc_results_csvs=expand(
-            root_perm_dir_template + "/" + perm_dir_template + "/posterior-summary.csv",
+            root_perm_dir_template
+            + "/"
+            + perm_dir_template
+            + "/posterior-summary.csv",
             perm_num=list(range(NUM_SIMULATIONS)),
             allow_missing=True,
         ),
@@ -199,7 +202,10 @@ rule collate_sbc:
 rule sbc_uniformity_test:
     input:
         sbc_results_csvs=expand(
-            root_perm_dir_template + "/" + perm_dir_template + "/posterior-summary.csv",
+            root_perm_dir_template
+            + "/"
+            + perm_dir_template
+            + "/posterior-summary.csv",
             perm_num=list(range(NUM_SIMULATIONS)),
             allow_missing=True,
         ),
