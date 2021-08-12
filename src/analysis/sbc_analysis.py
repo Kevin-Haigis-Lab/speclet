@@ -26,11 +26,21 @@ class SBCAnalysis:
     n_simulations: Optional[int]
 
     simulation_results: Optional[list[sbc.SBCResults]] = None
+    simulation_posteriors: Optional[pd.DataFrame] = None
     accuracy_test_results: Optional[pd.DataFrame] = None
     uniformity_test_results: Optional[pd.DataFrame] = None
 
+    mcmc_diagnostic_summary: Optional[dict[str, float]] = None
+
     def __init__(
-        self, root_dir: Path, pattern: str, n_simulations: Optional[int] = None
+        self,
+        root_dir: Path,
+        pattern: str,
+        n_simulations: Optional[int] = None,
+        simulation_results: Optional[list[sbc.SBCResults]] = None,
+        simulation_posteriors: Optional[pd.DataFrame] = None,
+        accuracy_test_results: Optional[pd.DataFrame] = None,
+        uniformity_test_results: Optional[pd.DataFrame] = None,
     ) -> None:
         """Create a `SBCAnalysis` object.
 
@@ -41,10 +51,22 @@ class SBCAnalysis:
             n_simulations (Optional[int], optional): Number of simulations expected. If
               supplied, this number will be used to check the root dir for all of the
               results. Defaults to None.
+            simulation_results (Optional[list[sbc.SBCResults]], optional): Already
+              existing list of all simulation results. Defaults to None.
+            simulation_posteriors (Optional[pd.DataFrame], optional): Already existing
+              dataframe of the simulation posteriors. Defaults to None.
+            accuracy_test_results (Optional[pd.DataFrame], optional): Already existing
+              results of the accuracy test. Defaults to None.
+            uniformity_test_results (Optional[pd.DataFrame], optional): Already existing
+              results of the uniformity test. Defaults to None.
         """
         self.root_dir = root_dir
         self.pattern = pattern
         self.n_simulations = n_simulations
+        self.simulation_results = simulation_results
+        self.simulation_posteriors = simulation_posteriors
+        self.accuracy_test_results = accuracy_test_results
+        self.uniformity_test_results = uniformity_test_results
 
     def _check_n_sims(self, ls: Sequence[Any]) -> None:
         if self.n_simulations is not None and self.n_simulations != len(ls):
@@ -154,39 +176,37 @@ class SBCAnalysis:
                     key = data_name + "_" + fxn_name
                     data[key] = fxn(values)  # type: ignore
 
+        self.mcmc_diagnostic_summary = data
         return data
 
-    def posterior_accuracy(
-        self,
-        simulation_posteriors_df: Optional[pd.DataFrame] = None,
+    def run_posterior_accuracy_test(
+        self, simulation_posteriors_df: Optional[pd.DataFrame] = None
     ) -> pd.DataFrame:
         """Get the accuracy of the simulation results.
 
         Args:
-          simulation_posteriors_df (Optional[pd.DataFrame], optional): Data frame of
+          simulation_posteriors_df (Optional[pd.DataFrame], optional): Dataframe of
             the summaries of the posterior summaries. If None is provided, then the data
             frame will be made first. Defaults to None.
 
         Returns:
             pd.DataFrame: Data frame of the accuracy of each parameter in the model.
         """
-        if simulation_posteriors_df is None:
+        if simulation_posteriors_df is not None:
+            self.simulation_posteriors = simulation_posteriors_df
+        elif self.simulation_posteriors is not None:
+            simulation_posteriors_df = self.simulation_posteriors
+        else:
             simulation_posteriors_df = sbc.collate_sbc_posteriors(
                 posterior_dirs=self.get_simulation_directories(),
                 num_permutations=self.n_simulations,
             )
+            self.simulation_posteriors = simulation_posteriors_df
 
-        self.accuracy_test_results = (
-            simulation_posteriors_df.copy()
-            .groupby(["parameter_name"])["within_hdi"]
-            .mean()
-            .reset_index(drop=False)
-            .sort_values("within_hdi", ascending=False)
-            .reset_index(drop=True)
-        )
+        self.accuracy_test_results = posterior_accuracy(simulation_posteriors_df)
         return self.accuracy_test_results
 
-    def uniformity_test(
+    def run_uniformity_test(
         self, k_draws: int = SBC_UNIFORMITY_THINNING_DRAWS, multithreaded: bool = True
     ) -> pd.DataFrame:
         """Perform the SBC uniformity analysis.
@@ -325,3 +345,22 @@ def calculate_parameter_rank_statistic(
         rank_stats_df = pd.concat([rank_stats_df, stat_df])
     rank_stats_df = rank_stats_df.reset_index(drop=True)
     return rank_stats_df
+
+
+def posterior_accuracy(simulation_posteriors_df: pd.DataFrame) -> pd.DataFrame:
+    """Get the accuracy of the simulation results.
+
+    Args:
+      simulation_posteriors_df (pd.DataFrame): Data frame of the summaries of the
+        posterior summaries.
+
+    Returns:
+        pd.DataFrame: Data frame of the accuracy of each parameter in the model.
+    """
+    return (
+        simulation_posteriors_df.groupby(["parameter_name"])["within_hdi"]
+        .mean()
+        .reset_index(drop=False)
+        .sort_values("within_hdi", ascending=False)
+        .reset_index(drop=True)
+    )
