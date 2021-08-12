@@ -8,10 +8,12 @@ from typing import Optional
 
 import pandas as pd
 import typer
+import xarray
 
 from src.command_line_interfaces import cli_helpers
 from src.io import model_config
 from src.loggers import logger
+from src.modeling import simulation_based_calibration_helpers as sbc
 from src.models import configuration
 from src.project_enums import MockDataSize, ModelFitMethod, SpecletPipeline
 
@@ -56,6 +58,7 @@ def run_sbc(
     sim_number: int,
     mock_data_path: Optional[Path] = None,
     data_size: Optional[MockDataSize] = None,
+    check_results: bool = True,
 ) -> None:
     """CLI for running a round of simulation-based calibration for a model.
 
@@ -71,6 +74,8 @@ def run_sbc(
         data_size (Optional[MockDataSize]): What size of mock data should be generated?
           Is ignored if a path is supplied to pre-existing mock data in the
           `mock_data_path` argument. Defaults to None.
+        check_results (bool, optional): Should the results be checked for completeness
+          (based off of known issues with the SBC pipeline's fidelity)? Defaults to True
 
     Returns:
         None: None
@@ -101,8 +106,23 @@ def run_sbc(
         size=data_size,
         fit_kwargs=fit_kwargs,
     )
+
     logger.info("SBC finished.")
+
+    if check_results:
+        logger.info("Checking SBC results...")
+        _check_sbc_results(cache_dir=cache_dir, fit_method=fit_method)
     return None
+
+
+def _check_sbc_results(cache_dir: Path, fit_method: ModelFitMethod) -> bool:
+    sbc_fm = sbc.SBCFileManager(cache_dir)
+    res = sbc_fm.get_sbc_results()
+
+    assert hasattr(res.inference_obj, "sample_stats")
+    assert isinstance(res.inference_obj.get("sample_stats"), xarray.Dataset)
+
+    return True
 
 
 if __name__ == "__main__":

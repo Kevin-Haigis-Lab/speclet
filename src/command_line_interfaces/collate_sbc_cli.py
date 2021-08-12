@@ -7,6 +7,7 @@ from typing import Optional
 
 import typer
 
+from src.analysis import sbc_analysis as sbcanal
 from src.command_line_interfaces import cli_helpers
 from src.exceptions import UnsupportedFileTypeError
 from src.loggers import logger
@@ -47,10 +48,10 @@ def uniformity_test_results(
         f"Performing uniformity test over {num_permutations} "
         + f"SBC simulations in '{root_perm_dir.as_posix()}'."
     )
-    sbc_analyzer = sbc.SBCAnalysis(
+    sbc_analyzer = sbcanal.SBCAnalysis(
         root_dir=root_perm_dir, pattern="sbc-perm", n_simulations=num_permutations
     )
-    sbc_uniformity_df = sbc_analyzer.uniformity_test()
+    sbc_uniformity_df = sbc_analyzer.run_uniformity_test()
 
     if output_path.suffix == ".pkl":
         logger.info(f"Saving final results to pickle: '{output_path.as_posix()}'.")

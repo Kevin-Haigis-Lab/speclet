@@ -145,7 +145,15 @@ class SBCAnalysis:
 
         def read_mcmc_diagnostics(sbc_fm: sbc.SBCFileManager) -> pmanal.MCMCDescription:
             results = sbc_fm.get_sbc_results()
-            return pmanal.describe_mcmc(results.inference_obj, silent=True, plot=False)
+            try:
+                res = pmanal.describe_mcmc(
+                    results.inference_obj, silent=True, plot=False
+                )
+                return res
+            except AttributeError as err:
+                raise Exception(
+                    f"Attribute error in SBC '{sbc_fm.dir.name}': {str(err)}"
+                )
 
         sbc_file_managers = self.get_simulation_file_managers()
         with ThreadPoolExecutor() as executor:

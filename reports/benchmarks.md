@@ -255,15 +255,15 @@ benchmark_df.groupby(["pipeline", "rule"]).mean().round(2)
     <tr>
       <th rowspan="4" valign="top">012_010_simulation-based-calibration-snakemake</th>
       <th>collate_sbc</th>
-      <td>178.84</td>
-      <td>288.88</td>
-      <td>1072.03</td>
-      <td>286.40</td>
-      <td>286.48</td>
-      <td>2729.82</td>
-      <td>0.28</td>
-      <td>43.00</td>
-      <td>88.26</td>
+      <td>180.46</td>
+      <td>380.04</td>
+      <td>2034.80</td>
+      <td>378.15</td>
+      <td>378.22</td>
+      <td>2595.87</td>
+      <td>0.22</td>
+      <td>41.23</td>
+      <td>83.04</td>
     </tr>
     <tr>
       <th>generate_mockdata</th>
@@ -291,15 +291,15 @@ benchmark_df.groupby(["pipeline", "rule"]).mean().round(2)
     </tr>
     <tr>
       <th>sbc_uniformity_test</th>
-      <td>403.19</td>
-      <td>4553.32</td>
-      <td>5082.03</td>
-      <td>4550.75</td>
-      <td>4550.79</td>
-      <td>17752.07</td>
+      <td>420.44</td>
+      <td>5097.16</td>
+      <td>6935.55</td>
+      <td>5095.12</td>
+      <td>5095.18</td>
+      <td>18126.12</td>
       <td>0.14</td>
-      <td>49.95</td>
-      <td>201.61</td>
+      <td>54.10</td>
+      <td>227.55</td>
     </tr>
   </tbody>
 </table>
@@ -404,7 +404,7 @@ sns.catplot(
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-27
+    Last updated: 2021-08-12
 
     Python implementation: CPython
     Python version       : 3.9.6
@@ -415,14 +415,14 @@ sns.catplot(
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-a-16-167.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
 
     Git branch: sbc-uniform-check
 
-    plotnine: 0.8.0
-    janitor : 0.21.0
-    pandas  : 1.3.0
     seaborn : 0.11.1
+    janitor : 0.21.0
+    plotnine: 0.8.0
+    pandas  : 1.3.0
