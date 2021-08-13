@@ -21,14 +21,6 @@ class SpecletSimple(SpecletModel):
     \\end{aligned}
     $$
 
-    where:
-
-    - s: sgRNA
-    - g: gene
-    - c: cell line
-    - b: batch
-    - C: copy number (input data)
-
     This is just a simple model for helping with testing pipelines and analyses.
     """
 

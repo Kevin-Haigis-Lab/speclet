@@ -55,12 +55,12 @@ tests.</p>
 5. Add the model to the following locations:
     - **src/models/configuration.py**: to the `model_option_map` in `get_model_class()`
     - **src/project_enums.py**: to the `ModelOption` enum
-    - **src/types.py**: to `SpecletProjectModelTypes` and `ModelConfigurationT` if the 
+    - **src/types.py**: to `SpecletProjectModelTypes` and `ModelConfigurationT` if the
       model has a custom configuration class
 6. Add the model to the model configuration file **models/model-configs.yaml**.
 7. Check the configuration file format with `make check_model_config`.
 
-A good and simple example is the `src.models.speclet_simple.SpecletSimple` model and its 
+A good and simple example is the `src.models.speclet_simple.SpecletSimple` model and its
 tests.
 &#34;&#34;&#34;</code></pre>
 </details>
