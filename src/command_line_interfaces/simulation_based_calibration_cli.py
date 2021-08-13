@@ -3,6 +3,7 @@
 """A helpful command line interface for simulation-based calibration."""
 
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
@@ -20,6 +21,12 @@ from src.project_enums import MockDataSize, ModelFitMethod, SpecletPipeline
 cli_helpers.configure_pretty()
 
 app = typer.Typer()
+
+
+class FailedSBCCheckError(BaseException):
+    """Failed SBC check error."""
+
+    pass
 
 
 @app.command()
@@ -111,18 +118,56 @@ def run_sbc(
 
     if check_results:
         logger.info("Checking SBC results...")
-        _check_sbc_results(cache_dir=cache_dir, fit_method=fit_method)
+        sbc_check = _check_sbc_results(cache_dir=cache_dir, fit_method=fit_method)
+        if sbc_check.result:
+            logger.info("SBC check successful with no errors detected.")
+        else:
+            logger.error(f"SBC check failed: {sbc_check.message}")
+            logger.warn("Clearing cached results of SBC.")
+            sbc_check.sbc_file_manager.clear_results()
+            raise FailedSBCCheckError(sbc_check.message)
+
     return None
 
 
-def _check_sbc_results(cache_dir: Path, fit_method: ModelFitMethod) -> bool:
+@dataclass
+class SBCCheckResult:
+    """Results of the SBC check."""
+
+    sbc_file_manager: sbc.SBCFileManager
+    result: bool
+    message: str
+
+
+def _check_sbc_results(cache_dir: Path, fit_method: ModelFitMethod) -> SBCCheckResult:
     sbc_fm = sbc.SBCFileManager(cache_dir)
-    res = sbc_fm.get_sbc_results()
 
-    assert hasattr(res.inference_obj, "sample_stats")
-    assert isinstance(res.inference_obj.get("sample_stats"), xarray.Dataset)
+    if not sbc_fm.all_data_exists():
+        return SBCCheckResult(
+            sbc_fm, result=False, message="Not all result files exist."
+        )
+    if not sbc_fm.simulation_data_exists():
+        return SBCCheckResult(
+            sbc_fm, result=False, message="Mock data file does not exist."
+        )
 
-    return True
+    sbc_res = sbc_fm.get_sbc_results()
+
+    if fit_method is ModelFitMethod.MCMC:
+        if not hasattr(sbc_res.inference_obj, "sample_stats"):
+            return SBCCheckResult(
+                sbc_fm,
+                result=False,
+                message="No sampling statistics.",
+            )
+        if not isinstance(sbc_res.inference_obj.get("sample_stats"), xarray.Dataset):
+            return SBCCheckResult(
+                sbc_fm,
+                result=False,
+                message="Sampling statistics is not a xarray.Dataset.",
+            )
+
+    return SBCCheckResult(sbc_fm, True, "")
 
 
 if __name__ == "__main__":
