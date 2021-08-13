@@ -31,7 +31,7 @@
 &#34;&#34;&#34;Foundational model object and related functions for the Speclet project.&#34;&#34;&#34;
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 import arviz as az
 import pymc3 as pm
@@ -88,7 +88,7 @@ class Pymc3ModelCacheManager:
         &#34;&#34;&#34;
         return self.mcmc_cache_delegate.read_cached_sampling()
 
-    def get_advi_cache(self) -&gt; Tuple[az.InferenceData, pm.Approximation]:
+    def get_advi_cache(self) -&gt; tuple[az.InferenceData, pm.Approximation]:
         &#34;&#34;&#34;Get ADVI fitting results from cache.
 
         Args:
@@ -243,7 +243,7 @@ cache directory.</dd>
         &#34;&#34;&#34;
         return self.mcmc_cache_delegate.read_cached_sampling()
 
-    def get_advi_cache(self) -&gt; Tuple[az.InferenceData, pm.Approximation]:
+    def get_advi_cache(self) -&gt; tuple[az.InferenceData, pm.Approximation]:
         &#34;&#34;&#34;Get ADVI fitting results from cache.
 
         Args:
@@ -373,7 +373,7 @@ cache directory.</dd>
 </details>
 </dd>
 <dt id="src.managers.model_cache_managers.Pymc3ModelCacheManager.get_advi_cache"><code class="name flex">
-<span>def <span class="ident">get_advi_cache</span></span>(<span>self) -> Tuple[arviz.data.inference_data.InferenceData, pymc3.variational.opvi.Approximation]</span>
+<span>def <span class="ident">get_advi_cache</span></span>(<span>self) -> tuple</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get ADVI fitting results from cache.</p>
@@ -391,7 +391,7 @@ cache directory.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_advi_cache(self) -&gt; Tuple[az.InferenceData, pm.Approximation]:
+<pre><code class="python">def get_advi_cache(self) -&gt; tuple[az.InferenceData, pm.Approximation]:
     &#34;&#34;&#34;Get ADVI fitting results from cache.
 
     Args:

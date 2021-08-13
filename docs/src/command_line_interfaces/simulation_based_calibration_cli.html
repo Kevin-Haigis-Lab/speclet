@@ -30,26 +30,70 @@
 
 &#34;&#34;&#34;A helpful command line interface for simulation-based calibration.&#34;&#34;&#34;
 
+import tempfile
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
+import pandas as pd
 import typer
+import xarray
 
 from src.command_line_interfaces import cli_helpers
 from src.io import model_config
 from src.loggers import logger
+from src.modeling import simulation_based_calibration_helpers as sbc
 from src.models import configuration
 from src.project_enums import MockDataSize, ModelFitMethod, SpecletPipeline
 
 cli_helpers.configure_pretty()
 
+app = typer.Typer()
 
+
+class FailedSBCCheckError(BaseException):
+    &#34;&#34;&#34;Failed SBC check error.&#34;&#34;&#34;
+
+    pass
+
+
+@app.command()
+def make_mock_data(
+    name: str,
+    config_path: Path,
+    data_size: MockDataSize,
+    save_path: Path,
+    random_seed: Optional[int] = None,
+) -&gt; None:
+    &#34;&#34;&#34;Generate mock data for a model.
+
+    Args:
+        name (str): Unique identifiable name for the model.
+        config_path (Path): Path to the model configuration file.
+        save_path (Optional[Path]): Path to save the data frame to as a CSV.
+        data_size (Optional[MockDataSize]): What size of mock data should be generated?
+          Is ignored if a path is supplied to pre-existing mock data in the
+          `mock_data_path` argument. Defaults to None.
+        save_path (Optional[Path]): Path to save the data frame to as a CSV.
+        random_seed (Optional[int]): Random seed for data generation process.
+    &#34;&#34;&#34;
+    sp_model = configuration.get_config_and_instantiate_model(
+        config_path=config_path, name=name, root_cache_dir=Path(tempfile.gettempdir())
+    )
+    mock_data = sp_model.generate_mock_data(size=data_size, random_seed=random_seed)
+    mock_data.to_csv(save_path)
+
+
+@app.command()
 def run_sbc(
     name: str,
     config_path: Path,
     fit_method: ModelFitMethod,
     cache_dir: Path,
     sim_number: int,
-    data_size: MockDataSize,
+    mock_data_path: Optional[Path] = None,
+    data_size: Optional[MockDataSize] = None,
+    check_results: bool = True,
 ) -&gt; None:
     &#34;&#34;&#34;CLI for running a round of simulation-based calibration for a model.
 
@@ -59,8 +103,14 @@ def run_sbc(
         fit_method (ModelFitMethod): Fitting method.
         cache_dir (Path): Where to store the results.
         sim_number (int): Simulation number.
-        data_size (str): Which data size to use. See the actual methods
-          for details and options.
+        mock_data_path (Optional[Path]): Path to pre-existing mock data (formatted as a
+          CSV) to use in the SBC. If novel data should be generated instead, pass the
+          desied size to the `data_size` argument. Defaults to None.
+        data_size (Optional[MockDataSize]): What size of mock data should be generated?
+          Is ignored if a path is supplied to pre-existing mock data in the
+          `mock_data_path` argument. Defaults to None.
+        check_results (bool, optional): Should the results be checked for completeness
+          (based off of known issues with the SBC pipeline&#39;s fidelity)? Defaults to True
 
     Returns:
         None: None
@@ -77,20 +127,79 @@ def run_sbc(
     if fit_kwargs != {}:
         logger.info(&#34;Found specific fitting keyword arguments.&#34;)
 
+    mock_data: Optional[pd.DataFrame] = None
+    if mock_data_path is not None:
+        logger.info(&#34;Loading pre-existing mock data for the SBC.&#34;)
+        mock_data = pd.read_csv(mock_data_path)
+
     logger.info(f&#34;Running SBC for model &#39;{sp_model.__class__}&#39; - &#39;{name}&#39;.&#34;)
     sp_model.run_simulation_based_calibration(
         cache_dir,
         fit_method=fit_method,
         random_seed=sim_number,
+        mock_data=mock_data,
         size=data_size,
         fit_kwargs=fit_kwargs,
     )
+
     logger.info(&#34;SBC finished.&#34;)
+
+    if check_results:
+        logger.info(&#34;Checking SBC results...&#34;)
+        sbc_check = _check_sbc_results(cache_dir=cache_dir, fit_method=fit_method)
+        if sbc_check.result:
+            logger.info(&#34;SBC check successful with no errors detected.&#34;)
+        else:
+            logger.error(f&#34;SBC check failed: {sbc_check.message}&#34;)
+            logger.warn(&#34;Clearing cached results of SBC.&#34;)
+            sbc_check.sbc_file_manager.clear_results()
+            raise FailedSBCCheckError(sbc_check.message)
+
     return None
 
 
+@dataclass
+class SBCCheckResult:
+    &#34;&#34;&#34;Results of the SBC check.&#34;&#34;&#34;
+
+    sbc_file_manager: sbc.SBCFileManager
+    result: bool
+    message: str
+
+
+def _check_sbc_results(cache_dir: Path, fit_method: ModelFitMethod) -&gt; SBCCheckResult:
+    sbc_fm = sbc.SBCFileManager(cache_dir)
+
+    if not sbc_fm.all_data_exists():
+        return SBCCheckResult(
+            sbc_fm, result=False, message=&#34;Not all result files exist.&#34;
+        )
+    if not sbc_fm.simulation_data_exists():
+        return SBCCheckResult(
+            sbc_fm, result=False, message=&#34;Mock data file does not exist.&#34;
+        )
+
+    sbc_res = sbc_fm.get_sbc_results()
+
+    if fit_method is ModelFitMethod.MCMC:
+        if not hasattr(sbc_res.inference_obj, &#34;sample_stats&#34;):
+            return SBCCheckResult(
+                sbc_fm,
+                result=False,
+                message=&#34;No sampling statistics.&#34;,
+            )
+        if not isinstance(sbc_res.inference_obj.get(&#34;sample_stats&#34;), xarray.Dataset):
+            return SBCCheckResult(
+                sbc_fm,
+                result=False,
+                message=&#34;Sampling statistics is not a xarray.Dataset.&#34;,
+            )
+
+    return SBCCheckResult(sbc_fm, True, &#34;&#34;)
+
+
 if __name__ == &#34;__main__&#34;:
-    typer.run(run_sbc)</code></pre>
+    app()</code></pre>
 </details>
 </section>
 <section>
@@ -100,8 +209,61 @@ if __name__ == &#34;__main__&#34;:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="src.command_line_interfaces.simulation_based_calibration_cli.make_mock_data"><code class="name flex">
+<span>def <span class="ident">make_mock_data</span></span>(<span>name: str, config_path: pathlib.Path, data_size: <a title="src.project_enums.MockDataSize" href="../project_enums.html#src.project_enums.MockDataSize">MockDataSize</a>, save_path: pathlib.Path, random_seed: Optional[int] = None) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate mock data for a model.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Unique identifiable name for the model.</dd>
+<dt><strong><code>config_path</code></strong> :&ensp;<code>Path</code></dt>
+<dd>Path to the model configuration file.</dd>
+<dt><strong><code>save_path</code></strong> :&ensp;<code>Optional[Path]</code></dt>
+<dd>Path to save the data frame to as a CSV.</dd>
+<dt><strong><code>data_size</code></strong> :&ensp;<code>Optional[MockDataSize]</code></dt>
+<dd>What size of mock data should be generated?
+Is ignored if a path is supplied to pre-existing mock data in the
+<code>mock_data_path</code> argument. Defaults to None.</dd>
+<dt><strong><code>save_path</code></strong> :&ensp;<code>Optional[Path]</code></dt>
+<dd>Path to save the data frame to as a CSV.</dd>
+<dt><strong><code>random_seed</code></strong> :&ensp;<code>Optional[int]</code></dt>
+<dd>Random seed for data generation process.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.command()
+def make_mock_data(
+    name: str,
+    config_path: Path,
+    data_size: MockDataSize,
+    save_path: Path,
+    random_seed: Optional[int] = None,
+) -&gt; None:
+    &#34;&#34;&#34;Generate mock data for a model.
+
+    Args:
+        name (str): Unique identifiable name for the model.
+        config_path (Path): Path to the model configuration file.
+        save_path (Optional[Path]): Path to save the data frame to as a CSV.
+        data_size (Optional[MockDataSize]): What size of mock data should be generated?
+          Is ignored if a path is supplied to pre-existing mock data in the
+          `mock_data_path` argument. Defaults to None.
+        save_path (Optional[Path]): Path to save the data frame to as a CSV.
+        random_seed (Optional[int]): Random seed for data generation process.
+    &#34;&#34;&#34;
+    sp_model = configuration.get_config_and_instantiate_model(
+        config_path=config_path, name=name, root_cache_dir=Path(tempfile.gettempdir())
+    )
+    mock_data = sp_model.generate_mock_data(size=data_size, random_seed=random_seed)
+    mock_data.to_csv(save_path)</code></pre>
+</details>
+</dd>
 <dt id="src.command_line_interfaces.simulation_based_calibration_cli.run_sbc"><code class="name flex">
-<span>def <span class="ident">run_sbc</span></span>(<span>name: str, config_path: pathlib.Path, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, cache_dir: pathlib.Path, sim_number: int, data_size: <a title="src.project_enums.MockDataSize" href="../project_enums.html#src.project_enums.MockDataSize">MockDataSize</a>) -> NoneType</span>
+<span>def <span class="ident">run_sbc</span></span>(<span>name: str, config_path: pathlib.Path, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, cache_dir: pathlib.Path, sim_number: int, mock_data_path: Optional[pathlib.Path] = None, data_size: Optional[<a title="src.project_enums.MockDataSize" href="../project_enums.html#src.project_enums.MockDataSize">MockDataSize</a>] = None, check_results: bool = True) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>CLI for running a round of simulation-based calibration for a model.</p>
@@ -117,9 +279,17 @@ if __name__ == &#34;__main__&#34;:
 <dd>Where to store the results.</dd>
 <dt><strong><code>sim_number</code></strong> :&ensp;<code>int</code></dt>
 <dd>Simulation number.</dd>
-<dt><strong><code>data_size</code></strong> :&ensp;<code>str</code></dt>
-<dd>Which data size to use. See the actual methods
-for details and options.</dd>
+<dt><strong><code>mock_data_path</code></strong> :&ensp;<code>Optional[Path]</code></dt>
+<dd>Path to pre-existing mock data (formatted as a
+CSV) to use in the SBC. If novel data should be generated instead, pass the
+desied size to the <code>data_size</code> argument. Defaults to None.</dd>
+<dt><strong><code>data_size</code></strong> :&ensp;<code>Optional[MockDataSize]</code></dt>
+<dd>What size of mock data should be generated?
+Is ignored if a path is supplied to pre-existing mock data in the
+<code>mock_data_path</code> argument. Defaults to None.</dd>
+<dt><strong><code>check_results</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the results be checked for completeness
+(based off of known issues with the SBC pipeline's fidelity)? Defaults to True</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -130,13 +300,16 @@ for details and options.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run_sbc(
+<pre><code class="python">@app.command()
+def run_sbc(
     name: str,
     config_path: Path,
     fit_method: ModelFitMethod,
     cache_dir: Path,
     sim_number: int,
-    data_size: MockDataSize,
+    mock_data_path: Optional[Path] = None,
+    data_size: Optional[MockDataSize] = None,
+    check_results: bool = True,
 ) -&gt; None:
     &#34;&#34;&#34;CLI for running a round of simulation-based calibration for a model.
 
@@ -146,8 +319,14 @@ for details and options.</dd>
         fit_method (ModelFitMethod): Fitting method.
         cache_dir (Path): Where to store the results.
         sim_number (int): Simulation number.
-        data_size (str): Which data size to use. See the actual methods
-          for details and options.
+        mock_data_path (Optional[Path]): Path to pre-existing mock data (formatted as a
+          CSV) to use in the SBC. If novel data should be generated instead, pass the
+          desied size to the `data_size` argument. Defaults to None.
+        data_size (Optional[MockDataSize]): What size of mock data should be generated?
+          Is ignored if a path is supplied to pre-existing mock data in the
+          `mock_data_path` argument. Defaults to None.
+        check_results (bool, optional): Should the results be checked for completeness
+          (based off of known issues with the SBC pipeline&#39;s fidelity)? Defaults to True
 
     Returns:
         None: None
@@ -164,21 +343,82 @@ for details and options.</dd>
     if fit_kwargs != {}:
         logger.info(&#34;Found specific fitting keyword arguments.&#34;)
 
+    mock_data: Optional[pd.DataFrame] = None
+    if mock_data_path is not None:
+        logger.info(&#34;Loading pre-existing mock data for the SBC.&#34;)
+        mock_data = pd.read_csv(mock_data_path)
+
     logger.info(f&#34;Running SBC for model &#39;{sp_model.__class__}&#39; - &#39;{name}&#39;.&#34;)
     sp_model.run_simulation_based_calibration(
         cache_dir,
         fit_method=fit_method,
         random_seed=sim_number,
+        mock_data=mock_data,
         size=data_size,
         fit_kwargs=fit_kwargs,
     )
+
     logger.info(&#34;SBC finished.&#34;)
+
+    if check_results:
+        logger.info(&#34;Checking SBC results...&#34;)
+        sbc_check = _check_sbc_results(cache_dir=cache_dir, fit_method=fit_method)
+        if sbc_check.result:
+            logger.info(&#34;SBC check successful with no errors detected.&#34;)
+        else:
+            logger.error(f&#34;SBC check failed: {sbc_check.message}&#34;)
+            logger.warn(&#34;Clearing cached results of SBC.&#34;)
+            sbc_check.sbc_file_manager.clear_results()
+            raise FailedSBCCheckError(sbc_check.message)
+
     return None</code></pre>
 </details>
 </dd>
 </dl>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="src.command_line_interfaces.simulation_based_calibration_cli.FailedSBCCheckError"><code class="flex name class">
+<span>class <span class="ident">FailedSBCCheckError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Failed SBC check error.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FailedSBCCheckError(BaseException):
+    &#34;&#34;&#34;Failed SBC check error.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="src.command_line_interfaces.simulation_based_calibration_cli.SBCCheckResult"><code class="flex name class">
+<span>class <span class="ident">SBCCheckResult</span></span>
+<span>(</span><span>sbc_file_manager: <a title="src.modeling.simulation_based_calibration_helpers.SBCFileManager" href="../modeling/simulation_based_calibration_helpers.html#src.modeling.simulation_based_calibration_helpers.SBCFileManager">SBCFileManager</a>, result: bool, message: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Results of the SBC check.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class SBCCheckResult:
+    &#34;&#34;&#34;Results of the SBC check.&#34;&#34;&#34;
+
+    sbc_file_manager: sbc.SBCFileManager
+    result: bool
+    message: str</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -194,7 +434,18 @@ for details and options.</dd>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="src.command_line_interfaces.simulation_based_calibration_cli.make_mock_data" href="#src.command_line_interfaces.simulation_based_calibration_cli.make_mock_data">make_mock_data</a></code></li>
 <li><code><a title="src.command_line_interfaces.simulation_based_calibration_cli.run_sbc" href="#src.command_line_interfaces.simulation_based_calibration_cli.run_sbc">run_sbc</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="src.command_line_interfaces.simulation_based_calibration_cli.FailedSBCCheckError" href="#src.command_line_interfaces.simulation_based_calibration_cli.FailedSBCCheckError">FailedSBCCheckError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="src.command_line_interfaces.simulation_based_calibration_cli.SBCCheckResult" href="#src.command_line_interfaces.simulation_based_calibration_cli.SBCCheckResult">SBCCheckResult</a></code></h4>
+</li>
 </ul>
 </li>
 </ul>

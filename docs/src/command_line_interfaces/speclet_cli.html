@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>src.formatting API documentation</title>
-<meta name="description" content="Formatters and formatting." />
+<title>src.command_line_interfaces.speclet_cli API documentation</title>
+<meta name="description" content="Commands for general project needs." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -18,60 +18,83 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>src.formatting</code></h1>
+<h1 class="title">Module <code>src.command_line_interfaces.speclet_cli</code></h1>
 </header>
 <section id="section-intro">
-<p>Formatters and formatting.</p>
+<p>Commands for general project needs.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Formatters and formatting.&#34;&#34;&#34;
+<pre><code class="python">#!/usr/bin/env python3
 
-from datetime import timedelta
-from enum import Enum, unique
-from typing import Callable, Optional, Union
+&#34;&#34;&#34;Commands for general project needs.&#34;&#34;&#34;
+
+import logging
+import tempfile
+from pathlib import Path
+from typing import Optional
+
+import pymc3 as pm
+import tqdm
+import typer
+
+from src.io import model_config
+from src.loggers import set_console_handler_level
+from src.models import configuration
+from src.project_enums import MockDataSize
+
+app = typer.Typer()
+
+set_console_handler_level(logging.ERROR)
 
 
-@unique
-class TimeDeltaFormat(str, Enum):
-    &#34;&#34;&#34;Pre-built timedelta formatting options.&#34;&#34;&#34;
-
-    SLURM = &#34;{days}-{hours:02d}:{minutes:02d}&#34;
-    DRMAA = &#34;{hours:02d}:{minutes:02d}:00&#34;
-
-
-def _drmaa_timedelta_format_callabck(d: dict[str, int]) -&gt; None:
-    d[&#34;hours&#34;] = (d[&#34;days&#34;] * 24) + d[&#34;hours&#34;]
-
-
-def format_timedelta(
-    tdelta: timedelta,
-    fmt: Union[str, TimeDeltaFormat],
-    callback: Optional[Callable[[dict[str, int]], None]] = None,
-) -&gt; str:
-    &#34;&#34;&#34;Format time delta object.
+@app.command()
+def model_graphs(
+    output_dir: Path = Path(&#34;models/model-graph-images&#34;),
+    config_path: Optional[Path] = None,
+    skip_existing: bool = False,
+) -&gt; None:
+    &#34;&#34;&#34;Save PDFs of graphs of each model in a configuration file.
 
     Args:
-        tdelta (timedelta): Time delta object.
-        fmt (Union[str, TimeDeltaFormat]): Format string with keys for &#39;days&#39;, &#39;hours&#39;,
-          and &#39;minutes&#39;.
-
-    Returns:
-        [type]: Formatted time delta.
+        output_dir (Path, optional): Where to save the PDF files. Defaults to
+          &#34;models/model-graph-images&#34;.
+        config_path (Optional[Path], optional): Path to a configuration file. Passing
+          None (default) results in using the default configuration file for the
+          project.
+        skip_existing (bool, optional): Should PDFs that already exist be skipped?
+          Defaults to False.
     &#34;&#34;&#34;
-    if isinstance(fmt, TimeDeltaFormat):
-        if fmt is TimeDeltaFormat.DRMAA and callback is None:
-            callback = _drmaa_timedelta_format_callabck
+    if config_path is None:
+        config_path = model_config.get_model_config()
+    if not output_dir.exists():
+        output_dir.mkdir(parents=True)
 
-        fmt = fmt.value
+    configs = model_config.get_model_configurations(config_path)
 
-    d = {&#34;days&#34;: tdelta.days}
-    d[&#34;hours&#34;], rem = divmod(tdelta.seconds, 3600)
-    d[&#34;minutes&#34;], d[&#34;seconds&#34;] = divmod(rem, 60)
-    if callback is not None:
-        callback(d)
-    return fmt.format(**d)</code></pre>
+    typer.echo(f&#34;Saving images to &#39;{output_dir.as_posix()}&#39;.&#34;)
+    typer.echo(f&#34;Found {len(configs.configurations)} model configurations.&#34;)
+    for config in tqdm.tqdm(configs.configurations):
+        output_path = output_dir / config.name
+        if (
+            skip_existing
+            and (output_path.parent / (output_path.name + &#34;.pdf&#34;)).exists()
+        ):
+            continue
+        sp_model = configuration.instantiate_and_configure_model(
+            config, root_cache_dir=Path(tempfile.mkdtemp())
+        )
+        mock_data = sp_model.generate_mock_data(MockDataSize.SMALL, random_seed=1)
+        sp_model.data_manager.set_data(mock_data)
+        sp_model.build_model()
+        mdl_graph = pm.model_to_graphviz(sp_model.model)
+        mdl_graph.render(output_path.as_posix(), format=&#34;pdf&#34;, cleanup=True)
+    return
+
+
+if __name__ == &#34;__main__&#34;:
+    app()</code></pre>
 </details>
 </section>
 <section>
@@ -81,97 +104,75 @@ def format_timedelta(
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="src.formatting.format_timedelta"><code class="name flex">
-<span>def <span class="ident">format_timedelta</span></span>(<span>tdelta: datetime.timedelta, fmt: Union[str, src.formatting.TimeDeltaFormat], callback: Optional[Callable[[dict[str, int]], NoneType]] = None) -> str</span>
+<dt id="src.command_line_interfaces.speclet_cli.model_graphs"><code class="name flex">
+<span>def <span class="ident">model_graphs</span></span>(<span>output_dir: pathlib.Path = PosixPath('models/model-graph-images'), config_path: Optional[pathlib.Path] = None, skip_existing: bool = False) -> NoneType</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Format time delta object.</p>
+<div class="desc"><p>Save PDFs of graphs of each model in a configuration file.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>tdelta</code></strong> :&ensp;<code>timedelta</code></dt>
-<dd>Time delta object.</dd>
-<dt><strong><code>fmt</code></strong> :&ensp;<code>Union[str, <a title="src.formatting.TimeDeltaFormat" href="#src.formatting.TimeDeltaFormat">TimeDeltaFormat</a>]</code></dt>
-<dd>Format string with keys for 'days', 'hours',
-and 'minutes'.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>[type]</code></dt>
-<dd>Formatted time delta.</dd>
+<dt><strong><code>output_dir</code></strong> :&ensp;<code>Path</code>, optional</dt>
+<dd>Where to save the PDF files. Defaults to
+"models/model-graph-images".</dd>
+<dt><strong><code>config_path</code></strong> :&ensp;<code>Optional[Path]</code>, optional</dt>
+<dd>Path to a configuration file. Passing
+None (default) results in using the default configuration file for the
+project.</dd>
+<dt><strong><code>skip_existing</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should PDFs that already exist be skipped?
+Defaults to False.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def format_timedelta(
-    tdelta: timedelta,
-    fmt: Union[str, TimeDeltaFormat],
-    callback: Optional[Callable[[dict[str, int]], None]] = None,
-) -&gt; str:
-    &#34;&#34;&#34;Format time delta object.
+<pre><code class="python">@app.command()
+def model_graphs(
+    output_dir: Path = Path(&#34;models/model-graph-images&#34;),
+    config_path: Optional[Path] = None,
+    skip_existing: bool = False,
+) -&gt; None:
+    &#34;&#34;&#34;Save PDFs of graphs of each model in a configuration file.
 
     Args:
-        tdelta (timedelta): Time delta object.
-        fmt (Union[str, TimeDeltaFormat]): Format string with keys for &#39;days&#39;, &#39;hours&#39;,
-          and &#39;minutes&#39;.
-
-    Returns:
-        [type]: Formatted time delta.
+        output_dir (Path, optional): Where to save the PDF files. Defaults to
+          &#34;models/model-graph-images&#34;.
+        config_path (Optional[Path], optional): Path to a configuration file. Passing
+          None (default) results in using the default configuration file for the
+          project.
+        skip_existing (bool, optional): Should PDFs that already exist be skipped?
+          Defaults to False.
     &#34;&#34;&#34;
-    if isinstance(fmt, TimeDeltaFormat):
-        if fmt is TimeDeltaFormat.DRMAA and callback is None:
-            callback = _drmaa_timedelta_format_callabck
+    if config_path is None:
+        config_path = model_config.get_model_config()
+    if not output_dir.exists():
+        output_dir.mkdir(parents=True)
 
-        fmt = fmt.value
+    configs = model_config.get_model_configurations(config_path)
 
-    d = {&#34;days&#34;: tdelta.days}
-    d[&#34;hours&#34;], rem = divmod(tdelta.seconds, 3600)
-    d[&#34;minutes&#34;], d[&#34;seconds&#34;] = divmod(rem, 60)
-    if callback is not None:
-        callback(d)
-    return fmt.format(**d)</code></pre>
+    typer.echo(f&#34;Saving images to &#39;{output_dir.as_posix()}&#39;.&#34;)
+    typer.echo(f&#34;Found {len(configs.configurations)} model configurations.&#34;)
+    for config in tqdm.tqdm(configs.configurations):
+        output_path = output_dir / config.name
+        if (
+            skip_existing
+            and (output_path.parent / (output_path.name + &#34;.pdf&#34;)).exists()
+        ):
+            continue
+        sp_model = configuration.instantiate_and_configure_model(
+            config, root_cache_dir=Path(tempfile.mkdtemp())
+        )
+        mock_data = sp_model.generate_mock_data(MockDataSize.SMALL, random_seed=1)
+        sp_model.data_manager.set_data(mock_data)
+        sp_model.build_model()
+        mdl_graph = pm.model_to_graphviz(sp_model.model)
+        mdl_graph.render(output_path.as_posix(), format=&#34;pdf&#34;, cleanup=True)
+    return</code></pre>
 </details>
 </dd>
 </dl>
 </section>
 <section>
-<h2 class="section-title" id="header-classes">Classes</h2>
-<dl>
-<dt id="src.formatting.TimeDeltaFormat"><code class="flex name class">
-<span>class <span class="ident">TimeDeltaFormat</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Pre-built timedelta formatting options.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@unique
-class TimeDeltaFormat(str, Enum):
-    &#34;&#34;&#34;Pre-built timedelta formatting options.&#34;&#34;&#34;
-
-    SLURM = &#34;{days}-{hours:02d}:{minutes:02d}&#34;
-    DRMAA = &#34;{hours:02d}:{minutes:02d}:00&#34;</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.str</li>
-<li>enum.Enum</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="src.formatting.TimeDeltaFormat.DRMAA"><code class="name">var <span class="ident">DRMAA</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="src.formatting.TimeDeltaFormat.SLURM"><code class="name">var <span class="ident">SLURM</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
-</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -182,23 +183,12 @@ class TimeDeltaFormat(str, Enum):
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="src" href="index.html">src</a></code></li>
+<li><code><a title="src.command_line_interfaces" href="index.html">src.command_line_interfaces</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="src.formatting.format_timedelta" href="#src.formatting.format_timedelta">format_timedelta</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-classes">Classes</a></h3>
-<ul>
-<li>
-<h4><code><a title="src.formatting.TimeDeltaFormat" href="#src.formatting.TimeDeltaFormat">TimeDeltaFormat</a></code></h4>
-<ul class="">
-<li><code><a title="src.formatting.TimeDeltaFormat.DRMAA" href="#src.formatting.TimeDeltaFormat.DRMAA">DRMAA</a></code></li>
-<li><code><a title="src.formatting.TimeDeltaFormat.SLURM" href="#src.formatting.TimeDeltaFormat.SLURM">SLURM</a></code></li>
-</ul>
-</li>
+<li><code><a title="src.command_line_interfaces.speclet_cli.model_graphs" href="#src.command_line_interfaces.speclet_cli.model_graphs">model_graphs</a></code></li>
 </ul>
 </li>
 </ul>

@@ -30,7 +30,7 @@
 
 from abc import abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import arviz as az
 import numpy as np
@@ -40,14 +40,14 @@ from pydantic import BaseModel
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 import src.modeling.simulation_based_calibration_helpers as sbc
-from src.exceptions import CacheDoesNotExistError
+from src.exceptions import CacheDoesNotExistError, RequiredArgumentError
 from src.loggers import logger
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.managers.model_data_managers import DataManager
 from src.modeling import pymc3_sampling_api as pmapi
 from src.project_enums import MockDataSize, ModelFitMethod, assert_never
 
-ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
+ReplacementsDict = dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
 
 class UnableToLocateNamedVariable(Exception):
@@ -97,8 +97,8 @@ class SpecletModel:
 
     model: Optional[pm.Model] = None
     observed_var_name: Optional[str] = None
-    shared_vars: Optional[Dict[str, TTShared]] = None
-    advi_results: Optional[Tuple[az.InferenceData, pm.Approximation]] = None
+    shared_vars: Optional[dict[str, TTShared]] = None
+    advi_results: Optional[tuple[az.InferenceData, pm.Approximation]] = None
     mcmc_results: Optional[az.InferenceData] = None
 
     mcmc_sampling_params: MCMCSamplingParameters = MCMCSamplingParameters()
@@ -180,7 +180,7 @@ class SpecletModel:
         self.cache_manager.clear_all_caches()
 
     @abstractmethod
-    def model_specification(self) -&gt; Tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, str]:
         &#34;&#34;&#34;Define the PyMC3 model.
 
         This model must be overridden by an subclass to define the desired PyMC3 model.
@@ -235,7 +235,7 @@ class SpecletModel:
         target_accept: Optional[float] = None,
         prior_pred_samples: Optional[int] = None,
         random_seed: Optional[int] = None,
-        sample_kwargs: Optional[Dict[str, Any]] = None,
+        sample_kwargs: Optional[dict[str, Any]] = None,
         ignore_cache: bool = False,
     ) -&gt; az.InferenceData:
         &#34;&#34;&#34;MCMC sample the model.
@@ -259,7 +259,7 @@ class SpecletModel:
               prior distributions. Defaults to None.
             random_seed (Optional[int], optional): The random seed for sampling.
             Defaults to None.
-            sample_kwargs (Dict[str, Any], optional): Kwargs for the sampling method.
+            sample_kwargs (dict[str, Any], optional): Kwargs for the sampling method.
             Defaults to {}.
             ignore_cache (bool, optional): Should any cached results be ignored?
               Defaults to False.
@@ -332,14 +332,14 @@ class SpecletModel:
         &#34;&#34;&#34;
         return None
 
-    def get_advi_callbacks(self) -&gt; List[Any]:
+    def get_advi_callbacks(self) -&gt; list[Any]:
         &#34;&#34;&#34;Prepare a list of callbacks for ADVI fitting.
 
         This can be overridden by subclasses to apply custom callbacks or change the
         parameters of the CheckParametersConvergence callback.
 
         Returns:
-            List[Any]: List of callbacks.
+            list[Any]: list of callbacks.
         &#34;&#34;&#34;
         return [
             pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff=&#34;absolute&#34;)
@@ -357,7 +357,7 @@ class SpecletModel:
         prior_pred_samples: Optional[int] = None,
         random_seed: Optional[int] = None,
         ignore_cache: bool = False,
-    ) -&gt; Tuple[az.InferenceData, pm.Approximation]:
+    ) -&gt; tuple[az.InferenceData, pm.Approximation]:
         &#34;&#34;&#34;ADVI fit the model.
 
         This method primarily wraps the
@@ -375,18 +375,18 @@ class SpecletModel:
               model. Defaults to None.
             prior_pred_samples (Optional[int], optional): Number of samples from the
               prior distributions. Defaults to None.
-            callbacks (List[Callable], optional): List of fitting callbacks. Default is
+            callbacks (list[Callable], optional): list of fitting callbacks. Default is
               None.
             random_seed (Optional[int], optional): The random seed for sampling.
               Defaults to None.
-            fit_kwargs (Dict[str, Any], optional): Kwargs for the fitting method.
+            fit_kwargs (dict[str, Any], optional): Kwargs for the fitting method.
               Defaults to {}.
 
         Raises:
             AttributeError: Raised if the model does not yet exist.
 
         Returns:
-            Tuple[az.InferenceData, pm.Approximation]: The results of fitting the model
+            tuple[az.InferenceData, pm.Approximation]: The results of fitting the model
               and the approximation object.
         &#34;&#34;&#34;
         logger.debug(&#34;Beginning ADVI fitting method.&#34;)
@@ -406,7 +406,7 @@ class SpecletModel:
                 + &#34;Make sure to run `model.build_model()` first.&#34;
             )
 
-        fit_kwargs: Dict[str, Any] = {}
+        fit_kwargs: dict[str, Any] = {}
         replacements = self.get_replacement_parameters()
         if replacements is not None:
             fit_kwargs[&#34;more_replacements&#34;] = replacements
@@ -439,24 +439,53 @@ class SpecletModel:
         self.write_advi_cache()
         return self.advi_results
 
+    def generate_mock_data(
+        self, size: MockDataSize, random_seed: Optional[int] = None
+    ) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Generate mock data.
+
+        Args:
+            size (MockDataSize): Size of the dataset to mock.
+            random_seed (Optional[int], optional): Random seed. Defaults to None.
+
+        Returns:
+            pd.DataFrame: Mock data.
+        &#34;&#34;&#34;
+        logger.info(&#34;Creating new simulation data.&#34;)
+        mock_data = self.data_manager.generate_mock_data(
+            size=size, random_seed=random_seed
+        )
+        return mock_data
+
     def run_simulation_based_calibration(
         self,
         results_path: Path,
         fit_method: ModelFitMethod,
-        size: MockDataSize,
+        mock_data: Optional[pd.DataFrame] = None,
+        size: Optional[MockDataSize] = None,
         random_seed: Optional[int] = None,
-        fit_kwargs: Optional[Dict[Any, Any]] = None,
+        fit_kwargs: Optional[dict[Any, Any]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Run a round of simulation-based calibration.
+
+        Pre-generated mock data can be passed for use in the simulation through the
+        `mock_data` argument or novel data can be generated by passing a preferred size
+        through the `size` argument.
 
         Args:
             results_path (Path): Where to store the results.
             fit_method (ModelFitMethod): Which method to use for fitting.
             random_seed (Optional[int], optional): Random seed (for reproducibility).
               Defaults to None.
-            size (MockDataSize): Size of the data set to mock. Defaults to &#34;large&#34;.
-            fit_kwargs (Optional[Dict[Any, Any]], optional): Keyword arguments to be
+            mock_data (Optional[pd.DataFrame], optional): Mock data to use for the SBC.
+              Defaults to None.
+            size (Optional[MockDataSize], optional): Size of the dataset to mock.
+              Defaults to None.
+            fit_kwargs (Optional[dict[Any, Any]], optional): Keyword arguments to be
               passed to the fitting method. Default is None.
+
+        Raises:
+            RequiredArgumentError: If neither `mock_data` nor `size` are supplied.
         &#34;&#34;&#34;
         if fit_kwargs is None:
             fit_kwargs = {}
@@ -464,9 +493,16 @@ class SpecletModel:
         sbc_fm = sbc.SBCFileManager(dir=results_path)
 
         logger.info(&#34;Creating new simulation data.&#34;)
-        mock_data = self.data_manager.generate_mock_data(
-            size=size, random_seed=random_seed
-        )
+        if mock_data is not None:
+            self.data_manager.set_data(mock_data)
+        elif size is not None:
+            mock_data = self.data_manager.generate_mock_data(
+                size=size, random_seed=random_seed
+            )
+        else:
+            raise RequiredArgumentError(
+                &#34;Either `mock_data` or `size` must be provided.&#34;
+            )
 
         logger.debug(&#34;Building model for SBC.&#34;)
         self.build_model()
@@ -478,7 +514,7 @@ class SpecletModel:
             priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
         mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
-        self.data_manager.set_data(mock_data)
+        self.data_manager.set_data(mock_data, apply_transformations=False)
         sbc_fm.save_sbc_data(mock_data)
 
         # Update shared variable with adjusted observed data.
@@ -569,7 +605,7 @@ class SpecletModel:
                 self.cache_manager.mcmc_cache_delegate.cache_dir
             )
 
-    def load_advi_cache(self) -&gt; Tuple[az.InferenceData, pm.Approximation]:
+    def load_advi_cache(self) -&gt; tuple[az.InferenceData, pm.Approximation]:
         &#34;&#34;&#34;Load ADVI from cache.
 
         Sets the cached ADVI result as the instance&#39;s `advi_results` attribute, too.
@@ -578,7 +614,7 @@ class SpecletModel:
             CacheDoesNotExistError: Raised if the cache does not exist.
 
         Returns:
-            Tuple[az.InferenceData, pm.Approximation]: Cached ADVI results.
+            tuple[az.InferenceData, pm.Approximation]: Cached ADVI results.
         &#34;&#34;&#34;
         if self.cache_manager.advi_cache_exists():
             _advi_results = self.cache_manager.get_advi_cache()
@@ -609,7 +645,7 @@ class SpecletModel:
             logger.error(msg)
             raise UnableToLocateNamedVariable(msg)
 
-    def set_config(self, info: Dict[Any, Any]) -&gt; None:
+    def set_config(self, info: dict[Any, Any]) -&gt; None:
         &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
         return None</code></pre>
 </details>
@@ -738,8 +774,8 @@ data. Defaults to None.</dd>
 
     model: Optional[pm.Model] = None
     observed_var_name: Optional[str] = None
-    shared_vars: Optional[Dict[str, TTShared]] = None
-    advi_results: Optional[Tuple[az.InferenceData, pm.Approximation]] = None
+    shared_vars: Optional[dict[str, TTShared]] = None
+    advi_results: Optional[tuple[az.InferenceData, pm.Approximation]] = None
     mcmc_results: Optional[az.InferenceData] = None
 
     mcmc_sampling_params: MCMCSamplingParameters = MCMCSamplingParameters()
@@ -821,7 +857,7 @@ data. Defaults to None.</dd>
         self.cache_manager.clear_all_caches()
 
     @abstractmethod
-    def model_specification(self) -&gt; Tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, str]:
         &#34;&#34;&#34;Define the PyMC3 model.
 
         This model must be overridden by an subclass to define the desired PyMC3 model.
@@ -876,7 +912,7 @@ data. Defaults to None.</dd>
         target_accept: Optional[float] = None,
         prior_pred_samples: Optional[int] = None,
         random_seed: Optional[int] = None,
-        sample_kwargs: Optional[Dict[str, Any]] = None,
+        sample_kwargs: Optional[dict[str, Any]] = None,
         ignore_cache: bool = False,
     ) -&gt; az.InferenceData:
         &#34;&#34;&#34;MCMC sample the model.
@@ -900,7 +936,7 @@ data. Defaults to None.</dd>
               prior distributions. Defaults to None.
             random_seed (Optional[int], optional): The random seed for sampling.
             Defaults to None.
-            sample_kwargs (Dict[str, Any], optional): Kwargs for the sampling method.
+            sample_kwargs (dict[str, Any], optional): Kwargs for the sampling method.
             Defaults to {}.
             ignore_cache (bool, optional): Should any cached results be ignored?
               Defaults to False.
@@ -973,14 +1009,14 @@ data. Defaults to None.</dd>
         &#34;&#34;&#34;
         return None
 
-    def get_advi_callbacks(self) -&gt; List[Any]:
+    def get_advi_callbacks(self) -&gt; list[Any]:
         &#34;&#34;&#34;Prepare a list of callbacks for ADVI fitting.
 
         This can be overridden by subclasses to apply custom callbacks or change the
         parameters of the CheckParametersConvergence callback.
 
         Returns:
-            List[Any]: List of callbacks.
+            list[Any]: list of callbacks.
         &#34;&#34;&#34;
         return [
             pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff=&#34;absolute&#34;)
@@ -998,7 +1034,7 @@ data. Defaults to None.</dd>
         prior_pred_samples: Optional[int] = None,
         random_seed: Optional[int] = None,
         ignore_cache: bool = False,
-    ) -&gt; Tuple[az.InferenceData, pm.Approximation]:
+    ) -&gt; tuple[az.InferenceData, pm.Approximation]:
         &#34;&#34;&#34;ADVI fit the model.
 
         This method primarily wraps the
@@ -1016,18 +1052,18 @@ data. Defaults to None.</dd>
               model. Defaults to None.
             prior_pred_samples (Optional[int], optional): Number of samples from the
               prior distributions. Defaults to None.
-            callbacks (List[Callable], optional): List of fitting callbacks. Default is
+            callbacks (list[Callable], optional): list of fitting callbacks. Default is
               None.
             random_seed (Optional[int], optional): The random seed for sampling.
               Defaults to None.
-            fit_kwargs (Dict[str, Any], optional): Kwargs for the fitting method.
+            fit_kwargs (dict[str, Any], optional): Kwargs for the fitting method.
               Defaults to {}.
 
         Raises:
             AttributeError: Raised if the model does not yet exist.
 
         Returns:
-            Tuple[az.InferenceData, pm.Approximation]: The results of fitting the model
+            tuple[az.InferenceData, pm.Approximation]: The results of fitting the model
               and the approximation object.
         &#34;&#34;&#34;
         logger.debug(&#34;Beginning ADVI fitting method.&#34;)
@@ -1047,7 +1083,7 @@ data. Defaults to None.</dd>
                 + &#34;Make sure to run `model.build_model()` first.&#34;
             )
 
-        fit_kwargs: Dict[str, Any] = {}
+        fit_kwargs: dict[str, Any] = {}
         replacements = self.get_replacement_parameters()
         if replacements is not None:
             fit_kwargs[&#34;more_replacements&#34;] = replacements
@@ -1080,24 +1116,53 @@ data. Defaults to None.</dd>
         self.write_advi_cache()
         return self.advi_results
 
+    def generate_mock_data(
+        self, size: MockDataSize, random_seed: Optional[int] = None
+    ) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Generate mock data.
+
+        Args:
+            size (MockDataSize): Size of the dataset to mock.
+            random_seed (Optional[int], optional): Random seed. Defaults to None.
+
+        Returns:
+            pd.DataFrame: Mock data.
+        &#34;&#34;&#34;
+        logger.info(&#34;Creating new simulation data.&#34;)
+        mock_data = self.data_manager.generate_mock_data(
+            size=size, random_seed=random_seed
+        )
+        return mock_data
+
     def run_simulation_based_calibration(
         self,
         results_path: Path,
         fit_method: ModelFitMethod,
-        size: MockDataSize,
+        mock_data: Optional[pd.DataFrame] = None,
+        size: Optional[MockDataSize] = None,
         random_seed: Optional[int] = None,
-        fit_kwargs: Optional[Dict[Any, Any]] = None,
+        fit_kwargs: Optional[dict[Any, Any]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Run a round of simulation-based calibration.
+
+        Pre-generated mock data can be passed for use in the simulation through the
+        `mock_data` argument or novel data can be generated by passing a preferred size
+        through the `size` argument.
 
         Args:
             results_path (Path): Where to store the results.
             fit_method (ModelFitMethod): Which method to use for fitting.
             random_seed (Optional[int], optional): Random seed (for reproducibility).
               Defaults to None.
-            size (MockDataSize): Size of the data set to mock. Defaults to &#34;large&#34;.
-            fit_kwargs (Optional[Dict[Any, Any]], optional): Keyword arguments to be
+            mock_data (Optional[pd.DataFrame], optional): Mock data to use for the SBC.
+              Defaults to None.
+            size (Optional[MockDataSize], optional): Size of the dataset to mock.
+              Defaults to None.
+            fit_kwargs (Optional[dict[Any, Any]], optional): Keyword arguments to be
               passed to the fitting method. Default is None.
+
+        Raises:
+            RequiredArgumentError: If neither `mock_data` nor `size` are supplied.
         &#34;&#34;&#34;
         if fit_kwargs is None:
             fit_kwargs = {}
@@ -1105,9 +1170,16 @@ data. Defaults to None.</dd>
         sbc_fm = sbc.SBCFileManager(dir=results_path)
 
         logger.info(&#34;Creating new simulation data.&#34;)
-        mock_data = self.data_manager.generate_mock_data(
-            size=size, random_seed=random_seed
-        )
+        if mock_data is not None:
+            self.data_manager.set_data(mock_data)
+        elif size is not None:
+            mock_data = self.data_manager.generate_mock_data(
+                size=size, random_seed=random_seed
+            )
+        else:
+            raise RequiredArgumentError(
+                &#34;Either `mock_data` or `size` must be provided.&#34;
+            )
 
         logger.debug(&#34;Building model for SBC.&#34;)
         self.build_model()
@@ -1119,7 +1191,7 @@ data. Defaults to None.</dd>
             priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
         mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
-        self.data_manager.set_data(mock_data)
+        self.data_manager.set_data(mock_data, apply_transformations=False)
         sbc_fm.save_sbc_data(mock_data)
 
         # Update shared variable with adjusted observed data.
@@ -1210,7 +1282,7 @@ data. Defaults to None.</dd>
                 self.cache_manager.mcmc_cache_delegate.cache_dir
             )
 
-    def load_advi_cache(self) -&gt; Tuple[az.InferenceData, pm.Approximation]:
+    def load_advi_cache(self) -&gt; tuple[az.InferenceData, pm.Approximation]:
         &#34;&#34;&#34;Load ADVI from cache.
 
         Sets the cached ADVI result as the instance&#39;s `advi_results` attribute, too.
@@ -1219,7 +1291,7 @@ data. Defaults to None.</dd>
             CacheDoesNotExistError: Raised if the cache does not exist.
 
         Returns:
-            Tuple[az.InferenceData, pm.Approximation]: Cached ADVI results.
+            tuple[az.InferenceData, pm.Approximation]: Cached ADVI results.
         &#34;&#34;&#34;
         if self.cache_manager.advi_cache_exists():
             _advi_results = self.cache_manager.get_advi_cache()
@@ -1250,7 +1322,7 @@ data. Defaults to None.</dd>
             logger.error(msg)
             raise UnableToLocateNamedVariable(msg)
 
-    def set_config(self, info: Dict[Any, Any]) -&gt; None:
+    def set_config(self, info: dict[Any, Any]) -&gt; None:
         &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
         return None</code></pre>
 </details>
@@ -1267,7 +1339,7 @@ data. Defaults to None.</dd>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="src.models.speclet_model.SpecletModel.advi_results"><code class="name">var <span class="ident">advi_results</span> : Optional[Tuple[arviz.data.inference_data.InferenceData, pymc3.variational.opvi.Approximation]]</code></dt>
+<dt id="src.models.speclet_model.SpecletModel.advi_results"><code class="name">var <span class="ident">advi_results</span> : Optional[tuple[arviz.data.inference_data.InferenceData, pymc3.variational.opvi.Approximation]]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1291,7 +1363,7 @@ data. Defaults to None.</dd>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.models.speclet_model.SpecletModel.shared_vars"><code class="name">var <span class="ident">shared_vars</span> : Optional[Dict[str, theano.tensor.sharedvar.TensorSharedVariable]]</code></dt>
+<dt id="src.models.speclet_model.SpecletModel.shared_vars"><code class="name">var <span class="ident">shared_vars</span> : Optional[dict[str, theano.tensor.sharedvar.TensorSharedVariable]]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1324,7 +1396,7 @@ def debug(self) -&gt; bool:
 <h3>Methods</h3>
 <dl>
 <dt id="src.models.speclet_model.SpecletModel.advi_sample_model"><code class="name flex">
-<span>def <span class="ident">advi_sample_model</span></span>(<span>self, method: Optional[str] = None, n_iterations: Optional[int] = None, draws: Optional[int] = None, prior_pred_samples: Optional[int] = None, random_seed: Optional[int] = None, ignore_cache: bool = False) -> Tuple[arviz.data.inference_data.InferenceData, pymc3.variational.opvi.Approximation]</span>
+<span>def <span class="ident">advi_sample_model</span></span>(<span>self, method: Optional[str] = None, n_iterations: Optional[int] = None, draws: Optional[int] = None, prior_pred_samples: Optional[int] = None, random_seed: Optional[int] = None, ignore_cache: bool = False) -> tuple</span>
 </code></dt>
 <dd>
 <div class="desc"><p>ADVI fit the model.</p>
@@ -1347,13 +1419,13 @@ model. Defaults to None.</dd>
 <dt><strong><code>prior_pred_samples</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
 <dd>Number of samples from the
 prior distributions. Defaults to None.</dd>
-<dt><strong><code>callbacks</code></strong> :&ensp;<code>List[Callable]</code>, optional</dt>
-<dd>List of fitting callbacks. Default is
+<dt><strong><code>callbacks</code></strong> :&ensp;<code>list[Callable]</code>, optional</dt>
+<dd>list of fitting callbacks. Default is
 None.</dd>
 <dt><strong><code>random_seed</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
 <dd>The random seed for sampling.
 Defaults to None.</dd>
-<dt><strong><code>fit_kwargs</code></strong> :&ensp;<code>Dict[str, Any]</code>, optional</dt>
+<dt><strong><code>fit_kwargs</code></strong> :&ensp;<code>dict[str, Any]</code>, optional</dt>
 <dd>Kwargs for the fitting method.
 Defaults to {}.</dd>
 </dl>
@@ -1364,7 +1436,7 @@ Defaults to {}.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Tuple[az.InferenceData, pm.Approximation]</code></dt>
+<dt><code>tuple[az.InferenceData, pm.Approximation]</code></dt>
 <dd>The results of fitting the model
 and the approximation object.</dd>
 </dl></div>
@@ -1380,7 +1452,7 @@ and the approximation object.</dd>
     prior_pred_samples: Optional[int] = None,
     random_seed: Optional[int] = None,
     ignore_cache: bool = False,
-) -&gt; Tuple[az.InferenceData, pm.Approximation]:
+) -&gt; tuple[az.InferenceData, pm.Approximation]:
     &#34;&#34;&#34;ADVI fit the model.
 
     This method primarily wraps the
@@ -1398,18 +1470,18 @@ and the approximation object.</dd>
           model. Defaults to None.
         prior_pred_samples (Optional[int], optional): Number of samples from the
           prior distributions. Defaults to None.
-        callbacks (List[Callable], optional): List of fitting callbacks. Default is
+        callbacks (list[Callable], optional): list of fitting callbacks. Default is
           None.
         random_seed (Optional[int], optional): The random seed for sampling.
           Defaults to None.
-        fit_kwargs (Dict[str, Any], optional): Kwargs for the fitting method.
+        fit_kwargs (dict[str, Any], optional): Kwargs for the fitting method.
           Defaults to {}.
 
     Raises:
         AttributeError: Raised if the model does not yet exist.
 
     Returns:
-        Tuple[az.InferenceData, pm.Approximation]: The results of fitting the model
+        tuple[az.InferenceData, pm.Approximation]: The results of fitting the model
           and the approximation object.
     &#34;&#34;&#34;
     logger.debug(&#34;Beginning ADVI fitting method.&#34;)
@@ -1429,7 +1501,7 @@ and the approximation object.</dd>
             + &#34;Make sure to run `model.build_model()` first.&#34;
         )
 
-    fit_kwargs: Dict[str, Any] = {}
+    fit_kwargs: dict[str, Any] = {}
     replacements = self.get_replacement_parameters()
     if replacements is not None:
         fit_kwargs[&#34;more_replacements&#34;] = replacements
@@ -1527,8 +1599,48 @@ after calling <code>self.model_specification()</code></dd>
     self.cache_manager.clear_all_caches()</code></pre>
 </details>
 </dd>
+<dt id="src.models.speclet_model.SpecletModel.generate_mock_data"><code class="name flex">
+<span>def <span class="ident">generate_mock_data</span></span>(<span>self, size: <a title="src.project_enums.MockDataSize" href="../project_enums.html#src.project_enums.MockDataSize">MockDataSize</a>, random_seed: Optional[int] = None) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate mock data.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>size</code></strong> :&ensp;<code>MockDataSize</code></dt>
+<dd>Size of the dataset to mock.</dd>
+<dt><strong><code>random_seed</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
+<dd>Random seed. Defaults to None.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>Mock data.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def generate_mock_data(
+    self, size: MockDataSize, random_seed: Optional[int] = None
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate mock data.
+
+    Args:
+        size (MockDataSize): Size of the dataset to mock.
+        random_seed (Optional[int], optional): Random seed. Defaults to None.
+
+    Returns:
+        pd.DataFrame: Mock data.
+    &#34;&#34;&#34;
+    logger.info(&#34;Creating new simulation data.&#34;)
+    mock_data = self.data_manager.generate_mock_data(
+        size=size, random_seed=random_seed
+    )
+    return mock_data</code></pre>
+</details>
+</dd>
 <dt id="src.models.speclet_model.SpecletModel.get_advi_callbacks"><code class="name flex">
-<span>def <span class="ident">get_advi_callbacks</span></span>(<span>self) -> List[Any]</span>
+<span>def <span class="ident">get_advi_callbacks</span></span>(<span>self) -> list</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Prepare a list of callbacks for ADVI fitting.</p>
@@ -1536,21 +1648,21 @@ after calling <code>self.model_specification()</code></dd>
 parameters of the CheckParametersConvergence callback.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>List[Any]</code></dt>
-<dd>List of callbacks.</dd>
+<dt><code>list[Any]</code></dt>
+<dd>list of callbacks.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_advi_callbacks(self) -&gt; List[Any]:
+<pre><code class="python">def get_advi_callbacks(self) -&gt; list[Any]:
     &#34;&#34;&#34;Prepare a list of callbacks for ADVI fitting.
 
     This can be overridden by subclasses to apply custom callbacks or change the
     parameters of the CheckParametersConvergence callback.
 
     Returns:
-        List[Any]: List of callbacks.
+        list[Any]: list of callbacks.
     &#34;&#34;&#34;
     return [
         pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff=&#34;absolute&#34;)
@@ -1558,7 +1670,7 @@ parameters of the CheckParametersConvergence callback.</p>
 </details>
 </dd>
 <dt id="src.models.speclet_model.SpecletModel.get_replacement_parameters"><code class="name flex">
-<span>def <span class="ident">get_replacement_parameters</span></span>(<span>self) -> Optional[Dict[theano.tensor.sharedvar.TensorSharedVariable, Union[pymc3.data.Minibatch, numpy.ndarray]]]</span>
+<span>def <span class="ident">get_replacement_parameters</span></span>(<span>self) -> Optional[dict[theano.tensor.sharedvar.TensorSharedVariable, Union[pymc3.data.Minibatch, numpy.ndarray]]]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a dictionary of PyMC3 variables to replace for ADVI fitting.</p>
@@ -1644,7 +1756,7 @@ this method returns None and has no effect on ADVI.</p>
 </details>
 </dd>
 <dt id="src.models.speclet_model.SpecletModel.load_advi_cache"><code class="name flex">
-<span>def <span class="ident">load_advi_cache</span></span>(<span>self) -> Tuple[arviz.data.inference_data.InferenceData, pymc3.variational.opvi.Approximation]</span>
+<span>def <span class="ident">load_advi_cache</span></span>(<span>self) -> tuple</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Load ADVI from cache.</p>
@@ -1656,14 +1768,14 @@ this method returns None and has no effect on ADVI.</p>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Tuple[az.InferenceData, pm.Approximation]</code></dt>
+<dt><code>tuple[az.InferenceData, pm.Approximation]</code></dt>
 <dd>Cached ADVI results.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def load_advi_cache(self) -&gt; Tuple[az.InferenceData, pm.Approximation]:
+<pre><code class="python">def load_advi_cache(self) -&gt; tuple[az.InferenceData, pm.Approximation]:
     &#34;&#34;&#34;Load ADVI from cache.
 
     Sets the cached ADVI result as the instance&#39;s `advi_results` attribute, too.
@@ -1672,7 +1784,7 @@ this method returns None and has no effect on ADVI.</p>
         CacheDoesNotExistError: Raised if the cache does not exist.
 
     Returns:
-        Tuple[az.InferenceData, pm.Approximation]: Cached ADVI results.
+        tuple[az.InferenceData, pm.Approximation]: Cached ADVI results.
     &#34;&#34;&#34;
     if self.cache_manager.advi_cache_exists():
         _advi_results = self.cache_manager.get_advi_cache()
@@ -1725,7 +1837,7 @@ this method returns None and has no effect on ADVI.</p>
 </details>
 </dd>
 <dt id="src.models.speclet_model.SpecletModel.mcmc_sample_model"><code class="name flex">
-<span>def <span class="ident">mcmc_sample_model</span></span>(<span>self, draws: Optional[int] = None, tune: Optional[int] = None, chains: Optional[int] = None, cores: Optional[int] = None, target_accept: Optional[float] = None, prior_pred_samples: Optional[int] = None, random_seed: Optional[int] = None, sample_kwargs: Optional[Dict[str, Any]] = None, ignore_cache: bool = False) -> arviz.data.inference_data.InferenceData</span>
+<span>def <span class="ident">mcmc_sample_model</span></span>(<span>self, draws: Optional[int] = None, tune: Optional[int] = None, chains: Optional[int] = None, cores: Optional[int] = None, target_accept: Optional[float] = None, prior_pred_samples: Optional[int] = None, random_seed: Optional[int] = None, sample_kwargs: Optional[dict[str, Any]] = None, ignore_cache: bool = False) -> arviz.data.inference_data.InferenceData</span>
 </code></dt>
 <dd>
 <div class="desc"><p>MCMC sample the model.</p>
@@ -1754,7 +1866,7 @@ prior distributions. Defaults to None.</dd>
 <dt><strong><code>random_seed</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
 <dd>The random seed for sampling.</dd>
 <dt>Defaults to None.</dt>
-<dt><strong><code>sample_kwargs</code></strong> :&ensp;<code>Dict[str, Any]</code>, optional</dt>
+<dt><strong><code>sample_kwargs</code></strong> :&ensp;<code>dict[str, Any]</code>, optional</dt>
 <dd>Kwargs for the sampling method.</dd>
 <dt>Defaults to {}.</dt>
 <dt><strong><code>ignore_cache</code></strong> :&ensp;<code>bool</code>, optional</dt>
@@ -1784,7 +1896,7 @@ Defaults to False.</dd>
     target_accept: Optional[float] = None,
     prior_pred_samples: Optional[int] = None,
     random_seed: Optional[int] = None,
-    sample_kwargs: Optional[Dict[str, Any]] = None,
+    sample_kwargs: Optional[dict[str, Any]] = None,
     ignore_cache: bool = False,
 ) -&gt; az.InferenceData:
     &#34;&#34;&#34;MCMC sample the model.
@@ -1808,7 +1920,7 @@ Defaults to False.</dd>
           prior distributions. Defaults to None.
         random_seed (Optional[int], optional): The random seed for sampling.
         Defaults to None.
-        sample_kwargs (Dict[str, Any], optional): Kwargs for the sampling method.
+        sample_kwargs (dict[str, Any], optional): Kwargs for the sampling method.
         Defaults to {}.
         ignore_cache (bool, optional): Should any cached results be ignored?
           Defaults to False.
@@ -1871,7 +1983,7 @@ Defaults to False.</dd>
 </details>
 </dd>
 <dt id="src.models.speclet_model.SpecletModel.model_specification"><code class="name flex">
-<span>def <span class="ident">model_specification</span></span>(<span>self) -> Tuple[pymc3.model.Model, str]</span>
+<span>def <span class="ident">model_specification</span></span>(<span>self) -> tuple</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Define the PyMC3 model.</p>
@@ -1888,7 +2000,7 @@ Defaults to False.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-def model_specification(self) -&gt; Tuple[pm.Model, str]:
+def model_specification(self) -&gt; tuple[pm.Model, str]:
     &#34;&#34;&#34;Define the PyMC3 model.
 
     This model must be overridden by an subclass to define the desired PyMC3 model.
@@ -1903,10 +2015,13 @@ def model_specification(self) -&gt; Tuple[pm.Model, str]:
 </details>
 </dd>
 <dt id="src.models.speclet_model.SpecletModel.run_simulation_based_calibration"><code class="name flex">
-<span>def <span class="ident">run_simulation_based_calibration</span></span>(<span>self, results_path: pathlib.Path, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, size: <a title="src.project_enums.MockDataSize" href="../project_enums.html#src.project_enums.MockDataSize">MockDataSize</a>, random_seed: Optional[int] = None, fit_kwargs: Optional[Dict[Any, Any]] = None) -> NoneType</span>
+<span>def <span class="ident">run_simulation_based_calibration</span></span>(<span>self, results_path: pathlib.Path, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, mock_data: Optional[pandas.core.frame.DataFrame] = None, size: Optional[<a title="src.project_enums.MockDataSize" href="../project_enums.html#src.project_enums.MockDataSize">MockDataSize</a>] = None, random_seed: Optional[int] = None, fit_kwargs: Optional[dict[Any, Any]] = None) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Run a round of simulation-based calibration.</p>
+<p>Pre-generated mock data can be passed for use in the simulation through the
+<code>mock_data</code> argument or novel data can be generated by passing a preferred size
+through the <code>size</code> argument.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>results_path</code></strong> :&ensp;<code>Path</code></dt>
@@ -1916,11 +2031,20 @@ def model_specification(self) -&gt; Tuple[pm.Model, str]:
 <dt><strong><code>random_seed</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
 <dd>Random seed (for reproducibility).
 Defaults to None.</dd>
-<dt><strong><code>size</code></strong> :&ensp;<code>MockDataSize</code></dt>
-<dd>Size of the data set to mock. Defaults to "large".</dd>
-<dt><strong><code>fit_kwargs</code></strong> :&ensp;<code>Optional[Dict[Any, Any]]</code>, optional</dt>
+<dt><strong><code>mock_data</code></strong> :&ensp;<code>Optional[pd.DataFrame]</code>, optional</dt>
+<dd>Mock data to use for the SBC.
+Defaults to None.</dd>
+<dt><strong><code>size</code></strong> :&ensp;<code>Optional[MockDataSize]</code>, optional</dt>
+<dd>Size of the dataset to mock.
+Defaults to None.</dd>
+<dt><strong><code>fit_kwargs</code></strong> :&ensp;<code>Optional[dict[Any, Any]]</code>, optional</dt>
 <dd>Keyword arguments to be
 passed to the fitting method. Default is None.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>RequiredArgumentError</code></dt>
+<dd>If neither <code>mock_data</code> nor <code>size</code> are supplied.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -1930,20 +2054,31 @@ passed to the fitting method. Default is None.</dd>
     self,
     results_path: Path,
     fit_method: ModelFitMethod,
-    size: MockDataSize,
+    mock_data: Optional[pd.DataFrame] = None,
+    size: Optional[MockDataSize] = None,
     random_seed: Optional[int] = None,
-    fit_kwargs: Optional[Dict[Any, Any]] = None,
+    fit_kwargs: Optional[dict[Any, Any]] = None,
 ) -&gt; None:
     &#34;&#34;&#34;Run a round of simulation-based calibration.
+
+    Pre-generated mock data can be passed for use in the simulation through the
+    `mock_data` argument or novel data can be generated by passing a preferred size
+    through the `size` argument.
 
     Args:
         results_path (Path): Where to store the results.
         fit_method (ModelFitMethod): Which method to use for fitting.
         random_seed (Optional[int], optional): Random seed (for reproducibility).
           Defaults to None.
-        size (MockDataSize): Size of the data set to mock. Defaults to &#34;large&#34;.
-        fit_kwargs (Optional[Dict[Any, Any]], optional): Keyword arguments to be
+        mock_data (Optional[pd.DataFrame], optional): Mock data to use for the SBC.
+          Defaults to None.
+        size (Optional[MockDataSize], optional): Size of the dataset to mock.
+          Defaults to None.
+        fit_kwargs (Optional[dict[Any, Any]], optional): Keyword arguments to be
           passed to the fitting method. Default is None.
+
+    Raises:
+        RequiredArgumentError: If neither `mock_data` nor `size` are supplied.
     &#34;&#34;&#34;
     if fit_kwargs is None:
         fit_kwargs = {}
@@ -1951,9 +2086,16 @@ passed to the fitting method. Default is None.</dd>
     sbc_fm = sbc.SBCFileManager(dir=results_path)
 
     logger.info(&#34;Creating new simulation data.&#34;)
-    mock_data = self.data_manager.generate_mock_data(
-        size=size, random_seed=random_seed
-    )
+    if mock_data is not None:
+        self.data_manager.set_data(mock_data)
+    elif size is not None:
+        mock_data = self.data_manager.generate_mock_data(
+            size=size, random_seed=random_seed
+        )
+    else:
+        raise RequiredArgumentError(
+            &#34;Either `mock_data` or `size` must be provided.&#34;
+        )
 
     logger.debug(&#34;Building model for SBC.&#34;)
     self.build_model()
@@ -1965,7 +2107,7 @@ passed to the fitting method. Default is None.</dd>
         priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
     mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
-    self.data_manager.set_data(mock_data)
+    self.data_manager.set_data(mock_data, apply_transformations=False)
     sbc_fm.save_sbc_data(mock_data)
 
     # Update shared variable with adjusted observed data.
@@ -1993,7 +2135,7 @@ passed to the fitting method. Default is None.</dd>
 </details>
 </dd>
 <dt id="src.models.speclet_model.SpecletModel.set_config"><code class="name flex">
-<span>def <span class="ident">set_config</span></span>(<span>self, info: Dict[Any, Any]) -> NoneType</span>
+<span>def <span class="ident">set_config</span></span>(<span>self, info: dict) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Set model-specific configuration.</p></div>
@@ -2001,7 +2143,7 @@ passed to the fitting method. Default is None.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def set_config(self, info: Dict[Any, Any]) -&gt; None:
+<pre><code class="python">def set_config(self, info: dict[Any, Any]) -&gt; None:
     &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
     return None</code></pre>
 </details>
@@ -2187,6 +2329,7 @@ passed to the fitting method. Default is None.</dd>
 <li><code><a title="src.models.speclet_model.SpecletModel.build_model" href="#src.models.speclet_model.SpecletModel.build_model">build_model</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.clear_cache" href="#src.models.speclet_model.SpecletModel.clear_cache">clear_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.debug" href="#src.models.speclet_model.SpecletModel.debug">debug</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.generate_mock_data" href="#src.models.speclet_model.SpecletModel.generate_mock_data">generate_mock_data</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_advi_callbacks" href="#src.models.speclet_model.SpecletModel.get_advi_callbacks">get_advi_callbacks</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_replacement_parameters" href="#src.models.speclet_model.SpecletModel.get_replacement_parameters">get_replacement_parameters</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_sbc" href="#src.models.speclet_model.SpecletModel.get_sbc">get_sbc</a></code></li>
