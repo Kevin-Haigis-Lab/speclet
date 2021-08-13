@@ -13,6 +13,7 @@ from src.models.speclet_model import SpecletModel
 from src.models.speclet_one import SpecletOne
 from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.models.speclet_seven import SpecletSeven
+from src.models.speclet_simple import SpecletSimple
 from src.models.speclet_six import SpecletSix
 from src.models.speclet_two import SpecletTwo
 from src.project_enums import ModelFitMethod, ModelOption, assert_never
@@ -51,6 +52,7 @@ def get_model_class(model_opt: ModelOption) -> Type[SpecletProjectModelTypes]:
     model_option_map: Dict[ModelOption, Type[SpecletProjectModelTypes]] = {
         ModelOption.SPECLET_TEST_MODEL: SpecletTestModel,
         ModelOption.CRC_CERES_MIMIC: CeresMimic,
+        ModelOption.SPECLET_SIMPLE: SpecletSimple,
         ModelOption.SPECLET_ONE: SpecletOne,
         ModelOption.SPECLET_TWO: SpecletTwo,
         ModelOption.SPECLET_FOUR: SpecletFour,

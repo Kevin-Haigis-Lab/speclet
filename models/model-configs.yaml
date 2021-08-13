@@ -1,3 +1,16 @@
+#### ---- SpecletSimple ---- ####
+
+- name: simple-default
+  description: Default SpecletSimple model.
+  model: speclet-simple
+  fit_methods:
+    - MCMC
+    - ADVI
+  pipelines:
+    - fitting
+    - sbc
+  debug: true
+
 #### ---- SpecletTwo ---- ####
 
 - name: sp2-default
