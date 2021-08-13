@@ -55,7 +55,7 @@ docs:
 
 clean:
 	find ./logs/*.log -mtime +7 | xargs rm || echo "No logs to remove.";
-	find ./temp/* -mtime +7 | xargs rm || echo "No temp files to remove.";
+	find ./temp/* -mtime +7 | xargs rm -r || echo "No temp files to remove.";
 	rm .coverage* || echo "No coverage remnants to remove."
 
 sbc:
