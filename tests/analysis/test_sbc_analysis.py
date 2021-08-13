@@ -80,7 +80,7 @@ class TestSBCAnalysis:
                 "within_hdi": [True, False, True, False],
             }
         )
-        acc_results = sbc_analyzer.posterior_accuracy(sim_posteriors_df)
+        acc_results = sbc_analyzer.run_posterior_accuracy_test(sim_posteriors_df)
         assert pytest.approx(
             acc_results[acc_results.parameter_name == "a"].within_hdi[0], 0.5
         )
@@ -95,7 +95,7 @@ class TestSBCAnalysis:
                 "within_hdi": [True, False, True, False, True, False, False],
             }
         )
-        acc_results = sbc_analyzer.posterior_accuracy(sim_posteriors_df)
+        acc_results = sbc_analyzer.run_posterior_accuracy_test(sim_posteriors_df)
 
         for p in sim_posteriors_df.parameter_name.unique():
             assert len(acc_results[acc_results.parameter_name == p]) == 1
