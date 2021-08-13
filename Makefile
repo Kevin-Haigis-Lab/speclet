@@ -63,3 +63,6 @@ sbc:
 
 fit:
 	sbatch pipelines/010_012_run-crc-sampling.sh
+
+check_model_config:
+	$(CONDA_ACTIVATE) speclet && ./src/command_line_interfaces/check_model_configuration.py models/model-configs.yaml
