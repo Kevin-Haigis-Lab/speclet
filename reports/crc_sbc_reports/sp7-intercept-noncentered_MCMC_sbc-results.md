@@ -2,11 +2,10 @@
 
 ```python
 import logging
-import re
 import warnings
 from pathlib import Path
 from time import time
-from typing import Dict, List, Tuple
+from typing import List
 
 import arviz as az
 import janitor
@@ -14,14 +13,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotnine as gg
-import pymc3 as pm
-import seaborn as sns
 
-from src.command_line_interfaces import cli_helpers
 from src.loggers import set_console_handler_level
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.modeling import pymc3_analysis as pmanal
-from src.modeling.simulation_based_calibration_helpers import SBCFileManager
+from src.modeling import simulation_based_calibration_helpers as sbc
 from src.project_enums import ModelFitMethod
 ```
 
@@ -301,7 +297,7 @@ for perm_dir in np.random.choice(
 ):
     print(perm_dir.name)
     print("-" * 30)
-    sbc_fm = SBCFileManager(perm_dir)
+    sbc_fm = sbc.SBCFileManager(perm_dir)
     if sbc_fm.all_data_exists():
         sbc_res = sbc_fm.get_sbc_results()
         _ = pmanal.describe_mcmc(sbc_res.inference_obj)
@@ -394,7 +390,7 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 
 ![png](sp7-intercept-noncentered_MCMC_sbc-results_files/sp7-intercept-noncentered_MCMC_sbc-results_22_0.png)
 
-    <ggplot: (2962094420989)>
+    <ggplot: (2996444243890)>
 
 ```python
 hdi_low, hdi_high = pmanal.get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -441,7 +437,104 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 
 ![png](sp7-intercept-noncentered_MCMC_sbc-results_files/sp7-intercept-noncentered_MCMC_sbc-results_23_0.png)
 
-    <ggplot: (2962094420881)>
+    <ggplot: (2996444239869)>
+
+### SBC Uniformity Test
+
+```python
+sbc_analyzer = sbc.SBCAnalysis(
+    root_dir=sbc_results_dir, pattern="sbc-perm", n_simulations=NUM_SIMULATIONS
+)
+```
+
+```python
+K_DRAWS = 100
+sbc_uniformity_test = sbc_analyzer.uniformity_test(k_draws=K_DRAWS)
+sbc_uniformity_test.head()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>parameter</th>
+      <th>rank_stat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>μ_μ_h</td>
+      <td>52</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>μ_h_offset[0,0]</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>μ_h_offset[0,1]</td>
+      <td>33</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>μ_h_offset[1,0]</td>
+      <td>29</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>μ_h_offset[1,1]</td>
+      <td>11</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+var_names = sbc_uniformity_test.parameter.unique().tolist()
+var_names = [v for v in var_names if "μ" not in v]
+for v in np.random.choice(var_names, size=min((10, len(var_names))), replace=False):
+    ax = sbc_analyzer.plot_uniformity(
+        sbc_uniformity_test.query(f"parameter == '{v}'"), k_draws=K_DRAWS
+    )
+    ax.set_title(v)
+    plt.show()
+```
+
+![png](sp7-intercept-noncentered_MCMC_sbc-results_files/sp7-intercept-noncentered_MCMC_sbc-results_27_0.png)
+
+![png](sp7-intercept-noncentered_MCMC_sbc-results_files/sp7-intercept-noncentered_MCMC_sbc-results_27_1.png)
+
+![png](sp7-intercept-noncentered_MCMC_sbc-results_files/sp7-intercept-noncentered_MCMC_sbc-results_27_2.png)
+
+![png](sp7-intercept-noncentered_MCMC_sbc-results_files/sp7-intercept-noncentered_MCMC_sbc-results_27_3.png)
+
+![png](sp7-intercept-noncentered_MCMC_sbc-results_files/sp7-intercept-noncentered_MCMC_sbc-results_27_4.png)
+
+![png](sp7-intercept-noncentered_MCMC_sbc-results_files/sp7-intercept-noncentered_MCMC_sbc-results_27_5.png)
+
+![png](sp7-intercept-noncentered_MCMC_sbc-results_files/sp7-intercept-noncentered_MCMC_sbc-results_27_6.png)
+
+![png](sp7-intercept-noncentered_MCMC_sbc-results_files/sp7-intercept-noncentered_MCMC_sbc-results_27_7.png)
+
+![png](sp7-intercept-noncentered_MCMC_sbc-results_files/sp7-intercept-noncentered_MCMC_sbc-results_27_8.png)
+
+![png](sp7-intercept-noncentered_MCMC_sbc-results_files/sp7-intercept-noncentered_MCMC_sbc-results_27_9.png)
 
 ---
 
@@ -450,14 +543,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.53 minutes
+    execution time: 1.97 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-22
+    Last updated: 2021-07-25
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -468,20 +561,17 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 20
     Architecture: 64bit
 
-    Hostname: compute-a-16-150.o2.rc.hms.harvard.edu
+    Hostname: compute-f-17-14.o2.rc.hms.harvard.edu
 
-    Git branch: sp7-parameterizations
+    Git branch: sbc-uniform-check
 
-    pandas    : 1.2.3
-    matplotlib: 3.3.4
-    logging   : 0.5.1.2
-    janitor   : 0.20.14
-    seaborn   : 0.11.1
-    plotnine  : 0.7.1
-    re        : 2.2.1
     arviz     : 0.11.2
+    matplotlib: 3.3.4
+    janitor   : 0.20.14
+    plotnine  : 0.7.1
+    logging   : 0.5.1.2
+    pandas    : 1.2.3
     numpy     : 1.20.1
-    pymc3     : 3.11.1

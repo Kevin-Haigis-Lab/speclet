@@ -1,21 +1,20 @@
-#!/usr/bin/env python3
-
 """Managers of model data."""
+
 
 import abc
 from pathlib import Path
-from typing import Callable, List, Optional, Union
+from typing import Callable, Optional, Union
 
 import numpy as np
 import pandas as pd
 
-import src.modeling.simulation_based_calibration_helpers as sbc
 from src.data_processing import achilles as achelp
 from src.io import data_io
 from src.loggers import logger
+from src.modeling import mock_data
 from src.project_enums import MockDataSize, assert_never
 
-DataFrameTransformations = List[Callable[[pd.DataFrame], pd.DataFrame]]
+DataFrameTransformations = list[Callable[[pd.DataFrame], pd.DataFrame]]
 
 
 class DataManager(abc.ABC):
@@ -72,11 +71,15 @@ class DataManager(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def set_data(self, new_data: Optional[pd.DataFrame]) -> None:
+    def set_data(
+        self, new_data: Optional[pd.DataFrame], apply_transformations: bool = True
+    ) -> None:
         """Set the data object (can be `None`).
 
         Args:
             new_data (Optional[pd.DataFrame]): New data object.
+            apply_transformations (bool, optional): Should the transformations be
+              applied? Defaults to True.
         """
         pass
 
@@ -138,14 +141,14 @@ class DataManager(abc.ABC):
 
     def add_transformations(
         self,
-        new_trans: List[Callable[[pd.DataFrame], pd.DataFrame]],
+        new_trans: list[Callable[[pd.DataFrame], pd.DataFrame]],
         run_transformations: bool = True,
         new_only: bool = True,
     ) -> None:
         """Add new data transformations.
 
         Args:
-            new_trans (List[Callable[[pd.DataFrame], pd.DataFrame]]): A list of
+            new_trans (list[Callable[[pd.DataFrame], pd.DataFrame]]): A list of
               callables to be used to transform the data. Each transformation must take
               a pandas DataFrame and return a pandas DataFrame.
             run_transformations (bool, optional): Should the new transforms be applied
@@ -292,16 +295,22 @@ class CrcDataManager(DataManager):
             assert isinstance(self._data, pd.DataFrame)
         return self._data
 
-    def set_data(self, new_data: Optional[pd.DataFrame]) -> None:
+    def set_data(
+        self, new_data: Optional[pd.DataFrame], apply_transformations: bool = True
+    ) -> None:
         """Set the new data set and apply the transformations automatically.
 
         Args:
             new_data (Optional[pd.DataFrame]): New data set.
+            apply_transformations (bool, optional): Should the transformations be
+              applied? Defaults to True.
         """
         if new_data is None:
             self._data = None
-        else:
+        elif apply_transformations:
             self._data = self.apply_transformations(new_data)
+        else:
+            self._data = new_data
 
     def apply_transformations(self, df: pd.DataFrame) -> pd.DataFrame:
         """Apply the stored transformations to the data set.
@@ -340,7 +349,7 @@ class CrcDataManager(DataManager):
             size = MockDataSize(size)
 
         if size is MockDataSize.SMALL:
-            self.data = sbc.generate_mock_achilles_data(
+            self.data = mock_data.generate_mock_achilles_data(
                 n_genes=10,
                 n_sgrnas_per_gene=3,
                 n_cell_lines=5,
@@ -349,7 +358,7 @@ class CrcDataManager(DataManager):
                 n_screens=1,
             )
         elif size is MockDataSize.MEDIUM:
-            self.data = sbc.generate_mock_achilles_data(
+            self.data = mock_data.generate_mock_achilles_data(
                 n_genes=25,
                 n_sgrnas_per_gene=5,
                 n_cell_lines=12,
@@ -358,7 +367,7 @@ class CrcDataManager(DataManager):
                 n_screens=2,
             )
         elif size is MockDataSize.LARGE:
-            self.data = sbc.generate_mock_achilles_data(
+            self.data = mock_data.generate_mock_achilles_data(
                 n_genes=100,
                 n_sgrnas_per_gene=5,
                 n_cell_lines=20,
@@ -429,16 +438,22 @@ class MockDataManager(DataManager):
             self.data = pd.DataFrame({"x": x, "y": y})
         return self.data
 
-    def set_data(self, new_data: Optional[pd.DataFrame]) -> None:
+    def set_data(
+        self, new_data: Optional[pd.DataFrame], apply_transformations: bool = True
+    ) -> None:
         """Set the new data set and apply the transformations automatically.
 
         Args:
             new_data (Optional[pd.DataFrame]): New data set.
+            apply_transformations (bool, optional): Should the transformations be
+              applied? Defaults to True.
         """
         if new_data is None:
             self._data = None
-        else:
+        elif apply_transformations:
             self._data = self.apply_transformations(new_data)
+        else:
+            self._data = new_data
 
     def generate_mock_data(
         self, size: Union[MockDataSize, str], random_seed: Optional[int] = None

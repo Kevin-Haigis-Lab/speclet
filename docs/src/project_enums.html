@@ -35,7 +35,7 @@ from typing import NoReturn
 
 
 @unique
-class ModelFitMethod(Enum):
+class ModelFitMethod(str, Enum):
     &#34;&#34;&#34;Available fit methods.&#34;&#34;&#34;
 
     ADVI = &#34;ADVI&#34;
@@ -43,7 +43,7 @@ class ModelFitMethod(Enum):
 
 
 @unique
-class ModelParameterization(Enum):
+class ModelParameterization(str, Enum):
     &#34;&#34;&#34;Possible model parameterization methods.&#34;&#34;&#34;
 
     CENTERED = &#34;centered&#34;
@@ -51,7 +51,7 @@ class ModelParameterization(Enum):
 
 
 @unique
-class ModelOption(Enum):
+class ModelOption(str, Enum):
     &#34;&#34;&#34;Model options.&#34;&#34;&#34;
 
     SPECLET_TEST_MODEL = &#34;speclet-test-model&#34;
@@ -68,7 +68,7 @@ class ModelOption(Enum):
 
 
 @unique
-class SlurmPartitions(Enum):
+class SlurmPartitions(str, Enum):
     &#34;&#34;&#34;Partitions of the HPC available through SLURM.&#34;&#34;&#34;
 
     PRIORITY = &#34;priority&#34;
@@ -79,7 +79,7 @@ class SlurmPartitions(Enum):
 
 
 @unique
-class SpecletPipeline(Enum):
+class SpecletPipeline(str, Enum):
     &#34;&#34;&#34;Pipelines available in this project.&#34;&#34;&#34;
 
     FITTING = &#34;fitting&#34;
@@ -87,7 +87,7 @@ class SpecletPipeline(Enum):
 
 
 @unique
-class MockDataSize(Enum):
+class MockDataSize(str, Enum):
     &#34;&#34;&#34;Options for dataset seizes when generating mock data.&#34;&#34;&#34;
 
     SMALL = &#34;small&#34;
@@ -164,7 +164,7 @@ def assert_never(value: NoReturn) -&gt; NoReturn:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@unique
-class MockDataSize(Enum):
+class MockDataSize(str, Enum):
     &#34;&#34;&#34;Options for dataset seizes when generating mock data.&#34;&#34;&#34;
 
     SMALL = &#34;small&#34;
@@ -173,6 +173,7 @@ class MockDataSize(Enum):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
+<li>builtins.str</li>
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
@@ -202,7 +203,7 @@ class MockDataSize(Enum):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@unique
-class ModelFitMethod(Enum):
+class ModelFitMethod(str, Enum):
     &#34;&#34;&#34;Available fit methods.&#34;&#34;&#34;
 
     ADVI = &#34;ADVI&#34;
@@ -210,6 +211,7 @@ class ModelFitMethod(Enum):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
+<li>builtins.str</li>
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
@@ -235,7 +237,7 @@ class ModelFitMethod(Enum):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@unique
-class ModelOption(Enum):
+class ModelOption(str, Enum):
     &#34;&#34;&#34;Model options.&#34;&#34;&#34;
 
     SPECLET_TEST_MODEL = &#34;speclet-test-model&#34;
@@ -249,6 +251,7 @@ class ModelOption(Enum):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
+<li>builtins.str</li>
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
@@ -298,7 +301,7 @@ class ModelOption(Enum):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@unique
-class ModelParameterization(Enum):
+class ModelParameterization(str, Enum):
     &#34;&#34;&#34;Possible model parameterization methods.&#34;&#34;&#34;
 
     CENTERED = &#34;centered&#34;
@@ -306,6 +309,7 @@ class ModelParameterization(Enum):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
+<li>builtins.str</li>
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
@@ -331,7 +335,7 @@ class ModelParameterization(Enum):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@unique
-class SlurmPartitions(Enum):
+class SlurmPartitions(str, Enum):
     &#34;&#34;&#34;Partitions of the HPC available through SLURM.&#34;&#34;&#34;
 
     PRIORITY = &#34;priority&#34;
@@ -342,6 +346,7 @@ class SlurmPartitions(Enum):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
+<li>builtins.str</li>
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
@@ -379,7 +384,7 @@ class SlurmPartitions(Enum):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@unique
-class SpecletPipeline(Enum):
+class SpecletPipeline(str, Enum):
     &#34;&#34;&#34;Pipelines available in this project.&#34;&#34;&#34;
 
     FITTING = &#34;fitting&#34;
@@ -387,6 +392,7 @@ class SpecletPipeline(Enum):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
+<li>builtins.str</li>
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>

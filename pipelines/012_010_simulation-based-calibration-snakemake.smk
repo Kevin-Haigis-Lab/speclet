@@ -11,11 +11,12 @@ from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline, Mock
 from src.pipelines import snakemake_parsing_helpers as smk_help
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
-NUM_SIMULATIONS = 25
+NUM_SIMULATIONS = 500
 
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yaml"
 ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
+CACHE_DIR = "cache/sbc-cache/"
 
 MOCK_DATA_SIZE = MockDataSize.MEDIUM
 
@@ -62,7 +63,7 @@ def make_permutation_dir(w: Wildcards) -> str:
 
 
 collated_results_template = (
-    "cache/sbc-cache/{model_name}_{fit_method}_collated-posterior-summaries.pkl"
+    CACHE_DIR + "{model_name}_{fit_method}_collated-posterior-summaries.pkl"
 )
 
 
@@ -73,8 +74,20 @@ def make_collated_results_path(w: Wildcards) -> str:
     )
 
 
-def create_resource_manager(w: Wildcards) -> RM:
-    return RM(w.model_name, MOCK_DATA_SIZE, w.fit_method, MODEL_CONFIG)
+uniformity_results_template = (
+    CACHE_DIR + "{model_name}_{fit_method}_uniformity-test-results.pkl"
+)
+
+
+def make_uniformity_results_path(w: Wildcards) -> str:
+    return uniformity_results_template.format(
+        model_name=w.model_name,
+        fit_method=w.fit_method,
+    )
+
+
+def create_resource_manager(w: Wildcards, attempt: int) -> RM:
+    return RM(w.model_name, MOCK_DATA_SIZE, w.fit_method, MODEL_CONFIG, attempt=attempt)
 
 
 #### ---- Rules ---- ####
@@ -95,7 +108,30 @@ rule all:
         ),
 
 
+rule generate_mockdata:
+    version:
+        "1"
+    output:
+        mock_data_path=CACHE_DIR + "{model_name}_mockdata.csv",
+    conda:
+        ENVIRONMENT_YAML
+    params:
+        config_path=MODEL_CONFIG.as_posix(),
+    benchmark:
+        BENCHMARK_DIR / "generate_mockdata/{model_name}.tsv"
+    shell:
+        "src/command_line_interfaces/simulation_based_calibration_cli.py"
+        "  make-mock-data"
+        "  {wildcards.model_name}"
+        "  {params.config_path}"
+        f"  {MOCK_DATA_SIZE.value}"
+        "  {output.mock_data_path}"
+        "  --random-seed 1234"
+
+
 rule run_sbc:
+    input:
+        mock_data_path=rules.generate_mockdata.output.mock_data_path,
     output:
         netcdf_file=(
             root_perm_dir_template + "/" + perm_dir_template + "/inference-data.netcdf"
@@ -108,28 +144,41 @@ rule run_sbc:
         ENVIRONMENT_YAML
     priority: 20
     params:
-        cores=lambda w: create_resource_manager(w).cores,
-        mem=lambda w: create_resource_manager(w).memory,
-        time=lambda w: create_resource_manager(w).time,
-        partition=lambda w: create_resource_manager(w).partition,
         perm_dir=make_permutation_dir,
         config_path=MODEL_CONFIG.as_posix(),
+    resources:
+        cores=lambda wildcards, attempt: create_resource_manager(
+            wildcards, attempt=attempt
+        ).cores,
+        mem=lambda wildcards, attempt: create_resource_manager(
+            wildcards, attempt=attempt
+        ).memory,
+        time=lambda wildcards, attempt: create_resource_manager(
+            wildcards, attempt=attempt
+        ).time,
+        partition=lambda wildcards, attempt: create_resource_manager(
+            wildcards, attempt=attempt
+        ).partition,
     benchmark:
         BENCHMARK_DIR / "run_sbc/{model_name}_{fit_method}_perm{perm_num}.tsv"
     shell:
         "src/command_line_interfaces/simulation_based_calibration_cli.py"
+        "  run-sbc"
         "  {wildcards.model_name}"
         "  {params.config_path}"
         "  {wildcards.fit_method}"
         "  {params.perm_dir}"
         "  {wildcards.perm_num}"
-        "  " + MOCK_DATA_SIZE.value
+        "  --mock-data-path {input.mock_data_path}"
 
 
 rule collate_sbc:
     input:
         sbc_results_csvs=expand(
-            root_perm_dir_template + "/" + perm_dir_template + "/posterior-summary.csv",
+            root_perm_dir_template
+            + "/"
+            + perm_dir_template
+            + "/posterior-summary.csv",
             perm_num=list(range(NUM_SIMULATIONS)),
             allow_missing=True,
         ),
@@ -144,17 +193,48 @@ rule collate_sbc:
         BENCHMARK_DIR / "collate_sbc/{model_name}_{fit_method}.tsv"
     shell:
         "src/command_line_interfaces/collate_sbc_cli.py "
+        " collate-sbc-posteriors-cli"
         " {params.perm_dir} "
         " {output.collated_results} "
         " --num-permutations=" + str(NUM_SIMULATIONS)
 
 
+rule sbc_uniformity_test:
+    input:
+        sbc_results_csvs=expand(
+            root_perm_dir_template
+            + "/"
+            + perm_dir_template
+            + "/posterior-summary.csv",
+            perm_num=list(range(NUM_SIMULATIONS)),
+            allow_missing=True,
+        ),
+    conda:
+        ENVIRONMENT_YAML
+    params:
+        perm_dir=make_root_permutation_directory,
+    output:
+        uniformity_results=uniformity_results_template,
+    priority: 10
+    benchmark:
+        BENCHMARK_DIR / "sbc_uniformity_test/{model_name}_{fit_method}.tsv"
+    shell:
+        "src/command_line_interfaces/collate_sbc_cli.py "
+        " uniformity-test-results"
+        " {params.perm_dir} "
+        " {output.uniformity_results} "
+        " --num-permutations=" + str(NUM_SIMULATIONS)
+
+
 rule papermill_report:
+    input:
+        REPORTS_DIR + "sbc-results-template.ipynb",
     version:
-        "2"
+        "3"
     params:
         root_perm_dir=make_root_permutation_directory,
         collated_results=make_collated_results_path,
+        uniformity_results=make_uniformity_results_path,
     output:
         notebook=REPORTS_DIR + "{model_name}_{fit_method}_sbc-results.ipynb",
     run:
@@ -165,6 +245,7 @@ rule papermill_report:
                 "MODEL_NAME": wildcards.model_name,
                 "SBC_RESULTS_DIR": params.root_perm_dir,
                 "SBC_COLLATED_RESULTS": params.collated_results,
+                "SBC_UNIFORMITY_RESULTS": params.uniformity_results,
                 "NUM_SIMULATIONS": NUM_SIMULATIONS,
                 "CONFIG_PATH": MODEL_CONFIG.as_posix(),
                 "FIT_METHOD_STR": wildcards.fit_method,
@@ -178,6 +259,7 @@ rule execute_report:
         "2"
     input:
         collated_results=rules.collate_sbc.output.collated_results,
+        uniformity_results=rules.sbc_uniformity_test.output.uniformity_results,
         notebook=rules.papermill_report.output.notebook,
     output:
         markdown=REPORTS_DIR + "{model_name}_{fit_method}_sbc-results.md",

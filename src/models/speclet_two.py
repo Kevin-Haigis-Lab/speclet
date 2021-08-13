@@ -82,20 +82,20 @@ class SpecletTwo(SpecletModel):
         logger.info("Creating PyMC3 model.")
         with pm.Model() as model:
             # [gene, cell line] varying intercept.
-            μ_α = pm.Normal("μ_α", 0, 0.5)
+            μ_α = pm.Normal("μ_α", 0, 2)
             σ_α = pm.HalfNormal("σ_α", 1)
             α = pm.Normal("α", μ_α, σ_α, shape=(co_idx.n_genes, co_idx.n_celllines))
 
             # Batch effect varying intercept.
-            μ_η = pm.Normal("μ_η", 0, 0.1)
-            σ_η = pm.HalfNormal("σ_η", 0.1)
+            μ_η = pm.Normal("μ_η", 0, 1)
+            σ_η = pm.HalfNormal("σ_η", 1)
             η = pm.Normal("η", μ_η, σ_η, shape=b_idx.n_batches)
 
             μ = pm.Deterministic(
                 "μ", α[gene_idx_shared, cellline_idx_shared] + η[batch_idx_shared]
             )
 
-            σ_σ = pm.HalfNormal("σ_σ", 0.5)
+            σ_σ = pm.HalfNormal("σ_σ", 1)
             σ = pm.HalfNormal("σ", σ_σ, shape=co_idx.n_sgrnas)
 
             # Likelihood

@@ -33,7 +33,7 @@
 import pickle
 import shutil
 from pathlib import Path
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import arviz as az
 import pymc3 as pm
@@ -315,7 +315,7 @@ class ArvizCacheManager:
 
     def read_cached_approximation(
         self, check_exists: bool = True
-    ) -&gt; Tuple[az.InferenceData, pm.Approximation]:
+    ) -&gt; tuple[az.InferenceData, pm.Approximation]:
         &#34;&#34;&#34;Read VI Approximation results from cache.
 
         Args:
@@ -327,7 +327,7 @@ class ArvizCacheManager:
             `check_exists = True`).
 
         Returns:
-            Tuple[az.InferenceData, pm.Approximation]: The cached data.
+            tuple[az.InferenceData, pm.Approximation]: The cached data.
         &#34;&#34;&#34;
         logger.debug(&#34;Reading approximation cache from file.&#34;)
         cache_paths = self.get_cache_file_names()
@@ -478,7 +478,7 @@ class ArvizCacheManager:
 
     def read_cached_approximation(
         self, check_exists: bool = True
-    ) -&gt; Tuple[az.InferenceData, pm.Approximation]:
+    ) -&gt; tuple[az.InferenceData, pm.Approximation]:
         &#34;&#34;&#34;Read VI Approximation results from cache.
 
         Args:
@@ -490,7 +490,7 @@ class ArvizCacheManager:
             `check_exists = True`).
 
         Returns:
-            Tuple[az.InferenceData, pm.Approximation]: The cached data.
+            tuple[az.InferenceData, pm.Approximation]: The cached data.
         &#34;&#34;&#34;
         logger.debug(&#34;Reading approximation cache from file.&#34;)
         cache_paths = self.get_cache_file_names()
@@ -665,7 +665,7 @@ InferenceObject and approximation object.</dd>
 </details>
 </dd>
 <dt id="src.managers.cache_managers.ArvizCacheManager.read_cached_approximation"><code class="name flex">
-<span>def <span class="ident">read_cached_approximation</span></span>(<span>self, check_exists: bool = True) -> Tuple[arviz.data.inference_data.InferenceData, pymc3.variational.opvi.Approximation]</span>
+<span>def <span class="ident">read_cached_approximation</span></span>(<span>self, check_exists: bool = True) -> tuple</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Read VI Approximation results from cache.</p>
@@ -683,7 +683,7 @@ first? Defaults to True.</dd>
 <p><code>check_exists = True</code>).</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Tuple[az.InferenceData, pm.Approximation]</code></dt>
+<dt><code>tuple[az.InferenceData, pm.Approximation]</code></dt>
 <dd>The cached data.</dd>
 </dl></div>
 <details class="source">
@@ -692,7 +692,7 @@ first? Defaults to True.</dd>
 </summary>
 <pre><code class="python">def read_cached_approximation(
     self, check_exists: bool = True
-) -&gt; Tuple[az.InferenceData, pm.Approximation]:
+) -&gt; tuple[az.InferenceData, pm.Approximation]:
     &#34;&#34;&#34;Read VI Approximation results from cache.
 
     Args:
@@ -704,7 +704,7 @@ first? Defaults to True.</dd>
         `check_exists = True`).
 
     Returns:
-        Tuple[az.InferenceData, pm.Approximation]: The cached data.
+        tuple[az.InferenceData, pm.Approximation]: The cached data.
     &#34;&#34;&#34;
     logger.debug(&#34;Reading approximation cache from file.&#34;)
     cache_paths = self.get_cache_file_names()

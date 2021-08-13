@@ -1,14 +1,34 @@
 import os
 from datetime import timedelta
 from pathlib import Path
+from typing import Callable
 
 import arviz as az
+import numpy as np
 import pandas as pd
+import pymc3 as pm
 import pytest
 import seaborn as sns
 from hypothesis import HealthCheck, Verbosity, settings
 
 from src.managers.model_data_managers import CrcDataManager
+
+#### ---- Callable fixtures ---- ####
+
+# These will tend to be function factories for use as monkeypatching  methods.
+
+
+@pytest.fixture
+def return_true() -> Callable:
+    """Get a function that can take any args and always returns `True`"""
+
+    def f(*args, **kwargs) -> bool:
+        return True
+
+    return f
+
+
+#### ---- Standard fixtures ---- ####
 
 
 @pytest.fixture
@@ -62,6 +82,28 @@ def centered_eight_post(centered_eight: az.InferenceData) -> pd.DataFrame:
     x = az.summary(centered_eight)
     assert isinstance(x, pd.DataFrame)
     return x
+
+
+@pytest.fixture(scope="module")
+def simple_model() -> pm.Model:
+    with pm.Model() as model:
+        mu = pm.Normal("mu", 0, 1)
+        sigma = pm.HalfNormal("sigma", 1)
+        y = pm.Normal("y", mu, sigma, observed=[1, 2, 3])  # noqa: F841
+    return model
+
+
+@pytest.fixture(scope="module")
+def hierarchical_model() -> pm.Model:
+    with pm.Model() as model:
+        mu_alpha = pm.Normal("mu_alpha", 0, 1)
+        sigma_alpha = pm.HalfCauchy("sigma_alpha", 1)
+        alpha = pm.Normal("alpha", mu_alpha, sigma_alpha, shape=2)
+        sigma = pm.HalfNormal("sigma", 1)
+        y = pm.Normal(  # noqa: F841
+            "y", alpha[np.array([0, 0, 1, 1])], sigma, observed=[1, 2, 3, 4]
+        )
+    return model
 
 
 #### ---- Hypothesis profiles ---- ####

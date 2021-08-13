@@ -1,8 +1,10 @@
+import arviz as az
 import pandas as pd
 import pymc3 as pm
 import pytest
 from seaborn import load_dataset
 
+import src.exceptions
 from src.modeling import pymc3_helpers as pmhelp
 
 
@@ -50,3 +52,41 @@ def test_get_all_variables_rm_log(mock_model: pm.Model):
     rvs = pmhelp.get_variable_names(mock_model, rm_log=True)
     expected_rvs = set(["a", "b", "mu", "sigma", "y"])
     assert expected_rvs == set(rvs)
+
+
+def test_get_posterior_names(centered_eight: az.InferenceData):
+    got_names = pmhelp.get_posterior_names(centered_eight)
+    expected_names = {"mu", "theta", "tau"}
+    assert set(got_names) == expected_names
+
+
+@pytest.mark.parametrize(
+    "var_name, thinned_shape",
+    [("mu", (4, 100)), ("tau", (4, 100)), ("theta", (4, 100, 8))],
+)
+def test_thin_posterior(
+    centered_eight: az.InferenceData, var_name: str, thinned_shape: tuple[int, ...]
+):
+    post = centered_eight["posterior"][var_name]
+    thinned_post = pmhelp.thin_posterior(post, thin_to=100)
+    assert thinned_post.shape == thinned_shape
+    thinned_post = pmhelp.thin_posterior(post, step_size=5)
+    assert thinned_post.shape == thinned_shape
+    with pytest.raises(src.exceptions.RequiredArgumentError):
+        pmhelp.thin_posterior(post)
+
+
+@pytest.mark.parametrize("chain_num", list(range(4)))
+@pytest.mark.parametrize(
+    "var_name, new_shape",
+    [("mu", (500,)), ("tau", (500,)), ("theta", (500, 8))],
+)
+def test_get_one_chain(
+    centered_eight: az.InferenceData,
+    var_name: str,
+    new_shape: tuple[int, ...],
+    chain_num: int,
+):
+    post = centered_eight["posterior"][var_name]
+    new_post = pmhelp.get_one_chain(post, chain_num=chain_num)
+    assert new_post.shape == new_shape

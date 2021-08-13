@@ -1,23 +1,18 @@
+import os
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
+import arviz as az
+import pandas as pd
 import pytest
-import typer
 from typer.testing import CliRunner
 
 from src import project_enums
 from src.command_line_interfaces import simulation_based_calibration_cli as sbc_cli
 from src.io import model_config
+from src.modeling.simulation_based_calibration_helpers import SBCFileManager, SBCResults
 from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
-
-
-@pytest.fixture(scope="class")
-def run_sbc_app() -> typer.Typer:
-    app = typer.Typer()
-    app.command()(sbc_cli.run_sbc)
-    return app
-
 
 runner = CliRunner()
 
@@ -29,7 +24,6 @@ runner = CliRunner()
 def test_run_sbc_with_sampling(
     model_name: str,
     fit_method: str,
-    run_sbc_app: typer.Typer,
     mock_model_config: Path,
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -42,38 +36,43 @@ def test_run_sbc_with_sampling(
     )
 
     result = runner.invoke(
-        run_sbc_app,
+        sbc_cli.app,
         [
+            "run-sbc",
             model_name,
             mock_model_config.as_posix(),
             fit_method,
             tmp_path.as_posix(),
             "111",
+            "--data-size",
             "small",
+            "--no-check-results",
         ],
     )
     assert result.exit_code == 0
 
 
-@pytest.mark.DEV
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 def test_uses_configuration_fitting_parameters(
-    run_sbc_app: typer.Typer,
-    # mock_model_config: Path,
     monkeypatch: pytest.MonkeyPatch,
     fit_method: ModelFitMethod,
     tmp_path: Path,
 ):
 
     advi_kwargs = {"n_iterations": 42, "draws": 23, "post_pred_samples": 12}
-    mcmc_kwargs = {"tune": 33, "target_accept": 0.2, "prior_pred_samples": 121}
+    mcmc_kwargs = {
+        "tune": 33,
+        "target_accept": 0.2,
+        "prior_pred_samples": 121,
+        "cores": 1,
+    }
 
-    def _compare_dicts(d1: Dict[str, Any], d2: Dict[str, Any]) -> None:
+    def _compare_dicts(d1: dict[str, Any], d2: dict[str, Any]) -> None:
         for k, v in d1.items():
             assert v == d2[k]
 
     def intercept_fit_kwargs_dict(*args, **kwargs) -> None:
-        fit_kwargs: Optional[Dict[Any, Any]] = kwargs["fit_kwargs"]
+        fit_kwargs: Optional[dict[Any, Any]] = kwargs["fit_kwargs"]
         assert fit_kwargs is not None
         if fit_method is ModelFitMethod.ADVI:
             _compare_dicts(advi_kwargs, fit_kwargs)
@@ -113,14 +112,125 @@ def test_uses_configuration_fitting_parameters(
     )
 
     result = runner.invoke(
-        run_sbc_app,
+        sbc_cli.app,
         [
+            "run-sbc",
             model_name,
             "not-real-config.yaml",
             fit_method.value,
             tmp_path.as_posix(),
             "111",
+            "--data-size",
             "small",
+            "--no-check-results",
         ],
     )
     assert result.exit_code == 0
+
+
+#### ---- SBC result checks ---- ####
+
+
+def setup_mock_sbc_results(dir: Path, az_data: az.InferenceData) -> SBCFileManager:
+    sbc_fm = SBCFileManager(dir)
+    sbc_fm.save_sbc_results(
+        priors={}, inference_obj=az_data, posterior_summary=pd.DataFrame()
+    )
+    sbc_fm.save_sbc_data(pd.DataFrame())
+    return sbc_fm
+
+
+@pytest.mark.parametrize("fit_method", ModelFitMethod)
+def test_check_sbc_results_succeeds(
+    tmp_path: Path, centered_eight: az.InferenceData, fit_method: ModelFitMethod
+):
+    setup_mock_sbc_results(tmp_path, centered_eight)
+    check = sbc_cli._check_sbc_results(tmp_path, fit_method=fit_method)
+    assert check.result
+    assert check.message == ""
+    assert check.sbc_file_manager is not None
+
+
+@pytest.mark.parametrize("fit_method", ModelFitMethod)
+def test_check_sbc_results_fails_if_no_result_files(
+    tmp_path: Path, centered_eight: az.InferenceData, fit_method: ModelFitMethod
+):
+    test_sbc_fm = setup_mock_sbc_results(tmp_path, centered_eight)
+    for f in (
+        test_sbc_fm.inference_data_path,
+        test_sbc_fm.priors_path_get,
+        test_sbc_fm.posterior_summary_path,
+    ):
+        setup_mock_sbc_results(tmp_path, centered_eight)
+        check = sbc_cli._check_sbc_results(tmp_path, fit_method=fit_method)
+        assert check.result
+        os.remove(f)
+        check = sbc_cli._check_sbc_results(tmp_path, fit_method=fit_method)
+        assert not check.result
+        assert check.message == "Not all result files exist."
+        assert check.sbc_file_manager is not None
+
+
+@pytest.mark.parametrize("fit_method", ModelFitMethod)
+def test_check_sbc_results_fails_if_no_data_files(
+    tmp_path: Path, centered_eight: az.InferenceData, fit_method: ModelFitMethod
+):
+    test_sbc_fm = setup_mock_sbc_results(tmp_path, centered_eight)
+    check = sbc_cli._check_sbc_results(tmp_path, fit_method=fit_method)
+    assert check.result
+    test_sbc_fm.clear_saved_data()
+    check = sbc_cli._check_sbc_results(tmp_path, fit_method=fit_method)
+    assert not check.result
+    assert check.message == "Mock data file does not exist."
+    assert check.sbc_file_manager is not None
+
+
+@pytest.mark.parametrize("fit_method", ModelFitMethod)
+def test_check_sbc_results_fails_without_sampling_statistics(
+    tmp_path: Path, centered_eight: az.InferenceData, fit_method: ModelFitMethod
+):
+    mod_ce = centered_eight.copy()
+    del mod_ce.sample_stats
+    setup_mock_sbc_results(tmp_path, mod_ce)
+
+    check = sbc_cli._check_sbc_results(tmp_path, fit_method=fit_method)
+    if fit_method is ModelFitMethod.ADVI:
+        assert check.result
+        assert check.message == ""
+        assert check.sbc_file_manager is not None
+    elif fit_method is ModelFitMethod.MCMC:
+        assert not check.result
+        assert check.message == "No sampling statistics."
+        assert check.sbc_file_manager is not None
+    else:
+        project_enums.assert_never(fit_method)
+
+
+@pytest.mark.parametrize("fit_method", ModelFitMethod)
+def test_check_sbc_results_fails_with_sampling_stats_wrong_type(
+    tmp_path: Path,
+    centered_eight: az.InferenceData,
+    fit_method: ModelFitMethod,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    setup_mock_sbc_results(tmp_path, centered_eight)
+
+    def mock_sbc_results(*args, **kwargs) -> SBCResults:
+        return SBCResults(
+            priors={}, inference_obj=centered_eight, posterior_summary=pd.DataFrame()
+        )
+
+    monkeypatch.setattr(centered_eight, "sample_stats", None)
+    monkeypatch.setattr(SBCFileManager, "get_sbc_results", mock_sbc_results)
+
+    check = sbc_cli._check_sbc_results(tmp_path, fit_method=fit_method)
+    if fit_method is ModelFitMethod.ADVI:
+        assert check.result
+        assert check.message == ""
+        assert check.sbc_file_manager is not None
+    elif fit_method is ModelFitMethod.MCMC:
+        assert not check.result
+        assert check.message == "Sampling statistics is not a xarray.Dataset."
+        assert check.sbc_file_manager is not None
+    else:
+        project_enums.assert_never(fit_method)

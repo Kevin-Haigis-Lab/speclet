@@ -5,7 +5,7 @@
 import pickle
 import shutil
 from pathlib import Path
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import arviz as az
 import pymc3 as pm
@@ -287,7 +287,7 @@ class ArvizCacheManager:
 
     def read_cached_approximation(
         self, check_exists: bool = True
-    ) -> Tuple[az.InferenceData, pm.Approximation]:
+    ) -> tuple[az.InferenceData, pm.Approximation]:
         """Read VI Approximation results from cache.
 
         Args:
@@ -299,7 +299,7 @@ class ArvizCacheManager:
             `check_exists = True`).
 
         Returns:
-            Tuple[az.InferenceData, pm.Approximation]: The cached data.
+            tuple[az.InferenceData, pm.Approximation]: The cached data.
         """
         logger.debug("Reading approximation cache from file.")
         cache_paths = self.get_cache_file_names()

@@ -99,3 +99,9 @@ class ShapeError(BaseException):
             f"Expected shape {self.expected_shape} - actual shape {self.actual_shape}."
         )
         super().__init__(self.message)
+
+
+class RequiredArgumentError(BaseException):
+    """Errors concerning required arguments that are not language-enforced."""
+
+    pass

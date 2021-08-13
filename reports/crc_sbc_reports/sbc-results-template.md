@@ -2,26 +2,22 @@
 
 ```python
 import logging
-import re
 import warnings
 from pathlib import Path
+from pprint import pprint
 from time import time
-from typing import Dict, List, Tuple
 
-import arviz as az
-import janitor
+import janitor  # noqa: F401
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotnine as gg
-import pymc3 as pm
-import seaborn as sns
 
-from src.command_line_interfaces import cli_helpers
+from src.analysis import pymc3_analysis as pmanal
+from src.analysis import sbc_analysis as sbcanal
 from src.loggers import set_console_handler_level
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
-from src.modeling import pymc3_analysis as pmanal
-from src.modeling.simulation_based_calibration_helpers import SBCFileManager
+from src.modeling import simulation_based_calibration_helpers as sbc
 from src.project_enums import ModelFitMethod
 ```
 
@@ -45,6 +41,7 @@ Parameters for papermill:
 - `MODEL_NAME`: unique, identifiable name of the model
 - `SBC_RESULTS_DIR`: directory containing results of many rounds of SBC
 - `SBC_COLLATED_RESULTS`: path to collated simulation posteriors
+- `SBC_UNIFORMITY_RESULTS`: path to results of the uniformity test
 - `NUM_SIMULATIONS`: the number of simiulations; will be used to check that all results are found
 - `CONFIG_PATH`: path to the model configuration file
 - `FIT_METHOD`: model fitting method used for this SBC
@@ -57,6 +54,7 @@ Parameters for papermill:
 MODEL_NAME = ""
 SBC_RESULTS_DIR = ""
 SBC_COLLATED_RESULTS = ""
+SBC_UNIFORMITY_RESULTS = ""
 NUM_SIMULATIONS = -1
 CONFIG_PATH = ""
 FIT_METHOD_STR = ""
@@ -76,6 +74,10 @@ assert sbc_results_dir.exists()
 sbc_collated_results_path = Path(path_addition, SBC_COLLATED_RESULTS)
 assert sbc_collated_results_path.is_file()
 assert sbc_collated_results_path.exists()
+
+sbc_uniformity_results_path = Path(path_addition, SBC_UNIFORMITY_RESULTS)
+assert sbc_uniformity_results_path.is_file()
+assert sbc_uniformity_results_path.exists()
 ```
 
 Confirm that there is a positive number of simulations.
@@ -91,17 +93,37 @@ FIT_METHOD = ModelFitMethod(FIT_METHOD_STR)
 ## Read in all results
 
 ```python
+# Posterior summaries dataframe.
 simulation_posteriors_df = pd.read_pickle(sbc_collated_results_path)
 simulation_posteriors_df.head()
 ```
 
+```python
+# Uniformity test results dataframe.
+sbc_uniformity_test = pd.read_pickle(sbc_uniformity_results_path)
+var_names = sbc_uniformity_test.parameter.tolist()
+parameter_names = [x.split("[")[0] for x in var_names]
+sbc_uniformity_test["parameter_name"] = parameter_names
+sbc_uniformity_test.head()
+```
+
 ## Analysis
+
+```python
+sbc_analyzer = sbcanal.SBCAnalysis(
+    root_dir=sbc_results_dir,
+    pattern="perm",
+    n_simulations=NUM_SIMULATIONS,
+    simulation_posteriors=simulation_posteriors_df,
+    uniformity_test_results=sbc_uniformity_test,
+)
+```
 
 ### ADVI approximation histories
 
 ```python
 if FIT_METHOD is ModelFitMethod.ADVI:
-    advi_histories: List[np.ndarray] = []
+    advi_histories: list[np.ndarray] = []
 
     for dir in sbc_results_dir.iterdir():
         if not dir.is_dir():
@@ -116,7 +138,7 @@ if FIT_METHOD is ModelFitMethod.ADVI:
         list(range(len(advi_histories))), size=n_sims_advi_hist, replace=False
     )
 
-    def make_hist_df(sim_idx: int, hist_list: List[np.ndarray]) -> pd.DataFrame:
+    def make_hist_df(sim_idx: int, hist_list: list[np.ndarray]) -> pd.DataFrame:
         df = pd.DataFrame({"sim_idx": sim_idx, "loss": hist_list[sim_idx].flatten()})
         df["step"] = np.arange(df.shape[0])
         return df
@@ -147,35 +169,31 @@ class IncompleteCachedResultsWarning(UserWarning):
     pass
 
 
-all_sbc_perm_dirs = list(sbc_results_dir.iterdir())
+if FIT_METHOD is ModelFitMethod.MCMC:
+    pprint(sbc_analyzer.mcmc_diagnostics())
+    print("=" * 60)
 
-for perm_dir in np.random.choice(
-    all_sbc_perm_dirs, size=min([5, len(all_sbc_perm_dirs)]), replace=False
-):
-    print(perm_dir.name)
-    print("-" * 30)
-    sbc_fm = SBCFileManager(perm_dir)
-    if sbc_fm.all_data_exists():
-        sbc_res = sbc_fm.get_sbc_results()
-        _ = pmanal.describe_mcmc(sbc_res.inference_obj)
-    else:
-        warnings.warn(
-            "Cannot find all components of the SBC results.",
-            IncompleteCachedResultsWarning,
-        )
+    all_sbc_perm_dirs = list(sbc_results_dir.iterdir())
+    for perm_dir in np.random.choice(
+        all_sbc_perm_dirs, size=min([5, len(all_sbc_perm_dirs)]), replace=False
+    ):
+        print(perm_dir.name)
+        print("-" * 30)
+        sbc_fm = sbc.SBCFileManager(perm_dir)
+        if sbc_fm.all_data_exists():
+            sbc_res = sbc_fm.get_sbc_results()
+            _ = pmanal.describe_mcmc(sbc_res.inference_obj)
+        else:
+            warnings.warn(
+                "Cannot find all components of the SBC results.",
+                IncompleteCachedResultsWarning,
+            )
 ```
 
 ### Estimate accuracy
 
 ```python
-accuracy_per_parameter = (
-    simulation_posteriors_df.copy()
-    .groupby(["parameter_name"])["within_hdi"]
-    .mean()
-    .reset_index(drop=False)
-    .sort_values("within_hdi", ascending=False)
-    .reset_index(drop=True)
-)
+accuracy_per_parameter = sbc_analyzer.run_posterior_accuracy_test()
 
 accuracy_per_parameter["parameter_name"] = pd.Categorical(
     accuracy_per_parameter["parameter_name"],
@@ -236,6 +254,28 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
         y="mean of posterior",
     )
 )
+```
+
+### SBC Uniformity Test
+
+```python
+var_names_to_plot = (
+    sbc_uniformity_test[["parameter", "parameter_name"]]
+    .drop_duplicates()
+    .reset_index(drop=True)
+    .sort_values(["parameter_name", "parameter"])
+    .groupby("parameter_name")
+    .head(3)
+    .reset_index(drop=True)
+    .parameter.tolist()
+)
+```
+
+```python
+for v in var_names_to_plot:
+    ax = sbc_analyzer.plot_uniformity(sbc_uniformity_test.query(f"parameter == '{v}'"))
+    ax.set_title(v)
+    plt.show()
 ```
 
 ---

@@ -672,7 +672,7 @@ def sgrna_intercept_cov(self) -&gt; bool:
 <h3>Methods</h3>
 <dl>
 <dt id="src.models.ceres_mimic.CeresMimic.get_replacement_parameters"><code class="name flex">
-<span>def <span class="ident">get_replacement_parameters</span></span>(<span>self) -> Dict[theano.tensor.sharedvar.TensorSharedVariable, Union[pymc3.data.Minibatch, numpy.ndarray]]</span>
+<span>def <span class="ident">get_replacement_parameters</span></span>(<span>self) -> dict</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Make a dictionary mapping the shared data variables to new data.</p>
@@ -853,6 +853,7 @@ def sgrna_intercept_cov(self) -&gt; bool:
 <li><code><a title="src.models.speclet_model.SpecletModel.build_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.build_model">build_model</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.clear_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.clear_cache">clear_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.debug" href="speclet_model.html#src.models.speclet_model.SpecletModel.debug">debug</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.generate_mock_data" href="speclet_model.html#src.models.speclet_model.SpecletModel.generate_mock_data">generate_mock_data</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_advi_callbacks" href="speclet_model.html#src.models.speclet_model.SpecletModel.get_advi_callbacks">get_advi_callbacks</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_sbc" href="speclet_model.html#src.models.speclet_model.SpecletModel.get_sbc">get_sbc</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.load_advi_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.load_advi_cache">load_advi_cache</a></code></li>

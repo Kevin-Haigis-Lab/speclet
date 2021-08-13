@@ -7,11 +7,17 @@ __default__:
   err: "logs/%j_{rule}.log"
   mail: "NONE"
   J: "snakejob"
+generate_mockdata:
+  partition: "short"
+  cores: 1
+  mem: "8000"
+  time: "00:10:00"
+  J: "mockdf"
 run_sbc:
-  partition: "{params.partition}"
-  cores: "{params.cores}"
-  mem: "{params.mem}"
-  time: "{params.time}"
+  partition: "{resources.partition}"
+  cores: "{resources.cores}"
+  mem: "{resources.mem}"
+  time: "{resources.time}"
   J: "run-sbc"
 collate_sbc:
   partition: "short"
@@ -19,6 +25,12 @@ collate_sbc:
   mem: "8000"
   time: "00:30:00"
   J: "collate"
+sbc_uniformity_test:
+  partition: "short"
+  cores: 1
+  mem: "16000"
+  time: "02:00:00"
+  J: "unif"
 papermill_report:
   partition: "short"
   cores: 1

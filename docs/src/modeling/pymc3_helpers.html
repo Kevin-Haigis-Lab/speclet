@@ -28,16 +28,21 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Simple functions for common interactions with PyMC3.&#34;&#34;&#34;
 
-from typing import List
+from math import floor
+from typing import Optional
 
+import arviz as az
 import pymc3 as pm
+import xarray as xr
+
+from src.exceptions import RequiredArgumentError
 
 
-def _rm_log(model_vars: List[str]) -&gt; List[str]:
+def _rm_log(model_vars: list[str]) -&gt; list[str]:
     return [v.replace(&#34;_log__&#34;, &#34;&#34;) for v in model_vars]
 
 
-def get_random_variable_names(m: pm.Model, rm_log: bool = False) -&gt; List[str]:
+def get_random_variable_names(m: pm.Model, rm_log: bool = False) -&gt; list[str]:
     &#34;&#34;&#34;Retrieve the names of the random variables in a model.
 
     Args:
@@ -46,15 +51,15 @@ def get_random_variable_names(m: pm.Model, rm_log: bool = False) -&gt; List[str]
           False.
 
     Returns:
-        List[str]: A list of the random variable names.
+        list[str]: A list of the random variable names.
     &#34;&#34;&#34;
-    model_vars: List[str] = [v.name for v in m.free_RVs]
+    model_vars: list[str] = [v.name for v in m.free_RVs]
     if rm_log:
         model_vars = _rm_log(model_vars)
     return model_vars
 
 
-def get_deterministic_variable_names(m: pm.Model, rm_log: bool = False) -&gt; List[str]:
+def get_deterministic_variable_names(m: pm.Model, rm_log: bool = False) -&gt; list[str]:
     &#34;&#34;&#34;Retrieve the names of the deterministic variables in a model.
 
     Args:
@@ -63,7 +68,7 @@ def get_deterministic_variable_names(m: pm.Model, rm_log: bool = False) -&gt; Li
           False.
 
     Returns:
-        List[str]: A list of the deterministic variable names.
+        list[str]: A list of the deterministic variable names.
     &#34;&#34;&#34;
     model_vars = list(
         set([v.name for v in m.unobserved_RVs])  # noqa: C403
@@ -75,7 +80,7 @@ def get_deterministic_variable_names(m: pm.Model, rm_log: bool = False) -&gt; Li
     return model_vars
 
 
-def get_variable_names(m: pm.Model, rm_log: bool = False) -&gt; List[str]:
+def get_variable_names(m: pm.Model, rm_log: bool = False) -&gt; list[str]:
     &#34;&#34;&#34;Get all variable names from a model.
 
     Args:
@@ -84,12 +89,69 @@ def get_variable_names(m: pm.Model, rm_log: bool = False) -&gt; List[str]:
           False.
 
     Returns:
-        List[str]: List of unique variable names.
+        list[str]: list of unique variable names.
     &#34;&#34;&#34;
     rvs = [v.name for v in m.unobserved_RVs] + [v.name for v in m.observed_RVs]
     if rm_log:
         rvs = _rm_log(rvs)
-    return list(set(rvs))</code></pre>
+    return list(set(rvs))
+
+
+def get_posterior_names(data: az.InferenceData) -&gt; list[str]:
+    &#34;&#34;&#34;Get the names of variables present in the posterior of a model.
+
+    Args:
+        data (az.InferenceData): The ArviZ data object with sampled posterior.
+
+    Raises:
+        KeyError: Raised if the posterior data is not present.
+
+    Returns:
+        list[str]: A list of the vairables with their posteriors sampled.
+    &#34;&#34;&#34;
+    if &#34;posterior&#34; in data:
+        return [str(i) for i in data[&#34;posterior&#34;].data_vars]
+    else:
+        raise KeyError(&#34;Input ArviZ InferenceData object does not have posterior data.&#34;)
+
+
+def thin_posterior(
+    posterior: xr.DataArray,
+    thin_to: Optional[int] = None,
+    step_size: Optional[int] = None,
+) -&gt; xr.DataArray:
+    &#34;&#34;&#34;Thin a posterior to a specific number of values or by ever n steps.
+
+    Args:
+        posterior (xr.DataArray): Posterior to thin.
+        thin_to (int, optional): Number of samples to thin the posterior down to.
+          Defaults to None.
+        step_size (Optional[int], optional): Size of the step for the thinning process.
+          Defaults to None.
+
+    Returns:
+        xr.DataArray: The thinned posterior distribution.
+    &#34;&#34;&#34;
+    if thin_to is not None:
+        step_size = floor(posterior.shape[1] / thin_to)
+    elif step_size is None:
+        raise RequiredArgumentError(
+            &#34;A value must be passed to either `thin_to` or `step_size`.&#34;
+        )
+    return posterior.sel(draw=slice(0, None, step_size))
+
+
+def get_one_chain(posterior: xr.DataArray, chain_num: int = 0) -&gt; xr.DataArray:
+    &#34;&#34;&#34;Extract just the first chain from a posterior.
+
+    Args:
+        posterior (xr.DataArray): The posterior.
+        chain_num (int, optional): The index of the chain to keep. Defaults to 0.
+
+    Returns:
+        xr.DataArray: The same posterior data structure but with only the desired chain.
+    &#34;&#34;&#34;
+    return posterior.sel(chain=chain_num)</code></pre>
 </details>
 </section>
 <section>
@@ -100,7 +162,7 @@ def get_variable_names(m: pm.Model, rm_log: bool = False) -&gt; List[str]:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.modeling.pymc3_helpers.get_deterministic_variable_names"><code class="name flex">
-<span>def <span class="ident">get_deterministic_variable_names</span></span>(<span>m: pymc3.model.Model, rm_log: bool = False) -> List[str]</span>
+<span>def <span class="ident">get_deterministic_variable_names</span></span>(<span>m: pymc3.model.Model, rm_log: bool = False) -> list</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Retrieve the names of the deterministic variables in a model.</p>
@@ -114,14 +176,14 @@ False.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>List[str]</code></dt>
+<dt><code>list[str]</code></dt>
 <dd>A list of the deterministic variable names.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_deterministic_variable_names(m: pm.Model, rm_log: bool = False) -&gt; List[str]:
+<pre><code class="python">def get_deterministic_variable_names(m: pm.Model, rm_log: bool = False) -&gt; list[str]:
     &#34;&#34;&#34;Retrieve the names of the deterministic variables in a model.
 
     Args:
@@ -130,7 +192,7 @@ False.</dd>
           False.
 
     Returns:
-        List[str]: A list of the deterministic variable names.
+        list[str]: A list of the deterministic variable names.
     &#34;&#34;&#34;
     model_vars = list(
         set([v.name for v in m.unobserved_RVs])  # noqa: C403
@@ -142,8 +204,84 @@ False.</dd>
     return model_vars</code></pre>
 </details>
 </dd>
+<dt id="src.modeling.pymc3_helpers.get_one_chain"><code class="name flex">
+<span>def <span class="ident">get_one_chain</span></span>(<span>posterior: xarray.core.dataarray.DataArray, chain_num: int = 0) -> xarray.core.dataarray.DataArray</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Extract just the first chain from a posterior.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>posterior</code></strong> :&ensp;<code>xr.DataArray</code></dt>
+<dd>The posterior.</dd>
+<dt><strong><code>chain_num</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The index of the chain to keep. Defaults to 0.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>xr.DataArray</code></dt>
+<dd>The same posterior data structure but with only the desired chain.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_one_chain(posterior: xr.DataArray, chain_num: int = 0) -&gt; xr.DataArray:
+    &#34;&#34;&#34;Extract just the first chain from a posterior.
+
+    Args:
+        posterior (xr.DataArray): The posterior.
+        chain_num (int, optional): The index of the chain to keep. Defaults to 0.
+
+    Returns:
+        xr.DataArray: The same posterior data structure but with only the desired chain.
+    &#34;&#34;&#34;
+    return posterior.sel(chain=chain_num)</code></pre>
+</details>
+</dd>
+<dt id="src.modeling.pymc3_helpers.get_posterior_names"><code class="name flex">
+<span>def <span class="ident">get_posterior_names</span></span>(<span>data: arviz.data.inference_data.InferenceData) -> list</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the names of variables present in the posterior of a model.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>az.InferenceData</code></dt>
+<dd>The ArviZ data object with sampled posterior.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>KeyError</code></dt>
+<dd>Raised if the posterior data is not present.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[str]</code></dt>
+<dd>A list of the vairables with their posteriors sampled.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_posterior_names(data: az.InferenceData) -&gt; list[str]:
+    &#34;&#34;&#34;Get the names of variables present in the posterior of a model.
+
+    Args:
+        data (az.InferenceData): The ArviZ data object with sampled posterior.
+
+    Raises:
+        KeyError: Raised if the posterior data is not present.
+
+    Returns:
+        list[str]: A list of the vairables with their posteriors sampled.
+    &#34;&#34;&#34;
+    if &#34;posterior&#34; in data:
+        return [str(i) for i in data[&#34;posterior&#34;].data_vars]
+    else:
+        raise KeyError(&#34;Input ArviZ InferenceData object does not have posterior data.&#34;)</code></pre>
+</details>
+</dd>
 <dt id="src.modeling.pymc3_helpers.get_random_variable_names"><code class="name flex">
-<span>def <span class="ident">get_random_variable_names</span></span>(<span>m: pymc3.model.Model, rm_log: bool = False) -> List[str]</span>
+<span>def <span class="ident">get_random_variable_names</span></span>(<span>m: pymc3.model.Model, rm_log: bool = False) -> list</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Retrieve the names of the random variables in a model.</p>
@@ -157,14 +295,14 @@ False.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>List[str]</code></dt>
+<dt><code>list[str]</code></dt>
 <dd>A list of the random variable names.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_random_variable_names(m: pm.Model, rm_log: bool = False) -&gt; List[str]:
+<pre><code class="python">def get_random_variable_names(m: pm.Model, rm_log: bool = False) -&gt; list[str]:
     &#34;&#34;&#34;Retrieve the names of the random variables in a model.
 
     Args:
@@ -173,16 +311,16 @@ False.</dd>
           False.
 
     Returns:
-        List[str]: A list of the random variable names.
+        list[str]: A list of the random variable names.
     &#34;&#34;&#34;
-    model_vars: List[str] = [v.name for v in m.free_RVs]
+    model_vars: list[str] = [v.name for v in m.free_RVs]
     if rm_log:
         model_vars = _rm_log(model_vars)
     return model_vars</code></pre>
 </details>
 </dd>
 <dt id="src.modeling.pymc3_helpers.get_variable_names"><code class="name flex">
-<span>def <span class="ident">get_variable_names</span></span>(<span>m: pymc3.model.Model, rm_log: bool = False) -> List[str]</span>
+<span>def <span class="ident">get_variable_names</span></span>(<span>m: pymc3.model.Model, rm_log: bool = False) -> list</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get all variable names from a model.</p>
@@ -196,14 +334,14 @@ False.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>List[str]</code></dt>
-<dd>List of unique variable names.</dd>
+<dt><code>list[str]</code></dt>
+<dd>list of unique variable names.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_variable_names(m: pm.Model, rm_log: bool = False) -&gt; List[str]:
+<pre><code class="python">def get_variable_names(m: pm.Model, rm_log: bool = False) -&gt; list[str]:
     &#34;&#34;&#34;Get all variable names from a model.
 
     Args:
@@ -212,12 +350,63 @@ False.</dd>
           False.
 
     Returns:
-        List[str]: List of unique variable names.
+        list[str]: list of unique variable names.
     &#34;&#34;&#34;
     rvs = [v.name for v in m.unobserved_RVs] + [v.name for v in m.observed_RVs]
     if rm_log:
         rvs = _rm_log(rvs)
     return list(set(rvs))</code></pre>
+</details>
+</dd>
+<dt id="src.modeling.pymc3_helpers.thin_posterior"><code class="name flex">
+<span>def <span class="ident">thin_posterior</span></span>(<span>posterior: xarray.core.dataarray.DataArray, thin_to: Optional[int] = None, step_size: Optional[int] = None) -> xarray.core.dataarray.DataArray</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Thin a posterior to a specific number of values or by ever n steps.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>posterior</code></strong> :&ensp;<code>xr.DataArray</code></dt>
+<dd>Posterior to thin.</dd>
+<dt><strong><code>thin_to</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of samples to thin the posterior down to.
+Defaults to None.</dd>
+<dt><strong><code>step_size</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
+<dd>Size of the step for the thinning process.
+Defaults to None.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>xr.DataArray</code></dt>
+<dd>The thinned posterior distribution.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def thin_posterior(
+    posterior: xr.DataArray,
+    thin_to: Optional[int] = None,
+    step_size: Optional[int] = None,
+) -&gt; xr.DataArray:
+    &#34;&#34;&#34;Thin a posterior to a specific number of values or by ever n steps.
+
+    Args:
+        posterior (xr.DataArray): Posterior to thin.
+        thin_to (int, optional): Number of samples to thin the posterior down to.
+          Defaults to None.
+        step_size (Optional[int], optional): Size of the step for the thinning process.
+          Defaults to None.
+
+    Returns:
+        xr.DataArray: The thinned posterior distribution.
+    &#34;&#34;&#34;
+    if thin_to is not None:
+        step_size = floor(posterior.shape[1] / thin_to)
+    elif step_size is None:
+        raise RequiredArgumentError(
+            &#34;A value must be passed to either `thin_to` or `step_size`.&#34;
+        )
+    return posterior.sel(draw=slice(0, None, step_size))</code></pre>
 </details>
 </dd>
 </dl>
@@ -239,8 +428,11 @@ False.</dd>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="src.modeling.pymc3_helpers.get_deterministic_variable_names" href="#src.modeling.pymc3_helpers.get_deterministic_variable_names">get_deterministic_variable_names</a></code></li>
+<li><code><a title="src.modeling.pymc3_helpers.get_one_chain" href="#src.modeling.pymc3_helpers.get_one_chain">get_one_chain</a></code></li>
+<li><code><a title="src.modeling.pymc3_helpers.get_posterior_names" href="#src.modeling.pymc3_helpers.get_posterior_names">get_posterior_names</a></code></li>
 <li><code><a title="src.modeling.pymc3_helpers.get_random_variable_names" href="#src.modeling.pymc3_helpers.get_random_variable_names">get_random_variable_names</a></code></li>
 <li><code><a title="src.modeling.pymc3_helpers.get_variable_names" href="#src.modeling.pymc3_helpers.get_variable_names">get_variable_names</a></code></li>
+<li><code><a title="src.modeling.pymc3_helpers.thin_posterior" href="#src.modeling.pymc3_helpers.thin_posterior">thin_posterior</a></code></li>
 </ul>
 </li>
 </ul>

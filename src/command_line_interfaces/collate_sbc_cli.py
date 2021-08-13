@@ -7,14 +7,63 @@ from typing import Optional
 
 import typer
 
+from src.analysis import sbc_analysis as sbcanal
 from src.command_line_interfaces import cli_helpers
 from src.exceptions import UnsupportedFileTypeError
 from src.loggers import logger
-from src.pipelines import collate_sbc
+from src.modeling import simulation_based_calibration_helpers as sbc
 
 cli_helpers.configure_pretty()
 
+app = typer.Typer()
 
+
+@app.command()
+def uniformity_test_results(
+    root_perm_dir: Path,
+    output_path: Path,
+    num_permutations: Optional[int] = None,
+) -> None:
+    """Command line interface for assembling the SBC uniformity test results.
+
+    Args:
+        root_perm_dir (Path): Path to the root directory containing the subdirectories
+          with the results of all of the simulations.
+        output_path (Path): Path to save the results to. Can either be saved as a pickle
+          or CSV.
+        num_permutations (Optional[int], optional):  Number of permutations expected. If
+          supplied, this will be checked against the number of found simulations.
+          Defaults to None.
+
+    Raises:
+        NotADirectoryError: Raised if the path to the permutation root directory is not
+          a directory.
+        UnsupportedOutputFileTypeError: Raised if the output path has an unsupported
+          extension.
+    """
+    if not root_perm_dir.is_dir():
+        raise NotADirectoryError(root_perm_dir)
+
+    logger.info(
+        f"Performing uniformity test over {num_permutations} "
+        + f"SBC simulations in '{root_perm_dir.as_posix()}'."
+    )
+    sbc_analyzer = sbcanal.SBCAnalysis(
+        root_dir=root_perm_dir, pattern="sbc-perm", n_simulations=num_permutations
+    )
+    sbc_uniformity_df = sbc_analyzer.run_uniformity_test()
+
+    if output_path.suffix == ".pkl":
+        logger.info(f"Saving final results to pickle: '{output_path.as_posix()}'.")
+        sbc_uniformity_df.to_pickle(output_path.as_posix())
+    elif output_path.suffix == ".csv":
+        logger.info(f"Saving final results to CSV: '{output_path.as_posix()}'.")
+        sbc_uniformity_df.to_csv(output_path)
+    else:
+        raise UnsupportedFileTypeError(output_path.suffix)
+
+
+@app.command()
 def collate_sbc_posteriors_cli(
     root_perm_dir: Path,
     output_path: Path,
@@ -32,8 +81,10 @@ def collate_sbc_posteriors_cli(
           Defaults to None.
 
     Raises:
+        NotADirectoryError: Raised if the path to the permutation root directory is not
+          a directory.
         UnsupportedOutputFileTypeError: Raised if the output path has an unsupported
-        extension.
+          extension.
     """
     if not root_perm_dir.is_dir():
         raise NotADirectoryError(root_perm_dir)
@@ -41,7 +92,7 @@ def collate_sbc_posteriors_cli(
     logger.info(
         f"Collating {num_permutations} SBC simulations in '{root_perm_dir.as_posix()}'."
     )
-    df = collate_sbc.collate_sbc_posteriors(
+    df = sbc.collate_sbc_posteriors(
         posterior_dirs=root_perm_dir.iterdir(), num_permutations=num_permutations
     )
     if output_path.suffix == ".pkl":
@@ -55,4 +106,4 @@ def collate_sbc_posteriors_cli(
 
 
 if __name__ == "__main__":
-    typer.run(collate_sbc_posteriors_cli)
+    app()

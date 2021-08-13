@@ -30,7 +30,7 @@
 
 from datetime import timedelta
 from enum import Enum, unique
-from typing import Callable, Dict, Optional, Union
+from typing import Callable, Optional, Union
 
 
 @unique
@@ -41,14 +41,14 @@ class TimeDeltaFormat(str, Enum):
     DRMAA = &#34;{hours:02d}:{minutes:02d}:00&#34;
 
 
-def _drmaa_timedelta_format_callabck(d: Dict[str, int]) -&gt; None:
+def _drmaa_timedelta_format_callabck(d: dict[str, int]) -&gt; None:
     d[&#34;hours&#34;] = (d[&#34;days&#34;] * 24) + d[&#34;hours&#34;]
 
 
 def format_timedelta(
     tdelta: timedelta,
     fmt: Union[str, TimeDeltaFormat],
-    callback: Optional[Callable[[Dict[str, int]], None]] = None,
+    callback: Optional[Callable[[dict[str, int]], None]] = None,
 ) -&gt; str:
     &#34;&#34;&#34;Format time delta object.
 
@@ -82,7 +82,7 @@ def format_timedelta(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.formatting.format_timedelta"><code class="name flex">
-<span>def <span class="ident">format_timedelta</span></span>(<span>tdelta: datetime.timedelta, fmt: Union[str, src.formatting.TimeDeltaFormat], callback: Optional[Callable[[Dict[str, int]], NoneType]] = None) -> str</span>
+<span>def <span class="ident">format_timedelta</span></span>(<span>tdelta: datetime.timedelta, fmt: Union[str, src.formatting.TimeDeltaFormat], callback: Optional[Callable[[dict[str, int]], NoneType]] = None) -> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Format time delta object.</p>
@@ -106,7 +106,7 @@ and 'minutes'.</dd>
 <pre><code class="python">def format_timedelta(
     tdelta: timedelta,
     fmt: Union[str, TimeDeltaFormat],
-    callback: Optional[Callable[[Dict[str, int]], None]] = None,
+    callback: Optional[Callable[[dict[str, int]], None]] = None,
 ) -&gt; str:
     &#34;&#34;&#34;Format time delta object.
 

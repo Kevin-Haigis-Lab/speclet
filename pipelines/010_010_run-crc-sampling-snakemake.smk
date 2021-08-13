@@ -105,7 +105,8 @@ rule combine_mcmc:
         combined_cache_dir=PYMC3_MODEL_CACHE_DIR,
         chain_dirs=directory(
             expand(
-                SCRATCH_DIR + "{{model_name}}_chain{chain}", chain=list(range(N_CHAINS))
+                SCRATCH_DIR + "{{model_name}}_chain{chain}",
+                chain=list(range(N_CHAINS)),
             )
         ),
     conda:

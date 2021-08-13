@@ -26,24 +26,23 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">#!/usr/bin/env python3
+<pre><code class="python">&#34;&#34;&#34;Managers of model data.&#34;&#34;&#34;
 
-&#34;&#34;&#34;Managers of model data.&#34;&#34;&#34;
 
 import abc
 from pathlib import Path
-from typing import Callable, List, Optional, Union
+from typing import Callable, Optional, Union
 
 import numpy as np
 import pandas as pd
 
-import src.modeling.simulation_based_calibration_helpers as sbc
 from src.data_processing import achilles as achelp
 from src.io import data_io
 from src.loggers import logger
+from src.modeling import mock_data
 from src.project_enums import MockDataSize, assert_never
 
-DataFrameTransformations = List[Callable[[pd.DataFrame], pd.DataFrame]]
+DataFrameTransformations = list[Callable[[pd.DataFrame], pd.DataFrame]]
 
 
 class DataManager(abc.ABC):
@@ -100,11 +99,15 @@ class DataManager(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+    def set_data(
+        self, new_data: Optional[pd.DataFrame], apply_transformations: bool = True
+    ) -&gt; None:
         &#34;&#34;&#34;Set the data object (can be `None`).
 
         Args:
             new_data (Optional[pd.DataFrame]): New data object.
+            apply_transformations (bool, optional): Should the transformations be
+              applied? Defaults to True.
         &#34;&#34;&#34;
         pass
 
@@ -166,14 +169,14 @@ class DataManager(abc.ABC):
 
     def add_transformations(
         self,
-        new_trans: List[Callable[[pd.DataFrame], pd.DataFrame]],
+        new_trans: list[Callable[[pd.DataFrame], pd.DataFrame]],
         run_transformations: bool = True,
         new_only: bool = True,
     ) -&gt; None:
         &#34;&#34;&#34;Add new data transformations.
 
         Args:
-            new_trans (List[Callable[[pd.DataFrame], pd.DataFrame]]): A list of
+            new_trans (list[Callable[[pd.DataFrame], pd.DataFrame]]): A list of
               callables to be used to transform the data. Each transformation must take
               a pandas DataFrame and return a pandas DataFrame.
             run_transformations (bool, optional): Should the new transforms be applied
@@ -222,6 +225,7 @@ class CrcDataManager(DataManager):
         self,
         debug: bool = False,
         transformations: Optional[DataFrameTransformations] = None,
+        broad_only: bool = True,
     ) -&gt; None:
         &#34;&#34;&#34;Create a CRC data manager.
 
@@ -230,15 +234,22 @@ class CrcDataManager(DataManager):
             transformations (Optional[DataFrameTransformations], optional): List of
               callable functions or classes for transforming the data. Defaults to None
               (an empty list).
+            broad_only (bool, optional): Should a filter be applied to only used screen
+              data from the Broad? Defaults to True.
         &#34;&#34;&#34;
         self.debug = debug
+        self.broad_only = broad_only
 
         self.transformations = [
             CrcDataManager._drop_sgrnas_that_map_to_multiple_genes,
             CrcDataManager._drop_missing_copynumber,
         ]
+
         if transformations is not None:
             self.transformations += transformations
+
+        if broad_only:
+            self.transformations.insert(0, CrcDataManager._filter_for_broad_source_only)
 
     def get_data_path(self) -&gt; Path:
         &#34;&#34;&#34;Get the path for the data set to use.
@@ -260,6 +271,10 @@ class CrcDataManager(DataManager):
             return 1000
         else:
             return 10000
+
+    @staticmethod
+    def _filter_for_broad_source_only(df: pd.DataFrame) -&gt; pd.DataFrame:
+        return df[df[&#34;screen&#34;] == &#34;broad&#34;].reset_index(drop=True)
 
     @staticmethod
     def _get_sgrnas_that_map_to_multiple_genes(df: pd.DataFrame) -&gt; np.ndarray:
@@ -308,16 +323,22 @@ class CrcDataManager(DataManager):
             assert isinstance(self._data, pd.DataFrame)
         return self._data
 
-    def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+    def set_data(
+        self, new_data: Optional[pd.DataFrame], apply_transformations: bool = True
+    ) -&gt; None:
         &#34;&#34;&#34;Set the new data set and apply the transformations automatically.
 
         Args:
             new_data (Optional[pd.DataFrame]): New data set.
+            apply_transformations (bool, optional): Should the transformations be
+              applied? Defaults to True.
         &#34;&#34;&#34;
         if new_data is None:
             self._data = None
-        else:
+        elif apply_transformations:
             self._data = self.apply_transformations(new_data)
+        else:
+            self._data = new_data
 
     def apply_transformations(self, df: pd.DataFrame) -&gt; pd.DataFrame:
         &#34;&#34;&#34;Apply the stored transformations to the data set.
@@ -356,7 +377,7 @@ class CrcDataManager(DataManager):
             size = MockDataSize(size)
 
         if size is MockDataSize.SMALL:
-            self.data = sbc.generate_mock_achilles_data(
+            self.data = mock_data.generate_mock_achilles_data(
                 n_genes=10,
                 n_sgrnas_per_gene=3,
                 n_cell_lines=5,
@@ -365,7 +386,7 @@ class CrcDataManager(DataManager):
                 n_screens=1,
             )
         elif size is MockDataSize.MEDIUM:
-            self.data = sbc.generate_mock_achilles_data(
+            self.data = mock_data.generate_mock_achilles_data(
                 n_genes=25,
                 n_sgrnas_per_gene=5,
                 n_cell_lines=12,
@@ -374,7 +395,7 @@ class CrcDataManager(DataManager):
                 n_screens=2,
             )
         elif size is MockDataSize.LARGE:
-            self.data = sbc.generate_mock_achilles_data(
+            self.data = mock_data.generate_mock_achilles_data(
                 n_genes=100,
                 n_sgrnas_per_gene=5,
                 n_cell_lines=20,
@@ -445,16 +466,22 @@ class MockDataManager(DataManager):
             self.data = pd.DataFrame({&#34;x&#34;: x, &#34;y&#34;: y})
         return self.data
 
-    def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+    def set_data(
+        self, new_data: Optional[pd.DataFrame], apply_transformations: bool = True
+    ) -&gt; None:
         &#34;&#34;&#34;Set the new data set and apply the transformations automatically.
 
         Args:
             new_data (Optional[pd.DataFrame]): New data set.
+            apply_transformations (bool, optional): Should the transformations be
+              applied? Defaults to True.
         &#34;&#34;&#34;
         if new_data is None:
             self._data = None
-        else:
+        elif apply_transformations:
             self._data = self.apply_transformations(new_data)
+        else:
+            self._data = new_data
 
     def generate_mock_data(
         self, size: Union[MockDataSize, str], random_seed: Optional[int] = None
@@ -491,7 +518,7 @@ class MockDataManager(DataManager):
 <dl>
 <dt id="src.managers.model_data_managers.CrcDataManager"><code class="flex name class">
 <span>class <span class="ident">CrcDataManager</span></span>
-<span>(</span><span>debug: bool = False, transformations: Optional[List[Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]]] = None)</span>
+<span>(</span><span>debug: bool = False, transformations: Optional[list[Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]]] = None, broad_only: bool = True)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Manager for CRC modeling data.</p>
@@ -504,6 +531,9 @@ class MockDataManager(DataManager):
 <dd>List of
 callable functions or classes for transforming the data. Defaults to None
 (an empty list).</dd>
+<dt><strong><code>broad_only</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should a filter be applied to only used screen
+data from the Broad? Defaults to True.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -516,6 +546,7 @@ callable functions or classes for transforming the data. Defaults to None
         self,
         debug: bool = False,
         transformations: Optional[DataFrameTransformations] = None,
+        broad_only: bool = True,
     ) -&gt; None:
         &#34;&#34;&#34;Create a CRC data manager.
 
@@ -524,15 +555,22 @@ callable functions or classes for transforming the data. Defaults to None
             transformations (Optional[DataFrameTransformations], optional): List of
               callable functions or classes for transforming the data. Defaults to None
               (an empty list).
+            broad_only (bool, optional): Should a filter be applied to only used screen
+              data from the Broad? Defaults to True.
         &#34;&#34;&#34;
         self.debug = debug
+        self.broad_only = broad_only
 
         self.transformations = [
             CrcDataManager._drop_sgrnas_that_map_to_multiple_genes,
             CrcDataManager._drop_missing_copynumber,
         ]
+
         if transformations is not None:
             self.transformations += transformations
+
+        if broad_only:
+            self.transformations.insert(0, CrcDataManager._filter_for_broad_source_only)
 
     def get_data_path(self) -&gt; Path:
         &#34;&#34;&#34;Get the path for the data set to use.
@@ -554,6 +592,10 @@ callable functions or classes for transforming the data. Defaults to None
             return 1000
         else:
             return 10000
+
+    @staticmethod
+    def _filter_for_broad_source_only(df: pd.DataFrame) -&gt; pd.DataFrame:
+        return df[df[&#34;screen&#34;] == &#34;broad&#34;].reset_index(drop=True)
 
     @staticmethod
     def _get_sgrnas_that_map_to_multiple_genes(df: pd.DataFrame) -&gt; np.ndarray:
@@ -602,16 +644,22 @@ callable functions or classes for transforming the data. Defaults to None
             assert isinstance(self._data, pd.DataFrame)
         return self._data
 
-    def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+    def set_data(
+        self, new_data: Optional[pd.DataFrame], apply_transformations: bool = True
+    ) -&gt; None:
         &#34;&#34;&#34;Set the new data set and apply the transformations automatically.
 
         Args:
             new_data (Optional[pd.DataFrame]): New data set.
+            apply_transformations (bool, optional): Should the transformations be
+              applied? Defaults to True.
         &#34;&#34;&#34;
         if new_data is None:
             self._data = None
-        else:
+        elif apply_transformations:
             self._data = self.apply_transformations(new_data)
+        else:
+            self._data = new_data
 
     def apply_transformations(self, df: pd.DataFrame) -&gt; pd.DataFrame:
         &#34;&#34;&#34;Apply the stored transformations to the data set.
@@ -650,7 +698,7 @@ callable functions or classes for transforming the data. Defaults to None
             size = MockDataSize(size)
 
         if size is MockDataSize.SMALL:
-            self.data = sbc.generate_mock_achilles_data(
+            self.data = mock_data.generate_mock_achilles_data(
                 n_genes=10,
                 n_sgrnas_per_gene=3,
                 n_cell_lines=5,
@@ -659,7 +707,7 @@ callable functions or classes for transforming the data. Defaults to None
                 n_screens=1,
             )
         elif size is MockDataSize.MEDIUM:
-            self.data = sbc.generate_mock_achilles_data(
+            self.data = mock_data.generate_mock_achilles_data(
                 n_genes=25,
                 n_sgrnas_per_gene=5,
                 n_cell_lines=12,
@@ -668,7 +716,7 @@ callable functions or classes for transforming the data. Defaults to None
                 n_screens=2,
             )
         elif size is MockDataSize.LARGE:
-            self.data = sbc.generate_mock_achilles_data(
+            self.data = mock_data.generate_mock_achilles_data(
                 n_genes=100,
                 n_sgrnas_per_gene=5,
                 n_cell_lines=20,
@@ -801,7 +849,7 @@ callable functions or classes for transforming the data. Defaults to None
 </details>
 </dd>
 <dt id="src.managers.model_data_managers.CrcDataManager.set_data"><code class="name flex">
-<span>def <span class="ident">set_data</span></span>(<span>self, new_data: Optional[pandas.core.frame.DataFrame]) -> NoneType</span>
+<span>def <span class="ident">set_data</span></span>(<span>self, new_data: Optional[pandas.core.frame.DataFrame], apply_transformations: bool = True) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Set the new data set and apply the transformations automatically.</p>
@@ -809,21 +857,30 @@ callable functions or classes for transforming the data. Defaults to None
 <dl>
 <dt><strong><code>new_data</code></strong> :&ensp;<code>Optional[pd.DataFrame]</code></dt>
 <dd>New data set.</dd>
+<dt><strong><code>apply_transformations</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the transformations be
+applied? Defaults to True.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+<pre><code class="python">def set_data(
+    self, new_data: Optional[pd.DataFrame], apply_transformations: bool = True
+) -&gt; None:
     &#34;&#34;&#34;Set the new data set and apply the transformations automatically.
 
     Args:
         new_data (Optional[pd.DataFrame]): New data set.
+        apply_transformations (bool, optional): Should the transformations be
+          applied? Defaults to True.
     &#34;&#34;&#34;
     if new_data is None:
         self._data = None
+    elif apply_transformations:
+        self._data = self.apply_transformations(new_data)
     else:
-        self._data = self.apply_transformations(new_data)</code></pre>
+        self._data = new_data</code></pre>
 </details>
 </dd>
 </dl>
@@ -841,7 +898,7 @@ callable functions or classes for transforming the data. Defaults to None
 </dd>
 <dt id="src.managers.model_data_managers.DataManager"><code class="flex name class">
 <span>class <span class="ident">DataManager</span></span>
-<span>(</span><span>debug: bool = False, transformations: Optional[List[Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]]] = None)</span>
+<span>(</span><span>debug: bool = False, transformations: Optional[list[Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract base class for the data managers.</p>
@@ -914,11 +971,15 @@ callable functions or classes for transforming the data. Defaults to None
         pass
 
     @abc.abstractmethod
-    def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+    def set_data(
+        self, new_data: Optional[pd.DataFrame], apply_transformations: bool = True
+    ) -&gt; None:
         &#34;&#34;&#34;Set the data object (can be `None`).
 
         Args:
             new_data (Optional[pd.DataFrame]): New data object.
+            apply_transformations (bool, optional): Should the transformations be
+              applied? Defaults to True.
         &#34;&#34;&#34;
         pass
 
@@ -980,14 +1041,14 @@ callable functions or classes for transforming the data. Defaults to None
 
     def add_transformations(
         self,
-        new_trans: List[Callable[[pd.DataFrame], pd.DataFrame]],
+        new_trans: list[Callable[[pd.DataFrame], pd.DataFrame]],
         run_transformations: bool = True,
         new_only: bool = True,
     ) -&gt; None:
         &#34;&#34;&#34;Add new data transformations.
 
         Args:
-            new_trans (List[Callable[[pd.DataFrame], pd.DataFrame]]): A list of
+            new_trans (list[Callable[[pd.DataFrame], pd.DataFrame]]): A list of
               callables to be used to transform the data. Each transformation must take
               a pandas DataFrame and return a pandas DataFrame.
             run_transformations (bool, optional): Should the new transforms be applied
@@ -1067,13 +1128,13 @@ def data(self) -&gt; Optional[pd.DataFrame]:
 <h3>Methods</h3>
 <dl>
 <dt id="src.managers.model_data_managers.DataManager.add_transformations"><code class="name flex">
-<span>def <span class="ident">add_transformations</span></span>(<span>self, new_trans: List[Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]], run_transformations: bool = True, new_only: bool = True) -> NoneType</span>
+<span>def <span class="ident">add_transformations</span></span>(<span>self, new_trans: list, run_transformations: bool = True, new_only: bool = True) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add new data transformations.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>new_trans</code></strong> :&ensp;<code>List[Callable[[pd.DataFrame], pd.DataFrame]]</code></dt>
+<dt><strong><code>new_trans</code></strong> :&ensp;<code>list[Callable[[pd.DataFrame], pd.DataFrame]]</code></dt>
 <dd>A list of
 callables to be used to transform the data. Each transformation must take
 a pandas DataFrame and return a pandas DataFrame.</dd>
@@ -1090,14 +1151,14 @@ to the data? Defaults to True.</dd>
 </summary>
 <pre><code class="python">def add_transformations(
     self,
-    new_trans: List[Callable[[pd.DataFrame], pd.DataFrame]],
+    new_trans: list[Callable[[pd.DataFrame], pd.DataFrame]],
     run_transformations: bool = True,
     new_only: bool = True,
 ) -&gt; None:
     &#34;&#34;&#34;Add new data transformations.
 
     Args:
-        new_trans (List[Callable[[pd.DataFrame], pd.DataFrame]]): A list of
+        new_trans (list[Callable[[pd.DataFrame], pd.DataFrame]]): A list of
           callables to be used to transform the data. Each transformation must take
           a pandas DataFrame and return a pandas DataFrame.
         run_transformations (bool, optional): Should the new transforms be applied
@@ -1268,7 +1329,7 @@ def get_data_path(self) -&gt; Path:
 </details>
 </dd>
 <dt id="src.managers.model_data_managers.DataManager.set_data"><code class="name flex">
-<span>def <span class="ident">set_data</span></span>(<span>self, new_data: Optional[pandas.core.frame.DataFrame]) -> NoneType</span>
+<span>def <span class="ident">set_data</span></span>(<span>self, new_data: Optional[pandas.core.frame.DataFrame], apply_transformations: bool = True) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Set the data object (can be <code>None</code>).</p>
@@ -1276,17 +1337,24 @@ def get_data_path(self) -&gt; Path:
 <dl>
 <dt><strong><code>new_data</code></strong> :&ensp;<code>Optional[pd.DataFrame]</code></dt>
 <dd>New data object.</dd>
+<dt><strong><code>apply_transformations</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the transformations be
+applied? Defaults to True.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+def set_data(
+    self, new_data: Optional[pd.DataFrame], apply_transformations: bool = True
+) -&gt; None:
     &#34;&#34;&#34;Set the data object (can be `None`).
 
     Args:
         new_data (Optional[pd.DataFrame]): New data object.
+        apply_transformations (bool, optional): Should the transformations be
+          applied? Defaults to True.
     &#34;&#34;&#34;
     pass</code></pre>
 </details>
@@ -1322,7 +1390,7 @@ usually not required.</p></div>
 </dd>
 <dt id="src.managers.model_data_managers.MockDataManager"><code class="flex name class">
 <span>class <span class="ident">MockDataManager</span></span>
-<span>(</span><span>debug: bool = False, transformations: Optional[List[Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]]] = None)</span>
+<span>(</span><span>debug: bool = False, transformations: Optional[list[Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A data manager with mock data (primarily for testing).</p>
@@ -1399,16 +1467,22 @@ callable functions or classes for transforming the data. Defaults to None
             self.data = pd.DataFrame({&#34;x&#34;: x, &#34;y&#34;: y})
         return self.data
 
-    def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+    def set_data(
+        self, new_data: Optional[pd.DataFrame], apply_transformations: bool = True
+    ) -&gt; None:
         &#34;&#34;&#34;Set the new data set and apply the transformations automatically.
 
         Args:
             new_data (Optional[pd.DataFrame]): New data set.
+            apply_transformations (bool, optional): Should the transformations be
+              applied? Defaults to True.
         &#34;&#34;&#34;
         if new_data is None:
             self._data = None
-        else:
+        elif apply_transformations:
             self._data = self.apply_transformations(new_data)
+        else:
+            self._data = new_data
 
     def generate_mock_data(
         self, size: Union[MockDataSize, str], random_seed: Optional[int] = None
@@ -1486,7 +1560,7 @@ callable functions or classes for transforming the data. Defaults to None
 </details>
 </dd>
 <dt id="src.managers.model_data_managers.MockDataManager.set_data"><code class="name flex">
-<span>def <span class="ident">set_data</span></span>(<span>self, new_data: Optional[pandas.core.frame.DataFrame]) -> NoneType</span>
+<span>def <span class="ident">set_data</span></span>(<span>self, new_data: Optional[pandas.core.frame.DataFrame], apply_transformations: bool = True) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Set the new data set and apply the transformations automatically.</p>
@@ -1494,21 +1568,30 @@ callable functions or classes for transforming the data. Defaults to None
 <dl>
 <dt><strong><code>new_data</code></strong> :&ensp;<code>Optional[pd.DataFrame]</code></dt>
 <dd>New data set.</dd>
+<dt><strong><code>apply_transformations</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the transformations be
+applied? Defaults to True.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def set_data(self, new_data: Optional[pd.DataFrame]) -&gt; None:
+<pre><code class="python">def set_data(
+    self, new_data: Optional[pd.DataFrame], apply_transformations: bool = True
+) -&gt; None:
     &#34;&#34;&#34;Set the new data set and apply the transformations automatically.
 
     Args:
         new_data (Optional[pd.DataFrame]): New data set.
+        apply_transformations (bool, optional): Should the transformations be
+          applied? Defaults to True.
     &#34;&#34;&#34;
     if new_data is None:
         self._data = None
+    elif apply_transformations:
+        self._data = self.apply_transformations(new_data)
     else:
-        self._data = self.apply_transformations(new_data)</code></pre>
+        self._data = new_data</code></pre>
 </details>
 </dd>
 </dl>

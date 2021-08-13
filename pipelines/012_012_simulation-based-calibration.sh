@@ -28,10 +28,11 @@ fi
 snakemake \
     --snakefile $SNAKEFILE \
     --jobs 20 \
-    --restart-times 1 \
+    --restart-times 3 \
     --latency-wait 120 \
     --use-conda \
     --keep-going \
+    --printshellcmds \
     --cluster-config pipelines/012_011_smk-config.yaml \
     --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}"
 
@@ -45,4 +46,4 @@ snakemake \
 
 
 conda deactivate
-exit 0
+exit 44

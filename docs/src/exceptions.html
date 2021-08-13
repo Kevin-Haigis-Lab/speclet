@@ -126,7 +126,13 @@ class ShapeError(BaseException):
         self.message = (
             f&#34;Expected shape {self.expected_shape} - actual shape {self.actual_shape}.&#34;
         )
-        super().__init__(self.message)</code></pre>
+        super().__init__(self.message)
+
+
+class RequiredArgumentError(BaseException):
+    &#34;&#34;&#34;Errors concerning required arguments that are not language-enforced.&#34;&#34;&#34;
+
+    pass</code></pre>
 </details>
 </section>
 <section>
@@ -232,6 +238,26 @@ class ShapeError(BaseException):
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="src.exceptions.RequiredArgumentError"><code class="flex name class">
+<span>class <span class="ident">RequiredArgumentError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Errors concerning required arguments that are not language-enforced.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RequiredArgumentError(BaseException):
+    &#34;&#34;&#34;Errors concerning required arguments that are not language-enforced.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
 <li>builtins.BaseException</li>
 </ul>
 </dd>
@@ -400,6 +426,9 @@ class ShapeError(BaseException):
 </li>
 <li>
 <h4><code><a title="src.exceptions.NoDirectorySpecified" href="#src.exceptions.NoDirectorySpecified">NoDirectorySpecified</a></code></h4>
+</li>
+<li>
+<h4><code><a title="src.exceptions.RequiredArgumentError" href="#src.exceptions.RequiredArgumentError">RequiredArgumentError</a></code></h4>
 </li>
 <li>
 <h4><code><a title="src.exceptions.ResourceRequestUnkown" href="#src.exceptions.ResourceRequestUnkown">ResourceRequestUnkown</a></code></h4>

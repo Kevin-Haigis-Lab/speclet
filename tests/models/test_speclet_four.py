@@ -41,7 +41,7 @@ class TestSpecletFour:
             draws=10,
             tune=10,
             chains=2,
-            cores=2,
+            cores=1,
             prior_pred_samples=10,
             random_seed=1,
         )

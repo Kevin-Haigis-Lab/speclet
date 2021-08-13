@@ -1,0 +1,1145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>src.modeling.mock_data API documentation</title>
+<meta name="description" content="For the noble and fraught persuit of the faithful generation of mock data." />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS_CHTML'></script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>src.modeling.mock_data</code></h1>
+</header>
+<section id="section-intro">
+<p>For the noble and fraught persuit of the faithful generation of mock data.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;For the noble and fraught persuit of the faithful generation of mock data.&#34;&#34;&#34;
+
+import math
+from enum import Enum, unique
+from random import choices
+from typing import Any, Optional, Union
+
+import numpy as np
+import pandas as pd
+
+from src.data_processing import achilles as achelp
+from src.data_processing import vectors as vhelp
+from src.io.data_io import DataFile, data_path
+from src.string_functions import prefixed_count
+
+
+def generate_mock_sgrna_gene_map(n_genes: int, n_sgrnas_per_gene: int) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate a fake sgRNA-gene map.
+
+    Args:
+        n_genes (int): Number of genes.
+        n_sgrnas_per_gene (int): Number of sgRNA per gene.
+
+    Returns:
+        pd.DataFrame: A data frame mapping each sgRNA to a gene. Each sgRNA only matches
+          to a single gene and each gene will have `n_sgrnas_per_gene` sgRNAs mapped
+          to it.
+    &#34;&#34;&#34;
+    genes = prefixed_count(&#34;gene&#34;, n=n_genes)
+    sgrna_target_chr = choices([&#34;Chr1&#34;, &#34;Chr2&#34;, &#34;Chr3&#34;], k=n_genes)
+    sgrnas = [prefixed_count(gene + &#34;_sgrna&#34;, n=n_sgrnas_per_gene) for gene in genes]
+    return pd.DataFrame(
+        {
+            &#34;hugo_symbol&#34;: np.repeat(genes, n_sgrnas_per_gene),
+            &#34;sgrna_target_chr&#34;: np.repeat(sgrna_target_chr, n_sgrnas_per_gene),
+            &#34;sgrna&#34;: np.array(sgrnas).flatten(),
+        }
+    )
+
+
+@unique
+class SelectionMethod(str, Enum):
+    &#34;&#34;&#34;Methods for selecting `n` elements from a list.&#34;&#34;&#34;
+
+    random = &#34;random&#34;
+    tiled = &#34;tiled&#34;
+    repeated = &#34;repeated&#34;
+    shuffled = &#34;shuffled&#34;
+
+
+def select_n_elements_from_l(
+    n: int, list: Union[list[Any], np.ndarray], method: Union[SelectionMethod, str]
+) -&gt; np.ndarray:
+    &#34;&#34;&#34;Select `n` elements from a collection `l` using a specified method.
+
+    There are three available methods:
+
+    1. `random`: Randomly select `n` values from `l`.
+    2. `tiled`: Use `numpy.tile()` (`[1, 2, 3]` → `[1, 2, 3, 1, 2, 3, ...]`).
+    3. `repeated`: Use `numpy.repeat()` (`[1, 2, 3]` → `[1, 1, 2, 2, 3, 3, ...]`).
+    4. `shuffled`: Shuffles the results of `numpy.tile()` to get even, random coverage.
+
+    Args:
+        n (int): Number elements to draw.
+        l (Union[list[Any], np.ndarray]): Collection to draw from.
+        method (SelectionMethod): Method to use for drawing elements.
+
+    Raises:
+        ValueError: Raised if an unknown method is passed.
+
+    Returns:
+        np.ndarray: A numpy array of length &#39;n&#39; with values from &#39;l&#39;.
+    &#34;&#34;&#34;
+    if isinstance(method, str):
+        method = SelectionMethod(method)
+
+    size = math.ceil(n / len(list))
+
+    if method == SelectionMethod.random:
+        return np.random.choice(list, n)
+    elif method == SelectionMethod.tiled:
+        return np.tile(list, size)[:n]
+    elif method == SelectionMethod.repeated:
+        return np.repeat(list, size)[:n]
+    elif method == SelectionMethod.shuffled:
+        a = np.tile(list, size)[:n]
+        np.random.shuffle(a)
+        return a
+    else:
+        raise ValueError(f&#34;Unknown selection method: {method}&#34;)
+
+
+def generate_mock_cell_line_information(
+    genes: Union[list[str], np.ndarray],
+    n_cell_lines: int,
+    n_lineages: int,
+    n_batches: int,
+    n_screens: int,
+    randomness: bool = False,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate mock &#34;sample information&#34; for fake cell lines.
+
+    Args:
+        genes (list[str]): List of genes tested in the cell lines.
+        n_cell_lines (int): Number of cell lines.
+        n_lineages (int, optional): Number of lineages. Must be less than or equal to
+          the number of cell lines.
+        n_batches (int): Number of pDNA batchs.
+        n_screens (int): Number of screens sourced for the data. Must be less than or
+          equal to the number of batches.
+        randomness (bool, optional): Should the lineages, screens, and batches be
+          randomly assigned or applied in a pattern? Defaults to False (patterned).
+
+    Returns:
+        pd.DataFrame: The mock sample information.
+    &#34;&#34;&#34;
+    # Methods for selecting elements from the list to produce pairings.
+    _lineage_method = &#34;random&#34; if randomness else &#34;tiled&#34;
+    _batch_method = &#34;random&#34; if randomness else &#34;shuffled&#34;
+    _screen_method = &#34;random&#34; if randomness else &#34;tiled&#34;
+
+    cell_lines = prefixed_count(&#34;cellline&#34;, n=n_cell_lines)
+    lineages = prefixed_count(&#34;lineage&#34;, n=n_lineages)
+    batches = prefixed_count(&#34;batch&#34;, n=n_batches)
+    batch_map = pd.DataFrame(
+        {
+            &#34;depmap_id&#34;: cell_lines,
+            &#34;lineage&#34;: select_n_elements_from_l(
+                n_cell_lines, lineages, _lineage_method
+            ),
+            &#34;p_dna_batch&#34;: select_n_elements_from_l(
+                n_cell_lines, batches, _batch_method
+            ),
+        }
+    )
+
+    screens = [&#34;broad&#34;]
+    if n_screens == 2:
+        screens += [&#34;sanger&#34;]
+    if n_screens &gt; 2:
+        screens += prefixed_count(&#34;screen&#34;, n=n_screens - 2)
+
+    screen_map = pd.DataFrame(
+        {
+            &#34;p_dna_batch&#34;: batches,
+            &#34;screen&#34;: select_n_elements_from_l(n_batches, screens, _screen_method),
+        }
+    )
+
+    return (
+        pd.DataFrame(
+            {
+                &#34;depmap_id&#34;: np.repeat(cell_lines, len(np.unique(genes))),
+                &#34;hugo_symbol&#34;: np.tile(genes, n_cell_lines),
+            }
+        )
+        .merge(batch_map, on=&#34;depmap_id&#34;)
+        .merge(screen_map, on=&#34;p_dna_batch&#34;)
+    )
+
+
+def generate_mock_achilles_categorical_groups(
+    n_genes: int,
+    n_sgrnas_per_gene: int,
+    n_cell_lines: int,
+    n_lineages: int,
+    n_batches: int,
+    n_screens: int,
+    randomness: bool = False,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate mock Achilles categorical column scaffolding.
+
+    This function should be used to generate a scaffolding of the Achilles data. It
+    creates columns that mimic the hierarchical natrue of the Achilles categorical
+    columns. Each sgRNA maps to a single gene. Each cell lines only received on pDNA
+    batch. Each cell line / sgRNA combination occurs exactly once.
+
+    Args:
+        n_genes (int): Number of genes.
+        n_sgrnas_per_gene (int): Number of sgRNAs per gene.
+        n_cell_lines (int): Number of cell lines.
+        n_lineages (int, optional): Number of lineages. Must be less than or equal to
+          the number of cell lines.
+        n_batches (int): Number of pDNA batchs.
+        n_screens (int): Number of screens sourced for the data. Must be less than or
+          equal to the number of batches.
+        randomness (bool, optional): Should the lineages, screens, and batches be
+          randomly assigned or applied in a pattern? Defaults to False (patterned).
+
+    Returns:
+        pd.DataFrame: A pandas data frame the resembles the categorical column
+        hierarchical structure of the Achilles data.
+    &#34;&#34;&#34;
+    sgnra_map = generate_mock_sgrna_gene_map(
+        n_genes=n_genes, n_sgrnas_per_gene=n_sgrnas_per_gene
+    )
+    cell_line_info = generate_mock_cell_line_information(
+        genes=sgnra_map.hugo_symbol.unique(),
+        n_cell_lines=n_cell_lines,
+        n_lineages=n_lineages,
+        n_batches=n_batches,
+        n_screens=n_screens,
+        randomness=randomness,
+    )
+
+    def _make_cat_cols(_df: pd.DataFrame) -&gt; pd.DataFrame:
+        return achelp.set_achilles_categorical_columns(_df, cols=_df.columns.tolist())
+
+    return (
+        cell_line_info.merge(sgnra_map, on=&#34;hugo_symbol&#34;)
+        .reset_index(drop=True)
+        .pipe(_make_cat_cols)
+    )
+
+
+def _make_mock_grouped_copy(
+    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]]
+) -&gt; pd.DataFrame:
+    df_copy = mock_df.copy()
+    if grouping_cols is not None:
+        df_copy = df_copy[grouping_cols].drop_duplicates()
+    return df_copy
+
+
+def _merge_mock_and_grouped_copy(
+    mock_df: pd.DataFrame, df_copy: pd.DataFrame, grouping_cols: Optional[list[str]]
+) -&gt; pd.DataFrame:
+    if grouping_cols is not None:
+        return mock_df.merge(df_copy, left_index=False, right_index=False)
+    return df_copy
+
+
+def add_mock_copynumber_data(
+    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]] = None
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Add mock copy number data to mock Achilles data.
+
+    The mock CNA values actually come from real copy number values from CRC cancer cell
+    lines. The values are randomly sampled with replacement and some noise is added to
+    each value.
+
+    Args:
+        mock_df (pd.DataFrame): Mock Achilles data frame.
+        grouping_cols (Optional[list[str]], optional): Columns to group by where every
+          appearance of the same combination will have the same CN value. Defaults to
+          None for no group effect.
+
+    Returns:
+        pd.DataFrame: Same mock Achilles data frame with a new &#34;copy_number&#34; column.
+    &#34;&#34;&#34;
+    real_cna_values = np.load(data_path(DataFile.copy_number_sample))
+
+    df_copy = _make_mock_grouped_copy(mock_df, grouping_cols)
+    mock_cn = np.random.choice(real_cna_values, size=df_copy.shape[0], replace=True)
+    mock_cn = mock_cn + np.random.normal(0, 0.1, size=mock_cn.shape)
+    mock_cn = vhelp.squish_array(mock_cn, lower=0.0, upper=20.0)
+    df_copy[&#34;copy_number&#34;] = mock_cn.flatten()
+    return _merge_mock_and_grouped_copy(mock_df, df_copy, grouping_cols)
+
+
+def add_mock_rna_expression_data(
+    mock_df: pd.DataFrame,
+    grouping_cols: Optional[list[str]] = None,
+    subgroups: Optional[list[str]] = None,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Add fake RNA expression data to a mock Achilles data frame.
+
+    The RNA expression values are sampled from a normal distribution with mean and
+    standard deviation that are each sampled from different normal distributions. If a
+    grouping is supplied, then each value in the group will be sampled from the same
+    distribution (i.e. same mean and standard deviation).
+
+    Args:
+        mock_df (pd.DataFrame): Mock Achilles data frame.
+        grouping_cols (Optional[list[str]], optional): Columns to group by where every
+          appearance of the same combination will have the same RNA value. Defaults to
+          None for no group effect.
+        subgroups (Optional[list[str]], optional): List of columns to group by. Each
+          group will have the same mean and standard deviation for the sampling
+          distribution. Defaults to None.
+
+    Returns:
+        pd.DataFrame: [description]
+    &#34;&#34;&#34;
+
+    def _rna_normal_distribution(df: pd.DataFrame) -&gt; pd.DataFrame:
+        df_copy = _make_mock_grouped_copy(df, grouping_cols)
+        mu = np.abs(np.random.normal(10.0, 3))
+        sd = np.abs(np.random.normal(0.0, 3))
+        rna_expr = np.random.normal(mu, sd, size=df_copy.shape[0])
+        rna_expr = vhelp.squish_array(rna_expr, lower=0.0, upper=np.inf)
+        df_copy[&#34;rna_expr&#34;] = rna_expr
+        df_copy = _merge_mock_and_grouped_copy(df, df_copy, grouping_cols)
+        return df_copy
+
+    if subgroups is None:
+        mock_df = _rna_normal_distribution(mock_df)
+    else:
+        mock_df = (
+            mock_df.groupby(subgroups)
+            .apply(_rna_normal_distribution)
+            .reset_index(drop=True)
+        )
+    return mock_df
+
+
+def add_mock_is_mutated_data(
+    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]] = None, prob: float = 0.01
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Add a mutation column to mock Achilles data.
+
+    Args:
+        mock_df (pd.DataFrame): Mock Achilles data frame.
+        grouping_cols (Optional[list[str]], optional): Columns to group by where every
+          appearance of the same combination will have the same mutation value. Defaults
+          to None for no group effect.
+        prob (float, optional): The probability of a gene being mutated. All mutations
+          are indpendent of each other. Defaults to 0.01.
+
+    Returns:
+        pd.DataFrame: The same mock Achilles data frame with an &#34;is_mutated&#34; columns.
+    &#34;&#34;&#34;
+    df_copy = _make_mock_grouped_copy(mock_df, grouping_cols)
+    df_copy[&#34;is_mutated&#34;] = np.random.uniform(0, 1, size=df_copy.shape[0]) &lt; prob
+    return _merge_mock_and_grouped_copy(mock_df, df_copy, grouping_cols)
+
+
+def add_mock_zero_effect_lfc_data(
+    mock_df: pd.DataFrame, mu: float = 0.0, sigma: float = 0.5
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Add fake log-fold change column to mock Achilles data.
+
+    Args:
+        mock_df (pd.DataFrame): Mock Achilles data frame.
+        mu (float, optional): Mean of normal distribution for sampling LFC values.
+          Defaults to 0.0.
+        sigma (float, optional): Standard deviation of normal distribution for sampling
+          LFC values. Defaults to 0.5.
+
+    Returns:
+        pd.DataFrame: Same mock Achilles data with a new &#34;lfc&#34; column.
+    &#34;&#34;&#34;
+    mock_df[&#34;lfc&#34;] = np.random.normal(mu, sigma, mock_df.shape[0])
+    return mock_df
+
+
+def generate_mock_achilles_data(
+    n_genes: int,
+    n_sgrnas_per_gene: int,
+    n_cell_lines: int,
+    n_lineages: int,
+    n_batches: int,
+    n_screens: int,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate mock Achilles data.
+
+    Each sgRNA maps to a single gene. Each cell lines only received on pDNA batch.
+    Each cell line / sgRNA combination occurs exactly once.
+
+    Args:
+        n_genes (int): Number of genes.
+        n_sgrnas_per_gene (int): Number of sgRNAs per gene.
+        n_cell_lines (int): Number of cell lines.
+        n_lineages (int, optional): Number of lineages. Must be less than or equal to
+          the number of cell lines.
+        n_batches (int): Number of pDNA batchs.
+        n_screens (int): Number of screens sourced for the data. Must be less than or
+          equal to the number of batches.
+
+    Returns:
+        pd.DataFrame: A pandas data frame the resembles the Achilles data.
+    &#34;&#34;&#34;
+    return (
+        generate_mock_achilles_categorical_groups(
+            n_genes=n_genes,
+            n_sgrnas_per_gene=n_sgrnas_per_gene,
+            n_cell_lines=n_cell_lines,
+            n_lineages=n_lineages,
+            n_batches=n_batches,
+            n_screens=n_screens,
+        )
+        .pipe(add_mock_copynumber_data, grouping_cols=[&#34;hugo_symbol&#34;, &#34;depmap_id&#34;])
+        .pipe(
+            add_mock_rna_expression_data,
+            grouping_cols=[&#34;hugo_symbol&#34;, &#34;depmap_id&#34;],
+            subgroups=[&#34;hugo_symbol&#34;, &#34;lineage&#34;],
+        )
+        .pipe(add_mock_is_mutated_data, grouping_cols=[&#34;hugo_symbol&#34;, &#34;depmap_id&#34;])
+        .pipe(add_mock_zero_effect_lfc_data)
+    )</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="src.modeling.mock_data.add_mock_copynumber_data"><code class="name flex">
+<span>def <span class="ident">add_mock_copynumber_data</span></span>(<span>mock_df: pandas.core.frame.DataFrame, grouping_cols: Optional[list[str]] = None) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add mock copy number data to mock Achilles data.</p>
+<p>The mock CNA values actually come from real copy number values from CRC cancer cell
+lines. The values are randomly sampled with replacement and some noise is added to
+each value.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>mock_df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>Mock Achilles data frame.</dd>
+<dt><strong><code>grouping_cols</code></strong> :&ensp;<code>Optional[list[str]]</code>, optional</dt>
+<dd>Columns to group by where every
+appearance of the same combination will have the same CN value. Defaults to
+None for no group effect.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>Same mock Achilles data frame with a new "copy_number" column.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_mock_copynumber_data(
+    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]] = None
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Add mock copy number data to mock Achilles data.
+
+    The mock CNA values actually come from real copy number values from CRC cancer cell
+    lines. The values are randomly sampled with replacement and some noise is added to
+    each value.
+
+    Args:
+        mock_df (pd.DataFrame): Mock Achilles data frame.
+        grouping_cols (Optional[list[str]], optional): Columns to group by where every
+          appearance of the same combination will have the same CN value. Defaults to
+          None for no group effect.
+
+    Returns:
+        pd.DataFrame: Same mock Achilles data frame with a new &#34;copy_number&#34; column.
+    &#34;&#34;&#34;
+    real_cna_values = np.load(data_path(DataFile.copy_number_sample))
+
+    df_copy = _make_mock_grouped_copy(mock_df, grouping_cols)
+    mock_cn = np.random.choice(real_cna_values, size=df_copy.shape[0], replace=True)
+    mock_cn = mock_cn + np.random.normal(0, 0.1, size=mock_cn.shape)
+    mock_cn = vhelp.squish_array(mock_cn, lower=0.0, upper=20.0)
+    df_copy[&#34;copy_number&#34;] = mock_cn.flatten()
+    return _merge_mock_and_grouped_copy(mock_df, df_copy, grouping_cols)</code></pre>
+</details>
+</dd>
+<dt id="src.modeling.mock_data.add_mock_is_mutated_data"><code class="name flex">
+<span>def <span class="ident">add_mock_is_mutated_data</span></span>(<span>mock_df: pandas.core.frame.DataFrame, grouping_cols: Optional[list[str]] = None, prob: float = 0.01) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a mutation column to mock Achilles data.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>mock_df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>Mock Achilles data frame.</dd>
+<dt><strong><code>grouping_cols</code></strong> :&ensp;<code>Optional[list[str]]</code>, optional</dt>
+<dd>Columns to group by where every
+appearance of the same combination will have the same mutation value. Defaults
+to None for no group effect.</dd>
+<dt><strong><code>prob</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>The probability of a gene being mutated. All mutations
+are indpendent of each other. Defaults to 0.01.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>The same mock Achilles data frame with an "is_mutated" columns.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_mock_is_mutated_data(
+    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]] = None, prob: float = 0.01
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Add a mutation column to mock Achilles data.
+
+    Args:
+        mock_df (pd.DataFrame): Mock Achilles data frame.
+        grouping_cols (Optional[list[str]], optional): Columns to group by where every
+          appearance of the same combination will have the same mutation value. Defaults
+          to None for no group effect.
+        prob (float, optional): The probability of a gene being mutated. All mutations
+          are indpendent of each other. Defaults to 0.01.
+
+    Returns:
+        pd.DataFrame: The same mock Achilles data frame with an &#34;is_mutated&#34; columns.
+    &#34;&#34;&#34;
+    df_copy = _make_mock_grouped_copy(mock_df, grouping_cols)
+    df_copy[&#34;is_mutated&#34;] = np.random.uniform(0, 1, size=df_copy.shape[0]) &lt; prob
+    return _merge_mock_and_grouped_copy(mock_df, df_copy, grouping_cols)</code></pre>
+</details>
+</dd>
+<dt id="src.modeling.mock_data.add_mock_rna_expression_data"><code class="name flex">
+<span>def <span class="ident">add_mock_rna_expression_data</span></span>(<span>mock_df: pandas.core.frame.DataFrame, grouping_cols: Optional[list[str]] = None, subgroups: Optional[list[str]] = None) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add fake RNA expression data to a mock Achilles data frame.</p>
+<p>The RNA expression values are sampled from a normal distribution with mean and
+standard deviation that are each sampled from different normal distributions. If a
+grouping is supplied, then each value in the group will be sampled from the same
+distribution (i.e. same mean and standard deviation).</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>mock_df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>Mock Achilles data frame.</dd>
+<dt><strong><code>grouping_cols</code></strong> :&ensp;<code>Optional[list[str]]</code>, optional</dt>
+<dd>Columns to group by where every
+appearance of the same combination will have the same RNA value. Defaults to
+None for no group effect.</dd>
+<dt><strong><code>subgroups</code></strong> :&ensp;<code>Optional[list[str]]</code>, optional</dt>
+<dd>List of columns to group by. Each
+group will have the same mean and standard deviation for the sampling
+distribution. Defaults to None.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>[description]</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_mock_rna_expression_data(
+    mock_df: pd.DataFrame,
+    grouping_cols: Optional[list[str]] = None,
+    subgroups: Optional[list[str]] = None,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Add fake RNA expression data to a mock Achilles data frame.
+
+    The RNA expression values are sampled from a normal distribution with mean and
+    standard deviation that are each sampled from different normal distributions. If a
+    grouping is supplied, then each value in the group will be sampled from the same
+    distribution (i.e. same mean and standard deviation).
+
+    Args:
+        mock_df (pd.DataFrame): Mock Achilles data frame.
+        grouping_cols (Optional[list[str]], optional): Columns to group by where every
+          appearance of the same combination will have the same RNA value. Defaults to
+          None for no group effect.
+        subgroups (Optional[list[str]], optional): List of columns to group by. Each
+          group will have the same mean and standard deviation for the sampling
+          distribution. Defaults to None.
+
+    Returns:
+        pd.DataFrame: [description]
+    &#34;&#34;&#34;
+
+    def _rna_normal_distribution(df: pd.DataFrame) -&gt; pd.DataFrame:
+        df_copy = _make_mock_grouped_copy(df, grouping_cols)
+        mu = np.abs(np.random.normal(10.0, 3))
+        sd = np.abs(np.random.normal(0.0, 3))
+        rna_expr = np.random.normal(mu, sd, size=df_copy.shape[0])
+        rna_expr = vhelp.squish_array(rna_expr, lower=0.0, upper=np.inf)
+        df_copy[&#34;rna_expr&#34;] = rna_expr
+        df_copy = _merge_mock_and_grouped_copy(df, df_copy, grouping_cols)
+        return df_copy
+
+    if subgroups is None:
+        mock_df = _rna_normal_distribution(mock_df)
+    else:
+        mock_df = (
+            mock_df.groupby(subgroups)
+            .apply(_rna_normal_distribution)
+            .reset_index(drop=True)
+        )
+    return mock_df</code></pre>
+</details>
+</dd>
+<dt id="src.modeling.mock_data.add_mock_zero_effect_lfc_data"><code class="name flex">
+<span>def <span class="ident">add_mock_zero_effect_lfc_data</span></span>(<span>mock_df: pandas.core.frame.DataFrame, mu: float = 0.0, sigma: float = 0.5) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add fake log-fold change column to mock Achilles data.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>mock_df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>Mock Achilles data frame.</dd>
+<dt><strong><code>mu</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Mean of normal distribution for sampling LFC values.
+Defaults to 0.0.</dd>
+<dt><strong><code>sigma</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Standard deviation of normal distribution for sampling
+LFC values. Defaults to 0.5.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>Same mock Achilles data with a new "lfc" column.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_mock_zero_effect_lfc_data(
+    mock_df: pd.DataFrame, mu: float = 0.0, sigma: float = 0.5
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Add fake log-fold change column to mock Achilles data.
+
+    Args:
+        mock_df (pd.DataFrame): Mock Achilles data frame.
+        mu (float, optional): Mean of normal distribution for sampling LFC values.
+          Defaults to 0.0.
+        sigma (float, optional): Standard deviation of normal distribution for sampling
+          LFC values. Defaults to 0.5.
+
+    Returns:
+        pd.DataFrame: Same mock Achilles data with a new &#34;lfc&#34; column.
+    &#34;&#34;&#34;
+    mock_df[&#34;lfc&#34;] = np.random.normal(mu, sigma, mock_df.shape[0])
+    return mock_df</code></pre>
+</details>
+</dd>
+<dt id="src.modeling.mock_data.generate_mock_achilles_categorical_groups"><code class="name flex">
+<span>def <span class="ident">generate_mock_achilles_categorical_groups</span></span>(<span>n_genes: int, n_sgrnas_per_gene: int, n_cell_lines: int, n_lineages: int, n_batches: int, n_screens: int, randomness: bool = False) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate mock Achilles categorical column scaffolding.</p>
+<p>This function should be used to generate a scaffolding of the Achilles data. It
+creates columns that mimic the hierarchical natrue of the Achilles categorical
+columns. Each sgRNA maps to a single gene. Each cell lines only received on pDNA
+batch. Each cell line / sgRNA combination occurs exactly once.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>n_genes</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of genes.</dd>
+<dt><strong><code>n_sgrnas_per_gene</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of sgRNAs per gene.</dd>
+<dt><strong><code>n_cell_lines</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of cell lines.</dd>
+<dt><strong><code>n_lineages</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of lineages. Must be less than or equal to
+the number of cell lines.</dd>
+<dt><strong><code>n_batches</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of pDNA batchs.</dd>
+<dt><strong><code>n_screens</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of screens sourced for the data. Must be less than or
+equal to the number of batches.</dd>
+<dt><strong><code>randomness</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the lineages, screens, and batches be
+randomly assigned or applied in a pattern? Defaults to False (patterned).</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>A pandas data frame the resembles the categorical column</dd>
+</dl>
+<p>hierarchical structure of the Achilles data.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def generate_mock_achilles_categorical_groups(
+    n_genes: int,
+    n_sgrnas_per_gene: int,
+    n_cell_lines: int,
+    n_lineages: int,
+    n_batches: int,
+    n_screens: int,
+    randomness: bool = False,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate mock Achilles categorical column scaffolding.
+
+    This function should be used to generate a scaffolding of the Achilles data. It
+    creates columns that mimic the hierarchical natrue of the Achilles categorical
+    columns. Each sgRNA maps to a single gene. Each cell lines only received on pDNA
+    batch. Each cell line / sgRNA combination occurs exactly once.
+
+    Args:
+        n_genes (int): Number of genes.
+        n_sgrnas_per_gene (int): Number of sgRNAs per gene.
+        n_cell_lines (int): Number of cell lines.
+        n_lineages (int, optional): Number of lineages. Must be less than or equal to
+          the number of cell lines.
+        n_batches (int): Number of pDNA batchs.
+        n_screens (int): Number of screens sourced for the data. Must be less than or
+          equal to the number of batches.
+        randomness (bool, optional): Should the lineages, screens, and batches be
+          randomly assigned or applied in a pattern? Defaults to False (patterned).
+
+    Returns:
+        pd.DataFrame: A pandas data frame the resembles the categorical column
+        hierarchical structure of the Achilles data.
+    &#34;&#34;&#34;
+    sgnra_map = generate_mock_sgrna_gene_map(
+        n_genes=n_genes, n_sgrnas_per_gene=n_sgrnas_per_gene
+    )
+    cell_line_info = generate_mock_cell_line_information(
+        genes=sgnra_map.hugo_symbol.unique(),
+        n_cell_lines=n_cell_lines,
+        n_lineages=n_lineages,
+        n_batches=n_batches,
+        n_screens=n_screens,
+        randomness=randomness,
+    )
+
+    def _make_cat_cols(_df: pd.DataFrame) -&gt; pd.DataFrame:
+        return achelp.set_achilles_categorical_columns(_df, cols=_df.columns.tolist())
+
+    return (
+        cell_line_info.merge(sgnra_map, on=&#34;hugo_symbol&#34;)
+        .reset_index(drop=True)
+        .pipe(_make_cat_cols)
+    )</code></pre>
+</details>
+</dd>
+<dt id="src.modeling.mock_data.generate_mock_achilles_data"><code class="name flex">
+<span>def <span class="ident">generate_mock_achilles_data</span></span>(<span>n_genes: int, n_sgrnas_per_gene: int, n_cell_lines: int, n_lineages: int, n_batches: int, n_screens: int) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate mock Achilles data.</p>
+<p>Each sgRNA maps to a single gene. Each cell lines only received on pDNA batch.
+Each cell line / sgRNA combination occurs exactly once.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>n_genes</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of genes.</dd>
+<dt><strong><code>n_sgrnas_per_gene</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of sgRNAs per gene.</dd>
+<dt><strong><code>n_cell_lines</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of cell lines.</dd>
+<dt><strong><code>n_lineages</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of lineages. Must be less than or equal to
+the number of cell lines.</dd>
+<dt><strong><code>n_batches</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of pDNA batchs.</dd>
+<dt><strong><code>n_screens</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of screens sourced for the data. Must be less than or
+equal to the number of batches.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>A pandas data frame the resembles the Achilles data.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def generate_mock_achilles_data(
+    n_genes: int,
+    n_sgrnas_per_gene: int,
+    n_cell_lines: int,
+    n_lineages: int,
+    n_batches: int,
+    n_screens: int,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate mock Achilles data.
+
+    Each sgRNA maps to a single gene. Each cell lines only received on pDNA batch.
+    Each cell line / sgRNA combination occurs exactly once.
+
+    Args:
+        n_genes (int): Number of genes.
+        n_sgrnas_per_gene (int): Number of sgRNAs per gene.
+        n_cell_lines (int): Number of cell lines.
+        n_lineages (int, optional): Number of lineages. Must be less than or equal to
+          the number of cell lines.
+        n_batches (int): Number of pDNA batchs.
+        n_screens (int): Number of screens sourced for the data. Must be less than or
+          equal to the number of batches.
+
+    Returns:
+        pd.DataFrame: A pandas data frame the resembles the Achilles data.
+    &#34;&#34;&#34;
+    return (
+        generate_mock_achilles_categorical_groups(
+            n_genes=n_genes,
+            n_sgrnas_per_gene=n_sgrnas_per_gene,
+            n_cell_lines=n_cell_lines,
+            n_lineages=n_lineages,
+            n_batches=n_batches,
+            n_screens=n_screens,
+        )
+        .pipe(add_mock_copynumber_data, grouping_cols=[&#34;hugo_symbol&#34;, &#34;depmap_id&#34;])
+        .pipe(
+            add_mock_rna_expression_data,
+            grouping_cols=[&#34;hugo_symbol&#34;, &#34;depmap_id&#34;],
+            subgroups=[&#34;hugo_symbol&#34;, &#34;lineage&#34;],
+        )
+        .pipe(add_mock_is_mutated_data, grouping_cols=[&#34;hugo_symbol&#34;, &#34;depmap_id&#34;])
+        .pipe(add_mock_zero_effect_lfc_data)
+    )</code></pre>
+</details>
+</dd>
+<dt id="src.modeling.mock_data.generate_mock_cell_line_information"><code class="name flex">
+<span>def <span class="ident">generate_mock_cell_line_information</span></span>(<span>genes: Union[list[str], numpy.ndarray], n_cell_lines: int, n_lineages: int, n_batches: int, n_screens: int, randomness: bool = False) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate mock "sample information" for fake cell lines.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>genes</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>List of genes tested in the cell lines.</dd>
+<dt><strong><code>n_cell_lines</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of cell lines.</dd>
+<dt><strong><code>n_lineages</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of lineages. Must be less than or equal to
+the number of cell lines.</dd>
+<dt><strong><code>n_batches</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of pDNA batchs.</dd>
+<dt><strong><code>n_screens</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of screens sourced for the data. Must be less than or
+equal to the number of batches.</dd>
+<dt><strong><code>randomness</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the lineages, screens, and batches be
+randomly assigned or applied in a pattern? Defaults to False (patterned).</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>The mock sample information.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def generate_mock_cell_line_information(
+    genes: Union[list[str], np.ndarray],
+    n_cell_lines: int,
+    n_lineages: int,
+    n_batches: int,
+    n_screens: int,
+    randomness: bool = False,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate mock &#34;sample information&#34; for fake cell lines.
+
+    Args:
+        genes (list[str]): List of genes tested in the cell lines.
+        n_cell_lines (int): Number of cell lines.
+        n_lineages (int, optional): Number of lineages. Must be less than or equal to
+          the number of cell lines.
+        n_batches (int): Number of pDNA batchs.
+        n_screens (int): Number of screens sourced for the data. Must be less than or
+          equal to the number of batches.
+        randomness (bool, optional): Should the lineages, screens, and batches be
+          randomly assigned or applied in a pattern? Defaults to False (patterned).
+
+    Returns:
+        pd.DataFrame: The mock sample information.
+    &#34;&#34;&#34;
+    # Methods for selecting elements from the list to produce pairings.
+    _lineage_method = &#34;random&#34; if randomness else &#34;tiled&#34;
+    _batch_method = &#34;random&#34; if randomness else &#34;shuffled&#34;
+    _screen_method = &#34;random&#34; if randomness else &#34;tiled&#34;
+
+    cell_lines = prefixed_count(&#34;cellline&#34;, n=n_cell_lines)
+    lineages = prefixed_count(&#34;lineage&#34;, n=n_lineages)
+    batches = prefixed_count(&#34;batch&#34;, n=n_batches)
+    batch_map = pd.DataFrame(
+        {
+            &#34;depmap_id&#34;: cell_lines,
+            &#34;lineage&#34;: select_n_elements_from_l(
+                n_cell_lines, lineages, _lineage_method
+            ),
+            &#34;p_dna_batch&#34;: select_n_elements_from_l(
+                n_cell_lines, batches, _batch_method
+            ),
+        }
+    )
+
+    screens = [&#34;broad&#34;]
+    if n_screens == 2:
+        screens += [&#34;sanger&#34;]
+    if n_screens &gt; 2:
+        screens += prefixed_count(&#34;screen&#34;, n=n_screens - 2)
+
+    screen_map = pd.DataFrame(
+        {
+            &#34;p_dna_batch&#34;: batches,
+            &#34;screen&#34;: select_n_elements_from_l(n_batches, screens, _screen_method),
+        }
+    )
+
+    return (
+        pd.DataFrame(
+            {
+                &#34;depmap_id&#34;: np.repeat(cell_lines, len(np.unique(genes))),
+                &#34;hugo_symbol&#34;: np.tile(genes, n_cell_lines),
+            }
+        )
+        .merge(batch_map, on=&#34;depmap_id&#34;)
+        .merge(screen_map, on=&#34;p_dna_batch&#34;)
+    )</code></pre>
+</details>
+</dd>
+<dt id="src.modeling.mock_data.generate_mock_sgrna_gene_map"><code class="name flex">
+<span>def <span class="ident">generate_mock_sgrna_gene_map</span></span>(<span>n_genes: int, n_sgrnas_per_gene: int) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate a fake sgRNA-gene map.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>n_genes</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of genes.</dd>
+<dt><strong><code>n_sgrnas_per_gene</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of sgRNA per gene.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>A data frame mapping each sgRNA to a gene. Each sgRNA only matches
+to a single gene and each gene will have <code>n_sgrnas_per_gene</code> sgRNAs mapped
+to it.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def generate_mock_sgrna_gene_map(n_genes: int, n_sgrnas_per_gene: int) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate a fake sgRNA-gene map.
+
+    Args:
+        n_genes (int): Number of genes.
+        n_sgrnas_per_gene (int): Number of sgRNA per gene.
+
+    Returns:
+        pd.DataFrame: A data frame mapping each sgRNA to a gene. Each sgRNA only matches
+          to a single gene and each gene will have `n_sgrnas_per_gene` sgRNAs mapped
+          to it.
+    &#34;&#34;&#34;
+    genes = prefixed_count(&#34;gene&#34;, n=n_genes)
+    sgrna_target_chr = choices([&#34;Chr1&#34;, &#34;Chr2&#34;, &#34;Chr3&#34;], k=n_genes)
+    sgrnas = [prefixed_count(gene + &#34;_sgrna&#34;, n=n_sgrnas_per_gene) for gene in genes]
+    return pd.DataFrame(
+        {
+            &#34;hugo_symbol&#34;: np.repeat(genes, n_sgrnas_per_gene),
+            &#34;sgrna_target_chr&#34;: np.repeat(sgrna_target_chr, n_sgrnas_per_gene),
+            &#34;sgrna&#34;: np.array(sgrnas).flatten(),
+        }
+    )</code></pre>
+</details>
+</dd>
+<dt id="src.modeling.mock_data.select_n_elements_from_l"><code class="name flex">
+<span>def <span class="ident">select_n_elements_from_l</span></span>(<span>n: int, list: Union[list[Any], numpy.ndarray], method: Union[src.modeling.mock_data.SelectionMethod, str]) -> numpy.ndarray</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Select <code>n</code> elements from a collection <code>l</code> using a specified method.</p>
+<p>There are three available methods:</p>
+<ol>
+<li><code>random</code>: Randomly select <code>n</code> values from <code>l</code>.</li>
+<li><code>tiled</code>: Use <code>numpy.tile()</code> (<code>[1, 2, 3]</code> → <code>[1, 2, 3, 1, 2, 3, &hellip;]</code>).</li>
+<li><code>repeated</code>: Use <code>numpy.repeat()</code> (<code>[1, 2, 3]</code> → <code>[1, 1, 2, 2, 3, 3, &hellip;]</code>).</li>
+<li><code>shuffled</code>: Shuffles the results of <code>numpy.tile()</code> to get even, random coverage.</li>
+</ol>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>n</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number elements to draw.</dd>
+<dt><strong><code>l</code></strong> :&ensp;<code>Union[list[Any], np.ndarray]</code></dt>
+<dd>Collection to draw from.</dd>
+<dt><strong><code>method</code></strong> :&ensp;<code><a title="src.modeling.mock_data.SelectionMethod" href="#src.modeling.mock_data.SelectionMethod">SelectionMethod</a></code></dt>
+<dd>Method to use for drawing elements.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>Raised if an unknown method is passed.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>np.ndarray</code></dt>
+<dd>A numpy array of length 'n' with values from 'l'.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def select_n_elements_from_l(
+    n: int, list: Union[list[Any], np.ndarray], method: Union[SelectionMethod, str]
+) -&gt; np.ndarray:
+    &#34;&#34;&#34;Select `n` elements from a collection `l` using a specified method.
+
+    There are three available methods:
+
+    1. `random`: Randomly select `n` values from `l`.
+    2. `tiled`: Use `numpy.tile()` (`[1, 2, 3]` → `[1, 2, 3, 1, 2, 3, ...]`).
+    3. `repeated`: Use `numpy.repeat()` (`[1, 2, 3]` → `[1, 1, 2, 2, 3, 3, ...]`).
+    4. `shuffled`: Shuffles the results of `numpy.tile()` to get even, random coverage.
+
+    Args:
+        n (int): Number elements to draw.
+        l (Union[list[Any], np.ndarray]): Collection to draw from.
+        method (SelectionMethod): Method to use for drawing elements.
+
+    Raises:
+        ValueError: Raised if an unknown method is passed.
+
+    Returns:
+        np.ndarray: A numpy array of length &#39;n&#39; with values from &#39;l&#39;.
+    &#34;&#34;&#34;
+    if isinstance(method, str):
+        method = SelectionMethod(method)
+
+    size = math.ceil(n / len(list))
+
+    if method == SelectionMethod.random:
+        return np.random.choice(list, n)
+    elif method == SelectionMethod.tiled:
+        return np.tile(list, size)[:n]
+    elif method == SelectionMethod.repeated:
+        return np.repeat(list, size)[:n]
+    elif method == SelectionMethod.shuffled:
+        a = np.tile(list, size)[:n]
+        np.random.shuffle(a)
+        return a
+    else:
+        raise ValueError(f&#34;Unknown selection method: {method}&#34;)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="src.modeling.mock_data.SelectionMethod"><code class="flex name class">
+<span>class <span class="ident">SelectionMethod</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Methods for selecting <code>n</code> elements from a list.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@unique
+class SelectionMethod(str, Enum):
+    &#34;&#34;&#34;Methods for selecting `n` elements from a list.&#34;&#34;&#34;
+
+    random = &#34;random&#34;
+    tiled = &#34;tiled&#34;
+    repeated = &#34;repeated&#34;
+    shuffled = &#34;shuffled&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="src.modeling.mock_data.SelectionMethod.random"><code class="name">var <span class="ident">random</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="src.modeling.mock_data.SelectionMethod.repeated"><code class="name">var <span class="ident">repeated</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="src.modeling.mock_data.SelectionMethod.shuffled"><code class="name">var <span class="ident">shuffled</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="src.modeling.mock_data.SelectionMethod.tiled"><code class="name">var <span class="ident">tiled</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="src.modeling" href="index.html">src.modeling</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="src.modeling.mock_data.add_mock_copynumber_data" href="#src.modeling.mock_data.add_mock_copynumber_data">add_mock_copynumber_data</a></code></li>
+<li><code><a title="src.modeling.mock_data.add_mock_is_mutated_data" href="#src.modeling.mock_data.add_mock_is_mutated_data">add_mock_is_mutated_data</a></code></li>
+<li><code><a title="src.modeling.mock_data.add_mock_rna_expression_data" href="#src.modeling.mock_data.add_mock_rna_expression_data">add_mock_rna_expression_data</a></code></li>
+<li><code><a title="src.modeling.mock_data.add_mock_zero_effect_lfc_data" href="#src.modeling.mock_data.add_mock_zero_effect_lfc_data">add_mock_zero_effect_lfc_data</a></code></li>
+<li><code><a title="src.modeling.mock_data.generate_mock_achilles_categorical_groups" href="#src.modeling.mock_data.generate_mock_achilles_categorical_groups">generate_mock_achilles_categorical_groups</a></code></li>
+<li><code><a title="src.modeling.mock_data.generate_mock_achilles_data" href="#src.modeling.mock_data.generate_mock_achilles_data">generate_mock_achilles_data</a></code></li>
+<li><code><a title="src.modeling.mock_data.generate_mock_cell_line_information" href="#src.modeling.mock_data.generate_mock_cell_line_information">generate_mock_cell_line_information</a></code></li>
+<li><code><a title="src.modeling.mock_data.generate_mock_sgrna_gene_map" href="#src.modeling.mock_data.generate_mock_sgrna_gene_map">generate_mock_sgrna_gene_map</a></code></li>
+<li><code><a title="src.modeling.mock_data.select_n_elements_from_l" href="#src.modeling.mock_data.select_n_elements_from_l">select_n_elements_from_l</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="src.modeling.mock_data.SelectionMethod" href="#src.modeling.mock_data.SelectionMethod">SelectionMethod</a></code></h4>
+<ul class="">
+<li><code><a title="src.modeling.mock_data.SelectionMethod.random" href="#src.modeling.mock_data.SelectionMethod.random">random</a></code></li>
+<li><code><a title="src.modeling.mock_data.SelectionMethod.repeated" href="#src.modeling.mock_data.SelectionMethod.repeated">repeated</a></code></li>
+<li><code><a title="src.modeling.mock_data.SelectionMethod.shuffled" href="#src.modeling.mock_data.SelectionMethod.shuffled">shuffled</a></code></li>
+<li><code><a title="src.modeling.mock_data.SelectionMethod.tiled" href="#src.modeling.mock_data.SelectionMethod.tiled">tiled</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

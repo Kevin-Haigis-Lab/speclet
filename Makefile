@@ -54,8 +54,8 @@ docs:
 	pdoc --html -o docs --force -c latex_math=True src
 
 clean:
-	find ./logs/*.log -mtime +7 -exec rm {} \ || echo "No logs to remove.";
-	find ./temp/* -mtime +7 -exec rm {} \ || echo "No temp files to remove.";
+	find ./logs/*.log -mtime +7 | xargs rm || echo "No logs to remove.";
+	find ./temp/* -mtime +7 | xargs rm || echo "No temp files to remove.";
 	rm .coverage* || echo "No coverage remnants to remove."
 
 sbc:

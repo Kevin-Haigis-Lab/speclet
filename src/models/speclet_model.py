@@ -2,7 +2,7 @@
 
 from abc import abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import arviz as az
 import numpy as np
@@ -12,14 +12,14 @@ from pydantic import BaseModel
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 import src.modeling.simulation_based_calibration_helpers as sbc
-from src.exceptions import CacheDoesNotExistError
+from src.exceptions import CacheDoesNotExistError, RequiredArgumentError
 from src.loggers import logger
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.managers.model_data_managers import DataManager
 from src.modeling import pymc3_sampling_api as pmapi
 from src.project_enums import MockDataSize, ModelFitMethod, assert_never
 
-ReplacementsDict = Dict[TTShared, Union[pm.Minibatch, np.ndarray]]
+ReplacementsDict = dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
 
 class UnableToLocateNamedVariable(Exception):
@@ -69,8 +69,8 @@ class SpecletModel:
 
     model: Optional[pm.Model] = None
     observed_var_name: Optional[str] = None
-    shared_vars: Optional[Dict[str, TTShared]] = None
-    advi_results: Optional[Tuple[az.InferenceData, pm.Approximation]] = None
+    shared_vars: Optional[dict[str, TTShared]] = None
+    advi_results: Optional[tuple[az.InferenceData, pm.Approximation]] = None
     mcmc_results: Optional[az.InferenceData] = None
 
     mcmc_sampling_params: MCMCSamplingParameters = MCMCSamplingParameters()
@@ -152,7 +152,7 @@ class SpecletModel:
         self.cache_manager.clear_all_caches()
 
     @abstractmethod
-    def model_specification(self) -> Tuple[pm.Model, str]:
+    def model_specification(self) -> tuple[pm.Model, str]:
         """Define the PyMC3 model.
 
         This model must be overridden by an subclass to define the desired PyMC3 model.
@@ -207,7 +207,7 @@ class SpecletModel:
         target_accept: Optional[float] = None,
         prior_pred_samples: Optional[int] = None,
         random_seed: Optional[int] = None,
-        sample_kwargs: Optional[Dict[str, Any]] = None,
+        sample_kwargs: Optional[dict[str, Any]] = None,
         ignore_cache: bool = False,
     ) -> az.InferenceData:
         """MCMC sample the model.
@@ -231,7 +231,7 @@ class SpecletModel:
               prior distributions. Defaults to None.
             random_seed (Optional[int], optional): The random seed for sampling.
             Defaults to None.
-            sample_kwargs (Dict[str, Any], optional): Kwargs for the sampling method.
+            sample_kwargs (dict[str, Any], optional): Kwargs for the sampling method.
             Defaults to {}.
             ignore_cache (bool, optional): Should any cached results be ignored?
               Defaults to False.
@@ -304,14 +304,14 @@ class SpecletModel:
         """
         return None
 
-    def get_advi_callbacks(self) -> List[Any]:
+    def get_advi_callbacks(self) -> list[Any]:
         """Prepare a list of callbacks for ADVI fitting.
 
         This can be overridden by subclasses to apply custom callbacks or change the
         parameters of the CheckParametersConvergence callback.
 
         Returns:
-            List[Any]: List of callbacks.
+            list[Any]: list of callbacks.
         """
         return [
             pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
@@ -329,7 +329,7 @@ class SpecletModel:
         prior_pred_samples: Optional[int] = None,
         random_seed: Optional[int] = None,
         ignore_cache: bool = False,
-    ) -> Tuple[az.InferenceData, pm.Approximation]:
+    ) -> tuple[az.InferenceData, pm.Approximation]:
         """ADVI fit the model.
 
         This method primarily wraps the
@@ -347,18 +347,18 @@ class SpecletModel:
               model. Defaults to None.
             prior_pred_samples (Optional[int], optional): Number of samples from the
               prior distributions. Defaults to None.
-            callbacks (List[Callable], optional): List of fitting callbacks. Default is
+            callbacks (list[Callable], optional): list of fitting callbacks. Default is
               None.
             random_seed (Optional[int], optional): The random seed for sampling.
               Defaults to None.
-            fit_kwargs (Dict[str, Any], optional): Kwargs for the fitting method.
+            fit_kwargs (dict[str, Any], optional): Kwargs for the fitting method.
               Defaults to {}.
 
         Raises:
             AttributeError: Raised if the model does not yet exist.
 
         Returns:
-            Tuple[az.InferenceData, pm.Approximation]: The results of fitting the model
+            tuple[az.InferenceData, pm.Approximation]: The results of fitting the model
               and the approximation object.
         """
         logger.debug("Beginning ADVI fitting method.")
@@ -378,7 +378,7 @@ class SpecletModel:
                 + "Make sure to run `model.build_model()` first."
             )
 
-        fit_kwargs: Dict[str, Any] = {}
+        fit_kwargs: dict[str, Any] = {}
         replacements = self.get_replacement_parameters()
         if replacements is not None:
             fit_kwargs["more_replacements"] = replacements
@@ -411,24 +411,53 @@ class SpecletModel:
         self.write_advi_cache()
         return self.advi_results
 
+    def generate_mock_data(
+        self, size: MockDataSize, random_seed: Optional[int] = None
+    ) -> pd.DataFrame:
+        """Generate mock data.
+
+        Args:
+            size (MockDataSize): Size of the dataset to mock.
+            random_seed (Optional[int], optional): Random seed. Defaults to None.
+
+        Returns:
+            pd.DataFrame: Mock data.
+        """
+        logger.info("Creating new simulation data.")
+        mock_data = self.data_manager.generate_mock_data(
+            size=size, random_seed=random_seed
+        )
+        return mock_data
+
     def run_simulation_based_calibration(
         self,
         results_path: Path,
         fit_method: ModelFitMethod,
-        size: MockDataSize,
+        mock_data: Optional[pd.DataFrame] = None,
+        size: Optional[MockDataSize] = None,
         random_seed: Optional[int] = None,
-        fit_kwargs: Optional[Dict[Any, Any]] = None,
+        fit_kwargs: Optional[dict[Any, Any]] = None,
     ) -> None:
         """Run a round of simulation-based calibration.
+
+        Pre-generated mock data can be passed for use in the simulation through the
+        `mock_data` argument or novel data can be generated by passing a preferred size
+        through the `size` argument.
 
         Args:
             results_path (Path): Where to store the results.
             fit_method (ModelFitMethod): Which method to use for fitting.
             random_seed (Optional[int], optional): Random seed (for reproducibility).
               Defaults to None.
-            size (MockDataSize): Size of the data set to mock. Defaults to "large".
-            fit_kwargs (Optional[Dict[Any, Any]], optional): Keyword arguments to be
+            mock_data (Optional[pd.DataFrame], optional): Mock data to use for the SBC.
+              Defaults to None.
+            size (Optional[MockDataSize], optional): Size of the dataset to mock.
+              Defaults to None.
+            fit_kwargs (Optional[dict[Any, Any]], optional): Keyword arguments to be
               passed to the fitting method. Default is None.
+
+        Raises:
+            RequiredArgumentError: If neither `mock_data` nor `size` are supplied.
         """
         if fit_kwargs is None:
             fit_kwargs = {}
@@ -436,9 +465,16 @@ class SpecletModel:
         sbc_fm = sbc.SBCFileManager(dir=results_path)
 
         logger.info("Creating new simulation data.")
-        mock_data = self.data_manager.generate_mock_data(
-            size=size, random_seed=random_seed
-        )
+        if mock_data is not None:
+            self.data_manager.set_data(mock_data)
+        elif size is not None:
+            mock_data = self.data_manager.generate_mock_data(
+                size=size, random_seed=random_seed
+            )
+        else:
+            raise RequiredArgumentError(
+                "Either `mock_data` or `size` must be provided."
+            )
 
         logger.debug("Building model for SBC.")
         self.build_model()
@@ -450,7 +486,7 @@ class SpecletModel:
             priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
         mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
-        self.data_manager.set_data(mock_data)
+        self.data_manager.set_data(mock_data, apply_transformations=False)
         sbc_fm.save_sbc_data(mock_data)
 
         # Update shared variable with adjusted observed data.
@@ -541,7 +577,7 @@ class SpecletModel:
                 self.cache_manager.mcmc_cache_delegate.cache_dir
             )
 
-    def load_advi_cache(self) -> Tuple[az.InferenceData, pm.Approximation]:
+    def load_advi_cache(self) -> tuple[az.InferenceData, pm.Approximation]:
         """Load ADVI from cache.
 
         Sets the cached ADVI result as the instance's `advi_results` attribute, too.
@@ -550,7 +586,7 @@ class SpecletModel:
             CacheDoesNotExistError: Raised if the cache does not exist.
 
         Returns:
-            Tuple[az.InferenceData, pm.Approximation]: Cached ADVI results.
+            tuple[az.InferenceData, pm.Approximation]: Cached ADVI results.
         """
         if self.cache_manager.advi_cache_exists():
             _advi_results = self.cache_manager.get_advi_cache()
@@ -581,6 +617,6 @@ class SpecletModel:
             logger.error(msg)
             raise UnableToLocateNamedVariable(msg)
 
-    def set_config(self, info: Dict[Any, Any]) -> None:
+    def set_config(self, info: dict[Any, Any]) -> None:
         """Set model-specific configuration."""
         return None
