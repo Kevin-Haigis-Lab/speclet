@@ -5,7 +5,7 @@
   model: speclet-simple
   fit_methods:
     - MCMC
-    - ADVI
+    # - ADVI
   pipelines:
     - fitting
     - sbc
@@ -20,7 +20,7 @@
     - MCMC
   pipelines:
     - fitting
-    - sbc
+    # - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
