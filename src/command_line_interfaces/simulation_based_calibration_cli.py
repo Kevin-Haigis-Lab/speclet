@@ -125,6 +125,8 @@ def run_sbc(
             logger.error(f"SBC check failed: {sbc_check.message}")
             logger.warn("Clearing cached results of SBC.")
             sbc_check.sbc_file_manager.clear_results()
+            sbc_check.sbc_file_manager.clear_saved_data()
+            sp_model.cache_manager.clear_all_caches()
             raise FailedSBCCheckError(sbc_check.message)
 
     return None
