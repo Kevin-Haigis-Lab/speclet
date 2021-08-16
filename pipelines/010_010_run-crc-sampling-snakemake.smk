@@ -150,11 +150,15 @@ rule sample_advi:
 
 
 rule papermill_report:
+    input:
+        template_nb=REPORTS_DIR + "model-report-template.ipynb",
     output:
         notebook=REPORTS_DIR + "{model_name}_{fit_method}.ipynb",
+    version:
+        "1.0"
     run:
         papermill.execute_notebook(
-            REPORTS_DIR + "model-report-template.ipynb",
+            input.template_nb,
             output.notebook,
             parameters={
                 "CONFIG_PATH": MODEL_CONFIG.as_posix(),
