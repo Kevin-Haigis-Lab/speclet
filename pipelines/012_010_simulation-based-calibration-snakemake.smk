@@ -32,7 +32,7 @@ model_configuration_lists = smk_help.get_models_names_fit_methods(
     MODEL_CONFIG, pipeline=SpecletPipeline.SBC
 )
 
-if len(model_configuration_lists):
+if len(model_configuration_lists) == 0:
     raise BaseException("No models to run in pipeline in the configuration file.")
 
 

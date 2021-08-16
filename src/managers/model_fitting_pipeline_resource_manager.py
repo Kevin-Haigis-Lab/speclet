@@ -25,6 +25,10 @@ MemoryLookupDict = ResourceLookupDict[int]
 TimeLookupDict = ResourceLookupDict[td]
 
 fitting_pipeline_memory_lookup: MemoryLookupDict = {
+    ModelOption.SPECLET_SIMPLE: {
+        True: {ModelFitMethod.ADVI: 4, ModelFitMethod.MCMC: 4},
+        False: {ModelFitMethod.ADVI: 8, ModelFitMethod.MCMC: 8},
+    },
     ModelOption.SPECLET_TEST_MODEL: {
         True: {ModelFitMethod.ADVI: 8, ModelFitMethod.MCMC: 8},
         False: {ModelFitMethod.ADVI: 8, ModelFitMethod.MCMC: 8},
