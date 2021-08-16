@@ -67,6 +67,13 @@ fitting_pipeline_memory_lookup: MemoryLookupDict = {
 # Time required for each configuration.
 #   key: [model][debug][fit_method]
 fitting_pipeline_time_lookup: TimeLookupDict = {
+    ModelOption.SPECLET_SIMPLE: {
+        True: {ModelFitMethod.ADVI: td(minutes=5), ModelFitMethod.MCMC: td(minutes=5)},
+        False: {
+            ModelFitMethod.ADVI: td(minutes=10),
+            ModelFitMethod.MCMC: td(minutes=10),
+        },
+    },
     ModelOption.SPECLET_TEST_MODEL: {
         True: {ModelFitMethod.ADVI: td(minutes=5), ModelFitMethod.MCMC: td(minutes=5)},
         False: {
