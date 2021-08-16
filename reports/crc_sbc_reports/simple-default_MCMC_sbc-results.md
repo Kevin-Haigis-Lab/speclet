@@ -483,7 +483,7 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 
 ![png](simple-default_MCMC_sbc-results_files/simple-default_MCMC_sbc-results_24_0.png)
 
-    <ggplot: (2934295350330)>
+    <ggplot: (2937290935504)>
 
 ```python
 hdi_low, hdi_high = pmanal.get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -497,11 +497,12 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+plot_df = filter_uninsteresting_parameters(simulation_posteriors_df)
+n_params = plot_df.parameter_name.nunique()
+plot_height = (1 + n_params // 4) * 4
+
 (
-    gg.ggplot(
-        filter_uninsteresting_parameters(simulation_posteriors_df),
-        gg.aes(x="true_value", y="mean", color="within_hdi"),
-    )
+    gg.ggplot(plot_df, gg.aes(x="true_value", y="mean", color="within_hdi"))
     + gg.facet_wrap("~ parameter_name", ncol=3, scales="free")
     + gg.geom_linerange(gg.aes(ymin=hdi_low, ymax=hdi_high), alpha=0.2, size=0.2)
     + gg.geom_point(size=0.3, alpha=0.3)
@@ -516,7 +517,7 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
         ),
     )
     + gg.theme(
-        figure_size=(10, 20),
+        figure_size=(10, plot_height),
         strip_background=gg.element_blank(),
         strip_text=gg.element_text(face="bold"),
         panel_spacing=0.25,
@@ -530,7 +531,7 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
 
 ![png](simple-default_MCMC_sbc-results_files/simple-default_MCMC_sbc-results_25_0.png)
 
-    <ggplot: (2934441201186)>
+    <ggplot: (2937479226724)>
 
 ### SBC Uniformity Test
 
@@ -565,14 +566,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 6.70 minutes
+    execution time: 25.22 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-08-14
+    Last updated: 2021-08-16
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -586,13 +587,13 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-a-16-164.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-167.o2.rc.hms.harvard.edu
 
     Git branch: speclet-simple
 
-    numpy     : 1.20.1
     plotnine  : 0.7.1
-    matplotlib: 3.3.4
-    pandas    : 1.2.3
-    logging   : 0.5.1.2
     janitor   : 0.20.14
+    pandas    : 1.2.3
+    matplotlib: 3.3.4
+    logging   : 0.5.1.2
+    numpy     : 1.20.1
