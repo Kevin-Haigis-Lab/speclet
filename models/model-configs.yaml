@@ -5,7 +5,7 @@
   model: speclet-simple
   fit_methods:
     - MCMC
-    # - ADVI
+    - ADVI
   pipelines:
     - fitting
     - sbc
@@ -18,9 +18,6 @@
   model: speclet-two
   fit_methods:
     - MCMC
-  pipelines:
-    - fitting
-    # - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -38,8 +35,6 @@
   fit_methods:
     - MCMC
     - ADVI
-  pipelines:
-    - fitting
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -51,8 +46,6 @@
   model: speclet-four
   fit_methods:
     - ADVI
-  pipelines:
-    - fitting
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -69,8 +62,6 @@
   fit_methods:
     - ADVI
     - MCMC
-  pipelines:
-    - fitting
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -89,8 +80,6 @@
   fit_methods:
     - ADVI
     - MCMC
-  pipelines:
-    - fitting
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -109,8 +98,6 @@
   fit_methods:
     - ADVI
     - MCMC
-  pipelines:
-    - fitting
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -125,8 +112,6 @@
   fit_methods:
     - MCMC
     - ADVI
-  pipelines:
-    - fitting
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -144,8 +129,6 @@
   fit_methods:
     - MCMC
     - ADVI
-  pipelines:
-    - fitting
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -160,8 +143,6 @@
   fit_methods:
     - MCMC
     - ADVI
-  pipelines:
-    - fitting
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -176,8 +157,6 @@
   fit_methods:
     - MCMC
     - ADVI
-  pipelines:
-    - fitting
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -188,8 +167,6 @@
   model: speclet-seven
   fit_methods:
     - ADVI
-  pipelines:
-    - fitting
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -204,8 +181,6 @@
   fit_methods:
     - MCMC
     - ADVI
-  pipelines:
-    - fitting
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -220,8 +195,6 @@
   fit_methods:
     - MCMC
     - ADVI
-  pipelines:
-    - fitting
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -240,8 +213,6 @@
   fit_methods:
     - MCMC
     - ADVI
-  pipelines:
-    - fitting
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -259,8 +230,6 @@
   fit_methods:
     - MCMC
     - ADVI
-  pipelines:
-    - fitting
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -279,8 +248,6 @@
   fit_methods:
     - MCMC
     - ADVI
-  pipelines:
-    - fitting
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -300,8 +267,6 @@
   fit_methods:
     - MCMC
     - ADVI
-  pipelines:
-    - fitting
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -322,8 +287,6 @@
   fit_methods:
     - MCMC
     - ADVI
-  pipelines:
-    - fitting
   debug: true
   pipeline_sampling_parameters:
     fitting:

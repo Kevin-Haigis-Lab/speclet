@@ -8,18 +8,19 @@ CONDA_ACTIVATE=source $$(conda info --base)/etc/profile.d/conda.sh ; conda activ
 
 help:
 	@echo "available commands"
-	@echo " - help            : information about available commands"
-	@echo " - install         : install virtual environments (Python and R)"
-	@echo " - download_data   : download data for the project"
-	@echo " - munge           : prepare the data for analysis"
-	@echo " - munge_o2        : prepare the data for analysis on O2"
-	@echo " - test            : run tests"
-	@echo " - test_o2         : run tests on O2 (-m 'not plots')"
-	@echo " - style           : style R and Python files"
-	@echo " - docs            : build documentation for Python modules"
-	@echo " - clean           : remove old logs and temp files"
-	@echo " - sbc             : run the SBC pipeline (on O2)"
-	@echo " - fit             : run the fitting pipeline (on O2)"
+	@echo " - help               : information about available commands"
+	@echo " - install            : install virtual environments (Python and R)"
+	@echo " - download_data      : download data for the project"
+	@echo " - munge              : prepare the data for analysis"
+	@echo " - munge_o2           : prepare the data for analysis on O2"
+	@echo " - test               : run tests"
+	@echo " - test_o2            : run tests on O2 (-m 'not plots')"
+	@echo " - style              : style R and Python files"
+	@echo " - docs               : build documentation for Python modules"
+	@echo " - clean              : remove old logs and temp files"
+	@echo " - sbc                : run the SBC pipeline (on O2)"
+	@echo " - fit                : run the fitting pipeline (on O2)"
+	@echo " - check_model_config : check the model configuration file"
 
 install:
 	@echo "Installing speclet conda environment."
@@ -56,7 +57,7 @@ docs:
 clean:
 	find ./logs/*.log -mtime +7 | xargs rm || echo "No logs to remove.";
 	find ./temp/* -mtime +7 | xargs rm -r || echo "No temp files to remove.";
-	rm .coverage* || echo "No coverage remnants to remove."
+	coverage erase
 
 sbc:
 	sbatch pipelines/012_012_simulation-based-calibration.sh

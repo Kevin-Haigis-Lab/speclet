@@ -32,6 +32,10 @@ model_configuration_lists = get_models_names_fit_methods(
 )
 
 
+if len(model_configuration_lists):
+    raise BaseException("No models to run in pipeline in the configuration file.")
+
+
 #### ---- Wildcard constrains ---- ####
 
 
