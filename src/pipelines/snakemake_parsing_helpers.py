@@ -16,6 +16,9 @@ class ParsedPipelineInformation(BaseModel):
     model_names: List[str]
     fit_methods: List[str]
 
+    def __len__(self) -> int:
+        return len(self.models)
+
 
 class _PipelineIntermediateInformation(BaseModel):
     """An intermediate step in the parsing process."""
