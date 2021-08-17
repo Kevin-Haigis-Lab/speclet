@@ -40,7 +40,7 @@ class ModelConfig(BaseModel):
     model: ModelOption
     config: Optional[Dict[str, Union[ModelFitMethod, BasicTypes]]]
     fit_methods: List[ModelFitMethod]
-    pipelines: List[SpecletPipeline]
+    pipelines: List[SpecletPipeline] = []
     debug: bool
     pipeline_sampling_parameters: Optional[PipelineSamplingParameters]
 

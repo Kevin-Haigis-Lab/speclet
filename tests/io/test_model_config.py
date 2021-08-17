@@ -3,6 +3,7 @@ from typing import Dict, Tuple
 from uuid import uuid4
 
 import pytest
+import yaml
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -126,3 +127,35 @@ def test_get_model_sampling_from_config_correct_pipeline_fitmethod(
         config, pipeline=pipeline, fit_method=fit_method
     )
     assert kwargs == expected_kwargs
+
+
+@pytest.mark.DEV
+def test_model_config_with_optional_pipeline_field():
+    yaml_txt = """
+- name: with-pipelines
+  description: "A description."
+  model: speclet-simple
+  fit_methods:
+      - MCMC
+      - ADVI
+  pipelines:
+      - fitting
+      - sbc
+  debug: true
+- name: without-pipelines
+  description: "A description."
+  model: speclet-simple
+  fit_methods:
+    - MCMC
+    - ADVI
+  debug: true
+    """
+    configs = model_config.ModelConfigs(configurations=yaml.safe_load(yaml_txt))
+    assert len(configs.configurations) == 2
+    for config in configs.configurations:
+        if config.name == "with-pipelines":
+            assert len(config.pipelines) == 2
+        elif config.name == "without-pipelines":
+            assert len(config.pipelines) == 0
+        else:
+            assert False

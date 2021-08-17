@@ -12,7 +12,7 @@ from src.command_line_interfaces import simulation_based_calibration_cli as sbc_
 from src.io import model_config
 from src.modeling.simulation_based_calibration_helpers import SBCFileManager, SBCResults
 from src.models.speclet_pipeline_test_model import SpecletTestModel
-from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
+from src.project_enums import MockDataSize, ModelFitMethod, ModelOption, SpecletPipeline
 
 runner = CliRunner()
 
@@ -50,6 +50,56 @@ def test_run_sbc_with_sampling(
         ],
     )
     assert result.exit_code == 0
+
+
+def mock_run_sbc(
+    sp_model: SpecletTestModel, results_path: Path, *args, **kwargs
+) -> None:
+    sbc_fm = SBCFileManager(results_path)
+    sbc_fm.save_sbc_data(pd.DataFrame())
+    sbc_fm.save_sbc_results({}, az.InferenceData(), pd.DataFrame())
+    sp_model.mcmc_results = az.InferenceData()
+    sp_model.write_mcmc_cache()
+    sp_model.advi_results = (az.InferenceData(), [1, 2, 3])  # type: ignore
+    sp_model.write_advi_cache()
+
+    assert sbc_fm.all_data_exists() and sbc_fm.simulation_data_exists()
+    assert sp_model.cache_manager.mcmc_cache_exists()
+    assert sp_model.cache_manager.advi_cache_exists()
+
+    return None
+
+
+def mock_check_results(cache_dir: Path, *args, **kwargs) -> sbc_cli.SBCCheckResult:
+    return sbc_cli.SBCCheckResult(
+        SBCFileManager(cache_dir), result=False, message="Testing mock function."
+    )
+
+
+def test_cache_files_are_removed_if_final_check_fails(
+    mock_model_config: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+):
+    monkeypatch.setattr(
+        SpecletTestModel, "run_simulation_based_calibration", mock_run_sbc
+    )
+    monkeypatch.setattr(sbc_cli, "_check_sbc_results", mock_check_results)
+    with pytest.raises(sbc_cli.FailedSBCCheckError):
+        sbc_cli.run_sbc(
+            "my-test-model",
+            config_path=mock_model_config,
+            fit_method=ModelFitMethod.MCMC,
+            cache_dir=tmp_path,
+            sim_number=1,
+            data_size=MockDataSize.SMALL,
+            check_results=True,
+        )
+
+    sbc_fm = SBCFileManager(tmp_path)
+    assert not sbc_fm.all_data_exists()
+    assert not sbc_fm.simulation_data_exists()
+    sp_model = SpecletTestModel("my-test-model", tmp_path)
+    assert not sp_model.cache_manager.mcmc_cache_exists()
+    assert not sp_model.cache_manager.advi_cache_exists()
 
 
 @pytest.mark.parametrize("fit_method", ModelFitMethod)

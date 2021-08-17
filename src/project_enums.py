@@ -27,6 +27,7 @@ class ModelOption(str, Enum):
     """Model options."""
 
     SPECLET_TEST_MODEL = "speclet-test-model"
+    SPECLET_SIMPLE = "speclet-simple"
     CRC_CERES_MIMIC = "crc-ceres-mimic"
     SPECLET_ONE = "speclet-one"
     SPECLET_TWO = "speclet-two"

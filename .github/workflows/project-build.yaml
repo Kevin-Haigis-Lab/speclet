@@ -18,7 +18,7 @@ jobs:
           activate-environment: speclet
           auto-activate-base: false
           channel-priority: strict
-          environment-file: environment.yml
+          environment-file: environment.yaml
       - name: Activate conda environment
         run: conda activate speclet
       - name: Describe virtual environment
@@ -47,7 +47,7 @@ jobs:
           activate-environment: speclet_snakemake
           auto-activate-base: false
           channel-priority: strict
-          environment-file: snakemake_environment.yml
+          environment-file: snakemake_environment.yaml
       - name: Activate conda environment
         run: conda activate speclet_snakemake
       - name: Describe virtual environment
@@ -92,7 +92,7 @@ jobs:
           activate-environment: speclet
           auto-activate-base: false
           channel-priority: strict
-          environment-file: environment.yml
+          environment-file: environment.yaml
       - name: Activate conda environment
         run: conda activate speclet
       - name: Describe virtual environment

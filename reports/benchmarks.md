@@ -105,83 +105,83 @@ benchmark_df.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>1394.6028</td>
-      <td>0:23:14</td>
-      <td>13024.31</td>
-      <td>17736.92</td>
-      <td>2819.38</td>
-      <td>2819.44</td>
-      <td>764.14</td>
-      <td>173.55</td>
-      <td>291.99</td>
-      <td>116.36</td>
-      <td>sp2-default_MCMC_perm106</td>
-      <td>run_sbc</td>
-      <td>012_010_simulation-based-calibration-snakemake</td>
+      <td>221.5452</td>
+      <td>0:03:41</td>
+      <td>1419.73</td>
+      <td>2140.38</td>
+      <td>1417.16</td>
+      <td>1417.25</td>
+      <td>908.23</td>
+      <td>16.45</td>
+      <td>17.16</td>
+      <td>38.26</td>
+      <td>simple-default_chain0</td>
+      <td>sample_mcmc</td>
+      <td>010_010_run-crc-sampling-snakemake</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>965.0994</td>
-      <td>0:16:05</td>
-      <td>12391.73</td>
-      <td>17107.66</td>
-      <td>2711.39</td>
-      <td>2711.48</td>
-      <td>1930.35</td>
-      <td>179.84</td>
-      <td>274.71</td>
-      <td>128.70</td>
-      <td>sp2-default_MCMC_perm447</td>
-      <td>run_sbc</td>
-      <td>012_010_simulation-based-calibration-snakemake</td>
+      <td>224.0925</td>
+      <td>0:03:44</td>
+      <td>1419.79</td>
+      <td>2140.32</td>
+      <td>1417.19</td>
+      <td>1417.29</td>
+      <td>959.60</td>
+      <td>12.40</td>
+      <td>17.09</td>
+      <td>38.29</td>
+      <td>simple-default_chain1</td>
+      <td>sample_mcmc</td>
+      <td>010_010_run-crc-sampling-snakemake</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>935.6633</td>
-      <td>0:15:35</td>
-      <td>13656.05</td>
-      <td>18371.72</td>
-      <td>2906.89</td>
-      <td>2921.86</td>
-      <td>19.48</td>
-      <td>177.94</td>
-      <td>272.56</td>
-      <td>115.20</td>
-      <td>sp2-default_MCMC_perm10</td>
-      <td>run_sbc</td>
-      <td>012_010_simulation-based-calibration-snakemake</td>
+      <td>220.5009</td>
+      <td>0:03:40</td>
+      <td>1427.61</td>
+      <td>2152.48</td>
+      <td>1425.79</td>
+      <td>1425.96</td>
+      <td>931.81</td>
+      <td>9.07</td>
+      <td>16.14</td>
+      <td>35.65</td>
+      <td>simple-default_chain3</td>
+      <td>sample_mcmc</td>
+      <td>010_010_run-crc-sampling-snakemake</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>1138.5514</td>
-      <td>0:18:58</td>
-      <td>12778.65</td>
-      <td>17491.38</td>
-      <td>2847.65</td>
-      <td>2847.71</td>
-      <td>278.06</td>
-      <td>129.89</td>
-      <td>284.06</td>
-      <td>121.95</td>
-      <td>sp2-default_MCMC_perm82</td>
-      <td>run_sbc</td>
-      <td>012_010_simulation-based-calibration-snakemake</td>
+      <td>206.2329</td>
+      <td>0:03:26</td>
+      <td>1419.41</td>
+      <td>2211.85</td>
+      <td>1416.80</td>
+      <td>1416.88</td>
+      <td>959.39</td>
+      <td>9.04</td>
+      <td>20.14</td>
+      <td>41.57</td>
+      <td>simple-default_chain2</td>
+      <td>sample_mcmc</td>
+      <td>010_010_run-crc-sampling-snakemake</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>1185.8116</td>
-      <td>0:19:45</td>
-      <td>13912.48</td>
-      <td>18616.94</td>
-      <td>2971.59</td>
-      <td>2995.49</td>
-      <td>6.51</td>
-      <td>173.51</td>
-      <td>276.01</td>
-      <td>124.15</td>
-      <td>sp2-default_MCMC_perm24</td>
-      <td>run_sbc</td>
-      <td>012_010_simulation-based-calibration-snakemake</td>
+      <td>220.6069</td>
+      <td>0:03:40</td>
+      <td>1418.07</td>
+      <td>2197.32</td>
+      <td>1415.48</td>
+      <td>1415.64</td>
+      <td>967.38</td>
+      <td>25.52</td>
+      <td>19.70</td>
+      <td>43.53</td>
+      <td>simple-default</td>
+      <td>sample_advi</td>
+      <td>010_010_run-crc-sampling-snakemake</td>
     </tr>
   </tbody>
 </table>
@@ -253,53 +253,78 @@ benchmark_df.groupby(["pipeline", "rule"]).mean().round(2)
   </thead>
   <tbody>
     <tr>
+      <th rowspan="2" valign="top">010_010_run-crc-sampling-snakemake</th>
+      <th>sample_advi</th>
+      <td>220.61</td>
+      <td>1418.07</td>
+      <td>2197.32</td>
+      <td>1415.48</td>
+      <td>1415.64</td>
+      <td>967.38</td>
+      <td>25.52</td>
+      <td>19.70</td>
+      <td>43.53</td>
+    </tr>
+    <tr>
+      <th>sample_mcmc</th>
+      <td>218.09</td>
+      <td>1421.64</td>
+      <td>2161.26</td>
+      <td>1419.24</td>
+      <td>1419.34</td>
+      <td>939.76</td>
+      <td>11.74</td>
+      <td>17.63</td>
+      <td>38.44</td>
+    </tr>
+    <tr>
       <th rowspan="4" valign="top">012_010_simulation-based-calibration-snakemake</th>
       <th>collate_sbc</th>
-      <td>180.46</td>
-      <td>380.04</td>
-      <td>2034.80</td>
-      <td>378.15</td>
-      <td>378.22</td>
-      <td>2595.87</td>
-      <td>0.22</td>
-      <td>41.23</td>
-      <td>83.04</td>
+      <td>349.97</td>
+      <td>449.04</td>
+      <td>2958.43</td>
+      <td>447.12</td>
+      <td>447.18</td>
+      <td>8047.58</td>
+      <td>0.26</td>
+      <td>42.32</td>
+      <td>147.87</td>
     </tr>
     <tr>
       <th>generate_mockdata</th>
-      <td>8.50</td>
-      <td>217.23</td>
-      <td>909.48</td>
-      <td>214.66</td>
-      <td>214.71</td>
-      <td>92.97</td>
+      <td>10.37</td>
+      <td>217.25</td>
+      <td>826.30</td>
+      <td>214.76</td>
+      <td>214.82</td>
+      <td>211.50</td>
       <td>0.27</td>
-      <td>40.35</td>
-      <td>3.66</td>
+      <td>34.63</td>
+      <td>3.58</td>
     </tr>
     <tr>
       <th>run_sbc</th>
-      <td>1046.89</td>
-      <td>12407.27</td>
-      <td>16817.09</td>
-      <td>2850.96</td>
-      <td>2859.93</td>
-      <td>306.70</td>
-      <td>137.59</td>
-      <td>243.69</td>
-      <td>115.56</td>
+      <td>468.31</td>
+      <td>5678.15</td>
+      <td>7866.74</td>
+      <td>1954.82</td>
+      <td>1960.67</td>
+      <td>150.24</td>
+      <td>79.93</td>
+      <td>107.71</td>
+      <td>76.16</td>
     </tr>
     <tr>
       <th>sbc_uniformity_test</th>
-      <td>420.44</td>
-      <td>5097.16</td>
-      <td>6935.55</td>
-      <td>5095.12</td>
-      <td>5095.18</td>
-      <td>18126.12</td>
-      <td>0.14</td>
-      <td>54.10</td>
-      <td>227.55</td>
+      <td>426.45</td>
+      <td>3051.67</td>
+      <td>4950.30</td>
+      <td>3049.61</td>
+      <td>3049.65</td>
+      <td>15221.14</td>
+      <td>0.15</td>
+      <td>46.53</td>
+      <td>198.18</td>
     </tr>
   </tbody>
 </table>
@@ -341,43 +366,43 @@ benchmark_df_long.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>012_010_simulation-based-calibration-snakemake</td>
-      <td>run_sbc</td>
-      <td>sp2-default_MCMC_perm106</td>
+      <td>010_010_run-crc-sampling-snakemake</td>
+      <td>sample_mcmc</td>
+      <td>simple-default_chain0</td>
       <td>cpu_time</td>
-      <td>116.36</td>
+      <td>38.26</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>012_010_simulation-based-calibration-snakemake</td>
-      <td>run_sbc</td>
-      <td>sp2-default_MCMC_perm447</td>
+      <td>010_010_run-crc-sampling-snakemake</td>
+      <td>sample_mcmc</td>
+      <td>simple-default_chain1</td>
       <td>cpu_time</td>
-      <td>128.70</td>
+      <td>38.29</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>012_010_simulation-based-calibration-snakemake</td>
-      <td>run_sbc</td>
-      <td>sp2-default_MCMC_perm10</td>
+      <td>010_010_run-crc-sampling-snakemake</td>
+      <td>sample_mcmc</td>
+      <td>simple-default_chain3</td>
       <td>cpu_time</td>
-      <td>115.20</td>
+      <td>35.65</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>012_010_simulation-based-calibration-snakemake</td>
-      <td>run_sbc</td>
-      <td>sp2-default_MCMC_perm82</td>
+      <td>010_010_run-crc-sampling-snakemake</td>
+      <td>sample_mcmc</td>
+      <td>simple-default_chain2</td>
       <td>cpu_time</td>
-      <td>121.95</td>
+      <td>41.57</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>012_010_simulation-based-calibration-snakemake</td>
-      <td>run_sbc</td>
-      <td>sp2-default_MCMC_perm24</td>
+      <td>010_010_run-crc-sampling-snakemake</td>
+      <td>sample_advi</td>
+      <td>simple-default</td>
       <td>cpu_time</td>
-      <td>124.15</td>
+      <td>43.53</td>
     </tr>
   </tbody>
 </table>
@@ -404,7 +429,7 @@ sns.catplot(
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-08-12
+    Last updated: 2021-08-16
 
     Python implementation: CPython
     Python version       : 3.9.6
@@ -415,14 +440,14 @@ sns.catplot(
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-54.o2.rc.hms.harvard.edu
 
-    Git branch: sbc-uniform-check
+    Git branch: speclet-simple
 
-    seaborn : 0.11.1
     janitor : 0.21.0
     plotnine: 0.8.0
+    seaborn : 0.11.1
     pandas  : 1.3.0

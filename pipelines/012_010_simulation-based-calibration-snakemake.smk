@@ -11,7 +11,7 @@ from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline, Mock
 from src.pipelines import snakemake_parsing_helpers as smk_help
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
-NUM_SIMULATIONS = 500
+NUM_SIMULATIONS = 1000
 
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yaml"
@@ -31,6 +31,9 @@ MODEL_CONFIG = Path("models", "model-configs.yaml")
 model_configuration_lists = smk_help.get_models_names_fit_methods(
     MODEL_CONFIG, pipeline=SpecletPipeline.SBC
 )
+
+if len(model_configuration_lists) == 0:
+    raise BaseException("No models to run in pipeline in the configuration file.")
 
 
 #### ---- Wildcard constrains ---- ####
