@@ -5,28 +5,28 @@ channels:
   - r
   - defaults
 dependencies:
-  - python=3.9.*
-  - snakemake=6.5.*
+  - python=3.9.6
+  - snakemake=6.7.*
   - colorama=0.4.*
   - drmaa=0.7.*
   - future=0.18.*
-  - graphviz=2.47.*
-  - ipython=7.25.*
-  - jupyterlab=3.0.*
+  - graphviz=2.48.*
+  - ipython=7.26.*
+  - jupyterlab=3.1.*
   - mamba=0.15.*
   - nbconvert=6.1.*
-  - networkx=2.6.*
+  - networkx
   - numpy=1.21.*
-  - openssl=1.1.*
+  - openssl
   - pandas=1.3.*
   - papermill=2.3.*
-  - pip=21.1.*
+  - pip=21.2.*
   - plotnine=0.8.*
   - pretty_errors=1.2.*
   - pydantic=1.8.*
   - pyjanitor=0.21.*
   - pytest=6.2.*
   - seaborn=0.11.*
-  - watermark=2.2.*
+  - watermark
   - pip:
     - -e .  # install the source directory as a package (keep as last)
