@@ -9,7 +9,8 @@ CONDA_ACTIVATE=source $$(conda info --base)/etc/profile.d/conda.sh ; conda activ
 help:
 	@echo "available commands"
 	@echo " - help               : information about available commands"
-	@echo " - install            : install virtual environments (Python and R)"
+	@echo " - envs               : install Python virtual environments"
+	@echo " - install            : install Python and R virtual environments"
 	@echo " - download_data      : download data for the project"
 	@echo " - munge              : prepare the data for analysis"
 	@echo " - munge_o2           : prepare the data for analysis on O2"
@@ -17,16 +18,20 @@ help:
 	@echo " - test_o2            : run tests on O2 (-m 'not plots')"
 	@echo " - style              : style R and Python files"
 	@echo " - docs               : build documentation for Python modules"
-	@echo " - clean              : remove old logs and temp files"
+	@echo " - clean              : remove old logs and temp files (+ style)"
 	@echo " - sbc                : run the SBC pipeline (on O2)"
 	@echo " - fit                : run the fitting pipeline (on O2)"
 	@echo " - check_model_config : check the model configuration file"
+	@echo " - build              : build the entire project"
+	@echo " - build_o2           : build the entire project (on O2)"
 
-install:
+envs:
 	@echo "Installing speclet conda environment."
 	($(CONDA_SETUP) conda env create -f environment.yaml)
 	@echo "Installing snakemake conda environment."
 	($(CONDA_SETUP) conda env create -f snakemake_environment.yaml)
+
+install: envs
 	@echo "Preparing R environment."
 	Rscript -e "renv::restore()"
 
@@ -54,7 +59,7 @@ style:
 docs:
 	pdoc --html -o docs --force -c latex_math=True src
 
-clean:
+clean: style
 	find ./logs/*.log -mtime +7 | xargs rm || echo "No logs to remove.";
 	find ./temp/* -mtime +7 | xargs rm -r || echo "No temp files to remove.";
 	coverage erase
@@ -67,3 +72,7 @@ fit:
 
 check_model_config:
 	$(CONDA_ACTIVATE) speclet && ./src/command_line_interfaces/check_model_configuration.py models/model-configs.yaml
+
+build: install download_data munge test sbc fit
+
+build_o2: install download_data munge_o2 test_o2 sbc fit
