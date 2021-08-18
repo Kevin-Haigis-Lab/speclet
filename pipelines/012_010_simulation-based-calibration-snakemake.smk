@@ -13,6 +13,7 @@ from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as R
 
 NUM_SIMULATIONS = 1000
 
+THEANORC_PATH = "pipelines/012_013_theanorc"
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yaml"
 ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
@@ -165,6 +166,7 @@ rule run_sbc:
     benchmark:
         BENCHMARK_DIR / "run_sbc/{model_name}_{fit_method}_perm{perm_num}.tsv"
     shell:
+        f"export THEANORC='{THEANORC_PATH}' && "
         "src/command_line_interfaces/simulation_based_calibration_cli.py"
         "  run-sbc"
         "  {wildcards.model_name}"

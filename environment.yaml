@@ -27,6 +27,7 @@ dependencies:
   - jupyterlab_code_formatter
   - matplotlib=3.4.*
   - mkl=2021.3.*
+  - mkl-service=2.4.*
   - mypy=0.910
   - nbconvert=6.1.*
   - nbdime
