@@ -18,6 +18,7 @@ dependencies:
   - jedi=0.18.0
   - matplotlib=3.4.3
   - mkl=2021.3.0
+  - mkl-service=2.4.*
   - mypy=0.910
   - nbconvert=6.1.0
   - nbqa=1.1.0

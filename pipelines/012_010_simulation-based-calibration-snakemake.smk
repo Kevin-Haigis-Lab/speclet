@@ -166,7 +166,7 @@ rule run_sbc:
     benchmark:
         BENCHMARK_DIR / "run_sbc/{model_name}_{fit_method}_perm{perm_num}.tsv"
     shell:
-        f"export THEANORC='{THEANORC_PATH}' && "
+        f"THEANORC='{THEANORC_PATH}' "
         "src/command_line_interfaces/simulation_based_calibration_cli.py"
         "  run-sbc"
         "  {wildcards.model_name}"

@@ -304,15 +304,15 @@ benchmark_df.groupby(["pipeline", "rule"]).mean().round(2)
     </tr>
     <tr>
       <th>run_sbc</th>
-      <td>468.31</td>
-      <td>5678.15</td>
-      <td>7866.74</td>
-      <td>1954.82</td>
-      <td>1960.67</td>
-      <td>150.24</td>
-      <td>79.93</td>
-      <td>107.71</td>
-      <td>76.16</td>
+      <td>465.78</td>
+      <td>5139.37</td>
+      <td>7164.39</td>
+      <td>1786.72</td>
+      <td>1792.50</td>
+      <td>137.30</td>
+      <td>73.46</td>
+      <td>97.46</td>
+      <td>70.20</td>
     </tr>
     <tr>
       <th>sbc_uniformity_test</th>
@@ -429,25 +429,25 @@ sns.catplot(
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-08-16
+    Last updated: 2021-08-19
 
     Python implementation: CPython
     Python version       : 3.9.6
-    IPython version      : 7.25.0
+    IPython version      : 7.26.0
 
     Compiler    : GCC 9.3.0
     OS          : Linux
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-a-16-54.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
 
-    Git branch: speclet-simple
+    Git branch: fix-theano-lock
 
-    janitor : 0.21.0
     plotnine: 0.8.0
-    seaborn : 0.11.1
-    pandas  : 1.3.0
+    janitor : 0.21.0
+    pandas  : 1.3.2
+    seaborn : 0.11.2
