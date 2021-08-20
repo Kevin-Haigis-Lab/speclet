@@ -27,8 +27,7 @@ fi
 
 snakemake \
     --snakefile $SNAKEFILE \
-    --jobs 30 \
-    --max-jobs-per-second 1 \
+    --jobs 980 \
     --restart-times 3 \
     --latency-wait 120 \
     --use-conda \
@@ -38,6 +37,7 @@ snakemake \
     --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}"
 
 # --conda-cleanup-envs  # use to clean up old conda envs
+
 
 # to make a dag
 # snakemake \

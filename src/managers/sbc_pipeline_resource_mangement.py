@@ -67,9 +67,9 @@ sbc_pipeline_memory_lookup: MemoryLookupDict = {
 sbc_pipeline_time_lookup: TimeLookupDict = {
     ModelOption.SPECLET_SIMPLE: {
         ModelFitMethod.ADVI: {
-            MockDataSize.SMALL: td(minutes=20),
-            MockDataSize.MEDIUM: td(minutes=30),
-            MockDataSize.LARGE: td(minutes=30),
+            MockDataSize.SMALL: td(minutes=5),
+            MockDataSize.MEDIUM: td(minutes=8),
+            MockDataSize.LARGE: td(minutes=15),
         },
         ModelFitMethod.MCMC: {
             MockDataSize.SMALL: td(minutes=3),

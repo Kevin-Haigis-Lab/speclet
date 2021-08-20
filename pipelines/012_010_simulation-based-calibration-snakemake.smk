@@ -6,21 +6,24 @@ from typing import List
 
 import papermill
 from snakemake.io import Wildcards
+import theano
 
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline, MockDataSize
 from src.pipelines import snakemake_parsing_helpers as smk_help
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
-NUM_SIMULATIONS = 1000
+# SBC parameters.
+NUM_SIMULATIONS = 2  # 1000
+MOCK_DATA_SIZE = MockDataSize.MEDIUM
 
-THEANORC_PATH = "pipelines/012_013_theanorc"
+# Directory and file paths
+THEANO_COMPILEDIR = theano.config.compiledir
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yaml"
 ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
 CACHE_DIR = "cache/sbc-cache/"
 
-MOCK_DATA_SIZE = MockDataSize.MEDIUM
-
+# Benchmarking jobs.
 BENCHMARK_DIR = Path("benchmarks", "012_010_simulation-based-calibration-snakemake")
 if not BENCHMARK_DIR.exists():
     BENCHMARK_DIR.mkdir(parents=True)
@@ -166,7 +169,7 @@ rule run_sbc:
     benchmark:
         BENCHMARK_DIR / "run_sbc/{model_name}_{fit_method}_perm{perm_num}.tsv"
     shell:
-        f"THEANORC='{THEANORC_PATH}' "
+        f"THEANO_FLAGS='compiledir={THEANO_COMPILEDIR}/{{wildcards.model_name}}_{{wildcards.perm_num}}' "
         "src/command_line_interfaces/simulation_based_calibration_cli.py"
         "  run-sbc"
         "  {wildcards.model_name}"
