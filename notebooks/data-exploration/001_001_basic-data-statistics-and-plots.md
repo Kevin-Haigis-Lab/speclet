@@ -256,6 +256,8 @@ achilles_data.columns
           dtype='object')
 
 ```python
+print("stats for all data:")
+
 for col, lbl in {
     "sgrna": "sgRNA",
     "hugo_symbol": "genes",
@@ -264,30 +266,136 @@ for col, lbl in {
     "screen": "data sources",
 }.items():
     count = len(achilles_data[col].unique().compute())
-    print(f"num {lbl}: {count:,}")
+    print(f"  num {lbl}: {count:,}")
 ```
 
-    num sgRNA: 157,808
-    num genes: 18,182
-    num cell lines: 984
-    num lineages: 27
-    num data sources: 2
+    stats for all data:
+      num sgRNA: 157,808
+      num genes: 18,182
+      num cell lines: 984
+      num lineages: 27
+      num data sources: 2
 
 ```python
-
-```
-
-```python
-
+broad_achilles_data = achilles_data.query("screen == 'broad'")
 ```
 
 ```python
+print("stats for broad data:")
 
+for col, lbl in {
+    "sgrna": "sgRNA",
+    "hugo_symbol": "genes",
+    "depmap_id": "cell lines",
+    "lineage": "lineages",
+}.items():
+    count = len(broad_achilles_data[col].unique().compute())
+    print(f"  num {lbl}: {count:,}")
+```
+
+    stats for broad data:
+      num sgRNA: 71,062
+      num genes: 18,119
+      num cell lines: 853
+      num lineages: 27
+
+```python
+gene_sgrna_map = (
+    broad_achilles_data[["hugo_symbol", "sgrna"]].drop_duplicates().compute()
+)
 ```
 
 ```python
-
+gene_sgrna_map.groupby("hugo_symbol").count().reset_index(drop=False).describe()
 ```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>sgrna</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>count</th>
+      <td>18119.000000</td>
+    </tr>
+    <tr>
+      <th>mean</th>
+      <td>3.921960</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>0.384721</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>1.000000</td>
+    </tr>
+    <tr>
+      <th>25%</th>
+      <td>4.000000</td>
+    </tr>
+    <tr>
+      <th>50%</th>
+      <td>4.000000</td>
+    </tr>
+    <tr>
+      <th>75%</th>
+      <td>4.000000</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>11.000000</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+sampled_dataset = broad_achilles_data.sample(frac=0.001).compute()
+```
+
+```python
+sampled_dataset.shape
+```
+
+    (60620, 22)
+
+```python
+(
+    gg.ggplot(sampled_dataset.sample(n=1000), gg.aes(x="lfc"))
+    + gg.geom_density(
+        size=1.2,
+        alpha=0.2,
+        fill=SeabornColor.BLUE,
+        color=SeabornColor.BLUE,
+    )
+    + gg.scale_x_continuous(expand=(0, 0))
+    + gg.scale_y_continuous(expand=(0, 0, 0.02, 0))
+    + gg.theme(figure_size=(4, 3))
+    + gg.labs(x="log-fold change", y="density")
+)
+```
+
+![png](001_001_basic-data-statistics-and-plots_files/001_001_basic-data-statistics-and-plots_18_0.png)
+
+    <ggplot: (8731168961003)>
 
 ---
 
@@ -296,14 +404,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 10.60 minutes
+    execution time: 27.66 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-08-20
+    Last updated: 2021-08-23
 
     Python implementation: CPython
     Python version       : 3.9.6
@@ -317,13 +425,13 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-e-16-237.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-230.o2.rc.hms.harvard.edu
 
     Git branch: fix-theano-lock
 
-    dask      : 2021.8.0
-    plotnine  : 0.8.0
-    pandas    : 1.3.2
-    matplotlib: 3.4.3
-    seaborn   : 0.11.2
     numpy     : 1.21.2
+    dask      : 2021.8.0
+    pandas    : 1.3.2
+    seaborn   : 0.11.2
+    matplotlib: 3.4.3
+    plotnine  : 0.8.0
