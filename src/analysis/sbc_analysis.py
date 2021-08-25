@@ -82,6 +82,21 @@ class SBCAnalysis:
         """
         return [p for p in self.root_dir.iterdir() if self.pattern in p.name]
 
+    def random_simulation_directories(self, n: int = 5) -> list[Path]:
+        """Get a random sample of the directories of all of the simulation results.
+
+        Args:
+            n (list[int], optional): Number of random samples. Must be less than or
+              equal to the number of directories available. If greater, all directories
+              will be returned. Defaults to 5.
+
+        Returns:
+            list[Path]: List of `n` random SBC result directories.
+        """
+        all_dirs = self.get_simulation_directories()
+        r_dirs = np.random.choice(all_dirs, size=min([n, len(all_dirs)]), replace=False)
+        return r_dirs
+
     def get_simulation_file_managers(self) -> list[sbc.SBCFileManager]:
         """Get the file managers for each simulation.
 
@@ -215,7 +230,10 @@ class SBCAnalysis:
         return self.accuracy_test_results
 
     def run_uniformity_test(
-        self, k_draws: int = SBC_UNIFORMITY_THINNING_DRAWS, multithreaded: bool = True
+        self,
+        k_draws: int = SBC_UNIFORMITY_THINNING_DRAWS,
+        multithreaded: bool = True,
+        max_workers: Optional[int] = None,
     ) -> pd.DataFrame:
         """Perform the SBC uniformity analysis.
 
@@ -224,6 +242,7 @@ class SBCAnalysis:
               to. Defaults to 100.
             multithreaded (bool, optional): Should the data processing use multiple
               threads? Defaults to True.
+            max_workers (Optional[int], optional): Number of threads. Defaults to None.
 
         Returns:
             pd.DataFrame: A data frame of the rank statistic of each variable in each
@@ -238,8 +257,9 @@ class SBCAnalysis:
             )
 
         if multithreaded:
-            with ThreadPoolExecutor() as executor:
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 results = executor.map(_calc_rank_stat, sbc_file_managers)
+                # print(f"number of workers: {threading.active_count()}")
             self.uniformity_test_results = pd.concat(list(results))
         else:
             self.uniformity_test_results = pd.concat(
@@ -265,6 +285,7 @@ class SBCAnalysis:
             Defaults to 100.
         """
         if rank_stats is None:
+            print("rank_stats was None")
             if self.uniformity_test_results is None:
                 raise src.exceptions.RequiredArgumentError(
                     "Parameter `rank_stats` must be passed because "

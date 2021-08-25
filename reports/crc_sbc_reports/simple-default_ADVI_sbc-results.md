@@ -66,16 +66,16 @@ FIT_METHOD_STR = ""
 ```python
 # Parameters
 MODEL_NAME = "simple-default"
-SBC_RESULTS_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/simple-default_MCMC"
+SBC_RESULTS_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/simple-default_ADVI"
 SBC_COLLATED_RESULTS = (
-    "cache/sbc-cache/simple-default_MCMC_collated-posterior-summaries.pkl"
+    "cache/sbc-cache/simple-default_ADVI_collated-posterior-summaries.pkl"
 )
 SBC_UNIFORMITY_RESULTS = (
-    "cache/sbc-cache/simple-default_MCMC_uniformity-test-results.pkl"
+    "cache/sbc-cache/simple-default_ADVI_uniformity-test-results.pkl"
 )
 NUM_SIMULATIONS = 1000
 CONFIG_PATH = "models/model-configs.yaml"
-FIT_METHOD_STR = "MCMC"
+FIT_METHOD_STR = "ADVI"
 
 ```
 
@@ -170,80 +170,80 @@ simulation_posteriors_df.head()
     <tr>
       <th>a</th>
       <th>a</th>
-      <td>8.734</td>
-      <td>0.047</td>
-      <td>8.660</td>
-      <td>8.806</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>3189.0</td>
-      <td>2814.0</td>
-      <td>1.0</td>
-      <td>8.747274</td>
-      <td>sim_id_0000</td>
-      <td>True</td>
-    </tr>
-    <tr>
-      <th>σ</th>
-      <th>σ</th>
-      <td>1.443</td>
-      <td>0.032</td>
-      <td>1.390</td>
-      <td>1.491</td>
-      <td>0.001</td>
-      <td>0.000</td>
-      <td>3523.0</td>
-      <td>2553.0</td>
-      <td>1.0</td>
-      <td>1.430365</td>
-      <td>sim_id_0000</td>
-      <td>True</td>
-    </tr>
-    <tr>
-      <th>a</th>
-      <th>a</th>
-      <td>10.857</td>
-      <td>0.158</td>
-      <td>10.590</td>
-      <td>11.088</td>
+      <td>2.344</td>
+      <td>0.147</td>
+      <td>2.131</td>
+      <td>2.581</td>
+      <td>0.005</td>
       <td>0.003</td>
-      <td>0.002</td>
-      <td>3390.0</td>
-      <td>2904.0</td>
-      <td>1.0</td>
-      <td>10.824675</td>
+      <td>973.0</td>
+      <td>880.0</td>
+      <td>NaN</td>
+      <td>2.364929</td>
+      <td>sim_id_0000</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>σ</th>
+      <th>σ</th>
+      <td>3.513</td>
+      <td>0.144</td>
+      <td>3.293</td>
+      <td>3.744</td>
+      <td>0.005</td>
+      <td>0.003</td>
+      <td>972.0</td>
+      <td>1026.0</td>
+      <td>NaN</td>
+      <td>3.407129</td>
+      <td>sim_id_0000</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>a</th>
+      <th>a</th>
+      <td>8.731</td>
+      <td>0.133</td>
+      <td>8.529</td>
+      <td>8.945</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>972.0</td>
+      <td>1026.0</td>
+      <td>NaN</td>
+      <td>8.820262</td>
       <td>sim_id_0001</td>
       <td>True</td>
     </tr>
     <tr>
       <th>σ</th>
       <th>σ</th>
-      <td>4.890</td>
-      <td>0.113</td>
-      <td>4.712</td>
-      <td>5.074</td>
+      <td>1.977</td>
+      <td>0.051</td>
+      <td>1.904</td>
+      <td>2.060</td>
       <td>0.002</td>
       <td>0.001</td>
-      <td>3202.0</td>
-      <td>2584.0</td>
-      <td>1.0</td>
-      <td>4.953259</td>
+      <td>973.0</td>
+      <td>880.0</td>
+      <td>NaN</td>
+      <td>2.000786</td>
       <td>sim_id_0001</td>
       <td>True</td>
     </tr>
     <tr>
       <th>a</th>
       <th>a</th>
-      <td>8.333</td>
-      <td>0.140</td>
-      <td>8.116</td>
-      <td>8.560</td>
-      <td>0.002</td>
-      <td>0.002</td>
-      <td>3360.0</td>
-      <td>2713.0</td>
-      <td>1.0</td>
-      <td>8.340341</td>
+      <td>2.216</td>
+      <td>0.172</td>
+      <td>1.954</td>
+      <td>2.493</td>
+      <td>0.006</td>
+      <td>0.004</td>
+      <td>972.0</td>
+      <td>1026.0</td>
+      <td>NaN</td>
+      <td>2.423401</td>
       <td>sim_id_0002</td>
       <td>True</td>
     </tr>
@@ -287,31 +287,31 @@ sbc_uniformity_test.head()
     <tr>
       <th>0</th>
       <td>a</td>
-      <td>2</td>
+      <td>23</td>
       <td>a</td>
     </tr>
     <tr>
       <th>1</th>
       <td>σ</td>
-      <td>22</td>
+      <td>34</td>
       <td>σ</td>
     </tr>
     <tr>
       <th>0</th>
       <td>a</td>
-      <td>77</td>
+      <td>73</td>
       <td>a</td>
     </tr>
     <tr>
       <th>1</th>
       <td>σ</td>
-      <td>21</td>
+      <td>33</td>
       <td>σ</td>
     </tr>
     <tr>
       <th>0</th>
       <td>a</td>
-      <td>27</td>
+      <td>39</td>
       <td>a</td>
     </tr>
   </tbody>
@@ -369,6 +369,8 @@ if FIT_METHOD is ModelFitMethod.ADVI:
     plt.show()
 ```
 
+![png](simple-default_ADVI_sbc-results_files/simple-default_ADVI_sbc-results_20_0.png)
+
 ### MCMC diagnostics
 
 ```python
@@ -386,66 +388,6 @@ if FIT_METHOD is ModelFitMethod.MCMC:
         else:
             raise CacheDoesNotExistError("Missing SBC results.")
 ```
-
-    {'bfmi_mean': 1.2489559122765277,
-     'bfmi_median': 1.2484674622732936,
-     'bfmi_std_dev': 0.07992446552965049,
-     'pct_divegences_mean': 0.0,
-     'pct_divegences_median': 0.0,
-     'pct_divegences_std_dev': 0.0,
-     'step_size_mean': 1.2610116497118526,
-     'step_size_median': 1.2441369890376048,
-     'step_size_std_dev': 0.19680953282381244}
-    ============================================================
-    sbc-perm442
-    ------------------------------
-    sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 0, 0, 0, 0
-    percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 1.312, 1.151, 1.166, 1.273
-    avg. step size: 1.247, 1.478, 1.222, 1.098
-
-![png](simple-default_MCMC_sbc-results_files/simple-default_MCMC_sbc-results_22_1.png)
-
-    sbc-perm414
-    ------------------------------
-    sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 0, 0, 0, 0
-    percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 1.182, 1.189, 1.321, 1.268
-    avg. step size: 1.109, 1.238, 0.933, 1.331
-
-![png](simple-default_MCMC_sbc-results_files/simple-default_MCMC_sbc-results_22_3.png)
-
-    sbc-perm761
-    ------------------------------
-    sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 0, 0, 0, 0
-    percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 1.263, 1.192, 1.191, 1.203
-    avg. step size: 1.172, 1.282, 0.995, 0.901
-
-![png](simple-default_MCMC_sbc-results_files/simple-default_MCMC_sbc-results_22_5.png)
-
-    sbc-perm782
-    ------------------------------
-    sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 0, 0, 0, 0
-    percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 1.149, 1.376, 1.3, 1.246
-    avg. step size: 1.379, 1.264, 1.405, 1.356
-
-![png](simple-default_MCMC_sbc-results_files/simple-default_MCMC_sbc-results_22_7.png)
-
-    sbc-perm451
-    ------------------------------
-    sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 0, 0, 0, 0
-    percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 1.233, 1.211, 1.254, 1.222
-    avg. step size: 1.15, 1.002, 1.201, 1.302
-
-![png](simple-default_MCMC_sbc-results_files/simple-default_MCMC_sbc-results_22_9.png)
 
 ### Estimate accuracy
 
@@ -470,9 +412,9 @@ accuracy_per_parameter["parameter_name"] = pd.Categorical(
 )
 ```
 
-![png](simple-default_MCMC_sbc-results_files/simple-default_MCMC_sbc-results_24_0.png)
+![png](simple-default_ADVI_sbc-results_files/simple-default_ADVI_sbc-results_24_0.png)
 
-    <ggplot: (2990739096881)>
+    <ggplot: (2952269975793)>
 
 ```python
 hdi_low, hdi_high = pmanal.get_hdi_colnames_from_az_summary(simulation_posteriors_df)
@@ -518,9 +460,9 @@ plot_height = (1 + n_params // 4) * 4
 )
 ```
 
-![png](simple-default_MCMC_sbc-results_files/simple-default_MCMC_sbc-results_25_0.png)
+![png](simple-default_ADVI_sbc-results_files/simple-default_ADVI_sbc-results_25_0.png)
 
-    <ggplot: (2990738664388)>
+    <ggplot: (2952269891850)>
 
 ### SBC Uniformity Test
 
@@ -546,9 +488,9 @@ for v in var_names_to_plot:
     plt.show()
 ```
 
-![png](simple-default_MCMC_sbc-results_files/simple-default_MCMC_sbc-results_28_0.png)
+![png](simple-default_ADVI_sbc-results_files/simple-default_ADVI_sbc-results_28_0.png)
 
-![png](simple-default_MCMC_sbc-results_files/simple-default_MCMC_sbc-results_28_1.png)
+![png](simple-default_ADVI_sbc-results_files/simple-default_ADVI_sbc-results_28_1.png)
 
 ---
 
@@ -557,7 +499,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 7.33 minutes
+    execution time: 0.09 minutes
 
 ```python
 %load_ext watermark
@@ -575,16 +517,16 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-a-16-160.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-238.o2.rc.hms.harvard.edu
 
     Git branch: fix-theano-lock
 
-    matplotlib: 3.4.3
     numpy     : 1.21.2
-    janitor   : 0.21.0
-    plotnine  : 0.8.0
     pandas    : 1.3.2
+    janitor   : 0.21.0
+    matplotlib: 3.4.3
+    plotnine  : 0.8.0
     logging   : 0.5.1.2

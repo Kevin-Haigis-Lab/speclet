@@ -13,7 +13,7 @@ from src.pipelines import snakemake_parsing_helpers as smk_help
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
 # SBC parameters.
-NUM_SIMULATIONS = 2  # 1000
+NUM_SIMULATIONS = 1000
 MOCK_DATA_SIZE = MockDataSize.MEDIUM
 
 # Directory and file paths

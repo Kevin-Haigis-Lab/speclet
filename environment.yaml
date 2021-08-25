@@ -13,6 +13,7 @@ dependencies:
   - black
   - colorama=0.4.*
   - coverage=5.5
+  - dask=2021.8.*
   - factory_boy=3.2.*
   - faker=8.11.*
   - flake8=3.9.*

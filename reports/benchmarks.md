@@ -280,15 +280,15 @@ benchmark_df.groupby(["pipeline", "rule"]).mean().round(2)
     <tr>
       <th rowspan="4" valign="top">012_010_simulation-based-calibration-snakemake</th>
       <th>collate_sbc</th>
-      <td>349.97</td>
-      <td>449.04</td>
-      <td>2958.43</td>
-      <td>447.12</td>
-      <td>447.18</td>
-      <td>8047.58</td>
-      <td>0.26</td>
-      <td>42.32</td>
-      <td>147.87</td>
+      <td>508.97</td>
+      <td>413.59</td>
+      <td>2929.06</td>
+      <td>411.41</td>
+      <td>411.49</td>
+      <td>20453.95</td>
+      <td>0.41</td>
+      <td>33.13</td>
+      <td>139.28</td>
     </tr>
     <tr>
       <th>generate_mockdata</th>
@@ -304,27 +304,27 @@ benchmark_df.groupby(["pipeline", "rule"]).mean().round(2)
     </tr>
     <tr>
       <th>run_sbc</th>
-      <td>465.78</td>
-      <td>5139.37</td>
-      <td>7164.39</td>
-      <td>1786.72</td>
-      <td>1792.50</td>
-      <td>137.30</td>
-      <td>73.46</td>
-      <td>97.46</td>
-      <td>70.20</td>
+      <td>423.27</td>
+      <td>3535.30</td>
+      <td>5129.40</td>
+      <td>1290.09</td>
+      <td>1296.86</td>
+      <td>97.73</td>
+      <td>75.48</td>
+      <td>68.96</td>
+      <td>53.50</td>
     </tr>
     <tr>
       <th>sbc_uniformity_test</th>
-      <td>426.45</td>
-      <td>3051.67</td>
-      <td>4950.30</td>
-      <td>3049.61</td>
-      <td>3049.65</td>
-      <td>15221.14</td>
-      <td>0.15</td>
-      <td>46.53</td>
-      <td>198.18</td>
+      <td>501.07</td>
+      <td>2309.26</td>
+      <td>4258.80</td>
+      <td>2306.99</td>
+      <td>2307.04</td>
+      <td>26340.55</td>
+      <td>0.25</td>
+      <td>37.61</td>
+      <td>174.91</td>
     </tr>
   </tbody>
 </table>
@@ -429,7 +429,7 @@ sns.catplot(
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-08-19
+    Last updated: 2021-08-25
 
     Python implementation: CPython
     Python version       : 3.9.6
@@ -448,6 +448,6 @@ sns.catplot(
     Git branch: fix-theano-lock
 
     plotnine: 0.8.0
-    janitor : 0.21.0
     pandas  : 1.3.2
     seaborn : 0.11.2
+    janitor : 0.21.0

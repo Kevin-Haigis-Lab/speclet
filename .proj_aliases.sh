@@ -10,6 +10,8 @@ alias speclet_jl="jupyter lab --port=7012 --browser='none'"
 alias speclet_sshlab="ssh -N -L 7012:127.0.0.1:7012"
 
 alias speclet_snakemake_env="conda activate speclet_snakemake && bash .proj_aliases.sh"
+alias smk_fit="snakemake --snakefile pipelines/010_010_run-crc-sampling-snakemake.smk"
+alias smk_sbc="snakemake --snakefile pipelines/012_010_simulation-based-calibration-snakemake.smk"
 
 # Misc.
 alias tmd="jupyter nbconvert --to markdown"
