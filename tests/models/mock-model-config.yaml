@@ -31,7 +31,6 @@
     sbc:
       ADVI:
         n_iterations: 100
-        post_pred_samples: 250
       MCMC:
         target_accept: 0.85
         prior_pred_samples: 50
