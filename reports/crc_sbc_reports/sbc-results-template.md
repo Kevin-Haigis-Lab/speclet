@@ -15,6 +15,7 @@ import plotnine as gg
 
 from src.analysis import pymc3_analysis as pmanal
 from src.analysis import sbc_analysis as sbcanal
+from src.exceptions import CacheDoesNotExistError
 from src.loggers import set_console_handler_level
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.modeling import simulation_based_calibration_helpers as sbc
@@ -124,27 +125,23 @@ sbc_analyzer = sbcanal.SBCAnalysis(
 ```python
 if FIT_METHOD is ModelFitMethod.ADVI:
     advi_histories: list[np.ndarray] = []
-
-    for dir in sbc_results_dir.iterdir():
-        if not dir.is_dir():
-            continue
-
+    example_result_dirs = sbc_analyzer.random_simulation_directories(5)
+    for dir in example_result_dirs:
         cache_manager = Pymc3ModelCacheManager(name=MODEL_NAME, root_cache_dir=dir)
         if cache_manager.advi_cache_exists():
             _, advi_approx = cache_manager.get_advi_cache()
             advi_histories.append(advi_approx.hist)
-    n_sims_advi_hist = min(NUM_SIMULATIONS, 5)
-    sample_hist_idxs = np.random.choice(
-        list(range(len(advi_histories))), size=n_sims_advi_hist, replace=False
-    )
+        else:
+            raise CacheDoesNotExistError("Missing SBC results.")
 
-    def make_hist_df(sim_idx: int, hist_list: list[np.ndarray]) -> pd.DataFrame:
-        df = pd.DataFrame({"sim_idx": sim_idx, "loss": hist_list[sim_idx].flatten()})
+    def make_hist_df(advi_history: np.ndarray, sim_idx: int) -> pd.DataFrame:
+        df = pd.DataFrame({"sim_idx": sim_idx, "loss": advi_history.flatten()})
         df["step"] = np.arange(df.shape[0])
         return df
 
+    sample_advi_indices = [d.name.replace("sbc-perm", "") for d in example_result_dirs]
     sampled_advi_histories = pd.concat(
-        [make_hist_df(i, advi_histories) for i in sample_hist_idxs]
+        [make_hist_df(ah, i) for ah, i in zip(advi_histories, sample_advi_indices)]
     ).reset_index(drop=True)
 
     (
@@ -165,18 +162,11 @@ if FIT_METHOD is ModelFitMethod.ADVI:
 ### MCMC diagnostics
 
 ```python
-class IncompleteCachedResultsWarning(UserWarning):
-    pass
-
-
 if FIT_METHOD is ModelFitMethod.MCMC:
     pprint(sbc_analyzer.mcmc_diagnostics())
     print("=" * 60)
 
-    all_sbc_perm_dirs = list(sbc_results_dir.iterdir())
-    for perm_dir in np.random.choice(
-        all_sbc_perm_dirs, size=min([5, len(all_sbc_perm_dirs)]), replace=False
-    ):
+    for perm_dir in sbc_analyzer.random_simulation_directories(5):
         print(perm_dir.name)
         print("-" * 30)
         sbc_fm = sbc.SBCFileManager(perm_dir)
@@ -184,10 +174,7 @@ if FIT_METHOD is ModelFitMethod.MCMC:
             sbc_res = sbc_fm.get_sbc_results()
             _ = pmanal.describe_mcmc(sbc_res.inference_obj)
         else:
-            warnings.warn(
-                "Cannot find all components of the SBC results.",
-                IncompleteCachedResultsWarning,
-            )
+            raise CacheDoesNotExistError("Missing SBC results.")
 ```
 
 ### Estimate accuracy
@@ -225,11 +212,12 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+plot_df = filter_uninsteresting_parameters(simulation_posteriors_df)
+n_params = plot_df.parameter_name.nunique()
+plot_height = (1 + n_params // 4) * 4
+
 (
-    gg.ggplot(
-        filter_uninsteresting_parameters(simulation_posteriors_df),
-        gg.aes(x="true_value", y="mean", color="within_hdi"),
-    )
+    gg.ggplot(plot_df, gg.aes(x="true_value", y="mean", color="within_hdi"))
     + gg.facet_wrap("~ parameter_name", ncol=3, scales="free")
     + gg.geom_linerange(gg.aes(ymin=hdi_low, ymax=hdi_high), alpha=0.2, size=0.2)
     + gg.geom_point(size=0.3, alpha=0.3)
@@ -244,7 +232,7 @@ def filter_uninsteresting_parameters(df: pd.DataFrame) -> pd.DataFrame:
         ),
     )
     + gg.theme(
-        figure_size=(10, 20),
+        figure_size=(10, plot_height),
         strip_background=gg.element_blank(),
         strip_text=gg.element_text(face="bold"),
         panel_spacing=0.25,
@@ -273,7 +261,9 @@ var_names_to_plot = (
 
 ```python
 for v in var_names_to_plot:
-    ax = sbc_analyzer.plot_uniformity(sbc_uniformity_test.query(f"parameter == '{v}'"))
+    ax = sbc_analyzer.plot_uniformity(
+        sbc_uniformity_test.query(f"parameter == '{v}'").reset_index(drop=True)
+    )
     ax.set_title(v)
     plt.show()
 ```

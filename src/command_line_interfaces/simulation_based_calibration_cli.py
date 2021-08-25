@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Optional
 
 import pandas as pd
+import theano
 import typer
 import xarray
 
@@ -56,6 +57,12 @@ def make_mock_data(
     mock_data.to_csv(save_path)
 
 
+def _check_theano_config() -> None:
+    logger.info(f"theano.config.compile__wait: {theano.config.compile__wait}")
+    logger.info(f"theano.config.compile__timeout: {theano.config.compile__timeout}")
+    return None
+
+
 @app.command()
 def run_sbc(
     name: str,
@@ -87,6 +94,7 @@ def run_sbc(
     Returns:
         None: None
     """
+    _check_theano_config()
     sp_model = configuration.get_config_and_instantiate_model(
         config_path=config_path, name=name, root_cache_dir=cache_dir
     )

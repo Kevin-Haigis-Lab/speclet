@@ -13,6 +13,7 @@ dependencies:
   - black
   - colorama=0.4.*
   - coverage=5.5
+  - dask=2021.8.*
   - factory_boy=3.2.*
   - faker=8.11.*
   - flake8=3.9.*
@@ -27,6 +28,7 @@ dependencies:
   - jupyterlab_code_formatter
   - matplotlib=3.4.*
   - mkl=2021.3.*
+  - mkl-service=2.4.*
   - mypy=0.910
   - nbconvert=6.1.*
   - nbdime
