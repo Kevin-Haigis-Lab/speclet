@@ -4,7 +4,8 @@
 
 [![python](https://img.shields.io/badge/Python-3.9-3776AB.svg?style=flat&logo=python)](https://www.python.org)
 [![jupyerlab](https://img.shields.io/badge/Jupyter-Lab-F37626.svg?style=flat&logo=jupyter)](https://jupyter.org) <br>
-[![project-build](https://github.com/Kevin-Haigis-Lab/speclet/actions/workflows/project-build.yml/badge.svg)](https://github.com/Kevin-Haigis-Lab/speclet/actions/workflows/full-test.yml)
+[![project-build](https://github.com/Kevin-Haigis-Lab/speclet/actions/workflows/project-build.yaml/badge.svg)](https://github.com/Kevin-Haigis-Lab/speclet/actions/workflows/project-build.yaml)
+[![pytest](https://github.com/Kevin-Haigis-Lab/speclet/actions/workflows/CI.yaml/badge.svg)](https://github.com/Kevin-Haigis-Lab/speclet/actions/workflows/CI.yaml)
 [![Tested with Hypothesis](https://img.shields.io/badge/hypothesis-tested-brightgreen.svg)](https://hypothesis.readthedocs.io/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Code style: snakefmt](https://img.shields.io/badge/code%20style-snakefmt-000000.svg)](https://github.com/snakemake/snakefmt)
