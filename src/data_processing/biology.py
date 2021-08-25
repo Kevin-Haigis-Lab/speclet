@@ -4,7 +4,7 @@
 import janitor  # noqa: F401
 import pandas as pd
 
-_chr_cat: list[str] = [str(i) for i in range(1, 22)] + ["X", "Y"]
+_chr_cat: list[str] = [str(i) for i in range(1, 22)] + ["X", "Y", "M"]
 
 
 def make_chromosome_categorical(
@@ -55,7 +55,7 @@ def extract_chromosome_location_to_df(
     split_info_dict["chr"] = pd.Series(
         [info[0].replace("chr", "") for info in split_info], dtype=str
     )
-    split_info_dict["pos"] = pd.Series([info[1] for info in split_info], dtype=int)
+    split_info_dict["pos"] = pd.Series([info[1] for info in split_info]).astype(int)
 
     strand_dict: dict[str, int] = {"-": -1, "+": 1}
     split_info_dict["strand"] = pd.Series(
