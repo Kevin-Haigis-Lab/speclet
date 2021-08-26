@@ -135,8 +135,8 @@ def generate_mock_cell_line_information(
     )
 
     screens = ["broad"]
-    if n_screens == 2:
-        screens += ["sanger"]
+    if n_screens > 1:
+        screens.append("sanger")
     if n_screens > 2:
         screens += prefixed_count("screen", n=n_screens - 2)
 
