@@ -44,6 +44,9 @@ class ParsedPipelineInformation(BaseModel):
     model_names: List[str]
     fit_methods: List[str]
 
+    def __len__(self) -&gt; int:
+        return len(self.models)
+
 
 class _PipelineIntermediateInformation(BaseModel):
     &#34;&#34;&#34;An intermediate step in the parsing process.&#34;&#34;&#34;
@@ -234,7 +237,10 @@ def get_models_names_fit_methods(
 
     models: List[str]
     model_names: List[str]
-    fit_methods: List[str]</code></pre>
+    fit_methods: List[str]
+
+    def __len__(self) -&gt; int:
+        return len(self.models)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">

@@ -163,8 +163,8 @@ def generate_mock_cell_line_information(
     )
 
     screens = [&#34;broad&#34;]
-    if n_screens == 2:
-        screens += [&#34;sanger&#34;]
+    if n_screens &gt; 1:
+        screens.append(&#34;sanger&#34;)
     if n_screens &gt; 2:
         screens += prefixed_count(&#34;screen&#34;, n=n_screens - 2)
 
@@ -896,8 +896,8 @@ randomly assigned or applied in a pattern? Defaults to False (patterned).</dd>
     )
 
     screens = [&#34;broad&#34;]
-    if n_screens == 2:
-        screens += [&#34;sanger&#34;]
+    if n_screens &gt; 1:
+        screens.append(&#34;sanger&#34;)
     if n_screens &gt; 2:
         screens += prefixed_count(&#34;screen&#34;, n=n_screens - 2)
 

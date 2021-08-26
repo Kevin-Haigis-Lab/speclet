@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
 <title>src.managers.model_fitting_pipeline_resource_manager API documentation</title>
-<meta name="description" content="Utilities for snakemake workflow: 010_010_run-crc-sampling-snakemake." />
+<meta name="description" content="Manage resources for the model fitting pipeline." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -21,12 +21,12 @@
 <h1 class="title">Module <code>src.managers.model_fitting_pipeline_resource_manager</code></h1>
 </header>
 <section id="section-intro">
-<p>Utilities for snakemake workflow: 010_010_run-crc-sampling-snakemake.</p>
+<p>Manage resources for the model fitting pipeline.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Utilities for snakemake workflow: 010_010_run-crc-sampling-snakemake.&#34;&#34;&#34;
+<pre><code class="python">&#34;&#34;&#34;Manage resources for the model fitting pipeline.&#34;&#34;&#34;
 
 from datetime import timedelta as td
 from pathlib import Path
@@ -53,6 +53,10 @@ MemoryLookupDict = ResourceLookupDict[int]
 TimeLookupDict = ResourceLookupDict[td]
 
 fitting_pipeline_memory_lookup: MemoryLookupDict = {
+    ModelOption.SPECLET_SIMPLE: {
+        True: {ModelFitMethod.ADVI: 4, ModelFitMethod.MCMC: 4},
+        False: {ModelFitMethod.ADVI: 8, ModelFitMethod.MCMC: 8},
+    },
     ModelOption.SPECLET_TEST_MODEL: {
         True: {ModelFitMethod.ADVI: 8, ModelFitMethod.MCMC: 8},
         False: {ModelFitMethod.ADVI: 8, ModelFitMethod.MCMC: 8},
@@ -91,6 +95,13 @@ fitting_pipeline_memory_lookup: MemoryLookupDict = {
 # Time required for each configuration.
 #   key: [model][debug][fit_method]
 fitting_pipeline_time_lookup: TimeLookupDict = {
+    ModelOption.SPECLET_SIMPLE: {
+        True: {ModelFitMethod.ADVI: td(minutes=5), ModelFitMethod.MCMC: td(minutes=5)},
+        False: {
+            ModelFitMethod.ADVI: td(minutes=10),
+            ModelFitMethod.MCMC: td(minutes=10),
+        },
+    },
     ModelOption.SPECLET_TEST_MODEL: {
         True: {ModelFitMethod.ADVI: td(minutes=5), ModelFitMethod.MCMC: td(minutes=5)},
         False: {

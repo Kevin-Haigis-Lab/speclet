@@ -1,4 +1,4 @@
-"""Utilities for snakemake workflow: 010_010_run-crc-sampling-snakemake."""
+"""Manage resources for the model fitting pipeline."""
 
 from datetime import timedelta as td
 from pathlib import Path

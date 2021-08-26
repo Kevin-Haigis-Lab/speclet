@@ -68,7 +68,7 @@ class ModelConfig(BaseModel):
     model: ModelOption
     config: Optional[Dict[str, Union[ModelFitMethod, BasicTypes]]]
     fit_methods: List[ModelFitMethod]
-    pipelines: List[SpecletPipeline]
+    pipelines: List[SpecletPipeline] = []
     debug: bool
     pipeline_sampling_parameters: Optional[PipelineSamplingParameters]
 
@@ -532,7 +532,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
 </dd>
 <dt id="src.io.model_config.ModelConfig"><code class="flex name class">
 <span>class <span class="ident">ModelConfig</span></span>
-<span>(</span><span>*, name: str, description: str, model: <a title="src.project_enums.ModelOption" href="../project_enums.html#src.project_enums.ModelOption">ModelOption</a>, config: Dict[str, Union[src.project_enums.ModelFitMethod, float, str, int, bool]] = None, fit_methods: List[<a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>], pipelines: List[<a title="src.project_enums.SpecletPipeline" href="../project_enums.html#src.project_enums.SpecletPipeline">SpecletPipeline</a>], debug: bool, pipeline_sampling_parameters: Dict[src.project_enums.SpecletPipeline, Dict[src.project_enums.ModelFitMethod, Dict[str, Union[float, str, int, bool]]]] = None)</span>
+<span>(</span><span>*, name: str, description: str, model: <a title="src.project_enums.ModelOption" href="../project_enums.html#src.project_enums.ModelOption">ModelOption</a>, config: Dict[str, Union[src.project_enums.ModelFitMethod, float, str, int, bool]] = None, fit_methods: List[<a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>], pipelines: List[<a title="src.project_enums.SpecletPipeline" href="../project_enums.html#src.project_enums.SpecletPipeline">SpecletPipeline</a>] = [], debug: bool, pipeline_sampling_parameters: Dict[src.project_enums.SpecletPipeline, Dict[src.project_enums.ModelFitMethod, Dict[str, Union[float, str, int, bool]]]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Model configuration format.</p>
@@ -550,7 +550,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
     model: ModelOption
     config: Optional[Dict[str, Union[ModelFitMethod, BasicTypes]]]
     fit_methods: List[ModelFitMethod]
-    pipelines: List[SpecletPipeline]
+    pipelines: List[SpecletPipeline] = []
     debug: bool
     pipeline_sampling_parameters: Optional[PipelineSamplingParameters]</code></pre>
 </details>

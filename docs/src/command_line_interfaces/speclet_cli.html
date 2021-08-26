@@ -48,6 +48,8 @@ app = typer.Typer()
 
 set_console_handler_level(logging.ERROR)
 
+#### ---- Make model graph images ---- ####
+
 
 @app.command()
 def model_graphs(
@@ -93,6 +95,79 @@ def model_graphs(
     return
 
 
+#### ---- Count number of lines of code ---- ####
+
+
+def _count_lines_in_file(f: Path) -&gt; int:
+    n: int = 0
+    try:
+        with open(f, &#34;r&#34;) as file:
+            for line in file:
+                if line.strip():
+                    n += 1
+    except UnicodeDecodeError:
+        typer.secho(
+            f&#34;Warning: unable to read file {f.as_posix()}&#34;,
+            fg=typer.colors.RED,
+            err=True,
+        )
+    return n
+
+
+def _recursively_count_lines_in_dir(
+    dir: Path, file_types: Optional[list[str]] = None, ignore_dirs: list[str] = []
+) -&gt; int:
+    n_lines = 0
+    for p in dir.iterdir():
+        if p.name in ignore_dirs:
+            continue
+        if p.is_dir():
+            n_lines += _recursively_count_lines_in_dir(
+                p, file_types=file_types, ignore_dirs=ignore_dirs
+            )
+        elif p.is_file():
+            if (file_types is None) or (p.suffix in file_types):
+                n_lines += _count_lines_in_file(p)
+    return n_lines
+
+
+@app.command()
+def lines_of_code(
+    file_types: list[str] = [&#34;.py&#34;, &#34;.smk&#34;, &#34;.sh&#34;, &#34;.zsh&#34;, &#34;.R&#34;, &#34;.r&#34;],
+    dirs: list[Path] = [
+        Path(&#34;src&#34;),
+        Path(&#34;pipelines&#34;),
+        Path(&#34;tests&#34;),
+        Path(&#34;munge&#34;),
+        Path(&#34;data&#34;),
+    ],
+    ignore_dirs: list[str] = [&#34;__pycache__&#34;, &#34;.ipynb_checkpoints&#34;, &#34;.DS_Store&#34;],
+) -&gt; None:
+    &#34;&#34;&#34;Count the lines of code.
+
+    Args:
+        file_types (list[str], optional): File types to include. Defaults to list of
+          common file types for code.
+        dirs (list[Path], optional): Directories to search recursively.
+        ignore_dirs (list[str], optional): Names of subdirectories to ignore. Defaults
+          to some standard caching and checkpoint directories.
+    &#34;&#34;&#34;
+    line_counts: dict[Path, int] = {d: -1 for d in dirs}
+    for dir in dirs:
+        if not dir.exists() and dir.is_dir():
+            typer.secho(f&#34;Unable to analyze files in directory &#39;{dir}&#39;&#34;)
+            continue
+        line_counts[dir] = _recursively_count_lines_in_dir(
+            dir, file_types=file_types, ignore_dirs=ignore_dirs
+        )
+
+    typer.secho(&#34;Lines of code:&#34;, fg=typer.colors.BRIGHT_BLUE)
+    for dir, n_lines in line_counts.items():
+        typer.secho(
+            f&#34;  {dir.as_posix().ljust(10)} -  {n_lines:,}&#34;, fg=typer.colors.BLUE
+        )
+
+
 if __name__ == &#34;__main__&#34;:
     app()</code></pre>
 </details>
@@ -104,6 +179,63 @@ if __name__ == &#34;__main__&#34;:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="src.command_line_interfaces.speclet_cli.lines_of_code"><code class="name flex">
+<span>def <span class="ident">lines_of_code</span></span>(<span>file_types: list = ['.py', '.smk', '.sh', '.zsh', '.R', '.r'], dirs: list = [PosixPath('src'), PosixPath('pipelines'), PosixPath('tests'), PosixPath('munge'), PosixPath('data')], ignore_dirs: list = ['__pycache__', '.ipynb_checkpoints', '.DS_Store']) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Count the lines of code.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>file_types</code></strong> :&ensp;<code>list[str]</code>, optional</dt>
+<dd>File types to include. Defaults to list of
+common file types for code.</dd>
+<dt><strong><code>dirs</code></strong> :&ensp;<code>list[Path]</code>, optional</dt>
+<dd>Directories to search recursively.</dd>
+<dt><strong><code>ignore_dirs</code></strong> :&ensp;<code>list[str]</code>, optional</dt>
+<dd>Names of subdirectories to ignore. Defaults
+to some standard caching and checkpoint directories.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.command()
+def lines_of_code(
+    file_types: list[str] = [&#34;.py&#34;, &#34;.smk&#34;, &#34;.sh&#34;, &#34;.zsh&#34;, &#34;.R&#34;, &#34;.r&#34;],
+    dirs: list[Path] = [
+        Path(&#34;src&#34;),
+        Path(&#34;pipelines&#34;),
+        Path(&#34;tests&#34;),
+        Path(&#34;munge&#34;),
+        Path(&#34;data&#34;),
+    ],
+    ignore_dirs: list[str] = [&#34;__pycache__&#34;, &#34;.ipynb_checkpoints&#34;, &#34;.DS_Store&#34;],
+) -&gt; None:
+    &#34;&#34;&#34;Count the lines of code.
+
+    Args:
+        file_types (list[str], optional): File types to include. Defaults to list of
+          common file types for code.
+        dirs (list[Path], optional): Directories to search recursively.
+        ignore_dirs (list[str], optional): Names of subdirectories to ignore. Defaults
+          to some standard caching and checkpoint directories.
+    &#34;&#34;&#34;
+    line_counts: dict[Path, int] = {d: -1 for d in dirs}
+    for dir in dirs:
+        if not dir.exists() and dir.is_dir():
+            typer.secho(f&#34;Unable to analyze files in directory &#39;{dir}&#39;&#34;)
+            continue
+        line_counts[dir] = _recursively_count_lines_in_dir(
+            dir, file_types=file_types, ignore_dirs=ignore_dirs
+        )
+
+    typer.secho(&#34;Lines of code:&#34;, fg=typer.colors.BRIGHT_BLUE)
+    for dir, n_lines in line_counts.items():
+        typer.secho(
+            f&#34;  {dir.as_posix().ljust(10)} -  {n_lines:,}&#34;, fg=typer.colors.BLUE
+        )</code></pre>
+</details>
+</dd>
 <dt id="src.command_line_interfaces.speclet_cli.model_graphs"><code class="name flex">
 <span>def <span class="ident">model_graphs</span></span>(<span>output_dir: pathlib.Path = PosixPath('models/model-graph-images'), config_path: Optional[pathlib.Path] = None, skip_existing: bool = False) -> NoneType</span>
 </code></dt>
@@ -188,6 +320,7 @@ def model_graphs(
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="src.command_line_interfaces.speclet_cli.lines_of_code" href="#src.command_line_interfaces.speclet_cli.lines_of_code">lines_of_code</a></code></li>
 <li><code><a title="src.command_line_interfaces.speclet_cli.model_graphs" href="#src.command_line_interfaces.speclet_cli.model_graphs">model_graphs</a></code></li>
 </ul>
 </li>

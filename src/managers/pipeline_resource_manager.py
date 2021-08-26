@@ -1,4 +1,4 @@
-"""Define a protocol for pipeline resource managers."""
+"""Protocol for pipeline resource managers."""
 
 from datetime import timedelta as td
 from typing import Protocol

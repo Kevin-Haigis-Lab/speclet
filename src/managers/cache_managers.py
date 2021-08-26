@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-"""PyMC3 model cache manager."""
+"""Available cache managers for different data types."""
 
 import pickle
 import shutil

@@ -32,7 +32,7 @@
 import janitor  # noqa: F401
 import pandas as pd
 
-_chr_cat: list[str] = [str(i) for i in range(1, 22)] + [&#34;X&#34;, &#34;Y&#34;]
+_chr_cat: list[str] = [str(i) for i in range(1, 22)] + [&#34;X&#34;, &#34;Y&#34;, &#34;M&#34;]
 
 
 def make_chromosome_categorical(
@@ -83,7 +83,7 @@ def extract_chromosome_location_to_df(
     split_info_dict[&#34;chr&#34;] = pd.Series(
         [info[0].replace(&#34;chr&#34;, &#34;&#34;) for info in split_info], dtype=str
     )
-    split_info_dict[&#34;pos&#34;] = pd.Series([info[1] for info in split_info], dtype=int)
+    split_info_dict[&#34;pos&#34;] = pd.Series([info[1] for info in split_info]).astype(int)
 
     strand_dict: dict[str, int] = {&#34;-&#34;: -1, &#34;+&#34;: 1}
     split_info_dict[&#34;strand&#34;] = pd.Series(
@@ -146,7 +146,7 @@ strings. Defaults to "genome_alignment".</dd>
     split_info_dict[&#34;chr&#34;] = pd.Series(
         [info[0].replace(&#34;chr&#34;, &#34;&#34;) for info in split_info], dtype=str
     )
-    split_info_dict[&#34;pos&#34;] = pd.Series([info[1] for info in split_info], dtype=int)
+    split_info_dict[&#34;pos&#34;] = pd.Series([info[1] for info in split_info]).astype(int)
 
     strand_dict: dict[str, int] = {&#34;-&#34;: -1, &#34;+&#34;: 1}
     split_info_dict[&#34;strand&#34;] = pd.Series(

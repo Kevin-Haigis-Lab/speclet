@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-"""Foundational model object and related functions for the Speclet project."""
+"""Managers for caching and retrieval of model fitting results."""
 
 from pathlib import Path
 from typing import Optional

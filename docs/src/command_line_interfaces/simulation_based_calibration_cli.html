@@ -36,6 +36,7 @@ from pathlib import Path
 from typing import Optional
 
 import pandas as pd
+import theano
 import typer
 import xarray
 
@@ -84,6 +85,12 @@ def make_mock_data(
     mock_data.to_csv(save_path)
 
 
+def _check_theano_config() -&gt; None:
+    logger.info(f&#34;theano.config.compile__wait: {theano.config.compile__wait}&#34;)
+    logger.info(f&#34;theano.config.compile__timeout: {theano.config.compile__timeout}&#34;)
+    return None
+
+
 @app.command()
 def run_sbc(
     name: str,
@@ -115,6 +122,7 @@ def run_sbc(
     Returns:
         None: None
     &#34;&#34;&#34;
+    _check_theano_config()
     sp_model = configuration.get_config_and_instantiate_model(
         config_path=config_path, name=name, root_cache_dir=cache_dir
     )
@@ -153,6 +161,8 @@ def run_sbc(
             logger.error(f&#34;SBC check failed: {sbc_check.message}&#34;)
             logger.warn(&#34;Clearing cached results of SBC.&#34;)
             sbc_check.sbc_file_manager.clear_results()
+            sbc_check.sbc_file_manager.clear_saved_data()
+            sp_model.cache_manager.clear_all_caches()
             raise FailedSBCCheckError(sbc_check.message)
 
     return None
@@ -331,6 +341,7 @@ def run_sbc(
     Returns:
         None: None
     &#34;&#34;&#34;
+    _check_theano_config()
     sp_model = configuration.get_config_and_instantiate_model(
         config_path=config_path, name=name, root_cache_dir=cache_dir
     )
@@ -369,6 +380,8 @@ def run_sbc(
             logger.error(f&#34;SBC check failed: {sbc_check.message}&#34;)
             logger.warn(&#34;Clearing cached results of SBC.&#34;)
             sbc_check.sbc_file_manager.clear_results()
+            sbc_check.sbc_file_manager.clear_saved_data()
+            sp_model.cache_manager.clear_all_caches()
             raise FailedSBCCheckError(sbc_check.message)
 
     return None</code></pre>
