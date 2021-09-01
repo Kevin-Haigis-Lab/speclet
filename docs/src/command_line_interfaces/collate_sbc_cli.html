@@ -51,6 +51,7 @@ def uniformity_test_results(
     root_perm_dir: Path,
     output_path: Path,
     num_permutations: Optional[int] = None,
+    num_posterior_draws: Optional[int] = None,
 ) -&gt; None:
     &#34;&#34;&#34;Command line interface for assembling the SBC uniformity test results.
 
@@ -62,6 +63,8 @@ def uniformity_test_results(
         num_permutations (Optional[int], optional):  Number of permutations expected. If
           supplied, this will be checked against the number of found simulations.
           Defaults to None.
+        num_posterior_draws (Optional[int], optional): Number of posterior draws to use
+          for the uniformity test. Defaults to None.
 
     Raises:
         NotADirectoryError: Raised if the path to the permutation root directory is not
@@ -79,7 +82,11 @@ def uniformity_test_results(
     sbc_analyzer = sbcanal.SBCAnalysis(
         root_dir=root_perm_dir, pattern=&#34;sbc-perm&#34;, n_simulations=num_permutations
     )
-    sbc_uniformity_df = sbc_analyzer.run_uniformity_test()
+
+    if num_posterior_draws is None:
+        num_posterior_draws = sbcanal.SBC_UNIFORMITY_THINNING_DRAWS
+
+    sbc_uniformity_df = sbc_analyzer.run_uniformity_test(k_draws=num_posterior_draws)
 
     if output_path.suffix == &#34;.pkl&#34;:
         logger.info(f&#34;Saving final results to pickle: &#39;{output_path.as_posix()}&#39;.&#34;)
@@ -218,7 +225,7 @@ def collate_sbc_posteriors_cli(
 </details>
 </dd>
 <dt id="src.command_line_interfaces.collate_sbc_cli.uniformity_test_results"><code class="name flex">
-<span>def <span class="ident">uniformity_test_results</span></span>(<span>root_perm_dir: pathlib.Path, output_path: pathlib.Path, num_permutations: Optional[int] = None) -> NoneType</span>
+<span>def <span class="ident">uniformity_test_results</span></span>(<span>root_perm_dir: pathlib.Path, output_path: pathlib.Path, num_permutations: Optional[int] = None, num_posterior_draws: Optional[int] = None) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Command line interface for assembling the SBC uniformity test results.</p>
@@ -234,6 +241,9 @@ or CSV.</dd>
 <dd>Number of permutations expected. If
 supplied, this will be checked against the number of found simulations.
 Defaults to None.</dd>
+<dt><strong><code>num_posterior_draws</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
+<dd>Number of posterior draws to use
+for the uniformity test. Defaults to None.</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
@@ -253,6 +263,7 @@ def uniformity_test_results(
     root_perm_dir: Path,
     output_path: Path,
     num_permutations: Optional[int] = None,
+    num_posterior_draws: Optional[int] = None,
 ) -&gt; None:
     &#34;&#34;&#34;Command line interface for assembling the SBC uniformity test results.
 
@@ -264,6 +275,8 @@ def uniformity_test_results(
         num_permutations (Optional[int], optional):  Number of permutations expected. If
           supplied, this will be checked against the number of found simulations.
           Defaults to None.
+        num_posterior_draws (Optional[int], optional): Number of posterior draws to use
+          for the uniformity test. Defaults to None.
 
     Raises:
         NotADirectoryError: Raised if the path to the permutation root directory is not
@@ -281,7 +294,11 @@ def uniformity_test_results(
     sbc_analyzer = sbcanal.SBCAnalysis(
         root_dir=root_perm_dir, pattern=&#34;sbc-perm&#34;, n_simulations=num_permutations
     )
-    sbc_uniformity_df = sbc_analyzer.run_uniformity_test()
+
+    if num_posterior_draws is None:
+        num_posterior_draws = sbcanal.SBC_UNIFORMITY_THINNING_DRAWS
+
+    sbc_uniformity_df = sbc_analyzer.run_uniformity_test(k_draws=num_posterior_draws)
 
     if output_path.suffix == &#34;.pkl&#34;:
         logger.info(f&#34;Saving final results to pickle: &#39;{output_path.as_posix()}&#39;.&#34;)

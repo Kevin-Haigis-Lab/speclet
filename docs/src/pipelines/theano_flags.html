@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>src.pipelines API documentation</title>
-<meta name="description" content="" />
+<title>src.pipelines.theano_flags API documentation</title>
+<meta name="description" content="Theano flags for pipelines." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -18,26 +18,83 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Namespace <code>src.pipelines</code></h1>
+<h1 class="title">Module <code>src.pipelines.theano_flags</code></h1>
 </header>
 <section id="section-intro">
+<p>Theano flags for pipelines.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Theano flags for pipelines.&#34;&#34;&#34;
+
+from typing import Optional
+
+import theano
+
+
+def get_theano_flags(unique_id: str, theano_compiledir: Optional[str] = None) -&gt; str:
+    &#34;&#34;&#34;Get shell statement to set Theano flags for a pipeline submission.
+
+    Args:
+        unique_id (str): Unique identifier for this compilation directory.
+        theano_compiledir (Optional[str], optional): Optional parent directory to use
+          instead of the default Theano compilation directory. Defaults to None.
+
+    Returns:
+        str: String with a statement for setting some Theano configurations.
+    &#34;&#34;&#34;
+    if theano_compiledir is None:
+        theano_compiledir = theano.config.compiledir
+    return f&#34;THEANO_FLAGS=&#39;compiledir={theano_compiledir}/&#39;&#34; + unique_id</code></pre>
+</details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="src.pipelines.snakemake_parsing_helpers" href="snakemake_parsing_helpers.html">src.pipelines.snakemake_parsing_helpers</a></code></dt>
+<dt id="src.pipelines.theano_flags.get_theano_flags"><code class="name flex">
+<span>def <span class="ident">get_theano_flags</span></span>(<span>unique_id: str, theano_compiledir: Optional[str] = None) -> str</span>
+</code></dt>
 <dd>
-<div class="desc"><p>Parsing complex structures for use in Snakemake pipelines.</p></div>
-</dd>
-<dt><code class="name"><a title="src.pipelines.theano_flags" href="theano_flags.html">src.pipelines.theano_flags</a></code></dt>
-<dd>
-<div class="desc"><p>Theano flags for pipelines.</p></div>
+<div class="desc"><p>Get shell statement to set Theano flags for a pipeline submission.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>unique_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>Unique identifier for this compilation directory.</dd>
+<dt><strong><code>theano_compiledir</code></strong> :&ensp;<code>Optional[str]</code>, optional</dt>
+<dd>Optional parent directory to use
+instead of the default Theano compilation directory. Defaults to None.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>String with a statement for setting some Theano configurations.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_theano_flags(unique_id: str, theano_compiledir: Optional[str] = None) -&gt; str:
+    &#34;&#34;&#34;Get shell statement to set Theano flags for a pipeline submission.
+
+    Args:
+        unique_id (str): Unique identifier for this compilation directory.
+        theano_compiledir (Optional[str], optional): Optional parent directory to use
+          instead of the default Theano compilation directory. Defaults to None.
+
+    Returns:
+        str: String with a statement for setting some Theano configurations.
+    &#34;&#34;&#34;
+    if theano_compiledir is None:
+        theano_compiledir = theano.config.compiledir
+    return f&#34;THEANO_FLAGS=&#39;compiledir={theano_compiledir}/&#39;&#34; + unique_id</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -50,13 +107,12 @@
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="src" href="../index.html">src</a></code></li>
+<li><code><a title="src.pipelines" href="index.html">src.pipelines</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="src.pipelines.snakemake_parsing_helpers" href="snakemake_parsing_helpers.html">src.pipelines.snakemake_parsing_helpers</a></code></li>
-<li><code><a title="src.pipelines.theano_flags" href="theano_flags.html">src.pipelines.theano_flags</a></code></li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="src.pipelines.theano_flags.get_theano_flags" href="#src.pipelines.theano_flags.get_theano_flags">get_theano_flags</a></code></li>
 </ul>
 </li>
 </ul>
