@@ -5,6 +5,15 @@ from typing import Optional
 import theano
 
 
+def get_theano_compile_dir() -> str:
+    """Get the Theano compilation directory from the config.
+
+    Returns:
+        str: String of path the compilation directory.
+    """
+    return theano.config.compiledir
+
+
 def get_theano_flags(unique_id: str, theano_compiledir: Optional[str] = None) -> str:
     """Get shell statement to set Theano flags for a pipeline submission.
 
@@ -17,5 +26,5 @@ def get_theano_flags(unique_id: str, theano_compiledir: Optional[str] = None) ->
         str: String with a statement for setting some Theano configurations.
     """
     if theano_compiledir is None:
-        theano_compiledir = theano.config.compiledir
+        theano_compiledir = get_theano_compile_dir()
     return f"THEANO_FLAGS='compiledir={theano_compiledir}/'" + unique_id

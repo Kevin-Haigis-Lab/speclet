@@ -19,7 +19,9 @@ from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
 N_CHAINS = 4
 
 # Directory and file paths.
-SCRATCH_DIR = "/n/scratch3/users/j/jc604/speclet/fitting-mcmc/"
+SCRATCH_DIR = "/n/scratch3/users/j/jc604"
+SCRATCH_TEMP_DIR = f"{SCRATCH_DIR}/speclet/fitting-mcmc/"
+THEANO_COMPILE_DIR = f"{SCRATCH_DIR}/.theano/"
 PYMC3_MODEL_CACHE_DIR = "models/"
 REPORTS_DIR = "reports/crc_model_sampling_reports/"
 ENVIRONMENT_YAML = Path("default_environment.yaml").as_posix()
@@ -79,7 +81,7 @@ rule all:
 rule sample_mcmc:
     output:
         touch_file=PYMC3_MODEL_CACHE_DIR + "_{model_name}_chain{chain}_MCMC.txt",
-        chain_dir=directory(SCRATCH_DIR + "{model_name}_chain{chain}"),
+        chain_dir=directory(SCRATCH_TEMP_DIR + "{model_name}_chain{chain}"),
     params:
         mem=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).memory,
         time=lambda w: create_resource_manager(w, ModelFitMethod.MCMC).time,
@@ -116,7 +118,7 @@ rule combine_mcmc:
         combined_cache_dir=PYMC3_MODEL_CACHE_DIR,
         chain_dirs=directory(
             expand(
-                SCRATCH_DIR + "{{model_name}}_chain{chain}",
+                SCRATCH_TEMP_DIR + "{{model_name}}_chain{chain}",
                 chain=list(range(N_CHAINS)),
             )
         ),
