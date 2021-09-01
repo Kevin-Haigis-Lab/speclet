@@ -27,7 +27,7 @@ fi
 
 snakemake \
     --snakefile $SNAKEFILE \
-    --jobs 980 \
+    --jobs 1985 \
     --restart-times 3 \
     --latency-wait 120 \
     --use-conda \

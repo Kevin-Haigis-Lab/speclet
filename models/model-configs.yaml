@@ -157,16 +157,23 @@
   fit_methods:
     - MCMC
     - ADVI
+  pipelines:
+    - fitting
+    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
       MCMC:
         target_accept: 0.95
+
 - name: sp7-advi-fullrank
   description: Default settings for SpecletSeven.
   model: speclet-seven
   fit_methods:
     - ADVI
+  pipelines:
+    - fitting
+    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
@@ -181,6 +188,9 @@
   fit_methods:
     - MCMC
     - ADVI
+  pipelines:
+    - fitting
+    - sbc
   debug: true
   pipeline_sampling_parameters:
     fitting:
