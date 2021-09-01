@@ -10,6 +10,7 @@ import theano
 
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline, MockDataSize
 from src.pipelines import snakemake_parsing_helpers as smk_help
+from src.pipelines.theano_flags import get_theano_flags
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 
 # SBC parameters.
@@ -17,11 +18,13 @@ NUM_SIMULATIONS = 1000
 MOCK_DATA_SIZE = MockDataSize.MEDIUM
 
 # Directory and file paths
-THEANO_COMPILEDIR = theano.config.compiledir
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yaml"
 ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
 CACHE_DIR = "cache/sbc-cache/"
+
+# Theano compilation locks.
+THEANO_FLAG = get_theano_flags("{wildcards.model_name}_{wildcards.perm_num}")
 
 # Benchmarking jobs.
 BENCHMARK_DIR = Path("benchmarks", "012_010_simulation-based-calibration-snakemake")
@@ -169,7 +172,7 @@ rule run_sbc:
     benchmark:
         BENCHMARK_DIR / "run_sbc/{model_name}_{fit_method}_perm{perm_num}.tsv"
     shell:
-        f"THEANO_FLAGS='compiledir={THEANO_COMPILEDIR}/{{wildcards.model_name}}_{{wildcards.perm_num}}' "
+        THEANO_FLAG + " "
         "src/command_line_interfaces/simulation_based_calibration_cli.py"
         "  run-sbc"
         "  {wildcards.model_name}"

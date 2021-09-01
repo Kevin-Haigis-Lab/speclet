@@ -11,17 +11,23 @@ from src.managers.model_fitting_pipeline_resource_manager import (
     ModelFittingPipelineResourceManager as RM,
 )
 from src.pipelines.snakemake_parsing_helpers import get_models_names_fit_methods
+from src.pipelines.theano_flags import get_theano_flags
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
 
+
+# Global parameters.
+N_CHAINS = 4
+
+# Directory and file paths.
 SCRATCH_DIR = "/n/scratch3/users/j/jc604/speclet/fitting-mcmc/"
 PYMC3_MODEL_CACHE_DIR = "models/"
 REPORTS_DIR = "reports/crc_model_sampling_reports/"
 ENVIRONMENT_YAML = Path("default_environment.yaml").as_posix()
+
+# Benchmarking jobs.
 BENCHMARK_DIR = Path("benchmarks", "010_010_run-crc-sampling-snakemake")
 if not BENCHMARK_DIR.exists():
     BENCHMARK_DIR.mkdir(parents=True)
-
-N_CHAINS = 4
 
 
 #### ---- Model configurations ---- ####
@@ -85,7 +91,8 @@ rule sample_mcmc:
         BENCHMARK_DIR / "sample_mcmc/{model_name}_chain{chain}.tsv"
     priority: 20
     shell:
-        "python3 src/command_line_interfaces/sampling_pymc3_models_cli.py"
+        get_theano_flags("{wildcards.model_name}_{wildcards.chain}_mcmc") + " "
+        "src/command_line_interfaces/sampling_pymc3_models_cli.py"
         '  "{wildcards.model_name}"'
         "  {params.config_file}"
         "  MCMC"
@@ -116,7 +123,8 @@ rule combine_mcmc:
     conda:
         ENVIRONMENT_YAML
     shell:
-        "python3 src/command_line_interfaces/combine_mcmc_chains_cli.py"
+        get_theano_flags("{wildcards.model_name}_combine-mcmc") + " "
+        "src/command_line_interfaces/combine_mcmc_chains_cli.py"
         "  {wildcards.model_name}"
         "  {params.config_file}"
         "  {params.chain_dirs}"
@@ -139,7 +147,8 @@ rule sample_advi:
         BENCHMARK_DIR / "sample_advi/{model_name}.tsv"
     priority: 10
     shell:
-        "python3 src/command_line_interfaces/sampling_pymc3_models_cli.py"
+        get_theano_flags("{wildcards.model_name}_advi") + " "
+        "src/command_line_interfaces/sampling_pymc3_models_cli.py"
         '  "{wildcards.model_name}"'
         " {params.config_file}"
         "  ADVI"
