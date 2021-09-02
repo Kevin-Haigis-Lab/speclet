@@ -21,7 +21,6 @@ N_CHAINS = 4
 # Directory and file paths.
 SCRATCH_DIR = "/n/scratch3/users/j/jc604"
 SCRATCH_TEMP_DIR = f"{SCRATCH_DIR}/speclet/fitting-mcmc/"
-THEANO_COMPILE_DIR = f"{SCRATCH_DIR}/.theano/"
 PYMC3_MODEL_CACHE_DIR = "models/"
 REPORTS_DIR = "reports/crc_model_sampling_reports/"
 ENVIRONMENT_YAML = Path("default_environment.yaml").as_posix()

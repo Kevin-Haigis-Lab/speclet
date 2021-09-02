@@ -25,10 +25,7 @@ ROOT_PERMUTATION_DIR = f"{SCRATCH_DIR}/speclet-sbc/"
 CACHE_DIR = "cache/sbc-cache/"
 
 # Theano compilation locks.
-THEANO_FLAG = get_theano_flags(
-    unique_id="{wildcards.model_name}_{wildcards.perm_num}",
-    theano_compiledir=f"{SCRATCH_DIR}/.theano",
-)
+THEANO_FLAG = get_theano_flags(unique_id="{wildcards.model_name}_{wildcards.perm_num}")
 
 # Benchmarking jobs.
 BENCHMARK_DIR = Path("benchmarks", "012_010_simulation-based-calibration-snakemake")
