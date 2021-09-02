@@ -185,6 +185,7 @@ rule run_sbc:
         "  {params.perm_dir}"
         "  {wildcards.perm_num}"
         "  --mock-data-path {input.mock_data_path}"
+        "  --remove-theano-comp-dir"
 
 
 rule collate_sbc:

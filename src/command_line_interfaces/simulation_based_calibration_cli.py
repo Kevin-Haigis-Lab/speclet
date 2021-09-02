@@ -2,6 +2,7 @@
 
 """A helpful command line interface for simulation-based calibration."""
 
+import shutil
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -17,6 +18,7 @@ from src.io import model_config
 from src.loggers import logger
 from src.modeling import simulation_based_calibration_helpers as sbc
 from src.models import configuration
+from src.pipelines.theano_flags import get_theano_compile_dir
 from src.project_enums import MockDataSize, ModelFitMethod, SpecletPipeline
 
 cli_helpers.configure_pretty()
@@ -63,6 +65,12 @@ def _check_theano_config() -> None:
     return None
 
 
+def _remove_thenao_comp_dir() -> None:
+    _theano_comp_dir = get_theano_compile_dir()
+    logger.info(f"Removing Theano compilation directory: '{_theano_comp_dir}'.")
+    shutil.rmtree(_theano_comp_dir, ignore_errors=True)
+
+
 @app.command()
 def run_sbc(
     name: str,
@@ -73,6 +81,7 @@ def run_sbc(
     mock_data_path: Optional[Path] = None,
     data_size: Optional[MockDataSize] = None,
     check_results: bool = True,
+    remove_theano_comp_dir: bool = False,
 ) -> None:
     """CLI for running a round of simulation-based calibration for a model.
 
@@ -89,7 +98,12 @@ def run_sbc(
           Is ignored if a path is supplied to pre-existing mock data in the
           `mock_data_path` argument. Defaults to None.
         check_results (bool, optional): Should the results be checked for completeness
-          (based off of known issues with the SBC pipeline's fidelity)? Defaults to True
+          (based off of known issues with the SBC pipeline's fidelity)? Defaults to
+          True.
+        remove_theano_comp_dir (bool, optional): Should the Theano compilation
+          directory be removed when the SBC finishes? Only use this if you are
+          certain that no other job is using this compilation directory. Defaults to
+          False.
 
     Returns:
         None: None
@@ -135,7 +149,12 @@ def run_sbc(
             sbc_check.sbc_file_manager.clear_results()
             sbc_check.sbc_file_manager.clear_saved_data()
             sp_model.cache_manager.clear_all_caches()
+            if remove_theano_comp_dir:
+                _remove_thenao_comp_dir()
             raise FailedSBCCheckError(sbc_check.message)
+
+    if remove_theano_comp_dir:
+        _remove_thenao_comp_dir()
 
     return None
 
