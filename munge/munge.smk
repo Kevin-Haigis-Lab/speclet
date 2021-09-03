@@ -19,13 +19,14 @@ MODELING_DATA_DIR = Path("modeling_data")
 MUNGE_DIR = Path("munge")
 TESTS_DIR = Path("tests")
 
-TEMP_DIR = Path("/n/no_backup2/dbmi/park/jc604/speclet/munge-intermediates")
-# TEMP_DIR = Path("temp")
+# TEMP_DIR = Path("/n/no_backup2/dbmi/park/jc604/speclet/munge-intermediates")
+TEMP_DIR = Path("temp")
 
 ENVIRONMENT_YAML = "pipeline-environment.yml"
 
-all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list()
-# all_depmap_ids = all_depmap_ids[:10] ### TESTING ###
+# all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list()
+print("---- TESTING WITH A FEW CELL LINES ----")
+all_depmap_ids = all_depmap_ids[:10]  ### TESTING ###
 # all_depmap_ids += ["ACH-002227", "ACH-001738"]
 
 
@@ -210,6 +211,18 @@ rule split_achilles_lfc:
         "011_split-file-by-depmapid.R"
 
 
+rule split_achilles_rc:
+    input:
+        data_file=rules.tidy_depmap.output.achilles_read_counts,
+    output:
+        out_files=expand(
+            (TEMP_DIR / "achilles-readcounts_{depmapid}.qs").as_posix(),
+            depmapid=all_depmap_ids,
+        ),
+    script:
+        "011_split-file-by-depmapid.R"
+
+
 rule split_score_cn:
     input:
         data_file=rules.tidy_score.output.copy_number,
@@ -241,11 +254,14 @@ rule merge_data:
         ccle_segment_cn=TEMP_DIR / "ccle-segmentcn_{depmapid}.qs",
         ccle_mut=TEMP_DIR / "ccle-mut_{depmapid}.qs",
         achilles_lfc=TEMP_DIR / "achilles-lfc_{depmapid}.qs",
+        achilles_readcounts=TEMP_DIR / "achilles-readcounts_{depmapid}.qs",
         score_cn=TEMP_DIR / "score-segmentcn_{depmapid}.qs",
         score_lfc=TEMP_DIR / "score-lfc_{depmapid}.qs",
         sample_info=MODELING_DATA_DIR / "ccle_sample_info.csv",
     output:
         out_file=TEMP_DIR / "merged_{depmapid}.qs",
+    version:
+        "1"
     script:
         "013_merge-modeling-data.R"
 

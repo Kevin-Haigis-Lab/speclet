@@ -146,7 +146,6 @@ tidy_chronos_gene_effect <- function(chronos_gene_effect, out_file) {
 #### ---- Function calls ---- ####
 
 
-
 print("Tidying known essential and non-essential genes.")
 make_known_essentials_and_nonessentials(
   essentials_file = snakemake@input[["common_essentials"]],
