@@ -100,7 +100,7 @@ tidy_read_counts <- function(rc_file, replicate_map, dropped_guides, guide_map, 
   dropped_guides <- read_csv(dropped_guides)$X1
   print(paste("Number of dropped guides:", length(dropped_guides)))
 
-  read_counts_df <- read_csv(rc_file, n_max = 1e2) %>%
+  read_counts_df <- read_csv(rc_file) %>%
     rename(sgrna = `Construct Barcode`) %>%
     filter(!sgrna %in% !!dropped_guides) %>%
     remove_columns(dropped_reps) %>%
@@ -110,7 +110,7 @@ tidy_read_counts <- function(rc_file, replicate_map, dropped_guides, guide_map, 
     rename(n_sgrna_alignments = n_alignments)
 
   check_all_pass_qc(read_counts_df)
-  write_csv(lfc_df, out_file)
+  write_csv(read_counts_df, out_file)
 }
 
 
@@ -146,14 +146,14 @@ tidy_chronos_gene_effect <- function(chronos_gene_effect, out_file) {
 #### ---- Function calls ---- ####
 
 
-print("Tidying known essential and non-essential genes.")
+print("---- Tidying known essential and non-essential genes. ----")
 make_known_essentials_and_nonessentials(
   essentials_file = snakemake@input[["common_essentials"]],
   nonessentials_file = snakemake@input[["nonessentials"]],
   out_file = snakemake@output[["known_essentials"]]
 )
 
-print("Tidying log fold change data.")
+print("---- Tidying log fold change data. ----")
 tidy_log_fold_change(
   lfc_file = snakemake@input[["achilles_logfold_change"]],
   replicate_map = snakemake@input[["achilles_replicate_map"]],
@@ -162,7 +162,7 @@ tidy_log_fold_change(
   out_file = snakemake@output[["achilles_log_fold_change"]]
 )
 
-print("Tidying read count data.")
+print("---- Tidying read count data. ----")
 tidy_read_counts(
   rc_file = snakemake@input[["achilles_raw_readcounts"]],
   replicate_map = snakemake@input[["achilles_replicate_map"]],
@@ -171,14 +171,14 @@ tidy_read_counts(
   out_file = snakemake@output[["achilles_read_counts"]]
 )
 
-print("Tidying Achilles gene effect.")
+print("---- Tidying Achilles gene effect. ----")
 tidy_achilles_gene_effect(
   gene_effect_scaled = snakemake@input[["achilles_gene_effect"]],
   gene_effect_unscaled = snakemake@input[["achilles_gene_effect_unscaled"]],
   out_file = snakemake@output[["achilles_gene_effect"]]
 )
 
-print("Tidying Chronos gene effect.")
+print("---- Tidying Chronos gene effect. ----")
 tidy_chronos_gene_effect(
   chronos_gene_effect = snakemake@input[["all_gene_effect_chronos"]],
   out_file = snakemake@output[["chronos_gene_effect"]]

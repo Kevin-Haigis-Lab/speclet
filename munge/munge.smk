@@ -24,7 +24,8 @@ TEMP_DIR = Path("temp")
 
 ENVIRONMENT_YAML = "pipeline-environment.yml"
 
-# all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list()
+all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list()
+
 print("---- TESTING WITH A FEW CELL LINES ----")
 all_depmap_ids = all_depmap_ids[:10]  ### TESTING ###
 # all_depmap_ids += ["ACH-002227", "ACH-001738"]
@@ -103,15 +104,6 @@ if os.getenv("CI") is not None:
 
 
 #### ---- Rules ---- ####
-
-
-rule clean_sanger_cgc:
-    input:
-        **clean_sanger_cgc_input(),
-    output:
-        cgc_output=MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",
-    script:
-        "025_prep-sanger-cgc.R"
 
 
 rule tidy_ccle:
@@ -316,6 +308,15 @@ rule auxillary_data_subsets:
         ENVIRONMENT_YAML
     script:
         "021_auxiliary-data-files.py"
+
+
+rule clean_sanger_cgc:
+    input:
+        **clean_sanger_cgc_input(),
+    output:
+        cgc_output=MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",
+    script:
+        "025_prep-sanger-cgc.R"
 
 
 rule all:
