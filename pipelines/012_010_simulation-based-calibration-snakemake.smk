@@ -18,7 +18,8 @@ NUM_SIMULATIONS = 1000
 MOCK_DATA_SIZE = MockDataSize.MEDIUM
 
 # Directory and file paths
-SCRATCH_DIR = "/n/scratch3/users/j/jc604"
+# SCRATCH_DIR = "/n/scratch3/users/j/jc604"
+SCRATCH_DIR = "/n/no_backup2/dbmi/park/jc604"
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yaml"
 ROOT_PERMUTATION_DIR = f"{SCRATCH_DIR}/speclet-sbc/"

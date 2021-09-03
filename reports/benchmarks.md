@@ -280,51 +280,51 @@ benchmark_df.groupby(["pipeline", "rule"]).mean().round(2)
     <tr>
       <th rowspan="4" valign="top">012_010_simulation-based-calibration-snakemake</th>
       <th>collate_sbc</th>
-      <td>508.97</td>
-      <td>413.59</td>
-      <td>2929.06</td>
-      <td>411.41</td>
-      <td>411.49</td>
-      <td>20453.95</td>
-      <td>0.41</td>
-      <td>33.13</td>
-      <td>139.28</td>
+      <td>641.62</td>
+      <td>803.26</td>
+      <td>2913.11</td>
+      <td>799.93</td>
+      <td>802.38</td>
+      <td>26585.63</td>
+      <td>0.86</td>
+      <td>60.40</td>
+      <td>399.18</td>
     </tr>
     <tr>
       <th>generate_mockdata</th>
-      <td>10.37</td>
-      <td>217.25</td>
-      <td>826.30</td>
-      <td>214.76</td>
-      <td>214.82</td>
-      <td>211.50</td>
-      <td>0.27</td>
-      <td>34.63</td>
-      <td>3.58</td>
+      <td>20.44</td>
+      <td>173.16</td>
+      <td>880.76</td>
+      <td>170.72</td>
+      <td>170.77</td>
+      <td>216.71</td>
+      <td>0.37</td>
+      <td>19.58</td>
+      <td>3.01</td>
     </tr>
     <tr>
       <th>run_sbc</th>
-      <td>423.27</td>
-      <td>3535.30</td>
-      <td>5129.40</td>
-      <td>1290.09</td>
-      <td>1296.86</td>
-      <td>97.73</td>
-      <td>75.48</td>
-      <td>68.96</td>
-      <td>53.50</td>
+      <td>602.97</td>
+      <td>1744.51</td>
+      <td>3399.60</td>
+      <td>742.90</td>
+      <td>751.64</td>
+      <td>52.41</td>
+      <td>198.71</td>
+      <td>95.33</td>
+      <td>86.48</td>
     </tr>
     <tr>
       <th>sbc_uniformity_test</th>
-      <td>501.07</td>
-      <td>2309.26</td>
-      <td>4258.80</td>
-      <td>2306.99</td>
-      <td>2307.04</td>
-      <td>26340.55</td>
-      <td>0.25</td>
-      <td>37.61</td>
-      <td>174.91</td>
+      <td>858.15</td>
+      <td>5310.08</td>
+      <td>6813.24</td>
+      <td>5305.28</td>
+      <td>5307.70</td>
+      <td>47729.32</td>
+      <td>0.38</td>
+      <td>55.34</td>
+      <td>488.02</td>
     </tr>
   </tbody>
 </table>
@@ -429,7 +429,7 @@ sns.catplot(
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-08-25
+    Last updated: 2021-09-03
 
     Python implementation: CPython
     Python version       : 3.9.6
@@ -445,9 +445,9 @@ sns.catplot(
 
     Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
 
-    Git branch: fix-theano-lock
+    Git branch: modeling
 
-    plotnine: 0.8.0
-    pandas  : 1.3.2
     seaborn : 0.11.2
+    plotnine: 0.8.0
     janitor : 0.21.0
+    pandas  : 1.3.2
