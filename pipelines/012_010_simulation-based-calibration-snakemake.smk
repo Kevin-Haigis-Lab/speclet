@@ -18,13 +18,15 @@ NUM_SIMULATIONS = 1000
 MOCK_DATA_SIZE = MockDataSize.MEDIUM
 
 # Directory and file paths
+# SCRATCH_DIR = "/n/scratch3/users/j/jc604"
+SCRATCH_DIR = "/n/no_backup2/dbmi/park/jc604"
 REPORTS_DIR = "reports/crc_sbc_reports/"
 ENVIRONMENT_YAML = "default_environment.yaml"
-ROOT_PERMUTATION_DIR = "/n/scratch3/users/j/jc604/speclet-sbc/"
+ROOT_PERMUTATION_DIR = f"{SCRATCH_DIR}/speclet-sbc/"
 CACHE_DIR = "cache/sbc-cache/"
 
 # Theano compilation locks.
-THEANO_FLAG = get_theano_flags("{wildcards.model_name}_{wildcards.perm_num}")
+THEANO_FLAG = get_theano_flags(unique_id="{wildcards.model_name}_{wildcards.perm_num}")
 
 # Benchmarking jobs.
 BENCHMARK_DIR = Path("benchmarks", "012_010_simulation-based-calibration-snakemake")
@@ -181,6 +183,7 @@ rule run_sbc:
         "  {params.perm_dir}"
         "  {wildcards.perm_num}"
         "  --mock-data-path {input.mock_data_path}"
+        "  --remove-theano-comp-dir"
 
 
 rule collate_sbc:

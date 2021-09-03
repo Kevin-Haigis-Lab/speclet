@@ -23,6 +23,7 @@ def uniformity_test_results(
     root_perm_dir: Path,
     output_path: Path,
     num_permutations: Optional[int] = None,
+    num_posterior_draws: Optional[int] = None,
 ) -> None:
     """Command line interface for assembling the SBC uniformity test results.
 
@@ -34,6 +35,8 @@ def uniformity_test_results(
         num_permutations (Optional[int], optional):  Number of permutations expected. If
           supplied, this will be checked against the number of found simulations.
           Defaults to None.
+        num_posterior_draws (Optional[int], optional): Number of posterior draws to use
+          for the uniformity test. Defaults to None.
 
     Raises:
         NotADirectoryError: Raised if the path to the permutation root directory is not
@@ -51,7 +54,11 @@ def uniformity_test_results(
     sbc_analyzer = sbcanal.SBCAnalysis(
         root_dir=root_perm_dir, pattern="sbc-perm", n_simulations=num_permutations
     )
-    sbc_uniformity_df = sbc_analyzer.run_uniformity_test()
+
+    if num_posterior_draws is None:
+        num_posterior_draws = sbcanal.SBC_UNIFORMITY_THINNING_DRAWS
+
+    sbc_uniformity_df = sbc_analyzer.run_uniformity_test(k_draws=num_posterior_draws)
 
     if output_path.suffix == ".pkl":
         logger.info(f"Saving final results to pickle: '{output_path.as_posix()}'.")

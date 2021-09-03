@@ -389,7 +389,7 @@ class SpecletModel:
             tuple[az.InferenceData, pm.Approximation]: The results of fitting the model
               and the approximation object.
         &#34;&#34;&#34;
-        logger.debug(&#34;Beginning ADVI fitting method.&#34;)
+        logger.info(&#34;Beginning ADVI fitting method.&#34;)
         self.update_advi_sampling_parameters()
         if method is None:
             method = self.advi_sampling_params.method
@@ -492,10 +492,12 @@ class SpecletModel:
 
         sbc_fm = sbc.SBCFileManager(dir=results_path)
 
-        logger.info(&#34;Creating new simulation data.&#34;)
         if mock_data is not None:
+            logger.info(&#34;Setting provided mock data as data.&#34;)
             self.data_manager.set_data(mock_data)
+            mock_data = self.data_manager.data  # Get result of any transformations.
         elif size is not None:
+            logger.info(&#34;Creating new simulation data.&#34;)
             mock_data = self.data_manager.generate_mock_data(
                 size=size, random_seed=random_seed
             )
@@ -504,7 +506,7 @@ class SpecletModel:
                 &#34;Either `mock_data` or `size` must be provided.&#34;
             )
 
-        logger.debug(&#34;Building model for SBC.&#34;)
+        logger.info(&#34;Building model for SBC.&#34;)
         self.build_model()
         assert self.model is not None
         assert self.observed_var_name is not None
@@ -513,8 +515,10 @@ class SpecletModel:
         with self.model:
             priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
+        logger.info(&#34;Updating observed variable with generated data.&#34;)
         mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
         self.data_manager.set_data(mock_data, apply_transformations=False)
+        logger.info(&#34;Saving mock data to SBC cache.&#34;)
         sbc_fm.save_sbc_data(mock_data)
 
         # Update shared variable with adjusted observed data.
@@ -1066,7 +1070,7 @@ data. Defaults to None.</dd>
             tuple[az.InferenceData, pm.Approximation]: The results of fitting the model
               and the approximation object.
         &#34;&#34;&#34;
-        logger.debug(&#34;Beginning ADVI fitting method.&#34;)
+        logger.info(&#34;Beginning ADVI fitting method.&#34;)
         self.update_advi_sampling_parameters()
         if method is None:
             method = self.advi_sampling_params.method
@@ -1169,10 +1173,12 @@ data. Defaults to None.</dd>
 
         sbc_fm = sbc.SBCFileManager(dir=results_path)
 
-        logger.info(&#34;Creating new simulation data.&#34;)
         if mock_data is not None:
+            logger.info(&#34;Setting provided mock data as data.&#34;)
             self.data_manager.set_data(mock_data)
+            mock_data = self.data_manager.data  # Get result of any transformations.
         elif size is not None:
+            logger.info(&#34;Creating new simulation data.&#34;)
             mock_data = self.data_manager.generate_mock_data(
                 size=size, random_seed=random_seed
             )
@@ -1181,7 +1187,7 @@ data. Defaults to None.</dd>
                 &#34;Either `mock_data` or `size` must be provided.&#34;
             )
 
-        logger.debug(&#34;Building model for SBC.&#34;)
+        logger.info(&#34;Building model for SBC.&#34;)
         self.build_model()
         assert self.model is not None
         assert self.observed_var_name is not None
@@ -1190,8 +1196,10 @@ data. Defaults to None.</dd>
         with self.model:
             priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
+        logger.info(&#34;Updating observed variable with generated data.&#34;)
         mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
         self.data_manager.set_data(mock_data, apply_transformations=False)
+        logger.info(&#34;Saving mock data to SBC cache.&#34;)
         sbc_fm.save_sbc_data(mock_data)
 
         # Update shared variable with adjusted observed data.
@@ -1485,7 +1493,7 @@ and the approximation object.</dd>
         tuple[az.InferenceData, pm.Approximation]: The results of fitting the model
           and the approximation object.
     &#34;&#34;&#34;
-    logger.debug(&#34;Beginning ADVI fitting method.&#34;)
+    logger.info(&#34;Beginning ADVI fitting method.&#34;)
     self.update_advi_sampling_parameters()
     if method is None:
         method = self.advi_sampling_params.method
@@ -2086,10 +2094,12 @@ passed to the fitting method. Default is None.</dd>
 
     sbc_fm = sbc.SBCFileManager(dir=results_path)
 
-    logger.info(&#34;Creating new simulation data.&#34;)
     if mock_data is not None:
+        logger.info(&#34;Setting provided mock data as data.&#34;)
         self.data_manager.set_data(mock_data)
+        mock_data = self.data_manager.data  # Get result of any transformations.
     elif size is not None:
+        logger.info(&#34;Creating new simulation data.&#34;)
         mock_data = self.data_manager.generate_mock_data(
             size=size, random_seed=random_seed
         )
@@ -2098,7 +2108,7 @@ passed to the fitting method. Default is None.</dd>
             &#34;Either `mock_data` or `size` must be provided.&#34;
         )
 
-    logger.debug(&#34;Building model for SBC.&#34;)
+    logger.info(&#34;Building model for SBC.&#34;)
     self.build_model()
     assert self.model is not None
     assert self.observed_var_name is not None
@@ -2107,8 +2117,10 @@ passed to the fitting method. Default is None.</dd>
     with self.model:
         priors = pm.sample_prior_predictive(samples=1, random_seed=random_seed)
 
+    logger.info(&#34;Updating observed variable with generated data.&#34;)
     mock_data[self.observed_var_name] = priors.get(self.observed_var_name).flatten()
     self.data_manager.set_data(mock_data, apply_transformations=False)
+    logger.info(&#34;Saving mock data to SBC cache.&#34;)
     sbc_fm.save_sbc_data(mock_data)
 
     # Update shared variable with adjusted observed data.

@@ -49,33 +49,101 @@ class SpecletSevenConfiguration(BaseModel):
 
 
 class SpecletSeven(SpecletModel):
-    """SpecletSeven Model.
+    """## SpecletSeven Model.
+
+    A very deep hierarchical model that is, in part, meant to be a proof-of-concept for
+    constructing, fitting, and interpreting such a "tall" hierarchical model.
+
+    Below is a key for the subscripts used:
+
+    - $s$: sgRNA
+    - $g$: gene
+    - $c$: cell line
+    - $l$: cell line lineage
+
+    The likelihood is a normal distribution over the log-fold change values.
 
     $$
     \\begin{aligned}
     lfc &\\sim N(\\mu, \\sigma) \\\\
-    \\mu &= a_{s,c} \\quad \\sigma \\sim HN(1) \\\\
-    a_{s,c} &\\sim N(\\mu_a, \\sigma_a)_{s,c} \\\\
-    \\mu_a &\\sim N(\\mu_{\\mu_a}, \\sigma_{\\mu_a})_{g,c}
-      \\quad \\sigma_a \\sim HN(\\sigma_{\\sigma_a})_{s}
-      \\quad \\sigma_{\\sigma_a} \\sim HN(1) \\\\
-    \\mu_{\\mu_a} &\\sim N(\\mu_{\\mu_{\\mu_a}}, \\sigma_{\\mu_{\\mu_a}})_{g,l}
-      \\quad \\sigma_{\\mu_a} \\sim HN(\\sigma_{\\sigma_{\\mu_a}})_{c}
-      \\quad \\sigma_{\\sigma_{\\mu_a}} \\sim HN(1)_{c} \\\\
-    \\mu_{\\mu_{\\mu_a}} &\\sim N(0, 1)
-      \\quad \\sigma_{\\mu_{\\mu_a}} \\sim HN(1)
+    \\mu &= a_{s,c} j_b \\\\
+    \\sigma &\\sim HN(1) \\\\
+    a_{s,c} &\\sim_{s,c} N(\\mu_a, \\sigma_a)_{s,c} \\\\
+    j_b &\\sim_b N(\\mu_j, \\sigma_j) \\\\
+    \\mu_j &\\sim N(0, 0.2) \\quad \\sigma_j \\sim HN(0.5) \\\\
+    \\sigma_a &\\sim_s HN(\\sigma_{\\sigma_a})_s \\\\
+    \\sigma_{\\sigma_a} &\\sim HN(1) \\\\
     \\end{aligned}
     $$
 
-    where:
+    What looks like it would normally be found at the first level of the model is
+    actually at the second level as each parameter is on the "per-gene" level. For
+    simplicity the individual pieces are split up below.
 
-    - s: sgRNA
-    - g: gene
-    - c: cell line
-    - l: cell line lineage
+    $$
+    \\mu_a = h_{g,c} + k_c C^{(c)} + n_g C^{(g)} + q_{g,l} R^{(g,l)} + m_{g,l} M \\\\
+    $$
 
-    A very deep hierarchical model that is, in part, meant to be a proof-of-concept for
-    constructing, fitting, and interpreting such a "tall" hierarchical model.
+    The $h_{g,c}$ parameter measures the varying effect per gene and per cell line. The
+    cell line effect is modeled further as coming from a distribution for the lineage.
+    This lineage level is only included if there is more than one lineage.
+
+    $$
+    \\begin{aligned}
+    h_{g,c} &\\sim_{g,c} N(\\mu_h, \\sigma_h)_{g,c} \\\\
+    \\mu_h &\\sim_{g,l} N(\\mu_{\\mu_h}, \\sigma_{\\mu_h})_{g,l}
+        \\quad \\sigma_h \\sim_c HN(\\sigma_{\\sigma_h})_c \\\\
+    \\mu_{\\mu_h} &\\sim N(0,1) \\quad \\sigma_{\\mu_h} \\sim HN(1) \\\\
+    \\sigma_{\\sigma_h} &\\sim HN(1) \\\\
+    \\end{aligned}
+    $$
+
+    The $k_c$ parameter measures the cell line-specific copy number effect. The
+    covariate $C^{(c)}$ is the copy number alterations scaled per cell line.
+
+    $$
+    \\begin{aligned}
+    k_c &\\sim_c N(\\mu_k, \\sigma_k)_l \\\\
+    \\mu_k &\\sim_l N(\\mu_{\\mu_k}, \\sigma_{\\mu_k})
+        \\quad \\sigma_k \\sim_l HN(\\sigma_{\\sigma_k}) \\\\
+    \\mu_{\\mu_k} &\\sim N(0,1) \\quad \\sigma_{\\mu_k} \\sim(1)
+        \\quad \\sigma_{\\sigma_k} \\sim HN(1)
+    \\end{aligned}
+    $$
+
+    The $n_g$ parameter measures the gene-specific copy number effect. The covariate
+    $C^{(g)}$ is the copy number alterations scaled per gene.
+
+    $$
+    \\begin{aligned}
+    n_g &\\sim_g N(\\mu_n, \\sigma_n) \\\\
+    \\mu_n &\\sim N(0,1) \\quad \\sigma_n \\sim HN(1)
+    \\end{aligned}
+    $$
+
+    The $q_{g,l}$ parameter measures the effect of RNA expression for each gene and
+    lineage combination. The RNA expression covariate $R^{(g,l)}$ is scaled per gene per
+    lineage.
+
+    $$
+    \\begin{aligned}
+    q_{g,l} &\\sim_{g,l} N(\\mu_q, \\sigma_q) \\\\
+    \\mu_q &\\sim N(0, 5) \\quad \\sigma \\sim HN(5)
+    \\end{aligned}
+    $$
+
+    The $m_{g,l}$ parameter measures the effect of a mutation to the gene represented by
+    the covariate $M$ that is a binary indicator variable where $M_{g,c}=1$ if gene $g$
+    in cell line $c$ is mutated.
+
+    $$
+    \\begin{aligned}
+    m_{g,l} &\\sim_{g,l} N(\\mu_m, \\sigma_m) \\\\
+    \\mu_m &\\sim_g N(\\mu_{\\mu_m}, \\sigma_{\\mu_m}) \\quad \\sigma_m \\sim HN(5) \\\\
+    \\mu_{\\mu_m} &\\sim N(0, 5) \\quad \\sigma_{\\mu_m} \\sim HN(5)
+    \\end{aligned}
+    $$
+
     """
 
     config: SpecletSevenConfiguration
