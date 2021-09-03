@@ -321,10 +321,29 @@ rule clean_sanger_cgc:
 
 rule all:
     input:
-        rules.tidy_ccle.output,
-        rules.tidy_depmap.output,
-        rules.tidy_score.output,
-        rules.combine_data.output,
-        rules.modeling_data_subsets.output,
-        rules.auxillary_data_subsets.output,
-        rules.clean_sanger_cgc.output,
+        # rules.tidy_ccle.output
+        MODELING_DATA_DIR / "ccle_expression.csv",
+        MODELING_DATA_DIR / "ccle_segment_cn.csv",
+        MODELING_DATA_DIR / "ccle_gene_cn.csv",
+        MODELING_DATA_DIR / "ccle_mutations.csv",
+        MODELING_DATA_DIR / "ccle_sample_info.csv",
+        # rules.tidy_depmap.output
+        MODELING_DATA_DIR / "known_essentials.csv",
+        MODELING_DATA_DIR / "achilles_log_fold_change_filtered.csv",
+        MODELING_DATA_DIR / "achilles_read_counts.csv",
+        MODELING_DATA_DIR / "achilles_gene_effect.csv",
+        MODELING_DATA_DIR / "chronos_gene_effect.csv",
+        # rules.tidy_score.output
+        MODELING_DATA_DIR / "score_segment_cn.csv",
+        MODELING_DATA_DIR / "score_gene_effect.csv",
+        MODELING_DATA_DIR / "score_log_fold_change_filtered.csv",
+        # rules.combine_data.output
+        MODELING_DATA_DIR / "depmap_modeling_dataframe.csv",
+        # rules.modeling_data_subsets.output
+        MODELING_DATA_DIR / "depmap_modeling_dataframe_crc.csv",
+        MODELING_DATA_DIR / "depmap_modeling_dataframe_crc-subsample.csv",
+        TESTS_DIR / "depmap_test_data.csv",
+        # rules.auxillary_data_subsets.output
+        MODELING_DATA_DIR / "copy_number_data_samples.npy",
+        # rules.clean_sanger_cgc.output
+        MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",
