@@ -19,7 +19,7 @@ MODELING_DATA_DIR = Path("modeling_data")
 MUNGE_DIR = Path("munge")
 TESTS_DIR = Path("tests")
 
-TEMP_DIR = Path("/n/scratch3/users/j/jc604/speclet/munge-intermediates")
+TEMP_DIR = Path("/n/no_backup2/dbmi/park/jc604/speclet/munge-intermediates")
 # TEMP_DIR = Path("temp")
 
 ENVIRONMENT_YAML = "pipeline-environment.yml"
@@ -53,6 +53,7 @@ def tidy_depmap_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
         "achilles_gene_effect_unscaled": DEPMAP_DIR
         / "Achilles_gene_effect_unscaled.csv",
         "achilles_logfold_change": DEPMAP_DIR / "Achilles_logfold_change.csv",
+        "achilles_raw_readcounts": DEPMAP_DIR / "Achilles_raw_readcounts.csv",
         "achilles_replicate_map": DEPMAP_DIR / "Achilles_replicate_map.csv",
         "all_gene_effect_chronos": DEPMAP_DIR / "CRISPR_gene_effect_Chronos.csv",
     }
@@ -133,6 +134,7 @@ rule tidy_depmap:
         achilles_log_fold_change=(
             MODELING_DATA_DIR / "achilles_log_fold_change_filtered.csv"
         ),
+        achilles_read_counts=MODELING_DATA_DIR / "achilles_read_counts.csv",
         achilles_gene_effect=MODELING_DATA_DIR / "achilles_gene_effect.csv",
         chronos_gene_effect=MODELING_DATA_DIR / "chronos_gene_effect.csv",
     script:
