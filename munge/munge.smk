@@ -305,6 +305,8 @@ rule check_depmap_modeling_data:
         output_md=MUNGE_DIR / "017_check-depmap-modeling-data.md",
     conda:
         ENVIRONMENT_YAML
+    version:
+        "1.1"
     shell:
         "jupyter nbconvert --to notebook --inplace --execute {input.check_nb} && "
         "nbqa black {input.check_nb} --nbqa-mutate && "
