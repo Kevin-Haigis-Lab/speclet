@@ -22,7 +22,7 @@ SNAKEFILE="munge/munge.smk"
 
 snakemake \
     --snakefile $SNAKEFILE \
-    --jobs 9000 \
+    --jobs 9997 \
     --restart-times 0 \
     --latency-wait 120 \
     --printshellcmds \

@@ -49,6 +49,11 @@
         "time": "03:00:00",
         "J": "ach-lfc"
     },
+    "split_achilles_rc": {
+        "mem": "64000",
+        "time": "03:00:00",
+        "J": "ach-rc"
+    },
     "split_score_cn": {
         "mem": "8000",
         "time": "00:30:00",

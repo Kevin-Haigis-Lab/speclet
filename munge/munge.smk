@@ -19,15 +19,14 @@ MODELING_DATA_DIR = Path("modeling_data")
 MUNGE_DIR = Path("munge")
 TESTS_DIR = Path("tests")
 
-# TEMP_DIR = Path("/n/no_backup2/dbmi/park/jc604/speclet/munge-intermediates")
-TEMP_DIR = Path("temp")
+TEMP_DIR = Path("/n/no_backup2/dbmi/park/jc604/speclet/munge-intermediates")
+# TEMP_DIR = Path("temp")
 
 ENVIRONMENT_YAML = "pipeline-environment.yml"
 
 all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list()
-
-print("---- TESTING WITH A FEW CELL LINES ----")
-all_depmap_ids = all_depmap_ids[:10]  ### TESTING ###
+# print("---- TESTING WITH A FEW CELL LINES ----")
+# all_depmap_ids = all_depmap_ids[:10]  ### TESTING ###
 # all_depmap_ids += ["ACH-002227", "ACH-001738"]
 
 
@@ -104,6 +103,36 @@ if os.getenv("CI") is not None:
 
 
 #### ---- Rules ---- ####
+
+
+rule all:
+    input:
+        # rules.tidy_ccle.output
+        MODELING_DATA_DIR / "ccle_expression.csv",
+        MODELING_DATA_DIR / "ccle_segment_cn.csv",
+        MODELING_DATA_DIR / "ccle_gene_cn.csv",
+        MODELING_DATA_DIR / "ccle_mutations.csv",
+        MODELING_DATA_DIR / "ccle_sample_info.csv",
+        # rules.tidy_depmap.output
+        MODELING_DATA_DIR / "known_essentials.csv",
+        MODELING_DATA_DIR / "achilles_log_fold_change_filtered.csv",
+        MODELING_DATA_DIR / "achilles_read_counts.csv",
+        MODELING_DATA_DIR / "achilles_gene_effect.csv",
+        MODELING_DATA_DIR / "chronos_gene_effect.csv",
+        # rules.tidy_score.output
+        MODELING_DATA_DIR / "score_segment_cn.csv",
+        MODELING_DATA_DIR / "score_gene_effect.csv",
+        MODELING_DATA_DIR / "score_log_fold_change_filtered.csv",
+        # rules.combine_data.output
+        MODELING_DATA_DIR / "depmap_modeling_dataframe.csv",
+        # rules.modeling_data_subsets.output
+        MODELING_DATA_DIR / "depmap_modeling_dataframe_crc.csv",
+        MODELING_DATA_DIR / "depmap_modeling_dataframe_crc-subsample.csv",
+        TESTS_DIR / "depmap_test_data.csv",
+        # rules.auxillary_data_subsets.output
+        MODELING_DATA_DIR / "copy_number_data_samples.npy",
+        # rules.clean_sanger_cgc.output
+        MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",
 
 
 rule tidy_ccle:
@@ -241,6 +270,7 @@ rule split_score_lfc:
 # Merge all data for a DepMapID.
 rule merge_data:
     input:
+        "munge/013_merge-modeling-data.R",
         ccle_rna=TEMP_DIR / "ccle-rna_{depmapid}.qs",
         ccle_gene_cn=TEMP_DIR / "ccle-genecn_{depmapid}.qs",
         ccle_segment_cn=TEMP_DIR / "ccle-segmentcn_{depmapid}.qs",
@@ -252,8 +282,6 @@ rule merge_data:
         sample_info=MODELING_DATA_DIR / "ccle_sample_info.csv",
     output:
         out_file=TEMP_DIR / "merged_{depmapid}.qs",
-    version:
-        "1"
     script:
         "013_merge-modeling-data.R"
 
@@ -317,33 +345,3 @@ rule clean_sanger_cgc:
         cgc_output=MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",
     script:
         "025_prep-sanger-cgc.R"
-
-
-rule all:
-    input:
-        # rules.tidy_ccle.output
-        MODELING_DATA_DIR / "ccle_expression.csv",
-        MODELING_DATA_DIR / "ccle_segment_cn.csv",
-        MODELING_DATA_DIR / "ccle_gene_cn.csv",
-        MODELING_DATA_DIR / "ccle_mutations.csv",
-        MODELING_DATA_DIR / "ccle_sample_info.csv",
-        # rules.tidy_depmap.output
-        MODELING_DATA_DIR / "known_essentials.csv",
-        MODELING_DATA_DIR / "achilles_log_fold_change_filtered.csv",
-        MODELING_DATA_DIR / "achilles_read_counts.csv",
-        MODELING_DATA_DIR / "achilles_gene_effect.csv",
-        MODELING_DATA_DIR / "chronos_gene_effect.csv",
-        # rules.tidy_score.output
-        MODELING_DATA_DIR / "score_segment_cn.csv",
-        MODELING_DATA_DIR / "score_gene_effect.csv",
-        MODELING_DATA_DIR / "score_log_fold_change_filtered.csv",
-        # rules.combine_data.output
-        MODELING_DATA_DIR / "depmap_modeling_dataframe.csv",
-        # rules.modeling_data_subsets.output
-        MODELING_DATA_DIR / "depmap_modeling_dataframe_crc.csv",
-        MODELING_DATA_DIR / "depmap_modeling_dataframe_crc-subsample.csv",
-        TESTS_DIR / "depmap_test_data.csv",
-        # rules.auxillary_data_subsets.output
-        MODELING_DATA_DIR / "copy_number_data_samples.npy",
-        # rules.clean_sanger_cgc.output
-        MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",

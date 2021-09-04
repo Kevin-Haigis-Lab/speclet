@@ -19,6 +19,7 @@ ccle_gene_cn_file <- snakemake@input[["ccle_gene_cn"]]
 ccle_segment_cn_file <- snakemake@input[["ccle_segment_cn"]]
 ccle_mut_file <- snakemake@input[["ccle_mut"]]
 achilles_lfc_file <- snakemake@input[["achilles_lfc"]]
+achilles_reads_file <- snakemake@input[["achilles_readcounts"]]
 score_cn_file <- snakemake@input[["score_cn"]]
 score_lfc_file <- snakemake@input[["score_lfc"]]
 sample_info_file <- snakemake@input[["sample_info"]]
@@ -28,16 +29,16 @@ info(logger, glue("Merging data for cell line '{DEPMAP_ID}'."))
 
 out_file <- snakemake@output[["out_file"]]
 
-DEPMAP_ID <- "ACH-000001"
-ccle_rna_file <- "temp/ccle-rna_ACH-000001.qs"
-ccle_gene_cn_file <- "temp/ccle-genecn_ACH-000001.qs"
-ccle_segment_cn_file <- "temp/ccle-segmentcn_ACH-000001.qs"
-ccle_mut_file <- "temp/ccle-mut_ACH-000001.qs"
-achilles_lfc_file <- "temp/achilles-lfc_ACH-000001.qs"
-achilles_reads_file <- "temp/achilles-readcounts_ACH-000001.qs"
-score_cn_file <- "temp/score-segmentcn_ACH-000001.qs"
-score_lfc_file <- "temp/score-lfc_ACH-000001.qs"
-sample_info_file <- "modeling_data/ccle_sample_info.csv"
+# DEPMAP_ID <- "ACH-000001"
+# ccle_rna_file <- "temp/ccle-rna_ACH-000001.qs"
+# ccle_gene_cn_file <- "temp/ccle-genecn_ACH-000001.qs"
+# ccle_segment_cn_file <- "temp/ccle-segmentcn_ACH-000001.qs"
+# ccle_mut_file <- "temp/ccle-mut_ACH-000001.qs"
+# achilles_lfc_file <- "temp/achilles-lfc_ACH-000001.qs"
+# achilles_reads_file <- "temp/achilles-readcounts_ACH-000001.qs"
+# score_cn_file <- "temp/score-segmentcn_ACH-000001.qs"
+# score_lfc_file <- "temp/score-lfc_ACH-000001.qs"
+# sample_info_file <- "modeling_data/ccle_sample_info.csv"
 
 
 #### ---- Data retrieval functions ---- ####
@@ -292,9 +293,10 @@ if (is.null(lfc_data)) {
 }
 
 rc_data <- get_read_counts_data(achilles_reads_file)
-
 if (!is.null(rc_data)) {
   rc_data <- rc_data %>%
+    remove_sgrna_that_target_multiple_genes() %>%
+    reconcile_sgrna_targeting_one_gene_in_mutliple_places() %>%
     select(sgrna, replicate_id, p_dna_batch, read_counts, screen)
 }
 
