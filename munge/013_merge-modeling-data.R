@@ -19,6 +19,7 @@ ccle_gene_cn_file <- snakemake@input[["ccle_gene_cn"]]
 ccle_segment_cn_file <- snakemake@input[["ccle_segment_cn"]]
 ccle_mut_file <- snakemake@input[["ccle_mut"]]
 achilles_lfc_file <- snakemake@input[["achilles_lfc"]]
+achilles_reads_file <- snakemake@input[["achilles_readcounts"]]
 score_cn_file <- snakemake@input[["score_cn"]]
 score_lfc_file <- snakemake@input[["score_lfc"]]
 sample_info_file <- snakemake@input[["sample_info"]]
@@ -28,11 +29,13 @@ info(logger, glue("Merging data for cell line '{DEPMAP_ID}'."))
 
 out_file <- snakemake@output[["out_file"]]
 
+# DEPMAP_ID <- "ACH-000001"
 # ccle_rna_file <- "temp/ccle-rna_ACH-000001.qs"
 # ccle_gene_cn_file <- "temp/ccle-genecn_ACH-000001.qs"
 # ccle_segment_cn_file <- "temp/ccle-segmentcn_ACH-000001.qs"
 # ccle_mut_file <- "temp/ccle-mut_ACH-000001.qs"
 # achilles_lfc_file <- "temp/achilles-lfc_ACH-000001.qs"
+# achilles_reads_file <- "temp/achilles-readcounts_ACH-000001.qs"
 # score_cn_file <- "temp/score-segmentcn_ACH-000001.qs"
 # score_lfc_file <- "temp/score-lfc_ACH-000001.qs"
 # sample_info_file <- "modeling_data/ccle_sample_info.csv"
@@ -70,14 +73,31 @@ get_log_fold_change_data <- function(achilles_lfc_path, score_lfc_path) {
     warn(logger, msg)
     return(NULL)
   } else if (nrow(achilles_lfc) == 0) {
-    info(logger, "Data found from Project SCORE.")
+    info(logger, "LFC data found from Project SCORE.")
     return(score_lfc)
   } else if (nrow(score_lfc) == 0) {
-    info(logger, "Data found from Achilles.")
+    info(logger, "LFC data found from Achilles.")
     return(achilles_lfc)
   } else {
-    info(logger, "Data found from both projects.")
+    info(logger, "LFC data found from both projects.")
     return(bind_rows(achilles_lfc, score_lfc))
+  }
+}
+
+# Retrieve the read count data from Achilles. If there is not data, `NULL` is returned.
+get_read_counts_data <- function(achilles_reads_path) {
+  info(logger, glue("Retrieving LFC data ({achilles_reads_path})."))
+
+  achilles_rc <- qs::qread(achilles_reads_path) %>%
+    prepare_lfc_data(screen_source = "broad") %>%
+    mutate(p_dna_batch = as.character(p_dna_batch))
+
+  if (nrow(achilles_rc) == 0) {
+    warn(logger, "Read count data not found.")
+    return(NULL)
+  } else {
+    info(logger, "Read count data found from the Achilles data.")
+    return(achilles_rc)
   }
 }
 
@@ -272,6 +292,14 @@ if (is.null(lfc_data)) {
   )
 }
 
+rc_data <- get_read_counts_data(achilles_reads_file)
+if (!is.null(rc_data)) {
+  rc_data <- rc_data %>%
+    remove_sgrna_that_target_multiple_genes() %>%
+    reconcile_sgrna_targeting_one_gene_in_mutliple_places() %>%
+    select(sgrna, replicate_id, p_dna_batch, read_counts, screen)
+}
+
 sample_info <- get_sample_info(sample_info_file, DEPMAP_ID)
 
 if (is.null(sample_info)) {
@@ -295,6 +323,7 @@ segment_cn_data <- get_segment_copy_number_data(ccle_segment_cn_file, score_cn_f
 sdim <- function(x) glue("{dim(x)[[1]]}, {dim(x)[[2]]}")
 
 info(logger, glue("Dimensions of LFC data: {sdim(lfc_data)}"))
+info(logger, glue("Dimensions of read counts data: {sdim(rc_data)}"))
 info(logger, glue("Dimensions of RNA data: {sdim(rna_data)}"))
 info(logger, glue("Dimensions of mutation data: {sdim(mut_data)}"))
 info(logger, glue("Dimensions of gene CN data: {sdim(gene_cn_data)}"))
@@ -315,8 +344,25 @@ stopifnot(!any(is.na(lfc_data$hugo_symbol)))
 stopifnot(!any(is.na(lfc_data$replicate_id)))
 stopifnot(!any(is.na(lfc_data$lfc)))
 
+stopifnot(all(table(rc_data$sgrna) == 1))
+stopifnot(!any(is.na(rc_data$replicate_id)))
+stopifnot(!any(is.na(rc_data$sgrna)))
+
 
 #### ---- Joining data ---- ####
+
+# Merge LFC data with read counts data.
+join_with_readcounts <- function(lfc_data, reads_df) {
+  info(logger, "Joining LFC data and read counts.")
+  if (is.null(reads_df)) {
+    info(logger, "No read counts data - setting to `read_counts = NA`.")
+    lfc_data$read_counts <- NA
+    return(lfc_data)
+  }
+  d <- lfc_data %>%
+    left_join(reads_df, by = c("sgrna", "replicate_id", "p_dna_batch", "screen"))
+  return(d)
+}
 
 # Merge LFC data with RNA expression data.
 # Genes with no RNA expression are assumed to be unexpressed.
@@ -402,7 +448,6 @@ get_copy_number_at_chromosome_location <- function(chr, pos, segment_cn_df) {
   if (nrow(cn) == 0) {
     return(NA_real_)
   } else if (nrow(cn) > 1) {
-    # print(cn)
     log4r::debug(logger, glue("Found {nrow(cn)} CN segments for chr{chr}:{pos}."))
     cn_val <- reconcile_multiple_segment_copy_numbers(cn)
     log4r::debug(logger, glue("Reconciled multiple values to {round(cn_val, 3)}."))
@@ -463,6 +508,7 @@ join_with_sample_info <- function(lfc_data, sample_info) {
 }
 
 combined_data <- lfc_data %>%
+  join_with_readcounts(rc_data) %>%
   join_with_rna(rna_data = rna_data) %>%
   join_with_mutation(mut_data = mut_data) %>%
   join_with_gene_copy_number(cn_data = gene_cn_data) %>%
@@ -486,6 +532,19 @@ glimpse(combined_data)
 cat(br)
 
 info(logger, glue("Dimesions of final data: {sdim(combined_data)}"))
+
+read_counts <- combined_data$read_counts
+read_counts <- read_counts[!is.na(read_counts)]
+info(logger, glue("Number of read count data points: {length(read_counts)}."))
+if (length(read_counts) > 1) {
+  avg_rc <- round(mean(read_counts))
+  sd_rc <- round(sd(read_counts), 2)
+  min_rc <- min(read_counts)
+  mid_rc <- round(median(read_counts))
+  max_rc <- max(read_counts)
+  info(logger, glue("Mean (± sd) of read counts: {avg_rc} ± {sd_rc}."))
+  info(logger, glue("Min, median, max of read counts: {min_rc}, {mid_rc}, {max_rc}."))
+}
 
 n_missing_rna <- sum(is.na(combined_data$rna_expr))
 info(logger, glue("Number of rows missing RNA data: {n_missing_rna}."))

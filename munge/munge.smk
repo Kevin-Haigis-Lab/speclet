@@ -19,13 +19,14 @@ MODELING_DATA_DIR = Path("modeling_data")
 MUNGE_DIR = Path("munge")
 TESTS_DIR = Path("tests")
 
-TEMP_DIR = Path("/n/scratch3/users/j/jc604/speclet/munge-intermediates")
+TEMP_DIR = Path("/n/no_backup2/dbmi/park/jc604/speclet/munge-intermediates")
 # TEMP_DIR = Path("temp")
 
 ENVIRONMENT_YAML = "pipeline-environment.yml"
 
 all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list()
-# all_depmap_ids = all_depmap_ids[:10] ### TESTING ###
+# print("---- TESTING WITH A FEW CELL LINES ----")
+# all_depmap_ids = all_depmap_ids[:10]  ### TESTING ###
 # all_depmap_ids += ["ACH-002227", "ACH-001738"]
 
 
@@ -53,6 +54,7 @@ def tidy_depmap_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
         "achilles_gene_effect_unscaled": DEPMAP_DIR
         / "Achilles_gene_effect_unscaled.csv",
         "achilles_logfold_change": DEPMAP_DIR / "Achilles_logfold_change.csv",
+        "achilles_raw_readcounts": DEPMAP_DIR / "Achilles_raw_readcounts.csv",
         "achilles_replicate_map": DEPMAP_DIR / "Achilles_replicate_map.csv",
         "all_gene_effect_chronos": DEPMAP_DIR / "CRISPR_gene_effect_Chronos.csv",
     }
@@ -103,13 +105,34 @@ if os.getenv("CI") is not None:
 #### ---- Rules ---- ####
 
 
-rule clean_sanger_cgc:
+rule all:
     input:
-        **clean_sanger_cgc_input(),
-    output:
-        cgc_output=MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",
-    script:
-        "025_prep-sanger-cgc.R"
+        # rules.tidy_ccle.output
+        MODELING_DATA_DIR / "ccle_expression.csv",
+        MODELING_DATA_DIR / "ccle_segment_cn.csv",
+        MODELING_DATA_DIR / "ccle_gene_cn.csv",
+        MODELING_DATA_DIR / "ccle_mutations.csv",
+        MODELING_DATA_DIR / "ccle_sample_info.csv",
+        # rules.tidy_depmap.output
+        MODELING_DATA_DIR / "known_essentials.csv",
+        MODELING_DATA_DIR / "achilles_log_fold_change_filtered.csv",
+        MODELING_DATA_DIR / "achilles_read_counts.csv",
+        MODELING_DATA_DIR / "achilles_gene_effect.csv",
+        MODELING_DATA_DIR / "chronos_gene_effect.csv",
+        # rules.tidy_score.output
+        MODELING_DATA_DIR / "score_segment_cn.csv",
+        MODELING_DATA_DIR / "score_gene_effect.csv",
+        MODELING_DATA_DIR / "score_log_fold_change_filtered.csv",
+        # rules.combine_data.output
+        MODELING_DATA_DIR / "depmap_modeling_dataframe.csv",
+        # rules.modeling_data_subsets.output
+        MODELING_DATA_DIR / "depmap_modeling_dataframe_crc.csv",
+        MODELING_DATA_DIR / "depmap_modeling_dataframe_crc-subsample.csv",
+        TESTS_DIR / "depmap_test_data.csv",
+        # rules.auxillary_data_subsets.output
+        MODELING_DATA_DIR / "copy_number_data_samples.npy",
+        # rules.clean_sanger_cgc.output
+        MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",
 
 
 rule tidy_ccle:
@@ -133,6 +156,7 @@ rule tidy_depmap:
         achilles_log_fold_change=(
             MODELING_DATA_DIR / "achilles_log_fold_change_filtered.csv"
         ),
+        achilles_read_counts=MODELING_DATA_DIR / "achilles_read_counts.csv",
         achilles_gene_effect=MODELING_DATA_DIR / "achilles_gene_effect.csv",
         chronos_gene_effect=MODELING_DATA_DIR / "chronos_gene_effect.csv",
     script:
@@ -208,6 +232,18 @@ rule split_achilles_lfc:
         "011_split-file-by-depmapid.R"
 
 
+rule split_achilles_rc:
+    input:
+        data_file=rules.tidy_depmap.output.achilles_read_counts,
+    output:
+        out_files=expand(
+            (TEMP_DIR / "achilles-readcounts_{depmapid}.qs").as_posix(),
+            depmapid=all_depmap_ids,
+        ),
+    script:
+        "011_split-file-by-depmapid.R"
+
+
 rule split_score_cn:
     input:
         data_file=rules.tidy_score.output.copy_number,
@@ -234,11 +270,13 @@ rule split_score_lfc:
 # Merge all data for a DepMapID.
 rule merge_data:
     input:
+        "munge/013_merge-modeling-data.R",
         ccle_rna=TEMP_DIR / "ccle-rna_{depmapid}.qs",
         ccle_gene_cn=TEMP_DIR / "ccle-genecn_{depmapid}.qs",
         ccle_segment_cn=TEMP_DIR / "ccle-segmentcn_{depmapid}.qs",
         ccle_mut=TEMP_DIR / "ccle-mut_{depmapid}.qs",
         achilles_lfc=TEMP_DIR / "achilles-lfc_{depmapid}.qs",
+        achilles_readcounts=TEMP_DIR / "achilles-readcounts_{depmapid}.qs",
         score_cn=TEMP_DIR / "score-segmentcn_{depmapid}.qs",
         score_lfc=TEMP_DIR / "score-lfc_{depmapid}.qs",
         sample_info=MODELING_DATA_DIR / "ccle_sample_info.csv",
@@ -267,6 +305,8 @@ rule check_depmap_modeling_data:
         output_md=MUNGE_DIR / "017_check-depmap-modeling-data.md",
     conda:
         ENVIRONMENT_YAML
+    version:
+        "1.1"
     shell:
         "jupyter nbconvert --to notebook --inplace --execute {input.check_nb} && "
         "nbqa black {input.check_nb} --nbqa-mutate && "
@@ -296,16 +336,14 @@ rule auxillary_data_subsets:
         cna_sample=MODELING_DATA_DIR / "copy_number_data_samples.npy",
     conda:
         ENVIRONMENT_YAML
-    script:
-        "021_auxiliary-data-files.py"
+    shell:
+        "munge/021_auxiliary-data-files.py {input.crc_subset} {output.cna_sample}"
 
 
-rule all:
+rule clean_sanger_cgc:
     input:
-        rules.tidy_ccle.output,
-        rules.tidy_depmap.output,
-        rules.tidy_score.output,
-        rules.combine_data.output,
-        rules.modeling_data_subsets.output,
-        rules.auxillary_data_subsets.output,
-        rules.clean_sanger_cgc.output,
+        **clean_sanger_cgc_input(),
+    output:
+        cgc_output=MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",
+    script:
+        "025_prep-sanger-cgc.R"

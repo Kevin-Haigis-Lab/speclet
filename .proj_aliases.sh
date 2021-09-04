@@ -12,6 +12,8 @@ alias speclet_sshlab="ssh -N -L 7012:127.0.0.1:7012"
 alias speclet_snakemake_env="conda activate speclet_snakemake && bash .proj_aliases.sh"
 alias smk_fit="snakemake --snakefile pipelines/010_010_run-crc-sampling-snakemake.smk"
 alias smk_sbc="snakemake --snakefile pipelines/012_010_simulation-based-calibration-snakemake.smk"
+alias smk_date="snakemake --snakefile data/download-data.smk"
+alias smk_munge="snakemake --snakefile munge/munge.smk"
 
 # Misc.
 alias tmd="jupyter nbconvert --to markdown"

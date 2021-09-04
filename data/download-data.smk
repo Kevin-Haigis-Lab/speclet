@@ -25,6 +25,8 @@ depmap_downloads: Dict[str, str] = {
     "nonessentials.csv": "https://ndownloader.figshare.com/files/27902370",
     "Achilles_logfold_change.csv": "https://ndownloader.figshare.com/files/27902121",
     "Achilles_logfold_change_failures.csv": "https://ndownloader.figshare.com/files/27902067",
+    "Achilles_raw_readcounts.csv": "https://ndownloader.figshare.com/files/27902079",
+    "Achilles_raw_readcounts_failures.csv": "https://ndownloader.figshare.com/files/27902073",
     "Achilles_guide_map.csv": "https://ndownloader.figshare.com/files/27902061",
     "Achilles_replicate_map.csv": "https://ndownloader.figshare.com/files/27902085",
     "Achilles_replicate_QC_report_failing.csv": "https://ndownloader.figshare.com/files/27902088",

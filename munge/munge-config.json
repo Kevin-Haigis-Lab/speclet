@@ -49,6 +49,11 @@
         "time": "03:00:00",
         "J": "ach-lfc"
     },
+    "split_achilles_rc": {
+        "mem": "64000",
+        "time": "03:00:00",
+        "J": "ach-rc"
+    },
     "split_score_cn": {
         "mem": "8000",
         "time": "00:30:00",
@@ -80,5 +85,11 @@
         "mem": "70000",
         "time": "00:30:00",
         "J": "subsample"
+    },
+    "auxillary_data_subsets": {
+        "cores": 1,
+        "mem": "4500",
+        "time": "00:01:30",
+        "J": "aux-sub"
     }
 }
