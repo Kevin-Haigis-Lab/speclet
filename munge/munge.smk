@@ -334,8 +334,8 @@ rule auxillary_data_subsets:
         cna_sample=MODELING_DATA_DIR / "copy_number_data_samples.npy",
     conda:
         ENVIRONMENT_YAML
-    script:
-        "021_auxiliary-data-files.py"
+    shell:
+        "munge/021_auxiliary-data-files.py {input.crc_subset} {output.cna_sample}"
 
 
 rule clean_sanger_cgc:
