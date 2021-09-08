@@ -29,7 +29,7 @@ from src.analysis import pymc3_analysis as pmanal
 from src.data_processing import achilles as achelp
 from src.data_processing import common as dphelp
 from src.globals import PYMC3
-from src.io import cache_io
+from src.io import cache_io, data_io
 from src.modeling import pymc3_sampling_api as pmapi
 from src.plot.color_pal import FitMethodColors, ModelColors, SeabornColor
 ```
@@ -40,7 +40,7 @@ notebook_tic = time()
 warnings.simplefilter(action="ignore", category=UserWarning)
 
 gg.theme_set(
-    gg.theme_bw()
+    gg.theme_classic()
     + gg.theme(
         figure_size=(4, 4),
         axis_ticks_major=gg.element_blank(),
@@ -230,7 +230,7 @@ school_data.describe()
 
 ![png](005_005_basic-experimentation_files/005_005_basic-experimentation_10_0.png)
 
-    <ggplot: (347717322)>
+    <ggplot: (352512154)>
 
 ```python
 school_data.groupby("prog").agg({"daysabs": ["mean", "std"]}).round(2)
@@ -363,10 +363,10 @@ with nb:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:24<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [8000/8000 00:25<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 41 seconds.
+    Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 47 seconds.
 
 <div>
     <style>
@@ -382,7 +382,7 @@ with nb:
         }
     </style>
   <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 01:12<00:00]
+  100.00% [4000/4000 01:03<00:00]
 </div>
 
 ```python
@@ -541,11 +541,15 @@ az.plot_posterior(nb_trace, var_names=main_vars, hdi_prob=0.89);
 ![png](005_005_basic-experimentation_files/005_005_basic-experimentation_22_0.png)
 
 ```python
-r_idx = np.arange(ppc["daysabs"].shape[1])
-np.random.shuffle(r_idx)
-ppc_df = pd.DataFrame(ppc["daysabs"][:, r_idx[:50]]).pivot_longer(
-    names_to="ppc_idx", values_to="draw"
-)
+def down_sample_ppc(ppc_ary: np.ndarray, n: int) -> tuple[np.ndarray, np.ndarray]:
+    r_idx = np.arange(ppc_ary.shape[1])
+    np.random.shuffle(r_idx)
+    return ppc_ary[:, r_idx[:n]], r_idx
+```
+
+```python
+ppc_sample, _ = down_sample_ppc(ppc["daysabs"], n=50)
+ppc_df = pd.DataFrame(ppc_sample).pivot_longer(names_to="ppc_idx", values_to="draw")
 
 (
     gg.ggplot(ppc_df, gg.aes(x="draw"))
@@ -556,14 +560,15 @@ ppc_df = pd.DataFrame(ppc["daysabs"][:, r_idx[:50]]).pivot_longer(
 )
 ```
 
-![png](005_005_basic-experimentation_files/005_005_basic-experimentation_23_0.png)
+![png](005_005_basic-experimentation_files/005_005_basic-experimentation_24_0.png)
 
-    <ggplot: (352068039)>
+    <ggplot: (356782785)>
 
 ```python
 num_samples = 100
+ppc_sample, r_idx = down_sample_ppc(ppc["daysabs"], n=num_samples)
 ppc_counts_df = (
-    pd.DataFrame(ppc["daysabs"][:, r_idx[:num_samples]])
+    pd.DataFrame(ppc_sample)
     .assign(prog=school_data.prog[r_idx[:num_samples]])
     .pivot_longer(index="prog", names_to="ppc_idx", values_to="draw")
     .assign(x=0)
@@ -592,15 +597,15 @@ real_counts = school_data.groupby(["prog", "daysabs"]).count().reset_index(drop=
 )
 ```
 
-![png](005_005_basic-experimentation_files/005_005_basic-experimentation_24_0.png)
+![png](005_005_basic-experimentation_files/005_005_basic-experimentation_25_0.png)
 
-    <ggplot: (350159222)>
+    <ggplot: (355646811)>
 
 ```python
 az.plot_ppc(nb_trace, num_pp_samples=100, kind="scatter");
 ```
 
-![png](005_005_basic-experimentation_files/005_005_basic-experimentation_25_0.png)
+![png](005_005_basic-experimentation_files/005_005_basic-experimentation_26_0.png)
 
 I next want to replicate their plot shown below.
 It is showing the effect of the math score on number of days absent for each program.
@@ -708,7 +713,7 @@ with nb:
         }
     </style>
   <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 01:23<00:00]
+  100.00% [4000/4000 01:24<00:00]
 </div>
 
 <div>
@@ -788,9 +793,9 @@ post_pred_df.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>14.28900</td>
+      <td>13.80975</td>
       <td>0.0</td>
-      <td>33.0</td>
+      <td>31.0</td>
       <td>General</td>
       <td>1.0</td>
       <td>2.620382</td>
@@ -799,9 +804,9 @@ post_pred_df.head()
     </tr>
     <tr>
       <th>1</th>
-      <td>13.73075</td>
+      <td>13.91450</td>
       <td>0.0</td>
-      <td>31.0</td>
+      <td>32.0</td>
       <td>General</td>
       <td>1.1</td>
       <td>2.619785</td>
@@ -810,9 +815,9 @@ post_pred_df.head()
     </tr>
     <tr>
       <th>2</th>
-      <td>13.77475</td>
+      <td>14.01950</td>
       <td>0.0</td>
-      <td>31.0</td>
+      <td>32.0</td>
       <td>General</td>
       <td>1.2</td>
       <td>2.619189</td>
@@ -821,9 +826,9 @@ post_pred_df.head()
     </tr>
     <tr>
       <th>3</th>
-      <td>14.25225</td>
+      <td>13.91325</td>
       <td>0.0</td>
-      <td>31.0</td>
+      <td>32.0</td>
       <td>General</td>
       <td>1.3</td>
       <td>2.618592</td>
@@ -832,9 +837,9 @@ post_pred_df.head()
     </tr>
     <tr>
       <th>4</th>
-      <td>14.43925</td>
+      <td>13.75900</td>
       <td>0.0</td>
-      <td>32.0</td>
+      <td>31.0</td>
       <td>General</td>
       <td>1.4</td>
       <td>2.617996</td>
@@ -867,9 +872,9 @@ post_pred_df.head()
 )
 ```
 
-![png](005_005_basic-experimentation_files/005_005_basic-experimentation_30_0.png)
+![png](005_005_basic-experimentation_files/005_005_basic-experimentation_31_0.png)
 
-    <ggplot: (352241369)>
+    <ggplot: (355740555)>
 
 ```python
 (
@@ -895,9 +900,433 @@ post_pred_df.head()
 )
 ```
 
-![png](005_005_basic-experimentation_files/005_005_basic-experimentation_31_0.png)
+![png](005_005_basic-experimentation_files/005_005_basic-experimentation_32_0.png)
 
-    <ggplot: (352045614)>
+    <ggplot: (356481970)>
+
+## Examples: Roaches
+
+source: ['rstanarm' vignette: "Estimating Generalized Linear Models for Count Data with rstanarm"](http://mc-stan.org/rstanarm/articles/count.html)
+
+```python
+roaches_path = data_io.project_root_dir() / "data" / "rstanarm" / "roaches.csv"
+roaches = pd.read_csv(roaches_path)
+roaches.head()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>y</th>
+      <th>roach1</th>
+      <th>treatment</th>
+      <th>senior</th>
+      <th>exposure2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>153</td>
+      <td>308.00</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0.800000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>127</td>
+      <td>331.25</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0.600000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>7</td>
+      <td>1.67</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1.000000</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>7</td>
+      <td>3.00</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1.000000</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0</td>
+      <td>2.00</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1.142857</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+Model from the vignette:
+
+```r
+stan_glm1 <- stan_glm(
+    y ~ roach1 + treatment + senior, offset = log(exposure2),
+    data = roaches, family = neg_binomial_2,
+    prior = normal(0, 2.5),
+    prior_intercept = normal(0, 5),
+    seed = 12345
+)
+```
+
+Results:
+
+|   |Parameter             | Median|   CI| CI_low| CI_high|    pd| ROPE_CI| ROPE_low| ROPE_high| ROPE_Percentage|  Rhat|      ESS|
+|:--|:---------------------|------:|----:|------:|-------:|-----:|-------:|--------:|---------:|---------------:|-----:|--------:|
+|1  |(Intercept)           |  2.845| 0.89|  2.483|   3.224| 1.000|    0.95|     -0.1|       0.1|           0.000| 1.000| 5605.984|
+|3  |roach1                |  1.309| 0.89|  0.920|   1.708| 1.000|    0.95|     -0.1|       0.1|           0.000| 1.000| 5041.104|
+|5  |treatment             | -0.774| 0.89| -1.147|  -0.337| 0.999|    0.95|     -0.1|       0.1|           0.000| 0.999| 6094.182|
+|4  |senior                | -0.329| 0.89| -0.768|   0.063| 0.898|    0.95|     -0.1|       0.1|           0.145| 1.000| 5543.693|
+|2  |reciprocal_dispersion |  0.271| 0.89|  0.230|   0.314| 1.000|    0.95|     -0.1|       0.1|           0.000| 1.000| 5732.929|
+
+```python
+roaches.senior.unique()
+```
+
+    array([0, 1])
+
+```python
+roaches.treatment.unique()
+```
+
+    array([1, 0])
+
+```python
+roaches.describe()
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>y</th>
+      <th>roach1</th>
+      <th>treatment</th>
+      <th>senior</th>
+      <th>exposure2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>count</th>
+      <td>262.000000</td>
+      <td>262.000000</td>
+      <td>262.000000</td>
+      <td>262.000000</td>
+      <td>262.000000</td>
+    </tr>
+    <tr>
+      <th>mean</th>
+      <td>25.648855</td>
+      <td>42.193473</td>
+      <td>0.603053</td>
+      <td>0.305344</td>
+      <td>1.021047</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>50.846539</td>
+      <td>75.261969</td>
+      <td>0.490201</td>
+      <td>0.461434</td>
+      <td>0.320757</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.200000</td>
+    </tr>
+    <tr>
+      <th>25%</th>
+      <td>0.000000</td>
+      <td>1.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>1.000000</td>
+    </tr>
+    <tr>
+      <th>50%</th>
+      <td>3.000000</td>
+      <td>7.000000</td>
+      <td>1.000000</td>
+      <td>0.000000</td>
+      <td>1.000000</td>
+    </tr>
+    <tr>
+      <th>75%</th>
+      <td>24.000000</td>
+      <td>50.500000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>357.000000</td>
+      <td>450.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>4.285714</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+(
+    gg.ggplot(roaches, gg.aes(x="roach1", y="y"))
+    + gg.facet_wrap("~ senior")
+    + gg.geom_point(gg.aes(color="factor(treatment)"), alpha=0.5)
+    + gg.scale_color_brewer(type="qual", palette="Set1")
+    + gg.scale_x_continuous(expand=(0.01, 0, 0.02, 0))
+    + gg.scale_y_continuous(expand=(0.01, 0, 0.02, 0))
+    + gg.theme(figure_size=(8, 4))
+)
+```
+
+![png](005_005_basic-experimentation_files/005_005_basic-experimentation_39_0.png)
+
+    <ggplot: (357540994)>
+
+```python
+with pm.Model() as roach_nb:
+    α = pm.HalfNormal("α", 5)
+    β_treat = pm.Normal("β_treat", 0, 2.5)
+    β_senior = pm.Normal("β_senior", 0, 2.5)
+    β_roach = pm.Normal("β_roach", 0, 2.5)
+    β = pm.Normal("β", 0, 5)
+    η = pm.Deterministic(
+        "η",
+        β
+        + β_roach * (roaches.roach1.values / 100.0)
+        + β_treat * roaches.treatment.values
+        + β_senior * roaches.senior.values,
+    )
+    μ = pm.Deterministic("μ", pm.math.exp(η) * roaches.exposure2.values)
+    y = pm.NegativeBinomial("y", μ, α, observed=roaches.y.values)
+```
+
+```python
+pm.model_to_graphviz(roach_nb)
+```
+
+![svg](005_005_basic-experimentation_files/005_005_basic-experimentation_41_0.svg)
+
+```python
+with roach_nb:
+    roach_trace = pm.sample(chains=4, random_seed=349, return_inferencedata=True)
+    roach_ppc = pm.sample_posterior_predictive(roach_trace, random_seed=353)
+    roach_trace.add_groups({"posterior_predictive": roach_ppc})
+```
+
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using jitter+adapt_diag...
+    Multiprocess sampling (4 chains in 2 jobs)
+    NUTS: [β, β_roach, β_senior, β_treat, α]
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [8000/8000 00:15<00:00 Sampling 4 chains, 0 divergences]
+</div>
+
+    Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 37 seconds.
+
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 00:06<00:00]
+</div>
+
+```python
+az.summary(roach_trace, var_names=["β", "α"], filter_vars="like", hdi_prob=0.89)
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>β_treat</th>
+      <td>-0.764</td>
+      <td>0.245</td>
+      <td>-1.151</td>
+      <td>-0.381</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>3575.0</td>
+      <td>2768.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>β_senior</th>
+      <td>-0.326</td>
+      <td>0.264</td>
+      <td>-0.754</td>
+      <td>0.080</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>3614.0</td>
+      <td>2559.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>β_roach</th>
+      <td>1.309</td>
+      <td>0.255</td>
+      <td>0.882</td>
+      <td>1.685</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>3470.0</td>
+      <td>2644.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>β</th>
+      <td>2.841</td>
+      <td>0.237</td>
+      <td>2.463</td>
+      <td>3.221</td>
+      <td>0.005</td>
+      <td>0.003</td>
+      <td>2745.0</td>
+      <td>2436.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>α</th>
+      <td>0.272</td>
+      <td>0.026</td>
+      <td>0.232</td>
+      <td>0.314</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>3952.0</td>
+      <td>2432.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+```python
+az.plot_trace(roach_trace, var_names=["β", "α"], filter_vars="like", compact=False);
+```
+
+![png](005_005_basic-experimentation_files/005_005_basic-experimentation_44_0.png)
+
+```python
+ppc_prop_zero = pd.DataFrame({"prop_zero": (roach_ppc["y"] == 0).mean(axis=0)})
+obs_prop_zero = np.mean(roaches.y == 0)
+(
+    gg.ggplot(ppc_prop_zero, gg.aes(x="prop_zero"))
+    + gg.geom_histogram(
+        color="#BBD2E3", fill="#BBD2E3", alpha=0.5, binwidth=0.01, size=0.5
+    )
+    + gg.geom_vline(xintercept=obs_prop_zero, color="#011F4B", size=1.2)
+    + gg.scale_x_continuous(expand=(0, 0))
+    + gg.scale_y_continuous(expand=(0, 0, 0.02, 0))
+    + gg.theme_classic()
+    + gg.labs(x="proportion of zeros", y="count")
+)
+```
+
+![png](005_005_basic-experimentation_files/005_005_basic-experimentation_45_0.png)
+
+    <ggplot: (356296006)>
 
 ---
 
@@ -906,7 +1335,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 4.41 minutes
+    execution time: 5.76 minutes
 
 ```python
 %load_ext watermark
@@ -931,13 +1360,17 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Git branch: nb-model
 
-    janitor   : 0.21.0
-    re        : 2.2.1
-    arviz     : 0.11.2
-    theano    : 1.0.5
-    plotnine  : 0.8.0
     numpy     : 1.21.2
-    matplotlib: 3.4.3
+    re        : 2.2.1
     pymc3     : 3.11.2
-    pandas    : 1.3.2
     seaborn   : 0.11.2
+    pandas    : 1.3.2
+    janitor   : 0.21.0
+    arviz     : 0.11.2
+    plotnine  : 0.8.0
+    theano    : 1.0.5
+    matplotlib: 3.4.3
+
+```python
+
+```
