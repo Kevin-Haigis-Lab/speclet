@@ -46,6 +46,7 @@ GENES <- unique(GENES)
 
 CELL_LINES <- crc_data %>%
   filter(hugo_symbol %in% !!GENES) %>%
+  filter(!is.na(counts_final)) %>%
   count(depmap_id) %>%
   arrange(desc(n)) %>%
   slice(n = 10) %>%
