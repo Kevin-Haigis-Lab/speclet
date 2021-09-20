@@ -79,7 +79,7 @@ class SpecletSevenConfiguration(BaseModel):
 class SpecletSeven(SpecletModel):
     &#34;&#34;&#34;## SpecletSeven Model.
 
-    A very deep hierarchical model that is, in part, meant to be a proof-of-concept for 
+    A very deep hierarchical model that is, in part, meant to be a proof-of-concept for
     constructing, fitting, and interpreting such a &#34;tall&#34; hierarchical model.
 
     Below is a key for the subscripts used:
@@ -104,16 +104,16 @@ class SpecletSeven(SpecletModel):
     \\end{aligned}
     $$
 
-    What looks like it would normally be found at the first level of the model is 
-    actually at the second level as each parameter is on the &#34;per-gene&#34; level. For 
+    What looks like it would normally be found at the first level of the model is
+    actually at the second level as each parameter is on the &#34;per-gene&#34; level. For
     simplicity the individual pieces are split up below.
 
     $$
     \\mu_a = h_{g,c} + k_c C^{(c)} + n_g C^{(g)} + q_{g,l} R^{(g,l)} + m_{g,l} M \\\\
     $$
 
-    The $h_{g,c}$ parameter measures the varying effect per gene and per cell line. The 
-    cell line effect is modeled further as coming from a distribution for the lineage. 
+    The $h_{g,c}$ parameter measures the varying effect per gene and per cell line. The
+    cell line effect is modeled further as coming from a distribution for the lineage.
     This lineage level is only included if there is more than one lineage.
 
     $$
@@ -126,7 +126,7 @@ class SpecletSeven(SpecletModel):
     \\end{aligned}
     $$
 
-    The $k_c$ parameter measures the cell line-specific copy number effect. The 
+    The $k_c$ parameter measures the cell line-specific copy number effect. The
     covariate $C^{(c)}$ is the copy number alterations scaled per cell line.
 
     $$
@@ -149,7 +149,7 @@ class SpecletSeven(SpecletModel):
     \\end{aligned}
     $$
 
-    The $q_{g,l}$ parameter measures the effect of RNA expression for each gene and 
+    The $q_{g,l}$ parameter measures the effect of RNA expression for each gene and
     lineage combination. The RNA expression covariate $R^{(g,l)}$ is scaled per gene per
     lineage.
 
@@ -805,7 +805,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <pre><code class="python">class SpecletSeven(SpecletModel):
     &#34;&#34;&#34;## SpecletSeven Model.
 
-    A very deep hierarchical model that is, in part, meant to be a proof-of-concept for 
+    A very deep hierarchical model that is, in part, meant to be a proof-of-concept for
     constructing, fitting, and interpreting such a &#34;tall&#34; hierarchical model.
 
     Below is a key for the subscripts used:
@@ -830,16 +830,16 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
     \\end{aligned}
     $$
 
-    What looks like it would normally be found at the first level of the model is 
-    actually at the second level as each parameter is on the &#34;per-gene&#34; level. For 
+    What looks like it would normally be found at the first level of the model is
+    actually at the second level as each parameter is on the &#34;per-gene&#34; level. For
     simplicity the individual pieces are split up below.
 
     $$
     \\mu_a = h_{g,c} + k_c C^{(c)} + n_g C^{(g)} + q_{g,l} R^{(g,l)} + m_{g,l} M \\\\
     $$
 
-    The $h_{g,c}$ parameter measures the varying effect per gene and per cell line. The 
-    cell line effect is modeled further as coming from a distribution for the lineage. 
+    The $h_{g,c}$ parameter measures the varying effect per gene and per cell line. The
+    cell line effect is modeled further as coming from a distribution for the lineage.
     This lineage level is only included if there is more than one lineage.
 
     $$
@@ -852,7 +852,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
     \\end{aligned}
     $$
 
-    The $k_c$ parameter measures the cell line-specific copy number effect. The 
+    The $k_c$ parameter measures the cell line-specific copy number effect. The
     covariate $C^{(c)}$ is the copy number alterations scaled per cell line.
 
     $$
@@ -875,7 +875,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
     \\end{aligned}
     $$
 
-    The $q_{g,l}$ parameter measures the effect of RNA expression for each gene and 
+    The $q_{g,l}$ parameter measures the effect of RNA expression for each gene and
     lineage combination. The RNA expression covariate $R^{(g,l)}$ is scaled per gene per
     lineage.
 

@@ -33,6 +33,15 @@ from typing import Optional
 import theano
 
 
+def get_theano_compile_dir() -&gt; str:
+    &#34;&#34;&#34;Get the Theano compilation directory from the config.
+
+    Returns:
+        str: String of path the compilation directory.
+    &#34;&#34;&#34;
+    return theano.config.compiledir
+
+
 def get_theano_flags(unique_id: str, theano_compiledir: Optional[str] = None) -&gt; str:
     &#34;&#34;&#34;Get shell statement to set Theano flags for a pipeline submission.
 
@@ -45,7 +54,7 @@ def get_theano_flags(unique_id: str, theano_compiledir: Optional[str] = None) -&
         str: String with a statement for setting some Theano configurations.
     &#34;&#34;&#34;
     if theano_compiledir is None:
-        theano_compiledir = theano.config.compiledir
+        theano_compiledir = get_theano_compile_dir()
     return f&#34;THEANO_FLAGS=&#39;compiledir={theano_compiledir}/&#39;&#34; + unique_id</code></pre>
 </details>
 </section>
@@ -56,6 +65,29 @@ def get_theano_flags(unique_id: str, theano_compiledir: Optional[str] = None) -&
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="src.pipelines.theano_flags.get_theano_compile_dir"><code class="name flex">
+<span>def <span class="ident">get_theano_compile_dir</span></span>(<span>) -> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the Theano compilation directory from the config.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>String of path the compilation directory.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_theano_compile_dir() -&gt; str:
+    &#34;&#34;&#34;Get the Theano compilation directory from the config.
+
+    Returns:
+        str: String of path the compilation directory.
+    &#34;&#34;&#34;
+    return theano.config.compiledir</code></pre>
+</details>
+</dd>
 <dt id="src.pipelines.theano_flags.get_theano_flags"><code class="name flex">
 <span>def <span class="ident">get_theano_flags</span></span>(<span>unique_id: str, theano_compiledir: Optional[str] = None) -> str</span>
 </code></dt>
@@ -90,7 +122,7 @@ instead of the default Theano compilation directory. Defaults to None.</dd>
         str: String with a statement for setting some Theano configurations.
     &#34;&#34;&#34;
     if theano_compiledir is None:
-        theano_compiledir = theano.config.compiledir
+        theano_compiledir = get_theano_compile_dir()
     return f&#34;THEANO_FLAGS=&#39;compiledir={theano_compiledir}/&#39;&#34; + unique_id</code></pre>
 </details>
 </dd>
@@ -112,6 +144,7 @@ instead of the default Theano compilation directory. Defaults to None.</dd>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="src.pipelines.theano_flags.get_theano_compile_dir" href="#src.pipelines.theano_flags.get_theano_compile_dir">get_theano_compile_dir</a></code></li>
 <li><code><a title="src.pipelines.theano_flags.get_theano_flags" href="#src.pipelines.theano_flags.get_theano_flags">get_theano_flags</a></code></li>
 </ul>
 </li>

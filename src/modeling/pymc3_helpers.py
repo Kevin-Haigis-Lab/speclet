@@ -1,11 +1,14 @@
 """Simple functions for common interactions with PyMC3."""
 
 from math import floor
-from typing import Optional
+from typing import Optional, Union
 
 import arviz as az
+import numpy as np
 import pymc3 as pm
 import xarray as xr
+from pymc3.model import PyMC3Variable
+from theano import tensor as tt
 
 from src.exceptions import RequiredArgumentError
 
@@ -124,3 +127,129 @@ def get_one_chain(posterior: xr.DataArray, chain_num: int = 0) -> xr.DataArray:
         xr.DataArray: The same posterior data structure but with only the desired chain.
     """
     return posterior.sel(chain=chain_num)
+
+
+def hierarchical_normal(
+    name: str,
+    shape: tuple[int, ...],
+    centered: bool = True,
+    mu: Optional[PyMC3Variable] = None,
+    mu_mean: float = 0.0,
+    mu_sd: float = 2.5,
+    sigma_sd: float = 2.5,
+) -> PyMC3Variable:
+    """Create a non-centered parameterized hierarchical variable.
+
+    Args:
+        name (str): Variable name.
+        shape (tuple[int, ...]): Variable shape.
+        centered (bool, optional): Centered or non-centered parameterization? Defaults
+          to `True` (centered).
+        mu (Optional[PyMC3Variable], optional): Optional pre-made hyper-distribution
+          mean. Defaults to None.
+        mu_mean (float, optional): Mean of the hyper-distribution mean hyperparameter.
+          Defaults to 0.0.
+        mu_sd (float, optional): Standard deviation of the hyper-distribution mean
+          hyperparameter. Defaults to 2.5.
+        sigma_sd (float, optional): Standard deviation of the hyper-distribution
+          standard deviation hyperparameter. Defaults to 2.5.
+
+    Returns:
+        PyMC3Variable: The create variable.
+    """
+    if mu is None:
+        mu = pm.Normal(f"μ_{name}", mu_mean, mu_sd)
+
+    sigma = pm.HalfNormal(f"σ_{name}", sigma_sd)
+
+    if centered:
+        v = pm.Normal(name, mu, sigma, shape=shape)
+    else:
+        delta = pm.Normal(f"Δ_{name}", 0.0, 1.0, shape=shape)
+        v = pm.Deterministic(name, mu + delta * sigma)
+
+    return v
+
+
+def hierarchical_normal_with_avg(
+    name: str,
+    avg_map: dict[str, Union[float, np.ndarray, tt.TensorConstant]],
+    shape: tuple[int, ...],
+    centered: bool = True,
+    mu: Optional[PyMC3Variable] = None,
+    mu_mean: float = 0.0,
+    mu_sd: float = 2.5,
+    sigma_sd: float = 2.5,
+    gamma_mean: float = 0.0,
+    gamma_sd: float = 2.5,
+) -> PyMC3Variable:
+    """Create a non-centered hierarchical variable with group-level mean predictors.
+
+    In a hierarchical model, "when one or more predictors correlate with the group or
+    unit effects, a key Gauss-Markov assumption is violated," and this may result in
+    poor estimates of parameter uncertainty. This function implements
+    `src.modeling.pymc3_helpers.hierarchical_normal()` except includes predictors for
+    group-level means to overcome this problem. See *Fitting Multilevel Models When
+    Predictors and GroupEffects Correlate* by Bafumi and Gelman for details.
+
+    Args:
+        name (str): Variable name.
+        avg_map (dict[str, Union[float, np.ndarray]]): Map of other predictor names to
+          their group-level means. See the example.
+        shape (tuple[int, ...]): Variable shape.
+        centered (bool, optional): Centered or non-centered parameterization? Defaults
+          to `True` (centered).
+        mu (Optional[PyMC3Variable], optional): Optional pre-made hyper-distribution
+          mean. Defaults to None.
+        mu_mean (float, optional): Mean of the hyper-distribution mean hyperparameter.
+          Defaults to 0.0.
+        mu_sd (float, optional): Standard deviation of the hyper-distribution mean
+          hyperparameter. Defaults to 2.5.
+        sigma_sd (float, optional): Standard deviation of the hyper-distribution
+          standard deviation hyperparameter. Defaults to 2.5.
+        gamma_mean (float, optional): Mean of the group-level predictor variables.
+          Defaults to 0.0.
+        gamma_sd (float, optional): Standard deviation of the group-level predictor
+          variables. Defaults to 2.5.
+
+    Returns:
+        PyMC3Variable: The create variable.
+
+    Example:
+        Example from *Modeling Shark Attacks in Python with PyMC3* in "Mixed Effects."
+        (https://austinrochford.com/posts/2021-06-27-sharks-pymc3.html#mixed-effects)
+        >>> def standardize(x: np.ndarray) -> np.ndarray:
+        ...     return (x - x.mean()) / x.std()
+        >>>
+        >>> x_pop_bar = tt.constant(
+        ...     standardize(
+        ...         attacks_df.assign(x_pop=x_pop.eval())
+        ...         .groupby(level="State")["x_pop"]
+        ...         .mean()
+        ...         .values
+        ...     )
+        ... )
+        >>>
+        >>> with pm.Model() as mixed_model:
+        ...     β0 = noncentered_normal_with_avg(
+        ...         "β0", {"pop": x_pop_bar}, n_state
+        ...     )
+    """
+    if mu is None:
+        mu = pm.Normal(f"μ_{name}", mu_mean, mu_sd)
+
+    avg_terms_sum = 0.0
+
+    for term_name, x_bar in avg_map.items():
+        _gamma = pm.Normal(f"γ_{name}_{term_name}_bar", gamma_mean, gamma_sd) * x_bar
+        avg_terms_sum += _gamma
+
+    return hierarchical_normal(
+        name=name,
+        shape=shape,
+        centered=centered,
+        mu=mu + avg_terms_sum,
+        mu_mean=mu_mean,
+        mu_sd=mu_sd,
+        sigma_sd=sigma_sd,
+    )
