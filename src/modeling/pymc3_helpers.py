@@ -131,7 +131,7 @@ def get_one_chain(posterior: xr.DataArray, chain_num: int = 0) -> xr.DataArray:
 
 def hierarchical_normal(
     name: str,
-    shape: tuple[int, ...],
+    shape: Union[int, tuple[int, ...]],
     centered: bool = True,
     mu: Optional[PyMC3Variable] = None,
     mu_mean: float = 0.0,
@@ -142,7 +142,7 @@ def hierarchical_normal(
 
     Args:
         name (str): Variable name.
-        shape (tuple[int, ...]): Variable shape.
+        shape (Union[int, tuple[int, ...]]): Variable shape.
         centered (bool, optional): Centered or non-centered parameterization? Defaults
           to `True` (centered).
         mu (Optional[PyMC3Variable], optional): Optional pre-made hyper-distribution
@@ -174,7 +174,7 @@ def hierarchical_normal(
 def hierarchical_normal_with_avg(
     name: str,
     avg_map: dict[str, Union[float, np.ndarray, tt.TensorConstant]],
-    shape: tuple[int, ...],
+    shape: Union[int, tuple[int, ...]],
     centered: bool = True,
     mu: Optional[PyMC3Variable] = None,
     mu_mean: float = 0.0,
@@ -196,7 +196,7 @@ def hierarchical_normal_with_avg(
         name (str): Variable name.
         avg_map (dict[str, Union[float, np.ndarray]]): Map of other predictor names to
           their group-level means. See the example.
-        shape (tuple[int, ...]): Variable shape.
+        shape (Union[int, tuple[int, ...]]): Variable shape.
         centered (bool, optional): Centered or non-centered parameterization? Defaults
           to `True` (centered).
         mu (Optional[PyMC3Variable], optional): Optional pre-made hyper-distribution
