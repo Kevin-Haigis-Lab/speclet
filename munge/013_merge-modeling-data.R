@@ -91,10 +91,7 @@ get_read_counts_data <- function(achilles_reads_path) {
   achilles_rc <- qs::qread(achilles_reads_path) %>%
     prepare_lfc_data(screen_source = "broad") %>%
     dplyr::rename(counts_final = read_counts) %>%
-    mutate(
-      p_dna_batch = as.character(p_dna_batch),
-      counts_initial = counts_final / (2**lfc)
-    )
+    mutate(p_dna_batch = as.character(p_dna_batch))
 
   if (nrow(achilles_rc) == 0) {
     warn(logger, "Read count data not found.")
@@ -361,10 +358,12 @@ join_with_readcounts <- function(lfc_data, reads_df) {
   if (is.null(reads_df)) {
     info(logger, "No read counts data - setting to `counts_final = NA`.")
     lfc_data$counts_final <- NA
+    lfc_data$counts_initial <- NA
     return(lfc_data)
   }
   d <- lfc_data %>%
-    left_join(reads_df, by = c("sgrna", "replicate_id", "p_dna_batch", "screen"))
+    left_join(reads_df, by = c("sgrna", "replicate_id", "p_dna_batch", "screen")) %>%
+    mutate(counts_initial = counts_final / (2**lfc))
   return(d)
 }
 
