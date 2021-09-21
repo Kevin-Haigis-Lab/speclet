@@ -16,7 +16,7 @@ library(tidyverse)
 #### ---- Load data ---- ####
 
 data <- data.table::fread(
-  snakemake@input[["modeling_df"]],
+  x, # snakemake@input[["modeling_df"]],
   showProgress = FALSE
 )
 data <- as_tibble(data)
@@ -34,8 +34,8 @@ write_csv(crc_data, snakemake@output[["crc_subset"]])
 
 set.seed(0)
 
-# CELL_LINES <- sample(unique(crc_data$depmap_id), 10)
-GENES <- sample(unique(crc_data$hugo_symbol), 50)
+CELL_LINES <- sample(unique(crc_data$depmap_id), 10)
+GENES <- sample(unique(crc_data$hugo_symbol), 100)
 
 GENES <- c(
   GENES, "KRAS", "BRAF", "NRAS", "PIK3CA", "TP53", "MDM2", "MDM4", "APC", "FBXW7",
@@ -44,14 +44,6 @@ GENES <- c(
 )
 GENES <- unique(GENES)
 
-CELL_LINES <- crc_data %>%
-  filter(hugo_symbol %in% !!GENES) %>%
-  filter(!is.na(counts_final)) %>%
-  count(depmap_id) %>%
-  arrange(desc(n)) %>%
-  slice(n = 10) %>%
-  pull(depmap_id) %>%
-  unlist()
 
 sample_sgrna_from_gene <- function(df, genes, n_sgrna) {
   df %>%
@@ -67,7 +59,7 @@ SGRNAS <- sample_sgrna_from_gene(crc_data, GENES, 3)
 
 crc_data %>%
   filter(depmap_id %in% !!CELL_LINES) %>%
-  filter(sgrna %in% SGRNAS) %>%
+  filter(sgrna %in% !!SGRNAS) %>%
   write_csv(snakemake@output[["crc_subsample"]])
 
 
