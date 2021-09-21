@@ -16,7 +16,7 @@ library(tidyverse)
 #### ---- Load data ---- ####
 
 data <- data.table::fread(
-  x, # snakemake@input[["modeling_df"]],
+  snakemake@input[["modeling_df"]],
   showProgress = FALSE
 )
 data <- as_tibble(data)
