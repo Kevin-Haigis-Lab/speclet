@@ -382,3 +382,22 @@ def describe_mcmc(
         plt.show()
 
     return mcmc_descr
+
+
+def down_sample_ppc(
+    ppc_ary: np.ndarray, n: int, axis: int = 0
+) -> tuple[np.ndarray, np.ndarray]:
+    """Down sample a PPC (or any numpy) array.
+
+    Args:
+        ppc_ary (np.ndarray): PPC array.
+        n (int): Number of samples to return.
+        axis (int, optional): The axis corresponding to the data samples. Defaults to 0.
+
+    Returns:
+        tuple[np.ndarray, np.ndarray]: A numpy array with `n` samples and an array of
+        the indices sampled.
+    """
+    r_idx = np.arange(ppc_ary.shape[axis])
+    np.random.shuffle(r_idx)
+    return ppc_ary[:, r_idx[:n]], r_idx
