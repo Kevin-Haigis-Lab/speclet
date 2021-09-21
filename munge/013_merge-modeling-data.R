@@ -298,7 +298,7 @@ if (!is.null(rc_data)) {
   rc_data <- rc_data %>%
     remove_sgrna_that_target_multiple_genes() %>%
     reconcile_sgrna_targeting_one_gene_in_mutliple_places() %>%
-    select(sgrna, replicate_id, p_dna_batch, read_counts, screen)
+    select(sgrna, replicate_id, p_dna_batch, counts_final, screen)
 }
 
 sample_info <- get_sample_info(sample_info_file, DEPMAP_ID)
