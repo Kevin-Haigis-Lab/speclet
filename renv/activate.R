@@ -130,10 +130,10 @@ local({
     }
 
     utils::download.file(
-      url = url,
+      url      = url,
       destfile = destfile,
-      mode = mode,
-      quiet = TRUE
+      mode     = mode,
+      quiet    = TRUE
     )
   }
 
@@ -147,11 +147,11 @@ local({
 
     info <- tryCatch(
       utils::download.packages(
-        pkgs = "renv",
+        pkgs    = "renv",
         destdir = tempdir(),
-        repos = repos,
-        type = type,
-        quiet = TRUE
+        repos   = repos,
+        type    = type,
+        quiet   = TRUE
       ),
       condition = identity
     )
@@ -395,11 +395,11 @@ local({
 
     # read /etc/os-release
     release <- utils::read.table(
-      file = file,
-      sep = "=",
-      quote = c("\"", "'"),
-      col.names = c("Key", "Value"),
-      comment.char = "#",
+      file             = file,
+      sep              = "=",
+      quote            = c("\"", "'"),
+      col.names        = c("Key", "Value"),
+      comment.char     = "#",
       stringsAsFactors = FALSE
     )
 

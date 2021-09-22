@@ -30,6 +30,7 @@
 
 &#34;&#34;&#34;A helpful command line interface for simulation-based calibration.&#34;&#34;&#34;
 
+import shutil
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -45,6 +46,7 @@ from src.io import model_config
 from src.loggers import logger
 from src.modeling import simulation_based_calibration_helpers as sbc
 from src.models import configuration
+from src.pipelines.theano_flags import get_theano_compile_dir
 from src.project_enums import MockDataSize, ModelFitMethod, SpecletPipeline
 
 cli_helpers.configure_pretty()
@@ -91,6 +93,12 @@ def _check_theano_config() -&gt; None:
     return None
 
 
+def _remove_thenao_comp_dir() -&gt; None:
+    _theano_comp_dir = get_theano_compile_dir()
+    logger.info(f&#34;Removing Theano compilation directory: &#39;{_theano_comp_dir}&#39;.&#34;)
+    shutil.rmtree(_theano_comp_dir, ignore_errors=True)
+
+
 @app.command()
 def run_sbc(
     name: str,
@@ -101,6 +109,7 @@ def run_sbc(
     mock_data_path: Optional[Path] = None,
     data_size: Optional[MockDataSize] = None,
     check_results: bool = True,
+    remove_theano_comp_dir: bool = False,
 ) -&gt; None:
     &#34;&#34;&#34;CLI for running a round of simulation-based calibration for a model.
 
@@ -117,7 +126,12 @@ def run_sbc(
           Is ignored if a path is supplied to pre-existing mock data in the
           `mock_data_path` argument. Defaults to None.
         check_results (bool, optional): Should the results be checked for completeness
-          (based off of known issues with the SBC pipeline&#39;s fidelity)? Defaults to True
+          (based off of known issues with the SBC pipeline&#39;s fidelity)? Defaults to
+          True.
+        remove_theano_comp_dir (bool, optional): Should the Theano compilation
+          directory be removed when the SBC finishes? Only use this if you are
+          certain that no other job is using this compilation directory. Defaults to
+          False.
 
     Returns:
         None: None
@@ -163,7 +177,12 @@ def run_sbc(
             sbc_check.sbc_file_manager.clear_results()
             sbc_check.sbc_file_manager.clear_saved_data()
             sp_model.cache_manager.clear_all_caches()
+            if remove_theano_comp_dir:
+                _remove_thenao_comp_dir()
             raise FailedSBCCheckError(sbc_check.message)
+
+    if remove_theano_comp_dir:
+        _remove_thenao_comp_dir()
 
     return None
 
@@ -273,7 +292,7 @@ def make_mock_data(
 </details>
 </dd>
 <dt id="src.command_line_interfaces.simulation_based_calibration_cli.run_sbc"><code class="name flex">
-<span>def <span class="ident">run_sbc</span></span>(<span>name: str, config_path: pathlib.Path, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, cache_dir: pathlib.Path, sim_number: int, mock_data_path: Optional[pathlib.Path] = None, data_size: Optional[<a title="src.project_enums.MockDataSize" href="../project_enums.html#src.project_enums.MockDataSize">MockDataSize</a>] = None, check_results: bool = True) -> NoneType</span>
+<span>def <span class="ident">run_sbc</span></span>(<span>name: str, config_path: pathlib.Path, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, cache_dir: pathlib.Path, sim_number: int, mock_data_path: Optional[pathlib.Path] = None, data_size: Optional[<a title="src.project_enums.MockDataSize" href="../project_enums.html#src.project_enums.MockDataSize">MockDataSize</a>] = None, check_results: bool = True, remove_theano_comp_dir: bool = False) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>CLI for running a round of simulation-based calibration for a model.</p>
@@ -299,7 +318,13 @@ Is ignored if a path is supplied to pre-existing mock data in the
 <code>mock_data_path</code> argument. Defaults to None.</dd>
 <dt><strong><code>check_results</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Should the results be checked for completeness
-(based off of known issues with the SBC pipeline's fidelity)? Defaults to True</dd>
+(based off of known issues with the SBC pipeline's fidelity)? Defaults to
+True.</dd>
+<dt><strong><code>remove_theano_comp_dir</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the Theano compilation
+directory be removed when the SBC finishes? Only use this if you are
+certain that no other job is using this compilation directory. Defaults to
+False.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -320,6 +345,7 @@ def run_sbc(
     mock_data_path: Optional[Path] = None,
     data_size: Optional[MockDataSize] = None,
     check_results: bool = True,
+    remove_theano_comp_dir: bool = False,
 ) -&gt; None:
     &#34;&#34;&#34;CLI for running a round of simulation-based calibration for a model.
 
@@ -336,7 +362,12 @@ def run_sbc(
           Is ignored if a path is supplied to pre-existing mock data in the
           `mock_data_path` argument. Defaults to None.
         check_results (bool, optional): Should the results be checked for completeness
-          (based off of known issues with the SBC pipeline&#39;s fidelity)? Defaults to True
+          (based off of known issues with the SBC pipeline&#39;s fidelity)? Defaults to
+          True.
+        remove_theano_comp_dir (bool, optional): Should the Theano compilation
+          directory be removed when the SBC finishes? Only use this if you are
+          certain that no other job is using this compilation directory. Defaults to
+          False.
 
     Returns:
         None: None
@@ -382,7 +413,12 @@ def run_sbc(
             sbc_check.sbc_file_manager.clear_results()
             sbc_check.sbc_file_manager.clear_saved_data()
             sp_model.cache_manager.clear_all_caches()
+            if remove_theano_comp_dir:
+                _remove_thenao_comp_dir()
             raise FailedSBCCheckError(sbc_check.message)
+
+    if remove_theano_comp_dir:
+        _remove_thenao_comp_dir()
 
     return None</code></pre>
 </details>

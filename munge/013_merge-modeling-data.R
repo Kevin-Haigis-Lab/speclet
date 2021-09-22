@@ -90,6 +90,7 @@ get_read_counts_data <- function(achilles_reads_path) {
 
   achilles_rc <- qs::qread(achilles_reads_path) %>%
     prepare_lfc_data(screen_source = "broad") %>%
+    dplyr::rename(counts_final = read_counts) %>%
     mutate(p_dna_batch = as.character(p_dna_batch))
 
   if (nrow(achilles_rc) == 0) {
@@ -297,7 +298,7 @@ if (!is.null(rc_data)) {
   rc_data <- rc_data %>%
     remove_sgrna_that_target_multiple_genes() %>%
     reconcile_sgrna_targeting_one_gene_in_mutliple_places() %>%
-    select(sgrna, replicate_id, p_dna_batch, read_counts, screen)
+    select(sgrna, replicate_id, p_dna_batch, counts_final, screen)
 }
 
 sample_info <- get_sample_info(sample_info_file, DEPMAP_ID)
@@ -355,12 +356,14 @@ stopifnot(!any(is.na(rc_data$sgrna)))
 join_with_readcounts <- function(lfc_data, reads_df) {
   info(logger, "Joining LFC data and read counts.")
   if (is.null(reads_df)) {
-    info(logger, "No read counts data - setting to `read_counts = NA`.")
-    lfc_data$read_counts <- NA
+    info(logger, "No read counts data - setting to `counts_final = NA`.")
+    lfc_data$counts_final <- NA
+    lfc_data$counts_initial <- NA
     return(lfc_data)
   }
   d <- lfc_data %>%
-    left_join(reads_df, by = c("sgrna", "replicate_id", "p_dna_batch", "screen"))
+    left_join(reads_df, by = c("sgrna", "replicate_id", "p_dna_batch", "screen")) %>%
+    mutate(counts_initial = counts_final / (2**lfc))
   return(d)
 }
 
@@ -533,7 +536,7 @@ cat(br)
 
 info(logger, glue("Dimesions of final data: {sdim(combined_data)}"))
 
-read_counts <- combined_data$read_counts
+read_counts <- combined_data$counts_final
 read_counts <- read_counts[!is.na(read_counts)]
 info(logger, glue("Number of read count data points: {length(read_counts)}."))
 if (length(read_counts) > 1) {

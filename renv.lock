@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.1.0",
+    "Version": "4.1.1",
     "Repositories": [
       {
         "Name": "https://cran.rstudio.com",
@@ -103,10 +103,10 @@
     },
     "R.cache": {
       "Package": "R.cache",
-      "Version": "0.14.0",
+      "Version": "0.15.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "1ca02d43e1a4d49e616bd23bb39b17e6"
+      "Hash": "e92a8ea8388c47c82ed8aa435ed3be50"
     },
     "R.methodsS3": {
       "Package": "R.methodsS3",
@@ -166,10 +166,10 @@
     },
     "Rcpp": {
       "Package": "Rcpp",
-      "Version": "1.0.5",
+      "Version": "1.0.7",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "125dc7a0ed375eb68c0ce533b48d291f"
+      "Hash": "dab19adae4440ae55aa8a9d238b246bb"
     },
     "RcppParallel": {
       "Package": "RcppParallel",
@@ -541,10 +541,10 @@
     },
     "htmltools": {
       "Package": "htmltools",
-      "Version": "0.5.0",
+      "Version": "0.5.2",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "7d651b7131794fe007b1ad6f21aaa401"
+      "Hash": "526c484233f42522278ab06fb185cb26"
     },
     "httr": {
       "Package": "httr",
@@ -917,10 +917,10 @@
     },
     "styler": {
       "Package": "styler",
-      "Version": "1.4.1",
+      "Version": "1.5.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "2ec6308547ffe73208cef3ef3766fc33"
+      "Hash": "eb62a56987abe8fa9d1de47eef53a790"
     },
     "sys": {
       "Package": "sys",

@@ -35,10 +35,15 @@ write_csv(crc_data, snakemake@output[["crc_subset"]])
 set.seed(0)
 
 CELL_LINES <- sample(unique(crc_data$depmap_id), 10)
-GENES <- sample(unique(crc_data$hugo_symbol), 50)
+GENES <- sample(unique(crc_data$hugo_symbol), 100)
 
-GENES <- c(GENES, "KRAS", "BRAF", "NRAS", "PIK3CA", "TP53", "MDM2", "MDM4", "APC", "FBXW7", "STK11", "PTK2", "CTNNB1", "KLF5", "GATA6")
+GENES <- c(
+  GENES, "KRAS", "BRAF", "NRAS", "PIK3CA", "TP53", "MDM2", "MDM4", "APC", "FBXW7",
+  "STK11", "PTK2", "CTNNB1", "KLF5",
+  "GATA6"
+)
 GENES <- unique(GENES)
+
 
 sample_sgrna_from_gene <- function(df, genes, n_sgrna) {
   df %>%
@@ -54,7 +59,7 @@ SGRNAS <- sample_sgrna_from_gene(crc_data, GENES, 3)
 
 crc_data %>%
   filter(depmap_id %in% !!CELL_LINES) %>%
-  filter(sgrna %in% SGRNAS) %>%
+  filter(sgrna %in% !!SGRNAS) %>%
   write_csv(snakemake@output[["crc_subsample"]])
 
 

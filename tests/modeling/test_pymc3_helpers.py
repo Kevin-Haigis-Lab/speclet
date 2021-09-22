@@ -3,6 +3,7 @@ import pandas as pd
 import pymc3 as pm
 import pytest
 from seaborn import load_dataset
+from theano import tensor as tt
 
 import src.exceptions
 from src.modeling import pymc3_helpers as pmhelp
@@ -90,3 +91,49 @@ def test_get_one_chain(
     post = centered_eight["posterior"][var_name]
     new_post = pmhelp.get_one_chain(post, chain_num=chain_num)
     assert new_post.shape == new_shape
+
+
+@pytest.mark.parametrize("centered", (True, False))
+def test_hierarchical_normal(centered: bool):
+    with pm.Model() as m:
+        a = pmhelp.hierarchical_normal("var-name", shape=(2, 5), centered=centered)
+
+    assert a.name == "var-name"
+    assert a.ndim == 2
+
+    if centered:
+        assert a.dshape == (2, 5)
+        assert isinstance(a, pm.model.FreeRV)
+        with pytest.raises(KeyError):
+            _ = m["Δ_var-name"]
+    else:
+        assert m["Δ_var-name"].dshape == (2, 5)
+        assert isinstance(a, pm.model.DeterministicWrapper)
+
+
+@pytest.mark.DEV
+@pytest.mark.parametrize("centered", (True, False))
+def test_hierarchical_normal_with_avg(centered: bool):
+
+    avgs = tt.constant([1, 2, 3, 4, 5])
+    shape = (5,)
+
+    with pm.Model() as m:
+        a = pmhelp.hierarchical_normal_with_avg(
+            "var-name", avg_map={"other-var": avgs}, shape=shape, centered=centered
+        )
+
+    assert a.name == "var-name"
+    assert a.ndim == 1
+
+    gamma = m["γ_var-name_other-var_bar"]
+    assert isinstance(gamma, pm.model.FreeRV)
+
+    if centered:
+        assert a.dshape == shape
+        assert isinstance(a, pm.model.FreeRV)
+        with pytest.raises(KeyError):
+            _ = m["Δ_var-name"]
+    else:
+        assert m["Δ_var-name"].dshape == shape
+        assert isinstance(a, pm.model.DeterministicWrapper)
