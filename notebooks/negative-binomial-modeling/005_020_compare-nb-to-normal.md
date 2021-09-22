@@ -12,6 +12,7 @@ Comparisons will be made on computational efficiency, MCMC diagnositics, model a
 
 ```python
 import logging
+import pprint
 import re
 import string
 import warnings
@@ -312,7 +313,7 @@ plot_df = (
 
 ![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_10_0.png)
 
-    <ggplot: (358141522)>
+    <ggplot: (351049623)>
 
 ```python
 (
@@ -329,7 +330,7 @@ plot_df = (
 
 ![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_11_0.png)
 
-    <ggplot: (358323276)>
+    <ggplot: (351224098)>
 
 ```python
 ax = sns.scatterplot(data=data, x="counts_initial", y="counts_final")
@@ -340,7 +341,7 @@ plt.show()
 
 ![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_12_0.png)
 
-## Model fitting
+## Modeling
 
 Fit models with hierarchical structure for gene and copy number effect per cell line.
 
@@ -376,6 +377,18 @@ y &\sim \text{N}(\mu, \sigma)
 \end{aligned}
 $$
 
+**The following two blocks show the data point(s) with 0 initial reads. This issue will be resolved in a new PR, then they can be deleted.**
+
+```python
+data[data.counts_initial == 0][
+    ["depmap_id", "hugo_symbol", "sgrna", "lfc", "counts_final", "counts_initial"]
+]
+```
+
+```python
+data = data[data.counts_initial > 0].reset_index(drop=True)
+```
+
 ```python
 gene_idx, n_genes = dphelp.get_indices_and_count(data, "hugo_symbol")
 print(f"number of genes: {n_genes}")
@@ -387,7 +400,9 @@ print(f"number of cell lines: {n_cells}")
     number of genes: 101
     number of cell lines: 6
 
-### Negative Binomial model
+### Build models
+
+#### Negative Binomial model
 
 ```python
 gene_copynumber_averages = vhelp.careful_zscore(
@@ -400,27 +415,26 @@ with pm.Model() as nb_model:
     g = pm.Data("g", gene_idx)
     c = pm.Data("c", cell_line_idx)
     x_cna = pm.Data("x_cna", data.copy_number_z.values)
-    x_cna_bar = pm.Data("x_cna_bar", gene_copynumber_averages)
     ct_i = pm.Data("initial_count", data.counts_initial.values)
     ct_f = pm.Data("final_count", data.counts_final.values)
 
-    β_0 = pmhelp.hierarchical_normal("β_0", shape=n_cells, centered=False)
-    β_cna = pmhelp.hierarchical_normal(
-        "β_cna", shape=n_cells, centered=False, mu_sd=1.0, sigma_sd=1.0
+    β_0 = pmhelp.hierarchical_normal(
+        "β_0", shape=n_genes, centered=False, mu_sd=0.1, sigma_sd=0.1
     )
-    η = pm.Deterministic("η", β_0[c] + β_cna[c] * x_cna)
-
-    μ = pm.Deterministic("μ", pm.math.exp(η))
-    α = pm.HalfNormal("α", 2.5)
-
-    y = pm.NegativeBinomial("y", μ * ct_i, α, observed=ct_f)
+    β_cna = pmhelp.hierarchical_normal(
+        "β_cna", shape=n_cells, centered=False, mu_sd=0.1, sigma_sd=0.1
+    )
+    η = pm.Deterministic("η", β_0[g] + β_cna[c] * x_cna)
+    μ = pm.Deterministic("μ", pm.math.exp(η) * ct_i)
+    α = pm.HalfNormal("α", 50)
+    y = pm.NegativeBinomial("y", μ, α, observed=ct_f)
 
 pm.model_to_graphviz(nb_model)
 ```
 
-![svg](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_17_0.svg)
+![svg](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_21_0.svg)
 
-### Normal linear regression model
+#### Normal linear regression model
 
 ```python
 with pm.Model() as lin_model:
@@ -429,20 +443,206 @@ with pm.Model() as lin_model:
     x_cna = pm.Data("x_cna", data.copy_number_z.values)
     lfc = pm.Data("lfc", data.lfc.values)
 
-    β_0 = pmhelp.hierarchical_normal("β_0", shape=n_genes, centered=False)
+    β_0 = pmhelp.hierarchical_normal(
+        "β_0", shape=n_genes, centered=False, mu_sd=1.0, sigma_sd=1.0
+    )
     β_cna = pmhelp.hierarchical_normal(
-        "β_cna", shape=n_cells, centered=False, mu_sd=1.0, sigma_sd=1.0
+        "β_cna", shape=n_cells, centered=False, mu_sd=0.5, sigma_sd=1.0
     )
     μ = pm.Deterministic("μ", β_0[g] + β_cna[c] * x_cna)
 
-    σ = pm.HalfNormal("σ", 5)
+    σ = pm.HalfNormal("σ", 1)
 
     y = pm.Normal("y", μ, σ, observed=lfc)
 
 pm.model_to_graphviz(lin_model)
 ```
 
-![svg](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_19_0.svg)
+![svg](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_23_0.svg)
+
+### Prior predictive checks
+
+```python
+prior_pred_kwargs = {"samples": 500, "random_seed": RANDOM_SEED}
+
+with nb_model:
+    nb_prior_pred = pm.sample_prior_predictive(**prior_pred_kwargs)
+
+
+with lin_model:
+    lin_prior_pred = pm.sample_prior_predictive(**prior_pred_kwargs)
+```
+
+```python
+def summarize_array(a: np.ndarray, name: str) -> np.ndarray:
+    return pd.DataFrame(
+        {
+            "min": a.min(),
+            "25%": np.quantile(a, q=0.25).astype(int),
+            "mean": a.mean().astype(int),
+            "median": np.median(a),
+            "75%": np.quantile(a, q=0.75).astype(int),
+            "max": a.max(),
+        },
+        index=[name],
+    )
+
+
+def get_varnames_to_print(prior_pred: dict[str, np.ndarray]) -> list[str]:
+    single_dim_vars: list[str] = []
+    for varname, vals in prior_pred.items():
+        if "log__" in varname or vals.ndim != 1:
+            continue
+        single_dim_vars.append(varname)
+    return single_dim_vars
+
+
+def plot_prior_pred_against_real(
+    prior_pred_i: np.array,
+    real_values: pd.Series,
+    i: int,
+    binwidth: float,
+    x_lab: str = "value",
+) -> gg.ggplot:
+    plot = (
+        gg.ggplot(
+            pd.DataFrame({"model": prior_pred_i, "observed": real_values}).pivot_longer(
+                names_to="source"
+            ),
+            gg.aes(x="value"),
+        )
+        + gg.geom_histogram(
+            gg.aes(fill="source"), alpha=0.75, binwidth=binwidth, position="identity"
+        )
+        + gg.scale_x_continuous(expand=(0, 0))
+        + gg.scale_y_continuous(expand=(0, 0, 0.02, 0))
+        + gg.scale_fill_brewer(type="qual", palette="Set1")
+        + gg.theme(
+            figure_size=(8, 4),
+            legend_title=gg.element_blank(),
+            legend_position=(0.8, 0.3),
+            legend_background=gg.element_blank(),
+        )
+        + gg.labs(
+            x=x_lab,
+            y="count",
+            title=f"Prior predictive distribution (#{i})",
+        )
+    )
+    return plot
+```
+
+```python
+def prior_pred_analysis(
+    prior_pred: dict[str, np.ndarray],
+    real_values: pd.Series,
+    x_lab: str,
+    num_examples: int = 5,
+    hist_binwidth: float = 1.0,
+) -> None:
+    print("Comparison of range of predicted values")
+    print(
+        pd.concat(
+            [
+                summarize_array(prior_pred["y"], "model"),
+                summarize_array(real_values.values, "real"),
+            ]
+        )
+    )
+    print()
+
+    fold_diff = prior_pred["y"].max() / real_values.max()
+    print(f"Fold difference in maximum values: {fold_diff:0.2f}")
+
+    for i in np.random.choice(
+        np.arange(prior_pred["y"].shape[0]), size=num_examples, replace=False
+    ):
+        print(
+            plot_prior_pred_against_real(
+                prior_pred["y"][i, :],
+                real_values,
+                i=i,
+                binwidth=hist_binwidth,
+                x_lab=x_lab,
+            )
+        )
+        params: dict[str, float] = {}
+        for v in get_varnames_to_print(prior_pred):
+            params[v] = np.round(prior_pred[v][i], 2)
+        pprint.pprint(params)
+```
+
+```python
+prior_pred_analysis(
+    nb_prior_pred,
+    real_values=data.counts_final,
+    x_lab="final read counts",
+    hist_binwidth=100,
+)
+```
+
+    Comparison of range of predicted values
+           min  25%  mean  median  75%    max
+    model    0  283   615   447.0  762  33945
+    real     9  277   611   423.0  755   5230
+
+    Fold difference in maximum values: 6.49
+
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_28_1.png)
+
+    {'α': 32.67, 'μ_β_0': 0.2, 'μ_β_cna': -0.06, 'σ_β_0': 0.01, 'σ_β_cna': 0.13}
+
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_28_3.png)
+
+    {'α': 58.12, 'μ_β_0': -0.09, 'μ_β_cna': 0.26, 'σ_β_0': 0.07, 'σ_β_cna': 0.01}
+
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_28_5.png)
+
+    {'α': 86.1, 'μ_β_0': 0.15, 'μ_β_cna': 0.08, 'σ_β_0': 0.1, 'σ_β_cna': 0.18}
+
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_28_7.png)
+
+    {'α': 58.57, 'μ_β_0': -0.02, 'μ_β_cna': 0.03, 'σ_β_0': 0.01, 'σ_β_cna': 0.02}
+
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_28_9.png)
+
+    {'α': 117.32, 'μ_β_0': 0.16, 'μ_β_cna': 0.05, 'σ_β_0': 0.05, 'σ_β_cna': 0.24}
+
+```python
+prior_pred_analysis(
+    lin_prior_pred,
+    real_values=data.lfc,
+    x_lab="log-fold change",
+    hist_binwidth=0.25,
+)
+```
+
+    Comparison of range of predicted values
+                 min  25%  mean    median  75%        max
+    model -30.175508   -1     0  0.037721    1  36.470539
+    real   -3.145193    0     0 -0.025503    0   1.905343
+
+    Fold difference in maximum values: 19.14
+
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_29_1.png)
+
+    {'μ_β_0': 2.04, 'μ_β_cna': -0.29, 'σ': 0.65, 'σ_β_0': 0.09, 'σ_β_cna': 1.27}
+
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_29_3.png)
+
+    {'μ_β_0': -0.85, 'μ_β_cna': 1.29, 'σ': 1.16, 'σ_β_0': 0.67, 'σ_β_cna': 0.1}
+
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_29_5.png)
+
+    {'μ_β_0': 1.47, 'μ_β_cna': 0.41, 'σ': 1.72, 'σ_β_0': 0.99, 'σ_β_cna': 1.85}
+
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_29_7.png)
+
+    {'μ_β_0': -0.23, 'μ_β_cna': 0.15, 'σ': 1.17, 'σ_β_0': 0.09, 'σ_β_cna': 0.21}
+
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_29_9.png)
+
+    {'μ_β_0': 1.58, 'μ_β_cna': 0.27, 'σ': 2.35, 'σ_β_0': 0.48, 'σ_β_cna': 2.36}
 
 ### Sampling from the models
 
@@ -451,8 +651,7 @@ pm_sample_kwargs = {
     "draws": 1000,
     "chains": 4,
     "tune": 2000,
-    "init": "advi",
-    "random_seed": 123,
+    "random_seed": [349 + 1 for i in range(4)],
     "target_accept": 0.95,
     "return_inferencedata": True,
 }
@@ -470,7 +669,7 @@ I timed the sampling processes a few times and put together the following table 
 tic = time()
 
 with nb_model:
-    nb_trace = pm.sample(**pm_sample_kwargs)
+    nb_trace = pm.sample(**pm_sample_kwargs, start={"α_log__": np.array(5)})
     ppc = pm.sample_posterior_predictive(nb_trace, **pm_sample_ppc_kwargs)
     ppc["lfc"] = np.log2(ppc["y"] / data["counts_initial"].values)
     nb_trace.extend(az.from_pymc3(posterior_predictive=ppc))
@@ -479,48 +678,48 @@ toc = time()
 print(f"sampling required {(toc - tic) / 60:.2f} minutes")
 ```
 
-    ---------------------------------------------------------------------------
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using jitter+adapt_diag...
+    Multiprocess sampling (4 chains in 2 jobs)
+    NUTS: [α, Δ_β_0, σ_β_0, μ_β_0]
 
-    SamplingError                             Traceback (most recent call last)
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='12000' class='' max='12000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [12000/12000 01:05<00:00 Sampling 4 chains, 0 divergences]
+</div>
 
-    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_82353/3398657848.py in <module>
-          2
-          3 with nb_model:
-    ----> 4     nb_trace = pm.sample(**pm_sample_kwargs)
-          5     ppc = pm.sample_posterior_predictive(nb_trace, **pm_sample_ppc_kwargs)
-          6     ppc["lfc"] = np.log2(ppc["y"] / data["counts_initial"].values)
+    Sampling 4 chains for 2_000 tune and 1_000 draw iterations (8_000 + 4_000 draws total) took 83 seconds.
 
+<div>
+    <style>
+        /*Turns off some styling*/
+        progress {
+            /*gets rid of default border in Firefox and Opera.*/
+            border: none;
+            /*Needs to be in here for Safari polyfill so background images work as expected.*/
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 00:47<00:00]
+</div>
 
-    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/pymc3/sampling.py in sample(draws, step, init, n_init, start, trace, chain_idx, chains, cores, tune, progressbar, model, random_seed, discard_tuned_samples, compute_convergence_checks, callback, jitter_max_retries, return_inferencedata, idata_kwargs, mp_ctx, pickle_backend, **kwargs)
-        426     start = deepcopy(start)
-        427     if start is None:
-    --> 428         check_start_vals(model.test_point, model)
-        429     else:
-        430         if isinstance(start, dict):
-
-
-    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/pymc3/util.py in check_start_vals(start, model)
-        235
-        236         if not np.all(np.isfinite(initial_eval)):
-    --> 237             raise SamplingError(
-        238                 "Initial evaluation of model at starting point failed!\n"
-        239                 "Starting values:\n{}\n\n"
-
-
-    SamplingError: Initial evaluation of model at starting point failed!
-    Starting values:
-    {'μ_β_0': array(0.), 'σ_β_0_log__': array(0.69049938), 'Δ_β_0': array([0., 0., 0., 0., 0., 0.]), 'μ_β_cna': array(0.), 'σ_β_cna_log__': array(-0.22579135), 'Δ_β_cna': array([0., 0., 0., 0., 0., 0.]), 'α_log__': array(0.69049938)}
-
-    Initial evaluation results:
-    μ_β_0           -1.84
-    σ_β_0_log__     -0.77
-    Δ_β_0           -5.51
-    μ_β_cna         -0.92
-    σ_β_cna_log__   -0.77
-    Δ_β_cna         -5.51
-    α_log__         -0.77
-    y                -inf
-    Name: Log-probability of test_point, dtype: float64
+    sampling required 2.38 minutes
 
 ```python
 tic = time()
@@ -678,7 +877,7 @@ model_comparison
 az.plot_compare(model_comparison);
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_29_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_39_0.png)
 
 Also, the LOO probability integral transformation (PIT) predictive checks ([ArviZ doc](https://arviz-devs.github.io/arviz/api/generated/arviz.plot_loo_pit.html) indicate that the normal model is a better fit.
 My concern is that this test is only for continuous data.
@@ -690,9 +889,9 @@ for name, idata in model_collection.items():
     plt.show()
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_31_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_41_0.png)
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_31_1.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_41_1.png)
 
 ### Posterior distributions
 
@@ -702,14 +901,14 @@ nb_varnames = shared_varnames.copy() + ["α"]
 az.plot_trace(nb_trace, var_names=nb_varnames);
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_33_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_43_0.png)
 
 ```python
 lin_varnames = shared_varnames.copy() + ["σ"]
 az.plot_trace(lin_trace, var_names=lin_varnames);
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_34_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_44_0.png)
 
 ```python
 def get_beta_0_summary(name: str, idata: az.InferenceData) -> pd.DataFrame:
@@ -824,7 +1023,7 @@ pos = gg.position_dodge(width=0.5)
 )
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_36_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_46_0.png)
 
     <ggplot: (351384028)>
 
@@ -838,12 +1037,12 @@ for name, idata in model_collection.items():
 
     posterior distributions in negative binomial model
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_37_1.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_47_1.png)
 
     --------------------------------------------------------------------------------
     posterior distributions in normal model
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_37_3.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_47_3.png)
 
     --------------------------------------------------------------------------------
 
@@ -858,9 +1057,9 @@ for name, idata in model_collection.items():
     plt.show()
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_39_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_49_0.png)
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_39_1.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_49_1.png)
 
 ```python
 nb_lfc_ppc_sample, _ = pmanal.down_sample_ppc(
@@ -889,7 +1088,7 @@ nb_ppc_lfc_sample_df = pd.DataFrame(nb_lfc_ppc_sample.T).pivot_longer(
 )
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_40_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_50_0.png)
 
     <ggplot: (364743105)>
 
@@ -1075,7 +1274,7 @@ ppc_df.head()
 )
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_42_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_52_0.png)
 
     <ggplot: (353648083)>
 
@@ -1100,7 +1299,7 @@ ppc_df.head()
 )
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_43_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_53_0.png)
 
     <ggplot: (353138815)>
 
@@ -1116,7 +1315,7 @@ ppc_df.head()
 )
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_44_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_54_0.png)
 
     <ggplot: (353847760)>
 
@@ -1151,7 +1350,7 @@ ppc_df.head()
 )
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_45_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_55_0.png)
 
     <ggplot: (353899852)>
 
@@ -1175,9 +1374,9 @@ for name, loo_res in loo_collection.items():
     print(p)
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_47_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_57_0.png)
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_47_2.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_57_2.png)
 
 ```python
 
