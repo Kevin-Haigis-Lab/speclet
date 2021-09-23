@@ -1,5 +1,3 @@
-#!/usr/bin/env Rscript
-
 # Tidy and clean Project SCORE raw data.
 
 if (basename(getwd()) == "munge") {

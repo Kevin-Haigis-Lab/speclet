@@ -1,5 +1,3 @@
-#!/usr/bin/env Rscript
-
 if (basename(getwd()) == "munge") {
   setwd("..")
 }
