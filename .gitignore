@@ -273,6 +273,7 @@ benchmarks/*
 !data/download-data.sh
 !data/download-data.smk
 !data/all-depmap-ids.csv
+!data/list_all_depmapids.py
 !data/README.md
 
 
