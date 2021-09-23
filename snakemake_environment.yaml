@@ -31,6 +31,7 @@ dependencies:
   - seaborn=0.11.*
   - theano=1.0.5
   - theano-pymc=1.1.2
+  - typer=0.4.*
   - watermark
   - pip:
     - -e .  # install the source directory as a package (keep as last)
