@@ -44,7 +44,7 @@ score_downloads: dict[str, str] = {
     "Score_gene_effect_CHRONOS.csv": "https://ndownloader.figshare.com/files/28340607",
     "Score_guide_gene_map.csv": "https://ndownloader.figshare.com/files/16623902",
     "Score_replicate_map.csv": "https://ndownloader.figshare.com/files/16623896",
-    "Score_raw_sgrnas_count.zip": "https://cog.sanger.ac.uk/cmp/download/raw_sgrnas_counts.zip",
+    "Score_raw_sgrna_counts.zip": "https://cog.sanger.ac.uk/cmp/download/raw_sgrnas_counts.zip",
 }
 
 ccle_downloads: dict[str, str] = {
@@ -106,6 +106,7 @@ rule all:
         ),
         ccle_files=expand(ccle_dir / "{filename}", filename=list(ccle_downloads.keys())),
         sanger_cgc=sanger_cosmic_dir / "cancer_gene_census.csv",
+        depmap_id_list=data_dir / "all-depmap-ids.csv",
 
 
 rule download_depmap:
@@ -142,3 +143,16 @@ rule download_sanger:
         url=sanger_cgc_url,
     shell:
         "wget --output-document {output.cgc_filename} {params.url}"
+
+
+rule make_depmap_id_list:
+    input:
+        achilles_replicate_map=depmap_dir / "Achilles_replicate_map.csv",
+        score_replicate_map=score_dir / "Score_replicate_map.csv",
+    output:
+        depmap_id_list=data_dir / "all-depmap-ids.csv",
+    shell:
+        "./data/list_all_depmapids.py"
+        "  {output.depmap_id_list}"
+        "  --achilles={input.achilles_replicate_map}"
+        "  --score={input.score_replicate_map}"
