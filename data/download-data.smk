@@ -9,6 +9,7 @@ colorama.init(autoreset=True)
 
 data_dir = Path("data")
 depmap_dir = data_dir / "depmap_21q3"
+score_dir = data_dir / "score_21q3"
 ccle_dir = data_dir / "ccle_21q3"
 sanger_cosmic_dir = data_dir / "sanger-cosmic"
 
@@ -99,6 +100,9 @@ rule all:
         depmap_files=expand(
             depmap_dir / "{filename}", filename=list(depmap_downloads.keys())
         ),
+        score_files=expand(
+            score_dir / "{filename}", filename=list(score_downloads.keys())
+        ),
         ccle_files=expand(ccle_dir / "{filename}", filename=list(ccle_downloads.keys())),
         sanger_cgc=sanger_cosmic_dir / "cancer_gene_census.csv",
 
@@ -108,6 +112,15 @@ rule download_depmap:
         filename=depmap_dir / "{filename}",
     params:
         url=lambda w: depmap_downloads[w.filename],
+    shell:
+        "wget --output-document {output.filename} {params.url}"
+
+
+rule download_score:
+    output:
+        filename=score_dir / "{filename}",
+    params:
+        url=lambda w: score_downloads[w.filename],
     shell:
         "wget --output-document {output.filename} {params.url}"
 
