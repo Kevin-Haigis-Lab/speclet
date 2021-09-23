@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Dict, List
 import os
 
 import requests
@@ -13,7 +12,7 @@ depmap_dir = data_dir / "depmap_21q3"
 ccle_dir = data_dir / "ccle_21q3"
 sanger_cosmic_dir = data_dir / "sanger-cosmic"
 
-depmap_downloads: Dict[str, str] = {
+depmap_downloads: dict[str, str] = {
     "Achilles_cell_line_efficacy.csv": "https://ndownloader.figshare.com/files/29124108",
     "Achilles_cell_line_growth_rate.csv": "https://ndownloader.figshare.com/files/29124111",
     "Achilles_common_essentials.csv": "https://ndownloader.figshare.com/files/29124102",
@@ -37,7 +36,16 @@ depmap_downloads: Dict[str, str] = {
     "common_essentials.csv": "https://ndownloader.figshare.com/files/29125281",
 }
 
-ccle_downloads: Dict[str, str] = {
+score_downloads: dict[str, str] = {
+    "Score_log_fold_change.csv": "https://ndownloader.figshare.com/files/16623878",
+    "Score_gene_effect_CERES.csv": "https://ndownloader.figshare.com/files/16623881",
+    "Score_gene_effect_CERES_unscaled.csv": "https://ndownloader.figshare.com/files/16623851",
+    "Score_gene_effect_CHRONOS.csv": "https://ndownloader.figshare.com/files/28340607",
+    "Score_guide_gene_map.csv": "https://ndownloader.figshare.com/files/16623902",
+    "Score_replicate_map.csv": "https://ndownloader.figshare.com/files/16623896",
+}
+
+ccle_downloads: dict[str, str] = {
     "CCLE_expression.csv": "https://ndownloader.figshare.com/files/29124747",
     "CCLE_gene_cn.csv": "https://ndownloader.figshare.com/files/29125230",
     "CCLE_segment_cn.csv": "https://ndownloader.figshare.com/files/29125278",
