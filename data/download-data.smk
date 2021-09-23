@@ -44,6 +44,7 @@ score_downloads: dict[str, str] = {
     "Score_gene_effect_CHRONOS.csv": "https://ndownloader.figshare.com/files/28340607",
     "Score_guide_gene_map.csv": "https://ndownloader.figshare.com/files/16623902",
     "Score_replicate_map.csv": "https://ndownloader.figshare.com/files/16623896",
+    "Score_raw_sgrnas_count.zip": "https://cog.sanger.ac.uk/cmp/download/raw_sgrnas_counts.zip",
 }
 
 ccle_downloads: dict[str, str] = {
