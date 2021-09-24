@@ -8,9 +8,11 @@ extract_hugo_gene_name <- function(df, col = gene) {
 }
 
 
-flatten_wide_df_by_gene <- function(df, values_to) {
+flatten_wide_df_by_gene <- function(df, values_to, rename_x1 = TRUE) {
+  if (rename_x1) {
+    df <- dplyr::rename(df, depmap_id = X1)
+  }
   df %>%
-    rename(depmap_id = X1) %>%
     pivot_longer(-depmap_id, names_to = "hugo_symbol", values_to = values_to) %>%
     extract_hugo_gene_name(hugo_symbol)
 }
@@ -23,7 +25,7 @@ remove_columns <- function(df, cols_to_drop) {
 
 # ---- Reading Achilles data ----
 
-read_replicate_map <- function(f) {
+read_achilles_replicate_map <- function(f) {
   readr::read_csv(f) %>%
     janitor::clean_names() %>%
     rename(depmap_id = dep_map_id)
@@ -39,7 +41,7 @@ get_dropped_replicates <- function(rep_map) {
 }
 
 
-read_guide_map <- function(f) {
+read_achilles_guide_map <- function(f) {
   readr::read_csv(f) %>%
     janitor::clean_names() %>%
     extract_hugo_gene_name() %>%

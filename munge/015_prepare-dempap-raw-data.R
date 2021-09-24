@@ -10,7 +10,7 @@ library(tidyverse)
 source("munge/munge_functions.R")
 
 
-#### ---- Data tidying functions ---- ####
+# ---- Data tidying functions ----
 
 
 make_known_essentials_and_nonessentials <- function(essentials_file,
@@ -39,8 +39,9 @@ tidy_log_fold_change <- function(lfc_file,
                                  dropped_guides,
                                  guide_map,
                                  out_file) {
-  guide_map <- read_guide_map(guide_map)
-  rep_map <- read_replicate_map(replicate_map)
+  guide_map <- read_achilles_guide_map(guide_map)
+
+  rep_map <- read_achilles_replicate_map(replicate_map)
   dropped_reps <- get_dropped_replicates(rep_map)
   print(paste("Number of dropped batches:", length(dropped_reps)))
 
@@ -66,9 +67,9 @@ tidy_read_counts <- function(rc_file,
                              dropped_guides,
                              guide_map,
                              out_file) {
-  guide_map <- read_guide_map(guide_map)
+  guide_map <- read_achilles_guide_map(guide_map)
 
-  rep_map <- read_replicate_map(replicate_map)
+  rep_map <- read_achilles_replicate_map(replicate_map)
   dropped_reps <- get_dropped_replicates(rep_map)
   print(paste("Number of dropped batches:", length(dropped_reps)))
 
@@ -89,13 +90,13 @@ tidy_read_counts <- function(rc_file,
 }
 
 
-tidy_achilles_gene_effect <- function(chronos_ge_file,
-                                      ceres_ge_file,
-                                      out_file) {
+tidy_crispr_gene_effect <- function(chronos_ge_file,
+                                    ceres_ge_file,
+                                    out_file) {
   chronos_ge <- readr::read_csv(chronos_ge_file) %>%
-    flatten_wide_df_by_gene(values_to = "chronos_gene_effect")
+    flatten_wide_df_by_gene(values_to = "chronos_gene_effect", rename_x1 = FALSE)
   ceres <- readr::read_csv(ceres_ge_file) %>%
-    flatten_wide_df_by_gene(values_to = "ceres_gene_effect")
+    flatten_wide_df_by_gene(values_to = "ceres_gene_effect", rename_x1 = FALSE)
   ge_combined <- inner_join(
     chronos_ge,
     ceres,
@@ -110,16 +111,7 @@ tidy_achilles_gene_effect <- function(chronos_ge_file,
 }
 
 
-tidy_chronos_gene_effect <- function(chronos_gene_effect, out_file) {
-  readr::read_csv(chronos_gene_effect) %>%
-    rename(X1 = DepMap_ID) %>%
-    flatten_wide_df_by_gene(values_to = "chronos_gene_effect") %>%
-    readr::write_csv(out_file)
-}
-
-
-
-#### ---- Function calls ---- ####
+# ---- Function calls ----
 
 
 print("---- Tidying known essential and non-essential genes. ----")
@@ -148,7 +140,7 @@ tidy_read_counts(
 )
 
 print("---- Tidying CRISPR gene effect. ----")
-tidy_achilles_gene_effect(
+tidy_crispr_gene_effect(
   chronos_ge_file = snakemake@input[["crispr_gene_effect_chronos"]],
   ceres_ge_file = snakemake@input[["crispr_gene_effect_ceres"]],
   out_file = snakemake@output[["crispr_gene_effect"]]
