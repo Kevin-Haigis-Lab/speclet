@@ -156,7 +156,7 @@ rule unzip_score_readcounts:
         ),
         unzip_complete_touch=touch(Path("temp") / "unzip_score_readcounts.done"),
     shell:
-        "gunzip {input.zipped_read_counts} && mv {params.default_unzipped_dir} {output.raw_counts_dir}"
+        "unzip {input.zipped_read_counts} && mv {params.default_unzipped_dir} {output.raw_counts_dir}"
 
 
 rule collate_score_readcounts:
@@ -168,7 +168,18 @@ rule collate_score_readcounts:
     output:
         score_raw_readcounts=tidy_score_input()["score_raw_readcounts"],
     script:
-        "004_collate-score-readcounts.R"
+        "005_collate-score-readcounts.R"
+
+
+rule extract_score_pdna:
+    input:
+        unzip_complete_touch=Path("temp") / "unzip_score_readcounts.done",
+    params:
+        raw_counts_dir=directory(SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch"),
+    output:
+        score_pdna=MODELING_DATA_DIR / "score_pdna_batch_read_counts.csv",
+    script:
+        ""
 
 
 rule tidy_ccle:
@@ -181,7 +192,7 @@ rule tidy_ccle:
         gene_mutations=MODELING_DATA_DIR / "ccle_mutations.csv",
         sample_info=MODELING_DATA_DIR / "ccle_sample_info.csv",
     script:
-        "005_prepare-ccle-raw-data.R"
+        "010_prepare-ccle-raw-data.R"
 
 
 rule tidy_depmap:
@@ -195,7 +206,7 @@ rule tidy_depmap:
         achilles_read_counts=MODELING_DATA_DIR / "achilles_read_counts.csv",
         crispr_gene_effect=MODELING_DATA_DIR / "crispr_gene_effect.csv",
     script:
-        "007_prepare-dempap-raw-data.R"
+        "015_prepare-dempap-raw-data.R"
 
 
 rule prep_achilles_pdna:
@@ -208,7 +219,7 @@ rule prep_achilles_pdna:
         achilles_batch_pdna_counts=MODELING_DATA_DIR
         / "achilles_pdna_batch_read_counts.csv",
     script:
-        "008_prepare-achilles-pdna-batch-read-counts.R"
+        "020_prepare-achilles-pdna-batch-read-counts.R"
 
 
 rule tidy_score:
@@ -218,7 +229,7 @@ rule tidy_score:
         log_fold_change=MODELING_DATA_DIR / "score_log_fold_change_filtered.csv",
         score_read_counts=MODELING_DATA_DIR / "score_read_counts.csv",
     script:
-        "009_prepare-score-raw-data.R"
+        "025_prepare-score-raw-data.R"
 
 
 rule split_ccle_rna_expression:
@@ -229,7 +240,7 @@ rule split_ccle_rna_expression:
             (TEMP_DIR / "ccle-rna_{depmapid}.qs").as_posix(), depmapid=all_depmap_ids
         ),
     script:
-        "011_split-file-by-depmapid.R"
+        "030_split-file-by-depmapid.R"
 
 
 rule split_ccle_gene_cn:
@@ -241,7 +252,7 @@ rule split_ccle_gene_cn:
             depmapid=all_depmap_ids,
         ),
     script:
-        "011_split-file-by-depmapid.R"
+        "030_split-file-by-depmapid.R"
 
 
 rule split_ccle_segment_cn:
@@ -253,7 +264,7 @@ rule split_ccle_segment_cn:
             depmapid=all_depmap_ids,
         ),
     script:
-        "011_split-file-by-depmapid.R"
+        "030_split-file-by-depmapid.R"
 
 
 rule split_ccle_mutations:
@@ -264,7 +275,7 @@ rule split_ccle_mutations:
             (TEMP_DIR / "ccle-mut_{depmapid}.qs").as_posix(), depmapid=all_depmap_ids
         ),
     script:
-        "011_split-file-by-depmapid.R"
+        "030_split-file-by-depmapid.R"
 
 
 ## Split DepMap data
@@ -279,7 +290,7 @@ rule split_achilles_lfc:
             depmapid=all_depmap_ids,
         ),
     script:
-        "011_split-file-by-depmapid.R"
+        "030_split-file-by-depmapid.R"
 
 
 rule split_achilles_rc:
@@ -291,7 +302,7 @@ rule split_achilles_rc:
             depmapid=all_depmap_ids,
         ),
     script:
-        "011_split-file-by-depmapid.R"
+        "030_split-file-by-depmapid.R"
 
 
 ## Split Score data
@@ -305,7 +316,7 @@ rule split_score_lfc:
             (TEMP_DIR / "score-lfc_{depmapid}.qs").as_posix(), depmapid=all_depmap_ids
         ),
     script:
-        "011_split-file-by-depmapid.R"
+        "030_split-file-by-depmapid.R"
 
 
 rule split_score_rc:
@@ -317,7 +328,7 @@ rule split_score_rc:
             depmapid=all_depmap_ids,
         ),
     script:
-        "011_split-file-by-depmapid.R"
+        "030_split-file-by-depmapid.R"
 
 
 ## Combined Achilles and Score gene effect file
@@ -332,7 +343,7 @@ rule split_crispr_geneeffect:
             depmapid=all_depmap_ids,
         ),
     script:
-        "011_split-file-by-depmapid.R"
+        "030_split-file-by-depmapid.R"
 
 
 ## Merge all data for a DepMapID and combine into a single data set.
@@ -340,7 +351,7 @@ rule split_crispr_geneeffect:
 
 rule merge_data:
     input:
-        "munge/013_merge-modeling-data.R",
+        "munge/035_merge-modeling-data.R",
         ccle_rna=TEMP_DIR / "ccle-rna_{depmapid}.qs",
         ccle_gene_cn=TEMP_DIR / "ccle-genecn_{depmapid}.qs",
         ccle_segment_cn=TEMP_DIR / "ccle-segmentcn_{depmapid}.qs",
@@ -354,7 +365,7 @@ rule merge_data:
     output:
         out_file=TEMP_DIR / "merged_{depmapid}.qs",
     script:
-        "013_merge-modeling-data.R"
+        "035_merge-modeling-data.R"
 
 
 rule combine_data:
@@ -365,15 +376,15 @@ rule combine_data:
     output:
         out_file=MODELING_DATA_DIR / "depmap_modeling_dataframe.csv",
     script:
-        "015_combine-modeling-data.R"
+        "040_combine-modeling-data.R"
 
 
 rule check_depmap_modeling_data:
     input:
         modeling_df=rules.combine_data.output.out_file,
-        check_nb=MUNGE_DIR / "017_check-depmap-modeling-data.ipynb",
+        check_nb=MUNGE_DIR / "045_check-depmap-modeling-data.ipynb",
     output:
-        output_md=MUNGE_DIR / "017_check-depmap-modeling-data.md",
+        output_md=MUNGE_DIR / "045_check-depmap-modeling-data.md",
     conda:
         ENVIRONMENT_YAML
     version:
@@ -399,7 +410,7 @@ rule modeling_data_subsets:
         ),
         test_data=TESTS_DIR / "depmap_test_data.csv",
     script:
-        "019_depmap-subset-dataframes.R"
+        "050_depmap-subset-dataframes.R"
 
 
 rule auxillary_data_subsets:
@@ -411,7 +422,7 @@ rule auxillary_data_subsets:
     conda:
         ENVIRONMENT_YAML
     shell:
-        "munge/021_auxiliary-data-files.py {input.crc_subset} {output.cna_sample}"
+        "munge/055_auxiliary-data-files.py {input.crc_subset} {output.cna_sample}"
 
 
 rule clean_sanger_cgc:
@@ -420,4 +431,4 @@ rule clean_sanger_cgc:
     output:
         cgc_output=MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",
     script:
-        "025_prep-sanger-cgc.R"
+        "060_prep-sanger-cgc.R"
