@@ -99,7 +99,7 @@ tidy_crispr_gene_effect <- function(chronos_ge_file,
       depmap_id_colname = "DepMap_ID"
     )
 
-  ceres <- readr::read_csv(ceres_ge_file) %>%
+  ceres_ge <- readr::read_csv(ceres_ge_file) %>%
     flatten_wide_df_by_gene(
       values_to = "ceres_gene_effect",
       depmap_id_colname = "DepMap_ID"
@@ -107,11 +107,11 @@ tidy_crispr_gene_effect <- function(chronos_ge_file,
 
   ge_combined <- inner_join(
     chronos_ge,
-    ceres,
+    ceres_ge,
     by = c("depmap_id", "hugo_symbol")
   )
 
-  if (nrow(ge_scaled) != nrow(ge_combined) || nrow(ge_unscaled) != nrow(ge_combined)) {
+  if (nrow(chronos_ge) != nrow(ge_combined) || nrow(ceres_ge) != nrow(ge_combined)) {
     stop("Lost data when merging scaled and unscaled gene effect values.")
   }
 
