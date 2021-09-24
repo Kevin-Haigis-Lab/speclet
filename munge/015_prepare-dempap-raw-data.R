@@ -94,7 +94,6 @@ tidy_crispr_gene_effect <- function(chronos_ge_file,
                                     ceres_ge_file,
                                     out_file) {
   chronos_ge <- readr::read_csv(chronos_ge_file) %>%
-    rename(depmap_id = DepMap_ID) %>%
     flatten_wide_df_by_gene(
       values_to = "chronos_gene_effect",
       depmap_id_colname = "DepMap_ID"

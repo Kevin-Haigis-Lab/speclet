@@ -152,12 +152,9 @@ rule unzip_score_readcounts:
         default_unzipped_dir=SCORE_DIR / "00_raw_counts",
     output:
         raw_counts_dir=directory(SCORE_DIR / "Score_raw_sgrna_counts"),
-        raw_counts_dir_batch2=directory(
-            SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch"
-        ),
         unzip_complete_touch=touch(Path("temp") / "unzip_score_readcounts.done"),
     shell:
-        "unzip {input.zipped_read_counts}  -d {params.destination_dir}"
+        "unzip {input.zipped_read_counts} -d {params.destination_dir}"
         " && mv {params.default_unzipped_dir} {output.raw_counts_dir}"
 
 
