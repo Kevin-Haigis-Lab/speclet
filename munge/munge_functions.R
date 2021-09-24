@@ -8,11 +8,9 @@ extract_hugo_gene_name <- function(df, col = gene) {
 }
 
 
-flatten_wide_df_by_gene <- function(df, values_to, rename_x1 = TRUE) {
-  if (rename_x1) {
-    df <- dplyr::rename(df, depmap_id = X1)
-  }
+flatten_wide_df_by_gene <- function(df, values_to, depmap_id_colname = "X1") {
   df %>%
+    dplyr::rename(depmap_id = !!depmap_id_colname) %>%
     pivot_longer(-depmap_id, names_to = "hugo_symbol", values_to = values_to) %>%
     extract_hugo_gene_name(hugo_symbol)
 }
