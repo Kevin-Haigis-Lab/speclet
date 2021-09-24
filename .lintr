@@ -1,0 +1,5 @@
+linters: with_defaults(
+  line_length_linter(88),
+  object_length_linter = NULL
+  )
+exclusions: list("renv/*")
