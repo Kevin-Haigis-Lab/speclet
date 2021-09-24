@@ -85,7 +85,7 @@ process_score_read_count_replicate <- function(replicate_id,
 }
 
 
-score_read_counts_dir <- snakemake@input[["raw_counts_dir"]]
+score_read_counts_dir <- snakemake@params[["raw_counts_dir"]]
 replicate_map_path <- snakemake@input[["replicate_map"]]
 output_file <- snakemake@output[["score_raw_readcounts"]]
 

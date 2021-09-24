@@ -6,7 +6,7 @@ from typing import Dict, Any
 
 import pandas as pd
 from colorama import init, Fore, Back, Style
-from snakemake.io import directory
+from snakemake.io import directory, touch
 
 from src import project_config
 
@@ -31,7 +31,7 @@ all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list(
 
 if MUNGE_CONFIG.test:
     print("---- TESTING WITH A FEW CELL LINES ----")
-    all_depmap_ids = all_depmap_ids[:10]
+    all_depmap_ids = all_depmap_ids[:3]
     all_depmap_ids += ["ACH-002227", "ACH-001738"]
 
 
@@ -154,14 +154,17 @@ rule unzip_score_readcounts:
         raw_counts_dir_batch2=directory(
             SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch"
         ),
+        unzip_complete_touch=touch(Path("temp") / "unzip_score_readcounts.done"),
     shell:
         "gunzip {input.zipped_read_counts} && mv {params.default_unzipped_dir} {output.raw_counts_dir}"
 
 
 rule collate_score_readcounts:
     input:
-        raw_counts_dir=directory(SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch"),
+        unzip_complete_touch=Path("temp") / "unzip_score_readcounts.done",
         replicate_map=tidy_score_input()["score_replicate_map"],
+    params:
+        raw_counts_dir=directory(SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch"),
     output:
         score_raw_readcounts=tidy_score_input()["score_raw_readcounts"],
     script:
@@ -264,6 +267,9 @@ rule split_ccle_mutations:
         "011_split-file-by-depmapid.R"
 
 
+## Split DepMap data
+
+
 rule split_achilles_lfc:
     input:
         data_file=rules.tidy_depmap.output.achilles_log_fold_change,
@@ -286,6 +292,9 @@ rule split_achilles_rc:
         ),
     script:
         "011_split-file-by-depmapid.R"
+
+
+## Split Score data
 
 
 rule split_score_lfc:
@@ -311,7 +320,24 @@ rule split_score_rc:
         "011_split-file-by-depmapid.R"
 
 
-# Merge all data for a DepMapID.
+## Combined Achilles and Score gene effect file
+
+
+rule split_crispr_geneeffect:
+    input:
+        data_file=rules.tidy_depmap.output.crispr_gene_effect,
+    output:
+        out_files=expand(
+            (TEMP_DIR / "crsipr-geneeffect_{depmapid}.qs").as_posix(),
+            depmapid=all_depmap_ids,
+        ),
+    script:
+        "011_split-file-by-depmapid.R"
+
+
+## Merge all data for a DepMapID and combine into a single data set.
+
+
 rule merge_data:
     input:
         "munge/013_merge-modeling-data.R",
@@ -323,6 +349,7 @@ rule merge_data:
         achilles_readcounts=TEMP_DIR / "achilles-readcounts_{depmapid}.qs",
         score_lfc=TEMP_DIR / "score-lfc_{depmapid}.qs",
         score_readcounts=TEMP_DIR / "score-readcounts_{depmapid}.qs",
+        crispr_geneeffect=TEMP_DIR / "crsipr-geneeffect_{depmapid}.qs",
         sample_info=MODELING_DATA_DIR / "ccle_sample_info.csv",
     output:
         out_file=TEMP_DIR / "merged_{depmapid}.qs",
@@ -356,6 +383,9 @@ rule check_depmap_modeling_data:
         "nbqa black {input.check_nb} --nbqa-mutate && "
         "nbqa isort {input.check_nb} --nbqa-mutate && "
         "jupyter nbconvert --to markdown {input.check_nb}"
+
+
+## Generate additional useful files
 
 
 rule modeling_data_subsets:
