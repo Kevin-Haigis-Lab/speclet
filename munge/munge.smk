@@ -6,28 +6,33 @@ from typing import Dict, Any
 
 import pandas as pd
 from colorama import init, Fore, Back, Style
+from snakemake.io import directory
+
+from src import project_config
 
 init(autoreset=True)
 
 DATA_DIR = Path("data")
-DEPMAP_DIR = DATA_DIR / "depmap_21q2"
-SCORE_DIR = DATA_DIR / "score_21q2"
-CCLE_DIR = DATA_DIR / "ccle_21q2"
+DEPMAP_DIR = DATA_DIR / "depmap_21q3"
+SCORE_DIR = DATA_DIR / "score_21q3"
+CCLE_DIR = DATA_DIR / "ccle_21q3"
 SANGER_COSMIC_DIR = DATA_DIR / "sanger-cosmic"
 
 MODELING_DATA_DIR = Path("modeling_data")
 MUNGE_DIR = Path("munge")
 TESTS_DIR = Path("tests")
 
-TEMP_DIR = Path("/n/no_backup2/dbmi/park/jc604/speclet/munge-intermediates")
-# TEMP_DIR = Path("temp")
+MUNGE_CONFIG = project_config.read_project_configuration().munge
+TEMP_DIR = MUNGE_CONFIG.temporary_directory
 
 ENVIRONMENT_YAML = "pipeline-environment.yml"
 
 all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list()
-# print("---- TESTING WITH A FEW CELL LINES ----")
-# all_depmap_ids = all_depmap_ids[:10]  ### TESTING ###
-# all_depmap_ids += ["ACH-002227", "ACH-001738"]
+
+if MUNGE_CONFIG.test:
+    print("---- TESTING WITH A FEW CELL LINES ----")
+    all_depmap_ids = all_depmap_ids[:10]
+    all_depmap_ids += ["ACH-002227", "ACH-001738"]
 
 
 #### ---- Inputs ---- ####
@@ -50,24 +55,24 @@ def tidy_depmap_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
         "achilles_dropped_guides": DEPMAP_DIR / "Achilles_dropped_guides.csv",
         "achilles_guide_efficacy": DEPMAP_DIR / "Achilles_guide_efficacy.csv",
         "achilles_guide_map": DEPMAP_DIR / "Achilles_guide_map.csv",
-        "achilles_gene_effect": DEPMAP_DIR / "Achilles_gene_effect.csv",
-        "achilles_gene_effect_unscaled": DEPMAP_DIR
-        / "Achilles_gene_effect_unscaled.csv",
         "achilles_logfold_change": DEPMAP_DIR / "Achilles_logfold_change.csv",
         "achilles_raw_readcounts": DEPMAP_DIR / "Achilles_raw_readcounts.csv",
         "achilles_replicate_map": DEPMAP_DIR / "Achilles_replicate_map.csv",
-        "all_gene_effect_chronos": DEPMAP_DIR / "CRISPR_gene_effect_Chronos.csv",
+        "achilles_gene_effect_ceres_unscaled": DEPMAP_DIR / "Achilles_gene_effect_unscaled_CERES.csv",
+        "crispr_data_sources": DEPMAP_DIR / "CRISPR_dataset_sources.csv",
+        "crispr_gene_effect_chronos": DEPMAP_DIR / "CRISPR_gene_effect.csv",
+        "crispr_gene_effect_ceres": DEPMAP_DIR / "CRISPR_gene_effect_CERES.csv",
+        "crispr_common_essentials": DEPMAP_DIR / "CRISPR_common_essentials.csv",
     }
 
 
 def tidy_score_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
     return {
-        "copy_number": SCORE_DIR / "SCORE_copy_number.csv",
-        "gene_effect": SCORE_DIR / "SCORE_gene_effect.csv",
-        "gene_effect_unscaled": SCORE_DIR / "SCORE_gene_effect_unscaled.csv",
-        "log_fold_change": SCORE_DIR / "SCORE_logfold_change.csv",
-        "guide_map": SCORE_DIR / "SCORE_guide_gene_map.csv",
-        "replicate_map": SCORE_DIR / "SCORE_replicate_map.csv",
+        "score_gene_effect_ceres_unscaled": SCORE_DIR / "Score_gene_effect_CERES_unscaled.csv",
+        "score_log_fold_change": SCORE_DIR / "Score_log_fold_change.csv",
+        "score_raw_readcounts": SCORE_DIR / "Score_raw_readcounts.csv",
+        "score_guide_map": SCORE_DIR / "Score_guide_gene_map.csv",
+        "score_replicate_map": SCORE_DIR / "Score_replicate_map.csv",
     }
 
 
@@ -134,6 +139,26 @@ rule all:
         # rules.clean_sanger_cgc.output
         MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",
 
+
+rule unzip_score_readcounts:
+    input:
+        zipped_read_counts=SCORE_DIR / "Score_raw_sgrna_counts.zip"
+    params:
+        default_unzipped_dir=SCORE_DIR / "00_raw_counts"
+    output:
+        raw_counts_dir=directory(SCORE_DIR / "Score_raw_sgrna_counts")
+        raw_counts_dir_batch2=directory(SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch")
+    shell:
+        "gunzip {input.zipped_read_counts} && mv {params.default_unzipped_dir} {output.raw_counts_dir}"
+
+rule collate_score_readcounts:
+    input:
+        raw_counts_dir=directory(SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch")
+        replicate_map=tidy_score_input()["score_replicate_map"]
+    output:
+        score_raw_readcounts=tidy_score_input()["score_raw_readcounts"]
+    script:
+        "004_collate-score-readcounts.R"
 
 rule tidy_ccle:
     input:
