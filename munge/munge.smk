@@ -172,7 +172,6 @@ rule tidy_ccle:
     script:
         "005_prepare-ccle-raw-data.R"
 
-
 rule tidy_depmap:
     input:
         **tidy_depmap_input(),
@@ -182,8 +181,7 @@ rule tidy_depmap:
             MODELING_DATA_DIR / "achilles_log_fold_change_filtered.csv"
         ),
         achilles_read_counts=MODELING_DATA_DIR / "achilles_read_counts.csv",
-        achilles_gene_effect=MODELING_DATA_DIR / "achilles_gene_effect.csv",
-        chronos_gene_effect=MODELING_DATA_DIR / "chronos_gene_effect.csv",
+        crispr_gene_effect=MODELING_DATA_DIR / "crispr_gene_effect.csv",
     script:
         "007_prepare-dempap-raw-data.R"
 

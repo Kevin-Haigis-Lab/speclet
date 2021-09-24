@@ -16,15 +16,15 @@ source("munge/munge_functions.R")
 make_known_essentials_and_nonessentials <- function(essentials_file,
                                                     nonessentials_file,
                                                     out_file) {
-  essentials <- read_csv(essentials_file) %>%
+  essentials <- readr::read_csv(essentials_file) %>%
     extract_hugo_gene_name() %>%
     add_column(is_essential = TRUE)
-  nonessentials <- read_csv(nonessentials_file) %>%
+  nonessentials <- readr::read_csv(nonessentials_file) %>%
     extract_hugo_gene_name() %>%
     add_column(is_essential = FALSE)
 
   bind_rows(essentials, nonessentials) %>%
-    write_csv(out_file)
+    readr::write_csv(out_file)
 }
 
 
@@ -34,7 +34,7 @@ remove_columns <- function(df, cols_to_drop) {
 
 
 read_replicate_map <- function(f) {
-  read_csv(f) %>%
+  readr::read_csv(f) %>%
     janitor::clean_names() %>%
     rename(depmap_id = dep_map_id)
 }
@@ -48,7 +48,7 @@ get_dropped_replicates <- function(rep_map) {
 }
 
 read_guide_map <- function(f) {
-  read_csv(f) %>%
+  readr::read_csv(f) %>%
     janitor::clean_names() %>%
     extract_hugo_gene_name() %>%
     rename(hugo_symbol = gene)
@@ -71,10 +71,10 @@ tidy_log_fold_change <- function(lfc_file,
   dropped_reps <- get_dropped_replicates(rep_map)
   print(paste("Number of dropped batches:", length(dropped_reps)))
 
-  dropped_guides <- read_csv(dropped_guides)$X1
+  dropped_guides <- readr::read_csv(dropped_guides)$X1
   print(paste("Number of dropped guides:", length(dropped_guides)))
 
-  lfc_df <- read_csv(lfc_file) %>%
+  lfc_df <- readr::read_csv(lfc_file) %>%
     rename(sgrna = `Construct Barcode`) %>%
     filter(!sgrna %in% !!dropped_guides) %>%
     remove_columns(dropped_reps) %>%
@@ -84,21 +84,25 @@ tidy_log_fold_change <- function(lfc_file,
     rename(n_sgrna_alignments = n_alignments)
 
   check_all_pass_qc(lfc_df)
-  write_csv(lfc_df, out_file)
+  readr::write_csv(lfc_df, out_file)
 }
 
 
-tidy_read_counts <- function(rc_file, replicate_map, dropped_guides, guide_map, out_file) {
+tidy_read_counts <- function(rc_file,
+                             replicate_map,
+                             dropped_guides,
+                             guide_map,
+                             out_file) {
   guide_map <- read_guide_map(guide_map)
 
   rep_map <- read_replicate_map(replicate_map)
   dropped_reps <- get_dropped_replicates(rep_map)
   print(paste("Number of dropped batches:", length(dropped_reps)))
 
-  dropped_guides <- read_csv(dropped_guides)$X1
+  dropped_guides <- readr::read_csv(dropped_guides)$X1
   print(paste("Number of dropped guides:", length(dropped_guides)))
 
-  read_counts_df <- read_csv(rc_file) %>%
+  read_counts_df <- readr::read_csv(rc_file) %>%
     rename(sgrna = `Construct Barcode`) %>%
     filter(!sgrna %in% !!dropped_guides) %>%
     remove_columns(dropped_reps) %>%
@@ -108,19 +112,20 @@ tidy_read_counts <- function(rc_file, replicate_map, dropped_guides, guide_map, 
     rename(n_sgrna_alignments = n_alignments)
 
   check_all_pass_qc(read_counts_df)
-  write_csv(read_counts_df, out_file)
+  readr::write_csv(read_counts_df, out_file)
 }
 
 
-tidy_achilles_gene_effect <- function(gene_effect_scaled, gene_effect_unscaled, out_file) {
-  ge_scaled <- read_csv(gene_effect_scaled) %>%
-    flatten_wide_df_by_gene(values_to = "gene_effect")
-  ge_unscaled <- read_csv(gene_effect_unscaled) %>%
-    rename(X1 = DepMap_ID) %>%
-    flatten_wide_df_by_gene(values_to = "gene_effect_unscaled")
+tidy_achilles_gene_effect <- function(chronos_ge_file,
+                                      ceres_ge_file,
+                                      out_file) {
+  chronos_ge <- readr::read_csv(chronos_ge_file) %>%
+    flatten_wide_df_by_gene(values_to = "chronos_gene_effect")
+  ceres <- readr::read_csv(ceres_ge_file) %>%
+    flatten_wide_df_by_gene(values_to = "ceres_gene_effect")
   ge_combined <- inner_join(
-    ge_scaled,
-    ge_unscaled,
+    chronos_ge,
+    ceres,
     by = c("depmap_id", "hugo_symbol")
   )
 
@@ -128,15 +133,15 @@ tidy_achilles_gene_effect <- function(gene_effect_scaled, gene_effect_unscaled, 
     stop("Lost data when merging scaled and unscaled gene effect values.")
   }
 
-  write_csv(ge_combined, out_file)
+  readr::write_csv(ge_combined, out_file)
 }
 
 
 tidy_chronos_gene_effect <- function(chronos_gene_effect, out_file) {
-  read_csv(chronos_gene_effect) %>%
+  readr::read_csv(chronos_gene_effect) %>%
     rename(X1 = DepMap_ID) %>%
     flatten_wide_df_by_gene(values_to = "chronos_gene_effect") %>%
-    write_csv(out_file)
+    readr::write_csv(out_file)
 }
 
 
@@ -169,15 +174,9 @@ tidy_read_counts(
   out_file = snakemake@output[["achilles_read_counts"]]
 )
 
-print("---- Tidying Achilles gene effect. ----")
+print("---- Tidying CRISPR gene effect. ----")
 tidy_achilles_gene_effect(
-  gene_effect_scaled = snakemake@input[["achilles_gene_effect"]],
-  gene_effect_unscaled = snakemake@input[["achilles_gene_effect_unscaled"]],
-  out_file = snakemake@output[["achilles_gene_effect"]]
-)
-
-print("---- Tidying Chronos gene effect. ----")
-tidy_chronos_gene_effect(
-  chronos_gene_effect = snakemake@input[["all_gene_effect_chronos"]],
-  out_file = snakemake@output[["chronos_gene_effect"]]
+  chronos_ge_file = snakemake@input[["crispr_gene_effect_chronos"]],
+  ceres_ge_file = snakemake@input[["crispr_gene_effect_ceres"]],
+  out_file = snakemake@output[["crispr_gene_effect"]]
 )
