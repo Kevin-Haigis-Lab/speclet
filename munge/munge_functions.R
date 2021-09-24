@@ -1,3 +1,6 @@
+# Re-usable code for munging data.
+
+# ---- General data processing ----
 
 extract_hugo_gene_name <- function(df, col = gene) {
   df %>%
@@ -17,6 +20,8 @@ remove_columns <- function(df, cols_to_drop) {
   return(df[, !(colnames(df) %in% cols_to_drop)])
 }
 
+
+# ---- Reading Achilles data ----
 
 read_replicate_map <- function(f) {
   readr::read_csv(f) %>%
@@ -39,4 +44,23 @@ read_guide_map <- function(f) {
     janitor::clean_names() %>%
     extract_hugo_gene_name() %>%
     rename(hugo_symbol = gene)
+}
+
+
+# ----Reading SCORE data ----
+
+
+read_score_replicate_map <- function(path) {
+  readr::read_csv(path) %>%
+    janitor::clean_names() %>%
+    dplyr::rename(depmap_id = dep_map_id)
+}
+
+get_score_read_count_path <- function(dir, replicate_id) {
+  file.path(dir, paste0(replicate_id, ".read_count.tsv.gz"))
+}
+
+read_score_count_file <- function(path) {
+  readr::read_tsv(path) %>%
+    rename(sgrna = sgRNA, hugo_symbol = gene)
 }

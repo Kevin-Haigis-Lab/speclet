@@ -14,18 +14,6 @@ source("munge/munge_functions.R")
 
 logger <- logger("INFO")
 
-
-read_score_replicate_map <- function(path) {
-  readr::read_csv(path) %>%
-    janitor::clean_names() %>%
-    dplyr::rename(depmap_id = dep_map_id)
-}
-
-read_score_count_file <- function(path) {
-  readr::read_tsv(path) %>%
-    rename(sgrna = sgRNA, hugo_symbol = gene)
-}
-
 assert_only_one_possible_final_count_column <- function(counts_df, possible_cols) {
   if (length(possible_cols) == 1) {
     return(NULL)
@@ -53,9 +41,9 @@ process_score_read_count_replicate <- function(replicate_id,
                                                counts_dir,
                                                out_file) {
   log4r::info(logger, glue::glue("Processing raw read counts for '{replicate_id}'"))
-  read_ct_file <- paste0(replicate_id, ".read_count.tsv.gz")
-  read_ct_path <- file.path(counts_dir, read_ct_file)
+  read_ct_path <- get_score_read_count_path(counts_dir, replicate_id)
   log4r::info(logger, glue::glue("read count path: '{read_ct_path}'"))
+
   read_ct_df <- read_score_count_file(read_ct_path) %>%
     add_column(depmap_id = depmap_id) %>%
     dplyr::relocate(depmap_id, hugo_symbol, sgrna) %>%
