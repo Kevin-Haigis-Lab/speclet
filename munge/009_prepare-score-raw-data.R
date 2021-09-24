@@ -12,74 +12,56 @@ source("munge/munge_functions.R")
 
 #### ---- Data tidying functions ---- ####
 
-tidy_gene_copynumber <- function(in_file, out_file) {
-  read_csv(in_file, col_types = c("Chromosome" = "c")) %>%
+
+read_replicate_map <- function(f) {
+  readr::read_csv(f) %>%
     janitor::clean_names() %>%
-    rename(depmap_id = dep_map_id, start_pos = start, end_pos = end) %>%
-    write_csv(out_file)
+    rename(depmap_id = dep_map_id)
 }
 
-
-tidy_gene_effect <- function(scaled_ge_file, unscaled_ge_file, out_file) {
-  scaled_ge <- read_csv(scaled_ge_file) %>%
-    flatten_wide_df_by_gene(values_to = "gene_effect")
-  unscaled_ge <- read_csv(unscaled_ge_file) %>%
-    flatten_wide_df_by_gene(values_to = "gene_effect_unscaled")
-
-  combined_ge <- inner_join(
-    scaled_ge,
-    unscaled_ge,
-    by = c("depmap_id", "hugo_symbol")
-  )
-
-  if (nrow(scaled_ge) != nrow(combined_ge) || nrow(unscaled_ge) != nrow(combined_ge)) {
-    stop("Lost data when merging scaled and unscaled gene effect values.")
-  }
-
-  write_csv(combined_ge, out_file)
+read_guide_map <- function(f) {
+  readr::read_csv(f) %>%
+    extract_hugo_gene_name(gene) %>%
+    rename(hugo_symbol = gene)
 }
 
 tidy_log_fold_change <- function(lfc_file,
                                  guide_map_file,
                                  replicate_map_file,
                                  out_file) {
-  replicate_map <- read_csv(replicate_map_file) %>%
-    janitor::clean_names() %>%
-    rename(depmap_id = dep_map_id)
+  replicate_map <- read_replicate_map(replicate_map_file)
+  guide_map <- read_guide_map(guide_map_file)
 
-  guide_map <- read_csv(guide_map_file) %>%
-    extract_hugo_gene_name(gene) %>%
-    rename(hugo_symbol = gene)
-
-  read_csv(lfc_file) %>%
+  readr::read_csv(lfc_file) %>%
     flatten_wide_df_by_gene(values_to = "lfc") %>%
     rename(sgrna = depmap_id, replicate_id = hugo_symbol) %>%
     inner_join(replicate_map, by = "replicate_id") %>%
     inner_join(guide_map, by = "sgrna") %>%
-    write_csv(out_file)
+    readr::write_csv(out_file)
 }
 
-
+tidy_read_counts <- function(counts_file,
+                             guide_map_file,
+                             replicate_map_file,
+                             out_file) {
+  # TODO
+  stop("Not yet implemented.")
+}
 
 #### ---- Function calls ---- ####
 
-print("Tidying SCORE copy number data.")
-tidy_gene_copynumber(
-  in_file = snakemake@input[["copy_number"]],
-  out_file = snakemake@output[["copy_number"]]
-)
-
-print("Tidying SCORE gene effect.")
-tidy_gene_effect(
-  scaled_ge_file = snakemake@input[["gene_effect"]],
-  unscaled_ge_file = snakemake@input[["gene_effect_unscaled"]],
-  out_file = snakemake@output[["gene_effect"]]
-)
-
-print("Tidying SCORE log fold change.")
+print("---- Tidying SCORE log fold change. ----")
 tidy_log_fold_change(
   lfc_file = snakemake@input[["log_fold_change"]],
   guide_map_file = snakemake@input[["guide_map"]],
   replicate_map_file = snakemake@input[["replicate_map"]],
   out_file = snakemake@output[["log_fold_change"]]
+)
+
+print("---- Tidying SCORE read counts. ----")
+tidy_read_counts(
+  counts_file = snakemake@input[["score_raw_readcounts"]],
+  guide_map_file = snakemake@input[["guide_map"]],
+  replicate_map_file = snakemake@input[["replicate_map"]],
+  out_file = snakemake@output[["score_read_counts"]]
 )

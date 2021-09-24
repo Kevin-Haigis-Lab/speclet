@@ -58,7 +58,8 @@ def tidy_depmap_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
         "achilles_logfold_change": DEPMAP_DIR / "Achilles_logfold_change.csv",
         "achilles_raw_readcounts": DEPMAP_DIR / "Achilles_raw_readcounts.csv",
         "achilles_replicate_map": DEPMAP_DIR / "Achilles_replicate_map.csv",
-        "achilles_gene_effect_ceres_unscaled": DEPMAP_DIR / "Achilles_gene_effect_unscaled_CERES.csv",
+        "achilles_gene_effect_ceres_unscaled": DEPMAP_DIR
+        / "Achilles_gene_effect_unscaled_CERES.csv",
         "crispr_data_sources": DEPMAP_DIR / "CRISPR_dataset_sources.csv",
         "crispr_gene_effect_chronos": DEPMAP_DIR / "CRISPR_gene_effect.csv",
         "crispr_gene_effect_ceres": DEPMAP_DIR / "CRISPR_gene_effect_CERES.csv",
@@ -68,7 +69,8 @@ def tidy_depmap_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
 
 def tidy_score_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
     return {
-        "score_gene_effect_ceres_unscaled": SCORE_DIR / "Score_gene_effect_CERES_unscaled.csv",
+        "score_gene_effect_ceres_unscaled": SCORE_DIR
+        / "Score_gene_effect_CERES_unscaled.csv",
         "score_log_fold_change": SCORE_DIR / "Score_log_fold_change.csv",
         "score_raw_readcounts": SCORE_DIR / "Score_raw_readcounts.csv",
         "score_guide_map": SCORE_DIR / "Score_guide_gene_map.csv",
@@ -122,12 +124,10 @@ rule all:
         MODELING_DATA_DIR / "known_essentials.csv",
         MODELING_DATA_DIR / "achilles_log_fold_change_filtered.csv",
         MODELING_DATA_DIR / "achilles_read_counts.csv",
-        MODELING_DATA_DIR / "achilles_gene_effect.csv",
-        MODELING_DATA_DIR / "chronos_gene_effect.csv",
+        MODELING_DATA_DIR / "crispr_gene_effect.csv",
         # rules.tidy_score.output
-        MODELING_DATA_DIR / "score_segment_cn.csv",
-        MODELING_DATA_DIR / "score_gene_effect.csv",
         MODELING_DATA_DIR / "score_log_fold_change_filtered.csv",
+        MODELING_DATA_DIR / "score_read_counts.csv",
         # rules.combine_data.output
         MODELING_DATA_DIR / "depmap_modeling_dataframe.csv",
         # rules.modeling_data_subsets.output
@@ -142,23 +142,27 @@ rule all:
 
 rule unzip_score_readcounts:
     input:
-        zipped_read_counts=SCORE_DIR / "Score_raw_sgrna_counts.zip"
+        zipped_read_counts=SCORE_DIR / "Score_raw_sgrna_counts.zip",
     params:
-        default_unzipped_dir=SCORE_DIR / "00_raw_counts"
+        default_unzipped_dir=SCORE_DIR / "00_raw_counts",
     output:
-        raw_counts_dir=directory(SCORE_DIR / "Score_raw_sgrna_counts")
-        raw_counts_dir_batch2=directory(SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch")
+        raw_counts_dir=directory(SCORE_DIR / "Score_raw_sgrna_counts"),
+        raw_counts_dir_batch2=directory(
+            SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch"
+        ),
     shell:
         "gunzip {input.zipped_read_counts} && mv {params.default_unzipped_dir} {output.raw_counts_dir}"
 
+
 rule collate_score_readcounts:
     input:
-        raw_counts_dir=directory(SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch")
-        replicate_map=tidy_score_input()["score_replicate_map"]
+        raw_counts_dir=directory(SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch"),
+        replicate_map=tidy_score_input()["score_replicate_map"],
     output:
-        score_raw_readcounts=tidy_score_input()["score_raw_readcounts"]
+        score_raw_readcounts=tidy_score_input()["score_raw_readcounts"],
     script:
         "004_collate-score-readcounts.R"
+
 
 rule tidy_ccle:
     input:
@@ -171,6 +175,7 @@ rule tidy_ccle:
         sample_info=MODELING_DATA_DIR / "ccle_sample_info.csv",
     script:
         "005_prepare-ccle-raw-data.R"
+
 
 rule tidy_depmap:
     input:
@@ -190,9 +195,8 @@ rule tidy_score:
     input:
         **tidy_score_input(),
     output:
-        copy_number=MODELING_DATA_DIR / "score_segment_cn.csv",
-        gene_effect=MODELING_DATA_DIR / "score_gene_effect.csv",
         log_fold_change=MODELING_DATA_DIR / "score_log_fold_change_filtered.csv",
+        score_read_counts=MODELING_DATA_DIR / "score_read_counts.csv",
     script:
         "009_prepare-score-raw-data.R"
 
@@ -267,24 +271,24 @@ rule split_achilles_rc:
         "011_split-file-by-depmapid.R"
 
 
-rule split_score_cn:
-    input:
-        data_file=rules.tidy_score.output.copy_number,
-    output:
-        out_files=expand(
-            (TEMP_DIR / "score-segmentcn_{depmapid}.qs").as_posix(),
-            depmapid=all_depmap_ids,
-        ),
-    script:
-        "011_split-file-by-depmapid.R"
-
-
 rule split_score_lfc:
     input:
         data_file=rules.tidy_score.output.log_fold_change,
     output:
         out_files=expand(
             (TEMP_DIR / "score-lfc_{depmapid}.qs").as_posix(), depmapid=all_depmap_ids
+        ),
+    script:
+        "011_split-file-by-depmapid.R"
+
+
+rule split_score_rc:
+    input:
+        data_file=rules.tidy_score.output.score_read_counts,
+    output:
+        out_files=expand(
+            (TEMP_DIR / "score-readcounts_{depmapid}.qs").as_posix(),
+            depmapid=all_depmap_ids,
         ),
     script:
         "011_split-file-by-depmapid.R"
@@ -300,8 +304,8 @@ rule merge_data:
         ccle_mut=TEMP_DIR / "ccle-mut_{depmapid}.qs",
         achilles_lfc=TEMP_DIR / "achilles-lfc_{depmapid}.qs",
         achilles_readcounts=TEMP_DIR / "achilles-readcounts_{depmapid}.qs",
-        score_cn=TEMP_DIR / "score-segmentcn_{depmapid}.qs",
         score_lfc=TEMP_DIR / "score-lfc_{depmapid}.qs",
+        score_readcounts=TEMP_DIR / "score-readcounts_{depmapid}.qs",
         sample_info=MODELING_DATA_DIR / "ccle_sample_info.csv",
     output:
         out_file=TEMP_DIR / "merged_{depmapid}.qs",
