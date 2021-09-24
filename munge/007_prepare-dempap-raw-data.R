@@ -28,32 +28,6 @@ make_known_essentials_and_nonessentials <- function(essentials_file,
 }
 
 
-remove_columns <- function(df, cols_to_drop) {
-  return(df[, !(colnames(df) %in% cols_to_drop)])
-}
-
-
-read_replicate_map <- function(f) {
-  readr::read_csv(f) %>%
-    janitor::clean_names() %>%
-    rename(depmap_id = dep_map_id)
-}
-
-get_dropped_replicates <- function(rep_map) {
-  rep_map %>%
-    filter(!passes_qc) %>%
-    pull(replicate_id) %>%
-    unlist() %>%
-    unique()
-}
-
-read_guide_map <- function(f) {
-  readr::read_csv(f) %>%
-    janitor::clean_names() %>%
-    extract_hugo_gene_name() %>%
-    rename(hugo_symbol = gene)
-}
-
 check_all_pass_qc <- function(df) {
   if (!all(df$passes_qc)) {
     stop("Not all batches passes QC.")
@@ -66,7 +40,6 @@ tidy_log_fold_change <- function(lfc_file,
                                  guide_map,
                                  out_file) {
   guide_map <- read_guide_map(guide_map)
-
   rep_map <- read_replicate_map(replicate_map)
   dropped_reps <- get_dropped_replicates(rep_map)
   print(paste("Number of dropped batches:", length(dropped_reps)))

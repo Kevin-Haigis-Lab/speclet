@@ -112,6 +112,10 @@ if os.getenv("CI") is not None:
 #### ---- Rules ---- ####
 
 
+localrules:
+    all,
+
+
 rule all:
     input:
         # rules.tidy_ccle.output
@@ -189,6 +193,19 @@ rule tidy_depmap:
         crispr_gene_effect=MODELING_DATA_DIR / "crispr_gene_effect.csv",
     script:
         "007_prepare-dempap-raw-data.R"
+
+
+rule prep_achilles_pdna:
+    input:
+        guide_map=tidy_depmap_input()["achilles_guide_map"],
+        dropped_guides=tidy_depmap_input()["achilles_dropped_guides"],
+        replicate_map=tidy_depmap_input()["achilles_replicate_map"],
+        achilles_read_counts=tidy_depmap_input()["achilles_raw_readcounts"],
+    output:
+        achilles_batch_pdna_counts=MODELING_DATA_DIR
+        / "achilles_pdna_batch_read_counts.csv",
+    script:
+        "008_prepare-achilles-pdna-batch-read-counts.R"
 
 
 rule tidy_score:
