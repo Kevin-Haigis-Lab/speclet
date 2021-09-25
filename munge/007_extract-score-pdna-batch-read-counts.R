@@ -20,11 +20,12 @@ extract_pdna_batch_read_counts <- function(replicate_id, p_dna_batch, counts_dir
 }
 
 
-
 read_counts_dir <- snakemake@params[["raw_counts_dir"]]
 replicate_map_path <- snakemake@input[["replicate_map"]]
 output_file <- snakemake@output[["score_pdna"]]
 
+# Select a single replicate for each pDNA batch and extract the pDNA reads from
+# that counts file.
 read_score_replicate_map(replicate_map_path) %>%
   group_by(p_dna_batch) %>%
   slice(1) %>%

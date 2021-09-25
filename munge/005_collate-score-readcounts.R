@@ -79,7 +79,7 @@ process_score_read_count_replicate <- function(replicate_id,
 
 score_read_counts_dir <- snakemake@params[["raw_counts_dir"]]
 replicate_map_path <- snakemake@input[["replicate_map"]]
-output_file <- snakemake@output[["score_raw_readcounts"]]
+output_path <- snakemake@output[["score_raw_readcounts"]]
 
 ## For testing
 # score_read_counts_dir <- "data/score_21q3/Score_raw_sgrna_counts/SecondBatch"
