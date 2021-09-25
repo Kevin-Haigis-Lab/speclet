@@ -105,14 +105,23 @@ tidy_crispr_gene_effect <- function(chronos_ge_file,
       depmap_id_colname = "DepMap_ID"
     )
 
-  ge_combined <- inner_join(
+  ge_combined <- full_join(
     chronos_ge,
     ceres_ge,
     by = c("depmap_id", "hugo_symbol")
   )
 
   if (nrow(chronos_ge) != nrow(ge_combined) || nrow(ceres_ge) != nrow(ge_combined)) {
-    stop("Lost data when merging scaled and unscaled gene effect values.")
+    warning("Lost data when merging scaled and unscaled gene effect values.")
+    warning(
+      "This is a known issue and I have brought it up with the DepMap folks:
+
+https://forum.depmap.org/t/different-number-of-genes-in-ceres-and-chronos-gene-effect
+
+There appears to a be 252 genes included in the CERES data set, but not the Chronos. I
+will update this code when I know why there is a difference. For now, there will NA
+values in the Chronos gene effect column"
+    )
   }
 
   readr::write_csv(ge_combined, out_file)
@@ -121,6 +130,9 @@ tidy_crispr_gene_effect <- function(chronos_ge_file,
 
 # ---- Function calls ----
 
+done <- function() {
+  print("\nDONE\n\n")
+}
 
 print("---- Tidying known essential and non-essential genes. ----")
 make_known_essentials_and_nonessentials(
@@ -128,6 +140,7 @@ make_known_essentials_and_nonessentials(
   nonessentials_file = snakemake@input[["nonessentials"]],
   out_file = snakemake@output[["known_essentials"]]
 )
+done()
 
 print("---- Tidying log fold change data. ----")
 tidy_log_fold_change(
@@ -137,6 +150,7 @@ tidy_log_fold_change(
   guide_map = snakemake@input[["achilles_guide_map"]],
   out_file = snakemake@output[["achilles_log_fold_change"]]
 )
+done()
 
 print("---- Tidying read count data. ----")
 tidy_read_counts(
@@ -146,6 +160,7 @@ tidy_read_counts(
   guide_map = snakemake@input[["achilles_guide_map"]],
   out_file = snakemake@output[["achilles_read_counts"]]
 )
+done()
 
 print("---- Tidying CRISPR gene effect. ----")
 tidy_crispr_gene_effect(
@@ -153,3 +168,4 @@ tidy_crispr_gene_effect(
   ceres_ge_file = snakemake@input[["crispr_gene_effect_ceres"]],
   out_file = snakemake@output[["crispr_gene_effect"]]
 )
+done()
