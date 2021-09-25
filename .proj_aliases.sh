@@ -1,7 +1,7 @@
 #!/bin/bash
 
 module unload python
-module load R/4.0.1 conda2
+module load R/4.1.1 conda2
 
 # Bash aliases used in this project.
 alias speclet_srun="srunp --pty -p priority --mem 80G -c 4 -t 0-15:00 --tunnel 7012:7012 /bin/bash"
