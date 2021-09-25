@@ -16,7 +16,7 @@
     },
     "tidy_depmap": {
         "mem": "40000",
-        "time": "00:30:00",
+        "time": "01:00:00",
         "J": "depmap"
     },
     "tidy_score": {
