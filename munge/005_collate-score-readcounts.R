@@ -30,6 +30,16 @@ assert_only_one_possible_final_count_column <- function(counts_df, possible_cols
   }
 }
 
+# Identify the final counts column as the only remaining column after removing all
+# known columns. In a previous attempt, I tried identifying the one that contained
+# "CRISPR" but this was not true for all read count files.
+identify_final_counts_column_name <- function(counts_df) {
+  counts_df %>%
+    select(-c(depmap_id, hugo_symbol, sgrna, p_dna_counts)) %>%
+    colnames() %>%
+    unlist()
+}
+
 save_processed_read_counts <- function(df, out_file) {
   readr::write_csv(df, out_file, append = file.exists(out_file))
   return(NULL)
@@ -45,6 +55,7 @@ process_score_read_count_replicate <- function(replicate_id,
 
   if (!file.exists(read_ct_path)) {
     log4r::info(logger, "No read count file found - exiting early.")
+    return(NULL)
   } else {
     log4r::info(logger, glue::glue("read count path: '{read_ct_path}'"))
   }
@@ -66,9 +77,7 @@ process_score_read_count_replicate <- function(replicate_id,
   read_ct_df <- read_ct_df %>%
     rename(p_dna_counts = {{ p_dna_batch }})
 
-  crispr_col_idx <- stringr::str_detect(colnames(read_ct_df), "CRISPR")
-  final_counts_col <- colnames(read_ct_df)[crispr_col_idx]
-  final_counts_col <- unlist(final_counts_col)
+  final_counts_col <- identify_final_counts_column_name(read_ct_df)
   assert_only_one_possible_final_count_column(read_ct_df, final_counts_col)
   final_counts_col <- final_counts_col[[1]]
   log4r::info(logger, glue::glue("final count column: '{final_counts_col}'"))

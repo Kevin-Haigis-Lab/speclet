@@ -9,8 +9,9 @@
         "mail": "NONE",
         "J": "snakejob"
     },
-    "rule collate_score_readcounts:": {
-        "time": "01:30:00",
+    "collate_score_readcounts": {
+        "mem": "4000",
+        "time": "00:10:00",
         "J": "col-s-rc"
     },
     "tidy_ccle": {
