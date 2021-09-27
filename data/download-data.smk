@@ -4,10 +4,12 @@ import os
 import requests
 from requests.auth import HTTPBasicAuth
 import colorama
+from snakemake.io import directory, touch
 
 colorama.init(autoreset=True)
 
 data_dir = Path("data")
+temp_dir = Path("temp")
 depmap_dir = data_dir / "depmap_21q3"
 score_dir = data_dir / "score_21q3"
 ccle_dir = data_dir / "ccle_21q3"
@@ -145,10 +147,27 @@ rule download_sanger:
         "wget --output-document {output.cgc_filename} {params.url}"
 
 
+rule unzip_score_readcounts:
+    input:
+        zipped_read_counts=score_dir / "Score_raw_sgrna_counts.zip",
+    params:
+        destination_dir=score_dir,
+        default_unzipped_dir=score_dir / "00_raw_counts",
+    output:
+        raw_counts_dir=directory(score_dir / "Score_raw_sgrna_counts"),
+        unzip_complete_touch=touch(temp_dir / "unzip_score_readcounts.done"),
+    shell:
+        "unzip {input.zipped_read_counts} -d {params.destination_dir}"
+        " && mv {params.default_unzipped_dir} {output.raw_counts_dir}"
+
+
 rule make_depmap_id_list:
     input:
         achilles_replicate_map=depmap_dir / "Achilles_replicate_map.csv",
         score_replicate_map=score_dir / "Score_replicate_map.csv",
+        unzip_complete_touch=temp_dir / "unzip_score_readcounts.done",
+    params:
+        raw_counts_dir=score_dir / "Score_raw_sgrna_counts" / "SecondBatch",
     output:
         depmap_id_list=data_dir / "all-depmap-ids.csv",
     shell:
@@ -156,3 +175,4 @@ rule make_depmap_id_list:
         "  {output.depmap_id_list}"
         "  --achilles={input.achilles_replicate_map}"
         "  --score={input.score_replicate_map}"
+        "  --score-reads-dir={params.raw_counts_dir}"

@@ -6,7 +6,6 @@ from typing import Dict, Any
 
 import pandas as pd
 from colorama import init, Fore, Back, Style
-from snakemake.io import directory, touch
 
 from src import project_config
 
@@ -144,26 +143,11 @@ rule all:
         MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",
 
 
-rule unzip_score_readcounts:
-    input:
-        zipped_read_counts=SCORE_DIR / "Score_raw_sgrna_counts.zip",
-    params:
-        destination_dir=SCORE_DIR,
-        default_unzipped_dir=SCORE_DIR / "00_raw_counts",
-    output:
-        raw_counts_dir=directory(SCORE_DIR / "Score_raw_sgrna_counts"),
-        unzip_complete_touch=touch(Path("temp") / "unzip_score_readcounts.done"),
-    shell:
-        "unzip {input.zipped_read_counts} -d {params.destination_dir}"
-        " && mv {params.default_unzipped_dir} {output.raw_counts_dir}"
-
-
 rule collate_score_readcounts:
     input:
-        unzip_complete_touch=Path("temp") / "unzip_score_readcounts.done",
         replicate_map=tidy_score_input()["score_replicate_map"],
     params:
-        raw_counts_dir=directory(SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch"),
+        raw_counts_dir=SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch",
     output:
         score_raw_readcounts=tidy_score_input()["score_raw_readcounts"],
     script:
@@ -175,7 +159,7 @@ rule extract_score_pdna:
         unzip_complete_touch=Path("temp") / "unzip_score_readcounts.done",
         replicate_map=tidy_score_input()["score_replicate_map"],
     params:
-        raw_counts_dir=directory(SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch"),
+        raw_counts_dir=SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch",
     output:
         score_pdna=MODELING_DATA_DIR / "score_pdna_batch_read_counts.csv",
     script:
