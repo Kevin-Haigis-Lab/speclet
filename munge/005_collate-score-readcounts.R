@@ -42,7 +42,12 @@ process_score_read_count_replicate <- function(replicate_id,
                                                out_file) {
   log4r::info(logger, glue::glue("Processing raw read counts for '{replicate_id}'"))
   read_ct_path <- get_score_read_count_path(counts_dir, replicate_id)
-  log4r::info(logger, glue::glue("read count path: '{read_ct_path}'"))
+
+  if (!file.exists(read_ct_path)) {
+    log4r::info(logger, "No read count file found - exiting early.")
+  } else {
+    log4r::info(logger, glue::glue("read count path: '{read_ct_path}'"))
+  }
 
   read_ct_df <- read_score_count_file(read_ct_path) %>%
     add_column(depmap_id = depmap_id) %>%
@@ -51,7 +56,7 @@ process_score_read_count_replicate <- function(replicate_id,
 
   log4r::info(
     logger,
-    glue::glue("number of rows in read count data frame: {nrow(read_ct_path)}")
+    glue::glue("number of rows in read count data frame: {nrow(read_ct_df)}")
   )
 
   if (!p_dna_batch %in% colnames(read_ct_df)) {
