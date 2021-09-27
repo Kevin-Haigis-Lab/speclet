@@ -49,6 +49,11 @@
         "time": "03:00:00",
         "J": "ach-lfc"
     },
+    "split_crispr_geneeffect": {
+        "mem": "64000",
+        "time": "03:00:00",
+        "J": "ach-ge"
+    },
     "split_achilles_rc": {
         "mem": "64000",
         "time": "03:00:00",
