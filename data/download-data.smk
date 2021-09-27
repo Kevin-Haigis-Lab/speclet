@@ -147,6 +147,19 @@ rule download_sanger:
         "wget --output-document {output.cgc_filename} {params.url}"
 
 
+rule download_score_sgrna_library:
+    params:
+        url="https://www.cell.com/cms/10.1016/j.celrep.2016.09.079/attachment/0cb71c0e-1d31-40c3-898b-3215a39a2bae/mmc2.xlsx",
+    output:
+        out_file=(
+            data_dir
+            / "Tzelepis_2016"
+            / "TableS1_Lists-of-gRNAs-in-the-Mouse-v2-and-Human-v1-CRISPR-Libraries.xlsx"
+        ),
+    shell:
+        "wget --output-document {output.out_file} {"
+
+
 rule unzip_score_readcounts:
     input:
         zipped_read_counts=score_dir / "Score_raw_sgrna_counts.zip",
