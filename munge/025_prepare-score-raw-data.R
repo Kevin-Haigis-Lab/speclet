@@ -52,16 +52,16 @@ tidy_read_counts <- function(counts_file,
 
 print("---- Tidying SCORE log fold change. ----")
 tidy_log_fold_change(
-  lfc_file = snakemake@input[["log_fold_change"]],
-  guide_map_file = snakemake@input[["guide_map"]],
-  replicate_map_file = snakemake@input[["replicate_map"]],
+  lfc_file = snakemake@input[["score_log_fold_change"]],
+  guide_map_file = snakemake@input[["score_guide_map"]],
+  replicate_map_file = snakemake@input[["score_replicate_map"]],
   out_file = snakemake@output[["log_fold_change"]]
 )
 
 print("---- Tidying SCORE read counts. ----")
 tidy_read_counts(
   counts_file = snakemake@input[["score_raw_readcounts"]],
-  guide_map_file = snakemake@input[["guide_map"]],
-  replicate_map_file = snakemake@input[["replicate_map"]],
+  guide_map_file = snakemake@input[["score_guide_map"]],
+  replicate_map_file = snakemake@input[["score_replicate_map"]],
   out_file = snakemake@output[["score_read_counts"]]
 )
