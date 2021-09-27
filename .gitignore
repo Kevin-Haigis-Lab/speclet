@@ -275,7 +275,7 @@ benchmarks/*
 !data/all-depmap-ids.csv
 !data/list_all_depmapids.py
 !data/README.md
-
+!data/Tzelepis_2016/TableS1_Lists-of-gRNAs-in-the-Mouse-v2-and-Human-v1-CRISPR-Libraries.xlsx
 
 # Dask
 */dask-worker-space/*
