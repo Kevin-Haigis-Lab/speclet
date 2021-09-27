@@ -109,6 +109,12 @@ rule all:
         ccle_files=expand(ccle_dir / "{filename}", filename=list(ccle_downloads.keys())),
         sanger_cgc=sanger_cosmic_dir / "cancer_gene_census.csv",
         depmap_id_list=data_dir / "all-depmap-ids.csv",
+        # download_score_sgrna_library
+        download_score_sgrna_library_file=(
+            data_dir
+            / "Tzelepis_2016"
+            / "TableS1_Lists-of-gRNAs-in-the-Mouse-v2-and-Human-v1-CRISPR-Libraries.xlsx"
+        ),
 
 
 rule download_depmap:
@@ -157,7 +163,7 @@ rule download_score_sgrna_library:
             / "TableS1_Lists-of-gRNAs-in-the-Mouse-v2-and-Human-v1-CRISPR-Libraries.xlsx"
         ),
     shell:
-        "wget --output-document {output.out_file} {"
+        "wget --output-document {output.out_file} {params.url}"
 
 
 rule unzip_score_readcounts:

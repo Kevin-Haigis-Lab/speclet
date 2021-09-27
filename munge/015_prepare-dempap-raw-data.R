@@ -96,13 +96,17 @@ tidy_crispr_gene_effect <- function(chronos_ge_file,
   chronos_ge <- readr::read_csv(chronos_ge_file) %>%
     flatten_wide_df_by_gene(
       values_to = "chronos_gene_effect",
-      depmap_id_colname = "DepMap_ID"
+      id_col_name = "DepMap_ID",
+      rename_id_col_to = depmap_id,
+      col_names_to = hugo_symbol
     )
 
   ceres_ge <- readr::read_csv(ceres_ge_file) %>%
     flatten_wide_df_by_gene(
       values_to = "ceres_gene_effect",
-      depmap_id_colname = "DepMap_ID"
+      id_col_name = "DepMap_ID",
+      rename_id_col_to = depmap_id,
+      col_names_to = hugo_symbol
     )
 
   ge_combined <- full_join(

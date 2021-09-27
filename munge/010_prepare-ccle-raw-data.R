@@ -14,7 +14,9 @@ source("munge/munge_functions.R")
 
 tidy_rna_expression <- function(file_in, file_out) {
   read_csv(file_in) %>%
-    flatten_wide_df_by_gene(values_to = "rna_expr") %>%
+    flatten_wide_df_by_gene(
+      values_to = "rna_expr", rename_id_col_to = depmap_id, col_names_to = hugo_symbol
+    ) %>%
     filter(!is.na(rna_expr)) %>%
     write_csv(file_out)
 }
@@ -22,7 +24,9 @@ tidy_rna_expression <- function(file_in, file_out) {
 
 tidy_gene_copynumber <- function(file_in, file_out) {
   read_csv(file_in) %>%
-    flatten_wide_df_by_gene(values_to = "gene_cn") %>%
+    flatten_wide_df_by_gene(
+      values_to = "gene_cn", rename_id_col_to = depmap_id, col_names_to = hugo_symbol
+    ) %>%
     write_csv(file_out)
 }
 

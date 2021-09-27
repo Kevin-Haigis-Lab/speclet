@@ -8,11 +8,20 @@ extract_hugo_gene_name <- function(df, col = gene) {
 }
 
 
-flatten_wide_df_by_gene <- function(df, values_to, depmap_id_colname = "X1") {
+flatten_wide_df_by_gene <- function(df,
+                                    values_to,
+                                    id_col_name = "X1",
+                                    rename_id_col_to = depmap_id,
+                                    col_names_to = hugo_symbol) {
   df %>%
-    dplyr::rename(depmap_id = !!depmap_id_colname) %>%
-    pivot_longer(-depmap_id, names_to = "hugo_symbol", values_to = values_to) %>%
-    extract_hugo_gene_name(hugo_symbol)
+    dplyr::rename({{ rename_id_col_to }} := !!id_col_name) %>%
+    pivot_longer(
+      -{{ rename_id_col_to }},
+      names_to = "names__col",
+      values_to = values_to
+    ) %>%
+    extract_hugo_gene_name(names__col) %>%
+    rename({{ col_names_to }} := names__col)
 }
 
 
@@ -54,6 +63,12 @@ read_score_replicate_map <- function(path) {
   readr::read_csv(path) %>%
     janitor::clean_names() %>%
     dplyr::rename(depmap_id = dep_map_id)
+}
+
+read_score_guide_map <- function(f) {
+  readr::read_csv(f) %>%
+    extract_hugo_gene_name(gene) %>%
+    rename(hugo_symbol = gene)
 }
 
 get_score_read_count_path <- function(dir, replicate_id) {
