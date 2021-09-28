@@ -11,7 +11,7 @@ source("munge/munge_functions.R")
 
 
 read_tzelepis2016_xlsx <- function(path) {
-  readxl::read_xlsx(path) %>%
+  readxl::read_xlsx(path, sheet = "Human v1 CRISPR library") %>%
     janitor::clean_names()
 }
 

@@ -35,7 +35,7 @@ assert_only_one_possible_final_count_column <- function(counts_df, possible_cols
 # "CRISPR" but this was not true for all read count files.
 identify_final_counts_column_name <- function(counts_df) {
   counts_df %>%
-    select(-c(depmap_id, hugo_symbol, sgrna, p_dna_counts)) %>%
+    select(-c(depmap_id, replicate_id, hugo_symbol, sgrna_id, p_dna_counts)) %>%
     colnames() %>%
     unlist()
 }
@@ -61,9 +61,9 @@ process_score_read_count_replicate <- function(replicate_id,
   }
 
   read_ct_df <- read_score_count_file(read_ct_path) %>%
-    add_column(depmap_id = depmap_id) %>%
-    dplyr::relocate(depmap_id, hugo_symbol, sgrna) %>%
-    arrange(hugo_symbol, sgrna)
+    add_column(depmap_id = depmap_id, replicate_id = replicate_id) %>%
+    dplyr::relocate(depmap_id, replicate_id, hugo_symbol, sgrna_id) %>%
+    arrange(hugo_symbol, sgrna_id)
 
   log4r::info(
     logger,
