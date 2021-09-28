@@ -20,6 +20,7 @@ ccle_mut_file <- snakemake@input[["ccle_mut"]]
 achilles_lfc_file <- snakemake@input[["achilles_lfc"]]
 achilles_reads_file <- snakemake@input[["achilles_readcounts"]]
 score_lfc_file <- snakemake@input[["score_lfc"]]
+score_reads_file <- snakemake@input[["score_readcounts"]]
 sample_info_file <- snakemake@input[["sample_info"]]
 
 DEPMAP_ID <- snakemake@wildcards[["depmapid"]]
@@ -81,21 +82,37 @@ get_log_fold_change_data <- function(achilles_lfc_path, score_lfc_path) {
   }
 }
 
+
 # Retrieve the read count data from Achilles. If there is not data, `NULL` is returned.
-get_read_counts_data <- function(achilles_reads_path) {
-  info(logger, glue("Retrieving LFC data ({achilles_reads_path})."))
+get_read_counts_data <- function(achilles_reads_path, score_reads_path) {
+  info(logger, glue("Retrieving LFC data ({achilles_reads_path}, {score_reads_path})."))
+
+  keep_cols <- c("sgrna", "replicate_id", "p_dna_batch", "counts_final", "screen")
 
   achilles_rc <- qs::qread(achilles_reads_path) %>%
     prepare_lfc_data(screen_source = "broad") %>%
     dplyr::rename(counts_final = read_counts) %>%
-    mutate(p_dna_batch = as.character(p_dna_batch))
+    mutate(p_dna_batch = as.character(p_dna_batch)) %>%
+    select(tidyselect::all_of(keep_cols))
 
-  if (nrow(achilles_rc) == 0) {
-    warn(logger, "Read count data not found.")
+  score_rc <- qs::qread(score_reads_path) %>%
+    prepare_lfc_data(screen_source = "sanger") %>%
+    rename(p_dna_batch = pdna_batch) %>%
+    mutate(p_dna_batch = as.character(p_dna_batch)) %>%
+    select(tidyselect::all_of(keep_cols))
+
+  if (nrow(achilles_rc) == 0 & nrow(score_rc) == 0) {
+    warn(logger, "No read count data found.")
     return(NULL)
-  } else {
-    info(logger, "Read count data found from the Achilles data.")
+  } else if (nrow(achilles_rc) == 0) {
+    info(logger, "No read count data from Achilles.")
+    return(score_rc)
+  } else if (nrow(score_rc) == 0) {
+    info(logger, "No read count data from Score.")
     return(achilles_rc)
+  } else {
+    info(logger, "Found read count data from both projects.")
+    return(bind_rows(achilles_rc, score_rc))
   }
 }
 
@@ -282,7 +299,7 @@ if (is.null(lfc_data)) {
   )
 }
 
-rc_data <- get_read_counts_data(achilles_reads_file)
+rc_data <- get_read_counts_data(achilles_reads_file, score_reads_file)
 if (!is.null(rc_data)) {
   rc_data <- rc_data %>%
     remove_sgrna_that_target_multiple_genes() %>%
