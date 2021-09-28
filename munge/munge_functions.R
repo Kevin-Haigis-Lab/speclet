@@ -77,5 +77,5 @@ get_score_read_count_path <- function(dir, replicate_id) {
 
 read_score_count_file <- function(path) {
   readr::read_tsv(path) %>%
-    rename(sgrna = sgRNA, hugo_symbol = gene)
+    rename(sgrna_id = sgRNA, hugo_symbol = gene)
 }

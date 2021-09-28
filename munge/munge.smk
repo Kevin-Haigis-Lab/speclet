@@ -231,7 +231,7 @@ rule prep_score_sgrna_library:
 rule tidy_score:
     input:
         **tidy_score_input(),
-        sgnra_lib=rules.prep_score_sgrna_library.output.outfile,
+        tzelepis_sgnra_lib=rules.prep_score_sgrna_library.output.outfile,
     output:
         log_fold_change=MODELING_DATA_DIR / "score_log_fold_change_filtered.csv",
         score_read_counts=MODELING_DATA_DIR / "score_read_counts.csv",

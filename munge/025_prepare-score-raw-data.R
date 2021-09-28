@@ -10,8 +10,9 @@ library(tidyverse)
 source("munge/munge_functions.R")
 
 
-#### ---- Data tidying functions ---- ####
+# ---- Data tidying functions ----
 
+# ---- LFC ----
 
 tidy_log_fold_change <- function(lfc_file,
                                  guide_map_file,
@@ -29,6 +30,12 @@ tidy_log_fold_change <- function(lfc_file,
     readr::write_csv(out_file)
 }
 
+# ---- Read counts ----
+
+read_tzelepis_guide_map <- function(path) {
+  readr::read_csv(path)
+}
+
 check_cleaned_read_counts <- function(counts_df) {
   if (any(is.na(counts_df))) {
     na_idx <- apply(counts_df, 1, function(x) {
@@ -43,17 +50,18 @@ check_cleaned_read_counts <- function(counts_df) {
 
 tidy_read_counts <- function(counts_file,
                              guide_map_file,
+                             tzelepis_guide_map_file,
                              replicate_map_file,
                              out_file) {
   replicate_map <- read_score_replicate_map(replicate_map_file)
-  guide_map <- read_score_guide_map(guide_map_file)
-
-  print(head(guide_map))
-  stop("JHC")
+  score_guide_map <- read_score_guide_map(guide_map_file)
+  tzelepis_guide_map <- read_tzelepis_guide_map(tzelepis_guide_map_file)
 
   counts_df <- readr::read_csv(counts_file, n_max = 1e5) %>%
+    ##### NOTE: NOT USING FULL FILE!
     left_join(replicate_map, by = c("depmap_id")) %>%
-    left_join(guide_map, by = c("sgrna", "hugo_symbol"))
+    left_join(tzelepis_guide_map, by = c("sgrna_id")) %>%
+    left_join(score_guide_map, by = c("sgrna", "hugo_symbol"))
 
   check_cleaned_read_counts(counts_df)
 
@@ -76,6 +84,7 @@ print("---- Tidying SCORE read counts. ----")
 tidy_read_counts(
   counts_file = snakemake@input[["score_raw_readcounts"]],
   guide_map_file = snakemake@input[["score_guide_map"]],
+  tzelepis_guide_map_file = snakemake@input[["tzelepis_sgnra_lib"]],
   replicate_map_file = snakemake@input[["score_replicate_map"]],
   out_file = snakemake@output[["score_read_counts"]]
 )
@@ -83,6 +92,7 @@ tidy_read_counts(
 tidy_read_counts(
   counts_file = "data/score_21q3/Score_raw_readcounts.csv",
   guide_map_file = "data/score_21q3/Score_guide_gene_map.csv",
+  tzelepis_guide_map_file = "modeling_data/Tzelepis2016_score_guide_map.csv",
   replicate_map_file = "data/score_21q3/Score_replicate_map.csv",
   out_file = "temp/score_read_counts.csv"
 )
