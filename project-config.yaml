@@ -1,8 +1,8 @@
 # Configurations used throughout the project.
 
 munge:
-  test: True
-  temporary_directory: "temp" # "/n/no_backup2/dbmi/park/jc604/speclet/munge-intermediates"
+  test: False
+  temporary_directory: "/n/no_backup2/dbmi/park/jc604/speclet/munge-intermediates"
 
 modeling:
   highest_density_interval: 0.89

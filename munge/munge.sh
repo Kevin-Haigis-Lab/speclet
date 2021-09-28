@@ -26,7 +26,7 @@ snakemake \
     --use-conda \
     --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
     --cluster-config munge/munge-config.json \
-    --keep-going
+    #--keep-going
 
 conda deactivate
 exit 44

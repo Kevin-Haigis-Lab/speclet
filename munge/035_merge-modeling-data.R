@@ -87,7 +87,7 @@ get_log_fold_change_data <- function(achilles_lfc_path, score_lfc_path) {
 get_read_counts_data <- function(achilles_reads_path, score_reads_path) {
   info(logger, glue("Retrieving LFC data ({achilles_reads_path}, {score_reads_path})."))
 
-  keep_cols <- c("sgrna", "replicate_id", "p_dna_batch", "counts_final", "screen")
+  keep_cols <- c("hugo_symbol", "sgrna", "replicate_id", "p_dna_batch", "counts_final", "screen")
 
   achilles_rc <- qs::qread(achilles_reads_path) %>%
     prepare_lfc_data(screen_source = "broad") %>%
