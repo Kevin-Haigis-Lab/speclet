@@ -21,7 +21,7 @@ tidy_log_fold_change <- function(lfc_file,
   replicate_map <- read_score_replicate_map(replicate_map_file)
   guide_map <- read_score_guide_map(guide_map_file)
 
-  readr::read_csv(lfc_file, n_max = 1e2) %>%
+  readr::read_csv(lfc_file) %>%
     flatten_wide_df_by_gene(
       values_to = "lfc", rename_id_col_to = sgrna, col_names_to = replicate_id
     ) %>%

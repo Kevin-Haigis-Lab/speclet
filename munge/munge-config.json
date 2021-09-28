@@ -74,6 +74,11 @@
         "time": "00:30:00",
         "J": "score-lfc"
     },
+    "split_score_rc": {
+        "mem": "30000",
+        "time": "00:30:00",
+        "J": "score-rc"
+    },
     "merge_data": {
         "mem": "2000",
         "time": "00:20:00",
