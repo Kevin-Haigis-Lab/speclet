@@ -12,10 +12,13 @@ library(tidyverse)
 
 
 
-#### ---- Load data ---- ####
+# ---- Load data ----
+
+modeling_df_path <- snakemake@input[["modeling_df"]]
+modeling_df_path <- "modeling_data/depmap_modeling_dataframe.csv"
 
 data <- data.table::fread(
-  snakemake@input[["modeling_df"]],
+  modeling_df_path,
   showProgress = FALSE
 )
 data <- as_tibble(data)
@@ -29,7 +32,7 @@ crc_data <- data %>%
 write_csv(crc_data, snakemake@output[["crc_subset"]])
 
 
-#### ---- Create a sub-sample for testing ---- ####
+# ---- Create a sub-sample for testing ----
 
 set.seed(0)
 
@@ -62,7 +65,7 @@ crc_data %>%
   write_csv(snakemake@output[["crc_subsample"]])
 
 
-#### ---- Small random subset for Python module testing ---- ####
+# ---- Small random subset for Python module testing ----
 
 set.seed(123)
 
