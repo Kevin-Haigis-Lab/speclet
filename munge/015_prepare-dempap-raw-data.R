@@ -115,18 +115,10 @@ tidy_crispr_gene_effect <- function(chronos_ge_file,
     by = c("depmap_id", "hugo_symbol")
   )
 
-  if (nrow(chronos_ge) != nrow(ge_combined) || nrow(ceres_ge) != nrow(ge_combined)) {
-    warning("Lost data when merging scaled and unscaled gene effect values.")
-    warning(
-      "This is a known issue and I have brought it up with the DepMap folks:
-
-https://forum.depmap.org/t/different-number-of-genes-in-ceres-and-chronos-gene-effect
-
-There appears to a be 252 genes included in the CERES data set, but not the Chronos. I
-will update this code when I know why there is a difference. For now, there will NA
-values in the Chronos gene effect column"
-    )
-  }
+  message(
+    "Note: some data may be missing from the Chronos gene effect because Chronos does
+not model guides that target multiple genes."
+  )
 
   readr::write_csv(ge_combined, out_file)
 }
