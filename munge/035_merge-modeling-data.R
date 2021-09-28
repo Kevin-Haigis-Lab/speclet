@@ -19,7 +19,6 @@ ccle_segment_cn_file <- snakemake@input[["ccle_segment_cn"]]
 ccle_mut_file <- snakemake@input[["ccle_mut"]]
 achilles_lfc_file <- snakemake@input[["achilles_lfc"]]
 achilles_reads_file <- snakemake@input[["achilles_readcounts"]]
-score_cn_file <- snakemake@input[["score_cn"]]
 score_lfc_file <- snakemake@input[["score_lfc"]]
 sample_info_file <- snakemake@input[["sample_info"]]
 
@@ -35,7 +34,6 @@ out_file <- snakemake@output[["out_file"]]
 # ccle_mut_file <- "temp/ccle-mut_ACH-000001.qs"
 # achilles_lfc_file <- "temp/achilles-lfc_ACH-000001.qs"
 # achilles_reads_file <- "temp/achilles-readcounts_ACH-000001.qs"
-# score_cn_file <- "temp/score-segmentcn_ACH-000001.qs"
 # score_lfc_file <- "temp/score-lfc_ACH-000001.qs"
 # sample_info_file <- "modeling_data/ccle_sample_info.csv"
 
@@ -246,29 +244,21 @@ get_gene_copy_number_data <- function(ccle_gene_cn_path, filter_genes = NULL) {
 # If data from both sources is available, they are merged.
 # If neither source provided segment CN data, `NULL` is
 # returned.
-get_segment_copy_number_data <- function(ccle_segment_cn_path,
-                                         sanger_segment_cn_path) {
+get_segment_copy_number_data <- function(ccle_segment_cn_path) {
   info(
     logger,
-    glue("Retrieving segment CN data ({ccle_segment_cn_path}, {sanger_segment_cn_path}).")
+    glue("Retrieving segment CN data ({ccle_segment_cn_path}).")
   )
+
   ccle_cn <- qs::qread(ccle_segment_cn_path) %>% distinct()
-  sanger_cn <- qs::qread(sanger_segment_cn_path) %>% distinct()
-  if (nrow(ccle_cn) == 0 && nrow(ccle_cn) == 0) {
-    msg <- "Segment CN data not found from either CCLE nor Sanger."
-    warn(logger, msg)
+
+  if (nrow(ccle_cn) == 0) {
+    info(logger, "No segment CN found.")
     return(NULL)
-  } else if (nrow(ccle_cn) == 0) {
-    info(logger, "Segment CN found from Sanger.")
-    return(ccle_cn)
-  } else if (nrow(ccle_cn) == 0) {
-    info(logger, "Segment CN found from CCLE.")
-    return(ccle_cn)
-  } else {
-    info(logger, "Data found from both CCLE and Sanger.")
-    cn <- bind_rows(ccle_cn, sanger_cn) %>% distinct()
-    return(cn)
   }
+
+  info(logger, "Segment CN data collected.")
+  return(ccle_cn)
 }
 
 # Helper function to quit early (usually because no
@@ -317,7 +307,7 @@ info(logger, glue("Found {length(lfc_genes)} genes in LFC data."))
 rna_data <- get_rna_expression_data(ccle_rna_file, filter_genes = lfc_genes)
 mut_data <- get_mutation_data(ccle_mut_file, filter_genes = lfc_genes)
 gene_cn_data <- get_gene_copy_number_data(ccle_gene_cn_file, filter_genes = lfc_genes)
-segment_cn_data <- get_segment_copy_number_data(ccle_segment_cn_file, score_cn_file)
+segment_cn_data <- get_segment_copy_number_data(ccle_segment_cn_file)
 
 
 sdim <- function(x) glue("{dim(x)[[1]]}, {dim(x)[[2]]}")
