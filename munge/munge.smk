@@ -143,27 +143,7 @@ rule all:
         MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",
 
 
-rule collate_score_readcounts:
-    input:
-        replicate_map=tidy_score_input()["score_replicate_map"],
-    params:
-        raw_counts_dir=str(SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch"),
-    output:
-        score_raw_readcounts=tidy_score_input()["score_raw_readcounts"],
-    script:
-        "005_collate-score-readcounts.R"
-
-
-rule extract_score_pdna:
-    input:
-        unzip_complete_touch=Path("temp") / "unzip_score_readcounts.done",
-        replicate_map=tidy_score_input()["score_replicate_map"],
-    params:
-        raw_counts_dir=SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch",
-    output:
-        score_pdna=MODELING_DATA_DIR / "score_pdna_batch_read_counts.csv",
-    script:
-        "007_extract-score-pdna-batch-read-counts.R"
+# ---- Prepare raw CCLE data ----
 
 
 rule tidy_ccle:
@@ -177,6 +157,9 @@ rule tidy_ccle:
         sample_info=MODELING_DATA_DIR / "ccle_sample_info.csv",
     script:
         "010_prepare-ccle-raw-data.R"
+
+
+# ---- Prepare raw DepMap / Achilles data ----
 
 
 rule tidy_depmap:
@@ -206,14 +189,57 @@ rule prep_achilles_pdna:
         "020_prepare-achilles-pdna-batch-read-counts.R"
 
 
+# ---- Prepare raw Score data ----
+
+
+rule collate_score_readcounts:
+    input:
+        replicate_map=tidy_score_input()["score_replicate_map"],
+    params:
+        raw_counts_dir=str(SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch"),
+    output:
+        score_raw_readcounts=tidy_score_input()["score_raw_readcounts"],
+    script:
+        "005_collate-score-readcounts.R"
+
+
+rule extract_score_pdna:
+    input:
+        unzip_complete_touch=Path("temp") / "unzip_score_readcounts.done",
+        replicate_map=tidy_score_input()["score_replicate_map"],
+    params:
+        raw_counts_dir=SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch",
+    output:
+        score_pdna=MODELING_DATA_DIR / "score_pdna_batch_read_counts.csv",
+    script:
+        "007_extract-score-pdna-batch-read-counts.R"
+
+
+rule prep_score_sgrna_library:
+    input:
+        sgrna_lib=(
+            DATA_DIR
+            / "Tzelepis_2016"
+            / "TableS1_Lists-of-gRNAs-in-the-Mouse-v2-and-Human-v1-CRISPR-Libraries.xlsx"
+        ),
+    output:
+        outfile=MODELING_DATA_DIR / "Tzelepis2016_score_guide_map.csv",
+    script:
+        "003_prepare-Tzelepis2016-score-sgrna-library.R"
+
+
 rule tidy_score:
     input:
         **tidy_score_input(),
+        sgnra_lib=rules.prep_score_sgrna_library.output.outfile,
     output:
         log_fold_change=MODELING_DATA_DIR / "score_log_fold_change_filtered.csv",
         score_read_counts=MODELING_DATA_DIR / "score_read_counts.csv",
     script:
         "025_prepare-score-raw-data.R"
+
+
+# ---- Split data by DepMap ID ----
 
 
 rule split_ccle_rna_expression:
@@ -330,7 +356,7 @@ rule split_crispr_geneeffect:
         "030_split-file-by-depmapid.R"
 
 
-## Merge all data for a DepMapID and combine into a single data set.
+# ---- Merge all data for a DepMapID and combine into a single data set ----
 
 
 rule merge_data:
@@ -380,7 +406,7 @@ rule check_depmap_modeling_data:
         "jupyter nbconvert --to markdown {input.check_nb}"
 
 
-## Generate additional useful files
+# ---- Generate additional useful files
 
 
 rule modeling_data_subsets:
