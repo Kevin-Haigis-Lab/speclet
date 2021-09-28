@@ -73,7 +73,8 @@ def get_model_config_hashes(config_path: Path) -> dict[str, int]:
         config_path (Path): Path to the configuration file.
 
     Returns:
-        dict[str, int]: A dictionary where the key is the model names and the value is the hash of the JSON serialization of the model's configuration.
+        dict[str, int]: A dictionary where the key is the model names and the value is
+        the hash of the JSON serialization of the model's configuration.
     """
     model_configurations = model_config.get_model_configurations(config_path)
     hashes: dict[str, int] = {}

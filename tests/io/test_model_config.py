@@ -158,4 +158,4 @@ def test_model_config_with_optional_pipeline_field():
         elif config.name == "without-pipelines":
             assert len(config.pipelines) == 0
         else:
-            assert False
+            assert 1 == 2  # Should never get here.

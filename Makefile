@@ -51,7 +51,9 @@ test_o2:
 	($(CONDA_ACTIVATE) speclet ; pytest -m "slow and not plots" & pytest -m "not slow and not plots" & wait)
 
 style:
-	Rscript -e "styler::style_dir()"
+	Rscript -e "styler::style_dir('data', recursive = FALSE)"
+	Rscript -e "styler::style_dir('munge', recursive = FALSE)"
+	Rscript -e "styler::style_dir('.', recursive = FALSE)"
 	($(CONDA_ACTIVATE) speclet && isort src && isort tests)
 	($(CONDA_ACTIVATE) speclet && black src && black tests)
 	($(CONDA_ACTIVATE) speclet && flake8 src && flake8 tests)

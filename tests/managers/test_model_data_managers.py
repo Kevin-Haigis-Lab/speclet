@@ -159,7 +159,7 @@ class TestCrcDataManager:
         dm.data = iris.copy()
         assert dm.data.shape[0] == 5
         assert dm.data.shape[1] == 2
-        assert set(["sepal_length", "species"]) == set(dm.data.columns.to_list())
+        assert {"sepal_length", "species"} == set(dm.data.columns.to_list())
 
     def test_transform_when_data_is_set(
         self,
@@ -169,7 +169,7 @@ class TestCrcDataManager:
     ):
         dm = CrcDataManager(debug=True)
         dm.add_transformations([head, select])
-        dm.data is None
+        assert dm.data is None
         dm.data = iris
         assert dm.get_data().shape[0] == 5
         assert dm.get_data().shape[1] == 2

@@ -5,7 +5,7 @@
 import logging
 import tempfile
 from pathlib import Path
-from typing import Optional
+from typing import Collection, Optional
 
 import pymc3 as pm
 import tqdm
@@ -25,7 +25,7 @@ set_console_handler_level(logging.ERROR)
 
 @app.command()
 def model_graphs(
-    output_dir: Path = Path("models/model-graph-images"),
+    output_dir: Optional[Path] = None,
     config_path: Optional[Path] = None,
     skip_existing: bool = False,
 ) -> None:
@@ -40,6 +40,8 @@ def model_graphs(
         skip_existing (bool, optional): Should PDFs that already exist be skipped?
           Defaults to False.
     """
+    if output_dir is None:
+        output_dir = Path("models/model-graph-images")
     if config_path is None:
         config_path = model_config.get_model_config()
     if not output_dir.exists():
@@ -87,9 +89,15 @@ def _count_lines_in_file(f: Path) -> int:
 
 
 def _recursively_count_lines_in_dir(
-    dir: Path, file_types: Optional[list[str]] = None, ignore_dirs: list[str] = []
+    dir: Path,
+    file_types: Optional[Collection[str]] = None,
+    ignore_dirs: Optional[Collection[str]] = None,
 ) -> int:
     n_lines = 0
+
+    if ignore_dirs is None:
+        ignore_dirs = []
+
     for p in dir.iterdir():
         if p.name in ignore_dirs:
             continue
@@ -105,15 +113,19 @@ def _recursively_count_lines_in_dir(
 
 @app.command()
 def lines_of_code(
-    file_types: list[str] = [".py", ".smk", ".sh", ".zsh", ".R", ".r"],
-    dirs: list[Path] = [
+    file_types: Collection[str] = (".py", ".smk", ".sh", ".zsh", ".R", ".r"),
+    dirs: Collection[Path] = (
         Path("src"),
         Path("pipelines"),
         Path("tests"),
         Path("munge"),
         Path("data"),
-    ],
-    ignore_dirs: list[str] = ["__pycache__", ".ipynb_checkpoints", ".DS_Store"],
+    ),
+    ignore_dirs: Optional[Collection[str]] = (
+        "__pycache__",
+        ".ipynb_checkpoints",
+        ".DS_Store",
+    ),
 ) -> None:
     """Count the lines of code.
 
