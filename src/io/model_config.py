@@ -20,7 +20,8 @@ def get_model_config() -> Path:
     Returns:
         Path: Path to a model configuration.
     """
-    return project_root_dir() / "models" / "model-configs.yaml"
+    config_path: Path = project_root_dir() / "models" / "model-configs.yaml"
+    return config_path
 
 
 #### ---- Configuration ---- ####

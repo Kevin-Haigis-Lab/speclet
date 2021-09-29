@@ -192,7 +192,7 @@ def plot_vi_hist(
 
     _x_lims, _y_lims = _plot_vi_axes_limits(approx.hist, x_start)
     if y_log:
-        _y_lims = np.log(_y_lims)
+        _y_lims = np.log(_y_lims).tolist()
 
     return (
         gg.ggplot(d, gg.aes(x="step"))
