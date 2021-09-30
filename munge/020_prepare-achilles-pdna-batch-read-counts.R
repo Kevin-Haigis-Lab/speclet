@@ -22,10 +22,10 @@ source("munge/munge_functions.R")
 #
 
 coalesce_sgrna_initial_reads <- function(reads_df) {
-  read_df %>%
+  reads_df %>%
     group_by(replicate_id) %>%
     mutate(
-      rpm = (reads / sum(reads_df)) * 1e6,
+      rpm = (reads / sum(reads)) * 1e6,
     ) %>%
     ungroup() %>%
     group_by(p_dna_batch, hugo_symbol, sgrna) %>%
