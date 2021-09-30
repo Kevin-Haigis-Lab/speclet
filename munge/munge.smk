@@ -30,8 +30,9 @@ all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list(
 
 if MUNGE_CONFIG.test:
     print("---- TESTING WITH A FEW CELL LINES ----")
-    all_depmap_ids = all_depmap_ids[:10]
-    all_depmap_ids += ["ACH-002227", "ACH-001738", "ACH-000956"]
+    # all_depmap_ids = all_depmap_ids[:10]
+    # all_depmap_ids += ["ACH-002227", "ACH-001738", "ACH-000956"]
+    all_depmap_ids = ["ACH-000956"]
 
 
 #### ---- Inputs ---- ####
@@ -192,6 +193,19 @@ rule prep_achilles_pdna:
 # ---- Prepare raw Score data ----
 
 
+rule prep_score_sgrna_library:
+    input:
+        sgrna_lib=(
+            DATA_DIR
+            / "Tzelepis_2016"
+            / "TableS1_Lists-of-gRNAs-in-the-Mouse-v2-and-Human-v1-CRISPR-Libraries.xlsx"
+        ),
+    output:
+        outfile=MODELING_DATA_DIR / "Tzelepis2016_score_guide_map.csv",
+    script:
+        "003_prepare-Tzelepis2016-score-sgrna-library.R"
+
+
 rule collate_score_readcounts:
     input:
         replicate_map=tidy_score_input()["score_replicate_map"],
@@ -213,19 +227,6 @@ rule extract_score_pdna:
         score_pdna=MODELING_DATA_DIR / "score_pdna_batch_read_counts.csv",
     script:
         "007_extract-score-pdna-batch-read-counts.R"
-
-
-rule prep_score_sgrna_library:
-    input:
-        sgrna_lib=(
-            DATA_DIR
-            / "Tzelepis_2016"
-            / "TableS1_Lists-of-gRNAs-in-the-Mouse-v2-and-Human-v1-CRISPR-Libraries.xlsx"
-        ),
-    output:
-        outfile=MODELING_DATA_DIR / "Tzelepis2016_score_guide_map.csv",
-    script:
-        "003_prepare-Tzelepis2016-score-sgrna-library.R"
 
 
 rule tidy_score:
