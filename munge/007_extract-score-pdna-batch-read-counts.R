@@ -14,9 +14,16 @@ source("munge/munge_functions.R")
 extract_pdna_batch_read_counts <- function(replicate_id, p_dna_batch, read_count_file) {
   read_ct_df <- read_score_count_file(read_count_file) %>%
     select(sgrna_id, tidyselect::matches(p_dna_batch)) %>%
-    add_column(pdna_batch = !!p_dna_batch) %>%
+    add_column(p_dna_batch = !!p_dna_batch) %>%
     rename(read_counts = !!p_dna_batch)
   return(read_ct_df)
+}
+
+reads_per_million <- function(df) {
+  df %>%
+    group_by(p_dna_batch) %>%
+    mutate(rpm = ((read_counts / sum(read_counts)) * 1e6) + 1) %>%
+    ungroup()
 }
 
 
@@ -39,4 +46,5 @@ read_score_replicate_map(replicate_map_path) %>%
   purrr::pmap_dfr(
     extract_pdna_batch_read_counts
   ) %>%
+  reads_per_million() %>%
   write_csv(output_file)
