@@ -208,7 +208,7 @@ rule extract_score_pdna:
         unzip_complete_touch=Path("temp") / "unzip_score_readcounts.done",
         replicate_map=tidy_score_input()["score_replicate_map"],
     params:
-        raw_counts_dir=str(SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch"),
+        raw_counts_dir=str(SCORE_DIR / "Score_raw_sgrna_counts"),
     output:
         score_pdna=MODELING_DATA_DIR / "score_pdna_batch_read_counts.csv",
     script:

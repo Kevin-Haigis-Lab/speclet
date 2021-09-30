@@ -83,3 +83,31 @@ read_score_count_file <- function(path) {
   readr::read_tsv(path) %>%
     rename(sgrna_id = sgRNA, hugo_symbol = gene)
 }
+
+
+map_read_count_files_to_replicate_id <- function(read_counts_dir) {
+  rc_suffix <- score_read_count_suffix()
+  all_read_count_files <- list.files(
+    read_counts_dir,
+    recursive = TRUE,
+    pattern = rc_suffix,
+    full.names = TRUE
+  )
+
+  repid_to_file_map <- tibble::tibble(read_count_file = all_read_count_files) %>%
+    dplyr::mutate(
+      replicate_id = basename(read_count_file),
+      replicate_id = str_remove(replicate_id, rc_suffix)
+    )
+  return(repid_to_file_map)
+}
+
+
+check_no_missing_count_files <- function(df, file_col) {
+  missing_file_paths <- dplyr::filter(df, is.na({{ file_col }}))
+  if (nrow(missing_file_paths) != 0) {
+    print(missing_file_paths)
+    stop(glue::glue("Missing {n_missing} file path(s)."))
+  }
+  return(df)
+}

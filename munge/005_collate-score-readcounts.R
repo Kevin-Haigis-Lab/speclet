@@ -90,42 +90,9 @@ process_score_read_count_replicate <- function(replicate_id,
 }
 
 
-map_read_count_files_to_replicate_id <- function(read_counts_dir) {
-  rc_suffix <- score_read_count_suffix()
-  all_read_count_files <- list.files(
-    read_counts_dir,
-    recursive = TRUE,
-    pattern = rc_suffix,
-    full.names = TRUE
-  )
-
-  repid_to_file_map <- tibble::tibble(read_count_file = all_read_count_files) %>%
-    dplyr::mutate(
-      replicate_id = basename(read_count_file),
-      replicate_id = str_remove(replicate_id, rc_suffix)
-    )
-  return(repid_to_file_map)
-}
-
-
-check_no_missing_count_files <- function(df, file_col) {
-  missing_file_paths <- df %>% filter(is.na({{ file_col }}))
-  if (nrow(missing_file_paths) != 0) {
-    print(missing_file_paths)
-    stop(glue::glue("Missing {n_missing} file path(s)."))
-  }
-  return(df)
-}
-
-
 score_read_counts_dir <- snakemake@params[["raw_counts_dir"]]
 replicate_map_path <- snakemake@input[["replicate_map"]]
 output_path <- snakemake@output[["score_raw_readcounts"]]
-
-## For testing
-# score_read_counts_dir <- "data/score_21q3/Score_raw_sgrna_counts/SecondBatch"
-# replicate_map_path <- "data/score_21q3/Score_replicate_map.csv"
-# output_path <- "temp/Score_raw_readcounts.csv"
 
 x <- read_score_replicate_map(replicate_map_path) %>%
   left_join(
