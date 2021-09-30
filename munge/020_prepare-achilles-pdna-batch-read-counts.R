@@ -22,14 +22,14 @@ source("munge/munge_functions.R")
 #
 
 reads_per_million <- function(df) {
-  reads_df %>%
+  df %>%
     group_by(replicate_id) %>%
     mutate(rpm = (reads / sum(reads)) * 1e6) %>%
     ungroup()
 }
 
-read_readcounts_data <- function(f) {
-  data.table::fread(achilles_read_counts_file, select = keep_cols) %>%
+read_readcounts_data <- function(f, keep) {
+  data.table::fread(f, select = keep) %>%
     as_tibble() %>%
     rename(sgrna = "Construct Barcode")
 }
@@ -55,7 +55,7 @@ prepare_achilles_pdna_batch_read_counts <- function(guide_map_file,
 
   keep_cols <- c("Construct Barcode", pdna_replicate_map$replicate_id)
 
-  read_counts <- read_readcounts_data(achilles_read_counts_file) %>%
+  read_counts <- read_readcounts_data(achilles_read_counts_file, keep = keep_cols) %>%
     filter(!(sgrna %in% dropped_guides)) %>%
     pivot_longer(-sgrna, names_to = "replicate_id", values_to = "reads") %>%
     left_join(pdna_replicate_map, by = c("replicate_id")) %>%
