@@ -50,6 +50,9 @@ test:
 test_o2:
 	($(CONDA_ACTIVATE) speclet ; pytest -m "slow and not plots" & pytest -m "not slow and not plots" & wait)
 
+test_modeling_data:
+	($(CONDA_ACTIVATE) speclet ; DATA_TESTS="yes" pytest tests/test_data.py
+
 style:
 	Rscript -e "styler::style_dir('data', recursive = FALSE)"
 	Rscript -e "styler::style_dir('munge', recursive = FALSE)"

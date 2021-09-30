@@ -364,12 +364,10 @@ join_with_readcounts <- function(lfc_data, reads_df) {
   if (is.null(reads_df)) {
     info(logger, "No read counts data - setting to `counts_final = NA`.")
     lfc_data$counts_final <- NA
-    lfc_data$counts_initial <- NA
     return(lfc_data)
   }
   d <- lfc_data %>%
-    left_join(reads_df, by = c("sgrna", "replicate_id", "p_dna_batch", "screen")) %>%
-    mutate(counts_initial = counts_final / (2**lfc))
+    left_join(reads_df, by = c("sgrna", "replicate_id", "p_dna_batch", "screen"))
   return(d)
 }
 
