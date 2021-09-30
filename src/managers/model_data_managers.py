@@ -230,8 +230,8 @@ class CrcDataManager(DataManager):
             Path: Path to the data.
         """
         if self.debug:
-            return data_io.data_path(to=data_io.DataFile.crc_subsample)
-        return data_io.data_path(to=data_io.DataFile.crc_data)
+            return data_io.data_path(to=data_io.DataFile.DEPMAP_CRC_SUBSAMPLE)
+        return data_io.data_path(to=data_io.DataFile.DEPMAP_CRC)
 
     def get_batch_size(self) -> int:
         """Decide on the minibatch size for modeling CRC data.

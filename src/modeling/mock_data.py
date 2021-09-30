@@ -248,7 +248,7 @@ def add_mock_copynumber_data(
     Returns:
         pd.DataFrame: Same mock Achilles data frame with a new "copy_number" column.
     """
-    real_cna_values = np.load(data_path(DataFile.copy_number_sample))
+    real_cna_values = np.load(data_path(DataFile.COPY_NUMBER_SAMPLE))
 
     df_copy = _make_mock_grouped_copy(mock_df, grouping_cols)
     mock_cn = np.random.choice(real_cna_values, size=df_copy.shape[0], replace=True)
