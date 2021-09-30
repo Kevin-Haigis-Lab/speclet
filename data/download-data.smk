@@ -176,7 +176,7 @@ rule unzip_score_readcounts:
         raw_counts_dir=directory(score_dir / "Score_raw_sgrna_counts"),
         unzip_complete_touch=touch(temp_dir / "unzip_score_readcounts.done"),
     shell:
-        "unzip {input.zipped_read_counts} -d {params.destination_dir}"
+        "unzip -q {input.zipped_read_counts} -d {params.destination_dir}"
         " && mv {params.default_unzipped_dir} {output.raw_counts_dir}"
 
 
@@ -186,9 +186,11 @@ rule make_depmap_id_list:
         score_replicate_map=score_dir / "Score_replicate_map.csv",
         unzip_complete_touch=temp_dir / "unzip_score_readcounts.done",
     params:
-        raw_counts_dir=score_dir / "Score_raw_sgrna_counts" / "SecondBatch",
+        raw_counts_dir=score_dir / "Score_raw_sgrna_counts",
     output:
         depmap_id_list=data_dir / "all-depmap-ids.csv",
+    version:
+        "1.0"
     shell:
         "./data/list_all_depmapids.py"
         "  {output.depmap_id_list}"

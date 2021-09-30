@@ -23,10 +23,19 @@ def get_depmapids_from_achilles(file_path: Path) -> list[str]:
     return _get_depmapids(pd.read_csv(file_path), "DepMap_ID")
 
 
-def _get_all_replicates_from_read_counts(dir: Path) -> list[str]:
+def _get_all_replicates_from_read_counts(
+    dir: Path, recursive: bool = True
+) -> list[str]:
     suffix = ".read_count.tsv.gz"
-    read_ct_files = [f for f in dir.iterdir() if suffix in f.name]
-    return [f.name.replace(suffix, "") for f in read_ct_files]
+    read_ct_files: list[str] = []
+    for p in dir.iterdir():
+        if recursive and p.is_dir():
+            read_ct_files += _get_all_replicates_from_read_counts(
+                p, recursive=recursive
+            )
+        elif suffix in p.name:
+            read_ct_files.append(p.name)
+    return [fname.replace(suffix, "") for fname in read_ct_files]
 
 
 def get_depmapids_from_score(
