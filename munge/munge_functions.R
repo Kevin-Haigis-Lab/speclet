@@ -71,8 +71,12 @@ read_score_guide_map <- function(f) {
     rename(hugo_symbol = gene)
 }
 
+score_read_count_suffix <- function() {
+  return(".read_count.tsv.gz")
+}
+
 get_score_read_count_path <- function(dir, replicate_id) {
-  file.path(dir, paste0(replicate_id, ".read_count.tsv.gz"))
+  file.path(dir, paste0(replicate_id, score_read_count_suffix()))
 }
 
 read_score_count_file <- function(path) {

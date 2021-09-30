@@ -196,7 +196,7 @@ rule collate_score_readcounts:
     input:
         replicate_map=tidy_score_input()["score_replicate_map"],
     params:
-        raw_counts_dir=str(SCORE_DIR / "Score_raw_sgrna_counts" / "SecondBatch"),
+        raw_counts_dir=str(SCORE_DIR / "Score_raw_sgrna_counts"),
     output:
         score_raw_readcounts=tidy_score_input()["score_raw_readcounts"],
     script:

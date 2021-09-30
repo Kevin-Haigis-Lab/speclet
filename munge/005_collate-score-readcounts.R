@@ -48,19 +48,18 @@ save_processed_read_counts <- function(df, out_file) {
 process_score_read_count_replicate <- function(replicate_id,
                                                depmap_id,
                                                p_dna_batch,
-                                               counts_dir,
+                                               read_count_file,
                                                out_file) {
   log4r::info(logger, glue::glue("Processing raw read counts for '{replicate_id}'"))
-  read_ct_path <- get_score_read_count_path(counts_dir, replicate_id)
 
-  if (!file.exists(read_ct_path)) {
+  if (!file.exists(read_count_file)) {
     log4r::info(logger, "No read count file found - exiting early.")
     return(NULL)
   } else {
-    log4r::info(logger, glue::glue("read count path: '{read_ct_path}'"))
+    log4r::info(logger, glue::glue("read count path: '{read_count_file}'"))
   }
 
-  read_ct_df <- read_score_count_file(read_ct_path) %>%
+  read_ct_df <- read_score_count_file(read_count_file) %>%
     add_column(depmap_id = depmap_id, replicate_id = replicate_id) %>%
     dplyr::relocate(depmap_id, replicate_id, hugo_symbol, sgrna_id) %>%
     arrange(hugo_symbol, sgrna_id)
@@ -91,6 +90,34 @@ process_score_read_count_replicate <- function(replicate_id,
 }
 
 
+map_read_count_files_to_replicate_id <- function(read_counts_dir) {
+  rc_suffix <- score_read_count_suffix()
+  all_read_count_files <- list.files(
+    read_counts_dir,
+    recursive = TRUE,
+    pattern = rc_suffix,
+    full.names = TRUE
+  )
+
+  repid_to_file_map <- tibble::tibble(read_count_file = all_read_count_files) %>%
+    dplyr::mutate(
+      replicate_id = basename(read_count_file),
+      replicate_id = str_remove(replicate_id, rc_suffix)
+    )
+  return(repid_to_file_map)
+}
+
+
+check_no_missing_count_files <- function(df, file_col) {
+  missing_file_paths <- df %>% filter(is.na({{ file_col }}))
+  if (nrow(missing_file_paths) != 0) {
+    print(missing_file_paths)
+    stop(glue::glue("Missing {n_missing} file path(s)."))
+  }
+  return(df)
+}
+
+
 score_read_counts_dir <- snakemake@params[["raw_counts_dir"]]
 replicate_map_path <- snakemake@input[["replicate_map"]]
 output_path <- snakemake@output[["score_raw_readcounts"]]
@@ -101,6 +128,11 @@ output_path <- snakemake@output[["score_raw_readcounts"]]
 # output_path <- "temp/Score_raw_readcounts.csv"
 
 x <- read_score_replicate_map(replicate_map_path) %>%
+  left_join(
+    map_read_count_files_to_replicate_id(score_read_counts_dir),
+    by = "replicate_id"
+  ) %>%
+  check_no_missing_count_files(read_count_file) %>%
   arrange(replicate_id) %>%
   purrr::pwalk(
     process_score_read_count_replicate,
