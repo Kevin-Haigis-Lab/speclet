@@ -41,10 +41,10 @@ prepare_achilles_pdna_batch_read_counts <- function(guide_map_file,
                                                     replicate_map_file,
                                                     achilles_read_counts_file,
                                                     out_file) {
-  guide_map <- read_guide_map(guide_map_file) %>%
+  guide_map <- read_achilles_guide_map(guide_map_file) %>%
     select(sgrna, hugo_symbol)
 
-  pdna_replicate_map <- read_replicate_map(replicate_map_file) %>%
+  pdna_replicate_map <- read_achilles_replicate_map(replicate_map_file) %>%
     filter(is.na(depmap_id)) %>%
     filter(passes_qc) %>%
     select(replicate_id, p_dna_batch) %>%

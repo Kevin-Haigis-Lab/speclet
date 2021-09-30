@@ -9,11 +9,6 @@
         "mail": "NONE",
         "J": "snakejob"
     },
-    "collate_score_readcounts": {
-        "mem": "4000",
-        "time": "00:10:00",
-        "J": "col-s-rc"
-    },
     "tidy_ccle": {
         "mem": "60000",
         "time": "01:30:00",
@@ -23,6 +18,21 @@
         "mem": "40000",
         "time": "01:00:00",
         "J": "depmap"
+    },
+    "prep_achilles_pdna": {
+        "mem": "8000",
+        "time": "00:30:00",
+        "J": "ach-pdna"
+    },
+    "collate_score_readcounts": {
+        "mem": "4000",
+        "time": "00:10:00",
+        "J": "col-sc-rc"
+    },
+    "extract_score_pdna": {
+        "mem": "8000",
+        "time": "00:15:00",
+        "J": "sco-pdna"
     },
     "tidy_score": {
         "mem": "30000",
