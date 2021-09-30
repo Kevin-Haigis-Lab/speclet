@@ -71,7 +71,7 @@ repos:
     -   id: parsable-R
     -   id: no-browser-statement
     -   id: lintr
-        verbose: true
+        exclude: "renv/activate.R"
 -   repo: https://github.com/nbQA-dev/nbQA
     rev: 1.1.1
     hooks:
