@@ -7,7 +7,10 @@ source(".Rprofile")
 
 library(log4r)
 library(glue)
-library(tidyverse)
+library(tibble)
+library(stringr)
+library(dplyr)
+library(magrittr)
 
 logger <- logger("INFO")
 
@@ -25,21 +28,26 @@ score_reads_file <- snakemake@input[["score_readcounts"]]
 score_pdna_file <- snakemake@input[["score_pdna"]]
 sample_info_file <- snakemake@input[["sample_info"]]
 
-DEPMAP_ID <- snakemake@wildcards[["depmapid"]]
+DEPMAP_ID <- snakemake@wildcards[["depmapid"]] # nolint
 info(logger, glue("Merging data for cell line '{DEPMAP_ID}'."))
 
 out_file <- snakemake@output[["out_file"]]
 
-# DEPMAP_ID <- "ACH-000001"
-# ccle_rna_file <- "temp/ccle-rna_ACH-000001.qs"
-# ccle_gene_cn_file <- "temp/ccle-genecn_ACH-000001.qs"
-# ccle_segment_cn_file <- "temp/ccle-segmentcn_ACH-000001.qs"
-# ccle_mut_file <- "temp/ccle-mut_ACH-000001.qs"
-# achilles_lfc_file <- "temp/achilles-lfc_ACH-000001.qs"
-# achilles_reads_file <- "temp/achilles-readcounts_ACH-000001.qs"
-# score_lfc_file <- "temp/score-lfc_ACH-000001.qs"
+# nolint start
+# DEPMAP_ID <- "ACH-000956"
+# ccle_rna_file <- "temp/ccle-rna_ACH-000956.qs"
+# ccle_gene_cn_file <- "temp/ccle-genecn_ACH-000956.qs"
+# ccle_segment_cn_file <- "temp/ccle-segmentcn_ACH-000956.qs"
+# ccle_mut_file <- "temp/ccle-mut_ACH-000956.qs"
+# achilles_lfc_file <- "temp/achilles-lfc_ACH-000956.qs"
+# achilles_reads_file <- "temp/achilles-readcounts_ACH-000956.qs"
+# achilles_pdna_file <- "modeling_data/achilles_pdna_batch_read_counts.csv"
+# score_lfc_file <- "temp/score-lfc_ACH-000956.qs"
+# score_reads_file <- "temp/score-readcounts_ACH-000956.qs"
+# score_pdna_file <- "modeling_data/score_pdna_batch_read_counts.csv"
 # sample_info_file <- "modeling_data/ccle_sample_info.csv"
-
+# out_file <- "temp/merged_ACH-000956.qs"
+# nolint end
 
 #### ---- Data retrieval functions ---- ####
 
@@ -47,7 +55,7 @@ out_file <- snakemake@output[["out_file"]]
 prepare_lfc_data <- function(lfc_df, screen_source) {
   lfc_df %>%
     add_column(screen = screen_source) %>%
-    filter(!is.na(hugo_symbol)) %>%
+    dplyr::filter(!is.na(hugo_symbol)) %>%
     distinct()
 }
 
@@ -55,7 +63,9 @@ prepare_lfc_data <- function(lfc_df, screen_source) {
 # If data is available from both sources, they are merged. If
 # neither data source is available, `NULL` is returned.
 get_log_fold_change_data <- function(achilles_lfc_path, score_lfc_path) {
-  info(logger, glue("Retrieving LFC data ({achilles_lfc_path}, {score_lfc_path})."))
+  info(
+    logger, glue("Retrieving LFC data ({achilles_lfc_path}, {score_lfc_path}).")
+  )
 
   achilles_lfc <- qs::qread(achilles_lfc_path) %>%
     prepare_lfc_data(screen_source = "broad") %>%
@@ -84,24 +94,50 @@ get_log_fold_change_data <- function(achilles_lfc_path, score_lfc_path) {
   }
 }
 
+add_achilles_pdna_data <- function(reads_df, achilles_pdna_path) {
+  readr::read_csv(achilles_pdna_path) %>%
+    mutate(p_dna_batch = as.character(p_dna_batch)) %>%
+    dplyr::select(-less_that_1_rpm, counts_initial = median_rpm) %>%
+    right_join(reads_df, by = c("p_dna_batch", "sgrna", "hugo_symbol"))
+}
+
+add_score_pdna_data <- function(reads_df, score_pdna_path) {
+  readr::read_csv(score_pdna_path) %>%
+    mutate(p_dna_batch = as.character(p_dna_batch)) %>%
+    dplyr::select(sgrna_id, p_dna_batch, counts_initial = rpm) %>%
+    right_join(reads_df, by = c("sgrna_id", "p_dna_batch"))
+}
 
 # Retrieve the read count data from Achilles. If there is not data, `NULL` is returned.
-get_read_counts_data <- function(achilles_reads_path, score_reads_path) {
-  info(logger, glue("Retrieving LFC data ({achilles_reads_path}, {score_reads_path})."))
+get_read_counts_data <- function(achilles_reads_path,
+                                 achilles_pdna_path,
+                                 score_reads_path,
+                                 score_pdna_path) {
+  info(
+    logger,
+    glue("Retrieving LFC data ({achilles_reads_path}, {score_reads_path}).")
+  )
 
-  keep_cols <- c("hugo_symbol", "sgrna", "replicate_id", "p_dna_batch", "counts_final", "screen")
+  keep_cols <- c(
+    "hugo_symbol", "sgrna", "replicate_id", "p_dna_batch",
+    "counts_final", "counts_initial", "screen"
+  )
 
   achilles_rc <- qs::qread(achilles_reads_path) %>%
     prepare_lfc_data(screen_source = "broad") %>%
     dplyr::rename(counts_final = read_counts) %>%
     mutate(p_dna_batch = as.character(p_dna_batch)) %>%
-    select(tidyselect::all_of(keep_cols))
+    add_achilles_pdna_data(achilles_pdna_path = achilles_pdna_path) %>%
+    dplyr::select(tidyselect::all_of(keep_cols))
 
   score_rc <- qs::qread(score_reads_path) %>%
     prepare_lfc_data(screen_source = "sanger") %>%
-    rename(p_dna_batch = pdna_batch) %>%
-    mutate(p_dna_batch = as.character(p_dna_batch)) %>%
-    select(tidyselect::all_of(keep_cols))
+    mutate(pdna_batch = as.character(pdna_batch)) %>%
+    dplyr::rename(p_dna_batch = pdna_batch) %>%
+    add_score_pdna_data(score_pdna_path = score_pdna_path) %>%
+    dplyr::select(tidyselect::all_of(keep_cols))
+
+  stopifnot(all(colnames(achilles_rc) %in% colnames(score_rc)))
 
   if (nrow(achilles_rc) == 0 & nrow(score_rc) == 0) {
     warn(logger, "No read count data found.")
@@ -127,7 +163,7 @@ remove_sgrna_that_target_multiple_genes <- function(lfc_df) {
   }
 
   target_counts <- lfc_df %>%
-    distinct(sgrna, hugo_symbol) %>%
+    dplyr::distinct(sgrna, hugo_symbol) %>%
     count(sgrna) %>%
     filter(n != 1)
   multi_target <- unique(unlist(target_counts$sgrna))
@@ -182,7 +218,7 @@ parse_genome_alignment <- function(df, col = genome_alignment) {
 # was "engineered" or non-cancerous in origin.
 get_sample_info <- function(sample_info_path, depmap_id) {
   info(logger, "Retrieving sample information.")
-  sample_info <- read_csv(sample_info_path) %>%
+  sample_info <- readr::read_csv(sample_info_path) %>%
     filter(depmap_id == !!depmap_id)
 
   if (nrow(sample_info) == 0) {
@@ -205,7 +241,7 @@ get_sample_info <- function(sample_info_path, depmap_id) {
 get_rna_expression_data <- function(rna_path, filter_genes = NULL) {
   info(logger, glue("Retrieving RNA expression data ({rna_path})."))
   rna <- qs::qread(rna_path) %>%
-    distinct()
+    dplyr::distinct()
 
   if (!is.null(filter_genes)) {
     info(logger, "Filtering RNA expression data for specific genes.")
@@ -224,7 +260,7 @@ get_rna_expression_data <- function(rna_path, filter_genes = NULL) {
 get_mutation_data <- function(mut_path, filter_genes = NULL) {
   info(logger, glue("Retrieving mutation data ({mut_path})."))
   mut <- qs::qread(mut_path) %>%
-    distinct() %>%
+    dplyr::distinct() %>%
     filter(!variant_annotation %in% c("silent")) %>%
     group_by(hugo_symbol) %>%
     summarise(
@@ -249,7 +285,7 @@ get_mutation_data <- function(mut_path, filter_genes = NULL) {
 get_gene_copy_number_data <- function(ccle_gene_cn_path, filter_genes = NULL) {
   info(logger, glue("Retrieving gene CN data ({ccle_gene_cn_path})."))
   cn <- qs::qread(ccle_gene_cn_path) %>%
-    distinct()
+    dplyr::distinct()
 
   if (!is.null(filter_genes)) {
     info(logger, "Filtering gene CN data for specific genes.")
@@ -269,7 +305,7 @@ get_segment_copy_number_data <- function(ccle_segment_cn_path) {
     glue("Retrieving segment CN data ({ccle_segment_cn_path}).")
   )
 
-  ccle_cn <- qs::qread(ccle_segment_cn_path) %>% distinct()
+  ccle_cn <- qs::qread(ccle_segment_cn_path) %>% dplyr::distinct()
 
   if (nrow(ccle_cn) == 0) {
     info(logger, "No segment CN found.")
@@ -301,34 +337,18 @@ if (is.null(lfc_data)) {
   )
 }
 
-rc_data <- get_read_counts_data(achilles_reads_file, score_reads_file)
+rc_data <- get_read_counts_data(
+  achilles_reads_path = achilles_reads_file,
+  achilles_pdna_path = achilles_pdna_file,
+  score_reads_path = score_reads_file,
+  score_pdna_path = score_pdna_file
+)
 if (!is.null(rc_data)) {
   rc_data <- rc_data %>%
     remove_sgrna_that_target_multiple_genes() %>%
     reconcile_sgrna_targeting_one_gene_in_mutliple_places() %>%
-    select(sgrna, replicate_id, p_dna_batch, counts_final, screen)
+    select(sgrna, replicate_id, p_dna_batch, counts_final, counts_initial, screen)
 }
-
-
-# ---- pDNA ----
-
-collect_pdna_data <- function(achilles_file, score_file) {
-  achilles_pdna <- readr::read_csv(achilles_file)
-  score_pdna <- readr::read_csv(score_file)
-
-  print(achilles_pdna)
-  print(score_pdna)
-  stop(" -- JHC -- ")
-}
-
-merge_with_pdna_initial_reads <- function(read_counts_df, pdna_df) {
-  stop(" -- JHC -- (not implemented yet")
-}
-
-pdna_df <- collect_pdna_data(achilles_file = achilles_pdna_file, score_file = score_pdna_file)
-rc_data <- merge_with_pdna_initial_reads(rc_data, pdna_df)
-
-
 
 
 sample_info <- get_sample_info(sample_info_file, DEPMAP_ID)
@@ -359,7 +379,10 @@ info(logger, glue("Dimensions of RNA data: {sdim(rna_data)}"))
 info(logger, glue("Dimensions of mutation data: {sdim(mut_data)}"))
 info(logger, glue("Dimensions of gene CN data: {sdim(gene_cn_data)}"))
 if (!is.null(segment_cn_data)) {
-  info(logger, glue("Dimensions of segment CN data: {sdim(segment_cn_data)}"))
+  info(
+    logger,
+    glue("Dimensions of segment CN data: {sdim(segment_cn_data)}")
+  )
 } else {
   info(logger, glue("No segment CN data."))
 }
@@ -433,7 +456,8 @@ join_with_gene_copy_number <- function(lfc_data, cn_data) {
 #  1. Remove any missing data and see if that reduces the data to a single point.
 #  2. If there are only two values:
 #   a. If the difference is small, return the mean.
-#   b. Else, return the CN with the most number of probes (taking the mean if there are still multiple values).
+#   b. Else, return the CN with the most number of probes (taking the mean if there are
+#      still multiple values).
 #  3. If there are more than 2 values, return the median CN.
 reconcile_multiple_segment_copy_numbers <- function(cn_df) {
   log4r::debug(logger, "Reconciling multiple CN data for a single position.")
@@ -493,17 +517,17 @@ get_copy_number_at_chromosome_location <- function(chr, pos, segment_cn_df) {
 # for chromosome `chr` and position `pos`.
 replace_missing_cn_using_segment_cn <- function(df, segment_cn_df) {
   sgrna_cn_df <- df %>%
-    distinct(sgrna, chr, pos) %>%
+    dplyr::distinct(sgrna, chr, pos) %>%
     mutate(copy_number = purrr::map2_dbl(
       chr,
       pos,
       get_copy_number_at_chromosome_location,
       segment_cn_df = segment_cn_df
     )) %>%
-    select(sgrna, copy_number)
+    dplyr::select(sgrna, copy_number)
 
   mod_df <- df %>%
-    select(-copy_number) %>%
+    dplyr::select(-copy_number) %>%
     left_join(sgrna_cn_df, by = "sgrna")
   return(mod_df)
 }
@@ -533,7 +557,7 @@ fill_in_missing_copy_number <- function(lfc_data, segment_cn) {
 join_with_sample_info <- function(lfc_data, sample_info) {
   info(logger, "Joining LFC data and sample info.")
   si <- sample_info %>%
-    select(lineage, primary_or_metastasis, is_male, age)
+    dplyr::select(lineage, primary_or_metastasis, is_male, age)
   stopifnot(nrow(si) == 1)
   return(bind_cols(lfc_data, si))
 }
@@ -544,7 +568,7 @@ combined_data <- lfc_data %>%
   join_with_mutation(mut_data = mut_data) %>%
   join_with_gene_copy_number(cn_data = gene_cn_data) %>%
   fill_in_missing_copy_number(segment_cn = segment_cn_data) %>%
-  rename(
+  dplyr::rename(
     sgrna_target_chr = chr,
     sgrna_target_pos = pos
   ) %>%
