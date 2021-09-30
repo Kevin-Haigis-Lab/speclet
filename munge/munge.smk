@@ -186,6 +186,8 @@ rule prep_achilles_pdna:
     output:
         achilles_batch_pdna_counts=MODELING_DATA_DIR
         / "achilles_pdna_batch_read_counts.csv",
+        achilles_replcate_pdna_counts=MODELING_DATA_DIR
+        / "achilles_replicate_pdna_batch_read_counts.csv",
     script:
         "020_prepare-achilles-pdna-batch-read-counts.R"
 
