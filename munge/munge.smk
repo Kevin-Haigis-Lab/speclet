@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 import pandas as pd
 from colorama import init, Fore, Back, Style
@@ -30,14 +30,14 @@ all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list(
 
 if MUNGE_CONFIG.test:
     print("---- TESTING WITH A FEW CELL LINES ----")
-    all_depmap_ids = all_depmap_ids[:100]
-# all_depmap_ids += ["ACH-002227", "ACH-001738", "ACH-000956"]
-# all_depmap_ids = list(set(all_depmap_ids))
+    all_depmap_ids = all_depmap_ids[:10]
+    all_depmap_ids += ["ACH-002227", "ACH-001738", "ACH-000956"]
+
 
 #### ---- Inputs ---- ####
 
 
-def tidy_ccle_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
+def tidy_ccle_input(*args: Any, **kwargs: Any) -> dict[str, Path]:
     return {
         "rna_expr": CCLE_DIR / "CCLE_expression.csv",
         "segment_cn": CCLE_DIR / "CCLE_segment_cn.csv",
@@ -47,7 +47,7 @@ def tidy_ccle_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
     }
 
 
-def tidy_depmap_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
+def tidy_depmap_input(*args: Any, **kwargs: Any) -> dict[str, Path]:
     return {
         "common_essentials": DEPMAP_DIR / "common_essentials.csv",
         "nonessentials": DEPMAP_DIR / "nonessentials.csv",
@@ -66,7 +66,7 @@ def tidy_depmap_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
     }
 
 
-def tidy_score_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
+def tidy_score_input(*args: Any, **kwargs: Any) -> dict[str, Path]:
     return {
         "score_gene_effect_ceres_unscaled": SCORE_DIR
         / "Score_gene_effect_CERES_unscaled.csv",
@@ -77,14 +77,14 @@ def tidy_score_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
     }
 
 
-def clean_sanger_cgc_input(*args: Any, **kwargs: Any) -> Dict[str, Path]:
+def clean_sanger_cgc_input(*args: Any, **kwargs: Any) -> dict[str, Path]:
     return {"cgc_input": SANGER_COSMIC_DIR / "cancer_gene_census.csv"}
 
 
 #### ---- CI ---- ####
 
 
-def _touch_input_dict(input_dict: Dict[str, Path]) -> None:
+def _touch_input_dict(input_dict: dict[str, Path]) -> None:
     for p in input_dict.values():
         if not p.parent.exists():
             print(Fore.YELLOW + f"  mkdir: '{p.parent.as_posix()}'")
@@ -368,8 +368,10 @@ rule merge_data:
         ccle_mut=TEMP_DIR / "ccle-mut_{depmapid}.qs",
         achilles_lfc=TEMP_DIR / "achilles-lfc_{depmapid}.qs",
         achilles_readcounts=TEMP_DIR / "achilles-readcounts_{depmapid}.qs",
+        achilles_pdna=rules.prep_achilles_pdna.output.achilles_batch_pdna_counts,
         score_lfc=TEMP_DIR / "score-lfc_{depmapid}.qs",
         score_readcounts=TEMP_DIR / "score-readcounts_{depmapid}.qs",
+        score_pdna=rules.extract_score_pdna.output.score_pdna,
         crispr_geneeffect=TEMP_DIR / "crsipr-geneeffect_{depmapid}.qs",
         sample_info=MODELING_DATA_DIR / "ccle_sample_info.csv",
     output:

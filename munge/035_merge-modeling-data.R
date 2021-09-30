@@ -19,8 +19,10 @@ ccle_segment_cn_file <- snakemake@input[["ccle_segment_cn"]]
 ccle_mut_file <- snakemake@input[["ccle_mut"]]
 achilles_lfc_file <- snakemake@input[["achilles_lfc"]]
 achilles_reads_file <- snakemake@input[["achilles_readcounts"]]
+achilles_pdna_file <- snakemake@input[["achilles_pdna"]]
 score_lfc_file <- snakemake@input[["score_lfc"]]
 score_reads_file <- snakemake@input[["score_readcounts"]]
+score_pdna_file <- snakemake@input[["score_pdna"]]
 sample_info_file <- snakemake@input[["sample_info"]]
 
 DEPMAP_ID <- snakemake@wildcards[["depmapid"]]
@@ -306,6 +308,28 @@ if (!is.null(rc_data)) {
     reconcile_sgrna_targeting_one_gene_in_mutliple_places() %>%
     select(sgrna, replicate_id, p_dna_batch, counts_final, screen)
 }
+
+
+# ---- pDNA ----
+
+collect_pdna_data <- function(achilles_file, score_file) {
+  achilles_pdna <- readr::read_csv(achilles_file)
+  score_pdna <- readr::read_csv(score_file)
+
+  print(achilles_pdna)
+  print(score_pdna)
+  stop(" -- JHC -- ")
+}
+
+merge_with_pdna_initial_reads <- function(read_counts_df, pdna_df) {
+  stop(" -- JHC -- (not implemented yet")
+}
+
+pdna_df <- collect_pdna_data(achilles_file = achilles_pdna_file, score_file = score_pdna_file)
+rc_data <- merge_with_pdna_initial_reads(rc_data, pdna_df)
+
+
+
 
 sample_info <- get_sample_info(sample_info_file, DEPMAP_ID)
 
