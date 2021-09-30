@@ -13,7 +13,7 @@ source("munge/munge_functions.R")
 
 extract_pdna_batch_read_counts <- function(replicate_id, p_dna_batch, read_count_file) {
   read_ct_df <- read_score_count_file(read_count_file) %>%
-    select(sgrna, tidyselect::matches(p_dna_batch)) %>%
+    select(sgrna_id, tidyselect::matches(p_dna_batch)) %>%
     add_column(pdna_batch = !!p_dna_batch) %>%
     rename(read_counts = !!p_dna_batch)
   return(read_ct_df)
