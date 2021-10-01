@@ -15,9 +15,6 @@ module load gcc conda2 slurm-drmaa/1.1.1
 source "$HOME/.bashrc"
 conda activate speclet_snakemake
 
-# Make a list of all DepMap IDs for Snakemake.
-./munge/_list_all_depmapids.R
-
 SNAKEFILE="munge/munge.smk"
 
 snakemake \
@@ -29,7 +26,7 @@ snakemake \
     --use-conda \
     --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
     --cluster-config munge/munge-config.json \
-    --keep-going
+    #--keep-going
 
 conda deactivate
 exit 44

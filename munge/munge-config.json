@@ -16,8 +16,23 @@
     },
     "tidy_depmap": {
         "mem": "40000",
-        "time": "00:30:00",
+        "time": "01:00:00",
         "J": "depmap"
+    },
+    "prep_achilles_pdna": {
+        "mem": "8000",
+        "time": "00:30:00",
+        "J": "ach-pdna"
+    },
+    "collate_score_readcounts": {
+        "mem": "4000",
+        "time": "00:10:00",
+        "J": "col-sc-rc"
+    },
+    "extract_score_pdna": {
+        "mem": "8000",
+        "time": "00:15:00",
+        "J": "sco-pdna"
     },
     "tidy_score": {
         "mem": "30000",
@@ -49,6 +64,11 @@
         "time": "03:00:00",
         "J": "ach-lfc"
     },
+    "split_crispr_geneeffect": {
+        "mem": "64000",
+        "time": "03:00:00",
+        "J": "ach-ge"
+    },
     "split_achilles_rc": {
         "mem": "64000",
         "time": "03:00:00",
@@ -64,6 +84,11 @@
         "time": "00:30:00",
         "J": "score-lfc"
     },
+    "split_score_rc": {
+        "mem": "30000",
+        "time": "00:30:00",
+        "J": "score-rc"
+    },
     "merge_data": {
         "mem": "2000",
         "time": "00:20:00",
@@ -76,8 +101,8 @@
     },
     "check_depmap_modeling_data": {
         "cores": 4,
-        "mem": "70000",
-        "time": "01:00:00",
+        "mem": "20000",
+        "time": "00:13:00",
         "J": "data-check"
     },
     "modeling_data_subsets": {

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 module unload python
-module load R/4.0.1 conda2
+module load R/4.1.1 conda2
 
 # Bash aliases used in this project.
 alias speclet_srun="srunp --pty -p priority --mem 80G -c 4 -t 0-15:00 --tunnel 7012:7012 /bin/bash"
@@ -12,7 +12,7 @@ alias speclet_sshlab="ssh -N -L 7012:127.0.0.1:7012"
 alias speclet_snakemake_env="conda activate speclet_snakemake && bash .proj_aliases.sh"
 alias smk_fit="snakemake --snakefile pipelines/010_010_run-crc-sampling-snakemake.smk"
 alias smk_sbc="snakemake --snakefile pipelines/012_010_simulation-based-calibration-snakemake.smk"
-alias smk_date="snakemake --snakefile data/download-data.smk"
+alias smk_data="snakemake --snakefile data/download-data.smk"
 alias smk_munge="snakemake --snakefile munge/munge.smk"
 
 # Misc.

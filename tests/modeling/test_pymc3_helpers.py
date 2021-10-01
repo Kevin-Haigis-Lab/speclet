@@ -27,31 +27,31 @@ def mock_model(iris_df: pd.DataFrame) -> pm.Model:
 
 def test_get_random_variables(mock_model: pm.Model):
     rvs = pmhelp.get_random_variable_names(mock_model)
-    expected_rvs = set(["a", "b", "sigma_log__"])
+    expected_rvs = {"a", "b", "sigma_log__"}
     assert expected_rvs == set(rvs)
 
 
 def test_get_random_variables_without_log(mock_model: pm.Model):
     rvs = pmhelp.get_random_variable_names(mock_model, rm_log=True)
-    expected_rvs = set(["a", "b", "sigma"])
+    expected_rvs = {"a", "b", "sigma"}
     assert expected_rvs == set(rvs)
 
 
 def test_get_deterministic_variables(mock_model: pm.Model):
     rvs = pmhelp.get_deterministic_variable_names(mock_model)
-    expected_rvs = set(["mu"])
+    expected_rvs = {"mu"}
     assert expected_rvs == set(rvs)
 
 
 def test_get_all_variables(mock_model: pm.Model):
     rvs = pmhelp.get_variable_names(mock_model)
-    expected_rvs = set(["a", "b", "sigma_log__", "mu", "sigma", "y"])
+    expected_rvs = {"a", "b", "sigma_log__", "mu", "sigma", "y"}
     assert expected_rvs == set(rvs)
 
 
 def test_get_all_variables_rm_log(mock_model: pm.Model):
     rvs = pmhelp.get_variable_names(mock_model, rm_log=True)
-    expected_rvs = set(["a", "b", "mu", "sigma", "y"])
+    expected_rvs = {"a", "b", "mu", "sigma", "y"}
     assert expected_rvs == set(rvs)
 
 

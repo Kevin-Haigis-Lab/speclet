@@ -442,8 +442,8 @@ def subsample_achilles_data(
     if n_cell_lines is not None and n_cell_lines <= 0:
         raise ValueError("Number of cell lines must be positive.")
 
-    genes: List[str] = df.hugo_symbol.unique()
-    cell_lines: List[str] = df.depmap_id.unique()
+    genes: np.ndarray = df.hugo_symbol.unique()
+    cell_lines: np.ndarray = df.depmap_id.unique()
 
     if n_genes is not None:
         genes = np.random.choice(genes, n_genes, replace=False)

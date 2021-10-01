@@ -16,3 +16,7 @@ If running on O2, the jobs can be parallelized over the HPC using the following 
 ```bash
 make munge_o2
 ```
+
+Below is the DAG of the pipeline (scaled down to just 5 cell lines).
+
+![munge-pipeline-dag](munge-dag.png)

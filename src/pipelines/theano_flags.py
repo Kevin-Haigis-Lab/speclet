@@ -11,7 +11,8 @@ def get_theano_compile_dir() -> str:
     Returns:
         str: String of path the compilation directory.
     """
-    return theano.config.compiledir
+    compile_dir: str = theano.config.compiledir
+    return compile_dir
 
 
 def get_theano_flags(unique_id: str, theano_compiledir: Optional[str] = None) -> str:

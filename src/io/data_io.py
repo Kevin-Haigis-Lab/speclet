@@ -13,16 +13,15 @@ class DataFile(str, Enum):
     """Data file names."""
 
     # crc_data = "depmap_CRC_data.csv"
-    crc_data = "depmap_modeling_dataframe_crc.csv"
-    crc_subsample = "depmap_modeling_dataframe_crc-subsample.csv"
-    achilles_data = "depmap_modeling_dataframe.csv"
-    achilles_subsample = "depmap_modeling_dataframe_crc-subsample.csv"
-    achilles_essentials = "known_essentials.csv"
-    achilles_gene_effect = "achilles_gene_effect.csv"
-    ccle_mutations = "ccle_mutations.csv"
-    ccle_copynumber = "ccle_gene_cn.csv"
-    copy_number_sample = "copy_number_data_samples.npy"
-    cgc = "sanger_cancer-gene-census.csv"
+    DEPMAP_CRC = "depmap_modeling_dataframe_crc.csv"
+    DEPMAP_CRC_SUBSAMPLE = "depmap_modeling_dataframe_crc-subsample.csv"
+    DEPMAP_DATA = "depmap_modeling_dataframe.csv"
+    DEPMAP_ESSENTIALS = "known_essentials.csv"
+    ACHILLES_GENE_EFFECT = "achilles_gene_effect.csv"
+    CCLE_MUTATIONS = "ccle_mutations.csv"
+    CCLE_COPYNUMBER = "ccle_gene_cn.csv"
+    COPY_NUMBER_SAMPLE = "copy_number_data_samples.npy"
+    CGC = "sanger_cancer-gene-census.csv"
 
 
 #### ---- Basics ---- ####

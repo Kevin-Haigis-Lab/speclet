@@ -16,7 +16,7 @@ def test_modeling_data_dir():
 
 
 def test_files_exist():
-    p = data_io.data_path(to=data_io.DataFile.crc_subsample)
+    p = data_io.data_path(to=data_io.DataFile.DEPMAP_CRC_SUBSAMPLE)
     assert isinstance(p, Path)
     assert p.exists()
     assert p.is_file()

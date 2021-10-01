@@ -94,7 +94,9 @@ class SBCAnalysis:
             list[Path]: List of `n` random SBC result directories.
         """
         all_dirs = self.get_simulation_directories()
-        r_dirs = np.random.choice(all_dirs, size=min([n, len(all_dirs)]), replace=False)
+        r_dirs = np.random.choice(
+            np.array(all_dirs), size=min([n, len(all_dirs)]), replace=False
+        ).tolist()
         return r_dirs
 
     def get_simulation_file_managers(self) -> list[sbc.SBCFileManager]:
