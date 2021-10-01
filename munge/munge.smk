@@ -30,9 +30,9 @@ all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list(
 
 if MUNGE_CONFIG.test:
     print("---- TESTING WITH A FEW CELL LINES ----")
-    # all_depmap_ids = all_depmap_ids[:10]
-    # all_depmap_ids += ["ACH-002227", "ACH-001738", "ACH-000956"]
-    all_depmap_ids = ["ACH-000956"]
+    all_depmap_ids = all_depmap_ids[:10]
+    all_depmap_ids += ["ACH-002227", "ACH-001738", "ACH-000956"]
+# all_depmap_ids = ["ACH-000956"]
 
 
 #### ---- Inputs ---- ####

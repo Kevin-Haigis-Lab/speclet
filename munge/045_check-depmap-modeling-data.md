@@ -24,7 +24,7 @@ client
 <td style="vertical-align: top; border: 0px solid white">
 <h3 style="text-align: left;">Client</h3>
 <ul style="text-align: left; list-style: none; margin: 0; padding: 0;">
-  <li><b>Scheduler: </b>tcp://127.0.0.1:40063</li>
+  <li><b>Scheduler: </b>tcp://127.0.0.1:38483</li>
   <li><b>Dashboard: </b><a href='http://127.0.0.1:8787/status' target='_blank'>http://127.0.0.1:8787/status</a></li>
 </ul>
 </td>
@@ -93,123 +93,123 @@ pd.read_csv(depmap_modeling_df_path, low_memory=False, nrows=200)
   <tbody>
     <tr>
       <th>0</th>
-      <td>AAAGCCCAGGAGTATGGGAG</td>
-      <td>HEL-311Cas9_RepA_p4_batch3</td>
-      <td>0.858827</td>
-      <td>3</td>
-      <td>chr2_130522105_-</td>
-      <td>CFC1B</td>
-      <td>broad</td>
+      <td>AAACCTGCGGCGGTCGCCA</td>
+      <td>OVR3_c905R1</td>
+      <td>-0.299958</td>
+      <td>CRISPR_C6596666.sample</td>
+      <td>chr8_66505451_-</td>
+      <td>VXN</td>
+      <td>sanger</td>
       <td>True</td>
-      <td>2</td>
-      <td>130522105</td>
+      <td>8</td>
+      <td>66505451</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>1.109223</td>
-      <td>blood</td>
-      <td>NaN</td>
-      <td>True</td>
-      <td>30</td>
+      <td>1.139595</td>
+      <td>ovary</td>
+      <td>metastasis</td>
+      <td>False</td>
+      <td>60</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>AAATCAGAGAAACCTGAACG</td>
-      <td>HEL-311Cas9_RepA_p4_batch3</td>
-      <td>-0.397664</td>
-      <td>3</td>
-      <td>chr11_89916950_-</td>
-      <td>TRIM49D1</td>
-      <td>broad</td>
+      <td>AACAGCACACCGGCCCCGT</td>
+      <td>OVR3_c905R1</td>
+      <td>0.267092</td>
+      <td>CRISPR_C6596666.sample</td>
+      <td>chrX_156009834_-</td>
+      <td>IL9R</td>
+      <td>sanger</td>
       <td>True</td>
-      <td>11</td>
-      <td>89916950</td>
+      <td>X</td>
+      <td>156009834</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>1.155134</td>
-      <td>blood</td>
-      <td>NaN</td>
-      <td>True</td>
-      <td>30</td>
+      <td>0.656377</td>
+      <td>ovary</td>
+      <td>metastasis</td>
+      <td>False</td>
+      <td>60</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>AACGTCTTTGAAGAAAGCTG</td>
-      <td>HEL-311Cas9_RepA_p4_batch3</td>
-      <td>0.102909</td>
-      <td>3</td>
-      <td>chr5_71055421_-</td>
-      <td>GTF2H2</td>
-      <td>broad</td>
+      <td>AACCTCCGGACTCCTCAGC</td>
+      <td>OVR3_c905R1</td>
+      <td>0.550477</td>
+      <td>CRISPR_C6596666.sample</td>
+      <td>chr7_39609658_-</td>
+      <td>YAE1</td>
+      <td>sanger</td>
       <td>True</td>
-      <td>5</td>
-      <td>71055421</td>
+      <td>7</td>
+      <td>39609658</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>0.757424</td>
-      <td>blood</td>
-      <td>NaN</td>
-      <td>True</td>
-      <td>30</td>
+      <td>0.923715</td>
+      <td>ovary</td>
+      <td>metastasis</td>
+      <td>False</td>
+      <td>60</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>AACGTCTTTGAAGGAAGCTG</td>
-      <td>HEL-311Cas9_RepA_p4_batch3</td>
-      <td>-0.434218</td>
-      <td>3</td>
-      <td>chr5_69572480_+</td>
-      <td>GTF2H2C</td>
-      <td>broad</td>
+      <td>AACTCAAACTGACGCCGAA</td>
+      <td>OVR3_c905R1</td>
+      <td>-0.391922</td>
+      <td>CRISPR_C6596666.sample</td>
+      <td>chr1_117623388_-</td>
+      <td>TENT5C</td>
+      <td>sanger</td>
       <td>True</td>
-      <td>5</td>
-      <td>69572480</td>
+      <td>1</td>
+      <td>117623388</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>0.757424</td>
-      <td>blood</td>
-      <td>NaN</td>
-      <td>True</td>
-      <td>30</td>
+      <td>1.352975</td>
+      <td>ovary</td>
+      <td>metastasis</td>
+      <td>False</td>
+      <td>60</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>AAGAGGTTCCAGACTACTTA</td>
-      <td>HEL-311Cas9_RepA_p4_batch3</td>
-      <td>0.590026</td>
-      <td>3</td>
-      <td>chrX_155898173_+</td>
-      <td>VAMP7</td>
-      <td>broad</td>
+      <td>AACTGACCTTGAAACGCTG</td>
+      <td>OVR3_c905R1</td>
+      <td>-1.562577</td>
+      <td>CRISPR_C6596666.sample</td>
+      <td>chr16_66933623_+</td>
+      <td>CIAO2B</td>
+      <td>sanger</td>
       <td>True</td>
-      <td>X</td>
-      <td>155898173</td>
+      <td>16</td>
+      <td>66933623</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>0.345761</td>
-      <td>blood</td>
-      <td>NaN</td>
-      <td>True</td>
-      <td>30</td>
+      <td>1.157211</td>
+      <td>ovary</td>
+      <td>metastasis</td>
+      <td>False</td>
+      <td>60</td>
     </tr>
     <tr>
       <th>...</th>
@@ -237,123 +237,123 @@ pd.read_csv(depmap_modeling_df_path, low_memory=False, nrows=200)
     </tr>
     <tr>
       <th>195</th>
-      <td>TGCTGGTGTGAATAAACAGT</td>
-      <td>HEL-311Cas9_RepA_p4_batch3</td>
-      <td>0.294152</td>
-      <td>3</td>
-      <td>chr5_79619732_-</td>
-      <td>TENT2</td>
-      <td>broad</td>
+      <td>TGAGCTGGCAATGCTAGAT</td>
+      <td>OVR3_c905R1</td>
+      <td>0.565344</td>
+      <td>CRISPR_C6596666.sample</td>
+      <td>chrX_155774116_-</td>
+      <td>SPRY3</td>
+      <td>sanger</td>
       <td>True</td>
-      <td>5</td>
-      <td>79619732</td>
+      <td>X</td>
+      <td>155774116</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>0.757424</td>
-      <td>blood</td>
-      <td>NaN</td>
-      <td>True</td>
-      <td>30</td>
+      <td>0.656377</td>
+      <td>ovary</td>
+      <td>metastasis</td>
+      <td>False</td>
+      <td>60</td>
     </tr>
     <tr>
       <th>196</th>
-      <td>TGGCCTTAGGAAGCAGTGCG</td>
-      <td>HEL-311Cas9_RepA_p4_batch3</td>
-      <td>0.110017</td>
-      <td>3</td>
-      <td>chr18_62187703_+</td>
-      <td>RELCH</td>
-      <td>broad</td>
+      <td>TGATGGAGCGAATCAGATG</td>
+      <td>OVR3_c905R1</td>
+      <td>-0.204959</td>
+      <td>CRISPR_C6596666.sample</td>
+      <td>chr16_66934065_+</td>
+      <td>CIAO2B</td>
+      <td>sanger</td>
       <td>True</td>
-      <td>18</td>
-      <td>62187703</td>
+      <td>16</td>
+      <td>66934065</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>1.064841</td>
-      <td>blood</td>
-      <td>NaN</td>
-      <td>True</td>
-      <td>30</td>
+      <td>1.157211</td>
+      <td>ovary</td>
+      <td>metastasis</td>
+      <td>False</td>
+      <td>60</td>
     </tr>
     <tr>
       <th>197</th>
-      <td>TGGCGAAGATGTAGACGGCG</td>
-      <td>HEL-311Cas9_RepA_p4_batch3</td>
-      <td>-0.013850</td>
-      <td>3</td>
-      <td>chr22_23961084_+</td>
-      <td>GSTT2B</td>
-      <td>broad</td>
+      <td>TGCACTTATGTGTGCCGCC</td>
+      <td>OVR3_c905R1</td>
+      <td>0.650650</td>
+      <td>CRISPR_C6596666.sample</td>
+      <td>chrX_156003692_-</td>
+      <td>IL9R</td>
+      <td>sanger</td>
       <td>True</td>
-      <td>22</td>
-      <td>23961084</td>
+      <td>X</td>
+      <td>156003692</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>0.794994</td>
-      <td>blood</td>
-      <td>NaN</td>
-      <td>True</td>
-      <td>30</td>
+      <td>0.656377</td>
+      <td>ovary</td>
+      <td>metastasis</td>
+      <td>False</td>
+      <td>60</td>
     </tr>
     <tr>
       <th>198</th>
-      <td>TGGCTGGTGTTCAGGATCCA</td>
-      <td>HEL-311Cas9_RepA_p4_batch3</td>
-      <td>-0.038889</td>
-      <td>3</td>
-      <td>chr3_50297333_+</td>
-      <td>NAA80</td>
-      <td>broad</td>
+      <td>TGCTAGGACCCAACTGAGC</td>
+      <td>OVR3_c905R1</td>
+      <td>-0.517796</td>
+      <td>CRISPR_C6596666.sample</td>
+      <td>chr10_46580364_+</td>
+      <td>SYT15</td>
+      <td>sanger</td>
       <td>True</td>
-      <td>3</td>
-      <td>50297333</td>
+      <td>10</td>
+      <td>46580364</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>1.154458</td>
-      <td>blood</td>
-      <td>NaN</td>
-      <td>True</td>
-      <td>30</td>
+      <td>0.752471</td>
+      <td>ovary</td>
+      <td>metastasis</td>
+      <td>False</td>
+      <td>60</td>
     </tr>
     <tr>
       <th>199</th>
-      <td>TGGTGTCGTAGTGAGCCAGG</td>
-      <td>HEL-311Cas9_RepA_p4_batch3</td>
-      <td>0.264638</td>
-      <td>3</td>
-      <td>chr21_43065249_+</td>
-      <td>CBS</td>
-      <td>broad</td>
+      <td>TGGAAAGTTGCCTCGTCCG</td>
+      <td>OVR3_c905R1</td>
+      <td>-0.218348</td>
+      <td>CRISPR_C6596666.sample</td>
+      <td>chr1_117622978_-</td>
+      <td>TENT5C</td>
+      <td>sanger</td>
       <td>True</td>
-      <td>21</td>
-      <td>43065249</td>
+      <td>1</td>
+      <td>117622978</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>2.266272</td>
-      <td>blood</td>
-      <td>NaN</td>
-      <td>True</td>
-      <td>30</td>
+      <td>1.352975</td>
+      <td>ovary</td>
+      <td>metastasis</td>
+      <td>False</td>
+      <td>60</td>
     </tr>
   </tbody>
 </table>
@@ -368,6 +368,7 @@ depmap_modeling_df = dd.read_csv(
         "p_dna_batch": "object",
         "primary_or_metastasis": "object",
         "counts_final": "float64",
+        "counts_initial": "float64",
     },
     low_memory=False,
 )
@@ -421,123 +422,123 @@ depmap_modeling_df.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>AAAGCCCAGGAGTATGGGAG</td>
-      <td>HEL-311Cas9_RepA_p4_batch3</td>
-      <td>0.858827</td>
-      <td>3</td>
-      <td>chr2_130522105_-</td>
-      <td>CFC1B</td>
-      <td>broad</td>
+      <td>AAACCTGCGGCGGTCGCCA</td>
+      <td>OVR3_c905R1</td>
+      <td>-0.299958</td>
+      <td>CRISPR_C6596666.sample</td>
+      <td>chr8_66505451_-</td>
+      <td>VXN</td>
+      <td>sanger</td>
       <td>True</td>
-      <td>2</td>
-      <td>130522105</td>
+      <td>8</td>
+      <td>66505451</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>1.109223</td>
-      <td>blood</td>
-      <td>NaN</td>
-      <td>True</td>
-      <td>30.0</td>
+      <td>1.139595</td>
+      <td>ovary</td>
+      <td>metastasis</td>
+      <td>False</td>
+      <td>60.0</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>AAATCAGAGAAACCTGAACG</td>
-      <td>HEL-311Cas9_RepA_p4_batch3</td>
-      <td>-0.397664</td>
-      <td>3</td>
-      <td>chr11_89916950_-</td>
-      <td>TRIM49D1</td>
-      <td>broad</td>
+      <td>AACAGCACACCGGCCCCGT</td>
+      <td>OVR3_c905R1</td>
+      <td>0.267092</td>
+      <td>CRISPR_C6596666.sample</td>
+      <td>chrX_156009834_-</td>
+      <td>IL9R</td>
+      <td>sanger</td>
       <td>True</td>
-      <td>11</td>
-      <td>89916950</td>
+      <td>X</td>
+      <td>156009834</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>1.155134</td>
-      <td>blood</td>
-      <td>NaN</td>
-      <td>True</td>
-      <td>30.0</td>
+      <td>0.656377</td>
+      <td>ovary</td>
+      <td>metastasis</td>
+      <td>False</td>
+      <td>60.0</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>AACGTCTTTGAAGAAAGCTG</td>
-      <td>HEL-311Cas9_RepA_p4_batch3</td>
-      <td>0.102909</td>
-      <td>3</td>
-      <td>chr5_71055421_-</td>
-      <td>GTF2H2</td>
-      <td>broad</td>
+      <td>AACCTCCGGACTCCTCAGC</td>
+      <td>OVR3_c905R1</td>
+      <td>0.550477</td>
+      <td>CRISPR_C6596666.sample</td>
+      <td>chr7_39609658_-</td>
+      <td>YAE1</td>
+      <td>sanger</td>
       <td>True</td>
-      <td>5</td>
-      <td>71055421</td>
+      <td>7</td>
+      <td>39609658</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>0.757424</td>
-      <td>blood</td>
-      <td>NaN</td>
-      <td>True</td>
-      <td>30.0</td>
+      <td>0.923715</td>
+      <td>ovary</td>
+      <td>metastasis</td>
+      <td>False</td>
+      <td>60.0</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>AACGTCTTTGAAGGAAGCTG</td>
-      <td>HEL-311Cas9_RepA_p4_batch3</td>
-      <td>-0.434218</td>
-      <td>3</td>
-      <td>chr5_69572480_+</td>
-      <td>GTF2H2C</td>
-      <td>broad</td>
+      <td>AACTCAAACTGACGCCGAA</td>
+      <td>OVR3_c905R1</td>
+      <td>-0.391922</td>
+      <td>CRISPR_C6596666.sample</td>
+      <td>chr1_117623388_-</td>
+      <td>TENT5C</td>
+      <td>sanger</td>
       <td>True</td>
-      <td>5</td>
-      <td>69572480</td>
+      <td>1</td>
+      <td>117623388</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>0.757424</td>
-      <td>blood</td>
-      <td>NaN</td>
-      <td>True</td>
-      <td>30.0</td>
+      <td>1.352975</td>
+      <td>ovary</td>
+      <td>metastasis</td>
+      <td>False</td>
+      <td>60.0</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>AAGAGGTTCCAGACTACTTA</td>
-      <td>HEL-311Cas9_RepA_p4_batch3</td>
-      <td>0.590026</td>
-      <td>3</td>
-      <td>chrX_155898173_+</td>
-      <td>VAMP7</td>
-      <td>broad</td>
+      <td>AACTGACCTTGAAACGCTG</td>
+      <td>OVR3_c905R1</td>
+      <td>-1.562577</td>
+      <td>CRISPR_C6596666.sample</td>
+      <td>chr16_66933623_+</td>
+      <td>CIAO2B</td>
+      <td>sanger</td>
       <td>True</td>
-      <td>X</td>
-      <td>155898173</td>
+      <td>16</td>
+      <td>66933623</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>False</td>
-      <td>0.345761</td>
-      <td>blood</td>
-      <td>NaN</td>
-      <td>True</td>
-      <td>30.0</td>
+      <td>1.157211</td>
+      <td>ovary</td>
+      <td>metastasis</td>
+      <td>False</td>
+      <td>60.0</td>
     </tr>
   </tbody>
 </table>
@@ -642,87 +643,6 @@ if not ct_df.shape[0] == 0:
     FAILED_CHECKS += 1
 ```
 
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.98 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.98 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.99 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.99 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.00 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.01 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.01 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.02 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.02 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.03 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.04 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.04 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.05 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.05 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.06 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.07 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.07 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.08 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.08 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.09 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.10 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.10 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.11 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.11 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.12 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.12 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.13 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.14 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.14 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.15 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.15 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.16 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.16 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.17 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.17 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.18 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.18 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.19 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.19 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.50 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.61 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.60 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.52 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.74 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.84 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.94 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.04 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.14 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.25 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.70 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.70 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.70 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.70 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.70 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.78 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.96 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.26 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.66 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.65 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.91 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.16 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.41 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.66 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.91 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Worker is at 80% memory usage. Pausing worker.  Process memory: 11.95 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.95 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Worker is at 71% memory usage. Resuming worker. Process memory: 10.70 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.70 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.80 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.92 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.22 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.46 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.69 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Worker is at 80% memory usage. Pausing worker.  Process memory: 11.95 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.95 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 12.12 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 12.47 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 12.73 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 12.78 GiB -- Worker memory limit: 14.90 GiB
-    distributed.worker - WARNING - Worker is at 63% memory usage. Resuming worker. Process memory: 9.45 GiB -- Worker memory limit: 14.90 GiB
-
 ```python
 if FAILED_CHECKS > 0:
     raise Exception(f"There were {FAILED_CHECKS} failed checks.")
@@ -735,7 +655,7 @@ if FAILED_CHECKS > 0:
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-09-28
+    Last updated: 2021-10-01
 
     Python implementation: CPython
     Python version       : 3.9.2
@@ -749,16 +669,16 @@ if FAILED_CHECKS > 0:
     CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-e-16-190.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-180.o2.rc.hms.harvard.edu
 
     Git branch: update-data
 
-    seaborn   : 0.11.2
+    numpy     : 1.20.1
+    matplotlib: 3.3.4
+    dask      : 2021.5.1
     plotnine  : 0.8.0
     pandas    : 1.2.3
-    numpy     : 1.20.1
-    dask      : 2021.5.1
-    matplotlib: 3.3.4
+    seaborn   : 0.11.2
 
 ```python
 

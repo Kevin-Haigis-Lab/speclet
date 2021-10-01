@@ -103,6 +103,5 @@ x <- read_score_replicate_map(replicate_map_path) %>%
   arrange(replicate_id) %>%
   purrr::pwalk(
     process_score_read_count_replicate,
-    counts_dir = score_read_counts_dir,
     out_file = output_path
   )
