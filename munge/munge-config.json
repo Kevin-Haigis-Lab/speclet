@@ -101,8 +101,8 @@
     },
     "check_depmap_modeling_data": {
         "cores": 4,
-        "mem": "70000",
-        "time": "01:00:00",
+        "mem": "20000",
+        "time": "00:13:00",
         "J": "data-check"
     },
     "modeling_data_subsets": {

@@ -24,7 +24,7 @@ client
 <td style="vertical-align: top; border: 0px solid white">
 <h3 style="text-align: left;">Client</h3>
 <ul style="text-align: left; list-style: none; margin: 0; padding: 0;">
-  <li><b>Scheduler: </b>tcp://127.0.0.1:38483</li>
+  <li><b>Scheduler: </b>tcp://127.0.0.1:33664</li>
   <li><b>Dashboard: </b><a href='http://127.0.0.1:8787/status' target='_blank'>http://127.0.0.1:8787/status</a></li>
 </ul>
 </td>
@@ -643,6 +643,125 @@ if not ct_df.shape[0] == 0:
     FAILED_CHECKS += 1
 ```
 
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.40 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.40 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.40 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.41 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.42 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.42 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.43 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.43 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.44 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.45 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.45 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.46 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.47 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.47 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.48 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.48 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.49 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.50 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.50 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.51 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.52 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.52 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.53 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.54 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.54 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.55 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.56 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.56 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.57 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.58 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.58 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.59 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.60 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.60 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.61 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.62 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.57 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.72 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.80 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.89 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.97 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.06 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.15 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.23 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.32 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.66 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.66 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.66 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.66 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.66 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.66 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.69 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.71 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.95 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.19 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.66 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.87 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.10 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.33 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.43 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.51 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.60 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.68 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.77 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.85 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Worker is at 80% memory usage. Pausing worker.  Process memory: 11.94 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.94 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 12.02 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Worker is at 76% memory usage. Resuming worker. Process memory: 11.35 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.35 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.35 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.35 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.35 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.35 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.35 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.41 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.48 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.73 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Worker is at 80% memory usage. Pausing worker.  Process memory: 11.97 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.97 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Worker is at 71% memory usage. Resuming worker. Process memory: 10.66 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.66 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.83 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.06 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.27 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.45 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.75 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.04 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.34 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.54 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.74 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Worker is at 80% memory usage. Pausing worker.  Process memory: 11.94 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.94 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 12.15 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 12.35 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 12.55 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 12.71 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Worker is at 76% memory usage. Resuming worker. Process memory: 11.35 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.35 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.35 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.44 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.48 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.74 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Worker is at 80% memory usage. Pausing worker.  Process memory: 11.99 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 11.99 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 12.18 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 12.35 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 12.56 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 12.77 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 12.88 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 13.14 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 13.41 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 13.56 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 13.60 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 12.11 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Worker is at 67% memory usage. Resuming worker. Process memory: 9.98 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.50 GiB -- Worker memory limit: 14.90 GiB
+    distributed.worker - WARNING - Memory use is high but worker has no data to store to disk.  Perhaps some other process is leaking memory?  Process memory: 10.63 GiB -- Worker memory limit: 14.90 GiB
+
 ```python
 if FAILED_CHECKS > 0:
     raise Exception(f"There were {FAILED_CHECKS} failed checks.")
@@ -666,19 +785,19 @@ if FAILED_CHECKS > 0:
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-180.o2.rc.hms.harvard.edu
+    Hostname: compute-h-17-52.o2.rc.hms.harvard.edu
 
     Git branch: update-data
 
-    numpy     : 1.20.1
-    matplotlib: 3.3.4
     dask      : 2021.5.1
     plotnine  : 0.8.0
     pandas    : 1.2.3
+    matplotlib: 3.3.4
     seaborn   : 0.11.2
+    numpy     : 1.20.1
 
 ```python
 
