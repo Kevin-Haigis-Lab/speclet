@@ -98,7 +98,7 @@ class DataManager(abc.ABC):
         """
         pass
 
-    def transform_data(self):
+    def transform_data(self) -> None:
         """Transform the data held by the manager.
 
         The data must be loaded using `get_data()` prior running this method. The

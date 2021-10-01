@@ -31,7 +31,7 @@ class ArvizCachePaths(BaseModel):
     approximation_path: Path
 
 
-def _mkdir(dir: Path):
+def _mkdir(dir: Path) -> None:
     if not dir.exists():
         dir.mkdir(parents=True)
 

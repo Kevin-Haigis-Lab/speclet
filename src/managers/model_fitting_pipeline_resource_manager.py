@@ -214,7 +214,7 @@ class ModelFittingPipelineResourceManager(PipelineResourceManager):
         """
         return self.config.debug
 
-    def is_debug_cli(self):
+    def is_debug_cli(self) -> str:
         """Get the correct flag for indicating debug mode through a CLI.
 
         Returns:

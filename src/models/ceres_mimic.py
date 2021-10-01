@@ -100,7 +100,7 @@ class CeresMimic(SpecletModel):
         return self.config.copynumber_cov
 
     @copynumber_cov.setter
-    def copynumber_cov(self, new_value: bool):
+    def copynumber_cov(self, new_value: bool) -> None:
         """Setter to control whether the copy number covariate should be in the model.
 
         If the value changes, then the `model` attribute and model results attributes
@@ -125,7 +125,7 @@ class CeresMimic(SpecletModel):
         return self.config.sgrna_intercept_cov
 
     @sgrna_intercept_cov.setter
-    def sgrna_intercept_cov(self, new_value: bool):
+    def sgrna_intercept_cov(self, new_value: bool) -> None:
         """Control if the `sgRNA|gene` varying intercept covariate is in the model.
 
         If the value changes, then the `model` attribute and model results attributes

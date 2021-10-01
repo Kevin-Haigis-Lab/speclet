@@ -2,7 +2,7 @@
 
 """Standardization of the interactions with PyMC3 sampling."""
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
 
 import arviz as az
 import numpy as np
@@ -10,6 +10,8 @@ import pymc3 as pm
 from pydantic import BaseModel, validator
 
 #### ---- Result Types ---- ####
+
+PossibleTrace = TypeVar("PossibleTrace")
 
 
 class MCMCSamplingResults(BaseModel):
@@ -25,7 +27,7 @@ class MCMCSamplingResults(BaseModel):
         arbitrary_types_allowed = True
 
     @validator("trace")
-    def validate_trace(cls, trace):
+    def validate_trace(cls, trace: PossibleTrace) -> PossibleTrace:
         """Validate a PyMC3 MultiTrace object.
 
         Args:
