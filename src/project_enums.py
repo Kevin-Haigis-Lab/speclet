@@ -7,7 +7,7 @@ from typing import NoReturn
 
 
 @unique
-class ModelFitMethod(str, Enum):
+class ModelFitMethod(Enum):
     """Available fit methods."""
 
     ADVI = "ADVI"
@@ -15,7 +15,7 @@ class ModelFitMethod(str, Enum):
 
 
 @unique
-class ModelParameterization(str, Enum):
+class ModelParameterization(Enum):
     """Possible model parameterization methods."""
 
     CENTERED = "centered"
@@ -23,7 +23,7 @@ class ModelParameterization(str, Enum):
 
 
 @unique
-class ModelOption(str, Enum):
+class ModelOption(Enum):
     """Model options."""
 
     SPECLET_TEST_MODEL = "speclet-test-model"
@@ -41,7 +41,7 @@ class ModelOption(str, Enum):
 
 
 @unique
-class SlurmPartitions(str, Enum):
+class SlurmPartitions(Enum):
     """Partitions of the HPC available through SLURM."""
 
     PRIORITY = "priority"
@@ -52,7 +52,7 @@ class SlurmPartitions(str, Enum):
 
 
 @unique
-class SpecletPipeline(str, Enum):
+class SpecletPipeline(Enum):
     """Pipelines available in this project."""
 
     FITTING = "fitting"
@@ -60,7 +60,7 @@ class SpecletPipeline(str, Enum):
 
 
 @unique
-class MockDataSize(str, Enum):
+class MockDataSize(Enum):
     """Options for dataset seizes when generating mock data."""
 
     SMALL = "small"
