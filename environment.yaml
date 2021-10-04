@@ -21,7 +21,7 @@ dependencies:
   - flake8-builtins
   - flake8-comprehensions
   - graphviz=2.48.*
-  - hypothesis=6.14.*
+  - hypothesis=6.23.*
   - ipython=7.26.*
   - isort=5.9.*
   - jedi
@@ -52,6 +52,7 @@ dependencies:
   - pytest-cov
   - pytest-sugar
   - python-graphviz=0.17
+  - pyupgrade=2.29.*
   - requests=2.26.*
   - rich=10.7.*
   - scikit-learn=0.24.2

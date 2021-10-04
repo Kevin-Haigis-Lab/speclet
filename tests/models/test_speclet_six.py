@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Set
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -139,7 +139,7 @@ class TestSpecletSix:
         mock_crc_dm: CrcDataManager,
         arg_name: str,
         arg_value: bool,
-        expected_vars: Set[str],
+        expected_vars: set[str],
     ) -> None:
         config = SpecletSixConfiguration(**{arg_name: arg_value})
         sp6 = SpecletSix(

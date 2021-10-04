@@ -70,5 +70,5 @@ def test_depmap_data_no_missing(setup_dask: Client) -> None:
     ]
 
     na_checks: pd.Series = dask_df.head().isna()[cols_without_na].any().compute()
-    for column, any_missing in na_checks.iteritems():
+    for column, any_missing in na_checks.iteritems():  # noqa: B301
         assert not any_missing and isinstance(column, str)

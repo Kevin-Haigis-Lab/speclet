@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import pytest
 import typer
@@ -105,7 +105,7 @@ def test_control_sampling(
     is_sampling: bool,
 ) -> None:
 
-    method_calls: List[ModelFitMethod] = []
+    method_calls: list[ModelFitMethod] = []
 
     def advi_sample_model_called(*args: Any, **kwargs: Any) -> None:
         method_calls.append(ModelFitMethod.ADVI)
@@ -147,7 +147,7 @@ def test_uses_configuration_fitting_parameters(
     advi_kwargs = {"n_iterations": 42, "draws": 23, "post_pred_samples": 12}
     mcmc_kwargs = {"tune": 33, "target_accept": 0.2, "prior_pred_samples": 121}
 
-    def _compare_dicts(d1: Dict[str, Any], d2: Dict[str, Any]) -> None:
+    def _compare_dicts(d1: dict[str, Any], d2: dict[str, Any]) -> None:
         for k, v in d1.items():
             assert v == d2[k]
 

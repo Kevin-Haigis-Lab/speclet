@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-from typing import List
 
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
@@ -43,7 +42,7 @@ class TestCeresMimic:
         model_params = get_variable_names(cm.model)
 
         def assert_maybe_all_in(
-            expected_vars: List[str], maybe: bool, all_params: List[str]
+            expected_vars: list[str], maybe: bool, all_params: list[str]
         ) -> None:
             assert all([(v in all_params) == maybe for v in expected_vars])
 

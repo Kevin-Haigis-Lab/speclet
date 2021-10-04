@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Type
+from typing import Any
 
 import pytest
 from hypothesis import given
@@ -44,8 +44,8 @@ def test_all_model_options_return_a_type(model_option: ModelOption) -> None:
     assert model_type is not None
 
 
-model_options_expected_class_parameterization: List[
-    Tuple[ModelOption, Type[SpecletModel]]
+model_options_expected_class_parameterization: list[
+    tuple[ModelOption, type[SpecletModel]]
 ] = [
     (ModelOption.SPECLET_TEST_MODEL, SpecletTestModel),
     (ModelOption.CRC_CERES_MIMIC, CeresMimic),
@@ -61,7 +61,7 @@ model_options_expected_class_parameterization: List[
 @pytest.mark.parametrize(
     "model_option, expected_class", model_options_expected_class_parameterization
 )
-def test_get_model_class(model_option: ModelOption, expected_class: Type) -> None:
+def test_get_model_class(model_option: ModelOption, expected_class: type) -> None:
     model_type = configuration.get_model_class(model_option)
     assert model_type == expected_class
 
@@ -129,7 +129,7 @@ def test_get_config_and_instantiate_model(
 @given(sampling_kwargs=st.dictionaries(st.text(), st.text()))
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 def test_check_sampling_kwargs_raises(
-    sampling_kwargs: Dict[str, str], fit_method: ModelFitMethod
+    sampling_kwargs: dict[str, str], fit_method: ModelFitMethod
 ) -> None:
     if sampling_kwargs == {}:
         configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
@@ -141,7 +141,7 @@ def test_check_sampling_kwargs_raises(
 
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 def test_check_sampling_kwargs_empty_always_passes(fit_method: ModelFitMethod) -> None:
-    sampling_kwargs: Dict[str, Any] = {}
+    sampling_kwargs: dict[str, Any] = {}
     configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
 
 
@@ -155,7 +155,7 @@ def test_check_sampling_kwargs_empty_always_passes(fit_method: ModelFitMethod) -
 )
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 def test_check_sampling_kwargs_all_fitmethods(
-    sampling_kwargs: Dict[str, Any], fit_method: ModelFitMethod
+    sampling_kwargs: dict[str, Any], fit_method: ModelFitMethod
 ) -> None:
     configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
 
@@ -172,7 +172,7 @@ def test_check_sampling_kwargs_all_fitmethods(
 )
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 def test_check_sampling_kwargs_fitmethod_specfic(
-    sampling_kwargs: Dict[str, Any],
+    sampling_kwargs: dict[str, Any],
     intended_fit_method: ModelFitMethod,
     fit_method: ModelFitMethod,
 ) -> None:

@@ -1,6 +1,6 @@
 from pathlib import Path
 from time import time
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Union
 
 import arviz as az
 import numpy as np
@@ -28,7 +28,7 @@ class MockSpecletModelClass(speclet_model.SpecletModel):
             name, _data_manager, root_cache_dir=root_cache_dir, debug=debug
         )
 
-    def model_specification(self) -> Tuple[pm.Model, str]:
+    def model_specification(self) -> tuple[pm.Model, str]:
         data = self.data_manager.get_data()
         with pm.Model() as model:
             b = pm.Normal("b", 0, 10)
@@ -40,7 +40,7 @@ class MockSpecletModelClass(speclet_model.SpecletModel):
         return model, "y"
 
 
-def assert_posterior_shape(res: az.InferenceData, shape: Tuple[int, int]) -> None:
+def assert_posterior_shape(res: az.InferenceData, shape: tuple[int, int]) -> None:
     for p in ["a", "b", "sigma"]:
         assert res.posterior[p].shape == shape
 
@@ -152,7 +152,7 @@ class TestSpecletModel:
         def mock_mcmc(*args: Any, **kwargs: Any) -> az.InferenceData:
             return centered_eight.copy()
 
-        def mock_advi(*args: Any, **kwargs: Any) -> Tuple[az.InferenceData, str]:
+        def mock_advi(*args: Any, **kwargs: Any) -> tuple[az.InferenceData, str]:
             return centered_eight.copy(), "hi"
 
         monkeypatch.setattr(
@@ -163,7 +163,7 @@ class TestSpecletModel:
         sp = MockSpecletModelClass("test-model", root_cache_dir=tmp_path, debug=True)
         assert sp.model is None
 
-        fit_kwargs: Dict[str, Union[float, int]]
+        fit_kwargs: dict[str, Union[float, int]]
 
         if fit_method == ModelFitMethod.ADVI:
             fit_kwargs = {"n_iterations": 100, "draws": 10}

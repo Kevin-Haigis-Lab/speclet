@@ -1,4 +1,4 @@
-from typing import Any, Callable, List
+from typing import Any, Callable
 
 import pytest
 
@@ -28,13 +28,13 @@ def test_check_kwarg_dict_with_functions_raises(fxn: Callable) -> None:
 
 
 @pytest.mark.parametrize("fxn, args", zip(mock_functions, mock_function_args))
-def test_check_kwarg_dict_with_functions(fxn: Callable, args: List[str]) -> None:
+def test_check_kwarg_dict_with_functions(fxn: Callable, args: list[str]) -> None:
     assert check_kwarg_dict.check_kwarg_dict(args, fxn) is None
 
 
 @pytest.mark.parametrize("fxn, args", [(f2, ["arg1"]), (f3, ["args", "kwargs"])])
 def test_check_kwarg_dict_with_functions_with_blacklist(
-    fxn: Callable, args: List[str]
+    fxn: Callable, args: list[str]
 ) -> None:
     with pytest.raises(check_kwarg_dict.KeywordsNotInCallableParametersError):
         check_kwarg_dict.check_kwarg_dict(args, fxn, blacklist=tuple(args))
@@ -49,7 +49,7 @@ class MyClass1:
 
 
 class MyClass2:
-    def __init__(self, arg: List[str]) -> None:
+    def __init__(self, arg: list[str]) -> None:
         return None
 
     def m(self, arg: Any) -> None:
@@ -76,7 +76,7 @@ def test_check_kwarg_dict_with_class_init_raises(cls: Callable) -> None:
 
 
 @pytest.mark.parametrize("cls, args", zip(mock_classes, mock_class_init_args))
-def test_check_kwarg_dict_with_class_init(cls: Callable, args: List[str]) -> None:
+def test_check_kwarg_dict_with_class_init(cls: Callable, args: list[str]) -> None:
     assert check_kwarg_dict.check_kwarg_dict(args, cls) is None
 
 
@@ -84,7 +84,7 @@ def test_check_kwarg_dict_with_class_init(cls: Callable, args: List[str]) -> Non
     "cls, args", [(MyClass2, ["arg"]), (MyClass3, ["arg1", "arg2"])]
 )
 def test_check_kwarg_dict_with_class_init_blacklist(
-    cls: Callable, args: List[str]
+    cls: Callable, args: list[str]
 ) -> None:
     with pytest.raises(check_kwarg_dict.KeywordsNotInCallableParametersError):
         check_kwarg_dict.check_kwarg_dict(args, cls, blacklist=tuple(args))
@@ -92,6 +92,6 @@ def test_check_kwarg_dict_with_class_init_blacklist(
 
 @pytest.mark.parametrize("cls, args", zip(mock_classes, mock_class_method_args))
 def test_check_kwarg_dict_with_class_method_raises(
-    cls: Callable, args: List[str]
+    cls: Callable, args: list[str]
 ) -> None:
     assert check_kwarg_dict.check_kwarg_dict(args, cls.m) is None  # type: ignore

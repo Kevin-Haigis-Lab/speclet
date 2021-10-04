@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Dict, Tuple
 from uuid import uuid4
 
 import pytest
@@ -17,6 +16,7 @@ def _filter_empty_configs(configs: model_config.ModelConfigs) -> bool:
 
 @given(st.builds(model_config.ModelConfigs).filter(_filter_empty_configs))
 def test_model_names_are_unique_fails(model_configs: model_config.ModelConfigs) -> None:
+    print(model_configs)
     model_configs.configurations.append(model_configs.configurations[0])
     with pytest.raises(model_config.ModelNamesAreNotAllUnique):
         model_config.check_model_names_are_unique(model_configs)
@@ -39,13 +39,13 @@ def test_get_model_configurations(mock_model_config: Path) -> None:
 
 
 def test_get_model_configuration(mock_model_config: Path) -> None:
-    names: Tuple[str, ...] = (
+    names: tuple[str, ...] = (
         "my-test-model",
         "second-test-model",
         "not-a-model-name",
         "no-config-test",
     )
-    results: Tuple[bool, ...] = (True, True, False, True)
+    results: tuple[bool, ...] = (True, True, False, True)
     assert len(names) == len(results)
     for name, result in zip(names, results):
         config = model_config.get_configuration_for_model(mock_model_config, name)
@@ -119,7 +119,7 @@ def test_get_model_sampling_from_config(
 @pytest.mark.parametrize("pipeline", SpecletPipeline)
 def test_get_model_sampling_from_config_correct_pipeline_fitmethod(
     config: model_config.ModelConfig,
-    expected_kwargs: Dict[str, int],
+    expected_kwargs: dict[str, int],
     fit_method: ModelFitMethod,
     pipeline: SpecletPipeline,
 ) -> None:

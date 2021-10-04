@@ -1,7 +1,4 @@
-#!/usr/bin/env python3
-
 from pathlib import Path
-from typing import Tuple
 
 import arviz as az
 import numpy as np
@@ -12,7 +9,7 @@ import pytest
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.modeling import pymc3_sampling_api as pmapi
 
-UNOBSERVED_VARS: Tuple[str, str, str] = ("a", "b", "sigma")
+UNOBSERVED_VARS: tuple[str, str, str] = ("a", "b", "sigma")
 OBSERVED_VAR = "y"
 
 

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Tuple
+from typing import Any
 
 import pytest
 from hypothesis import HealthCheck, given, settings
@@ -32,7 +32,7 @@ class TestSpecletFive:
         config: SpecletFiveConfiguration,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        def mock_build_model(*args: Any, **kwargs: Any) -> Tuple[str, str]:
+        def mock_build_model(*args: Any, **kwargs: Any) -> tuple[str, str]:
             return "my-test-model", "another-string"
 
         monkeypatch.setattr(SpecletFive, "model_specification", mock_build_model)

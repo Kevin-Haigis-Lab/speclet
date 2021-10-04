@@ -3,7 +3,7 @@
 
 from collections import Counter
 from pathlib import Path
-from typing import Optional, Union
+from typing import Dict, Optional, Union  # <-- need to keep for a Hypothesis test!
 
 import yaml
 from pydantic import BaseModel
@@ -28,8 +28,10 @@ def get_model_config() -> Path:
 
 BasicTypes = Union[float, str, int, bool]
 
-PipelineSamplingParameters = dict[
-    SpecletPipeline, dict[ModelFitMethod, dict[str, BasicTypes]]
+# Need to use old typing.Dict here because of a bug in Hypothesis:
+# https://github.com/HypothesisWorks/hypothesis/issues/3080
+PipelineSamplingParameters = Dict[
+    SpecletPipeline, Dict[ModelFitMethod, Dict[str, BasicTypes]]
 ]
 
 
@@ -39,7 +41,7 @@ class ModelConfig(BaseModel):
     name: str
     description: str
     model: ModelOption
-    config: Optional[dict[str, Union[ModelFitMethod, BasicTypes]]]
+    config: Optional[Dict[str, Union[ModelFitMethod, BasicTypes]]]
     fit_methods: list[ModelFitMethod]
     pipelines: list[SpecletPipeline] = []
     debug: bool
