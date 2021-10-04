@@ -46,7 +46,7 @@ def get_deterministic_variable_names(m: pm.Model, rm_log: bool = False) -> list[
         list[str]: A list of the deterministic variable names.
     """
     model_vars = list(
-        set([v.name for v in m.unobserved_RVs])  # noqa: C403
+        {v.name for v in m.unobserved_RVs}  # noqa: C403
         .difference(get_random_variable_names(m))
         .difference(get_random_variable_names(m, rm_log=True))
     )

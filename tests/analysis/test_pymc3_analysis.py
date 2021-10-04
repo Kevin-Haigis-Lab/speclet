@@ -50,13 +50,13 @@ def mock_advi(mock_model: pm.Model) -> ADVIResults:
 
 
 class TestSummarizePosteriorPredictions:
-    def test_columnnames(self):
+    def test_columnnames(self) -> None:
         ppc_df = pmanal.summarize_posterior_predictions(standard_normal((100, 200)))
         expected_columns = ["pred_mean", "pred_hdi_low", "pred_hdi_high"]
         for col in expected_columns:
             assert col in ppc_df.columns
 
-    def test_hdi_parameter(self, mock_data: pd.DataFrame):
+    def test_hdi_parameter(self, mock_data: pd.DataFrame) -> None:
         post_shape = (mock_data.shape[0], 100)
         ppc_df_low = pmanal.summarize_posterior_predictions(
             standard_normal(post_shape), hdi_prob=0.5
@@ -72,7 +72,7 @@ class TestSummarizePosteriorPredictions:
             ppc_df_low["pred_hdi_high"], ppc_df_high["pred_hdi_high"]
         )
 
-    def test_data_merging(self, mock_data: pd.DataFrame):
+    def test_data_merging(self, mock_data: pd.DataFrame) -> None:
         ppc_df = pmanal.summarize_posterior_predictions(
             standard_normal((mock_data.shape[0], 100)), merge_with=mock_data
         )
@@ -80,7 +80,7 @@ class TestSummarizePosteriorPredictions:
         for col in expected_columns:
             assert col in ppc_df.columns
 
-    def test_calc_error(self, mock_data: pd.DataFrame):
+    def test_calc_error(self, mock_data: pd.DataFrame) -> None:
         y_pred = standard_normal((mock_data.shape[0], 100))
         ppc_df = pmanal.summarize_posterior_predictions(y_pred)
         assert "error" not in ppc_df.columns
@@ -121,20 +121,22 @@ class TestSummarizePosteriorPredictions:
 @pytest.mark.plots
 class TestPlotVIHistory:
     @pytest.mark.parametrize("y_log", (True, False))
-    def test_returns_plot(self, mock_advi: ADVIResults, y_log: bool):
+    def test_returns_plot(self, mock_advi: ADVIResults, y_log: bool) -> None:
         _, _, approx = mock_advi
         hist_plot = pmanal.plot_vi_hist(approx, y_log=y_log)
         assert isinstance(hist_plot, gg.ggplot)
 
     @pytest.mark.parametrize("y_log", (True, False))
-    def test_plot_data_has_correct_columns(self, mock_advi: ADVIResults, y_log: bool):
+    def test_plot_data_has_correct_columns(
+        self, mock_advi: ADVIResults, y_log: bool
+    ) -> None:
         _, _, approx = mock_advi
         hist_plot = pmanal.plot_vi_hist(approx, y_log=y_log)
         for colname in ["loss", "step"]:
             assert colname in hist_plot.data.columns
 
 
-def test_extract_matrix_variable_indices():
+def test_extract_matrix_variable_indices() -> None:
 
     n_i = 3
     n_j = 4
@@ -178,7 +180,7 @@ class TestPlottingOfPriors:
             "y_pred": standard_normal((mock_data.shape[0], self.draws)),
         }
 
-    def test_returns_fig_and_axes(self, prior_pred: PriorPrediction):
+    def test_returns_fig_and_axes(self, prior_pred: PriorPrediction) -> None:
         axes_shape = (2, 2)
         fig, axes = pmanal.plot_all_priors(prior_pred, axes_shape, (5, 5), samples=100)
         assert isinstance(fig, matplotlib.figure.Figure)
@@ -193,7 +195,7 @@ def test_get_hdi_colnames_from_az_summary(centered_eight_post: pd.DataFrame) -> 
 @pytest.mark.parametrize(
     "az_obj_name", ["centered_eight", "non_centered_eight", "radon", "rugby"]
 )
-def test_describe_mcmc(az_obj_name: str):
+def test_describe_mcmc(az_obj_name: str) -> None:
     az_obj = az.load_arviz_data(az_obj_name)
     assert isinstance(az_obj, az.InferenceData)
     mcmc_desc = pmanal.describe_mcmc(az_obj, plot=False)

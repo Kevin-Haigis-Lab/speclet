@@ -7,27 +7,27 @@ from src import string_functions
 #### ---- str_replace ---- ####
 
 
-def test_replacing_patterns_in_a_list_of_strings():
+def test_replacing_patterns_in_a_list_of_strings() -> None:
     s = ["hey", "there"]
     assert string_functions.str_replace(s, "e", "X") == ["hXy", "thXrX"]
 
 
-def test_replacing_patterns_in_a_tuple_of_strings():
+def test_replacing_patterns_in_a_tuple_of_strings() -> None:
     s = ("hey", "there")
     assert string_functions.str_replace(s, "e", "X") == ["hXy", "thXrX"]
 
 
-def test_replacing_patterns_in_a_string():
+def test_replacing_patterns_in_a_string() -> None:
     s = "hey"
     assert string_functions.str_replace(s, "e", "X") == "hXy"
 
 
-def test_replacing_patterns_in_a_list_of_strings_with_defaults():
+def test_replacing_patterns_in_a_list_of_strings_with_defaults() -> None:
     s = ["hey", "there"]
     assert string_functions.str_replace(s, "e") == ["h y", "th r "]
 
 
-def test_replacing_patterns_in_a_string_with_defaults():
+def test_replacing_patterns_in_a_string_with_defaults() -> None:
     s = "hey"
     assert string_functions.str_replace(s, "e") == "h y"
 
@@ -35,11 +35,11 @@ def test_replacing_patterns_in_a_string_with_defaults():
 #### ---- prefixed_count ---- ####
 
 
-def test_prefixed_count():
+def test_prefixed_count() -> None:
     assert string_functions.prefixed_count("#", 5) == ["#0", "#1", "#2", "#3", "#4"]
 
 
-def test_prefixed_count_plus_1():
+def test_prefixed_count_plus_1() -> None:
     assert string_functions.prefixed_count("#", 5, plus=1) == [
         "#1",
         "#2",
@@ -49,7 +49,7 @@ def test_prefixed_count_plus_1():
     ]
 
 
-def test_prefixed_count_plus_1pt5():
+def test_prefixed_count_plus_1pt5() -> None:
     assert string_functions.prefixed_count("#", 5, plus=1.5) == [
         "#1.5",
         "#2.5",
@@ -62,11 +62,11 @@ def test_prefixed_count_plus_1pt5():
 #### ---- str_wrap ---- ####
 
 
-def test_str_wrap():
+def test_str_wrap() -> None:
     assert string_functions.str_wrap("a" * 20, 10) == "a" * 10 + "\n" + "a" * 10
 
 
-def test_str_wrap_vectorized():
+def test_str_wrap_vectorized() -> None:
     strings = [letter * 20 for letter in ascii_lowercase]
     expected_output = [letter * 10 + "\n" + letter * 10 for letter in ascii_lowercase]
     assert string_functions.str_wrap(strings, 10) == expected_output

@@ -12,11 +12,11 @@ from src.models.speclet_four import SpecletFour, SpecletFourConfiguration
 
 
 class TestSpecletFour:
-    def test_instantiation(self, tmp_path: Path):
+    def test_instantiation(self, tmp_path: Path) -> None:
         sp4 = SpecletFour("test-model", root_cache_dir=tmp_path, debug=True)
         assert sp4.model is None
 
-    def test_build_model(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
+    def test_build_model(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> None:
         sp4 = SpecletFour(
             "test-model", root_cache_dir=tmp_path, debug=True, data_manager=mock_crc_dm
         )
@@ -25,7 +25,7 @@ class TestSpecletFour:
         assert sp4.model is not None
 
     @pytest.mark.slow
-    def test_mcmc_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
+    def test_mcmc_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> None:
         sp4 = SpecletFour(
             "test-model",
             root_cache_dir=tmp_path,
@@ -55,8 +55,8 @@ class TestSpecletFour:
         mock_crc_dm: CrcDataManager,
         config: SpecletFourConfiguration,
         monkeypatch: pytest.MonkeyPatch,
-    ):
-        def mock_build_model(*args, **kwargs) -> Tuple[str, str]:
+    ) -> None:
+        def mock_build_model(*args: Any, **kwargs: Any) -> Tuple[str, str]:
             return "my-test-model", "another-string"
 
         monkeypatch.setattr(SpecletFour, "model_specification", mock_build_model)
@@ -73,7 +73,7 @@ class TestSpecletFour:
     @pytest.mark.parametrize("copy_cov", [True, False])
     def test_switching_copynumber_covariate(
         self, tmp_path: Path, mock_crc_dm: CrcDataManager, copy_cov: bool
-    ):
+    ) -> None:
         sp4 = SpecletFour(
             "test-model",
             root_cache_dir=tmp_path,
@@ -99,7 +99,7 @@ class TestSpecletFour:
         tmp_path: Path,
         mock_crc_dm: CrcDataManager,
         config: SpecletFourConfiguration,
-    ):
+    ) -> None:
         sp4 = SpecletFour(
             "test-model",
             root_cache_dir=tmp_path,

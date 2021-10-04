@@ -2,7 +2,7 @@
 
 """Standardization of the interactions with PyMC3 sampling."""
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Optional, TypeVar, Union
 
 import arviz as az
 import numpy as np
@@ -11,13 +11,15 @@ from pydantic import BaseModel, validator
 
 #### ---- Result Types ---- ####
 
+PossibleTrace = TypeVar("PossibleTrace")
+
 
 class MCMCSamplingResults(BaseModel):
     """The results of MCMC sampling."""
 
     trace: pm.backends.base.MultiTrace
-    prior_predictive: Dict[str, np.ndarray]
-    posterior_predictive: Dict[str, np.ndarray]
+    prior_predictive: dict[str, np.ndarray]
+    posterior_predictive: dict[str, np.ndarray]
 
     class Config:
         """Configuration for pydantic validation."""
@@ -25,7 +27,7 @@ class MCMCSamplingResults(BaseModel):
         arbitrary_types_allowed = True
 
     @validator("trace")
-    def validate_trace(cls, trace):
+    def validate_trace(cls, trace: PossibleTrace) -> PossibleTrace:
         """Validate a PyMC3 MultiTrace object.
 
         Args:
@@ -86,7 +88,7 @@ def pymc3_sampling_procedure(
     cores: Optional[int] = None,
     prior_pred_samples: int = 1000,
     random_seed: Optional[int] = None,
-    sample_kwargs: Optional[Dict[str, Any]] = None,
+    sample_kwargs: Optional[dict[str, Any]] = None,
 ) -> MCMCSamplingResults:
     """Run a standard PyMC3 sampling procedure.
 
@@ -139,9 +141,9 @@ def pymc3_advi_approximation_procedure(
     n_iterations: int = 100000,
     draws: int = 1000,
     prior_pred_samples: int = 1000,
-    callbacks: Optional[List[Callable]] = None,
+    callbacks: Optional[list[Callable]] = None,
     random_seed: Optional[int] = None,
-    fit_kwargs: Optional[Dict[Any, Any]] = None,
+    fit_kwargs: Optional[dict[Any, Any]] = None,
 ) -> ApproximationSamplingResults:
     """Run a standard PyMC3 ADVI fitting procedure.
 

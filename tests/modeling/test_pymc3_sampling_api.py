@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import arviz as az
 import numpy as np
 import pandas as pd
@@ -47,7 +45,7 @@ class TestPyMC3SamplingAPI:
 
         return m
 
-    def test_can_mock_model(self, model: pm.Model):
+    def test_can_mock_model(self, model: pm.Model) -> None:
         assert isinstance(model, pm.Model)
 
 
@@ -56,7 +54,7 @@ class TestPyMC3SamplingAPI:
 
 class TestMCMCSampling(TestPyMC3SamplingAPI):
     @pytest.mark.slow
-    def test_can_sample_model(self, model: pm.Model):
+    def test_can_sample_model(self, model: pm.Model) -> None:
         sampling_res = pmapi.pymc3_sampling_procedure(
             model=model,
             mcmc_draws=100,
@@ -70,7 +68,7 @@ class TestMCMCSampling(TestPyMC3SamplingAPI):
         assert isinstance(sampling_res, pmapi.MCMCSamplingResults)
 
     @pytest.mark.slow
-    def test_correctly_sampling_model(self, model: pm.Model):
+    def test_correctly_sampling_model(self, model: pm.Model) -> None:
         sampling_res = pmapi.pymc3_sampling_procedure(
             model=model,
             mcmc_draws=1000,
@@ -100,7 +98,7 @@ class TestMCMCSampling(TestPyMC3SamplingAPI):
 
 class TestADVISampling(TestPyMC3SamplingAPI):
     @pytest.mark.slow
-    def test_can_sample_model(self, model: pm.Model):
+    def test_can_sample_model(self, model: pm.Model) -> None:
         sampling_res = pmapi.pymc3_advi_approximation_procedure(
             model=model,
             n_iterations=100,
@@ -111,7 +109,7 @@ class TestADVISampling(TestPyMC3SamplingAPI):
         assert isinstance(sampling_res, pmapi.ApproximationSamplingResults)
 
     @pytest.mark.slow
-    def test_correctly_sampling_model(self, model: pm.Model):
+    def test_correctly_sampling_model(self, model: pm.Model) -> None:
         sampling_res = pmapi.pymc3_advi_approximation_procedure(
             model=model, callbacks=[pm.callbacks.CheckParametersConvergence()]
         )
@@ -132,7 +130,7 @@ class TestADVISampling(TestPyMC3SamplingAPI):
             )
 
     @pytest.mark.slow
-    def test_correctly_sampling_fullrank(self, model: pm.Model):
+    def test_correctly_sampling_fullrank(self, model: pm.Model) -> None:
         sampling_res = pmapi.pymc3_advi_approximation_procedure(
             model=model,
             method="fullrank_advi",

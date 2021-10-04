@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Tuple
+from typing import Any, Tuple
 
 import pytest
 from hypothesis import HealthCheck, given, settings
@@ -11,11 +11,11 @@ from src.models.speclet_five import SpecletFive, SpecletFiveConfiguration
 
 
 class TestSpecletFive:
-    def test_instantiation(self, tmp_path: Path):
+    def test_instantiation(self, tmp_path: Path) -> None:
         sp5 = SpecletFive("TEST-MODEL", root_cache_dir=tmp_path, debug=True)
         assert sp5.model is None
 
-    def test_build_model(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
+    def test_build_model(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> None:
         sp5 = SpecletFive(
             "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=mock_crc_dm
         )
@@ -31,8 +31,8 @@ class TestSpecletFive:
         mock_crc_dm: CrcDataManager,
         config: SpecletFiveConfiguration,
         monkeypatch: pytest.MonkeyPatch,
-    ):
-        def mock_build_model(*args, **kwargs) -> Tuple[str, str]:
+    ) -> None:
+        def mock_build_model(*args: Any, **kwargs: Any) -> Tuple[str, str]:
             return "my-test-model", "another-string"
 
         monkeypatch.setattr(SpecletFive, "model_specification", mock_build_model)
@@ -47,7 +47,7 @@ class TestSpecletFive:
         )
 
     @pytest.mark.slow
-    def test_mcmc_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
+    def test_mcmc_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> None:
         sp5 = SpecletFive(
             "TEST-MODEL",
             root_cache_dir=tmp_path,
@@ -70,7 +70,7 @@ class TestSpecletFive:
         assert sp5.mcmc_results is not None
 
     @pytest.mark.slow
-    def test_advi_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
+    def test_advi_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> None:
         sp5 = SpecletFive(
             "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=mock_crc_dm
         )
@@ -98,7 +98,7 @@ class TestSpecletFive:
         tmp_path: Path,
         mock_crc_dm: CrcDataManager,
         config: SpecletFiveConfiguration,
-    ):
+    ) -> None:
         sp5 = SpecletFive(
             "test-model",
             root_cache_dir=tmp_path,

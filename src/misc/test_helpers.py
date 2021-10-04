@@ -1,6 +1,6 @@
 """Various functions used in many test modules."""
 
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 from pydantic import BaseModel
 
@@ -11,7 +11,7 @@ from src.project_enums import ModelParameterization as MP
 #### ---- General ---- ####
 
 
-def do_nothing(*args, **kwargs) -> None:
+def do_nothing(*args: Any, **kwargs: Any) -> None:
     """Take any arguments and do nothing.
 
     Returns:

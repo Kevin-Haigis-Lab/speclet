@@ -1,14 +1,14 @@
 """Speclet Model One."""
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 import pymc3 as pm
 import theano
 
 from src.data_processing import achilles as achelp
 from src.managers.model_data_managers import CrcDataManager, DataManager
-from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
 
 
 class SpecletOne(SpecletModel):
@@ -65,11 +65,12 @@ class SpecletOne(SpecletModel):
             data_manager=data_manager,
         )
 
-    def model_specification(self) -> Tuple[pm.Model, str]:
+    def model_specification(self) -> tuple[pm.Model, ObservedVarName]:
         """Build SpecletOne model.
 
         Returns:
-            Tuple[pm.Model, str]: The model and name of the observed variable.
+            Tuple[pm.Model, ObservedVarName]: The model and name of the observed
+            variable.
         """
         data = self.data_manager.get_data()
 

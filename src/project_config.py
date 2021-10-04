@@ -44,7 +44,7 @@ def read_project_configuration(path: Optional[Path] = None) -> ProjectConfig:
     if path is None:
         path = project_root_dir() / "project-config.yaml"
 
-    with open(path, "r") as file:
+    with open(path) as file:
         config_yaml = yaml.safe_load(file)
 
     config = ProjectConfig(**config_yaml)

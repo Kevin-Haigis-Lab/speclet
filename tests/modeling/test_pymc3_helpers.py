@@ -25,37 +25,37 @@ def mock_model(iris_df: pd.DataFrame) -> pm.Model:
     return m
 
 
-def test_get_random_variables(mock_model: pm.Model):
+def test_get_random_variables(mock_model: pm.Model) -> None:
     rvs = pmhelp.get_random_variable_names(mock_model)
     expected_rvs = {"a", "b", "sigma_log__"}
     assert expected_rvs == set(rvs)
 
 
-def test_get_random_variables_without_log(mock_model: pm.Model):
+def test_get_random_variables_without_log(mock_model: pm.Model) -> None:
     rvs = pmhelp.get_random_variable_names(mock_model, rm_log=True)
     expected_rvs = {"a", "b", "sigma"}
     assert expected_rvs == set(rvs)
 
 
-def test_get_deterministic_variables(mock_model: pm.Model):
+def test_get_deterministic_variables(mock_model: pm.Model) -> None:
     rvs = pmhelp.get_deterministic_variable_names(mock_model)
     expected_rvs = {"mu"}
     assert expected_rvs == set(rvs)
 
 
-def test_get_all_variables(mock_model: pm.Model):
+def test_get_all_variables(mock_model: pm.Model) -> None:
     rvs = pmhelp.get_variable_names(mock_model)
     expected_rvs = {"a", "b", "sigma_log__", "mu", "sigma", "y"}
     assert expected_rvs == set(rvs)
 
 
-def test_get_all_variables_rm_log(mock_model: pm.Model):
+def test_get_all_variables_rm_log(mock_model: pm.Model) -> None:
     rvs = pmhelp.get_variable_names(mock_model, rm_log=True)
     expected_rvs = {"a", "b", "mu", "sigma", "y"}
     assert expected_rvs == set(rvs)
 
 
-def test_get_posterior_names(centered_eight: az.InferenceData):
+def test_get_posterior_names(centered_eight: az.InferenceData) -> None:
     got_names = pmhelp.get_posterior_names(centered_eight)
     expected_names = {"mu", "theta", "tau"}
     assert set(got_names) == expected_names
@@ -67,7 +67,7 @@ def test_get_posterior_names(centered_eight: az.InferenceData):
 )
 def test_thin_posterior(
     centered_eight: az.InferenceData, var_name: str, thinned_shape: tuple[int, ...]
-):
+) -> None:
     post = centered_eight["posterior"][var_name]
     thinned_post = pmhelp.thin_posterior(post, thin_to=100)
     assert thinned_post.shape == thinned_shape
@@ -87,14 +87,14 @@ def test_get_one_chain(
     var_name: str,
     new_shape: tuple[int, ...],
     chain_num: int,
-):
+) -> None:
     post = centered_eight["posterior"][var_name]
     new_post = pmhelp.get_one_chain(post, chain_num=chain_num)
     assert new_post.shape == new_shape
 
 
 @pytest.mark.parametrize("centered", (True, False))
-def test_hierarchical_normal(centered: bool):
+def test_hierarchical_normal(centered: bool) -> None:
     with pm.Model() as m:
         a = pmhelp.hierarchical_normal("var-name", shape=(2, 5), centered=centered)
 
@@ -113,7 +113,7 @@ def test_hierarchical_normal(centered: bool):
 
 @pytest.mark.DEV
 @pytest.mark.parametrize("centered", (True, False))
-def test_hierarchical_normal_with_avg(centered: bool):
+def test_hierarchical_normal_with_avg(centered: bool) -> None:
 
     avgs = tt.constant([1, 2, 3, 4, 5])
     shape = (5,)

@@ -19,7 +19,7 @@ from src import formatting
         (timedelta(days=0, minutes=70), "0-01:10"),
     ],
 )
-def test_format_timedelta_slurm(input: timedelta, expected: str):
+def test_format_timedelta_slurm(input: timedelta, expected: str) -> None:
     output = formatting.format_timedelta(input, fmt=formatting.TimeDeltaFormat.SLURM)
     assert output == expected
 
@@ -37,6 +37,6 @@ def test_format_timedelta_slurm(input: timedelta, expected: str):
         (timedelta(days=0, minutes=70), "01:10:00"),
     ],
 )
-def test_format_timedelta_drmaa(input: timedelta, expected: str):
+def test_format_timedelta_drmaa(input: timedelta, expected: str) -> None:
     output = formatting.format_timedelta(input, fmt=formatting.TimeDeltaFormat.DRMAA)
     assert output == expected

@@ -33,6 +33,11 @@ repos:
     - id: isort
       types: [python]
       args: ["--profile", "black"]
+-   repo: https://github.com/asottile/pyupgrade
+    rev: v2.29.0
+    hooks:
+    -   id: pyupgrade
+        args: ["--py39-plus"]
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: v0.910
     hooks:
@@ -86,3 +91,7 @@ repos:
         additional_dependencies: [pydantic, mypy, types-python-dateutil]
         types: [jupyter]
         exclude: "munge/019_prepare-data-subsample.ipynb"
+-   repo: https://github.com/MarcoGorelli/check-execution-order
+    rev: v0.1.1
+    hooks:
+    -   id: check-execution-order

@@ -23,7 +23,7 @@ def setup_dask() -> Client:
 
 
 @pytest.mark.skipif(SKIP_DATA_TESTS, reason="Skip data tests.")
-def test_depmap_data_columns_exist(depmap_test_data: Path):
+def test_depmap_data_columns_exist(depmap_test_data: Path) -> None:
     df = pd.read_csv(depmap_test_data)
     expected_cols = (
         "sgrna",
@@ -47,7 +47,7 @@ def test_depmap_data_columns_exist(depmap_test_data: Path):
 
 
 @pytest.mark.skipif(SKIP_DATA_TESTS, reason="Skip data tests.")
-def test_depmap_data_no_missing(setup_dask: Client):
+def test_depmap_data_no_missing(setup_dask: Client) -> None:
     dask_df: dd.DataFrame = dd.read_csv(
         FULL_DEPMAP_DATASET_PATH,
         dtype={

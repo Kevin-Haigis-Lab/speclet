@@ -17,7 +17,7 @@ from src.exceptions import ShapeError
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
 from src.modeling import feature_engineering as feng
-from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
 from src.project_enums import ModelParameterization as MP
 from src.project_enums import assert_never
 
@@ -440,11 +440,12 @@ class SpecletSeven(SpecletModel):
                 assert_never(self.config.h)
         return h_shape
 
-    def model_specification(self) -> tuple[pm.Model, str]:
+    def model_specification(self) -> tuple[pm.Model, ObservedVarName]:
         """Build SpecletSeven model.
 
         Returns:
-            tuple[pm.Model, str]: The model and name of the observed variable.
+            tuple[pm.Model, ObservedVarName]: The model and name of the observed
+            variable.
         """
         logger.info("Beginning PyMC3 model specification.")
         data = self.data_manager.get_data()

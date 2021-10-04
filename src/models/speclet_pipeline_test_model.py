@@ -1,14 +1,14 @@
 """A simple, light-weight SpecletModel for testing pipelines."""
 
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 import numpy as np
 import pymc3 as pm
 from pydantic import BaseModel
 
 from src.managers.model_data_managers import DataManager, MockDataManager
-from src.models.speclet_model import SpecletModel
+from src.models.speclet_model import ObservedVarName, SpecletModel
 from src.project_enums import ModelParameterization as MP
 
 
@@ -59,15 +59,15 @@ class SpecletTestModel(SpecletModel):
             data_manager=data_manager,
         )
 
-    def set_config(self, info: Dict[Any, Any]) -> None:
+    def set_config(self, info: dict[Any, Any]) -> None:
         """Set model-specific configuration."""
         self.config = SpecletTestModelConfiguration(**info)
 
-    def model_specification(self) -> Tuple[pm.Model, str]:
+    def model_specification(self) -> tuple[pm.Model, ObservedVarName]:
         """Specify a simple model.
 
         Returns:
-            Tuple[pm.Model, str]: Model and name of target  variable.
+            Tuple[pm.Model, ObservedVarName]: Model and name of target  variable.
         """
         d = self.data_manager.get_data()
         with pm.Model() as model:

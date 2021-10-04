@@ -3,6 +3,7 @@
 """Custom context managers."""
 
 import os
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Union
@@ -12,7 +13,7 @@ from typing import Union
 
 
 @contextmanager
-def set_directory(path: Union[Path, str]):
+def set_directory(path: Union[Path, str]) -> Generator[None, None, None]:
     """Set the current working directory within the context.
 
     Args:

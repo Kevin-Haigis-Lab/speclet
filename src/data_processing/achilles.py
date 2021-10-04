@@ -1,7 +1,7 @@
 """Functions for handling common modifications and processing of the Achilles data."""
 
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -17,7 +17,7 @@ def zscale_cna_by_group(
     df: pd.DataFrame,
     cn_col: str = "copy_number",
     new_col: str = "copy_number_z",
-    groupby_cols: Optional[Union[List[str], Tuple[str, ...]]] = ("hugo_symbol",),
+    groupby_cols: Optional[Union[list[str], tuple[str, ...]]] = ("hugo_symbol",),
     cn_max: Optional[float] = None,
 ) -> pd.DataFrame:
     """Z-scale the copy number values.
@@ -42,7 +42,7 @@ def zscale_cna_by_group(
     else:
         df[new_col] = df[cn_col]
 
-    def zscore_cna_col(d: pd.DataFrame):
+    def zscore_cna_col(d: pd.DataFrame) -> pd.DataFrame:
         d[new_col] = careful_zscore(d[new_col].values)
         return d
 
@@ -94,8 +94,13 @@ def zscale_rna_expression(
     return df
 
 
+ArgToZscaleByExpression = Union[str, Optional[str], Optional[float]]
+
+
 def zscale_rna_expression_by_gene_lineage(
-    df: pd.DataFrame, *args, **kwargs
+    df: pd.DataFrame,
+    *args: ArgToZscaleByExpression,
+    **kwargs: ArgToZscaleByExpression,
 ) -> pd.DataFrame:
     """Z-scale RNA expression data grouping by lineage and gene.
 
@@ -236,7 +241,7 @@ class CommonIndices(BaseModel):
     cellline_to_lineage_map: pd.DataFrame
     cellline_to_lineage_idx: np.ndarray
 
-    def __init__(self, **data):
+    def __init__(self, **data: Union[int, np.ndarray, pd.DataFrame]):
         """Object to hold common indices used for modeling Achilles data."""
         super().__init__(**data)
         self.n_sgrnas = dphelp.nunique(self.sgrna_idx)
@@ -284,7 +289,7 @@ class DataBatchIndices(BaseModel):
     batch_to_screen_map: pd.DataFrame
     batch_to_screen_idx: np.ndarray
 
-    def __init__(self, **data):
+    def __init__(self, **data: Union[int, np.ndarray, pd.DataFrame]):
         """Object to hold indices relating to data screens and batches."""
         super().__init__(**data)
         self.n_batches = dphelp.nunique(self.batch_idx)
@@ -355,7 +360,7 @@ def data_batch_indices(achilles_df: pd.DataFrame) -> DataBatchIndices:
 
 #### ---- Data frames ---- ####
 
-_default_achilles_categorical_cols: Tuple[str, ...] = (
+_default_achilles_categorical_cols: tuple[str, ...] = (
     "hugo_symbol",
     "depmap_id",
     "sgrna",
@@ -368,7 +373,7 @@ _default_achilles_categorical_cols: Tuple[str, ...] = (
 
 def set_achilles_categorical_columns(
     data: pd.DataFrame,
-    cols: Union[List[str], Tuple[str, ...]] = _default_achilles_categorical_cols,
+    cols: Union[list[str], tuple[str, ...]] = _default_achilles_categorical_cols,
     ordered: bool = True,
     sort_cats: bool = False,
 ) -> pd.DataFrame:

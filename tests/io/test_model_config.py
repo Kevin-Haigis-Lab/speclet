@@ -16,14 +16,16 @@ def _filter_empty_configs(configs: model_config.ModelConfigs) -> bool:
 
 
 @given(st.builds(model_config.ModelConfigs).filter(_filter_empty_configs))
-def test_model_names_are_unique_fails(model_configs: model_config.ModelConfigs):
+def test_model_names_are_unique_fails(model_configs: model_config.ModelConfigs) -> None:
     model_configs.configurations.append(model_configs.configurations[0])
     with pytest.raises(model_config.ModelNamesAreNotAllUnique):
         model_config.check_model_names_are_unique(model_configs)
 
 
 @given(st.builds(model_config.ModelConfigs).filter(_filter_empty_configs))
-def test_model_names_are_unique_does_not_fail(model_configs: model_config.ModelConfigs):
+def test_model_names_are_unique_does_not_fail(
+    model_configs: model_config.ModelConfigs,
+) -> None:
     for idx, config in enumerate(model_configs.configurations):
         _config = config.copy()
         _config.name = str(uuid4())
@@ -31,12 +33,12 @@ def test_model_names_are_unique_does_not_fail(model_configs: model_config.ModelC
     assert model_config.check_model_names_are_unique(model_configs) is None
 
 
-def test_get_model_configurations(mock_model_config: Path):
+def test_get_model_configurations(mock_model_config: Path) -> None:
     config = model_config.get_model_configurations(mock_model_config)
     assert len(config.configurations) == 3
 
 
-def test_get_model_configuration(mock_model_config: Path):
+def test_get_model_configuration(mock_model_config: Path) -> None:
     names: Tuple[str, ...] = (
         "my-test-model",
         "second-test-model",
@@ -60,7 +62,7 @@ def test_get_model_sampling_kwargs_dict(
     pipeline: SpecletPipeline,
     fit_method: ModelFitMethod,
     mock_model_config: Path,
-):
+) -> None:
     sampling_kwargs = model_config.get_sampling_kwargs(
         mock_model_config, name, pipeline=pipeline, fit_method=fit_method
     )
@@ -86,7 +88,7 @@ def test_get_model_sampling_kwargs_exist(
     fit_method: ModelFitMethod,
     exists: bool,
     mock_model_config: Path,
-):
+) -> None:
     sampling_kwargs = model_config.get_sampling_kwargs(
         mock_model_config, name, fit_method=fit_method, pipeline=pipeline
     )
@@ -100,7 +102,7 @@ def test_get_model_sampling_from_config(
     config: model_config.ModelConfig,
     fit_method: ModelFitMethod,
     pipeline: SpecletPipeline,
-):
+) -> None:
     kwargs = model_config.get_sampling_kwargs_from_config(
         config, pipeline=pipeline, fit_method=fit_method
     )
@@ -120,9 +122,9 @@ def test_get_model_sampling_from_config_correct_pipeline_fitmethod(
     expected_kwargs: Dict[str, int],
     fit_method: ModelFitMethod,
     pipeline: SpecletPipeline,
-):
+) -> None:
     pipeline_params = {pipeline: {fit_method: expected_kwargs.copy()}}
-    config.pipeline_sampling_parameters = pipeline_params  # type: ignore
+    config.pipeline_sampling_parameters = pipeline_params
     kwargs = model_config.get_sampling_kwargs_from_config(
         config, pipeline=pipeline, fit_method=fit_method
     )
@@ -130,7 +132,7 @@ def test_get_model_sampling_from_config_correct_pipeline_fitmethod(
 
 
 @pytest.mark.DEV
-def test_model_config_with_optional_pipeline_field():
+def test_model_config_with_optional_pipeline_field() -> None:
     yaml_txt = """
 - name: with-pipelines
   description: "A description."

@@ -1,7 +1,7 @@
 import os
 from datetime import timedelta
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable
 
 import arviz as az
 import numpy as np
@@ -22,7 +22,7 @@ from src.managers.model_data_managers import CrcDataManager
 def return_true() -> Callable:
     """Get a function that can take any args and always returns `True`"""
 
-    def f(*args, **kwargs) -> bool:
+    def f(*args: Any, **kwargs: Any) -> bool:
         return True
 
     return f
@@ -41,7 +41,7 @@ def depmap_test_data() -> Path:
     return Path("tests", "depmap_test_data.csv")
 
 
-def monkey_get_data_path(*args, **kwargs) -> Path:
+def monkey_get_data_path(*args: Any, **kwargs: Any) -> Path:
     return Path("tests", "depmap_test_data.csv")
 
 

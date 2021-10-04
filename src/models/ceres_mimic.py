@@ -3,7 +3,7 @@
 """Builders for CRC CERES Mimic model."""
 
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 import numpy as np
 import pymc3 as pm
@@ -13,7 +13,7 @@ from pydantic import BaseModel
 from src.data_processing import achilles as achelp
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
-from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
 
 #### ---- CERES Mimic ---- ####
 
@@ -82,7 +82,7 @@ class CeresMimic(SpecletModel):
             data_manager=data_manager,
         )
 
-    def set_config(self, info: Dict[Any, Any]) -> None:
+    def set_config(self, info: dict[Any, Any]) -> None:
         """Set model-specific configuration."""
         new_config = CeresMimicConfiguration(**info)
         if self.config is not None and self.config != new_config:
@@ -100,7 +100,7 @@ class CeresMimic(SpecletModel):
         return self.config.copynumber_cov
 
     @copynumber_cov.setter
-    def copynumber_cov(self, new_value: bool):
+    def copynumber_cov(self, new_value: bool) -> None:
         """Setter to control whether the copy number covariate should be in the model.
 
         If the value changes, then the `model` attribute and model results attributes
@@ -125,7 +125,7 @@ class CeresMimic(SpecletModel):
         return self.config.sgrna_intercept_cov
 
     @sgrna_intercept_cov.setter
-    def sgrna_intercept_cov(self, new_value: bool):
+    def sgrna_intercept_cov(self, new_value: bool) -> None:
         """Control if the `sgRNA|gene` varying intercept covariate is in the model.
 
         If the value changes, then the `model` attribute and model results attributes
@@ -139,11 +139,11 @@ class CeresMimic(SpecletModel):
             self._reset_model_and_results()
             self.config.sgrna_intercept_cov = new_value
 
-    def model_specification(self) -> Tuple[pm.Model, str]:
+    def model_specification(self) -> tuple[pm.Model, ObservedVarName]:
         """Build CRC CERES Mimic One.
 
         Returns:
-            [None]: None
+            Tuple[pm.Model, ObservedVarName]: Model and name of observed variable.
         """
         data = self.data_manager.get_data()
 

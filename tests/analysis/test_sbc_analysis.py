@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable
 
 import arviz as az
 import pandas as pd
@@ -11,14 +11,14 @@ from src.modeling import simulation_based_calibration_helpers as sbchelp
 #### ---- SBCAnalysis ---- ####
 
 
-def mock_get_sbc_results(*args, **kwargs):
+def mock_get_sbc_results(*args: Any, **kwargs: Any) -> int:
     return 1
 
 
 class TestSBCAnalysis:
     @pytest.mark.parametrize("pattern", ("A", "my-pattern", "a_pattern", "32nf343n"))
     @pytest.mark.parametrize("n_simulations", (0, 6, 100))
-    def test_init(self, tmp_path: Path, pattern: str, n_simulations: int):
+    def test_init(self, tmp_path: Path, pattern: str, n_simulations: int) -> None:
         sbc_analyzer = sbcanal.SBCAnalysis(
             root_dir=tmp_path, pattern=pattern, n_simulations=n_simulations
         )
@@ -28,7 +28,7 @@ class TestSBCAnalysis:
     @pytest.mark.parametrize("n_simulations", (0, 6, 100))
     def test_get_simulation_directories_and_filemanagers(
         self, tmp_path: Path, pattern: str, n_simulations: int
-    ):
+    ) -> None:
         for i in range(n_simulations):
             (tmp_path / f"{pattern}_{i}").mkdir()
 
@@ -54,7 +54,7 @@ class TestSBCAnalysis:
         pattern: str,
         n_simulations: int,
         return_true: Callable,
-    ):
+    ) -> None:
 
         monkeypatch.setattr(
             sbcanal.sbc.SBCFileManager, "get_sbc_results", mock_get_sbc_results
@@ -70,7 +70,7 @@ class TestSBCAnalysis:
         sbc_results = sbc_analyzer.get_simulation_results(multithreaded=multithreaded)
         assert len(sbc_results) == n_simulations
 
-    def test_posterior_accuracy_simple(self, tmp_path: Path):
+    def test_posterior_accuracy_simple(self, tmp_path: Path) -> None:
         sbc_analyzer = sbcanal.SBCAnalysis(
             root_dir=tmp_path, pattern="pattern", n_simulations=100
         )
@@ -85,7 +85,7 @@ class TestSBCAnalysis:
             acc_results[acc_results.parameter_name == "a"].within_hdi[0], 0.5
         )
 
-    def test_posterior_accuracy_multiple(self, tmp_path: Path):
+    def test_posterior_accuracy_multiple(self, tmp_path: Path) -> None:
         sbc_analyzer = sbcanal.SBCAnalysis(
             root_dir=tmp_path, pattern="pattern", n_simulations=100
         )
@@ -107,7 +107,9 @@ class TestSBCAnalysis:
             1.0 / 3.0,
         )
 
-    def test_mcmc_diagnostics(self, tmp_path: Path, centered_eight: az.InferenceData):
+    def test_mcmc_diagnostics(
+        self, tmp_path: Path, centered_eight: az.InferenceData
+    ) -> None:
         n_sims = 10
         pattern = "perm"
         for i in range(n_sims):
@@ -135,7 +137,7 @@ class TestSBCAnalysis:
 )
 def test_expected_range_under_uniform(
     k_draws: int, exp: float, low: float, high: float
-):
+) -> None:
     _exp, _lower, _upper = sbcanal.expected_range_under_uniform(
         n_sims=100, k_draws=k_draws
     )
