@@ -17,6 +17,7 @@ help:
 	@echo " - test               : run tests"
 	@echo " - test_o2            : run tests on O2 (-m 'not plots')"
 	@echo " - style              : style R and Python files"
+	@echo " - model_desc         : make a document of SpecletModel descriptions"
 	@echo " - docs               : build documentation for Python modules"
 	@echo " - clean              : remove old logs and temp files (+ style)"
 	@echo " - sbc                : run the SBC pipeline (on O2)"
@@ -61,7 +62,10 @@ style:
 	($(CONDA_ACTIVATE) speclet && black src && black tests)
 	($(CONDA_ACTIVATE) speclet && flake8 src && flake8 tests)
 
-docs:
+model_desc:
+	python3 src/command_line_interfaces/speclet_cli.py model-docs
+
+docs: model_desc
 	pdoc --html -o docs --force -c latex_math=True src
 
 clean: style

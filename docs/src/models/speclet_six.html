@@ -29,7 +29,7 @@
 <pre><code class="python">&#34;&#34;&#34;Speclet Model Six.&#34;&#34;&#34;
 
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 import pymc3 as pm
 from pydantic import BaseModel
@@ -39,7 +39,7 @@ from src.data_processing import achilles as achelp
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
 from src.modeling import feature_engineering as feng
-from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
 from src.project_enums import ModelParameterization as MP
 
 
@@ -142,7 +142,7 @@ class SpecletSix(SpecletModel):
             data_manager=data_manager,
         )
 
-    def set_config(self, info: Dict[Any, Any]) -&gt; None:
+    def set_config(self, info: dict[Any, Any]) -&gt; None:
         &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
         new_config = SpecletSixConfiguration(**info)
         if self.config is not None and self.config != new_config:
@@ -150,11 +150,12 @@ class SpecletSix(SpecletModel):
             self.config = new_config
             self.model = None
 
-    def model_specification(self) -&gt; Tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
         &#34;&#34;&#34;Build SpecletSix model.
 
         Returns:
-            Tuple[pm.Model, str]: The model and name of the observed variable.
+            Tuple[pm.Model, ObservedVarName]: The model and name of the observed
+            variable.
         &#34;&#34;&#34;
         logger.info(&#34;Beginning PyMC3 model specification.&#34;)
         data = self.data_manager.get_data()
@@ -587,7 +588,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             data_manager=data_manager,
         )
 
-    def set_config(self, info: Dict[Any, Any]) -&gt; None:
+    def set_config(self, info: dict[Any, Any]) -&gt; None:
         &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
         new_config = SpecletSixConfiguration(**info)
         if self.config is not None and self.config != new_config:
@@ -595,11 +596,12 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             self.config = new_config
             self.model = None
 
-    def model_specification(self) -&gt; Tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
         &#34;&#34;&#34;Build SpecletSix model.
 
         Returns:
-            Tuple[pm.Model, str]: The model and name of the observed variable.
+            Tuple[pm.Model, ObservedVarName]: The model and name of the observed
+            variable.
         &#34;&#34;&#34;
         logger.info(&#34;Beginning PyMC3 model specification.&#34;)
         data = self.data_manager.get_data()
@@ -937,24 +939,26 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 </details>
 </dd>
 <dt id="src.models.speclet_six.SpecletSix.model_specification"><code class="name flex">
-<span>def <span class="ident">model_specification</span></span>(<span>self) -> Tuple[pymc3.model.Model, str]</span>
+<span>def <span class="ident">model_specification</span></span>(<span>self) -> tuple</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Build SpecletSix model.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Tuple[pm.Model, str]</code></dt>
-<dd>The model and name of the observed variable.</dd>
-</dl></div>
+<dt><code>Tuple[pm.Model, ObservedVarName]</code></dt>
+<dd>The model and name of the observed</dd>
+</dl>
+<p>variable.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def model_specification(self) -&gt; Tuple[pm.Model, str]:
+<pre><code class="python">def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
     &#34;&#34;&#34;Build SpecletSix model.
 
     Returns:
-        Tuple[pm.Model, str]: The model and name of the observed variable.
+        Tuple[pm.Model, ObservedVarName]: The model and name of the observed
+        variable.
     &#34;&#34;&#34;
     logger.info(&#34;Beginning PyMC3 model specification.&#34;)
     data = self.data_manager.get_data()

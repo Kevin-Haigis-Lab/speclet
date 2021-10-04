@@ -29,7 +29,7 @@
 <pre><code class="python">&#34;&#34;&#34;Handle model configuration.&#34;&#34;&#34;
 
 from pathlib import Path
-from typing import Any, Dict, Type
+from typing import Any
 
 from src.io import model_config
 from src.loggers import logger
@@ -68,7 +68,7 @@ def configure_model(model: SpecletModel, config_path: Path) -&gt; None:
         logger.info(f&#34;No configuration found for model name: &#39;{model.name}&#39;.&#34;)
 
 
-def get_model_class(model_opt: ModelOption) -&gt; Type[SpecletProjectModelTypes]:
+def get_model_class(model_opt: ModelOption) -&gt; type[SpecletProjectModelTypes]:
     &#34;&#34;&#34;Get the model class from its string identifier.
 
     Args:
@@ -77,7 +77,7 @@ def get_model_class(model_opt: ModelOption) -&gt; Type[SpecletProjectModelTypes]
     Returns:
         Type[SpecletModel]: The corresponding model class.
     &#34;&#34;&#34;
-    model_option_map: Dict[ModelOption, Type[SpecletProjectModelTypes]] = {
+    model_option_map: dict[ModelOption, type[SpecletProjectModelTypes]] = {
         ModelOption.SPECLET_TEST_MODEL: SpecletTestModel,
         ModelOption.CRC_CERES_MIMIC: CeresMimic,
         ModelOption.SPECLET_SIMPLE: SpecletSimple,
@@ -144,7 +144,7 @@ def get_config_and_instantiate_model(
 
 
 def check_sampling_kwargs(
-    sampling_kwargs: Dict[str, Any], fit_method: ModelFitMethod
+    sampling_kwargs: dict[str, Any], fit_method: ModelFitMethod
 ) -&gt; None:
     &#34;&#34;&#34;Check that sampling keyword arguments are appropriate for the method called.
 
@@ -178,7 +178,7 @@ def check_sampling_kwargs(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.models.configuration.check_sampling_kwargs"><code class="name flex">
-<span>def <span class="ident">check_sampling_kwargs</span></span>(<span>sampling_kwargs: Dict[str, Any], fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>) -> NoneType</span>
+<span>def <span class="ident">check_sampling_kwargs</span></span>(<span>sampling_kwargs: dict, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Check that sampling keyword arguments are appropriate for the method called.</p>
@@ -197,7 +197,7 @@ expected <code>SpecletModel</code> method. If there are spare arguments, then a
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def check_sampling_kwargs(
-    sampling_kwargs: Dict[str, Any], fit_method: ModelFitMethod
+    sampling_kwargs: dict[str, Any], fit_method: ModelFitMethod
 ) -&gt; None:
     &#34;&#34;&#34;Check that sampling keyword arguments are appropriate for the method called.
 
@@ -319,7 +319,7 @@ expected <code>SpecletModel</code> method. If there are spare arguments, then a
 </details>
 </dd>
 <dt id="src.models.configuration.get_model_class"><code class="name flex">
-<span>def <span class="ident">get_model_class</span></span>(<span>model_opt: <a title="src.project_enums.ModelOption" href="../project_enums.html#src.project_enums.ModelOption">ModelOption</a>) -> Type[Union[<a title="src.models.speclet_pipeline_test_model.SpecletTestModel" href="speclet_pipeline_test_model.html#src.models.speclet_pipeline_test_model.SpecletTestModel">SpecletTestModel</a>, <a title="src.models.speclet_simple.SpecletSimple" href="speclet_simple.html#src.models.speclet_simple.SpecletSimple">SpecletSimple</a>, <a title="src.models.ceres_mimic.CeresMimic" href="ceres_mimic.html#src.models.ceres_mimic.CeresMimic">CeresMimic</a>, <a title="src.models.speclet_one.SpecletOne" href="speclet_one.html#src.models.speclet_one.SpecletOne">SpecletOne</a>, <a title="src.models.speclet_two.SpecletTwo" href="speclet_two.html#src.models.speclet_two.SpecletTwo">SpecletTwo</a>, <a title="src.models.speclet_four.SpecletFour" href="speclet_four.html#src.models.speclet_four.SpecletFour">SpecletFour</a>, <a title="src.models.speclet_five.SpecletFive" href="speclet_five.html#src.models.speclet_five.SpecletFive">SpecletFive</a>, <a title="src.models.speclet_six.SpecletSix" href="speclet_six.html#src.models.speclet_six.SpecletSix">SpecletSix</a>, <a title="src.models.speclet_seven.SpecletSeven" href="speclet_seven.html#src.models.speclet_seven.SpecletSeven">SpecletSeven</a>]]</span>
+<span>def <span class="ident">get_model_class</span></span>(<span>model_opt: <a title="src.project_enums.ModelOption" href="../project_enums.html#src.project_enums.ModelOption">ModelOption</a>) -> type</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the model class from its string identifier.</p>
@@ -337,7 +337,7 @@ expected <code>SpecletModel</code> method. If there are spare arguments, then a
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_model_class(model_opt: ModelOption) -&gt; Type[SpecletProjectModelTypes]:
+<pre><code class="python">def get_model_class(model_opt: ModelOption) -&gt; type[SpecletProjectModelTypes]:
     &#34;&#34;&#34;Get the model class from its string identifier.
 
     Args:
@@ -346,7 +346,7 @@ expected <code>SpecletModel</code> method. If there are spare arguments, then a
     Returns:
         Type[SpecletModel]: The corresponding model class.
     &#34;&#34;&#34;
-    model_option_map: Dict[ModelOption, Type[SpecletProjectModelTypes]] = {
+    model_option_map: dict[ModelOption, type[SpecletProjectModelTypes]] = {
         ModelOption.SPECLET_TEST_MODEL: SpecletTestModel,
         ModelOption.CRC_CERES_MIMIC: CeresMimic,
         ModelOption.SPECLET_SIMPLE: SpecletSimple,

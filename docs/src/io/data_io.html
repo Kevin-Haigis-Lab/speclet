@@ -41,16 +41,15 @@ class DataFile(str, Enum):
     &#34;&#34;&#34;Data file names.&#34;&#34;&#34;
 
     # crc_data = &#34;depmap_CRC_data.csv&#34;
-    crc_data = &#34;depmap_modeling_dataframe_crc.csv&#34;
-    crc_subsample = &#34;depmap_modeling_dataframe_crc-subsample.csv&#34;
-    achilles_data = &#34;depmap_modeling_dataframe.csv&#34;
-    achilles_subsample = &#34;depmap_modeling_dataframe_crc-subsample.csv&#34;
-    achilles_essentials = &#34;known_essentials.csv&#34;
-    achilles_gene_effect = &#34;achilles_gene_effect.csv&#34;
-    ccle_mutations = &#34;ccle_mutations.csv&#34;
-    ccle_copynumber = &#34;ccle_gene_cn.csv&#34;
-    copy_number_sample = &#34;copy_number_data_samples.npy&#34;
-    cgc = &#34;sanger_cancer-gene-census.csv&#34;
+    DEPMAP_CRC = &#34;depmap_modeling_dataframe_crc.csv&#34;
+    DEPMAP_CRC_SUBSAMPLE = &#34;depmap_modeling_dataframe_crc-subsample.csv&#34;
+    DEPMAP_DATA = &#34;depmap_modeling_dataframe.csv&#34;
+    DEPMAP_ESSENTIALS = &#34;known_essentials.csv&#34;
+    ACHILLES_GENE_EFFECT = &#34;achilles_gene_effect.csv&#34;
+    CCLE_MUTATIONS = &#34;ccle_mutations.csv&#34;
+    CCLE_COPYNUMBER = &#34;ccle_gene_cn.csv&#34;
+    COPY_NUMBER_SAMPLE = &#34;copy_number_data_samples.npy&#34;
+    CGC = &#34;sanger_cancer-gene-census.csv&#34;
 
 
 #### ---- Basics ---- ####
@@ -196,16 +195,15 @@ def data_path(to: Union[str, DataFile]) -&gt; Path:
     &#34;&#34;&#34;Data file names.&#34;&#34;&#34;
 
     # crc_data = &#34;depmap_CRC_data.csv&#34;
-    crc_data = &#34;depmap_modeling_dataframe_crc.csv&#34;
-    crc_subsample = &#34;depmap_modeling_dataframe_crc-subsample.csv&#34;
-    achilles_data = &#34;depmap_modeling_dataframe.csv&#34;
-    achilles_subsample = &#34;depmap_modeling_dataframe_crc-subsample.csv&#34;
-    achilles_essentials = &#34;known_essentials.csv&#34;
-    achilles_gene_effect = &#34;achilles_gene_effect.csv&#34;
-    ccle_mutations = &#34;ccle_mutations.csv&#34;
-    ccle_copynumber = &#34;ccle_gene_cn.csv&#34;
-    copy_number_sample = &#34;copy_number_data_samples.npy&#34;
-    cgc = &#34;sanger_cancer-gene-census.csv&#34;</code></pre>
+    DEPMAP_CRC = &#34;depmap_modeling_dataframe_crc.csv&#34;
+    DEPMAP_CRC_SUBSAMPLE = &#34;depmap_modeling_dataframe_crc-subsample.csv&#34;
+    DEPMAP_DATA = &#34;depmap_modeling_dataframe.csv&#34;
+    DEPMAP_ESSENTIALS = &#34;known_essentials.csv&#34;
+    ACHILLES_GENE_EFFECT = &#34;achilles_gene_effect.csv&#34;
+    CCLE_MUTATIONS = &#34;ccle_mutations.csv&#34;
+    CCLE_COPYNUMBER = &#34;ccle_gene_cn.csv&#34;
+    COPY_NUMBER_SAMPLE = &#34;copy_number_data_samples.npy&#34;
+    CGC = &#34;sanger_cancer-gene-census.csv&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -214,39 +212,39 @@ def data_path(to: Union[str, DataFile]) -&gt; Path:
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="src.io.data_io.DataFile.achilles_data"><code class="name">var <span class="ident">achilles_data</span></code></dt>
+<dt id="src.io.data_io.DataFile.ACHILLES_GENE_EFFECT"><code class="name">var <span class="ident">ACHILLES_GENE_EFFECT</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.io.data_io.DataFile.achilles_essentials"><code class="name">var <span class="ident">achilles_essentials</span></code></dt>
+<dt id="src.io.data_io.DataFile.CCLE_COPYNUMBER"><code class="name">var <span class="ident">CCLE_COPYNUMBER</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.io.data_io.DataFile.achilles_gene_effect"><code class="name">var <span class="ident">achilles_gene_effect</span></code></dt>
+<dt id="src.io.data_io.DataFile.CCLE_MUTATIONS"><code class="name">var <span class="ident">CCLE_MUTATIONS</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.io.data_io.DataFile.ccle_copynumber"><code class="name">var <span class="ident">ccle_copynumber</span></code></dt>
+<dt id="src.io.data_io.DataFile.CGC"><code class="name">var <span class="ident">CGC</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.io.data_io.DataFile.ccle_mutations"><code class="name">var <span class="ident">ccle_mutations</span></code></dt>
+<dt id="src.io.data_io.DataFile.COPY_NUMBER_SAMPLE"><code class="name">var <span class="ident">COPY_NUMBER_SAMPLE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.io.data_io.DataFile.cgc"><code class="name">var <span class="ident">cgc</span></code></dt>
+<dt id="src.io.data_io.DataFile.DEPMAP_CRC"><code class="name">var <span class="ident">DEPMAP_CRC</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.io.data_io.DataFile.copy_number_sample"><code class="name">var <span class="ident">copy_number_sample</span></code></dt>
+<dt id="src.io.data_io.DataFile.DEPMAP_CRC_SUBSAMPLE"><code class="name">var <span class="ident">DEPMAP_CRC_SUBSAMPLE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.io.data_io.DataFile.crc_data"><code class="name">var <span class="ident">crc_data</span></code></dt>
+<dt id="src.io.data_io.DataFile.DEPMAP_DATA"><code class="name">var <span class="ident">DEPMAP_DATA</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.io.data_io.DataFile.crc_subsample"><code class="name">var <span class="ident">crc_subsample</span></code></dt>
+<dt id="src.io.data_io.DataFile.DEPMAP_ESSENTIALS"><code class="name">var <span class="ident">DEPMAP_ESSENTIALS</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -278,15 +276,15 @@ def data_path(to: Union[str, DataFile]) -&gt; Path:
 <li>
 <h4><code><a title="src.io.data_io.DataFile" href="#src.io.data_io.DataFile">DataFile</a></code></h4>
 <ul class="">
-<li><code><a title="src.io.data_io.DataFile.achilles_data" href="#src.io.data_io.DataFile.achilles_data">achilles_data</a></code></li>
-<li><code><a title="src.io.data_io.DataFile.achilles_essentials" href="#src.io.data_io.DataFile.achilles_essentials">achilles_essentials</a></code></li>
-<li><code><a title="src.io.data_io.DataFile.achilles_gene_effect" href="#src.io.data_io.DataFile.achilles_gene_effect">achilles_gene_effect</a></code></li>
-<li><code><a title="src.io.data_io.DataFile.ccle_copynumber" href="#src.io.data_io.DataFile.ccle_copynumber">ccle_copynumber</a></code></li>
-<li><code><a title="src.io.data_io.DataFile.ccle_mutations" href="#src.io.data_io.DataFile.ccle_mutations">ccle_mutations</a></code></li>
-<li><code><a title="src.io.data_io.DataFile.cgc" href="#src.io.data_io.DataFile.cgc">cgc</a></code></li>
-<li><code><a title="src.io.data_io.DataFile.copy_number_sample" href="#src.io.data_io.DataFile.copy_number_sample">copy_number_sample</a></code></li>
-<li><code><a title="src.io.data_io.DataFile.crc_data" href="#src.io.data_io.DataFile.crc_data">crc_data</a></code></li>
-<li><code><a title="src.io.data_io.DataFile.crc_subsample" href="#src.io.data_io.DataFile.crc_subsample">crc_subsample</a></code></li>
+<li><code><a title="src.io.data_io.DataFile.ACHILLES_GENE_EFFECT" href="#src.io.data_io.DataFile.ACHILLES_GENE_EFFECT">ACHILLES_GENE_EFFECT</a></code></li>
+<li><code><a title="src.io.data_io.DataFile.CCLE_COPYNUMBER" href="#src.io.data_io.DataFile.CCLE_COPYNUMBER">CCLE_COPYNUMBER</a></code></li>
+<li><code><a title="src.io.data_io.DataFile.CCLE_MUTATIONS" href="#src.io.data_io.DataFile.CCLE_MUTATIONS">CCLE_MUTATIONS</a></code></li>
+<li><code><a title="src.io.data_io.DataFile.CGC" href="#src.io.data_io.DataFile.CGC">CGC</a></code></li>
+<li><code><a title="src.io.data_io.DataFile.COPY_NUMBER_SAMPLE" href="#src.io.data_io.DataFile.COPY_NUMBER_SAMPLE">COPY_NUMBER_SAMPLE</a></code></li>
+<li><code><a title="src.io.data_io.DataFile.DEPMAP_CRC" href="#src.io.data_io.DataFile.DEPMAP_CRC">DEPMAP_CRC</a></code></li>
+<li><code><a title="src.io.data_io.DataFile.DEPMAP_CRC_SUBSAMPLE" href="#src.io.data_io.DataFile.DEPMAP_CRC_SUBSAMPLE">DEPMAP_CRC_SUBSAMPLE</a></code></li>
+<li><code><a title="src.io.data_io.DataFile.DEPMAP_DATA" href="#src.io.data_io.DataFile.DEPMAP_DATA">DEPMAP_DATA</a></code></li>
+<li><code><a title="src.io.data_io.DataFile.DEPMAP_ESSENTIALS" href="#src.io.data_io.DataFile.DEPMAP_ESSENTIALS">DEPMAP_ESSENTIALS</a></code></li>
 </ul>
 </li>
 </ul>

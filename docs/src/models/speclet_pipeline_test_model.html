@@ -29,14 +29,14 @@
 <pre><code class="python">&#34;&#34;&#34;A simple, light-weight SpecletModel for testing pipelines.&#34;&#34;&#34;
 
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 import numpy as np
 import pymc3 as pm
 from pydantic import BaseModel
 
 from src.managers.model_data_managers import DataManager, MockDataManager
-from src.models.speclet_model import SpecletModel
+from src.models.speclet_model import ObservedVarName, SpecletModel
 from src.project_enums import ModelParameterization as MP
 
 
@@ -87,15 +87,15 @@ class SpecletTestModel(SpecletModel):
             data_manager=data_manager,
         )
 
-    def set_config(self, info: Dict[Any, Any]) -&gt; None:
+    def set_config(self, info: dict[Any, Any]) -&gt; None:
         &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
         self.config = SpecletTestModelConfiguration(**info)
 
-    def model_specification(self) -&gt; Tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
         &#34;&#34;&#34;Specify a simple model.
 
         Returns:
-            Tuple[pm.Model, str]: Model and name of target  variable.
+            Tuple[pm.Model, ObservedVarName]: Model and name of target  variable.
         &#34;&#34;&#34;
         d = self.data_manager.get_data()
         with pm.Model() as model:
@@ -186,15 +186,15 @@ configuration.</dd>
             data_manager=data_manager,
         )
 
-    def set_config(self, info: Dict[Any, Any]) -&gt; None:
+    def set_config(self, info: dict[Any, Any]) -&gt; None:
         &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
         self.config = SpecletTestModelConfiguration(**info)
 
-    def model_specification(self) -&gt; Tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
         &#34;&#34;&#34;Specify a simple model.
 
         Returns:
-            Tuple[pm.Model, str]: Model and name of target  variable.
+            Tuple[pm.Model, ObservedVarName]: Model and name of target  variable.
         &#34;&#34;&#34;
         d = self.data_manager.get_data()
         with pm.Model() as model:
@@ -217,13 +217,13 @@ configuration.</dd>
 <h3>Methods</h3>
 <dl>
 <dt id="src.models.speclet_pipeline_test_model.SpecletTestModel.model_specification"><code class="name flex">
-<span>def <span class="ident">model_specification</span></span>(<span>self) -> Tuple[pymc3.model.Model, str]</span>
+<span>def <span class="ident">model_specification</span></span>(<span>self) -> tuple</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Specify a simple model.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Tuple[pm.Model, str]</code></dt>
+<dt><code>Tuple[pm.Model, ObservedVarName]</code></dt>
 <dd>Model and name of target
 variable.</dd>
 </dl></div>
@@ -231,11 +231,11 @@ variable.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def model_specification(self) -&gt; Tuple[pm.Model, str]:
+<pre><code class="python">def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
     &#34;&#34;&#34;Specify a simple model.
 
     Returns:
-        Tuple[pm.Model, str]: Model and name of target  variable.
+        Tuple[pm.Model, ObservedVarName]: Model and name of target  variable.
     &#34;&#34;&#34;
     d = self.data_manager.get_data()
     with pm.Model() as model:

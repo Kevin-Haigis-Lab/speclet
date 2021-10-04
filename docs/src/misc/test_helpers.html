@@ -28,7 +28,7 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Various functions used in many test modules.&#34;&#34;&#34;
 
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 from pydantic import BaseModel
 
@@ -39,7 +39,7 @@ from src.project_enums import ModelParameterization as MP
 #### ---- General ---- ####
 
 
-def do_nothing(*args, **kwargs) -&gt; None:
+def do_nothing(*args: Any, **kwargs: Any) -&gt; None:
     &#34;&#34;&#34;Take any arguments and do nothing.
 
     Returns:
@@ -204,7 +204,7 @@ returns <code>True</code>, the check is skipped. Defaults to None.</dd>
 </details>
 </dd>
 <dt id="src.misc.test_helpers.do_nothing"><code class="name flex">
-<span>def <span class="ident">do_nothing</span></span>(<span>*args, **kwargs) -> NoneType</span>
+<span>def <span class="ident">do_nothing</span></span>(<span>*args: Any, **kwargs: Any) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Take any arguments and do nothing.</p>
@@ -217,7 +217,7 @@ returns <code>True</code>, the check is skipped. Defaults to None.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def do_nothing(*args, **kwargs) -&gt; None:
+<pre><code class="python">def do_nothing(*args: Any, **kwargs: Any) -&gt; None:
     &#34;&#34;&#34;Take any arguments and do nothing.
 
     Returns:

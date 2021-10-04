@@ -31,6 +31,7 @@
 &#34;&#34;&#34;Custom context managers.&#34;&#34;&#34;
 
 import os
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Union
@@ -40,7 +41,7 @@ from typing import Union
 
 
 @contextmanager
-def set_directory(path: Union[Path, str]):
+def set_directory(path: Union[Path, str]) -&gt; Generator[None, None, None]:
     &#34;&#34;&#34;Set the current working directory within the context.
 
     Args:
@@ -68,7 +69,7 @@ def set_directory(path: Union[Path, str]):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.context_managers.set_directory"><code class="name flex">
-<span>def <span class="ident">set_directory</span></span>(<span>path: Union[pathlib.Path, str])</span>
+<span>def <span class="ident">set_directory</span></span>(<span>path: Union[pathlib.Path, str]) -> collections.abc.Generator</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Set the current working directory within the context.</p>
@@ -87,7 +88,7 @@ def set_directory(path: Union[Path, str]):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@contextmanager
-def set_directory(path: Union[Path, str]):
+def set_directory(path: Union[Path, str]) -&gt; Generator[None, None, None]:
     &#34;&#34;&#34;Set the current working directory within the context.
 
     Args:

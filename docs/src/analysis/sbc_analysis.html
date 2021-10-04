@@ -122,7 +122,9 @@ class SBCAnalysis:
             list[Path]: List of `n` random SBC result directories.
         &#34;&#34;&#34;
         all_dirs = self.get_simulation_directories()
-        r_dirs = np.random.choice(all_dirs, size=min([n, len(all_dirs)]), replace=False)
+        r_dirs = np.random.choice(
+            np.array(all_dirs), size=min([n, len(all_dirs)]), replace=False
+        ).tolist()
         return r_dirs
 
     def get_simulation_file_managers(self) -&gt; list[sbc.SBCFileManager]:
@@ -674,7 +676,9 @@ results of the uniformity test. Defaults to None.</dd>
             list[Path]: List of `n` random SBC result directories.
         &#34;&#34;&#34;
         all_dirs = self.get_simulation_directories()
-        r_dirs = np.random.choice(all_dirs, size=min([n, len(all_dirs)]), replace=False)
+        r_dirs = np.random.choice(
+            np.array(all_dirs), size=min([n, len(all_dirs)]), replace=False
+        ).tolist()
         return r_dirs
 
     def get_simulation_file_managers(self) -&gt; list[sbc.SBCFileManager]:
@@ -1182,7 +1186,9 @@ will be returned. Defaults to 5.</dd>
         list[Path]: List of `n` random SBC result directories.
     &#34;&#34;&#34;
     all_dirs = self.get_simulation_directories()
-    r_dirs = np.random.choice(all_dirs, size=min([n, len(all_dirs)]), replace=False)
+    r_dirs = np.random.choice(
+        np.array(all_dirs), size=min([n, len(all_dirs)]), replace=False
+    ).tolist()
     return r_dirs</code></pre>
 </details>
 </dd>

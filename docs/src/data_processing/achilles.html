@@ -29,7 +29,7 @@
 <pre><code class="python">&#34;&#34;&#34;Functions for handling common modifications and processing of the Achilles data.&#34;&#34;&#34;
 
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -45,7 +45,7 @@ def zscale_cna_by_group(
     df: pd.DataFrame,
     cn_col: str = &#34;copy_number&#34;,
     new_col: str = &#34;copy_number_z&#34;,
-    groupby_cols: Optional[Union[List[str], Tuple[str, ...]]] = (&#34;hugo_symbol&#34;,),
+    groupby_cols: Optional[Union[list[str], tuple[str, ...]]] = (&#34;hugo_symbol&#34;,),
     cn_max: Optional[float] = None,
 ) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Z-scale the copy number values.
@@ -70,7 +70,7 @@ def zscale_cna_by_group(
     else:
         df[new_col] = df[cn_col]
 
-    def zscore_cna_col(d: pd.DataFrame):
+    def zscore_cna_col(d: pd.DataFrame) -&gt; pd.DataFrame:
         d[new_col] = careful_zscore(d[new_col].values)
         return d
 
@@ -122,8 +122,13 @@ def zscale_rna_expression(
     return df
 
 
+ArgToZscaleByExpression = Union[str, Optional[str], Optional[float]]
+
+
 def zscale_rna_expression_by_gene_lineage(
-    df: pd.DataFrame, *args, **kwargs
+    df: pd.DataFrame,
+    *args: ArgToZscaleByExpression,
+    **kwargs: ArgToZscaleByExpression,
 ) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Z-scale RNA expression data grouping by lineage and gene.
 
@@ -264,7 +269,7 @@ class CommonIndices(BaseModel):
     cellline_to_lineage_map: pd.DataFrame
     cellline_to_lineage_idx: np.ndarray
 
-    def __init__(self, **data):
+    def __init__(self, **data: Union[int, np.ndarray, pd.DataFrame]):
         &#34;&#34;&#34;Object to hold common indices used for modeling Achilles data.&#34;&#34;&#34;
         super().__init__(**data)
         self.n_sgrnas = dphelp.nunique(self.sgrna_idx)
@@ -312,7 +317,7 @@ class DataBatchIndices(BaseModel):
     batch_to_screen_map: pd.DataFrame
     batch_to_screen_idx: np.ndarray
 
-    def __init__(self, **data):
+    def __init__(self, **data: Union[int, np.ndarray, pd.DataFrame]):
         &#34;&#34;&#34;Object to hold indices relating to data screens and batches.&#34;&#34;&#34;
         super().__init__(**data)
         self.n_batches = dphelp.nunique(self.batch_idx)
@@ -383,7 +388,7 @@ def data_batch_indices(achilles_df: pd.DataFrame) -&gt; DataBatchIndices:
 
 #### ---- Data frames ---- ####
 
-_default_achilles_categorical_cols: Tuple[str, ...] = (
+_default_achilles_categorical_cols: tuple[str, ...] = (
     &#34;hugo_symbol&#34;,
     &#34;depmap_id&#34;,
     &#34;sgrna&#34;,
@@ -396,7 +401,7 @@ _default_achilles_categorical_cols: Tuple[str, ...] = (
 
 def set_achilles_categorical_columns(
     data: pd.DataFrame,
-    cols: Union[List[str], Tuple[str, ...]] = _default_achilles_categorical_cols,
+    cols: Union[list[str], tuple[str, ...]] = _default_achilles_categorical_cols,
     ordered: bool = True,
     sort_cats: bool = False,
 ) -&gt; pd.DataFrame:
@@ -470,8 +475,8 @@ def subsample_achilles_data(
     if n_cell_lines is not None and n_cell_lines &lt;= 0:
         raise ValueError(&#34;Number of cell lines must be positive.&#34;)
 
-    genes: List[str] = df.hugo_symbol.unique()
-    cell_lines: List[str] = df.depmap_id.unique()
+    genes: np.ndarray = df.hugo_symbol.unique()
+    cell_lines: np.ndarray = df.depmap_id.unique()
 
     if n_genes is not None:
         genes = np.random.choice(genes, n_genes, replace=False)
@@ -839,7 +844,7 @@ be set? Defaults to True.</dd>
 </details>
 </dd>
 <dt id="src.data_processing.achilles.set_achilles_categorical_columns"><code class="name flex">
-<span>def <span class="ident">set_achilles_categorical_columns</span></span>(<span>data: pandas.core.frame.DataFrame, cols: Union[List[str], Tuple[str, ...]] = ('hugo_symbol', 'depmap_id', 'sgrna', 'lineage', 'sgrna_target_chr', 'p_dna_batch', 'screen'), ordered: bool = True, sort_cats: bool = False) -> pandas.core.frame.DataFrame</span>
+<span>def <span class="ident">set_achilles_categorical_columns</span></span>(<span>data: pandas.core.frame.DataFrame, cols: Union[list[str], tuple[str, ...]] = ('hugo_symbol', 'depmap_id', 'sgrna', 'lineage', 'sgrna_target_chr', 'p_dna_batch', 'screen'), ordered: bool = True, sort_cats: bool = False) -> pandas.core.frame.DataFrame</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Set the appropriate columns of the Achilles data as factors.</p>
@@ -869,7 +874,7 @@ Defaults to False.</dd>
 </summary>
 <pre><code class="python">def set_achilles_categorical_columns(
     data: pd.DataFrame,
-    cols: Union[List[str], Tuple[str, ...]] = _default_achilles_categorical_cols,
+    cols: Union[list[str], tuple[str, ...]] = _default_achilles_categorical_cols,
     ordered: bool = True,
     sort_cats: bool = False,
 ) -&gt; pd.DataFrame:
@@ -946,8 +951,8 @@ Defaults to None.</dd>
     if n_cell_lines is not None and n_cell_lines &lt;= 0:
         raise ValueError(&#34;Number of cell lines must be positive.&#34;)
 
-    genes: List[str] = df.hugo_symbol.unique()
-    cell_lines: List[str] = df.depmap_id.unique()
+    genes: np.ndarray = df.hugo_symbol.unique()
+    cell_lines: np.ndarray = df.depmap_id.unique()
 
     if n_genes is not None:
         genes = np.random.choice(genes, n_genes, replace=False)
@@ -962,7 +967,7 @@ Defaults to None.</dd>
 </details>
 </dd>
 <dt id="src.data_processing.achilles.zscale_cna_by_group"><code class="name flex">
-<span>def <span class="ident">zscale_cna_by_group</span></span>(<span>df: pandas.core.frame.DataFrame, cn_col: str = 'copy_number', new_col: str = 'copy_number_z', groupby_cols: Union[List[str], Tuple[str, ...], NoneType] = ('hugo_symbol',), cn_max: Optional[float] = None) -> pandas.core.frame.DataFrame</span>
+<span>def <span class="ident">zscale_cna_by_group</span></span>(<span>df: pandas.core.frame.DataFrame, cn_col: str = 'copy_number', new_col: str = 'copy_number_z', groupby_cols: Union[list[str], tuple[str, ...], NoneType] = ('hugo_symbol',), cn_max: Optional[float] = None) -> pandas.core.frame.DataFrame</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Z-scale the copy number values.</p>
@@ -997,7 +1002,7 @@ Defaults to None.</dd>
     df: pd.DataFrame,
     cn_col: str = &#34;copy_number&#34;,
     new_col: str = &#34;copy_number_z&#34;,
-    groupby_cols: Optional[Union[List[str], Tuple[str, ...]]] = (&#34;hugo_symbol&#34;,),
+    groupby_cols: Optional[Union[list[str], tuple[str, ...]]] = (&#34;hugo_symbol&#34;,),
     cn_max: Optional[float] = None,
 ) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Z-scale the copy number values.
@@ -1022,7 +1027,7 @@ Defaults to None.</dd>
     else:
         df[new_col] = df[cn_col]
 
-    def zscore_cna_col(d: pd.DataFrame):
+    def zscore_cna_col(d: pd.DataFrame) -&gt; pd.DataFrame:
         d[new_col] = careful_zscore(d[new_col].values)
         return d
 
@@ -1109,7 +1114,7 @@ expression values.</dd>
 </details>
 </dd>
 <dt id="src.data_processing.achilles.zscale_rna_expression_by_gene_lineage"><code class="name flex">
-<span>def <span class="ident">zscale_rna_expression_by_gene_lineage</span></span>(<span>df: pandas.core.frame.DataFrame, *args, **kwargs) -> pandas.core.frame.DataFrame</span>
+<span>def <span class="ident">zscale_rna_expression_by_gene_lineage</span></span>(<span>df: pandas.core.frame.DataFrame, *args: Union[str, NoneType, float], **kwargs: Union[str, NoneType, float]) -> pandas.core.frame.DataFrame</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Z-scale RNA expression data grouping by lineage and gene.</p>
@@ -1130,7 +1135,9 @@ expression values.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def zscale_rna_expression_by_gene_lineage(
-    df: pd.DataFrame, *args, **kwargs
+    df: pd.DataFrame,
+    *args: ArgToZscaleByExpression,
+    **kwargs: ArgToZscaleByExpression,
 ) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Z-scale RNA expression data grouping by lineage and gene.
 
@@ -1180,7 +1187,7 @@ expression values.</dd>
     cellline_to_lineage_map: pd.DataFrame
     cellline_to_lineage_idx: np.ndarray
 
-    def __init__(self, **data):
+    def __init__(self, **data: Union[int, np.ndarray, pd.DataFrame]):
         &#34;&#34;&#34;Object to hold common indices used for modeling Achilles data.&#34;&#34;&#34;
         super().__init__(**data)
         self.n_sgrnas = dphelp.nunique(self.sgrna_idx)
@@ -1227,7 +1234,7 @@ expression values.</dd>
     batch_to_screen_map: pd.DataFrame
     batch_to_screen_idx: np.ndarray
 
-    def __init__(self, **data):
+    def __init__(self, **data: Union[int, np.ndarray, pd.DataFrame]):
         &#34;&#34;&#34;Object to hold indices relating to data screens and batches.&#34;&#34;&#34;
         super().__init__(**data)
         self.n_batches = dphelp.nunique(self.batch_idx)

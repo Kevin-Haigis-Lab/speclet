@@ -49,6 +49,8 @@ from src.project_enums import MockDataSize, ModelFitMethod, assert_never
 
 ReplacementsDict = dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
+ObservedVarName = str
+
 
 class UnableToLocateNamedVariable(Exception):
     &#34;&#34;&#34;Error when a named variable or object cannot be located.&#34;&#34;&#34;
@@ -96,7 +98,7 @@ class SpecletModel:
     data_manager: DataManager
 
     model: Optional[pm.Model] = None
-    observed_var_name: Optional[str] = None
+    observed_var_name: Optional[ObservedVarName] = None
     shared_vars: Optional[dict[str, TTShared]] = None
     advi_results: Optional[tuple[az.InferenceData, pm.Approximation]] = None
     mcmc_results: Optional[az.InferenceData] = None
@@ -167,7 +169,7 @@ class SpecletModel:
         if self.data_manager is not None:
             self.data_manager.debug = new_value
 
-    def _reset_model_and_results(self, clear_cache: bool = False):
+    def _reset_model_and_results(self, clear_cache: bool = False) -&gt; None:
         logger.warning(&#34;Reseting all model and results.&#34;)
         self.model = None
         self.mcmc_results = None
@@ -175,19 +177,19 @@ class SpecletModel:
         if clear_cache:
             self.clear_cache()
 
-    def clear_cache(self):
+    def clear_cache(self) -&gt; None:
         &#34;&#34;&#34;Clear all available caches for the model.&#34;&#34;&#34;
         self.cache_manager.clear_all_caches()
 
     @abstractmethod
-    def model_specification(self) -&gt; tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
         &#34;&#34;&#34;Define the PyMC3 model.
 
         This model must be overridden by an subclass to define the desired PyMC3 model.
 
         Returns:
             pm.Model: The PyMC3 model.
-            str: Name of the target variable in the model.
+            ObservedVarName: Name of the target variable in the model.
         &#34;&#34;&#34;
         raise Exception(
             &#34;The `model_specification()` method must be overridden by subclasses.&#34;
@@ -777,7 +779,7 @@ data. Defaults to None.</dd>
     data_manager: DataManager
 
     model: Optional[pm.Model] = None
-    observed_var_name: Optional[str] = None
+    observed_var_name: Optional[ObservedVarName] = None
     shared_vars: Optional[dict[str, TTShared]] = None
     advi_results: Optional[tuple[az.InferenceData, pm.Approximation]] = None
     mcmc_results: Optional[az.InferenceData] = None
@@ -848,7 +850,7 @@ data. Defaults to None.</dd>
         if self.data_manager is not None:
             self.data_manager.debug = new_value
 
-    def _reset_model_and_results(self, clear_cache: bool = False):
+    def _reset_model_and_results(self, clear_cache: bool = False) -&gt; None:
         logger.warning(&#34;Reseting all model and results.&#34;)
         self.model = None
         self.mcmc_results = None
@@ -856,19 +858,19 @@ data. Defaults to None.</dd>
         if clear_cache:
             self.clear_cache()
 
-    def clear_cache(self):
+    def clear_cache(self) -&gt; None:
         &#34;&#34;&#34;Clear all available caches for the model.&#34;&#34;&#34;
         self.cache_manager.clear_all_caches()
 
     @abstractmethod
-    def model_specification(self) -&gt; tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
         &#34;&#34;&#34;Define the PyMC3 model.
 
         This model must be overridden by an subclass to define the desired PyMC3 model.
 
         Returns:
             pm.Model: The PyMC3 model.
-            str: Name of the target variable in the model.
+            ObservedVarName: Name of the target variable in the model.
         &#34;&#34;&#34;
         raise Exception(
             &#34;The `model_specification()` method must be overridden by subclasses.&#34;
@@ -1595,7 +1597,7 @@ after calling <code>self.model_specification()</code></dd>
 </details>
 </dd>
 <dt id="src.models.speclet_model.SpecletModel.clear_cache"><code class="name flex">
-<span>def <span class="ident">clear_cache</span></span>(<span>self)</span>
+<span>def <span class="ident">clear_cache</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Clear all available caches for the model.</p></div>
@@ -1603,7 +1605,7 @@ after calling <code>self.model_specification()</code></dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def clear_cache(self):
+<pre><code class="python">def clear_cache(self) -&gt; None:
     &#34;&#34;&#34;Clear all available caches for the model.&#34;&#34;&#34;
     self.cache_manager.clear_all_caches()</code></pre>
 </details>
@@ -2001,7 +2003,7 @@ Defaults to False.</dd>
 <dl>
 <dt><code>pm.Model</code></dt>
 <dd>The PyMC3 model.</dd>
-<dt><code>str</code></dt>
+<dt><code>ObservedVarName</code></dt>
 <dd>Name of the target variable in the model.</dd>
 </dl></div>
 <details class="source">
@@ -2009,14 +2011,14 @@ Defaults to False.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-def model_specification(self) -&gt; tuple[pm.Model, str]:
+def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
     &#34;&#34;&#34;Define the PyMC3 model.
 
     This model must be overridden by an subclass to define the desired PyMC3 model.
 
     Returns:
         pm.Model: The PyMC3 model.
-        str: Name of the target variable in the model.
+        ObservedVarName: Name of the target variable in the model.
     &#34;&#34;&#34;
     raise Exception(
         &#34;The `model_specification()` method must be overridden by subclasses.&#34;

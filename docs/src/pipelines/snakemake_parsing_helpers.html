@@ -29,7 +29,6 @@
 <pre><code class="python">&#34;&#34;&#34;Parsing complex structures for use in Snakemake pipelines.&#34;&#34;&#34;
 
 from pathlib import Path
-from typing import List
 
 from pydantic import BaseModel, validate_arguments
 
@@ -40,9 +39,9 @@ from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
 class ParsedPipelineInformation(BaseModel):
     &#34;&#34;&#34;Parsed pipeline information.&#34;&#34;&#34;
 
-    models: List[str]
-    model_names: List[str]
-    fit_methods: List[str]
+    models: list[str]
+    model_names: list[str]
+    fit_methods: list[str]
 
     def __len__(self) -&gt; int:
         return len(self.models)
@@ -73,7 +72,7 @@ def get_models_names_fit_methods(
     model_configurations = model_config.get_model_configurations(config_path)
     model_config.check_model_names_are_unique(model_configurations)
 
-    pipeline_informations: List[_PipelineIntermediateInformation] = []
+    pipeline_informations: list[_PipelineIntermediateInformation] = []
 
     for config in model_configurations.configurations:
         if pipeline not in config.pipelines:
@@ -101,7 +100,8 @@ def get_model_config_hashes(config_path: Path) -&gt; dict[str, int]:
         config_path (Path): Path to the configuration file.
 
     Returns:
-        dict[str, int]: A dictionary where the key is the model names and the value is the hash of the JSON serialization of the model&#39;s configuration.
+        dict[str, int]: A dictionary where the key is the model names and the value is
+        the hash of the JSON serialization of the model&#39;s configuration.
     &#34;&#34;&#34;
     model_configurations = model_config.get_model_configurations(config_path)
     hashes: dict[str, int] = {}
@@ -132,8 +132,9 @@ def get_model_config_hashes(config_path: Path) -&gt; dict[str, int]:
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>dict[str, int]</code></dt>
-<dd>A dictionary where the key is the model names and the value is the hash of the JSON serialization of the model's configuration.</dd>
-</dl></div>
+<dd>A dictionary where the key is the model names and the value is</dd>
+</dl>
+<p>the hash of the JSON serialization of the model's configuration.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -147,7 +148,8 @@ def get_model_config_hashes(config_path: Path) -&gt; dict[str, int]:
         config_path (Path): Path to the configuration file.
 
     Returns:
-        dict[str, int]: A dictionary where the key is the model names and the value is the hash of the JSON serialization of the model&#39;s configuration.
+        dict[str, int]: A dictionary where the key is the model names and the value is
+        the hash of the JSON serialization of the model&#39;s configuration.
     &#34;&#34;&#34;
     model_configurations = model_config.get_model_configurations(config_path)
     hashes: dict[str, int] = {}
@@ -196,7 +198,7 @@ def get_models_names_fit_methods(
     model_configurations = model_config.get_model_configurations(config_path)
     model_config.check_model_names_are_unique(model_configurations)
 
-    pipeline_informations: List[_PipelineIntermediateInformation] = []
+    pipeline_informations: list[_PipelineIntermediateInformation] = []
 
     for config in model_configurations.configurations:
         if pipeline not in config.pipelines:
@@ -222,7 +224,7 @@ def get_models_names_fit_methods(
 <dl>
 <dt id="src.pipelines.snakemake_parsing_helpers.ParsedPipelineInformation"><code class="flex name class">
 <span>class <span class="ident">ParsedPipelineInformation</span></span>
-<span>(</span><span>*, models: List[str], model_names: List[str], fit_methods: List[str])</span>
+<span>(</span><span>*, models: list, model_names: list, fit_methods: list)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Parsed pipeline information.</p>
@@ -235,9 +237,9 @@ def get_models_names_fit_methods(
 <pre><code class="python">class ParsedPipelineInformation(BaseModel):
     &#34;&#34;&#34;Parsed pipeline information.&#34;&#34;&#34;
 
-    models: List[str]
-    model_names: List[str]
-    fit_methods: List[str]
+    models: list[str]
+    model_names: list[str]
+    fit_methods: list[str]
 
     def __len__(self) -&gt; int:
         return len(self.models)</code></pre>

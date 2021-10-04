@@ -29,7 +29,7 @@
 <pre><code class="python">&#34;&#34;&#34;Command line interface for merging MCMC chains for a single model.&#34;&#34;&#34;
 
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import arviz as az
 import typer
@@ -44,7 +44,7 @@ cli_helpers.configure_pretty()
 def combine_mcmc_chains(
     name: str,
     config_path: Path,
-    chain_dirs: List[Path],
+    chain_dirs: list[Path],
     combined_root_cache_dir: Path,
     touch: Optional[Path] = None,
 ) -&gt; None:
@@ -65,7 +65,7 @@ def combine_mcmc_chains(
     n_chains = len(chain_dirs)
     logger.info(f&#34;Expecting {n_chains} separate chains.&#34;)
 
-    all_arviz_data_objects: List[az.InferenceData] = []
+    all_arviz_data_objects: list[az.InferenceData] = []
     for chain_dir in chain_dirs:
         logger.info(f&#34;Gather MCMC chain &#39;{chain_dir.as_posix()}&#39;.&#34;)
         sp_model = configuration.get_config_and_instantiate_model(
@@ -128,7 +128,7 @@ if __name__ == &#34;__main__&#34;:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.command_line_interfaces.combine_mcmc_chains_cli.combine_mcmc_chains"><code class="name flex">
-<span>def <span class="ident">combine_mcmc_chains</span></span>(<span>name: str, config_path: pathlib.Path, chain_dirs: List[pathlib.Path], combined_root_cache_dir: pathlib.Path, touch: Optional[pathlib.Path] = None) -> NoneType</span>
+<span>def <span class="ident">combine_mcmc_chains</span></span>(<span>name: str, config_path: pathlib.Path, chain_dirs: list, combined_root_cache_dir: pathlib.Path, touch: Optional[pathlib.Path] = None) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Combine multiple MCMC chains for a single model.</p>
@@ -159,7 +159,7 @@ that this step is complete. Defaults to False.</dd>
 <pre><code class="python">def combine_mcmc_chains(
     name: str,
     config_path: Path,
-    chain_dirs: List[Path],
+    chain_dirs: list[Path],
     combined_root_cache_dir: Path,
     touch: Optional[Path] = None,
 ) -&gt; None:
@@ -180,7 +180,7 @@ that this step is complete. Defaults to False.</dd>
     n_chains = len(chain_dirs)
     logger.info(f&#34;Expecting {n_chains} separate chains.&#34;)
 
-    all_arviz_data_objects: List[az.InferenceData] = []
+    all_arviz_data_objects: list[az.InferenceData] = []
     for chain_dir in chain_dirs:
         logger.info(f&#34;Gather MCMC chain &#39;{chain_dir.as_posix()}&#39;.&#34;)
         sp_model = configuration.get_config_and_instantiate_model(

@@ -74,7 +74,7 @@ def get_deterministic_variable_names(m: pm.Model, rm_log: bool = False) -&gt; li
         list[str]: A list of the deterministic variable names.
     &#34;&#34;&#34;
     model_vars = list(
-        set([v.name for v in m.unobserved_RVs])  # noqa: C403
+        {v.name for v in m.unobserved_RVs}  # noqa: C403
         .difference(get_random_variable_names(m))
         .difference(get_random_variable_names(m, rm_log=True))
     )
@@ -159,7 +159,7 @@ def get_one_chain(posterior: xr.DataArray, chain_num: int = 0) -&gt; xr.DataArra
 
 def hierarchical_normal(
     name: str,
-    shape: tuple[int, ...],
+    shape: Union[int, tuple[int, ...]],
     centered: bool = True,
     mu: Optional[PyMC3Variable] = None,
     mu_mean: float = 0.0,
@@ -170,7 +170,7 @@ def hierarchical_normal(
 
     Args:
         name (str): Variable name.
-        shape (tuple[int, ...]): Variable shape.
+        shape (Union[int, tuple[int, ...]]): Variable shape.
         centered (bool, optional): Centered or non-centered parameterization? Defaults
           to `True` (centered).
         mu (Optional[PyMC3Variable], optional): Optional pre-made hyper-distribution
@@ -202,7 +202,7 @@ def hierarchical_normal(
 def hierarchical_normal_with_avg(
     name: str,
     avg_map: dict[str, Union[float, np.ndarray, tt.TensorConstant]],
-    shape: tuple[int, ...],
+    shape: Union[int, tuple[int, ...]],
     centered: bool = True,
     mu: Optional[PyMC3Variable] = None,
     mu_mean: float = 0.0,
@@ -224,7 +224,7 @@ def hierarchical_normal_with_avg(
         name (str): Variable name.
         avg_map (dict[str, Union[float, np.ndarray]]): Map of other predictor names to
           their group-level means. See the example.
-        shape (tuple[int, ...]): Variable shape.
+        shape (Union[int, tuple[int, ...]]): Variable shape.
         centered (bool, optional): Centered or non-centered parameterization? Defaults
           to `True` (centered).
         mu (Optional[PyMC3Variable], optional): Optional pre-made hyper-distribution
@@ -324,7 +324,7 @@ False.</dd>
         list[str]: A list of the deterministic variable names.
     &#34;&#34;&#34;
     model_vars = list(
-        set([v.name for v in m.unobserved_RVs])  # noqa: C403
+        {v.name for v in m.unobserved_RVs}  # noqa: C403
         .difference(get_random_variable_names(m))
         .difference(get_random_variable_names(m, rm_log=True))
     )
@@ -488,7 +488,7 @@ False.</dd>
 </details>
 </dd>
 <dt id="src.modeling.pymc3_helpers.hierarchical_normal"><code class="name flex">
-<span>def <span class="ident">hierarchical_normal</span></span>(<span>name: str, shape: tuple, centered: bool = True, mu: Optional[pymc3.model.PyMC3Variable] = None, mu_mean: float = 0.0, mu_sd: float = 2.5, sigma_sd: float = 2.5) -> pymc3.model.PyMC3Variable</span>
+<span>def <span class="ident">hierarchical_normal</span></span>(<span>name: str, shape: Union[int, tuple[int, ...]], centered: bool = True, mu: Optional[pymc3.model.PyMC3Variable] = None, mu_mean: float = 0.0, mu_sd: float = 2.5, sigma_sd: float = 2.5) -> pymc3.model.PyMC3Variable</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a non-centered parameterized hierarchical variable.</p>
@@ -496,7 +496,7 @@ False.</dd>
 <dl>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
 <dd>Variable name.</dd>
-<dt><strong><code>shape</code></strong> :&ensp;<code>tuple[int, &hellip;]</code></dt>
+<dt><strong><code>shape</code></strong> :&ensp;<code>Union[int, tuple[int, &hellip;]]</code></dt>
 <dd>Variable shape.</dd>
 <dt><strong><code>centered</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Centered or non-centered parameterization? Defaults
@@ -525,7 +525,7 @@ standard deviation hyperparameter. Defaults to 2.5.</dd>
 </summary>
 <pre><code class="python">def hierarchical_normal(
     name: str,
-    shape: tuple[int, ...],
+    shape: Union[int, tuple[int, ...]],
     centered: bool = True,
     mu: Optional[PyMC3Variable] = None,
     mu_mean: float = 0.0,
@@ -536,7 +536,7 @@ standard deviation hyperparameter. Defaults to 2.5.</dd>
 
     Args:
         name (str): Variable name.
-        shape (tuple[int, ...]): Variable shape.
+        shape (Union[int, tuple[int, ...]]): Variable shape.
         centered (bool, optional): Centered or non-centered parameterization? Defaults
           to `True` (centered).
         mu (Optional[PyMC3Variable], optional): Optional pre-made hyper-distribution
@@ -566,7 +566,7 @@ standard deviation hyperparameter. Defaults to 2.5.</dd>
 </details>
 </dd>
 <dt id="src.modeling.pymc3_helpers.hierarchical_normal_with_avg"><code class="name flex">
-<span>def <span class="ident">hierarchical_normal_with_avg</span></span>(<span>name: str, avg_map: dict, shape: tuple, centered: bool = True, mu: Optional[pymc3.model.PyMC3Variable] = None, mu_mean: float = 0.0, mu_sd: float = 2.5, sigma_sd: float = 2.5, gamma_mean: float = 0.0, gamma_sd: float = 2.5) -> pymc3.model.PyMC3Variable</span>
+<span>def <span class="ident">hierarchical_normal_with_avg</span></span>(<span>name: str, avg_map: dict, shape: Union[int, tuple[int, ...]], centered: bool = True, mu: Optional[pymc3.model.PyMC3Variable] = None, mu_mean: float = 0.0, mu_sd: float = 2.5, sigma_sd: float = 2.5, gamma_mean: float = 0.0, gamma_sd: float = 2.5) -> pymc3.model.PyMC3Variable</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a non-centered hierarchical variable with group-level mean predictors.</p>
@@ -583,7 +583,7 @@ Predictors and GroupEffects Correlate</em> by Bafumi and Gelman for details.</p>
 <dt><strong><code>avg_map</code></strong> :&ensp;<code>dict[str, Union[float, np.ndarray]]</code></dt>
 <dd>Map of other predictor names to
 their group-level means. See the example.</dd>
-<dt><strong><code>shape</code></strong> :&ensp;<code>tuple[int, &hellip;]</code></dt>
+<dt><strong><code>shape</code></strong> :&ensp;<code>Union[int, tuple[int, &hellip;]]</code></dt>
 <dd>Variable shape.</dd>
 <dt><strong><code>centered</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Centered or non-centered parameterization? Defaults
@@ -639,7 +639,7 @@ variables. Defaults to 2.5.</dd>
 <pre><code class="python">def hierarchical_normal_with_avg(
     name: str,
     avg_map: dict[str, Union[float, np.ndarray, tt.TensorConstant]],
-    shape: tuple[int, ...],
+    shape: Union[int, tuple[int, ...]],
     centered: bool = True,
     mu: Optional[PyMC3Variable] = None,
     mu_mean: float = 0.0,
@@ -661,7 +661,7 @@ variables. Defaults to 2.5.</dd>
         name (str): Variable name.
         avg_map (dict[str, Union[float, np.ndarray]]): Map of other predictor names to
           their group-level means. See the example.
-        shape (tuple[int, ...]): Variable shape.
+        shape (Union[int, tuple[int, ...]]): Variable shape.
         centered (bool, optional): Centered or non-centered parameterization? Defaults
           to `True` (centered).
         mu (Optional[PyMC3Variable], optional): Optional pre-made hyper-distribution

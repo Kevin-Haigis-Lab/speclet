@@ -126,7 +126,7 @@ class DataManager(abc.ABC):
         &#34;&#34;&#34;
         pass
 
-    def transform_data(self):
+    def transform_data(self) -&gt; None:
         &#34;&#34;&#34;Transform the data held by the manager.
 
         The data must be loaded using `get_data()` prior running this method. The
@@ -258,8 +258,8 @@ class CrcDataManager(DataManager):
             Path: Path to the data.
         &#34;&#34;&#34;
         if self.debug:
-            return data_io.data_path(to=data_io.DataFile.crc_subsample)
-        return data_io.data_path(to=data_io.DataFile.crc_data)
+            return data_io.data_path(to=data_io.DataFile.DEPMAP_CRC_SUBSAMPLE)
+        return data_io.data_path(to=data_io.DataFile.DEPMAP_CRC)
 
     def get_batch_size(self) -&gt; int:
         &#34;&#34;&#34;Decide on the minibatch size for modeling CRC data.
@@ -579,8 +579,8 @@ data from the Broad? Defaults to True.</dd>
             Path: Path to the data.
         &#34;&#34;&#34;
         if self.debug:
-            return data_io.data_path(to=data_io.DataFile.crc_subsample)
-        return data_io.data_path(to=data_io.DataFile.crc_data)
+            return data_io.data_path(to=data_io.DataFile.DEPMAP_CRC_SUBSAMPLE)
+        return data_io.data_path(to=data_io.DataFile.DEPMAP_CRC)
 
     def get_batch_size(self) -&gt; int:
         &#34;&#34;&#34;Decide on the minibatch size for modeling CRC data.
@@ -844,8 +844,8 @@ data from the Broad? Defaults to True.</dd>
         Path: Path to the data.
     &#34;&#34;&#34;
     if self.debug:
-        return data_io.data_path(to=data_io.DataFile.crc_subsample)
-    return data_io.data_path(to=data_io.DataFile.crc_data)</code></pre>
+        return data_io.data_path(to=data_io.DataFile.DEPMAP_CRC_SUBSAMPLE)
+    return data_io.data_path(to=data_io.DataFile.DEPMAP_CRC)</code></pre>
 </details>
 </dd>
 <dt id="src.managers.model_data_managers.CrcDataManager.set_data"><code class="name flex">
@@ -998,7 +998,7 @@ callable functions or classes for transforming the data. Defaults to None
         &#34;&#34;&#34;
         pass
 
-    def transform_data(self):
+    def transform_data(self) -&gt; None:
         &#34;&#34;&#34;Transform the data held by the manager.
 
         The data must be loaded using `get_data()` prior running this method. The
@@ -1360,7 +1360,7 @@ def set_data(
 </details>
 </dd>
 <dt id="src.managers.model_data_managers.DataManager.transform_data"><code class="name flex">
-<span>def <span class="ident">transform_data</span></span>(<span>self)</span>
+<span>def <span class="ident">transform_data</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Transform the data held by the manager.</p>
@@ -1371,7 +1371,7 @@ usually not required.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def transform_data(self):
+<pre><code class="python">def transform_data(self) -&gt; None:
     &#34;&#34;&#34;Transform the data held by the manager.
 
     The data must be loaded using `get_data()` prior running this method. The

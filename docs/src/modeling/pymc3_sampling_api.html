@@ -30,7 +30,7 @@
 
 &#34;&#34;&#34;Standardization of the interactions with PyMC3 sampling.&#34;&#34;&#34;
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Optional, TypeVar, Union
 
 import arviz as az
 import numpy as np
@@ -39,13 +39,15 @@ from pydantic import BaseModel, validator
 
 #### ---- Result Types ---- ####
 
+PossibleTrace = TypeVar(&#34;PossibleTrace&#34;)
+
 
 class MCMCSamplingResults(BaseModel):
     &#34;&#34;&#34;The results of MCMC sampling.&#34;&#34;&#34;
 
     trace: pm.backends.base.MultiTrace
-    prior_predictive: Dict[str, np.ndarray]
-    posterior_predictive: Dict[str, np.ndarray]
+    prior_predictive: dict[str, np.ndarray]
+    posterior_predictive: dict[str, np.ndarray]
 
     class Config:
         &#34;&#34;&#34;Configuration for pydantic validation.&#34;&#34;&#34;
@@ -53,7 +55,7 @@ class MCMCSamplingResults(BaseModel):
         arbitrary_types_allowed = True
 
     @validator(&#34;trace&#34;)
-    def validate_trace(cls, trace):
+    def validate_trace(cls, trace: PossibleTrace) -&gt; PossibleTrace:
         &#34;&#34;&#34;Validate a PyMC3 MultiTrace object.
 
         Args:
@@ -114,7 +116,7 @@ def pymc3_sampling_procedure(
     cores: Optional[int] = None,
     prior_pred_samples: int = 1000,
     random_seed: Optional[int] = None,
-    sample_kwargs: Optional[Dict[str, Any]] = None,
+    sample_kwargs: Optional[dict[str, Any]] = None,
 ) -&gt; MCMCSamplingResults:
     &#34;&#34;&#34;Run a standard PyMC3 sampling procedure.
 
@@ -167,9 +169,9 @@ def pymc3_advi_approximation_procedure(
     n_iterations: int = 100000,
     draws: int = 1000,
     prior_pred_samples: int = 1000,
-    callbacks: Optional[List[Callable]] = None,
+    callbacks: Optional[list[Callable]] = None,
     random_seed: Optional[int] = None,
-    fit_kwargs: Optional[Dict[Any, Any]] = None,
+    fit_kwargs: Optional[dict[Any, Any]] = None,
 ) -&gt; ApproximationSamplingResults:
     &#34;&#34;&#34;Run a standard PyMC3 ADVI fitting procedure.
 
@@ -264,7 +266,7 @@ the sampling/fitting process.</dd>
 </details>
 </dd>
 <dt id="src.modeling.pymc3_sampling_api.pymc3_advi_approximation_procedure"><code class="name flex">
-<span>def <span class="ident">pymc3_advi_approximation_procedure</span></span>(<span>model: pymc3.model.Model, method: str = 'advi', n_iterations: int = 100000, draws: int = 1000, prior_pred_samples: int = 1000, callbacks: Optional[List[Callable]] = None, random_seed: Optional[int] = None, fit_kwargs: Optional[Dict[Any, Any]] = None) -> <a title="src.modeling.pymc3_sampling_api.ApproximationSamplingResults" href="#src.modeling.pymc3_sampling_api.ApproximationSamplingResults">ApproximationSamplingResults</a></span>
+<span>def <span class="ident">pymc3_advi_approximation_procedure</span></span>(<span>model: pymc3.model.Model, method: str = 'advi', n_iterations: int = 100000, draws: int = 1000, prior_pred_samples: int = 1000, callbacks: Optional[list[Callable]] = None, random_seed: Optional[int] = None, fit_kwargs: Optional[dict[Any, Any]] = None) -> <a title="src.modeling.pymc3_sampling_api.ApproximationSamplingResults" href="#src.modeling.pymc3_sampling_api.ApproximationSamplingResults">ApproximationSamplingResults</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Run a standard PyMC3 ADVI fitting procedure.</p>
@@ -307,9 +309,9 @@ Defaults to {}.</dd>
     n_iterations: int = 100000,
     draws: int = 1000,
     prior_pred_samples: int = 1000,
-    callbacks: Optional[List[Callable]] = None,
+    callbacks: Optional[list[Callable]] = None,
     random_seed: Optional[int] = None,
-    fit_kwargs: Optional[Dict[Any, Any]] = None,
+    fit_kwargs: Optional[dict[Any, Any]] = None,
 ) -&gt; ApproximationSamplingResults:
     &#34;&#34;&#34;Run a standard PyMC3 ADVI fitting procedure.
 
@@ -353,7 +355,7 @@ Defaults to {}.</dd>
 </details>
 </dd>
 <dt id="src.modeling.pymc3_sampling_api.pymc3_sampling_procedure"><code class="name flex">
-<span>def <span class="ident">pymc3_sampling_procedure</span></span>(<span>model: pymc3.model.Model, mcmc_draws: int = 1000, tune: int = 1000, chains: int = 3, cores: Optional[int] = None, prior_pred_samples: int = 1000, random_seed: Optional[int] = None, sample_kwargs: Optional[Dict[str, Any]] = None) -> <a title="src.modeling.pymc3_sampling_api.MCMCSamplingResults" href="#src.modeling.pymc3_sampling_api.MCMCSamplingResults">MCMCSamplingResults</a></span>
+<span>def <span class="ident">pymc3_sampling_procedure</span></span>(<span>model: pymc3.model.Model, mcmc_draws: int = 1000, tune: int = 1000, chains: int = 3, cores: Optional[int] = None, prior_pred_samples: int = 1000, random_seed: Optional[int] = None, sample_kwargs: Optional[dict[str, Any]] = None) -> <a title="src.modeling.pymc3_sampling_api.MCMCSamplingResults" href="#src.modeling.pymc3_sampling_api.MCMCSamplingResults">MCMCSamplingResults</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Run a standard PyMC3 sampling procedure.</p>
@@ -398,7 +400,7 @@ Defaults to {}.</dd>
     cores: Optional[int] = None,
     prior_pred_samples: int = 1000,
     random_seed: Optional[int] = None,
-    sample_kwargs: Optional[Dict[str, Any]] = None,
+    sample_kwargs: Optional[dict[str, Any]] = None,
 ) -&gt; MCMCSamplingResults:
     &#34;&#34;&#34;Run a standard PyMC3 sampling procedure.
 
@@ -452,7 +454,7 @@ Defaults to {}.</dd>
 <dl>
 <dt id="src.modeling.pymc3_sampling_api.ApproximationSamplingResults"><code class="flex name class">
 <span>class <span class="ident">ApproximationSamplingResults</span></span>
-<span>(</span><span>*, trace: pymc3.backends.base.MultiTrace, prior_predictive: Dict[str, numpy.ndarray], posterior_predictive: Dict[str, numpy.ndarray], approximation: pymc3.variational.opvi.Approximation)</span>
+<span>(</span><span>*, trace: pymc3.backends.base.MultiTrace, prior_predictive: dict, posterior_predictive: dict, approximation: pymc3.variational.opvi.Approximation)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The results of ADVI fitting and sampling.</p>
@@ -485,7 +487,7 @@ Defaults to {}.</dd>
 </dd>
 <dt id="src.modeling.pymc3_sampling_api.MCMCSamplingResults"><code class="flex name class">
 <span>class <span class="ident">MCMCSamplingResults</span></span>
-<span>(</span><span>*, trace: pymc3.backends.base.MultiTrace, prior_predictive: Dict[str, numpy.ndarray], posterior_predictive: Dict[str, numpy.ndarray])</span>
+<span>(</span><span>*, trace: pymc3.backends.base.MultiTrace, prior_predictive: dict, posterior_predictive: dict)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The results of MCMC sampling.</p>
@@ -499,8 +501,8 @@ Defaults to {}.</dd>
     &#34;&#34;&#34;The results of MCMC sampling.&#34;&#34;&#34;
 
     trace: pm.backends.base.MultiTrace
-    prior_predictive: Dict[str, np.ndarray]
-    posterior_predictive: Dict[str, np.ndarray]
+    prior_predictive: dict[str, np.ndarray]
+    posterior_predictive: dict[str, np.ndarray]
 
     class Config:
         &#34;&#34;&#34;Configuration for pydantic validation.&#34;&#34;&#34;
@@ -508,7 +510,7 @@ Defaults to {}.</dd>
         arbitrary_types_allowed = True
 
     @validator(&#34;trace&#34;)
-    def validate_trace(cls, trace):
+    def validate_trace(cls, trace: PossibleTrace) -&gt; PossibleTrace:
         &#34;&#34;&#34;Validate a PyMC3 MultiTrace object.
 
         Args:
@@ -548,7 +550,7 @@ Defaults to {}.</dd>
 <h3>Static methods</h3>
 <dl>
 <dt id="src.modeling.pymc3_sampling_api.MCMCSamplingResults.validate_trace"><code class="name flex">
-<span>def <span class="ident">validate_trace</span></span>(<span>trace)</span>
+<span>def <span class="ident">validate_trace</span></span>(<span>trace: ~PossibleTrace) -> ~PossibleTrace</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Validate a PyMC3 MultiTrace object.</p>
@@ -572,7 +574,7 @@ Defaults to {}.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@validator(&#34;trace&#34;)
-def validate_trace(cls, trace):
+def validate_trace(cls, trace: PossibleTrace) -&gt; PossibleTrace:
     &#34;&#34;&#34;Validate a PyMC3 MultiTrace object.
 
     Args:
