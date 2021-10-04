@@ -1,7 +1,6 @@
 """Parsing complex structures for use in Snakemake pipelines."""
 
 from pathlib import Path
-from typing import List
 
 from pydantic import BaseModel, validate_arguments
 
@@ -12,9 +11,9 @@ from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
 class ParsedPipelineInformation(BaseModel):
     """Parsed pipeline information."""
 
-    models: List[str]
-    model_names: List[str]
-    fit_methods: List[str]
+    models: list[str]
+    model_names: list[str]
+    fit_methods: list[str]
 
     def __len__(self) -> int:
         return len(self.models)
@@ -45,7 +44,7 @@ def get_models_names_fit_methods(
     model_configurations = model_config.get_model_configurations(config_path)
     model_config.check_model_names_are_unique(model_configurations)
 
-    pipeline_informations: List[_PipelineIntermediateInformation] = []
+    pipeline_informations: list[_PipelineIntermediateInformation] = []
 
     for config in model_configurations.configurations:
         if pipeline not in config.pipelines:

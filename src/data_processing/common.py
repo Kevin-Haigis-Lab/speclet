@@ -3,7 +3,7 @@
 """Functions for modifying the everyday pandas DataFrame."""
 
 import warnings
-from typing import Any, Iterable, List, Tuple, Union
+from typing import Any, Iterable, Union
 
 import janitor  # noqa: F401
 import numpy as np
@@ -27,7 +27,7 @@ def make_cat(
     Returns:
         pd.DataFrame: The modified DataFrame.
     """
-    categories: List[Any] = df[col].unique().tolist()
+    categories: list[Any] = df[col].unique().tolist()
     if sort_cats:
         categories.sort()
     df[col] = pd.Categorical(df[col], categories=categories, ordered=ordered)
@@ -47,7 +47,7 @@ def get_indices(df: pd.DataFrame, col: str) -> np.ndarray:
     return df[col].cat.codes.to_numpy()
 
 
-def get_indices_and_count(df: pd.DataFrame, col: str) -> Tuple[np.ndarray, int]:
+def get_indices_and_count(df: pd.DataFrame, col: str) -> tuple[np.ndarray, int]:
     """Get the indices and number of unique values for a categorical column.
 
     Args:
@@ -107,7 +107,7 @@ def nunique(x: Iterable[Any]) -> int:
 
 
 def center_column_grouped_dataframe(
-    df: pd.DataFrame, grp_col: Union[str, List[str]], val_col: str, new_col_name: str
+    df: pd.DataFrame, grp_col: Union[str, list[str]], val_col: str, new_col_name: str
 ) -> pd.DataFrame:
     """Center the values of a column after grouping by another.
 

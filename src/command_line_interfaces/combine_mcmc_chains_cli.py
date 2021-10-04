@@ -1,7 +1,7 @@
 """Command line interface for merging MCMC chains for a single model."""
 
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import arviz as az
 import typer
@@ -16,7 +16,7 @@ cli_helpers.configure_pretty()
 def combine_mcmc_chains(
     name: str,
     config_path: Path,
-    chain_dirs: List[Path],
+    chain_dirs: list[Path],
     combined_root_cache_dir: Path,
     touch: Optional[Path] = None,
 ) -> None:
@@ -37,7 +37,7 @@ def combine_mcmc_chains(
     n_chains = len(chain_dirs)
     logger.info(f"Expecting {n_chains} separate chains.")
 
-    all_arviz_data_objects: List[az.InferenceData] = []
+    all_arviz_data_objects: list[az.InferenceData] = []
     for chain_dir in chain_dirs:
         logger.info(f"Gather MCMC chain '{chain_dir.as_posix()}'.")
         sp_model = configuration.get_config_and_instantiate_model(

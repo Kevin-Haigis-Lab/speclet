@@ -2,7 +2,6 @@
 
 """Sampling and fitting callbacks for PyMC3 models."""
 
-from typing import Dict
 
 import pymc3 as pm
 
@@ -31,7 +30,7 @@ class DivergenceFractionCallback:
         self.n_tune_steps = n_tune_steps
         self.max_frac = max_frac
         self.min_samples = min_samples
-        self.divergence_counts: Dict[int, int] = {}
+        self.divergence_counts: dict[int, int] = {}
 
     def __call__(
         self, trace: pm.backends.ndarray.NDArray, draw: pm.parallel_sampling.Draw

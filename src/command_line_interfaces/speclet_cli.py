@@ -75,7 +75,7 @@ def model_graphs(
 def _count_lines_in_file(f: Path) -> int:
     n: int = 0
     try:
-        with open(f, "r") as file:
+        with open(f) as file:
             for line in file:
                 if line.strip():
                     n += 1

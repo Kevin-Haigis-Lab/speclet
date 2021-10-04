@@ -1,7 +1,7 @@
 """Functions for handling common modifications and processing of the Achilles data."""
 
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -17,7 +17,7 @@ def zscale_cna_by_group(
     df: pd.DataFrame,
     cn_col: str = "copy_number",
     new_col: str = "copy_number_z",
-    groupby_cols: Optional[Union[List[str], Tuple[str, ...]]] = ("hugo_symbol",),
+    groupby_cols: Optional[Union[list[str], tuple[str, ...]]] = ("hugo_symbol",),
     cn_max: Optional[float] = None,
 ) -> pd.DataFrame:
     """Z-scale the copy number values.
@@ -360,7 +360,7 @@ def data_batch_indices(achilles_df: pd.DataFrame) -> DataBatchIndices:
 
 #### ---- Data frames ---- ####
 
-_default_achilles_categorical_cols: Tuple[str, ...] = (
+_default_achilles_categorical_cols: tuple[str, ...] = (
     "hugo_symbol",
     "depmap_id",
     "sgrna",
@@ -373,7 +373,7 @@ _default_achilles_categorical_cols: Tuple[str, ...] = (
 
 def set_achilles_categorical_columns(
     data: pd.DataFrame,
-    cols: Union[List[str], Tuple[str, ...]] = _default_achilles_categorical_cols,
+    cols: Union[list[str], tuple[str, ...]] = _default_achilles_categorical_cols,
     ordered: bool = True,
     sort_cats: bool = False,
 ) -> pd.DataFrame:

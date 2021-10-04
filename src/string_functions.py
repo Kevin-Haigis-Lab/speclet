@@ -1,9 +1,7 @@
-#!/usr/bin/env python3
-
 """Common string handling functions."""
 
 import textwrap
-from typing import Iterable, List, Union
+from typing import Iterable, Union
 
 
 def str_wrap(strings: Union[str, Iterable[str]], width: int = 80) -> Iterable[str]:
@@ -41,7 +39,7 @@ def str_replace(
         return [s.replace(pattern, replace_with) for s in strings]
 
 
-def prefixed_count(prefix: str, n: int, plus: float = 0) -> List[str]:
+def prefixed_count(prefix: str, n: int, plus: float = 0) -> list[str]:
     """Make an array of 1-->n with the number and some prefix.
 
     Args:

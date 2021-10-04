@@ -1,7 +1,7 @@
 """Speclet Model Five."""
 
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 import pymc3 as pm
 import theano
@@ -76,7 +76,7 @@ class SpecletFive(SpecletModel):
             data_manager=data_manager,
         )
 
-    def set_config(self, info: Dict[Any, Any]) -> None:
+    def set_config(self, info: dict[Any, Any]) -> None:
         """Set model-specific configuration."""
         new_config = SpecletFiveConfiguration(**info)
         if self.config is not None and self.config != new_config:
@@ -84,7 +84,7 @@ class SpecletFive(SpecletModel):
             self.config = new_config
             self.model = None
 
-    def model_specification(self) -> Tuple[pm.Model, ObservedVarName]:
+    def model_specification(self) -> tuple[pm.Model, ObservedVarName]:
         """Build SpecletFour model.
 
         Returns:

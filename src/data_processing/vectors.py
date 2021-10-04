@@ -1,6 +1,6 @@
 """Common and general vector operations."""
 
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 import numpy as np
 from scipy import stats
@@ -94,7 +94,7 @@ def careful_zscore(
         return zscale(transform(x))
 
 
-def index_array_by_list(ary: np.ndarray, idx: List[int]) -> np.ndarray:
+def index_array_by_list(ary: np.ndarray, idx: list[int]) -> np.ndarray:
     """Extract a value from an array by a list of indices.
 
     The input array may be any number of dimensions and the indices in the list each

@@ -1,7 +1,7 @@
 """Speclet Model Two."""
 
 from pathlib import Path
-from typing import Any, List, Optional, Tuple
+from typing import Any, Optional
 
 import pymc3 as pm
 import theano
@@ -56,7 +56,7 @@ class SpecletTwo(SpecletModel):
             data_manager=data_manager,
         )
 
-    def model_specification(self) -> Tuple[pm.Model, ObservedVarName]:
+    def model_specification(self) -> tuple[pm.Model, ObservedVarName]:
         """Build SpecletTwo model.
 
         Returns:
@@ -151,7 +151,7 @@ class SpecletTwo(SpecletModel):
             self.shared_vars["lfc_shared"]: lfc_data_batch,
         }
 
-    def get_advi_callbacks(self) -> List[Any]:
+    def get_advi_callbacks(self) -> list[Any]:
         """Prepare a list of callbacks for ADVI fitting.
 
         This can be overridden by subclasses to apply custom callbacks or change the

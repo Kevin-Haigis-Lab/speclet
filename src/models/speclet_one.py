@@ -1,7 +1,7 @@
 """Speclet Model One."""
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 import pymc3 as pm
 import theano
@@ -65,7 +65,7 @@ class SpecletOne(SpecletModel):
             data_manager=data_manager,
         )
 
-    def model_specification(self) -> Tuple[pm.Model, ObservedVarName]:
+    def model_specification(self) -> tuple[pm.Model, ObservedVarName]:
         """Build SpecletOne model.
 
         Returns:

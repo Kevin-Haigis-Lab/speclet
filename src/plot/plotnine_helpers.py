@@ -1,9 +1,7 @@
-#!/usr/bin/env python3
-
 """Common functions to help with 'plotnine'."""
 
 from enum import Enum
-from typing import Dict, Union
+from typing import Union
 
 
 class PlotnineUnits(str, Enum):
@@ -20,7 +18,7 @@ def margin(
     l: float = 0,  # noqa: E741
     r: float = 0,
     units: PlotnineUnits = PlotnineUnits.pt,
-) -> Dict[str, Union[float, str]]:
+) -> dict[str, Union[float, str]]:
     """Return a dictionary of margin data.
 
     Args:

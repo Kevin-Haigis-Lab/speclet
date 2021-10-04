@@ -3,7 +3,7 @@
 
 from collections import Counter
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Union
+from typing import Optional, Union
 
 import yaml
 from pydantic import BaseModel
@@ -28,8 +28,8 @@ def get_model_config() -> Path:
 
 BasicTypes = Union[float, str, int, bool]
 
-PipelineSamplingParameters = Dict[
-    SpecletPipeline, Dict[ModelFitMethod, Dict[str, BasicTypes]]
+PipelineSamplingParameters = dict[
+    SpecletPipeline, dict[ModelFitMethod, dict[str, BasicTypes]]
 ]
 
 
@@ -39,9 +39,9 @@ class ModelConfig(BaseModel):
     name: str
     description: str
     model: ModelOption
-    config: Optional[Dict[str, Union[ModelFitMethod, BasicTypes]]]
-    fit_methods: List[ModelFitMethod]
-    pipelines: List[SpecletPipeline] = []
+    config: Optional[dict[str, Union[ModelFitMethod, BasicTypes]]]
+    fit_methods: list[ModelFitMethod]
+    pipelines: list[SpecletPipeline] = []
     debug: bool
     pipeline_sampling_parameters: Optional[PipelineSamplingParameters]
 
@@ -49,7 +49,7 @@ class ModelConfig(BaseModel):
 class ModelConfigs(BaseModel):
     """Model configurations."""
 
-    configurations: List[ModelConfig]
+    configurations: list[ModelConfig]
 
 
 class FoundMultipleModelConfigurationsError(BaseException):
@@ -77,7 +77,7 @@ def get_model_configurations(path: Path) -> ModelConfigs:
     Returns:
         ModelConfigs: Configuration spec for a model.
     """
-    with open(path, "r") as file:
+    with open(path) as file:
         return ModelConfigs(configurations=yaml.safe_load(file))
 
 
@@ -112,7 +112,7 @@ def get_sampling_kwargs_from_config(
     config: ModelConfig,
     pipeline: SpecletPipeline,
     fit_method: ModelFitMethod,
-) -> Dict[str, BasicTypes]:
+) -> dict[str, BasicTypes]:
     """Get the sampling keyword argument dictionary from a model configuration.
 
     Args:
@@ -135,7 +135,7 @@ def get_sampling_kwargs_from_config(
 
 def get_sampling_kwargs(
     config_path: Path, name: str, pipeline: SpecletPipeline, fit_method: ModelFitMethod
-) -> Dict[str, BasicTypes]:
+) -> dict[str, BasicTypes]:
     """Get the sampling keyword argument dictionary from a configuration file.
 
     Args:
@@ -176,7 +176,7 @@ class ModelConfigurationNotFound(BaseException):
 class ModelNamesAreNotAllUnique(BaseException):
     """Model names are not all unique."""
 
-    def __init__(self, nonunique_ids: Set[str]) -> None:
+    def __init__(self, nonunique_ids: set[str]) -> None:
         """Create a ModelNamesAreNotAllUnique error.
 
         Args:
@@ -198,5 +198,5 @@ def check_model_names_are_unique(configs: ModelConfigs) -> None:
     """
     counter = Counter([config.name for config in configs.configurations])
     if not all(i == 1 for i in counter.values()):
-        nonunique_ids = set([v for v, c in counter.items() if c != 1])  # noqa: C403
+        nonunique_ids = {v for v, c in counter.items() if c != 1}  # noqa: C403
         raise ModelNamesAreNotAllUnique(nonunique_ids)

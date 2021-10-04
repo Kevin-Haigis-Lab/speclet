@@ -1,7 +1,7 @@
 """A simple, light-weight SpecletModel for testing pipelines."""
 
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 import numpy as np
 import pymc3 as pm
@@ -59,11 +59,11 @@ class SpecletTestModel(SpecletModel):
             data_manager=data_manager,
         )
 
-    def set_config(self, info: Dict[Any, Any]) -> None:
+    def set_config(self, info: dict[Any, Any]) -> None:
         """Set model-specific configuration."""
         self.config = SpecletTestModelConfiguration(**info)
 
-    def model_specification(self) -> Tuple[pm.Model, ObservedVarName]:
+    def model_specification(self) -> tuple[pm.Model, ObservedVarName]:
         """Specify a simple model.
 
         Returns:

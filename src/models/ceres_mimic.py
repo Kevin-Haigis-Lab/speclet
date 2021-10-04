@@ -3,7 +3,7 @@
 """Builders for CRC CERES Mimic model."""
 
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 import numpy as np
 import pymc3 as pm
@@ -82,7 +82,7 @@ class CeresMimic(SpecletModel):
             data_manager=data_manager,
         )
 
-    def set_config(self, info: Dict[Any, Any]) -> None:
+    def set_config(self, info: dict[Any, Any]) -> None:
         """Set model-specific configuration."""
         new_config = CeresMimicConfiguration(**info)
         if self.config is not None and self.config != new_config:
@@ -139,7 +139,7 @@ class CeresMimic(SpecletModel):
             self._reset_model_and_results()
             self.config.sgrna_intercept_cov = new_value
 
-    def model_specification(self) -> Tuple[pm.Model, ObservedVarName]:
+    def model_specification(self) -> tuple[pm.Model, ObservedVarName]:
         """Build CRC CERES Mimic One.
 
         Returns:

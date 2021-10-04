@@ -1,7 +1,7 @@
 """Speclet Model Four."""
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 import pymc3 as pm
 import theano
@@ -78,7 +78,7 @@ class SpecletFour(SpecletModel):
             data_manager=data_manager,
         )
 
-    def set_config(self, info: Dict[Any, Any]) -> None:
+    def set_config(self, info: dict[Any, Any]) -> None:
         """Set model-specific configuration."""
         new_config = SpecletFourConfiguration(**info)
         if self.config is not None and self.config != new_config:
@@ -97,7 +97,7 @@ class SpecletFour(SpecletModel):
         cn_shared: TTShared,
         lfc_shared: TTShared,
         total_size: int,
-    ) -> Tuple[pm.Model, ObservedVarName]:
+    ) -> tuple[pm.Model, ObservedVarName]:
         with pm.Model() as model:
             # Gene varying intercept.
             μ_h = pm.Normal("μ_h", 0, 1)
@@ -168,7 +168,7 @@ class SpecletFour(SpecletModel):
 
         return model, "lfc"
 
-    def model_specification(self) -> Tuple[pm.Model, ObservedVarName]:
+    def model_specification(self) -> tuple[pm.Model, ObservedVarName]:
         """Build SpecletFour model.
 
         Returns:
@@ -253,7 +253,7 @@ class SpecletFour(SpecletModel):
             self.shared_vars["lfc_shared"]: lfc_data_batch,
         }
 
-    def get_advi_callbacks(self) -> List[Any]:
+    def get_advi_callbacks(self) -> list[Any]:
         """Prepare a list of callbacks for ADVI fitting.
 
         This can be overridden by subclasses to apply custom callbacks or change the

@@ -1,12 +1,9 @@
-#!/usr/bin/env python3
-
 """My colors and color palettes."""
 
 from enum import Enum, EnumMeta
-from typing import Dict
 
 
-class SeabornColor(str, Enum):
+class SeabornColor(Enum):
     """Colors from the 'seaborn' package."""
 
     ORANGE = "#ED854A"
@@ -15,7 +12,7 @@ class SeabornColor(str, Enum):
     RED = "#D65F5F"
 
 
-class ModelColors(str, Enum):
+class ModelColors(Enum):
     """Colors for specific models."""
 
     CERES = "#417BB1"
@@ -24,14 +21,14 @@ class ModelColors(str, Enum):
     SPECLET_TWO = "#DE522F"
 
 
-class FitMethodColors(str, Enum):
+class FitMethodColors(Enum):
     """Colors for the different ways to fit a model."""
 
     PYMC3_MCMC = "#F57E3F"
     PYMC3_ADVI = "#0AA8A2"
 
 
-def make_pal(colors: EnumMeta) -> Dict[str, str]:
+def make_pal(colors: EnumMeta) -> dict[str, str]:
     """Convert an Enum to a usable color palette.
 
     Args:
@@ -40,7 +37,7 @@ def make_pal(colors: EnumMeta) -> Dict[str, str]:
     Returns:
         (Dict[str, str]) Dictionary mapping of enum.
     """
-    d: Dict[str, str] = {}
+    d: dict[str, str] = {}
     for c in colors:  # type: ignore
         assert isinstance(c.name, str) and isinstance(c.value, str)
         d[c.name] = c.value

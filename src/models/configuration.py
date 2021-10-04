@@ -1,7 +1,7 @@
 """Handle model configuration."""
 
 from pathlib import Path
-from typing import Any, Dict, Type
+from typing import Any
 
 from src.io import model_config
 from src.loggers import logger
@@ -40,7 +40,7 @@ def configure_model(model: SpecletModel, config_path: Path) -> None:
         logger.info(f"No configuration found for model name: '{model.name}'.")
 
 
-def get_model_class(model_opt: ModelOption) -> Type[SpecletProjectModelTypes]:
+def get_model_class(model_opt: ModelOption) -> type[SpecletProjectModelTypes]:
     """Get the model class from its string identifier.
 
     Args:
@@ -49,7 +49,7 @@ def get_model_class(model_opt: ModelOption) -> Type[SpecletProjectModelTypes]:
     Returns:
         Type[SpecletModel]: The corresponding model class.
     """
-    model_option_map: Dict[ModelOption, Type[SpecletProjectModelTypes]] = {
+    model_option_map: dict[ModelOption, type[SpecletProjectModelTypes]] = {
         ModelOption.SPECLET_TEST_MODEL: SpecletTestModel,
         ModelOption.CRC_CERES_MIMIC: CeresMimic,
         ModelOption.SPECLET_SIMPLE: SpecletSimple,
@@ -116,7 +116,7 @@ def get_config_and_instantiate_model(
 
 
 def check_sampling_kwargs(
-    sampling_kwargs: Dict[str, Any], fit_method: ModelFitMethod
+    sampling_kwargs: dict[str, Any], fit_method: ModelFitMethod
 ) -> None:
     """Check that sampling keyword arguments are appropriate for the method called.
 
