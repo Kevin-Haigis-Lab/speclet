@@ -91,3 +91,7 @@ repos:
         additional_dependencies: [pydantic, mypy, types-python-dateutil]
         types: [jupyter]
         exclude: "munge/019_prepare-data-subsample.ipynb"
+-   repo: https://github.com/MarcoGorelli/check-execution-order
+    rev: v0.1.1
+    hooks:
+    -   id: check-execution-order
