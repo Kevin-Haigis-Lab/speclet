@@ -1,6 +1,7 @@
 """My colors and color palettes."""
 
-from enum import Enum, EnumMeta
+from enum import Enum
+from typing import Literal
 
 
 class SeabornColor(Enum):
@@ -28,17 +29,21 @@ class FitMethodColors(Enum):
     PYMC3_ADVI = "#0AA8A2"
 
 
-def make_pal(colors: EnumMeta) -> dict[str, str]:
+ColorPalette = Literal[SeabornColor, ModelColors, FitMethodColors]  # type: ignore
+name = str
+color = str
+
+
+def make_pal(colors: ColorPalette) -> dict[name, color]:
     """Convert an Enum to a usable color palette.
 
     Args:
-        colors (EnumMeta): Enum to convert to a palette.
+        colors (ColorPalette): Color palette Enum to convert to dictionary.
 
     Returns:
-        (Dict[str, str]) Dictionary mapping of enum.
+        (dict[name, color]) Dictionary mapping of name to color (both strings).
     """
     d: dict[str, str] = {}
-    for c in colors:  # type: ignore
-        assert isinstance(c.name, str) and isinstance(c.value, str)
+    for c in colors:
         d[c.name] = c.value
     return d
