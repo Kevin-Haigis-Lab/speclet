@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from src.data_processing import achilles as achelp
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
-from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
 from src.project_enums import ModelParameterization as MP
 
 
@@ -84,11 +84,12 @@ class SpecletFive(SpecletModel):
             self.config = new_config
             self.model = None
 
-    def model_specification(self) -> Tuple[pm.Model, str]:
+    def model_specification(self) -> Tuple[pm.Model, ObservedVarName]:
         """Build SpecletFour model.
 
         Returns:
-            Tuple[pm.Model, str]: The model and name of the observed variable.
+            Tuple[pm.Model, ObservedVarName]: The model and name of the observed
+            variable.
         """
         logger.info("Beginning PyMC3 model specification.")
         data = self.data_manager.get_data()

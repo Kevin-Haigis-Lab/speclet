@@ -8,7 +8,7 @@ import pymc3 as pm
 from pydantic import BaseModel
 
 from src.managers.model_data_managers import DataManager, MockDataManager
-from src.models.speclet_model import SpecletModel
+from src.models.speclet_model import ObservedVarName, SpecletModel
 from src.project_enums import ModelParameterization as MP
 
 
@@ -63,11 +63,11 @@ class SpecletTestModel(SpecletModel):
         """Set model-specific configuration."""
         self.config = SpecletTestModelConfiguration(**info)
 
-    def model_specification(self) -> Tuple[pm.Model, str]:
+    def model_specification(self) -> Tuple[pm.Model, ObservedVarName]:
         """Specify a simple model.
 
         Returns:
-            Tuple[pm.Model, str]: Model and name of target  variable.
+            Tuple[pm.Model, ObservedVarName]: Model and name of target  variable.
         """
         d = self.data_manager.get_data()
         with pm.Model() as model:

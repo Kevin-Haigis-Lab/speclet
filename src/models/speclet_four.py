@@ -11,7 +11,7 @@ from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 from src.data_processing import achilles as achelp
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
-from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
 from src.project_enums import ModelParameterization as MP
 
 
@@ -97,7 +97,7 @@ class SpecletFour(SpecletModel):
         cn_shared: TTShared,
         lfc_shared: TTShared,
         total_size: int,
-    ) -> Tuple[pm.Model, str]:
+    ) -> Tuple[pm.Model, ObservedVarName]:
         with pm.Model() as model:
             # Gene varying intercept.
             μ_h = pm.Normal("μ_h", 0, 1)
@@ -168,11 +168,12 @@ class SpecletFour(SpecletModel):
 
         return model, "lfc"
 
-    def model_specification(self) -> Tuple[pm.Model, str]:
+    def model_specification(self) -> Tuple[pm.Model, ObservedVarName]:
         """Build SpecletFour model.
 
         Returns:
-            Tuple[pm.Model, str]: The model and name of the observed variable.
+            Tuple[pm.Model, ObservedVarName]: The model and name of the observed
+            variable.
         """
         logger.info("Beginning PyMC3 model specification.")
 

@@ -9,7 +9,7 @@ import theano
 from src.data_processing import achilles as achelp
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
-from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
 
 
 class SpecletTwo(SpecletModel):
@@ -56,11 +56,12 @@ class SpecletTwo(SpecletModel):
             data_manager=data_manager,
         )
 
-    def model_specification(self) -> Tuple[pm.Model, str]:
+    def model_specification(self) -> Tuple[pm.Model, ObservedVarName]:
         """Build SpecletTwo model.
 
         Returns:
-            Tuple[pm.Model, str]: The model and name of the observed variable.
+            Tuple[pm.Model, ObservedVarName]: The model and name of the observed
+            variable.
         """
         logger.info("Beginning PyMC3 model specification.")
 

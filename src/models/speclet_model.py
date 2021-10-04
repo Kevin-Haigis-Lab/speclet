@@ -21,6 +21,8 @@ from src.project_enums import MockDataSize, ModelFitMethod, assert_never
 
 ReplacementsDict = dict[TTShared, Union[pm.Minibatch, np.ndarray]]
 
+ObservedVarName = str
+
 
 class UnableToLocateNamedVariable(Exception):
     """Error when a named variable or object cannot be located."""
@@ -68,7 +70,7 @@ class SpecletModel:
     data_manager: DataManager
 
     model: Optional[pm.Model] = None
-    observed_var_name: Optional[str] = None
+    observed_var_name: Optional[ObservedVarName] = None
     shared_vars: Optional[dict[str, TTShared]] = None
     advi_results: Optional[tuple[az.InferenceData, pm.Approximation]] = None
     mcmc_results: Optional[az.InferenceData] = None
@@ -152,14 +154,14 @@ class SpecletModel:
         self.cache_manager.clear_all_caches()
 
     @abstractmethod
-    def model_specification(self) -> tuple[pm.Model, str]:
+    def model_specification(self) -> tuple[pm.Model, ObservedVarName]:
         """Define the PyMC3 model.
 
         This model must be overridden by an subclass to define the desired PyMC3 model.
 
         Returns:
             pm.Model: The PyMC3 model.
-            str: Name of the target variable in the model.
+            ObservedVarName: Name of the target variable in the model.
         """
         raise Exception(
             "The `model_specification()` method must be overridden by subclasses."

@@ -13,7 +13,7 @@ from pydantic import BaseModel
 from src.data_processing import achilles as achelp
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
-from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
 
 #### ---- CERES Mimic ---- ####
 
@@ -139,11 +139,11 @@ class CeresMimic(SpecletModel):
             self._reset_model_and_results()
             self.config.sgrna_intercept_cov = new_value
 
-    def model_specification(self) -> Tuple[pm.Model, str]:
+    def model_specification(self) -> Tuple[pm.Model, ObservedVarName]:
         """Build CRC CERES Mimic One.
 
         Returns:
-            [None]: None
+            Tuple[pm.Model, ObservedVarName]: Model and name of observed variable.
         """
         data = self.data_manager.get_data()
 

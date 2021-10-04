@@ -7,7 +7,7 @@ import pymc3 as pm
 import theano
 
 from src.managers.model_data_managers import CrcDataManager, DataManager
-from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
 
 
 class SpecletSimple(SpecletModel):
@@ -52,11 +52,12 @@ class SpecletSimple(SpecletModel):
             data_manager=data_manager,
         )
 
-    def model_specification(self) -> tuple[pm.Model, str]:
+    def model_specification(self) -> tuple[pm.Model, ObservedVarName]:
         """Build SpecletSimple model.
 
         Returns:
-            tuple[pm.Model, str]: The model and name of the observed variable.
+            tuple[pm.Model, ObservedVarName]: The model and name of the observed
+            variable.
         """
         data = self.data_manager.get_data()
         total_size = data.shape[0]
