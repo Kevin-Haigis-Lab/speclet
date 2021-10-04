@@ -12,8 +12,8 @@ from src.models.speclet_seven import SpecletSeven, SpecletSevenConfiguration
 
 
 @pytest.fixture(autouse=True)
-def data_manager_use_test_data(monkeypatch: pytest.MonkeyPatch):
-    def mock_get_data_path(*args, **kwargs) -> Path:
+def data_manager_use_test_data(monkeypatch: pytest.MonkeyPatch) -> None:
+    def mock_get_data_path(*args: Any, **kwargs: Any) -> Path:
         return Path("tests", "depmap_test_data.csv")
 
     monkeypatch.setattr(CrcDataManager, "get_data_path", mock_get_data_path)
@@ -26,20 +26,20 @@ class TestSpecletSeven:
             "test-model", root_cache_dir=tmp_path, data_manager=mock_crc_dm, debug=True
         )
 
-    def test_init(self, sp7: SpecletSeven):
+    def test_init(self, sp7: SpecletSeven) -> None:
         assert sp7.model is None
         assert sp7.mcmc_results is None
         assert sp7.advi_results is None
         assert sp7.data_manager is not None
 
-    def test_build_model(self, sp7: SpecletSeven):
+    def test_build_model(self, sp7: SpecletSeven) -> None:
         assert sp7.model is None
         sp7.build_model()
         assert sp7.model is not None
 
     @pytest.mark.slow
     @pytest.mark.parametrize("fit_method", ["mcmc", "advi"])
-    def test_model_fitting(self, sp7: SpecletSeven, fit_method: str):
+    def test_model_fitting(self, sp7: SpecletSeven, fit_method: str) -> None:
         sp7.build_model()
         assert sp7.model is not None
 
@@ -75,8 +75,8 @@ class TestSpecletSeven:
         mock_crc_dm: CrcDataManager,
         config: SpecletSevenConfiguration,
         monkeypatch: pytest.MonkeyPatch,
-    ):
-        def mock_build_model(*args, **kwargs) -> tuple[str, str]:
+    ) -> None:
+        def mock_build_model(*args: Any, **kwargs: Any) -> tuple[str, str]:
             return "my-test-model", "another-string"
 
         monkeypatch.setattr(SpecletSeven, "model_specification", mock_build_model)
@@ -100,7 +100,7 @@ class TestSpecletSeven:
         tmp_path: Path,
         mock_crc_dm: CrcDataManager,
         config: SpecletSevenConfiguration,
-    ):
+    ) -> None:
         sp7 = SpecletSeven(
             "test-model",
             root_cache_dir=tmp_path,

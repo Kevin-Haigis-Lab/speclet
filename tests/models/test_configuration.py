@@ -24,14 +24,14 @@ from src.project_enums import ModelFitMethod, ModelOption
 from src.project_enums import ModelParameterization as MP
 
 
-def test_configure_model(mock_model_config: Path, tmp_path: Path):
+def test_configure_model(mock_model_config: Path, tmp_path: Path) -> None:
     sp = SpecletTestModel("my-test-model", tmp_path)
     configuration.configure_model(sp, config_path=mock_model_config)
     assert sp.config.some_param is MP.NONCENTERED
     assert sp.config.cov2
 
 
-def test_configure_model_no_change(mock_model_config: Path, tmp_path: Path):
+def test_configure_model_no_change(mock_model_config: Path, tmp_path: Path) -> None:
     sp = SpecletTestModel("my-test-model-that-doesnot-exist", tmp_path)
     configuration.configure_model(sp, config_path=mock_model_config)
     assert sp.config.some_param is MP.CENTERED
@@ -39,7 +39,7 @@ def test_configure_model_no_change(mock_model_config: Path, tmp_path: Path):
 
 
 @pytest.mark.parametrize("model_option", ModelOption)
-def test_all_model_options_return_a_type(model_option: ModelOption):
+def test_all_model_options_return_a_type(model_option: ModelOption) -> None:
     model_type = configuration.get_model_class(model_option)
     assert model_type is not None
 
@@ -61,7 +61,7 @@ model_options_expected_class_parameterization: List[
 @pytest.mark.parametrize(
     "model_option, expected_class", model_options_expected_class_parameterization
 )
-def test_get_model_class(model_option: ModelOption, expected_class: Type):
+def test_get_model_class(model_option: ModelOption, expected_class: Type) -> None:
     model_type = configuration.get_model_class(model_option)
     assert model_type == expected_class
 
@@ -100,7 +100,7 @@ def check_test_model_configurations(
 )
 def test_instantiate_and_configure_model(
     model_name: str, tmp_path: Path, mock_model_config: Path
-):
+) -> None:
     config = mc.get_configuration_for_model(mock_model_config, model_name)
     assert config is not None
     sp_model = configuration.instantiate_and_configure_model(
@@ -116,7 +116,7 @@ def test_instantiate_and_configure_model(
 )
 def test_get_config_and_instantiate_model(
     model_name: str, tmp_path: Path, mock_model_config: Path
-):
+) -> None:
     sp_model = configuration.get_config_and_instantiate_model(
         mock_model_config,
         name=model_name,
@@ -130,12 +130,9 @@ def test_get_config_and_instantiate_model(
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 def test_check_sampling_kwargs_raises(
     sampling_kwargs: Dict[str, str], fit_method: ModelFitMethod
-):
+) -> None:
     if sampling_kwargs == {}:
-        assert (
-            configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
-            is None
-        )
+        configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
     else:
         sampling_kwargs["fjieorjgiers;orgrhj"] = "vjdiorgvherogjheiorg"
         with pytest.raises(KeywordsNotInCallableParametersError):
@@ -143,12 +140,9 @@ def test_check_sampling_kwargs_raises(
 
 
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
-def test_check_sampling_kwargs_empty_always_passes(fit_method: ModelFitMethod):
+def test_check_sampling_kwargs_empty_always_passes(fit_method: ModelFitMethod) -> None:
     sampling_kwargs: Dict[str, Any] = {}
-    assert (
-        configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
-        is None
-    )
+    configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
 
 
 @pytest.mark.parametrize(
@@ -162,11 +156,8 @@ def test_check_sampling_kwargs_empty_always_passes(fit_method: ModelFitMethod):
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 def test_check_sampling_kwargs_all_fitmethods(
     sampling_kwargs: Dict[str, Any], fit_method: ModelFitMethod
-):
-    assert (
-        configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
-        is None
-    )
+) -> None:
+    configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
 
 
 @pytest.mark.parametrize(
@@ -184,12 +175,9 @@ def test_check_sampling_kwargs_fitmethod_specfic(
     sampling_kwargs: Dict[str, Any],
     intended_fit_method: ModelFitMethod,
     fit_method: ModelFitMethod,
-):
+) -> None:
     if fit_method == intended_fit_method:
-        assert (
-            configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
-            is None
-        )
+        configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
     else:
         with pytest.raises(KeywordsNotInCallableParametersError):
             configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)

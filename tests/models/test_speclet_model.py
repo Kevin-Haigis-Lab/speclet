@@ -16,6 +16,11 @@ from src.models import speclet_model
 from src.project_enums import MockDataSize, ModelFitMethod
 
 
+class MinimalSpecletModel(speclet_model.SpecletModel):
+    def model_specification(self) -> tuple[pm.Model, str]:
+        return "my-mock-model", "mock-observed_var"
+
+
 class MockSpecletModelClass(speclet_model.SpecletModel):
     def __init__(self, name: str, root_cache_dir: Path, debug: bool) -> None:
         _data_manager = MockDataManager()
@@ -49,22 +54,22 @@ class TestSpecletModel:
             debug=False,
         )
 
-    def test_mcmc_sample_model_fails_without_overriding(self, tmp_path: Path):
-        sp = speclet_model.SpecletModel(
+    def test_mcmc_sample_model_fails_without_overriding(self, tmp_path: Path) -> None:
+        sp = MinimalSpecletModel(
             "test-model", data_manager=MockDataManager(), root_cache_dir=tmp_path
         )
         with pytest.raises(AttributeError, match="Cannot sample: model is 'None'"):
             sp.mcmc_sample_model()
 
     @pytest.mark.slow
-    def test_build_model(self, mock_sp_model: MockSpecletModelClass):
+    def test_build_model(self, mock_sp_model: MockSpecletModelClass) -> None:
         assert mock_sp_model.model is None
         mock_sp_model.build_model()
         assert mock_sp_model.model is not None
         assert isinstance(mock_sp_model.model, pm.Model)
 
     @pytest.mark.slow
-    def test_mcmc_sample_model(self, mock_sp_model: MockSpecletModelClass):
+    def test_mcmc_sample_model(self, mock_sp_model: MockSpecletModelClass) -> None:
         mock_sp_model.build_model()
         mcmc_res = mock_sp_model.mcmc_sample_model(
             draws=50,
@@ -97,15 +102,15 @@ class TestSpecletModel:
                 mcmc_res.posterior[p], mcmc_res_2.posterior[p]
             )
 
-    def test_advi_sample_model_fails_without_model(self, tmp_path: Path):
-        sp = speclet_model.SpecletModel(
+    def test_advi_sample_model_fails_without_model(self, tmp_path: Path) -> None:
+        sp = MinimalSpecletModel(
             "test-model", data_manager=MockDataManager(), root_cache_dir=tmp_path
         )
         with pytest.raises(AttributeError, match="model is 'None'"):
             sp.advi_sample_model()
 
     @pytest.mark.slow
-    def test_advi_sample_model(self, mock_sp_model: MockSpecletModelClass):
+    def test_advi_sample_model(self, mock_sp_model: MockSpecletModelClass) -> None:
         mock_sp_model.build_model()
         advi_res, advi_approx = mock_sp_model.advi_sample_model(
             n_iterations=100,
@@ -143,11 +148,11 @@ class TestSpecletModel:
         fit_method: ModelFitMethod,
         monkeypatch: pytest.MonkeyPatch,
         centered_eight: az.InferenceData,
-    ):
-        def mock_mcmc(*args, **kwargs) -> az.InferenceData:
+    ) -> None:
+        def mock_mcmc(*args: Any, **kwargs: Any) -> az.InferenceData:
             return centered_eight.copy()
 
-        def mock_advi(*args, **kwargs) -> Tuple[az.InferenceData, str]:
+        def mock_advi(*args: Any, **kwargs: Any) -> Tuple[az.InferenceData, str]:
             return centered_eight.copy(), "hi"
 
         monkeypatch.setattr(
@@ -198,7 +203,7 @@ class TestSpecletModel:
         iris: pd.DataFrame,
         centered_eight: az.InferenceData,
         centered_eight_post: pd.DataFrame,
-    ):
+    ) -> None:
         # setup SBC results
         sbc_dir = tmp_path / "sbc-results-dir"
         if not sbc_dir.exists():
@@ -221,7 +226,7 @@ class TestSpecletModel:
         monkeypatch.setattr(speclet_model.SpecletModel, "build_model", do_nothing)
         monkeypatch.setattr(CrcDataManager, "apply_transformations", just_return)
 
-        sp = speclet_model.SpecletModel(
+        sp = MinimalSpecletModel(
             "testing-get-sbc", mock_crc_dm, root_cache_dir=tmp_path, debug=True
         )
         sim_df, sbc_res, sim_sbc_fm = sp.get_sbc(sbc_dir)
@@ -231,8 +236,8 @@ class TestSpecletModel:
         assert isinstance(sim_sbc_fm, sbc.SBCFileManager)
         assert sim_sbc_fm.dir == sbc_fm.dir
 
-    def test_get_sbc_errors(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
-        sp_model = speclet_model.SpecletModel(
+    def test_get_sbc_errors(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> None:
+        sp_model = MinimalSpecletModel(
             "testing-model", mock_crc_dm, root_cache_dir=tmp_path
         )
         sbc_dir = tmp_path / "sbc-results"
@@ -252,14 +257,16 @@ class TestSpecletModel:
         with pytest.raises(CacheDoesNotExistError):
             _ = sp_model.get_sbc(sbc_dir)
 
-    def test_changing_debug_status(self, mock_sp_model: MockSpecletModelClass):
+    def test_changing_debug_status(self, mock_sp_model: MockSpecletModelClass) -> None:
         assert mock_sp_model.data_manager is not None
         assert not mock_sp_model.debug and not mock_sp_model.data_manager.debug
         mock_sp_model.debug = True
         assert mock_sp_model.debug and mock_sp_model.data_manager.debug
 
     @pytest.mark.slow
-    def test_changing_mcmc_sampling_params(self, mock_sp_model: MockSpecletModelClass):
+    def test_changing_mcmc_sampling_params(
+        self, mock_sp_model: MockSpecletModelClass
+    ) -> None:
         mock_sp_model.mcmc_sampling_params.draws = 12
         mock_sp_model.mcmc_sampling_params.chains = 2
         mock_sp_model.mcmc_sampling_params.cores = 1
@@ -271,7 +278,9 @@ class TestSpecletModel:
         assert mcmc_res.prior["a"].shape == (1, 14)
 
     @pytest.mark.slow
-    def test_changing_advi_sampling_params(self, mock_sp_model: MockSpecletModelClass):
+    def test_changing_advi_sampling_params(
+        self, mock_sp_model: MockSpecletModelClass
+    ) -> None:
         mock_sp_model.advi_sampling_params.draws = 17
         mock_sp_model.advi_sampling_params.n_iterations = 103
         mock_sp_model.advi_sampling_params.prior_pred_samples = 14

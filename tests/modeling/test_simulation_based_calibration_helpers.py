@@ -16,7 +16,7 @@ chars = list(ascii_letters) + [str(i) for i in (range(10))]
 
 
 class TestSBCFileManager:
-    def test_init(self, tmp_path: Path):
+    def test_init(self, tmp_path: Path) -> None:
         fm = sbc.SBCFileManager(dir=tmp_path)
         assert not fm.all_data_exists()
 
@@ -37,7 +37,7 @@ class TestSBCFileManager:
 
     def test_saving(
         self, tmp_path: Path, priors: dict[str, Any], posterior_summary: pd.DataFrame
-    ):
+    ) -> None:
         fm = sbc.SBCFileManager(dir=tmp_path)
         fm.save_sbc_results(
             priors=priors,
@@ -48,7 +48,7 @@ class TestSBCFileManager:
 
     def test_reading(
         self, tmp_path: Path, priors: dict[str, Any], posterior_summary: pd.DataFrame
-    ):
+    ) -> None:
         fm = sbc.SBCFileManager(dir=tmp_path)
 
         fm.save_sbc_results(
@@ -68,7 +68,9 @@ class TestSBCFileManager:
                 read_results.posterior_summary[c].values, posterior_summary[c].values
             )
 
-    def test_saving_simulation_dataframe(self, tmp_path: Path, iris: pd.DataFrame):
+    def test_saving_simulation_dataframe(
+        self, tmp_path: Path, iris: pd.DataFrame
+    ) -> None:
         fm = sbc.SBCFileManager(tmp_path)
         fm.save_sbc_data(iris)
         assert fm.get_sbc_data() is iris
@@ -78,7 +80,7 @@ class TestSBCFileManager:
 
     def test_clearing_saved_simulation_dataframe(
         self, tmp_path: Path, iris: pd.DataFrame
-    ):
+    ) -> None:
         fm = sbc.SBCFileManager(tmp_path)
         fm.save_sbc_data(iris)
         assert fm.sbc_data_path.exists()
@@ -91,11 +93,11 @@ class TestSBCFileManager:
 #### ---- Test SBC collation ---- ####
 
 
-def return_iris(*args, **kwargs) -> pd.DataFrame:
+def return_iris(*args: Any, **kwargs: Any) -> pd.DataFrame:
     return sns.load_dataset("iris")
 
 
-def test_is_true_value_within_hdi_lower_limit():
+def test_is_true_value_within_hdi_lower_limit() -> None:
     n = 100
     low = pd.Series(list(range(0, n)))
     high = pd.Series([200] * n)
@@ -105,7 +107,7 @@ def test_is_true_value_within_hdi_lower_limit():
     assert not np.any(is_within[50:])
 
 
-def test_is_true_value_within_hdi_upper_limit():
+def test_is_true_value_within_hdi_upper_limit() -> None:
     n = 100
     low = pd.Series([0] * n)
     high = pd.Series(list(range(100)))
@@ -115,28 +117,28 @@ def test_is_true_value_within_hdi_upper_limit():
     assert np.all(is_within[51:])
 
 
-def test_get_prior_value_using_index_list_mismatch_index_size():
+def test_get_prior_value_using_index_list_mismatch_index_size() -> None:
     a = np.array([4, 3, 2, 1])
     idx: list[int] = []
     with pytest.raises(AssertionError):
         _ = sbc._get_prior_value_using_index_list(a, idx)
 
 
-def test_get_prior_value_using_index_list_empty_idx():
+def test_get_prior_value_using_index_list_empty_idx() -> None:
     a = np.array(4)
     idx: list[int] = []
     b = sbc._get_prior_value_using_index_list(a, idx)
     assert b == 4.0
 
 
-def test_get_prior_value_using_index_list_empty_idx_but_not_flat_array():
+def test_get_prior_value_using_index_list_empty_idx_but_not_flat_array() -> None:
     a = np.array([4])
     idx: list[int] = []
     b = sbc._get_prior_value_using_index_list(a, idx)
     assert b == 4.0
 
 
-def test_get_prior_value_using_index_list_1d():
+def test_get_prior_value_using_index_list_1d() -> None:
     a = np.array([4, 3, 2, 1])
     idx = [0]
     b = sbc._get_prior_value_using_index_list(a, idx)
@@ -146,7 +148,7 @@ def test_get_prior_value_using_index_list_1d():
     assert b == 3
 
 
-def test_get_prior_value_using_index_list_2d():
+def test_get_prior_value_using_index_list_2d() -> None:
     a = np.arange(9).reshape((3, 3))
     idx = [1, 2]
     b = sbc._get_prior_value_using_index_list(a, idx)
@@ -164,11 +166,13 @@ def test_get_prior_value_using_index_list_2d():
         ("abc[x,y,z]", ["abc", "x", "y", "z"]),
     ],
 )
-def test_split_parameter(p: str, res: str):
+def test_split_parameter(p: str, res: str) -> None:
     assert res == sbc._split_parameter(p)
 
 
-def test_error_when_incorrect_number_of_results_found(monkeypatch: pytest.MonkeyPatch):
+def test_error_when_incorrect_number_of_results_found(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(sbc, "get_posterior_summary_for_file_manager", return_iris)
 
     n_paths = 20
@@ -188,7 +192,7 @@ def test_error_when_incorrect_number_of_results_found(monkeypatch: pytest.Monkey
 
 
 @pytest.mark.slow
-def test_make_priors_dataframe_simple(simple_model: pm.Model):
+def test_make_priors_dataframe_simple(simple_model: pm.Model) -> None:
     with simple_model:
         priors = pm.sample_prior_predictive(samples=1)
 
@@ -199,7 +203,7 @@ def test_make_priors_dataframe_simple(simple_model: pm.Model):
 
 
 @pytest.mark.slow
-def test_make_priors_dataframe_hierarchical(hierarchical_model: pm.Model):
+def test_make_priors_dataframe_hierarchical(hierarchical_model: pm.Model) -> None:
     with hierarchical_model:
         priors = pm.sample_prior_predictive(samples=1)
 
@@ -210,7 +214,9 @@ def test_make_priors_dataframe_hierarchical(hierarchical_model: pm.Model):
 
 
 @pytest.mark.slow
-def test_make_priors_dataframe_hierarchical_with_post(hierarchical_model: pm.Model):
+def test_make_priors_dataframe_hierarchical_with_post(
+    hierarchical_model: pm.Model,
+) -> None:
     with hierarchical_model:
         priors = pm.sample_prior_predictive(samples=1)
         trace = pm.sample(10, tune=10, cores=1, chains=2, return_inferencedata=True)
@@ -221,6 +227,6 @@ def test_make_priors_dataframe_hierarchical_with_post(hierarchical_model: pm.Mod
     assert set(parameters) == set(prior_df.index.tolist())
 
 
-def test_failure_if_data_does_not_exist(tmp_path: Path):
+def test_failure_if_data_does_not_exist(tmp_path: Path) -> None:
     with pytest.raises(sbc.SBCResultsNotFoundError):
         sbc.get_posterior_summary_for_file_manager(tmp_path)

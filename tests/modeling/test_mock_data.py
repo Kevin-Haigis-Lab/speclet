@@ -1,4 +1,5 @@
 from string import ascii_letters, ascii_lowercase
+from typing import Callable
 
 import numpy as np
 import pandas as pd
@@ -6,6 +7,7 @@ import pytest
 import seaborn as sns
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
+from hypothesis.strategies import DataObject
 
 from src.data_processing import common as dphelp
 from src.modeling import mock_data
@@ -23,7 +25,7 @@ selection_methods = [a.value for a in mock_data.SelectionMethod]
     n=st.integers(0, 100),
     list=st.lists(st.text(chars, min_size=1), min_size=1),
 )
-def test_select_n_elements_from_l_strings(method: str, n: int, list: list[str]):
+def test_select_n_elements_from_l_strings(method: str, n: int, list: list[str]) -> None:
     selection = mock_data.select_n_elements_from_l(n, list, method=method)
     assert len(selection) == n
     for a in selection:
@@ -35,14 +37,16 @@ def test_select_n_elements_from_l_strings(method: str, n: int, list: list[str]):
     n=st.integers(0, 100),
     list=st.lists(st.integers(), min_size=1),
 )
-def test_select_n_elements_from_l_integers(method: str, n: int, list: list[int]):
+def test_select_n_elements_from_l_integers(
+    method: str, n: int, list: list[int]
+) -> None:
     selection = mock_data.select_n_elements_from_l(n, list, method=method)
     assert len(selection) == n
     for a in selection:
         assert a in list
 
 
-def test_select_n_elements_from_l_tiled():
+def test_select_n_elements_from_l_tiled() -> None:
     list = ["j", "h", "c"]
     n = 5
     selection = mock_data.select_n_elements_from_l(n, list, "tiled")
@@ -50,7 +54,7 @@ def test_select_n_elements_from_l_tiled():
     np.testing.assert_equal(selection, np.array(["j", "h", "c", "j", "h"]))
 
 
-def test_select_n_elements_from_l_repeated():
+def test_select_n_elements_from_l_repeated() -> None:
     list = ["j", "h", "c"]
     n = 5
     selection = mock_data.select_n_elements_from_l(n, list, "repeated")
@@ -62,7 +66,7 @@ def test_select_n_elements_from_l_repeated():
     n=st.integers(5, 100),
     list=st.lists(st.text(chars, min_size=1), min_size=2, unique=True),
 )
-def test_select_n_elements_from_l_random_are_different(n: int, list: list[str]):
+def test_select_n_elements_from_l_random_are_different(n: int, list: list[str]) -> None:
     n_same = 0
     for _ in range(10):
         a = mock_data.select_n_elements_from_l(n, list, method="random")
@@ -75,7 +79,9 @@ def test_select_n_elements_from_l_random_are_different(n: int, list: list[str]):
     n=st.integers(5, 100),
     list=st.lists(st.text(chars, min_size=1), min_size=2, unique=True),
 )
-def test_select_n_elements_from_l_shuffled_are_different(n: int, list: list[str]):
+def test_select_n_elements_from_l_shuffled_are_different(
+    n: int, list: list[str]
+) -> None:
     n_same = 0
     for _ in range(10):
         a = mock_data.select_n_elements_from_l(n, list, method="shuffled")
@@ -88,7 +94,9 @@ def test_select_n_elements_from_l_shuffled_are_different(n: int, list: list[str]
     n=st.integers(5, 100),
     list=st.lists(st.text(chars, min_size=1), min_size=2, unique=True),
 )
-def test_select_n_elements_from_l_shuffled_have_even_coverage(n: int, list: list[str]):
+def test_select_n_elements_from_l_shuffled_have_even_coverage(
+    n: int, list: list[str]
+) -> None:
     a = mock_data.select_n_elements_from_l(n, list, method="shuffled")
     b = mock_data.select_n_elements_from_l(n, list, method="shuffled")
     for element in list:
@@ -96,7 +104,7 @@ def test_select_n_elements_from_l_shuffled_have_even_coverage(n: int, list: list
 
 
 @given(st.integers(1, 50), st.integers(1, 5))
-def test_generate_mock_sgrna_gene_map(n_genes: int, n_sgrnas_per_gene: int):
+def test_generate_mock_sgrna_gene_map(n_genes: int, n_sgrnas_per_gene: int) -> None:
     sgrna_gene_map = mock_data.generate_mock_sgrna_gene_map(
         n_genes=n_genes, n_sgrnas_per_gene=n_sgrnas_per_gene
     )
@@ -106,7 +114,7 @@ def test_generate_mock_sgrna_gene_map(n_genes: int, n_sgrnas_per_gene: int):
     assert len(sgrnas) == len(np.unique(sgrnas))
 
 
-def test_generate_mock_cell_line_information():
+def test_generate_mock_cell_line_information() -> None:
     genes = [f"gene_{i}" for i in range(5)]
     n_cell_lines = 10
     n_lineages = 2
@@ -128,7 +136,7 @@ def test_generate_mock_cell_line_information():
 
 
 @given(st.data())
-def test_generate_mock_cell_line_information_notrandomness(data: st.DataObject):
+def test_generate_mock_cell_line_information_notrandomness(data: st.DataObject) -> None:
     genes = data.draw(st.lists(st.text(chars), min_size=1, unique=True), label="genes")
     n_cell_lines = data.draw(st.integers(5, 10), label="n_cell_lines")
     n_lineages = data.draw(st.integers(2, n_cell_lines), label="n_lineages")
@@ -152,7 +160,7 @@ def test_generate_mock_cell_line_information_notrandomness(data: st.DataObject):
 
 
 @given(st.data())
-def test_generate_mock_cell_line_information_randomness(data: st.DataObject):
+def test_generate_mock_cell_line_information_randomness(data: st.DataObject) -> None:
     genes = data.draw(
         st.lists(st.text(chars), min_size=1, max_size=25, unique=True), label="genes"
     )
@@ -193,7 +201,7 @@ def test_generate_mock_achilles_categorical_groups(
     n_batches: int,
     n_screens: int,
     randomness: bool,
-):
+) -> None:
     df = mock_data.generate_mock_achilles_categorical_groups(
         n_genes=n_genes,
         n_sgrnas_per_gene=n_sgrnas_per_gene,
@@ -222,7 +230,7 @@ def test_generate_mock_achilles_categorical_groups(
 
 
 @st.composite
-def generate_data_with_random_params(draw) -> pd.DataFrame:
+def generate_data_with_random_params(draw: Callable) -> pd.DataFrame:
     n_genes = draw(st.integers(2, 7), label="n_genes")
     n_sgrnas_per_gene = draw(st.integers(1, 5), label="n_sgrnas_per_gene")
     n_cell_lines = draw(st.integers(3, 6), label="n_cell_lines")
@@ -243,7 +251,7 @@ def generate_data_with_random_params(draw) -> pd.DataFrame:
     )
 
 
-def test_add_mock_copynumber_data():
+def test_add_mock_copynumber_data() -> None:
     df = sns.load_dataset("iris")
     for _ in range(10):
         df_cna = mock_data.add_mock_copynumber_data(df.copy())
@@ -252,7 +260,7 @@ def test_add_mock_copynumber_data():
         assert not any(df_cna["copy_number"].isna())
 
 
-def test_add_mock_copynumber_data_with_groups():
+def test_add_mock_copynumber_data_with_groups() -> None:
     df = sns.load_dataset("iris")
     for _ in range(10):
         df_cna = mock_data.add_mock_copynumber_data(
@@ -269,7 +277,7 @@ def test_add_mock_copynumber_data_with_groups():
             assert n_unique_vals == 1
 
 
-def test_add_mock_rna_expression_data():
+def test_add_mock_rna_expression_data() -> None:
     df = mock_data.generate_mock_achilles_categorical_groups(
         n_genes=5,
         n_sgrnas_per_gene=3,
@@ -285,7 +293,7 @@ def test_add_mock_rna_expression_data():
     assert np.all(np.isfinite(mod_df["rna_expr"].values))
 
 
-def test_add_mock_rna_expression_data_grouped():
+def test_add_mock_rna_expression_data_grouped() -> None:
     df = mock_data.generate_mock_achilles_categorical_groups(
         n_genes=10,
         n_sgrnas_per_gene=100,
@@ -317,7 +325,7 @@ def test_add_mock_rna_expression_data_grouped():
     assert not np.allclose(np.array(gene_avgs) - np.mean(gene_avgs), 0.0, atol=1.0)
 
 
-def test_add_mock_rna_expression_data_grouping_cols():
+def test_add_mock_rna_expression_data_grouping_cols() -> None:
     df = mock_data.generate_mock_achilles_categorical_groups(
         n_genes=10,
         n_sgrnas_per_gene=100,
@@ -340,14 +348,14 @@ def test_add_mock_rna_expression_data_grouping_cols():
 
 
 @given(st.floats(0, 1, allow_nan=False, allow_infinity=False))
-def test_add_mock_is_mutated_data(prob: float):
+def test_add_mock_is_mutated_data(prob: float) -> None:
     df = pd.DataFrame({"A": np.zeros(10000)})
     df = mock_data.add_mock_is_mutated_data(df, prob=prob)
     assert df["is_mutated"].mean() == pytest.approx(prob, abs=0.1)
 
 
 @given(st.floats(0, 1, allow_nan=False, allow_infinity=False))
-def test_add_mock_is_mutated_data_grouped(prob: float):
+def test_add_mock_is_mutated_data_grouped(prob: float) -> None:
     letters = list(ascii_lowercase)
     grp_a = np.random.choice(letters, size=5, replace=False)
     grp_b = np.random.choice(letters, size=5, replace=False)
@@ -368,7 +376,7 @@ def test_add_mock_is_mutated_data_grouped(prob: float):
     st.floats(-5.0, 5.0, allow_infinity=False, allow_nan=False),
     st.floats(0.0, 2.0, allow_infinity=False, allow_nan=False),
 )
-def test_add_mock_zero_effect_lfc_data(mu: float, sigma: float):
+def test_add_mock_zero_effect_lfc_data(mu: float, sigma: float) -> None:
     df = sns.load_dataset("iris")
     df_lfc = mock_data.add_mock_zero_effect_lfc_data(df, mu=mu, sigma=sigma)
     assert "lfc" in df_lfc.columns.to_list()
@@ -379,7 +387,7 @@ def test_add_mock_zero_effect_lfc_data(mu: float, sigma: float):
 
 @settings(settings.get_profile("slow-adaptive"))
 @given(st.data())
-def test_mock_data_has_correct_categories_sizes(data):
+def test_mock_data_has_correct_categories_sizes(data: DataObject) -> None:
     n_genes = data.draw(st.integers(2, 20), label="n_genes")
     n_sgrnas_per_gene = data.draw(st.integers(2, 20), label="n_sgrnas_per_gene")
     n_cell_lines = data.draw(st.integers(3, 20), label="n_cell_lines")
@@ -407,7 +415,7 @@ def test_mock_data_has_correct_categories_sizes(data):
 @pytest.mark.DEV
 @settings(settings.load_profile("slow-adaptive"))
 @given(mock_data=generate_data_with_random_params())
-def test_sgrnas_uniquely_map_to_genes(mock_data: pd.DataFrame):
+def test_sgrnas_uniquely_map_to_genes(mock_data: pd.DataFrame) -> None:
     sgrna_gene_map = (
         mock_data[["sgrna", "hugo_symbol"]].drop_duplicates().reset_index(drop=True)
     )
@@ -419,7 +427,7 @@ def test_sgrnas_uniquely_map_to_genes(mock_data: pd.DataFrame):
     settings.get_profile("slow-adaptive"), suppress_health_check=[HealthCheck.too_slow]
 )
 @given(mock_data=generate_data_with_random_params())
-def test_cellline_in_one_batch(mock_data: pd.DataFrame):
+def test_cellline_in_one_batch(mock_data: pd.DataFrame) -> None:
     cellline_to_batch = (
         mock_data[["depmap_id", "p_dna_batch"]].drop_duplicates().reset_index(drop=True)
     )
@@ -428,7 +436,7 @@ def test_cellline_in_one_batch(mock_data: pd.DataFrame):
 
 
 @given(mock_data=generate_data_with_random_params())
-def test_sgrna_for_each_cellline(mock_data: pd.DataFrame):
+def test_sgrna_for_each_cellline(mock_data: pd.DataFrame) -> None:
     all_sgrnas = set(mock_data.sgrna.values.to_list())
     for cell_line in mock_data.depmap_id.values.unique():
         cell_line_sgrnas = mock_data[
@@ -441,7 +449,7 @@ def test_sgrna_for_each_cellline(mock_data: pd.DataFrame):
 
 @settings(suppress_health_check=[HealthCheck.too_slow])
 @given(mock_data=generate_data_with_random_params())
-def test_cn_same_for_gene_cellline_combination(mock_data: pd.DataFrame):
+def test_cn_same_for_gene_cellline_combination(mock_data: pd.DataFrame) -> None:
     assert "copy_number" in mock_data.columns.tolist()
     n_genes = len(mock_data.hugo_symbol.unique())
     n_celllines = len(mock_data.depmap_id.unique())

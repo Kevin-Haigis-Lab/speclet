@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -6,7 +7,7 @@ from src.managers.model_data_managers import CrcDataManager
 from src.models.speclet_two import SpecletTwo
 
 
-def monkey_get_data_path(*args, **kwargs) -> Path:
+def monkey_get_data_path(*args: Any, **kwargs: Any) -> Path:
     return Path("tests", "depmap_test_data.csv")
 
 
@@ -17,11 +18,11 @@ class TestSpecletTwo:
         dm = CrcDataManager(debug=True)
         return dm
 
-    def test_instantiation(self, tmp_path: Path):
+    def test_instantiation(self, tmp_path: Path) -> None:
         sp_two = SpecletTwo("test-model", root_cache_dir=tmp_path, debug=True)
         assert sp_two.model is None
 
-    def test_build_model(self, tmp_path: Path, data_manager: CrcDataManager):
+    def test_build_model(self, tmp_path: Path, data_manager: CrcDataManager) -> None:
         sp_two = SpecletTwo(
             "test-model", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
         )
@@ -30,7 +31,7 @@ class TestSpecletTwo:
         assert sp_two.model is not None
 
     @pytest.mark.slow
-    def test_mcmc_sampling(self, tmp_path: Path, data_manager: CrcDataManager):
+    def test_mcmc_sampling(self, tmp_path: Path, data_manager: CrcDataManager) -> None:
         sp_two = SpecletTwo(
             "test-model", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
         )
@@ -50,7 +51,7 @@ class TestSpecletTwo:
         assert sp_two.mcmc_results is not None
 
     @pytest.mark.slow
-    def test_advi_sampling(self, tmp_path: Path, data_manager: CrcDataManager):
+    def test_advi_sampling(self, tmp_path: Path, data_manager: CrcDataManager) -> None:
         sp_two = SpecletTwo(
             "test-model", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
         )

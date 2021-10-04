@@ -12,7 +12,7 @@ from src.models.ceres_mimic import CeresMimic, CeresMimicConfiguration
 
 
 class TestCeresMimic:
-    def test_instantiation(self, tmp_path: Path):
+    def test_instantiation(self, tmp_path: Path) -> None:
         cm = CeresMimic("test-model", root_cache_dir=tmp_path, debug=True)
         assert cm.model is None
 
@@ -26,7 +26,7 @@ class TestCeresMimic:
         config: CeresMimicConfiguration,
         tmp_path: Path,
         mock_crc_dm: CrcDataManager,
-    ):
+    ) -> None:
         cm = CeresMimic(
             "test-model",
             root_cache_dir=tmp_path,

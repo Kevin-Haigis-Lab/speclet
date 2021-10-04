@@ -23,7 +23,7 @@ class TestDivergenceFractionCallback:
 
         return m
 
-    def test_divergences(self, mock_model: pm.Model):
+    def test_divergences(self, mock_model: pm.Model) -> None:
         n_tune_steps = 200
         cb = pymc3calls.DivergenceFractionCallback(
             n_tune_steps=n_tune_steps, max_frac=0.01
@@ -39,7 +39,7 @@ class TestDivergenceFractionCallback:
                     random_seed=404,
                 )
 
-    def test_min_samples_param(self, mock_model: pm.Model):
+    def test_min_samples_param(self, mock_model: pm.Model) -> None:
         n_tune_steps = 200
         cb = pymc3calls.DivergenceFractionCallback(
             n_tune_steps=n_tune_steps, min_samples=10000
@@ -56,7 +56,7 @@ class TestDivergenceFractionCallback:
 
         assert trace["a"].shape[0] == 1000
 
-    def test_max_frac_param(self, mock_model: pm.Model):
+    def test_max_frac_param(self, mock_model: pm.Model) -> None:
         n_tune_steps = 200
         cb = pymc3calls.DivergenceFractionCallback(
             n_tune_steps=n_tune_steps, max_frac=1.1

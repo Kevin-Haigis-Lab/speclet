@@ -8,6 +8,7 @@ from typer.testing import CliRunner
 import src.command_line_interfaces.sampling_pymc3_models_cli as sampling
 from src.io import model_config
 from src.io.model_config import ModelConfigurationNotFound
+from src.misc.test_helpers import do_nothing
 from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline, assert_never
 
@@ -26,7 +27,7 @@ def runner() -> CliRunner:
     return CliRunner()
 
 
-def test_show_help(app: typer.Typer, runner: CliRunner):
+def test_show_help(app: typer.Typer, runner: CliRunner) -> None:
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0
     assert "Usage:" in result.output
@@ -34,7 +35,7 @@ def test_show_help(app: typer.Typer, runner: CliRunner):
     assert "Options:" in result.output
 
 
-def test_no_input_error(app: typer.Typer, runner: CliRunner):
+def test_no_input_error(app: typer.Typer, runner: CliRunner) -> None:
     result = runner.invoke(app, [])
     assert "Error: Missing argument" in result.output
     assert result.exit_code > 0
@@ -49,7 +50,7 @@ def test_not_real_model_name_error(
     fit_method: ModelFitMethod,
     mock_model_config: Path,
     tmp_path: Path,
-):
+) -> None:
     with pytest.raises(ModelConfigurationNotFound):
         _ = runner.invoke(
             app,
@@ -62,10 +63,6 @@ def test_not_real_model_name_error(
         )
 
 
-def do_nothing(*args: Any, **kwargs: Any) -> None:
-    return None
-
-
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 def test_touch_file(
     app: typer.Typer,
@@ -74,7 +71,7 @@ def test_touch_file(
     mock_model_config: Path,
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
-):
+) -> None:
     monkeypatch.setattr(SpecletTestModel, "build_model", do_nothing)
     touch_path = tmp_path / "touch-file-for-testing-cli.txt"
     result = runner.invoke(
@@ -106,7 +103,7 @@ def test_control_sampling(
     tmp_path: Path,
     sampling: str,
     is_sampling: bool,
-):
+) -> None:
 
     method_calls: List[ModelFitMethod] = []
 
@@ -145,7 +142,7 @@ def test_uses_configuration_fitting_parameters(
     monkeypatch: pytest.MonkeyPatch,
     fit_method: ModelFitMethod,
     tmp_path: Path,
-):
+) -> None:
 
     advi_kwargs = {"n_iterations": 42, "draws": 23, "post_pred_samples": 12}
     mcmc_kwargs = {"tune": 33, "target_accept": 0.2, "prior_pred_samples": 121}
@@ -154,7 +151,7 @@ def test_uses_configuration_fitting_parameters(
         for k, v in d1.items():
             assert v == d2[k]
 
-    def check_kwargs(*args, **kwargs) -> None:
+    def check_kwargs(*args: Any, **kwargs: Any) -> None:
         if fit_method is ModelFitMethod.ADVI:
             _compare_dicts(advi_kwargs, kwargs)
         elif fit_method is ModelFitMethod.MCMC:
@@ -167,7 +164,9 @@ def test_uses_configuration_fitting_parameters(
 
     model_name = "my-test-model"
 
-    def get_mock_model_config(*args, **kwargs) -> Optional[model_config.ModelConfig]:
+    def get_mock_model_config(
+        *args: Any, **kwargs: Any
+    ) -> Optional[model_config.ModelConfig]:
         return model_config.ModelConfig(
             name=model_name,
             description="",

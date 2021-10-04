@@ -14,7 +14,9 @@ from src.data_processing import biology as biohelp
         ("chrY_8342790_-", "Y", 8342790, -1),
     ],
 )
-def test_extract_chromosome_location(input: str, chr: str, pos: int, strand: int):
+def test_extract_chromosome_location(
+    input: str, chr: str, pos: int, strand: int
+) -> None:
     input_df = pd.DataFrame({"my_col": pd.Series([input])})
     res = biohelp.extract_chromosome_location_to_df(input_df, col_name="my_col")
     print(res)
@@ -24,7 +26,7 @@ def test_extract_chromosome_location(input: str, chr: str, pos: int, strand: int
     assert res.strand[0] == strand
 
 
-def test_extract_chromosome_location_dataframe():
+def test_extract_chromosome_location_dataframe() -> None:
     input_df = pd.DataFrame(
         {
             "geno_info": [

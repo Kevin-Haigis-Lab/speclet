@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from pathlib import Path
 from random import choice
 from typing import Any
@@ -22,12 +20,12 @@ def select(df: pd.DataFrame) -> pd.DataFrame:
     return df[["sepal_length", "species"]]
 
 
-def mock_load_data(*args, **kwargs) -> pd.DataFrame:
+def mock_load_data(*args: Any, **kwargs: Any) -> pd.DataFrame:
     return sns.load_dataset("iris")
 
 
 @pytest.fixture
-def no_standard_crc_transformations(monkeypatch: pytest.MonkeyPatch):
+def no_standard_crc_transformations(monkeypatch: pytest.MonkeyPatch) -> None:
     def identity(df: pd.DataFrame) -> pd.DataFrame:
         return df
 
@@ -39,7 +37,7 @@ def no_standard_crc_transformations(monkeypatch: pytest.MonkeyPatch):
 
 
 @pytest.fixture
-def no_setting_achilles_categorical_columns(monkeypatch: pytest.MonkeyPatch):
+def no_setting_achilles_categorical_columns(monkeypatch: pytest.MonkeyPatch) -> None:
     def identity(df: pd.DataFrame, *args: Any, **kwargs: Any) -> pd.DataFrame:
         return df
 
@@ -51,19 +49,19 @@ class TestCrcDataManager:
     def iris(self) -> pd.DataFrame:
         return sns.load_dataset("iris")
 
-    def test_batch_size(self):
+    def test_batch_size(self) -> None:
         dm = CrcDataManager()
         not_debug_batch_size = dm.get_batch_size()
         dm.debug = True
         debug_batch_size = dm.get_batch_size()
         assert debug_batch_size < not_debug_batch_size
 
-    def test_data_paths(self):
+    def test_data_paths(self) -> None:
         dm = CrcDataManager(debug=True)
         assert dm.get_data_path().exists and dm.get_data_path().is_file()
         assert dm.get_data_path().suffix == ".csv"
 
-    def test_data_paths_not_debug(self):
+    def test_data_paths_not_debug(self) -> None:
         dm = CrcDataManager(debug=False)
         assert isinstance(dm.get_data_path(), Path)
         assert dm.get_data_path().suffix == ".csv"
@@ -71,9 +69,9 @@ class TestCrcDataManager:
     def test_set_data_to_none(
         self,
         monkeypatch: pytest.MonkeyPatch,
-        no_standard_crc_transformations,
-        no_setting_achilles_categorical_columns,
-    ):
+        no_standard_crc_transformations: Any,
+        no_setting_achilles_categorical_columns: Any,
+    ) -> None:
         dm = CrcDataManager(debug=True)
         assert dm.data is None
 
@@ -92,9 +90,9 @@ class TestCrcDataManager:
     def test_set_data_apply_trans(
         self,
         iris: pd.DataFrame,
-        no_standard_crc_transformations,
-        no_setting_achilles_categorical_columns,
-    ):
+        no_standard_crc_transformations: Any,
+        no_setting_achilles_categorical_columns: Any,
+    ) -> None:
         dm = CrcDataManager()
         dm.add_transformations([head])
         dm.set_data(iris)
@@ -104,8 +102,10 @@ class TestCrcDataManager:
         assert dm.data is not None and dm.data.shape[0] == 5
 
     def test_get_data(
-        self, no_standard_crc_transformations, no_setting_achilles_categorical_columns
-    ):
+        self,
+        no_standard_crc_transformations: Any,
+        no_setting_achilles_categorical_columns: Any,
+    ) -> None:
         dm = CrcDataManager(debug=True)
         assert dm.data is None
         data = dm.get_data()
@@ -114,7 +114,7 @@ class TestCrcDataManager:
         assert dm.data.shape[0] == data.shape[0]
         assert dm.data.shape[1] == data.shape[1]
 
-    def test_mock_data_generation(self):
+    def test_mock_data_generation(self) -> None:
         dm = CrcDataManager(debug=True)
         small_mock_data = dm.generate_mock_data(size="small")
         medium_mock_data = dm.generate_mock_data(size="medium")
@@ -133,9 +133,9 @@ class TestCrcDataManager:
     def test_init_with_transformations(
         self,
         iris: pd.DataFrame,
-        no_standard_crc_transformations,
-        no_setting_achilles_categorical_columns,
-    ):
+        no_standard_crc_transformations: Any,
+        no_setting_achilles_categorical_columns: Any,
+    ) -> None:
         assert iris.shape[0] > 5
         dm = CrcDataManager(debug=True, transformations=[head])
         dm.data = iris
@@ -144,9 +144,9 @@ class TestCrcDataManager:
     def test_data_transformations(
         self,
         iris: pd.DataFrame,
-        no_standard_crc_transformations,
-        no_setting_achilles_categorical_columns,
-    ):
+        no_standard_crc_transformations: Any,
+        no_setting_achilles_categorical_columns: Any,
+    ) -> None:
         dm = CrcDataManager(debug=True)
         dm.data = iris.copy()
         assert dm.data.shape[0] > 5
@@ -164,9 +164,9 @@ class TestCrcDataManager:
     def test_transform_when_data_is_set(
         self,
         iris: pd.DataFrame,
-        no_standard_crc_transformations,
-        no_setting_achilles_categorical_columns,
-    ):
+        no_standard_crc_transformations: Any,
+        no_setting_achilles_categorical_columns: Any,
+    ) -> None:
         dm = CrcDataManager(debug=True)
         dm.add_transformations([head, select])
         assert dm.data is None
@@ -177,9 +177,9 @@ class TestCrcDataManager:
     def test_transform_when_getting_data(
         self,
         monkeypatch: pytest.MonkeyPatch,
-        no_standard_crc_transformations,
-        no_setting_achilles_categorical_columns,
-    ):
+        no_standard_crc_transformations: Any,
+        no_setting_achilles_categorical_columns: Any,
+    ) -> None:
         # Monkeypatch to load 'iris' instead of real data.
         monkeypatch.setattr(CrcDataManager, "_load_data", mock_load_data)
 
@@ -193,9 +193,9 @@ class TestCrcDataManager:
     def test_adding_new_transformations(
         self,
         iris: pd.DataFrame,
-        no_standard_crc_transformations,
-        no_setting_achilles_categorical_columns,
-    ):
+        no_standard_crc_transformations: Any,
+        no_setting_achilles_categorical_columns: Any,
+    ) -> None:
         dm = CrcDataManager(debug=True)
         dm.data = iris.copy()
         dm.transform_data()
@@ -215,7 +215,7 @@ class TestCrcDataManager:
     @pytest.mark.parametrize("col", achilles._default_achilles_categorical_cols)
     def test_achilles_cat_columns_reset_when_data_is_retrieved(
         self, mock_crc_dm: CrcDataManager, col: str, monkeypatch: pytest.MonkeyPatch
-    ):
+    ) -> None:
         original_df = mock_crc_dm.get_data()
         mock_crc_dm.data = None
         mod_df = remove_random_cat(original_df, col=col)
@@ -231,7 +231,7 @@ class TestCrcDataManager:
     @pytest.mark.parametrize("col", achilles._default_achilles_categorical_cols)
     def test_achilles_cat_columns_reset_when_data_is_assigned(
         self, mock_crc_dm: CrcDataManager, col: str
-    ):
+    ) -> None:
         original_df = mock_crc_dm.get_data()
         mod_df = remove_random_cat(original_df, col=col)
         assert not check_achilles_cat_columns_correct_indexing(mod_df, col)
@@ -244,7 +244,7 @@ class TestCrcDataManager:
     @pytest.mark.parametrize("col", achilles._default_achilles_categorical_cols)
     def test_achilles_cat_columns_reset_when_data_is_set(
         self, mock_crc_dm: CrcDataManager, col: str
-    ):
+    ) -> None:
         original_df = mock_crc_dm.get_data()
         mod_df = remove_random_cat(original_df, col=col)
         assert not check_achilles_cat_columns_correct_indexing(mod_df, col)
@@ -257,7 +257,7 @@ class TestCrcDataManager:
     @pytest.mark.parametrize("col", achilles._default_achilles_categorical_cols)
     def test_achilles_cat_columns_reset_when_apply_transforms(
         self, mock_crc_dm: CrcDataManager, col: str
-    ):
+    ) -> None:
         original_df = mock_crc_dm.get_data()
         mod_df = remove_random_cat(original_df, col=col)
         assert not check_achilles_cat_columns_correct_indexing(mod_df, col)
@@ -269,7 +269,7 @@ class TestCrcDataManager:
     @pytest.mark.parametrize("col", achilles._default_achilles_categorical_cols)
     def test_achilles_cat_columns_reset_when_add_new_transforms(
         self, mock_crc_dm: CrcDataManager, col: str
-    ):
+    ) -> None:
         original_df = mock_crc_dm.get_data()
 
         def my_transformation(df: pd.DataFrame) -> pd.DataFrame:
@@ -283,8 +283,8 @@ class TestCrcDataManager:
     @pytest.mark.DEV
     def test_filter_only_broad(
         self, monkeypatch: pytest.MonkeyPatch, depmap_test_data: Path
-    ):
-        def monkey_get_data_path(*args, **kwargs) -> Path:
+    ) -> None:
+        def monkey_get_data_path(*args: Any, **kwargs: Any) -> Path:
             return depmap_test_data
 
         monkeypatch.setattr(CrcDataManager, "get_data_path", monkey_get_data_path)

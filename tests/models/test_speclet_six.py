@@ -27,14 +27,14 @@ def make_column_tiled(
     return df_mod
 
 
-def make_data_multiple_lineages(dm: CrcDataManager):
+def make_data_multiple_lineages(dm: CrcDataManager) -> None:
     data = dm.get_data()
     lineage_map = achelp.make_cell_line_to_lineage_mapping_df(data)
     new_lineages = ["lineage_A", "lineage_B"]
     dm.data = make_column_tiled(data, lineage_map, "lineage", new_lineages)
 
 
-def make_data_multiple_screens(dm: CrcDataManager):
+def make_data_multiple_screens(dm: CrcDataManager) -> None:
     data = dm.get_data()
     batch_map = achelp.data_batch_indices(data).batch_to_screen_map
     new_screens = ["screen_A", "screen_B"]
@@ -42,11 +42,11 @@ def make_data_multiple_screens(dm: CrcDataManager):
 
 
 class TestSpecletSix:
-    def test_instantiation(self, tmp_path: Path):
+    def test_instantiation(self, tmp_path: Path) -> None:
         sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path, debug=True)
         assert sp6.model is None
 
-    def test_build_model(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
+    def test_build_model(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> None:
         sp6 = SpecletSix(
             "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=mock_crc_dm
         )
@@ -62,8 +62,8 @@ class TestSpecletSix:
         mock_crc_dm: CrcDataManager,
         config: SpecletSixConfiguration,
         monkeypatch: pytest.MonkeyPatch,
-    ):
-        def mock_build_model(*args, **kwargs) -> tuple[str, str]:
+    ) -> None:
+        def mock_build_model(*args: Any, **kwargs: Any) -> tuple[str, str]:
             return "my-test-model", "another-string"
 
         monkeypatch.setattr(SpecletSix, "model_specification", mock_build_model)
@@ -79,7 +79,7 @@ class TestSpecletSix:
 
     def test_model_with_multiple_cell_line_lineages(
         self, tmp_path: Path, mock_crc_dm: CrcDataManager
-    ):
+    ) -> None:
         make_data_multiple_lineages(mock_crc_dm)
         sp6 = SpecletSix(
             "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=mock_crc_dm
@@ -94,7 +94,7 @@ class TestSpecletSix:
         self,
         tmp_path: Path,
         mock_crc_dm_multiscreen: CrcDataManager,
-    ):
+    ) -> None:
         d = mock_crc_dm_multiscreen.get_data().copy()
         d["screen"] = "screen_A"
         d = achelp.set_achilles_categorical_columns(d)
@@ -140,7 +140,7 @@ class TestSpecletSix:
         arg_name: str,
         arg_value: bool,
         expected_vars: Set[str],
-    ):
+    ) -> None:
         config = SpecletSixConfiguration(**{arg_name: arg_value})
         sp6 = SpecletSix(
             "TEST-MODEL",
@@ -157,7 +157,7 @@ class TestSpecletSix:
             assert (v in model_vars) == arg_value
 
     @pytest.mark.slow
-    def test_mcmc_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
+    def test_mcmc_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> None:
         sp6 = SpecletSix(
             "TEST-MODEL",
             root_cache_dir=tmp_path,
@@ -182,7 +182,7 @@ class TestSpecletSix:
     @pytest.mark.slow
     def test_mcmc_sampling_multiple_lineages(
         self, tmp_path: Path, mock_crc_dm: CrcDataManager
-    ):
+    ) -> None:
         make_data_multiple_lineages(mock_crc_dm)
         sp6 = SpecletSix(
             "TEST-MODEL",
@@ -208,7 +208,7 @@ class TestSpecletSix:
     @pytest.mark.slow
     def test_mcmc_sampling_with_optional_covariates(
         self, tmp_path: Path, mock_crc_dm: CrcDataManager
-    ):
+    ) -> None:
         sp6 = SpecletSix(
             "TEST-MODEL",
             root_cache_dir=tmp_path,
@@ -239,7 +239,7 @@ class TestSpecletSix:
         assert sp6.mcmc_results is not None
 
     @pytest.mark.slow
-    def test_advi_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager):
+    def test_advi_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> None:
         sp6 = SpecletSix(
             "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=mock_crc_dm
         )
@@ -266,7 +266,7 @@ class TestSpecletSix:
         tmp_path: Path,
         mock_crc_dm: CrcDataManager,
         config: SpecletSixConfiguration,
-    ):
+    ) -> None:
         sp6 = SpecletSix(
             "test-model",
             root_cache_dir=tmp_path,
