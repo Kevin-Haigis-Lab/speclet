@@ -22,6 +22,8 @@ class DataFile(str, Enum):
     CCLE_COPYNUMBER = "ccle_gene_cn.csv"
     COPY_NUMBER_SAMPLE = "copy_number_data_samples.npy"
     CGC = "sanger_cancer-gene-census.csv"
+    SCREEN_READ_COUNT_TOTALS = "depmap_replicate_total_read_counts.csv"
+    PDNA_READ_COUNT_TOTALS = "depmap_pdna_total_read_counts.csv"
 
 
 #### ---- Basics ---- ####
