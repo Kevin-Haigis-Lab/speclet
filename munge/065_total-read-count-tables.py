@@ -85,14 +85,14 @@ def build_read_count_total_tables(
     pdna_table_out: Path,
 ) -> None:
     _build_depmap_modeling_df_totals_table(depmap_modeling_df_path).to_csv(
-        final_counts_table_out
+        final_counts_table_out, index=False
     )
     pd.concat(
         [
             _build_achilles_pdna_totals_table(achilles_pdna_df_path),
             _build_score_pdna_totals_table(score_pdna_df_path),
         ]
-    ).to_csv(pdna_table_out)
+    ).to_csv(pdna_table_out, index=False)
     return None
 
 
