@@ -88,7 +88,7 @@ repos:
     -   id: nbqa-pyupgrade
         exclude: "munge/019_prepare-data-subsample.ipynb"
     -   id: nbqa-mypy
-        additional_dependencies: [pydantic, mypy, types-python-dateutil]
+        additional_dependencies: [pydantic, mypy, types-python-dateutil, types-PyYAML]
         types: [jupyter]
         exclude: "munge/019_prepare-data-subsample.ipynb"
 -   repo: https://github.com/MarcoGorelli/check-execution-order
