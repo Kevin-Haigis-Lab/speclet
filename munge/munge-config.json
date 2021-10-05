@@ -105,6 +105,12 @@
         "time": "00:13:00",
         "J": "data-check"
     },
+    "screen_total_counts_tables": {
+        "cores": 4,
+        "mem": "62000",
+        "time": "00:20:00",
+        "J": "cts-total"
+    },
     "modeling_data_subsets": {
         "cores": 4,
         "mem": "70000",
