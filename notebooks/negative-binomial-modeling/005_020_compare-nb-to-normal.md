@@ -35,31 +35,22 @@ from src.analysis import pymc3_analysis as pmanal
 from src.data_processing import achilles as achelp
 from src.data_processing import common as dphelp
 from src.data_processing import vectors as vhelp
-from src.globals import PYMC3
+from src.globals import get_pymc3_constants
 from src.io import cache_io, data_io
 from src.loggers import set_console_handler_level
 from src.modeling import pymc3_helpers as pmhelp
 from src.modeling import pymc3_sampling_api as pmapi
 from src.plot.color_pal import SeabornColor
+from src.plot.plotnine_helpers import set_gg_theme
 ```
 
 ```python
 notebook_tic = time()
-
 warnings.simplefilter(action="ignore", category=UserWarning)
 set_console_handler_level(logging.WARN)
-
-gg.theme_set(
-    gg.theme_classic()
-    + gg.theme(
-        figure_size=(4, 4),
-        axis_ticks_major=gg.element_blank(),
-        strip_background=gg.element_blank(),
-        panel_grid_major_y=gg.element_line(),
-    )
-)
+set_gg_theme()
 %config InlineBackend.figure_format = "retina"
-
+PYMC3 = get_pymc3_constants
 RANDOM_SEED = 212
 np.random.seed(RANDOM_SEED)
 ```
@@ -67,11 +58,11 @@ np.random.seed(RANDOM_SEED)
 ## Data
 
 ```python
-crc_subsample_modeling_data_path = data_io.data_path(data_io.DataFile.crc_subsample)
-crc_subsample_modeling_data = achelp.read_achilles_data(
-    crc_subsample_modeling_data_path, low_memory=False, set_categorical_cols=True
+crc_modeling_data_path = data_io.data_path(data_io.DataFile.DEPMAP_CRC_SUBSAMPLE)
+crc_modeling_data = achelp.read_achilles_data(
+    crc_modeling_data_path, low_memory=False, set_categorical_cols=True
 )
-crc_subsample_modeling_data.head()
+crc_modeling_data.head()
 ```
 
 <div>
@@ -242,7 +233,7 @@ crc_subsample_modeling_data.head()
 </div>
 
 ```python
-crc_subsample_modeling_data.columns.to_list()
+crc_modeling_data.columns.to_list()
 ```
 
     ['sgrna',
@@ -272,7 +263,7 @@ crc_subsample_modeling_data.columns.to_list()
 
 ```python
 data = (
-    crc_subsample_modeling_data[~crc_subsample_modeling_data.counts_final.isna()]
+    crc_modeling_data[~crc_modeling_data.counts_final.isna()]
     .reset_index(drop=True)
     .pipe(achelp.set_achilles_categorical_columns)
     .astype({"counts_final": int, "counts_initial": int})
@@ -285,11 +276,13 @@ data = (
         groupby_cols=["depmap_id"],
         cn_max=20,
     )
+    .pipe(achelp.append_total_read_counts)
+    .pipe(achelp.add_useful_read_count_columns)
 )
 data.shape
 ```
 
-    (960, 25)
+    (2384, 29)
 
 ```python
 plot_df = (
@@ -313,7 +306,7 @@ plot_df = (
 
 ![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_10_0.png)
 
-    <ggplot: (351049623)>
+    <ggplot: (349013863)>
 
 ```python
 (
@@ -330,10 +323,10 @@ plot_df = (
 
 ![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_11_0.png)
 
-    <ggplot: (351224098)>
+    <ggplot: (349248925)>
 
 ```python
-ax = sns.scatterplot(data=data, x="counts_initial", y="counts_final")
+ax = sns.scatterplot(data=data, x="counts_initial_adj", y="counts_final")
 ax.set_yscale("log", base=10)
 ax.set_xscale("log", base=10)
 plt.show()
@@ -377,18 +370,6 @@ y &\sim \text{N}(\mu, \sigma)
 \end{aligned}
 $$
 
-**The following two blocks show the data point(s) with 0 initial reads. This issue will be resolved in a new PR, then they can be deleted.**
-
-```python
-data[data.counts_initial == 0][
-    ["depmap_id", "hugo_symbol", "sgrna", "lfc", "counts_final", "counts_initial"]
-]
-```
-
-```python
-data = data[data.counts_initial > 0].reset_index(drop=True)
-```
-
 ```python
 gene_idx, n_genes = dphelp.get_indices_and_count(data, "hugo_symbol")
 print(f"number of genes: {n_genes}")
@@ -397,8 +378,8 @@ cell_line_idx, n_cells = dphelp.get_indices_and_count(data, "depmap_id")
 print(f"number of cell lines: {n_cells}")
 ```
 
-    number of genes: 101
-    number of cell lines: 6
+    number of genes: 114
+    number of cell lines: 10
 
 ### Build models
 
@@ -415,7 +396,7 @@ with pm.Model() as nb_model:
     g = pm.Data("g", gene_idx)
     c = pm.Data("c", cell_line_idx)
     x_cna = pm.Data("x_cna", data.copy_number_z.values)
-    ct_i = pm.Data("initial_count", data.counts_initial.values)
+    ct_i = pm.Data("initial_count", data.counts_initial_adj.values)
     ct_f = pm.Data("final_count", data.counts_final.values)
 
     β_0 = pmhelp.hierarchical_normal(
@@ -432,7 +413,7 @@ with pm.Model() as nb_model:
 pm.model_to_graphviz(nb_model)
 ```
 
-![svg](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_21_0.svg)
+![svg](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_18_0.svg)
 
 #### Normal linear regression model
 
@@ -458,7 +439,7 @@ with pm.Model() as lin_model:
 pm.model_to_graphviz(lin_model)
 ```
 
-![svg](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_23_0.svg)
+![svg](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_20_0.svg)
 
 ### Prior predictive checks
 
@@ -582,31 +563,31 @@ prior_pred_analysis(
 ```
 
     Comparison of range of predicted values
-           min  25%  mean  median  75%    max
-    model    0  283   615   447.0  762  33945
-    real     9  277   611   423.0  755   5230
+           min  25%  mean  median  75%     max
+    model    0  226   501   381.0  649  237913
+    real     0  225   579   417.0  743    9255
 
-    Fold difference in maximum values: 6.49
+    Fold difference in maximum values: 25.71
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_28_1.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_25_1.png)
 
-    {'α': 32.67, 'μ_β_0': 0.2, 'μ_β_cna': -0.06, 'σ_β_0': 0.01, 'σ_β_cna': 0.13}
+    {'α': 116.98, 'μ_β_0': 0.17, 'μ_β_cna': -0.01, 'σ_β_0': 0.08, 'σ_β_cna': 0.06}
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_28_3.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_25_3.png)
 
-    {'α': 58.12, 'μ_β_0': -0.09, 'μ_β_cna': 0.26, 'σ_β_0': 0.07, 'σ_β_cna': 0.01}
+    {'α': 20.2, 'μ_β_0': 0.06, 'μ_β_cna': 0.07, 'σ_β_0': 0.11, 'σ_β_cna': 0.12}
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_28_5.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_25_5.png)
 
-    {'α': 86.1, 'μ_β_0': 0.15, 'μ_β_cna': 0.08, 'σ_β_0': 0.1, 'σ_β_cna': 0.18}
+    {'α': 39.92, 'μ_β_0': 0.04, 'μ_β_cna': 0.04, 'σ_β_0': 0.03, 'σ_β_cna': 0.05}
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_28_7.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_25_7.png)
 
-    {'α': 58.57, 'μ_β_0': -0.02, 'μ_β_cna': 0.03, 'σ_β_0': 0.01, 'σ_β_cna': 0.02}
+    {'α': 19.26, 'μ_β_0': -0.05, 'μ_β_cna': -0.16, 'σ_β_0': 0.14, 'σ_β_cna': 0.11}
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_28_9.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_25_9.png)
 
-    {'α': 117.32, 'μ_β_0': 0.16, 'μ_β_cna': 0.05, 'σ_β_0': 0.05, 'σ_β_cna': 0.24}
+    {'α': 14.81, 'μ_β_0': 0.03, 'μ_β_cna': 0.18, 'σ_β_0': 0.08, 'σ_β_cna': 0.2}
 
 ```python
 prior_pred_analysis(
@@ -619,30 +600,30 @@ prior_pred_analysis(
 
     Comparison of range of predicted values
                  min  25%  mean    median  75%        max
-    model -30.175508   -1     0  0.037721    1  36.470539
-    real   -3.145193    0     0 -0.025503    0   1.905343
+    model -80.960324   -1     0 -0.011173    1  55.902164
+    real   -4.318012    0     0 -0.037561    0   3.011199
 
-    Fold difference in maximum values: 19.14
+    Fold difference in maximum values: 18.56
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_29_1.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_26_1.png)
 
-    {'μ_β_0': 2.04, 'μ_β_cna': -0.29, 'σ': 0.65, 'σ_β_0': 0.09, 'σ_β_cna': 1.27}
+    {'μ_β_0': -0.6, 'μ_β_cna': 0.27, 'σ': 1.71, 'σ_β_0': 0.05, 'σ_β_cna': 1.3}
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_29_3.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_26_3.png)
 
-    {'μ_β_0': -0.85, 'μ_β_cna': 1.29, 'σ': 1.16, 'σ_β_0': 0.67, 'σ_β_cna': 0.1}
+    {'μ_β_0': -0.61, 'μ_β_cna': 0.43, 'σ': 0.77, 'σ_β_0': 0.15, 'σ_β_cna': 0.93}
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_29_5.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_26_5.png)
 
-    {'μ_β_0': 1.47, 'μ_β_cna': 0.41, 'σ': 1.72, 'σ_β_0': 0.99, 'σ_β_cna': 1.85}
+    {'μ_β_0': 1.01, 'μ_β_cna': -0.25, 'σ': 0.93, 'σ_β_0': 0.3, 'σ_β_cna': 1.89}
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_29_7.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_26_7.png)
 
-    {'μ_β_0': -0.23, 'μ_β_cna': 0.15, 'σ': 1.17, 'σ_β_0': 0.09, 'σ_β_cna': 0.21}
+    {'μ_β_0': -1.48, 'μ_β_cna': 0.13, 'σ': 0.17, 'σ_β_0': 1.85, 'σ_β_cna': 1.71}
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_29_9.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_26_9.png)
 
-    {'μ_β_0': 1.58, 'μ_β_cna': 0.27, 'σ': 2.35, 'σ_β_0': 0.48, 'σ_β_cna': 2.36}
+    {'μ_β_0': -0.17, 'μ_β_cna': -1.44, 'σ': 0.3, 'σ_β_0': 1.96, 'σ_β_cna': 1.56}
 
 ### Sampling from the models
 
@@ -669,9 +650,9 @@ I timed the sampling processes a few times and put together the following table 
 tic = time()
 
 with nb_model:
-    nb_trace = pm.sample(**pm_sample_kwargs, start={"α_log__": np.array(5)})
+    nb_trace = pm.sample(**pm_sample_kwargs)  # , start={"α_log__": np.array(5)})
     ppc = pm.sample_posterior_predictive(nb_trace, **pm_sample_ppc_kwargs)
-    ppc["lfc"] = np.log2(ppc["y"] / data["counts_initial"].values)
+    ppc["lfc"] = np.log2((1.0 + ppc["y"]) / data["counts_initial_adj"].values)
     nb_trace.extend(az.from_pymc3(posterior_predictive=ppc))
 
 toc = time()
@@ -681,7 +662,7 @@ print(f"sampling required {(toc - tic) / 60:.2f} minutes")
     Auto-assigning NUTS sampler...
     Initializing NUTS using jitter+adapt_diag...
     Multiprocess sampling (4 chains in 2 jobs)
-    NUTS: [α, Δ_β_0, σ_β_0, μ_β_0]
+    NUTS: [α, Δ_β_cna, σ_β_cna, μ_β_cna, Δ_β_0, σ_β_0, μ_β_0]
 
 <div>
     <style>
@@ -697,10 +678,11 @@ print(f"sampling required {(toc - tic) / 60:.2f} minutes")
         }
     </style>
   <progress value='12000' class='' max='12000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [12000/12000 01:05<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [12000/12000 03:23<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 2_000 tune and 1_000 draw iterations (8_000 + 4_000 draws total) took 83 seconds.
+    Sampling 4 chains for 2_000 tune and 1_000 draw iterations (8_000 + 4_000 draws total) took 222 seconds.
+    The number of effective samples is smaller than 25% for some parameters.
 
 <div>
     <style>
@@ -716,10 +698,10 @@ print(f"sampling required {(toc - tic) / 60:.2f} minutes")
         }
     </style>
   <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 00:47<00:00]
+  100.00% [4000/4000 01:17<00:00]
 </div>
 
-    sampling required 2.38 minutes
+    sampling required 5.32 minutes
 
 ```python
 tic = time()
@@ -734,27 +716,7 @@ print(f"sampling required {(toc - tic) / 60:.2f} minutes")
 ```
 
     Auto-assigning NUTS sampler...
-    Initializing NUTS using advi...
-
-<div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='20794' class='' max='200000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  10.40% [20794/200000 00:04<00:39 Average Loss = 861.71]
-</div>
-
-    Convergence achieved at 21500
-    Interrupted at 21,499 [10%]: Average Loss = 1,247
+    Initializing NUTS using jitter+adapt_diag...
     Multiprocess sampling (4 chains in 2 jobs)
     NUTS: [σ, Δ_β_cna, σ_β_cna, μ_β_cna, Δ_β_0, σ_β_0, μ_β_0]
 
@@ -771,13 +733,12 @@ print(f"sampling required {(toc - tic) / 60:.2f} minutes")
             background: #F44336;
         }
     </style>
-  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:15<00:00 Sampling 4 chains, 1 divergences]
+  <progress value='12000' class='' max='12000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [12000/12000 01:37<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 34 seconds.
-    There was 1 divergence after tuning. Increase `target_accept` or reparameterize.
-    The number of effective samples is smaller than 10% for some parameters.
+    Sampling 4 chains for 2_000 tune and 1_000 draw iterations (8_000 + 4_000 draws total) took 119 seconds.
+    The number of effective samples is smaller than 25% for some parameters.
 
 <div>
     <style>
@@ -793,10 +754,10 @@ print(f"sampling required {(toc - tic) / 60:.2f} minutes")
         }
     </style>
   <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 01:02<00:00]
+  100.00% [4000/4000 01:19<00:00]
 </div>
 
-    sampling required 1.93 minutes
+    sampling required 3.54 minutes
 
 ## Model comparison
 
@@ -848,25 +809,25 @@ model_comparison
     <tr>
       <th>normal</th>
       <td>0</td>
-      <td>-498.413064</td>
-      <td>42.690541</td>
+      <td>-2249.736256</td>
+      <td>103.83120</td>
       <td>0.000000</td>
       <td>1.0</td>
-      <td>22.796215</td>
-      <td>0.000000</td>
+      <td>42.739655</td>
+      <td>0.00000</td>
       <td>False</td>
       <td>log</td>
     </tr>
     <tr>
       <th>negative binomial</th>
       <td>1</td>
-      <td>-3675.823353</td>
-      <td>39.864054</td>
-      <td>3177.410289</td>
+      <td>-16280.009812</td>
+      <td>76.46166</td>
+      <td>14030.273556</td>
       <td>0.0</td>
-      <td>25.443751</td>
-      <td>20.839538</td>
-      <td>False</td>
+      <td>51.161340</td>
+      <td>48.77773</td>
+      <td>True</td>
       <td>log</td>
     </tr>
   </tbody>
@@ -877,7 +838,7 @@ model_comparison
 az.plot_compare(model_comparison);
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_39_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_36_0.png)
 
 Also, the LOO probability integral transformation (PIT) predictive checks ([ArviZ doc](https://arviz-devs.github.io/arviz/api/generated/arviz.plot_loo_pit.html) indicate that the normal model is a better fit.
 My concern is that this test is only for continuous data.
@@ -889,9 +850,9 @@ for name, idata in model_collection.items():
     plt.show()
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_41_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_38_0.png)
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_41_1.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_38_1.png)
 
 ### Posterior distributions
 
@@ -901,14 +862,14 @@ nb_varnames = shared_varnames.copy() + ["α"]
 az.plot_trace(nb_trace, var_names=nb_varnames);
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_43_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_40_0.png)
 
 ```python
 lin_varnames = shared_varnames.copy() + ["σ"]
 az.plot_trace(lin_trace, var_names=lin_varnames);
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_44_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_41_0.png)
 
 ```python
 def get_beta_0_summary(name: str, idata: az.InferenceData) -> pd.DataFrame:
@@ -955,51 +916,51 @@ beta_0_post.head()
     <tr>
       <th>0</th>
       <td>β_0[0]</td>
-      <td>0.081</td>
-      <td>0.121</td>
-      <td>-0.115</td>
-      <td>0.268</td>
+      <td>-0.180</td>
+      <td>0.116</td>
+      <td>-0.373</td>
+      <td>0.002</td>
       <td>ACVR1C</td>
       <td>negative binomial</td>
     </tr>
     <tr>
       <th>1</th>
       <td>β_0[1]</td>
-      <td>-0.088</td>
-      <td>0.095</td>
-      <td>-0.243</td>
-      <td>0.056</td>
-      <td>ADPRHL1</td>
+      <td>0.406</td>
+      <td>0.113</td>
+      <td>0.219</td>
+      <td>0.579</td>
+      <td>ADAMTS2</td>
       <td>negative binomial</td>
     </tr>
     <tr>
       <th>2</th>
       <td>β_0[2]</td>
-      <td>0.093</td>
-      <td>0.120</td>
-      <td>-0.095</td>
-      <td>0.279</td>
-      <td>APC</td>
+      <td>0.171</td>
+      <td>0.106</td>
+      <td>0.014</td>
+      <td>0.353</td>
+      <td>ADPRHL1</td>
       <td>negative binomial</td>
     </tr>
     <tr>
       <th>3</th>
       <td>β_0[3]</td>
-      <td>-0.034</td>
-      <td>0.094</td>
-      <td>-0.191</td>
-      <td>0.107</td>
-      <td>BRAF</td>
+      <td>0.201</td>
+      <td>0.118</td>
+      <td>0.011</td>
+      <td>0.387</td>
+      <td>ALKBH8</td>
       <td>negative binomial</td>
     </tr>
     <tr>
       <th>4</th>
       <td>β_0[4]</td>
-      <td>-0.004</td>
-      <td>0.097</td>
-      <td>-0.165</td>
-      <td>0.144</td>
-      <td>CCR3</td>
+      <td>-0.161</td>
+      <td>0.118</td>
+      <td>-0.364</td>
+      <td>0.015</td>
+      <td>APC</td>
       <td>negative binomial</td>
     </tr>
   </tbody>
@@ -1023,9 +984,9 @@ pos = gg.position_dodge(width=0.5)
 )
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_46_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_43_0.png)
 
-    <ggplot: (351384028)>
+    <ggplot: (353979935)>
 
 ```python
 for name, idata in model_collection.items():
@@ -1037,12 +998,12 @@ for name, idata in model_collection.items():
 
     posterior distributions in negative binomial model
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_47_1.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_44_1.png)
 
     --------------------------------------------------------------------------------
     posterior distributions in normal model
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_47_3.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_44_3.png)
 
     --------------------------------------------------------------------------------
 
@@ -1057,9 +1018,9 @@ for name, idata in model_collection.items():
     plt.show()
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_49_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_46_0.png)
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_49_1.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_46_1.png)
 
 ```python
 nb_lfc_ppc_sample, _ = pmanal.down_sample_ppc(
@@ -1088,15 +1049,15 @@ nb_ppc_lfc_sample_df = pd.DataFrame(nb_lfc_ppc_sample.T).pivot_longer(
 )
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_50_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_47_0.png)
 
-    <ggplot: (364743105)>
+    <ggplot: (354723762)>
 
 ```python
 def prep_ppc(name: str, idata: az.InferenceData, observed_y: str) -> pd.DataFrame:
     df = pmanal.summarize_posterior_predictions(
         idata["posterior_predictive"]["y"].values.squeeze(),
-        merge_with=data[["hugo_symbol", "lfc", "counts_final", "counts_initial"]],
+        merge_with=data[["hugo_symbol", "lfc", "counts_final", "counts_initial_adj"]],
         calc_error=True,
         observed_y=observed_y,
     ).assign(
@@ -1106,9 +1067,9 @@ def prep_ppc(name: str, idata: az.InferenceData, observed_y: str) -> pd.DataFram
     )
 
     if observed_y == "counts_final":
-        df["pred_lfc"] = np.log2(df.pred_mean / df.counts_initial)
-        df["pred_lfc_low"] = np.log2(df.pred_hdi_low / df.counts_initial)
-        df["pred_lfc_high"] = np.log2(df.pred_hdi_high / df.counts_initial)
+        df["pred_lfc"] = np.log2(df.pred_mean / df.counts_initial_adj)
+        df["pred_lfc_low"] = np.log2(df.pred_hdi_low / df.counts_initial_adj)
+        df["pred_lfc_high"] = np.log2(df.pred_hdi_high / df.counts_initial_adj)
     else:
         df["pred_lfc"] = df.pred_mean
         df["pred_lfc_low"] = df.pred_hdi_low
@@ -1127,8 +1088,6 @@ ppc_df = pd.concat(
 )
 ppc_df.head()
 ```
-
-    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/arviz/stats/stats.py:456: FutureWarning: hdi currently interprets 2d data as (draw, shape) but this will change in a future release to (chain, draw) for coherence with other functions
 
 <div>
 <style scoped>
@@ -1154,7 +1113,7 @@ ppc_df.head()
       <th>hugo_symbol</th>
       <th>lfc</th>
       <th>counts_final</th>
-      <th>counts_initial</th>
+      <th>counts_initial_adj</th>
       <th>error</th>
       <th>model</th>
       <th>percent_error</th>
@@ -1168,93 +1127,93 @@ ppc_df.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>290.51025</td>
-      <td>102.0</td>
-      <td>437.0</td>
-      <td>ACVR1C</td>
-      <td>0.296921</td>
-      <td>329.0</td>
-      <td>267.802016</td>
-      <td>38.48975</td>
+      <td>461.45850</td>
+      <td>57.0</td>
+      <td>814.0</td>
+      <td>SAMD8</td>
+      <td>-0.807107</td>
+      <td>220</td>
+      <td>345.041669</td>
+      <td>-241.45850</td>
       <td>negative binomial</td>
-      <td>11.699012</td>
-      <td>329.0</td>
-      <td>0.117422</td>
-      <td>-1.392598</td>
-      <td>0.706466</td>
-      <td>0.179499</td>
+      <td>-109.753864</td>
+      <td>220.0</td>
+      <td>0.419430</td>
+      <td>-2.597737</td>
+      <td>1.238258</td>
+      <td>-1.226538</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>423.19050</td>
-      <td>174.0</td>
-      <td>664.0</td>
-      <td>ACVR1C</td>
-      <td>0.944830</td>
-      <td>741.0</td>
-      <td>384.942637</td>
-      <td>317.80950</td>
+      <td>548.05375</td>
+      <td>62.0</td>
+      <td>963.0</td>
+      <td>NKAPL</td>
+      <td>0.363149</td>
+      <td>589</td>
+      <td>383.379632</td>
+      <td>40.94625</td>
       <td>negative binomial</td>
-      <td>42.889271</td>
-      <td>741.0</td>
-      <td>0.136664</td>
-      <td>-1.145556</td>
-      <td>0.786540</td>
-      <td>0.808166</td>
+      <td>6.951825</td>
+      <td>589.0</td>
+      <td>0.515544</td>
+      <td>-2.628434</td>
+      <td>1.328762</td>
+      <td>-0.152395</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>583.94200</td>
-      <td>236.0</td>
-      <td>903.0</td>
-      <td>ACVR1C</td>
-      <td>-0.646824</td>
-      <td>344.0</td>
-      <td>538.606821</td>
-      <td>-239.94200</td>
+      <td>213.53300</td>
+      <td>23.0</td>
+      <td>374.0</td>
+      <td>SLC27A2</td>
+      <td>-0.118512</td>
+      <td>221</td>
+      <td>191.689816</td>
+      <td>7.46700</td>
       <td>negative binomial</td>
-      <td>-69.750581</td>
-      <td>344.0</td>
-      <td>0.116593</td>
-      <td>-1.190446</td>
-      <td>0.745493</td>
-      <td>-0.763417</td>
+      <td>3.378733</td>
+      <td>221.0</td>
+      <td>0.155685</td>
+      <td>-3.059068</td>
+      <td>0.964265</td>
+      <td>-0.274197</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>317.03350</td>
-      <td>125.0</td>
-      <td>488.0</td>
-      <td>ACVR1C</td>
-      <td>-0.016798</td>
-      <td>286.0</td>
-      <td>289.349513</td>
-      <td>-31.03350</td>
+      <td>226.34275</td>
+      <td>28.0</td>
+      <td>403.0</td>
+      <td>SEC23B</td>
+      <td>-0.643089</td>
+      <td>128</td>
+      <td>191.689816</td>
+      <td>-98.34275</td>
       <td>negative binomial</td>
-      <td>-10.850874</td>
-      <td>286.0</td>
-      <td>0.131822</td>
-      <td>-1.210885</td>
-      <td>0.754068</td>
-      <td>-0.148620</td>
+      <td>-76.830273</td>
+      <td>128.0</td>
+      <td>0.239735</td>
+      <td>-2.775275</td>
+      <td>1.072006</td>
+      <td>-0.882824</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>379.92125</td>
-      <td>146.0</td>
-      <td>573.0</td>
-      <td>ACVR1C</td>
-      <td>-0.074812</td>
-      <td>329.0</td>
-      <td>346.510616</td>
-      <td>-50.92125</td>
+      <td>308.46625</td>
+      <td>39.0</td>
+      <td>559.0</td>
+      <td>BRAF</td>
+      <td>-0.033767</td>
+      <td>355</td>
+      <td>306.703706</td>
+      <td>46.53375</td>
       <td>negative binomial</td>
-      <td>-15.477584</td>
-      <td>329.0</td>
-      <td>0.132801</td>
-      <td>-1.246931</td>
-      <td>0.725636</td>
-      <td>-0.207613</td>
+      <td>13.108099</td>
+      <td>355.0</td>
+      <td>0.008267</td>
+      <td>-2.975300</td>
+      <td>0.866003</td>
+      <td>-0.042034</td>
     </tr>
   </tbody>
 </table>
@@ -1274,9 +1233,9 @@ ppc_df.head()
 )
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_52_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_49_0.png)
 
-    <ggplot: (353648083)>
+    <ggplot: (354248081)>
 
 ```python
 (
@@ -1286,10 +1245,10 @@ ppc_df.head()
         gg.aes(ymin="pred_lfc_low", ymax="pred_lfc_high"),
         alpha=0.1,
         size=0.5,
-        color=SeabornColor.BLUE,
+        color=SeabornColor.BLUE.value,
     )
-    + gg.geom_point(alpha=0.5, color=SeabornColor.BLUE)
-    + gg.geom_abline(slope=1, intercept=0, color=SeabornColor.RED)
+    + gg.geom_point(alpha=0.5, color=SeabornColor.BLUE.value)
+    + gg.geom_abline(slope=1, intercept=0, color=SeabornColor.RED.value)
     + gg.scale_x_continuous(expand=(0.02, 0, 0.02, 0))
     + gg.scale_y_continuous(expand=(0.02, 0, 0.02, 0))
     + gg.theme(figure_size=(8, 4), panel_spacing_x=0.5)
@@ -1299,15 +1258,15 @@ ppc_df.head()
 )
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_53_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_50_0.png)
 
-    <ggplot: (353138815)>
+    <ggplot: (356103437)>
 
 ```python
 (
     gg.ggplot(ppc_df, gg.aes(x="lfc", y="lfc_error"))
     + gg.facet_wrap("~ model", nrow=1)
-    + gg.geom_point(alpha=0.5, color=SeabornColor.BLUE)
+    + gg.geom_point(alpha=0.5, color=SeabornColor.BLUE.value)
     + gg.geom_hline(yintercept=0, linetype="--")
     + gg.geom_vline(xintercept=0, linetype="--")
     + gg.theme(figure_size=(8, 4), panel_spacing_x=0.5)
@@ -1315,9 +1274,9 @@ ppc_df.head()
 )
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_54_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_51_0.png)
 
-    <ggplot: (353847760)>
+    <ggplot: (355967741)>
 
 ```python
 (
@@ -1337,7 +1296,7 @@ ppc_df.head()
         alpha=0.6,
         linetype="--",
         size=0.6,
-        color=SeabornColor.BLUE,
+        color=SeabornColor.BLUE.value,
     )
     + gg.geom_hline(yintercept=0, alpha=0.5, color="grey")
     + gg.geom_vline(xintercept=0, alpha=0.5, color="grey")
@@ -1350,9 +1309,9 @@ ppc_df.head()
 )
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_55_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_52_0.png)
 
-    <ggplot: (353899852)>
+    <ggplot: (356700865)>
 
 ```python
 loo_collection = {n: az.loo(d, pointwise=True) for n, d in model_collection.items()}
@@ -1374,17 +1333,9 @@ for name, loo_res in loo_collection.items():
     print(p)
 ```
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_57_0.png)
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_54_0.png)
 
-![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_57_2.png)
-
-```python
-
-```
-
-```python
-
-```
+![png](005_020_compare-nb-to-normal_files/005_020_compare-nb-to-normal_54_2.png)
 
 ---
 
@@ -1393,14 +1344,16 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 9.98 minutes
+    execution time: 12.83 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-09-20
+    The watermark extension is already loaded. To reload it, use:
+      %reload_ext watermark
+    Last updated: 2021-10-06
 
     Python implementation: CPython
     Python version       : 3.9.6
@@ -1416,15 +1369,19 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Hostname: JHCookMac.local
 
-    Git branch: nb-model
+    Git branch: nb-model-2
 
-    matplotlib: 3.4.3
-    seaborn   : 0.11.2
-    plotnine  : 0.8.0
-    re        : 2.2.1
-    logging   : 0.5.1.2
     pandas    : 1.3.2
-    numpy     : 1.21.2
     theano    : 1.0.5
+    plotnine  : 0.8.0
+    logging   : 0.5.1.2
+    numpy     : 1.21.2
+    seaborn   : 0.11.2
+    matplotlib: 3.4.3
     arviz     : 0.11.2
     pymc3     : 3.11.2
+    re        : 2.2.1
+
+```python
+
+```
