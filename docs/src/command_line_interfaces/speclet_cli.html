@@ -31,11 +31,10 @@
 &#34;&#34;&#34;Commands for general project needs.&#34;&#34;&#34;
 
 import logging
+import os
 import tempfile
 from pathlib import Path
-from typing import Optional, Literal
-import os
-
+from typing import Optional
 
 import pymc3 as pm
 import tqdm
@@ -65,16 +64,25 @@ def _write_docstring(doc: Optional[str], file: Path) -&gt; bool:
 
 def _remove_indents(file: Path) -&gt; None:
     clean_lines: list[str] = []
-    with open(file, &#34;r&#34;) as f:
-        for l in f:
-            clean_lines.append(l.strip())
-    with open(file, &#34;w&#34;) as f:
-        f.write(&#34;\n&#34;.join(clean_lines))
+    with open(file, &#34;r&#34;) as open_file:
+        for line in open_file:
+            clean_lines.append(line.strip())
+    with open(file, &#34;w&#34;) as open_file:
+        open_file.write(&#34;\n&#34;.join(clean_lines))
     return None
 
 
 @app.command()
 def model_docs(output_md: Optional[Path] = None, overwrite: bool = True) -&gt; None:
+    &#34;&#34;&#34;Make a document with all SpecletModel descriptions.
+
+    Args:
+        output_md (Optional[Path], optional): Output file path. Defaults to None.
+        overwrite (bool, optional): Overwrite the existing file? Defaults to True.
+
+    Returns:
+        None: None
+    &#34;&#34;&#34;
     if output_md is None:
         output_md = Path(&#34;models&#34;, &#34;model-docs.md&#34;)
 
@@ -265,13 +273,34 @@ def lines_of_code() -&gt; None:
 <span>def <span class="ident">model_docs</span></span>(<span>output_md: Optional[pathlib.Path] = None, overwrite: bool = True) -> NoneType</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Make a document with all SpecletModel descriptions.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>output_md</code></strong> :&ensp;<code>Optional[Path]</code>, optional</dt>
+<dd>Output file path. Defaults to None.</dd>
+<dt><strong><code>overwrite</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Overwrite the existing file? Defaults to True.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>None</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@app.command()
 def model_docs(output_md: Optional[Path] = None, overwrite: bool = True) -&gt; None:
+    &#34;&#34;&#34;Make a document with all SpecletModel descriptions.
+
+    Args:
+        output_md (Optional[Path], optional): Output file path. Defaults to None.
+        overwrite (bool, optional): Overwrite the existing file? Defaults to True.
+
+    Returns:
+        None: None
+    &#34;&#34;&#34;
     if output_md is None:
         output_md = Path(&#34;models&#34;, &#34;model-docs.md&#34;)
 

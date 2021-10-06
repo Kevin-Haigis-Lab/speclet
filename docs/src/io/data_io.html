@@ -50,6 +50,8 @@ class DataFile(str, Enum):
     CCLE_COPYNUMBER = &#34;ccle_gene_cn.csv&#34;
     COPY_NUMBER_SAMPLE = &#34;copy_number_data_samples.npy&#34;
     CGC = &#34;sanger_cancer-gene-census.csv&#34;
+    SCREEN_READ_COUNT_TOTALS = &#34;depmap_replicate_total_read_counts.csv&#34;
+    PDNA_READ_COUNT_TOTALS = &#34;depmap_pdna_total_read_counts.csv&#34;
 
 
 #### ---- Basics ---- ####
@@ -203,7 +205,9 @@ def data_path(to: Union[str, DataFile]) -&gt; Path:
     CCLE_MUTATIONS = &#34;ccle_mutations.csv&#34;
     CCLE_COPYNUMBER = &#34;ccle_gene_cn.csv&#34;
     COPY_NUMBER_SAMPLE = &#34;copy_number_data_samples.npy&#34;
-    CGC = &#34;sanger_cancer-gene-census.csv&#34;</code></pre>
+    CGC = &#34;sanger_cancer-gene-census.csv&#34;
+    SCREEN_READ_COUNT_TOTALS = &#34;depmap_replicate_total_read_counts.csv&#34;
+    PDNA_READ_COUNT_TOTALS = &#34;depmap_pdna_total_read_counts.csv&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -248,6 +252,14 @@ def data_path(to: Union[str, DataFile]) -&gt; Path:
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="src.io.data_io.DataFile.PDNA_READ_COUNT_TOTALS"><code class="name">var <span class="ident">PDNA_READ_COUNT_TOTALS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="src.io.data_io.DataFile.SCREEN_READ_COUNT_TOTALS"><code class="name">var <span class="ident">SCREEN_READ_COUNT_TOTALS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -285,6 +297,8 @@ def data_path(to: Union[str, DataFile]) -&gt; Path:
 <li><code><a title="src.io.data_io.DataFile.DEPMAP_CRC_SUBSAMPLE" href="#src.io.data_io.DataFile.DEPMAP_CRC_SUBSAMPLE">DEPMAP_CRC_SUBSAMPLE</a></code></li>
 <li><code><a title="src.io.data_io.DataFile.DEPMAP_DATA" href="#src.io.data_io.DataFile.DEPMAP_DATA">DEPMAP_DATA</a></code></li>
 <li><code><a title="src.io.data_io.DataFile.DEPMAP_ESSENTIALS" href="#src.io.data_io.DataFile.DEPMAP_ESSENTIALS">DEPMAP_ESSENTIALS</a></code></li>
+<li><code><a title="src.io.data_io.DataFile.PDNA_READ_COUNT_TOTALS" href="#src.io.data_io.DataFile.PDNA_READ_COUNT_TOTALS">PDNA_READ_COUNT_TOTALS</a></code></li>
+<li><code><a title="src.io.data_io.DataFile.SCREEN_READ_COUNT_TOTALS" href="#src.io.data_io.DataFile.SCREEN_READ_COUNT_TOTALS">SCREEN_READ_COUNT_TOTALS</a></code></li>
 </ul>
 </li>
 </ul>

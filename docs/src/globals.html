@@ -28,10 +28,26 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Global constants.&#34;&#34;&#34;
 
-from collections import namedtuple
+from dataclasses import dataclass
 
-_pymc3 = namedtuple(&#34;_pymc3&#34;, &#34;HDI_PROB&#34;)
-PYMC3 = _pymc3(0.89)</code></pre>
+from src.project_config import read_project_configuration
+
+
+@dataclass(frozen=True)
+class Pymc3Constants:
+    &#34;&#34;&#34;PyMC3 global constants.&#34;&#34;&#34;
+
+    hdi_prob: float
+
+
+def get_pymc3_constants() -&gt; Pymc3Constants:
+    &#34;&#34;&#34;Get the PyMC3 global constant data.
+
+    Returns:
+        Pymc3Constants: PyMC3 global constants.
+    &#34;&#34;&#34;
+    project_config = read_project_configuration()
+    return Pymc3Constants(hdi_prob=project_config.modeling.highest_density_interval)</code></pre>
 </details>
 </section>
 <section>
@@ -39,8 +55,55 @@ PYMC3 = _pymc3(0.89)</code></pre>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="src.globals.get_pymc3_constants"><code class="name flex">
+<span>def <span class="ident">get_pymc3_constants</span></span>(<span>) -> <a title="src.globals.Pymc3Constants" href="#src.globals.Pymc3Constants">Pymc3Constants</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the PyMC3 global constant data.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="src.globals.Pymc3Constants" href="#src.globals.Pymc3Constants">Pymc3Constants</a></code></dt>
+<dd>PyMC3 global constants.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_pymc3_constants() -&gt; Pymc3Constants:
+    &#34;&#34;&#34;Get the PyMC3 global constant data.
+
+    Returns:
+        Pymc3Constants: PyMC3 global constants.
+    &#34;&#34;&#34;
+    project_config = read_project_configuration()
+    return Pymc3Constants(hdi_prob=project_config.modeling.highest_density_interval)</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="src.globals.Pymc3Constants"><code class="flex name class">
+<span>class <span class="ident">Pymc3Constants</span></span>
+<span>(</span><span>hdi_prob: float)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>PyMC3 global constants.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(frozen=True)
+class Pymc3Constants:
+    &#34;&#34;&#34;PyMC3 global constants.&#34;&#34;&#34;
+
+    hdi_prob: float</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -52,6 +115,18 @@ PYMC3 = _pymc3(0.89)</code></pre>
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="src" href="index.html">src</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="src.globals.get_pymc3_constants" href="#src.globals.get_pymc3_constants">get_pymc3_constants</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="src.globals.Pymc3Constants" href="#src.globals.Pymc3Constants">Pymc3Constants</a></code></h4>
+</li>
 </ul>
 </li>
 </ul>

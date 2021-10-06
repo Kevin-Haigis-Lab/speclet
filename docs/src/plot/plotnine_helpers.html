@@ -31,13 +31,15 @@
 from enum import Enum
 from typing import Union
 
+import plotnine as gg
+
 
 class PlotnineUnits(str, Enum):
     &#34;&#34;&#34;Units used in Plotnine.&#34;&#34;&#34;
 
-    pt = &#34;pt&#34;
-    lines = &#34;lines&#34;
-    inches = &#34;in&#34;
+    PT = &#34;pt&#34;
+    LINES = &#34;lines&#34;
+    INCHES = &#34;in&#34;
 
 
 def margin(
@@ -45,7 +47,7 @@ def margin(
     b: float = 0,
     l: float = 0,  # noqa: E741
     r: float = 0,
-    units: PlotnineUnits = PlotnineUnits.pt,
+    units: Union[str, PlotnineUnits] = PlotnineUnits.PT,
 ) -&gt; dict[str, Union[float, str]]:
     &#34;&#34;&#34;Return a dictionary of margin data.
 
@@ -54,14 +56,31 @@ def margin(
         b (float, optional): Bottom margin. Defaults to 0.
         l (float, optional): Left margin. Defaults to 0.
         r (float, optional): Right margin. Defaults to 0.
-        units (str, optional): Units for the margin. Defaults to &#34;pt&#34;.
+        units (Union[str, PlotnineUnits], optional): Units for the margin. Defaults to
+          &#34;PT&#34;.
 
     Returns:
         Dict[str, Any]: A dictionary for use as margin data in plotnine plots.
     &#34;&#34;&#34;
     if isinstance(units, str):
         units = PlotnineUnits(units)
-    return {&#34;t&#34;: t, &#34;b&#34;: b, &#34;l&#34;: l, &#34;r&#34;: r, &#34;units&#34;: units}</code></pre>
+    return {&#34;t&#34;: t, &#34;b&#34;: b, &#34;l&#34;: l, &#34;r&#34;: r, &#34;units&#34;: units.value}
+
+
+def set_gg_theme(figure_size: tuple[float, float] = (4, 4)) -&gt; None:
+    &#34;&#34;&#34;Set the default plotnine theme.
+
+    Args:
+        figure_size (tuple[float, float], optional): Figure size. Defaults to (4, 4).
+    &#34;&#34;&#34;
+    gg.theme_set(
+        gg.theme_classic()
+        + gg.theme(
+            figure_size=figure_size,
+            axis_ticks_major=gg.element_blank(),
+            strip_background=gg.element_blank(),
+        )
+    )</code></pre>
 </details>
 </section>
 <section>
@@ -72,7 +91,7 @@ def margin(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.plot.plotnine_helpers.margin"><code class="name flex">
-<span>def <span class="ident">margin</span></span>(<span>t: float = 0, b: float = 0, l: float = 0, r: float = 0, units: <a title="src.plot.plotnine_helpers.PlotnineUnits" href="#src.plot.plotnine_helpers.PlotnineUnits">PlotnineUnits</a> = PlotnineUnits.pt) -> dict</span>
+<span>def <span class="ident">margin</span></span>(<span>t: float = 0, b: float = 0, l: float = 0, r: float = 0, units: Union[str, src.plot.plotnine_helpers.PlotnineUnits] = PlotnineUnits.PT) -> dict</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return a dictionary of margin data.</p>
@@ -86,8 +105,9 @@ def margin(
 <dd>Left margin. Defaults to 0.</dd>
 <dt><strong><code>r</code></strong> :&ensp;<code>float</code>, optional</dt>
 <dd>Right margin. Defaults to 0.</dd>
-<dt><strong><code>units</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>Units for the margin. Defaults to "pt".</dd>
+<dt><strong><code>units</code></strong> :&ensp;<code>Union[str, <a title="src.plot.plotnine_helpers.PlotnineUnits" href="#src.plot.plotnine_helpers.PlotnineUnits">PlotnineUnits</a>]</code>, optional</dt>
+<dd>Units for the margin. Defaults to
+"PT".</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -103,7 +123,7 @@ def margin(
     b: float = 0,
     l: float = 0,  # noqa: E741
     r: float = 0,
-    units: PlotnineUnits = PlotnineUnits.pt,
+    units: Union[str, PlotnineUnits] = PlotnineUnits.PT,
 ) -&gt; dict[str, Union[float, str]]:
     &#34;&#34;&#34;Return a dictionary of margin data.
 
@@ -112,14 +132,45 @@ def margin(
         b (float, optional): Bottom margin. Defaults to 0.
         l (float, optional): Left margin. Defaults to 0.
         r (float, optional): Right margin. Defaults to 0.
-        units (str, optional): Units for the margin. Defaults to &#34;pt&#34;.
+        units (Union[str, PlotnineUnits], optional): Units for the margin. Defaults to
+          &#34;PT&#34;.
 
     Returns:
         Dict[str, Any]: A dictionary for use as margin data in plotnine plots.
     &#34;&#34;&#34;
     if isinstance(units, str):
         units = PlotnineUnits(units)
-    return {&#34;t&#34;: t, &#34;b&#34;: b, &#34;l&#34;: l, &#34;r&#34;: r, &#34;units&#34;: units}</code></pre>
+    return {&#34;t&#34;: t, &#34;b&#34;: b, &#34;l&#34;: l, &#34;r&#34;: r, &#34;units&#34;: units.value}</code></pre>
+</details>
+</dd>
+<dt id="src.plot.plotnine_helpers.set_gg_theme"><code class="name flex">
+<span>def <span class="ident">set_gg_theme</span></span>(<span>figure_size: tuple = (4, 4)) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the default plotnine theme.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>figure_size</code></strong> :&ensp;<code>tuple[float, float]</code>, optional</dt>
+<dd>Figure size. Defaults to (4, 4).</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_gg_theme(figure_size: tuple[float, float] = (4, 4)) -&gt; None:
+    &#34;&#34;&#34;Set the default plotnine theme.
+
+    Args:
+        figure_size (tuple[float, float], optional): Figure size. Defaults to (4, 4).
+    &#34;&#34;&#34;
+    gg.theme_set(
+        gg.theme_classic()
+        + gg.theme(
+            figure_size=figure_size,
+            axis_ticks_major=gg.element_blank(),
+            strip_background=gg.element_blank(),
+        )
+    )</code></pre>
 </details>
 </dd>
 </dl>
@@ -140,9 +191,9 @@ def margin(
 <pre><code class="python">class PlotnineUnits(str, Enum):
     &#34;&#34;&#34;Units used in Plotnine.&#34;&#34;&#34;
 
-    pt = &#34;pt&#34;
-    lines = &#34;lines&#34;
-    inches = &#34;in&#34;</code></pre>
+    PT = &#34;pt&#34;
+    LINES = &#34;lines&#34;
+    INCHES = &#34;in&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -151,15 +202,15 @@ def margin(
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="src.plot.plotnine_helpers.PlotnineUnits.inches"><code class="name">var <span class="ident">inches</span></code></dt>
+<dt id="src.plot.plotnine_helpers.PlotnineUnits.INCHES"><code class="name">var <span class="ident">INCHES</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.plot.plotnine_helpers.PlotnineUnits.lines"><code class="name">var <span class="ident">lines</span></code></dt>
+<dt id="src.plot.plotnine_helpers.PlotnineUnits.LINES"><code class="name">var <span class="ident">LINES</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="src.plot.plotnine_helpers.PlotnineUnits.pt"><code class="name">var <span class="ident">pt</span></code></dt>
+<dt id="src.plot.plotnine_helpers.PlotnineUnits.PT"><code class="name">var <span class="ident">PT</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -182,6 +233,7 @@ def margin(
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="src.plot.plotnine_helpers.margin" href="#src.plot.plotnine_helpers.margin">margin</a></code></li>
+<li><code><a title="src.plot.plotnine_helpers.set_gg_theme" href="#src.plot.plotnine_helpers.set_gg_theme">set_gg_theme</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
@@ -189,9 +241,9 @@ def margin(
 <li>
 <h4><code><a title="src.plot.plotnine_helpers.PlotnineUnits" href="#src.plot.plotnine_helpers.PlotnineUnits">PlotnineUnits</a></code></h4>
 <ul class="">
-<li><code><a title="src.plot.plotnine_helpers.PlotnineUnits.inches" href="#src.plot.plotnine_helpers.PlotnineUnits.inches">inches</a></code></li>
-<li><code><a title="src.plot.plotnine_helpers.PlotnineUnits.lines" href="#src.plot.plotnine_helpers.PlotnineUnits.lines">lines</a></code></li>
-<li><code><a title="src.plot.plotnine_helpers.PlotnineUnits.pt" href="#src.plot.plotnine_helpers.PlotnineUnits.pt">pt</a></code></li>
+<li><code><a title="src.plot.plotnine_helpers.PlotnineUnits.INCHES" href="#src.plot.plotnine_helpers.PlotnineUnits.INCHES">INCHES</a></code></li>
+<li><code><a title="src.plot.plotnine_helpers.PlotnineUnits.LINES" href="#src.plot.plotnine_helpers.PlotnineUnits.LINES">LINES</a></code></li>
+<li><code><a title="src.plot.plotnine_helpers.PlotnineUnits.PT" href="#src.plot.plotnine_helpers.PlotnineUnits.PT">PT</a></code></li>
 </ul>
 </li>
 </ul>

@@ -37,6 +37,7 @@ from pydantic import BaseModel
 
 from src.data_processing import common as dphelp
 from src.data_processing.vectors import careful_zscore, squish_array
+from src.io.data_io import data_path, DataFile
 
 #### ---- Data manipulation ---- ####
 
@@ -487,7 +488,98 @@ def subsample_achilles_data(
     sub_df: pd.DataFrame = df.copy()
     sub_df = sub_df[sub_df.hugo_symbol.isin(genes)]
     sub_df = sub_df[sub_df.depmap_id.isin(cell_lines)]
-    return sub_df</code></pre>
+    return sub_df
+
+
+def append_total_read_counts(
+    achilles_df: pd.DataFrame,
+    final_reads_total: Optional[Path] = None,
+    p_dna_reads_total: Optional[Path] = None,
+    final_reads_total_colname: str = &#34;counts_final_total&#34;,
+    initial_reads_total_colname: str = &#34;counts_initial_total&#34;,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Append columns with total read count data.
+
+    Args:
+        achilles_df (pd.DataFrame): Achilles data frame.
+        final_reads_total (Optional[Path], optional): Path to the final read totals
+          table (as a CSV). Defaults to None.
+        p_dna_reads_total (Optional[Path], optional): Path to the initial read totals
+          table (as a CSV). Defaults to None.
+        final_reads_total_colname (str, optional): Name for the column with the total
+          number of final read counts. Defaults to &#34;counts_final_total&#34;.
+        initial_reads_total_colname (str, optional): Name for the column with the total
+          number of initial read counts. Defaults to &#34;counts_initial_total&#34;.
+
+    Returns:
+        pd.DataFrame: The initial data frame with two new columns.
+    &#34;&#34;&#34;
+    if final_reads_total is None:
+        final_reads_total = data_path(DataFile.SCREEN_READ_COUNT_TOTALS)
+    if p_dna_reads_total is None:
+        p_dna_reads_total = data_path(DataFile.PDNA_READ_COUNT_TOTALS)
+
+    final_reads_total_df = pd.read_csv(final_reads_total)
+    p_dna_reads_total_df = pd.read_csv(p_dna_reads_total)
+
+    return (
+        achilles_df.merge(final_reads_total_df, on=&#34;replicate_id&#34;)
+        .rename(columns={&#34;total_reads&#34;: final_reads_total_colname})
+        .merge(p_dna_reads_total_df, on=&#34;p_dna_batch&#34;)
+        .rename(columns={&#34;total_reads&#34;: initial_reads_total_colname})
+    )
+
+
+def add_useful_read_count_columns(
+    achilles_df: pd.DataFrame,
+    counts_final: str = &#34;counts_final&#34;,
+    counts_final_total: str = &#34;counts_final_total&#34;,
+    counts_initial: str = &#34;counts_initial&#34;,
+    counts_initial_total: str = &#34;counts_initial_total&#34;,
+    counts_final_rpm: str = &#34;counts_final_rpm&#34;,
+    counts_initial_adj: str = &#34;counts_initial_adj&#34;,
+    copy: bool = False,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Add some useful columns for modeling read count data.
+
+    - final counts RPM =
+      \\(1^6 \\times (c_\\text{final} / \\Sigma c_\\text{final}) + 1\\)
+    - adjusted initial counts = \\((c_\\text{initial} / \\Sigma c_\\text{initial})
+      \\times \\Sigma c_\\text{final}\\)
+
+    Args:
+        achilles_df (pd.DataFrame): Achilles data frame
+        counts_final (str, optional): Column of final read counts. Defaults to
+          &#34;counts_final&#34;.
+        counts_final_total (str, optional): Column of total final read counts. Defaults
+          to &#34;counts_final_total&#34;.
+        counts_initial (str, optional): Column of initial read counts. Defaults to
+          &#34;counts_initial&#34;.
+        counts_initial_total (str, optional): Column of total initial read counts.
+          Defaults to &#34;counts_initial_total&#34;.
+        counts_final_rpm (str, optional): Column name for the new column with the final
+          read counts in &#34;reads per million&#34; (RPM). Defaults to &#34;counts_final_rpm&#34;.
+        counts_initial_adj (str, optional): Column name for the new column with the
+          adjusted initial read counts. Defaults to &#34;counts_initial_adj&#34;.
+        copy (bool, optional): First copy the data frame? Defaults to False.
+
+    Returns:
+        pd.DataFrame: The original data frame with the new columns append.
+    &#34;&#34;&#34;
+
+    if copy:
+        achilles_df = achilles_df.copy()
+
+    # 1e6 * (counts_f / Σ counts_f) + 1
+    achilles_df[counts_final_rpm] = (
+        1e6 * (achilles_df[counts_final] / achilles_df[counts_final_total]) + 1
+    )
+    # (counts_i / Σ counts_i) * Σ counts_f
+    achilles_df[counts_initial_adj] = (
+        achilles_df[counts_initial] / achilles_df[counts_initial_total]
+    ) * achilles_df[counts_final_total]
+
+    return achilles_df</code></pre>
 </details>
 </section>
 <section>
@@ -497,6 +589,174 @@ def subsample_achilles_data(
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="src.data_processing.achilles.add_useful_read_count_columns"><code class="name flex">
+<span>def <span class="ident">add_useful_read_count_columns</span></span>(<span>achilles_df: pandas.core.frame.DataFrame, counts_final: str = 'counts_final', counts_final_total: str = 'counts_final_total', counts_initial: str = 'counts_initial', counts_initial_total: str = 'counts_initial_total', counts_final_rpm: str = 'counts_final_rpm', counts_initial_adj: str = 'counts_initial_adj', copy: bool = False) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add some useful columns for modeling read count data.</p>
+<ul>
+<li>final counts RPM =
+<span><span class="MathJax_Preview">1^6 \times (c_\text{final} / \Sigma c_\text{final}) + 1</span><script type="math/tex">1^6 \times (c_\text{final} / \Sigma c_\text{final}) + 1</script></span></li>
+<li>adjusted initial counts = <span><span class="MathJax_Preview">(c_\text{initial} / \Sigma c_\text{initial})
+\times \Sigma c_\text{final}</span><script type="math/tex">(c_\text{initial} / \Sigma c_\text{initial})
+\times \Sigma c_\text{final}</script></span></li>
+</ul>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>achilles_df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>Achilles data frame</dd>
+<dt><strong><code>counts_final</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Column of final read counts. Defaults to
+"counts_final".</dd>
+<dt><strong><code>counts_final_total</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Column of total final read counts. Defaults
+to "counts_final_total".</dd>
+<dt><strong><code>counts_initial</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Column of initial read counts. Defaults to
+"counts_initial".</dd>
+<dt><strong><code>counts_initial_total</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Column of total initial read counts.
+Defaults to "counts_initial_total".</dd>
+<dt><strong><code>counts_final_rpm</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Column name for the new column with the final
+read counts in "reads per million" (RPM). Defaults to "counts_final_rpm".</dd>
+<dt><strong><code>counts_initial_adj</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Column name for the new column with the
+adjusted initial read counts. Defaults to "counts_initial_adj".</dd>
+<dt><strong><code>copy</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>First copy the data frame? Defaults to False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>The original data frame with the new columns append.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_useful_read_count_columns(
+    achilles_df: pd.DataFrame,
+    counts_final: str = &#34;counts_final&#34;,
+    counts_final_total: str = &#34;counts_final_total&#34;,
+    counts_initial: str = &#34;counts_initial&#34;,
+    counts_initial_total: str = &#34;counts_initial_total&#34;,
+    counts_final_rpm: str = &#34;counts_final_rpm&#34;,
+    counts_initial_adj: str = &#34;counts_initial_adj&#34;,
+    copy: bool = False,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Add some useful columns for modeling read count data.
+
+    - final counts RPM =
+      \\(1^6 \\times (c_\\text{final} / \\Sigma c_\\text{final}) + 1\\)
+    - adjusted initial counts = \\((c_\\text{initial} / \\Sigma c_\\text{initial})
+      \\times \\Sigma c_\\text{final}\\)
+
+    Args:
+        achilles_df (pd.DataFrame): Achilles data frame
+        counts_final (str, optional): Column of final read counts. Defaults to
+          &#34;counts_final&#34;.
+        counts_final_total (str, optional): Column of total final read counts. Defaults
+          to &#34;counts_final_total&#34;.
+        counts_initial (str, optional): Column of initial read counts. Defaults to
+          &#34;counts_initial&#34;.
+        counts_initial_total (str, optional): Column of total initial read counts.
+          Defaults to &#34;counts_initial_total&#34;.
+        counts_final_rpm (str, optional): Column name for the new column with the final
+          read counts in &#34;reads per million&#34; (RPM). Defaults to &#34;counts_final_rpm&#34;.
+        counts_initial_adj (str, optional): Column name for the new column with the
+          adjusted initial read counts. Defaults to &#34;counts_initial_adj&#34;.
+        copy (bool, optional): First copy the data frame? Defaults to False.
+
+    Returns:
+        pd.DataFrame: The original data frame with the new columns append.
+    &#34;&#34;&#34;
+
+    if copy:
+        achilles_df = achilles_df.copy()
+
+    # 1e6 * (counts_f / Σ counts_f) + 1
+    achilles_df[counts_final_rpm] = (
+        1e6 * (achilles_df[counts_final] / achilles_df[counts_final_total]) + 1
+    )
+    # (counts_i / Σ counts_i) * Σ counts_f
+    achilles_df[counts_initial_adj] = (
+        achilles_df[counts_initial] / achilles_df[counts_initial_total]
+    ) * achilles_df[counts_final_total]
+
+    return achilles_df</code></pre>
+</details>
+</dd>
+<dt id="src.data_processing.achilles.append_total_read_counts"><code class="name flex">
+<span>def <span class="ident">append_total_read_counts</span></span>(<span>achilles_df: pandas.core.frame.DataFrame, final_reads_total: Optional[pathlib.Path] = None, p_dna_reads_total: Optional[pathlib.Path] = None, final_reads_total_colname: str = 'counts_final_total', initial_reads_total_colname: str = 'counts_initial_total') -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Append columns with total read count data.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>achilles_df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>Achilles data frame.</dd>
+<dt><strong><code>final_reads_total</code></strong> :&ensp;<code>Optional[Path]</code>, optional</dt>
+<dd>Path to the final read totals
+table (as a CSV). Defaults to None.</dd>
+<dt><strong><code>p_dna_reads_total</code></strong> :&ensp;<code>Optional[Path]</code>, optional</dt>
+<dd>Path to the initial read totals
+table (as a CSV). Defaults to None.</dd>
+<dt><strong><code>final_reads_total_colname</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Name for the column with the total
+number of final read counts. Defaults to "counts_final_total".</dd>
+<dt><strong><code>initial_reads_total_colname</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Name for the column with the total
+number of initial read counts. Defaults to "counts_initial_total".</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>The initial data frame with two new columns.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def append_total_read_counts(
+    achilles_df: pd.DataFrame,
+    final_reads_total: Optional[Path] = None,
+    p_dna_reads_total: Optional[Path] = None,
+    final_reads_total_colname: str = &#34;counts_final_total&#34;,
+    initial_reads_total_colname: str = &#34;counts_initial_total&#34;,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Append columns with total read count data.
+
+    Args:
+        achilles_df (pd.DataFrame): Achilles data frame.
+        final_reads_total (Optional[Path], optional): Path to the final read totals
+          table (as a CSV). Defaults to None.
+        p_dna_reads_total (Optional[Path], optional): Path to the initial read totals
+          table (as a CSV). Defaults to None.
+        final_reads_total_colname (str, optional): Name for the column with the total
+          number of final read counts. Defaults to &#34;counts_final_total&#34;.
+        initial_reads_total_colname (str, optional): Name for the column with the total
+          number of initial read counts. Defaults to &#34;counts_initial_total&#34;.
+
+    Returns:
+        pd.DataFrame: The initial data frame with two new columns.
+    &#34;&#34;&#34;
+    if final_reads_total is None:
+        final_reads_total = data_path(DataFile.SCREEN_READ_COUNT_TOTALS)
+    if p_dna_reads_total is None:
+        p_dna_reads_total = data_path(DataFile.PDNA_READ_COUNT_TOTALS)
+
+    final_reads_total_df = pd.read_csv(final_reads_total)
+    p_dna_reads_total_df = pd.read_csv(p_dna_reads_total)
+
+    return (
+        achilles_df.merge(final_reads_total_df, on=&#34;replicate_id&#34;)
+        .rename(columns={&#34;total_reads&#34;: final_reads_total_colname})
+        .merge(p_dna_reads_total_df, on=&#34;p_dna_batch&#34;)
+        .rename(columns={&#34;total_reads&#34;: initial_reads_total_colname})
+    )</code></pre>
+</details>
+</dd>
 <dt id="src.data_processing.achilles.common_indices"><code class="name flex">
 <span>def <span class="ident">common_indices</span></span>(<span>achilles_df: pandas.core.frame.DataFrame) -> <a title="src.data_processing.achilles.CommonIndices" href="#src.data_processing.achilles.CommonIndices">CommonIndices</a></span>
 </code></dt>
@@ -1274,6 +1534,8 @@ expression values.</dd>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="src.data_processing.achilles.add_useful_read_count_columns" href="#src.data_processing.achilles.add_useful_read_count_columns">add_useful_read_count_columns</a></code></li>
+<li><code><a title="src.data_processing.achilles.append_total_read_counts" href="#src.data_processing.achilles.append_total_read_counts">append_total_read_counts</a></code></li>
 <li><code><a title="src.data_processing.achilles.common_indices" href="#src.data_processing.achilles.common_indices">common_indices</a></code></li>
 <li><code><a title="src.data_processing.achilles.data_batch_indices" href="#src.data_processing.achilles.data_batch_indices">data_batch_indices</a></code></li>
 <li><code><a title="src.data_processing.achilles.make_cell_line_to_lineage_mapping_df" href="#src.data_processing.achilles.make_cell_line_to_lineage_mapping_df">make_cell_line_to_lineage_mapping_df</a></code></li>
