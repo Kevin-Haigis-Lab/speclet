@@ -157,6 +157,8 @@ class CrisprScreenDataManager:
 
         The new transformation is added to the end of the current list.
 
+        TODO (@jhrcook): Allow adding a list of funtions.
+
         Args:
             fxn (DataFrameTransformation): Data transforming function.
 
@@ -277,6 +279,3 @@ class CrisprScreenDataManager:
             assert_never(size)
         assert self._data is not None
         return self._data
-
-
-# TODO: generate mock data
