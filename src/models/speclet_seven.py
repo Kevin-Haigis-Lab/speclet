@@ -14,10 +14,16 @@ from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 from src.data_processing import achilles as achelp
 from src.data_processing import common as dphelp
 from src.exceptions import ShapeError
+from src.io.data_io import DataFile
 from src.loggers import logger
-from src.managers.model_data_managers import CrcDataManager, DataManager
+from src.managers.data_managers import CrisprScreenDataManager
 from src.modeling import feature_engineering as feng
-from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
+from src.models.speclet_model import (
+    ObservedVarName,
+    ReplacementsDict,
+    SpecletModel,
+    SpecletModelDataManager,
+)
 from src.project_enums import ModelParameterization as MP
 from src.project_enums import assert_never
 
@@ -153,7 +159,7 @@ class SpecletSeven(SpecletModel):
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
-        data_manager: Optional[DataManager] = None,
+        data_manager: Optional[SpecletModelDataManager] = None,
         config: Optional[SpecletSevenConfiguration] = None,
     ) -> None:
         """Instantiate a SpecletSeven model.
@@ -164,23 +170,25 @@ class SpecletSeven(SpecletModel):
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
             debug (bool, optional): Are you in debug mode? Defaults to False.
-            data_manager (Optional[DataManager], optional): Object that will manage the
-              data. If None (default), a `CrcDataManager` is created automatically.
+            data_manager (Optional[SpecletModelDataManager], optional): Object that will
+              manage the data. If None (default), a `CrisprScreenDataManager` is
+              created automatically.
             config (SpecletSevenConfiguration, optional): Model configuration.
         """
         logger.debug("Instantiating a SpecletSeven model.")
         if data_manager is None:
             logger.debug("Creating a data manager since none was supplied.")
-            data_manager = CrcDataManager(debug=debug)
+            data_manager = CrisprScreenDataManager(DataFile.DEPMAP_CRC_SUBSAMPLE)
 
-        data_manager.add_transformations(
-            [
-                feng.centered_copynumber_by_cellline,
-                feng.centered_copynumber_by_gene,
-                feng.zscale_rna_expression_by_gene_and_lineage,
-                feng.convert_is_mutated_to_numeric,
-            ]
-        )
+        transformations = [
+            feng.centered_copynumber_by_cellline,
+            feng.centered_copynumber_by_gene,
+            feng.zscale_rna_expression_by_gene_and_lineage,
+            feng.convert_is_mutated_to_numeric,
+        ]
+        # TODO: will support adding list of trans.
+        for fxn in transformations:
+            data_manager.add_transformation(fxn)
 
         self.config = config if config is not None else SpecletSevenConfiguration()
 
@@ -595,7 +603,7 @@ class SpecletSeven(SpecletModel):
             )
 
         data = self.data_manager.get_data()
-        mb_size = self.data_manager.get_batch_size()
+        mb_size = self._get_batch_size()
         co_idx = achelp.common_indices(data)
         b_idx = achelp.data_batch_indices(data)
 

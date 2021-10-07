@@ -8,9 +8,15 @@ import theano
 from pydantic import BaseModel
 
 from src.data_processing import achilles as achelp
+from src.io.data_io import DataFile
 from src.loggers import logger
-from src.managers.model_data_managers import CrcDataManager, DataManager
-from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
+from src.managers.data_managers import CrisprScreenDataManager
+from src.models.speclet_model import (
+    ObservedVarName,
+    ReplacementsDict,
+    SpecletModel,
+    SpecletModelDataManager,
+)
 from src.project_enums import ModelParameterization as MP
 
 
@@ -49,7 +55,7 @@ class SpecletFive(SpecletModel):
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
-        data_manager: Optional[DataManager] = None,
+        data_manager: Optional[SpecletModelDataManager] = None,
         config: Optional[SpecletFiveConfiguration] = None,
     ) -> None:
         """Instantiate a SpecletFive model.
@@ -60,14 +66,15 @@ class SpecletFive(SpecletModel):
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
             debug (bool, optional): Are you in debug mode? Defaults to False.
-            data_manager (Optional[DataManager], optional): Object that will manage the
-              data. If None (default), a `CrcDataManager` is created automatically.
+            data_manager (Optional[SpecletModelDataManager], optional): Object that will
+              manage the data. If None (default), a `CrisprScreenDataManager` is
+              created automatically.
             config (SpecletFiveConfiguration, optional): Model configuration.
         """
         logger.debug("Instantiating a SpecletFive model.")
         if data_manager is None:
             logger.debug("Creating a data manager since none was supplied.")
-            data_manager = CrcDataManager(debug=debug)
+            data_manager = CrisprScreenDataManager(DataFile.DEPMAP_CRC_SUBSAMPLE)
         self.config = config if config is not None else SpecletFiveConfiguration()
         super().__init__(
             name=name,
@@ -196,7 +203,7 @@ class SpecletFive(SpecletModel):
             )
 
         data = self.data_manager.get_data()
-        batch_size = self.data_manager.get_batch_size()
+        batch_size = self._get_batch_size()
         idx = achelp.common_indices(data)
         b_idx = achelp.data_batch_indices(data)
 

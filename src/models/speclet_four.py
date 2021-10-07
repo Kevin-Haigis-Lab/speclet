@@ -9,9 +9,15 @@ from pydantic import BaseModel
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 from src.data_processing import achilles as achelp
+from src.io.data_io import DataFile
 from src.loggers import logger
-from src.managers.model_data_managers import CrcDataManager, DataManager
-from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
+from src.managers.data_managers import CrisprScreenDataManager
+from src.models.speclet_model import (
+    ObservedVarName,
+    ReplacementsDict,
+    SpecletModel,
+    SpecletModelDataManager,
+)
 from src.project_enums import ModelParameterization as MP
 
 
@@ -51,7 +57,7 @@ class SpecletFour(SpecletModel):
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
-        data_manager: Optional[DataManager] = None,
+        data_manager: Optional[SpecletModelDataManager] = None,
         config: Optional[SpecletFourConfiguration] = None,
     ):
         """Instantiate a SpecletFour model.
@@ -62,12 +68,13 @@ class SpecletFour(SpecletModel):
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
             debug (bool, optional): Are you in debug mode? Defaults to False.
-            data_manager (Optional[DataManager], optional): Object that will manage the
-              data. If None (default), a `CrcDataManager` is created automatically.
+            data_manager (Optional[SpecletModelDataManager], optional): Object that will
+              manage the data. If None (default), a `CrisprScreenDataManager` is
+              created automatically.
             config (Optional[SpecletFourConfiguration], optional): Model configuration.
         """
         if data_manager is None:
-            data_manager = CrcDataManager(debug=debug)
+            data_manager = CrisprScreenDataManager(DataFile.DEPMAP_CRC_SUBSAMPLE)
 
         self.config = config if config is not None else SpecletFourConfiguration()
 
@@ -233,7 +240,7 @@ class SpecletFour(SpecletModel):
             )
 
         data = self.data_manager.get_data()
-        batch_size = self.data_manager.get_batch_size()
+        batch_size = self._get_batch_size()
         co_idx = achelp.common_indices(data)
         batch_idx = achelp.data_batch_indices(data)
 

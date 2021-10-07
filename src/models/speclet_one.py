@@ -7,8 +7,14 @@ import pymc3 as pm
 import theano
 
 from src.data_processing import achilles as achelp
-from src.managers.model_data_managers import CrcDataManager, DataManager
-from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
+from src.io.data_io import DataFile
+from src.managers.data_managers import CrisprScreenDataManager
+from src.models.speclet_model import (
+    ObservedVarName,
+    ReplacementsDict,
+    SpecletModel,
+    SpecletModelDataManager,
+)
 
 
 class SpecletOne(SpecletModel):
@@ -42,7 +48,7 @@ class SpecletOne(SpecletModel):
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
-        data_manager: Optional[DataManager] = None,
+        data_manager: Optional[SpecletModelDataManager] = None,
     ):
         """Instantiate a SpecletOne model.
 
@@ -52,11 +58,12 @@ class SpecletOne(SpecletModel):
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
             debug (bool, optional): Are you in debug mode? Defaults to False.
-            data_manager (Optional[DataManager], optional): Object that will manage the
-              data. If None (default), a `CrcDataManager` is created automatically.
+            data_manager (Optional[SpecletModelDataManager], optional): Object that will
+              manage the data. If None (default), a `CrisprScreenDataManager` is
+              created automatically.
         """
         if data_manager is None:
-            data_manager = CrcDataManager(debug=debug)
+            data_manager = CrisprScreenDataManager(DataFile.DEPMAP_CRC_SUBSAMPLE)
 
         super().__init__(
             name=name,
@@ -170,7 +177,7 @@ class SpecletOne(SpecletModel):
             )
 
         data = self.data_manager.get_data()
-        batch_size = self.data_manager.get_batch_size()
+        batch_size = self._get_batch_size()
         co_idx = achelp.common_indices(data)
         b_idx = achelp.data_batch_indices(data)
 
