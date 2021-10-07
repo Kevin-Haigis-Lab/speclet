@@ -45,7 +45,7 @@ from src.exceptions import ShapeError
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
 from src.modeling import feature_engineering as feng
-from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
 from src.project_enums import ModelParameterization as MP
 from src.project_enums import assert_never
 
@@ -468,11 +468,12 @@ class SpecletSeven(SpecletModel):
                 assert_never(self.config.h)
         return h_shape
 
-    def model_specification(self) -&gt; tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
         &#34;&#34;&#34;Build SpecletSeven model.
 
         Returns:
-            tuple[pm.Model, str]: The model and name of the observed variable.
+            tuple[pm.Model, ObservedVarName]: The model and name of the observed
+            variable.
         &#34;&#34;&#34;
         logger.info(&#34;Beginning PyMC3 model specification.&#34;)
         data = self.data_manager.get_data()
@@ -1194,11 +1195,12 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
                 assert_never(self.config.h)
         return h_shape
 
-    def model_specification(self) -&gt; tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
         &#34;&#34;&#34;Build SpecletSeven model.
 
         Returns:
-            tuple[pm.Model, str]: The model and name of the observed variable.
+            tuple[pm.Model, ObservedVarName]: The model and name of the observed
+            variable.
         &#34;&#34;&#34;
         logger.info(&#34;Beginning PyMC3 model specification.&#34;)
         data = self.data_manager.get_data()
@@ -1438,18 +1440,20 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <div class="desc"><p>Build SpecletSeven model.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>tuple[pm.Model, str]</code></dt>
-<dd>The model and name of the observed variable.</dd>
-</dl></div>
+<dt><code>tuple[pm.Model, ObservedVarName]</code></dt>
+<dd>The model and name of the observed</dd>
+</dl>
+<p>variable.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def model_specification(self) -&gt; tuple[pm.Model, str]:
+<pre><code class="python">def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
     &#34;&#34;&#34;Build SpecletSeven model.
 
     Returns:
-        tuple[pm.Model, str]: The model and name of the observed variable.
+        tuple[pm.Model, ObservedVarName]: The model and name of the observed
+        variable.
     &#34;&#34;&#34;
     logger.info(&#34;Beginning PyMC3 model specification.&#34;)
     data = self.data_manager.get_data()

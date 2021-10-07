@@ -29,7 +29,7 @@
 <pre><code class="python">&#34;&#34;&#34;Speclet Model Four.&#34;&#34;&#34;
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 import pymc3 as pm
 import theano
@@ -39,7 +39,7 @@ from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 from src.data_processing import achilles as achelp
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
-from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
 from src.project_enums import ModelParameterization as MP
 
 
@@ -106,7 +106,7 @@ class SpecletFour(SpecletModel):
             data_manager=data_manager,
         )
 
-    def set_config(self, info: Dict[Any, Any]) -&gt; None:
+    def set_config(self, info: dict[Any, Any]) -&gt; None:
         &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
         new_config = SpecletFourConfiguration(**info)
         if self.config is not None and self.config != new_config:
@@ -125,7 +125,7 @@ class SpecletFour(SpecletModel):
         cn_shared: TTShared,
         lfc_shared: TTShared,
         total_size: int,
-    ) -&gt; Tuple[pm.Model, str]:
+    ) -&gt; tuple[pm.Model, ObservedVarName]:
         with pm.Model() as model:
             # Gene varying intercept.
             μ_h = pm.Normal(&#34;μ_h&#34;, 0, 1)
@@ -196,11 +196,12 @@ class SpecletFour(SpecletModel):
 
         return model, &#34;lfc&#34;
 
-    def model_specification(self) -&gt; Tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
         &#34;&#34;&#34;Build SpecletFour model.
 
         Returns:
-            Tuple[pm.Model, str]: The model and name of the observed variable.
+            Tuple[pm.Model, ObservedVarName]: The model and name of the observed
+            variable.
         &#34;&#34;&#34;
         logger.info(&#34;Beginning PyMC3 model specification.&#34;)
 
@@ -280,7 +281,7 @@ class SpecletFour(SpecletModel):
             self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
         }
 
-    def get_advi_callbacks(self) -&gt; List[Any]:
+    def get_advi_callbacks(self) -&gt; list[Any]:
         &#34;&#34;&#34;Prepare a list of callbacks for ADVI fitting.
 
         This can be overridden by subclasses to apply custom callbacks or change the
@@ -401,7 +402,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             data_manager=data_manager,
         )
 
-    def set_config(self, info: Dict[Any, Any]) -&gt; None:
+    def set_config(self, info: dict[Any, Any]) -&gt; None:
         &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
         new_config = SpecletFourConfiguration(**info)
         if self.config is not None and self.config != new_config:
@@ -420,7 +421,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
         cn_shared: TTShared,
         lfc_shared: TTShared,
         total_size: int,
-    ) -&gt; Tuple[pm.Model, str]:
+    ) -&gt; tuple[pm.Model, ObservedVarName]:
         with pm.Model() as model:
             # Gene varying intercept.
             μ_h = pm.Normal(&#34;μ_h&#34;, 0, 1)
@@ -491,11 +492,12 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 
         return model, &#34;lfc&#34;
 
-    def model_specification(self) -&gt; Tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
         &#34;&#34;&#34;Build SpecletFour model.
 
         Returns:
-            Tuple[pm.Model, str]: The model and name of the observed variable.
+            Tuple[pm.Model, ObservedVarName]: The model and name of the observed
+            variable.
         &#34;&#34;&#34;
         logger.info(&#34;Beginning PyMC3 model specification.&#34;)
 
@@ -575,7 +577,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             self.shared_vars[&#34;lfc_shared&#34;]: lfc_data_batch,
         }
 
-    def get_advi_callbacks(self) -&gt; List[Any]:
+    def get_advi_callbacks(self) -&gt; list[Any]:
         &#34;&#34;&#34;Prepare a list of callbacks for ADVI fitting.
 
         This can be overridden by subclasses to apply custom callbacks or change the
@@ -598,7 +600,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <h3>Methods</h3>
 <dl>
 <dt id="src.models.speclet_four.SpecletFour.get_advi_callbacks"><code class="name flex">
-<span>def <span class="ident">get_advi_callbacks</span></span>(<span>self) -> List[Any]</span>
+<span>def <span class="ident">get_advi_callbacks</span></span>(<span>self) -> list</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Prepare a list of callbacks for ADVI fitting.</p>
@@ -613,7 +615,7 @@ parameters of the CheckParametersConvergence callback.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_advi_callbacks(self) -&gt; List[Any]:
+<pre><code class="python">def get_advi_callbacks(self) -&gt; list[Any]:
     &#34;&#34;&#34;Prepare a list of callbacks for ADVI fitting.
 
     This can be overridden by subclasses to apply custom callbacks or change the
@@ -686,24 +688,26 @@ parameters of the CheckParametersConvergence callback.</p>
 </details>
 </dd>
 <dt id="src.models.speclet_four.SpecletFour.model_specification"><code class="name flex">
-<span>def <span class="ident">model_specification</span></span>(<span>self) -> Tuple[pymc3.model.Model, str]</span>
+<span>def <span class="ident">model_specification</span></span>(<span>self) -> tuple</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Build SpecletFour model.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Tuple[pm.Model, str]</code></dt>
-<dd>The model and name of the observed variable.</dd>
-</dl></div>
+<dt><code>Tuple[pm.Model, ObservedVarName]</code></dt>
+<dd>The model and name of the observed</dd>
+</dl>
+<p>variable.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def model_specification(self) -&gt; Tuple[pm.Model, str]:
+<pre><code class="python">def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
     &#34;&#34;&#34;Build SpecletFour model.
 
     Returns:
-        Tuple[pm.Model, str]: The model and name of the observed variable.
+        Tuple[pm.Model, ObservedVarName]: The model and name of the observed
+        variable.
     &#34;&#34;&#34;
     logger.info(&#34;Beginning PyMC3 model specification.&#34;)
 

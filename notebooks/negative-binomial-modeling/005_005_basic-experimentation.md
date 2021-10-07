@@ -24,6 +24,8 @@ import seaborn as sns
 from theano import tensor as tt
 ```
 
+    WARNING (theano.tensor.blas): Using NumPy C-API based implementation for BLAS functions.
+
 ```python
 from src.analysis import pymc3_analysis as pmanal
 from src.data_processing import achilles as achelp
@@ -230,7 +232,7 @@ school_data.describe()
 
 ![png](005_005_basic-experimentation_files/005_005_basic-experimentation_10_0.png)
 
-    <ggplot: (352512154)>
+    <ggplot: (8758012180640)>
 
 ```python
 school_data.groupby("prog").agg({"daysabs": ["mean", "std"]}).round(2)
@@ -341,7 +343,7 @@ with nb:
         return_inferencedata=True,
     )
     ppc = pm.sample_posterior_predictive(nb_trace)
-    nb_trace.add_groups({"posterior_predictive": ppc})
+    nb_trace.extend(az.from_pymc3(posterior_predictive=ppc))
 ```
 
     Auto-assigning NUTS sampler...
@@ -363,10 +365,10 @@ with nb:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:25<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [8000/8000 00:17<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 47 seconds.
+    Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 18 seconds.
 
 <div>
     <style>
@@ -382,7 +384,7 @@ with nb:
         }
     </style>
   <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 01:03<00:00]
+  100.00% [4000/4000 00:39<00:00]
 </div>
 
 ```python
@@ -434,57 +436,57 @@ az.summary(nb_trace, var_names=main_vars)
       <td>-0.001</td>
       <td>0.000</td>
       <td>0.000</td>
-      <td>1500.0</td>
-      <td>1933.0</td>
-      <td>1.01</td>
+      <td>1594.0</td>
+      <td>2134.0</td>
+      <td>1.0</td>
     </tr>
     <tr>
       <th>β_prog[0]</th>
-      <td>2.626</td>
-      <td>0.206</td>
-      <td>2.253</td>
-      <td>3.014</td>
+      <td>2.621</td>
+      <td>0.201</td>
+      <td>2.265</td>
+      <td>3.005</td>
       <td>0.004</td>
       <td>0.003</td>
-      <td>2115.0</td>
-      <td>2190.0</td>
-      <td>1.00</td>
+      <td>2085.0</td>
+      <td>2577.0</td>
+      <td>1.0</td>
     </tr>
     <tr>
       <th>β_prog[1]</th>
-      <td>2.177</td>
-      <td>0.139</td>
-      <td>1.918</td>
-      <td>2.435</td>
+      <td>2.170</td>
+      <td>0.135</td>
+      <td>1.938</td>
+      <td>2.447</td>
       <td>0.003</td>
       <td>0.002</td>
-      <td>1859.0</td>
-      <td>2088.0</td>
-      <td>1.00</td>
+      <td>1834.0</td>
+      <td>2366.0</td>
+      <td>1.0</td>
     </tr>
     <tr>
       <th>β_prog[2]</th>
-      <td>1.336</td>
-      <td>0.199</td>
-      <td>0.970</td>
-      <td>1.717</td>
-      <td>0.005</td>
+      <td>1.330</td>
+      <td>0.190</td>
+      <td>0.978</td>
+      <td>1.695</td>
+      <td>0.004</td>
       <td>0.003</td>
-      <td>1830.0</td>
-      <td>1948.0</td>
-      <td>1.00</td>
+      <td>1846.0</td>
+      <td>2415.0</td>
+      <td>1.0</td>
     </tr>
     <tr>
       <th>α</th>
-      <td>1.028</td>
+      <td>1.030</td>
       <td>0.107</td>
-      <td>0.829</td>
-      <td>1.226</td>
+      <td>0.838</td>
+      <td>1.228</td>
       <td>0.002</td>
       <td>0.001</td>
-      <td>3262.0</td>
-      <td>2851.0</td>
-      <td>1.00</td>
+      <td>2942.0</td>
+      <td>2384.0</td>
+      <td>1.0</td>
     </tr>
   </tbody>
 </table>
@@ -562,7 +564,7 @@ ppc_df = pd.DataFrame(ppc_sample).pivot_longer(names_to="ppc_idx", values_to="dr
 
 ![png](005_005_basic-experimentation_files/005_005_basic-experimentation_24_0.png)
 
-    <ggplot: (356782785)>
+    <ggplot: (8757997521740)>
 
 ```python
 num_samples = 100
@@ -599,7 +601,7 @@ real_counts = school_data.groupby(["prog", "daysabs"]).count().reset_index(drop=
 
 ![png](005_005_basic-experimentation_files/005_005_basic-experimentation_25_0.png)
 
-    <ggplot: (355646811)>
+    <ggplot: (8757997448991)>
 
 ```python
 az.plot_ppc(nb_trace, num_pp_samples=100, kind="scatter");
@@ -713,7 +715,7 @@ with nb:
         }
     </style>
   <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 01:24<00:00]
+  100.00% [4000/4000 00:52<00:00]
 </div>
 
 <div>
@@ -730,7 +732,7 @@ with nb:
         }
     </style>
   <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 00:02<00:00]
+  100.00% [4000/4000 00:01<00:00]
 </div>
 
 ```python
@@ -760,7 +762,7 @@ post_pred_df = pd.concat([post_pred_df, eta_post_pred], axis=1)
 post_pred_df.head()
 ```
 
-    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/arviz/stats/stats.py:456: FutureWarning: hdi currently interprets 2d data as (draw, shape) but this will change in a future release to (chain, draw) for coherence with other functions
+    /home/jc604/.conda/envs/speclet/lib/python3.9/site-packages/arviz/stats/stats.py:456: FutureWarning: hdi currently interprets 2d data as (draw, shape) but this will change in a future release to (chain, draw) for coherence with other functions
 
 <div>
 <style scoped>
@@ -793,58 +795,58 @@ post_pred_df.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>13.80975</td>
+      <td>13.85025</td>
       <td>0.0</td>
       <td>31.0</td>
       <td>General</td>
       <td>1.0</td>
-      <td>2.620382</td>
-      <td>2.302848</td>
-      <td>2.941070</td>
+      <td>2.615305</td>
+      <td>2.305643</td>
+      <td>2.940035</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>13.91450</td>
+      <td>13.82975</td>
       <td>0.0</td>
-      <td>32.0</td>
+      <td>31.0</td>
       <td>General</td>
       <td>1.1</td>
-      <td>2.619785</td>
-      <td>2.302827</td>
-      <td>2.940389</td>
+      <td>2.614722</td>
+      <td>2.305129</td>
+      <td>2.939085</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>14.01950</td>
+      <td>14.35650</td>
       <td>0.0</td>
       <td>32.0</td>
       <td>General</td>
       <td>1.2</td>
-      <td>2.619189</td>
-      <td>2.302663</td>
-      <td>2.939673</td>
+      <td>2.614139</td>
+      <td>2.304536</td>
+      <td>2.938134</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>13.91325</td>
+      <td>14.72900</td>
       <td>0.0</td>
-      <td>32.0</td>
+      <td>33.0</td>
       <td>General</td>
       <td>1.3</td>
-      <td>2.618592</td>
-      <td>2.302421</td>
-      <td>2.938974</td>
+      <td>2.613556</td>
+      <td>2.303917</td>
+      <td>2.937240</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>13.75900</td>
+      <td>13.85375</td>
       <td>0.0</td>
-      <td>31.0</td>
+      <td>32.0</td>
       <td>General</td>
       <td>1.4</td>
-      <td>2.617996</td>
-      <td>2.301756</td>
-      <td>2.937968</td>
+      <td>2.612973</td>
+      <td>2.303298</td>
+      <td>2.936693</td>
     </tr>
   </tbody>
 </table>
@@ -874,7 +876,7 @@ post_pred_df.head()
 
 ![png](005_005_basic-experimentation_files/005_005_basic-experimentation_31_0.png)
 
-    <ggplot: (355740555)>
+    <ggplot: (8757999736119)>
 
 ```python
 (
@@ -902,7 +904,7 @@ post_pred_df.head()
 
 ![png](005_005_basic-experimentation_files/005_005_basic-experimentation_32_0.png)
 
-    <ggplot: (356481970)>
+    <ggplot: (8757998681558)>
 
 ## Examples: Roaches
 
@@ -1130,7 +1132,7 @@ roaches.describe()
 
 ![png](005_005_basic-experimentation_files/005_005_basic-experimentation_39_0.png)
 
-    <ggplot: (357540994)>
+    <ggplot: (8757999514393)>
 
 ```python
 with pm.Model() as roach_nb:
@@ -1160,12 +1162,12 @@ pm.model_to_graphviz(roach_nb)
 with roach_nb:
     roach_trace = pm.sample(chains=4, random_seed=349, return_inferencedata=True)
     roach_ppc = pm.sample_posterior_predictive(roach_trace, random_seed=353)
-    roach_trace.add_groups({"posterior_predictive": roach_ppc})
+    roach_trace.extend(az.from_pymc3(posterior_predictive=roach_ppc))
 ```
 
     Auto-assigning NUTS sampler...
     Initializing NUTS using jitter+adapt_diag...
-    Multiprocess sampling (4 chains in 2 jobs)
+    Multiprocess sampling (4 chains in 4 jobs)
     NUTS: [β, β_roach, β_senior, β_treat, α]
 
 <div>
@@ -1182,10 +1184,10 @@ with roach_nb:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:15<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [8000/8000 00:06<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 37 seconds.
+    Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 7 seconds.
 
 <div>
     <style>
@@ -1201,7 +1203,7 @@ with roach_nb:
         }
     </style>
   <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 00:06<00:00]
+  100.00% [4000/4000 00:04<00:00]
 </div>
 
 ```python
@@ -1240,62 +1242,62 @@ az.summary(roach_trace, var_names=["β", "α"], filter_vars="like", hdi_prob=0.8
   <tbody>
     <tr>
       <th>β_treat</th>
-      <td>-0.764</td>
-      <td>0.245</td>
-      <td>-1.151</td>
-      <td>-0.381</td>
+      <td>-0.773</td>
+      <td>0.250</td>
+      <td>-1.181</td>
+      <td>-0.387</td>
       <td>0.004</td>
       <td>0.003</td>
-      <td>3575.0</td>
-      <td>2768.0</td>
+      <td>3229.0</td>
+      <td>2576.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>β_senior</th>
-      <td>-0.326</td>
-      <td>0.264</td>
-      <td>-0.754</td>
-      <td>0.080</td>
+      <td>-0.323</td>
+      <td>0.271</td>
+      <td>-0.774</td>
+      <td>0.100</td>
+      <td>0.005</td>
       <td>0.004</td>
-      <td>0.003</td>
-      <td>3614.0</td>
-      <td>2559.0</td>
+      <td>3292.0</td>
+      <td>2467.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>β_roach</th>
-      <td>1.309</td>
-      <td>0.255</td>
-      <td>0.882</td>
-      <td>1.685</td>
+      <td>1.314</td>
+      <td>0.247</td>
+      <td>0.914</td>
+      <td>1.694</td>
       <td>0.004</td>
       <td>0.003</td>
-      <td>3470.0</td>
-      <td>2644.0</td>
+      <td>3762.0</td>
+      <td>2510.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>β</th>
-      <td>2.841</td>
-      <td>0.237</td>
-      <td>2.463</td>
-      <td>3.221</td>
+      <td>2.845</td>
+      <td>0.239</td>
+      <td>2.484</td>
+      <td>3.241</td>
       <td>0.005</td>
       <td>0.003</td>
-      <td>2745.0</td>
-      <td>2436.0</td>
+      <td>2645.0</td>
+      <td>2214.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>α</th>
-      <td>0.272</td>
+      <td>0.273</td>
       <td>0.026</td>
-      <td>0.232</td>
+      <td>0.231</td>
       <td>0.314</td>
       <td>0.000</td>
       <td>0.000</td>
-      <td>3952.0</td>
-      <td>2432.0</td>
+      <td>3409.0</td>
+      <td>2105.0</td>
       <td>1.0</td>
     </tr>
   </tbody>
@@ -1326,7 +1328,7 @@ obs_prop_zero = np.mean(roaches.y == 0)
 
 ![png](005_005_basic-experimentation_files/005_005_basic-experimentation_45_0.png)
 
-    <ggplot: (356296006)>
+    <ggplot: (8757997710951)>
 
 ---
 
@@ -1335,41 +1337,41 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 5.76 minutes
+    execution time: 3.74 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-09-08
+    Last updated: 2021-10-04
 
     Python implementation: CPython
     Python version       : 3.9.6
     IPython version      : 7.26.0
 
-    Compiler    : Clang 11.1.0
-    OS          : Darwin
-    Release     : 20.4.0
+    Compiler    : GCC 9.3.0
+    OS          : Linux
+    Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
-    Processor   : i386
-    CPU cores   : 4
+    Processor   : x86_64
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: JHCookMac.local
+    Hostname: compute-a-16-37.o2.rc.hms.harvard.edu
 
-    Git branch: nb-model
+    Git branch: master
 
-    numpy     : 1.21.2
     re        : 2.2.1
-    pymc3     : 3.11.2
-    seaborn   : 0.11.2
-    pandas    : 1.3.2
     janitor   : 0.21.0
-    arviz     : 0.11.2
+    pymc3     : 3.11.2
+    matplotlib: 3.4.3
+    seaborn   : 0.11.2
+    numpy     : 1.21.2
     plotnine  : 0.8.0
     theano    : 1.0.5
-    matplotlib: 3.4.3
+    pandas    : 1.3.2
+    arviz     : 0.11.2
 
 ```python
 

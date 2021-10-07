@@ -35,7 +35,7 @@ import pymc3 as pm
 import theano
 
 from src.managers.model_data_managers import CrcDataManager, DataManager
-from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
 
 
 class SpecletSimple(SpecletModel):
@@ -80,11 +80,12 @@ class SpecletSimple(SpecletModel):
             data_manager=data_manager,
         )
 
-    def model_specification(self) -&gt; tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
         &#34;&#34;&#34;Build SpecletSimple model.
 
         Returns:
-            tuple[pm.Model, str]: The model and name of the observed variable.
+            tuple[pm.Model, ObservedVarName]: The model and name of the observed
+            variable.
         &#34;&#34;&#34;
         data = self.data_manager.get_data()
         total_size = data.shape[0]
@@ -218,11 +219,12 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             data_manager=data_manager,
         )
 
-    def model_specification(self) -&gt; tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
         &#34;&#34;&#34;Build SpecletSimple model.
 
         Returns:
-            tuple[pm.Model, str]: The model and name of the observed variable.
+            tuple[pm.Model, ObservedVarName]: The model and name of the observed
+            variable.
         &#34;&#34;&#34;
         data = self.data_manager.get_data()
         total_size = data.shape[0]
@@ -320,18 +322,20 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 <div class="desc"><p>Build SpecletSimple model.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>tuple[pm.Model, str]</code></dt>
-<dd>The model and name of the observed variable.</dd>
-</dl></div>
+<dt><code>tuple[pm.Model, ObservedVarName]</code></dt>
+<dd>The model and name of the observed</dd>
+</dl>
+<p>variable.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def model_specification(self) -&gt; tuple[pm.Model, str]:
+<pre><code class="python">def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
     &#34;&#34;&#34;Build SpecletSimple model.
 
     Returns:
-        tuple[pm.Model, str]: The model and name of the observed variable.
+        tuple[pm.Model, ObservedVarName]: The model and name of the observed
+        variable.
     &#34;&#34;&#34;
     data = self.data_manager.get_data()
     total_size = data.shape[0]

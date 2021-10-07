@@ -31,6 +31,7 @@
 &#34;&#34;&#34;Commands for general project needs.&#34;&#34;&#34;
 
 import logging
+import os
 import tempfile
 from pathlib import Path
 from typing import Optional
@@ -42,18 +43,79 @@ import typer
 from src.io import model_config
 from src.loggers import set_console_handler_level
 from src.models import configuration
-from src.project_enums import MockDataSize
+from src.project_enums import MockDataSize, ModelOption
 
 app = typer.Typer()
 
 set_console_handler_level(logging.ERROR)
 
-#### ---- Make model graph images ---- ####
+
+# ---- Make document with model details ----
+
+
+def _write_docstring(doc: Optional[str], file: Path) -&gt; bool:
+    if doc is None:
+        return False
+    with open(file, &#34;a&#34;) as f:
+        f.write(doc)
+        f.write(&#34;\n---\n\n&#34;)
+    return True
+
+
+def _remove_indents(file: Path) -&gt; None:
+    clean_lines: list[str] = []
+    with open(file, &#34;r&#34;) as open_file:
+        for line in open_file:
+            clean_lines.append(line.strip())
+    with open(file, &#34;w&#34;) as open_file:
+        open_file.write(&#34;\n&#34;.join(clean_lines))
+    return None
+
+
+@app.command()
+def model_docs(output_md: Optional[Path] = None, overwrite: bool = True) -&gt; None:
+    &#34;&#34;&#34;Make a document with all SpecletModel descriptions.
+
+    Args:
+        output_md (Optional[Path], optional): Output file path. Defaults to None.
+        overwrite (bool, optional): Overwrite the existing file? Defaults to True.
+
+    Returns:
+        None: None
+    &#34;&#34;&#34;
+    if output_md is None:
+        output_md = Path(&#34;models&#34;, &#34;model-docs.md&#34;)
+
+    if output_md.exists() and overwrite:
+        typer.secho(&#34;Removing old file.&#34;, fg=typer.colors.BRIGHT_BLACK)
+        os.remove(output_md)
+    elif output_md.exists():
+        typer.secho(
+            &#34;File already exists and will be added to.&#34;, fg=typer.colors.BRIGHT_BLACK
+        )
+
+    for model_opt in ModelOption:
+        if model_opt in {ModelOption.SPECLET_TEST_MODEL, ModelOption.SPECLET_SIMPLE}:
+            continue
+
+        model_cls = configuration.get_model_class(model_opt)
+        if _write_docstring(model_cls.__doc__, file=output_md):
+            typer.secho(f&#34;doc written for &#39;{model_opt.value}&#39;&#34;, fg=typer.colors.BLUE)
+        else:
+            typer.secho(
+                f&#34;no docstring found for &#39;{model_opt.value}&#39;&#34;, fg=typer.colors.RED
+            )
+    _remove_indents(output_md)
+
+    return None
+
+
+# ---- Make model graph images ----
 
 
 @app.command()
 def model_graphs(
-    output_dir: Path = Path(&#34;models/model-graph-images&#34;),
+    output_dir: Optional[Path] = None,
     config_path: Optional[Path] = None,
     skip_existing: bool = False,
 ) -&gt; None:
@@ -68,6 +130,8 @@ def model_graphs(
         skip_existing (bool, optional): Should PDFs that already exist be skipped?
           Defaults to False.
     &#34;&#34;&#34;
+    if output_dir is None:
+        output_dir = Path(&#34;models&#34;, &#34;model-graph-images&#34;)
     if config_path is None:
         config_path = model_config.get_model_config()
     if not output_dir.exists():
@@ -95,13 +159,13 @@ def model_graphs(
     return
 
 
-#### ---- Count number of lines of code ---- ####
+# ---- Count number of lines of code ----
 
 
 def _count_lines_in_file(f: Path) -&gt; int:
     n: int = 0
     try:
-        with open(f, &#34;r&#34;) as file:
+        with open(f) as file:
             for line in file:
                 if line.strip():
                     n += 1
@@ -115,9 +179,15 @@ def _count_lines_in_file(f: Path) -&gt; int:
 
 
 def _recursively_count_lines_in_dir(
-    dir: Path, file_types: Optional[list[str]] = None, ignore_dirs: list[str] = []
+    dir: Path,
+    file_types: Optional[set[str]] = None,
+    ignore_dirs: Optional[set[str]] = None,
 ) -&gt; int:
     n_lines = 0
+
+    if ignore_dirs is None:
+        ignore_dirs = set()
+
     for p in dir.iterdir():
         if p.name in ignore_dirs:
             continue
@@ -132,26 +202,13 @@ def _recursively_count_lines_in_dir(
 
 
 @app.command()
-def lines_of_code(
-    file_types: list[str] = [&#34;.py&#34;, &#34;.smk&#34;, &#34;.sh&#34;, &#34;.zsh&#34;, &#34;.R&#34;, &#34;.r&#34;],
-    dirs: list[Path] = [
-        Path(&#34;src&#34;),
-        Path(&#34;pipelines&#34;),
-        Path(&#34;tests&#34;),
-        Path(&#34;munge&#34;),
-        Path(&#34;data&#34;),
-    ],
-    ignore_dirs: list[str] = [&#34;__pycache__&#34;, &#34;.ipynb_checkpoints&#34;, &#34;.DS_Store&#34;],
-) -&gt; None:
-    &#34;&#34;&#34;Count the lines of code.
+def lines_of_code() -&gt; None:
+    &#34;&#34;&#34;Count the lines of code in the project.&#34;&#34;&#34;
+    # Parameters for the search
+    file_types = {&#34;.py&#34;, &#34;.smk&#34;, &#34;.sh&#34;, &#34;.zsh&#34;, &#34;.R&#34;, &#34;.r&#34;}
+    dirs = {Path(&#34;src&#34;), Path(&#34;pipelines&#34;), Path(&#34;tests&#34;), Path(&#34;munge&#34;), Path(&#34;data&#34;)}
+    ignore_dirs = {&#34;__pycache__&#34;, &#34;.ipynb_checkpoints&#34;, &#34;.DS_Store&#34;}
 
-    Args:
-        file_types (list[str], optional): File types to include. Defaults to list of
-          common file types for code.
-        dirs (list[Path], optional): Directories to search recursively.
-        ignore_dirs (list[str], optional): Names of subdirectories to ignore. Defaults
-          to some standard caching and checkpoint directories.
-    &#34;&#34;&#34;
     line_counts: dict[Path, int] = {d: -1 for d in dirs}
     for dir in dirs:
         if not dir.exists() and dir.is_dir():
@@ -180,46 +237,22 @@ if __name__ == &#34;__main__&#34;:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.command_line_interfaces.speclet_cli.lines_of_code"><code class="name flex">
-<span>def <span class="ident">lines_of_code</span></span>(<span>file_types: list = ['.py', '.smk', '.sh', '.zsh', '.R', '.r'], dirs: list = [PosixPath('src'), PosixPath('pipelines'), PosixPath('tests'), PosixPath('munge'), PosixPath('data')], ignore_dirs: list = ['__pycache__', '.ipynb_checkpoints', '.DS_Store']) -> NoneType</span>
+<span>def <span class="ident">lines_of_code</span></span>(<span>) -> NoneType</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Count the lines of code.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>file_types</code></strong> :&ensp;<code>list[str]</code>, optional</dt>
-<dd>File types to include. Defaults to list of
-common file types for code.</dd>
-<dt><strong><code>dirs</code></strong> :&ensp;<code>list[Path]</code>, optional</dt>
-<dd>Directories to search recursively.</dd>
-<dt><strong><code>ignore_dirs</code></strong> :&ensp;<code>list[str]</code>, optional</dt>
-<dd>Names of subdirectories to ignore. Defaults
-to some standard caching and checkpoint directories.</dd>
-</dl></div>
+<div class="desc"><p>Count the lines of code in the project.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@app.command()
-def lines_of_code(
-    file_types: list[str] = [&#34;.py&#34;, &#34;.smk&#34;, &#34;.sh&#34;, &#34;.zsh&#34;, &#34;.R&#34;, &#34;.r&#34;],
-    dirs: list[Path] = [
-        Path(&#34;src&#34;),
-        Path(&#34;pipelines&#34;),
-        Path(&#34;tests&#34;),
-        Path(&#34;munge&#34;),
-        Path(&#34;data&#34;),
-    ],
-    ignore_dirs: list[str] = [&#34;__pycache__&#34;, &#34;.ipynb_checkpoints&#34;, &#34;.DS_Store&#34;],
-) -&gt; None:
-    &#34;&#34;&#34;Count the lines of code.
+def lines_of_code() -&gt; None:
+    &#34;&#34;&#34;Count the lines of code in the project.&#34;&#34;&#34;
+    # Parameters for the search
+    file_types = {&#34;.py&#34;, &#34;.smk&#34;, &#34;.sh&#34;, &#34;.zsh&#34;, &#34;.R&#34;, &#34;.r&#34;}
+    dirs = {Path(&#34;src&#34;), Path(&#34;pipelines&#34;), Path(&#34;tests&#34;), Path(&#34;munge&#34;), Path(&#34;data&#34;)}
+    ignore_dirs = {&#34;__pycache__&#34;, &#34;.ipynb_checkpoints&#34;, &#34;.DS_Store&#34;}
 
-    Args:
-        file_types (list[str], optional): File types to include. Defaults to list of
-          common file types for code.
-        dirs (list[Path], optional): Directories to search recursively.
-        ignore_dirs (list[str], optional): Names of subdirectories to ignore. Defaults
-          to some standard caching and checkpoint directories.
-    &#34;&#34;&#34;
     line_counts: dict[Path, int] = {d: -1 for d in dirs}
     for dir in dirs:
         if not dir.exists() and dir.is_dir():
@@ -236,8 +269,67 @@ def lines_of_code(
         )</code></pre>
 </details>
 </dd>
+<dt id="src.command_line_interfaces.speclet_cli.model_docs"><code class="name flex">
+<span>def <span class="ident">model_docs</span></span>(<span>output_md: Optional[pathlib.Path] = None, overwrite: bool = True) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Make a document with all SpecletModel descriptions.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>output_md</code></strong> :&ensp;<code>Optional[Path]</code>, optional</dt>
+<dd>Output file path. Defaults to None.</dd>
+<dt><strong><code>overwrite</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Overwrite the existing file? Defaults to True.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>None</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.command()
+def model_docs(output_md: Optional[Path] = None, overwrite: bool = True) -&gt; None:
+    &#34;&#34;&#34;Make a document with all SpecletModel descriptions.
+
+    Args:
+        output_md (Optional[Path], optional): Output file path. Defaults to None.
+        overwrite (bool, optional): Overwrite the existing file? Defaults to True.
+
+    Returns:
+        None: None
+    &#34;&#34;&#34;
+    if output_md is None:
+        output_md = Path(&#34;models&#34;, &#34;model-docs.md&#34;)
+
+    if output_md.exists() and overwrite:
+        typer.secho(&#34;Removing old file.&#34;, fg=typer.colors.BRIGHT_BLACK)
+        os.remove(output_md)
+    elif output_md.exists():
+        typer.secho(
+            &#34;File already exists and will be added to.&#34;, fg=typer.colors.BRIGHT_BLACK
+        )
+
+    for model_opt in ModelOption:
+        if model_opt in {ModelOption.SPECLET_TEST_MODEL, ModelOption.SPECLET_SIMPLE}:
+            continue
+
+        model_cls = configuration.get_model_class(model_opt)
+        if _write_docstring(model_cls.__doc__, file=output_md):
+            typer.secho(f&#34;doc written for &#39;{model_opt.value}&#39;&#34;, fg=typer.colors.BLUE)
+        else:
+            typer.secho(
+                f&#34;no docstring found for &#39;{model_opt.value}&#39;&#34;, fg=typer.colors.RED
+            )
+    _remove_indents(output_md)
+
+    return None</code></pre>
+</details>
+</dd>
 <dt id="src.command_line_interfaces.speclet_cli.model_graphs"><code class="name flex">
-<span>def <span class="ident">model_graphs</span></span>(<span>output_dir: pathlib.Path = PosixPath('models/model-graph-images'), config_path: Optional[pathlib.Path] = None, skip_existing: bool = False) -> NoneType</span>
+<span>def <span class="ident">model_graphs</span></span>(<span>output_dir: Optional[pathlib.Path] = None, config_path: Optional[pathlib.Path] = None, skip_existing: bool = False) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Save PDFs of graphs of each model in a configuration file.</p>
@@ -260,7 +352,7 @@ Defaults to False.</dd>
 </summary>
 <pre><code class="python">@app.command()
 def model_graphs(
-    output_dir: Path = Path(&#34;models/model-graph-images&#34;),
+    output_dir: Optional[Path] = None,
     config_path: Optional[Path] = None,
     skip_existing: bool = False,
 ) -&gt; None:
@@ -275,6 +367,8 @@ def model_graphs(
         skip_existing (bool, optional): Should PDFs that already exist be skipped?
           Defaults to False.
     &#34;&#34;&#34;
+    if output_dir is None:
+        output_dir = Path(&#34;models&#34;, &#34;model-graph-images&#34;)
     if config_path is None:
         config_path = model_config.get_model_config()
     if not output_dir.exists():
@@ -321,6 +415,7 @@ def model_graphs(
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="src.command_line_interfaces.speclet_cli.lines_of_code" href="#src.command_line_interfaces.speclet_cli.lines_of_code">lines_of_code</a></code></li>
+<li><code><a title="src.command_line_interfaces.speclet_cli.model_docs" href="#src.command_line_interfaces.speclet_cli.model_docs">model_docs</a></code></li>
 <li><code><a title="src.command_line_interfaces.speclet_cli.model_graphs" href="#src.command_line_interfaces.speclet_cli.model_graphs">model_graphs</a></code></li>
 </ul>
 </li>

@@ -31,7 +31,7 @@
 &#34;&#34;&#34;Builders for CRC CERES Mimic model.&#34;&#34;&#34;
 
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 import numpy as np
 import pymc3 as pm
@@ -41,7 +41,7 @@ from pydantic import BaseModel
 from src.data_processing import achilles as achelp
 from src.loggers import logger
 from src.managers.model_data_managers import CrcDataManager, DataManager
-from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
 
 #### ---- CERES Mimic ---- ####
 
@@ -110,7 +110,7 @@ class CeresMimic(SpecletModel):
             data_manager=data_manager,
         )
 
-    def set_config(self, info: Dict[Any, Any]) -&gt; None:
+    def set_config(self, info: dict[Any, Any]) -&gt; None:
         &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
         new_config = CeresMimicConfiguration(**info)
         if self.config is not None and self.config != new_config:
@@ -128,7 +128,7 @@ class CeresMimic(SpecletModel):
         return self.config.copynumber_cov
 
     @copynumber_cov.setter
-    def copynumber_cov(self, new_value: bool):
+    def copynumber_cov(self, new_value: bool) -&gt; None:
         &#34;&#34;&#34;Setter to control whether the copy number covariate should be in the model.
 
         If the value changes, then the `model` attribute and model results attributes
@@ -153,7 +153,7 @@ class CeresMimic(SpecletModel):
         return self.config.sgrna_intercept_cov
 
     @sgrna_intercept_cov.setter
-    def sgrna_intercept_cov(self, new_value: bool):
+    def sgrna_intercept_cov(self, new_value: bool) -&gt; None:
         &#34;&#34;&#34;Control if the `sgRNA|gene` varying intercept covariate is in the model.
 
         If the value changes, then the `model` attribute and model results attributes
@@ -167,11 +167,11 @@ class CeresMimic(SpecletModel):
             self._reset_model_and_results()
             self.config.sgrna_intercept_cov = new_value
 
-    def model_specification(self) -&gt; Tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
         &#34;&#34;&#34;Build CRC CERES Mimic One.
 
         Returns:
-            [None]: None
+            Tuple[pm.Model, ObservedVarName]: Model and name of observed variable.
         &#34;&#34;&#34;
         data = self.data_manager.get_data()
 
@@ -421,7 +421,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             data_manager=data_manager,
         )
 
-    def set_config(self, info: Dict[Any, Any]) -&gt; None:
+    def set_config(self, info: dict[Any, Any]) -&gt; None:
         &#34;&#34;&#34;Set model-specific configuration.&#34;&#34;&#34;
         new_config = CeresMimicConfiguration(**info)
         if self.config is not None and self.config != new_config:
@@ -439,7 +439,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
         return self.config.copynumber_cov
 
     @copynumber_cov.setter
-    def copynumber_cov(self, new_value: bool):
+    def copynumber_cov(self, new_value: bool) -&gt; None:
         &#34;&#34;&#34;Setter to control whether the copy number covariate should be in the model.
 
         If the value changes, then the `model` attribute and model results attributes
@@ -464,7 +464,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
         return self.config.sgrna_intercept_cov
 
     @sgrna_intercept_cov.setter
-    def sgrna_intercept_cov(self, new_value: bool):
+    def sgrna_intercept_cov(self, new_value: bool) -&gt; None:
         &#34;&#34;&#34;Control if the `sgRNA|gene` varying intercept covariate is in the model.
 
         If the value changes, then the `model` attribute and model results attributes
@@ -478,11 +478,11 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             self._reset_model_and_results()
             self.config.sgrna_intercept_cov = new_value
 
-    def model_specification(self) -&gt; Tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
         &#34;&#34;&#34;Build CRC CERES Mimic One.
 
         Returns:
-            [None]: None
+            Tuple[pm.Model, ObservedVarName]: Model and name of observed variable.
         &#34;&#34;&#34;
         data = self.data_manager.get_data()
 
@@ -729,24 +729,24 @@ def sgrna_intercept_cov(self) -&gt; bool:
 </details>
 </dd>
 <dt id="src.models.ceres_mimic.CeresMimic.model_specification"><code class="name flex">
-<span>def <span class="ident">model_specification</span></span>(<span>self) -> Tuple[pymc3.model.Model, str]</span>
+<span>def <span class="ident">model_specification</span></span>(<span>self) -> tuple</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Build CRC CERES Mimic One.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>[None]</code></dt>
-<dd>None</dd>
+<dt><code>Tuple[pm.Model, ObservedVarName]</code></dt>
+<dd>Model and name of observed variable.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def model_specification(self) -&gt; Tuple[pm.Model, str]:
+<pre><code class="python">def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
     &#34;&#34;&#34;Build CRC CERES Mimic One.
 
     Returns:
-        [None]: None
+        Tuple[pm.Model, ObservedVarName]: Model and name of observed variable.
     &#34;&#34;&#34;
     data = self.data_manager.get_data()
 

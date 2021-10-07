@@ -26,12 +26,10 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">#!/usr/bin/env python3
-
-&#34;&#34;&#34;Common string handling functions.&#34;&#34;&#34;
+<pre><code class="python">&#34;&#34;&#34;Common string handling functions.&#34;&#34;&#34;
 
 import textwrap
-from typing import Iterable, List, Union
+from typing import Iterable, Union
 
 
 def str_wrap(strings: Union[str, Iterable[str]], width: int = 80) -&gt; Iterable[str]:
@@ -69,7 +67,7 @@ def str_replace(
         return [s.replace(pattern, replace_with) for s in strings]
 
 
-def prefixed_count(prefix: str, n: int, plus: float = 0) -&gt; List[str]:
+def prefixed_count(prefix: str, n: int, plus: float = 0) -&gt; list[str]:
     &#34;&#34;&#34;Make an array of 1--&gt;n with the number and some prefix.
 
     Args:
@@ -91,7 +89,7 @@ def prefixed_count(prefix: str, n: int, plus: float = 0) -&gt; List[str]:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.string_functions.prefixed_count"><code class="name flex">
-<span>def <span class="ident">prefixed_count</span></span>(<span>prefix: str, n: int, plus: float = 0) -> List[str]</span>
+<span>def <span class="ident">prefixed_count</span></span>(<span>prefix: str, n: int, plus: float = 0) -> list</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Make an array of 1&ndash;&gt;n with the number and some prefix.</p>
@@ -113,7 +111,7 @@ def prefixed_count(prefix: str, n: int, plus: float = 0) -&gt; List[str]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def prefixed_count(prefix: str, n: int, plus: float = 0) -&gt; List[str]:
+<pre><code class="python">def prefixed_count(prefix: str, n: int, plus: float = 0) -&gt; list[str]:
     &#34;&#34;&#34;Make an array of 1--&gt;n with the number and some prefix.
 
     Args:

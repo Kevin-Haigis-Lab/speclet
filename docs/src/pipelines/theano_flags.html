@@ -39,7 +39,8 @@ def get_theano_compile_dir() -&gt; str:
     Returns:
         str: String of path the compilation directory.
     &#34;&#34;&#34;
-    return theano.config.compiledir
+    compile_dir: str = theano.config.compiledir
+    return compile_dir
 
 
 def get_theano_flags(unique_id: str, theano_compiledir: Optional[str] = None) -&gt; str:
@@ -85,7 +86,8 @@ def get_theano_flags(unique_id: str, theano_compiledir: Optional[str] = None) -&
     Returns:
         str: String of path the compilation directory.
     &#34;&#34;&#34;
-    return theano.config.compiledir</code></pre>
+    compile_dir: str = theano.config.compiledir
+    return compile_dir</code></pre>
 </details>
 </dd>
 <dt id="src.pipelines.theano_flags.get_theano_flags"><code class="name flex">

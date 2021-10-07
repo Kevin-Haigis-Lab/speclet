@@ -29,14 +29,14 @@
 <pre><code class="python">&#34;&#34;&#34;Speclet Model One.&#34;&#34;&#34;
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 import pymc3 as pm
 import theano
 
 from src.data_processing import achilles as achelp
 from src.managers.model_data_managers import CrcDataManager, DataManager
-from src.models.speclet_model import ReplacementsDict, SpecletModel
+from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
 
 
 class SpecletOne(SpecletModel):
@@ -93,11 +93,12 @@ class SpecletOne(SpecletModel):
             data_manager=data_manager,
         )
 
-    def model_specification(self) -&gt; Tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
         &#34;&#34;&#34;Build SpecletOne model.
 
         Returns:
-            Tuple[pm.Model, str]: The model and name of the observed variable.
+            Tuple[pm.Model, ObservedVarName]: The model and name of the observed
+            variable.
         &#34;&#34;&#34;
         data = self.data_manager.get_data()
 
@@ -334,11 +335,12 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             data_manager=data_manager,
         )
 
-    def model_specification(self) -&gt; Tuple[pm.Model, str]:
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
         &#34;&#34;&#34;Build SpecletOne model.
 
         Returns:
-            Tuple[pm.Model, str]: The model and name of the observed variable.
+            Tuple[pm.Model, ObservedVarName]: The model and name of the observed
+            variable.
         &#34;&#34;&#34;
         data = self.data_manager.get_data()
 
@@ -524,24 +526,26 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
 </details>
 </dd>
 <dt id="src.models.speclet_one.SpecletOne.model_specification"><code class="name flex">
-<span>def <span class="ident">model_specification</span></span>(<span>self) -> Tuple[pymc3.model.Model, str]</span>
+<span>def <span class="ident">model_specification</span></span>(<span>self) -> tuple</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Build SpecletOne model.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Tuple[pm.Model, str]</code></dt>
-<dd>The model and name of the observed variable.</dd>
-</dl></div>
+<dt><code>Tuple[pm.Model, ObservedVarName]</code></dt>
+<dd>The model and name of the observed</dd>
+</dl>
+<p>variable.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def model_specification(self) -&gt; Tuple[pm.Model, str]:
+<pre><code class="python">def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
     &#34;&#34;&#34;Build SpecletOne model.
 
     Returns:
-        Tuple[pm.Model, str]: The model and name of the observed variable.
+        Tuple[pm.Model, ObservedVarName]: The model and name of the observed
+        variable.
     &#34;&#34;&#34;
     data = self.data_manager.get_data()
 

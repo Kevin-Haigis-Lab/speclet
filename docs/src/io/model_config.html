@@ -31,7 +31,7 @@
 
 from collections import Counter
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Union
+from typing import Dict, Optional, Union  # &lt;-- need to keep for a Hypothesis test!
 
 import yaml
 from pydantic import BaseModel
@@ -48,13 +48,16 @@ def get_model_config() -&gt; Path:
     Returns:
         Path: Path to a model configuration.
     &#34;&#34;&#34;
-    return project_root_dir() / &#34;models&#34; / &#34;model-configs.yaml&#34;
+    config_path: Path = project_root_dir() / &#34;models&#34; / &#34;model-configs.yaml&#34;
+    return config_path
 
 
 #### ---- Configuration ---- ####
 
 BasicTypes = Union[float, str, int, bool]
 
+# Need to use old typing.Dict here because of a bug in Hypothesis:
+# https://github.com/HypothesisWorks/hypothesis/issues/3080
 PipelineSamplingParameters = Dict[
     SpecletPipeline, Dict[ModelFitMethod, Dict[str, BasicTypes]]
 ]
@@ -67,8 +70,8 @@ class ModelConfig(BaseModel):
     description: str
     model: ModelOption
     config: Optional[Dict[str, Union[ModelFitMethod, BasicTypes]]]
-    fit_methods: List[ModelFitMethod]
-    pipelines: List[SpecletPipeline] = []
+    fit_methods: list[ModelFitMethod]
+    pipelines: list[SpecletPipeline] = []
     debug: bool
     pipeline_sampling_parameters: Optional[PipelineSamplingParameters]
 
@@ -76,7 +79,7 @@ class ModelConfig(BaseModel):
 class ModelConfigs(BaseModel):
     &#34;&#34;&#34;Model configurations.&#34;&#34;&#34;
 
-    configurations: List[ModelConfig]
+    configurations: list[ModelConfig]
 
 
 class FoundMultipleModelConfigurationsError(BaseException):
@@ -104,7 +107,7 @@ def get_model_configurations(path: Path) -&gt; ModelConfigs:
     Returns:
         ModelConfigs: Configuration spec for a model.
     &#34;&#34;&#34;
-    with open(path, &#34;r&#34;) as file:
+    with open(path) as file:
         return ModelConfigs(configurations=yaml.safe_load(file))
 
 
@@ -139,7 +142,7 @@ def get_sampling_kwargs_from_config(
     config: ModelConfig,
     pipeline: SpecletPipeline,
     fit_method: ModelFitMethod,
-) -&gt; Dict[str, BasicTypes]:
+) -&gt; dict[str, BasicTypes]:
     &#34;&#34;&#34;Get the sampling keyword argument dictionary from a model configuration.
 
     Args:
@@ -162,7 +165,7 @@ def get_sampling_kwargs_from_config(
 
 def get_sampling_kwargs(
     config_path: Path, name: str, pipeline: SpecletPipeline, fit_method: ModelFitMethod
-) -&gt; Dict[str, BasicTypes]:
+) -&gt; dict[str, BasicTypes]:
     &#34;&#34;&#34;Get the sampling keyword argument dictionary from a configuration file.
 
     Args:
@@ -203,7 +206,7 @@ class ModelConfigurationNotFound(BaseException):
 class ModelNamesAreNotAllUnique(BaseException):
     &#34;&#34;&#34;Model names are not all unique.&#34;&#34;&#34;
 
-    def __init__(self, nonunique_ids: Set[str]) -&gt; None:
+    def __init__(self, nonunique_ids: set[str]) -&gt; None:
         &#34;&#34;&#34;Create a ModelNamesAreNotAllUnique error.
 
         Args:
@@ -225,7 +228,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
     &#34;&#34;&#34;
     counter = Counter([config.name for config in configs.configurations])
     if not all(i == 1 for i in counter.values()):
-        nonunique_ids = set([v for v, c in counter.items() if c != 1])  # noqa: C403
+        nonunique_ids = {v for v, c in counter.items() if c != 1}  # noqa: C403
         raise ModelNamesAreNotAllUnique(nonunique_ids)</code></pre>
 </details>
 </section>
@@ -266,7 +269,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
     &#34;&#34;&#34;
     counter = Counter([config.name for config in configs.configurations])
     if not all(i == 1 for i in counter.values()):
-        nonunique_ids = set([v for v, c in counter.items() if c != 1])  # noqa: C403
+        nonunique_ids = {v for v, c in counter.items() if c != 1}  # noqa: C403
         raise ModelNamesAreNotAllUnique(nonunique_ids)</code></pre>
 </details>
 </dd>
@@ -345,7 +348,8 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
     Returns:
         Path: Path to a model configuration.
     &#34;&#34;&#34;
-    return project_root_dir() / &#34;models&#34; / &#34;model-configs.yaml&#34;</code></pre>
+    config_path: Path = project_root_dir() / &#34;models&#34; / &#34;model-configs.yaml&#34;
+    return config_path</code></pre>
 </details>
 </dd>
 <dt id="src.io.model_config.get_model_configurations"><code class="name flex">
@@ -376,12 +380,12 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
     Returns:
         ModelConfigs: Configuration spec for a model.
     &#34;&#34;&#34;
-    with open(path, &#34;r&#34;) as file:
+    with open(path) as file:
         return ModelConfigs(configurations=yaml.safe_load(file))</code></pre>
 </details>
 </dd>
 <dt id="src.io.model_config.get_sampling_kwargs"><code class="name flex">
-<span>def <span class="ident">get_sampling_kwargs</span></span>(<span>config_path: pathlib.Path, name: str, pipeline: <a title="src.project_enums.SpecletPipeline" href="../project_enums.html#src.project_enums.SpecletPipeline">SpecletPipeline</a>, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>) -> Dict[str, Union[float, str, int, bool]]</span>
+<span>def <span class="ident">get_sampling_kwargs</span></span>(<span>config_path: pathlib.Path, name: str, pipeline: <a title="src.project_enums.SpecletPipeline" href="../project_enums.html#src.project_enums.SpecletPipeline">SpecletPipeline</a>, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>) -> dict</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the sampling keyword argument dictionary from a configuration file.</p>
@@ -414,7 +418,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
 </summary>
 <pre><code class="python">def get_sampling_kwargs(
     config_path: Path, name: str, pipeline: SpecletPipeline, fit_method: ModelFitMethod
-) -&gt; Dict[str, BasicTypes]:
+) -&gt; dict[str, BasicTypes]:
     &#34;&#34;&#34;Get the sampling keyword argument dictionary from a configuration file.
 
     Args:
@@ -439,7 +443,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
 </details>
 </dd>
 <dt id="src.io.model_config.get_sampling_kwargs_from_config"><code class="name flex">
-<span>def <span class="ident">get_sampling_kwargs_from_config</span></span>(<span>config: <a title="src.io.model_config.ModelConfig" href="#src.io.model_config.ModelConfig">ModelConfig</a>, pipeline: <a title="src.project_enums.SpecletPipeline" href="../project_enums.html#src.project_enums.SpecletPipeline">SpecletPipeline</a>, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>) -> Dict[str, Union[float, str, int, bool]]</span>
+<span>def <span class="ident">get_sampling_kwargs_from_config</span></span>(<span>config: <a title="src.io.model_config.ModelConfig" href="#src.io.model_config.ModelConfig">ModelConfig</a>, pipeline: <a title="src.project_enums.SpecletPipeline" href="../project_enums.html#src.project_enums.SpecletPipeline">SpecletPipeline</a>, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>) -> dict</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the sampling keyword argument dictionary from a model configuration.</p>
@@ -466,7 +470,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
     config: ModelConfig,
     pipeline: SpecletPipeline,
     fit_method: ModelFitMethod,
-) -&gt; Dict[str, BasicTypes]:
+) -&gt; dict[str, BasicTypes]:
     &#34;&#34;&#34;Get the sampling keyword argument dictionary from a model configuration.
 
     Args:
@@ -532,7 +536,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
 </dd>
 <dt id="src.io.model_config.ModelConfig"><code class="flex name class">
 <span>class <span class="ident">ModelConfig</span></span>
-<span>(</span><span>*, name: str, description: str, model: <a title="src.project_enums.ModelOption" href="../project_enums.html#src.project_enums.ModelOption">ModelOption</a>, config: Dict[str, Union[src.project_enums.ModelFitMethod, float, str, int, bool]] = None, fit_methods: List[<a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>], pipelines: List[<a title="src.project_enums.SpecletPipeline" href="../project_enums.html#src.project_enums.SpecletPipeline">SpecletPipeline</a>] = [], debug: bool, pipeline_sampling_parameters: Dict[src.project_enums.SpecletPipeline, Dict[src.project_enums.ModelFitMethod, Dict[str, Union[float, str, int, bool]]]] = None)</span>
+<span>(</span><span>*, name: str, description: str, model: <a title="src.project_enums.ModelOption" href="../project_enums.html#src.project_enums.ModelOption">ModelOption</a>, config: Dict[str, Union[src.project_enums.ModelFitMethod, float, str, int, bool]] = None, fit_methods: list, pipelines: list = [], debug: bool, pipeline_sampling_parameters: Dict[src.project_enums.SpecletPipeline, Dict[src.project_enums.ModelFitMethod, Dict[str, Union[float, str, int, bool]]]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Model configuration format.</p>
@@ -549,8 +553,8 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
     description: str
     model: ModelOption
     config: Optional[Dict[str, Union[ModelFitMethod, BasicTypes]]]
-    fit_methods: List[ModelFitMethod]
-    pipelines: List[SpecletPipeline] = []
+    fit_methods: list[ModelFitMethod]
+    pipelines: list[SpecletPipeline] = []
     debug: bool
     pipeline_sampling_parameters: Optional[PipelineSamplingParameters]</code></pre>
 </details>
@@ -562,7 +566,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
 </dd>
 <dt id="src.io.model_config.ModelConfigs"><code class="flex name class">
 <span>class <span class="ident">ModelConfigs</span></span>
-<span>(</span><span>*, configurations: List[<a title="src.io.model_config.ModelConfig" href="#src.io.model_config.ModelConfig">ModelConfig</a>])</span>
+<span>(</span><span>*, configurations: list)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Model configurations.</p>
@@ -575,7 +579,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
 <pre><code class="python">class ModelConfigs(BaseModel):
     &#34;&#34;&#34;Model configurations.&#34;&#34;&#34;
 
-    configurations: List[ModelConfig]</code></pre>
+    configurations: list[ModelConfig]</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -619,7 +623,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
 </dd>
 <dt id="src.io.model_config.ModelNamesAreNotAllUnique"><code class="flex name class">
 <span>class <span class="ident">ModelNamesAreNotAllUnique</span></span>
-<span>(</span><span>nonunique_ids: Set[str])</span>
+<span>(</span><span>nonunique_ids: set)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Model names are not all unique.</p>
@@ -636,7 +640,7 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; None:
 <pre><code class="python">class ModelNamesAreNotAllUnique(BaseException):
     &#34;&#34;&#34;Model names are not all unique.&#34;&#34;&#34;
 
-    def __init__(self, nonunique_ids: Set[str]) -&gt; None:
+    def __init__(self, nonunique_ids: set[str]) -&gt; None:
         &#34;&#34;&#34;Create a ModelNamesAreNotAllUnique error.
 
         Args:

@@ -118,30 +118,34 @@ localrules:
 
 rule all:
     input:
-        # rules.tidy_ccle.output
+        # rules.tidy_ccle
         MODELING_DATA_DIR / "ccle_expression.csv",
         MODELING_DATA_DIR / "ccle_segment_cn.csv",
         MODELING_DATA_DIR / "ccle_gene_cn.csv",
         MODELING_DATA_DIR / "ccle_mutations.csv",
         MODELING_DATA_DIR / "ccle_sample_info.csv",
-        # rules.tidy_depmap.output
+        # rules.tidy_depmap
         MODELING_DATA_DIR / "known_essentials.csv",
         MODELING_DATA_DIR / "achilles_log_fold_change_filtered.csv",
         MODELING_DATA_DIR / "achilles_read_counts.csv",
         MODELING_DATA_DIR / "crispr_gene_effect.csv",
-        # rules.tidy_score.output
+        # rules.tidy_score
         MODELING_DATA_DIR / "score_log_fold_change_filtered.csv",
         MODELING_DATA_DIR / "score_read_counts.csv",
-        # rules.combine_data.output
+        # rules.combine_data
         MODELING_DATA_DIR / "depmap_modeling_dataframe.csv",
         # rules.modeling_data_subsets.output
         MODELING_DATA_DIR / "depmap_modeling_dataframe_crc.csv",
         MODELING_DATA_DIR / "depmap_modeling_dataframe_crc-subsample.csv",
         TESTS_DIR / "depmap_test_data.csv",
-        # rules.auxillary_data_subsets.output
+        # rules.auxillary_data_subsets
         MODELING_DATA_DIR / "copy_number_data_samples.npy",
         # rules.clean_sanger_cgc.output
         MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",
+        # rules.screen_total_counts_tables
+        final_counts_table_out=MODELING_DATA_DIR
+        / "depmap_replicate_total_read_counts.csv",
+        pdna_table_out=MODELING_DATA_DIR / "depmap_pdna_total_read_counts.csv",
 
 
 # ---- Prepare raw CCLE data ----
@@ -409,6 +413,26 @@ rule check_depmap_modeling_data:
         "nbqa black {input.check_nb} --nbqa-mutate && "
         "nbqa isort {input.check_nb} --nbqa-mutate && "
         "jupyter nbconvert --to markdown {input.check_nb}"
+
+
+rule screen_total_counts_tables:
+    input:
+        depmap_modeling_df=rules.combine_data.output.out_file,
+        achillles_pdna_df=rules.prep_achilles_pdna.output.achilles_batch_pdna_counts,
+        score_pdna_df=rules.extract_score_pdna.output.score_pdna,
+    output:
+        final_counts_table_out=MODELING_DATA_DIR
+        / "depmap_replicate_total_read_counts.csv",
+        pdna_table_out=MODELING_DATA_DIR / "depmap_pdna_total_read_counts.csv",
+    conda:
+        ENVIRONMENT_YAML
+    shell:
+        "munge/065_total-read-count-tables.py"
+        " {input.depmap_modeling_df}"
+        " {input.achillles_pdna_df}"
+        " {input.score_pdna_df}"
+        " {output.final_counts_table_out}"
+        " {output.pdna_table_out}"
 
 
 # ---- Generate additional useful files

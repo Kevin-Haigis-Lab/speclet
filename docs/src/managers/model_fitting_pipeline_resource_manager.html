@@ -242,7 +242,7 @@ class ModelFittingPipelineResourceManager(PipelineResourceManager):
         &#34;&#34;&#34;
         return self.config.debug
 
-    def is_debug_cli(self):
+    def is_debug_cli(self) -&gt; str:
         &#34;&#34;&#34;Get the correct flag for indicating debug mode through a CLI.
 
         Returns:
@@ -379,7 +379,7 @@ class ModelFittingPipelineResourceManager(PipelineResourceManager):
         &#34;&#34;&#34;
         return self.config.debug
 
-    def is_debug_cli(self):
+    def is_debug_cli(self) -&gt; str:
         &#34;&#34;&#34;Get the correct flag for indicating debug mode through a CLI.
 
         Returns:
@@ -512,7 +512,7 @@ def time(self) -&gt; str:
 <h3>Methods</h3>
 <dl>
 <dt id="src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.is_debug_cli"><code class="name flex">
-<span>def <span class="ident">is_debug_cli</span></span>(<span>self)</span>
+<span>def <span class="ident">is_debug_cli</span></span>(<span>self) -> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the correct flag for indicating debug mode through a CLI.</p>
@@ -525,7 +525,7 @@ def time(self) -&gt; str:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def is_debug_cli(self):
+<pre><code class="python">def is_debug_cli(self) -&gt; str:
     &#34;&#34;&#34;Get the correct flag for indicating debug mode through a CLI.
 
     Returns:

@@ -31,7 +31,7 @@
 &#34;&#34;&#34;Functions for modifying the everyday pandas DataFrame.&#34;&#34;&#34;
 
 import warnings
-from typing import Any, Iterable, List, Tuple, Union
+from typing import Any, Iterable, Union
 
 import janitor  # noqa: F401
 import numpy as np
@@ -55,7 +55,7 @@ def make_cat(
     Returns:
         pd.DataFrame: The modified DataFrame.
     &#34;&#34;&#34;
-    categories: List[Any] = df[col].unique().tolist()
+    categories: list[Any] = df[col].unique().tolist()
     if sort_cats:
         categories.sort()
     df[col] = pd.Categorical(df[col], categories=categories, ordered=ordered)
@@ -75,7 +75,7 @@ def get_indices(df: pd.DataFrame, col: str) -&gt; np.ndarray:
     return df[col].cat.codes.to_numpy()
 
 
-def get_indices_and_count(df: pd.DataFrame, col: str) -&gt; Tuple[np.ndarray, int]:
+def get_indices_and_count(df: pd.DataFrame, col: str) -&gt; tuple[np.ndarray, int]:
     &#34;&#34;&#34;Get the indices and number of unique values for a categorical column.
 
     Args:
@@ -135,7 +135,7 @@ def nunique(x: Iterable[Any]) -&gt; int:
 
 
 def center_column_grouped_dataframe(
-    df: pd.DataFrame, grp_col: Union[str, List[str]], val_col: str, new_col_name: str
+    df: pd.DataFrame, grp_col: Union[str, list[str]], val_col: str, new_col_name: str
 ) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Center the values of a column after grouping by another.
 
@@ -204,7 +204,7 @@ def dataframe_to_matrix(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.data_processing.common.center_column_grouped_dataframe"><code class="name flex">
-<span>def <span class="ident">center_column_grouped_dataframe</span></span>(<span>df: pandas.core.frame.DataFrame, grp_col: Union[str, List[str]], val_col: str, new_col_name: str) -> pandas.core.frame.DataFrame</span>
+<span>def <span class="ident">center_column_grouped_dataframe</span></span>(<span>df: pandas.core.frame.DataFrame, grp_col: Union[str, list[str]], val_col: str, new_col_name: str) -> pandas.core.frame.DataFrame</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Center the values of a column after grouping by another.</p>
@@ -229,7 +229,7 @@ def dataframe_to_matrix(
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def center_column_grouped_dataframe(
-    df: pd.DataFrame, grp_col: Union[str, List[str]], val_col: str, new_col_name: str
+    df: pd.DataFrame, grp_col: Union[str, list[str]], val_col: str, new_col_name: str
 ) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Center the values of a column after grouping by another.
 
@@ -382,7 +382,7 @@ def dataframe_to_matrix(
 </details>
 </dd>
 <dt id="src.data_processing.common.get_indices_and_count"><code class="name flex">
-<span>def <span class="ident">get_indices_and_count</span></span>(<span>df: pandas.core.frame.DataFrame, col: str) -> Tuple[numpy.ndarray, int]</span>
+<span>def <span class="ident">get_indices_and_count</span></span>(<span>df: pandas.core.frame.DataFrame, col: str) -> tuple</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the indices and number of unique values for a categorical column.</p>
@@ -403,7 +403,7 @@ values in the column.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_indices_and_count(df: pd.DataFrame, col: str) -&gt; Tuple[np.ndarray, int]:
+<pre><code class="python">def get_indices_and_count(df: pd.DataFrame, col: str) -&gt; tuple[np.ndarray, int]:
     &#34;&#34;&#34;Get the indices and number of unique values for a categorical column.
 
     Args:
@@ -458,7 +458,7 @@ Defaults to False.</dd>
     Returns:
         pd.DataFrame: The modified DataFrame.
     &#34;&#34;&#34;
-    categories: List[Any] = df[col].unique().tolist()
+    categories: list[Any] = df[col].unique().tolist()
     if sort_cats:
         categories.sort()
     df[col] = pd.Categorical(df[col], categories=categories, ordered=ordered)

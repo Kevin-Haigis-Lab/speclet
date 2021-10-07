@@ -26,15 +26,13 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">#!/usr/bin/env python3
+<pre><code class="python">&#34;&#34;&#34;My colors and color palettes.&#34;&#34;&#34;
 
-&#34;&#34;&#34;My colors and color palettes.&#34;&#34;&#34;
-
-from enum import Enum, EnumMeta
-from typing import Dict
+from enum import Enum
+from typing import Literal
 
 
-class SeabornColor(str, Enum):
+class SeabornColor(Enum):
     &#34;&#34;&#34;Colors from the &#39;seaborn&#39; package.&#34;&#34;&#34;
 
     ORANGE = &#34;#ED854A&#34;
@@ -43,7 +41,7 @@ class SeabornColor(str, Enum):
     RED = &#34;#D65F5F&#34;
 
 
-class ModelColors(str, Enum):
+class ModelColors(Enum):
     &#34;&#34;&#34;Colors for specific models.&#34;&#34;&#34;
 
     CERES = &#34;#417BB1&#34;
@@ -52,25 +50,29 @@ class ModelColors(str, Enum):
     SPECLET_TWO = &#34;#DE522F&#34;
 
 
-class FitMethodColors(str, Enum):
+class FitMethodColors(Enum):
     &#34;&#34;&#34;Colors for the different ways to fit a model.&#34;&#34;&#34;
 
     PYMC3_MCMC = &#34;#F57E3F&#34;
     PYMC3_ADVI = &#34;#0AA8A2&#34;
 
 
-def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
+ColorPalette = Literal[SeabornColor, ModelColors, FitMethodColors]  # type: ignore
+name = str
+color = str
+
+
+def make_pal(colors: ColorPalette) -&gt; dict[name, color]:
     &#34;&#34;&#34;Convert an Enum to a usable color palette.
 
     Args:
-        colors (EnumMeta): Enum to convert to a palette.
+        colors (ColorPalette): Color palette Enum to convert to dictionary.
 
     Returns:
-        (Dict[str, str]) Dictionary mapping of enum.
+        (dict[name, color]) Dictionary mapping of name to color (both strings).
     &#34;&#34;&#34;
-    d: Dict[str, str] = {}
-    for c in colors:  # type: ignore
-        assert isinstance(c.name, str) and isinstance(c.value, str)
+    d: dict[str, str] = {}
+    for c in colors:
         d[c.name] = c.value
     return d</code></pre>
 </details>
@@ -83,33 +85,32 @@ def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.plot.color_pal.make_pal"><code class="name flex">
-<span>def <span class="ident">make_pal</span></span>(<span>colors: enum.EnumMeta) -> Dict[str, str]</span>
+<span>def <span class="ident">make_pal</span></span>(<span>colors: Literal[src.plot.color_pal.SeabornColor, src.plot.color_pal.ModelColors, src.plot.color_pal.FitMethodColors]) -> dict</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Convert an Enum to a usable color palette.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>colors</code></strong> :&ensp;<code>EnumMeta</code></dt>
-<dd>Enum to convert to a palette.</dd>
+<dt><strong><code>colors</code></strong> :&ensp;<code>ColorPalette</code></dt>
+<dd>Color palette Enum to convert to dictionary.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>(Dict[str, str]) Dictionary mapping of enum.</p></div>
+<p>(dict[name, color]) Dictionary mapping of name to color (both strings).</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
+<pre><code class="python">def make_pal(colors: ColorPalette) -&gt; dict[name, color]:
     &#34;&#34;&#34;Convert an Enum to a usable color palette.
 
     Args:
-        colors (EnumMeta): Enum to convert to a palette.
+        colors (ColorPalette): Color palette Enum to convert to dictionary.
 
     Returns:
-        (Dict[str, str]) Dictionary mapping of enum.
+        (dict[name, color]) Dictionary mapping of name to color (both strings).
     &#34;&#34;&#34;
-    d: Dict[str, str] = {}
-    for c in colors:  # type: ignore
-        assert isinstance(c.name, str) and isinstance(c.value, str)
+    d: dict[str, str] = {}
+    for c in colors:
         d[c.name] = c.value
     return d</code></pre>
 </details>
@@ -129,7 +130,7 @@ def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class FitMethodColors(str, Enum):
+<pre><code class="python">class FitMethodColors(Enum):
     &#34;&#34;&#34;Colors for the different ways to fit a model.&#34;&#34;&#34;
 
     PYMC3_MCMC = &#34;#F57E3F&#34;
@@ -137,7 +138,6 @@ def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>builtins.str</li>
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
@@ -162,7 +162,7 @@ def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class ModelColors(str, Enum):
+<pre><code class="python">class ModelColors(Enum):
     &#34;&#34;&#34;Colors for specific models.&#34;&#34;&#34;
 
     CERES = &#34;#417BB1&#34;
@@ -172,7 +172,6 @@ def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>builtins.str</li>
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
@@ -205,7 +204,7 @@ def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class SeabornColor(str, Enum):
+<pre><code class="python">class SeabornColor(Enum):
     &#34;&#34;&#34;Colors from the &#39;seaborn&#39; package.&#34;&#34;&#34;
 
     ORANGE = &#34;#ED854A&#34;
@@ -215,7 +214,6 @@ def make_pal(colors: EnumMeta) -&gt; Dict[str, str]:
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>builtins.str</li>
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>

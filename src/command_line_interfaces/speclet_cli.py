@@ -3,9 +3,10 @@
 """Commands for general project needs."""
 
 import logging
+import os
 import tempfile
 from pathlib import Path
-from typing import Collection, Optional
+from typing import Optional
 
 import pymc3 as pm
 import tqdm
@@ -14,13 +15,74 @@ import typer
 from src.io import model_config
 from src.loggers import set_console_handler_level
 from src.models import configuration
-from src.project_enums import MockDataSize
+from src.project_enums import MockDataSize, ModelOption
 
 app = typer.Typer()
 
 set_console_handler_level(logging.ERROR)
 
-#### ---- Make model graph images ---- ####
+
+# ---- Make document with model details ----
+
+
+def _write_docstring(doc: Optional[str], file: Path) -> bool:
+    if doc is None:
+        return False
+    with open(file, "a") as f:
+        f.write(doc)
+        f.write("\n---\n\n")
+    return True
+
+
+def _remove_indents(file: Path) -> None:
+    clean_lines: list[str] = []
+    with open(file, "r") as open_file:
+        for line in open_file:
+            clean_lines.append(line.strip())
+    with open(file, "w") as open_file:
+        open_file.write("\n".join(clean_lines))
+    return None
+
+
+@app.command()
+def model_docs(output_md: Optional[Path] = None, overwrite: bool = True) -> None:
+    """Make a document with all SpecletModel descriptions.
+
+    Args:
+        output_md (Optional[Path], optional): Output file path. Defaults to None.
+        overwrite (bool, optional): Overwrite the existing file? Defaults to True.
+
+    Returns:
+        None: None
+    """
+    if output_md is None:
+        output_md = Path("models", "model-docs.md")
+
+    if output_md.exists() and overwrite:
+        typer.secho("Removing old file.", fg=typer.colors.BRIGHT_BLACK)
+        os.remove(output_md)
+    elif output_md.exists():
+        typer.secho(
+            "File already exists and will be added to.", fg=typer.colors.BRIGHT_BLACK
+        )
+
+    for model_opt in ModelOption:
+        if model_opt in {ModelOption.SPECLET_TEST_MODEL, ModelOption.SPECLET_SIMPLE}:
+            continue
+
+        model_cls = configuration.get_model_class(model_opt)
+        if _write_docstring(model_cls.__doc__, file=output_md):
+            typer.secho(f"doc written for '{model_opt.value}'", fg=typer.colors.BLUE)
+        else:
+            typer.secho(
+                f"no docstring found for '{model_opt.value}'", fg=typer.colors.RED
+            )
+    _remove_indents(output_md)
+
+    return None
+
+
+# ---- Make model graph images ----
 
 
 @app.command()
@@ -41,7 +103,7 @@ def model_graphs(
           Defaults to False.
     """
     if output_dir is None:
-        output_dir = Path("models/model-graph-images")
+        output_dir = Path("models", "model-graph-images")
     if config_path is None:
         config_path = model_config.get_model_config()
     if not output_dir.exists():
@@ -69,7 +131,7 @@ def model_graphs(
     return
 
 
-#### ---- Count number of lines of code ---- ####
+# ---- Count number of lines of code ----
 
 
 def _count_lines_in_file(f: Path) -> int:
@@ -90,13 +152,13 @@ def _count_lines_in_file(f: Path) -> int:
 
 def _recursively_count_lines_in_dir(
     dir: Path,
-    file_types: Optional[Collection[str]] = None,
-    ignore_dirs: Optional[Collection[str]] = None,
+    file_types: Optional[set[str]] = None,
+    ignore_dirs: Optional[set[str]] = None,
 ) -> int:
     n_lines = 0
 
     if ignore_dirs is None:
-        ignore_dirs = []
+        ignore_dirs = set()
 
     for p in dir.iterdir():
         if p.name in ignore_dirs:
@@ -112,30 +174,13 @@ def _recursively_count_lines_in_dir(
 
 
 @app.command()
-def lines_of_code(
-    file_types: Collection[str] = (".py", ".smk", ".sh", ".zsh", ".R", ".r"),
-    dirs: Collection[Path] = (
-        Path("src"),
-        Path("pipelines"),
-        Path("tests"),
-        Path("munge"),
-        Path("data"),
-    ),
-    ignore_dirs: Optional[Collection[str]] = (
-        "__pycache__",
-        ".ipynb_checkpoints",
-        ".DS_Store",
-    ),
-) -> None:
-    """Count the lines of code.
+def lines_of_code() -> None:
+    """Count the lines of code in the project."""
+    # Parameters for the search
+    file_types = {".py", ".smk", ".sh", ".zsh", ".R", ".r"}
+    dirs = {Path("src"), Path("pipelines"), Path("tests"), Path("munge"), Path("data")}
+    ignore_dirs = {"__pycache__", ".ipynb_checkpoints", ".DS_Store"}
 
-    Args:
-        file_types (list[str], optional): File types to include. Defaults to list of
-          common file types for code.
-        dirs (list[Path], optional): Directories to search recursively.
-        ignore_dirs (list[str], optional): Names of subdirectories to ignore. Defaults
-          to some standard caching and checkpoint directories.
-    """
     line_counts: dict[Path, int] = {d: -1 for d in dirs}
     for dir in dirs:
         if not dir.exists() and dir.is_dir():

@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from src.data_processing import common as dphelp
 from src.data_processing.vectors import careful_zscore, squish_array
+from src.io.data_io import DataFile, data_path
 
 #### ---- Data manipulation ---- ####
 
@@ -460,3 +461,93 @@ def subsample_achilles_data(
     sub_df = sub_df[sub_df.hugo_symbol.isin(genes)]
     sub_df = sub_df[sub_df.depmap_id.isin(cell_lines)]
     return sub_df
+
+
+def append_total_read_counts(
+    achilles_df: pd.DataFrame,
+    final_reads_total: Optional[Path] = None,
+    p_dna_reads_total: Optional[Path] = None,
+    final_reads_total_colname: str = "counts_final_total",
+    initial_reads_total_colname: str = "counts_initial_total",
+) -> pd.DataFrame:
+    """Append columns with total read count data.
+
+    Args:
+        achilles_df (pd.DataFrame): Achilles data frame.
+        final_reads_total (Optional[Path], optional): Path to the final read totals
+          table (as a CSV). Defaults to None.
+        p_dna_reads_total (Optional[Path], optional): Path to the initial read totals
+          table (as a CSV). Defaults to None.
+        final_reads_total_colname (str, optional): Name for the column with the total
+          number of final read counts. Defaults to "counts_final_total".
+        initial_reads_total_colname (str, optional): Name for the column with the total
+          number of initial read counts. Defaults to "counts_initial_total".
+
+    Returns:
+        pd.DataFrame: The initial data frame with two new columns.
+    """
+    if final_reads_total is None:
+        final_reads_total = data_path(DataFile.SCREEN_READ_COUNT_TOTALS)
+    if p_dna_reads_total is None:
+        p_dna_reads_total = data_path(DataFile.PDNA_READ_COUNT_TOTALS)
+
+    final_reads_total_df = pd.read_csv(final_reads_total)
+    p_dna_reads_total_df = pd.read_csv(p_dna_reads_total)
+
+    return (
+        achilles_df.merge(final_reads_total_df, on="replicate_id")
+        .rename(columns={"total_reads": final_reads_total_colname})
+        .merge(p_dna_reads_total_df, on="p_dna_batch")
+        .rename(columns={"total_reads": initial_reads_total_colname})
+    )
+
+
+def add_useful_read_count_columns(
+    achilles_df: pd.DataFrame,
+    counts_final: str = "counts_final",
+    counts_final_total: str = "counts_final_total",
+    counts_initial: str = "counts_initial",
+    counts_initial_total: str = "counts_initial_total",
+    counts_final_rpm: str = "counts_final_rpm",
+    counts_initial_adj: str = "counts_initial_adj",
+    copy: bool = False,
+) -> pd.DataFrame:
+    """Add some useful columns for modeling read count data.
+
+    - final counts RPM =
+      \\(1^6 \\times (c_\\text{final} / \\Sigma c_\\text{final}) + 1\\)
+    - adjusted initial counts = \\((c_\\text{initial} / \\Sigma c_\\text{initial})
+      \\times \\Sigma c_\\text{final}\\)
+
+    Args:
+        achilles_df (pd.DataFrame): Achilles data frame
+        counts_final (str, optional): Column of final read counts. Defaults to
+          "counts_final".
+        counts_final_total (str, optional): Column of total final read counts. Defaults
+          to "counts_final_total".
+        counts_initial (str, optional): Column of initial read counts. Defaults to
+          "counts_initial".
+        counts_initial_total (str, optional): Column of total initial read counts.
+          Defaults to "counts_initial_total".
+        counts_final_rpm (str, optional): Column name for the new column with the final
+          read counts in "reads per million" (RPM). Defaults to "counts_final_rpm".
+        counts_initial_adj (str, optional): Column name for the new column with the
+          adjusted initial read counts. Defaults to "counts_initial_adj".
+        copy (bool, optional): First copy the data frame? Defaults to False.
+
+    Returns:
+        pd.DataFrame: The original data frame with the new columns append.
+    """
+    if copy:
+        achilles_df = achilles_df.copy()
+
+    # 1e6 * (counts_f / Σ counts_f) + 1
+    achilles_df[counts_final_rpm] = (
+        1e6 * (achilles_df[counts_final] / achilles_df[counts_final_total]) + 1
+    )
+    # (counts_i / Σ counts_i) * Σ counts_f
+    achilles_df[counts_initial_adj] = (
+        achilles_df[counts_initial] / achilles_df[counts_initial_total]
+    ) * achilles_df[counts_final_total]
+
+    return achilles_df

@@ -19,7 +19,7 @@ def test_margin_values() -> None:
 
 
 def test_margin_unit_enum() -> None:
-    values = [1, 2, 3, 4, plotnine_helpers.PlotnineUnits.inches]
+    values = [1, 2, 3, 4, plotnine_helpers.PlotnineUnits.INCHES]
     m = plotnine_helpers.margin(*values)
     for key, val in zip(["t", "b", "l", "r", "units"], values):
         assert m[key] == val

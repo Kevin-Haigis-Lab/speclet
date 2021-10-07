@@ -28,7 +28,7 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Common and general vector operations.&#34;&#34;&#34;
 
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
 import numpy as np
 from scipy import stats
@@ -122,7 +122,7 @@ def careful_zscore(
         return zscale(transform(x))
 
 
-def index_array_by_list(ary: np.ndarray, idx: List[int]) -&gt; np.ndarray:
+def index_array_by_list(ary: np.ndarray, idx: list[int]) -&gt; np.ndarray:
     &#34;&#34;&#34;Extract a value from an array by a list of indices.
 
     The input array may be any number of dimensions and the indices in the list each
@@ -239,7 +239,7 @@ which is equivalent to an identity transform.</dd>
 </details>
 </dd>
 <dt id="src.data_processing.vectors.index_array_by_list"><code class="name flex">
-<span>def <span class="ident">index_array_by_list</span></span>(<span>ary: numpy.ndarray, idx: List[int]) -> numpy.ndarray</span>
+<span>def <span class="ident">index_array_by_list</span></span>(<span>ary: numpy.ndarray, idx: list) -> numpy.ndarray</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Extract a value from an array by a list of indices.</p>
@@ -265,7 +265,7 @@ and contain a single value.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def index_array_by_list(ary: np.ndarray, idx: List[int]) -&gt; np.ndarray:
+<pre><code class="python">def index_array_by_list(ary: np.ndarray, idx: list[int]) -&gt; np.ndarray:
     &#34;&#34;&#34;Extract a value from an array by a list of indices.
 
     The input array may be any number of dimensions and the indices in the list each
