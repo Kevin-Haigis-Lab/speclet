@@ -1,6 +1,5 @@
 """Managers of model data."""
 
-
 import abc
 from pathlib import Path
 from typing import Callable, Optional, Union
@@ -213,15 +212,15 @@ class CrcDataManager(DataManager):
         self.broad_only = broad_only
 
         self.transformations = [
-            CrcDataManager._drop_sgrnas_that_map_to_multiple_genes,
-            CrcDataManager._drop_missing_copynumber,
+            achelp.drop_sgrnas_that_map_to_multiple_genes,
+            achelp.drop_missing_copynumber,
         ]
 
         if transformations is not None:
             self.transformations += transformations
 
         if broad_only:
-            self.transformations.insert(0, CrcDataManager._filter_for_broad_source_only)
+            self.transformations.insert(0, achelp.filter_for_broad_source_only)
 
     def get_data_path(self) -> Path:
         """Get the path for the data set to use.
@@ -243,37 +242,6 @@ class CrcDataManager(DataManager):
             return 1000
         else:
             return 10000
-
-    @staticmethod
-    def _filter_for_broad_source_only(df: pd.DataFrame) -> pd.DataFrame:
-        return df[df["screen"] == "broad"].reset_index(drop=True)
-
-    @staticmethod
-    def _get_sgrnas_that_map_to_multiple_genes(df: pd.DataFrame) -> np.ndarray:
-        return (
-            achelp.make_sgrna_to_gene_mapping_df(df)
-            .groupby(["sgrna"])["hugo_symbol"]
-            .count()
-            .reset_index()
-            .query("hugo_symbol > 1")["sgrna"]
-            .unique()
-        )
-
-    @staticmethod
-    def _drop_sgrnas_that_map_to_multiple_genes(df: pd.DataFrame) -> pd.DataFrame:
-        sgrnas_to_remove = CrcDataManager._get_sgrnas_that_map_to_multiple_genes(df)
-        logger.warning(
-            f"Dropping {len(sgrnas_to_remove)} sgRNA that map to multiple genes."
-        )
-        df_new = df.copy()[~df["sgrna"].isin(sgrnas_to_remove)]
-        return df_new
-
-    @staticmethod
-    def _drop_missing_copynumber(df: pd.DataFrame) -> pd.DataFrame:
-        df_new = df.copy()[~df["copy_number"].isna()]
-        size_diff = df.shape[0] - df_new.shape[0]
-        logger.warning(f"Dropping {size_diff} data points with missing copy number.")
-        return df_new
 
     def _load_data(self) -> pd.DataFrame:
         """Load CRC data."""
