@@ -5,26 +5,18 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from src.managers.model_data_managers import CrcDataManager
 from src.misc import test_helpers as th
 from src.modeling import pymc3_helpers as pmhelp
 from src.models.speclet_seven import SpecletSeven, SpecletSevenConfiguration
 
 
-@pytest.fixture(autouse=True)
-def data_manager_use_test_data(monkeypatch: pytest.MonkeyPatch) -> None:
-    def mock_get_data_path(*args: Any, **kwargs: Any) -> Path:
-        return Path("tests", "depmap_test_data.csv")
-
-    monkeypatch.setattr(CrcDataManager, "get_data_path", mock_get_data_path)
-
-
 class TestSpecletSeven:
     @pytest.fixture(scope="function")
-    def sp7(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> SpecletSeven:
-        return SpecletSeven(
-            "test-model", root_cache_dir=tmp_path, data_manager=mock_crc_dm, debug=True
-        )
+    def sp7(
+        self,
+        tmp_path: Path,
+    ) -> SpecletSeven:
+        return SpecletSeven("test-model", root_cache_dir=tmp_path, debug=True)
 
     def test_init(self, sp7: SpecletSeven) -> None:
         assert sp7.model is None
@@ -72,7 +64,6 @@ class TestSpecletSeven:
     def test_changing_configuration_resets_model(
         self,
         tmp_path: Path,
-        mock_crc_dm: CrcDataManager,
         config: SpecletSevenConfiguration,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
@@ -80,12 +71,7 @@ class TestSpecletSeven:
             return "my-test-model", "another-string"
 
         monkeypatch.setattr(SpecletSeven, "model_specification", mock_build_model)
-        sp7 = SpecletSeven(
-            "test-model",
-            root_cache_dir=tmp_path,
-            debug=True,
-            data_manager=mock_crc_dm,
-        )
+        sp7 = SpecletSeven("test-model", root_cache_dir=tmp_path, debug=True)
         th.assert_changing_configuration_resets_model(
             sp7, new_config=config, default_config=SpecletSevenConfiguration()
         )
@@ -98,15 +84,10 @@ class TestSpecletSeven:
     def test_model_parameterizations(
         self,
         tmp_path: Path,
-        mock_crc_dm: CrcDataManager,
         config: SpecletSevenConfiguration,
     ) -> None:
         sp7 = SpecletSeven(
-            "test-model",
-            root_cache_dir=tmp_path,
-            debug=True,
-            data_manager=mock_crc_dm,
-            config=config,
+            "test-model", root_cache_dir=tmp_path, debug=True, config=config
         )
 
         optional_param_to_name: dict[str, str] = {

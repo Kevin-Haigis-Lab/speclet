@@ -1,7 +1,7 @@
 import os
 from datetime import timedelta
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Final, Union
 
 import arviz as az
 import numpy as np
@@ -11,10 +11,38 @@ import pytest
 import seaborn as sns
 from hypothesis import HealthCheck, Verbosity, settings
 
-from src.managers.model_data_managers import CrcDataManager
+import src.managers.data_managers
+from src.io import data_io
+from src.io.data_io import DataFile
 
-#### ---- Callable fixtures ---- ####
+TEST_DATA: Final[Path] = Path("tests", "depmap_test_data.csv")
 
+# ---- Test data ----
+
+
+def test_data_path(to: Union[str, data_io.DataFile]) -> Path:
+    """Path a to a data file.
+
+    Args:
+        to (DataFile): The desired data.
+
+    Returns:
+        Path: Path to the file.
+    """
+    if isinstance(to, str):
+        to = data_io.DataFile(to)
+
+    if to in {DataFile.DEPMAP_CRC, DataFile.DEPMAP_CRC_SUBSAMPLE, DataFile.DEPMAP_DATA}:
+        return TEST_DATA
+
+    return data_io.modeling_data_dir() / to.value
+
+
+mp = pytest.MonkeyPatch()
+mp.setattr(src.managers.data_managers, "data_path", test_data_path)
+
+
+# ---- Callable fixtures ----
 # These will tend to be function factories for use as monkeypatching  methods.
 
 
@@ -28,7 +56,7 @@ def return_true() -> Callable:
     return f
 
 
-#### ---- Standard fixtures ---- ####
+# ---- Standard fixtures ----
 
 
 @pytest.fixture
@@ -38,28 +66,14 @@ def mock_model_config() -> Path:
 
 @pytest.fixture
 def depmap_test_data() -> Path:
-    return Path("tests", "depmap_test_data.csv")
+    return TEST_DATA
 
 
 def monkey_get_data_path(*args: Any, **kwargs: Any) -> Path:
-    return Path("tests", "depmap_test_data.csv")
+    return TEST_DATA
 
 
-@pytest.fixture(scope="function")
-def mock_crc_dm(monkeypatch: pytest.MonkeyPatch) -> CrcDataManager:
-    monkeypatch.setattr(CrcDataManager, "get_data_path", monkey_get_data_path)
-    dm = CrcDataManager(debug=True)
-    return dm
-
-
-@pytest.fixture(scope="function")
-def mock_crc_dm_multiscreen(monkeypatch: pytest.MonkeyPatch) -> CrcDataManager:
-    monkeypatch.setattr(CrcDataManager, "get_data_path", monkey_get_data_path)
-    dm = CrcDataManager(debug=True, broad_only=False)
-    return dm
-
-
-#### ---- Data frames ---- ####
+# ---- Data frames ----
 
 
 @pytest.fixture
@@ -67,7 +81,7 @@ def iris() -> pd.DataFrame:
     return sns.load_dataset("iris")
 
 
-#### ---- PyMC3 fixtures ---- ####
+# ---- PyMC3 fixtures ----
 
 
 @pytest.fixture
@@ -106,7 +120,7 @@ def hierarchical_model() -> pm.Model:
     return model
 
 
-#### ---- Hypothesis profiles ---- ####
+# ---- Hypothesis profiles ----
 
 settings.register_profile(
     "ci", deadline=None, max_examples=1000, suppress_health_check=[HealthCheck.too_slow]

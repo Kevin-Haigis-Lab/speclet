@@ -1,6 +1,6 @@
 from pathlib import Path
 from time import time
-from typing import Any, Union
+from typing import Any, Final, Union
 
 import arviz as az
 import numpy as np
@@ -9,11 +9,18 @@ import pymc3 as pm
 import pytest
 
 from src.exceptions import CacheDoesNotExistError
-from src.managers.model_data_managers import CrcDataManager, MockDataManager
+from src.managers.data_managers import CrisprScreenDataManager
 from src.misc.test_helpers import do_nothing
 from src.modeling import simulation_based_calibration_helpers as sbc
 from src.models import speclet_model
 from src.project_enums import MockDataSize, ModelFitMethod
+
+TEST_DATA: Final[Path] = Path("tests", "depmap_test_data.csv")
+
+
+@pytest.fixture
+def mock_crispr_screen_dm() -> CrisprScreenDataManager:
+    return CrisprScreenDataManager(TEST_DATA)
 
 
 class MinimalSpecletModel(speclet_model.SpecletModel):
@@ -21,9 +28,17 @@ class MinimalSpecletModel(speclet_model.SpecletModel):
         return "my-mock-model", "mock-observed_var"
 
 
+def make_x_and_y_cols(df: pd.DataFrame) -> pd.DataFrame:
+    df["x"] = np.random.normal(0, 2, df.shape[0])
+    df["y"] = np.random.normal(0, 0.2, df.shape[0]) + 1.5 * (-0.5 * df["x"].values)
+    return df
+
+
 class MockSpecletModelClass(speclet_model.SpecletModel):
     def __init__(self, name: str, root_cache_dir: Path, debug: bool) -> None:
-        _data_manager = MockDataManager()
+        _data_manager = CrisprScreenDataManager(
+            TEST_DATA, transformations=[make_x_and_y_cols]
+        )
         super().__init__(
             name, _data_manager, root_cache_dir=root_cache_dir, debug=debug
         )
@@ -35,7 +50,10 @@ class MockSpecletModelClass(speclet_model.SpecletModel):
             a = pm.Normal("a", 0, 10)
             sigma = pm.HalfNormal("sigma", 10)
             y = pm.Normal(  # noqa: F841
-                "y", a + b * data["x"].values, sigma, observed=data["y"].values
+                "y",
+                a + b * data["x"].values,
+                sigma,
+                observed=data["y"].values,
             )
         return model, "y"
 
@@ -54,9 +72,11 @@ class TestSpecletModel:
             debug=False,
         )
 
-    def test_mcmc_sample_model_fails_without_overriding(self, tmp_path: Path) -> None:
+    def test_mcmc_sample_model_fails_without_overriding(
+        self, tmp_path: Path, mock_crispr_screen_dm: CrisprScreenDataManager
+    ) -> None:
         sp = MinimalSpecletModel(
-            "test-model", data_manager=MockDataManager(), root_cache_dir=tmp_path
+            "test-model", data_manager=mock_crispr_screen_dm, root_cache_dir=tmp_path
         )
         with pytest.raises(AttributeError, match="Cannot sample: model is 'None'"):
             sp.mcmc_sample_model()
@@ -102,9 +122,11 @@ class TestSpecletModel:
                 mcmc_res.posterior[p], mcmc_res_2.posterior[p]
             )
 
-    def test_advi_sample_model_fails_without_model(self, tmp_path: Path) -> None:
+    def test_advi_sample_model_fails_without_model(
+        self, tmp_path: Path, mock_crispr_screen_dm: CrisprScreenDataManager
+    ) -> None:
         sp = MinimalSpecletModel(
-            "test-model", data_manager=MockDataManager(), root_cache_dir=tmp_path
+            "test-model", data_manager=mock_crispr_screen_dm, root_cache_dir=tmp_path
         )
         with pytest.raises(AttributeError, match="model is 'None'"):
             sp.advi_sample_model()
@@ -199,7 +221,7 @@ class TestSpecletModel:
         self,
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch,
-        mock_crc_dm: CrcDataManager,
+        mock_crispr_screen_dm: CrisprScreenDataManager,
         iris: pd.DataFrame,
         centered_eight: az.InferenceData,
         centered_eight_post: pd.DataFrame,
@@ -224,10 +246,13 @@ class TestSpecletModel:
 
         monkeypatch.setattr(sbc.SBCFileManager, "get_sbc_results", mock_get_sbc_results)
         monkeypatch.setattr(speclet_model.SpecletModel, "build_model", do_nothing)
-        monkeypatch.setattr(CrcDataManager, "apply_transformations", just_return)
+        monkeypatch.setattr(mock_crispr_screen_dm, "apply_transformations", just_return)
 
         sp = MinimalSpecletModel(
-            "testing-get-sbc", mock_crc_dm, root_cache_dir=tmp_path, debug=True
+            "testing-get-sbc",
+            mock_crispr_screen_dm,
+            root_cache_dir=tmp_path,
+            debug=True,
         )
         sim_df, sbc_res, sim_sbc_fm = sp.get_sbc(sbc_dir)
         assert isinstance(sim_df, pd.DataFrame)
@@ -236,9 +261,11 @@ class TestSpecletModel:
         assert isinstance(sim_sbc_fm, sbc.SBCFileManager)
         assert sim_sbc_fm.dir == sbc_fm.dir
 
-    def test_get_sbc_errors(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> None:
+    def test_get_sbc_errors(
+        self, tmp_path: Path, mock_crispr_screen_dm: CrisprScreenDataManager
+    ) -> None:
         sp_model = MinimalSpecletModel(
-            "testing-model", mock_crc_dm, root_cache_dir=tmp_path
+            "testing-model", mock_crispr_screen_dm, root_cache_dir=tmp_path
         )
         sbc_dir = tmp_path / "sbc-results"
         if not sbc_dir.exists():
@@ -259,9 +286,9 @@ class TestSpecletModel:
 
     def test_changing_debug_status(self, mock_sp_model: MockSpecletModelClass) -> None:
         assert mock_sp_model.data_manager is not None
-        assert not mock_sp_model.debug and not mock_sp_model.data_manager.debug
+        assert not mock_sp_model.debug
         mock_sp_model.debug = True
-        assert mock_sp_model.debug and mock_sp_model.data_manager.debug
+        assert mock_sp_model.debug
 
     @pytest.mark.slow
     def test_changing_mcmc_sampling_params(

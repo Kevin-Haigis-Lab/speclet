@@ -101,9 +101,9 @@ def add_one_to_log_fold_change(df: pd.DataFrame) -> pd.DataFrame:
 def test_add_transformation(depmap_test_data: Path) -> None:
     dm = CrisprScreenDataManager(depmap_test_data)
     df = dm.get_data()
-    assert len(dm.get_transformations()) == 0
-    dm.add_transformation(double_log_fold_change)
     assert len(dm.get_transformations()) == 1
+    dm.add_transformation(double_log_fold_change)
+    assert len(dm.get_transformations()) == 2
     dm.clear_data()
     assert not dm.data_is_loaded()
     new_df = dm.get_data()
@@ -112,9 +112,9 @@ def test_add_transformation(depmap_test_data: Path) -> None:
 
 def test_add_transformations(depmap_test_data: Path) -> None:
     dm = CrisprScreenDataManager(depmap_test_data)
-    assert len(dm.get_transformations()) == 0
+    assert len(dm.get_transformations()) == 1
     dm.add_transformation([double_log_fold_change, add_one_to_log_fold_change])
-    assert len(dm.get_transformations()) == 2
+    assert len(dm.get_transformations()) == 3
 
 
 def test_insert_transformation(depmap_test_data: Path) -> None:
@@ -139,7 +139,7 @@ def test_get_transformations(depmap_test_data: Path) -> None:
     dm = CrisprScreenDataManager(
         depmap_test_data, transformations=[double_log_fold_change]
     )
-    assert len(dm.get_transformations()) == 1
+    assert len(dm.get_transformations()) == 2
     dm.clear_transformations()
     assert len(dm.get_transformations()) == 0
     dm.set_transformations([double_log_fold_change, add_one_to_log_fold_change])
