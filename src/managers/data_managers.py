@@ -152,21 +152,25 @@ class CrisprScreenDataManager:
         """Check if the data has been loaded."""
         return self._data is not None
 
-    def add_transformation(self, fxn: DataFrameTransformation) -> None:
+    def add_transformation(
+        self, fxn: Union[DataFrameTransformation, list[DataFrameTransformation]]
+    ) -> None:
         """Add a new transformation.
 
         The new transformation is added to the end of the current list.
 
-        TODO (@jhrcook): Allow adding a list of funtions.
-
         Args:
-            fxn (DataFrameTransformation): Data transforming function.
+            fxn (Union[DataFrameTransformation, list[DataFrameTransformation]]): Data
+              transforming function(s).
 
         Returns:
             None
         """
         logger.info("Adding new transformation.")
-        self._transformations.append(fxn)
+        if isinstance(fxn, list):
+            self._transformations += fxn
+        else:
+            self._transformations.append(fxn)
         return None
 
     def insert_transformation(self, fxn: DataFrameTransformation, at: int) -> None:

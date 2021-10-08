@@ -16,7 +16,7 @@ from src.data_processing import common as dphelp
 from src.exceptions import ShapeError
 from src.io.data_io import DataFile
 from src.loggers import logger
-from src.managers.data_managers import CrisprScreenDataManager
+from src.managers.data_managers import CrisprScreenDataManager, DataFrameTransformation
 from src.modeling import feature_engineering as feng
 from src.models.speclet_model import (
     ObservedVarName,
@@ -180,15 +180,13 @@ class SpecletSeven(SpecletModel):
             logger.debug("Creating a data manager since none was supplied.")
             data_manager = CrisprScreenDataManager(DataFile.DEPMAP_CRC_SUBSAMPLE)
 
-        transformations = [
+        transformations: list[DataFrameTransformation] = [
             feng.centered_copynumber_by_cellline,
             feng.centered_copynumber_by_gene,
             feng.zscale_rna_expression_by_gene_and_lineage,
             feng.convert_is_mutated_to_numeric,
         ]
-        # TODO: will support adding list of trans.
-        for fxn in transformations:
-            data_manager.add_transformation(fxn)
+        data_manager.add_transformation(transformations)
 
         self.config = config if config is not None else SpecletSevenConfiguration()
 
