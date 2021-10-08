@@ -27,7 +27,7 @@ def make_cat(
     Returns:
         pd.DataFrame: The modified DataFrame.
     """
-    categories: list[Any] = df[col].unique().tolist()
+    categories: list[Any] = df[col].unique()
     if sort_cats:
         categories.sort()
     df[col] = pd.Categorical(df[col], categories=categories, ordered=ordered)
