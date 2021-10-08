@@ -34,7 +34,7 @@ def _get_crispr_screen_data_coltypes() -> dict[str, str]:
     ]:
         col_types[c] = "object"
     for c in ["counts_final", "counts_final_total"]:
-        col_types[c] = "int"
+        col_types[c] = "Int64"
     return col_types
 
 
@@ -73,8 +73,8 @@ class CrisprScreenDataManager:
         """
         self._data = None
         self.columns = columns
-        self._transformations = [] if transformations is None else transformations
         self.use_dask = use_dask
+        self._transformations = [] if transformations is None else transformations
 
         if isinstance(data_source, DataFile):
             self.data_source = data_path(data_source)
@@ -252,8 +252,9 @@ class CrisprScreenDataManager:
         if isinstance(size, str):
             size = MockDataSize(size)
 
+        df: pd.DataFrame
         if size is MockDataSize.SMALL:
-            self._data = mock_data.generate_mock_achilles_data(
+            df = mock_data.generate_mock_achilles_data(
                 n_genes=10,
                 n_sgrnas_per_gene=3,
                 n_cell_lines=5,
@@ -262,7 +263,7 @@ class CrisprScreenDataManager:
                 n_screens=1,
             )
         elif size is MockDataSize.MEDIUM:
-            self._data = mock_data.generate_mock_achilles_data(
+            df = mock_data.generate_mock_achilles_data(
                 n_genes=25,
                 n_sgrnas_per_gene=5,
                 n_cell_lines=12,
@@ -271,7 +272,7 @@ class CrisprScreenDataManager:
                 n_screens=2,
             )
         elif size is MockDataSize.LARGE:
-            self._data = mock_data.generate_mock_achilles_data(
+            df = mock_data.generate_mock_achilles_data(
                 n_genes=100,
                 n_sgrnas_per_gene=5,
                 n_cell_lines=20,
@@ -281,5 +282,7 @@ class CrisprScreenDataManager:
             )
         else:
             assert_never(size)
+
+        self.set_data(df, apply_transformations=True)
         assert self._data is not None
-        return self._data
+        return self.get_data()
