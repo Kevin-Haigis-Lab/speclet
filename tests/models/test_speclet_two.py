@@ -3,7 +3,6 @@ from typing import Any
 
 import pytest
 
-from src.managers.model_data_managers import CrcDataManager
 from src.models.speclet_two import SpecletTwo
 
 
@@ -13,28 +12,22 @@ def monkey_get_data_path(*args: Any, **kwargs: Any) -> Path:
 
 class TestSpecletTwo:
     @pytest.fixture(scope="function")
-    def data_manager(self, monkeypatch: pytest.MonkeyPatch) -> CrcDataManager:
-        monkeypatch.setattr(CrcDataManager, "get_data_path", monkey_get_data_path)
-        dm = CrcDataManager(debug=True)
-        return dm
-
     def test_instantiation(self, tmp_path: Path) -> None:
         sp_two = SpecletTwo("test-model", root_cache_dir=tmp_path, debug=True)
         assert sp_two.model is None
 
-    def test_build_model(self, tmp_path: Path, data_manager: CrcDataManager) -> None:
-        sp_two = SpecletTwo(
-            "test-model", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
-        )
+    @pytest.fixture(scope="function")
+    def sp_two(self, tmp_path: Path) -> SpecletTwo:
+        sp_two = SpecletTwo("test-model", root_cache_dir=tmp_path, debug=True)
+        return sp_two
+
+    def test_build_model(self, sp_two: SpecletTwo) -> None:
         assert sp_two.model is None
         sp_two.build_model()
         assert sp_two.model is not None
 
     @pytest.mark.slow
-    def test_mcmc_sampling(self, tmp_path: Path, data_manager: CrcDataManager) -> None:
-        sp_two = SpecletTwo(
-            "test-model", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
-        )
+    def test_mcmc_sampling(self, sp_two: SpecletTwo) -> None:
         assert sp_two.model is None
         sp_two.build_model()
         assert sp_two.model is not None
@@ -51,10 +44,7 @@ class TestSpecletTwo:
         assert sp_two.mcmc_results is not None
 
     @pytest.mark.slow
-    def test_advi_sampling(self, tmp_path: Path, data_manager: CrcDataManager) -> None:
-        sp_two = SpecletTwo(
-            "test-model", root_cache_dir=tmp_path, debug=True, data_manager=data_manager
-        )
+    def test_advi_sampling(self, sp_two: SpecletTwo) -> None:
         assert sp_two.model is None
         sp_two.build_model()
         assert sp_two.model is not None

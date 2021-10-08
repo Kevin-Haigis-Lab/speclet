@@ -1,11 +1,8 @@
-#!/usr/bin/env python3
-
 from pathlib import Path
 
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from src.managers.model_data_managers import CrcDataManager
 from src.modeling.pymc3_helpers import get_variable_names
 from src.models.ceres_mimic import CeresMimic, CeresMimicConfiguration
 
@@ -24,12 +21,10 @@ class TestCeresMimic:
         self,
         config: CeresMimicConfiguration,
         tmp_path: Path,
-        mock_crc_dm: CrcDataManager,
     ) -> None:
         cm = CeresMimic(
             "test-model",
             root_cache_dir=tmp_path,
-            data_manager=mock_crc_dm,
             config=config,
         )
 
