@@ -10,7 +10,7 @@ from theano import shared as ts
 from src.data_processing import achilles as achelp
 from src.io.data_io import DataFile
 from src.loggers import logger
-from src.managers.data_managers import CrisprScreenDataManager
+from src.managers.data_managers import CrisprScreenDataManager, DataFrameTransformation
 from src.modeling import feature_engineering as feng
 from src.models.speclet_model import (
     ObservedVarName,
@@ -103,15 +103,13 @@ class SpecletSix(SpecletModel):
             logger.debug("Creating a data manager since none was supplied.")
             data_manager = CrisprScreenDataManager(DataFile.DEPMAP_CRC_SUBSAMPLE)
 
-        transformations = [
+        transformations: list[DataFrameTransformation] = [
             feng.centered_copynumber_by_cellline,
             feng.centered_copynumber_by_gene,
             feng.zscale_rna_expression_by_gene_and_lineage,
             feng.convert_is_mutated_to_numeric,
         ]
-        for fxn in transformations:
-            # TODO: will support adding multiple functions at a time.
-            data_manager.add_transformation(fxn)
+        data_manager.add_transformation(transformations)
 
         self.config = config if config is not None else SpecletSixConfiguration()
 

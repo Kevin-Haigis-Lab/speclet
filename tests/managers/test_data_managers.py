@@ -110,6 +110,13 @@ def test_add_transformation(depmap_test_data: Path) -> None:
     assert all(new_df["lfc"].values == (df["lfc"].values * 2.0))
 
 
+def test_add_transformations(depmap_test_data: Path) -> None:
+    dm = CrisprScreenDataManager(depmap_test_data)
+    assert len(dm.get_transformations()) == 0
+    dm.add_transformation([double_log_fold_change, add_one_to_log_fold_change])
+    assert len(dm.get_transformations()) == 2
+
+
 def test_insert_transformation(depmap_test_data: Path) -> None:
     dm = CrisprScreenDataManager(
         depmap_test_data, transformations=[add_one_to_log_fold_change]
