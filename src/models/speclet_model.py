@@ -492,10 +492,8 @@ class SpecletModel:
 
         if mock_data is not None:
             logger.info("Setting provided mock data as data.")
-            self.data_manager.set_data(mock_data)
-            mock_data = (
-                self.data_manager.get_data()
-            )  # Get result of any transformations.
+            self.data_manager.set_data(mock_data, apply_transformations=True)
+            mock_data = self.data_manager.get_data()
         elif size is not None:
             logger.info("Creating new simulation data.")
             mock_data = self.data_manager.generate_mock_data(
