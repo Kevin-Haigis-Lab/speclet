@@ -78,7 +78,10 @@ class CeresMimic(SpecletModel):
             config (SpecletSixConfiguration, optional): Model configurations.
         """
         if data_manager is None:
-            data_manager = CrisprScreenDataManager(DataFile.DEPMAP_CRC_SUBSAMPLE)
+            data_manager = CrisprScreenDataManager(
+                DataFile.DEPMAP_CRC_SUBSAMPLE,
+                transformations=[achelp.set_achilles_categorical_columns],
+            )
 
         self.config = config if config is not None else CeresMimicConfiguration()
 

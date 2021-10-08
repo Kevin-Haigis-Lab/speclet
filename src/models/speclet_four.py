@@ -11,7 +11,10 @@ from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 from src.data_processing import achilles as achelp
 from src.io.data_io import DataFile
 from src.loggers import logger
-from src.managers.data_managers import CrisprScreenDataManager
+from src.managers.data_managers import (
+    CrisprScreenDataManager,
+    common_crispr_screen_transformations,
+)
 from src.models.speclet_model import (
     ObservedVarName,
     ReplacementsDict,
@@ -74,7 +77,10 @@ class SpecletFour(SpecletModel):
             config (Optional[SpecletFourConfiguration], optional): Model configuration.
         """
         if data_manager is None:
-            data_manager = CrisprScreenDataManager(DataFile.DEPMAP_CRC_SUBSAMPLE)
+            data_manager = CrisprScreenDataManager(
+                DataFile.DEPMAP_CRC_SUBSAMPLE,
+                transformations=common_crispr_screen_transformations,
+            )
 
         self.config = config if config is not None else SpecletFourConfiguration()
 

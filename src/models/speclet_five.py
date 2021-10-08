@@ -10,7 +10,10 @@ from pydantic import BaseModel
 from src.data_processing import achilles as achelp
 from src.io.data_io import DataFile
 from src.loggers import logger
-from src.managers.data_managers import CrisprScreenDataManager
+from src.managers.data_managers import (
+    CrisprScreenDataManager,
+    common_crispr_screen_transformations,
+)
 from src.models.speclet_model import (
     ObservedVarName,
     ReplacementsDict,
@@ -74,7 +77,10 @@ class SpecletFive(SpecletModel):
         logger.debug("Instantiating a SpecletFive model.")
         if data_manager is None:
             logger.debug("Creating a data manager since none was supplied.")
-            data_manager = CrisprScreenDataManager(DataFile.DEPMAP_CRC_SUBSAMPLE)
+            data_manager = CrisprScreenDataManager(
+                DataFile.DEPMAP_CRC_SUBSAMPLE,
+                transformations=common_crispr_screen_transformations,
+            )
         self.config = config if config is not None else SpecletFiveConfiguration()
         super().__init__(
             name=name,

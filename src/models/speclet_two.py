@@ -9,7 +9,10 @@ import theano
 from src.data_processing import achilles as achelp
 from src.io.data_io import DataFile
 from src.loggers import logger
-from src.managers.data_managers import CrisprScreenDataManager
+from src.managers.data_managers import (
+    CrisprScreenDataManager,
+    common_crispr_screen_transformations,
+)
 from src.models.speclet_model import (
     ObservedVarName,
     ReplacementsDict,
@@ -54,7 +57,10 @@ class SpecletTwo(SpecletModel):
               created automatically.
         """
         if data_manager is None:
-            data_manager = CrisprScreenDataManager(DataFile.DEPMAP_CRC_SUBSAMPLE)
+            data_manager = CrisprScreenDataManager(
+                DataFile.DEPMAP_CRC_SUBSAMPLE,
+                transformations=common_crispr_screen_transformations,
+            )
 
         super().__init__(
             name=name,
