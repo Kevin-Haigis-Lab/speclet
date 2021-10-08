@@ -9,10 +9,9 @@ from typing import Union
 #### ---- Enums ---- ####
 
 
-class DataFile(str, Enum):
+class DataFile(Enum):
     """Data file names."""
 
-    # crc_data = "depmap_CRC_data.csv"
     DEPMAP_CRC = "depmap_modeling_dataframe_crc.csv"
     DEPMAP_CRC_SUBSAMPLE = "depmap_modeling_dataframe_crc-subsample.csv"
     DEPMAP_DATA = "depmap_modeling_dataframe.csv"
