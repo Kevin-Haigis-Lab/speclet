@@ -202,7 +202,6 @@ class SpecletModel:
               after calling `self.model_specification()`
         """
         logger.debug("Building PyMC3 model.")
-
         logger.info("Calling `model_specification()` method.")
         self.model, self.observed_var_name = self.model_specification()
 

@@ -30,7 +30,7 @@
 
 from abc import abstractmethod
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional, Protocol, Union
 
 import arviz as az
 import numpy as np
@@ -42,8 +42,8 @@ from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 import src.modeling.simulation_based_calibration_helpers as sbc
 from src.exceptions import CacheDoesNotExistError, RequiredArgumentError
 from src.loggers import logger
+from src.managers.data_managers import DataFrameTransformation
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
-from src.managers.model_data_managers import DataManager
 from src.modeling import pymc3_sampling_api as pmapi
 from src.project_enums import MockDataSize, ModelFitMethod, assert_never
 
@@ -89,13 +89,35 @@ class VISamplingParameters(PyMC3SamplingParameters):
     n_iterations: int = 50000
 
 
+class SpecletModelDataManager(Protocol):
+    &#34;&#34;&#34;Protocol for the data manager of SpecletModel.&#34;&#34;&#34;
+
+    def get_data(self, read_kwargs: Optional[dict[str, Any]] = None) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Get data for modeling.&#34;&#34;&#34;
+        ...
+
+    def set_data(self, data: pd.DataFrame, apply_transformations: bool = False) -&gt; None:
+        &#34;&#34;&#34;Set data.&#34;&#34;&#34;
+        ...
+
+    def add_transformation(self, fxn: DataFrameTransformation) -&gt; None:
+        &#34;&#34;&#34;Add a transforming function.&#34;&#34;&#34;
+        ...
+
+    def generate_mock_data(
+        self, size: Union[MockDataSize, str], random_seed: Optional[int] = None
+    ) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Generate mock data.&#34;&#34;&#34;
+        ...
+
+
 class SpecletModel:
     &#34;&#34;&#34;Base class to contain a PyMC3 model.&#34;&#34;&#34;
 
     name: str
     _debug: bool
     cache_manager: Pymc3ModelCacheManager
-    data_manager: DataManager
+    data_manager: SpecletModelDataManager
 
     model: Optional[pm.Model] = None
     observed_var_name: Optional[ObservedVarName] = None
@@ -109,7 +131,7 @@ class SpecletModel:
     def __init__(
         self,
         name: str,
-        data_manager: DataManager,
+        data_manager: SpecletModelDataManager,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
     ) -&gt; None:
@@ -121,8 +143,7 @@ class SpecletModel:
               If None (default), then the project&#39;s default cache directory is used.
               Defaults to None.
             debug (bool, optional): Use debug mode? Defaults to False.
-            data_manager (Optional[DataManager], optional): Object that will manage the
-              data. Defaults to None.
+            data_manager (SpecletModelDataManager): Object that will manage the data.
         &#34;&#34;&#34;
         self.name = name
         self._debug = debug
@@ -130,7 +151,6 @@ class SpecletModel:
             name=name, root_cache_dir=root_cache_dir
         )
         self.data_manager = data_manager
-        self.data_manager.debug = self._debug
 
     def __str__(self) -&gt; str:
         &#34;&#34;&#34;Describe the object.
@@ -166,8 +186,6 @@ class SpecletModel:
             return
         logger.info(f&#34;Changing value of debug to &#39;{new_value}&#39;.&#34;)
         self._debug = new_value
-        if self.data_manager is not None:
-            self.data_manager.debug = new_value
 
     def _reset_model_and_results(self, clear_cache: bool = False) -&gt; None:
         logger.warning(&#34;Reseting all model and results.&#34;)
@@ -176,6 +194,12 @@ class SpecletModel:
         self.advi_results = None
         if clear_cache:
             self.clear_cache()
+
+    def _get_batch_size(self) -&gt; int:
+        if self.debug:
+            return 1000
+        else:
+            return 10000
 
     def clear_cache(self) -&gt; None:
         &#34;&#34;&#34;Clear all available caches for the model.&#34;&#34;&#34;
@@ -206,7 +230,6 @@ class SpecletModel:
               after calling `self.model_specification()`
         &#34;&#34;&#34;
         logger.debug(&#34;Building PyMC3 model.&#34;)
-
         logger.info(&#34;Calling `model_specification()` method.&#34;)
         self.model, self.observed_var_name = self.model_specification()
 
@@ -496,8 +519,8 @@ class SpecletModel:
 
         if mock_data is not None:
             logger.info(&#34;Setting provided mock data as data.&#34;)
-            self.data_manager.set_data(mock_data)
-            mock_data = self.data_manager.data  # Get result of any transformations.
+            self.data_manager.set_data(mock_data, apply_transformations=True)
+            mock_data = self.data_manager.get_data()
         elif size is not None:
             logger.info(&#34;Creating new simulation data.&#34;)
             mock_data = self.data_manager.generate_mock_data(
@@ -747,7 +770,7 @@ class SpecletModel:
 </dd>
 <dt id="src.models.speclet_model.SpecletModel"><code class="flex name class">
 <span>class <span class="ident">SpecletModel</span></span>
-<span>(</span><span>name: str, data_manager: <a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False)</span>
+<span>(</span><span>name: str, data_manager: <a title="src.models.speclet_model.SpecletModelDataManager" href="#src.models.speclet_model.SpecletModelDataManager">SpecletModelDataManager</a>, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Base class to contain a PyMC3 model.</p>
@@ -762,9 +785,8 @@ If None (default), then the project's default cache directory is used.
 Defaults to None.</dd>
 <dt><strong><code>debug</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Use debug mode? Defaults to False.</dd>
-<dt><strong><code>data_manager</code></strong> :&ensp;<code>Optional[DataManager]</code>, optional</dt>
-<dd>Object that will manage the
-data. Defaults to None.</dd>
+<dt><strong><code>data_manager</code></strong> :&ensp;<code><a title="src.models.speclet_model.SpecletModelDataManager" href="#src.models.speclet_model.SpecletModelDataManager">SpecletModelDataManager</a></code></dt>
+<dd>Object that will manage the data.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -776,7 +798,7 @@ data. Defaults to None.</dd>
     name: str
     _debug: bool
     cache_manager: Pymc3ModelCacheManager
-    data_manager: DataManager
+    data_manager: SpecletModelDataManager
 
     model: Optional[pm.Model] = None
     observed_var_name: Optional[ObservedVarName] = None
@@ -790,7 +812,7 @@ data. Defaults to None.</dd>
     def __init__(
         self,
         name: str,
-        data_manager: DataManager,
+        data_manager: SpecletModelDataManager,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
     ) -&gt; None:
@@ -802,8 +824,7 @@ data. Defaults to None.</dd>
               If None (default), then the project&#39;s default cache directory is used.
               Defaults to None.
             debug (bool, optional): Use debug mode? Defaults to False.
-            data_manager (Optional[DataManager], optional): Object that will manage the
-              data. Defaults to None.
+            data_manager (SpecletModelDataManager): Object that will manage the data.
         &#34;&#34;&#34;
         self.name = name
         self._debug = debug
@@ -811,7 +832,6 @@ data. Defaults to None.</dd>
             name=name, root_cache_dir=root_cache_dir
         )
         self.data_manager = data_manager
-        self.data_manager.debug = self._debug
 
     def __str__(self) -&gt; str:
         &#34;&#34;&#34;Describe the object.
@@ -847,8 +867,6 @@ data. Defaults to None.</dd>
             return
         logger.info(f&#34;Changing value of debug to &#39;{new_value}&#39;.&#34;)
         self._debug = new_value
-        if self.data_manager is not None:
-            self.data_manager.debug = new_value
 
     def _reset_model_and_results(self, clear_cache: bool = False) -&gt; None:
         logger.warning(&#34;Reseting all model and results.&#34;)
@@ -857,6 +875,12 @@ data. Defaults to None.</dd>
         self.advi_results = None
         if clear_cache:
             self.clear_cache()
+
+    def _get_batch_size(self) -&gt; int:
+        if self.debug:
+            return 1000
+        else:
+            return 10000
 
     def clear_cache(self) -&gt; None:
         &#34;&#34;&#34;Clear all available caches for the model.&#34;&#34;&#34;
@@ -887,7 +911,6 @@ data. Defaults to None.</dd>
               after calling `self.model_specification()`
         &#34;&#34;&#34;
         logger.debug(&#34;Building PyMC3 model.&#34;)
-
         logger.info(&#34;Calling `model_specification()` method.&#34;)
         self.model, self.observed_var_name = self.model_specification()
 
@@ -1177,8 +1200,8 @@ data. Defaults to None.</dd>
 
         if mock_data is not None:
             logger.info(&#34;Setting provided mock data as data.&#34;)
-            self.data_manager.set_data(mock_data)
-            mock_data = self.data_manager.data  # Get result of any transformations.
+            self.data_manager.set_data(mock_data, apply_transformations=True)
+            mock_data = self.data_manager.get_data()
         elif size is not None:
             logger.info(&#34;Creating new simulation data.&#34;)
             mock_data = self.data_manager.generate_mock_data(
@@ -1577,7 +1600,6 @@ after calling <code>self.model_specification()</code></dd>
           after calling `self.model_specification()`
     &#34;&#34;&#34;
     logger.debug(&#34;Building PyMC3 model.&#34;)
-
     logger.info(&#34;Calling `model_specification()` method.&#34;)
     self.model, self.observed_var_name = self.model_specification()
 
@@ -2098,8 +2120,8 @@ passed to the fitting method. Default is None.</dd>
 
     if mock_data is not None:
         logger.info(&#34;Setting provided mock data as data.&#34;)
-        self.data_manager.set_data(mock_data)
-        mock_data = self.data_manager.data  # Get result of any transformations.
+        self.data_manager.set_data(mock_data, apply_transformations=True)
+        mock_data = self.data_manager.get_data()
     elif size is not None:
         logger.info(&#34;Creating new simulation data.&#34;)
         mock_data = self.data_manager.generate_mock_data(
@@ -2264,6 +2286,104 @@ passed to the fitting method. Default is None.</dd>
 </dd>
 </dl>
 </dd>
+<dt id="src.models.speclet_model.SpecletModelDataManager"><code class="flex name class">
+<span>class <span class="ident">SpecletModelDataManager</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Protocol for the data manager of SpecletModel.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SpecletModelDataManager(Protocol):
+    &#34;&#34;&#34;Protocol for the data manager of SpecletModel.&#34;&#34;&#34;
+
+    def get_data(self, read_kwargs: Optional[dict[str, Any]] = None) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Get data for modeling.&#34;&#34;&#34;
+        ...
+
+    def set_data(self, data: pd.DataFrame, apply_transformations: bool = False) -&gt; None:
+        &#34;&#34;&#34;Set data.&#34;&#34;&#34;
+        ...
+
+    def add_transformation(self, fxn: DataFrameTransformation) -&gt; None:
+        &#34;&#34;&#34;Add a transforming function.&#34;&#34;&#34;
+        ...
+
+    def generate_mock_data(
+        self, size: Union[MockDataSize, str], random_seed: Optional[int] = None
+    ) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Generate mock data.&#34;&#34;&#34;
+        ...</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>typing.Protocol</li>
+<li>typing.Generic</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="src.models.speclet_model.SpecletModelDataManager.add_transformation"><code class="name flex">
+<span>def <span class="ident">add_transformation</span></span>(<span>self, fxn: Callable[[~Data], ~Data]) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a transforming function.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_transformation(self, fxn: DataFrameTransformation) -&gt; None:
+    &#34;&#34;&#34;Add a transforming function.&#34;&#34;&#34;
+    ...</code></pre>
+</details>
+</dd>
+<dt id="src.models.speclet_model.SpecletModelDataManager.generate_mock_data"><code class="name flex">
+<span>def <span class="ident">generate_mock_data</span></span>(<span>self, size: Union[src.project_enums.MockDataSize, str], random_seed: Optional[int] = None) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate mock data.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def generate_mock_data(
+    self, size: Union[MockDataSize, str], random_seed: Optional[int] = None
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate mock data.&#34;&#34;&#34;
+    ...</code></pre>
+</details>
+</dd>
+<dt id="src.models.speclet_model.SpecletModelDataManager.get_data"><code class="name flex">
+<span>def <span class="ident">get_data</span></span>(<span>self, read_kwargs: Optional[dict[str, Any]] = None) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get data for modeling.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_data(self, read_kwargs: Optional[dict[str, Any]] = None) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Get data for modeling.&#34;&#34;&#34;
+    ...</code></pre>
+</details>
+</dd>
+<dt id="src.models.speclet_model.SpecletModelDataManager.set_data"><code class="name flex">
+<span>def <span class="ident">set_data</span></span>(<span>self, data: pandas.core.frame.DataFrame, apply_transformations: bool = False) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set data.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_data(self, data: pd.DataFrame, apply_transformations: bool = False) -&gt; None:
+    &#34;&#34;&#34;Set data.&#34;&#34;&#34;
+    ...</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 <dt id="src.models.speclet_model.UnableToLocateNamedVariable"><code class="flex name class">
 <span>class <span class="ident">UnableToLocateNamedVariable</span></span>
 <span>(</span><span>...)</span>
@@ -2364,6 +2484,15 @@ passed to the fitting method. Default is None.</dd>
 <li><code><a title="src.models.speclet_model.SpecletModel.update_observed_data" href="#src.models.speclet_model.SpecletModel.update_observed_data">update_observed_data</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.write_advi_cache" href="#src.models.speclet_model.SpecletModel.write_advi_cache">write_advi_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.write_mcmc_cache" href="#src.models.speclet_model.SpecletModel.write_mcmc_cache">write_mcmc_cache</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="src.models.speclet_model.SpecletModelDataManager" href="#src.models.speclet_model.SpecletModelDataManager">SpecletModelDataManager</a></code></h4>
+<ul class="">
+<li><code><a title="src.models.speclet_model.SpecletModelDataManager.add_transformation" href="#src.models.speclet_model.SpecletModelDataManager.add_transformation">add_transformation</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModelDataManager.generate_mock_data" href="#src.models.speclet_model.SpecletModelDataManager.generate_mock_data">generate_mock_data</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModelDataManager.get_data" href="#src.models.speclet_model.SpecletModelDataManager.get_data">get_data</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModelDataManager.set_data" href="#src.models.speclet_model.SpecletModelDataManager.set_data">set_data</a></code></li>
 </ul>
 </li>
 <li>

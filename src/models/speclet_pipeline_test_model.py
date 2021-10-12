@@ -81,7 +81,7 @@ class SpecletTestModel(SpecletModel):
             b = pm.Normal("b", 0, 5)
             sigma = pm.HalfNormal("sigma", 10)
             y = pm.Normal(  # noqa: F841
-                "y", a + b * d.x.values, sigma, observed=d.y.values
+                "y", a + b * d.lfc.values, sigma, observed=d.lfc.values
             )
         return model, "y"
 

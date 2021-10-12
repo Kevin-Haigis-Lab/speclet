@@ -62,7 +62,7 @@ def _get_crispr_screen_data_coltypes() -&gt; dict[str, str]:
     ]:
         col_types[c] = &#34;object&#34;
     for c in [&#34;counts_final&#34;, &#34;counts_final_total&#34;]:
-        col_types[c] = &#34;int&#34;
+        col_types[c] = &#34;Int64&#34;
     return col_types
 
 
@@ -101,8 +101,10 @@ class CrisprScreenDataManager:
         &#34;&#34;&#34;
         self._data = None
         self.columns = columns
-        self._transformations = [] if transformations is None else transformations
         self.use_dask = use_dask
+        self._transformations = (
+            [] if transformations is None else transformations.copy()
+        )
 
         if isinstance(data_source, DataFile):
             self.data_source = data_path(data_source)
@@ -123,7 +125,6 @@ class CrisprScreenDataManager:
             df = read_csv(
                 self.data_source, usecols=self.columns, dtype=col_types, **read_kwargs
             )
-
         df = self._apply_transformations(df)
 
         if self.use_dask:
@@ -180,19 +181,25 @@ class CrisprScreenDataManager:
         &#34;&#34;&#34;Check if the data has been loaded.&#34;&#34;&#34;
         return self._data is not None
 
-    def add_transformation(self, fxn: DataFrameTransformation) -&gt; None:
+    def add_transformation(
+        self, fxn: Union[DataFrameTransformation, list[DataFrameTransformation]]
+    ) -&gt; None:
         &#34;&#34;&#34;Add a new transformation.
 
         The new transformation is added to the end of the current list.
 
         Args:
-            fxn (DataFrameTransformation): Data transforming function.
+            fxn (Union[DataFrameTransformation, list[DataFrameTransformation]]): Data
+              transforming function(s).
 
         Returns:
             None
         &#34;&#34;&#34;
         logger.info(&#34;Adding new transformation.&#34;)
-        self._transformations.append(fxn)
+        if isinstance(fxn, list):
+            self._transformations += fxn
+        else:
+            self._transformations.append(fxn)
         return None
 
     def insert_transformation(self, fxn: DataFrameTransformation, at: int) -&gt; None:
@@ -242,8 +249,16 @@ class CrisprScreenDataManager:
             self.apply_transformations()
         return None
 
+    def num_transformations(self) -&gt; int:
+        &#34;&#34;&#34;Get the number of transformations.
+
+        Returns:
+            int: Number of transformations.
+        &#34;&#34;&#34;
+        return len(self._transformations)
+
     def _apply_transformations(self, data: Data) -&gt; Data:
-        logger.info(&#34;Applying transofrmations to data.&#34;)
+        logger.debug(f&#34;Applying {self.num_transformations()} transformations.&#34;)
         for fxn in self._transformations:
             data = fxn(data)
         return data
@@ -274,8 +289,9 @@ class CrisprScreenDataManager:
         if isinstance(size, str):
             size = MockDataSize(size)
 
+        df: pd.DataFrame
         if size is MockDataSize.SMALL:
-            self._data = mock_data.generate_mock_achilles_data(
+            df = mock_data.generate_mock_achilles_data(
                 n_genes=10,
                 n_sgrnas_per_gene=3,
                 n_cell_lines=5,
@@ -284,7 +300,7 @@ class CrisprScreenDataManager:
                 n_screens=1,
             )
         elif size is MockDataSize.MEDIUM:
-            self._data = mock_data.generate_mock_achilles_data(
+            df = mock_data.generate_mock_achilles_data(
                 n_genes=25,
                 n_sgrnas_per_gene=5,
                 n_cell_lines=12,
@@ -293,7 +309,7 @@ class CrisprScreenDataManager:
                 n_screens=2,
             )
         elif size is MockDataSize.LARGE:
-            self._data = mock_data.generate_mock_achilles_data(
+            df = mock_data.generate_mock_achilles_data(
                 n_genes=100,
                 n_sgrnas_per_gene=5,
                 n_cell_lines=20,
@@ -303,11 +319,10 @@ class CrisprScreenDataManager:
             )
         else:
             assert_never(size)
+
+        self.set_data(df, apply_transformations=True)
         assert self._data is not None
-        return self._data
-
-
-# TODO: generate mock data</code></pre>
+        return self.get_data()</code></pre>
 </details>
 </section>
 <section>
@@ -373,8 +388,10 @@ Defaults to None.</dd>
         &#34;&#34;&#34;
         self._data = None
         self.columns = columns
-        self._transformations = [] if transformations is None else transformations
         self.use_dask = use_dask
+        self._transformations = (
+            [] if transformations is None else transformations.copy()
+        )
 
         if isinstance(data_source, DataFile):
             self.data_source = data_path(data_source)
@@ -395,7 +412,6 @@ Defaults to None.</dd>
             df = read_csv(
                 self.data_source, usecols=self.columns, dtype=col_types, **read_kwargs
             )
-
         df = self._apply_transformations(df)
 
         if self.use_dask:
@@ -452,19 +468,25 @@ Defaults to None.</dd>
         &#34;&#34;&#34;Check if the data has been loaded.&#34;&#34;&#34;
         return self._data is not None
 
-    def add_transformation(self, fxn: DataFrameTransformation) -&gt; None:
+    def add_transformation(
+        self, fxn: Union[DataFrameTransformation, list[DataFrameTransformation]]
+    ) -&gt; None:
         &#34;&#34;&#34;Add a new transformation.
 
         The new transformation is added to the end of the current list.
 
         Args:
-            fxn (DataFrameTransformation): Data transforming function.
+            fxn (Union[DataFrameTransformation, list[DataFrameTransformation]]): Data
+              transforming function(s).
 
         Returns:
             None
         &#34;&#34;&#34;
         logger.info(&#34;Adding new transformation.&#34;)
-        self._transformations.append(fxn)
+        if isinstance(fxn, list):
+            self._transformations += fxn
+        else:
+            self._transformations.append(fxn)
         return None
 
     def insert_transformation(self, fxn: DataFrameTransformation, at: int) -&gt; None:
@@ -514,8 +536,16 @@ Defaults to None.</dd>
             self.apply_transformations()
         return None
 
+    def num_transformations(self) -&gt; int:
+        &#34;&#34;&#34;Get the number of transformations.
+
+        Returns:
+            int: Number of transformations.
+        &#34;&#34;&#34;
+        return len(self._transformations)
+
     def _apply_transformations(self, data: Data) -&gt; Data:
-        logger.info(&#34;Applying transofrmations to data.&#34;)
+        logger.debug(f&#34;Applying {self.num_transformations()} transformations.&#34;)
         for fxn in self._transformations:
             data = fxn(data)
         return data
@@ -546,8 +576,9 @@ Defaults to None.</dd>
         if isinstance(size, str):
             size = MockDataSize(size)
 
+        df: pd.DataFrame
         if size is MockDataSize.SMALL:
-            self._data = mock_data.generate_mock_achilles_data(
+            df = mock_data.generate_mock_achilles_data(
                 n_genes=10,
                 n_sgrnas_per_gene=3,
                 n_cell_lines=5,
@@ -556,7 +587,7 @@ Defaults to None.</dd>
                 n_screens=1,
             )
         elif size is MockDataSize.MEDIUM:
-            self._data = mock_data.generate_mock_achilles_data(
+            df = mock_data.generate_mock_achilles_data(
                 n_genes=25,
                 n_sgrnas_per_gene=5,
                 n_cell_lines=12,
@@ -565,7 +596,7 @@ Defaults to None.</dd>
                 n_screens=2,
             )
         elif size is MockDataSize.LARGE:
-            self._data = mock_data.generate_mock_achilles_data(
+            df = mock_data.generate_mock_achilles_data(
                 n_genes=100,
                 n_sgrnas_per_gene=5,
                 n_cell_lines=20,
@@ -575,21 +606,24 @@ Defaults to None.</dd>
             )
         else:
             assert_never(size)
+
+        self.set_data(df, apply_transformations=True)
         assert self._data is not None
-        return self._data</code></pre>
+        return self.get_data()</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
 <dt id="src.managers.data_managers.CrisprScreenDataManager.add_transformation"><code class="name flex">
-<span>def <span class="ident">add_transformation</span></span>(<span>self, fxn: Callable[[~Data], ~Data]) -> NoneType</span>
+<span>def <span class="ident">add_transformation</span></span>(<span>self, fxn: Union[Callable[[~Data], ~Data], list[Callable[[~Data], ~Data]]]) -> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add a new transformation.</p>
 <p>The new transformation is added to the end of the current list.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>fxn</code></strong> :&ensp;<code>DataFrameTransformation</code></dt>
-<dd>Data transforming function.</dd>
+<dt><strong><code>fxn</code></strong> :&ensp;<code>Union[DataFrameTransformation, list[DataFrameTransformation]]</code></dt>
+<dd>Data
+transforming function(s).</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -600,19 +634,25 @@ Defaults to None.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_transformation(self, fxn: DataFrameTransformation) -&gt; None:
+<pre><code class="python">def add_transformation(
+    self, fxn: Union[DataFrameTransformation, list[DataFrameTransformation]]
+) -&gt; None:
     &#34;&#34;&#34;Add a new transformation.
 
     The new transformation is added to the end of the current list.
 
     Args:
-        fxn (DataFrameTransformation): Data transforming function.
+        fxn (Union[DataFrameTransformation, list[DataFrameTransformation]]): Data
+          transforming function(s).
 
     Returns:
         None
     &#34;&#34;&#34;
     logger.info(&#34;Adding new transformation.&#34;)
-    self._transformations.append(fxn)
+    if isinstance(fxn, list):
+        self._transformations += fxn
+    else:
+        self._transformations.append(fxn)
     return None</code></pre>
 </details>
 </dd>
@@ -717,8 +757,9 @@ Defaults to None.</dd>
     if isinstance(size, str):
         size = MockDataSize(size)
 
+    df: pd.DataFrame
     if size is MockDataSize.SMALL:
-        self._data = mock_data.generate_mock_achilles_data(
+        df = mock_data.generate_mock_achilles_data(
             n_genes=10,
             n_sgrnas_per_gene=3,
             n_cell_lines=5,
@@ -727,7 +768,7 @@ Defaults to None.</dd>
             n_screens=1,
         )
     elif size is MockDataSize.MEDIUM:
-        self._data = mock_data.generate_mock_achilles_data(
+        df = mock_data.generate_mock_achilles_data(
             n_genes=25,
             n_sgrnas_per_gene=5,
             n_cell_lines=12,
@@ -736,7 +777,7 @@ Defaults to None.</dd>
             n_screens=2,
         )
     elif size is MockDataSize.LARGE:
-        self._data = mock_data.generate_mock_achilles_data(
+        df = mock_data.generate_mock_achilles_data(
             n_genes=100,
             n_sgrnas_per_gene=5,
             n_cell_lines=20,
@@ -746,8 +787,10 @@ Defaults to None.</dd>
         )
     else:
         assert_never(size)
+
+    self.set_data(df, apply_transformations=True)
     assert self._data is not None
-    return self._data</code></pre>
+    return self.get_data()</code></pre>
 </details>
 </dd>
 <dt id="src.managers.data_managers.CrisprScreenDataManager.get_data"><code class="name flex">
@@ -852,6 +895,29 @@ file.</p>
     logger.info(f&#34;Inserting transformation at index {at}.&#34;)
     self._transformations.insert(at, fxn)
     return None</code></pre>
+</details>
+</dd>
+<dt id="src.managers.data_managers.CrisprScreenDataManager.num_transformations"><code class="name flex">
+<span>def <span class="ident">num_transformations</span></span>(<span>self) -> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the number of transformations.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>int</code></dt>
+<dd>Number of transformations.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def num_transformations(self) -&gt; int:
+    &#34;&#34;&#34;Get the number of transformations.
+
+    Returns:
+        int: Number of transformations.
+    &#34;&#34;&#34;
+    return len(self._transformations)</code></pre>
 </details>
 </dd>
 <dt id="src.managers.data_managers.CrisprScreenDataManager.set_data"><code class="name flex">
@@ -988,6 +1054,7 @@ to False.</dd>
 <li><code><a title="src.managers.data_managers.CrisprScreenDataManager.get_data" href="#src.managers.data_managers.CrisprScreenDataManager.get_data">get_data</a></code></li>
 <li><code><a title="src.managers.data_managers.CrisprScreenDataManager.get_transformations" href="#src.managers.data_managers.CrisprScreenDataManager.get_transformations">get_transformations</a></code></li>
 <li><code><a title="src.managers.data_managers.CrisprScreenDataManager.insert_transformation" href="#src.managers.data_managers.CrisprScreenDataManager.insert_transformation">insert_transformation</a></code></li>
+<li><code><a title="src.managers.data_managers.CrisprScreenDataManager.num_transformations" href="#src.managers.data_managers.CrisprScreenDataManager.num_transformations">num_transformations</a></code></li>
 <li><code><a title="src.managers.data_managers.CrisprScreenDataManager.set_data" href="#src.managers.data_managers.CrisprScreenDataManager.set_data">set_data</a></code></li>
 <li><code><a title="src.managers.data_managers.CrisprScreenDataManager.set_transformations" href="#src.managers.data_managers.CrisprScreenDataManager.set_transformations">set_transformations</a></code></li>
 </ul>
