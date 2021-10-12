@@ -52,12 +52,11 @@ def _build_achilles_pdna_totals_table(achilles_pdna_df_path: Path) -> pd.DataFra
         achilles_pdna = dd.read_csv(achilles_pdna_df_path, low_memory=False)
         achilles_pdna_count_totals = (
             achilles_pdna[["p_dna_batch", "median_rpm"]]
-            .assign(median_rpm_reverted=lambda d: d.median_rpm - 1)
-            .groupby("p_dna_batch")["median_rpm_reverted"]
+            .groupby("p_dna_batch")["median_rpm"]
             .sum()
             .compute()
             .reset_index(drop=False)
-            .rename(columns={"median_rpm_reverted": "total_reads"})
+            .rename(columns={"median_rpm": "total_reads"})
         )
     return achilles_pdna_count_totals
 
@@ -66,11 +65,11 @@ def _build_score_pdna_totals_table(score_pdna_df_path: Path) -> pd.DataFrame:
     with dask_client() as _:
         score_pdna = dd.read_csv(score_pdna_df_path, low_memory=False)
         score_pdna_count_totals = (
-            score_pdna[["p_dna_batch", "read_counts"]]
-            .groupby("p_dna_batch")["read_counts"]
-            .count()
+            score_pdna[["p_dna_batch", "rpm"]]
+            .groupby("p_dna_batch")["rpm"]
+            .sum()
             .reset_index(drop=False)
-            .rename(columns={"read_counts": "total_reads"})
+            .rename(columns={"rpm": "total_reads"})
             .compute()
         )
     return score_pdna_count_totals
