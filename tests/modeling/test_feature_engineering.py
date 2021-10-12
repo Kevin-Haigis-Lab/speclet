@@ -1,3 +1,4 @@
+from pathlib import Path
 from string import ascii_letters
 from typing import Callable
 
@@ -45,12 +46,26 @@ def test_centered_copynumber_by_cellline(df: pd.DataFrame) -> None:
         assert avg == pytest.approx(0.0, abs=0.001)
 
 
+def test_centered_copynumber_by_cellline_real_data(depmap_test_data: Path) -> None:
+    df = pd.read_csv(depmap_test_data)
+    mod_df = feng.centered_copynumber_by_cellline(df)
+    assert mod_df.copy_number_cellline.values.shape[0] == df.shape[0]
+    assert len(mod_df.copy_number_cellline.values.shape) == 1
+
+
 @given(copynumber_dataframe(group_name="hugo_symbol"))
 def test_centered_copynumber_by_gene(df: pd.DataFrame) -> None:
     mod_df = feng.centered_copynumber_by_gene(df.copy())
     for gene in mod_df["hugo_symbol"].unique():
         avg = mod_df.query(f"hugo_symbol == '{gene}'")["copy_number_gene"].mean()
         assert avg == pytest.approx(0.0, abs=0.001)
+
+
+def test_centered_copynumber_by_gene_real_data(depmap_test_data: Path) -> None:
+    df = pd.read_csv(depmap_test_data)
+    mod_df = feng.centered_copynumber_by_gene(df)
+    assert mod_df.copy_number_gene.values.shape[0] == df.shape[0]
+    assert len(mod_df.copy_number_gene.values.shape) == 1
 
 
 @given(st.lists(st.booleans(), max_size=100))

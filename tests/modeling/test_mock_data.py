@@ -412,7 +412,6 @@ def test_mock_data_has_correct_categories_sizes(data: DataObject) -> None:
     assert n_batches >= dphelp.nunique(mock_data_df.p_dna_batch)
 
 
-@pytest.mark.DEV
 @settings(settings.load_profile("slow-adaptive"))
 @given(mock_data=generate_data_with_random_params())
 def test_sgrnas_uniquely_map_to_genes(mock_data: pd.DataFrame) -> None:

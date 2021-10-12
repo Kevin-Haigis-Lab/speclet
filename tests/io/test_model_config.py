@@ -131,7 +131,6 @@ def test_get_model_sampling_from_config_correct_pipeline_fitmethod(
     assert kwargs == expected_kwargs
 
 
-@pytest.mark.DEV
 def test_model_config_with_optional_pipeline_field() -> None:
     yaml_txt = """
 - name: with-pipelines
