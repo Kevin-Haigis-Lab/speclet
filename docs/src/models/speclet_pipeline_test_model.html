@@ -35,8 +35,13 @@ import numpy as np
 import pymc3 as pm
 from pydantic import BaseModel
 
-from src.managers.model_data_managers import DataManager, MockDataManager
-from src.models.speclet_model import ObservedVarName, SpecletModel
+from src.io.data_io import DataFile
+from src.managers.data_managers import CrisprScreenDataManager
+from src.models.speclet_model import (
+    ObservedVarName,
+    SpecletModel,
+    SpecletModelDataManager,
+)
 from src.project_enums import ModelParameterization as MP
 
 
@@ -57,7 +62,7 @@ class SpecletTestModel(SpecletModel):
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
-        data_manager: Optional[DataManager] = None,
+        data_manager: Optional[SpecletModelDataManager] = None,
         config: Optional[SpecletTestModelConfiguration] = None,
     ):
         &#34;&#34;&#34;Initialize a SpecletTestModel.
@@ -67,13 +72,14 @@ class SpecletTestModel(SpecletModel):
             root_cache_dir (Optional[Path], optional): Location for cache. Defaults to
               None.
             debug (bool, optional): In debug mode? Defaults to False.
-            data_manager (Optional[DataManager], optional): Object that will manage the
-              data. If None (default), a `MockDataManager` is created automatically.
+            data_manager (Optional[SpecletModelDataManager], optional): Object that will
+              manage the data. If None (default), a `CrisprScreenDataManager` is
+              created automatically.
             config (Optional[SpecletTestModelConfiguration], optional): Model
               configuration.
         &#34;&#34;&#34;
         if data_manager is None:
-            data_manager = MockDataManager(debug=debug)
+            data_manager = CrisprScreenDataManager(DataFile.DEPMAP_CRC_SUBSAMPLE)
 
         if config is None:
             self.config = SpecletTestModelConfiguration()
@@ -103,7 +109,7 @@ class SpecletTestModel(SpecletModel):
             b = pm.Normal(&#34;b&#34;, 0, 5)
             sigma = pm.HalfNormal(&#34;sigma&#34;, 10)
             y = pm.Normal(  # noqa: F841
-                &#34;y&#34;, a + b * d.x.values, sigma, observed=d.y.values
+                &#34;y&#34;, a + b * d.lfc.values, sigma, observed=d.lfc.values
             )
         return model, &#34;y&#34;
 
@@ -123,7 +129,7 @@ class SpecletTestModel(SpecletModel):
 <dl>
 <dt id="src.models.speclet_pipeline_test_model.SpecletTestModel"><code class="flex name class">
 <span>class <span class="ident">SpecletTestModel</span></span>
-<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = None, config: Optional[<a title="src.models.speclet_pipeline_test_model.SpecletTestModelConfiguration" href="#src.models.speclet_pipeline_test_model.SpecletTestModelConfiguration">SpecletTestModelConfiguration</a>] = None)</span>
+<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.models.speclet_model.SpecletModelDataManager" href="speclet_model.html#src.models.speclet_model.SpecletModelDataManager">SpecletModelDataManager</a>] = None, config: Optional[<a title="src.models.speclet_pipeline_test_model.SpecletTestModelConfiguration" href="#src.models.speclet_pipeline_test_model.SpecletTestModelConfiguration">SpecletTestModelConfiguration</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A SpecletModel class for testing purposes.</p>
@@ -137,9 +143,10 @@ class SpecletTestModel(SpecletModel):
 None.</dd>
 <dt><strong><code>debug</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>In debug mode? Defaults to False.</dd>
-<dt><strong><code>data_manager</code></strong> :&ensp;<code>Optional[DataManager]</code>, optional</dt>
-<dd>Object that will manage the
-data. If None (default), a <code>MockDataManager</code> is created automatically.</dd>
+<dt><strong><code>data_manager</code></strong> :&ensp;<code>Optional[SpecletModelDataManager]</code>, optional</dt>
+<dd>Object that will
+manage the data. If None (default), a <code>CrisprScreenDataManager</code> is
+created automatically.</dd>
 <dt><strong><code>config</code></strong> :&ensp;<code>Optional[<a title="src.models.speclet_pipeline_test_model.SpecletTestModelConfiguration" href="#src.models.speclet_pipeline_test_model.SpecletTestModelConfiguration">SpecletTestModelConfiguration</a>]</code>, optional</dt>
 <dd>Model
 configuration.</dd>
@@ -156,7 +163,7 @@ configuration.</dd>
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
-        data_manager: Optional[DataManager] = None,
+        data_manager: Optional[SpecletModelDataManager] = None,
         config: Optional[SpecletTestModelConfiguration] = None,
     ):
         &#34;&#34;&#34;Initialize a SpecletTestModel.
@@ -166,13 +173,14 @@ configuration.</dd>
             root_cache_dir (Optional[Path], optional): Location for cache. Defaults to
               None.
             debug (bool, optional): In debug mode? Defaults to False.
-            data_manager (Optional[DataManager], optional): Object that will manage the
-              data. If None (default), a `MockDataManager` is created automatically.
+            data_manager (Optional[SpecletModelDataManager], optional): Object that will
+              manage the data. If None (default), a `CrisprScreenDataManager` is
+              created automatically.
             config (Optional[SpecletTestModelConfiguration], optional): Model
               configuration.
         &#34;&#34;&#34;
         if data_manager is None:
-            data_manager = MockDataManager(debug=debug)
+            data_manager = CrisprScreenDataManager(DataFile.DEPMAP_CRC_SUBSAMPLE)
 
         if config is None:
             self.config = SpecletTestModelConfiguration()
@@ -202,7 +210,7 @@ configuration.</dd>
             b = pm.Normal(&#34;b&#34;, 0, 5)
             sigma = pm.HalfNormal(&#34;sigma&#34;, 10)
             y = pm.Normal(  # noqa: F841
-                &#34;y&#34;, a + b * d.x.values, sigma, observed=d.y.values
+                &#34;y&#34;, a + b * d.lfc.values, sigma, observed=d.lfc.values
             )
         return model, &#34;y&#34;
 
@@ -243,7 +251,7 @@ variable.</dd>
         b = pm.Normal(&#34;b&#34;, 0, 5)
         sigma = pm.HalfNormal(&#34;sigma&#34;, 10)
         y = pm.Normal(  # noqa: F841
-            &#34;y&#34;, a + b * d.x.values, sigma, observed=d.y.values
+            &#34;y&#34;, a + b * d.lfc.values, sigma, observed=d.lfc.values
         )
     return model, &#34;y&#34;</code></pre>
 </details>

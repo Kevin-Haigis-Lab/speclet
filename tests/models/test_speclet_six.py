@@ -119,14 +119,22 @@ class TestSpecletSix:
         for var in multi_screen_vars:
             assert var in model_vars
 
+    def test_transformed_data_has_expected_shape(self, tmp_path: Path) -> None:
+        sp6 = SpecletSix("TEST-MODEL_fsejio", root_cache_dir=tmp_path)
+        data = sp6.data_manager.get_data()
+        for _ in range(3):
+            data = sp6.data_manager.get_data()
+        assert data.copy_number_cellline.values.ndim == 1
+        assert data.copy_number_gene.values.ndim == 1
+
     @pytest.mark.DEV
     @pytest.mark.parametrize(
         "arg_name, expected_vars",
         [
-            ("cell_line_cna_cov", {"μ_k", "σ_k", "k"}),
             ("gene_cna_cov", {"μ_n", "σ_n", "n"}),
             ("rna_cov", {"μ_q", "σ_q", "q"}),
             ("mutation_cov", {"μ_m", "σ_m", "m"}),
+            ("cell_line_cna_cov", {"μ_k", "σ_k", "k"}),
         ],
     )
     @pytest.mark.parametrize("arg_value", [True, False])
@@ -134,10 +142,14 @@ class TestSpecletSix:
         self, tmp_path: Path, arg_name: str, expected_vars: set[str], arg_value: bool
     ) -> None:
         config = SpecletSixConfiguration(**{arg_name: arg_value})
+        cache_dir = tmp_path / arg_name
+        cache_dir.mkdir()
         sp6 = SpecletSix(
-            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, config=config
+            f"TEST-MODEL_{arg_name}",
+            root_cache_dir=cache_dir,
+            debug=True,
+            config=config,
         )
-        sp6.clear_cache()
         assert sp6.model is None
         sp6.build_model()
         assert sp6.model is not None

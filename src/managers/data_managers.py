@@ -74,7 +74,9 @@ class CrisprScreenDataManager:
         self._data = None
         self.columns = columns
         self.use_dask = use_dask
-        self._transformations = [] if transformations is None else transformations
+        self._transformations = (
+            [] if transformations is None else transformations.copy()
+        )
 
         if isinstance(data_source, DataFile):
             self.data_source = data_path(data_source)
@@ -95,7 +97,6 @@ class CrisprScreenDataManager:
             df = read_csv(
                 self.data_source, usecols=self.columns, dtype=col_types, **read_kwargs
             )
-
         df = self._apply_transformations(df)
 
         if self.use_dask:
@@ -220,8 +221,16 @@ class CrisprScreenDataManager:
             self.apply_transformations()
         return None
 
+    def num_transformations(self) -> int:
+        """Get the number of transformations.
+
+        Returns:
+            int: Number of transformations.
+        """
+        return len(self._transformations)
+
     def _apply_transformations(self, data: Data) -> Data:
-        logger.info("Applying transofrmations to data.")
+        logger.debug(f"Applying {self.num_transformations()} transformations.")
         for fxn in self._transformations:
             data = fxn(data)
         return data
