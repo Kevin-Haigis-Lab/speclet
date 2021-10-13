@@ -288,7 +288,7 @@ class SpecletModel:
                 + "Make sure to run `model.build_model()` first."
             )
 
-        if self.mcmc_results is not None:
+        if not ignore_cache and self.mcmc_results is not None:
             logger.info("Returning results from stored `mcmc_results` attribute.")
             return self.mcmc_results
 
