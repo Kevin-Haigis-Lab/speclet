@@ -6,6 +6,13 @@ from src.data_processing import achilles as achelp
 from src.data_processing import common as dphelp
 from src.loggers import logger
 
+
+class ColumnAlreadyExistsError(BaseException):
+    """Column already exists error."""
+
+    pass
+
+
 #### ---- Copy number ---- ####
 
 
@@ -18,12 +25,15 @@ def centered_copynumber_by_cellline(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Same data frame with a new column `"copy_number_cellline"`.
     """
-    logger.info("Adding 'copy_number_cellline' column.")
+    _new_col = "copy_number_cellline"
+    logger.info(f"Adding '{_new_col}' column.")
+    if _new_col in df.columns:
+        raise ColumnAlreadyExistsError(_new_col)
     return dphelp.center_column_grouped_dataframe(
         df,
         grp_col="depmap_id",
         val_col="copy_number",
-        new_col_name="copy_number_cellline",
+        new_col_name=_new_col,
     )
 
 
@@ -36,12 +46,15 @@ def centered_copynumber_by_gene(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Same data frame with a new column `"copy_number_gene"`.
     """
-    logger.info("Adding 'copy_number_gene' column.")
+    _new_col = "copy_number_gene"
+    logger.info(f"Adding '{_new_col}' column.")
+    if _new_col in df.columns:
+        raise ColumnAlreadyExistsError(_new_col)
     return dphelp.center_column_grouped_dataframe(
         df,
         grp_col="hugo_symbol",
         val_col="copy_number",
-        new_col_name="copy_number_gene",
+        new_col_name=_new_col,
     )
 
 

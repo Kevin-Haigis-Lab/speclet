@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from typing import Callable
 
 import numpy as np
@@ -164,7 +162,6 @@ def mock_df_for_df_to_mat(row_n: int, col_n: int) -> pd.DataFrame:
     return df
 
 
-@pytest.mark.DEV
 @given(st.integers(1, 6), st.integers(1, 6))
 def test_dataframe_to_matrix(row_n: int, col_n: int) -> None:
     df = mock_df_for_df_to_mat(row_n, col_n)
@@ -181,7 +178,6 @@ def test_dataframe_to_matrix(row_n: int, col_n: int) -> None:
             assert df_val == m_val
 
 
-@pytest.mark.DEV
 @given(st.integers(1, 6), st.integers(1, 6))
 def test_dataframe_to_matrix_categorical(row_n: int, col_n: int) -> None:
     df = mock_df_for_df_to_mat(row_n, col_n)

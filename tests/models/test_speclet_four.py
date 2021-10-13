@@ -5,7 +5,6 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from src.managers.model_data_managers import CrcDataManager
 from src.misc import test_helpers as th
 from src.modeling import pymc3_helpers as pmhelp
 from src.models.speclet_four import SpecletFour, SpecletFourConfiguration
@@ -16,28 +15,24 @@ class TestSpecletFour:
         sp4 = SpecletFour("test-model", root_cache_dir=tmp_path, debug=True)
         assert sp4.model is None
 
-    def test_build_model(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> None:
-        sp4 = SpecletFour(
-            "test-model", root_cache_dir=tmp_path, debug=True, data_manager=mock_crc_dm
-        )
-        assert sp4.model is None
-        sp4.build_model()
-        assert sp4.model is not None
+    @pytest.fixture(scope="function")
+    def sp_four(self, tmp_path: Path) -> SpecletFour:
+        sp_four = SpecletFour("test-model", root_cache_dir=tmp_path, debug=True)
+        return sp_four
+
+    def test_build_model(self, sp_four: SpecletFour) -> None:
+        assert sp_four.model is None
+        sp_four.build_model()
+        assert sp_four.model is not None
 
     @pytest.mark.slow
-    def test_mcmc_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> None:
-        sp4 = SpecletFour(
-            "test-model",
-            root_cache_dir=tmp_path,
-            debug=True,
-            data_manager=mock_crc_dm,
-        )
-        assert sp4.model is None
-        sp4.build_model()
-        assert sp4.model is not None
-        assert sp4.observed_var_name is not None
-        assert sp4.mcmc_results is None
-        _ = sp4.mcmc_sample_model(
+    def test_mcmc_sampling(self, sp_four: SpecletFour) -> None:
+        assert sp_four.model is None
+        sp_four.build_model()
+        assert sp_four.model is not None
+        assert sp_four.observed_var_name is not None
+        assert sp_four.mcmc_results is None
+        _ = sp_four.mcmc_sample_model(
             draws=10,
             tune=10,
             chains=2,
@@ -45,14 +40,13 @@ class TestSpecletFour:
             prior_pred_samples=10,
             random_seed=1,
         )
-        assert sp4.mcmc_results is not None
+        assert sp_four.mcmc_results is not None
 
     @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(config=st.builds(SpecletFourConfiguration))
     def test_changing_configuration_resets_model(
         self,
         tmp_path: Path,
-        mock_crc_dm: CrcDataManager,
         config: SpecletFourConfiguration,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
@@ -60,26 +54,18 @@ class TestSpecletFour:
             return "my-test-model", "another-string"
 
         monkeypatch.setattr(SpecletFour, "model_specification", mock_build_model)
-        sp4 = SpecletFour(
-            "test-model",
-            root_cache_dir=tmp_path,
-            debug=True,
-            data_manager=mock_crc_dm,
-        )
+        sp4 = SpecletFour("test-model", root_cache_dir=tmp_path, debug=True)
         th.assert_changing_configuration_resets_model(
             sp4, new_config=config, default_config=SpecletFourConfiguration()
         )
 
     @pytest.mark.parametrize("copy_cov", [True, False])
     def test_switching_copynumber_covariate(
-        self, tmp_path: Path, mock_crc_dm: CrcDataManager, copy_cov: bool
+        self,
+        tmp_path: Path,
+        copy_cov: bool,
     ) -> None:
-        sp4 = SpecletFour(
-            "test-model",
-            root_cache_dir=tmp_path,
-            debug=True,
-            data_manager=mock_crc_dm,
-        )
+        sp4 = SpecletFour("test-model", root_cache_dir=tmp_path, debug=True)
         _config = sp4.config.copy()
         _config.copy_number_cov = copy_cov
         sp4.set_config(_config.dict())
@@ -95,17 +81,10 @@ class TestSpecletFour:
     )
     @given(config=st.builds(SpecletFourConfiguration))
     def test_model_parameterizations(
-        self,
-        tmp_path: Path,
-        mock_crc_dm: CrcDataManager,
-        config: SpecletFourConfiguration,
+        self, tmp_path: Path, config: SpecletFourConfiguration
     ) -> None:
         sp4 = SpecletFour(
-            "test-model",
-            root_cache_dir=tmp_path,
-            debug=True,
-            data_manager=mock_crc_dm,
-            config=config,
+            "test-model", root_cache_dir=tmp_path, debug=True, config=config
         )
 
         def pre_check_callback(param_name: str, *args: Any, **kwargs: Any) -> bool:

@@ -5,7 +5,6 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from src.managers.model_data_managers import CrcDataManager
 from src.misc import test_helpers as th
 from src.models.speclet_five import SpecletFive, SpecletFiveConfiguration
 
@@ -15,10 +14,16 @@ class TestSpecletFive:
         sp5 = SpecletFive("TEST-MODEL", root_cache_dir=tmp_path, debug=True)
         assert sp5.model is None
 
-    def test_build_model(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> None:
+    @pytest.fixture(scope="function")
+    def sp5(self, tmp_path: Path) -> SpecletFive:
         sp5 = SpecletFive(
-            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=mock_crc_dm
+            "TEST-MODEL",
+            root_cache_dir=tmp_path,
+            debug=True,
         )
+        return sp5
+
+    def test_build_model(self, sp5: SpecletFive) -> None:
         assert sp5.model is None
         sp5.build_model()
         assert sp5.model is not None
@@ -28,7 +33,6 @@ class TestSpecletFive:
     def test_changing_configuration_resets_model(
         self,
         tmp_path: Path,
-        mock_crc_dm: CrcDataManager,
         config: SpecletFiveConfiguration,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
@@ -40,20 +44,13 @@ class TestSpecletFive:
             "test-model",
             root_cache_dir=tmp_path,
             debug=True,
-            data_manager=mock_crc_dm,
         )
         th.assert_changing_configuration_resets_model(
             sp5, new_config=config, default_config=SpecletFiveConfiguration()
         )
 
     @pytest.mark.slow
-    def test_mcmc_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> None:
-        sp5 = SpecletFive(
-            "TEST-MODEL",
-            root_cache_dir=tmp_path,
-            debug=True,
-            data_manager=mock_crc_dm,
-        )
+    def test_mcmc_sampling(self, sp5: SpecletFive) -> None:
         assert sp5.model is None
         sp5.build_model()
         assert sp5.model is not None
@@ -70,10 +67,7 @@ class TestSpecletFive:
         assert sp5.mcmc_results is not None
 
     @pytest.mark.slow
-    def test_advi_sampling(self, tmp_path: Path, mock_crc_dm: CrcDataManager) -> None:
-        sp5 = SpecletFive(
-            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, data_manager=mock_crc_dm
-        )
+    def test_advi_sampling(self, sp5: SpecletFive) -> None:
         assert sp5.model is None
         sp5.build_model()
         assert sp5.model is not None
@@ -96,14 +90,12 @@ class TestSpecletFive:
     def test_model_parameterizations(
         self,
         tmp_path: Path,
-        mock_crc_dm: CrcDataManager,
         config: SpecletFiveConfiguration,
     ) -> None:
         sp5 = SpecletFive(
             "test-model",
             root_cache_dir=tmp_path,
             debug=True,
-            data_manager=mock_crc_dm,
             config=config,
         )
         th.assert_model_reparameterization(sp5, config=config)

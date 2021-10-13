@@ -7,8 +7,13 @@ import numpy as np
 import pymc3 as pm
 from pydantic import BaseModel
 
-from src.managers.model_data_managers import DataManager, MockDataManager
-from src.models.speclet_model import ObservedVarName, SpecletModel
+from src.io.data_io import DataFile
+from src.managers.data_managers import CrisprScreenDataManager
+from src.models.speclet_model import (
+    ObservedVarName,
+    SpecletModel,
+    SpecletModelDataManager,
+)
 from src.project_enums import ModelParameterization as MP
 
 
@@ -29,7 +34,7 @@ class SpecletTestModel(SpecletModel):
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
-        data_manager: Optional[DataManager] = None,
+        data_manager: Optional[SpecletModelDataManager] = None,
         config: Optional[SpecletTestModelConfiguration] = None,
     ):
         """Initialize a SpecletTestModel.
@@ -39,13 +44,14 @@ class SpecletTestModel(SpecletModel):
             root_cache_dir (Optional[Path], optional): Location for cache. Defaults to
               None.
             debug (bool, optional): In debug mode? Defaults to False.
-            data_manager (Optional[DataManager], optional): Object that will manage the
-              data. If None (default), a `MockDataManager` is created automatically.
+            data_manager (Optional[SpecletModelDataManager], optional): Object that will
+              manage the data. If None (default), a `CrisprScreenDataManager` is
+              created automatically.
             config (Optional[SpecletTestModelConfiguration], optional): Model
               configuration.
         """
         if data_manager is None:
-            data_manager = MockDataManager(debug=debug)
+            data_manager = CrisprScreenDataManager(DataFile.DEPMAP_CRC_SUBSAMPLE)
 
         if config is None:
             self.config = SpecletTestModelConfiguration()
@@ -75,7 +81,7 @@ class SpecletTestModel(SpecletModel):
             b = pm.Normal("b", 0, 5)
             sigma = pm.HalfNormal("sigma", 10)
             y = pm.Normal(  # noqa: F841
-                "y", a + b * d.x.values, sigma, observed=d.y.values
+                "y", a + b * d.lfc.values, sigma, observed=d.lfc.values
             )
         return model, "y"
 

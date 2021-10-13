@@ -7,8 +7,9 @@ import pandas as pd
 import pymc3 as pm
 import pytest
 
-from src.managers import model_data_managers as dms
+from src.managers.data_managers import CrisprScreenDataManager
 from src.modeling.simulation_based_calibration_helpers import SBCFileManager
+from src.models.speclet_model import SpecletModelDataManager
 from src.models.speclet_simple import SpecletSimple
 from src.project_enums import MockDataSize, ModelFitMethod, assert_never
 
@@ -17,10 +18,11 @@ fake = faker.Faker()
 
 @pytest.mark.parametrize("debug", [True, False])
 @pytest.mark.parametrize(
-    "data_manager", [None, dms.CrcDataManager(), dms.MockDataManager()]
+    "data_manager",
+    [None, CrisprScreenDataManager(Path("tests", "depmap_test_data.csv"))],
 )
 def test_init(
-    tmp_path: Path, debug: bool, data_manager: Optional[dms.DataManager]
+    tmp_path: Path, debug: bool, data_manager: Optional[SpecletModelDataManager]
 ) -> None:
     sps = SpecletSimple(fake.name(), tmp_path, debug, data_manager)
     assert isinstance(sps, SpecletSimple)
@@ -32,10 +34,8 @@ def test_init(
 
 
 @pytest.mark.parametrize("debug", [True, False])
-def test_build_model(
-    tmp_path: Path, debug: bool, mock_crc_dm: dms.CrcDataManager
-) -> None:
-    sps = SpecletSimple(fake.name(), tmp_path, debug=debug, data_manager=mock_crc_dm)
+def test_build_model(tmp_path: Path, debug: bool) -> None:
+    sps = SpecletSimple(fake.name(), tmp_path, debug=debug)
     assert isinstance(sps, SpecletSimple)
     assert sps.model is None
     sps.build_model()
@@ -45,10 +45,8 @@ def test_build_model(
 
 @pytest.mark.slow
 @pytest.mark.parametrize("debug", [True, False])
-def test_mcmc_sample_model(
-    tmp_path: Path, debug: bool, mock_crc_dm: dms.CrcDataManager
-) -> None:
-    sps = SpecletSimple(fake.name(), tmp_path, debug=debug, data_manager=mock_crc_dm)
+def test_mcmc_sample_model(tmp_path: Path, debug: bool) -> None:
+    sps = SpecletSimple(fake.name(), tmp_path, debug=debug)
     sps.build_model()
     assert sps.mcmc_results is None and sps.advi_results is None
     sps.mcmc_sample_model(
@@ -81,10 +79,8 @@ def test_mcmc_sample_model(
 
 @pytest.mark.slow
 @pytest.mark.parametrize("debug", [True, False])
-def test_advi_sample_model(
-    tmp_path: Path, debug: bool, mock_crc_dm: dms.CrcDataManager
-) -> None:
-    sps = SpecletSimple(fake.name(), tmp_path, debug=debug, data_manager=mock_crc_dm)
+def test_advi_sample_model(tmp_path: Path, debug: bool) -> None:
+    sps = SpecletSimple(fake.name(), tmp_path, debug=debug)
     sps.build_model()
     assert sps.mcmc_results is None and sps.advi_results is None
     sps.advi_sample_model(n_iterations=21, draws=11, prior_pred_samples=101)
@@ -117,12 +113,9 @@ def test_advi_sample_model(
 @pytest.mark.parametrize("debug", [True, False])
 @pytest.mark.parametrize("data_size", MockDataSize)
 def test_generate_mock_data(
-    tmp_path: Path,
-    mock_crc_dm: dms.CrcDataManager,
-    data_size: MockDataSize,
-    debug: bool,
+    tmp_path: Path, data_size: MockDataSize, debug: bool
 ) -> None:
-    sps = SpecletSimple(fake.name(), tmp_path, debug=debug, data_manager=mock_crc_dm)
+    sps = SpecletSimple(fake.name(), tmp_path, debug=debug)
     mock_data = sps.generate_mock_data(data_size)
     assert "lfc" in mock_data.columns
     assert mock_data.shape[0] > 10
@@ -133,17 +126,13 @@ def test_generate_mock_data(
 @pytest.mark.parametrize("data_size", MockDataSize)
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 def test_run_simulation_based_calibration(
-    tmp_path: Path,
-    mock_crc_dm: dms.CrcDataManager,
-    data_size: MockDataSize,
-    fit_method: ModelFitMethod,
-    debug: bool,
+    tmp_path: Path, data_size: MockDataSize, fit_method: ModelFitMethod, debug: bool
 ) -> None:
     root_dir = tmp_path / "model-cache"
     root_dir.mkdir()
     sbc_dir = tmp_path / "sbc-cache"
     sbc_dir.mkdir()
-    sps = SpecletSimple(fake.name(), root_dir, debug=debug, data_manager=mock_crc_dm)
+    sps = SpecletSimple(fake.name(), root_dir, debug=debug)
 
     fit_kwargs: dict[str, float] = {"draws": 11, "prior_pred_samples": 101}
     if fit_method is ModelFitMethod.ADVI:
@@ -176,13 +165,12 @@ def make_sbc_subdirs(tmp_path: Path, n: int = 2) -> list[Path]:
 @pytest.mark.parametrize("debug", (True, False))
 def test_get_sbc(
     tmp_path: Path,
-    mock_crc_dm: dms.CrcDataManager,
     centered_eight: az.InferenceData,
     debug: bool,
 ) -> None:
     model_dir, sbc_dir = make_sbc_subdirs(tmp_path, n=2)
     sbc_fm = SBCFileManager(sbc_dir)
-    sps = SpecletSimple(fake.name(), model_dir, debug=debug, data_manager=mock_crc_dm)
+    sps = SpecletSimple(fake.name(), model_dir, debug=debug)
 
     sbc_fm.save_sbc_data(sps.generate_mock_data(MockDataSize.SMALL))
     sbc_fm.save_sbc_results(
@@ -201,11 +189,10 @@ def test_get_sbc(
 @pytest.mark.parametrize("debug", (True, False))
 def test_mcmc_caching(
     tmp_path: Path,
-    mock_crc_dm: dms.CrcDataManager,
     centered_eight: az.InferenceData,
     debug: bool,
 ) -> None:
-    sps = SpecletSimple(fake.name(), tmp_path, debug=debug, data_manager=mock_crc_dm)
+    sps = SpecletSimple(fake.name(), tmp_path, debug=debug)
     assert not sps.cache_manager.mcmc_cache_exists()
     sps.mcmc_results = centered_eight
     sps.write_mcmc_cache()
@@ -216,11 +203,10 @@ def test_mcmc_caching(
 @pytest.mark.parametrize("debug", (True, False))
 def test_advi_caching(
     tmp_path: Path,
-    mock_crc_dm: dms.CrcDataManager,
     centered_eight: az.InferenceData,
     debug: bool,
 ) -> None:
-    sps = SpecletSimple(fake.name(), tmp_path, debug=debug, data_manager=mock_crc_dm)
+    sps = SpecletSimple(fake.name(), tmp_path, debug=debug)
     assert not sps.cache_manager.advi_cache_exists()
     sps.build_model()
     sps.advi_sample_model(n_iterations=21, draws=11, prior_pred_samples=101)

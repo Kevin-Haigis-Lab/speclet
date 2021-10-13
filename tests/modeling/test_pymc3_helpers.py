@@ -111,7 +111,6 @@ def test_hierarchical_normal(centered: bool) -> None:
         assert isinstance(a, pm.model.DeterministicWrapper)
 
 
-@pytest.mark.DEV
 @pytest.mark.parametrize("centered", (True, False))
 def test_hierarchical_normal_with_avg(centered: bool) -> None:
 

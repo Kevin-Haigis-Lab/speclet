@@ -1,0 +1,1076 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>src.managers.data_managers API documentation</title>
+<meta name="description" content="Data management classes." />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS_CHTML'></script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>src.managers.data_managers</code></h1>
+</header>
+<section id="section-intro">
+<p>Data management classes.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Data management classes.&#34;&#34;&#34;
+
+from pathlib import Path
+from typing import Any, Callable, Final, Optional, TypeVar, Union
+
+import dask.dataframe as dd
+import numpy as np
+import pandas as pd
+
+from src.data_processing import achilles as achelp
+from src.io.data_io import DataFile, data_path
+from src.loggers import logger
+from src.modeling import mock_data
+from src.project_enums import MockDataSize, assert_never
+
+Data = TypeVar(&#34;Data&#34;, pd.DataFrame, dd.DataFrame)
+DataFrameTransformation = Callable[[Data], Data]
+
+common_crispr_screen_transformations: Final[list[DataFrameTransformation]] = [
+    achelp.drop_sgrnas_that_map_to_multiple_genes,
+    achelp.set_achilles_categorical_columns,
+]
+
+
+def _get_crispr_screen_data_coltypes() -&gt; dict[str, str]:
+    col_types = {}
+    for c in [
+        &#34;sgrna&#34;,
+        &#34;hugo_symbol&#34;,
+        &#34;p_dna_batch&#34;,
+        &#34;replicate_id&#34;,
+        &#34;depmap_id&#34;,
+        &#34;sex&#34;,
+    ]:
+        col_types[c] = &#34;object&#34;
+    for c in [&#34;counts_final&#34;, &#34;counts_final_total&#34;]:
+        col_types[c] = &#34;Int64&#34;
+    return col_types
+
+
+class DataNotLoadedException(BaseException):
+    &#34;&#34;&#34;Data not loaded exception.&#34;&#34;&#34;
+
+    pass
+
+
+class CrisprScreenDataManager:
+    &#34;&#34;&#34;Manage CRISPR screen data.&#34;&#34;&#34;
+
+    _data: Optional[pd.DataFrame]
+    data_source: Path
+    _transformations: list[DataFrameTransformation]
+    columns: Optional[set[str]]
+    use_dask: bool
+
+    def __init__(
+        self,
+        data_source: Union[Path, DataFile],
+        transformations: Optional[list[DataFrameTransformation]] = None,
+        columns: Optional[set[str]] = None,
+        use_dask: bool = False,
+    ) -&gt; None:
+        &#34;&#34;&#34;Create a CRISPR screen data manager.
+
+        Args:
+            data_source (Union[Path, DataFile]): CSV file with data.
+            transformations (Optional[list[DataFrameTransformation]], optional): List of
+              functions that take, mutate, and return a data frame (pandas or dask).
+              Defaults to None.
+            columns (Optional[set[str]], optional): Columns to keep from the data.
+              Defaults to None.
+            use_dask (bool, optional): Use a dask backend? Defaults to False.
+        &#34;&#34;&#34;
+        self._data = None
+        self.columns = columns
+        self.use_dask = use_dask
+        self._transformations = (
+            [] if transformations is None else transformations.copy()
+        )
+
+        if isinstance(data_source, DataFile):
+            self.data_source = data_path(data_source)
+        else:
+            self.data_source = data_source
+
+        assert self.data_source.name.endswith(&#34;csv&#34;)
+        assert self.data_source.is_file()
+        assert self.data_source.exists()
+
+    def _read_data(self, read_kwargs: dict[str, Any]) -&gt; pd.DataFrame:
+        read_csv = dd.read_csv if self.use_dask else pd.read_csv
+        df: Union[pd.DataFrame, dd.DataFrame]
+        col_types = _get_crispr_screen_data_coltypes()
+        if self.columns is None:
+            df = read_csv(self.data_source, dtype=col_types, **read_kwargs)
+        else:
+            df = read_csv(
+                self.data_source, usecols=self.columns, dtype=col_types, **read_kwargs
+            )
+        df = self._apply_transformations(df)
+
+        if self.use_dask:
+            df = df.compute()
+
+        self._data = df
+        return self._data
+
+    def get_data(self, read_kwargs: Optional[dict[str, Any]] = None) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Get CRISPR screen data.
+
+        If the data has already been loaded, it is returned without re-reading from
+        file.
+
+        Args:
+            read_kwargs (Optional[dict[str, Any]], optional): Key-word arguments for the
+            CSV-parsing function. Defaults to None.
+
+        Returns:
+            pd.DataFrame: CRISPR screen data.
+        &#34;&#34;&#34;
+        if self._data is not None:
+            logger.info(&#34;Getting data - already loaded.&#34;)
+            return self._data
+
+        logger.info(&#34;Getting data - reading from file.&#34;)
+        if read_kwargs is None:
+            read_kwargs = {}
+        return self._read_data(read_kwargs=read_kwargs)
+
+    def set_data(self, data: pd.DataFrame, apply_transformations: bool = False) -&gt; None:
+        &#34;&#34;&#34;Set the CRISPR screen data.
+
+        Args:
+            data (pd.DataFrame): New data.
+            apply_transformations (bool, optional): Should the transformations be
+              applied? Defaults to False.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        logger.info(&#34;Setting data.&#34;)
+        if apply_transformations:
+            data = self._apply_transformations(data)
+        self._data = data
+        return None
+
+    def clear_data(self) -&gt; None:
+        &#34;&#34;&#34;Clear the CRISPR screen data.&#34;&#34;&#34;
+        logger.info(&#34;Clearing data.&#34;)
+        self._data = None
+
+    def data_is_loaded(self) -&gt; bool:
+        &#34;&#34;&#34;Check if the data has been loaded.&#34;&#34;&#34;
+        return self._data is not None
+
+    def add_transformation(
+        self, fxn: Union[DataFrameTransformation, list[DataFrameTransformation]]
+    ) -&gt; None:
+        &#34;&#34;&#34;Add a new transformation.
+
+        The new transformation is added to the end of the current list.
+
+        Args:
+            fxn (Union[DataFrameTransformation, list[DataFrameTransformation]]): Data
+              transforming function(s).
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        logger.info(&#34;Adding new transformation.&#34;)
+        if isinstance(fxn, list):
+            self._transformations += fxn
+        else:
+            self._transformations.append(fxn)
+        return None
+
+    def insert_transformation(self, fxn: DataFrameTransformation, at: int) -&gt; None:
+        &#34;&#34;&#34;Insert a new transformation at a specified index.
+
+        Args:
+            fxn (DataFrameTransformation): Data transforming function.
+            at (int): Insertion index.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        logger.info(f&#34;Inserting transformation at index {at}.&#34;)
+        self._transformations.insert(at, fxn)
+        return None
+
+    def get_transformations(self) -&gt; list[DataFrameTransformation]:
+        &#34;&#34;&#34;Get (a copty of) the list of transformations.
+
+        Returns:
+            list[DataFrameTransformation]: Copy of the list of transformation.
+        &#34;&#34;&#34;
+        return self._transformations.copy()
+
+    def clear_transformations(self) -&gt; None:
+        &#34;&#34;&#34;Clear the list of transformations.&#34;&#34;&#34;
+        logger.info(&#34;Clearing transformations.&#34;)
+        self._transformations = []
+
+    def set_transformations(
+        self, new_transformations: list[DataFrameTransformation], apply: bool = False
+    ) -&gt; None:
+        &#34;&#34;&#34;Set the list of transformations.
+
+        Args:
+            new_transformations (list[DataFrameTransformation]): New list of data
+              transforming functions.
+            apply (bool, optional): Should the new list be applied to the data? Defaults
+              to False.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        logger.info(&#34;Setting transformations.&#34;)
+        self._transformations = new_transformations
+        if apply:
+            self.apply_transformations()
+        return None
+
+    def num_transformations(self) -&gt; int:
+        &#34;&#34;&#34;Get the number of transformations.
+
+        Returns:
+            int: Number of transformations.
+        &#34;&#34;&#34;
+        return len(self._transformations)
+
+    def _apply_transformations(self, data: Data) -&gt; Data:
+        logger.debug(f&#34;Applying {self.num_transformations()} transformations.&#34;)
+        for fxn in self._transformations:
+            data = fxn(data)
+        return data
+
+    def apply_transformations(self) -&gt; None:
+        &#34;&#34;&#34;Apply the transformations to the data.&#34;&#34;&#34;
+        logger.info(&#34;Applying transformations.&#34;)
+        if self._data is None:
+            raise DataNotLoadedException(&#34;Data not loaded&#34;)
+        self._data = self._apply_transformations(self._data)
+
+    def generate_mock_data(
+        self, size: Union[MockDataSize, str], random_seed: Optional[int] = None
+    ) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Generate mock data to be used for testing or SBC.
+
+        Args:
+            size (Union[MockDataSize, str]): Size of the final mock dataset.
+            random_seed (Optional[int], optional): Random seed. Defaults to None.
+
+        Returns:
+            pd.DataFrame: Mock data.
+        &#34;&#34;&#34;
+        logger.info(f&#34;Generating mock data of size &#39;{size}&#39;.&#34;)
+        if random_seed is not None:
+            np.random.seed(random_seed)
+
+        if isinstance(size, str):
+            size = MockDataSize(size)
+
+        df: pd.DataFrame
+        if size is MockDataSize.SMALL:
+            df = mock_data.generate_mock_achilles_data(
+                n_genes=10,
+                n_sgrnas_per_gene=3,
+                n_cell_lines=5,
+                n_lineages=2,
+                n_batches=2,
+                n_screens=1,
+            )
+        elif size is MockDataSize.MEDIUM:
+            df = mock_data.generate_mock_achilles_data(
+                n_genes=25,
+                n_sgrnas_per_gene=5,
+                n_cell_lines=12,
+                n_lineages=2,
+                n_batches=3,
+                n_screens=2,
+            )
+        elif size is MockDataSize.LARGE:
+            df = mock_data.generate_mock_achilles_data(
+                n_genes=100,
+                n_sgrnas_per_gene=5,
+                n_cell_lines=20,
+                n_lineages=3,
+                n_batches=4,
+                n_screens=2,
+            )
+        else:
+            assert_never(size)
+
+        self.set_data(df, apply_transformations=True)
+        assert self._data is not None
+        return self.get_data()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="src.managers.data_managers.CrisprScreenDataManager"><code class="flex name class">
+<span>class <span class="ident">CrisprScreenDataManager</span></span>
+<span>(</span><span>data_source: Union[pathlib.Path, src.io.data_io.DataFile], transformations: Optional[list[Callable[[~Data], ~Data]]] = None, columns: Optional[set[str]] = None, use_dask: bool = False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Manage CRISPR screen data.</p>
+<p>Create a CRISPR screen data manager.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data_source</code></strong> :&ensp;<code>Union[Path, DataFile]</code></dt>
+<dd>CSV file with data.</dd>
+<dt><strong><code>transformations</code></strong> :&ensp;<code>Optional[list[DataFrameTransformation]]</code>, optional</dt>
+<dd>List of
+functions that take, mutate, and return a data frame (pandas or dask).
+Defaults to None.</dd>
+<dt><strong><code>columns</code></strong> :&ensp;<code>Optional[set[str]]</code>, optional</dt>
+<dd>Columns to keep from the data.
+Defaults to None.</dd>
+<dt><strong><code>use_dask</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Use a dask backend? Defaults to False.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CrisprScreenDataManager:
+    &#34;&#34;&#34;Manage CRISPR screen data.&#34;&#34;&#34;
+
+    _data: Optional[pd.DataFrame]
+    data_source: Path
+    _transformations: list[DataFrameTransformation]
+    columns: Optional[set[str]]
+    use_dask: bool
+
+    def __init__(
+        self,
+        data_source: Union[Path, DataFile],
+        transformations: Optional[list[DataFrameTransformation]] = None,
+        columns: Optional[set[str]] = None,
+        use_dask: bool = False,
+    ) -&gt; None:
+        &#34;&#34;&#34;Create a CRISPR screen data manager.
+
+        Args:
+            data_source (Union[Path, DataFile]): CSV file with data.
+            transformations (Optional[list[DataFrameTransformation]], optional): List of
+              functions that take, mutate, and return a data frame (pandas or dask).
+              Defaults to None.
+            columns (Optional[set[str]], optional): Columns to keep from the data.
+              Defaults to None.
+            use_dask (bool, optional): Use a dask backend? Defaults to False.
+        &#34;&#34;&#34;
+        self._data = None
+        self.columns = columns
+        self.use_dask = use_dask
+        self._transformations = (
+            [] if transformations is None else transformations.copy()
+        )
+
+        if isinstance(data_source, DataFile):
+            self.data_source = data_path(data_source)
+        else:
+            self.data_source = data_source
+
+        assert self.data_source.name.endswith(&#34;csv&#34;)
+        assert self.data_source.is_file()
+        assert self.data_source.exists()
+
+    def _read_data(self, read_kwargs: dict[str, Any]) -&gt; pd.DataFrame:
+        read_csv = dd.read_csv if self.use_dask else pd.read_csv
+        df: Union[pd.DataFrame, dd.DataFrame]
+        col_types = _get_crispr_screen_data_coltypes()
+        if self.columns is None:
+            df = read_csv(self.data_source, dtype=col_types, **read_kwargs)
+        else:
+            df = read_csv(
+                self.data_source, usecols=self.columns, dtype=col_types, **read_kwargs
+            )
+        df = self._apply_transformations(df)
+
+        if self.use_dask:
+            df = df.compute()
+
+        self._data = df
+        return self._data
+
+    def get_data(self, read_kwargs: Optional[dict[str, Any]] = None) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Get CRISPR screen data.
+
+        If the data has already been loaded, it is returned without re-reading from
+        file.
+
+        Args:
+            read_kwargs (Optional[dict[str, Any]], optional): Key-word arguments for the
+            CSV-parsing function. Defaults to None.
+
+        Returns:
+            pd.DataFrame: CRISPR screen data.
+        &#34;&#34;&#34;
+        if self._data is not None:
+            logger.info(&#34;Getting data - already loaded.&#34;)
+            return self._data
+
+        logger.info(&#34;Getting data - reading from file.&#34;)
+        if read_kwargs is None:
+            read_kwargs = {}
+        return self._read_data(read_kwargs=read_kwargs)
+
+    def set_data(self, data: pd.DataFrame, apply_transformations: bool = False) -&gt; None:
+        &#34;&#34;&#34;Set the CRISPR screen data.
+
+        Args:
+            data (pd.DataFrame): New data.
+            apply_transformations (bool, optional): Should the transformations be
+              applied? Defaults to False.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        logger.info(&#34;Setting data.&#34;)
+        if apply_transformations:
+            data = self._apply_transformations(data)
+        self._data = data
+        return None
+
+    def clear_data(self) -&gt; None:
+        &#34;&#34;&#34;Clear the CRISPR screen data.&#34;&#34;&#34;
+        logger.info(&#34;Clearing data.&#34;)
+        self._data = None
+
+    def data_is_loaded(self) -&gt; bool:
+        &#34;&#34;&#34;Check if the data has been loaded.&#34;&#34;&#34;
+        return self._data is not None
+
+    def add_transformation(
+        self, fxn: Union[DataFrameTransformation, list[DataFrameTransformation]]
+    ) -&gt; None:
+        &#34;&#34;&#34;Add a new transformation.
+
+        The new transformation is added to the end of the current list.
+
+        Args:
+            fxn (Union[DataFrameTransformation, list[DataFrameTransformation]]): Data
+              transforming function(s).
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        logger.info(&#34;Adding new transformation.&#34;)
+        if isinstance(fxn, list):
+            self._transformations += fxn
+        else:
+            self._transformations.append(fxn)
+        return None
+
+    def insert_transformation(self, fxn: DataFrameTransformation, at: int) -&gt; None:
+        &#34;&#34;&#34;Insert a new transformation at a specified index.
+
+        Args:
+            fxn (DataFrameTransformation): Data transforming function.
+            at (int): Insertion index.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        logger.info(f&#34;Inserting transformation at index {at}.&#34;)
+        self._transformations.insert(at, fxn)
+        return None
+
+    def get_transformations(self) -&gt; list[DataFrameTransformation]:
+        &#34;&#34;&#34;Get (a copty of) the list of transformations.
+
+        Returns:
+            list[DataFrameTransformation]: Copy of the list of transformation.
+        &#34;&#34;&#34;
+        return self._transformations.copy()
+
+    def clear_transformations(self) -&gt; None:
+        &#34;&#34;&#34;Clear the list of transformations.&#34;&#34;&#34;
+        logger.info(&#34;Clearing transformations.&#34;)
+        self._transformations = []
+
+    def set_transformations(
+        self, new_transformations: list[DataFrameTransformation], apply: bool = False
+    ) -&gt; None:
+        &#34;&#34;&#34;Set the list of transformations.
+
+        Args:
+            new_transformations (list[DataFrameTransformation]): New list of data
+              transforming functions.
+            apply (bool, optional): Should the new list be applied to the data? Defaults
+              to False.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        logger.info(&#34;Setting transformations.&#34;)
+        self._transformations = new_transformations
+        if apply:
+            self.apply_transformations()
+        return None
+
+    def num_transformations(self) -&gt; int:
+        &#34;&#34;&#34;Get the number of transformations.
+
+        Returns:
+            int: Number of transformations.
+        &#34;&#34;&#34;
+        return len(self._transformations)
+
+    def _apply_transformations(self, data: Data) -&gt; Data:
+        logger.debug(f&#34;Applying {self.num_transformations()} transformations.&#34;)
+        for fxn in self._transformations:
+            data = fxn(data)
+        return data
+
+    def apply_transformations(self) -&gt; None:
+        &#34;&#34;&#34;Apply the transformations to the data.&#34;&#34;&#34;
+        logger.info(&#34;Applying transformations.&#34;)
+        if self._data is None:
+            raise DataNotLoadedException(&#34;Data not loaded&#34;)
+        self._data = self._apply_transformations(self._data)
+
+    def generate_mock_data(
+        self, size: Union[MockDataSize, str], random_seed: Optional[int] = None
+    ) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Generate mock data to be used for testing or SBC.
+
+        Args:
+            size (Union[MockDataSize, str]): Size of the final mock dataset.
+            random_seed (Optional[int], optional): Random seed. Defaults to None.
+
+        Returns:
+            pd.DataFrame: Mock data.
+        &#34;&#34;&#34;
+        logger.info(f&#34;Generating mock data of size &#39;{size}&#39;.&#34;)
+        if random_seed is not None:
+            np.random.seed(random_seed)
+
+        if isinstance(size, str):
+            size = MockDataSize(size)
+
+        df: pd.DataFrame
+        if size is MockDataSize.SMALL:
+            df = mock_data.generate_mock_achilles_data(
+                n_genes=10,
+                n_sgrnas_per_gene=3,
+                n_cell_lines=5,
+                n_lineages=2,
+                n_batches=2,
+                n_screens=1,
+            )
+        elif size is MockDataSize.MEDIUM:
+            df = mock_data.generate_mock_achilles_data(
+                n_genes=25,
+                n_sgrnas_per_gene=5,
+                n_cell_lines=12,
+                n_lineages=2,
+                n_batches=3,
+                n_screens=2,
+            )
+        elif size is MockDataSize.LARGE:
+            df = mock_data.generate_mock_achilles_data(
+                n_genes=100,
+                n_sgrnas_per_gene=5,
+                n_cell_lines=20,
+                n_lineages=3,
+                n_batches=4,
+                n_screens=2,
+            )
+        else:
+            assert_never(size)
+
+        self.set_data(df, apply_transformations=True)
+        assert self._data is not None
+        return self.get_data()</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="src.managers.data_managers.CrisprScreenDataManager.add_transformation"><code class="name flex">
+<span>def <span class="ident">add_transformation</span></span>(<span>self, fxn: Union[Callable[[~Data], ~Data], list[Callable[[~Data], ~Data]]]) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a new transformation.</p>
+<p>The new transformation is added to the end of the current list.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>fxn</code></strong> :&ensp;<code>Union[DataFrameTransformation, list[DataFrameTransformation]]</code></dt>
+<dd>Data
+transforming function(s).</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_transformation(
+    self, fxn: Union[DataFrameTransformation, list[DataFrameTransformation]]
+) -&gt; None:
+    &#34;&#34;&#34;Add a new transformation.
+
+    The new transformation is added to the end of the current list.
+
+    Args:
+        fxn (Union[DataFrameTransformation, list[DataFrameTransformation]]): Data
+          transforming function(s).
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    logger.info(&#34;Adding new transformation.&#34;)
+    if isinstance(fxn, list):
+        self._transformations += fxn
+    else:
+        self._transformations.append(fxn)
+    return None</code></pre>
+</details>
+</dd>
+<dt id="src.managers.data_managers.CrisprScreenDataManager.apply_transformations"><code class="name flex">
+<span>def <span class="ident">apply_transformations</span></span>(<span>self) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Apply the transformations to the data.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def apply_transformations(self) -&gt; None:
+    &#34;&#34;&#34;Apply the transformations to the data.&#34;&#34;&#34;
+    logger.info(&#34;Applying transformations.&#34;)
+    if self._data is None:
+        raise DataNotLoadedException(&#34;Data not loaded&#34;)
+    self._data = self._apply_transformations(self._data)</code></pre>
+</details>
+</dd>
+<dt id="src.managers.data_managers.CrisprScreenDataManager.clear_data"><code class="name flex">
+<span>def <span class="ident">clear_data</span></span>(<span>self) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Clear the CRISPR screen data.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clear_data(self) -&gt; None:
+    &#34;&#34;&#34;Clear the CRISPR screen data.&#34;&#34;&#34;
+    logger.info(&#34;Clearing data.&#34;)
+    self._data = None</code></pre>
+</details>
+</dd>
+<dt id="src.managers.data_managers.CrisprScreenDataManager.clear_transformations"><code class="name flex">
+<span>def <span class="ident">clear_transformations</span></span>(<span>self) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Clear the list of transformations.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clear_transformations(self) -&gt; None:
+    &#34;&#34;&#34;Clear the list of transformations.&#34;&#34;&#34;
+    logger.info(&#34;Clearing transformations.&#34;)
+    self._transformations = []</code></pre>
+</details>
+</dd>
+<dt id="src.managers.data_managers.CrisprScreenDataManager.data_is_loaded"><code class="name flex">
+<span>def <span class="ident">data_is_loaded</span></span>(<span>self) -> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Check if the data has been loaded.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def data_is_loaded(self) -&gt; bool:
+    &#34;&#34;&#34;Check if the data has been loaded.&#34;&#34;&#34;
+    return self._data is not None</code></pre>
+</details>
+</dd>
+<dt id="src.managers.data_managers.CrisprScreenDataManager.generate_mock_data"><code class="name flex">
+<span>def <span class="ident">generate_mock_data</span></span>(<span>self, size: Union[src.project_enums.MockDataSize, str], random_seed: Optional[int] = None) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate mock data to be used for testing or SBC.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>size</code></strong> :&ensp;<code>Union[MockDataSize, str]</code></dt>
+<dd>Size of the final mock dataset.</dd>
+<dt><strong><code>random_seed</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
+<dd>Random seed. Defaults to None.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>Mock data.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def generate_mock_data(
+    self, size: Union[MockDataSize, str], random_seed: Optional[int] = None
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Generate mock data to be used for testing or SBC.
+
+    Args:
+        size (Union[MockDataSize, str]): Size of the final mock dataset.
+        random_seed (Optional[int], optional): Random seed. Defaults to None.
+
+    Returns:
+        pd.DataFrame: Mock data.
+    &#34;&#34;&#34;
+    logger.info(f&#34;Generating mock data of size &#39;{size}&#39;.&#34;)
+    if random_seed is not None:
+        np.random.seed(random_seed)
+
+    if isinstance(size, str):
+        size = MockDataSize(size)
+
+    df: pd.DataFrame
+    if size is MockDataSize.SMALL:
+        df = mock_data.generate_mock_achilles_data(
+            n_genes=10,
+            n_sgrnas_per_gene=3,
+            n_cell_lines=5,
+            n_lineages=2,
+            n_batches=2,
+            n_screens=1,
+        )
+    elif size is MockDataSize.MEDIUM:
+        df = mock_data.generate_mock_achilles_data(
+            n_genes=25,
+            n_sgrnas_per_gene=5,
+            n_cell_lines=12,
+            n_lineages=2,
+            n_batches=3,
+            n_screens=2,
+        )
+    elif size is MockDataSize.LARGE:
+        df = mock_data.generate_mock_achilles_data(
+            n_genes=100,
+            n_sgrnas_per_gene=5,
+            n_cell_lines=20,
+            n_lineages=3,
+            n_batches=4,
+            n_screens=2,
+        )
+    else:
+        assert_never(size)
+
+    self.set_data(df, apply_transformations=True)
+    assert self._data is not None
+    return self.get_data()</code></pre>
+</details>
+</dd>
+<dt id="src.managers.data_managers.CrisprScreenDataManager.get_data"><code class="name flex">
+<span>def <span class="ident">get_data</span></span>(<span>self, read_kwargs: Optional[dict[str, Any]] = None) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get CRISPR screen data.</p>
+<p>If the data has already been loaded, it is returned without re-reading from
+file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>read_kwargs</code></strong> :&ensp;<code>Optional[dict[str, Any]]</code>, optional</dt>
+<dd>Key-word arguments for the</dd>
+</dl>
+<p>CSV-parsing function. Defaults to None.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>CRISPR screen data.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_data(self, read_kwargs: Optional[dict[str, Any]] = None) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Get CRISPR screen data.
+
+    If the data has already been loaded, it is returned without re-reading from
+    file.
+
+    Args:
+        read_kwargs (Optional[dict[str, Any]], optional): Key-word arguments for the
+        CSV-parsing function. Defaults to None.
+
+    Returns:
+        pd.DataFrame: CRISPR screen data.
+    &#34;&#34;&#34;
+    if self._data is not None:
+        logger.info(&#34;Getting data - already loaded.&#34;)
+        return self._data
+
+    logger.info(&#34;Getting data - reading from file.&#34;)
+    if read_kwargs is None:
+        read_kwargs = {}
+    return self._read_data(read_kwargs=read_kwargs)</code></pre>
+</details>
+</dd>
+<dt id="src.managers.data_managers.CrisprScreenDataManager.get_transformations"><code class="name flex">
+<span>def <span class="ident">get_transformations</span></span>(<span>self) -> list</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get (a copty of) the list of transformations.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[DataFrameTransformation]</code></dt>
+<dd>Copy of the list of transformation.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_transformations(self) -&gt; list[DataFrameTransformation]:
+    &#34;&#34;&#34;Get (a copty of) the list of transformations.
+
+    Returns:
+        list[DataFrameTransformation]: Copy of the list of transformation.
+    &#34;&#34;&#34;
+    return self._transformations.copy()</code></pre>
+</details>
+</dd>
+<dt id="src.managers.data_managers.CrisprScreenDataManager.insert_transformation"><code class="name flex">
+<span>def <span class="ident">insert_transformation</span></span>(<span>self, fxn: Callable[[~Data], ~Data], at: int) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Insert a new transformation at a specified index.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>fxn</code></strong> :&ensp;<code>DataFrameTransformation</code></dt>
+<dd>Data transforming function.</dd>
+<dt><strong><code>at</code></strong> :&ensp;<code>int</code></dt>
+<dd>Insertion index.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def insert_transformation(self, fxn: DataFrameTransformation, at: int) -&gt; None:
+    &#34;&#34;&#34;Insert a new transformation at a specified index.
+
+    Args:
+        fxn (DataFrameTransformation): Data transforming function.
+        at (int): Insertion index.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    logger.info(f&#34;Inserting transformation at index {at}.&#34;)
+    self._transformations.insert(at, fxn)
+    return None</code></pre>
+</details>
+</dd>
+<dt id="src.managers.data_managers.CrisprScreenDataManager.num_transformations"><code class="name flex">
+<span>def <span class="ident">num_transformations</span></span>(<span>self) -> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the number of transformations.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>int</code></dt>
+<dd>Number of transformations.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def num_transformations(self) -&gt; int:
+    &#34;&#34;&#34;Get the number of transformations.
+
+    Returns:
+        int: Number of transformations.
+    &#34;&#34;&#34;
+    return len(self._transformations)</code></pre>
+</details>
+</dd>
+<dt id="src.managers.data_managers.CrisprScreenDataManager.set_data"><code class="name flex">
+<span>def <span class="ident">set_data</span></span>(<span>self, data: pandas.core.frame.DataFrame, apply_transformations: bool = False) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the CRISPR screen data.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>New data.</dd>
+<dt><strong><code>apply_transformations</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the transformations be
+applied? Defaults to False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_data(self, data: pd.DataFrame, apply_transformations: bool = False) -&gt; None:
+    &#34;&#34;&#34;Set the CRISPR screen data.
+
+    Args:
+        data (pd.DataFrame): New data.
+        apply_transformations (bool, optional): Should the transformations be
+          applied? Defaults to False.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    logger.info(&#34;Setting data.&#34;)
+    if apply_transformations:
+        data = self._apply_transformations(data)
+    self._data = data
+    return None</code></pre>
+</details>
+</dd>
+<dt id="src.managers.data_managers.CrisprScreenDataManager.set_transformations"><code class="name flex">
+<span>def <span class="ident">set_transformations</span></span>(<span>self, new_transformations: list, apply: bool = False) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the list of transformations.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>new_transformations</code></strong> :&ensp;<code>list[DataFrameTransformation]</code></dt>
+<dd>New list of data
+transforming functions.</dd>
+<dt><strong><code>apply</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the new list be applied to the data? Defaults
+to False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_transformations(
+    self, new_transformations: list[DataFrameTransformation], apply: bool = False
+) -&gt; None:
+    &#34;&#34;&#34;Set the list of transformations.
+
+    Args:
+        new_transformations (list[DataFrameTransformation]): New list of data
+          transforming functions.
+        apply (bool, optional): Should the new list be applied to the data? Defaults
+          to False.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    logger.info(&#34;Setting transformations.&#34;)
+    self._transformations = new_transformations
+    if apply:
+        self.apply_transformations()
+    return None</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="src.managers.data_managers.DataNotLoadedException"><code class="flex name class">
+<span>class <span class="ident">DataNotLoadedException</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Data not loaded exception.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DataNotLoadedException(BaseException):
+    &#34;&#34;&#34;Data not loaded exception.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="src.managers" href="index.html">src.managers</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="src.managers.data_managers.CrisprScreenDataManager" href="#src.managers.data_managers.CrisprScreenDataManager">CrisprScreenDataManager</a></code></h4>
+<ul class="">
+<li><code><a title="src.managers.data_managers.CrisprScreenDataManager.add_transformation" href="#src.managers.data_managers.CrisprScreenDataManager.add_transformation">add_transformation</a></code></li>
+<li><code><a title="src.managers.data_managers.CrisprScreenDataManager.apply_transformations" href="#src.managers.data_managers.CrisprScreenDataManager.apply_transformations">apply_transformations</a></code></li>
+<li><code><a title="src.managers.data_managers.CrisprScreenDataManager.clear_data" href="#src.managers.data_managers.CrisprScreenDataManager.clear_data">clear_data</a></code></li>
+<li><code><a title="src.managers.data_managers.CrisprScreenDataManager.clear_transformations" href="#src.managers.data_managers.CrisprScreenDataManager.clear_transformations">clear_transformations</a></code></li>
+<li><code><a title="src.managers.data_managers.CrisprScreenDataManager.data_is_loaded" href="#src.managers.data_managers.CrisprScreenDataManager.data_is_loaded">data_is_loaded</a></code></li>
+<li><code><a title="src.managers.data_managers.CrisprScreenDataManager.generate_mock_data" href="#src.managers.data_managers.CrisprScreenDataManager.generate_mock_data">generate_mock_data</a></code></li>
+<li><code><a title="src.managers.data_managers.CrisprScreenDataManager.get_data" href="#src.managers.data_managers.CrisprScreenDataManager.get_data">get_data</a></code></li>
+<li><code><a title="src.managers.data_managers.CrisprScreenDataManager.get_transformations" href="#src.managers.data_managers.CrisprScreenDataManager.get_transformations">get_transformations</a></code></li>
+<li><code><a title="src.managers.data_managers.CrisprScreenDataManager.insert_transformation" href="#src.managers.data_managers.CrisprScreenDataManager.insert_transformation">insert_transformation</a></code></li>
+<li><code><a title="src.managers.data_managers.CrisprScreenDataManager.num_transformations" href="#src.managers.data_managers.CrisprScreenDataManager.num_transformations">num_transformations</a></code></li>
+<li><code><a title="src.managers.data_managers.CrisprScreenDataManager.set_data" href="#src.managers.data_managers.CrisprScreenDataManager.set_data">set_data</a></code></li>
+<li><code><a title="src.managers.data_managers.CrisprScreenDataManager.set_transformations" href="#src.managers.data_managers.CrisprScreenDataManager.set_transformations">set_transformations</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="src.managers.data_managers.DataNotLoadedException" href="#src.managers.data_managers.DataNotLoadedException">DataNotLoadedException</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

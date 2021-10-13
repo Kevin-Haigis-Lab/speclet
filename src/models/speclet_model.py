@@ -2,7 +2,7 @@
 
 from abc import abstractmethod
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional, Protocol, Union
 
 import arviz as az
 import numpy as np
@@ -14,8 +14,8 @@ from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 import src.modeling.simulation_based_calibration_helpers as sbc
 from src.exceptions import CacheDoesNotExistError, RequiredArgumentError
 from src.loggers import logger
+from src.managers.data_managers import DataFrameTransformation
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
-from src.managers.model_data_managers import DataManager
 from src.modeling import pymc3_sampling_api as pmapi
 from src.project_enums import MockDataSize, ModelFitMethod, assert_never
 
@@ -61,13 +61,35 @@ class VISamplingParameters(PyMC3SamplingParameters):
     n_iterations: int = 50000
 
 
+class SpecletModelDataManager(Protocol):
+    """Protocol for the data manager of SpecletModel."""
+
+    def get_data(self, read_kwargs: Optional[dict[str, Any]] = None) -> pd.DataFrame:
+        """Get data for modeling."""
+        ...
+
+    def set_data(self, data: pd.DataFrame, apply_transformations: bool = False) -> None:
+        """Set data."""
+        ...
+
+    def add_transformation(self, fxn: DataFrameTransformation) -> None:
+        """Add a transforming function."""
+        ...
+
+    def generate_mock_data(
+        self, size: Union[MockDataSize, str], random_seed: Optional[int] = None
+    ) -> pd.DataFrame:
+        """Generate mock data."""
+        ...
+
+
 class SpecletModel:
     """Base class to contain a PyMC3 model."""
 
     name: str
     _debug: bool
     cache_manager: Pymc3ModelCacheManager
-    data_manager: DataManager
+    data_manager: SpecletModelDataManager
 
     model: Optional[pm.Model] = None
     observed_var_name: Optional[ObservedVarName] = None
@@ -81,7 +103,7 @@ class SpecletModel:
     def __init__(
         self,
         name: str,
-        data_manager: DataManager,
+        data_manager: SpecletModelDataManager,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
     ) -> None:
@@ -93,8 +115,7 @@ class SpecletModel:
               If None (default), then the project's default cache directory is used.
               Defaults to None.
             debug (bool, optional): Use debug mode? Defaults to False.
-            data_manager (Optional[DataManager], optional): Object that will manage the
-              data. Defaults to None.
+            data_manager (SpecletModelDataManager): Object that will manage the data.
         """
         self.name = name
         self._debug = debug
@@ -102,7 +123,6 @@ class SpecletModel:
             name=name, root_cache_dir=root_cache_dir
         )
         self.data_manager = data_manager
-        self.data_manager.debug = self._debug
 
     def __str__(self) -> str:
         """Describe the object.
@@ -138,8 +158,6 @@ class SpecletModel:
             return
         logger.info(f"Changing value of debug to '{new_value}'.")
         self._debug = new_value
-        if self.data_manager is not None:
-            self.data_manager.debug = new_value
 
     def _reset_model_and_results(self, clear_cache: bool = False) -> None:
         logger.warning("Reseting all model and results.")
@@ -148,6 +166,12 @@ class SpecletModel:
         self.advi_results = None
         if clear_cache:
             self.clear_cache()
+
+    def _get_batch_size(self) -> int:
+        if self.debug:
+            return 1000
+        else:
+            return 10000
 
     def clear_cache(self) -> None:
         """Clear all available caches for the model."""
@@ -178,7 +202,6 @@ class SpecletModel:
               after calling `self.model_specification()`
         """
         logger.debug("Building PyMC3 model.")
-
         logger.info("Calling `model_specification()` method.")
         self.model, self.observed_var_name = self.model_specification()
 
@@ -468,8 +491,8 @@ class SpecletModel:
 
         if mock_data is not None:
             logger.info("Setting provided mock data as data.")
-            self.data_manager.set_data(mock_data)
-            mock_data = self.data_manager.data  # Get result of any transformations.
+            self.data_manager.set_data(mock_data, apply_transformations=True)
+            mock_data = self.data_manager.get_data()
         elif size is not None:
             logger.info("Creating new simulation data.")
             mock_data = self.data_manager.generate_mock_data(

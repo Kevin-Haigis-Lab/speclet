@@ -1,7 +1,7 @@
 """Functions for handling common modifications and processing of the Achilles data."""
 
 from pathlib import Path
-from typing import Optional, Union
+from typing import Final, Iterable, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from src.data_processing import common as dphelp
 from src.data_processing.vectors import careful_zscore, squish_array
 from src.io.data_io import DataFile, data_path
+from src.loggers import logger
 
 #### ---- Data manipulation ---- ####
 
@@ -361,7 +362,7 @@ def data_batch_indices(achilles_df: pd.DataFrame) -> DataBatchIndices:
 
 #### ---- Data frames ---- ####
 
-_default_achilles_categorical_cols: tuple[str, ...] = (
+_default_achilles_categorical_cols: Final[tuple[str, ...]] = (
     "hugo_symbol",
     "depmap_id",
     "sgrna",
@@ -374,11 +375,13 @@ _default_achilles_categorical_cols: tuple[str, ...] = (
 
 def set_achilles_categorical_columns(
     data: pd.DataFrame,
-    cols: Union[list[str], tuple[str, ...]] = _default_achilles_categorical_cols,
+    cols: Iterable[str] = _default_achilles_categorical_cols,
     ordered: bool = True,
     sort_cats: bool = False,
 ) -> pd.DataFrame:
     """Set the appropriate columns of the Achilles data as factors.
+
+    If the column is not actually in the data frame, it is just skipped.
 
     Args:
         data (pd.DataFrame): Achilles DataFrame.
@@ -394,8 +397,23 @@ def set_achilles_categorical_columns(
         pd.DataFrame: The modified DataFrame.
     """
     for col in cols:
-        data = dphelp.make_cat(data, col, ordered=ordered, sort_cats=sort_cats)
+        if col in data.columns:
+            data = dphelp.make_cat(data, col, ordered=ordered, sort_cats=sort_cats)
     return data
+
+
+def sort_achilles_data(data: pd.DataFrame) -> pd.DataFrame:
+    """Sort a CRISPR screen data frame.
+
+    Args:
+        data (pd.DataFrame): CRISPR screen data frame.
+
+    Returns:
+        pd.DataFrame: Sorted data frame.
+    """
+    return data.sort_values(
+        ["hugo_symbol", "sgrna", "lineage", "depmap_id"]
+    ).reset_index(drop=True)
 
 
 def read_achilles_data(
@@ -413,11 +431,7 @@ def read_achilles_data(
     Returns:
         pd.DataFrame: The Achilles data set.
     """
-    data = pd.read_csv(data_path, low_memory=low_memory)
-
-    data = data.sort_values(
-        ["hugo_symbol", "sgrna", "lineage", "depmap_id"]
-    ).reset_index(drop=True)
+    data = pd.read_csv(data_path, low_memory=low_memory).pipe(sort_achilles_data)
 
     if set_categorical_cols:
         data = set_achilles_categorical_columns(data)
@@ -551,3 +565,75 @@ def add_useful_read_count_columns(
     ) * achilles_df[counts_final_total]
 
     return achilles_df
+
+
+def filter_for_broad_source_only(
+    df: pd.DataFrame, screen_col: str = "screen"
+) -> pd.DataFrame:
+    """Filter for only data from the Broad.
+
+    Args:
+        df (pd.DataFrame): CRISPR screen data.
+        screen_col (str, optional): Name of the column indicating the origin of the
+          data. Defaults to "screen".
+
+    Returns:
+        pd.DataFrame: The filtered data frame.
+    """
+    return df[df[screen_col] == "broad"].reset_index(drop=True)
+
+
+def _get_sgrnas_that_map_to_multiple_genes(
+    df: pd.DataFrame, sgrna_col: str
+) -> np.ndarray:
+    return (
+        make_sgrna_to_gene_mapping_df(df)
+        .groupby([sgrna_col])["hugo_symbol"]
+        .count()
+        .reset_index()
+        .query("hugo_symbol > 1")[sgrna_col]
+        .unique()
+    )
+
+
+def drop_sgrnas_that_map_to_multiple_genes(
+    df: pd.DataFrame, sgrna_col: str = "sgrna", gene_col: str = "hugo_symbol"
+) -> pd.DataFrame:
+    """Drop sgRNAs that map to multiple genes.
+
+    Because of how the multi-hitting sgRNAs are identified, this function in not
+    "Dask friendly."
+
+    Args:
+        df (pd.DataFrame): CRISPR screen data frame.
+        sgrna_col (str, optional): sgRNA column name. Defaults to "sgrna".
+        gene_col (str, optional): Gene column name. Defaults to "hugo_symbol".
+
+    Returns:
+        pd.DataFrame: The filtered data frame.
+    """
+    sgrnas_to_remove = _get_sgrnas_that_map_to_multiple_genes(df, sgrna_col)
+    logger.warning(
+        f"Dropping {len(sgrnas_to_remove)} sgRNA that map to multiple genes."
+    )
+    df_new = df.copy()[~df[sgrna_col].isin(sgrnas_to_remove)]
+    return df_new
+
+
+def drop_missing_copynumber(
+    df: pd.DataFrame, cn_col: str = "copy_number"
+) -> pd.DataFrame:
+    """From data points with missing copy number data.
+
+    Args:
+        df (pd.DataFrame): CRISPR screen data.
+        cn_col (str, optional): Name of the column with copy number data. Defaults to
+          "copy_number".
+
+    Returns:
+        pd.DataFrame: Filtered data frame.
+    """
+    df_new = df.copy()[~df[cn_col].isna()]
+    size_diff = df.shape[0] - df_new.shape[0]
+    logger.warning(f"Dropping {size_diff} data points with missing copy number.")
+    return df_new

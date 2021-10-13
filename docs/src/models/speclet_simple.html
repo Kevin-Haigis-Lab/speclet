@@ -34,8 +34,19 @@ from typing import Optional
 import pymc3 as pm
 import theano
 
-from src.managers.model_data_managers import CrcDataManager, DataManager
-from src.models.speclet_model import ObservedVarName, ReplacementsDict, SpecletModel
+from src.io.data_io import DataFile
+
+# from src.managers.model_data_managers import CrcDataManager, DataManager
+from src.managers.data_managers import (
+    CrisprScreenDataManager,
+    common_crispr_screen_transformations,
+)
+from src.models.speclet_model import (
+    ObservedVarName,
+    ReplacementsDict,
+    SpecletModel,
+    SpecletModelDataManager,
+)
 
 
 class SpecletSimple(SpecletModel):
@@ -57,7 +68,7 @@ class SpecletSimple(SpecletModel):
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
-        data_manager: Optional[DataManager] = None,
+        data_manager: Optional[SpecletModelDataManager] = None,
     ):
         &#34;&#34;&#34;Instantiate a SpecletSimple model.
 
@@ -67,11 +78,15 @@ class SpecletSimple(SpecletModel):
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
             debug (bool, optional): Are you in debug mode? Defaults to False.
-            data_manager (Optional[DataManager], optional): Object that will manage the
-              data. If None (default), a `CrcDataManager` is created automatically.
+            data_manager (Optional[SpecletModelDataManager], optional): Object that will
+              manage the data. If None (default), a `CrisprScreenDataManager` is created
+              automatically.
         &#34;&#34;&#34;
         if data_manager is None:
-            data_manager = CrcDataManager(debug=debug)
+            data_manager = CrisprScreenDataManager(
+                DataFile.DEPMAP_CRC_SUBSAMPLE,
+                transformations=common_crispr_screen_transformations,
+            )
 
         super().__init__(
             name=name,
@@ -121,7 +136,7 @@ class SpecletSimple(SpecletModel):
             )
 
         data = self.data_manager.get_data()
-        batch_size = self.data_manager.get_batch_size()
+        batch_size = self._get_batch_size()
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
         return {
@@ -140,7 +155,7 @@ class SpecletSimple(SpecletModel):
 <dl>
 <dt id="src.models.speclet_simple.SpecletSimple"><code class="flex name class">
 <span>class <span class="ident">SpecletSimple</span></span>
-<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.managers.model_data_managers.DataManager" href="../managers/model_data_managers.html#src.managers.model_data_managers.DataManager">DataManager</a>] = None)</span>
+<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.models.speclet_model.SpecletModelDataManager" href="speclet_model.html#src.models.speclet_model.SpecletModelDataManager">SpecletModelDataManager</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>SpecletSimple Model.</p>
@@ -169,9 +184,10 @@ for cache management.)</dd>
 sampling/fitting results. Defaults to None.</dd>
 <dt><strong><code>debug</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Are you in debug mode? Defaults to False.</dd>
-<dt><strong><code>data_manager</code></strong> :&ensp;<code>Optional[DataManager]</code>, optional</dt>
-<dd>Object that will manage the
-data. If None (default), a <code>CrcDataManager</code> is created automatically.</dd>
+<dt><strong><code>data_manager</code></strong> :&ensp;<code>Optional[SpecletModelDataManager]</code>, optional</dt>
+<dd>Object that will
+manage the data. If None (default), a <code>CrisprScreenDataManager</code> is created
+automatically.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -196,7 +212,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
         name: str,
         root_cache_dir: Optional[Path] = None,
         debug: bool = False,
-        data_manager: Optional[DataManager] = None,
+        data_manager: Optional[SpecletModelDataManager] = None,
     ):
         &#34;&#34;&#34;Instantiate a SpecletSimple model.
 
@@ -206,11 +222,15 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
             debug (bool, optional): Are you in debug mode? Defaults to False.
-            data_manager (Optional[DataManager], optional): Object that will manage the
-              data. If None (default), a `CrcDataManager` is created automatically.
+            data_manager (Optional[SpecletModelDataManager], optional): Object that will
+              manage the data. If None (default), a `CrisprScreenDataManager` is created
+              automatically.
         &#34;&#34;&#34;
         if data_manager is None:
-            data_manager = CrcDataManager(debug=debug)
+            data_manager = CrisprScreenDataManager(
+                DataFile.DEPMAP_CRC_SUBSAMPLE,
+                transformations=common_crispr_screen_transformations,
+            )
 
         super().__init__(
             name=name,
@@ -260,7 +280,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
             )
 
         data = self.data_manager.get_data()
-        batch_size = self.data_manager.get_batch_size()
+        batch_size = self._get_batch_size()
         lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
         return {
@@ -307,7 +327,7 @@ data. If None (default), a <code>CrcDataManager</code> is created automatically.
         )
 
     data = self.data_manager.get_data()
-    batch_size = self.data_manager.get_batch_size()
+    batch_size = self._get_batch_size()
     lfc_data_batch = pm.Minibatch(data.lfc.values, batch_size=batch_size)
 
     return {

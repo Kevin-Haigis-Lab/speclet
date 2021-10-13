@@ -396,3 +396,11 @@ def test_data_batch_indices(example_achilles_data: pd.DataFrame) -> None:
     np.testing.assert_array_equal(
         batch_map["p_dna_batch"].values, batch_map["p_dna_batch"].unique()
     )
+
+
+def test_filter_only_broad(depmap_test_data: Path) -> None:
+    data = pd.read_csv(depmap_test_data)
+    assert data["screen"].nunique() >= 1
+    mod_data = achelp.filter_for_broad_source_only(data)
+    assert mod_data["screen"].nunique() == 1
+    assert mod_data["screen"].unique()[0] == "broad"
