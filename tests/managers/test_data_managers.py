@@ -163,3 +163,24 @@ def test_mock_data_generation(depmap_test_data: Path) -> None:
     assert (
         small_mock_data.shape[0] < medium_mock_data.shape[0] < large_mock_data.shape[0]
     )
+
+
+def head(df: pd.DataFrame) -> pd.DataFrame:
+    return df.head(10)
+
+
+@pytest.mark.DEV
+def test_cannot_mutate_transformations_externally(depmap_test_data: Path) -> None:
+    transformations = [double_log_fold_change, add_one_to_log_fold_change]
+    dm = CrisprScreenDataManager(
+        data_source=depmap_test_data, transformations=transformations
+    )
+    assert dm.num_transformations == 2
+    assert dm.get_transformations() is not transformations
+    transformations.append(head)
+    assert len(transformations) == 3
+    assert dm.num_transformations == 2
+
+    new_trans = dm.get_transformations()
+    new_trans.append(head)
+    assert dm.num_transformations == 2

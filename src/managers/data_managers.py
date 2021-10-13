@@ -221,6 +221,7 @@ class CrisprScreenDataManager:
             self.apply_transformations()
         return None
 
+    @property
     def num_transformations(self) -> int:
         """Get the number of transformations.
 
@@ -230,7 +231,7 @@ class CrisprScreenDataManager:
         return len(self._transformations)
 
     def _apply_transformations(self, data: Data) -> Data:
-        logger.debug(f"Applying {self.num_transformations()} transformations.")
+        logger.debug(f"Applying {self.num_transformations} transformations.")
         for fxn in self._transformations:
             data = fxn(data)
         return data
