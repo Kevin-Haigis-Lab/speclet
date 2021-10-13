@@ -127,7 +127,6 @@ class TestSpecletSix:
         assert data.copy_number_cellline.values.ndim == 1
         assert data.copy_number_gene.values.ndim == 1
 
-    @pytest.mark.DEV
     @pytest.mark.parametrize(
         "arg_name, expected_vars",
         [

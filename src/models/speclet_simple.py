@@ -7,8 +7,6 @@ import pymc3 as pm
 import theano
 
 from src.io.data_io import DataFile
-
-# from src.managers.model_data_managers import CrcDataManager, DataManager
 from src.managers.data_managers import (
     CrisprScreenDataManager,
     common_crispr_screen_transformations,
