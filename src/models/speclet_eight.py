@@ -7,6 +7,7 @@ from typing import Optional
 import pymc3 as pm
 from pydantic import BaseModel
 from theano import shared as ts
+from theano import tensor as tt
 
 from src.data_processing import achilles as achelp
 from src.io.data_io import DataFile
@@ -104,10 +105,11 @@ class SpecletEight(SpecletModel):
         total_size = data.shape[0]
         logger.info(f"Number of data points: {total_size}")
         co_idx = achelp.common_indices(data)
+        logger.info(f"Number of sgRNA: {co_idx.n_sgrnas}")
         logger.info(f"Number of genes: {co_idx.n_genes}")
         logger.info(f"Number of cell lines: {co_idx.n_celllines}")
         logger.info(f"Number of lineages: {co_idx.n_lineages}")
-        b_idx = achelp.data_batch_indices(data)
+        # b_idx = achelp.data_batch_indices(data)
 
         logger.info("Creating shared variables.")
         x_initial = ts(data.counts_initial_adj.values)
@@ -116,28 +118,53 @@ class SpecletEight(SpecletModel):
             "sgrna": data.sgrna.cat.categories,
             "gene": data.hugo_symbol.cat.categories,
             "cell_line": data.depmap_id.cat.categories,
+            "lineage": data.lineage.cat.categories,
             "batch": data.p_dna_batch.cat.categories,
         }
 
         with pm.Model(coords=coords) as model:
             s = pm.Data("sgrna_idx", co_idx.sgrna_idx)
-            # g = pm.Data("gene_idx", co_idx.gene_idx)
+            g_s = pm.Data("sgrna_to_gene_idx", co_idx.sgrna_to_gene_idx)
             c = pm.Data("cell_line_idx", co_idx.cellline_idx)
-            b = pm.Data("batch_idx", b_idx.batch_idx)
+            # l_c = pm.Data("cell_line_to_lineage_idx", co_idx.cellline_to_lineage_idx)
+            # b = pm.Data("batch_idx", b_idx.batch_idx)
             x_initial = pm.Data("x_initial", data.counts_initial_adj.values)
             counts_final = pm.Data("counts_final", data.counts_final.values)
 
-            beta_sgrna = pm.Normal("beta_sgrna", 0, 2.5, dims=("sgrna", "cell_line"))
-
-            mu_beta_batch = pm.Normal("mu_beta_batch", 0, 0.1)
-            sigma_beta_batch = pm.HalfNormal("sigma_beta_batch", 0.1)
-            beta_batch = pm.Normal(
-                "beta_batch", mu_beta_batch, sigma_beta_batch, dims=("batch")
+            mu_mu_h = pm.Normal("mu_mu_h", 0, 1)
+            sigma_mu_h = pm.HalfNormal("sigma_mu_h", 1)
+            mu_h = pm.Normal("mu_h", mu_mu_h, sigma_mu_h, dims=("gene", "lineage"))
+            sigma_sigma_h = pm.HalfNormal("sigma_sigma_h", 2.5)
+            sigma_h = pm.HalfNormal("sigma_h", sigma_sigma_h, dims="cell_line")
+            h = pm.Normal(
+                "h",
+                mu_h,
+                tt.ones(shape=(co_idx.n_genes, co_idx.n_celllines)) * sigma_h,
+                dims=("gene", "cell_line"),
             )
 
-            eta = pm.Deterministic("eta", beta_sgrna[s, c] + beta_batch[b])
+            mu_beta_sgrna = pm.Deterministic("mu_beta_sgrna", h[g_s, :])
+            sigma_sigma_beta_sgrna = pm.HalfNormal("sigma_sigma_beta_sgrna", 2.5)
+            sigma_beta_sgrna = pm.HalfNormal(
+                "sigma_beta_sgrna", sigma_sigma_beta_sgrna, dims="sgrna"
+            )
+            beta_sgrna = pm.Normal(
+                "beta_sgrna",
+                mu_beta_sgrna,
+                sigma_beta_sgrna.reshape((-1, 1))
+                * tt.ones(shape=(co_idx.n_sgrnas, co_idx.n_celllines)),
+                dims=("sgrna", "cell_line"),
+            )
+
+            # mu_beta_batch = pm.Normal("mu_beta_batch", 0, 0.5)
+            # sigma_beta_batch = pm.HalfCauchy("sigma_beta_batch", 1)
+            # beta_batch = pm.Normal(
+            #     "beta_batch", mu_beta_batch, sigma_beta_batch, dims=("batch")
+            # )
+
+            eta = pm.Deterministic("eta", beta_sgrna[s, c])  # + beta_batch[b])
             mu = pm.Deterministic("mu", pm.math.exp(eta))
-            alpha = pm.HalfNormal("alpha", 5)
+            alpha = pm.HalfCauchy("alpha", 5)
             y = pm.NegativeBinomial(  # noqa: F841
                 "y", x_initial * mu, alpha, observed=counts_final
             )
