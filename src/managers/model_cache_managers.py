@@ -4,11 +4,11 @@ from pathlib import Path
 from typing import Optional
 
 import arviz as az
-import pymc3 as pm
 from pydantic import BaseModel
 
 from src.io import cache_io
 from src.managers.cache_managers import ArvizCacheManager
+from src.modeling.pymc3_sampling_api import ApproximationSamplingResults
 from src.project_enums import ModelFitMethod
 
 
@@ -58,14 +58,14 @@ class Pymc3ModelCacheManager:
         """
         return self.mcmc_cache_delegate.read_cached_sampling()
 
-    def get_advi_cache(self) -> tuple[az.InferenceData, pm.Approximation]:
+    def get_advi_cache(self) -> ApproximationSamplingResults:
         """Get ADVI fitting results from cache.
 
         Args:
             draws (int): Number of draws from the posterior to make for the trace.
 
         Returns:
-            pmapi.ApproximationSamplingResults: ADVI fitting results.
+            ApproximationSamplingResults: ADVI fitting results.
         """
         return self.advi_cache_delegate.read_cached_approximation()
 
@@ -78,17 +78,18 @@ class Pymc3ModelCacheManager:
         self.mcmc_cache_delegate.cache_sampling_results(inference_data)
 
     def write_advi_cache(
-        self,
-        inference_data: az.InferenceData,
-        approx: pm.Approximation,
+        self, approx_sampling_results: ApproximationSamplingResults
     ) -> None:
         """Cache ADVI fitting results.
 
         Args:
-            inference_data (az.InferenceData): Fitting results.
-            approx (pm.Approximation): ADVI approximation information.
+            approx_sampling_results (ApproximationSamplingResults): ADVI sampling
+              results.
         """
-        self.advi_cache_delegate.cache_sampling_results(inference_data, approx)
+        self.advi_cache_delegate.cache_sampling_results(
+            approx_sampling_results.inference_data,
+            approx_sampling_results.approximation,
+        )
 
     def mcmc_cache_exists(self) -> bool:
         """Confirm that a cache of MCMC sampling results exists.

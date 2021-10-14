@@ -94,7 +94,7 @@ class SpecletModel:
     model: Optional[pm.Model] = None
     observed_var_name: Optional[ObservedVarName] = None
     shared_vars: Optional[dict[str, TTShared]] = None
-    advi_results: Optional[tuple[az.InferenceData, pm.Approximation]] = None
+    advi_results: Optional[pmapi.ApproximationSamplingResults] = None
     mcmc_results: Optional[az.InferenceData] = None
 
     mcmc_sampling_params: MCMCSamplingParameters = MCMCSamplingParameters()
@@ -302,7 +302,7 @@ class SpecletModel:
         sample_kwargs["target_accept"] = target_accept
 
         logger.info("Beginning MCMC sampling.")
-        _mcmc_results = pmapi.pymc3_sampling_procedure(
+        self.mcmc_results = pmapi.pymc3_sampling_procedure(
             model=self.model,
             mcmc_draws=draws,
             tune=tune,
@@ -312,7 +312,6 @@ class SpecletModel:
             random_seed=random_seed,
             sample_kwargs=sample_kwargs,
         )
-        self.mcmc_results = pmapi.convert_samples_to_arviz(self.model, _mcmc_results)
         logger.info("Finished MCMC sampling - caching results.")
         self.write_mcmc_cache()
         return self.mcmc_results
