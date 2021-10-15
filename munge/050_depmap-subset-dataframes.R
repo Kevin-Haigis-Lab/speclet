@@ -47,7 +47,6 @@ genes <- c(
 )
 genes <- unique(genes)
 
-
 sample_sgrna_from_gene <- function(df, genes, n_sgrna) {
   df %>%
     filter(hugo_symbol %in% !!genes) %>%
@@ -75,7 +74,7 @@ bone_data <- data %>%
 
 write_csv(bone_data, snakemake@output[["bone_subset"]])
 bind_rows(crc_data, bone_data) %>%
-  write_csv(bone_data, snakemake@output[["crc_bone_subset"]])
+  write_csv(snakemake@output[["crc_bone_subset"]])
 
 
 # ---- Sub-sample of CRC + BONE data ----
