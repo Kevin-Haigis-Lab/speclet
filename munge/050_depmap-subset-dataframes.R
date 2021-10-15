@@ -80,9 +80,12 @@ bind_rows(crc_data, bone_data) %>%
 # ---- Sub-sample of CRC + BONE data ----
 
 bone_cell_lines <- sample(
-  unique(crc_data$depmap_id),
-  min(5, dplyr::n_distinct(crc_data$depmap_id))
+  unique(bone_data$depmap_id),
+  min(5, dplyr::n_distinct(bone_data$depmap_id))
 )
+
+print("BONE CELL LINES:")
+print(bone_cell_lines)
 
 cell_lines <- c(bone_cell_lines, sample(crc_cell_lines, 5))
 
