@@ -448,6 +448,10 @@ rule modeling_data_subsets:
             MODELING_DATA_DIR / "depmap_modeling_dataframe_crc-subsample.csv"
         ),
         test_data=TESTS_DIR / "depmap_test_data.csv",
+        bone_subset=MODELING_DATA_DIR / "depmap_modeling_dataframe_bone.csv",
+        crc_bone_subset=MODELING_DATA_DIR / "depmap_modeling_dataframe_crc_bone.csv",
+        crc_bone_subsample=MODELING_DATA_DIR
+        / "depmap_modeling_dataframe_crc_bone-subsample.csv",
     script:
         "050_depmap-subset-dataframes.R"
 

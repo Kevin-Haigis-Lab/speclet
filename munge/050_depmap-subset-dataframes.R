@@ -73,9 +73,9 @@ bone_lineages <- c("bone")
 bone_data <- data %>%
   filter(lineage %in% !!bone_lineages)
 
-write_csv(bone_data, snamekake@output[["bone_subset"]])
+write_csv(bone_data, snakemake@output[["bone_subset"]])
 bind_rows(crc_data, bone_data) %>%
-  write_csv(bone_data, snamekake@output[["crc_bone_subset"]])
+  write_csv(bone_data, snakemake@output[["crc_bone_subset"]])
 
 
 # ---- Sub-sample of CRC + BONE data ----
@@ -115,6 +115,6 @@ genes <- sample(unique(crc_data$hugo_symbol), 10)
 sgrnas <- sample_sgrna_from_gene(test_data, genes, 2)
 
 test_data %>%
-  filter(hugo_symbol %in% !!GENES) %>%
+  filter(hugo_symbol %in% !!genes) %>%
   filter(sgrna %in% sgrnas) %>%
   write_csv(snakemake@output[["test_data"]])
