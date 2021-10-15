@@ -12,6 +12,7 @@ dependencies:
   - black=21.7b0
   - colorama=0.4.4
   - coverage=5.5
+  - dask=2021.8.1
   - graphviz=2.48.0
   - ipython=7.26.0
   - isort=5.9.3
