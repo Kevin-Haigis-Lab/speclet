@@ -92,7 +92,7 @@ class SpecletEight(SpecletModel):
 
         if data_manager is None:
             data_manager = CrisprScreenDataManager(
-                data_source=DataFile.DEPMAP_CRC_SUBSAMPLE
+                data_source=DataFile.DEPMAP_CRC_BONE_SUBSAMPLE
             )
 
         data_transformations = common_crispr_screen_transformations.copy()
