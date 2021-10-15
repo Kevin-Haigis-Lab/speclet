@@ -39,28 +39,21 @@ def _extend_trace_with_prior_and_posterior(
 
 def pymc3_sampling_procedure(
     model: pm.Model,
-    mcmc_draws: int = 1000,
-    tune: int = 1000,
-    chains: int = 3,
-    cores: Optional[int] = None,
-    prior_pred_samples: int = 1000,
+    prior_pred_samples: Optional[int] = 500,
     random_seed: Optional[int] = None,
     sample_kwargs: Optional[dict[str, Any]] = None,
 ) -> az.InferenceData:
-    """Run a standard PyMC3 sampling procedure.
+    """Run a standardized PyMC3 sampling procedure.
 
     Args:
         model (pm.Model): PyMC3 model.
-        mcmc_draws (int, optional): Number of MCMC draws. Defaults to 1000.
-        tune (int, optional): Number of tuning steps. Defaults to 1000.
-        chains (int, optional): Number of chains. Defaults to 3.
-        cores (Optional[int], optional): Number of cores. Defaults to None.
-        prior_pred_samples (int, optional): Number of samples from the prior
-          distributions. Defaults to 1000. If less than 1, no prior samples are taken.
+        prior_pred_samples (Optional[int], optional): Number of samples from the prior
+          distributions. Defaults to 1000. If `None` or less than 1, no prior samples
+          are taken.
         random_seed (Optional[int], optional): The random seed for sampling.
-          Defaults to None.
+          Defaults to `None`.
         sample_kwargs (Dict[str, Any], optional): Kwargs for the sampling method.
-          Defaults to {}.
+          Defaults to `None`.
 
     Returns:
         az.InferenceData: ArviZ standardized data set.
@@ -70,20 +63,14 @@ def pymc3_sampling_procedure(
 
     with model:
         trace = pm.sample(
-            draws=mcmc_draws,
-            tune=tune,
-            chains=chains,
-            cores=cores,
-            random_seed=random_seed,
-            return_inferencedata=True,
-            **sample_kwargs,
+            random_seed=random_seed, return_inferencedata=True, **sample_kwargs
         )
         post_pred = pm.sample_posterior_predictive(trace, random_seed=random_seed)
 
     assert isinstance(trace, az.InferenceData)
 
     prior_pred: Optional[dict[str, np.ndarray]] = None
-    if prior_pred_samples > 0:
+    if prior_pred_samples is not None and prior_pred_samples > 0:
         with model:
             prior_pred = pm.sample_prior_predictive(
                 prior_pred_samples, random_seed=random_seed
@@ -101,10 +88,10 @@ def pymc3_advi_approximation_procedure(
     method: str = "advi",
     n_iterations: int = 100000,
     draws: int = 1000,
-    prior_pred_samples: int = 1000,
+    prior_pred_samples: Optional[int] = 500,
     callbacks: Optional[list[Callable]] = None,
     random_seed: Optional[int] = None,
-    fit_kwargs: Optional[dict[Any, Any]] = None,
+    fit_kwargs: Optional[dict[str, Any]] = None,
 ) -> ApproximationSamplingResults:
     """Run a standard PyMC3 ADVI fitting procedure.
 
@@ -124,7 +111,7 @@ def pymc3_advi_approximation_procedure(
         random_seed (Optional[int], optional): The random seed for sampling.
           Defaults to None.
         fit_kwargs (Dict[str, Any], optional): Kwargs for the fitting method.
-          Defaults to {}.
+          Defaults to None.
 
     Returns:
         ApproximationSamplingResults: A collection of the fitting and sampling results.
@@ -140,7 +127,7 @@ def pymc3_advi_approximation_procedure(
     assert isinstance(trace, az.InferenceData)
 
     prior_pred: Optional[dict[str, np.ndarray]] = None
-    if prior_pred_samples > 0:
+    if prior_pred_samples is not None and prior_pred_samples > 0:
         with model:
             prior_pred = pm.sample_prior_predictive(
                 prior_pred_samples, random_seed=random_seed

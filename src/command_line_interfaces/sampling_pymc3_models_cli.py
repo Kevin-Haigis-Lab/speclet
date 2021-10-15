@@ -5,7 +5,7 @@
 
 from pathlib import Path
 from time import time
-from typing import Optional
+from typing import Any, Optional
 
 import numpy as np
 import typer
@@ -15,12 +15,20 @@ from src.io import model_config
 from src.loggers import logger
 from src.models import configuration
 from src.models.speclet_model import SpecletModel
-from src.project_enums import ModelFitMethod, SpecletPipeline
+from src.project_enums import ModelFitMethod, SpecletPipeline, assert_never
 
 cli_helpers.configure_pretty()
 
 
 #### ---- Main ---- ####
+
+
+def _update_sampling_kwargs(kwargs: dict[str, Any], chains: int, cores: int) -> None:
+    for key, value in {"chains": chains, "cores": cores}.items():
+        if key in kwargs.keys():
+            logger.warn(f"Overriding configured '{key}'.")
+        kwargs[key] = value
+    return None
 
 
 def sample_speclet_model(
@@ -78,27 +86,27 @@ def sample_speclet_model(
         fit_method=fit_method,
     )
 
+    _update_sampling_kwargs(sampling_kwargs, chains=mcmc_chains, cores=mcmc_cores)
+
     logger.info("Running model build method.")
     sp_model.build_model()
 
     if sample:
-        if fit_method == ModelFitMethod.ADVI:
+        if fit_method is ModelFitMethod.ADVI:
             logger.info("Running ADVI fitting method.")
             _ = sp_model.advi_sample_model(
                 random_seed=random_seed, ignore_cache=ignore_cache, **sampling_kwargs
             )
 
-        elif fit_method == ModelFitMethod.MCMC:
+        elif fit_method is ModelFitMethod.MCMC:
             logger.info("Running MCMC fitting method.")
             _ = sp_model.mcmc_sample_model(
-                chains=mcmc_chains,
-                cores=mcmc_cores,
                 random_seed=random_seed,
                 ignore_cache=ignore_cache,
-                **sampling_kwargs,
+                sample_kwargs=sampling_kwargs,
             )
         else:
-            raise Exception(f"Unknown fit method '{fit_method.value}'.")
+            assert_never(fit_method)
 
     if touch is not None:
         logger.info(f"Touching file: '{touch.as_posix()}'.")

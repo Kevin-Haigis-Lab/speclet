@@ -14,6 +14,7 @@ class DataFile(Enum):
 
     DEPMAP_CRC = "depmap_modeling_dataframe_crc.csv"
     DEPMAP_CRC_SUBSAMPLE = "depmap_modeling_dataframe_crc-subsample.csv"
+    DEPMAP_CRC_BONE_SUBSAMPLE = "depmap_modeling_dataframe_crc_bone-subsample.csv"
     DEPMAP_DATA = "depmap_modeling_dataframe.csv"
     DEPMAP_ESSENTIALS = "known_essentials.csv"
     ACHILLES_GENE_EFFECT = "achilles_gene_effect.csv"

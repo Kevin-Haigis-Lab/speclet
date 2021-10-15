@@ -7,6 +7,7 @@ from src.io import model_config
 from src.loggers import logger
 from src.misc import check_kwarg_dict
 from src.models.ceres_mimic import CeresMimic
+from src.models.speclet_eight import SpecletEight
 from src.models.speclet_five import SpecletFive
 from src.models.speclet_four import SpecletFour
 from src.models.speclet_model import SpecletModel
@@ -27,7 +28,6 @@ def configure_model(model: SpecletModel, config_path: Path) -> None:
 
     Args:
         model (SpecletModel): Speclet model to configure.
-        name (str): Identifiable name of the model.
         config_path (Path): Path to the configuration file.
     """
     configuration = model_config.get_configuration_for_model(
@@ -59,6 +59,7 @@ def get_model_class(model_opt: ModelOption) -> type[SpecletProjectModelTypes]:
         ModelOption.SPECLET_FIVE: SpecletFive,
         ModelOption.SPECLET_SIX: SpecletSix,
         ModelOption.SPECLET_SEVEN: SpecletSeven,
+        ModelOption.SPECLET_EIGHT: SpecletEight,
     }
     return model_option_map[model_opt]
 
