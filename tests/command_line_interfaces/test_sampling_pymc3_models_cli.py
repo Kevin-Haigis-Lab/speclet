@@ -134,6 +134,7 @@ def test_control_sampling(
         assert method_calls[0] is fit_method
 
 
+@pytest.mark.skip("Need to refactor configuration.")
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 def test_uses_configuration_fitting_parameters(
     app: typer.Typer,

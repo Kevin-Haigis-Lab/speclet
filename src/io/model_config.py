@@ -26,12 +26,14 @@ def get_model_config() -> Path:
 
 #### ---- Configuration ---- ####
 
-BasicTypes = Union[float, str, int, bool]
+BasicTypes = Union[float, str, int, bool, None]
+KeywordArgs = dict[str, BasicTypes]
+ModelFitConfiguration = Union[KeywordArgs, BasicTypes]
 
 # Need to use old typing.Dict here because of a bug in Hypothesis:
 # https://github.com/HypothesisWorks/hypothesis/issues/3080
 PipelineSamplingParameters = Dict[
-    SpecletPipeline, Dict[ModelFitMethod, Dict[str, BasicTypes]]
+    SpecletPipeline, Dict[ModelFitMethod, Dict[str, ModelFitConfiguration]]
 ]
 
 
@@ -114,7 +116,7 @@ def get_sampling_kwargs_from_config(
     config: ModelConfig,
     pipeline: SpecletPipeline,
     fit_method: ModelFitMethod,
-) -> dict[str, BasicTypes]:
+) -> dict[str, ModelFitConfiguration]:
     """Get the sampling keyword argument dictionary from a model configuration.
 
     Args:
@@ -123,7 +125,7 @@ def get_sampling_kwargs_from_config(
         fit_method (ModelFitMethod): Desired model fitting method.
 
     Returns:
-        Dict[str, BasicTypes]: Keyword arguments for the model-fitting
+        Dict[str, ModelFitConfiguration]: Keyword arguments for the model-fitting
         method.
     """
     if (sampling_params := config.pipeline_sampling_parameters) is None:
@@ -137,7 +139,7 @@ def get_sampling_kwargs_from_config(
 
 def get_sampling_kwargs(
     config_path: Path, name: str, pipeline: SpecletPipeline, fit_method: ModelFitMethod
-) -> dict[str, BasicTypes]:
+) -> dict[str, ModelFitConfiguration]:
     """Get the sampling keyword argument dictionary from a configuration file.
 
     Args:
@@ -151,7 +153,7 @@ def get_sampling_kwargs(
         not found.
 
     Returns:
-        Dict[str, BasicTypes]: Keyword arguments for the model-fitting
+        Dict[str, ModelFitConfiguration]: Keyword arguments for the model-fitting
         method.
     """
     if (config := get_configuration_for_model(config_path, name)) is None:

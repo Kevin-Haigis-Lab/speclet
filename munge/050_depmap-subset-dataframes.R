@@ -15,7 +15,6 @@ library(tidyverse)
 # ---- Load data ----
 
 modeling_df_path <- snakemake@input[["modeling_df"]]
-modeling_df_path <- "modeling_data/depmap_modeling_dataframe.csv"
 
 data <- data.table::fread(
   modeling_df_path,
@@ -24,28 +23,29 @@ data <- data.table::fread(
 data <- as_tibble(data)
 
 
-CRC_LINEAGES <- c("colorectal")
+# ---- CRC data ----
+
+crc_lineages <- c("colorectal")
 
 crc_data <- data %>%
-  filter(lineage %in% !!CRC_LINEAGES)
+  filter(lineage %in% !!crc_lineages)
 
 write_csv(crc_data, snakemake@output[["crc_subset"]])
 
 
-# ---- Create a sub-sample for testing ----
+# ---- Sub-sample of CRC data ----
 
 set.seed(0)
 
-CELL_LINES <- sample(unique(crc_data$depmap_id), 10)
-GENES <- sample(unique(crc_data$hugo_symbol), 100)
+crc_cell_lines <- sample(unique(crc_data$depmap_id), 10)
+genes <- sample(unique(crc_data$hugo_symbol), 100)
 
-GENES <- c(
-  GENES, "KRAS", "BRAF", "NRAS", "PIK3CA", "TP53", "MDM2", "MDM4", "APC", "FBXW7",
+genes <- c(
+  genes, "KRAS", "BRAF", "NRAS", "PIK3CA", "TP53", "MDM2", "MDM4", "APC", "FBXW7",
   "STK11", "PTK2", "CTNNB1", "KLF5",
   "GATA6"
 )
-GENES <- unique(GENES)
-
+genes <- unique(genes)
 
 sample_sgrna_from_gene <- function(df, genes, n_sgrna) {
   df %>%
@@ -57,21 +57,51 @@ sample_sgrna_from_gene <- function(df, genes, n_sgrna) {
     unlist()
 }
 
-SGRNAS <- sample_sgrna_from_gene(crc_data, GENES, 3)
+sgrnas <- sample_sgrna_from_gene(crc_data, genes, 3)
 
 crc_data %>%
-  filter(depmap_id %in% !!CELL_LINES) %>%
-  filter(sgrna %in% !!SGRNAS) %>%
+  filter(depmap_id %in% !!crc_cell_lines) %>%
+  filter(sgrna %in% !!sgrnas) %>%
   write_csv(snakemake@output[["crc_subsample"]])
+
+
+# ---- CRC + BONE data ----
+
+bone_lineages <- c("bone")
+
+bone_data <- data %>%
+  filter(lineage %in% !!bone_lineages)
+
+write_csv(bone_data, snakemake@output[["bone_subset"]])
+bind_rows(crc_data, bone_data) %>%
+  write_csv(snakemake@output[["crc_bone_subset"]])
+
+
+# ---- Sub-sample of CRC + BONE data ----
+
+bone_cell_lines <- sample(
+  unique(bone_data$depmap_id),
+  min(5, dplyr::n_distinct(bone_data$depmap_id))
+)
+
+print("BONE CELL LINES:")
+print(bone_cell_lines)
+
+cell_lines <- c(bone_cell_lines, sample(crc_cell_lines, 5))
+
+data %>%
+  filter(depmap_id %in% !!cell_lines) %>%
+  filter(sgrna %in% !!sgrnas) %>%
+  write_csv(snakemake@output[["crc_bone_subsample"]])
 
 
 # ---- Small random subset for Python module testing ----
 
 set.seed(123)
 
-LINEAGES <- sample(unique(data$lineage), 2)
-CELL_LINES <- data %>%
-  filter(lineage %in% !!LINEAGES) %>%
+lineages <- sample(unique(data$lineage), 2)
+cell_lines <- data %>%
+  filter(lineage %in% !!lineages) %>%
   distinct(lineage, depmap_id) %>%
   group_by(lineage) %>%
   sample_n(3) %T>%
@@ -81,12 +111,12 @@ CELL_LINES <- data %>%
 
 
 test_data <- data %>%
-  filter(depmap_id %in% !!CELL_LINES)
+  filter(depmap_id %in% !!cell_lines)
 
-GENES <- sample(unique(crc_data$hugo_symbol), 10)
-SGRNAS <- SGRNAS <- sample_sgrna_from_gene(test_data, GENES, 2)
+genes <- sample(unique(crc_data$hugo_symbol), 10)
+sgrnas <- sample_sgrna_from_gene(test_data, genes, 2)
 
 test_data %>%
-  filter(hugo_symbol %in% !!GENES) %>%
-  filter(sgrna %in% SGRNAS) %>%
+  filter(hugo_symbol %in% !!genes) %>%
+  filter(sgrna %in% sgrnas) %>%
   write_csv(snakemake@output[["test_data"]])

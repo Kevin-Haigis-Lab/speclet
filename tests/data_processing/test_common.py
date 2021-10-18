@@ -97,7 +97,7 @@ class TestIndexingFunctions:
     def test_make_cat_with_specific_order(self, data: pd.DataFrame) -> None:
         assert data["d"].dtype == np.dtype("int64")
         data = dphelp.make_cat(data.copy(), "d", ordered=True, sort_cats=False)
-        np.testing.assert_equal(dphelp.get_indices(data, "d"), [0, 1, 2, 0, 1])
+        np.testing.assert_equal(dphelp.get_indices(data, "d"), [2, 1, 0, 2, 1])
 
 
 #### ---- center_column_grouped_dataframe ---- ####

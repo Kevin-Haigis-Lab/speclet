@@ -45,18 +45,17 @@ class TestPymc3ModelCacheManager:
                 cores=1,
                 chains=2,
                 random_seed=123,
-                return_inferencedata=False,
+                return_inferencedata=True,
             )
             post = pm.sample_posterior_predictive(
                 trace=trace, samples=100, random_seed=123
             )
-        res = pmapi.MCMCSamplingResults(
-            trace=trace, prior_predictive=prior, posterior_predictive=post
-        )
-        return pmapi.convert_samples_to_arviz(model=pm_model, res=res)
+            assert isinstance(trace, az.InferenceData)
+            trace.extend(az.from_pymc3(prior=prior, posterior_predictive=post))
+        return trace
 
     @pytest.fixture(scope="class")
-    def advi_fit(self, pm_model: pm.Model) -> pmapi.ApproximationSamplingResults:
+    def advi_res(self, pm_model: pm.Model) -> pmapi.ApproximationSamplingResults:
         with pm_model:
             prior = pm.sample_prior_predictive(samples=100, random_seed=123)
             approx = pm.fit(
@@ -64,23 +63,16 @@ class TestPymc3ModelCacheManager:
                 callbacks=[pm.callbacks.CheckParametersConvergence(tolerance=1e-4)],
                 random_seed=123,
             )
-            trace = approx.sample(draws=100)
+            trace = az.from_pymc3(trace=approx.sample(draws=100))
             post = pm.sample_posterior_predictive(
                 trace=trace, samples=100, random_seed=123
             )
+            trace.extend(az.from_pymc3(prior=prior, posterior_predictive=post))
+
         res = pmapi.ApproximationSamplingResults(
-            trace=trace,
-            prior_predictive=prior,
-            posterior_predictive=post,
-            approximation=approx,
+            inference_data=trace, approximation=approx
         )
         return res
-
-    @pytest.fixture(scope="class")
-    def advi_results(
-        self, pm_model: pm.Model, advi_fit: pmapi.ApproximationSamplingResults
-    ) -> az.InferenceData:
-        return pmapi.convert_samples_to_arviz(model=pm_model, res=advi_fit)
 
     @pytest.mark.slow
     def test_writing_mcmc_cache(
@@ -125,15 +117,14 @@ class TestPymc3ModelCacheManager:
     @pytest.mark.slow
     def test_writing_advi_cache(
         self,
-        advi_fit: pmapi.ApproximationSamplingResults,
-        advi_results: az.InferenceData,
+        advi_res: pmapi.ApproximationSamplingResults,
         tmp_path: Path,
     ) -> None:
         assert len(list(tmp_path.iterdir())) == 0
         cm = Pymc3ModelCacheManager(name="test-advi-model", root_cache_dir=tmp_path)
         assert len(list(tmp_path.iterdir())) == 1
         assert len(list(cm.cache_dir.iterdir())) == 2
-        cm.write_advi_cache(advi_results, approx=advi_fit.approximation)
+        cm.write_advi_cache(approx_sampling_results=advi_res)
 
         assert not cm.mcmc_cache_exists()
         assert cm.advi_cache_exists()
@@ -141,26 +132,26 @@ class TestPymc3ModelCacheManager:
     @pytest.mark.slow
     def test_reading_advi_cache(
         self,
-        advi_fit: pmapi.ApproximationSamplingResults,
-        advi_results: az.InferenceData,
+        advi_res: pmapi.ApproximationSamplingResults,
         tmp_path: Path,
     ) -> None:
         assert len(list(tmp_path.iterdir())) == 0
         cm = Pymc3ModelCacheManager(name="test-advi-model", root_cache_dir=tmp_path)
-        cm.write_advi_cache(advi_results, approx=advi_fit.approximation)
-        new_res, _ = cm.get_advi_cache()
-        TestPymc3ModelCacheManager.compare_inference_datas(advi_results, new_res)
+        cm.write_advi_cache(advi_res)
+        new_res = cm.get_advi_cache()
+        TestPymc3ModelCacheManager.compare_inference_datas(
+            advi_res.inference_data, new_res.inference_data
+        )
 
     @pytest.mark.slow
     def test_advi_cache_exists_and_clear(
         self,
-        advi_fit: pmapi.ApproximationSamplingResults,
-        advi_results: az.InferenceData,
+        advi_res: pmapi.ApproximationSamplingResults,
         tmp_path: Path,
     ) -> None:
         cm = Pymc3ModelCacheManager(name="test-advi-model", root_cache_dir=tmp_path)
         assert not cm.advi_cache_exists() and not cm.mcmc_cache_exists()
-        cm.write_advi_cache(advi_results, approx=advi_fit.approximation)
+        cm.write_advi_cache(advi_res)
         assert cm.advi_cache_exists() and not cm.mcmc_cache_exists()
         cm.clear_mcmc_cache()
         assert cm.advi_cache_exists() and not cm.mcmc_cache_exists()
@@ -186,21 +177,20 @@ class TestPymc3ModelCacheManager:
     def test_mcmc_and_advi_cache_exists_and_clear(
         self,
         mcmc_results: az.InferenceData,
-        advi_fit: pmapi.ApproximationSamplingResults,
-        advi_results: az.InferenceData,
+        advi_res: pmapi.ApproximationSamplingResults,
         tmp_path: Path,
     ) -> None:
         cm = Pymc3ModelCacheManager(name="test-advi-model", root_cache_dir=tmp_path)
         assert not cm.advi_cache_exists() and not cm.mcmc_cache_exists()
         cm.write_mcmc_cache(mcmc_results)
         assert not cm.advi_cache_exists() and cm.mcmc_cache_exists()
-        cm.write_advi_cache(advi_results, approx=advi_fit.approximation)
+        cm.write_advi_cache(advi_res)
         assert cm.advi_cache_exists() and cm.mcmc_cache_exists()
         cm.clear_advi_cache()
         assert not cm.advi_cache_exists() and cm.mcmc_cache_exists()
         cm.clear_mcmc_cache()
         assert not cm.advi_cache_exists() and not cm.mcmc_cache_exists()
-        cm.write_advi_cache(advi_results, approx=advi_fit.approximation)
+        cm.write_advi_cache(advi_res)
         cm.write_mcmc_cache(mcmc_results)
         assert cm.mcmc_cache_exists() and cm.advi_cache_exists()
         cm.clear_all_caches()

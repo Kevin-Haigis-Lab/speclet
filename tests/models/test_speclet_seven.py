@@ -39,18 +39,20 @@ class TestSpecletSeven:
 
         if fit_method == "mcmc":
             _ = sp7.mcmc_sample_model(
-                draws=n_draws,
-                tune=10,
-                chains=n_chains,
-                cores=n_chains,
-                target_accept=0.8,
                 prior_pred_samples=10,
                 ignore_cache=True,
+                sample_kwargs={
+                    "draws": n_draws,
+                    "tune": 10,
+                    "chains": n_chains,
+                    "cores": n_chains,
+                    "target_accept": 0.8,
+                },
             )
             assert sp7.mcmc_results is not None
             assert sp7.advi_results is None
         else:
-            _, _ = sp7.advi_sample_model(
+            _ = sp7.advi_sample_model(
                 n_iterations=20,
                 draws=n_draws,
                 prior_pred_samples=10,

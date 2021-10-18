@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import arviz as az
 import faker
@@ -50,7 +50,14 @@ def test_mcmc_sample_model(tmp_path: Path, debug: bool) -> None:
     sps.build_model()
     assert sps.mcmc_results is None and sps.advi_results is None
     sps.mcmc_sample_model(
-        draws=11, tune=10, chains=2, cores=1, target_accept=0.8, prior_pred_samples=101
+        prior_pred_samples=101,
+        sample_kwargs={
+            "draws": 11,
+            "tune": 10,
+            "chains": 2,
+            "cores": 1,
+            "target_accept": 0.8,
+        },
     )
     assert sps.mcmc_results is not None
     assert isinstance(sps.mcmc_results, az.InferenceData)
@@ -71,8 +78,8 @@ def test_mcmc_sample_model(tmp_path: Path, debug: bool) -> None:
         n_datapoints,
     )
     assert sps.mcmc_results.get("posterior_predictive")["lfc"].values.shape == (
-        2,
-        11,
+        1,
+        22,
         n_datapoints,
     )
 
@@ -85,25 +92,26 @@ def test_advi_sample_model(tmp_path: Path, debug: bool) -> None:
     assert sps.mcmc_results is None and sps.advi_results is None
     sps.advi_sample_model(n_iterations=21, draws=11, prior_pred_samples=101)
     assert sps.advi_results is not None
-    assert isinstance(sps.advi_results[0], az.InferenceData)
-    assert isinstance(sps.advi_results[1], pm.Approximation)
-    assert len(sps.advi_results[1].hist) == 21
+    assert isinstance(sps.advi_results.inference_data, az.InferenceData)
+    assert isinstance(sps.advi_results.approximation, pm.Approximation)
+    assert len(sps.advi_results.approximation.hist) == 21
     for x in (
         "posterior",
         "posterior_predictive",
         "prior",
-        "prior_predictive",
     ):
-        assert hasattr(sps.advi_results[0], x)
+        assert sps.advi_results.inference_data.get(x) is not None
 
     n_datapoints = sps.data_manager.get_data().shape[0]
-    assert sps.advi_results[0].get("posterior")["a"].values.shape == (1, 11)
-    assert sps.advi_results[0].get("prior_predictive")["lfc"].values.shape == (
+    assert sps.advi_results.inference_data.get("posterior")["a"].values.shape == (1, 11)
+    assert sps.advi_results.inference_data.get("prior")["lfc"].values.shape == (
         1,
         101,
         n_datapoints,
     )
-    assert sps.advi_results[0].get("posterior_predictive")["lfc"].values.shape == (
+    assert sps.advi_results.inference_data.get("posterior_predictive")[
+        "lfc"
+    ].values.shape == (
         1,
         11,
         n_datapoints,
@@ -134,14 +142,18 @@ def test_run_simulation_based_calibration(
     sbc_dir.mkdir()
     sps = SpecletSimple(fake.name(), root_dir, debug=debug)
 
-    fit_kwargs: dict[str, float] = {"draws": 11, "prior_pred_samples": 101}
+    fit_kwargs: dict[str, Any] = {"prior_pred_samples": 101}
     if fit_method is ModelFitMethod.ADVI:
+        fit_kwargs["draws"] = 11
         fit_kwargs["n_iterations"] = 21
     elif fit_method is ModelFitMethod.MCMC:
-        fit_kwargs["tune"] = 10
-        fit_kwargs["chains"] = 2
-        fit_kwargs["cores"] = 1
-        fit_kwargs["target_accept"] = 0.8
+        fit_kwargs["sample_kwargs"] = {
+            "draws": 11,
+            "tune": 10,
+            "chains": 2,
+            "cores": 1,
+            "target_accept": 0.8,
+        }
     else:
         assert_never(fit_method)
 

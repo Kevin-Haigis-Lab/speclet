@@ -222,7 +222,7 @@ def make_kras_mutation_index_with_other(
     mut_freq = mut_freq[[kras_col, kg]]
     return (
         pd.merge(df.copy(), mut_freq, how="left", on=kras_col)
-        .pipe(dphelp.make_cat, col=kg)
+        .pipe(dphelp.make_cat, col=kg, sort_cats=True)
         .pipe(dphelp.get_indices, col=kg)
     )
 
@@ -387,7 +387,7 @@ def set_achilles_categorical_columns(
         data (pd.DataFrame): Achilles DataFrame.
         cols (Union[List[str], Tuple[str, ...]], optional): The names of the columns to
           make categorical. Defaults to ("hugo_symbol", "depmap_id", "sgrna",
-          "lineage", "sgrna_target_chr", "p_dna_batch", "sreen").
+          "lineage", "sgrna_target_chr", "p_dna_batch", "screen").
         ordered (bool, optional): Should the categorical columns be ordered?
           Defaults to True.
         sort_cats (bool, optional): Should the categorical columns be sorted?

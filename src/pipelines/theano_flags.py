@@ -28,4 +28,4 @@ def get_theano_flags(unique_id: str, theano_compiledir: Optional[str] = None) ->
     """
     if theano_compiledir is None:
         theano_compiledir = get_theano_compile_dir()
-    return f"THEANO_FLAGS='compiledir={theano_compiledir}/'" + unique_id
+    return f"THEANO_FLAGS='compiledir={theano_compiledir}/{unique_id}'"

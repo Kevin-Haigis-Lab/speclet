@@ -2,137 +2,85 @@
 
 """Standardization of the interactions with PyMC3 sampling."""
 
-from typing import Any, Callable, Optional, TypeVar, Union
+from dataclasses import dataclass
+from typing import Any, Callable, Optional
 
 import arviz as az
 import numpy as np
 import pymc3 as pm
-from pydantic import BaseModel, validator
+
+from src.loggers import logger
 
 #### ---- Result Types ---- ####
 
-PossibleTrace = TypeVar("PossibleTrace")
 
-
-class MCMCSamplingResults(BaseModel):
-    """The results of MCMC sampling."""
-
-    trace: pm.backends.base.MultiTrace
-    prior_predictive: dict[str, np.ndarray]
-    posterior_predictive: dict[str, np.ndarray]
-
-    class Config:
-        """Configuration for pydantic validation."""
-
-        arbitrary_types_allowed = True
-
-    @validator("trace")
-    def validate_trace(cls, trace: PossibleTrace) -> PossibleTrace:
-        """Validate a PyMC3 MultiTrace object.
-
-        Args:
-            trace ([type]): MultiTrace object.
-
-        Raises:
-            ValueError: If the object does not satisfy pre-determined requirements.
-
-        Returns:
-            [type]: The original object (if valid).
-        """
-        trace_methods = dir(trace)
-        expected_methods = ["get_values"]
-        for method in expected_methods:
-            if method not in trace_methods:
-                raise ValueError(
-                    f"Object passed for trace does not have the method '{method}'."
-                )
-        return trace
-
-
-class ApproximationSamplingResults(MCMCSamplingResults):
+@dataclass
+class ApproximationSamplingResults:
     """The results of ADVI fitting and sampling."""
 
+    inference_data: az.InferenceData
     approximation: pm.Approximation
-
-
-def convert_samples_to_arviz(
-    model: pm.Model,
-    res: Union[MCMCSamplingResults, ApproximationSamplingResults],
-) -> az.InferenceData:
-    """Turn the results from a sampling procedure into a standard ArviZ object.
-
-    Args:
-        model (pm.Model): The PyMC3 model.
-        res (Union[MCMCSamplingResults, ApproximationSamplingResults]): The results of
-          the sampling/fitting process.
-
-    Returns:
-        az.InferenceData: A standard ArviZ data object.
-    """
-    return az.from_pymc3(
-        trace=res.trace,
-        model=model,
-        prior=res.prior_predictive,
-        posterior_predictive=res.posterior_predictive,
-    )
 
 
 #### ---- Interface with PyMC3 ---- ####
 
 
+def _extend_trace_with_prior_and_posterior(
+    trace: az.InferenceData,
+    prior: Optional[dict[str, np.ndarray]] = None,
+    post: Optional[dict[str, np.ndarray]] = None,
+) -> None:
+    if prior is not None:
+        trace.extend(az.from_pymc3(prior=prior))
+    if post is not None:
+        trace.extend(az.from_pymc3(posterior_predictive=post))
+    return None
+
+
 def pymc3_sampling_procedure(
     model: pm.Model,
-    mcmc_draws: int = 1000,
-    tune: int = 1000,
-    chains: int = 3,
-    cores: Optional[int] = None,
-    prior_pred_samples: int = 1000,
+    prior_pred_samples: Optional[int] = 500,
     random_seed: Optional[int] = None,
     sample_kwargs: Optional[dict[str, Any]] = None,
-) -> MCMCSamplingResults:
-    """Run a standard PyMC3 sampling procedure.
-
-    TODO: Remove `post_pred_samples` from argument list and modeling
-    options.
+) -> az.InferenceData:
+    """Run a standardized PyMC3 sampling procedure.
 
     Args:
         model (pm.Model): PyMC3 model.
-        mcmc_draws (int, optional): Number of MCMC draws. Defaults to 1000.
-        tune (int, optional): Number of tuning steps. Defaults to 1000.
-        chains (int, optional): Number of chains. Defaults to 3.
-        cores (Optional[int], optional): Number of cores. Defaults to None.
-        prior_pred_samples (int, optional): Number of samples from the prior
-          distributions. Defaults to 1000.
+        prior_pred_samples (Optional[int], optional): Number of samples from the prior
+          distributions. Defaults to 1000. If `None` or less than 1, no prior samples
+          are taken.
         random_seed (Optional[int], optional): The random seed for sampling.
-          Defaults to None.
+          Defaults to `None`.
         sample_kwargs (Dict[str, Any], optional): Kwargs for the sampling method.
-          Defaults to {}.
+          Defaults to `None`.
 
     Returns:
-        MCMCSamplingResults: A collection of the fitting and sampling results.
+        az.InferenceData: ArviZ standardized data set.
     """
     if sample_kwargs is None:
         sample_kwargs = {}
 
     with model:
-        prior_pred = pm.sample_prior_predictive(
-            prior_pred_samples, random_seed=random_seed
-        )
         trace = pm.sample(
-            draws=mcmc_draws,
-            tune=tune,
-            chains=chains,
-            cores=cores,
-            random_seed=random_seed,
-            return_inferencedata=False,
-            **sample_kwargs,
+            random_seed=random_seed, return_inferencedata=True, **sample_kwargs
         )
-
         post_pred = pm.sample_posterior_predictive(trace, random_seed=random_seed)
 
-    return MCMCSamplingResults(
-        trace=trace, prior_predictive=prior_pred, posterior_predictive=post_pred
-    )
+    assert isinstance(trace, az.InferenceData)
+
+    prior_pred: Optional[dict[str, np.ndarray]] = None
+    if prior_pred_samples is not None and prior_pred_samples > 0:
+        with model:
+            prior_pred = pm.sample_prior_predictive(
+                prior_pred_samples, random_seed=random_seed
+            )
+    else:
+        logger.info("Not sampling from prior predictive.")
+
+    with model:
+        _extend_trace_with_prior_and_posterior(trace, prior=prior_pred, post=post_pred)
+    return trace
 
 
 def pymc3_advi_approximation_procedure(
@@ -140,12 +88,15 @@ def pymc3_advi_approximation_procedure(
     method: str = "advi",
     n_iterations: int = 100000,
     draws: int = 1000,
-    prior_pred_samples: int = 1000,
+    prior_pred_samples: Optional[int] = 500,
     callbacks: Optional[list[Callable]] = None,
     random_seed: Optional[int] = None,
-    fit_kwargs: Optional[dict[Any, Any]] = None,
+    fit_kwargs: Optional[dict[str, Any]] = None,
 ) -> ApproximationSamplingResults:
     """Run a standard PyMC3 ADVI fitting procedure.
+
+    TODO (@jhrcook): Change `method` from a string to a literal and get supported
+    options from PyMC3.
 
     Args:
         model (pm.Model): PyMC3 model.
@@ -154,13 +105,13 @@ def pymc3_advi_approximation_procedure(
         draws (int, optional): Number of MCMC samples to draw from the fit model.
           Defaults to 1000.
         prior_pred_samples (int, optional): Number of samples from the prior
-          distributions. Defaults to 1000.
+          distributions. Defaults to 1000. If less than 1, no prior samples are taken.
         callbacks (List[Callable], optional): List of fitting callbacks.
           Default is None.
         random_seed (Optional[int], optional): The random seed for sampling.
           Defaults to None.
         fit_kwargs (Dict[str, Any], optional): Kwargs for the fitting method.
-          Defaults to {}.
+          Defaults to None.
 
     Returns:
         ApproximationSamplingResults: A collection of the fitting and sampling results.
@@ -169,18 +120,20 @@ def pymc3_advi_approximation_procedure(
         fit_kwargs = {}
 
     with model:
-        prior_pred = pm.sample_prior_predictive(
-            prior_pred_samples, random_seed=random_seed
-        )
         approx = pm.fit(n_iterations, method=method, callbacks=callbacks, **fit_kwargs)
-        advi_trace = approx.sample(draws)
-        post_pred = pm.sample_posterior_predictive(
-            trace=advi_trace, random_seed=random_seed
-        )
+        trace = az.from_pymc3(trace=approx.sample(draws))
+        post_pred = pm.sample_posterior_predictive(trace=trace, random_seed=random_seed)
 
-    return ApproximationSamplingResults(
-        trace=advi_trace,
-        prior_predictive=prior_pred,
-        posterior_predictive=post_pred,
-        approximation=approx,
-    )
+    assert isinstance(trace, az.InferenceData)
+
+    prior_pred: Optional[dict[str, np.ndarray]] = None
+    if prior_pred_samples is not None and prior_pred_samples > 0:
+        with model:
+            prior_pred = pm.sample_prior_predictive(
+                prior_pred_samples, random_seed=random_seed
+            )
+    else:
+        logger.info("Not sampling from prior predictive.")
+
+    _extend_trace_with_prior_and_posterior(trace, prior=prior_pred, post=post_pred)
+    return ApproximationSamplingResults(inference_data=trace, approximation=approx)

@@ -24,6 +24,7 @@ from src.project_enums import ModelFitMethod, ModelOption
 from src.project_enums import ModelParameterization as MP
 
 
+@pytest.mark.skip("Needs refactoring")
 def test_configure_model(mock_model_config: Path, tmp_path: Path) -> None:
     sp = SpecletTestModel("my-test-model", tmp_path)
     configuration.configure_model(sp, config_path=mock_model_config)
@@ -31,6 +32,7 @@ def test_configure_model(mock_model_config: Path, tmp_path: Path) -> None:
     assert sp.config.cov2
 
 
+@pytest.mark.skip("Needs refactoring")
 def test_configure_model_no_change(mock_model_config: Path, tmp_path: Path) -> None:
     sp = SpecletTestModel("my-test-model-that-doesnot-exist", tmp_path)
     configuration.configure_model(sp, config_path=mock_model_config)
@@ -38,6 +40,7 @@ def test_configure_model_no_change(mock_model_config: Path, tmp_path: Path) -> N
     assert not sp.config.cov2
 
 
+@pytest.mark.skip("Needs refactoring")
 @pytest.mark.parametrize("model_option", ModelOption)
 def test_all_model_options_return_a_type(model_option: ModelOption) -> None:
     model_type = configuration.get_model_class(model_option)
@@ -58,6 +61,7 @@ model_options_expected_class_parameterization: list[
 ]
 
 
+@pytest.mark.skip("Needs refactoring")
 @pytest.mark.parametrize(
     "model_option, expected_class", model_options_expected_class_parameterization
 )
@@ -95,6 +99,7 @@ def check_test_model_configurations(
         assert sp_model.config.cov2 == SpecletTestModelConfiguration().cov2
 
 
+@pytest.mark.skip("Needs refactoring")
 @pytest.mark.parametrize(
     "model_name", ["my-test-model", "second-test-model", "no-config-test"]
 )
@@ -111,6 +116,7 @@ def test_instantiate_and_configure_model(
     check_test_model_configurations(sp_model, model_name)
 
 
+@pytest.mark.skip("Needs refactoring")
 @pytest.mark.parametrize(
     "model_name", ["my-test-model", "second-test-model", "no-config-test"]
 )
@@ -126,6 +132,7 @@ def test_get_config_and_instantiate_model(
     check_test_model_configurations(sp_model, model_name)
 
 
+@pytest.mark.skip("Needs refactoring")
 @given(sampling_kwargs=st.dictionaries(st.text(), st.text()))
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 def test_check_sampling_kwargs_raises(
@@ -139,12 +146,14 @@ def test_check_sampling_kwargs_raises(
             configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
 
 
+@pytest.mark.skip("Needs refactoring")
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 def test_check_sampling_kwargs_empty_always_passes(fit_method: ModelFitMethod) -> None:
     sampling_kwargs: dict[str, Any] = {}
     configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
 
 
+@pytest.mark.skip("Needs refactoring")
 @pytest.mark.parametrize(
     "sampling_kwargs",
     [
@@ -160,6 +169,7 @@ def test_check_sampling_kwargs_all_fitmethods(
     configuration.check_sampling_kwargs(sampling_kwargs, fit_method=fit_method)
 
 
+@pytest.mark.skip("Needs refactoring")
 @pytest.mark.parametrize(
     "sampling_kwargs, intended_fit_method",
     [

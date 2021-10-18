@@ -8,7 +8,6 @@ import arviz as az
 import numpy as np
 import pandas as pd
 import pymc3 as pm
-from pydantic import BaseModel
 from theano.tensor.sharedvar import TensorSharedVariable as TTShared
 
 import src.modeling.simulation_based_calibration_helpers as sbc
@@ -20,11 +19,16 @@ from src.modeling import pymc3_sampling_api as pmapi
 from src.project_enums import MockDataSize, ModelFitMethod, assert_never
 
 ReplacementsDict = dict[TTShared, Union[pm.Minibatch, np.ndarray]]
-
 ObservedVarName = str
 
 
-class UnableToLocateNamedVariable(Exception):
+class ModelNotYetBuilt(AttributeError):
+    """Model has yet to be built."""
+
+    pass
+
+
+class UnableToLocateNamedVariable(BaseException):
     """Error when a named variable or object cannot be located."""
 
     pass
@@ -34,31 +38,6 @@ class SharedVariableDictionaryNotSet(AttributeError):
     """Error for when the shared variable dictionary should be available but is not."""
 
     pass
-
-
-class PyMC3SamplingParameters(BaseModel):
-    """Paramerers common to fitting a model in PyMC3."""
-
-    draws: int = 1000
-    prior_pred_samples: int = 1000
-
-
-class MCMCSamplingParameters(PyMC3SamplingParameters):
-    """Parameters for MCMC sampling."""
-
-    tune: int = 2000
-    cores: int = 4
-    chains: int = 4
-    init: str = "auto"
-    n_init: int = 200000
-    target_accept: float = 0.8  # default for pm.NUTS
-
-
-class VISamplingParameters(PyMC3SamplingParameters):
-    """Parameters for fitting by VI."""
-
-    method: str = "advi"
-    n_iterations: int = 50000
 
 
 class SpecletModelDataManager(Protocol):
@@ -94,11 +73,8 @@ class SpecletModel:
     model: Optional[pm.Model] = None
     observed_var_name: Optional[ObservedVarName] = None
     shared_vars: Optional[dict[str, TTShared]] = None
-    advi_results: Optional[tuple[az.InferenceData, pm.Approximation]] = None
+    advi_results: Optional[pmapi.ApproximationSamplingResults] = None
     mcmc_results: Optional[az.InferenceData] = None
-
-    mcmc_sampling_params: MCMCSamplingParameters = MCMCSamplingParameters()
-    advi_sampling_params: VISamplingParameters = VISamplingParameters()
 
     def __init__(
         self,
@@ -219,18 +195,9 @@ class SpecletModel:
 
         return None
 
-    def update_mcmc_sampling_parameters(self) -> None:
-        """Override if MCMC sampling parameters need to be adjusted."""
-        return None
-
     def mcmc_sample_model(
         self,
-        draws: Optional[int] = None,
-        tune: Optional[int] = None,
-        chains: Optional[int] = None,
-        cores: Optional[int] = None,
-        target_accept: Optional[float] = None,
-        prior_pred_samples: Optional[int] = None,
+        prior_pred_samples: Optional[int] = 500,
         random_seed: Optional[int] = None,
         sample_kwargs: Optional[dict[str, Any]] = None,
         ignore_cache: bool = False,
@@ -244,16 +211,9 @@ class SpecletModel:
         by the values in the `self.mcmc_sampling_params` attribute.
 
         Args:
-            mcmc_draws (Optional[int], optional): Number of MCMC draws. Defaults to
-              None.
-            tune (Optional[int], optional): Number of tuning steps. Defaults to None.
-            chains (Optional[int], optional): Number of chains. Defaults to 3.
-            cores (Optional[int], optional): Number of cores. Defaults to
-              None.
-            target_accept (Optional[float], optional): MCMC target acceptance. Defaults
-              to None.
             prior_pred_samples (Optional[int], optional): Number of samples from the
-              prior distributions. Defaults to None.
+              prior distributions. Defaults to 500. Set to `None` or a non-positive
+              value to skip.
             random_seed (Optional[int], optional): The random seed for sampling.
             Defaults to None.
             sample_kwargs (dict[str, Any], optional): Kwargs for the sampling method.
@@ -262,33 +222,20 @@ class SpecletModel:
               Defaults to False.
 
         Raises:
-            AttributeError: Raised if the PyMC3 model does not yet exist.
+            ModelNotYetBuilt: Raised if the PyMC3 model does not yet exist.
 
         Returns:
             az.InferenceData: The results of MCMC sampling.
         """
         logger.debug("Beginning MCMC sampling method.")
-        self.update_mcmc_sampling_parameters()
-        if draws is None:
-            draws = self.mcmc_sampling_params.draws
-        if tune is None:
-            tune = self.mcmc_sampling_params.tune
-        if chains is None:
-            chains = self.mcmc_sampling_params.chains
-        if cores is None:
-            cores = self.mcmc_sampling_params.cores
-        if target_accept is None:
-            target_accept = self.mcmc_sampling_params.target_accept
-        if prior_pred_samples is None:
-            prior_pred_samples = self.mcmc_sampling_params.prior_pred_samples
 
         if self.model is None:
-            raise AttributeError(
+            raise ModelNotYetBuilt(
                 "Cannot sample: model is 'None'. "
                 + "Make sure to run `model.build_model()` first."
             )
 
-        if self.mcmc_results is not None:
+        if not ignore_cache and self.mcmc_results is not None:
             logger.info("Returning results from stored `mcmc_results` attribute.")
             return self.mcmc_results
 
@@ -299,20 +246,14 @@ class SpecletModel:
 
         if sample_kwargs is None:
             sample_kwargs = {}
-        sample_kwargs["target_accept"] = target_accept
 
         logger.info("Beginning MCMC sampling.")
-        _mcmc_results = pmapi.pymc3_sampling_procedure(
+        self.mcmc_results = pmapi.pymc3_sampling_procedure(
             model=self.model,
-            mcmc_draws=draws,
-            tune=tune,
-            chains=chains,
-            cores=cores,
             prior_pred_samples=prior_pred_samples,
             random_seed=random_seed,
             sample_kwargs=sample_kwargs,
         )
-        self.mcmc_results = pmapi.convert_samples_to_arviz(self.model, _mcmc_results)
         logger.info("Finished MCMC sampling - caching results.")
         self.write_mcmc_cache()
         return self.mcmc_results
@@ -342,19 +283,16 @@ class SpecletModel:
             pm.callbacks.CheckParametersConvergence(tolerance=0.01, diff="absolute")
         ]
 
-    def update_advi_sampling_parameters(self) -> None:
-        """Override if ADVI fitting parameters need to be adjusted."""
-        return None
-
     def advi_sample_model(
         self,
-        method: Optional[str] = None,
-        n_iterations: Optional[int] = None,
-        draws: Optional[int] = None,
+        method: str = "advi",
+        n_iterations: int = 100000,
+        draws: int = 1000,
         prior_pred_samples: Optional[int] = None,
         random_seed: Optional[int] = None,
+        fit_kwargs: Optional[dict[str, Any]] = None,
         ignore_cache: bool = False,
-    ) -> tuple[az.InferenceData, pm.Approximation]:
+    ) -> pmapi.ApproximationSamplingResults:
         """ADVI fit the model.
 
         This method primarily wraps the
@@ -376,34 +314,27 @@ class SpecletModel:
               None.
             random_seed (Optional[int], optional): The random seed for sampling.
               Defaults to None.
-            fit_kwargs (dict[str, Any], optional): Kwargs for the fitting method.
-              Defaults to {}.
+            fit_kwargs (Optional[dict[str, Any]], optional): Kwargs for the fitting
+              method. Defaults to None.
 
         Raises:
-            AttributeError: Raised if the model does not yet exist.
+            ModelNotYetBuilt: Raised if the model does not yet exist.
 
         Returns:
-            tuple[az.InferenceData, pm.Approximation]: The results of fitting the model
+            pmapi.ApproximationSamplingResults: The results of fitting the model
               and the approximation object.
         """
         logger.info("Beginning ADVI fitting method.")
-        self.update_advi_sampling_parameters()
-        if method is None:
-            method = self.advi_sampling_params.method
-        if n_iterations is None:
-            n_iterations = self.advi_sampling_params.n_iterations
-        if draws is None:
-            draws = self.advi_sampling_params.draws
-        if prior_pred_samples is None:
-            prior_pred_samples = self.advi_sampling_params.prior_pred_samples
 
         if self.model is None:
-            raise AttributeError(
+            raise ModelNotYetBuilt(
                 "Cannot sample: model is 'None'. "
                 + "Make sure to run `model.build_model()` first."
             )
 
-        fit_kwargs: dict[str, Any] = {}
+        if fit_kwargs is None:
+            fit_kwargs = {}
+
         replacements = self.get_replacement_parameters()
         if replacements is not None:
             fit_kwargs["more_replacements"] = replacements
@@ -418,7 +349,7 @@ class SpecletModel:
             return self.advi_results
 
         logger.info("Beginning ADVI fitting.")
-        _advi_results = pmapi.pymc3_advi_approximation_procedure(
+        self.advi_results = pmapi.pymc3_advi_approximation_procedure(
             model=self.model,
             method=method,
             n_iterations=n_iterations,
@@ -427,10 +358,6 @@ class SpecletModel:
             callbacks=self.get_advi_callbacks(),
             random_seed=random_seed,
             fit_kwargs=fit_kwargs,
-        )
-        self.advi_results = (
-            pmapi.convert_samples_to_arviz(self.model, _advi_results),
-            _advi_results.approximation,
         )
         logger.info("Finished ADVI fitting - caching results.")
         self.write_advi_cache()
@@ -523,14 +450,18 @@ class SpecletModel:
         self.update_observed_data(mock_data[self.observed_var_name].values)
 
         logger.info(f"Fitting model to mock data using {fit_method.value}.")
+        res: az.InferenceData
         if fit_method is ModelFitMethod.ADVI:
-            res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
+            res = self.advi_sample_model(
+                random_seed=random_seed, **fit_kwargs
+            ).inference_data
         elif fit_method is ModelFitMethod.MCMC:
             res = self.mcmc_sample_model(random_seed=random_seed, **fit_kwargs)
         else:
             assert_never(fit_method)
 
         logger.info("Making posterior summary for the SBC.")
+        # TODO: use project configuration value for `hdi_prob`.
         posterior_summary = az.summary(res, fmt="wide", hdi_prob=0.89)
         assert isinstance(posterior_summary, pd.DataFrame)
 
@@ -581,9 +512,7 @@ class SpecletModel:
     def write_advi_cache(self) -> None:
         """Cache the ADVI sampling results."""
         if self.advi_results is not None:
-            self.cache_manager.write_advi_cache(
-                self.advi_results[0], self.advi_results[1]
-            )
+            self.cache_manager.write_advi_cache(self.advi_results)
         else:
             logger.warning("Did not cache MCMC samples because they do not exist.")
 
@@ -606,7 +535,7 @@ class SpecletModel:
                 self.cache_manager.mcmc_cache_delegate.cache_dir
             )
 
-    def load_advi_cache(self) -> tuple[az.InferenceData, pm.Approximation]:
+    def load_advi_cache(self) -> pmapi.ApproximationSamplingResults:
         """Load ADVI from cache.
 
         Sets the cached ADVI result as the instance's `advi_results` attribute, too.
@@ -618,9 +547,8 @@ class SpecletModel:
             tuple[az.InferenceData, pm.Approximation]: Cached ADVI results.
         """
         if self.cache_manager.advi_cache_exists():
-            _advi_results = self.cache_manager.get_advi_cache()
-            self.advi_results = _advi_results
-            return _advi_results
+            self.advi_results = self.cache_manager.get_advi_cache()
+            return self.advi_results
         else:
             raise CacheDoesNotExistError(
                 self.cache_manager.advi_cache_delegate.cache_dir

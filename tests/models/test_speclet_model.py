@@ -12,6 +12,7 @@ from src.exceptions import CacheDoesNotExistError
 from src.managers.data_managers import CrisprScreenDataManager
 from src.misc.test_helpers import do_nothing
 from src.modeling import simulation_based_calibration_helpers as sbc
+from src.modeling.pymc3_sampling_api import ApproximationSamplingResults
 from src.models import speclet_model
 from src.project_enums import MockDataSize, ModelFitMethod
 
@@ -92,12 +93,14 @@ class TestSpecletModel:
     def test_mcmc_sample_model(self, mock_sp_model: MockSpecletModelClass) -> None:
         mock_sp_model.build_model()
         mcmc_res = mock_sp_model.mcmc_sample_model(
-            draws=50,
-            tune=50,
-            chains=2,
-            cores=1,
             prior_pred_samples=25,
             random_seed=1,
+            sample_kwargs={
+                "draws": 50,
+                "tune": 50,
+                "chains": 2,
+                "cores": 1,
+            },
         )
         assert isinstance(mcmc_res, az.InferenceData)
         assert_posterior_shape(mcmc_res, (2, 50))
@@ -106,12 +109,14 @@ class TestSpecletModel:
 
         tic = time()
         mcmc_res_2 = mock_sp_model.mcmc_sample_model(
-            draws=50,
-            tune=50,
-            chains=2,
-            cores=1,
             prior_pred_samples=25,
             random_seed=1,
+            sample_kwargs={
+                "draws": 50,
+                "tune": 50,
+                "chains": 2,
+                "cores": 1,
+            },
         )
         toc = time()
 
@@ -134,19 +139,18 @@ class TestSpecletModel:
     @pytest.mark.slow
     def test_advi_sample_model(self, mock_sp_model: MockSpecletModelClass) -> None:
         mock_sp_model.build_model()
-        advi_res, advi_approx = mock_sp_model.advi_sample_model(
+        advi_res = mock_sp_model.advi_sample_model(
             n_iterations=100,
             draws=100,
             prior_pred_samples=25,
             random_seed=1,
         )
-        assert isinstance(advi_res, az.InferenceData)
-        assert_posterior_shape(advi_res, (1, 100))
+        assert_posterior_shape(advi_res.inference_data, (1, 100))
 
         assert mock_sp_model.advi_results is not None
 
         tic = time()
-        advi_res_2, advi_approx_2 = mock_sp_model.advi_sample_model(
+        advi_res_2 = mock_sp_model.advi_sample_model(
             n_iterations=100,
             draws=100,
             prior_pred_samples=25,
@@ -155,11 +159,11 @@ class TestSpecletModel:
         toc = time()
 
         assert advi_res is advi_res_2
-        assert advi_approx is advi_approx_2
         assert toc - tic < 1
         for p in ["a", "b", "sigma"]:
             np.testing.assert_array_equal(
-                advi_res.posterior[p], advi_res_2.posterior[p]
+                advi_res.inference_data.posterior[p],
+                advi_res_2.inference_data.posterior[p],
             )
 
     @pytest.mark.slow
@@ -174,8 +178,8 @@ class TestSpecletModel:
         def mock_mcmc(*args: Any, **kwargs: Any) -> az.InferenceData:
             return centered_eight.copy()
 
-        def mock_advi(*args: Any, **kwargs: Any) -> tuple[az.InferenceData, str]:
-            return centered_eight.copy(), "hi"
+        def mock_advi(*args: Any, **kwargs: Any) -> ApproximationSamplingResults:
+            return ApproximationSamplingResults(centered_eight.copy(), [1, 2, 3])
 
         monkeypatch.setattr(
             speclet_model.SpecletModel, "update_observed_data", do_nothing
@@ -289,30 +293,3 @@ class TestSpecletModel:
         assert not mock_sp_model.debug
         mock_sp_model.debug = True
         assert mock_sp_model.debug
-
-    @pytest.mark.slow
-    def test_changing_mcmc_sampling_params(
-        self, mock_sp_model: MockSpecletModelClass
-    ) -> None:
-        mock_sp_model.mcmc_sampling_params.draws = 12
-        mock_sp_model.mcmc_sampling_params.chains = 2
-        mock_sp_model.mcmc_sampling_params.cores = 1
-        mock_sp_model.mcmc_sampling_params.tune = 13
-        mock_sp_model.mcmc_sampling_params.prior_pred_samples = 14
-        mock_sp_model.build_model()
-        mcmc_res = mock_sp_model.mcmc_sample_model()
-        assert mcmc_res.posterior["a"].shape == (2, 12)
-        assert mcmc_res.prior["a"].shape == (1, 14)
-
-    @pytest.mark.slow
-    def test_changing_advi_sampling_params(
-        self, mock_sp_model: MockSpecletModelClass
-    ) -> None:
-        mock_sp_model.advi_sampling_params.draws = 17
-        mock_sp_model.advi_sampling_params.n_iterations = 103
-        mock_sp_model.advi_sampling_params.prior_pred_samples = 14
-        mock_sp_model.build_model()
-        advi_res, approx = mock_sp_model.advi_sample_model()
-        assert len(approx.hist) == 103
-        assert advi_res.posterior["a"].shape == (1, 17)
-        assert advi_res.prior["a"].shape == (1, 14)

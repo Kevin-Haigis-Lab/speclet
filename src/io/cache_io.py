@@ -13,5 +13,13 @@ def default_cache_dir() -> Path:
     Returns:
         Path: Path to the default cache directory.
     """
-    cache_dir: Path = project_root_dir() / "models"
-    return cache_dir
+    return project_root_dir() / "models"
+
+
+def temp_dir() -> Path:
+    """Get default temporary directory.
+
+    Returns:
+        Path: Path to the default temporary directory.
+    """
+    return project_root_dir() / "temp"

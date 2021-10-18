@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from itertools import product
 from pathlib import Path
 from string import ascii_lowercase as letters

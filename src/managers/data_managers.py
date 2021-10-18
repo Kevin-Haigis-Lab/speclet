@@ -17,8 +17,8 @@ Data = TypeVar("Data", pd.DataFrame, dd.DataFrame)
 DataFrameTransformation = Callable[[Data], Data]
 
 common_crispr_screen_transformations: Final[list[DataFrameTransformation]] = [
-    achelp.drop_sgrnas_that_map_to_multiple_genes,
     achelp.set_achilles_categorical_columns,
+    achelp.drop_sgrnas_that_map_to_multiple_genes,
 ]
 
 
@@ -31,6 +31,7 @@ def _get_crispr_screen_data_coltypes() -> dict[str, str]:
         "replicate_id",
         "depmap_id",
         "sex",
+        "lineage",
     ]:
         col_types[c] = "object"
     for c in ["counts_final", "counts_final_total"]:
