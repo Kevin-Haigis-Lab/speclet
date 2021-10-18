@@ -450,14 +450,18 @@ class SpecletModel:
         self.update_observed_data(mock_data[self.observed_var_name].values)
 
         logger.info(f"Fitting model to mock data using {fit_method.value}.")
+        res: az.InferenceData
         if fit_method is ModelFitMethod.ADVI:
-            res, _ = self.advi_sample_model(random_seed=random_seed, **fit_kwargs)
+            res = self.advi_sample_model(
+                random_seed=random_seed, **fit_kwargs
+            ).inference_data
         elif fit_method is ModelFitMethod.MCMC:
             res = self.mcmc_sample_model(random_seed=random_seed, **fit_kwargs)
         else:
             assert_never(fit_method)
 
         logger.info("Making posterior summary for the SBC.")
+        # TODO: use project configuration value for `hdi_prob`.
         posterior_summary = az.summary(res, fmt="wide", hdi_prob=0.89)
         assert isinstance(posterior_summary, pd.DataFrame)
 
@@ -508,9 +512,7 @@ class SpecletModel:
     def write_advi_cache(self) -> None:
         """Cache the ADVI sampling results."""
         if self.advi_results is not None:
-            self.cache_manager.write_advi_cache(
-                self.advi_results[0], self.advi_results[1]
-            )
+            self.cache_manager.write_advi_cache(self.advi_results)
         else:
             logger.warning("Did not cache MCMC samples because they do not exist.")
 
@@ -533,7 +535,7 @@ class SpecletModel:
                 self.cache_manager.mcmc_cache_delegate.cache_dir
             )
 
-    def load_advi_cache(self) -> tuple[az.InferenceData, pm.Approximation]:
+    def load_advi_cache(self) -> pmapi.ApproximationSamplingResults:
         """Load ADVI from cache.
 
         Sets the cached ADVI result as the instance's `advi_results` attribute, too.
@@ -545,9 +547,8 @@ class SpecletModel:
             tuple[az.InferenceData, pm.Approximation]: Cached ADVI results.
         """
         if self.cache_manager.advi_cache_exists():
-            _advi_results = self.cache_manager.get_advi_cache()
-            self.advi_results = _advi_results
-            return _advi_results
+            self.advi_results = self.cache_manager.get_advi_cache()
+            return self.advi_results
         else:
             raise CacheDoesNotExistError(
                 self.cache_manager.advi_cache_delegate.cache_dir

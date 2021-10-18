@@ -10,6 +10,7 @@ from typer.testing import CliRunner
 from src import project_enums
 from src.command_line_interfaces import simulation_based_calibration_cli as sbc_cli
 from src.io import model_config
+from src.modeling.pymc3_sampling_api import ApproximationSamplingResults
 from src.modeling.simulation_based_calibration_helpers import SBCFileManager, SBCResults
 from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.project_enums import MockDataSize, ModelFitMethod, ModelOption, SpecletPipeline
@@ -60,7 +61,7 @@ def mock_run_sbc(
     sbc_fm.save_sbc_results({}, az.InferenceData(), pd.DataFrame())
     sp_model.mcmc_results = az.InferenceData()
     sp_model.write_mcmc_cache()
-    sp_model.advi_results = (az.InferenceData(), [1, 2, 3])
+    sp_model.advi_results = ApproximationSamplingResults(az.InferenceData(), [1, 2, 3])
     sp_model.write_advi_cache()
 
     assert sbc_fm.all_data_exists() and sbc_fm.simulation_data_exists()

@@ -31,12 +31,14 @@ class TestSpecletOne:
         assert sp_one.observed_var_name is not None
         assert sp_one.mcmc_results is None
         _ = sp_one.mcmc_sample_model(
-            draws=10,
-            tune=10,
-            chains=2,
-            cores=1,
             prior_pred_samples=10,
             random_seed=1,
+            sample_kwargs={
+                "draws": 10,
+                "tune": 10,
+                "chains": 2,
+                "cores": 1,
+            },
         )
         assert sp_one.mcmc_results is not None
 

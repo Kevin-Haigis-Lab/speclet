@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import numpy as np
 import pymc3 as pm
 import pytest

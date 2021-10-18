@@ -121,7 +121,7 @@ def pymc3_advi_approximation_procedure(
 
     with model:
         approx = pm.fit(n_iterations, method=method, callbacks=callbacks, **fit_kwargs)
-        trace = approx.sample(draws)
+        trace = az.from_pymc3(trace=approx.sample(draws))
         post_pred = pm.sample_posterior_predictive(trace=trace, random_seed=random_seed)
 
     assert isinstance(trace, az.InferenceData)
