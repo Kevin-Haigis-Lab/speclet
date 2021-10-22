@@ -21,23 +21,20 @@ mock_functions = [f1, f2, f3]
 mock_function_args = [[], ["arg1"], ["args", "kwargs"]]
 
 
-@pytest.mark.parametrize("fxn", mock_functions)
+@pytest.mark.parametrize("fxn", [f1, f2])
 def test_check_kwarg_dict_with_functions_raises(fxn: Callable) -> None:
     with pytest.raises(check_kwarg_dict.KeywordsNotInCallableParametersError):
         check_kwarg_dict.check_kwarg_dict(["not_a_param"], fxn)
 
 
+def test_check_kwarg_dict_with_functions_warns() -> None:
+    with pytest.warns(check_kwarg_dict.KeywordsWillBePassedToKwargsWarning):
+        check_kwarg_dict.check_kwarg_dict(["not_a_param"], f3)
+
+
 @pytest.mark.parametrize("fxn, args", zip(mock_functions, mock_function_args))
 def test_check_kwarg_dict_with_functions(fxn: Callable, args: list[str]) -> None:
     assert check_kwarg_dict.check_kwarg_dict(args, fxn) is None
-
-
-@pytest.mark.parametrize("fxn, args", [(f2, ["arg1"]), (f3, ["args", "kwargs"])])
-def test_check_kwarg_dict_with_functions_with_blacklist(
-    fxn: Callable, args: list[str]
-) -> None:
-    with pytest.raises(check_kwarg_dict.KeywordsNotInCallableParametersError):
-        check_kwarg_dict.check_kwarg_dict(args, fxn, blacklist=tuple(args))
 
 
 class MyClass1:

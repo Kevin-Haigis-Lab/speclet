@@ -6,9 +6,9 @@ import typer
 from typer.testing import CliRunner
 
 import src.command_line_interfaces.sampling_pymc3_models_cli as sampling
-from src.io import model_config
-from src.io.model_config import ModelConfigurationNotFound
+from src import model_configuration as model_config
 from src.misc.test_helpers import do_nothing
+from src.model_configuration import ModelConfigurationNotFound
 from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline, assert_never
 

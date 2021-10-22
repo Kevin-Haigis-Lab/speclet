@@ -3,8 +3,8 @@ from typing import Any
 
 import pytest
 
+from src import model_configuration as model_config
 from src import project_enums
-from src.io import model_config
 from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
 from src.project_enums import MockDataSize, ModelFitMethod, ModelOption, SlurmPartitions
 

@@ -16,7 +16,7 @@ class TestSpecletSeven:
         self,
         tmp_path: Path,
     ) -> SpecletSeven:
-        return SpecletSeven("test-model", root_cache_dir=tmp_path, debug=True)
+        return SpecletSeven("test-model", root_cache_dir=tmp_path)
 
     def test_init(self, sp7: SpecletSeven) -> None:
         assert sp7.model is None
@@ -73,7 +73,7 @@ class TestSpecletSeven:
             return "my-test-model", "another-string"
 
         monkeypatch.setattr(SpecletSeven, "model_specification", mock_build_model)
-        sp7 = SpecletSeven("test-model", root_cache_dir=tmp_path, debug=True)
+        sp7 = SpecletSeven("test-model", root_cache_dir=tmp_path)
         th.assert_changing_configuration_resets_model(
             sp7, new_config=config, default_config=SpecletSevenConfiguration()
         )
@@ -88,9 +88,7 @@ class TestSpecletSeven:
         tmp_path: Path,
         config: SpecletSevenConfiguration,
     ) -> None:
-        sp7 = SpecletSeven(
-            "test-model", root_cache_dir=tmp_path, debug=True, config=config
-        )
+        sp7 = SpecletSeven("test-model", root_cache_dir=tmp_path, config=config)
 
         optional_param_to_name: dict[str, str] = {
             "k": "cell_line_cna_cov",

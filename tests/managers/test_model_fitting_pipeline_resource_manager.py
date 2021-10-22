@@ -3,7 +3,7 @@ from typing import Any
 
 import pytest
 
-from src.io import model_config
+from src import model_configuration as model_config
 from src.managers.model_fitting_pipeline_resource_manager import (
     ModelFittingPipelineResourceManager as RM,
 )
@@ -42,7 +42,6 @@ def test_resources_available_for_models(
 ) -> None:
     rm = RM(name=TEST_MODEL_NAME, fit_method=fit_method, config_path=Path("."))
     rm.config.model = model
-    rm.config.debug = debug
 
     assert int(rm.memory) > 0
     assert rm.time is not None
@@ -65,18 +64,21 @@ def test_create_resource_manager_with_wrong_types(fit_method: str) -> None:
     assert SlurmPartitions(rm.partition) in SlurmPartitions
 
 
-def test_resource_manager_detects_debug() -> None:
+@pytest.mark.parametrize("debug", (True, False))
+def test_resource_manager_detects_debug(debug: bool) -> None:
     rm = RM(
         name="my-model-debug",
         fit_method=ModelFitMethod.ADVI,
         config_path=Path("some-directory/not-a-real-file.txt"),
+        debug=debug,
     )
-    assert rm.debug
-    assert rm.is_debug_cli() == "--debug"
 
-    rm.config.debug = False
-    assert not rm.debug
-    assert rm.is_debug_cli() == "--no-debug"
+    if debug:
+        assert rm.debug
+        assert rm.is_debug_cli() == "--debug"
+    else:
+        assert not rm.debug
+        assert rm.is_debug_cli() == "--no-debug"
 
 
 def test_error_on_invalid_model_params() -> None:

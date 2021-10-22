@@ -23,11 +23,18 @@ class ModelingConfig(BaseModel):
     models_config: Path
 
 
+class FittingPipelineConfig(BaseModel):
+    """Fitting pipeline configurations."""
+
+    debug: bool
+
+
 class ProjectConfig(BaseModel):
     """Project configurations."""
 
     munge: MungeConfig
     modeling: ModelingConfig
+    fitting_pipeline: FittingPipelineConfig
 
 
 def read_project_configuration(path: Optional[Path] = None) -> ProjectConfig:
@@ -49,3 +56,15 @@ def read_project_configuration(path: Optional[Path] = None) -> ProjectConfig:
 
     config = ProjectConfig(**config_yaml)
     return config
+
+
+# ---- Access helpers ----
+
+
+def fitting_pipeline_debug_status() -> bool:
+    """Retrieve the fitting pipeline's debug status.
+
+    Returns:
+        bool: Whether or not the pipeline is in debug mode.
+    """
+    return read_project_configuration().fitting_pipeline.debug

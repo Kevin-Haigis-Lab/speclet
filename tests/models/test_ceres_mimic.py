@@ -9,7 +9,7 @@ from src.models.ceres_mimic import CeresMimic, CeresMimicConfiguration
 
 class TestCeresMimic:
     def test_instantiation(self, tmp_path: Path) -> None:
-        cm = CeresMimic("test-model", root_cache_dir=tmp_path, debug=True)
+        cm = CeresMimic("test-model", root_cache_dir=tmp_path)
         assert cm.model is None
 
     @settings(

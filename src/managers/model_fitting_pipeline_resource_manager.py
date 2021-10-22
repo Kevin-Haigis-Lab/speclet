@@ -7,8 +7,8 @@ from typing import TypeVar
 from pydantic import validate_arguments
 
 from src import formatting
+from src import model_configuration as model_config
 from src.exceptions import ResourceRequestUnkown
-from src.io import model_config
 from src.managers import pipeline_resource_manager as prm
 from src.managers.pipeline_resource_manager import PipelineResourceManager
 from src.project_enums import ModelFitMethod, ModelOption
@@ -129,11 +129,15 @@ class ModelFittingPipelineResourceManager(PipelineResourceManager):
     name: str
     fit_method: ModelFitMethod
     config_path: Path
-    config: model_config.ModelConfig
+    _debug: bool
 
     @validate_arguments
     def __init__(
-        self, name: str, fit_method: ModelFitMethod, config_path: Path
+        self,
+        name: str,
+        fit_method: ModelFitMethod,
+        config_path: Path,
+        debug: bool = False,
     ) -> None:
         """Create a resource manager of the model-fitting pipeline.
 
@@ -141,6 +145,7 @@ class ModelFittingPipelineResourceManager(PipelineResourceManager):
             name (str): Identifiable and descriptive name of the model.
             fit_method (ModelFitMethod): Method being used to fit the model.
             config_path (Path): Path to a model configuration file.
+            debug (bool, optional): In debug mode? Defaults to False.
         """
         self.name = name
         self.fit_method = fit_method
@@ -151,6 +156,7 @@ class ModelFittingPipelineResourceManager(PipelineResourceManager):
         if _config is None:
             raise model_config.ModelConfigurationNotFound(self.name)
         self.config = _config
+        self._debug = debug
 
     @property
     def memory(self) -> str:
@@ -220,7 +226,7 @@ class ModelFittingPipelineResourceManager(PipelineResourceManager):
         Returns:
             bool: Whether or not the model should be in debug mode.
         """
-        return self.config.debug
+        return self._debug
 
     def is_debug_cli(self) -> str:
         """Get the correct flag for indicating debug mode through a CLI.

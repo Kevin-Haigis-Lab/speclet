@@ -180,6 +180,23 @@ def get_configuration_for_model(config_path: Path, name: str) -> Optional[ModelC
 # ---- Model configuration ----
 
 
+def configure_model(model: SpecletModel, config_path: Path) -> None:
+    """Apply model-specific configuration from a configuration file.
+
+    Configuration is applied in-place to the provided SpecletModel object.
+
+    Args:
+        model (SpecletModel): Speclet model to configure.
+        config_path (Path): Path to the configuration file.
+    """
+    configuration = get_configuration_for_model(config_path, name=model.name)
+    if configuration is not None and configuration.config is not None:
+        logger.info(f"Found configuration for model name: '{model.name}'.")
+        model.set_config(configuration.config)
+    else:
+        logger.info(f"No configuration found for model name: '{model.name}'.")
+
+
 def get_model_class(model_opt: ModelOption) -> type[SpecletProjectModelTypes]:
     """Get the model class from its string identifier.
 
@@ -269,7 +286,7 @@ def get_sampling_kwargs_from_config(
         fit_method (ModelFitMethod): Desired model fitting method.
 
     Returns:
-        Dict[str, ModelFitConfiguration]: Keyword arguments for the model-fitting
+        dict[str, ModelFitConfiguration]: Keyword arguments for the model-fitting
         method.
     """
     if (sampling_params := config.sampling_arguments) is None:
@@ -297,7 +314,7 @@ def get_sampling_kwargs(
         not found.
 
     Returns:
-        Dict[str, ModelFitConfiguration]: Keyword arguments for the model-fitting
+        dict[str, ModelFitConfiguration]: Keyword arguments for the model-fitting
         method.
     """
     if (config := get_configuration_for_model(config_path, name)) is None:
@@ -310,7 +327,7 @@ def get_sampling_kwargs(
 # ---- Checks ----
 
 
-def check_model_names_are_unique(configs: ModelConfigs) -> None:
+def check_model_names_are_unique(configs: ModelConfigs) -> bool:
     """Check that all model names are unique in a collection of configurations.
 
     Args:
@@ -318,18 +335,22 @@ def check_model_names_are_unique(configs: ModelConfigs) -> None:
 
     Raises:
         ModelNamesAreNotAllUnique: Raised if there are some non-unique names.
+
+    Returns:
+        bool: True is model names are unique.
     """
     counter = Counter([config.name for config in configs.configurations])
     if not all(i == 1 for i in counter.values()):
         nonunique_ids = {v for v, c in counter.items() if c != 1}  # noqa: C403
         raise ModelNamesAreNotAllUnique(nonunique_ids)
+    return True
 
 
 def check_sampling_kwargs(
     sampling_kwargs: dict[str, Any],
     fit_method: ModelFitMethod,
     pipeline: SpecletPipeline,
-) -> None:
+) -> bool:
     """Check that sampling keyword arguments are appropriate for the method called.
 
     Checks a dictionary of keyword arguments against the actual parameter names in the
@@ -337,7 +358,7 @@ def check_sampling_kwargs(
     `KeywordsNotInCallableParametersError` will be raised.
 
     Args:
-        sampling_kwargs (Dict[str, Any]): Keyword arguments to be used for sampling.
+        sampling_kwargs (dict[str, Any]): Keyword arguments to be used for sampling.
         fit_method (ModelFitMethod): Fit method to be used.
         pipeline (SpecletPipeline): Pipeline being run.
     """
@@ -363,3 +384,4 @@ def check_sampling_kwargs(
             assert_never(fit_method)
     else:
         assert_never(pipeline)
+    return True

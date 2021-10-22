@@ -7,22 +7,18 @@
     some_param: noncentered
     cov2: true
   pipelines:
-    - fitting
-  debug: False
+    fitting: []
+
 - name: second-test-model
   description: Another model for testing the pipelines.
   model: speclet-test-model
-  fit_methods:
-    - ADVI
-    - MCMC
   config:
     some_param: noncentered
     cov1: true
     cov2: true
   pipelines:
-    - fitting
-    - sbc
-  debug: True
+    fitting: ["ADVI", "MCMC"]
+    sbc: ["ADVI", "MCMC"]
   pipeline_sampling_parameters:
     fitting:
       ADVI:
@@ -32,13 +28,12 @@
       ADVI:
         n_iterations: 100
       MCMC:
-        target_accept: 0.85
         prior_pred_samples: 50
+        samples_kwargs:
+          target_accept: 0.85
+
 - name: no-config-test
   description: A config without a `config` section.
   model: speclet-test-model
-  fit_methods:
-    - ADVI
   pipelines:
-    - fitting
-  debug: False
+    fitting: ["ADVI"]

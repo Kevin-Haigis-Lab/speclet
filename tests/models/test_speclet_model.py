@@ -36,13 +36,11 @@ def make_x_and_y_cols(df: pd.DataFrame) -> pd.DataFrame:
 
 
 class MockSpecletModelClass(speclet_model.SpecletModel):
-    def __init__(self, name: str, root_cache_dir: Path, debug: bool) -> None:
+    def __init__(self, name: str, root_cache_dir: Path) -> None:
         _data_manager = CrisprScreenDataManager(
             TEST_DATA, transformations=[make_x_and_y_cols]
         )
-        super().__init__(
-            name, _data_manager, root_cache_dir=root_cache_dir, debug=debug
-        )
+        super().__init__(name, _data_manager, root_cache_dir=root_cache_dir)
 
     def model_specification(self) -> tuple[pm.Model, str]:
         data = self.data_manager.get_data()
@@ -70,7 +68,6 @@ class TestSpecletModel:
         return MockSpecletModelClass(
             name="test-model",
             root_cache_dir=tmp_path,
-            debug=False,
         )
 
     def test_mcmc_sample_model_fails_without_overriding(
@@ -186,7 +183,7 @@ class TestSpecletModel:
         )
         monkeypatch.setattr(speclet_model.SpecletModel, "mcmc_sample_model", mock_mcmc)
         monkeypatch.setattr(speclet_model.SpecletModel, "advi_sample_model", mock_advi)
-        sp = MockSpecletModelClass("test-model", root_cache_dir=tmp_path, debug=True)
+        sp = MockSpecletModelClass("test-model", root_cache_dir=tmp_path)
         assert sp.model is None
 
         fit_kwargs: dict[str, Union[float, int]]
@@ -256,7 +253,6 @@ class TestSpecletModel:
             "testing-get-sbc",
             mock_crispr_screen_dm,
             root_cache_dir=tmp_path,
-            debug=True,
         )
         sim_df, sbc_res, sim_sbc_fm = sp.get_sbc(sbc_dir)
         assert isinstance(sim_df, pd.DataFrame)
@@ -287,9 +283,3 @@ class TestSpecletModel:
         self._touch_sbc_results_files(sbc_fm)
         with pytest.raises(CacheDoesNotExistError):
             _ = sp_model.get_sbc(sbc_dir)
-
-    def test_changing_debug_status(self, mock_sp_model: MockSpecletModelClass) -> None:
-        assert mock_sp_model.data_manager is not None
-        assert not mock_sp_model.debug
-        mock_sp_model.debug = True
-        assert mock_sp_model.debug

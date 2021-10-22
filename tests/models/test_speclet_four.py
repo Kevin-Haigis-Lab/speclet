@@ -12,12 +12,12 @@ from src.models.speclet_four import SpecletFour, SpecletFourConfiguration
 
 class TestSpecletFour:
     def test_instantiation(self, tmp_path: Path) -> None:
-        sp4 = SpecletFour("test-model", root_cache_dir=tmp_path, debug=True)
+        sp4 = SpecletFour("test-model", root_cache_dir=tmp_path)
         assert sp4.model is None
 
     @pytest.fixture(scope="function")
     def sp_four(self, tmp_path: Path) -> SpecletFour:
-        sp_four = SpecletFour("test-model", root_cache_dir=tmp_path, debug=True)
+        sp_four = SpecletFour("test-model", root_cache_dir=tmp_path)
         return sp_four
 
     def test_build_model(self, sp_four: SpecletFour) -> None:
@@ -56,7 +56,7 @@ class TestSpecletFour:
             return "my-test-model", "another-string"
 
         monkeypatch.setattr(SpecletFour, "model_specification", mock_build_model)
-        sp4 = SpecletFour("test-model", root_cache_dir=tmp_path, debug=True)
+        sp4 = SpecletFour("test-model", root_cache_dir=tmp_path)
         th.assert_changing_configuration_resets_model(
             sp4, new_config=config, default_config=SpecletFourConfiguration()
         )
@@ -67,7 +67,7 @@ class TestSpecletFour:
         tmp_path: Path,
         copy_cov: bool,
     ) -> None:
-        sp4 = SpecletFour("test-model", root_cache_dir=tmp_path, debug=True)
+        sp4 = SpecletFour("test-model", root_cache_dir=tmp_path)
         _config = sp4.config.copy()
         _config.copy_number_cov = copy_cov
         sp4.set_config(_config.dict())
@@ -85,9 +85,7 @@ class TestSpecletFour:
     def test_model_parameterizations(
         self, tmp_path: Path, config: SpecletFourConfiguration
     ) -> None:
-        sp4 = SpecletFour(
-            "test-model", root_cache_dir=tmp_path, debug=True, config=config
-        )
+        sp4 = SpecletFour("test-model", root_cache_dir=tmp_path, config=config)
 
         def pre_check_callback(param_name: str, *args: Any, **kwargs: Any) -> bool:
             if param_name == "β" and not config.copy_number_cov:

@@ -49,11 +49,11 @@ def make_data_multiple_screens(dm: SpecletModelDataManager) -> None:
 
 class TestSpecletSix:
     def test_instantiation(self, tmp_path: Path) -> None:
-        sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path)
         assert sp6.model is None
 
     def test_build_model(self, tmp_path: Path) -> None:
-        sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path)
         assert sp6.model is None
         sp6.build_model()
         assert sp6.model is not None
@@ -70,17 +70,13 @@ class TestSpecletSix:
             return "my-test-model", "another-string"
 
         monkeypatch.setattr(SpecletSix, "model_specification", mock_build_model)
-        sp6 = SpecletSix("test-model", root_cache_dir=tmp_path, debug=True)
+        sp6 = SpecletSix("test-model", root_cache_dir=tmp_path)
         th.assert_changing_configuration_resets_model(
             sp6, new_config=config, default_config=SpecletSixConfiguration()
         )
 
     def test_model_with_multiple_cell_line_lineages(self, tmp_path: Path) -> None:
-        sp6 = SpecletSix(
-            "TEST-MODEL",
-            root_cache_dir=tmp_path,
-            debug=True,
-        )
+        sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path)
         make_data_multiple_lineages(sp6.data_manager)
         sp6.build_model()
         assert sp6.model is not None
@@ -92,11 +88,7 @@ class TestSpecletSix:
         self,
         tmp_path: Path,
     ) -> None:
-        sp6 = SpecletSix(
-            "TEST-MODEL",
-            root_cache_dir=tmp_path,
-            debug=True,
-        )
+        sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path)
 
         d = sp6.data_manager.get_data().copy()
         d["screen"] = "screen_A"
@@ -144,10 +136,7 @@ class TestSpecletSix:
         cache_dir = tmp_path / arg_name
         cache_dir.mkdir()
         sp6 = SpecletSix(
-            f"TEST-MODEL_{arg_name}",
-            root_cache_dir=cache_dir,
-            debug=True,
-            config=config,
+            f"TEST-MODEL_{arg_name}", root_cache_dir=cache_dir, config=config
         )
         assert sp6.model is None
         sp6.build_model()
@@ -158,7 +147,7 @@ class TestSpecletSix:
 
     @pytest.mark.slow
     def test_mcmc_sampling(self, tmp_path: Path) -> None:
-        sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path)
         assert sp6.model is None
         sp6.build_model()
         assert sp6.model is not None
@@ -178,7 +167,7 @@ class TestSpecletSix:
 
     @pytest.mark.slow
     def test_mcmc_sampling_multiple_lineages(self, tmp_path: Path) -> None:
-        sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path)
         make_data_multiple_lineages(sp6.data_manager)
         assert sp6.model is None
         sp6.build_model()
@@ -207,9 +196,7 @@ class TestSpecletSix:
                 "mutation_cov": True,
             }
         )
-        sp6 = SpecletSix(
-            "TEST-MODEL", root_cache_dir=tmp_path, debug=True, config=config
-        )
+        sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path, config=config)
         assert sp6.model is None
         sp6.build_model()
         assert sp6.model is not None
@@ -229,7 +216,7 @@ class TestSpecletSix:
 
     @pytest.mark.slow
     def test_advi_sampling(self, tmp_path: Path) -> None:
-        sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        sp6 = SpecletSix("TEST-MODEL", root_cache_dir=tmp_path)
         assert sp6.model is None
         sp6.build_model()
         assert sp6.model is not None
@@ -253,9 +240,7 @@ class TestSpecletSix:
         tmp_path: Path,
         config: SpecletSixConfiguration,
     ) -> None:
-        sp6 = SpecletSix(
-            "test-model", root_cache_dir=tmp_path, debug=True, config=config
-        )
+        sp6 = SpecletSix("test-model", root_cache_dir=tmp_path, config=config)
 
         optional_param_to_name: dict[str, str] = {
             "k": "cell_line_cna_cov",

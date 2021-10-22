@@ -11,16 +11,12 @@ from src.models.speclet_five import SpecletFive, SpecletFiveConfiguration
 
 class TestSpecletFive:
     def test_instantiation(self, tmp_path: Path) -> None:
-        sp5 = SpecletFive("TEST-MODEL", root_cache_dir=tmp_path, debug=True)
+        sp5 = SpecletFive("TEST-MODEL", root_cache_dir=tmp_path)
         assert sp5.model is None
 
     @pytest.fixture(scope="function")
     def sp5(self, tmp_path: Path) -> SpecletFive:
-        sp5 = SpecletFive(
-            "TEST-MODEL",
-            root_cache_dir=tmp_path,
-            debug=True,
-        )
+        sp5 = SpecletFive("TEST-MODEL", root_cache_dir=tmp_path)
         return sp5
 
     def test_build_model(self, sp5: SpecletFive) -> None:
@@ -43,7 +39,6 @@ class TestSpecletFive:
         sp5 = SpecletFive(
             "test-model",
             root_cache_dir=tmp_path,
-            debug=True,
         )
         th.assert_changing_configuration_resets_model(
             sp5, new_config=config, default_config=SpecletFiveConfiguration()
@@ -94,10 +89,5 @@ class TestSpecletFive:
         tmp_path: Path,
         config: SpecletFiveConfiguration,
     ) -> None:
-        sp5 = SpecletFive(
-            "test-model",
-            root_cache_dir=tmp_path,
-            debug=True,
-            config=config,
-        )
+        sp5 = SpecletFive("test-model", root_cache_dir=tmp_path, config=config)
         th.assert_model_reparameterization(sp5, config=config)
