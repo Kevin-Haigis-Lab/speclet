@@ -1,12 +1,43 @@
+
+# ---- Configuration specification ----
+
+- name: example-specification # UUID name of this model and configuration.
+  description: An example config spec. # Some helpful description of the model.
+  model: speclet-simple # SpecletModel subclass -- see `project_enums.ModelOption`.
+  pipelines:
+    # List of model-fitting methods for each pipeline.
+    fitting: []
+    sbc: []
+  sampling_arguments:
+    # Arguments for each pipeline and fitting method.
+    fitting:
+      MCMC:
+        # Should match SpecletModel.mcmc_sample_model()` parameters.
+        prior_pred_samples: null
+        sample_kwargs:
+          tune: 2000
+          draws: 2000
+          target_accept: 0.95
+          init: "advi"
+          n_init: 25000
+      ADVI:
+        # Should match SpecletModel.advi_sample_model()` parameters.
+        method: "advi"
+        prior_pred_samples: 500
+    sbc:
+      MCMC:
+        # Will be passed to `fit_kwargs` in SpecletModel.run_simulation_based_calibration().
+        target_accept: 0.95
+
 # ---- SpecletEight ----
 
 - name: eight-default
   description: Default SpecletEight model.
   model: speclet-eight
-  fit_methods: ["MCMC"]
-  pipelines: ["fitting"]
-  debug: true
-  pipeline_sampling_parameters:
+  pipelines:
+    fitting: ["MCMC"]
+    sbc: []
+  sampling_arguments:
     fitting:
       MCMC:
         prior_pred_samples: null

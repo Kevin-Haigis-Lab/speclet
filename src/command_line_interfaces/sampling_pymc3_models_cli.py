@@ -10,10 +10,9 @@ from typing import Any, Optional
 import numpy as np
 import typer
 
+from src import model_configuration as model_config
 from src.command_line_interfaces import cli_helpers
-from src.io import model_config
 from src.loggers import logger
-from src.models import configuration
 from src.models.speclet_model import SpecletModel
 from src.project_enums import ModelFitMethod, SpecletPipeline, assert_never
 
@@ -71,7 +70,7 @@ def sample_speclet_model(
 
     logger.info(f"Model config file: '{config_path.as_posix()}'.")
     logger.info(f"Root cache directory: {cache_dir.as_posix()}")
-    sp_model = configuration.get_config_and_instantiate_model(
+    sp_model = model_config.get_config_and_instantiate_model(
         config_path=config_path, name=name, root_cache_dir=cache_dir
     )
     logger.info(f"Sampling '{sp_model.__class__}' with name '{sp_model.name}'")
@@ -79,13 +78,12 @@ def sample_speclet_model(
         f"Model's cache directory: '{sp_model.cache_manager.cache_dir.as_posix()}'."
     )
 
-    sampling_kwargs = model_config.get_sampling_kwargs(
+    sampling_kwargs: dict[str, Any] = model_config.get_sampling_kwargs(
         config_path=config_path,
         name=name,
         pipeline=SpecletPipeline.FITTING,
         fit_method=fit_method,
     )
-
     _update_sampling_kwargs(sampling_kwargs, chains=mcmc_chains, cores=mcmc_cores)
 
     logger.info("Running model build method.")
@@ -103,7 +101,7 @@ def sample_speclet_model(
             _ = sp_model.mcmc_sample_model(
                 random_seed=random_seed,
                 ignore_cache=ignore_cache,
-                sample_kwargs=sampling_kwargs,
+                **sampling_kwargs,
             )
         else:
             assert_never(fit_method)
