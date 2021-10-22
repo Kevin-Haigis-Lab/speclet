@@ -59,7 +59,6 @@ class SpecletFour(SpecletModel):
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
-        debug: bool = False,
         data_manager: Optional[SpecletModelDataManager] = None,
         config: Optional[SpecletFourConfiguration] = None,
     ):
@@ -70,7 +69,6 @@ class SpecletFour(SpecletModel):
               for cache management.)
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
-            debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[SpecletModelDataManager], optional): Object that will
               manage the data. If None (default), a `CrisprScreenDataManager` is
               created automatically.
@@ -87,7 +85,6 @@ class SpecletFour(SpecletModel):
         super().__init__(
             name=name,
             root_cache_dir=root_cache_dir,
-            debug=debug,
             data_manager=data_manager,
         )
 

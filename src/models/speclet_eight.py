@@ -71,7 +71,6 @@ class SpecletEight(SpecletModel):
         name: str,
         data_manager: Optional[SpecletModelDataManager] = None,
         root_cache_dir: Optional[Path] = None,
-        debug: bool = False,
         config: Optional[SpecletEightConfiguration] = None,
     ) -> None:
         """Instantiate a SpecletEight model.
@@ -81,7 +80,6 @@ class SpecletEight(SpecletModel):
               for cache management.)
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
-            debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[SpecletModelDataManager], optional): Object that will
               manage the data. If None (default), a `CrisprScreenDataManager` is
               created automatically.
@@ -109,7 +107,7 @@ class SpecletEight(SpecletModel):
         # Need to add at end because `p_dna_batch` becomes non-categorical.
         data_manager.add_transformation(achelp.set_achilles_categorical_columns)
 
-        super().__init__(name, data_manager, root_cache_dir=root_cache_dir, debug=debug)
+        super().__init__(name, data_manager, root_cache_dir=root_cache_dir)
 
     def model_specification(self) -> tuple[pm.Model, ObservedVarName]:
         """Define the PyMC3 model.
