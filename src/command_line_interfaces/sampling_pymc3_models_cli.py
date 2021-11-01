@@ -23,10 +23,12 @@ cli_helpers.configure_pretty()
 
 
 def _update_sampling_kwargs(kwargs: dict[str, Any], chains: int, cores: int) -> None:
+    sample_kwargs = kwargs.get("sample_kwargs", {})
     for key, value in {"chains": chains, "cores": cores}.items():
         if key in kwargs.keys():
             logger.warn(f"Overriding configured '{key}'.")
-        kwargs[key] = value
+        sample_kwargs[key] = value
+    kwargs["sample_kwargs"] = sample_kwargs
     return None
 
 
