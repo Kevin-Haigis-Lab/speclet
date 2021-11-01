@@ -56,7 +56,7 @@ def get_theano_flags(unique_id: str, theano_compiledir: Optional[str] = None) -&
     &#34;&#34;&#34;
     if theano_compiledir is None:
         theano_compiledir = get_theano_compile_dir()
-    return f&#34;THEANO_FLAGS=&#39;compiledir={theano_compiledir}/&#39;&#34; + unique_id</code></pre>
+    return f&#34;THEANO_FLAGS=&#39;compiledir={theano_compiledir}/{unique_id}&#39;&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -125,7 +125,7 @@ instead of the default Theano compilation directory. Defaults to None.</dd>
     &#34;&#34;&#34;
     if theano_compiledir is None:
         theano_compiledir = get_theano_compile_dir()
-    return f&#34;THEANO_FLAGS=&#39;compiledir={theano_compiledir}/&#39;&#34; + unique_id</code></pre>
+    return f&#34;THEANO_FLAGS=&#39;compiledir={theano_compiledir}/{unique_id}&#39;&#34;</code></pre>
 </details>
 </dd>
 </dl>

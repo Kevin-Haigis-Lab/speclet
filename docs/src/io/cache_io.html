@@ -41,8 +41,16 @@ def default_cache_dir() -&gt; Path:
     Returns:
         Path: Path to the default cache directory.
     &#34;&#34;&#34;
-    cache_dir: Path = project_root_dir() / &#34;models&#34;
-    return cache_dir</code></pre>
+    return project_root_dir() / &#34;models&#34;
+
+
+def temp_dir() -&gt; Path:
+    &#34;&#34;&#34;Get default temporary directory.
+
+    Returns:
+        Path: Path to the default temporary directory.
+    &#34;&#34;&#34;
+    return project_root_dir() / &#34;temp&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -72,8 +80,30 @@ def default_cache_dir() -&gt; Path:
     Returns:
         Path: Path to the default cache directory.
     &#34;&#34;&#34;
-    cache_dir: Path = project_root_dir() / &#34;models&#34;
-    return cache_dir</code></pre>
+    return project_root_dir() / &#34;models&#34;</code></pre>
+</details>
+</dd>
+<dt id="src.io.cache_io.temp_dir"><code class="name flex">
+<span>def <span class="ident">temp_dir</span></span>(<span>) -> pathlib.Path</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get default temporary directory.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Path</code></dt>
+<dd>Path to the default temporary directory.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def temp_dir() -&gt; Path:
+    &#34;&#34;&#34;Get default temporary directory.
+
+    Returns:
+        Path: Path to the default temporary directory.
+    &#34;&#34;&#34;
+    return project_root_dir() / &#34;temp&#34;</code></pre>
 </details>
 </dd>
 </dl>
@@ -95,6 +125,7 @@ def default_cache_dir() -&gt; Path:
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="src.io.cache_io.default_cache_dir" href="#src.io.cache_io.default_cache_dir">default_cache_dir</a></code></li>
+<li><code><a title="src.io.cache_io.temp_dir" href="#src.io.cache_io.temp_dir">temp_dir</a></code></li>
 </ul>
 </li>
 </ul>

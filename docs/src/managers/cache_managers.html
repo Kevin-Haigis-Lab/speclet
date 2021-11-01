@@ -31,7 +31,7 @@
 import pickle
 import shutil
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 import arviz as az
 import pymc3 as pm
@@ -74,142 +74,6 @@ def _get_pickle(fp: Path) -&gt; Any:
     with open(fp, &#34;rb&#34;) as f:
         d = pickle.load(f)
     return d
-
-
-class Pymc3CacheManager:
-    &#34;&#34;&#34;PyMC3 model cache manager.&#34;&#34;&#34;
-
-    cache_dir: Path
-
-    def __init__(self, cache_dir: Path):
-        &#34;&#34;&#34;Instantiate a new Pymc3CacheManager object.
-
-        Args:
-            cache_dir (Path): The directory for caching sampling/fitting results.
-        &#34;&#34;&#34;
-        self.cache_dir = cache_dir
-        _mkdir(self.cache_dir)
-
-    def get_cache_file_names(self) -&gt; ModelComponentCachePaths:
-        &#34;&#34;&#34;Generate standard caching file paths.
-
-        Returns:
-            ModelComponentCachePaths: Object containing the paths to use for caching
-              various results from fitting a model.
-        &#34;&#34;&#34;
-        trace_dir_path = self.cache_dir / &#34;pm-trace&#34;
-        prior_file_path = self.cache_dir / &#34;prior-predictive-check.pkl&#34;
-        post_file_path = self.cache_dir / &#34;posterior-predictive-check.pkl&#34;
-        approx_file_path = self.cache_dir / &#34;vi-approximation.pkl&#34;
-        return ModelComponentCachePaths(
-            trace_path=trace_dir_path,
-            prior_predictive_path=prior_file_path,
-            posterior_predictive_path=post_file_path,
-            approximation_path=approx_file_path,
-        )
-
-    def read_cached_sampling(self, model: pm.Model) -&gt; pmapi.MCMCSamplingResults:
-        &#34;&#34;&#34;Read sampling from cache.
-
-        Args:
-            model (pm.Model): The model corresponding to the cached sampling.
-
-        Returns:
-            pmapi.MCMCSamplingResults: The cached data.
-        &#34;&#34;&#34;
-        cache_paths = self.get_cache_file_names()
-
-        trace = pm.load_trace(cache_paths.trace_path.as_posix(), model=model)
-        post_check = _get_pickle(cache_paths.posterior_predictive_path)
-        prior_check = _get_pickle(cache_paths.prior_predictive_path)
-
-        return pmapi.MCMCSamplingResults(
-            trace=trace, prior_predictive=prior_check, posterior_predictive=post_check
-        )
-
-    def read_cached_approximation(
-        self, draws: int = 1000
-    ) -&gt; pmapi.ApproximationSamplingResults:
-        &#34;&#34;&#34;Read VI Approximation results from cache.
-
-        Args:
-            draws (int, optional): The number of draws from the trace. Default is 1000.
-
-        Returns:
-            pmapi.ApproximationSamplingResults: The cached data.
-        &#34;&#34;&#34;
-        cache_paths = self.get_cache_file_names()
-
-        post_check = _get_pickle(cache_paths.posterior_predictive_path)
-        prior_check = _get_pickle(cache_paths.prior_predictive_path)
-        approx = _get_pickle(cache_paths.approximation_path)
-        trace = approx.sample(draws)
-
-        return pmapi.ApproximationSamplingResults(
-            trace=trace,
-            prior_predictive=prior_check,
-            posterior_predictive=post_check,
-            approximation=approx,
-        )
-
-    _SamplingResT = Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]
-
-    def cache_sampling_results(self, res: _SamplingResT) -&gt; None:
-        &#34;&#34;&#34;Cache sampling results to disk.
-
-        Args:
-            res (_SamplingResT): The results to cache.
-        &#34;&#34;&#34;
-        _mkdir(self.cache_dir)
-        cache_paths = self.get_cache_file_names()
-        _write_pickle(res.posterior_predictive, cache_paths.posterior_predictive_path)
-        _write_pickle(res.prior_predictive, cache_paths.prior_predictive_path)
-        if isinstance(res, pmapi.ApproximationSamplingResults):
-            _write_pickle(res.approximation, cache_paths.approximation_path)
-        elif isinstance(res, pmapi.MCMCSamplingResults):
-            pm.save_trace(
-                res.trace, directory=cache_paths.trace_path.as_posix(), overwrite=True
-            )
-
-    def cache_exists(self, method: ModelFitMethod) -&gt; bool:
-        &#34;&#34;&#34;Confirm that the cached sampling/fitting results exist.
-
-        This method checks for each pickle file and the trace directory (if applicable).
-
-        Args:
-            method (ModelFitMethod): Which cache to look for.
-
-        Returns:
-            bool: Does the cache exist?
-
-        Raises:
-            UnsupportedFitMethod: If the passed method is not an acceptable option.
-        &#34;&#34;&#34;
-        cache_paths = self.get_cache_file_names()
-        if (
-            not cache_paths.prior_predictive_path.exists()
-            or not cache_paths.posterior_predictive_path
-        ):
-            return False
-
-        if method is ModelFitMethod.MCMC:
-            return cache_paths.trace_path.exists()
-        elif method is ModelFitMethod.ADVI:
-            return cache_paths.approximation_path.exists()
-        else:
-            assert_never(method)
-
-    def clear_cache(self) -&gt; bool:
-        &#34;&#34;&#34;Remove the cache directory.
-
-        Returns:
-            bool: Whether the directory was removed or not. Returns False if the
-              directory did not exist.
-        &#34;&#34;&#34;
-        if self.cache_dir.exists():
-            shutil.rmtree(self.cache_dir)
-            return True
-        return False
 
 
 class ArvizCacheManager:
@@ -313,7 +177,7 @@ class ArvizCacheManager:
 
     def read_cached_approximation(
         self, check_exists: bool = True
-    ) -&gt; tuple[az.InferenceData, pm.Approximation]:
+    ) -&gt; pmapi.ApproximationSamplingResults:
         &#34;&#34;&#34;Read VI Approximation results from cache.
 
         Args:
@@ -334,7 +198,9 @@ class ArvizCacheManager:
                 raise CacheDoesNotExistError(self.cache_dir)
         inf_data = self.read_cached_sampling(check_exists=False)
         approx = _get_pickle(cache_paths.approximation_path)
-        return inf_data, approx
+        return pmapi.ApproximationSamplingResults(
+            inference_data=inf_data, approximation=approx
+        )
 
     def clear_cache(self) -&gt; bool:
         &#34;&#34;&#34;Remove the cache directory.
@@ -476,7 +342,7 @@ class ArvizCacheManager:
 
     def read_cached_approximation(
         self, check_exists: bool = True
-    ) -&gt; tuple[az.InferenceData, pm.Approximation]:
+    ) -&gt; pmapi.ApproximationSamplingResults:
         &#34;&#34;&#34;Read VI Approximation results from cache.
 
         Args:
@@ -497,7 +363,9 @@ class ArvizCacheManager:
                 raise CacheDoesNotExistError(self.cache_dir)
         inf_data = self.read_cached_sampling(check_exists=False)
         approx = _get_pickle(cache_paths.approximation_path)
-        return inf_data, approx
+        return pmapi.ApproximationSamplingResults(
+            inference_data=inf_data, approximation=approx
+        )
 
     def clear_cache(self) -&gt; bool:
         &#34;&#34;&#34;Remove the cache directory.
@@ -663,7 +531,7 @@ InferenceObject and approximation object.</dd>
 </details>
 </dd>
 <dt id="src.managers.cache_managers.ArvizCacheManager.read_cached_approximation"><code class="name flex">
-<span>def <span class="ident">read_cached_approximation</span></span>(<span>self, check_exists: bool = True) -> tuple</span>
+<span>def <span class="ident">read_cached_approximation</span></span>(<span>self, check_exists: bool = True) -> <a title="src.modeling.pymc3_sampling_api.ApproximationSamplingResults" href="../modeling/pymc3_sampling_api.html#src.modeling.pymc3_sampling_api.ApproximationSamplingResults">ApproximationSamplingResults</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Read VI Approximation results from cache.</p>
@@ -690,7 +558,7 @@ first? Defaults to True.</dd>
 </summary>
 <pre><code class="python">def read_cached_approximation(
     self, check_exists: bool = True
-) -&gt; tuple[az.InferenceData, pm.Approximation]:
+) -&gt; pmapi.ApproximationSamplingResults:
     &#34;&#34;&#34;Read VI Approximation results from cache.
 
     Args:
@@ -711,7 +579,9 @@ first? Defaults to True.</dd>
             raise CacheDoesNotExistError(self.cache_dir)
     inf_data = self.read_cached_sampling(check_exists=False)
     approx = _get_pickle(cache_paths.approximation_path)
-    return inf_data, approx</code></pre>
+    return pmapi.ApproximationSamplingResults(
+        inference_data=inf_data, approximation=approx
+    )</code></pre>
 </details>
 </dd>
 <dt id="src.managers.cache_managers.ArvizCacheManager.read_cached_sampling"><code class="name flex">
@@ -814,393 +684,6 @@ first? Defaults to True.</dd>
 <li>pydantic.utils.Representation</li>
 </ul>
 </dd>
-<dt id="src.managers.cache_managers.Pymc3CacheManager"><code class="flex name class">
-<span>class <span class="ident">Pymc3CacheManager</span></span>
-<span>(</span><span>cache_dir: pathlib.Path)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>PyMC3 model cache manager.</p>
-<p>Instantiate a new Pymc3CacheManager object.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>cache_dir</code></strong> :&ensp;<code>Path</code></dt>
-<dd>The directory for caching sampling/fitting results.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Pymc3CacheManager:
-    &#34;&#34;&#34;PyMC3 model cache manager.&#34;&#34;&#34;
-
-    cache_dir: Path
-
-    def __init__(self, cache_dir: Path):
-        &#34;&#34;&#34;Instantiate a new Pymc3CacheManager object.
-
-        Args:
-            cache_dir (Path): The directory for caching sampling/fitting results.
-        &#34;&#34;&#34;
-        self.cache_dir = cache_dir
-        _mkdir(self.cache_dir)
-
-    def get_cache_file_names(self) -&gt; ModelComponentCachePaths:
-        &#34;&#34;&#34;Generate standard caching file paths.
-
-        Returns:
-            ModelComponentCachePaths: Object containing the paths to use for caching
-              various results from fitting a model.
-        &#34;&#34;&#34;
-        trace_dir_path = self.cache_dir / &#34;pm-trace&#34;
-        prior_file_path = self.cache_dir / &#34;prior-predictive-check.pkl&#34;
-        post_file_path = self.cache_dir / &#34;posterior-predictive-check.pkl&#34;
-        approx_file_path = self.cache_dir / &#34;vi-approximation.pkl&#34;
-        return ModelComponentCachePaths(
-            trace_path=trace_dir_path,
-            prior_predictive_path=prior_file_path,
-            posterior_predictive_path=post_file_path,
-            approximation_path=approx_file_path,
-        )
-
-    def read_cached_sampling(self, model: pm.Model) -&gt; pmapi.MCMCSamplingResults:
-        &#34;&#34;&#34;Read sampling from cache.
-
-        Args:
-            model (pm.Model): The model corresponding to the cached sampling.
-
-        Returns:
-            pmapi.MCMCSamplingResults: The cached data.
-        &#34;&#34;&#34;
-        cache_paths = self.get_cache_file_names()
-
-        trace = pm.load_trace(cache_paths.trace_path.as_posix(), model=model)
-        post_check = _get_pickle(cache_paths.posterior_predictive_path)
-        prior_check = _get_pickle(cache_paths.prior_predictive_path)
-
-        return pmapi.MCMCSamplingResults(
-            trace=trace, prior_predictive=prior_check, posterior_predictive=post_check
-        )
-
-    def read_cached_approximation(
-        self, draws: int = 1000
-    ) -&gt; pmapi.ApproximationSamplingResults:
-        &#34;&#34;&#34;Read VI Approximation results from cache.
-
-        Args:
-            draws (int, optional): The number of draws from the trace. Default is 1000.
-
-        Returns:
-            pmapi.ApproximationSamplingResults: The cached data.
-        &#34;&#34;&#34;
-        cache_paths = self.get_cache_file_names()
-
-        post_check = _get_pickle(cache_paths.posterior_predictive_path)
-        prior_check = _get_pickle(cache_paths.prior_predictive_path)
-        approx = _get_pickle(cache_paths.approximation_path)
-        trace = approx.sample(draws)
-
-        return pmapi.ApproximationSamplingResults(
-            trace=trace,
-            prior_predictive=prior_check,
-            posterior_predictive=post_check,
-            approximation=approx,
-        )
-
-    _SamplingResT = Union[pmapi.MCMCSamplingResults, pmapi.ApproximationSamplingResults]
-
-    def cache_sampling_results(self, res: _SamplingResT) -&gt; None:
-        &#34;&#34;&#34;Cache sampling results to disk.
-
-        Args:
-            res (_SamplingResT): The results to cache.
-        &#34;&#34;&#34;
-        _mkdir(self.cache_dir)
-        cache_paths = self.get_cache_file_names()
-        _write_pickle(res.posterior_predictive, cache_paths.posterior_predictive_path)
-        _write_pickle(res.prior_predictive, cache_paths.prior_predictive_path)
-        if isinstance(res, pmapi.ApproximationSamplingResults):
-            _write_pickle(res.approximation, cache_paths.approximation_path)
-        elif isinstance(res, pmapi.MCMCSamplingResults):
-            pm.save_trace(
-                res.trace, directory=cache_paths.trace_path.as_posix(), overwrite=True
-            )
-
-    def cache_exists(self, method: ModelFitMethod) -&gt; bool:
-        &#34;&#34;&#34;Confirm that the cached sampling/fitting results exist.
-
-        This method checks for each pickle file and the trace directory (if applicable).
-
-        Args:
-            method (ModelFitMethod): Which cache to look for.
-
-        Returns:
-            bool: Does the cache exist?
-
-        Raises:
-            UnsupportedFitMethod: If the passed method is not an acceptable option.
-        &#34;&#34;&#34;
-        cache_paths = self.get_cache_file_names()
-        if (
-            not cache_paths.prior_predictive_path.exists()
-            or not cache_paths.posterior_predictive_path
-        ):
-            return False
-
-        if method is ModelFitMethod.MCMC:
-            return cache_paths.trace_path.exists()
-        elif method is ModelFitMethod.ADVI:
-            return cache_paths.approximation_path.exists()
-        else:
-            assert_never(method)
-
-    def clear_cache(self) -&gt; bool:
-        &#34;&#34;&#34;Remove the cache directory.
-
-        Returns:
-            bool: Whether the directory was removed or not. Returns False if the
-              directory did not exist.
-        &#34;&#34;&#34;
-        if self.cache_dir.exists():
-            shutil.rmtree(self.cache_dir)
-            return True
-        return False</code></pre>
-</details>
-<h3>Methods</h3>
-<dl>
-<dt id="src.managers.cache_managers.Pymc3CacheManager.cache_exists"><code class="name flex">
-<span>def <span class="ident">cache_exists</span></span>(<span>self, method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>) -> bool</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Confirm that the cached sampling/fitting results exist.</p>
-<p>This method checks for each pickle file and the trace directory (if applicable).</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>method</code></strong> :&ensp;<code>ModelFitMethod</code></dt>
-<dd>Which cache to look for.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>bool</code></dt>
-<dd>Does the cache exist?</dd>
-</dl>
-<h2 id="raises">Raises</h2>
-<dl>
-<dt><code>UnsupportedFitMethod</code></dt>
-<dd>If the passed method is not an acceptable option.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def cache_exists(self, method: ModelFitMethod) -&gt; bool:
-    &#34;&#34;&#34;Confirm that the cached sampling/fitting results exist.
-
-    This method checks for each pickle file and the trace directory (if applicable).
-
-    Args:
-        method (ModelFitMethod): Which cache to look for.
-
-    Returns:
-        bool: Does the cache exist?
-
-    Raises:
-        UnsupportedFitMethod: If the passed method is not an acceptable option.
-    &#34;&#34;&#34;
-    cache_paths = self.get_cache_file_names()
-    if (
-        not cache_paths.prior_predictive_path.exists()
-        or not cache_paths.posterior_predictive_path
-    ):
-        return False
-
-    if method is ModelFitMethod.MCMC:
-        return cache_paths.trace_path.exists()
-    elif method is ModelFitMethod.ADVI:
-        return cache_paths.approximation_path.exists()
-    else:
-        assert_never(method)</code></pre>
-</details>
-</dd>
-<dt id="src.managers.cache_managers.Pymc3CacheManager.cache_sampling_results"><code class="name flex">
-<span>def <span class="ident">cache_sampling_results</span></span>(<span>self, res: Union[src.modeling.pymc3_sampling_api.MCMCSamplingResults, src.modeling.pymc3_sampling_api.ApproximationSamplingResults]) -> NoneType</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Cache sampling results to disk.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>res</code></strong> :&ensp;<code>_SamplingResT</code></dt>
-<dd>The results to cache.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def cache_sampling_results(self, res: _SamplingResT) -&gt; None:
-    &#34;&#34;&#34;Cache sampling results to disk.
-
-    Args:
-        res (_SamplingResT): The results to cache.
-    &#34;&#34;&#34;
-    _mkdir(self.cache_dir)
-    cache_paths = self.get_cache_file_names()
-    _write_pickle(res.posterior_predictive, cache_paths.posterior_predictive_path)
-    _write_pickle(res.prior_predictive, cache_paths.prior_predictive_path)
-    if isinstance(res, pmapi.ApproximationSamplingResults):
-        _write_pickle(res.approximation, cache_paths.approximation_path)
-    elif isinstance(res, pmapi.MCMCSamplingResults):
-        pm.save_trace(
-            res.trace, directory=cache_paths.trace_path.as_posix(), overwrite=True
-        )</code></pre>
-</details>
-</dd>
-<dt id="src.managers.cache_managers.Pymc3CacheManager.clear_cache"><code class="name flex">
-<span>def <span class="ident">clear_cache</span></span>(<span>self) -> bool</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Remove the cache directory.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>bool</code></dt>
-<dd>Whether the directory was removed or not. Returns False if the
-directory did not exist.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def clear_cache(self) -&gt; bool:
-    &#34;&#34;&#34;Remove the cache directory.
-
-    Returns:
-        bool: Whether the directory was removed or not. Returns False if the
-          directory did not exist.
-    &#34;&#34;&#34;
-    if self.cache_dir.exists():
-        shutil.rmtree(self.cache_dir)
-        return True
-    return False</code></pre>
-</details>
-</dd>
-<dt id="src.managers.cache_managers.Pymc3CacheManager.get_cache_file_names"><code class="name flex">
-<span>def <span class="ident">get_cache_file_names</span></span>(<span>self) -> <a title="src.managers.cache_managers.ModelComponentCachePaths" href="#src.managers.cache_managers.ModelComponentCachePaths">ModelComponentCachePaths</a></span>
-</code></dt>
-<dd>
-<div class="desc"><p>Generate standard caching file paths.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code><a title="src.managers.cache_managers.ModelComponentCachePaths" href="#src.managers.cache_managers.ModelComponentCachePaths">ModelComponentCachePaths</a></code></dt>
-<dd>Object containing the paths to use for caching
-various results from fitting a model.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_cache_file_names(self) -&gt; ModelComponentCachePaths:
-    &#34;&#34;&#34;Generate standard caching file paths.
-
-    Returns:
-        ModelComponentCachePaths: Object containing the paths to use for caching
-          various results from fitting a model.
-    &#34;&#34;&#34;
-    trace_dir_path = self.cache_dir / &#34;pm-trace&#34;
-    prior_file_path = self.cache_dir / &#34;prior-predictive-check.pkl&#34;
-    post_file_path = self.cache_dir / &#34;posterior-predictive-check.pkl&#34;
-    approx_file_path = self.cache_dir / &#34;vi-approximation.pkl&#34;
-    return ModelComponentCachePaths(
-        trace_path=trace_dir_path,
-        prior_predictive_path=prior_file_path,
-        posterior_predictive_path=post_file_path,
-        approximation_path=approx_file_path,
-    )</code></pre>
-</details>
-</dd>
-<dt id="src.managers.cache_managers.Pymc3CacheManager.read_cached_approximation"><code class="name flex">
-<span>def <span class="ident">read_cached_approximation</span></span>(<span>self, draws: int = 1000) -> <a title="src.modeling.pymc3_sampling_api.ApproximationSamplingResults" href="../modeling/pymc3_sampling_api.html#src.modeling.pymc3_sampling_api.ApproximationSamplingResults">ApproximationSamplingResults</a></span>
-</code></dt>
-<dd>
-<div class="desc"><p>Read VI Approximation results from cache.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>draws</code></strong> :&ensp;<code>int</code>, optional</dt>
-<dd>The number of draws from the trace. Default is 1000.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>pmapi.ApproximationSamplingResults</code></dt>
-<dd>The cached data.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def read_cached_approximation(
-    self, draws: int = 1000
-) -&gt; pmapi.ApproximationSamplingResults:
-    &#34;&#34;&#34;Read VI Approximation results from cache.
-
-    Args:
-        draws (int, optional): The number of draws from the trace. Default is 1000.
-
-    Returns:
-        pmapi.ApproximationSamplingResults: The cached data.
-    &#34;&#34;&#34;
-    cache_paths = self.get_cache_file_names()
-
-    post_check = _get_pickle(cache_paths.posterior_predictive_path)
-    prior_check = _get_pickle(cache_paths.prior_predictive_path)
-    approx = _get_pickle(cache_paths.approximation_path)
-    trace = approx.sample(draws)
-
-    return pmapi.ApproximationSamplingResults(
-        trace=trace,
-        prior_predictive=prior_check,
-        posterior_predictive=post_check,
-        approximation=approx,
-    )</code></pre>
-</details>
-</dd>
-<dt id="src.managers.cache_managers.Pymc3CacheManager.read_cached_sampling"><code class="name flex">
-<span>def <span class="ident">read_cached_sampling</span></span>(<span>self, model: pymc3.model.Model) -> <a title="src.modeling.pymc3_sampling_api.MCMCSamplingResults" href="../modeling/pymc3_sampling_api.html#src.modeling.pymc3_sampling_api.MCMCSamplingResults">MCMCSamplingResults</a></span>
-</code></dt>
-<dd>
-<div class="desc"><p>Read sampling from cache.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>model</code></strong> :&ensp;<code>pm.Model</code></dt>
-<dd>The model corresponding to the cached sampling.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>pmapi.MCMCSamplingResults</code></dt>
-<dd>The cached data.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def read_cached_sampling(self, model: pm.Model) -&gt; pmapi.MCMCSamplingResults:
-    &#34;&#34;&#34;Read sampling from cache.
-
-    Args:
-        model (pm.Model): The model corresponding to the cached sampling.
-
-    Returns:
-        pmapi.MCMCSamplingResults: The cached data.
-    &#34;&#34;&#34;
-    cache_paths = self.get_cache_file_names()
-
-    trace = pm.load_trace(cache_paths.trace_path.as_posix(), model=model)
-    post_check = _get_pickle(cache_paths.posterior_predictive_path)
-    prior_check = _get_pickle(cache_paths.prior_predictive_path)
-
-    return pmapi.MCMCSamplingResults(
-        trace=trace, prior_predictive=prior_check, posterior_predictive=post_check
-    )</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
 </dl>
 </section>
 </article>
@@ -1233,17 +716,6 @@ various results from fitting a model.</dd>
 </li>
 <li>
 <h4><code><a title="src.managers.cache_managers.ModelComponentCachePaths" href="#src.managers.cache_managers.ModelComponentCachePaths">ModelComponentCachePaths</a></code></h4>
-</li>
-<li>
-<h4><code><a title="src.managers.cache_managers.Pymc3CacheManager" href="#src.managers.cache_managers.Pymc3CacheManager">Pymc3CacheManager</a></code></h4>
-<ul class="">
-<li><code><a title="src.managers.cache_managers.Pymc3CacheManager.cache_exists" href="#src.managers.cache_managers.Pymc3CacheManager.cache_exists">cache_exists</a></code></li>
-<li><code><a title="src.managers.cache_managers.Pymc3CacheManager.cache_sampling_results" href="#src.managers.cache_managers.Pymc3CacheManager.cache_sampling_results">cache_sampling_results</a></code></li>
-<li><code><a title="src.managers.cache_managers.Pymc3CacheManager.clear_cache" href="#src.managers.cache_managers.Pymc3CacheManager.clear_cache">clear_cache</a></code></li>
-<li><code><a title="src.managers.cache_managers.Pymc3CacheManager.get_cache_file_names" href="#src.managers.cache_managers.Pymc3CacheManager.get_cache_file_names">get_cache_file_names</a></code></li>
-<li><code><a title="src.managers.cache_managers.Pymc3CacheManager.read_cached_approximation" href="#src.managers.cache_managers.Pymc3CacheManager.read_cached_approximation">read_cached_approximation</a></code></li>
-<li><code><a title="src.managers.cache_managers.Pymc3CacheManager.read_cached_sampling" href="#src.managers.cache_managers.Pymc3CacheManager.read_cached_sampling">read_cached_sampling</a></code></li>
-</ul>
 </li>
 </ul>
 </li>

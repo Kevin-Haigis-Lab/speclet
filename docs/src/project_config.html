@@ -51,11 +51,18 @@ class ModelingConfig(BaseModel):
     models_config: Path
 
 
+class FittingPipelineConfig(BaseModel):
+    &#34;&#34;&#34;Fitting pipeline configurations.&#34;&#34;&#34;
+
+    debug: bool
+
+
 class ProjectConfig(BaseModel):
     &#34;&#34;&#34;Project configurations.&#34;&#34;&#34;
 
     munge: MungeConfig
     modeling: ModelingConfig
+    fitting_pipeline: FittingPipelineConfig
 
 
 def read_project_configuration(path: Optional[Path] = None) -&gt; ProjectConfig:
@@ -76,7 +83,19 @@ def read_project_configuration(path: Optional[Path] = None) -&gt; ProjectConfig:
         config_yaml = yaml.safe_load(file)
 
     config = ProjectConfig(**config_yaml)
-    return config</code></pre>
+    return config
+
+
+# ---- Access helpers ----
+
+
+def fitting_pipeline_debug_status() -&gt; bool:
+    &#34;&#34;&#34;Retrieve the fitting pipeline&#39;s debug status.
+
+    Returns:
+        bool: Whether or not the pipeline is in debug mode.
+    &#34;&#34;&#34;
+    return read_project_configuration().fitting_pipeline.debug</code></pre>
 </details>
 </section>
 <section>
@@ -86,6 +105,29 @@ def read_project_configuration(path: Optional[Path] = None) -&gt; ProjectConfig:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="src.project_config.fitting_pipeline_debug_status"><code class="name flex">
+<span>def <span class="ident">fitting_pipeline_debug_status</span></span>(<span>) -> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve the fitting pipeline's debug status.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>Whether or not the pipeline is in debug mode.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fitting_pipeline_debug_status() -&gt; bool:
+    &#34;&#34;&#34;Retrieve the fitting pipeline&#39;s debug status.
+
+    Returns:
+        bool: Whether or not the pipeline is in debug mode.
+    &#34;&#34;&#34;
+    return read_project_configuration().fitting_pipeline.debug</code></pre>
+</details>
+</dd>
 <dt id="src.project_config.read_project_configuration"><code class="name flex">
 <span>def <span class="ident">read_project_configuration</span></span>(<span>path: Optional[pathlib.Path] = None) -> <a title="src.project_config.ProjectConfig" href="#src.project_config.ProjectConfig">ProjectConfig</a></span>
 </code></dt>
@@ -133,6 +175,29 @@ root directory.</dd>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="src.project_config.FittingPipelineConfig"><code class="flex name class">
+<span>class <span class="ident">FittingPipelineConfig</span></span>
+<span>(</span><span>*, debug: bool)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Fitting pipeline configurations.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FittingPipelineConfig(BaseModel):
+    &#34;&#34;&#34;Fitting pipeline configurations.&#34;&#34;&#34;
+
+    debug: bool</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+</dd>
 <dt id="src.project_config.ModelingConfig"><code class="flex name class">
 <span>class <span class="ident">ModelingConfig</span></span>
 <span>(</span><span>*, highest_density_interval: float, models_config: pathlib.Path)</span>
@@ -183,7 +248,7 @@ root directory.</dd>
 </dd>
 <dt id="src.project_config.ProjectConfig"><code class="flex name class">
 <span>class <span class="ident">ProjectConfig</span></span>
-<span>(</span><span>*, munge: <a title="src.project_config.MungeConfig" href="#src.project_config.MungeConfig">MungeConfig</a>, modeling: <a title="src.project_config.ModelingConfig" href="#src.project_config.ModelingConfig">ModelingConfig</a>)</span>
+<span>(</span><span>*, munge: <a title="src.project_config.MungeConfig" href="#src.project_config.MungeConfig">MungeConfig</a>, modeling: <a title="src.project_config.ModelingConfig" href="#src.project_config.ModelingConfig">ModelingConfig</a>, fitting_pipeline: <a title="src.project_config.FittingPipelineConfig" href="#src.project_config.FittingPipelineConfig">FittingPipelineConfig</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Project configurations.</p>
@@ -197,7 +262,8 @@ root directory.</dd>
     &#34;&#34;&#34;Project configurations.&#34;&#34;&#34;
 
     munge: MungeConfig
-    modeling: ModelingConfig</code></pre>
+    modeling: ModelingConfig
+    fitting_pipeline: FittingPipelineConfig</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -221,11 +287,15 @@ root directory.</dd>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="src.project_config.fitting_pipeline_debug_status" href="#src.project_config.fitting_pipeline_debug_status">fitting_pipeline_debug_status</a></code></li>
 <li><code><a title="src.project_config.read_project_configuration" href="#src.project_config.read_project_configuration">read_project_configuration</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
+<li>
+<h4><code><a title="src.project_config.FittingPipelineConfig" href="#src.project_config.FittingPipelineConfig">FittingPipelineConfig</a></code></h4>
+</li>
 <li>
 <h4><code><a title="src.project_config.ModelingConfig" href="#src.project_config.ModelingConfig">ModelingConfig</a></code></h4>
 </li>

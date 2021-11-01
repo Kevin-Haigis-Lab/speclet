@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>src.models.speclet_eight API documentation</title>
+<meta name="description" content="SpecletEight model." />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS_CHTML'></script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>src.models.speclet_eight</code></h1>
+</header>
+<section id="section-intro">
+<p>SpecletEight model.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;SpecletEight model.&#34;&#34;&#34;
+
+
+from pathlib import Path
+from typing import Final, Optional, Union
+
+import janitor  # noqa: F401
+import numpy as np
+import pandas as pd
+import pymc3 as pm
+from pydantic import BaseModel
+from pymc3.model import FreeRV as pmFreeRV
+from theano import shared as ts
+from theano import tensor as tt
+
+from src.data_processing import achilles as achelp
+from src.io.data_io import DataFile
+from src.loggers import logger
+from src.managers.data_managers import (
+    CrisprScreenDataManager,
+    Data,
+    common_crispr_screen_transformations,
+)
+from src.modeling import feature_engineering as feng
+from src.models.speclet_model import (
+    ObservedVarName,
+    SpecletModel,
+    SpecletModelDataManager,
+)
+
+
+class SpecletEightConfiguration(BaseModel):
+    &#34;&#34;&#34;Configuration for SpecletEight.&#34;&#34;&#34;
+
+    broad_only: bool = True
+
+
+def _append_total_read_counts(df: Data) -&gt; Data:
+    return achelp.append_total_read_counts(df)
+
+
+def _add_useful_read_count_columns(df: Data) -&gt; Data:
+    return achelp.add_useful_read_count_columns(df)
+
+
+def _thin_data_columns(df: Data) -&gt; Data:
+    keep_cols: Final[list[str]] = [
+        &#34;sgrna&#34;,
+        &#34;hugo_symbol&#34;,
+        &#34;depmap_id&#34;,
+        &#34;lineage&#34;,
+        &#34;counts_initial_adj&#34;,
+        &#34;counts_final&#34;,
+        &#34;rna_expr_gene_lineage&#34;,
+        &#34;p_dna_batch&#34;,
+        &#34;screen&#34;,
+    ]
+    return df[keep_cols]
+
+
+class SpecletEight(SpecletModel):
+    &#34;&#34;&#34;## SpecletEight.
+
+    A negative binomial model of the read counts from the CRISPR screen data.
+    &#34;&#34;&#34;
+
+    _config: SpecletEightConfiguration
+
+    def __init__(
+        self,
+        name: str,
+        data_manager: Optional[SpecletModelDataManager] = None,
+        root_cache_dir: Optional[Path] = None,
+        config: Optional[SpecletEightConfiguration] = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;Instantiate a SpecletEight model.
+
+        Args:
+            name (str): A unique identifier for this instance of SpecletEight. (Used
+              for cache management.)
+            root_cache_dir (Optional[Path], optional): The directory for caching
+              sampling/fitting results. Defaults to None.
+            data_manager (Optional[SpecletModelDataManager], optional): Object that will
+              manage the data. If None (default), a `CrisprScreenDataManager` is
+              created automatically.
+            config (SpecletEightConfiguration, optional): Model configuration.
+        &#34;&#34;&#34;
+        logger.info(&#34;Creating a new SpecletEight object.&#34;)
+        self._config = SpecletEightConfiguration() if config is None else config
+
+        if data_manager is None:
+            data_manager = CrisprScreenDataManager(
+                data_source=DataFile.DEPMAP_CRC_BONE_SUBSAMPLE
+            )
+
+        data_transformations = common_crispr_screen_transformations.copy()
+        data_transformations += [
+            feng.zscale_rna_expression_by_gene_and_lineage,
+            _append_total_read_counts,
+            _add_useful_read_count_columns,
+        ]
+        if self._config.broad_only:
+            data_transformations.append(achelp.filter_for_broad_source_only)
+
+        data_manager.add_transformation(data_transformations)
+        data_manager.add_transformation(_thin_data_columns)
+        # Need to add at end because `p_dna_batch` becomes non-categorical.
+        data_manager.add_transformation(achelp.set_achilles_categorical_columns)
+
+        super().__init__(name, data_manager, root_cache_dir=root_cache_dir)
+
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
+        &#34;&#34;&#34;Define the PyMC3 model.
+
+        Returns:
+            pm.Model: The PyMC3 model.
+            ObservedVarName: Name of the target variable in the model.
+        &#34;&#34;&#34;
+        logger.info(&#34;Creating SpecletEight model.&#34;)
+        data = self.data_manager.get_data()
+
+        total_size = data.shape[0]
+        logger.info(f&#34;Number of data points: {total_size}&#34;)
+        co_idx = achelp.common_indices(data)
+        logger.info(f&#34;Number of sgRNA: {co_idx.n_sgrnas}&#34;)
+        logger.info(f&#34;Number of genes: {co_idx.n_genes}&#34;)
+        logger.info(f&#34;Number of cell lines: {co_idx.n_celllines}&#34;)
+        logger.info(f&#34;Number of lineages: {co_idx.n_lineages}&#34;)
+        # b_idx = achelp.data_batch_indices(data)
+
+        logger.info(&#34;Creating shared variables.&#34;)
+        x_initial = ts(data.counts_initial_adj.values)
+
+        coords = {
+            &#34;sgrna&#34;: data.sgrna.cat.categories,
+            &#34;gene&#34;: data.hugo_symbol.cat.categories,
+            &#34;cell_line&#34;: data.depmap_id.cat.categories,
+            &#34;lineage&#34;: data.lineage.cat.categories,
+            &#34;batch&#34;: data.p_dna_batch.cat.categories,
+        }
+
+        rna_expr_matrix = _rna_expr_gene_lineage_matrix(data, &#34;rna_expr_gene_lineage&#34;)
+        _sgrna_by_cell_line = (co_idx.n_sgrnas, co_idx.n_celllines)
+
+        with pm.Model(coords=coords) as model:
+            s = pm.Data(&#34;sgrna_idx&#34;, co_idx.sgrna_idx)
+            g_s = pm.Data(&#34;sgrna_to_gene_idx&#34;, co_idx.sgrna_to_gene_idx)
+            c = pm.Data(&#34;cell_line_idx&#34;, co_idx.cellline_idx)
+            l_c = pm.Data(&#34;cell_line_to_lineage_idx&#34;, co_idx.cellline_to_lineage_idx)
+            # b = pm.Data(&#34;batch_idx&#34;, b_idx.batch_idx)
+            rna_expr = pm.Data(&#34;rna_expression_gl&#34;, rna_expr_matrix)
+            x_initial = pm.Data(&#34;x_initial&#34;, data.counts_initial_adj.values)
+            counts_final = pm.Data(&#34;counts_final&#34;, data.counts_final.values)
+
+            h = _gene_by_cell_line_hierarchical_structure(
+                &#34;h&#34;, co_idx=co_idx, l_c_idx=l_c
+            )
+            q = _gene_by_cell_line_hierarchical_structure(
+                &#34;q&#34;, co_idx=co_idx, l_c_idx=l_c
+            )
+
+            mu_beta = pm.Deterministic(
+                &#34;mu_beta&#34;, h + q * rna_expr
+            )  # shape: [gene x cell line]
+
+            sigma_sigma_beta = pm.HalfNormal(&#34;sigma_sigma_beta&#34;, 1)
+            sigma_beta = pm.HalfNormal(&#34;sigma_beta&#34;, sigma_sigma_beta, dims=&#34;gene&#34;)
+
+            beta_sgrna = pm.Normal(
+                &#34;beta_sgrna&#34;,
+                mu_beta[g_s, :],
+                tt.ones(shape=_sgrna_by_cell_line)
+                * sigma_beta[g_s].reshape((co_idx.n_sgrnas, 1)),
+                dims=(&#34;sgrna&#34;, &#34;cell_line&#34;),
+            )
+
+            eta = pm.Deterministic(&#34;eta&#34;, beta_sgrna[s, c])
+            mu = pm.Deterministic(&#34;mu&#34;, pm.math.exp(eta))
+            alpha = pm.HalfCauchy(&#34;alpha&#34;, 5)
+            y = pm.NegativeBinomial(  # noqa: F841
+                &#34;y&#34;, x_initial * mu, alpha, observed=counts_final
+            )
+
+        return model, &#34;y&#34;
+
+
+def _gene_by_cell_line_hierarchical_structure(
+    name: str, co_idx: achelp.CommonIndices, l_c_idx: Union[np.ndarray, pm.Data]
+) -&gt; pmFreeRV:
+    _gene_by_cell_line = (co_idx.n_genes, co_idx.n_celllines)
+
+    mu_mu_beta = pm.Normal(f&#34;mu_mu_{name}&#34;, 0, 1)
+    sigma_mu_beta = pm.HalfNormal(f&#34;sigma_mu_{name}&#34;, 1)
+    mu_beta = pm.Normal(
+        f&#34;mu_{name}&#34;, mu_mu_beta, sigma_mu_beta, dims=(&#34;gene&#34;, &#34;lineage&#34;)
+    )
+
+    sigma_sigma_beta = pm.HalfNormal(f&#34;sigma_sigma_{name}&#34;, 1)
+    sigma_beta = pm.HalfNormal(f&#34;sigma_{name}&#34;, sigma_sigma_beta, dims=&#34;lineage&#34;)
+
+    beta = pm.Normal(
+        name,
+        mu_beta[:, l_c_idx],
+        tt.ones(shape=_gene_by_cell_line) * sigma_beta[l_c_idx],
+        dims=(&#34;gene&#34;, &#34;cell_line&#34;),
+    )
+    return beta
+
+
+def _rna_expr_gene_lineage_matrix(df: pd.DataFrame, rna_col: str) -&gt; np.ndarray:
+    &#34;&#34;&#34;Pivot a long data frame into a matrix of RNA expression data.
+
+    Output is a matrix of shape (gene x cell line).
+
+    &#34;&#34;&#34;
+    pivot_df = (
+        df.copy()[[&#34;hugo_symbol&#34;, &#34;depmap_id&#34;, rna_col]]
+        .drop_duplicates()
+        .sort_values(&#34;depmap_id&#34;)
+        .pivot_wider(index=&#34;hugo_symbol&#34;, names_from=&#34;depmap_id&#34;, values_from=rna_col)
+        .sort_values(&#34;hugo_symbol&#34;, ascending=True)
+    )
+
+    assert all(pivot_df.hugo_symbol.values == df.hugo_symbol.cat.categories)
+    assert all(pivot_df.columns[1:] == df.depmap_id.cat.categories)
+    return pivot_df.drop(columns=&#34;hugo_symbol&#34;).values</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="src.models.speclet_eight.SpecletEight"><code class="flex name class">
+<span>class <span class="ident">SpecletEight</span></span>
+<span>(</span><span>name: str, data_manager: Optional[<a title="src.models.speclet_model.SpecletModelDataManager" href="speclet_model.html#src.models.speclet_model.SpecletModelDataManager">SpecletModelDataManager</a>] = None, root_cache_dir: Optional[pathlib.Path] = None, config: Optional[<a title="src.models.speclet_eight.SpecletEightConfiguration" href="#src.models.speclet_eight.SpecletEightConfiguration">SpecletEightConfiguration</a>] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="specleteight">SpecletEight.</h2>
+<p>A negative binomial model of the read counts from the CRISPR screen data.</p>
+<p>Instantiate a SpecletEight model.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>A unique identifier for this instance of SpecletEight. (Used
+for cache management.)</dd>
+<dt><strong><code>root_cache_dir</code></strong> :&ensp;<code>Optional[Path]</code>, optional</dt>
+<dd>The directory for caching
+sampling/fitting results. Defaults to None.</dd>
+<dt><strong><code>data_manager</code></strong> :&ensp;<code>Optional[SpecletModelDataManager]</code>, optional</dt>
+<dd>Object that will
+manage the data. If None (default), a <code>CrisprScreenDataManager</code> is
+created automatically.</dd>
+<dt><strong><code>config</code></strong> :&ensp;<code><a title="src.models.speclet_eight.SpecletEightConfiguration" href="#src.models.speclet_eight.SpecletEightConfiguration">SpecletEightConfiguration</a></code>, optional</dt>
+<dd>Model configuration.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SpecletEight(SpecletModel):
+    &#34;&#34;&#34;## SpecletEight.
+
+    A negative binomial model of the read counts from the CRISPR screen data.
+    &#34;&#34;&#34;
+
+    _config: SpecletEightConfiguration
+
+    def __init__(
+        self,
+        name: str,
+        data_manager: Optional[SpecletModelDataManager] = None,
+        root_cache_dir: Optional[Path] = None,
+        config: Optional[SpecletEightConfiguration] = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;Instantiate a SpecletEight model.
+
+        Args:
+            name (str): A unique identifier for this instance of SpecletEight. (Used
+              for cache management.)
+            root_cache_dir (Optional[Path], optional): The directory for caching
+              sampling/fitting results. Defaults to None.
+            data_manager (Optional[SpecletModelDataManager], optional): Object that will
+              manage the data. If None (default), a `CrisprScreenDataManager` is
+              created automatically.
+            config (SpecletEightConfiguration, optional): Model configuration.
+        &#34;&#34;&#34;
+        logger.info(&#34;Creating a new SpecletEight object.&#34;)
+        self._config = SpecletEightConfiguration() if config is None else config
+
+        if data_manager is None:
+            data_manager = CrisprScreenDataManager(
+                data_source=DataFile.DEPMAP_CRC_BONE_SUBSAMPLE
+            )
+
+        data_transformations = common_crispr_screen_transformations.copy()
+        data_transformations += [
+            feng.zscale_rna_expression_by_gene_and_lineage,
+            _append_total_read_counts,
+            _add_useful_read_count_columns,
+        ]
+        if self._config.broad_only:
+            data_transformations.append(achelp.filter_for_broad_source_only)
+
+        data_manager.add_transformation(data_transformations)
+        data_manager.add_transformation(_thin_data_columns)
+        # Need to add at end because `p_dna_batch` becomes non-categorical.
+        data_manager.add_transformation(achelp.set_achilles_categorical_columns)
+
+        super().__init__(name, data_manager, root_cache_dir=root_cache_dir)
+
+    def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
+        &#34;&#34;&#34;Define the PyMC3 model.
+
+        Returns:
+            pm.Model: The PyMC3 model.
+            ObservedVarName: Name of the target variable in the model.
+        &#34;&#34;&#34;
+        logger.info(&#34;Creating SpecletEight model.&#34;)
+        data = self.data_manager.get_data()
+
+        total_size = data.shape[0]
+        logger.info(f&#34;Number of data points: {total_size}&#34;)
+        co_idx = achelp.common_indices(data)
+        logger.info(f&#34;Number of sgRNA: {co_idx.n_sgrnas}&#34;)
+        logger.info(f&#34;Number of genes: {co_idx.n_genes}&#34;)
+        logger.info(f&#34;Number of cell lines: {co_idx.n_celllines}&#34;)
+        logger.info(f&#34;Number of lineages: {co_idx.n_lineages}&#34;)
+        # b_idx = achelp.data_batch_indices(data)
+
+        logger.info(&#34;Creating shared variables.&#34;)
+        x_initial = ts(data.counts_initial_adj.values)
+
+        coords = {
+            &#34;sgrna&#34;: data.sgrna.cat.categories,
+            &#34;gene&#34;: data.hugo_symbol.cat.categories,
+            &#34;cell_line&#34;: data.depmap_id.cat.categories,
+            &#34;lineage&#34;: data.lineage.cat.categories,
+            &#34;batch&#34;: data.p_dna_batch.cat.categories,
+        }
+
+        rna_expr_matrix = _rna_expr_gene_lineage_matrix(data, &#34;rna_expr_gene_lineage&#34;)
+        _sgrna_by_cell_line = (co_idx.n_sgrnas, co_idx.n_celllines)
+
+        with pm.Model(coords=coords) as model:
+            s = pm.Data(&#34;sgrna_idx&#34;, co_idx.sgrna_idx)
+            g_s = pm.Data(&#34;sgrna_to_gene_idx&#34;, co_idx.sgrna_to_gene_idx)
+            c = pm.Data(&#34;cell_line_idx&#34;, co_idx.cellline_idx)
+            l_c = pm.Data(&#34;cell_line_to_lineage_idx&#34;, co_idx.cellline_to_lineage_idx)
+            # b = pm.Data(&#34;batch_idx&#34;, b_idx.batch_idx)
+            rna_expr = pm.Data(&#34;rna_expression_gl&#34;, rna_expr_matrix)
+            x_initial = pm.Data(&#34;x_initial&#34;, data.counts_initial_adj.values)
+            counts_final = pm.Data(&#34;counts_final&#34;, data.counts_final.values)
+
+            h = _gene_by_cell_line_hierarchical_structure(
+                &#34;h&#34;, co_idx=co_idx, l_c_idx=l_c
+            )
+            q = _gene_by_cell_line_hierarchical_structure(
+                &#34;q&#34;, co_idx=co_idx, l_c_idx=l_c
+            )
+
+            mu_beta = pm.Deterministic(
+                &#34;mu_beta&#34;, h + q * rna_expr
+            )  # shape: [gene x cell line]
+
+            sigma_sigma_beta = pm.HalfNormal(&#34;sigma_sigma_beta&#34;, 1)
+            sigma_beta = pm.HalfNormal(&#34;sigma_beta&#34;, sigma_sigma_beta, dims=&#34;gene&#34;)
+
+            beta_sgrna = pm.Normal(
+                &#34;beta_sgrna&#34;,
+                mu_beta[g_s, :],
+                tt.ones(shape=_sgrna_by_cell_line)
+                * sigma_beta[g_s].reshape((co_idx.n_sgrnas, 1)),
+                dims=(&#34;sgrna&#34;, &#34;cell_line&#34;),
+            )
+
+            eta = pm.Deterministic(&#34;eta&#34;, beta_sgrna[s, c])
+            mu = pm.Deterministic(&#34;mu&#34;, pm.math.exp(eta))
+            alpha = pm.HalfCauchy(&#34;alpha&#34;, 5)
+            y = pm.NegativeBinomial(  # noqa: F841
+                &#34;y&#34;, x_initial * mu, alpha, observed=counts_final
+            )
+
+        return model, &#34;y&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="src.models.speclet_model.SpecletModel" href="speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="src.models.speclet_eight.SpecletEight.model_specification"><code class="name flex">
+<span>def <span class="ident">model_specification</span></span>(<span>self) -> tuple</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the PyMC3 model.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pm.Model</code></dt>
+<dd>The PyMC3 model.</dd>
+<dt><code>ObservedVarName</code></dt>
+<dd>Name of the target variable in the model.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def model_specification(self) -&gt; tuple[pm.Model, ObservedVarName]:
+    &#34;&#34;&#34;Define the PyMC3 model.
+
+    Returns:
+        pm.Model: The PyMC3 model.
+        ObservedVarName: Name of the target variable in the model.
+    &#34;&#34;&#34;
+    logger.info(&#34;Creating SpecletEight model.&#34;)
+    data = self.data_manager.get_data()
+
+    total_size = data.shape[0]
+    logger.info(f&#34;Number of data points: {total_size}&#34;)
+    co_idx = achelp.common_indices(data)
+    logger.info(f&#34;Number of sgRNA: {co_idx.n_sgrnas}&#34;)
+    logger.info(f&#34;Number of genes: {co_idx.n_genes}&#34;)
+    logger.info(f&#34;Number of cell lines: {co_idx.n_celllines}&#34;)
+    logger.info(f&#34;Number of lineages: {co_idx.n_lineages}&#34;)
+    # b_idx = achelp.data_batch_indices(data)
+
+    logger.info(&#34;Creating shared variables.&#34;)
+    x_initial = ts(data.counts_initial_adj.values)
+
+    coords = {
+        &#34;sgrna&#34;: data.sgrna.cat.categories,
+        &#34;gene&#34;: data.hugo_symbol.cat.categories,
+        &#34;cell_line&#34;: data.depmap_id.cat.categories,
+        &#34;lineage&#34;: data.lineage.cat.categories,
+        &#34;batch&#34;: data.p_dna_batch.cat.categories,
+    }
+
+    rna_expr_matrix = _rna_expr_gene_lineage_matrix(data, &#34;rna_expr_gene_lineage&#34;)
+    _sgrna_by_cell_line = (co_idx.n_sgrnas, co_idx.n_celllines)
+
+    with pm.Model(coords=coords) as model:
+        s = pm.Data(&#34;sgrna_idx&#34;, co_idx.sgrna_idx)
+        g_s = pm.Data(&#34;sgrna_to_gene_idx&#34;, co_idx.sgrna_to_gene_idx)
+        c = pm.Data(&#34;cell_line_idx&#34;, co_idx.cellline_idx)
+        l_c = pm.Data(&#34;cell_line_to_lineage_idx&#34;, co_idx.cellline_to_lineage_idx)
+        # b = pm.Data(&#34;batch_idx&#34;, b_idx.batch_idx)
+        rna_expr = pm.Data(&#34;rna_expression_gl&#34;, rna_expr_matrix)
+        x_initial = pm.Data(&#34;x_initial&#34;, data.counts_initial_adj.values)
+        counts_final = pm.Data(&#34;counts_final&#34;, data.counts_final.values)
+
+        h = _gene_by_cell_line_hierarchical_structure(
+            &#34;h&#34;, co_idx=co_idx, l_c_idx=l_c
+        )
+        q = _gene_by_cell_line_hierarchical_structure(
+            &#34;q&#34;, co_idx=co_idx, l_c_idx=l_c
+        )
+
+        mu_beta = pm.Deterministic(
+            &#34;mu_beta&#34;, h + q * rna_expr
+        )  # shape: [gene x cell line]
+
+        sigma_sigma_beta = pm.HalfNormal(&#34;sigma_sigma_beta&#34;, 1)
+        sigma_beta = pm.HalfNormal(&#34;sigma_beta&#34;, sigma_sigma_beta, dims=&#34;gene&#34;)
+
+        beta_sgrna = pm.Normal(
+            &#34;beta_sgrna&#34;,
+            mu_beta[g_s, :],
+            tt.ones(shape=_sgrna_by_cell_line)
+            * sigma_beta[g_s].reshape((co_idx.n_sgrnas, 1)),
+            dims=(&#34;sgrna&#34;, &#34;cell_line&#34;),
+        )
+
+        eta = pm.Deterministic(&#34;eta&#34;, beta_sgrna[s, c])
+        mu = pm.Deterministic(&#34;mu&#34;, pm.math.exp(eta))
+        alpha = pm.HalfCauchy(&#34;alpha&#34;, 5)
+        y = pm.NegativeBinomial(  # noqa: F841
+            &#34;y&#34;, x_initial * mu, alpha, observed=counts_final
+        )
+
+    return model, &#34;y&#34;</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="src.models.speclet_model.SpecletModel" href="speclet_model.html#src.models.speclet_model.SpecletModel">SpecletModel</a></b></code>:
+<ul class="hlist">
+<li><code><a title="src.models.speclet_model.SpecletModel.advi_sample_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.advi_sample_model">advi_sample_model</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.build_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.build_model">build_model</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.clear_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.clear_cache">clear_cache</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.generate_mock_data" href="speclet_model.html#src.models.speclet_model.SpecletModel.generate_mock_data">generate_mock_data</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.get_advi_callbacks" href="speclet_model.html#src.models.speclet_model.SpecletModel.get_advi_callbacks">get_advi_callbacks</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.get_replacement_parameters" href="speclet_model.html#src.models.speclet_model.SpecletModel.get_replacement_parameters">get_replacement_parameters</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.get_sbc" href="speclet_model.html#src.models.speclet_model.SpecletModel.get_sbc">get_sbc</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.load_advi_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.load_advi_cache">load_advi_cache</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.load_mcmc_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.load_mcmc_cache">load_mcmc_cache</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.mcmc_sample_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.mcmc_sample_model">mcmc_sample_model</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.run_simulation_based_calibration" href="speclet_model.html#src.models.speclet_model.SpecletModel.run_simulation_based_calibration">run_simulation_based_calibration</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.set_config" href="speclet_model.html#src.models.speclet_model.SpecletModel.set_config">set_config</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.update_observed_data" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_observed_data">update_observed_data</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.write_advi_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_advi_cache">write_advi_cache</a></code></li>
+<li><code><a title="src.models.speclet_model.SpecletModel.write_mcmc_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_mcmc_cache">write_mcmc_cache</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="src.models.speclet_eight.SpecletEightConfiguration"><code class="flex name class">
+<span>class <span class="ident">SpecletEightConfiguration</span></span>
+<span>(</span><span>*, broad_only: bool = True)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Configuration for SpecletEight.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SpecletEightConfiguration(BaseModel):
+    &#34;&#34;&#34;Configuration for SpecletEight.&#34;&#34;&#34;
+
+    broad_only: bool = True</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="src.models" href="index.html">src.models</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="src.models.speclet_eight.SpecletEight" href="#src.models.speclet_eight.SpecletEight">SpecletEight</a></code></h4>
+<ul class="">
+<li><code><a title="src.models.speclet_eight.SpecletEight.model_specification" href="#src.models.speclet_eight.SpecletEight.model_specification">model_specification</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="src.models.speclet_eight.SpecletEightConfiguration" href="#src.models.speclet_eight.SpecletEightConfiguration">SpecletEightConfiguration</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

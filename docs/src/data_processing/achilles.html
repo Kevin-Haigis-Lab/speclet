@@ -250,7 +250,7 @@ def make_kras_mutation_index_with_other(
     mut_freq = mut_freq[[kras_col, kg]]
     return (
         pd.merge(df.copy(), mut_freq, how=&#34;left&#34;, on=kras_col)
-        .pipe(dphelp.make_cat, col=kg)
+        .pipe(dphelp.make_cat, col=kg, sort_cats=True)
         .pipe(dphelp.get_indices, col=kg)
     )
 
@@ -415,7 +415,7 @@ def set_achilles_categorical_columns(
         data (pd.DataFrame): Achilles DataFrame.
         cols (Union[List[str], Tuple[str, ...]], optional): The names of the columns to
           make categorical. Defaults to (&#34;hugo_symbol&#34;, &#34;depmap_id&#34;, &#34;sgrna&#34;,
-          &#34;lineage&#34;, &#34;sgrna_target_chr&#34;, &#34;p_dna_batch&#34;, &#34;sreen&#34;).
+          &#34;lineage&#34;, &#34;sgrna_target_chr&#34;, &#34;p_dna_batch&#34;, &#34;screen&#34;).
         ordered (bool, optional): Should the categorical columns be ordered?
           Defaults to True.
         sort_cats (bool, optional): Should the categorical columns be sorted?
@@ -1168,7 +1168,7 @@ as a separate group. Defaults to 0.</dd>
     mut_freq = mut_freq[[kras_col, kg]]
     return (
         pd.merge(df.copy(), mut_freq, how=&#34;left&#34;, on=kras_col)
-        .pipe(dphelp.make_cat, col=kg)
+        .pipe(dphelp.make_cat, col=kg, sort_cats=True)
         .pipe(dphelp.get_indices, col=kg)
     )</code></pre>
 </details>
@@ -1324,7 +1324,7 @@ be set? Defaults to True.</dd>
 <dt><strong><code>cols</code></strong> :&ensp;<code>Union[List[str], Tuple[str, &hellip;]]</code>, optional</dt>
 <dd>The names of the columns to
 make categorical. Defaults to ("hugo_symbol", "depmap_id", "sgrna",
-"lineage", "sgrna_target_chr", "p_dna_batch", "sreen").</dd>
+"lineage", "sgrna_target_chr", "p_dna_batch", "screen").</dd>
 <dt><strong><code>ordered</code></strong> :&ensp;<code>bool</code>, optional</dt>
 <dd>Should the categorical columns be ordered?
 Defaults to True.</dd>
@@ -1355,7 +1355,7 @@ Defaults to False.</dd>
         data (pd.DataFrame): Achilles DataFrame.
         cols (Union[List[str], Tuple[str, ...]], optional): The names of the columns to
           make categorical. Defaults to (&#34;hugo_symbol&#34;, &#34;depmap_id&#34;, &#34;sgrna&#34;,
-          &#34;lineage&#34;, &#34;sgrna_target_chr&#34;, &#34;p_dna_batch&#34;, &#34;sreen&#34;).
+          &#34;lineage&#34;, &#34;sgrna_target_chr&#34;, &#34;p_dna_batch&#34;, &#34;screen&#34;).
         ordered (bool, optional): Should the categorical columns be ordered?
           Defaults to True.
         sort_cats (bool, optional): Should the categorical columns be sorted?

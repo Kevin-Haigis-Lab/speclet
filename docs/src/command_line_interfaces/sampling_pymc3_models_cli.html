@@ -33,22 +33,29 @@
 
 from pathlib import Path
 from time import time
-from typing import Optional
+from typing import Any, Optional
 
 import numpy as np
 import typer
 
+from src import model_configuration as model_config
 from src.command_line_interfaces import cli_helpers
-from src.io import model_config
 from src.loggers import logger
-from src.models import configuration
 from src.models.speclet_model import SpecletModel
-from src.project_enums import ModelFitMethod, SpecletPipeline
+from src.project_enums import ModelFitMethod, SpecletPipeline, assert_never
 
 cli_helpers.configure_pretty()
 
 
 #### ---- Main ---- ####
+
+
+def _update_sampling_kwargs(kwargs: dict[str, Any], chains: int, cores: int) -&gt; None:
+    for key, value in {&#34;chains&#34;: chains, &#34;cores&#34;: cores}.items():
+        if key in kwargs.keys():
+            logger.warn(f&#34;Overriding configured &#39;{key}&#39;.&#34;)
+        kwargs[key] = value
+    return None
 
 
 def sample_speclet_model(
@@ -91,7 +98,7 @@ def sample_speclet_model(
 
     logger.info(f&#34;Model config file: &#39;{config_path.as_posix()}&#39;.&#34;)
     logger.info(f&#34;Root cache directory: {cache_dir.as_posix()}&#34;)
-    sp_model = configuration.get_config_and_instantiate_model(
+    sp_model = model_config.get_config_and_instantiate_model(
         config_path=config_path, name=name, root_cache_dir=cache_dir
     )
     logger.info(f&#34;Sampling &#39;{sp_model.__class__}&#39; with name &#39;{sp_model.name}&#39;&#34;)
@@ -99,34 +106,33 @@ def sample_speclet_model(
         f&#34;Model&#39;s cache directory: &#39;{sp_model.cache_manager.cache_dir.as_posix()}&#39;.&#34;
     )
 
-    sampling_kwargs = model_config.get_sampling_kwargs(
+    sampling_kwargs: dict[str, Any] = model_config.get_sampling_kwargs(
         config_path=config_path,
         name=name,
         pipeline=SpecletPipeline.FITTING,
         fit_method=fit_method,
     )
+    _update_sampling_kwargs(sampling_kwargs, chains=mcmc_chains, cores=mcmc_cores)
 
     logger.info(&#34;Running model build method.&#34;)
     sp_model.build_model()
 
     if sample:
-        if fit_method == ModelFitMethod.ADVI:
+        if fit_method is ModelFitMethod.ADVI:
             logger.info(&#34;Running ADVI fitting method.&#34;)
             _ = sp_model.advi_sample_model(
                 random_seed=random_seed, ignore_cache=ignore_cache, **sampling_kwargs
             )
 
-        elif fit_method == ModelFitMethod.MCMC:
+        elif fit_method is ModelFitMethod.MCMC:
             logger.info(&#34;Running MCMC fitting method.&#34;)
             _ = sp_model.mcmc_sample_model(
-                chains=mcmc_chains,
-                cores=mcmc_cores,
                 random_seed=random_seed,
                 ignore_cache=ignore_cache,
                 **sampling_kwargs,
             )
         else:
-            raise Exception(f&#34;Unknown fit method &#39;{fit_method.value}&#39;.&#34;)
+            assert_never(fit_method)
 
     if touch is not None:
         logger.info(f&#34;Touching file: &#39;{touch.as_posix()}&#39;.&#34;)
@@ -229,7 +235,7 @@ built and fit.</dd>
 
     logger.info(f&#34;Model config file: &#39;{config_path.as_posix()}&#39;.&#34;)
     logger.info(f&#34;Root cache directory: {cache_dir.as_posix()}&#34;)
-    sp_model = configuration.get_config_and_instantiate_model(
+    sp_model = model_config.get_config_and_instantiate_model(
         config_path=config_path, name=name, root_cache_dir=cache_dir
     )
     logger.info(f&#34;Sampling &#39;{sp_model.__class__}&#39; with name &#39;{sp_model.name}&#39;&#34;)
@@ -237,34 +243,33 @@ built and fit.</dd>
         f&#34;Model&#39;s cache directory: &#39;{sp_model.cache_manager.cache_dir.as_posix()}&#39;.&#34;
     )
 
-    sampling_kwargs = model_config.get_sampling_kwargs(
+    sampling_kwargs: dict[str, Any] = model_config.get_sampling_kwargs(
         config_path=config_path,
         name=name,
         pipeline=SpecletPipeline.FITTING,
         fit_method=fit_method,
     )
+    _update_sampling_kwargs(sampling_kwargs, chains=mcmc_chains, cores=mcmc_cores)
 
     logger.info(&#34;Running model build method.&#34;)
     sp_model.build_model()
 
     if sample:
-        if fit_method == ModelFitMethod.ADVI:
+        if fit_method is ModelFitMethod.ADVI:
             logger.info(&#34;Running ADVI fitting method.&#34;)
             _ = sp_model.advi_sample_model(
                 random_seed=random_seed, ignore_cache=ignore_cache, **sampling_kwargs
             )
 
-        elif fit_method == ModelFitMethod.MCMC:
+        elif fit_method is ModelFitMethod.MCMC:
             logger.info(&#34;Running MCMC fitting method.&#34;)
             _ = sp_model.mcmc_sample_model(
-                chains=mcmc_chains,
-                cores=mcmc_cores,
                 random_seed=random_seed,
                 ignore_cache=ignore_cache,
                 **sampling_kwargs,
             )
         else:
-            raise Exception(f&#34;Unknown fit method &#39;{fit_method.value}&#39;.&#34;)
+            assert_never(fit_method)
 
     if touch is not None:
         logger.info(f&#34;Touching file: &#39;{touch.as_posix()}&#39;.&#34;)

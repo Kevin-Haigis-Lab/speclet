@@ -45,8 +45,8 @@ Data = TypeVar(&#34;Data&#34;, pd.DataFrame, dd.DataFrame)
 DataFrameTransformation = Callable[[Data], Data]
 
 common_crispr_screen_transformations: Final[list[DataFrameTransformation]] = [
-    achelp.drop_sgrnas_that_map_to_multiple_genes,
     achelp.set_achilles_categorical_columns,
+    achelp.drop_sgrnas_that_map_to_multiple_genes,
 ]
 
 
@@ -59,6 +59,7 @@ def _get_crispr_screen_data_coltypes() -&gt; dict[str, str]:
         &#34;replicate_id&#34;,
         &#34;depmap_id&#34;,
         &#34;sex&#34;,
+        &#34;lineage&#34;,
     ]:
         col_types[c] = &#34;object&#34;
     for c in [&#34;counts_final&#34;, &#34;counts_final_total&#34;]:
@@ -249,6 +250,7 @@ class CrisprScreenDataManager:
             self.apply_transformations()
         return None
 
+    @property
     def num_transformations(self) -&gt; int:
         &#34;&#34;&#34;Get the number of transformations.
 
@@ -258,7 +260,7 @@ class CrisprScreenDataManager:
         return len(self._transformations)
 
     def _apply_transformations(self, data: Data) -&gt; Data:
-        logger.debug(f&#34;Applying {self.num_transformations()} transformations.&#34;)
+        logger.debug(f&#34;Applying {self.num_transformations} transformations.&#34;)
         for fxn in self._transformations:
             data = fxn(data)
         return data
@@ -536,6 +538,7 @@ Defaults to None.</dd>
             self.apply_transformations()
         return None
 
+    @property
     def num_transformations(self) -&gt; int:
         &#34;&#34;&#34;Get the number of transformations.
 
@@ -545,7 +548,7 @@ Defaults to None.</dd>
         return len(self._transformations)
 
     def _apply_transformations(self, data: Data) -&gt; Data:
-        logger.debug(f&#34;Applying {self.num_transformations()} transformations.&#34;)
+        logger.debug(f&#34;Applying {self.num_transformations} transformations.&#34;)
         for fxn in self._transformations:
             data = fxn(data)
         return data
@@ -611,6 +614,31 @@ Defaults to None.</dd>
         assert self._data is not None
         return self.get_data()</code></pre>
 </details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="src.managers.data_managers.CrisprScreenDataManager.num_transformations"><code class="name">var <span class="ident">num_transformations</span> : int</code></dt>
+<dd>
+<div class="desc"><p>Get the number of transformations.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>int</code></dt>
+<dd>Number of transformations.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def num_transformations(self) -&gt; int:
+    &#34;&#34;&#34;Get the number of transformations.
+
+    Returns:
+        int: Number of transformations.
+    &#34;&#34;&#34;
+    return len(self._transformations)</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="src.managers.data_managers.CrisprScreenDataManager.add_transformation"><code class="name flex">
@@ -895,29 +923,6 @@ file.</p>
     logger.info(f&#34;Inserting transformation at index {at}.&#34;)
     self._transformations.insert(at, fxn)
     return None</code></pre>
-</details>
-</dd>
-<dt id="src.managers.data_managers.CrisprScreenDataManager.num_transformations"><code class="name flex">
-<span>def <span class="ident">num_transformations</span></span>(<span>self) -> int</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Get the number of transformations.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>int</code></dt>
-<dd>Number of transformations.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def num_transformations(self) -&gt; int:
-    &#34;&#34;&#34;Get the number of transformations.
-
-    Returns:
-        int: Number of transformations.
-    &#34;&#34;&#34;
-    return len(self._transformations)</code></pre>
 </details>
 </dd>
 <dt id="src.managers.data_managers.CrisprScreenDataManager.set_data"><code class="name flex">

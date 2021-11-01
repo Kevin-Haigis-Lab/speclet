@@ -34,9 +34,9 @@ from typing import Optional
 import arviz as az
 import typer
 
+from src import model_configuration as model_config
 from src.command_line_interfaces import cli_helpers
 from src.loggers import logger
-from src.models import configuration
 
 cli_helpers.configure_pretty()
 
@@ -68,7 +68,7 @@ def combine_mcmc_chains(
     all_arviz_data_objects: list[az.InferenceData] = []
     for chain_dir in chain_dirs:
         logger.info(f&#34;Gather MCMC chain &#39;{chain_dir.as_posix()}&#39;.&#34;)
-        sp_model = configuration.get_config_and_instantiate_model(
+        sp_model = model_config.get_config_and_instantiate_model(
             config_path=config_path, name=name, root_cache_dir=chain_dir
         )
 
@@ -97,7 +97,7 @@ def combine_mcmc_chains(
         logger.info(f&#34;Collected {len(all_arviz_data_objects)} chains.&#34;)
 
     combined_chains = az.concat(all_arviz_data_objects, dim=&#34;chain&#34;)
-    combined_sp_model = sp_model = configuration.get_config_and_instantiate_model(
+    combined_sp_model = sp_model = model_config.get_config_and_instantiate_model(
         config_path=config_path, name=name, root_cache_dir=combined_root_cache_dir
     )
     if isinstance(combined_chains, az.InferenceData):
@@ -183,7 +183,7 @@ that this step is complete. Defaults to False.</dd>
     all_arviz_data_objects: list[az.InferenceData] = []
     for chain_dir in chain_dirs:
         logger.info(f&#34;Gather MCMC chain &#39;{chain_dir.as_posix()}&#39;.&#34;)
-        sp_model = configuration.get_config_and_instantiate_model(
+        sp_model = model_config.get_config_and_instantiate_model(
             config_path=config_path, name=name, root_cache_dir=chain_dir
         )
 
@@ -212,7 +212,7 @@ that this step is complete. Defaults to False.</dd>
         logger.info(f&#34;Collected {len(all_arviz_data_objects)} chains.&#34;)
 
     combined_chains = az.concat(all_arviz_data_objects, dim=&#34;chain&#34;)
-    combined_sp_model = sp_model = configuration.get_config_and_instantiate_model(
+    combined_sp_model = sp_model = model_config.get_config_and_instantiate_model(
         config_path=config_path, name=name, root_cache_dir=combined_root_cache_dir
     )
     if isinstance(combined_chains, az.InferenceData):

@@ -35,8 +35,8 @@ from typing import TypeVar
 from pydantic import validate_arguments
 
 from src import formatting
+from src import model_configuration as model_config
 from src.exceptions import ResourceRequestUnkown
-from src.io import model_config
 from src.managers import pipeline_resource_manager as prm
 from src.managers.pipeline_resource_manager import PipelineResourceManager
 from src.project_enums import ModelFitMethod, ModelOption
@@ -87,6 +87,10 @@ fitting_pipeline_memory_lookup: MemoryLookupDict = {
     },
     ModelOption.SPECLET_SEVEN: {
         True: {ModelFitMethod.ADVI: 6, ModelFitMethod.MCMC: 60},
+        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
+    },
+    ModelOption.SPECLET_EIGHT: {
+        True: {ModelFitMethod.ADVI: 6, ModelFitMethod.MCMC: 16},
         False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
     },
 }
@@ -140,6 +144,10 @@ fitting_pipeline_time_lookup: TimeLookupDict = {
         True: {ModelFitMethod.ADVI: td(hours=12), ModelFitMethod.MCMC: td(days=1)},
         False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
+    ModelOption.SPECLET_EIGHT: {
+        True: {ModelFitMethod.ADVI: td(hours=1), ModelFitMethod.MCMC: td(hours=1)},
+        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
+    },
 }
 
 
@@ -149,11 +157,15 @@ class ModelFittingPipelineResourceManager(PipelineResourceManager):
     name: str
     fit_method: ModelFitMethod
     config_path: Path
-    config: model_config.ModelConfig
+    _debug: bool
 
     @validate_arguments
     def __init__(
-        self, name: str, fit_method: ModelFitMethod, config_path: Path
+        self,
+        name: str,
+        fit_method: ModelFitMethod,
+        config_path: Path,
+        debug: bool = False,
     ) -&gt; None:
         &#34;&#34;&#34;Create a resource manager of the model-fitting pipeline.
 
@@ -161,6 +173,7 @@ class ModelFittingPipelineResourceManager(PipelineResourceManager):
             name (str): Identifiable and descriptive name of the model.
             fit_method (ModelFitMethod): Method being used to fit the model.
             config_path (Path): Path to a model configuration file.
+            debug (bool, optional): In debug mode? Defaults to False.
         &#34;&#34;&#34;
         self.name = name
         self.fit_method = fit_method
@@ -171,6 +184,7 @@ class ModelFittingPipelineResourceManager(PipelineResourceManager):
         if _config is None:
             raise model_config.ModelConfigurationNotFound(self.name)
         self.config = _config
+        self._debug = debug
 
     @property
     def memory(self) -&gt; str:
@@ -240,7 +254,7 @@ class ModelFittingPipelineResourceManager(PipelineResourceManager):
         Returns:
             bool: Whether or not the model should be in debug mode.
         &#34;&#34;&#34;
-        return self.config.debug
+        return self._debug
 
     def is_debug_cli(self) -&gt; str:
         &#34;&#34;&#34;Get the correct flag for indicating debug mode through a CLI.
@@ -262,7 +276,7 @@ class ModelFittingPipelineResourceManager(PipelineResourceManager):
 <dl>
 <dt id="src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager"><code class="flex name class">
 <span>class <span class="ident">ModelFittingPipelineResourceManager</span></span>
-<span>(</span><span>name: str, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, config_path: pathlib.Path)</span>
+<span>(</span><span>name: str, fit_method: <a title="src.project_enums.ModelFitMethod" href="../project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, config_path: pathlib.Path, debug: bool = False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Resource manager for the pipeline to fit models on O2.</p>
@@ -275,6 +289,8 @@ class ModelFittingPipelineResourceManager(PipelineResourceManager):
 <dd>Method being used to fit the model.</dd>
 <dt><strong><code>config_path</code></strong> :&ensp;<code>Path</code></dt>
 <dd>Path to a model configuration file.</dd>
+<dt><strong><code>debug</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>In debug mode? Defaults to False.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -286,11 +302,15 @@ class ModelFittingPipelineResourceManager(PipelineResourceManager):
     name: str
     fit_method: ModelFitMethod
     config_path: Path
-    config: model_config.ModelConfig
+    _debug: bool
 
     @validate_arguments
     def __init__(
-        self, name: str, fit_method: ModelFitMethod, config_path: Path
+        self,
+        name: str,
+        fit_method: ModelFitMethod,
+        config_path: Path,
+        debug: bool = False,
     ) -&gt; None:
         &#34;&#34;&#34;Create a resource manager of the model-fitting pipeline.
 
@@ -298,6 +318,7 @@ class ModelFittingPipelineResourceManager(PipelineResourceManager):
             name (str): Identifiable and descriptive name of the model.
             fit_method (ModelFitMethod): Method being used to fit the model.
             config_path (Path): Path to a model configuration file.
+            debug (bool, optional): In debug mode? Defaults to False.
         &#34;&#34;&#34;
         self.name = name
         self.fit_method = fit_method
@@ -308,6 +329,7 @@ class ModelFittingPipelineResourceManager(PipelineResourceManager):
         if _config is None:
             raise model_config.ModelConfigurationNotFound(self.name)
         self.config = _config
+        self._debug = debug
 
     @property
     def memory(self) -&gt; str:
@@ -377,7 +399,7 @@ class ModelFittingPipelineResourceManager(PipelineResourceManager):
         Returns:
             bool: Whether or not the model should be in debug mode.
         &#34;&#34;&#34;
-        return self.config.debug
+        return self._debug
 
     def is_debug_cli(self) -&gt; str:
         &#34;&#34;&#34;Get the correct flag for indicating debug mode through a CLI.
@@ -436,7 +458,7 @@ def debug(self) -&gt; bool:
     Returns:
         bool: Whether or not the model should be in debug mode.
     &#34;&#34;&#34;
-    return self.config.debug</code></pre>
+    return self._debug</code></pre>
 </details>
 </dd>
 <dt id="src.managers.model_fitting_pipeline_resource_manager.ModelFittingPipelineResourceManager.memory"><code class="name">var <span class="ident">memory</span> : str</code></dt>

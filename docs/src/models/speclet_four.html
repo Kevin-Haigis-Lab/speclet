@@ -87,7 +87,6 @@ class SpecletFour(SpecletModel):
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
-        debug: bool = False,
         data_manager: Optional[SpecletModelDataManager] = None,
         config: Optional[SpecletFourConfiguration] = None,
     ):
@@ -98,7 +97,6 @@ class SpecletFour(SpecletModel):
               for cache management.)
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
-            debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[SpecletModelDataManager], optional): Object that will
               manage the data. If None (default), a `CrisprScreenDataManager` is
               created automatically.
@@ -115,7 +113,6 @@ class SpecletFour(SpecletModel):
         super().__init__(
             name=name,
             root_cache_dir=root_cache_dir,
-            debug=debug,
             data_manager=data_manager,
         )
 
@@ -322,7 +319,7 @@ class SpecletFour(SpecletModel):
 <dl>
 <dt id="src.models.speclet_four.SpecletFour"><code class="flex name class">
 <span>class <span class="ident">SpecletFour</span></span>
-<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.models.speclet_model.SpecletModelDataManager" href="speclet_model.html#src.models.speclet_model.SpecletModelDataManager">SpecletModelDataManager</a>] = None, config: Optional[<a title="src.models.speclet_four.SpecletFourConfiguration" href="#src.models.speclet_four.SpecletFourConfiguration">SpecletFourConfiguration</a>] = None)</span>
+<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, data_manager: Optional[<a title="src.models.speclet_model.SpecletModelDataManager" href="speclet_model.html#src.models.speclet_model.SpecletModelDataManager">SpecletModelDataManager</a>] = None, config: Optional[<a title="src.models.speclet_four.SpecletFourConfiguration" href="#src.models.speclet_four.SpecletFourConfiguration">SpecletFourConfiguration</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>SpecletFour Model.</p>
@@ -350,8 +347,6 @@ for cache management.)</dd>
 <dt><strong><code>root_cache_dir</code></strong> :&ensp;<code>Optional[Path]</code>, optional</dt>
 <dd>The directory for caching
 sampling/fitting results. Defaults to None.</dd>
-<dt><strong><code>debug</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>Are you in debug mode? Defaults to False.</dd>
 <dt><strong><code>data_manager</code></strong> :&ensp;<code>Optional[SpecletModelDataManager]</code>, optional</dt>
 <dd>Object that will
 manage the data. If None (default), a <code>CrisprScreenDataManager</code> is
@@ -388,7 +383,6 @@ created automatically.</dd>
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
-        debug: bool = False,
         data_manager: Optional[SpecletModelDataManager] = None,
         config: Optional[SpecletFourConfiguration] = None,
     ):
@@ -399,7 +393,6 @@ created automatically.</dd>
               for cache management.)
             root_cache_dir (Optional[Path], optional): The directory for caching
               sampling/fitting results. Defaults to None.
-            debug (bool, optional): Are you in debug mode? Defaults to False.
             data_manager (Optional[SpecletModelDataManager], optional): Object that will
               manage the data. If None (default), a `CrisprScreenDataManager` is
               created automatically.
@@ -416,7 +409,6 @@ created automatically.</dd>
         super().__init__(
             name=name,
             root_cache_dir=root_cache_dir,
-            debug=debug,
             data_manager=data_manager,
         )
 
@@ -779,7 +771,6 @@ parameters of the CheckParametersConvergence callback.</p>
 <li><code><a title="src.models.speclet_model.SpecletModel.advi_sample_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.advi_sample_model">advi_sample_model</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.build_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.build_model">build_model</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.clear_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.clear_cache">clear_cache</a></code></li>
-<li><code><a title="src.models.speclet_model.SpecletModel.debug" href="speclet_model.html#src.models.speclet_model.SpecletModel.debug">debug</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.generate_mock_data" href="speclet_model.html#src.models.speclet_model.SpecletModel.generate_mock_data">generate_mock_data</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_sbc" href="speclet_model.html#src.models.speclet_model.SpecletModel.get_sbc">get_sbc</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.load_advi_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.load_advi_cache">load_advi_cache</a></code></li>
@@ -787,8 +778,6 @@ parameters of the CheckParametersConvergence callback.</p>
 <li><code><a title="src.models.speclet_model.SpecletModel.mcmc_sample_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.mcmc_sample_model">mcmc_sample_model</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.run_simulation_based_calibration" href="speclet_model.html#src.models.speclet_model.SpecletModel.run_simulation_based_calibration">run_simulation_based_calibration</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.set_config" href="speclet_model.html#src.models.speclet_model.SpecletModel.set_config">set_config</a></code></li>
-<li><code><a title="src.models.speclet_model.SpecletModel.update_advi_sampling_parameters" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>
-<li><code><a title="src.models.speclet_model.SpecletModel.update_mcmc_sampling_parameters" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_mcmc_sampling_parameters">update_mcmc_sampling_parameters</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.update_observed_data" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_observed_data">update_observed_data</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.write_advi_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_advi_cache">write_advi_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.write_mcmc_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_mcmc_cache">write_mcmc_cache</a></code></li>
