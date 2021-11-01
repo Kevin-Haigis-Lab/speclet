@@ -22,6 +22,18 @@ cli_helpers.configure_pretty()
 #### ---- Main ---- ####
 
 
+def _integerize_sampling_args(kwargs: dict[str, Any]) -> None:
+    sample_kwargs = kwargs.get("sample_kwargs")
+    if sample_kwargs is None:
+        return None
+    for key, value in sample_kwargs.items():
+        if isinstance(value, (int, float)):
+            if int(value) == value:
+                sample_kwargs[key] = int(value)
+    kwargs["sample_kwargs"] = sample_kwargs
+    return None
+
+
 def _update_sampling_kwargs(kwargs: dict[str, Any], chains: int, cores: int) -> None:
     sample_kwargs = kwargs.get("sample_kwargs", {})
     for key, value in {"chains": chains, "cores": cores}.items():
@@ -88,11 +100,11 @@ def sample_speclet_model(
         fit_method=fit_method,
     )
     _update_sampling_kwargs(sampling_kwargs, chains=mcmc_chains, cores=mcmc_cores)
+    _integerize_sampling_args(sampling_kwargs)
+    print(sampling_kwargs)
 
     logger.info("Running model build method.")
     sp_model.build_model()
-
-    print(sampling_kwargs)
 
     if sample:
         if fit_method is ModelFitMethod.ADVI:
