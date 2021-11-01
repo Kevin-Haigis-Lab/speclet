@@ -17,7 +17,7 @@ from src import project_config
 
 # Global parameters.
 N_CHAINS = 4
-DEBUG = project_config.debug_status()
+DEBUG = project_config.fitting_pipeline_debug_status()
 
 # Directory and file paths.
 SCRATCH_DIR = "/n/scratch3/users/j/jc604"
