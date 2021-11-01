@@ -7,9 +7,9 @@ import pandas as pd
 import pytest
 from typer.testing import CliRunner
 
+from src import model_configuration as model_config
 from src import project_enums
 from src.command_line_interfaces import simulation_based_calibration_cli as sbc_cli
-from src.io import model_config
 from src.modeling.pymc3_sampling_api import ApproximationSamplingResults
 from src.modeling.simulation_based_calibration_helpers import SBCFileManager, SBCResults
 from src.models.speclet_pipeline_test_model import SpecletTestModel
@@ -111,13 +111,10 @@ def test_uses_configuration_fitting_parameters(
     fit_method: ModelFitMethod,
     tmp_path: Path,
 ) -> None:
-
-    advi_kwargs = {"n_iterations": 42, "draws": 23, "post_pred_samples": 12}
+    advi_kwargs = {"n_iterations": 42, "draws": 23}
     mcmc_kwargs = {
-        "tune": 33,
-        "target_accept": 0.2,
         "prior_pred_samples": 121,
-        "cores": 1,
+        "sample_kwargs": {"tune": 33, "target_accept": 0.2, "cores": 1},
     }
 
     def _compare_dicts(d1: dict[str, Any], d2: dict[str, Any]) -> None:
@@ -147,10 +144,11 @@ def test_uses_configuration_fitting_parameters(
             name=model_name,
             description="",
             model=ModelOption.SPECLET_TEST_MODEL,
-            fit_methods=[ModelFitMethod.ADVI],
-            pipelines=[SpecletPipeline.FITTING],
-            debug=False,
-            pipeline_sampling_parameters={
+            pipelines={
+                SpecletPipeline.FITTING: [ModelFitMethod.ADVI],
+                SpecletPipeline.SBC: [ModelFitMethod.ADVI],
+            },
+            sampling_arguments={
                 SpecletPipeline.SBC: {
                     ModelFitMethod.ADVI: advi_kwargs,
                     ModelFitMethod.MCMC: mcmc_kwargs,

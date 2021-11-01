@@ -35,9 +35,8 @@ from pathlib import Path
 
 import typer
 
-from src.io import model_config
+from src import model_configuration as model_config
 from src.loggers import set_console_handler_level
-from src.models import configuration
 from src.project_enums import ModelFitMethod, SpecletPipeline
 
 set_console_handler_level(logging.WARNING)
@@ -56,14 +55,14 @@ def check_model_configuration(path: Path) -&gt; None:
     &#34;&#34;&#34;
     typer.secho(f&#34;Checking model config: &#39;{path.as_posix()}&#39;&#34;, fg=typer.colors.BLUE)
 
-    configs = model_config.get_model_configurations(path)
+    configs = model_config.read_model_configurations(path)
     typer.echo(&#34;Configuration file can be parsed: ✔︎&#34;)
 
     model_config.check_model_names_are_unique(configs)
     typer.echo(&#34;Configuration names are unique: ✔︎&#34;)
 
     for config in configs.configurations:
-        _ = configuration.instantiate_and_configure_model(
+        _ = model_config.instantiate_and_configure_model(
             config,
             root_cache_dir=Path(&#34;temp&#34;),
         )
@@ -77,8 +76,8 @@ def check_model_configuration(path: Path) -&gt; None:
                     pipeline=pipeline,
                     fit_method=fit_method,
                 )
-                configuration.check_sampling_kwargs(
-                    sampling_kwargs, fit_method=fit_method
+                model_config.check_sampling_kwargs(
+                    sampling_kwargs, fit_method=fit_method, pipeline=pipeline
                 )
     typer.echo(&#34;All sampling parameterizations use acceptable keywords: ✔︎&#34;)
 
@@ -129,14 +128,14 @@ if __name__ == &#34;__main__&#34;:
     &#34;&#34;&#34;
     typer.secho(f&#34;Checking model config: &#39;{path.as_posix()}&#39;&#34;, fg=typer.colors.BLUE)
 
-    configs = model_config.get_model_configurations(path)
+    configs = model_config.read_model_configurations(path)
     typer.echo(&#34;Configuration file can be parsed: ✔︎&#34;)
 
     model_config.check_model_names_are_unique(configs)
     typer.echo(&#34;Configuration names are unique: ✔︎&#34;)
 
     for config in configs.configurations:
-        _ = configuration.instantiate_and_configure_model(
+        _ = model_config.instantiate_and_configure_model(
             config,
             root_cache_dir=Path(&#34;temp&#34;),
         )
@@ -150,8 +149,8 @@ if __name__ == &#34;__main__&#34;:
                     pipeline=pipeline,
                     fit_method=fit_method,
                 )
-                configuration.check_sampling_kwargs(
-                    sampling_kwargs, fit_method=fit_method
+                model_config.check_sampling_kwargs(
+                    sampling_kwargs, fit_method=fit_method, pipeline=pipeline
                 )
     typer.echo(&#34;All sampling parameterizations use acceptable keywords: ✔︎&#34;)
 

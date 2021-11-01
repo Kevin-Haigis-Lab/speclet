@@ -61,7 +61,7 @@ def return_true() -> Callable:
 
 @pytest.fixture
 def mock_model_config() -> Path:
-    return Path("tests/models/mock-model-config.yaml")
+    return Path("tests", "models", "mock-model-config.yaml")
 
 
 @pytest.fixture

@@ -12,12 +12,12 @@ def monkey_get_data_path(*args: Any, **kwargs: Any) -> Path:
 
 class TestSpecletOne:
     def test_instantiation(self, tmp_path: Path) -> None:
-        sp_one = SpecletOne("test-model", root_cache_dir=tmp_path, debug=True)
+        sp_one = SpecletOne("test-model", root_cache_dir=tmp_path)
         assert sp_one.model is None
 
     @pytest.fixture(scope="function")
     def sp_one(self, tmp_path: Path) -> SpecletOne:
-        return SpecletOne("test-model", root_cache_dir=tmp_path, debug=True)
+        return SpecletOne("test-model", root_cache_dir=tmp_path)
 
     def test_build_model(self, sp_one: SpecletOne) -> None:
         assert sp_one.model is None

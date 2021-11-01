@@ -13,11 +13,10 @@ import theano
 import typer
 import xarray
 
+from src import model_configuration as model_config
 from src.command_line_interfaces import cli_helpers
-from src.io import model_config
 from src.loggers import logger
 from src.modeling import simulation_based_calibration_helpers as sbc
-from src.models import configuration
 from src.pipelines.theano_flags import get_theano_compile_dir
 from src.project_enums import MockDataSize, ModelFitMethod, SpecletPipeline
 
@@ -52,7 +51,7 @@ def make_mock_data(
         save_path (Optional[Path]): Path to save the data frame to as a CSV.
         random_seed (Optional[int]): Random seed for data generation process.
     """
-    sp_model = configuration.get_config_and_instantiate_model(
+    sp_model = model_config.get_config_and_instantiate_model(
         config_path=config_path, name=name, root_cache_dir=Path(tempfile.gettempdir())
     )
     mock_data = sp_model.generate_mock_data(size=data_size, random_seed=random_seed)
@@ -109,7 +108,7 @@ def run_sbc(
         None: None
     """
     _check_theano_config()
-    sp_model = configuration.get_config_and_instantiate_model(
+    sp_model = model_config.get_config_and_instantiate_model(
         config_path=config_path, name=name, root_cache_dir=cache_dir
     )
     fit_kwargs = model_config.get_sampling_kwargs(

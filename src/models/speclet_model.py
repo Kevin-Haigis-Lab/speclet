@@ -66,7 +66,6 @@ class SpecletModel:
     """Base class to contain a PyMC3 model."""
 
     name: str
-    _debug: bool
     cache_manager: Pymc3ModelCacheManager
     data_manager: SpecletModelDataManager
 
@@ -81,7 +80,6 @@ class SpecletModel:
         name: str,
         data_manager: SpecletModelDataManager,
         root_cache_dir: Optional[Path] = None,
-        debug: bool = False,
     ) -> None:
         """Instantiate a Speclet Model.
 
@@ -90,11 +88,9 @@ class SpecletModel:
             root_cache_dir (Optional[Path], optional): Location for the cache directory.
               If None (default), then the project's default cache directory is used.
               Defaults to None.
-            debug (bool, optional): Use debug mode? Defaults to False.
             data_manager (SpecletModelDataManager): Object that will manage the data.
         """
         self.name = name
-        self._debug = debug
         self.cache_manager = Pymc3ModelCacheManager(
             name=name, root_cache_dir=root_cache_dir
         )
@@ -107,33 +103,7 @@ class SpecletModel:
             str: String description of the object.
         """
         msg = f"Speclet Model: '{self.name}'"
-        if self.debug:
-            msg += " (debug)"
         return msg
-
-    @property
-    def debug(self) -> bool:
-        """Whether or not to use debug mode.
-
-        Returns:
-            bool: The current value for debug mode.
-        """
-        return self._debug
-
-    @debug.setter
-    def debug(self, new_value: bool) -> None:
-        """Set the value for debug mode.
-
-        This also changes the debug mode for the data manager. Changes are only made if
-        the new value is different from the current value.
-
-        Args:
-            new_value (bool): New value for `debug`.
-        """
-        if new_value == self._debug:
-            return
-        logger.info(f"Changing value of debug to '{new_value}'.")
-        self._debug = new_value
 
     def _reset_model_and_results(self, clear_cache: bool = False) -> None:
         logger.warning("Reseting all model and results.")
@@ -144,10 +114,7 @@ class SpecletModel:
             self.clear_cache()
 
     def _get_batch_size(self) -> int:
-        if self.debug:
-            return 1000
-        else:
-            return 10000
+        return 1000
 
     def clear_cache(self) -> None:
         """Clear all available caches for the model."""

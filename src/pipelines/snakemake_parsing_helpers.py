@@ -1,11 +1,13 @@
 """Parsing complex structures for use in Snakemake pipelines."""
 
 from pathlib import Path
+from typing import Optional
 
 from pydantic import BaseModel, validate_arguments
 
-from src.io import model_config
-from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
+import src.model_configuration as model_config
+from src.model_configuration import ModelConfig
+from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline, assert_never
 
 
 class ParsedPipelineInformation(BaseModel):
@@ -27,6 +29,12 @@ class _PipelineIntermediateInformation(BaseModel):
     fit_method: ModelFitMethod
 
 
+def _get_pipeline_fit_methods(
+    config: ModelConfig, pipeline: SpecletPipeline
+) -> Optional[list[ModelFitMethod]]:
+    return config.pipelines.get(pipeline, None)
+
+
 @validate_arguments
 def get_models_names_fit_methods(
     config_path: Path, pipeline: SpecletPipeline
@@ -41,15 +49,16 @@ def get_models_names_fit_methods(
         ParsedPipelineInformation: The information in a useful format for use in a
         snakemake workflow.
     """
-    model_configurations = model_config.get_model_configurations(config_path)
+    model_configurations = model_config.read_model_configurations(config_path)
     model_config.check_model_names_are_unique(model_configurations)
 
     pipeline_informations: list[_PipelineIntermediateInformation] = []
 
     for config in model_configurations.configurations:
-        if pipeline not in config.pipelines:
+        fit_methods = _get_pipeline_fit_methods(config, pipeline)
+        if fit_methods is None:
             continue
-        for fit_method in config.fit_methods:
+        for fit_method in fit_methods:
             pipeline_informations.append(
                 _PipelineIntermediateInformation(
                     model=config.model, model_name=config.name, fit_method=fit_method
@@ -75,7 +84,7 @@ def get_model_config_hashes(config_path: Path) -> dict[str, int]:
         dict[str, int]: A dictionary where the key is the model names and the value is
         the hash of the JSON serialization of the model's configuration.
     """
-    model_configurations = model_config.get_model_configurations(config_path)
+    model_configurations = model_config.read_model_configurations(config_path)
     hashes: dict[str, int] = {}
     for config in model_configurations.configurations:
         config.description = ""

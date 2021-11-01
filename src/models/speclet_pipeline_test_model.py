@@ -33,7 +33,6 @@ class SpecletTestModel(SpecletModel):
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
-        debug: bool = False,
         data_manager: Optional[SpecletModelDataManager] = None,
         config: Optional[SpecletTestModelConfiguration] = None,
     ):
@@ -43,7 +42,6 @@ class SpecletTestModel(SpecletModel):
             name (str): Unique name of the model. 'TestingModel-' will be prepended.
             root_cache_dir (Optional[Path], optional): Location for cache. Defaults to
               None.
-            debug (bool, optional): In debug mode? Defaults to False.
             data_manager (Optional[SpecletModelDataManager], optional): Object that will
               manage the data. If None (default), a `CrisprScreenDataManager` is
               created automatically.
@@ -61,7 +59,6 @@ class SpecletTestModel(SpecletModel):
         super().__init__(
             name=name,
             root_cache_dir=root_cache_dir,
-            debug=debug,
             data_manager=data_manager,
         )
 

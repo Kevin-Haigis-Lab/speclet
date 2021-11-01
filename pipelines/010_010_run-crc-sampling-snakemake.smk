@@ -13,10 +13,11 @@ from src.managers.model_fitting_pipeline_resource_manager import (
 from src.pipelines.snakemake_parsing_helpers import get_models_names_fit_methods
 from src.pipelines.theano_flags import get_theano_flags
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
-
+from src import project_config
 
 # Global parameters.
 N_CHAINS = 4
+DEBUG = project_config.debug_status()
 
 # Directory and file paths.
 SCRATCH_DIR = "/n/scratch3/users/j/jc604"
@@ -56,7 +57,9 @@ wildcard_constraints:
 
 
 def create_resource_manager(w: Wildcards, fit_method: ModelFitMethod) -> RM:
-    return RM(name=w.model_name, fit_method=fit_method, config_path=MODEL_CONFIG)
+    return RM(
+        name=w.model_name, fit_method=fit_method, config_path=MODEL_CONFIG, debug=DEBUG
+    )
 
 
 #### ---- Rules ---- ####

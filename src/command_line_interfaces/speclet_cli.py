@@ -12,9 +12,8 @@ import pymc3 as pm
 import tqdm
 import typer
 
-from src.io import model_config
+from src import model_configuration as model_config
 from src.loggers import set_console_handler_level
-from src.models import configuration
 from src.project_enums import MockDataSize, ModelOption
 
 app = typer.Typer()
@@ -70,7 +69,7 @@ def model_docs(output_md: Optional[Path] = None, overwrite: bool = True) -> None
         if model_opt in {ModelOption.SPECLET_TEST_MODEL, ModelOption.SPECLET_SIMPLE}:
             continue
 
-        model_cls = configuration.get_model_class(model_opt)
+        model_cls = model_config.get_model_class(model_opt)
         if _write_docstring(model_cls.__doc__, file=output_md):
             typer.secho(f"doc written for '{model_opt.value}'", fg=typer.colors.BLUE)
         else:
@@ -109,7 +108,7 @@ def model_graphs(
     if not output_dir.exists():
         output_dir.mkdir(parents=True)
 
-    configs = model_config.get_model_configurations(config_path)
+    configs = model_config.read_model_configurations(config_path)
 
     typer.echo(f"Saving images to '{output_dir.as_posix()}'.")
     typer.echo(f"Found {len(configs.configurations)} model configurations.")
@@ -120,7 +119,7 @@ def model_graphs(
             and (output_path.parent / (output_path.name + ".pdf")).exists()
         ):
             continue
-        sp_model = configuration.instantiate_and_configure_model(
+        sp_model = model_config.instantiate_and_configure_model(
             config, root_cache_dir=Path(tempfile.mkdtemp())
         )
         mock_data = sp_model.generate_mock_data(MockDataSize.SMALL, random_seed=1)

@@ -61,7 +61,6 @@ class SpecletTestModel(SpecletModel):
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
-        debug: bool = False,
         data_manager: Optional[SpecletModelDataManager] = None,
         config: Optional[SpecletTestModelConfiguration] = None,
     ):
@@ -71,7 +70,6 @@ class SpecletTestModel(SpecletModel):
             name (str): Unique name of the model. &#39;TestingModel-&#39; will be prepended.
             root_cache_dir (Optional[Path], optional): Location for cache. Defaults to
               None.
-            debug (bool, optional): In debug mode? Defaults to False.
             data_manager (Optional[SpecletModelDataManager], optional): Object that will
               manage the data. If None (default), a `CrisprScreenDataManager` is
               created automatically.
@@ -89,7 +87,6 @@ class SpecletTestModel(SpecletModel):
         super().__init__(
             name=name,
             root_cache_dir=root_cache_dir,
-            debug=debug,
             data_manager=data_manager,
         )
 
@@ -129,7 +126,7 @@ class SpecletTestModel(SpecletModel):
 <dl>
 <dt id="src.models.speclet_pipeline_test_model.SpecletTestModel"><code class="flex name class">
 <span>class <span class="ident">SpecletTestModel</span></span>
-<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, debug: bool = False, data_manager: Optional[<a title="src.models.speclet_model.SpecletModelDataManager" href="speclet_model.html#src.models.speclet_model.SpecletModelDataManager">SpecletModelDataManager</a>] = None, config: Optional[<a title="src.models.speclet_pipeline_test_model.SpecletTestModelConfiguration" href="#src.models.speclet_pipeline_test_model.SpecletTestModelConfiguration">SpecletTestModelConfiguration</a>] = None)</span>
+<span>(</span><span>name: str, root_cache_dir: Optional[pathlib.Path] = None, data_manager: Optional[<a title="src.models.speclet_model.SpecletModelDataManager" href="speclet_model.html#src.models.speclet_model.SpecletModelDataManager">SpecletModelDataManager</a>] = None, config: Optional[<a title="src.models.speclet_pipeline_test_model.SpecletTestModelConfiguration" href="#src.models.speclet_pipeline_test_model.SpecletTestModelConfiguration">SpecletTestModelConfiguration</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A SpecletModel class for testing purposes.</p>
@@ -141,8 +138,6 @@ class SpecletTestModel(SpecletModel):
 <dt><strong><code>root_cache_dir</code></strong> :&ensp;<code>Optional[Path]</code>, optional</dt>
 <dd>Location for cache. Defaults to
 None.</dd>
-<dt><strong><code>debug</code></strong> :&ensp;<code>bool</code>, optional</dt>
-<dd>In debug mode? Defaults to False.</dd>
 <dt><strong><code>data_manager</code></strong> :&ensp;<code>Optional[SpecletModelDataManager]</code>, optional</dt>
 <dd>Object that will
 manage the data. If None (default), a <code>CrisprScreenDataManager</code> is
@@ -162,7 +157,6 @@ configuration.</dd>
         self,
         name: str,
         root_cache_dir: Optional[Path] = None,
-        debug: bool = False,
         data_manager: Optional[SpecletModelDataManager] = None,
         config: Optional[SpecletTestModelConfiguration] = None,
     ):
@@ -172,7 +166,6 @@ configuration.</dd>
             name (str): Unique name of the model. &#39;TestingModel-&#39; will be prepended.
             root_cache_dir (Optional[Path], optional): Location for cache. Defaults to
               None.
-            debug (bool, optional): In debug mode? Defaults to False.
             data_manager (Optional[SpecletModelDataManager], optional): Object that will
               manage the data. If None (default), a `CrisprScreenDataManager` is
               created automatically.
@@ -190,7 +183,6 @@ configuration.</dd>
         super().__init__(
             name=name,
             root_cache_dir=root_cache_dir,
-            debug=debug,
             data_manager=data_manager,
         )
 
@@ -278,7 +270,6 @@ variable.</dd>
 <li><code><a title="src.models.speclet_model.SpecletModel.advi_sample_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.advi_sample_model">advi_sample_model</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.build_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.build_model">build_model</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.clear_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.clear_cache">clear_cache</a></code></li>
-<li><code><a title="src.models.speclet_model.SpecletModel.debug" href="speclet_model.html#src.models.speclet_model.SpecletModel.debug">debug</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.generate_mock_data" href="speclet_model.html#src.models.speclet_model.SpecletModel.generate_mock_data">generate_mock_data</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_advi_callbacks" href="speclet_model.html#src.models.speclet_model.SpecletModel.get_advi_callbacks">get_advi_callbacks</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.get_replacement_parameters" href="speclet_model.html#src.models.speclet_model.SpecletModel.get_replacement_parameters">get_replacement_parameters</a></code></li>
@@ -288,8 +279,6 @@ variable.</dd>
 <li><code><a title="src.models.speclet_model.SpecletModel.mcmc_sample_model" href="speclet_model.html#src.models.speclet_model.SpecletModel.mcmc_sample_model">mcmc_sample_model</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.run_simulation_based_calibration" href="speclet_model.html#src.models.speclet_model.SpecletModel.run_simulation_based_calibration">run_simulation_based_calibration</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.set_config" href="speclet_model.html#src.models.speclet_model.SpecletModel.set_config">set_config</a></code></li>
-<li><code><a title="src.models.speclet_model.SpecletModel.update_advi_sampling_parameters" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_advi_sampling_parameters">update_advi_sampling_parameters</a></code></li>
-<li><code><a title="src.models.speclet_model.SpecletModel.update_mcmc_sampling_parameters" href="speclet_model.html#src.models.speclet_model.SpecletModel.update_mcmc_sampling_parameters">update_mcmc_sampling_parameters</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.write_advi_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_advi_cache">write_advi_cache</a></code></li>
 <li><code><a title="src.models.speclet_model.SpecletModel.write_mcmc_cache" href="speclet_model.html#src.models.speclet_model.SpecletModel.write_mcmc_cache">write_mcmc_cache</a></code></li>
 </ul>
