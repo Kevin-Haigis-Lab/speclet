@@ -67,6 +67,7 @@ def sample_speclet_model(
     """
     tic = time()
     if random_seed:
+        random_seed = abs(int(random_seed)) + 1
         logger.info(f"Setting random seed ({random_seed}).")
         np.random.seed(random_seed)
 
@@ -90,6 +91,8 @@ def sample_speclet_model(
 
     logger.info("Running model build method.")
     sp_model.build_model()
+
+    print(sampling_kwargs)
 
     if sample:
         if fit_method is ModelFitMethod.ADVI:
