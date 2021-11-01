@@ -19,7 +19,13 @@ class KeywordsNotInCallableParametersError(BaseException):
         super().__init__(self.message)
 
 
-def _get_parameter_names(f: Callable) -> Mapping[str, inspect.Parameter]:
+class KeywordsWillBePassedToKwargsWarning(UserWarning):
+    """Keywords will be passed to 'kwargs'."""
+
+    pass
+
+
+def _get_function_parameters(f: Callable) -> Mapping[str, inspect.Parameter]:
     return inspect.signature(f).parameters
 
 
@@ -30,14 +36,11 @@ def _look_for_kwargs_parameters(params: Mapping[str, inspect.Parameter]) -> bool
     return False
 
 
-class KeywordsWillBePassedToKwargsWarning(UserWarning):
-    """Keywords will be passed to 'kwargs'."""
-
-    pass
-
-
 def check_kwarg_dict(
-    keywords: list[str], f: Callable, blacklist: Optional[set[str]] = None
+    keywords: list[str],
+    f: Callable,
+    blacklist: Optional[set[str]] = None,
+    ignore_kwargs: bool = False,
 ) -> None:
     """Check a list of keywords against the parameters in a callable (e.g. function).
 
@@ -45,6 +48,8 @@ def check_kwarg_dict(
         keywords (list[str]): List of expected keywords.
         f (Callable): Callable object that will be passed they keyword arguments.
         blacklist (tuple[str]): Parameters to ignore (e.g. `("self",)`)
+        ignore_kwargs (bool, optional): Ignore keyword argument parameters? Defaults to
+          False.
 
     Raises:
         KeywordsNotInCallableParametersError: Raised if spare keywords are found.
@@ -52,7 +57,13 @@ def check_kwarg_dict(
     Returns:
         None: None
     """
-    parameters = _get_parameter_names(f)
+    parameters = _get_function_parameters(f)
+    if ignore_kwargs:
+        parameters = {
+            name: param
+            for name, param in parameters.items()
+            if param.kind is not inspect._ParameterKind.VAR_KEYWORD
+        }
     param_names: list[str] = list(parameters)
     is_kwargs = _look_for_kwargs_parameters(parameters)
 

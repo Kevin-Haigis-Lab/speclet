@@ -1,8 +1,6 @@
 - name: my-test-model
   description: My model for testing model configs.
   model: speclet-test-model
-  fit_methods:
-    - ADVI
   config:
     some_param: noncentered
     cov2: true
@@ -19,7 +17,7 @@
   pipelines:
     fitting: ["ADVI", "MCMC"]
     sbc: ["ADVI", "MCMC"]
-  pipeline_sampling_parameters:
+  sampling_arguments:
     fitting:
       ADVI:
         n_iterations: 400

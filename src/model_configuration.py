@@ -42,7 +42,7 @@ SpecletProjectModelTypes = Union[
 
 
 BasicTypes = Union[float, str, int, bool, None]
-KeywordArgs = dict[str, BasicTypes]
+KeywordArgs = Dict[str, BasicTypes]
 ModelFitConfiguration = Union[BasicTypes, KeywordArgs]
 
 # Need to use old typing.Dict here because of a bug in Hypothesis:
@@ -289,11 +289,12 @@ def get_sampling_kwargs_from_config(
         dict[str, ModelFitConfiguration]: Keyword arguments for the model-fitting
         method.
     """
+    print(config)
     if (sampling_params := config.sampling_arguments) is None:
         return {}
-    if (pipeline_dict := sampling_params.get(pipeline, None)) is None:
+    if (pipeline_dict := sampling_params.get(pipeline)) is None:
         return {}
-    if (kwargs_dict := pipeline_dict.get(fit_method, None)) is None:
+    if (kwargs_dict := pipeline_dict.get(fit_method)) is None:
         return {}
     return kwargs_dict
 
@@ -367,19 +368,29 @@ def check_sampling_kwargs(
     if pipeline is SpecletPipeline.FITTING:
         if fit_method is ModelFitMethod.ADVI:
             check_kwarg_dict.check_kwarg_dict(
-                keys, SpecletModel.advi_sample_model, blacklist=blacklist
+                keys,
+                SpecletModel.advi_sample_model,
+                blacklist=blacklist,
+                ignore_kwargs=True,
             )
         elif fit_method is ModelFitMethod.MCMC:
             check_kwarg_dict.check_kwarg_dict(
-                keys, SpecletModel.mcmc_sample_model, blacklist=blacklist
+                keys,
+                SpecletModel.mcmc_sample_model,
+                blacklist=blacklist,
+                ignore_kwargs=True,
             )
         else:
             assert_never(fit_method)
     elif pipeline is SpecletPipeline.SBC:
         if fit_method is ModelFitMethod.ADVI:
-            check_kwarg_dict.check_kwarg_dict(keys, pm.fit, blacklist=blacklist)
+            check_kwarg_dict.check_kwarg_dict(
+                keys, pm.fit, blacklist=blacklist, ignore_kwargs=True
+            )
         elif fit_method is ModelFitMethod.MCMC:
-            check_kwarg_dict.check_kwarg_dict(keys, pm.sample, blacklist=blacklist)
+            check_kwarg_dict.check_kwarg_dict(
+                keys, pm.sample, blacklist=blacklist, ignore_kwargs=False
+            )
         else:
             assert_never(fit_method)
     else:

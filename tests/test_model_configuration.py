@@ -8,7 +8,10 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 from src import model_configuration as model_config
-from src.misc.check_kwarg_dict import KeywordsNotInCallableParametersError
+from src.misc.check_kwarg_dict import (
+    KeywordsNotInCallableParametersError,
+    KeywordsWillBePassedToKwargsWarning,
+)
 from src.models.ceres_mimic import CeresMimic
 from src.models.speclet_five import SpecletFive
 from src.models.speclet_four import SpecletFour
@@ -26,7 +29,6 @@ from src.project_enums import ModelParameterization as MP
 from src.project_enums import SpecletPipeline
 
 
-@pytest.mark.skip("Needs refactoring")
 def test_configure_model(mock_model_config: Path, tmp_path: Path) -> None:
     sp = SpecletTestModel("my-test-model", tmp_path)
     model_config.configure_model(sp, config_path=mock_model_config)
@@ -34,7 +36,6 @@ def test_configure_model(mock_model_config: Path, tmp_path: Path) -> None:
     assert sp.config.cov2
 
 
-@pytest.mark.skip("Needs refactoring")
 def test_configure_model_no_change(mock_model_config: Path, tmp_path: Path) -> None:
     sp = SpecletTestModel("my-test-model-that-doesnot-exist", tmp_path)
     model_config.configure_model(sp, config_path=mock_model_config)
@@ -42,7 +43,6 @@ def test_configure_model_no_change(mock_model_config: Path, tmp_path: Path) -> N
     assert not sp.config.cov2
 
 
-@pytest.mark.skip("Needs refactoring")
 @pytest.mark.parametrize("model_option", ModelOption)
 def test_all_model_options_return_a_type(model_option: ModelOption) -> None:
     model_type = model_config.get_model_class(model_option)
@@ -63,7 +63,6 @@ model_options_expected_class_parameterization: list[
 ]
 
 
-@pytest.mark.skip("Needs refactoring")
 @pytest.mark.parametrize(
     "model_option, expected_class", model_options_expected_class_parameterization
 )
@@ -101,7 +100,6 @@ def check_test_model_configurations(
         assert sp_model.config.cov2 == SpecletTestModelConfiguration().cov2
 
 
-@pytest.mark.skip("Needs refactoring")
 @pytest.mark.parametrize(
     "model_name", ["my-test-model", "second-test-model", "no-config-test"]
 )
@@ -118,7 +116,6 @@ def test_instantiate_and_configure_model(
     check_test_model_configurations(sp_model, model_name)
 
 
-@pytest.mark.skip("Needs refactoring")
 @pytest.mark.parametrize(
     "model_name", ["my-test-model", "second-test-model", "no-config-test"]
 )
@@ -134,7 +131,6 @@ def test_get_config_and_instantiate_model(
     check_test_model_configurations(sp_model, model_name)
 
 
-@pytest.mark.skip("Needs refactoring")
 @given(sampling_kwargs=st.dictionaries(st.text(), st.text()))
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 @pytest.mark.parametrize("pipeline", SpecletPipeline)
@@ -147,6 +143,12 @@ def test_check_sampling_kwargs_raises(
         model_config.check_sampling_kwargs(
             sampling_kwargs, fit_method=fit_method, pipeline=pipeline
         )
+    elif fit_method is ModelFitMethod.MCMC and pipeline is SpecletPipeline.SBC:
+        sampling_kwargs["fjieorjgiers;orgrhj"] = "vjdiorgvherogjheiorg"
+        with pytest.warns(KeywordsWillBePassedToKwargsWarning):
+            model_config.check_sampling_kwargs(
+                sampling_kwargs, fit_method=fit_method, pipeline=pipeline
+            )
     else:
         sampling_kwargs["fjieorjgiers;orgrhj"] = "vjdiorgvherogjheiorg"
         with pytest.raises(KeywordsNotInCallableParametersError):
@@ -155,7 +157,6 @@ def test_check_sampling_kwargs_raises(
             )
 
 
-@pytest.mark.skip("Needs refactoring")
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 @pytest.mark.parametrize("pipeline", SpecletPipeline)
 def test_check_sampling_kwargs_empty_always_passes(
@@ -167,17 +168,44 @@ def test_check_sampling_kwargs_empty_always_passes(
     )
 
 
-@pytest.mark.skip("Needs refactoring")
 @pytest.mark.parametrize(
-    "sampling_kwargs",
+    "sampling_kwargs, fit_method, pipeline",
     [
-        {"draws": 100, "prior_pred_samples": "hi"},
-        {"prior_pred_samples": 10},
-        {"draws": 100.0001, "prior_pred_samples": False},
+        (
+            {
+                "prior_pred_samples": 10,
+                "random_seed": 20,
+                "sample_kwargs": {"draws": 10, "chains": 2},
+                "ignore_cache": True,
+            },
+            ModelFitMethod.MCMC,
+            SpecletPipeline.FITTING,
+        ),
+        (
+            {
+                "method": "advi-method",
+                "n_iterations": 29,
+                "draws": 34,
+                "prior_pred_samples": 210,
+                "random_seed": 0,
+                "fit_kwargs": {"key": "value"},
+                "ignore_cache": True,
+            },
+            ModelFitMethod.ADVI,
+            SpecletPipeline.FITTING,
+        ),
+        (
+            {"draws": 10, "tune": 9, "random_seed": 23, "return_inferencedata": True},
+            ModelFitMethod.MCMC,
+            SpecletPipeline.SBC,
+        ),
+        (
+            {"n": 10, "method": "advi-method", "random_seed": 23},
+            ModelFitMethod.ADVI,
+            SpecletPipeline.SBC,
+        ),
     ],
 )
-@pytest.mark.parametrize("fit_method", ModelFitMethod)
-@pytest.mark.parametrize("pipeline", SpecletPipeline)
 def test_check_sampling_kwargs_all_fitmethods(
     sampling_kwargs: dict[str, Any],
     fit_method: ModelFitMethod,
@@ -188,31 +216,48 @@ def test_check_sampling_kwargs_all_fitmethods(
     )
 
 
-@pytest.mark.skip("Needs refactoring")
 @pytest.mark.parametrize(
-    "sampling_kwargs, intended_fit_method",
+    "sampling_kwargs, fit_method, pipeline, raises",
     [
-        ({"draws": 100, "tune": 20, "cores": 2, "chains": 40}, ModelFitMethod.MCMC),
-        ({"draws": 100, "target_accept": 0.0001}, ModelFitMethod.MCMC),
-        ({"draws": 100, "method": 20, "n_iterations": 2}, ModelFitMethod.ADVI),
-        ({"draws": 77, "method": "e", "n_iterations": "f"}, ModelFitMethod.ADVI),
-        ({"draws": 33, "method": False, "n_iterations": True}, ModelFitMethod.ADVI),
+        (
+            {"not-a-real-variable": 10},
+            ModelFitMethod.MCMC,
+            SpecletPipeline.FITTING,
+            True,
+        ),
+        (
+            {"method": "advi-method", "fake-var": True},
+            ModelFitMethod.ADVI,
+            SpecletPipeline.FITTING,
+            True,
+        ),
+        (
+            {"draws": 10, "bad-var": "hi", "return_inferencedata": True},
+            ModelFitMethod.MCMC,
+            SpecletPipeline.SBC,
+            False,
+        ),
+        (
+            {"n": 10, "no-such-keyword": 10},
+            ModelFitMethod.ADVI,
+            SpecletPipeline.SBC,
+            True,
+        ),
     ],
 )
-@pytest.mark.parametrize("fit_method", ModelFitMethod)
-@pytest.mark.parametrize("pipeline", SpecletPipeline)
-def test_check_sampling_kwargs_fitmethod_specfic(
+def test_check_sampling_kwargs_all_fitmethods_fails(
     sampling_kwargs: dict[str, Any],
-    intended_fit_method: ModelFitMethod,
     fit_method: ModelFitMethod,
     pipeline: SpecletPipeline,
+    raises: bool,
 ) -> None:
-    if fit_method == intended_fit_method:
-        model_config.check_sampling_kwargs(
-            sampling_kwargs, fit_method=fit_method, pipeline=pipeline
-        )
-    else:
+    if raises:
         with pytest.raises(KeywordsNotInCallableParametersError):
+            model_config.check_sampling_kwargs(
+                sampling_kwargs, fit_method=fit_method, pipeline=pipeline
+            )
+    else:
+        with pytest.warns(KeywordsWillBePassedToKwargsWarning):
             model_config.check_sampling_kwargs(
                 sampling_kwargs, fit_method=fit_method, pipeline=pipeline
             )
@@ -222,16 +267,13 @@ def _filter_empty_configs(configs: model_config.ModelConfigs) -> bool:
     return len(configs.configurations) > 0
 
 
-@pytest.mark.skip("Needs refactoring")
 @given(st.builds(model_config.ModelConfigs).filter(_filter_empty_configs))
 def test_model_names_are_unique_fails(model_configs: model_config.ModelConfigs) -> None:
-    print(model_configs)
     model_configs.configurations.append(model_configs.configurations[0])
     with pytest.raises(model_config.ModelNamesAreNotAllUnique):
         model_config.check_model_names_are_unique(model_configs)
 
 
-@pytest.mark.skip("Needs refactoring")
 @given(st.builds(model_config.ModelConfigs).filter(_filter_empty_configs))
 def test_model_names_are_unique_does_not_fail(
     model_configs: model_config.ModelConfigs,
@@ -243,13 +285,11 @@ def test_model_names_are_unique_does_not_fail(
     assert model_config.check_model_names_are_unique(model_configs)
 
 
-@pytest.mark.skip("Needs refactoring")
 def test_get_model_configurations(mock_model_config: Path) -> None:
     config = model_config.read_model_configurations(mock_model_config)
     assert len(config.configurations) == 3
 
 
-@pytest.mark.skip("Needs refactoring")
 def test_get_model_configuration(mock_model_config: Path) -> None:
     names: tuple[str, ...] = (
         "my-test-model",
@@ -264,7 +304,6 @@ def test_get_model_configuration(mock_model_config: Path) -> None:
         assert (config is not None) == result
 
 
-@pytest.mark.skip("Needs refactoring")
 @pytest.mark.parametrize(
     "name", ("my-test-model", "second-test-model", "no-config-test")
 )
@@ -282,7 +321,6 @@ def test_get_model_sampling_kwargs_dict(
     assert isinstance(sampling_kwargs, dict)
 
 
-@pytest.mark.skip("Needs refactoring")
 @pytest.mark.parametrize(
     "name, pipeline, fit_method, exists",
     (
@@ -309,7 +347,6 @@ def test_get_model_sampling_kwargs_exist(
     assert (sampling_kwargs != {}) == exists
 
 
-@pytest.mark.skip("Needs refactoring")
 @given(config=st.builds(model_config.ModelConfig))
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 @pytest.mark.parametrize("pipeline", SpecletPipeline)
@@ -326,7 +363,6 @@ def test_get_model_sampling_from_config(
     assert isinstance(kwargs, dict)
 
 
-@pytest.mark.skip("Needs refactoring")
 @given(
     config=st.builds(model_config.ModelConfig),
     expected_kwargs=st.dictionaries(st.text(), st.integers()),
@@ -347,33 +383,29 @@ def test_get_model_sampling_from_config_correct_pipeline_fitmethod(
     assert kwargs == expected_kwargs
 
 
-@pytest.mark.skip("Needs refactoring")
 def test_model_config_with_optional_pipeline_field() -> None:
     yaml_txt = """
 - name: with-pipelines
   description: "A description."
   model: speclet-simple
-  fit_methods:
-      - MCMC
-      - ADVI
   pipelines:
-      - fitting
-      - sbc
-  debug: true
+    fitting: ['MCMC', 'ADVI']
+    sbc: ['MCMC', 'ADVI']
+
 - name: without-pipelines
   description: "A description."
   model: speclet-simple
-  fit_methods:
-    - MCMC
-    - ADVI
-  debug: true
-    """
+  pipelines:
+    fitting: ['MCMC', 'ADVI']
+"""
     configs = model_config.ModelConfigs(configurations=yaml.safe_load(yaml_txt))
     assert len(configs.configurations) == 2
     for config in configs.configurations:
         if config.name == "with-pipelines":
-            assert len(config.pipelines) == 2
+            assert len(config.pipelines[SpecletPipeline.FITTING]) == 2
+            assert len(config.pipelines[SpecletPipeline.SBC]) == 2
         elif config.name == "without-pipelines":
-            assert len(config.pipelines) == 0
+            assert len(config.pipelines[SpecletPipeline.FITTING]) == 2
+            assert config.pipelines.get(SpecletPipeline.SBC) is None
         else:
             assert 1 == 2  # Should never get here.
