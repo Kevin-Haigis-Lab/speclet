@@ -117,7 +117,7 @@ fitting_pipeline_time_lookup: TimeLookupDict = {
         False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
     ModelOption.SPECLET_EIGHT: {
-        True: {ModelFitMethod.ADVI: td(hours=1), ModelFitMethod.MCMC: td(hours=1)},
+        True: {ModelFitMethod.ADVI: td(hours=1), ModelFitMethod.MCMC: td(hours=5)},
         False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
 }

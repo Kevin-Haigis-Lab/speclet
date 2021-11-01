@@ -78,10 +78,12 @@ def sample_speclet_model(
           built and fit.
     """
     tic = time()
-    if random_seed:
-        random_seed = abs(int(random_seed)) + 1
+    if random_seed is not None:
+        random_seed = abs(random_seed) + 1
         logger.info(f"Setting random seed ({random_seed}).")
         np.random.seed(random_seed)
+    else:
+        logger.info("No random seed.")
 
     logger.info(f"Model config file: '{config_path.as_posix()}'.")
     logger.info(f"Root cache directory: {cache_dir.as_posix()}")
