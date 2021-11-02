@@ -267,6 +267,7 @@ benchmarks/*
 # Specific files to except from the rules above
 !models/model-configs.yaml
 !models/model-graph-images/
+!models/model-docs.md
 !modeling_data/depmap_modeling_dataframe_crc-subsample.csv
 !modeling_data/depmap_modeling_dataframe_crc_bone-subsample.csv
 !modeling_data/copy_number_data_samples.npy
