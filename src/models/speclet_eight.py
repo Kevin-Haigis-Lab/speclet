@@ -153,10 +153,10 @@ class SpecletEight(SpecletModel):
             counts_final = pm.Data("counts_final", data.counts_final.values)
 
             h = _gene_by_cell_line_hierarchical_structure(
-                "h", co_idx=co_idx, l_c_idx=l_c
+                "h", co_idx=co_idx, l_c_idx=l_c, centered=False
             )
             q = _gene_by_cell_line_hierarchical_structure(
-                "q", co_idx=co_idx, l_c_idx=l_c
+                "q", co_idx=co_idx, l_c_idx=l_c, centered=False
             )
 
             mu_beta = pm.Deterministic(
@@ -185,7 +185,10 @@ class SpecletEight(SpecletModel):
 
 
 def _gene_by_cell_line_hierarchical_structure(
-    name: str, co_idx: achelp.CommonIndices, l_c_idx: Union[np.ndarray, pm.Data]
+    name: str,
+    co_idx: achelp.CommonIndices,
+    l_c_idx: Union[np.ndarray, pm.Data],
+    centered: bool = True,
 ) -> pmFreeRV:
     _gene_by_cell_line = (co_idx.n_genes, co_idx.n_celllines)
 
@@ -198,12 +201,23 @@ def _gene_by_cell_line_hierarchical_structure(
     sigma_sigma_beta = pm.HalfNormal(f"sigma_sigma_{name}", 1)
     sigma_beta = pm.HalfNormal(f"sigma_{name}", sigma_sigma_beta, dims="lineage")
 
-    beta = pm.Normal(
-        name,
-        mu_beta[:, l_c_idx],
-        tt.ones(shape=_gene_by_cell_line) * sigma_beta[l_c_idx],
-        dims=("gene", "cell_line"),
-    )
+    if centered:
+        logger.info(f"Centered parameterization for var '{name}'.")
+        beta = pm.Normal(
+            name,
+            mu_beta[:, l_c_idx],
+            tt.ones(shape=_gene_by_cell_line) * sigma_beta[l_c_idx],
+            dims=("gene", "cell_line"),
+        )
+    else:
+        logger.info(f"Non-centered parameterization for var '{name}'.")
+        delta = pm.Normal(f"Δ_{name}", 0.0, 1.0, dims=("gene", "cell_line"))
+        beta = pm.Deterministic(
+            name,
+            mu_beta[:, l_c_idx]
+            + delta * (tt.ones(shape=_gene_by_cell_line) * sigma_beta[l_c_idx]),
+        )
+
     return beta
 
 

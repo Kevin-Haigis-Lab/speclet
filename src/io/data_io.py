@@ -6,6 +6,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Union
 
+from src.io.general_io import project_root_dir
+
 #### ---- Enums ---- ####
 
 
@@ -27,15 +29,6 @@ class DataFile(Enum):
 
 
 #### ---- Basics ---- ####
-
-
-def project_root_dir() -> Path:
-    """Speclet root directory.
-
-    Returns:
-        Path: Path to root directory.
-    """
-    return Path(__file__).parent.parent.parent
 
 
 def modeling_data_dir() -> Path:
