@@ -2,16 +2,21 @@
 
 from collections import Counter
 from pathlib import Path
-from typing import Dict  # <-- need to keep for a Hypothesis test!
-from typing import Any, Optional, Union
+from typing import (  # <-- need to keep for a Hypothesis test!
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    Optional,
+    Union,
+)
 
 import pymc3 as pm
 import yaml
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, PositiveInt
 
 from src.io.data_io import project_root_dir
 from src.loggers import logger
-from src.misc import check_kwarg_dict
 from src.models.ceres_mimic import CeresMimic
 from src.models.speclet_eight import SpecletEight
 from src.models.speclet_five import SpecletFive
@@ -23,7 +28,7 @@ from src.models.speclet_seven import SpecletSeven
 from src.models.speclet_simple import SpecletSimple
 from src.models.speclet_six import SpecletSix
 from src.models.speclet_two import SpecletTwo
-from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline, assert_never
+from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
 
 # ---- Types ----
 
@@ -53,6 +58,96 @@ PipelineSamplingParameters = Dict[
 
 
 # ----  Configuration classes ----
+class Pymc3SampleArguments(BaseModel):
+    """Model `sample()` keyword arguments (PyMC3 v3.11.2)."""
+
+    _pymc3_version: str = "3.11.2"
+    draws: int = 1000
+    step: Optional[Union[Callable, Iterable[Callable]]] = None
+    init: str = "auto"
+    n_init: int = 200000
+    chain_idx: PositiveInt = 0
+    chains: Optional[PositiveInt] = None
+    cores: Optional[PositiveInt] = None
+    tune: PositiveInt = 1000
+    progressbar: bool = True
+    random_seed: Optional[PositiveInt] = None
+    discard_tuned_samples: bool = True
+    compute_convergence_checks: bool = True
+    return_inferencedata: Optional[bool] = True  # not default
+    idata_kwargs: Optional[dict[str, Any]] = None
+
+    def __init__(self, **data: dict[str, Any]) -> None:
+        """Create a Pymc3SampleArguments object.
+
+        Raises:
+            NotImplementedError: If the currently installed PyMC3 version is different
+            from the supported version.
+        """
+        super().__init__(**data)
+        if self._pymc3_version != pm.__version__:
+            raise NotImplementedError(
+                f"Support for {self._pymc3_version} -> current ver {pm.__version__}"
+            )
+
+
+class Pymc3FitArguments(BaseModel):
+    """Model `fit()` keyword arguments (PyMC3 v3.11.2)."""
+
+    _pymc3_version: str = "3.11.2"
+    n: PositiveInt = 10000
+    method = "advi"
+    random_seed: Optional[PositiveInt] = None
+    inf_kwargs: Optional[dict[str, Any]] = None
+    progressbar: bool = True
+
+    def __init__(self, **data: dict[str, Any]) -> None:
+        """Create a Pymc3FitArguments object.
+
+        Raises:
+            NotImplementedError: If the currently installed PyMC3 version is different
+            from the supported version.
+        """
+        super().__init__(**data)
+        if self._pymc3_version != pm.__version__:
+            raise NotImplementedError(
+                f"Support for {self._pymc3_version} -> current ver {pm.__version__}"
+            )
+
+
+class SpecletModelMcmcArguments(BaseModel):
+    """SpecletModel MCMC arguments."""
+
+    prior_pred_samples: Optional[int] = 500
+    random_seed: Optional[int] = None
+    sample_kwargs: Pymc3SampleArguments = Field(default_factory=Pymc3SampleArguments)
+    ignore_cache: bool = False
+
+
+class SpecletModelAdviArguments(BaseModel):
+    """SpecletModel ADVI arguments."""
+
+    method: str = "advi"
+    n_iterations: int = 100000
+    draws: int = 1000
+    prior_pred_samples: Optional[int] = None
+    random_seed: Optional[int] = None
+    fit_kwargs: Optional[dict[str, Any]] = None
+    ignore_cache: bool = False
+
+
+class SpecletModelSamplingArguments(BaseModel):
+    """Arguments for SpecletModel fitting methods."""
+
+    MCMC: SpecletModelMcmcArguments
+    ADVI: SpecletModelAdviArguments
+
+
+class PipelineSamplingArguments(BaseModel):
+    """Sampling arguments for each pipeline."""
+
+    fitting: Optional[SpecletModelSamplingArguments] = None
+    sbc: Optional[SpecletModelSamplingArguments] = None
 
 
 class ModelConfig(BaseModel):
@@ -344,55 +439,4 @@ def check_model_names_are_unique(configs: ModelConfigs) -> bool:
     if not all(i == 1 for i in counter.values()):
         nonunique_ids = {v for v, c in counter.items() if c != 1}  # noqa: C403
         raise ModelNamesAreNotAllUnique(nonunique_ids)
-    return True
-
-
-def check_sampling_kwargs(
-    sampling_kwargs: dict[str, Any],
-    fit_method: ModelFitMethod,
-    pipeline: SpecletPipeline,
-) -> bool:
-    """Check that sampling keyword arguments are appropriate for the method called.
-
-    Checks a dictionary of keyword arguments against the actual parameter names in the
-    expected `SpecletModel` method. If there are spare arguments, then a
-    `KeywordsNotInCallableParametersError` will be raised.
-
-    Args:
-        sampling_kwargs (dict[str, Any]): Keyword arguments to be used for sampling.
-        fit_method (ModelFitMethod): Fit method to be used.
-        pipeline (SpecletPipeline): Pipeline being run.
-    """
-    keys = list(sampling_kwargs.keys())
-    blacklist = {"self"}
-    if pipeline is SpecletPipeline.FITTING:
-        if fit_method is ModelFitMethod.ADVI:
-            check_kwarg_dict.check_kwarg_dict(
-                keys,
-                SpecletModel.advi_sample_model,
-                blacklist=blacklist,
-                ignore_kwargs=True,
-            )
-        elif fit_method is ModelFitMethod.MCMC:
-            check_kwarg_dict.check_kwarg_dict(
-                keys,
-                SpecletModel.mcmc_sample_model,
-                blacklist=blacklist,
-                ignore_kwargs=True,
-            )
-        else:
-            assert_never(fit_method)
-    elif pipeline is SpecletPipeline.SBC:
-        if fit_method is ModelFitMethod.ADVI:
-            check_kwarg_dict.check_kwarg_dict(
-                keys, pm.fit, blacklist=blacklist, ignore_kwargs=True
-            )
-        elif fit_method is ModelFitMethod.MCMC:
-            check_kwarg_dict.check_kwarg_dict(
-                keys, pm.sample, blacklist=blacklist, ignore_kwargs=False
-            )
-        else:
-            assert_never(fit_method)
-    else:
-        assert_never(pipeline)
     return True
