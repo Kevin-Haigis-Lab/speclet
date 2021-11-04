@@ -6,7 +6,7 @@ import shutil
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import pandas as pd
 import theano
@@ -111,14 +111,19 @@ def run_sbc(
     sp_model = model_config.get_config_and_instantiate_model(
         config_path=config_path, name=name, root_cache_dir=cache_dir
     )
-    fit_kwargs = model_config.get_sampling_kwargs(
+    config_sampling_kwargs = model_config.get_sampling_kwargs(
         config_path=config_path,
         name=name,
         pipeline=SpecletPipeline.SBC,
         fit_method=fit_method,
     )
-    if fit_kwargs != {}:
-        logger.info("Found specific fitting keyword arguments.")
+
+    fit_kwargs: dict[str, Any]
+    if config_sampling_kwargs is not None:
+        config_sampling_kwargs.random_seed = sim_number
+        fit_kwargs = config_sampling_kwargs.dict()
+    else:
+        fit_kwargs = {"random_seed": sim_number}
 
     mock_data: Optional[pd.DataFrame] = None
     if mock_data_path is not None:

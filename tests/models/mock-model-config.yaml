@@ -22,6 +22,9 @@
       ADVI:
         n_iterations: 400
         draws: 25
+      MCMC:
+        samples_kwargs:
+          draws: 34
     sbc:
       ADVI:
         n_iterations: 100

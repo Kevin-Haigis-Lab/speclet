@@ -2,14 +2,7 @@
 
 from collections import Counter
 from pathlib import Path
-from typing import (  # <-- need to keep for a Hypothesis test!
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    Optional,
-    Union,
-)
+from typing import Any, Callable, Iterable, Optional, Union
 
 import pymc3 as pm
 import yaml
@@ -28,7 +21,7 @@ from src.models.speclet_seven import SpecletSeven
 from src.models.speclet_simple import SpecletSimple
 from src.models.speclet_six import SpecletSix
 from src.models.speclet_two import SpecletTwo
-from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
+from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline, assert_never
 
 # ---- Types ----
 
@@ -47,14 +40,6 @@ SpecletProjectModelTypes = Union[
 
 
 BasicTypes = Union[float, str, int, bool, None]
-KeywordArgs = Dict[str, BasicTypes]
-ModelFitConfiguration = Union[BasicTypes, KeywordArgs]
-
-# Need to use old typing.Dict here because of a bug in Hypothesis:
-# https://github.com/HypothesisWorks/hypothesis/issues/3080
-PipelineSamplingParameters = Dict[
-    SpecletPipeline, Dict[ModelFitMethod, Dict[str, ModelFitConfiguration]]
-]
 
 
 # ----  Configuration classes ----
@@ -75,7 +60,7 @@ class Pymc3SampleArguments(BaseModel):
     discard_tuned_samples: bool = True
     compute_convergence_checks: bool = True
     return_inferencedata: Optional[bool] = True  # not default
-    idata_kwargs: Optional[dict[str, Any]] = None
+    idata_kwargs: Optional[dict[str, BasicTypes]] = None
 
     def __init__(self, **data: dict[str, Any]) -> None:
         """Create a Pymc3SampleArguments object.
@@ -98,7 +83,7 @@ class Pymc3FitArguments(BaseModel):
     n: PositiveInt = 10000
     method = "advi"
     random_seed: Optional[PositiveInt] = None
-    inf_kwargs: Optional[dict[str, Any]] = None
+    inf_kwargs: Optional[dict[str, BasicTypes]] = None
     progressbar: bool = True
 
     def __init__(self, **data: dict[str, Any]) -> None:
@@ -120,7 +105,7 @@ class SpecletModelMcmcArguments(BaseModel):
 
     prior_pred_samples: Optional[int] = 500
     random_seed: Optional[int] = None
-    sample_kwargs: Pymc3SampleArguments = Field(default_factory=Pymc3SampleArguments)
+    sample_kwargs: Optional[Pymc3SampleArguments] = None
     ignore_cache: bool = False
 
 
@@ -132,15 +117,15 @@ class SpecletModelAdviArguments(BaseModel):
     draws: int = 1000
     prior_pred_samples: Optional[int] = None
     random_seed: Optional[int] = None
-    fit_kwargs: Optional[dict[str, Any]] = None
+    fit_kwargs: Optional[dict[str, BasicTypes]] = None
     ignore_cache: bool = False
 
 
 class SpecletModelSamplingArguments(BaseModel):
     """Arguments for SpecletModel fitting methods."""
 
-    MCMC: SpecletModelMcmcArguments
-    ADVI: SpecletModelAdviArguments
+    MCMC: Optional[SpecletModelMcmcArguments] = None
+    ADVI: Optional[SpecletModelAdviArguments] = None
 
 
 class PipelineSamplingArguments(BaseModel):
@@ -156,9 +141,11 @@ class ModelConfig(BaseModel):
     name: str
     description: str
     model: ModelOption
-    config: Optional[Dict[str, Union[ModelFitMethod, BasicTypes]]]
-    pipelines: Dict[SpecletPipeline, list[ModelFitMethod]]
-    sampling_arguments: Optional[PipelineSamplingParameters]
+    config: Optional[dict[str, Union[ModelFitMethod, BasicTypes]]] = None
+    pipelines: dict[SpecletPipeline, list[ModelFitMethod]] = Field(default_factory=dict)
+    sampling_arguments: PipelineSamplingArguments = Field(
+        default_factory=PipelineSamplingArguments
+    )
 
 
 class ModelConfigs(BaseModel):
@@ -368,11 +355,24 @@ def get_config_and_instantiate_model(
 # ---- Keyword arguments from config ----
 
 
+def _get_fit_method_arguments(
+    pipeline_args: Optional[SpecletModelSamplingArguments], fit_method: ModelFitMethod
+) -> Optional[Union[SpecletModelMcmcArguments, SpecletModelAdviArguments]]:
+    if pipeline_args is None:
+        return None
+    elif fit_method is ModelFitMethod.MCMC:
+        return pipeline_args.MCMC
+    elif fit_method is ModelFitMethod.ADVI:
+        return pipeline_args.ADVI
+    else:
+        assert_never(fit_method)
+
+
 def get_sampling_kwargs_from_config(
     config: ModelConfig,
     pipeline: SpecletPipeline,
     fit_method: ModelFitMethod,
-) -> dict[str, ModelFitConfiguration]:
+) -> Optional[Union[SpecletModelMcmcArguments, SpecletModelAdviArguments]]:
     """Get the sampling keyword argument dictionary from a model configuration.
 
     Args:
@@ -381,22 +381,21 @@ def get_sampling_kwargs_from_config(
         fit_method (ModelFitMethod): Desired model fitting method.
 
     Returns:
-        dict[str, ModelFitConfiguration]: Keyword arguments for the model-fitting
-        method.
+        Optional[Union[SpecletModelMcmcArguments, SpecletModelAdviArguments]]: Model
+        fitting arguments.
     """
-    print(config)
-    if (sampling_params := config.sampling_arguments) is None:
-        return {}
-    if (pipeline_dict := sampling_params.get(pipeline)) is None:
-        return {}
-    if (kwargs_dict := pipeline_dict.get(fit_method)) is None:
-        return {}
-    return kwargs_dict
+    sampling_arguments = config.sampling_arguments
+    if pipeline is SpecletPipeline.FITTING:
+        return _get_fit_method_arguments(sampling_arguments.fitting, fit_method)
+    elif pipeline is SpecletPipeline.SBC:
+        return _get_fit_method_arguments(sampling_arguments.sbc, fit_method)
+    else:
+        assert_never(pipeline)
 
 
 def get_sampling_kwargs(
     config_path: Path, name: str, pipeline: SpecletPipeline, fit_method: ModelFitMethod
-) -> dict[str, ModelFitConfiguration]:
+) -> Optional[Union[SpecletModelMcmcArguments, SpecletModelAdviArguments]]:
     """Get the sampling keyword argument dictionary from a configuration file.
 
     Args:
