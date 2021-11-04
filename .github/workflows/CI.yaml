@@ -58,4 +58,4 @@ jobs:
             --disable-warnings \
             --force-sugar \
             --testmon \
-            tests
+            tests/models/test_speclet_eight.py
