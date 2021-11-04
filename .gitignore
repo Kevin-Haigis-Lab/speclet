@@ -268,16 +268,21 @@ benchmarks/*
 !models/model-configs.yaml
 !models/model-graph-images/
 !models/model-docs.md
+
 !modeling_data/depmap_modeling_dataframe_crc-subsample.csv
 !modeling_data/depmap_modeling_dataframe_crc_bone-subsample.csv
 !modeling_data/copy_number_data_samples.npy
 !modeling_data/sanger_cancer-gene-census.csv
+!modeling_data/depmap_pdna_total_read_counts.csv
+!modeling_data/depmap_replicate_total_read_counts.csv
+
 !data/download-data.sh
 !data/download-data.smk
 !data/all-depmap-ids.csv
 !data/list_all_depmapids.py
 !data/README.md
 !data/Tzelepis_2016/TableS1_Lists-of-gRNAs-in-the-Mouse-v2-and-Human-v1-CRISPR-Libraries.xlsx
+
 
 # Dask
 */dask-worker-space/*
