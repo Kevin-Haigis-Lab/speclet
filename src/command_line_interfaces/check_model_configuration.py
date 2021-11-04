@@ -5,15 +5,17 @@
 import logging
 from pathlib import Path
 
-import typer
+from typer import Typer, colors, secho
 
 from src import model_configuration as model_config
 from src.loggers import set_console_handler_level
-from src.project_enums import ModelFitMethod, SpecletPipeline
 
 set_console_handler_level(logging.WARNING)
 
+app = Typer()
 
+
+@app.command()
 def check_model_configuration(path: Path) -> None:
     """Check a model configuration file.
 
@@ -25,37 +27,28 @@ def check_model_configuration(path: Path) -> None:
     Args:
         path (Path): Path to the config file.
     """
-    typer.secho(f"Checking model config: '{path.as_posix()}'", fg=typer.colors.BLUE)
+    secho(f"Checking model config: '{path.as_posix()}'", fg=colors.BLUE)
 
+    secho("Trying to parse configuration file...")
     configs = model_config.read_model_configurations(path)
-    typer.echo("Configuration file can be parsed: ✔︎")
+    secho("Configuration file can be parsed: ✔︎", fg=colors.GREEN)
 
+    secho("Checking all names are unique...")
     model_config.check_model_names_are_unique(configs)
-    typer.echo("Configuration names are unique: ✔︎")
+    secho("Configuration names are unique: ✔︎", fg=colors.GREEN)
 
+    secho("Checking all models can be instantiated and configured...")
     for config in configs.configurations:
+        secho(f"  {config.name}", fg=colors.BRIGHT_BLACK)
         _ = model_config.instantiate_and_configure_model(
             config,
             root_cache_dir=Path("temp"),
         )
-    typer.echo("All models can be instantiated and configured: ✔︎")
+    secho("All models can be instantiated and configured: ✔︎", fg=colors.GREEN)
 
-    for config in configs.configurations:
-        for fit_method in ModelFitMethod:
-            for pipeline in SpecletPipeline:
-                sampling_kwargs = model_config.get_sampling_kwargs_from_config(
-                    config=config,
-                    pipeline=pipeline,
-                    fit_method=fit_method,
-                )
-                model_config.check_sampling_kwargs(
-                    sampling_kwargs, fit_method=fit_method, pipeline=pipeline
-                )
-    typer.echo("All sampling parameterizations use acceptable keywords: ✔︎")
-
-    typer.secho("Configuration file looks good.", fg=typer.colors.GREEN)
+    secho("Configuration file looks good.", fg=colors.BLUE, bold=True)
     return None
 
 
 if __name__ == "__main__":
-    typer.run(check_model_configuration)
+    app()

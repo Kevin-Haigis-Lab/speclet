@@ -34,13 +34,25 @@ def _integerize_sampling_args(kwargs: dict[str, Any]) -> None:
     return None
 
 
-def _update_sampling_kwargs(kwargs: dict[str, Any], chains: int, cores: int) -> None:
-    sample_kwargs = kwargs.get("sample_kwargs", {})
-    for key, value in {"chains": chains, "cores": cores}.items():
+def _update_sampling_kwargs(
+    kwargs: dict[str, Any],
+    chains: int,
+    cores: int,
+    random_seed: Optional[int],
+    ignore_cache: bool,
+) -> None:
+    first_layer_kwargs = {"random_seed": random_seed, "ignore_cache": ignore_cache}
+    for key, value in first_layer_kwargs.items():
         if key in kwargs.keys():
-            logger.warn(f"Overriding configured '{key}'.")
-        sample_kwargs[key] = value
-    kwargs["sample_kwargs"] = sample_kwargs
+            logger.warn(f"Overriding configured '{key}' with {value}.")
+        kwargs[key] = value
+
+    model_sampling_kwargs = kwargs.get("sample_kwargs", {})
+    for key, value in {"chains": chains, "cores": cores}.items():
+        if key in model_sampling_kwargs.keys():
+            logger.warn(f"Overriding configured '{key}' with {value}.")
+        model_sampling_kwargs[key] = value
+    kwargs["sample_kwargs"] = model_sampling_kwargs
     return None
 
 
@@ -95,14 +107,24 @@ def sample_speclet_model(
         f"Model's cache directory: '{sp_model.cache_manager.cache_dir.as_posix()}'."
     )
 
-    sampling_kwargs: dict[str, Any] = model_config.get_sampling_kwargs(
+    sampling_arguments = model_config.get_sampling_kwargs(
         config_path=config_path,
         name=name,
         pipeline=SpecletPipeline.FITTING,
         fit_method=fit_method,
     )
-    _update_sampling_kwargs(sampling_kwargs, chains=mcmc_chains, cores=mcmc_cores)
-    _integerize_sampling_args(sampling_kwargs)
+    if sampling_arguments is None:
+        sampling_kwargs = {}
+    else:
+        sampling_kwargs = sampling_arguments.dict()
+
+    _update_sampling_kwargs(
+        sampling_kwargs,
+        chains=mcmc_chains,
+        cores=mcmc_cores,
+        random_seed=random_seed,
+        ignore_cache=ignore_cache,
+    )
     print(sampling_kwargs)
 
     logger.info("Running model build method.")
@@ -111,17 +133,11 @@ def sample_speclet_model(
     if sample:
         if fit_method is ModelFitMethod.ADVI:
             logger.info("Running ADVI fitting method.")
-            _ = sp_model.advi_sample_model(
-                random_seed=random_seed, ignore_cache=ignore_cache, **sampling_kwargs
-            )
+            _ = sp_model.advi_sample_model(**sampling_kwargs)
 
         elif fit_method is ModelFitMethod.MCMC:
             logger.info("Running MCMC fitting method.")
-            _ = sp_model.mcmc_sample_model(
-                random_seed=random_seed,
-                ignore_cache=ignore_cache,
-                **sampling_kwargs,
-            )
+            _ = sp_model.mcmc_sample_model(**sampling_kwargs)
         else:
             assert_never(fit_method)
 

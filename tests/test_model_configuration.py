@@ -1,17 +1,10 @@
 from pathlib import Path
-from typing import Any
 from uuid import uuid4
 
 import pytest
 import yaml
-from hypothesis import given
-from hypothesis import strategies as st
 
 from src import model_configuration as model_config
-from src.misc.check_kwarg_dict import (
-    KeywordsNotInCallableParametersError,
-    KeywordsWillBePassedToKwargsWarning,
-)
 from src.models.ceres_mimic import CeresMimic
 from src.models.speclet_five import SpecletFive
 from src.models.speclet_four import SpecletFour
@@ -27,6 +20,11 @@ from src.models.speclet_two import SpecletTwo
 from src.project_enums import ModelFitMethod, ModelOption
 from src.project_enums import ModelParameterization as MP
 from src.project_enums import SpecletPipeline
+
+
+@pytest.fixture(scope="function")
+def model_configs(mock_model_config: Path) -> model_config.ModelConfigs:
+    return model_config.read_model_configurations(mock_model_config)
 
 
 def test_configure_model(mock_model_config: Path, tmp_path: Path) -> None:
@@ -131,150 +129,15 @@ def test_get_config_and_instantiate_model(
     check_test_model_configurations(sp_model, model_name)
 
 
-@given(sampling_kwargs=st.dictionaries(st.text(), st.text()))
-@pytest.mark.parametrize("fit_method", ModelFitMethod)
-@pytest.mark.parametrize("pipeline", SpecletPipeline)
-def test_check_sampling_kwargs_raises(
-    sampling_kwargs: dict[str, str],
-    fit_method: ModelFitMethod,
-    pipeline: SpecletPipeline,
-) -> None:
-    if sampling_kwargs == {}:
-        model_config.check_sampling_kwargs(
-            sampling_kwargs, fit_method=fit_method, pipeline=pipeline
-        )
-    elif fit_method is ModelFitMethod.MCMC and pipeline is SpecletPipeline.SBC:
-        sampling_kwargs["fjieorjgiers;orgrhj"] = "vjdiorgvherogjheiorg"
-        with pytest.warns(KeywordsWillBePassedToKwargsWarning):
-            model_config.check_sampling_kwargs(
-                sampling_kwargs, fit_method=fit_method, pipeline=pipeline
-            )
-    else:
-        sampling_kwargs["fjieorjgiers;orgrhj"] = "vjdiorgvherogjheiorg"
-        with pytest.raises(KeywordsNotInCallableParametersError):
-            model_config.check_sampling_kwargs(
-                sampling_kwargs, fit_method=fit_method, pipeline=pipeline
-            )
-
-
-@pytest.mark.parametrize("fit_method", ModelFitMethod)
-@pytest.mark.parametrize("pipeline", SpecletPipeline)
-def test_check_sampling_kwargs_empty_always_passes(
-    fit_method: ModelFitMethod, pipeline: SpecletPipeline
-) -> None:
-    sampling_kwargs: dict[str, Any] = {}
-    model_config.check_sampling_kwargs(
-        sampling_kwargs, fit_method=fit_method, pipeline=pipeline
-    )
-
-
-@pytest.mark.parametrize(
-    "sampling_kwargs, fit_method, pipeline",
-    [
-        (
-            {
-                "prior_pred_samples": 10,
-                "random_seed": 20,
-                "sample_kwargs": {"draws": 10, "chains": 2},
-                "ignore_cache": True,
-            },
-            ModelFitMethod.MCMC,
-            SpecletPipeline.FITTING,
-        ),
-        (
-            {
-                "method": "advi-method",
-                "n_iterations": 29,
-                "draws": 34,
-                "prior_pred_samples": 210,
-                "random_seed": 0,
-                "fit_kwargs": {"key": "value"},
-                "ignore_cache": True,
-            },
-            ModelFitMethod.ADVI,
-            SpecletPipeline.FITTING,
-        ),
-        (
-            {"draws": 10, "tune": 9, "random_seed": 23, "return_inferencedata": True},
-            ModelFitMethod.MCMC,
-            SpecletPipeline.SBC,
-        ),
-        (
-            {"n": 10, "method": "advi-method", "random_seed": 23},
-            ModelFitMethod.ADVI,
-            SpecletPipeline.SBC,
-        ),
-    ],
-)
-def test_check_sampling_kwargs_all_fitmethods(
-    sampling_kwargs: dict[str, Any],
-    fit_method: ModelFitMethod,
-    pipeline: SpecletPipeline,
-) -> None:
-    model_config.check_sampling_kwargs(
-        sampling_kwargs, fit_method=fit_method, pipeline=pipeline
-    )
-
-
-@pytest.mark.parametrize(
-    "sampling_kwargs, fit_method, pipeline, raises",
-    [
-        (
-            {"not-a-real-variable": 10},
-            ModelFitMethod.MCMC,
-            SpecletPipeline.FITTING,
-            True,
-        ),
-        (
-            {"method": "advi-method", "fake-var": True},
-            ModelFitMethod.ADVI,
-            SpecletPipeline.FITTING,
-            True,
-        ),
-        (
-            {"draws": 10, "bad-var": "hi", "return_inferencedata": True},
-            ModelFitMethod.MCMC,
-            SpecletPipeline.SBC,
-            False,
-        ),
-        (
-            {"n": 10, "no-such-keyword": 10},
-            ModelFitMethod.ADVI,
-            SpecletPipeline.SBC,
-            True,
-        ),
-    ],
-)
-def test_check_sampling_kwargs_all_fitmethods_fails(
-    sampling_kwargs: dict[str, Any],
-    fit_method: ModelFitMethod,
-    pipeline: SpecletPipeline,
-    raises: bool,
-) -> None:
-    if raises:
-        with pytest.raises(KeywordsNotInCallableParametersError):
-            model_config.check_sampling_kwargs(
-                sampling_kwargs, fit_method=fit_method, pipeline=pipeline
-            )
-    else:
-        with pytest.warns(KeywordsWillBePassedToKwargsWarning):
-            model_config.check_sampling_kwargs(
-                sampling_kwargs, fit_method=fit_method, pipeline=pipeline
-            )
-
-
-def _filter_empty_configs(configs: model_config.ModelConfigs) -> bool:
-    return len(configs.configurations) > 0
-
-
-@given(st.builds(model_config.ModelConfigs).filter(_filter_empty_configs))
-def test_model_names_are_unique_fails(model_configs: model_config.ModelConfigs) -> None:
+@pytest.mark.DEV
+def test_model_names_are_unique_fails(mock_model_config: Path) -> None:
+    model_configs = model_config.read_model_configurations(mock_model_config)
     model_configs.configurations.append(model_configs.configurations[0])
     with pytest.raises(model_config.ModelNamesAreNotAllUnique):
         model_config.check_model_names_are_unique(model_configs)
 
 
-@given(st.builds(model_config.ModelConfigs).filter(_filter_empty_configs))
+@pytest.mark.DEV
 def test_model_names_are_unique_does_not_fail(
     model_configs: model_config.ModelConfigs,
 ) -> None:
@@ -304,21 +167,30 @@ def test_get_model_configuration(mock_model_config: Path) -> None:
         assert (config is not None) == result
 
 
-@pytest.mark.parametrize(
-    "name", ("my-test-model", "second-test-model", "no-config-test")
-)
 @pytest.mark.parametrize("pipeline", SpecletPipeline)
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
-def test_get_model_sampling_kwargs_dict(
-    name: str,
+def test_get_no_model_sampling_kwargs(
     pipeline: SpecletPipeline,
     fit_method: ModelFitMethod,
     mock_model_config: Path,
 ) -> None:
     sampling_kwargs = model_config.get_sampling_kwargs(
-        mock_model_config, name, pipeline=pipeline, fit_method=fit_method
+        mock_model_config, "my-test-model", pipeline=pipeline, fit_method=fit_method
     )
-    assert isinstance(sampling_kwargs, dict)
+    assert sampling_kwargs is None
+
+
+@pytest.mark.parametrize("pipeline", SpecletPipeline)
+@pytest.mark.parametrize("fit_method", ModelFitMethod)
+def test_get_sampling_kwargs(
+    pipeline: SpecletPipeline,
+    fit_method: ModelFitMethod,
+    mock_model_config: Path,
+) -> None:
+    sampling_kwargs = model_config.get_sampling_kwargs(
+        mock_model_config, "second-test-model", pipeline=pipeline, fit_method=fit_method
+    )
+    assert sampling_kwargs is not None
 
 
 @pytest.mark.parametrize(
@@ -326,7 +198,7 @@ def test_get_model_sampling_kwargs_dict(
     (
         ("my-test-model", SpecletPipeline.FITTING, ModelFitMethod.ADVI, False),
         ("second-test-model", SpecletPipeline.FITTING, ModelFitMethod.ADVI, True),
-        ("second-test-model", SpecletPipeline.FITTING, ModelFitMethod.MCMC, False),
+        ("second-test-model", SpecletPipeline.FITTING, ModelFitMethod.MCMC, True),
         ("second-test-model", SpecletPipeline.SBC, ModelFitMethod.ADVI, True),
         ("second-test-model", SpecletPipeline.SBC, ModelFitMethod.MCMC, True),
         ("no-config-test", SpecletPipeline.FITTING, ModelFitMethod.MCMC, False),
@@ -344,43 +216,7 @@ def test_get_model_sampling_kwargs_exist(
     sampling_kwargs = model_config.get_sampling_kwargs(
         mock_model_config, name, fit_method=fit_method, pipeline=pipeline
     )
-    assert (sampling_kwargs != {}) == exists
-
-
-@given(config=st.builds(model_config.ModelConfig))
-@pytest.mark.parametrize("fit_method", ModelFitMethod)
-@pytest.mark.parametrize("pipeline", SpecletPipeline)
-def test_get_model_sampling_from_config(
-    config: model_config.ModelConfig,
-    fit_method: ModelFitMethod,
-    pipeline: SpecletPipeline,
-) -> None:
-    kwargs = model_config.get_sampling_kwargs_from_config(
-        config, pipeline=pipeline, fit_method=fit_method
-    )
-    if config.sampling_arguments is None:
-        assert kwargs == {}
-    assert isinstance(kwargs, dict)
-
-
-@given(
-    config=st.builds(model_config.ModelConfig),
-    expected_kwargs=st.dictionaries(st.text(), st.integers()),
-)
-@pytest.mark.parametrize("fit_method", ModelFitMethod)
-@pytest.mark.parametrize("pipeline", SpecletPipeline)
-def test_get_model_sampling_from_config_correct_pipeline_fitmethod(
-    config: model_config.ModelConfig,
-    expected_kwargs: dict[str, int],
-    fit_method: ModelFitMethod,
-    pipeline: SpecletPipeline,
-) -> None:
-    pipeline_params = {pipeline: {fit_method: expected_kwargs.copy()}}
-    config.sampling_arguments = pipeline_params  # type: ignore
-    kwargs = model_config.get_sampling_kwargs_from_config(
-        config, pipeline=pipeline, fit_method=fit_method
-    )
-    assert kwargs == expected_kwargs
+    assert (sampling_kwargs is not None) == exists
 
 
 def test_model_config_with_optional_pipeline_field() -> None:
