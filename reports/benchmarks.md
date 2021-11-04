@@ -137,16 +137,16 @@ benchmark_df.head()
     </tr>
     <tr>
       <th>2</th>
-      <td>4568.8255</td>
-      <td>1:16:08</td>
-      <td>578.52</td>
-      <td>1054.55</td>
-      <td>576.08</td>
-      <td>576.22</td>
-      <td>129.52</td>
-      <td>24.68</td>
-      <td>99.07</td>
-      <td>4525.93</td>
+      <td>4842.7330</td>
+      <td>1:20:42</td>
+      <td>648.49</td>
+      <td>1130.01</td>
+      <td>645.73</td>
+      <td>645.89</td>
+      <td>321.32</td>
+      <td>145.66</td>
+      <td>96.27</td>
+      <td>4652.00</td>
       <td>eight-default_chain1</td>
       <td>sample_mcmc</td>
       <td>010_010_run-crc-sampling-snakemake</td>
@@ -169,16 +169,16 @@ benchmark_df.head()
     </tr>
     <tr>
       <th>4</th>
-      <td>4771.2836</td>
-      <td>1:19:31</td>
-      <td>549.35</td>
-      <td>1042.35</td>
-      <td>546.66</td>
-      <td>546.77</td>
-      <td>322.03</td>
-      <td>23.70</td>
-      <td>98.65</td>
-      <td>4706.62</td>
+      <td>4872.2791</td>
+      <td>1:21:12</td>
+      <td>633.27</td>
+      <td>1120.16</td>
+      <td>630.51</td>
+      <td>630.60</td>
+      <td>318.39</td>
+      <td>146.55</td>
+      <td>97.02</td>
+      <td>4724.19</td>
       <td>eight-default_chain3</td>
       <td>sample_mcmc</td>
       <td>010_010_run-crc-sampling-snakemake</td>
@@ -267,15 +267,15 @@ benchmark_df.groupby(["pipeline", "rule"]).mean().round(2)
     </tr>
     <tr>
       <th>sample_mcmc</th>
-      <td>2469.17</td>
-      <td>991.04</td>
-      <td>1615.71</td>
-      <td>983.54</td>
-      <td>986.15</td>
-      <td>594.46</td>
-      <td>33.34</td>
-      <td>57.95</td>
-      <td>2338.96</td>
+      <td>2515.63</td>
+      <td>1027.83</td>
+      <td>1643.51</td>
+      <td>1025.34</td>
+      <td>1025.45</td>
+      <td>629.36</td>
+      <td>79.11</td>
+      <td>56.97</td>
+      <td>2335.40</td>
     </tr>
     <tr>
       <th rowspan="4" valign="top">012_010_simulation-based-calibration-snakemake</th>
@@ -386,7 +386,7 @@ benchmark_df_long.head()
       <td>sample_mcmc</td>
       <td>eight-default_chain1</td>
       <td>cpu_time</td>
-      <td>4525.93</td>
+      <td>4652.00</td>
     </tr>
     <tr>
       <th>3</th>
@@ -402,7 +402,7 @@ benchmark_df_long.head()
       <td>sample_mcmc</td>
       <td>eight-default_chain3</td>
       <td>cpu_time</td>
-      <td>4706.62</td>
+      <td>4724.19</td>
     </tr>
   </tbody>
 </table>
@@ -429,7 +429,7 @@ sns.catplot(
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-11-02
+    Last updated: 2021-11-03
 
     Python implementation: CPython
     Python version       : 3.9.6
@@ -443,11 +443,11 @@ sns.catplot(
     CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-229.o2.rc.hms.harvard.edu
 
     Git branch: sp8-run
 
-    plotnine: 0.8.0
     janitor : 0.21.0
     seaborn : 0.11.2
     pandas  : 1.3.2
+    plotnine: 0.8.0
