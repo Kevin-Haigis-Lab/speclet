@@ -58,11 +58,11 @@ sp8 = get_config_and_instantiate_model(
 )
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[11/03/21 17:03:28] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Instantiating and configuring a       <a href="file:///Users/admin/Lab_Projects/speclet/src/model_configuration.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_configuration.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:238</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[11/04/21 08:05:00] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Instantiating and configuring a       <a href="file:///Users/admin/Lab_Projects/speclet/src/model_configuration.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">model_configuration.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:238</span>
                              speclet model from config.
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Creating a new SpecletEight object.          <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:94</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Creating a new SpecletEight object.          <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:92</span>
 </pre>
 
 <pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Adding new transformation.                  <a href="file:///Users/admin/Lab_Projects/speclet/src/managers/data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:171</span>
@@ -79,77 +79,74 @@ sp8.build_model()
 pm.model_to_graphviz(sp8.model)
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Calling `<span style="color: #800080; text-decoration-color: #800080; font-weight: bold">model_specification</span><span style="font-weight: bold">()</span>` method.     <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_model.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_model.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:148</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[11/04/21 08:05:05] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Calling `<span style="color: #800080; text-decoration-color: #800080; font-weight: bold">model_specification</span><span style="font-weight: bold">()</span>` method.     <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_model.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_model.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:148</span>
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Creating SpecletEight model.                <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:126</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Creating SpecletEight model.                <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:123</span>
 </pre>
 
 <pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Getting data - reading from file.           <a href="file:///Users/admin/Lab_Projects/speclet/src/managers/data_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">data_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:126</span>
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[11/03/21 17:03:29] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple genes.     <a href="file:///Users/admin/Lab_Projects/speclet/src/data_processing/achilles.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">achilles.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:616</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> sgRNA that map to multiple genes.     <a href="file:///Users/admin/Lab_Projects/speclet/src/data_processing/achilles.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">achilles.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:616</span>
 </pre>
 
 <pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Adding <span style="color: #008000; text-decoration-color: #008000">'rna_expr_gene_lineage'</span> column. <a href="file:///Users/admin/Lab_Projects/speclet/src/modeling/feature_engineering.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">feature_engineering.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:73</span>
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> Reducing number of genes for development.    <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:47</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[11/04/21 08:05:07] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of data points: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1120</span>                 <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:127</span>
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of data points: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">56</span>                   <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:130</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of sgRNA: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">160</span>                        <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:129</span>
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of sgRNA: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span>                          <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:132</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of genes: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">101</span>                        <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:130</span>
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of genes: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4</span>                          <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:133</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of cell lines: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">7</span>                     <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:131</span>
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of cell lines: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">7</span>                     <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:134</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of lineages: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span>                       <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:132</span>
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of lineages: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span>                       <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:135</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Creating coordinates dictionary.            <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:135</span>
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Creating coordinates dictionary.            <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:138</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Creating RNA expression matrix.             <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:145</span>
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Creating RNA expression matrix.             <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:148</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Building PyMC3 model.                       <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:149</span>
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Building PyMC3 model.                       <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:152</span>
-</pre>
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[11/03/21 17:03:36] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Non-centered parameterization for var       <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:207</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[11/04/21 08:05:15] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Non-centered parameterization for var       <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:204</span>
                              <span style="color: #008000; text-decoration-color: #008000">'mu_h'</span>.
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[11/03/21 17:03:39] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Non-centered parameterization for var <span style="color: #008000; text-decoration-color: #008000">'h'</span>.  <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:223</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[11/04/21 08:05:18] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Non-centered parameterization for var <span style="color: #008000; text-decoration-color: #008000">'h'</span>.  <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:220</span>
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[11/03/21 17:03:41] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Non-centered parameterization for var       <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:207</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[11/04/21 08:05:20] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Non-centered parameterization for var       <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:204</span>
                              <span style="color: #008000; text-decoration-color: #008000">'mu_q'</span>.
 </pre>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[11/03/21 17:03:42] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Non-centered parameterization for var <span style="color: #008000; text-decoration-color: #008000">'q'</span>.  <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:223</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[11/04/21 08:05:21] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Non-centered parameterization for var <span style="color: #008000; text-decoration-color: #008000">'q'</span>.  <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_eight.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_eight.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:220</span>
 </pre>
 
-![svg](020_010_analyze-sp8-subsample-data_files/020_010_analyze-sp8-subsample-data_5_18.svg)
+![svg](020_010_analyze-sp8-subsample-data_files/020_010_analyze-sp8-subsample-data_5_17.svg)
 
 ```python
-sp8.mcmc_sample_model(
-    prior_pred_samples=-1,
-    random_seed=9303,
-    sample_kwargs={
-        "draws": 1000,
-        "tune": 1000,
-        "init": "advi",
-        "n_init": 20000,
-        "target_accept": 0.95,
-    },
-    ignore_cache=True,
-)
+# sp8.mcmc_sample_model(
+#     prior_pred_samples=-1,
+#     random_seed=9303,
+#     sample_kwargs={
+#         "draws": 1000,
+#         "tune": 1000,
+#         "init": "advi",
+#         "n_init": 20000,
+#         "target_accept": 0.95,
+#     },
+#     ignore_cache=True,
+# )
 ```
 
 <pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[11/03/21 17:03:54] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Beginning MCMC sampling.                    <a href="file:///Users/admin/Lab_Projects/speclet/src/models/speclet_model.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">speclet_model.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:217</span>
@@ -3588,7 +3585,7 @@ else:
     raise CacheDoesNotExistError(sp8.cache_manager.mcmc_cache_delegate.cache_dir)
 ```
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[11/03/21 17:21:03] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> ArvizCacheManager: MCMC cache exists.      <a href="file:///Users/admin/Lab_Projects/speclet/src/managers/cache_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">cache_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:119</span>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[11/04/21 08:05:29] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> ArvizCacheManager: MCMC cache exists.      <a href="file:///Users/admin/Lab_Projects/speclet/src/managers/cache_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">cache_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:119</span>
 </pre>
 
 <pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> ArvizCacheManager: MCMC cache exists.      <a href="file:///Users/admin/Lab_Projects/speclet/src/managers/cache_managers.py"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">cache_managers.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:119</span>
@@ -3631,11 +3628,11 @@ plt.show()
 _ = pmanal.describe_mcmc(sp8_trace)
 ```
 
-    sampled 2 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 14, 41
-    percent divergences: 1.4, 4.1
-    BFMI: 0.283, 0.324
-    avg. step size: 0.012, 0.024
+    sampled 4 chains with (unknown) tuning steps and 2,000 draws
+    num. divergences: 4, 0, 30, 9
+    percent divergences: 0.2, 0.0, 1.5, 0.45
+    BFMI: 0.678, 0.421, 0.222, 0.428
+    avg. step size: 0.0, 0.0, 0.001, 0.0
 
 ![png](020_010_analyze-sp8-subsample-data_files/020_010_analyze-sp8-subsample-data_10_1.png)
 
@@ -3674,184 +3671,184 @@ az.summary(sp8_trace, main_var_names).sort_values("r_hat", ascending=False).head
   </thead>
   <tbody>
     <tr>
-      <th>sigma_beta[3,0]</th>
-      <td>0.455</td>
-      <td>0.237</td>
-      <td>0.011</td>
-      <td>0.807</td>
-      <td>0.067</td>
-      <td>0.049</td>
-      <td>14.0</td>
-      <td>77.0</td>
-      <td>1.15</td>
-    </tr>
-    <tr>
-      <th>alpha</th>
-      <td>22.198</td>
-      <td>15.011</td>
-      <td>3.709</td>
-      <td>50.029</td>
-      <td>3.011</td>
-      <td>2.155</td>
-      <td>16.0</td>
-      <td>60.0</td>
-      <td>1.14</td>
-    </tr>
-    <tr>
-      <th>beta[5,4]</th>
-      <td>-1.654</td>
-      <td>0.658</td>
-      <td>-2.579</td>
-      <td>-0.360</td>
-      <td>0.204</td>
-      <td>0.148</td>
-      <td>14.0</td>
-      <td>54.0</td>
-      <td>1.14</td>
-    </tr>
-    <tr>
-      <th>sigma_beta[2,0]</th>
-      <td>0.343</td>
-      <td>0.182</td>
-      <td>0.026</td>
-      <td>0.643</td>
-      <td>0.041</td>
-      <td>0.030</td>
-      <td>18.0</td>
-      <td>49.0</td>
-      <td>1.11</td>
-    </tr>
-    <tr>
-      <th>beta[0,0]</th>
-      <td>-0.288</td>
-      <td>0.328</td>
-      <td>-0.820</td>
-      <td>0.352</td>
-      <td>0.068</td>
-      <td>0.049</td>
-      <td>27.0</td>
-      <td>310.0</td>
-      <td>1.09</td>
-    </tr>
-    <tr>
-      <th>sigma_sigma_beta</th>
-      <td>4.556</td>
-      <td>3.263</td>
-      <td>0.587</td>
-      <td>10.273</td>
-      <td>0.783</td>
-      <td>0.563</td>
-      <td>27.0</td>
-      <td>34.0</td>
-      <td>1.08</td>
-    </tr>
-    <tr>
-      <th>beta[4,6]</th>
-      <td>-1.173</td>
-      <td>0.317</td>
-      <td>-1.719</td>
-      <td>-0.542</td>
-      <td>0.060</td>
-      <td>0.043</td>
-      <td>31.0</td>
-      <td>207.0</td>
-      <td>1.07</td>
-    </tr>
-    <tr>
-      <th>beta[0,6]</th>
-      <td>-1.128</td>
-      <td>0.320</td>
-      <td>-1.665</td>
-      <td>-0.527</td>
-      <td>0.053</td>
-      <td>0.038</td>
-      <td>41.0</td>
-      <td>252.0</td>
-      <td>1.06</td>
-    </tr>
-    <tr>
-      <th>sigma_beta[0,0]</th>
-      <td>0.208</td>
-      <td>0.131</td>
-      <td>0.011</td>
-      <td>0.433</td>
-      <td>0.018</td>
-      <td>0.013</td>
-      <td>44.0</td>
-      <td>83.0</td>
-      <td>1.06</td>
-    </tr>
-    <tr>
-      <th>beta[4,1]</th>
-      <td>-0.042</td>
-      <td>0.251</td>
-      <td>-0.473</td>
-      <td>0.468</td>
-      <td>0.038</td>
-      <td>0.027</td>
-      <td>49.0</td>
-      <td>346.0</td>
-      <td>1.05</td>
-    </tr>
-    <tr>
-      <th>beta[6,0]</th>
-      <td>0.146</td>
-      <td>0.258</td>
-      <td>-0.324</td>
-      <td>0.626</td>
-      <td>0.036</td>
-      <td>0.026</td>
-      <td>55.0</td>
-      <td>435.0</td>
-      <td>1.05</td>
-    </tr>
-    <tr>
-      <th>beta[0,3]</th>
-      <td>0.185</td>
-      <td>0.283</td>
-      <td>-0.297</td>
-      <td>0.736</td>
-      <td>0.045</td>
-      <td>0.032</td>
-      <td>47.0</td>
-      <td>300.0</td>
-      <td>1.05</td>
-    </tr>
-    <tr>
-      <th>beta[5,1]</th>
-      <td>0.430</td>
-      <td>0.239</td>
-      <td>-0.056</td>
-      <td>0.845</td>
-      <td>0.035</td>
-      <td>0.025</td>
-      <td>49.0</td>
-      <td>363.0</td>
-      <td>1.05</td>
-    </tr>
-    <tr>
-      <th>beta[0,2]</th>
-      <td>-0.449</td>
-      <td>0.295</td>
-      <td>-0.960</td>
-      <td>0.139</td>
-      <td>0.035</td>
-      <td>0.025</td>
-      <td>114.0</td>
-      <td>229.0</td>
-      <td>1.04</td>
-    </tr>
-    <tr>
-      <th>beta[0,1]</th>
-      <td>0.402</td>
-      <td>0.213</td>
+      <th>h[27,2]</th>
       <td>0.001</td>
-      <td>0.804</td>
-      <td>0.027</td>
-      <td>0.019</td>
-      <td>58.0</td>
-      <td>463.0</td>
-      <td>1.04</td>
+      <td>0.310</td>
+      <td>-0.564</td>
+      <td>0.477</td>
+      <td>0.147</td>
+      <td>0.112</td>
+      <td>5.0</td>
+      <td>20.0</td>
+      <td>2.44</td>
+    </tr>
+    <tr>
+      <th>mu_beta[27,5]</th>
+      <td>0.001</td>
+      <td>0.322</td>
+      <td>-0.620</td>
+      <td>0.450</td>
+      <td>0.152</td>
+      <td>0.115</td>
+      <td>5.0</td>
+      <td>28.0</td>
+      <td>2.44</td>
+    </tr>
+    <tr>
+      <th>mu_beta[27,2]</th>
+      <td>0.003</td>
+      <td>0.315</td>
+      <td>-0.578</td>
+      <td>0.468</td>
+      <td>0.150</td>
+      <td>0.114</td>
+      <td>5.0</td>
+      <td>21.0</td>
+      <td>2.44</td>
+    </tr>
+    <tr>
+      <th>h[27,5]</th>
+      <td>0.043</td>
+      <td>0.251</td>
+      <td>-0.400</td>
+      <td>0.431</td>
+      <td>0.117</td>
+      <td>0.088</td>
+      <td>5.0</td>
+      <td>23.0</td>
+      <td>2.38</td>
+    </tr>
+    <tr>
+      <th>sigma_beta[92,0]</th>
+      <td>0.045</td>
+      <td>0.061</td>
+      <td>0.000</td>
+      <td>0.167</td>
+      <td>0.022</td>
+      <td>0.016</td>
+      <td>5.0</td>
+      <td>14.0</td>
+      <td>2.28</td>
+    </tr>
+    <tr>
+      <th>sigma_beta[51,0]</th>
+      <td>0.050</td>
+      <td>0.066</td>
+      <td>0.000</td>
+      <td>0.177</td>
+      <td>0.024</td>
+      <td>0.018</td>
+      <td>5.0</td>
+      <td>11.0</td>
+      <td>2.27</td>
+    </tr>
+    <tr>
+      <th>mu_beta[27,6]</th>
+      <td>-0.003</td>
+      <td>0.319</td>
+      <td>-0.562</td>
+      <td>0.429</td>
+      <td>0.148</td>
+      <td>0.112</td>
+      <td>5.0</td>
+      <td>29.0</td>
+      <td>2.25</td>
+    </tr>
+    <tr>
+      <th>mu_beta[27,0]</th>
+      <td>0.023</td>
+      <td>0.283</td>
+      <td>-0.504</td>
+      <td>0.457</td>
+      <td>0.128</td>
+      <td>0.097</td>
+      <td>5.0</td>
+      <td>33.0</td>
+      <td>2.23</td>
+    </tr>
+    <tr>
+      <th>mu_beta[97,5]</th>
+      <td>0.034</td>
+      <td>0.273</td>
+      <td>-0.490</td>
+      <td>0.473</td>
+      <td>0.123</td>
+      <td>0.092</td>
+      <td>5.0</td>
+      <td>22.0</td>
+      <td>2.23</td>
+    </tr>
+    <tr>
+      <th>mu_beta[46,6]</th>
+      <td>0.141</td>
+      <td>0.359</td>
+      <td>-0.505</td>
+      <td>0.764</td>
+      <td>0.159</td>
+      <td>0.120</td>
+      <td>5.0</td>
+      <td>30.0</td>
+      <td>2.22</td>
+    </tr>
+    <tr>
+      <th>mu_beta[73,3]</th>
+      <td>0.042</td>
+      <td>0.337</td>
+      <td>-0.672</td>
+      <td>0.636</td>
+      <td>0.152</td>
+      <td>0.115</td>
+      <td>5.0</td>
+      <td>14.0</td>
+      <td>2.18</td>
+    </tr>
+    <tr>
+      <th>h[35,2]</th>
+      <td>-0.016</td>
+      <td>0.255</td>
+      <td>-0.519</td>
+      <td>0.408</td>
+      <td>0.114</td>
+      <td>0.086</td>
+      <td>5.0</td>
+      <td>29.0</td>
+      <td>2.15</td>
+    </tr>
+    <tr>
+      <th>h[27,0]</th>
+      <td>0.041</td>
+      <td>0.245</td>
+      <td>-0.419</td>
+      <td>0.431</td>
+      <td>0.110</td>
+      <td>0.083</td>
+      <td>5.0</td>
+      <td>28.0</td>
+      <td>2.15</td>
+    </tr>
+    <tr>
+      <th>mu_beta[35,2]</th>
+      <td>-0.015</td>
+      <td>0.259</td>
+      <td>-0.520</td>
+      <td>0.417</td>
+      <td>0.115</td>
+      <td>0.087</td>
+      <td>5.0</td>
+      <td>29.0</td>
+      <td>2.14</td>
+    </tr>
+    <tr>
+      <th>h[35,0]</th>
+      <td>-0.004</td>
+      <td>0.266</td>
+      <td>-0.503</td>
+      <td>0.430</td>
+      <td>0.119</td>
+      <td>0.089</td>
+      <td>5.0</td>
+      <td>29.0</td>
+      <td>2.13</td>
     </tr>
   </tbody>
 </table>
@@ -3864,14 +3861,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 17.96 minutes
+    execution time: 13.09 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-11-03
+    Last updated: 2021-11-04
 
     Python implementation: CPython
     Python version       : 3.9.6
@@ -3889,16 +3886,16 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Git branch: sp8-run
 
-    numpy     : 1.21.2
-    pymc3     : 3.11.2
-    pandas    : 1.3.2
-    matplotlib: 3.4.3
-    seaborn   : 0.11.2
-    logging   : 0.5.1.2
     plotnine  : 0.8.0
     arviz     : 0.11.2
+    numpy     : 1.21.2
     sys       : 3.9.6 | packaged by conda-forge | (default, Jul 11 2021, 03:36:15)
     [Clang 11.1.0 ]
+    matplotlib: 3.4.3
+    seaborn   : 0.11.2
+    pandas    : 1.3.2
+    pymc3     : 3.11.2
+    logging   : 0.5.1.2
 
 ```python
 
