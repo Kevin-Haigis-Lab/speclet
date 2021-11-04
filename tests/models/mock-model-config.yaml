@@ -23,15 +23,15 @@
         n_iterations: 400
         draws: 25
       MCMC:
-        samples_kwargs:
+        sample_kwargs:
           draws: 34
     sbc:
       ADVI:
         n_iterations: 100
       MCMC:
         prior_pred_samples: 50
-        samples_kwargs:
-          target_accept: 0.85
+        sample_kwargs:
+          target_accept: 0.83
 
 - name: no-config-test
   description: A config without a `config` section.

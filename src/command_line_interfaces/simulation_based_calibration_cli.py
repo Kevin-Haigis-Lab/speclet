@@ -111,6 +111,7 @@ def run_sbc(
     sp_model = model_config.get_config_and_instantiate_model(
         config_path=config_path, name=name, root_cache_dir=cache_dir
     )
+
     config_sampling_kwargs = model_config.get_sampling_kwargs(
         config_path=config_path,
         name=name,

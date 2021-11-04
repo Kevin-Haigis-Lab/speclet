@@ -7,13 +7,12 @@ import pandas as pd
 import pytest
 from typer.testing import CliRunner
 
-from src import model_configuration as model_config
 from src import project_enums
 from src.command_line_interfaces import simulation_based_calibration_cli as sbc_cli
 from src.modeling.pymc3_sampling_api import ApproximationSamplingResults
 from src.modeling.simulation_based_calibration_helpers import SBCFileManager, SBCResults
 from src.models.speclet_pipeline_test_model import SpecletTestModel
-from src.project_enums import MockDataSize, ModelFitMethod, ModelOption, SpecletPipeline
+from src.project_enums import MockDataSize, ModelFitMethod
 
 runner = CliRunner()
 
@@ -105,71 +104,46 @@ def test_cache_files_are_removed_if_final_check_fails(
     assert not sp_model.cache_manager.advi_cache_exists()
 
 
-@pytest.mark.parametrize("fit_method", ModelFitMethod)
+@pytest.mark.DEV
+@pytest.mark.parametrize(
+    "fit_method, expected_kwargs",
+    [
+        (ModelFitMethod.ADVI, {"n_iterations": 100}),
+        (
+            ModelFitMethod.MCMC,
+            {"prior_pred_samples": 50, "sample_kwargs": {"target_accept": 0.83}},
+        ),
+    ],
+)
 def test_uses_configuration_fitting_parameters(
     monkeypatch: pytest.MonkeyPatch,
     fit_method: ModelFitMethod,
+    expected_kwargs: dict[str, Any],
+    mock_model_config: Path,
     tmp_path: Path,
 ) -> None:
-    advi_kwargs = {"n_iterations": 42, "draws": 23}
-    mcmc_kwargs = {
-        "prior_pred_samples": 121,
-        "sample_kwargs": {"tune": 33, "target_accept": 0.2, "cores": 1},
-    }
-
     def _compare_dicts(d1: dict[str, Any], d2: dict[str, Any]) -> None:
         for k, v in d1.items():
-            assert v == d2[k]
+            if isinstance(v, dict):
+                _compare_dicts(v, d2.get(k, {}))
+            else:
+                assert v == d2[k]
 
     def intercept_fit_kwargs_dict(*args: Any, **kwargs: Any) -> None:
-        fit_kwargs: Optional[dict[Any, Any]] = kwargs["fit_kwargs"]
+        fit_kwargs: Optional[dict[Any, Any]] = kwargs.get("fit_kwargs")
         assert fit_kwargs is not None
-        if fit_method is ModelFitMethod.ADVI:
-            _compare_dicts(advi_kwargs, fit_kwargs)
-        elif fit_method is ModelFitMethod.MCMC:
-            _compare_dicts(mcmc_kwargs, fit_kwargs)
-        else:
-            project_enums.assert_never(fit_method)
+        _compare_dicts(expected_kwargs, fit_kwargs)
 
     monkeypatch.setattr(
         SpecletTestModel, "run_simulation_based_calibration", intercept_fit_kwargs_dict
-    )
-
-    model_name = "my-test-model"
-
-    def get_mock_model_config(
-        *args: Any, **kwargs: Any
-    ) -> Optional[model_config.ModelConfig]:
-        return model_config.ModelConfig(
-            name=model_name,
-            description="",
-            model=ModelOption.SPECLET_TEST_MODEL,
-            pipelines={
-                SpecletPipeline.FITTING: [ModelFitMethod.ADVI],
-                SpecletPipeline.SBC: [ModelFitMethod.ADVI],
-            },
-            sampling_arguments={
-                SpecletPipeline.SBC: {
-                    ModelFitMethod.ADVI: advi_kwargs,
-                    ModelFitMethod.MCMC: mcmc_kwargs,
-                },
-                SpecletPipeline.FITTING: {
-                    ModelFitMethod.ADVI: {},
-                    ModelFitMethod.MCMC: {},
-                },
-            },
-        )
-
-    monkeypatch.setattr(
-        model_config, "get_configuration_for_model", get_mock_model_config
     )
 
     result = runner.invoke(
         sbc_cli.app,
         [
             "run-sbc",
-            model_name,
-            "not-real-config.yaml",
+            "second-test-model",
+            mock_model_config.as_posix(),
             fit_method.value,
             tmp_path.as_posix(),
             "111",
@@ -178,6 +152,7 @@ def test_uses_configuration_fitting_parameters(
             "--no-check-results",
         ],
     )
+    # print(result.output)  # uncomment to help with debugging
     assert result.exit_code == 0
 
 

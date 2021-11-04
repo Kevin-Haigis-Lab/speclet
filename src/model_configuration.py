@@ -7,6 +7,7 @@ from typing import Any, Callable, Iterable, Optional, Union
 import pymc3 as pm
 import yaml
 from pydantic import BaseModel, Field, PositiveInt
+from pydantic.types import confloat
 
 from src.io.data_io import project_root_dir
 from src.loggers import logger
@@ -22,6 +23,7 @@ from src.models.speclet_simple import SpecletSimple
 from src.models.speclet_six import SpecletSix
 from src.models.speclet_two import SpecletTwo
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline, assert_never
+from src.types import BasicTypes
 
 # ---- Types ----
 
@@ -38,11 +40,11 @@ SpecletProjectModelTypes = Union[
     SpecletEight,
 ]
 
-
-BasicTypes = Union[float, str, int, bool, None]
-
+TargetAcceptFloat = confloat(ge=0.5, lt=1.0)
 
 # ----  Configuration classes ----
+
+
 class Pymc3SampleArguments(BaseModel):
     """Model `sample()` keyword arguments (PyMC3 v3.11.2)."""
 
@@ -61,6 +63,7 @@ class Pymc3SampleArguments(BaseModel):
     compute_convergence_checks: bool = True
     return_inferencedata: Optional[bool] = True  # not default
     idata_kwargs: Optional[dict[str, BasicTypes]] = None
+    target_accept: TargetAcceptFloat = 0.8  # type: ignore
 
     def __init__(self, **data: dict[str, Any]) -> None:
         """Create a Pymc3SampleArguments object.
