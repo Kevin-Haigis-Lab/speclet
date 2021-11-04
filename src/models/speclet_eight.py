@@ -15,12 +15,10 @@ from src.data_processing import achilles as achelp
 from src.io.data_io import DataFile
 from src.loggers import logger
 from src.managers.data_managers import (
-    CrisprScreenDataManager,
     Data,
     DataFrameTransformation,
-    common_crispr_screen_transformations,
+    make_count_model_data_manager,
 )
-from src.modeling import feature_engineering as feng
 from src.models.speclet_model import (
     ObservedVarName,
     SpecletModel,
@@ -32,14 +30,6 @@ class SpecletEightConfiguration(BaseModel):
     """Configuration for SpecletEight."""
 
     broad_only: bool = True
-
-
-def _append_total_read_counts(df: Data) -> Data:
-    return achelp.append_total_read_counts(df)
-
-
-def _add_useful_read_count_columns(df: Data) -> Data:
-    return achelp.add_useful_read_count_columns(df)
 
 
 def _reduce_num_genes_for_dev(df: Data) -> Data:
@@ -61,46 +51,6 @@ def _thin_data_columns(df: Data) -> Data:
         "screen",
     ]
     return df[keep_cols]
-
-
-def make_count_model_data_manager(
-    data_source: DataFile,
-    other_transforms: Optional[list[DataFrameTransformation]] = None,
-) -> CrisprScreenDataManager:
-    """Make a data manager good for models of count data.
-
-    Default list of data transformation:
-
-    1. z-scale RNA expression by gene and lineage (`src.modeling.feature_engineering`)
-    2. append total read counts (`src.data_processing.achilles`)
-    3. add useful read count columns (`src.data_processing.achilles`)
-    4. (optional additional transformations)
-    5. set Achilles categorical columns (`src.data_processing.achilles`)
-
-    Args:
-        data_source (DataFile): Data source.
-        other_transforms (Optional[list[DataFrameTransformation]], optional): Additional
-          transformation to include in the data manager's defaults. Defaults to None.
-
-    Returns:
-        CrisprScreenDataManager: Data manager for count modeling.
-    """
-    data_manager = CrisprScreenDataManager(data_source=data_source)
-
-    data_transformations = common_crispr_screen_transformations.copy()
-    data_transformations += [
-        feng.zscale_rna_expression_by_gene_and_lineage,
-        _append_total_read_counts,
-        _add_useful_read_count_columns,
-    ]
-
-    if other_transforms is not None:
-        data_transformations += other_transforms
-
-    data_manager.add_transformation(data_transformations)
-    # Need to add at end because `p_dna_batch` becomes non-categorical.
-    data_manager.add_transformation(achelp.set_achilles_categorical_columns)
-    return data_manager
 
 
 class SpecletEight(SpecletModel):
