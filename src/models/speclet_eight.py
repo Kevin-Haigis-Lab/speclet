@@ -10,8 +10,6 @@ import pandas as pd
 import pymc3 as pm
 from pydantic import BaseModel
 from pymc3.model import FreeRV as pmFreeRV
-from theano import shared as ts
-from theano import tensor as tt
 
 from src.data_processing import achilles as achelp
 from src.io.data_io import DataFile
@@ -41,6 +39,12 @@ def _append_total_read_counts(df: Data) -> Data:
 
 def _add_useful_read_count_columns(df: Data) -> Data:
     return achelp.add_useful_read_count_columns(df)
+
+
+def _reduce_num_genes_for_dev(df: Data) -> Data:
+    logger.warn("Reducing number of genes for development.")
+    _genes = ["KRAS", "TP53", "NLRP8", "KLF5"]
+    return df[df.hugo_symbol.isin(_genes)]
 
 
 def _thin_data_columns(df: Data) -> Data:
@@ -128,10 +132,9 @@ class SpecletEight(SpecletModel):
         logger.info(f"Number of lineages: {co_idx.n_lineages}")
         # b_idx = achelp.data_batch_indices(data)
 
-        logger.info("Creating shared variables.")
-        x_initial = ts(data.counts_initial_adj.values)
-
+        logger.info("Creating coordinates dictionary.")
         coords = {
+            "one": ["dim_one"],
             "sgrna": data.sgrna.cat.categories,
             "gene": data.hugo_symbol.cat.categories,
             "cell_line": data.depmap_id.cat.categories,
@@ -139,9 +142,11 @@ class SpecletEight(SpecletModel):
             "batch": data.p_dna_batch.cat.categories,
         }
 
+        logger.info("Creating RNA expression matrix.")
         rna_expr_matrix = _rna_expr_gene_lineage_matrix(data, "rna_expr_gene_lineage")
-        _sgrna_by_cell_line = (co_idx.n_sgrnas, co_idx.n_celllines)
+        # _sgrna_by_cell_line = (co_idx.n_sgrnas, co_idx.n_celllines)
 
+        logger.info("Building PyMC3 model.")
         with pm.Model(coords=coords) as model:
             s = pm.Data("sgrna_idx", co_idx.sgrna_idx)
             g_s = pm.Data("sgrna_to_gene_idx", co_idx.sgrna_to_gene_idx)
@@ -149,62 +154,77 @@ class SpecletEight(SpecletModel):
             l_c = pm.Data("cell_line_to_lineage_idx", co_idx.cellline_to_lineage_idx)
             # b = pm.Data("batch_idx", b_idx.batch_idx)
             rna_expr = pm.Data("rna_expression_gl", rna_expr_matrix)
-            x_initial = pm.Data("x_initial", data.counts_initial_adj.values)
-            counts_final = pm.Data("counts_final", data.counts_final.values)
+            ct_initial = pm.Data("ct_initial", data.counts_initial_adj.values)
+            ct_final = pm.Data("ct_final", data.counts_final.values)
 
             h = _gene_by_cell_line_hierarchical_structure(
-                "h", co_idx=co_idx, l_c_idx=l_c
+                "h", l_c_idx=l_c, centered=False
             )
             q = _gene_by_cell_line_hierarchical_structure(
-                "q", co_idx=co_idx, l_c_idx=l_c
+                "q", l_c_idx=l_c, centered=False
             )
 
-            mu_beta = pm.Deterministic(
-                "mu_beta", h + q * rna_expr
-            )  # shape: [gene x cell line]
+            # shape: [gene x cell line]
+            mu_beta = pm.Deterministic("mu_beta", h + q * rna_expr)
 
-            sigma_sigma_beta = pm.HalfNormal("sigma_sigma_beta", 1)
-            sigma_beta = pm.HalfNormal("sigma_beta", sigma_sigma_beta, dims="gene")
+            sigma_sigma_beta = pm.Exponential("sigma_sigma_beta", 0.2)
+            sigma_beta = pm.Exponential(
+                "sigma_beta", sigma_sigma_beta, dims=("gene", "one")
+            )
 
-            beta_sgrna = pm.Normal(
-                "beta_sgrna",
+            beta = pm.Normal(
+                "beta",
                 mu_beta[g_s, :],
-                tt.ones(shape=_sgrna_by_cell_line)
-                * sigma_beta[g_s].reshape((co_idx.n_sgrnas, 1)),
+                sigma_beta[g_s, :],
                 dims=("sgrna", "cell_line"),
             )
 
-            eta = pm.Deterministic("eta", beta_sgrna[s, c])
+            eta = pm.Deterministic("eta", beta[s, c])
             mu = pm.Deterministic("mu", pm.math.exp(eta))
-            alpha = pm.HalfCauchy("alpha", 5)
+            alpha = pm.Exponential("alpha", 1 / 10)
             y = pm.NegativeBinomial(  # noqa: F841
-                "y", x_initial * mu, alpha, observed=counts_final
+                "y", ct_initial * mu, alpha, observed=ct_final
             )
 
         return model, "y"
 
 
 def _gene_by_cell_line_hierarchical_structure(
-    name: str, co_idx: achelp.CommonIndices, l_c_idx: Union[np.ndarray, pm.Data]
+    name: str,
+    l_c_idx: Union[np.ndarray, pm.Data],
+    centered: bool = True,
 ) -> pmFreeRV:
-    _gene_by_cell_line = (co_idx.n_genes, co_idx.n_celllines)
+    mu_mu_x = pm.Normal(f"mu_mu_{name}", 0, 1)
+    sigma_mu_x = pm.HalfNormal(f"sigma_mu_{name}", 1)
 
-    mu_mu_beta = pm.Normal(f"mu_mu_{name}", 0, 1)
-    sigma_mu_beta = pm.HalfNormal(f"sigma_mu_{name}", 1)
-    mu_beta = pm.Normal(
-        f"mu_{name}", mu_mu_beta, sigma_mu_beta, dims=("gene", "lineage")
-    )
+    if centered:
+        logger.info(f"Centered parameterization for var 'mu_{name}'.")
+        mu_x = pm.Normal(f"mu_{name}", mu_mu_x, sigma_mu_x, dims=("gene", "lineage"))
+    else:
+        logger.info(f"Non-centered parameterization for var 'mu_{name}'.")
+        mu_x_delta = pm.Normal(f"mu_{name}_Δ", 0, 1, dims=("gene", "lineage"))
+        mu_x = pm.Deterministic(f"mu_{name}", mu_mu_x + mu_x_delta * sigma_mu_x)
 
-    sigma_sigma_beta = pm.HalfNormal(f"sigma_sigma_{name}", 1)
-    sigma_beta = pm.HalfNormal(f"sigma_{name}", sigma_sigma_beta, dims="lineage")
+    sigma_sigma_x = pm.HalfNormal(f"sigma_sigma_{name}", 1)
+    sigma_x = pm.HalfNormal(f"sigma_{name}", sigma_sigma_x, dims=("one", "lineage"))
 
-    beta = pm.Normal(
-        name,
-        mu_beta[:, l_c_idx],
-        tt.ones(shape=_gene_by_cell_line) * sigma_beta[l_c_idx],
-        dims=("gene", "cell_line"),
-    )
-    return beta
+    if centered:
+        logger.info(f"Centered parameterization for var '{name}'.")
+        x = pm.Normal(
+            name,
+            mu_x[:, l_c_idx],
+            sigma_x[:, l_c_idx],
+            dims=("gene", "cell_line"),
+        )
+    else:
+        logger.info(f"Non-centered parameterization for var '{name}'.")
+        x_delta = pm.Normal(f"{name}_Δ", 0.0, 1.0, dims=("gene", "cell_line"))
+        x = pm.Deterministic(
+            name,
+            mu_x[:, l_c_idx] + x_delta * sigma_x[:, l_c_idx],
+        )
+
+    return x
 
 
 def _rna_expr_gene_lineage_matrix(df: pd.DataFrame, rna_col: str) -> np.ndarray:

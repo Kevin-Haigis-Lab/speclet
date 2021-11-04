@@ -44,6 +44,6 @@
         sample_kwargs:
           tune: 2000
           draws: 2000
-          target_accept: 0.95
+          target_accept: 0.98
           init: "advi"
-          n_init: 25000
+          n_init: 30000

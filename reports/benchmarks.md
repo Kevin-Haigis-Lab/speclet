@@ -137,6 +137,22 @@ benchmark_df.head()
     </tr>
     <tr>
       <th>2</th>
+      <td>4842.7330</td>
+      <td>1:20:42</td>
+      <td>648.49</td>
+      <td>1130.01</td>
+      <td>645.73</td>
+      <td>645.89</td>
+      <td>321.32</td>
+      <td>145.66</td>
+      <td>96.27</td>
+      <td>4652.00</td>
+      <td>eight-default_chain1</td>
+      <td>sample_mcmc</td>
+      <td>010_010_run-crc-sampling-snakemake</td>
+    </tr>
+    <tr>
+      <th>3</th>
       <td>220.5009</td>
       <td>0:03:40</td>
       <td>1427.61</td>
@@ -152,35 +168,19 @@ benchmark_df.head()
       <td>010_010_run-crc-sampling-snakemake</td>
     </tr>
     <tr>
-      <th>3</th>
-      <td>206.2329</td>
-      <td>0:03:26</td>
-      <td>1419.41</td>
-      <td>2211.85</td>
-      <td>1416.80</td>
-      <td>1416.88</td>
-      <td>959.39</td>
-      <td>9.04</td>
-      <td>20.14</td>
-      <td>41.57</td>
-      <td>simple-default_chain2</td>
-      <td>sample_mcmc</td>
-      <td>010_010_run-crc-sampling-snakemake</td>
-    </tr>
-    <tr>
       <th>4</th>
-      <td>220.6069</td>
-      <td>0:03:40</td>
-      <td>1418.07</td>
-      <td>2197.32</td>
-      <td>1415.48</td>
-      <td>1415.64</td>
-      <td>967.38</td>
-      <td>25.52</td>
-      <td>19.70</td>
-      <td>43.53</td>
-      <td>simple-default</td>
-      <td>sample_advi</td>
+      <td>4872.2791</td>
+      <td>1:21:12</td>
+      <td>633.27</td>
+      <td>1120.16</td>
+      <td>630.51</td>
+      <td>630.60</td>
+      <td>318.39</td>
+      <td>146.55</td>
+      <td>97.02</td>
+      <td>4724.19</td>
+      <td>eight-default_chain3</td>
+      <td>sample_mcmc</td>
       <td>010_010_run-crc-sampling-snakemake</td>
     </tr>
   </tbody>
@@ -267,15 +267,15 @@ benchmark_df.groupby(["pipeline", "rule"]).mean().round(2)
     </tr>
     <tr>
       <th>sample_mcmc</th>
-      <td>218.09</td>
-      <td>1421.64</td>
-      <td>2161.26</td>
-      <td>1419.24</td>
-      <td>1419.34</td>
-      <td>939.76</td>
-      <td>11.74</td>
-      <td>17.63</td>
-      <td>38.44</td>
+      <td>2515.63</td>
+      <td>1027.83</td>
+      <td>1643.51</td>
+      <td>1025.34</td>
+      <td>1025.45</td>
+      <td>629.36</td>
+      <td>79.11</td>
+      <td>56.97</td>
+      <td>2335.40</td>
     </tr>
     <tr>
       <th rowspan="4" valign="top">012_010_simulation-based-calibration-snakemake</th>
@@ -384,25 +384,25 @@ benchmark_df_long.head()
       <th>2</th>
       <td>010_010_run-crc-sampling-snakemake</td>
       <td>sample_mcmc</td>
-      <td>simple-default_chain3</td>
+      <td>eight-default_chain1</td>
       <td>cpu_time</td>
-      <td>35.65</td>
+      <td>4652.00</td>
     </tr>
     <tr>
       <th>3</th>
       <td>010_010_run-crc-sampling-snakemake</td>
       <td>sample_mcmc</td>
-      <td>simple-default_chain2</td>
+      <td>simple-default_chain3</td>
       <td>cpu_time</td>
-      <td>41.57</td>
+      <td>35.65</td>
     </tr>
     <tr>
       <th>4</th>
       <td>010_010_run-crc-sampling-snakemake</td>
-      <td>sample_advi</td>
-      <td>simple-default</td>
+      <td>sample_mcmc</td>
+      <td>eight-default_chain3</td>
       <td>cpu_time</td>
-      <td>43.53</td>
+      <td>4724.19</td>
     </tr>
   </tbody>
 </table>
@@ -429,7 +429,7 @@ sns.catplot(
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-10-15
+    Last updated: 2021-11-03
 
     Python implementation: CPython
     Python version       : 3.9.6
@@ -440,14 +440,14 @@ sns.catplot(
     Release     : 3.10.0-1062.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-a-16-171.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-229.o2.rc.hms.harvard.edu
 
-    Git branch: speclet-eight
+    Git branch: sp8-run
 
     janitor : 0.21.0
-    pandas  : 1.3.2
     seaborn : 0.11.2
+    pandas  : 1.3.2
     plotnine: 0.8.0
