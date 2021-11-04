@@ -17,6 +17,7 @@ from src.loggers import logger
 from src.managers.data_managers import (
     CrisprScreenDataManager,
     Data,
+    DataFrameTransformation,
     common_crispr_screen_transformations,
 )
 from src.modeling import feature_engineering as feng
@@ -62,6 +63,46 @@ def _thin_data_columns(df: Data) -> Data:
     return df[keep_cols]
 
 
+def make_count_model_data_manager(
+    data_source: DataFile,
+    other_transforms: Optional[list[DataFrameTransformation]] = None,
+) -> CrisprScreenDataManager:
+    """Make a data manager good for models of count data.
+
+    Default list of data transformation:
+
+    1. z-scale RNA expression by gene and lineage (`src.modeling.feature_engineering`)
+    2. append total read counts (`src.data_processing.achilles`)
+    3. add useful read count columns (`src.data_processing.achilles`)
+    4. (optional additional transformations)
+    5. set Achilles categorical columns (`src.data_processing.achilles`)
+
+    Args:
+        data_source (DataFile): Data source.
+        other_transforms (Optional[list[DataFrameTransformation]], optional): Additional
+          transformation to include in the data manager's defaults. Defaults to None.
+
+    Returns:
+        CrisprScreenDataManager: Data manager for count modeling.
+    """
+    data_manager = CrisprScreenDataManager(data_source=data_source)
+
+    data_transformations = common_crispr_screen_transformations.copy()
+    data_transformations += [
+        feng.zscale_rna_expression_by_gene_and_lineage,
+        _append_total_read_counts,
+        _add_useful_read_count_columns,
+    ]
+
+    if other_transforms is not None:
+        data_transformations += other_transforms
+
+    data_manager.add_transformation(data_transformations)
+    # Need to add at end because `p_dna_batch` becomes non-categorical.
+    data_manager.add_transformation(achelp.set_achilles_categorical_columns)
+    return data_manager
+
+
 class SpecletEight(SpecletModel):
     """## SpecletEight.
 
@@ -93,23 +134,14 @@ class SpecletEight(SpecletModel):
         self._config = SpecletEightConfiguration() if config is None else config
 
         if data_manager is None:
-            data_manager = CrisprScreenDataManager(
-                data_source=DataFile.DEPMAP_CRC_BONE_SUBSAMPLE
+            _other_transforms: list[DataFrameTransformation] = []
+            _other_transforms.append(_thin_data_columns)
+            if self._config.broad_only:
+                _other_transforms.append(achelp.filter_for_broad_source_only)
+
+            data_manager = make_count_model_data_manager(
+                DataFile.DEPMAP_CRC_BONE_SUBSAMPLE, other_transforms=_other_transforms
             )
-
-        data_transformations = common_crispr_screen_transformations.copy()
-        data_transformations += [
-            feng.zscale_rna_expression_by_gene_and_lineage,
-            _append_total_read_counts,
-            _add_useful_read_count_columns,
-        ]
-        if self._config.broad_only:
-            data_transformations.append(achelp.filter_for_broad_source_only)
-
-        data_manager.add_transformation(data_transformations)
-        data_manager.add_transformation(_thin_data_columns)
-        # Need to add at end because `p_dna_batch` becomes non-categorical.
-        data_manager.add_transformation(achelp.set_achilles_categorical_columns)
 
         super().__init__(name, data_manager, root_cache_dir=root_cache_dir)
 

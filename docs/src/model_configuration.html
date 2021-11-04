@@ -30,16 +30,15 @@
 
 from collections import Counter
 from pathlib import Path
-from typing import Dict  # &lt;-- need to keep for a Hypothesis test!
-from typing import Any, Optional, Union
+from typing import Any, Callable, Iterable, Optional, Union
 
 import pymc3 as pm
 import yaml
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, PositiveInt
+from pydantic.types import confloat
 
 from src.io.data_io import project_root_dir
 from src.loggers import logger
-from src.misc import check_kwarg_dict
 from src.models.ceres_mimic import CeresMimic
 from src.models.speclet_eight import SpecletEight
 from src.models.speclet_five import SpecletFive
@@ -52,6 +51,7 @@ from src.models.speclet_simple import SpecletSimple
 from src.models.speclet_six import SpecletSix
 from src.models.speclet_two import SpecletTwo
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline, assert_never
+from src.types import BasicTypes
 
 # ---- Types ----
 
@@ -68,19 +68,102 @@ SpecletProjectModelTypes = Union[
     SpecletEight,
 ]
 
-
-BasicTypes = Union[float, str, int, bool, None]
-KeywordArgs = Dict[str, BasicTypes]
-ModelFitConfiguration = Union[BasicTypes, KeywordArgs]
-
-# Need to use old typing.Dict here because of a bug in Hypothesis:
-# https://github.com/HypothesisWorks/hypothesis/issues/3080
-PipelineSamplingParameters = Dict[
-    SpecletPipeline, Dict[ModelFitMethod, Dict[str, ModelFitConfiguration]]
-]
-
+TargetAcceptFloat = confloat(ge=0.5, lt=1.0)
 
 # ----  Configuration classes ----
+
+
+class Pymc3SampleArguments(BaseModel):
+    &#34;&#34;&#34;Model `sample()` keyword arguments (PyMC3 v3.11.2).&#34;&#34;&#34;
+
+    _pymc3_version: str = &#34;3.11.2&#34;
+    draws: int = 1000
+    step: Optional[Union[Callable, Iterable[Callable]]] = None
+    init: str = &#34;auto&#34;
+    n_init: int = 200000
+    chain_idx: PositiveInt = 0
+    chains: Optional[PositiveInt] = None
+    cores: Optional[PositiveInt] = None
+    tune: PositiveInt = 1000
+    progressbar: bool = True
+    random_seed: Optional[PositiveInt] = None
+    discard_tuned_samples: bool = True
+    compute_convergence_checks: bool = True
+    return_inferencedata: Optional[bool] = True  # not default
+    idata_kwargs: Optional[dict[str, BasicTypes]] = None
+    target_accept: TargetAcceptFloat = 0.8  # type: ignore
+
+    def __init__(self, **data: dict[str, Any]) -&gt; None:
+        &#34;&#34;&#34;Create a Pymc3SampleArguments object.
+
+        Raises:
+            NotImplementedError: If the currently installed PyMC3 version is different
+            from the supported version.
+        &#34;&#34;&#34;
+        super().__init__(**data)
+        if self._pymc3_version != pm.__version__:
+            raise NotImplementedError(
+                f&#34;Support for {self._pymc3_version} -&gt; current ver {pm.__version__}&#34;
+            )
+
+
+class Pymc3FitArguments(BaseModel):
+    &#34;&#34;&#34;Model `fit()` keyword arguments (PyMC3 v3.11.2).&#34;&#34;&#34;
+
+    _pymc3_version: str = &#34;3.11.2&#34;
+    n: PositiveInt = 10000
+    method = &#34;advi&#34;
+    random_seed: Optional[PositiveInt] = None
+    inf_kwargs: Optional[dict[str, BasicTypes]] = None
+    progressbar: bool = True
+
+    def __init__(self, **data: dict[str, Any]) -&gt; None:
+        &#34;&#34;&#34;Create a Pymc3FitArguments object.
+
+        Raises:
+            NotImplementedError: If the currently installed PyMC3 version is different
+            from the supported version.
+        &#34;&#34;&#34;
+        super().__init__(**data)
+        if self._pymc3_version != pm.__version__:
+            raise NotImplementedError(
+                f&#34;Support for {self._pymc3_version} -&gt; current ver {pm.__version__}&#34;
+            )
+
+
+class SpecletModelMcmcArguments(BaseModel):
+    &#34;&#34;&#34;SpecletModel MCMC arguments.&#34;&#34;&#34;
+
+    prior_pred_samples: Optional[int] = 500
+    random_seed: Optional[int] = None
+    sample_kwargs: Optional[Pymc3SampleArguments] = None
+    ignore_cache: bool = False
+
+
+class SpecletModelAdviArguments(BaseModel):
+    &#34;&#34;&#34;SpecletModel ADVI arguments.&#34;&#34;&#34;
+
+    method: str = &#34;advi&#34;
+    n_iterations: int = 100000
+    draws: int = 1000
+    prior_pred_samples: Optional[int] = None
+    random_seed: Optional[int] = None
+    fit_kwargs: Optional[dict[str, BasicTypes]] = None
+    ignore_cache: bool = False
+
+
+class SpecletModelSamplingArguments(BaseModel):
+    &#34;&#34;&#34;Arguments for SpecletModel fitting methods.&#34;&#34;&#34;
+
+    MCMC: Optional[SpecletModelMcmcArguments] = None
+    ADVI: Optional[SpecletModelAdviArguments] = None
+
+
+class PipelineSamplingArguments(BaseModel):
+    &#34;&#34;&#34;Sampling arguments for each pipeline.&#34;&#34;&#34;
+
+    fitting: Optional[SpecletModelSamplingArguments] = None
+    sbc: Optional[SpecletModelSamplingArguments] = None
 
 
 class ModelConfig(BaseModel):
@@ -89,9 +172,11 @@ class ModelConfig(BaseModel):
     name: str
     description: str
     model: ModelOption
-    config: Optional[Dict[str, Union[ModelFitMethod, BasicTypes]]]
-    pipelines: Dict[SpecletPipeline, list[ModelFitMethod]]
-    sampling_arguments: Optional[PipelineSamplingParameters]
+    config: Optional[dict[str, Union[ModelFitMethod, BasicTypes]]] = None
+    pipelines: dict[SpecletPipeline, list[ModelFitMethod]] = Field(default_factory=dict)
+    sampling_arguments: PipelineSamplingArguments = Field(
+        default_factory=PipelineSamplingArguments
+    )
 
 
 class ModelConfigs(BaseModel):
@@ -301,11 +386,24 @@ def get_config_and_instantiate_model(
 # ---- Keyword arguments from config ----
 
 
+def _get_fit_method_arguments(
+    pipeline_args: Optional[SpecletModelSamplingArguments], fit_method: ModelFitMethod
+) -&gt; Optional[Union[SpecletModelMcmcArguments, SpecletModelAdviArguments]]:
+    if pipeline_args is None:
+        return None
+    elif fit_method is ModelFitMethod.MCMC:
+        return pipeline_args.MCMC
+    elif fit_method is ModelFitMethod.ADVI:
+        return pipeline_args.ADVI
+    else:
+        assert_never(fit_method)
+
+
 def get_sampling_kwargs_from_config(
     config: ModelConfig,
     pipeline: SpecletPipeline,
     fit_method: ModelFitMethod,
-) -&gt; dict[str, ModelFitConfiguration]:
+) -&gt; Optional[Union[SpecletModelMcmcArguments, SpecletModelAdviArguments]]:
     &#34;&#34;&#34;Get the sampling keyword argument dictionary from a model configuration.
 
     Args:
@@ -314,22 +412,21 @@ def get_sampling_kwargs_from_config(
         fit_method (ModelFitMethod): Desired model fitting method.
 
     Returns:
-        dict[str, ModelFitConfiguration]: Keyword arguments for the model-fitting
-        method.
+        Optional[Union[SpecletModelMcmcArguments, SpecletModelAdviArguments]]: Model
+        fitting arguments.
     &#34;&#34;&#34;
-    print(config)
-    if (sampling_params := config.sampling_arguments) is None:
-        return {}
-    if (pipeline_dict := sampling_params.get(pipeline)) is None:
-        return {}
-    if (kwargs_dict := pipeline_dict.get(fit_method)) is None:
-        return {}
-    return kwargs_dict
+    sampling_arguments = config.sampling_arguments
+    if pipeline is SpecletPipeline.FITTING:
+        return _get_fit_method_arguments(sampling_arguments.fitting, fit_method)
+    elif pipeline is SpecletPipeline.SBC:
+        return _get_fit_method_arguments(sampling_arguments.sbc, fit_method)
+    else:
+        assert_never(pipeline)
 
 
 def get_sampling_kwargs(
     config_path: Path, name: str, pipeline: SpecletPipeline, fit_method: ModelFitMethod
-) -&gt; dict[str, ModelFitConfiguration]:
+) -&gt; Optional[Union[SpecletModelMcmcArguments, SpecletModelAdviArguments]]:
     &#34;&#34;&#34;Get the sampling keyword argument dictionary from a configuration file.
 
     Args:
@@ -372,57 +469,6 @@ def check_model_names_are_unique(configs: ModelConfigs) -&gt; bool:
     if not all(i == 1 for i in counter.values()):
         nonunique_ids = {v for v, c in counter.items() if c != 1}  # noqa: C403
         raise ModelNamesAreNotAllUnique(nonunique_ids)
-    return True
-
-
-def check_sampling_kwargs(
-    sampling_kwargs: dict[str, Any],
-    fit_method: ModelFitMethod,
-    pipeline: SpecletPipeline,
-) -&gt; bool:
-    &#34;&#34;&#34;Check that sampling keyword arguments are appropriate for the method called.
-
-    Checks a dictionary of keyword arguments against the actual parameter names in the
-    expected `SpecletModel` method. If there are spare arguments, then a
-    `KeywordsNotInCallableParametersError` will be raised.
-
-    Args:
-        sampling_kwargs (dict[str, Any]): Keyword arguments to be used for sampling.
-        fit_method (ModelFitMethod): Fit method to be used.
-        pipeline (SpecletPipeline): Pipeline being run.
-    &#34;&#34;&#34;
-    keys = list(sampling_kwargs.keys())
-    blacklist = {&#34;self&#34;}
-    if pipeline is SpecletPipeline.FITTING:
-        if fit_method is ModelFitMethod.ADVI:
-            check_kwarg_dict.check_kwarg_dict(
-                keys,
-                SpecletModel.advi_sample_model,
-                blacklist=blacklist,
-                ignore_kwargs=True,
-            )
-        elif fit_method is ModelFitMethod.MCMC:
-            check_kwarg_dict.check_kwarg_dict(
-                keys,
-                SpecletModel.mcmc_sample_model,
-                blacklist=blacklist,
-                ignore_kwargs=True,
-            )
-        else:
-            assert_never(fit_method)
-    elif pipeline is SpecletPipeline.SBC:
-        if fit_method is ModelFitMethod.ADVI:
-            check_kwarg_dict.check_kwarg_dict(
-                keys, pm.fit, blacklist=blacklist, ignore_kwargs=True
-            )
-        elif fit_method is ModelFitMethod.MCMC:
-            check_kwarg_dict.check_kwarg_dict(
-                keys, pm.sample, blacklist=blacklist, ignore_kwargs=False
-            )
-        else:
-            assert_never(fit_method)
-    else:
-        assert_never(pipeline)
     return True</code></pre>
 </details>
 </section>
@@ -473,78 +519,6 @@ def check_sampling_kwargs(
     if not all(i == 1 for i in counter.values()):
         nonunique_ids = {v for v, c in counter.items() if c != 1}  # noqa: C403
         raise ModelNamesAreNotAllUnique(nonunique_ids)
-    return True</code></pre>
-</details>
-</dd>
-<dt id="src.model_configuration.check_sampling_kwargs"><code class="name flex">
-<span>def <span class="ident">check_sampling_kwargs</span></span>(<span>sampling_kwargs: dict, fit_method: <a title="src.project_enums.ModelFitMethod" href="project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>, pipeline: <a title="src.project_enums.SpecletPipeline" href="project_enums.html#src.project_enums.SpecletPipeline">SpecletPipeline</a>) -> bool</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Check that sampling keyword arguments are appropriate for the method called.</p>
-<p>Checks a dictionary of keyword arguments against the actual parameter names in the
-expected <code>SpecletModel</code> method. If there are spare arguments, then a
-<code>KeywordsNotInCallableParametersError</code> will be raised.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>sampling_kwargs</code></strong> :&ensp;<code>dict[str, Any]</code></dt>
-<dd>Keyword arguments to be used for sampling.</dd>
-<dt><strong><code>fit_method</code></strong> :&ensp;<code>ModelFitMethod</code></dt>
-<dd>Fit method to be used.</dd>
-<dt><strong><code>pipeline</code></strong> :&ensp;<code>SpecletPipeline</code></dt>
-<dd>Pipeline being run.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def check_sampling_kwargs(
-    sampling_kwargs: dict[str, Any],
-    fit_method: ModelFitMethod,
-    pipeline: SpecletPipeline,
-) -&gt; bool:
-    &#34;&#34;&#34;Check that sampling keyword arguments are appropriate for the method called.
-
-    Checks a dictionary of keyword arguments against the actual parameter names in the
-    expected `SpecletModel` method. If there are spare arguments, then a
-    `KeywordsNotInCallableParametersError` will be raised.
-
-    Args:
-        sampling_kwargs (dict[str, Any]): Keyword arguments to be used for sampling.
-        fit_method (ModelFitMethod): Fit method to be used.
-        pipeline (SpecletPipeline): Pipeline being run.
-    &#34;&#34;&#34;
-    keys = list(sampling_kwargs.keys())
-    blacklist = {&#34;self&#34;}
-    if pipeline is SpecletPipeline.FITTING:
-        if fit_method is ModelFitMethod.ADVI:
-            check_kwarg_dict.check_kwarg_dict(
-                keys,
-                SpecletModel.advi_sample_model,
-                blacklist=blacklist,
-                ignore_kwargs=True,
-            )
-        elif fit_method is ModelFitMethod.MCMC:
-            check_kwarg_dict.check_kwarg_dict(
-                keys,
-                SpecletModel.mcmc_sample_model,
-                blacklist=blacklist,
-                ignore_kwargs=True,
-            )
-        else:
-            assert_never(fit_method)
-    elif pipeline is SpecletPipeline.SBC:
-        if fit_method is ModelFitMethod.ADVI:
-            check_kwarg_dict.check_kwarg_dict(
-                keys, pm.fit, blacklist=blacklist, ignore_kwargs=True
-            )
-        elif fit_method is ModelFitMethod.MCMC:
-            check_kwarg_dict.check_kwarg_dict(
-                keys, pm.sample, blacklist=blacklist, ignore_kwargs=False
-            )
-        else:
-            assert_never(fit_method)
-    else:
-        assert_never(pipeline)
     return True</code></pre>
 </details>
 </dd>
@@ -762,7 +736,7 @@ expected <code>SpecletModel</code> method. If there are spare arguments, then a
 </details>
 </dd>
 <dt id="src.model_configuration.get_sampling_kwargs"><code class="name flex">
-<span>def <span class="ident">get_sampling_kwargs</span></span>(<span>config_path: pathlib.Path, name: str, pipeline: <a title="src.project_enums.SpecletPipeline" href="project_enums.html#src.project_enums.SpecletPipeline">SpecletPipeline</a>, fit_method: <a title="src.project_enums.ModelFitMethod" href="project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>) -> dict</span>
+<span>def <span class="ident">get_sampling_kwargs</span></span>(<span>config_path: pathlib.Path, name: str, pipeline: <a title="src.project_enums.SpecletPipeline" href="project_enums.html#src.project_enums.SpecletPipeline">SpecletPipeline</a>, fit_method: <a title="src.project_enums.ModelFitMethod" href="project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>) -> Union[<a title="src.model_configuration.SpecletModelMcmcArguments" href="#src.model_configuration.SpecletModelMcmcArguments">SpecletModelMcmcArguments</a>, <a title="src.model_configuration.SpecletModelAdviArguments" href="#src.model_configuration.SpecletModelAdviArguments">SpecletModelAdviArguments</a>, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the sampling keyword argument dictionary from a configuration file.</p>
@@ -795,7 +769,7 @@ expected <code>SpecletModel</code> method. If there are spare arguments, then a
 </summary>
 <pre><code class="python">def get_sampling_kwargs(
     config_path: Path, name: str, pipeline: SpecletPipeline, fit_method: ModelFitMethod
-) -&gt; dict[str, ModelFitConfiguration]:
+) -&gt; Optional[Union[SpecletModelMcmcArguments, SpecletModelAdviArguments]]:
     &#34;&#34;&#34;Get the sampling keyword argument dictionary from a configuration file.
 
     Args:
@@ -820,7 +794,7 @@ expected <code>SpecletModel</code> method. If there are spare arguments, then a
 </details>
 </dd>
 <dt id="src.model_configuration.get_sampling_kwargs_from_config"><code class="name flex">
-<span>def <span class="ident">get_sampling_kwargs_from_config</span></span>(<span>config: <a title="src.model_configuration.ModelConfig" href="#src.model_configuration.ModelConfig">ModelConfig</a>, pipeline: <a title="src.project_enums.SpecletPipeline" href="project_enums.html#src.project_enums.SpecletPipeline">SpecletPipeline</a>, fit_method: <a title="src.project_enums.ModelFitMethod" href="project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>) -> dict</span>
+<span>def <span class="ident">get_sampling_kwargs_from_config</span></span>(<span>config: <a title="src.model_configuration.ModelConfig" href="#src.model_configuration.ModelConfig">ModelConfig</a>, pipeline: <a title="src.project_enums.SpecletPipeline" href="project_enums.html#src.project_enums.SpecletPipeline">SpecletPipeline</a>, fit_method: <a title="src.project_enums.ModelFitMethod" href="project_enums.html#src.project_enums.ModelFitMethod">ModelFitMethod</a>) -> Union[<a title="src.model_configuration.SpecletModelMcmcArguments" href="#src.model_configuration.SpecletModelMcmcArguments">SpecletModelMcmcArguments</a>, <a title="src.model_configuration.SpecletModelAdviArguments" href="#src.model_configuration.SpecletModelAdviArguments">SpecletModelAdviArguments</a>, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the sampling keyword argument dictionary from a model configuration.</p>
@@ -835,10 +809,10 @@ expected <code>SpecletModel</code> method. If there are spare arguments, then a
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>dict[str, ModelFitConfiguration]</code></dt>
-<dd>Keyword arguments for the model-fitting</dd>
+<dt><code>Optional[Union[<a title="src.model_configuration.SpecletModelMcmcArguments" href="#src.model_configuration.SpecletModelMcmcArguments">SpecletModelMcmcArguments</a>, <a title="src.model_configuration.SpecletModelAdviArguments" href="#src.model_configuration.SpecletModelAdviArguments">SpecletModelAdviArguments</a>]]</code></dt>
+<dd>Model</dd>
 </dl>
-<p>method.</p></div>
+<p>fitting arguments.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -847,7 +821,7 @@ expected <code>SpecletModel</code> method. If there are spare arguments, then a
     config: ModelConfig,
     pipeline: SpecletPipeline,
     fit_method: ModelFitMethod,
-) -&gt; dict[str, ModelFitConfiguration]:
+) -&gt; Optional[Union[SpecletModelMcmcArguments, SpecletModelAdviArguments]]:
     &#34;&#34;&#34;Get the sampling keyword argument dictionary from a model configuration.
 
     Args:
@@ -856,17 +830,16 @@ expected <code>SpecletModel</code> method. If there are spare arguments, then a
         fit_method (ModelFitMethod): Desired model fitting method.
 
     Returns:
-        dict[str, ModelFitConfiguration]: Keyword arguments for the model-fitting
-        method.
+        Optional[Union[SpecletModelMcmcArguments, SpecletModelAdviArguments]]: Model
+        fitting arguments.
     &#34;&#34;&#34;
-    print(config)
-    if (sampling_params := config.sampling_arguments) is None:
-        return {}
-    if (pipeline_dict := sampling_params.get(pipeline)) is None:
-        return {}
-    if (kwargs_dict := pipeline_dict.get(fit_method)) is None:
-        return {}
-    return kwargs_dict</code></pre>
+    sampling_arguments = config.sampling_arguments
+    if pipeline is SpecletPipeline.FITTING:
+        return _get_fit_method_arguments(sampling_arguments.fitting, fit_method)
+    elif pipeline is SpecletPipeline.SBC:
+        return _get_fit_method_arguments(sampling_arguments.sbc, fit_method)
+    else:
+        assert_never(pipeline)</code></pre>
 </details>
 </dd>
 <dt id="src.model_configuration.instantiate_and_configure_model"><code class="name flex">
@@ -947,6 +920,45 @@ expected <code>SpecletModel</code> method. If there are spare arguments, then a
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="src.model_configuration.ConstrainedFloatValue"><code class="flex name class">
+<span>class <span class="ident">TargetAcceptFloat</span></span>
+<span>(</span><span>x=0)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert a string or number to a floating point number, if possible.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.types.ConstrainedFloat</li>
+<li>builtins.float</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="src.model_configuration.ConstrainedFloatValue.ge"><code class="name">var <span class="ident">ge</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="src.model_configuration.ConstrainedFloatValue.gt"><code class="name">var <span class="ident">gt</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="src.model_configuration.ConstrainedFloatValue.le"><code class="name">var <span class="ident">le</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="src.model_configuration.ConstrainedFloatValue.lt"><code class="name">var <span class="ident">lt</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="src.model_configuration.ConstrainedFloatValue.multiple_of"><code class="name">var <span class="ident">multiple_of</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="src.model_configuration.ConstrainedFloatValue.strict"><code class="name">var <span class="ident">strict</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
 <dt id="src.model_configuration.FoundMultipleModelConfigurationsError"><code class="flex name class">
 <span>class <span class="ident">FoundMultipleModelConfigurationsError</span></span>
 <span>(</span><span>name: str, n_configs: int)</span>
@@ -987,7 +999,7 @@ expected <code>SpecletModel</code> method. If there are spare arguments, then a
 </dd>
 <dt id="src.model_configuration.ModelConfig"><code class="flex name class">
 <span>class <span class="ident">ModelConfig</span></span>
-<span>(</span><span>*, name: str, description: str, model: <a title="src.project_enums.ModelOption" href="project_enums.html#src.project_enums.ModelOption">ModelOption</a>, config: Dict[str, Union[src.project_enums.ModelFitMethod, float, str, int, bool, NoneType]] = None, pipelines: Dict[src.project_enums.SpecletPipeline, list[src.project_enums.ModelFitMethod]], sampling_arguments: Dict[src.project_enums.SpecletPipeline, Dict[src.project_enums.ModelFitMethod, Dict[str, Union[float, str, int, bool, NoneType, Dict[str, Union[float, str, int, bool, NoneType]]]]]] = None)</span>
+<span>(</span><span>*, name: str, description: str, model: <a title="src.project_enums.ModelOption" href="project_enums.html#src.project_enums.ModelOption">ModelOption</a>, config: dict = None, pipelines: dict = None, sampling_arguments: <a title="src.model_configuration.PipelineSamplingArguments" href="#src.model_configuration.PipelineSamplingArguments">PipelineSamplingArguments</a> = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Model configuration format.</p>
@@ -1003,9 +1015,11 @@ expected <code>SpecletModel</code> method. If there are spare arguments, then a
     name: str
     description: str
     model: ModelOption
-    config: Optional[Dict[str, Union[ModelFitMethod, BasicTypes]]]
-    pipelines: Dict[SpecletPipeline, list[ModelFitMethod]]
-    sampling_arguments: Optional[PipelineSamplingParameters]</code></pre>
+    config: Optional[dict[str, Union[ModelFitMethod, BasicTypes]]] = None
+    pipelines: dict[SpecletPipeline, list[ModelFitMethod]] = Field(default_factory=dict)
+    sampling_arguments: PipelineSamplingArguments = Field(
+        default_factory=PipelineSamplingArguments
+    )</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1124,6 +1138,211 @@ expected <code>SpecletModel</code> method. If there are spare arguments, then a
 <li>builtins.BaseException</li>
 </ul>
 </dd>
+<dt id="src.model_configuration.PipelineSamplingArguments"><code class="flex name class">
+<span>class <span class="ident">PipelineSamplingArguments</span></span>
+<span>(</span><span>*, fitting: <a title="src.model_configuration.SpecletModelSamplingArguments" href="#src.model_configuration.SpecletModelSamplingArguments">SpecletModelSamplingArguments</a> = None, sbc: <a title="src.model_configuration.SpecletModelSamplingArguments" href="#src.model_configuration.SpecletModelSamplingArguments">SpecletModelSamplingArguments</a> = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sampling arguments for each pipeline.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PipelineSamplingArguments(BaseModel):
+    &#34;&#34;&#34;Sampling arguments for each pipeline.&#34;&#34;&#34;
+
+    fitting: Optional[SpecletModelSamplingArguments] = None
+    sbc: Optional[SpecletModelSamplingArguments] = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+</dd>
+<dt id="src.model_configuration.Pymc3FitArguments"><code class="flex name class">
+<span>class <span class="ident">Pymc3FitArguments</span></span>
+<span>(</span><span>*, n: pydantic.types.PositiveInt = 10000, random_seed: pydantic.types.PositiveInt = None, inf_kwargs: dict = None, progressbar: bool = True, method: str = 'advi')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Model <code>fit()</code> keyword arguments (PyMC3 v3.11.2).</p>
+<p>Create a Pymc3FitArguments object.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>NotImplementedError</code></dt>
+<dd>If the currently installed PyMC3 version is different</dd>
+</dl>
+<p>from the supported version.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Pymc3FitArguments(BaseModel):
+    &#34;&#34;&#34;Model `fit()` keyword arguments (PyMC3 v3.11.2).&#34;&#34;&#34;
+
+    _pymc3_version: str = &#34;3.11.2&#34;
+    n: PositiveInt = 10000
+    method = &#34;advi&#34;
+    random_seed: Optional[PositiveInt] = None
+    inf_kwargs: Optional[dict[str, BasicTypes]] = None
+    progressbar: bool = True
+
+    def __init__(self, **data: dict[str, Any]) -&gt; None:
+        &#34;&#34;&#34;Create a Pymc3FitArguments object.
+
+        Raises:
+            NotImplementedError: If the currently installed PyMC3 version is different
+            from the supported version.
+        &#34;&#34;&#34;
+        super().__init__(**data)
+        if self._pymc3_version != pm.__version__:
+            raise NotImplementedError(
+                f&#34;Support for {self._pymc3_version} -&gt; current ver {pm.__version__}&#34;
+            )</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+</dd>
+<dt id="src.model_configuration.Pymc3SampleArguments"><code class="flex name class">
+<span>class <span class="ident">Pymc3SampleArguments</span></span>
+<span>(</span><span>*, draws: int = 1000, step: Union[Callable, Iterable[Callable], NoneType] = None, init: str = 'auto', n_init: int = 200000, chain_idx: pydantic.types.PositiveInt = 0, chains: pydantic.types.PositiveInt = None, cores: pydantic.types.PositiveInt = None, tune: pydantic.types.PositiveInt = 1000, progressbar: bool = True, random_seed: pydantic.types.PositiveInt = None, discard_tuned_samples: bool = True, compute_convergence_checks: bool = True, return_inferencedata: bool = True, idata_kwargs: dict = None, target_accept: <a title="src.model_configuration.ConstrainedFloatValue" href="#src.model_configuration.ConstrainedFloatValue">ConstrainedFloatValue</a> = 0.8)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Model <code>sample()</code> keyword arguments (PyMC3 v3.11.2).</p>
+<p>Create a Pymc3SampleArguments object.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>NotImplementedError</code></dt>
+<dd>If the currently installed PyMC3 version is different</dd>
+</dl>
+<p>from the supported version.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Pymc3SampleArguments(BaseModel):
+    &#34;&#34;&#34;Model `sample()` keyword arguments (PyMC3 v3.11.2).&#34;&#34;&#34;
+
+    _pymc3_version: str = &#34;3.11.2&#34;
+    draws: int = 1000
+    step: Optional[Union[Callable, Iterable[Callable]]] = None
+    init: str = &#34;auto&#34;
+    n_init: int = 200000
+    chain_idx: PositiveInt = 0
+    chains: Optional[PositiveInt] = None
+    cores: Optional[PositiveInt] = None
+    tune: PositiveInt = 1000
+    progressbar: bool = True
+    random_seed: Optional[PositiveInt] = None
+    discard_tuned_samples: bool = True
+    compute_convergence_checks: bool = True
+    return_inferencedata: Optional[bool] = True  # not default
+    idata_kwargs: Optional[dict[str, BasicTypes]] = None
+    target_accept: TargetAcceptFloat = 0.8  # type: ignore
+
+    def __init__(self, **data: dict[str, Any]) -&gt; None:
+        &#34;&#34;&#34;Create a Pymc3SampleArguments object.
+
+        Raises:
+            NotImplementedError: If the currently installed PyMC3 version is different
+            from the supported version.
+        &#34;&#34;&#34;
+        super().__init__(**data)
+        if self._pymc3_version != pm.__version__:
+            raise NotImplementedError(
+                f&#34;Support for {self._pymc3_version} -&gt; current ver {pm.__version__}&#34;
+            )</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+</dd>
+<dt id="src.model_configuration.SpecletModelAdviArguments"><code class="flex name class">
+<span>class <span class="ident">SpecletModelAdviArguments</span></span>
+<span>(</span><span>*, method: str = 'advi', n_iterations: int = 100000, draws: int = 1000, prior_pred_samples: int = None, random_seed: int = None, fit_kwargs: dict = None, ignore_cache: bool = False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>SpecletModel ADVI arguments.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SpecletModelAdviArguments(BaseModel):
+    &#34;&#34;&#34;SpecletModel ADVI arguments.&#34;&#34;&#34;
+
+    method: str = &#34;advi&#34;
+    n_iterations: int = 100000
+    draws: int = 1000
+    prior_pred_samples: Optional[int] = None
+    random_seed: Optional[int] = None
+    fit_kwargs: Optional[dict[str, BasicTypes]] = None
+    ignore_cache: bool = False</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+</dd>
+<dt id="src.model_configuration.SpecletModelMcmcArguments"><code class="flex name class">
+<span>class <span class="ident">SpecletModelMcmcArguments</span></span>
+<span>(</span><span>*, prior_pred_samples: int = 500, random_seed: int = None, sample_kwargs: <a title="src.model_configuration.Pymc3SampleArguments" href="#src.model_configuration.Pymc3SampleArguments">Pymc3SampleArguments</a> = None, ignore_cache: bool = False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>SpecletModel MCMC arguments.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SpecletModelMcmcArguments(BaseModel):
+    &#34;&#34;&#34;SpecletModel MCMC arguments.&#34;&#34;&#34;
+
+    prior_pred_samples: Optional[int] = 500
+    random_seed: Optional[int] = None
+    sample_kwargs: Optional[Pymc3SampleArguments] = None
+    ignore_cache: bool = False</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+</dd>
+<dt id="src.model_configuration.SpecletModelSamplingArguments"><code class="flex name class">
+<span>class <span class="ident">SpecletModelSamplingArguments</span></span>
+<span>(</span><span>*, MCMC: <a title="src.model_configuration.SpecletModelMcmcArguments" href="#src.model_configuration.SpecletModelMcmcArguments">SpecletModelMcmcArguments</a> = None, ADVI: <a title="src.model_configuration.SpecletModelAdviArguments" href="#src.model_configuration.SpecletModelAdviArguments">SpecletModelAdviArguments</a> = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Arguments for SpecletModel fitting methods.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SpecletModelSamplingArguments(BaseModel):
+    &#34;&#34;&#34;Arguments for SpecletModel fitting methods.&#34;&#34;&#34;
+
+    MCMC: Optional[SpecletModelMcmcArguments] = None
+    ADVI: Optional[SpecletModelAdviArguments] = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+</dd>
 </dl>
 </section>
 </article>
@@ -1141,7 +1360,6 @@ expected <code>SpecletModel</code> method. If there are spare arguments, then a
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="src.model_configuration.check_model_names_are_unique" href="#src.model_configuration.check_model_names_are_unique">check_model_names_are_unique</a></code></li>
-<li><code><a title="src.model_configuration.check_sampling_kwargs" href="#src.model_configuration.check_sampling_kwargs">check_sampling_kwargs</a></code></li>
 <li><code><a title="src.model_configuration.configure_model" href="#src.model_configuration.configure_model">configure_model</a></code></li>
 <li><code><a title="src.model_configuration.get_config_and_instantiate_model" href="#src.model_configuration.get_config_and_instantiate_model">get_config_and_instantiate_model</a></code></li>
 <li><code><a title="src.model_configuration.get_configuration_for_model" href="#src.model_configuration.get_configuration_for_model">get_configuration_for_model</a></code></li>
@@ -1155,6 +1373,17 @@ expected <code>SpecletModel</code> method. If there are spare arguments, then a
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
+<li>
+<h4><code><a title="src.model_configuration.ConstrainedFloatValue" href="#src.model_configuration.ConstrainedFloatValue">ConstrainedFloatValue</a></code></h4>
+<ul class="two-column">
+<li><code><a title="src.model_configuration.ConstrainedFloatValue.ge" href="#src.model_configuration.ConstrainedFloatValue.ge">ge</a></code></li>
+<li><code><a title="src.model_configuration.ConstrainedFloatValue.gt" href="#src.model_configuration.ConstrainedFloatValue.gt">gt</a></code></li>
+<li><code><a title="src.model_configuration.ConstrainedFloatValue.le" href="#src.model_configuration.ConstrainedFloatValue.le">le</a></code></li>
+<li><code><a title="src.model_configuration.ConstrainedFloatValue.lt" href="#src.model_configuration.ConstrainedFloatValue.lt">lt</a></code></li>
+<li><code><a title="src.model_configuration.ConstrainedFloatValue.multiple_of" href="#src.model_configuration.ConstrainedFloatValue.multiple_of">multiple_of</a></code></li>
+<li><code><a title="src.model_configuration.ConstrainedFloatValue.strict" href="#src.model_configuration.ConstrainedFloatValue.strict">strict</a></code></li>
+</ul>
+</li>
 <li>
 <h4><code><a title="src.model_configuration.FoundMultipleModelConfigurationsError" href="#src.model_configuration.FoundMultipleModelConfigurationsError">FoundMultipleModelConfigurationsError</a></code></h4>
 </li>
@@ -1172,6 +1401,24 @@ expected <code>SpecletModel</code> method. If there are spare arguments, then a
 </li>
 <li>
 <h4><code><a title="src.model_configuration.ModelOptionNotAssociatedWithAClassException" href="#src.model_configuration.ModelOptionNotAssociatedWithAClassException">ModelOptionNotAssociatedWithAClassException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="src.model_configuration.PipelineSamplingArguments" href="#src.model_configuration.PipelineSamplingArguments">PipelineSamplingArguments</a></code></h4>
+</li>
+<li>
+<h4><code><a title="src.model_configuration.Pymc3FitArguments" href="#src.model_configuration.Pymc3FitArguments">Pymc3FitArguments</a></code></h4>
+</li>
+<li>
+<h4><code><a title="src.model_configuration.Pymc3SampleArguments" href="#src.model_configuration.Pymc3SampleArguments">Pymc3SampleArguments</a></code></h4>
+</li>
+<li>
+<h4><code><a title="src.model_configuration.SpecletModelAdviArguments" href="#src.model_configuration.SpecletModelAdviArguments">SpecletModelAdviArguments</a></code></h4>
+</li>
+<li>
+<h4><code><a title="src.model_configuration.SpecletModelMcmcArguments" href="#src.model_configuration.SpecletModelMcmcArguments">SpecletModelMcmcArguments</a></code></h4>
+</li>
+<li>
+<h4><code><a title="src.model_configuration.SpecletModelSamplingArguments" href="#src.model_configuration.SpecletModelSamplingArguments">SpecletModelSamplingArguments</a></code></h4>
 </li>
 </ul>
 </li>

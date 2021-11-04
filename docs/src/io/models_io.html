@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>src.types API documentation</title>
-<meta name="description" content="Common types used throughout the project." />
+<title>src.io.models_io API documentation</title>
+<meta name="description" content="IO for Speclet models." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -18,19 +18,30 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>src.types</code></h1>
+<h1 class="title">Module <code>src.io.models_io</code></h1>
 </header>
 <section id="section-intro">
-<p>Common types used throughout the project.</p>
+<p>IO for Speclet models.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Common types used throughout the project.&#34;&#34;&#34;
+<pre><code class="python">#!/usr/bin/env python3
 
-from typing import Union
+&#34;&#34;&#34;IO for Speclet models.&#34;&#34;&#34;
 
-BasicTypes = Union[float, str, int, bool, None]</code></pre>
+from pathlib import Path
+
+from src.io.general_io import project_root_dir
+
+
+def models_dir() -&gt; Path:
+    &#34;&#34;&#34;Path to the models directory.
+
+    Returns:
+        Path: Path to the models directory.
+    &#34;&#34;&#34;
+    return project_root_dir() / &#34;models&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -38,6 +49,32 @@ BasicTypes = Union[float, str, int, bool, None]</code></pre>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="src.io.models_io.models_dir"><code class="name flex">
+<span>def <span class="ident">models_dir</span></span>(<span>) -> pathlib.Path</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Path to the models directory.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Path</code></dt>
+<dd>Path to the models directory.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def models_dir() -&gt; Path:
+    &#34;&#34;&#34;Path to the models directory.
+
+    Returns:
+        Path: Path to the models directory.
+    &#34;&#34;&#34;
+    return project_root_dir() / &#34;models&#34;</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -50,7 +87,12 @@ BasicTypes = Union[float, str, int, bool, None]</code></pre>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="src" href="index.html">src</a></code></li>
+<li><code><a title="src.io" href="index.html">src.io</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="src.io.models_io.models_dir" href="#src.io.models_io.models_dir">models_dir</a></code></li>
 </ul>
 </li>
 </ul>

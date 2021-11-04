@@ -50,11 +50,37 @@ cli_helpers.configure_pretty()
 #### ---- Main ---- ####
 
 
-def _update_sampling_kwargs(kwargs: dict[str, Any], chains: int, cores: int) -&gt; None:
-    for key, value in {&#34;chains&#34;: chains, &#34;cores&#34;: cores}.items():
+def _integerize_sampling_args(kwargs: dict[str, Any]) -&gt; None:
+    sample_kwargs = kwargs.get(&#34;sample_kwargs&#34;)
+    if sample_kwargs is None:
+        return None
+    for key, value in sample_kwargs.items():
+        if isinstance(value, (int, float)):
+            if int(value) == value:
+                sample_kwargs[key] = int(value)
+    kwargs[&#34;sample_kwargs&#34;] = sample_kwargs
+    return None
+
+
+def _update_sampling_kwargs(
+    kwargs: dict[str, Any],
+    chains: int,
+    cores: int,
+    random_seed: Optional[int],
+    ignore_cache: bool,
+) -&gt; None:
+    first_layer_kwargs = {&#34;random_seed&#34;: random_seed, &#34;ignore_cache&#34;: ignore_cache}
+    for key, value in first_layer_kwargs.items():
         if key in kwargs.keys():
-            logger.warn(f&#34;Overriding configured &#39;{key}&#39;.&#34;)
+            logger.warn(f&#34;Overriding configured &#39;{key}&#39; with {value}.&#34;)
         kwargs[key] = value
+
+    model_sampling_kwargs = kwargs.get(&#34;sample_kwargs&#34;, {})
+    for key, value in {&#34;chains&#34;: chains, &#34;cores&#34;: cores}.items():
+        if key in model_sampling_kwargs.keys():
+            logger.warn(f&#34;Overriding configured &#39;{key}&#39; with {value}.&#34;)
+        model_sampling_kwargs[key] = value
+    kwargs[&#34;sample_kwargs&#34;] = model_sampling_kwargs
     return None
 
 
@@ -92,9 +118,12 @@ def sample_speclet_model(
           built and fit.
     &#34;&#34;&#34;
     tic = time()
-    if random_seed:
+    if random_seed is not None:
+        random_seed = abs(random_seed) + 1
         logger.info(f&#34;Setting random seed ({random_seed}).&#34;)
         np.random.seed(random_seed)
+    else:
+        logger.info(&#34;No random seed.&#34;)
 
     logger.info(f&#34;Model config file: &#39;{config_path.as_posix()}&#39;.&#34;)
     logger.info(f&#34;Root cache directory: {cache_dir.as_posix()}&#34;)
@@ -106,13 +135,25 @@ def sample_speclet_model(
         f&#34;Model&#39;s cache directory: &#39;{sp_model.cache_manager.cache_dir.as_posix()}&#39;.&#34;
     )
 
-    sampling_kwargs: dict[str, Any] = model_config.get_sampling_kwargs(
+    sampling_arguments = model_config.get_sampling_kwargs(
         config_path=config_path,
         name=name,
         pipeline=SpecletPipeline.FITTING,
         fit_method=fit_method,
     )
-    _update_sampling_kwargs(sampling_kwargs, chains=mcmc_chains, cores=mcmc_cores)
+    if sampling_arguments is None:
+        sampling_kwargs = {}
+    else:
+        sampling_kwargs = sampling_arguments.dict()
+
+    _update_sampling_kwargs(
+        sampling_kwargs,
+        chains=mcmc_chains,
+        cores=mcmc_cores,
+        random_seed=random_seed,
+        ignore_cache=ignore_cache,
+    )
+    print(sampling_kwargs)
 
     logger.info(&#34;Running model build method.&#34;)
     sp_model.build_model()
@@ -120,17 +161,11 @@ def sample_speclet_model(
     if sample:
         if fit_method is ModelFitMethod.ADVI:
             logger.info(&#34;Running ADVI fitting method.&#34;)
-            _ = sp_model.advi_sample_model(
-                random_seed=random_seed, ignore_cache=ignore_cache, **sampling_kwargs
-            )
+            _ = sp_model.advi_sample_model(**sampling_kwargs)
 
         elif fit_method is ModelFitMethod.MCMC:
             logger.info(&#34;Running MCMC fitting method.&#34;)
-            _ = sp_model.mcmc_sample_model(
-                random_seed=random_seed,
-                ignore_cache=ignore_cache,
-                **sampling_kwargs,
-            )
+            _ = sp_model.mcmc_sample_model(**sampling_kwargs)
         else:
             assert_never(fit_method)
 
@@ -229,9 +264,12 @@ built and fit.</dd>
           built and fit.
     &#34;&#34;&#34;
     tic = time()
-    if random_seed:
+    if random_seed is not None:
+        random_seed = abs(random_seed) + 1
         logger.info(f&#34;Setting random seed ({random_seed}).&#34;)
         np.random.seed(random_seed)
+    else:
+        logger.info(&#34;No random seed.&#34;)
 
     logger.info(f&#34;Model config file: &#39;{config_path.as_posix()}&#39;.&#34;)
     logger.info(f&#34;Root cache directory: {cache_dir.as_posix()}&#34;)
@@ -243,13 +281,25 @@ built and fit.</dd>
         f&#34;Model&#39;s cache directory: &#39;{sp_model.cache_manager.cache_dir.as_posix()}&#39;.&#34;
     )
 
-    sampling_kwargs: dict[str, Any] = model_config.get_sampling_kwargs(
+    sampling_arguments = model_config.get_sampling_kwargs(
         config_path=config_path,
         name=name,
         pipeline=SpecletPipeline.FITTING,
         fit_method=fit_method,
     )
-    _update_sampling_kwargs(sampling_kwargs, chains=mcmc_chains, cores=mcmc_cores)
+    if sampling_arguments is None:
+        sampling_kwargs = {}
+    else:
+        sampling_kwargs = sampling_arguments.dict()
+
+    _update_sampling_kwargs(
+        sampling_kwargs,
+        chains=mcmc_chains,
+        cores=mcmc_cores,
+        random_seed=random_seed,
+        ignore_cache=ignore_cache,
+    )
+    print(sampling_kwargs)
 
     logger.info(&#34;Running model build method.&#34;)
     sp_model.build_model()
@@ -257,17 +307,11 @@ built and fit.</dd>
     if sample:
         if fit_method is ModelFitMethod.ADVI:
             logger.info(&#34;Running ADVI fitting method.&#34;)
-            _ = sp_model.advi_sample_model(
-                random_seed=random_seed, ignore_cache=ignore_cache, **sampling_kwargs
-            )
+            _ = sp_model.advi_sample_model(**sampling_kwargs)
 
         elif fit_method is ModelFitMethod.MCMC:
             logger.info(&#34;Running MCMC fitting method.&#34;)
-            _ = sp_model.mcmc_sample_model(
-                random_seed=random_seed,
-                ignore_cache=ignore_cache,
-                **sampling_kwargs,
-            )
+            _ = sp_model.mcmc_sample_model(**sampling_kwargs)
         else:
             assert_never(fit_method)
 

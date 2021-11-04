@@ -38,8 +38,6 @@ import pandas as pd
 import pymc3 as pm
 from pydantic import BaseModel
 from pymc3.model import FreeRV as pmFreeRV
-from theano import shared as ts
-from theano import tensor as tt
 
 from src.data_processing import achilles as achelp
 from src.io.data_io import DataFile
@@ -47,6 +45,7 @@ from src.loggers import logger
 from src.managers.data_managers import (
     CrisprScreenDataManager,
     Data,
+    DataFrameTransformation,
     common_crispr_screen_transformations,
 )
 from src.modeling import feature_engineering as feng
@@ -71,6 +70,12 @@ def _add_useful_read_count_columns(df: Data) -&gt; Data:
     return achelp.add_useful_read_count_columns(df)
 
 
+def _reduce_num_genes_for_dev(df: Data) -&gt; Data:
+    logger.warn(&#34;Reducing number of genes for development.&#34;)
+    _genes = [&#34;KRAS&#34;, &#34;TP53&#34;, &#34;NLRP8&#34;, &#34;KLF5&#34;]
+    return df[df.hugo_symbol.isin(_genes)]
+
+
 def _thin_data_columns(df: Data) -&gt; Data:
     keep_cols: Final[list[str]] = [
         &#34;sgrna&#34;,
@@ -84,6 +89,46 @@ def _thin_data_columns(df: Data) -&gt; Data:
         &#34;screen&#34;,
     ]
     return df[keep_cols]
+
+
+def make_count_model_data_manager(
+    data_source: DataFile,
+    other_transforms: Optional[list[DataFrameTransformation]] = None,
+) -&gt; CrisprScreenDataManager:
+    &#34;&#34;&#34;Make a data manager good for models of count data.
+
+    Default list of data transformation:
+
+    1. z-scale RNA expression by gene and lineage (`src.modeling.feature_engineering`)
+    2. append total read counts (`src.data_processing.achilles`)
+    3. add useful read count columns (`src.data_processing.achilles`)
+    4. (optional additional transformations)
+    5. set Achilles categorical columns (`src.data_processing.achilles`)
+
+    Args:
+        data_source (DataFile): Data source.
+        other_transforms (Optional[list[DataFrameTransformation]], optional): Additional
+          transformation to include in the data manager&#39;s defaults. Defaults to None.
+
+    Returns:
+        CrisprScreenDataManager: Data manager for count modeling.
+    &#34;&#34;&#34;
+    data_manager = CrisprScreenDataManager(data_source=data_source)
+
+    data_transformations = common_crispr_screen_transformations.copy()
+    data_transformations += [
+        feng.zscale_rna_expression_by_gene_and_lineage,
+        _append_total_read_counts,
+        _add_useful_read_count_columns,
+    ]
+
+    if other_transforms is not None:
+        data_transformations += other_transforms
+
+    data_manager.add_transformation(data_transformations)
+    # Need to add at end because `p_dna_batch` becomes non-categorical.
+    data_manager.add_transformation(achelp.set_achilles_categorical_columns)
+    return data_manager
 
 
 class SpecletEight(SpecletModel):
@@ -117,23 +162,14 @@ class SpecletEight(SpecletModel):
         self._config = SpecletEightConfiguration() if config is None else config
 
         if data_manager is None:
-            data_manager = CrisprScreenDataManager(
-                data_source=DataFile.DEPMAP_CRC_BONE_SUBSAMPLE
+            _other_transforms: list[DataFrameTransformation] = []
+            _other_transforms.append(_thin_data_columns)
+            if self._config.broad_only:
+                _other_transforms.append(achelp.filter_for_broad_source_only)
+
+            data_manager = make_count_model_data_manager(
+                DataFile.DEPMAP_CRC_BONE_SUBSAMPLE, other_transforms=_other_transforms
             )
-
-        data_transformations = common_crispr_screen_transformations.copy()
-        data_transformations += [
-            feng.zscale_rna_expression_by_gene_and_lineage,
-            _append_total_read_counts,
-            _add_useful_read_count_columns,
-        ]
-        if self._config.broad_only:
-            data_transformations.append(achelp.filter_for_broad_source_only)
-
-        data_manager.add_transformation(data_transformations)
-        data_manager.add_transformation(_thin_data_columns)
-        # Need to add at end because `p_dna_batch` becomes non-categorical.
-        data_manager.add_transformation(achelp.set_achilles_categorical_columns)
 
         super().__init__(name, data_manager, root_cache_dir=root_cache_dir)
 
@@ -156,10 +192,9 @@ class SpecletEight(SpecletModel):
         logger.info(f&#34;Number of lineages: {co_idx.n_lineages}&#34;)
         # b_idx = achelp.data_batch_indices(data)
 
-        logger.info(&#34;Creating shared variables.&#34;)
-        x_initial = ts(data.counts_initial_adj.values)
-
+        logger.info(&#34;Creating coordinates dictionary.&#34;)
         coords = {
+            &#34;one&#34;: [&#34;dim_one&#34;],
             &#34;sgrna&#34;: data.sgrna.cat.categories,
             &#34;gene&#34;: data.hugo_symbol.cat.categories,
             &#34;cell_line&#34;: data.depmap_id.cat.categories,
@@ -167,9 +202,11 @@ class SpecletEight(SpecletModel):
             &#34;batch&#34;: data.p_dna_batch.cat.categories,
         }
 
+        logger.info(&#34;Creating RNA expression matrix.&#34;)
         rna_expr_matrix = _rna_expr_gene_lineage_matrix(data, &#34;rna_expr_gene_lineage&#34;)
-        _sgrna_by_cell_line = (co_idx.n_sgrnas, co_idx.n_celllines)
+        # _sgrna_by_cell_line = (co_idx.n_sgrnas, co_idx.n_celllines)
 
+        logger.info(&#34;Building PyMC3 model.&#34;)
         with pm.Model(coords=coords) as model:
             s = pm.Data(&#34;sgrna_idx&#34;, co_idx.sgrna_idx)
             g_s = pm.Data(&#34;sgrna_to_gene_idx&#34;, co_idx.sgrna_to_gene_idx)
@@ -177,62 +214,77 @@ class SpecletEight(SpecletModel):
             l_c = pm.Data(&#34;cell_line_to_lineage_idx&#34;, co_idx.cellline_to_lineage_idx)
             # b = pm.Data(&#34;batch_idx&#34;, b_idx.batch_idx)
             rna_expr = pm.Data(&#34;rna_expression_gl&#34;, rna_expr_matrix)
-            x_initial = pm.Data(&#34;x_initial&#34;, data.counts_initial_adj.values)
-            counts_final = pm.Data(&#34;counts_final&#34;, data.counts_final.values)
+            ct_initial = pm.Data(&#34;ct_initial&#34;, data.counts_initial_adj.values)
+            ct_final = pm.Data(&#34;ct_final&#34;, data.counts_final.values)
 
             h = _gene_by_cell_line_hierarchical_structure(
-                &#34;h&#34;, co_idx=co_idx, l_c_idx=l_c
+                &#34;h&#34;, l_c_idx=l_c, centered=False
             )
             q = _gene_by_cell_line_hierarchical_structure(
-                &#34;q&#34;, co_idx=co_idx, l_c_idx=l_c
+                &#34;q&#34;, l_c_idx=l_c, centered=False
             )
 
-            mu_beta = pm.Deterministic(
-                &#34;mu_beta&#34;, h + q * rna_expr
-            )  # shape: [gene x cell line]
+            # shape: [gene x cell line]
+            mu_beta = pm.Deterministic(&#34;mu_beta&#34;, h + q * rna_expr)
 
-            sigma_sigma_beta = pm.HalfNormal(&#34;sigma_sigma_beta&#34;, 1)
-            sigma_beta = pm.HalfNormal(&#34;sigma_beta&#34;, sigma_sigma_beta, dims=&#34;gene&#34;)
+            sigma_sigma_beta = pm.Exponential(&#34;sigma_sigma_beta&#34;, 0.2)
+            sigma_beta = pm.Exponential(
+                &#34;sigma_beta&#34;, sigma_sigma_beta, dims=(&#34;gene&#34;, &#34;one&#34;)
+            )
 
-            beta_sgrna = pm.Normal(
-                &#34;beta_sgrna&#34;,
+            beta = pm.Normal(
+                &#34;beta&#34;,
                 mu_beta[g_s, :],
-                tt.ones(shape=_sgrna_by_cell_line)
-                * sigma_beta[g_s].reshape((co_idx.n_sgrnas, 1)),
+                sigma_beta[g_s, :],
                 dims=(&#34;sgrna&#34;, &#34;cell_line&#34;),
             )
 
-            eta = pm.Deterministic(&#34;eta&#34;, beta_sgrna[s, c])
+            eta = pm.Deterministic(&#34;eta&#34;, beta[s, c])
             mu = pm.Deterministic(&#34;mu&#34;, pm.math.exp(eta))
-            alpha = pm.HalfCauchy(&#34;alpha&#34;, 5)
+            alpha = pm.Exponential(&#34;alpha&#34;, 1 / 10)
             y = pm.NegativeBinomial(  # noqa: F841
-                &#34;y&#34;, x_initial * mu, alpha, observed=counts_final
+                &#34;y&#34;, ct_initial * mu, alpha, observed=ct_final
             )
 
         return model, &#34;y&#34;
 
 
 def _gene_by_cell_line_hierarchical_structure(
-    name: str, co_idx: achelp.CommonIndices, l_c_idx: Union[np.ndarray, pm.Data]
+    name: str,
+    l_c_idx: Union[np.ndarray, pm.Data],
+    centered: bool = True,
 ) -&gt; pmFreeRV:
-    _gene_by_cell_line = (co_idx.n_genes, co_idx.n_celllines)
+    mu_mu_x = pm.Normal(f&#34;mu_mu_{name}&#34;, 0, 1)
+    sigma_mu_x = pm.HalfNormal(f&#34;sigma_mu_{name}&#34;, 1)
 
-    mu_mu_beta = pm.Normal(f&#34;mu_mu_{name}&#34;, 0, 1)
-    sigma_mu_beta = pm.HalfNormal(f&#34;sigma_mu_{name}&#34;, 1)
-    mu_beta = pm.Normal(
-        f&#34;mu_{name}&#34;, mu_mu_beta, sigma_mu_beta, dims=(&#34;gene&#34;, &#34;lineage&#34;)
-    )
+    if centered:
+        logger.info(f&#34;Centered parameterization for var &#39;mu_{name}&#39;.&#34;)
+        mu_x = pm.Normal(f&#34;mu_{name}&#34;, mu_mu_x, sigma_mu_x, dims=(&#34;gene&#34;, &#34;lineage&#34;))
+    else:
+        logger.info(f&#34;Non-centered parameterization for var &#39;mu_{name}&#39;.&#34;)
+        mu_x_delta = pm.Normal(f&#34;mu_{name}_Δ&#34;, 0, 1, dims=(&#34;gene&#34;, &#34;lineage&#34;))
+        mu_x = pm.Deterministic(f&#34;mu_{name}&#34;, mu_mu_x + mu_x_delta * sigma_mu_x)
 
-    sigma_sigma_beta = pm.HalfNormal(f&#34;sigma_sigma_{name}&#34;, 1)
-    sigma_beta = pm.HalfNormal(f&#34;sigma_{name}&#34;, sigma_sigma_beta, dims=&#34;lineage&#34;)
+    sigma_sigma_x = pm.HalfNormal(f&#34;sigma_sigma_{name}&#34;, 1)
+    sigma_x = pm.HalfNormal(f&#34;sigma_{name}&#34;, sigma_sigma_x, dims=(&#34;one&#34;, &#34;lineage&#34;))
 
-    beta = pm.Normal(
-        name,
-        mu_beta[:, l_c_idx],
-        tt.ones(shape=_gene_by_cell_line) * sigma_beta[l_c_idx],
-        dims=(&#34;gene&#34;, &#34;cell_line&#34;),
-    )
-    return beta
+    if centered:
+        logger.info(f&#34;Centered parameterization for var &#39;{name}&#39;.&#34;)
+        x = pm.Normal(
+            name,
+            mu_x[:, l_c_idx],
+            sigma_x[:, l_c_idx],
+            dims=(&#34;gene&#34;, &#34;cell_line&#34;),
+        )
+    else:
+        logger.info(f&#34;Non-centered parameterization for var &#39;{name}&#39;.&#34;)
+        x_delta = pm.Normal(f&#34;{name}_Δ&#34;, 0.0, 1.0, dims=(&#34;gene&#34;, &#34;cell_line&#34;))
+        x = pm.Deterministic(
+            name,
+            mu_x[:, l_c_idx] + x_delta * sigma_x[:, l_c_idx],
+        )
+
+    return x
 
 
 def _rna_expr_gene_lineage_matrix(df: pd.DataFrame, rna_col: str) -&gt; np.ndarray:
@@ -259,6 +311,79 @@ def _rna_expr_gene_lineage_matrix(df: pd.DataFrame, rna_col: str) -&gt; np.ndarr
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="src.models.speclet_eight.make_count_model_data_manager"><code class="name flex">
+<span>def <span class="ident">make_count_model_data_manager</span></span>(<span>data_source: <a title="src.io.data_io.DataFile" href="../io/data_io.html#src.io.data_io.DataFile">DataFile</a>, other_transforms: Optional[list[Callable[[~Data], ~Data]]] = None) -> <a title="src.managers.data_managers.CrisprScreenDataManager" href="../managers/data_managers.html#src.managers.data_managers.CrisprScreenDataManager">CrisprScreenDataManager</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Make a data manager good for models of count data.</p>
+<p>Default list of data transformation:</p>
+<ol>
+<li>z-scale RNA expression by gene and lineage (<code><a title="src.modeling.feature_engineering" href="../modeling/feature_engineering.html">src.modeling.feature_engineering</a></code>)</li>
+<li>append total read counts (<code><a title="src.data_processing.achilles" href="../data_processing/achilles.html">src.data_processing.achilles</a></code>)</li>
+<li>add useful read count columns (<code><a title="src.data_processing.achilles" href="../data_processing/achilles.html">src.data_processing.achilles</a></code>)</li>
+<li>(optional additional transformations)</li>
+<li>set Achilles categorical columns (<code><a title="src.data_processing.achilles" href="../data_processing/achilles.html">src.data_processing.achilles</a></code>)</li>
+</ol>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data_source</code></strong> :&ensp;<code>DataFile</code></dt>
+<dd>Data source.</dd>
+<dt><strong><code>other_transforms</code></strong> :&ensp;<code>Optional[list[DataFrameTransformation]]</code>, optional</dt>
+<dd>Additional
+transformation to include in the data manager's defaults. Defaults to None.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>CrisprScreenDataManager</code></dt>
+<dd>Data manager for count modeling.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def make_count_model_data_manager(
+    data_source: DataFile,
+    other_transforms: Optional[list[DataFrameTransformation]] = None,
+) -&gt; CrisprScreenDataManager:
+    &#34;&#34;&#34;Make a data manager good for models of count data.
+
+    Default list of data transformation:
+
+    1. z-scale RNA expression by gene and lineage (`src.modeling.feature_engineering`)
+    2. append total read counts (`src.data_processing.achilles`)
+    3. add useful read count columns (`src.data_processing.achilles`)
+    4. (optional additional transformations)
+    5. set Achilles categorical columns (`src.data_processing.achilles`)
+
+    Args:
+        data_source (DataFile): Data source.
+        other_transforms (Optional[list[DataFrameTransformation]], optional): Additional
+          transformation to include in the data manager&#39;s defaults. Defaults to None.
+
+    Returns:
+        CrisprScreenDataManager: Data manager for count modeling.
+    &#34;&#34;&#34;
+    data_manager = CrisprScreenDataManager(data_source=data_source)
+
+    data_transformations = common_crispr_screen_transformations.copy()
+    data_transformations += [
+        feng.zscale_rna_expression_by_gene_and_lineage,
+        _append_total_read_counts,
+        _add_useful_read_count_columns,
+    ]
+
+    if other_transforms is not None:
+        data_transformations += other_transforms
+
+    data_manager.add_transformation(data_transformations)
+    # Need to add at end because `p_dna_batch` becomes non-categorical.
+    data_manager.add_transformation(achelp.set_achilles_categorical_columns)
+    return data_manager</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -321,23 +446,14 @@ created automatically.</dd>
         self._config = SpecletEightConfiguration() if config is None else config
 
         if data_manager is None:
-            data_manager = CrisprScreenDataManager(
-                data_source=DataFile.DEPMAP_CRC_BONE_SUBSAMPLE
+            _other_transforms: list[DataFrameTransformation] = []
+            _other_transforms.append(_thin_data_columns)
+            if self._config.broad_only:
+                _other_transforms.append(achelp.filter_for_broad_source_only)
+
+            data_manager = make_count_model_data_manager(
+                DataFile.DEPMAP_CRC_BONE_SUBSAMPLE, other_transforms=_other_transforms
             )
-
-        data_transformations = common_crispr_screen_transformations.copy()
-        data_transformations += [
-            feng.zscale_rna_expression_by_gene_and_lineage,
-            _append_total_read_counts,
-            _add_useful_read_count_columns,
-        ]
-        if self._config.broad_only:
-            data_transformations.append(achelp.filter_for_broad_source_only)
-
-        data_manager.add_transformation(data_transformations)
-        data_manager.add_transformation(_thin_data_columns)
-        # Need to add at end because `p_dna_batch` becomes non-categorical.
-        data_manager.add_transformation(achelp.set_achilles_categorical_columns)
 
         super().__init__(name, data_manager, root_cache_dir=root_cache_dir)
 
@@ -360,10 +476,9 @@ created automatically.</dd>
         logger.info(f&#34;Number of lineages: {co_idx.n_lineages}&#34;)
         # b_idx = achelp.data_batch_indices(data)
 
-        logger.info(&#34;Creating shared variables.&#34;)
-        x_initial = ts(data.counts_initial_adj.values)
-
+        logger.info(&#34;Creating coordinates dictionary.&#34;)
         coords = {
+            &#34;one&#34;: [&#34;dim_one&#34;],
             &#34;sgrna&#34;: data.sgrna.cat.categories,
             &#34;gene&#34;: data.hugo_symbol.cat.categories,
             &#34;cell_line&#34;: data.depmap_id.cat.categories,
@@ -371,9 +486,11 @@ created automatically.</dd>
             &#34;batch&#34;: data.p_dna_batch.cat.categories,
         }
 
+        logger.info(&#34;Creating RNA expression matrix.&#34;)
         rna_expr_matrix = _rna_expr_gene_lineage_matrix(data, &#34;rna_expr_gene_lineage&#34;)
-        _sgrna_by_cell_line = (co_idx.n_sgrnas, co_idx.n_celllines)
+        # _sgrna_by_cell_line = (co_idx.n_sgrnas, co_idx.n_celllines)
 
+        logger.info(&#34;Building PyMC3 model.&#34;)
         with pm.Model(coords=coords) as model:
             s = pm.Data(&#34;sgrna_idx&#34;, co_idx.sgrna_idx)
             g_s = pm.Data(&#34;sgrna_to_gene_idx&#34;, co_idx.sgrna_to_gene_idx)
@@ -381,36 +498,36 @@ created automatically.</dd>
             l_c = pm.Data(&#34;cell_line_to_lineage_idx&#34;, co_idx.cellline_to_lineage_idx)
             # b = pm.Data(&#34;batch_idx&#34;, b_idx.batch_idx)
             rna_expr = pm.Data(&#34;rna_expression_gl&#34;, rna_expr_matrix)
-            x_initial = pm.Data(&#34;x_initial&#34;, data.counts_initial_adj.values)
-            counts_final = pm.Data(&#34;counts_final&#34;, data.counts_final.values)
+            ct_initial = pm.Data(&#34;ct_initial&#34;, data.counts_initial_adj.values)
+            ct_final = pm.Data(&#34;ct_final&#34;, data.counts_final.values)
 
             h = _gene_by_cell_line_hierarchical_structure(
-                &#34;h&#34;, co_idx=co_idx, l_c_idx=l_c
+                &#34;h&#34;, l_c_idx=l_c, centered=False
             )
             q = _gene_by_cell_line_hierarchical_structure(
-                &#34;q&#34;, co_idx=co_idx, l_c_idx=l_c
+                &#34;q&#34;, l_c_idx=l_c, centered=False
             )
 
-            mu_beta = pm.Deterministic(
-                &#34;mu_beta&#34;, h + q * rna_expr
-            )  # shape: [gene x cell line]
+            # shape: [gene x cell line]
+            mu_beta = pm.Deterministic(&#34;mu_beta&#34;, h + q * rna_expr)
 
-            sigma_sigma_beta = pm.HalfNormal(&#34;sigma_sigma_beta&#34;, 1)
-            sigma_beta = pm.HalfNormal(&#34;sigma_beta&#34;, sigma_sigma_beta, dims=&#34;gene&#34;)
+            sigma_sigma_beta = pm.Exponential(&#34;sigma_sigma_beta&#34;, 0.2)
+            sigma_beta = pm.Exponential(
+                &#34;sigma_beta&#34;, sigma_sigma_beta, dims=(&#34;gene&#34;, &#34;one&#34;)
+            )
 
-            beta_sgrna = pm.Normal(
-                &#34;beta_sgrna&#34;,
+            beta = pm.Normal(
+                &#34;beta&#34;,
                 mu_beta[g_s, :],
-                tt.ones(shape=_sgrna_by_cell_line)
-                * sigma_beta[g_s].reshape((co_idx.n_sgrnas, 1)),
+                sigma_beta[g_s, :],
                 dims=(&#34;sgrna&#34;, &#34;cell_line&#34;),
             )
 
-            eta = pm.Deterministic(&#34;eta&#34;, beta_sgrna[s, c])
+            eta = pm.Deterministic(&#34;eta&#34;, beta[s, c])
             mu = pm.Deterministic(&#34;mu&#34;, pm.math.exp(eta))
-            alpha = pm.HalfCauchy(&#34;alpha&#34;, 5)
+            alpha = pm.Exponential(&#34;alpha&#34;, 1 / 10)
             y = pm.NegativeBinomial(  # noqa: F841
-                &#34;y&#34;, x_initial * mu, alpha, observed=counts_final
+                &#34;y&#34;, ct_initial * mu, alpha, observed=ct_final
             )
 
         return model, &#34;y&#34;</code></pre>
@@ -456,10 +573,9 @@ created automatically.</dd>
     logger.info(f&#34;Number of lineages: {co_idx.n_lineages}&#34;)
     # b_idx = achelp.data_batch_indices(data)
 
-    logger.info(&#34;Creating shared variables.&#34;)
-    x_initial = ts(data.counts_initial_adj.values)
-
+    logger.info(&#34;Creating coordinates dictionary.&#34;)
     coords = {
+        &#34;one&#34;: [&#34;dim_one&#34;],
         &#34;sgrna&#34;: data.sgrna.cat.categories,
         &#34;gene&#34;: data.hugo_symbol.cat.categories,
         &#34;cell_line&#34;: data.depmap_id.cat.categories,
@@ -467,9 +583,11 @@ created automatically.</dd>
         &#34;batch&#34;: data.p_dna_batch.cat.categories,
     }
 
+    logger.info(&#34;Creating RNA expression matrix.&#34;)
     rna_expr_matrix = _rna_expr_gene_lineage_matrix(data, &#34;rna_expr_gene_lineage&#34;)
-    _sgrna_by_cell_line = (co_idx.n_sgrnas, co_idx.n_celllines)
+    # _sgrna_by_cell_line = (co_idx.n_sgrnas, co_idx.n_celllines)
 
+    logger.info(&#34;Building PyMC3 model.&#34;)
     with pm.Model(coords=coords) as model:
         s = pm.Data(&#34;sgrna_idx&#34;, co_idx.sgrna_idx)
         g_s = pm.Data(&#34;sgrna_to_gene_idx&#34;, co_idx.sgrna_to_gene_idx)
@@ -477,36 +595,36 @@ created automatically.</dd>
         l_c = pm.Data(&#34;cell_line_to_lineage_idx&#34;, co_idx.cellline_to_lineage_idx)
         # b = pm.Data(&#34;batch_idx&#34;, b_idx.batch_idx)
         rna_expr = pm.Data(&#34;rna_expression_gl&#34;, rna_expr_matrix)
-        x_initial = pm.Data(&#34;x_initial&#34;, data.counts_initial_adj.values)
-        counts_final = pm.Data(&#34;counts_final&#34;, data.counts_final.values)
+        ct_initial = pm.Data(&#34;ct_initial&#34;, data.counts_initial_adj.values)
+        ct_final = pm.Data(&#34;ct_final&#34;, data.counts_final.values)
 
         h = _gene_by_cell_line_hierarchical_structure(
-            &#34;h&#34;, co_idx=co_idx, l_c_idx=l_c
+            &#34;h&#34;, l_c_idx=l_c, centered=False
         )
         q = _gene_by_cell_line_hierarchical_structure(
-            &#34;q&#34;, co_idx=co_idx, l_c_idx=l_c
+            &#34;q&#34;, l_c_idx=l_c, centered=False
         )
 
-        mu_beta = pm.Deterministic(
-            &#34;mu_beta&#34;, h + q * rna_expr
-        )  # shape: [gene x cell line]
+        # shape: [gene x cell line]
+        mu_beta = pm.Deterministic(&#34;mu_beta&#34;, h + q * rna_expr)
 
-        sigma_sigma_beta = pm.HalfNormal(&#34;sigma_sigma_beta&#34;, 1)
-        sigma_beta = pm.HalfNormal(&#34;sigma_beta&#34;, sigma_sigma_beta, dims=&#34;gene&#34;)
+        sigma_sigma_beta = pm.Exponential(&#34;sigma_sigma_beta&#34;, 0.2)
+        sigma_beta = pm.Exponential(
+            &#34;sigma_beta&#34;, sigma_sigma_beta, dims=(&#34;gene&#34;, &#34;one&#34;)
+        )
 
-        beta_sgrna = pm.Normal(
-            &#34;beta_sgrna&#34;,
+        beta = pm.Normal(
+            &#34;beta&#34;,
             mu_beta[g_s, :],
-            tt.ones(shape=_sgrna_by_cell_line)
-            * sigma_beta[g_s].reshape((co_idx.n_sgrnas, 1)),
+            sigma_beta[g_s, :],
             dims=(&#34;sgrna&#34;, &#34;cell_line&#34;),
         )
 
-        eta = pm.Deterministic(&#34;eta&#34;, beta_sgrna[s, c])
+        eta = pm.Deterministic(&#34;eta&#34;, beta[s, c])
         mu = pm.Deterministic(&#34;mu&#34;, pm.math.exp(eta))
-        alpha = pm.HalfCauchy(&#34;alpha&#34;, 5)
+        alpha = pm.Exponential(&#34;alpha&#34;, 1 / 10)
         y = pm.NegativeBinomial(  # noqa: F841
-            &#34;y&#34;, x_initial * mu, alpha, observed=counts_final
+            &#34;y&#34;, ct_initial * mu, alpha, observed=ct_final
         )
 
     return model, &#34;y&#34;</code></pre>
@@ -571,6 +689,11 @@ created automatically.</dd>
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="src.models" href="index.html">src.models</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="src.models.speclet_eight.make_count_model_data_manager" href="#src.models.speclet_eight.make_count_model_data_manager">make_count_model_data_manager</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
