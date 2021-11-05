@@ -4,9 +4,9 @@
 from pathlib import Path
 from typing import Final, Optional
 
-import janitor  # noqa: F401
 import pymc3 as pm
 from pydantic import BaseModel
+from pydantic.types import PositiveFloat  # noqa: F401
 
 from src.data_processing import achilles as achelp
 from src.io.data_io import DataFile
@@ -23,10 +23,72 @@ from src.models.speclet_model import (
 )
 
 
+class NormalParameters(BaseModel):
+    """Normal distribution parameters."""
+
+    mu: float
+    sigma: PositiveFloat
+
+
+class HalfNormalParameters(BaseModel):
+    """Half-Normal distribution parameters."""
+
+    sigma: PositiveFloat
+
+
+class ExponentialParameters(BaseModel):
+    """Exponential distribution parameters."""
+
+    lam: PositiveFloat
+
+
+class GammaParameters(BaseModel):
+    """Gamma distribution parameters."""
+
+    alpha: PositiveFloat
+    beta: PositiveFloat
+
+
+class SpecletNinePriors(BaseModel):
+    """Priors for SpecletNine."""
+
+    mu_beta: NormalParameters = NormalParameters(mu=0, sigma=1)
+    sigma_beta: ExponentialParameters = ExponentialParameters(lam=5)
+    alpha: GammaParameters = GammaParameters(alpha=2.0, beta=0.3)
+
+
 class SpecletNineConfiguration(BaseModel):
     """Configuration for SpecletNine."""
 
     broad_only: bool = True
+    priors: SpecletNinePriors = SpecletNinePriors()
+
+
+def make_speclet_nine_priors_config(
+    mu_beta_mu: float,
+    mu_beta_sigma: float,
+    sigma_beta_lam: float,
+    alpha_alpha: float,
+    alpha_beta: float,
+) -> SpecletNineConfiguration:
+    """Generate a SpecletNine configuration with specific prior values.
+
+    Args:
+        mu_beta_mu (float): Centrality of `mu_beta`.
+        mu_beta_sigma (float): Standard deviation of `mu_beta`.
+        sigma_beta_lam (float): Lambda of `sigma_beta`.
+        alpha_alpha (float): Alpha of `alpha`.
+        alpha_beta (float): Beta of `alpha`.
+
+    Returns:
+        SpecletNineConfiguration: SpecletNineConfiguration with the specific priors.
+    """
+    priors = SpecletNinePriors(
+        mu_beta=NormalParameters(mu=mu_beta_mu, sigma=mu_beta_sigma),
+        sigma_beta=ExponentialParameters(lam=sigma_beta_lam),
+        alpha=GammaParameters(alpha=alpha_alpha, beta=alpha_beta),
+    )
+    return SpecletNineConfiguration(priors=priors)
 
 
 def _reduce_num_genes_for_dev(df: Data) -> Data:
@@ -119,29 +181,27 @@ class SpecletNine(SpecletModel):
             # "lineage": data.lineage.cat.categories,
         }
 
+        priors = self._config.priors
+        logger.info(f"Model prior constants: {priors.dict()}")
+
         logger.info("Building PyMC3 model.")
         with pm.Model(coords=coords) as model:
-            s = pm.Data("sgrna_idx", co_idx.sgrna_idx)
-            g_s = pm.Data("sgrna_to_gene_idx", co_idx.sgrna_to_gene_idx)
+            # s = pm.Data("sgrna_idx", co_idx.sgrna_idx)
+            g = pm.Data("gene_idx", co_idx.gene_idx)
+            # g_s = pm.Data("sgrna_to_gene_idx", co_idx.sgrna_to_gene_idx)
             c = pm.Data("cell_line_idx", co_idx.cellline_idx)
             # l_c = pm.Data("cell_line_to_lineage_idx", co_idx.cellline_to_lineage_idx)
             ct_initial = pm.Data("ct_initial", data.counts_initial_adj.values)
             ct_final = pm.Data("ct_final", data.counts_final.values)
 
-            # shape: [gene x cell line]
-            mu_beta = pm.Normal("mu_beta", 0, 0.1, dims=("gene", "one"))
-            sigma_beta = pm.Exponential("sigma_beta", 2)
+            mu_beta = pm.Normal("mu_beta", priors.mu_beta.mu, priors.mu_beta.sigma)
+            sigma_beta = pm.Exponential("sigma_beta", priors.sigma_beta.lam)
 
-            beta = pm.Normal(
-                "beta",
-                mu_beta[g_s, :],
-                sigma_beta,
-                dims=("sgrna", "cell_line"),
-            )
+            beta = pm.Normal("beta", mu_beta, sigma_beta, dims=("gene", "cell_line"))
 
-            eta = pm.Deterministic("eta", beta[s, c])
+            eta = pm.Deterministic("eta", beta[g, c])
             mu = pm.Deterministic("mu", pm.math.exp(eta))
-            alpha = pm.Exponential("alpha", 1)
+            alpha = pm.Gamma("alpha", priors.alpha.alpha, priors.alpha.beta)
             y = pm.NegativeBinomial(  # noqa: F841
                 "y", ct_initial * mu, alpha, observed=ct_final
             )
