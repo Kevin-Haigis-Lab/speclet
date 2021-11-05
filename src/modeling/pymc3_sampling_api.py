@@ -3,7 +3,7 @@
 """Standardization of the interactions with PyMC3 sampling."""
 
 from dataclasses import dataclass
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Literal, Optional
 
 import arviz as az
 import numpy as np
@@ -83,9 +83,12 @@ def pymc3_sampling_procedure(
     return trace
 
 
+VIMethod = Literal["advi", "fullrank_advi", "svgd", "asvgd", "nfvi", "nfv"]
+
+
 def pymc3_advi_approximation_procedure(
     model: pm.Model,
-    method: str = "advi",
+    method: VIMethod = "advi",
     n_iterations: int = 100000,
     draws: int = 1000,
     prior_pred_samples: Optional[int] = 500,
@@ -94,9 +97,6 @@ def pymc3_advi_approximation_procedure(
     fit_kwargs: Optional[dict[str, Any]] = None,
 ) -> ApproximationSamplingResults:
     """Run a standard PyMC3 ADVI fitting procedure.
-
-    TODO (@jhrcook): Change `method` from a string to a literal and get supported
-    options from PyMC3.
 
     Args:
         model (pm.Model): PyMC3 model.

@@ -16,6 +16,7 @@ from src.loggers import logger
 from src.managers.data_managers import DataFrameTransformation
 from src.managers.model_cache_managers import Pymc3ModelCacheManager
 from src.modeling import pymc3_sampling_api as pmapi
+from src.project_config import read_project_configuration
 from src.project_enums import MockDataSize, ModelFitMethod, assert_never
 
 ReplacementsDict = dict[TTShared, Union[pm.Minibatch, np.ndarray]]
@@ -348,6 +349,9 @@ class SpecletModel:
         )
         return mock_data
 
+    def _hdi(self) -> float:
+        return read_project_configuration().modeling.highest_density_interval
+
     def run_simulation_based_calibration(
         self,
         results_path: Path,
@@ -428,8 +432,7 @@ class SpecletModel:
             assert_never(fit_method)
 
         logger.info("Making posterior summary for the SBC.")
-        # TODO: use project configuration value for `hdi_prob`.
-        posterior_summary = az.summary(res, fmt="wide", hdi_prob=0.89)
+        posterior_summary = az.summary(res, fmt="wide", hdi_prob=self._hdi())
         assert isinstance(posterior_summary, pd.DataFrame)
 
         logger.info("Using a SBC file manager to save SBC results.")

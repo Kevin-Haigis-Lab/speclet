@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from src.models.speclet_nine import SpecletNine
+from src.project_enums import ModelFitMethod, assert_never
 
 
 @pytest.fixture(scope="function")
@@ -31,10 +32,10 @@ def test_build_model(sp9: SpecletNine) -> None:
 
 
 @pytest.mark.slow
-def test_sample_model(sp9: SpecletNine) -> None:
+@pytest.mark.parametrize("method", ModelFitMethod)
+def test_sample_model(sp9: SpecletNine, method: ModelFitMethod) -> None:
     data = sp9.data_manager.get_data()
     ct_i = np.abs(np.random.normal(loc=10, scale=2, size=data.shape[0]))
-    # ct_i = np.ones(data.shape[0])
     ct_f = np.abs(ct_i + np.random.normal(loc=0, scale=5, size=data.shape[0]))
     data["counts_initial_adj"] = ct_i.astype(np.int32)
     data["counts_final"] = ct_f.astype(np.int32)
@@ -42,10 +43,17 @@ def test_sample_model(sp9: SpecletNine) -> None:
 
     sp9.build_model()
     assert sp9.mcmc_results is None
-    _ = sp9.mcmc_sample_model(
-        prior_pred_samples=100, sample_kwargs={"draws": 10, "tune": 10, "chains": 1}
-    )
-    assert sp9.mcmc_results is not None
+    assert sp9.advi_results is None
 
-
-# TODO: add test for ADVI sampling
+    if method is ModelFitMethod.MCMC:
+        _ = sp9.mcmc_sample_model(
+            prior_pred_samples=100, sample_kwargs={"draws": 10, "tune": 10, "chains": 1}
+        )
+        assert sp9.mcmc_results is not None
+        assert sp9.advi_results is None
+    elif method is ModelFitMethod.ADVI:
+        _ = sp9.advi_sample_model(prior_pred_samples=100, n_iterations=100, draws=23)
+        assert sp9.mcmc_results is None
+        assert sp9.advi_results is not None
+    else:
+        assert_never(method)

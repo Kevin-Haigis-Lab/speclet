@@ -11,6 +11,7 @@ from pydantic.types import confloat
 
 from src.io.data_io import project_root_dir
 from src.loggers import logger
+from src.modeling.pymc3_sampling_api import VIMethod
 from src.models.ceres_mimic import CeresMimic
 from src.models.speclet_eight import SpecletEight
 from src.models.speclet_five import SpecletFive
@@ -84,7 +85,7 @@ class Pymc3FitArguments(BaseModel):
 
     _pymc3_version: str = "3.11.2"
     n: PositiveInt = 10000
-    method = "advi"
+    method: VIMethod = "advi"
     random_seed: Optional[PositiveInt] = None
     inf_kwargs: Optional[dict[str, BasicTypes]] = None
     progressbar: bool = True
@@ -115,7 +116,7 @@ class SpecletModelMcmcArguments(BaseModel):
 class SpecletModelAdviArguments(BaseModel):
     """SpecletModel ADVI arguments."""
 
-    method: str = "advi"
+    method: VIMethod = "advi"
     n_iterations: int = 100000
     draws: int = 1000
     prior_pred_samples: Optional[int] = None
