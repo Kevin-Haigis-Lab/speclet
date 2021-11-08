@@ -11,4 +11,4 @@ modeling:
   models_config: "model-configs.yaml"
 
 fitting_pipeline:
-  debug: true
+  debug: false

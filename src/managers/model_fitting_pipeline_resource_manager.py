@@ -67,7 +67,7 @@ fitting_pipeline_memory_lookup: MemoryLookupDict = {
     },
     ModelOption.SPECLET_NINE: {
         True: {ModelFitMethod.ADVI: 4, ModelFitMethod.MCMC: 4},
-        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
+        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 64},
     },
 }
 
@@ -125,8 +125,8 @@ fitting_pipeline_time_lookup: TimeLookupDict = {
         False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
     },
     ModelOption.SPECLET_NINE: {
-        True: {ModelFitMethod.ADVI: td(hours=1), ModelFitMethod.MCMC: td(hours=4)},
-        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
+        True: {ModelFitMethod.ADVI: td(hours=1), ModelFitMethod.MCMC: td(hours=1.5)},
+        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=1)},
     },
 }
 

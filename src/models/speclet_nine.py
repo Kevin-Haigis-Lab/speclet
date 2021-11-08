@@ -150,7 +150,7 @@ class SpecletNine(SpecletModel):
                 _other_transforms.append(achelp.filter_for_broad_source_only)
 
             data_manager = make_count_model_data_manager(
-                DataFile.DEPMAP_CRC_BONE_SUBSAMPLE, other_transforms=_other_transforms
+                DataFile.DEPMAP_CRC_BONE, other_transforms=_other_transforms
             )
 
         super().__init__(name, data_manager, root_cache_dir=root_cache_dir)
