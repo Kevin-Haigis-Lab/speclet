@@ -17,6 +17,7 @@ from src.models.speclet_eight import SpecletEight
 from src.models.speclet_five import SpecletFive
 from src.models.speclet_four import SpecletFour
 from src.models.speclet_model import SpecletModel
+from src.models.speclet_nine import SpecletNine
 from src.models.speclet_one import SpecletOne
 from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.models.speclet_seven import SpecletSeven
@@ -39,6 +40,7 @@ SpecletProjectModelTypes = Union[
     SpecletSix,
     SpecletSeven,
     SpecletEight,
+    SpecletNine,
 ]
 
 TargetAcceptFloat = confloat(ge=0.5, lt=1.0)
@@ -145,7 +147,7 @@ class ModelConfig(BaseModel):
     name: str
     description: str
     model: ModelOption
-    config: Optional[dict[str, Union[ModelFitMethod, BasicTypes]]] = None
+    config: Optional[dict[str, BasicTypes]] = None
     pipelines: dict[SpecletPipeline, list[ModelFitMethod]] = Field(default_factory=dict)
     sampling_arguments: PipelineSamplingArguments = Field(
         default_factory=PipelineSamplingArguments
@@ -303,6 +305,7 @@ def get_model_class(model_opt: ModelOption) -> type[SpecletProjectModelTypes]:
         ModelOption.SPECLET_SIX: SpecletSix,
         ModelOption.SPECLET_SEVEN: SpecletSeven,
         ModelOption.SPECLET_EIGHT: SpecletEight,
+        ModelOption.SPECLET_NINE: SpecletNine,
     }
     if model_opt not in model_option_map:
         raise ModelOptionNotAssociatedWithAClassException(model_opt.value)

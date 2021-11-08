@@ -2,7 +2,7 @@
 
 
 from pathlib import Path
-from typing import Final, Optional
+from typing import Any, Final, Optional
 
 import pymc3 as pm
 from pydantic import BaseModel
@@ -21,6 +21,7 @@ from src.models.speclet_model import (
     SpecletModel,
     SpecletModelDataManager,
 )
+from src.project_enums import ModelParameterization, assert_never
 
 
 class NormalParameters(BaseModel):
@@ -52,8 +53,8 @@ class GammaParameters(BaseModel):
 class SpecletNinePriors(BaseModel):
     """Priors for SpecletNine."""
 
-    mu_beta: NormalParameters = NormalParameters(mu=0, sigma=1)
-    sigma_beta: ExponentialParameters = ExponentialParameters(lam=5)
+    mu_beta: NormalParameters = NormalParameters(mu=0, sigma=2.5)
+    sigma_beta: ExponentialParameters = ExponentialParameters(lam=2.5)
     alpha: GammaParameters = GammaParameters(alpha=2.0, beta=0.3)
 
 
@@ -61,6 +62,7 @@ class SpecletNineConfiguration(BaseModel):
     """Configuration for SpecletNine."""
 
     broad_only: bool = True
+    beta_parameterization: ModelParameterization = ModelParameterization.CENTERED
     priors: SpecletNinePriors = SpecletNinePriors()
 
 
@@ -153,6 +155,12 @@ class SpecletNine(SpecletModel):
 
         super().__init__(name, data_manager, root_cache_dir=root_cache_dir)
 
+    def set_config(self, info: dict[Any, Any]) -> None:
+        """Set model-specific configuration."""
+        logger.info("Setting model configuration.")
+        self._config = SpecletNineConfiguration(**info)
+        return None
+
     def model_specification(self) -> tuple[pm.Model, ObservedVarName]:
         """Define the PyMC3 model.
 
@@ -178,17 +186,17 @@ class SpecletNine(SpecletModel):
             "sgrna": data.sgrna.cat.categories,
             "gene": data.hugo_symbol.cat.categories,
             "cell_line": data.depmap_id.cat.categories,
-            # "lineage": data.lineage.cat.categories,
+            "lineage": data.lineage.cat.categories,
         }
 
         priors = self._config.priors
         logger.info(f"Model prior constants: {priors.dict()}")
+        beta_param = self._config.beta_parameterization
+        logger.info(f"Beta parameterization: {beta_param.value}")
 
         logger.info("Building PyMC3 model.")
         with pm.Model(coords=coords) as model:
-            # s = pm.Data("sgrna_idx", co_idx.sgrna_idx)
             g = pm.Data("gene_idx", co_idx.gene_idx)
-            # g_s = pm.Data("sgrna_to_gene_idx", co_idx.sgrna_to_gene_idx)
             c = pm.Data("cell_line_idx", co_idx.cellline_idx)
             # l_c = pm.Data("cell_line_to_lineage_idx", co_idx.cellline_to_lineage_idx)
             ct_initial = pm.Data("ct_initial", data.counts_initial_adj.values)
@@ -197,7 +205,15 @@ class SpecletNine(SpecletModel):
             mu_beta = pm.Normal("mu_beta", priors.mu_beta.mu, priors.mu_beta.sigma)
             sigma_beta = pm.Exponential("sigma_beta", priors.sigma_beta.lam)
 
-            beta = pm.Normal("beta", mu_beta, sigma_beta, dims=("gene", "cell_line"))
+            if beta_param is ModelParameterization.CENTERED:
+                beta = pm.Normal(
+                    "beta", mu_beta, sigma_beta, dims=("gene", "cell_line")
+                )
+            elif beta_param is ModelParameterization.NONCENTERED:
+                delta_beta = pm.Normal("delta_beta", 0, 1, dims=("gene", "cell_line"))
+                beta = pm.Deterministic("beta", mu_beta + delta_beta * sigma_beta)
+            else:
+                assert_never(beta_param)
 
             eta = pm.Deterministic("eta", beta[g, c])
             mu = pm.Deterministic("mu", pm.math.exp(eta))

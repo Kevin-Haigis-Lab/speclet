@@ -3,8 +3,12 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from src.models.speclet_nine import SpecletNine
-from src.project_enums import ModelFitMethod, assert_never
+from src.models.speclet_nine import (
+    SpecletNine,
+    SpecletNineConfiguration,
+    SpecletNinePriors,
+)
+from src.project_enums import ModelFitMethod, ModelParameterization, assert_never
 
 
 @pytest.fixture(scope="function")
@@ -31,9 +35,38 @@ def test_build_model(sp9: SpecletNine) -> None:
     assert sp9.observed_var_name is not None
 
 
+@pytest.mark.parametrize(
+    "config",
+    [
+        SpecletNineConfiguration(),
+        SpecletNineConfiguration(
+            beta_parameterization=ModelParameterization.NONCENTERED
+        ),
+        SpecletNineConfiguration(
+            priors=SpecletNinePriors(**{"mu_beta": {"mu": 10, "sigma": 1.2}})
+        ),
+    ],
+)
+def test_set_config(sp9: SpecletNine, config: SpecletNineConfiguration) -> None:
+    sp9.set_config(config.dict())
+    assert sp9._config.dict() == config.dict()
+
+
 @pytest.mark.slow
+@pytest.mark.parametrize(
+    "config",
+    [
+        SpecletNineConfiguration(),
+        SpecletNineConfiguration(
+            beta_parameterization=ModelParameterization.NONCENTERED
+        ),
+    ],
+)
 @pytest.mark.parametrize("method", ModelFitMethod)
-def test_sample_model(sp9: SpecletNine, method: ModelFitMethod) -> None:
+def test_sample_model(
+    sp9: SpecletNine, config: SpecletNineConfiguration, method: ModelFitMethod
+) -> None:
+    sp9.set_config(config.dict())
     data = sp9.data_manager.get_data()
     ct_i = np.abs(np.random.normal(loc=10, scale=2, size=data.shape[0]))
     ct_f = np.abs(ct_i + np.random.normal(loc=0, scale=5, size=data.shape[0]))
