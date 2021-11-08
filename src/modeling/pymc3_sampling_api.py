@@ -25,6 +25,16 @@ class ApproximationSamplingResults:
 #### ---- Interface with PyMC3 ---- ####
 
 
+def _insert_random_seed_into_kwargs(
+    random_seed: Optional[int], sample_kwargs: dict[str, Any]
+) -> None:
+    kwargs_seed: Optional[int] = sample_kwargs.get("random_seed")
+    if kwargs_seed != random_seed:
+        logger.warning(f"Different random seeds supplied - using {random_seed}")
+    sample_kwargs["random_seed"] = random_seed
+    return
+
+
 def _extend_trace_with_prior_and_posterior(
     trace: az.InferenceData,
     prior: Optional[dict[str, np.ndarray]] = None,
@@ -61,10 +71,11 @@ def pymc3_sampling_procedure(
     if sample_kwargs is None:
         sample_kwargs = {}
 
+    _insert_random_seed_into_kwargs(random_seed, sample_kwargs)
+    sample_kwargs["return_inferencedata"] = True
+
     with model:
-        trace = pm.sample(
-            random_seed=random_seed, return_inferencedata=True, **sample_kwargs
-        )
+        trace = pm.sample(**sample_kwargs)
         post_pred = pm.sample_posterior_predictive(trace, random_seed=random_seed)
 
     assert isinstance(trace, az.InferenceData)

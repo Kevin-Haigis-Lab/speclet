@@ -44,13 +44,13 @@ def _update_sampling_kwargs(
     first_layer_kwargs = {"random_seed": random_seed, "ignore_cache": ignore_cache}
     for key, value in first_layer_kwargs.items():
         if key in kwargs.keys():
-            logger.warn(f"Overriding configured '{key}' with {value}.")
+            logger.warning(f"Overriding configured '{key}' with {value}.")
         kwargs[key] = value
 
     model_sampling_kwargs = kwargs.get("sample_kwargs", {})
     for key, value in {"chains": chains, "cores": cores}.items():
         if key in model_sampling_kwargs.keys():
-            logger.warn(f"Overriding configured '{key}' with {value}.")
+            logger.warning(f"Overriding configured '{key}' with {value}.")
         model_sampling_kwargs[key] = value
     kwargs["sample_kwargs"] = model_sampling_kwargs
     return None
