@@ -32,7 +32,12 @@ def test_data_path(to: Union[str, data_io.DataFile]) -> Path:
     if isinstance(to, str):
         to = data_io.DataFile(to)
 
-    if to in {DataFile.DEPMAP_CRC, DataFile.DEPMAP_CRC_SUBSAMPLE, DataFile.DEPMAP_DATA}:
+    if to in {
+        DataFile.DEPMAP_CRC,
+        DataFile.DEPMAP_CRC_SUBSAMPLE,
+        DataFile.DEPMAP_DATA,
+        DataFile.DEPMAP_CRC_BONE,
+    }:
         return TEST_DATA
 
     return data_io.modeling_data_dir() / to.value

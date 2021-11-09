@@ -4,6 +4,7 @@
 from pathlib import Path
 from typing import Any, Final, Optional
 
+import numpy as np
 import pymc3 as pm
 from pydantic import BaseModel
 from pydantic.types import PositiveFloat  # noqa: F401
@@ -199,8 +200,10 @@ class SpecletNine(SpecletModel):
             g = pm.Data("gene_idx", co_idx.gene_idx)
             c = pm.Data("cell_line_idx", co_idx.cellline_idx)
             # l_c = pm.Data("cell_line_to_lineage_idx", co_idx.cellline_to_lineage_idx)
-            ct_initial = pm.Data("ct_initial", data.counts_initial_adj.values)
-            ct_final = pm.Data("ct_final", data.counts_final.values)
+            ct_initial = pm.Data(
+                "ct_initial", data.counts_initial_adj.values.astype(np.float32)
+            )
+            ct_final = pm.Data("ct_final", data.counts_final.values.astype(np.uintc))
 
             mu_beta = pm.Normal("mu_beta", priors.mu_beta.mu, priors.mu_beta.sigma)
             sigma_beta = pm.Exponential("sigma_beta", priors.sigma_beta.lam)

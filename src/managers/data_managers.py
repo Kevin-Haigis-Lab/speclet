@@ -24,7 +24,7 @@ common_crispr_screen_transformations: Final[list[DataFrameTransformation]] = [
 
 
 def _get_crispr_screen_data_coltypes() -> dict[str, str]:
-    col_types = {}
+    col_types: dict[str, str] = {}
     for c in [
         "sgrna",
         "hugo_symbol",
@@ -36,7 +36,7 @@ def _get_crispr_screen_data_coltypes() -> dict[str, str]:
     ]:
         col_types[c] = "object"
     for c in ["counts_final", "counts_final_total"]:
-        col_types[c] = "Int64"
+        col_types[c] = "UInt32"
     return col_types
 
 
