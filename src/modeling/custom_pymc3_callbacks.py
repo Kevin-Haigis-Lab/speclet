@@ -2,8 +2,10 @@
 
 """Sampling and fitting callbacks for PyMC3 models."""
 
+from datetime import datetime
 
-import pymc3 as pm
+from pymc3.backends.ndarray import NDArray
+from pymc3.parallel_sampling import Draw
 
 
 class TooManyDivergences(Exception):
@@ -32,14 +34,12 @@ class DivergenceFractionCallback:
         self.min_samples = min_samples
         self.divergence_counts: dict[int, int] = {}
 
-    def __call__(
-        self, trace: pm.backends.ndarray.NDArray, draw: pm.parallel_sampling.Draw
-    ) -> None:
+    def __call__(self, trace: NDArray, draw: Draw) -> None:
         """Responder to sampling callback.
 
         Args:
-            trace (pm.backends.ndarray.NDArray): The current MCMC trace.
-            draw (pm.parallel_sampling.Draw): The current MCMC draw.
+            trace (NDArray): The current MCMC trace.
+            draw (Draw): The current MCMC draw.
 
         Raises:
             TooManyDivergences: Throws if the proportion of divergences it too high.
@@ -63,3 +63,39 @@ class DivergenceFractionCallback:
             msg = f"Too many divergences: {current_count} of {trace.draw_idx} "
             msg += f"steps ({current_count / trace.draw_idx} %). Stopping early."
             raise TooManyDivergences(msg)
+
+
+def _print_draw_table(draw: Draw) -> None:
+    tuning = "tune" if draw.tuning else "sampling"
+    print(f"{str(datetime.now())}, chain {draw.chain}, draw {draw.draw_idx}, {tuning}")
+
+
+class ProgressPrinterCallback:
+    """A simpler replacement to the progress bar for use in log files."""
+
+    every_n: int
+    tuning: bool
+
+    def __init__(self, every_n: int = 50, tuning: bool = True) -> None:
+        """Create a ProgressPrinterCallback object.
+
+        Args:
+            every_n (int, optional): Print updates every `n` draws. Defaults to 50.
+            tuning (bool, optional): Should tuning draws be included? Defaults to True.
+        """
+        self.every_n = every_n
+        self.tuning = tuning
+        return None
+
+    def __call__(self, trace: NDArray, draw: Draw) -> None:
+        """Responder to sampling callback.
+
+        Args:
+            trace (NDArray): The current MCMC trace.
+            draw (Draw): The current MCMC draw.
+        """
+        if not self.tuning and draw.tuning:
+            return None
+        if draw.draw_idx % self.every_n == 0:
+            _print_draw_table(draw)
+        return None
