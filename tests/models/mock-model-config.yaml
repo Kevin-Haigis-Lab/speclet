@@ -38,3 +38,16 @@
   model: speclet-test-model
   pipelines:
     fitting: ["ADVI"]
+
+- name: sampling-pymc3-models-cli_short-sampling-test
+  description: A config with a short sampling process.
+  model: speclet-test-model
+  pipelines:
+    fitting: ["MCMC"]
+  sampling_arguments:
+    fitting:
+      MCMC:
+        prior_pred_samples: null
+        sample_kwargs:
+          draws: 200
+          tune: 100

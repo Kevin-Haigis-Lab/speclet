@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import Any, Optional
 
@@ -134,7 +135,6 @@ def test_control_sampling(
         assert method_calls[0] is fit_method
 
 
-# @pytest.mark.skip("Need to refactor configuration.")
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 def test_uses_configuration_fitting_parameters(
     app: typer.Typer,
@@ -198,3 +198,30 @@ def test_uses_configuration_fitting_parameters(
         ],
     )
     assert result.exit_code == 0
+
+
+@pytest.mark.slow
+def test_print_custom_progress_messages(
+    app: typer.Typer,
+    runner: CliRunner,
+    mock_model_config: Path,
+    tmp_path: Path,
+) -> None:
+    res = runner.invoke(
+        app,
+        [
+            "sampling-pymc3-models-cli_short-sampling-test",
+            mock_model_config.as_posix(),
+            "MCMC",
+            tmp_path.as_posix(),
+            "--mcmc-chains=2",
+            "--mcmc-cores=1",
+        ],
+    )
+    assert res.exit_code == 0
+
+    n_draw_prints = 0
+    for line in res.stdout.split("\n"):
+        if re.search("chain \\d, draw \\d+", line):
+            n_draw_prints += 1
+    assert n_draw_prints == 12
