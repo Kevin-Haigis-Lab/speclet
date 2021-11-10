@@ -75,3 +75,23 @@ def assert_model_reparameterization(
             continue
         assert (param_name in set(rv_names)) == (param_method is MP.CENTERED)
         assert (param_name in set(unobs_names)) == (param_method is MP.NONCENTERED)
+
+
+# ---- Comparing dictionaries ----
+
+
+def assert_dicts(d1: dict[str, Any], d2: dict[str, Any]) -> None:
+    """Compare dictionaries.
+
+    Compares the two dictionaries using the keys from `d1` only.
+
+    Args:
+        d1 (dict[str, Any]): Dictionary one.
+        d2 (dict[str, Any]): Dictionary two.
+    """
+    for k, v in d1.items():
+        if isinstance(v, dict):
+            assert_dicts(v, d2.get(k, {}))
+        else:
+            assert v == d2[k]
+    return None

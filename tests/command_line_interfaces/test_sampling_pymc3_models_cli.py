@@ -7,7 +7,7 @@ from typer.testing import CliRunner
 
 import src.command_line_interfaces.sampling_pymc3_models_cli as sampling
 from src import model_configuration as model_config
-from src.misc.test_helpers import do_nothing
+from src.misc.test_helpers import assert_dicts, do_nothing
 from src.model_configuration import ModelConfigurationNotFound
 from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.project_enums import ModelFitMethod, ModelOption, SpecletPipeline, assert_never
@@ -134,7 +134,7 @@ def test_control_sampling(
         assert method_calls[0] is fit_method
 
 
-@pytest.mark.skip("Need to refactor configuration.")
+# @pytest.mark.skip("Need to refactor configuration.")
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 def test_uses_configuration_fitting_parameters(
     app: typer.Typer,
@@ -145,18 +145,17 @@ def test_uses_configuration_fitting_parameters(
     tmp_path: Path,
 ) -> None:
 
-    advi_kwargs = {"n_iterations": 42, "draws": 23, "post_pred_samples": 12}
-    mcmc_kwargs = {"tune": 33, "target_accept": 0.2, "prior_pred_samples": 121}
-
-    def _compare_dicts(d1: dict[str, Any], d2: dict[str, Any]) -> None:
-        for k, v in d1.items():
-            assert v == d2[k]
+    advi_kwargs = {"n_iterations": 42, "draws": 23, "prior_pred_samples": 12}
+    mcmc_kwargs = {
+        "prior_pred_samples": 121,
+        "sample_kwargs": {"draws": 29, "target_accept": 0.73},
+    }
 
     def check_kwargs(*args: Any, **kwargs: Any) -> None:
         if fit_method is ModelFitMethod.ADVI:
-            _compare_dicts(advi_kwargs, kwargs)
+            assert_dicts(advi_kwargs, kwargs)
         elif fit_method is ModelFitMethod.MCMC:
-            _compare_dicts(mcmc_kwargs, kwargs)
+            assert_dicts(mcmc_kwargs, kwargs)
         else:
             assert_never(fit_method)
 
@@ -172,17 +171,15 @@ def test_uses_configuration_fitting_parameters(
             name=model_name,
             description="",
             model=ModelOption.SPECLET_TEST_MODEL,
-            fit_methods=[ModelFitMethod.ADVI],
-            pipelines=[SpecletPipeline.FITTING],
-            debug=False,
-            pipeline_sampling_parameters={
-                SpecletPipeline.FITTING: {
-                    ModelFitMethod.ADVI: advi_kwargs,
-                    ModelFitMethod.MCMC: mcmc_kwargs,
+            pipelines={SpecletPipeline.FITTING: [ModelFitMethod.MCMC]},
+            sampling_arguments={
+                SpecletPipeline.FITTING.value: {
+                    ModelFitMethod.ADVI.value: advi_kwargs,
+                    ModelFitMethod.MCMC.value: mcmc_kwargs,
                 },
-                SpecletPipeline.SBC: {
-                    ModelFitMethod.ADVI: {},
-                    ModelFitMethod.MCMC: {},
+                SpecletPipeline.SBC.value: {
+                    ModelFitMethod.ADVI.value: {},
+                    ModelFitMethod.MCMC.value: {},
                 },
             },
         )
