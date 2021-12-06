@@ -150,7 +150,7 @@ def test_model_names_are_unique_does_not_fail(
 
 def test_get_model_configurations(mock_model_config: Path) -> None:
     config = model_config.read_model_configurations(mock_model_config)
-    assert len(config.configurations) == 3
+    assert len(config.configurations) == 4
 
 
 def test_get_model_configuration(mock_model_config: Path) -> None:
