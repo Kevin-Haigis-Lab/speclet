@@ -13,6 +13,7 @@ import typer
 from src import model_configuration as model_config
 from src.command_line_interfaces import cli_helpers
 from src.loggers import logger
+from src.modeling.custom_pymc3_callbacks import ProgressPrinterCallback
 from src.models.speclet_model import SpecletModel
 from src.project_enums import ModelFitMethod, SpecletPipeline, assert_never
 
@@ -44,15 +45,23 @@ def _update_sampling_kwargs(
     first_layer_kwargs = {"random_seed": random_seed, "ignore_cache": ignore_cache}
     for key, value in first_layer_kwargs.items():
         if key in kwargs.keys():
-            logger.warn(f"Overriding configured '{key}' with {value}.")
+            logger.warning(f"Overriding configured '{key}' with {value}.")
         kwargs[key] = value
 
     model_sampling_kwargs = kwargs.get("sample_kwargs", {})
     for key, value in {"chains": chains, "cores": cores}.items():
         if key in model_sampling_kwargs.keys():
-            logger.warn(f"Overriding configured '{key}' with {value}.")
+            logger.warning(f"Overriding configured '{key}' with {value}.")
         model_sampling_kwargs[key] = value
     kwargs["sample_kwargs"] = model_sampling_kwargs
+    return None
+
+
+def _add_progress_callback_to_sampling_kwargs(kwargs: dict[str, Any]) -> None:
+    sample_kwargs = kwargs.get("sample_kwargs", {})
+    sample_kwargs["callback"] = ProgressPrinterCallback()
+    sample_kwargs["progressbar"] = False
+    kwargs["sample_kwargs"] = sample_kwargs
     return None
 
 
@@ -67,6 +76,7 @@ def sample_speclet_model(
     ignore_cache: bool = False,
     random_seed: Optional[int] = None,
     touch: Optional[Path] = None,
+    custom_progress_callback: bool = True,
 ) -> SpecletModel:
     """Fit and sample from a variety of predefined PyMC3 models.
 
@@ -125,6 +135,10 @@ def sample_speclet_model(
         random_seed=random_seed,
         ignore_cache=ignore_cache,
     )
+
+    if custom_progress_callback and fit_method is ModelFitMethod.MCMC:
+        _add_progress_callback_to_sampling_kwargs(sampling_kwargs)
+
     print(sampling_kwargs)
 
     logger.info("Running model build method.")

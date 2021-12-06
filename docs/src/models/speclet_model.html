@@ -407,7 +407,9 @@ class SpecletModel:
             RequiredArgumentError: If neither `mock_data` nor `size` are supplied.
         &#34;&#34;&#34;
         if fit_kwargs is None:
-            fit_kwargs = {}
+            fit_kwargs = {&#34;random_seed&#34;: random_seed}
+        else:
+            fit_kwargs[&#34;random_seed&#34;] = random_seed
 
         sbc_fm = sbc.SBCFileManager(dir=results_path)
 
@@ -447,11 +449,9 @@ class SpecletModel:
         logger.info(f&#34;Fitting model to mock data using {fit_method.value}.&#34;)
         res: az.InferenceData
         if fit_method is ModelFitMethod.ADVI:
-            res = self.advi_sample_model(
-                random_seed=random_seed, **fit_kwargs
-            ).inference_data
+            res = self.advi_sample_model(**fit_kwargs).inference_data
         elif fit_method is ModelFitMethod.MCMC:
-            res = self.mcmc_sample_model(random_seed=random_seed, **fit_kwargs)
+            res = self.mcmc_sample_model(**fit_kwargs)
         else:
             assert_never(fit_method)
 
@@ -966,7 +966,9 @@ Defaults to None.</dd>
             RequiredArgumentError: If neither `mock_data` nor `size` are supplied.
         &#34;&#34;&#34;
         if fit_kwargs is None:
-            fit_kwargs = {}
+            fit_kwargs = {&#34;random_seed&#34;: random_seed}
+        else:
+            fit_kwargs[&#34;random_seed&#34;] = random_seed
 
         sbc_fm = sbc.SBCFileManager(dir=results_path)
 
@@ -1006,11 +1008,9 @@ Defaults to None.</dd>
         logger.info(f&#34;Fitting model to mock data using {fit_method.value}.&#34;)
         res: az.InferenceData
         if fit_method is ModelFitMethod.ADVI:
-            res = self.advi_sample_model(
-                random_seed=random_seed, **fit_kwargs
-            ).inference_data
+            res = self.advi_sample_model(**fit_kwargs).inference_data
         elif fit_method is ModelFitMethod.MCMC:
-            res = self.mcmc_sample_model(random_seed=random_seed, **fit_kwargs)
+            res = self.mcmc_sample_model(**fit_kwargs)
         else:
             assert_never(fit_method)
 
@@ -1801,7 +1801,9 @@ passed to the fitting method. Default is None.</dd>
         RequiredArgumentError: If neither `mock_data` nor `size` are supplied.
     &#34;&#34;&#34;
     if fit_kwargs is None:
-        fit_kwargs = {}
+        fit_kwargs = {&#34;random_seed&#34;: random_seed}
+    else:
+        fit_kwargs[&#34;random_seed&#34;] = random_seed
 
     sbc_fm = sbc.SBCFileManager(dir=results_path)
 
@@ -1841,11 +1843,9 @@ passed to the fitting method. Default is None.</dd>
     logger.info(f&#34;Fitting model to mock data using {fit_method.value}.&#34;)
     res: az.InferenceData
     if fit_method is ModelFitMethod.ADVI:
-        res = self.advi_sample_model(
-            random_seed=random_seed, **fit_kwargs
-        ).inference_data
+        res = self.advi_sample_model(**fit_kwargs).inference_data
     elif fit_method is ModelFitMethod.MCMC:
-        res = self.mcmc_sample_model(random_seed=random_seed, **fit_kwargs)
+        res = self.mcmc_sample_model(**fit_kwargs)
     else:
         assert_never(fit_method)
 

@@ -9,6 +9,7 @@ from typer.testing import CliRunner
 
 from src import project_enums
 from src.command_line_interfaces import simulation_based_calibration_cli as sbc_cli
+from src.misc.test_helpers import assert_dicts
 from src.modeling.pymc3_sampling_api import ApproximationSamplingResults
 from src.modeling.simulation_based_calibration_helpers import SBCFileManager, SBCResults
 from src.models.speclet_pipeline_test_model import SpecletTestModel
@@ -122,17 +123,10 @@ def test_uses_configuration_fitting_parameters(
     mock_model_config: Path,
     tmp_path: Path,
 ) -> None:
-    def _compare_dicts(d1: dict[str, Any], d2: dict[str, Any]) -> None:
-        for k, v in d1.items():
-            if isinstance(v, dict):
-                _compare_dicts(v, d2.get(k, {}))
-            else:
-                assert v == d2[k]
-
     def intercept_fit_kwargs_dict(*args: Any, **kwargs: Any) -> None:
         fit_kwargs: Optional[dict[Any, Any]] = kwargs.get("fit_kwargs")
         assert fit_kwargs is not None
-        _compare_dicts(expected_kwargs, fit_kwargs)
+        assert_dicts(expected_kwargs, fit_kwargs)
 
     monkeypatch.setattr(
         SpecletTestModel, "run_simulation_based_calibration", intercept_fit_kwargs_dict

@@ -29,21 +29,36 @@
         # Will be passed to `fit_kwargs` in SpecletModel.run_simulation_based_calibration().
         target_accept: 0.95
 
-# ---- SpecletEight ----
+# ---- SpecletNine ----
 
-- name: eight-default
-  description: Default SpecletEight model.
-  model: speclet-eight
+- name: nine-default
+  description: Default SpecletNone model.
+  model: speclet-nine
   pipelines:
     fitting: ["MCMC"]
     sbc: []
   sampling_arguments:
     fitting:
       MCMC:
-        prior_pred_samples: null
+        prior_pred_samples: 500
         sample_kwargs:
-          tune: 2000
+          tune: 4000
           draws: 2000
-          target_accept: 0.98
-          init: "advi"
-          n_init: 30000
+          target_accept: 0.95
+
+- name: nine-noncentered
+  description: SpecletNone model with non-centered parameterization.
+  model: speclet-nine
+  config:
+    beta_parameterization: noncentered
+  pipelines:
+    fitting: ["MCMC"]
+    sbc: []
+  sampling_arguments:
+    fitting:
+      MCMC:
+        prior_pred_samples: 500
+        sample_kwargs:
+          tune: 4000
+          draws: 2000
+          target_accept: 0.95

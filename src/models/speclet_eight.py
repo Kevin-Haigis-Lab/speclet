@@ -15,11 +15,10 @@ from src.data_processing import achilles as achelp
 from src.io.data_io import DataFile
 from src.loggers import logger
 from src.managers.data_managers import (
-    CrisprScreenDataManager,
     Data,
-    common_crispr_screen_transformations,
+    DataFrameTransformation,
+    make_count_model_data_manager,
 )
-from src.modeling import feature_engineering as feng
 from src.models.speclet_model import (
     ObservedVarName,
     SpecletModel,
@@ -31,14 +30,6 @@ class SpecletEightConfiguration(BaseModel):
     """Configuration for SpecletEight."""
 
     broad_only: bool = True
-
-
-def _append_total_read_counts(df: Data) -> Data:
-    return achelp.append_total_read_counts(df)
-
-
-def _add_useful_read_count_columns(df: Data) -> Data:
-    return achelp.add_useful_read_count_columns(df)
 
 
 def _reduce_num_genes_for_dev(df: Data) -> Data:
@@ -93,23 +84,14 @@ class SpecletEight(SpecletModel):
         self._config = SpecletEightConfiguration() if config is None else config
 
         if data_manager is None:
-            data_manager = CrisprScreenDataManager(
-                data_source=DataFile.DEPMAP_CRC_BONE_SUBSAMPLE
+            _other_transforms: list[DataFrameTransformation] = []
+            _other_transforms.append(_thin_data_columns)
+            if self._config.broad_only:
+                _other_transforms.append(achelp.filter_for_broad_source_only)
+
+            data_manager = make_count_model_data_manager(
+                DataFile.DEPMAP_CRC_BONE_SUBSAMPLE, other_transforms=_other_transforms
             )
-
-        data_transformations = common_crispr_screen_transformations.copy()
-        data_transformations += [
-            feng.zscale_rna_expression_by_gene_and_lineage,
-            _append_total_read_counts,
-            _add_useful_read_count_columns,
-        ]
-        if self._config.broad_only:
-            data_transformations.append(achelp.filter_for_broad_source_only)
-
-        data_manager.add_transformation(data_transformations)
-        data_manager.add_transformation(_thin_data_columns)
-        # Need to add at end because `p_dna_batch` becomes non-categorical.
-        data_manager.add_transformation(achelp.set_achilles_categorical_columns)
 
         super().__init__(name, data_manager, root_cache_dir=root_cache_dir)
 

@@ -34,6 +34,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Union
 
+from src.io.general_io import project_root_dir
+
 #### ---- Enums ---- ####
 
 
@@ -55,15 +57,6 @@ class DataFile(Enum):
 
 
 #### ---- Basics ---- ####
-
-
-def project_root_dir() -&gt; Path:
-    &#34;&#34;&#34;Speclet root directory.
-
-    Returns:
-        Path: Path to root directory.
-    &#34;&#34;&#34;
-    return Path(__file__).parent.parent.parent
 
 
 def modeling_data_dir() -&gt; Path:
@@ -153,29 +146,6 @@ def data_path(to: Union[str, DataFile]) -&gt; Path:
         Path: Path to the modeling data directory.
     &#34;&#34;&#34;
     return project_root_dir() / &#34;modeling_data&#34;</code></pre>
-</details>
-</dd>
-<dt id="src.io.data_io.project_root_dir"><code class="name flex">
-<span>def <span class="ident">project_root_dir</span></span>(<span>) -> pathlib.Path</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Speclet root directory.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>Path</code></dt>
-<dd>Path to root directory.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def project_root_dir() -&gt; Path:
-    &#34;&#34;&#34;Speclet root directory.
-
-    Returns:
-        Path: Path to root directory.
-    &#34;&#34;&#34;
-    return Path(__file__).parent.parent.parent</code></pre>
 </details>
 </dd>
 </dl>
@@ -283,7 +253,6 @@ def data_path(to: Union[str, DataFile]) -&gt; Path:
 <ul class="">
 <li><code><a title="src.io.data_io.data_path" href="#src.io.data_io.data_path">data_path</a></code></li>
 <li><code><a title="src.io.data_io.modeling_data_dir" href="#src.io.data_io.modeling_data_dir">modeling_data_dir</a></code></li>
-<li><code><a title="src.io.data_io.project_root_dir" href="#src.io.data_io.project_root_dir">project_root_dir</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>

@@ -10,6 +10,7 @@ import pandas as pd
 from src.data_processing import achilles as achelp
 from src.io.data_io import DataFile, data_path
 from src.loggers import logger
+from src.modeling import feature_engineering as feng
 from src.modeling import mock_data
 from src.project_enums import MockDataSize, assert_never
 
@@ -23,7 +24,7 @@ common_crispr_screen_transformations: Final[list[DataFrameTransformation]] = [
 
 
 def _get_crispr_screen_data_coltypes() -> dict[str, str]:
-    col_types = {}
+    col_types: dict[str, str] = {}
     for c in [
         "sgrna",
         "hugo_symbol",
@@ -35,7 +36,7 @@ def _get_crispr_screen_data_coltypes() -> dict[str, str]:
     ]:
         col_types[c] = "object"
     for c in ["counts_final", "counts_final_total"]:
-        col_types[c] = "Int64"
+        col_types[c] = "UInt32"
     return col_types
 
 
@@ -297,3 +298,56 @@ class CrisprScreenDataManager:
         self.set_data(df, apply_transformations=True)
         assert self._data is not None
         return self.get_data()
+
+
+# ---- Data manager generators ----
+
+
+def _append_total_read_counts(df: Data) -> Data:
+    return achelp.append_total_read_counts(df)
+
+
+def _add_useful_read_count_columns(df: Data) -> Data:
+    return achelp.add_useful_read_count_columns(df)
+
+
+def make_count_model_data_manager(
+    data_source: DataFile,
+    other_transforms: Optional[list[DataFrameTransformation]] = None,
+) -> CrisprScreenDataManager:
+    """Make a data manager good for models of count data.
+
+    Default list of data transformation:
+
+    1. set Achilles categorical columns (`src.data_processing.achilles`)
+    2. drop sgRNAs that map to multiple genes (`src.data_processing.achilles`)
+    3. z-scale RNA expression by gene and lineage (`src.modeling.feature_engineering`)
+    4. append total read counts (`src.data_processing.achilles`)
+    5. add useful read count columns (`src.data_processing.achilles`)
+    6. (optional additional transformations)
+    7. set Achilles categorical columns, again (`src.data_processing.achilles`)
+
+    Args:
+        data_source (DataFile): Data source.
+        other_transforms (Optional[list[DataFrameTransformation]], optional): Additional
+          transformation to include in the data manager's defaults. Defaults to None.
+
+    Returns:
+        CrisprScreenDataManager: Data manager for count modeling.
+    """
+    data_manager = CrisprScreenDataManager(data_source=data_source)
+
+    data_transformations = common_crispr_screen_transformations.copy()
+    data_transformations += [
+        feng.zscale_rna_expression_by_gene_and_lineage,
+        _append_total_read_counts,
+        _add_useful_read_count_columns,
+    ]
+
+    if other_transforms is not None:
+        data_transformations += other_transforms
+
+    data_manager.add_transformation(data_transformations)
+    # Need to add at end because `p_dna_batch` becomes non-categorical.
+    data_manager.add_transformation(achelp.set_achilles_categorical_columns)
+    return data_manager

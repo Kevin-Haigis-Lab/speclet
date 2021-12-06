@@ -3,7 +3,7 @@
 """Standardization of the interactions with PyMC3 sampling."""
 
 from dataclasses import dataclass
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Literal, Optional
 
 import arviz as az
 import numpy as np
@@ -23,6 +23,16 @@ class ApproximationSamplingResults:
 
 
 #### ---- Interface with PyMC3 ---- ####
+
+
+def _insert_random_seed_into_kwargs(
+    random_seed: Optional[int], sample_kwargs: dict[str, Any]
+) -> None:
+    kwargs_seed: Optional[int] = sample_kwargs.get("random_seed")
+    if kwargs_seed != random_seed:
+        logger.warning(f"Different random seeds supplied - using {random_seed}")
+    sample_kwargs["random_seed"] = random_seed
+    return
 
 
 def _extend_trace_with_prior_and_posterior(
@@ -61,10 +71,11 @@ def pymc3_sampling_procedure(
     if sample_kwargs is None:
         sample_kwargs = {}
 
+    _insert_random_seed_into_kwargs(random_seed, sample_kwargs)
+    sample_kwargs["return_inferencedata"] = True
+
     with model:
-        trace = pm.sample(
-            random_seed=random_seed, return_inferencedata=True, **sample_kwargs
-        )
+        trace = pm.sample(**sample_kwargs)
         post_pred = pm.sample_posterior_predictive(trace, random_seed=random_seed)
 
     assert isinstance(trace, az.InferenceData)
@@ -83,9 +94,12 @@ def pymc3_sampling_procedure(
     return trace
 
 
+VIMethod = Literal["advi", "fullrank_advi", "svgd", "asvgd", "nfvi", "nfv"]
+
+
 def pymc3_advi_approximation_procedure(
     model: pm.Model,
-    method: str = "advi",
+    method: VIMethod = "advi",
     n_iterations: int = 100000,
     draws: int = 1000,
     prior_pred_samples: Optional[int] = 500,
@@ -94,9 +108,6 @@ def pymc3_advi_approximation_procedure(
     fit_kwargs: Optional[dict[str, Any]] = None,
 ) -> ApproximationSamplingResults:
     """Run a standard PyMC3 ADVI fitting procedure.
-
-    TODO (@jhrcook): Change `method` from a string to a literal and get supported
-    options from PyMC3.
 
     Args:
         model (pm.Model): PyMC3 model.

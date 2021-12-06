@@ -36,6 +36,7 @@ class ModelOption(Enum):
     SPECLET_SIX = "speclet-six"
     SPECLET_SEVEN = "speclet-seven"
     SPECLET_EIGHT = "speclet-eight"
+    SPECLET_NINE = "speclet-nine"
 
 
 #### ---- SLURM and pipelines ---- ####

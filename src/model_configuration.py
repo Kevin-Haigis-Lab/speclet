@@ -11,11 +11,13 @@ from pydantic.types import confloat
 
 from src.io.data_io import project_root_dir
 from src.loggers import logger
+from src.modeling.pymc3_sampling_api import VIMethod
 from src.models.ceres_mimic import CeresMimic
 from src.models.speclet_eight import SpecletEight
 from src.models.speclet_five import SpecletFive
 from src.models.speclet_four import SpecletFour
 from src.models.speclet_model import SpecletModel
+from src.models.speclet_nine import SpecletNine
 from src.models.speclet_one import SpecletOne
 from src.models.speclet_pipeline_test_model import SpecletTestModel
 from src.models.speclet_seven import SpecletSeven
@@ -38,6 +40,7 @@ SpecletProjectModelTypes = Union[
     SpecletSix,
     SpecletSeven,
     SpecletEight,
+    SpecletNine,
 ]
 
 TargetAcceptFloat = confloat(ge=0.5, lt=1.0)
@@ -84,7 +87,7 @@ class Pymc3FitArguments(BaseModel):
 
     _pymc3_version: str = "3.11.2"
     n: PositiveInt = 10000
-    method = "advi"
+    method: VIMethod = "advi"
     random_seed: Optional[PositiveInt] = None
     inf_kwargs: Optional[dict[str, BasicTypes]] = None
     progressbar: bool = True
@@ -115,7 +118,7 @@ class SpecletModelMcmcArguments(BaseModel):
 class SpecletModelAdviArguments(BaseModel):
     """SpecletModel ADVI arguments."""
 
-    method: str = "advi"
+    method: VIMethod = "advi"
     n_iterations: int = 100000
     draws: int = 1000
     prior_pred_samples: Optional[int] = None
@@ -144,7 +147,7 @@ class ModelConfig(BaseModel):
     name: str
     description: str
     model: ModelOption
-    config: Optional[dict[str, Union[ModelFitMethod, BasicTypes]]] = None
+    config: Optional[dict[str, BasicTypes]] = None
     pipelines: dict[SpecletPipeline, list[ModelFitMethod]] = Field(default_factory=dict)
     sampling_arguments: PipelineSamplingArguments = Field(
         default_factory=PipelineSamplingArguments
@@ -302,6 +305,7 @@ def get_model_class(model_opt: ModelOption) -> type[SpecletProjectModelTypes]:
         ModelOption.SPECLET_SIX: SpecletSix,
         ModelOption.SPECLET_SEVEN: SpecletSeven,
         ModelOption.SPECLET_EIGHT: SpecletEight,
+        ModelOption.SPECLET_NINE: SpecletNine,
     }
     if model_opt not in model_option_map:
         raise ModelOptionNotAssociatedWithAClassException(model_opt.value)

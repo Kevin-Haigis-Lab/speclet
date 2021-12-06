@@ -2,7 +2,7 @@
 
 """Data IO for the speclet project."""
 
-from enum import Enum
+from enum import Enum, unique
 from pathlib import Path
 from typing import Union
 
@@ -11,10 +11,12 @@ from src.io.general_io import project_root_dir
 #### ---- Enums ---- ####
 
 
+@unique
 class DataFile(Enum):
     """Data file names."""
 
     DEPMAP_CRC = "depmap_modeling_dataframe_crc.csv"
+    DEPMAP_CRC_BONE = "depmap_modeling_dataframe_crc_bone.csv"
     DEPMAP_CRC_SUBSAMPLE = "depmap_modeling_dataframe_crc-subsample.csv"
     DEPMAP_CRC_BONE_SUBSAMPLE = "depmap_modeling_dataframe_crc_bone-subsample.csv"
     DEPMAP_DATA = "depmap_modeling_dataframe.csv"
