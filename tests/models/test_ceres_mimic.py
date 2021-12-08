@@ -3,8 +3,8 @@ from pathlib import Path
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from src.modeling.pymc3_helpers import get_variable_names
-from src.models.ceres_mimic import CeresMimic, CeresMimicConfiguration
+from speclet.modeling.pymc3_helpers import get_variable_names
+from speclet.models.ceres_mimic import CeresMimic, CeresMimicConfiguration
 
 
 class TestCeresMimic:

@@ -11,9 +11,9 @@ import pytest
 import seaborn as sns
 from hypothesis import HealthCheck, Verbosity, settings
 
-import src.managers.data_managers
-from src.io import data_io
-from src.io.data_io import DataFile
+import speclet.managers.data_managers
+from speclet.io import data_io
+from speclet.io.data_io import DataFile
 
 TEST_DATA: Final[Path] = Path("tests", "depmap_test_data.csv")
 
@@ -44,7 +44,7 @@ def test_data_path(to: Union[str, data_io.DataFile]) -> Path:
 
 
 mp = pytest.MonkeyPatch()
-mp.setattr(src.managers.data_managers, "data_path", test_data_path)
+mp.setattr(speclet.managers.data_managers, "data_path", test_data_path)
 
 
 # ---- Callable fixtures ----

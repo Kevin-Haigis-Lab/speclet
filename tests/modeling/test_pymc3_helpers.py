@@ -5,8 +5,8 @@ import pytest
 from seaborn import load_dataset
 from theano import tensor as tt
 
-import src.exceptions
-from src.modeling import pymc3_helpers as pmhelp
+import speclet.exceptions
+from speclet.modeling import pymc3_helpers as pmhelp
 
 
 @pytest.fixture(scope="module")
@@ -73,7 +73,7 @@ def test_thin_posterior(
     assert thinned_post.shape == thinned_shape
     thinned_post = pmhelp.thin_posterior(post, step_size=5)
     assert thinned_post.shape == thinned_shape
-    with pytest.raises(src.exceptions.RequiredArgumentError):
+    with pytest.raises(speclet.exceptions.RequiredArgumentError):
         pmhelp.thin_posterior(post)
 
 

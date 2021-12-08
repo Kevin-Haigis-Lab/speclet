@@ -3,10 +3,15 @@ from typing import Any
 
 import pytest
 
-from src import model_configuration as model_config
-from src import project_enums
-from src.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
-from src.project_enums import MockDataSize, ModelFitMethod, ModelOption, SlurmPartitions
+from speclet import model_configuration as model_config
+from speclet import project_enums
+from speclet.managers.sbc_pipeline_resource_mangement import SBCResourceManager as RM
+from speclet.project_enums import (
+    MockDataSize,
+    ModelFitMethod,
+    ModelOption,
+    SlurmPartitions,
+)
 
 TEST_MODEL_NAME = "test-model"
 

@@ -7,11 +7,11 @@ import pandas as pd
 import pymc3 as pm
 import pytest
 
-from src.managers.data_managers import CrisprScreenDataManager
-from src.modeling.simulation_based_calibration_helpers import SBCFileManager
-from src.models.speclet_model import SpecletModelDataManager
-from src.models.speclet_simple import SpecletSimple
-from src.project_enums import MockDataSize, ModelFitMethod, assert_never
+from speclet.managers.data_managers import CrisprScreenDataManager
+from speclet.modeling.simulation_based_calibration_helpers import SBCFileManager
+from speclet.models.speclet_model import SpecletModelDataManager
+from speclet.models.speclet_simple import SpecletSimple
+from speclet.project_enums import MockDataSize, ModelFitMethod, assert_never
 
 fake = faker.Faker()
 

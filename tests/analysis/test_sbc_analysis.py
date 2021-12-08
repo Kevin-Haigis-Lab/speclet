@@ -5,8 +5,8 @@ import arviz as az
 import pandas as pd
 import pytest
 
-from src.analysis import sbc_analysis as sbcanal
-from src.modeling import simulation_based_calibration_helpers as sbchelp
+from speclet.analysis import sbc_analysis as sbcanal
+from speclet.modeling import simulation_based_calibration_helpers as sbchelp
 
 #### ---- SBCAnalysis ---- ####
 

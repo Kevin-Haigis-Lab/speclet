@@ -8,7 +8,7 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from src.modeling import feature_engineering as feng
+from speclet.modeling import feature_engineering as feng
 
 chars = [str(i) for i in range(10)] + list(ascii_letters)
 

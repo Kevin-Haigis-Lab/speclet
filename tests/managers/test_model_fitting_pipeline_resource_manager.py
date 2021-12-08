@@ -3,12 +3,14 @@ from typing import Any
 
 import pytest
 
-from src import model_configuration as model_config
-from src.managers.model_fitting_pipeline_resource_manager import (
+from speclet import model_configuration as model_config
+from speclet.managers.model_fitting_pipeline_resource_manager import (
     ModelFittingPipelineResourceManager as RM,
 )
-from src.managers.model_fitting_pipeline_resource_manager import ResourceRequestUnkown
-from src.project_enums import ModelFitMethod, ModelOption, SlurmPartitions
+from speclet.managers.model_fitting_pipeline_resource_manager import (
+    ResourceRequestUnkown,
+)
+from speclet.project_enums import ModelFitMethod, ModelOption, SlurmPartitions
 
 TEST_MODEL_NAME = "test-model"
 

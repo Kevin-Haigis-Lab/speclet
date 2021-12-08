@@ -3,8 +3,8 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from src.context_managers import dask_client
-from src.managers.data_managers import CrisprScreenDataManager
+from speclet.context_managers import dask_client
+from speclet.managers.data_managers import CrisprScreenDataManager
 
 
 def reverse_sgrna(df: pd.DataFrame) -> pd.DataFrame:

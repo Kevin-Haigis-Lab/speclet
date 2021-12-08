@@ -2,7 +2,7 @@ from typing import Any, Callable
 
 import pytest
 
-from src.misc import check_kwarg_dict
+from speclet.misc import check_kwarg_dict
 
 
 def f1() -> None:

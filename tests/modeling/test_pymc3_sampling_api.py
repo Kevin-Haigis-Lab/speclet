@@ -4,7 +4,7 @@ import pandas as pd
 import pymc3 as pm
 import pytest
 
-from src.modeling import pymc3_sampling_api as pmapi
+from speclet.modeling import pymc3_sampling_api as pmapi
 
 #### ---- MCMC Sampling ---- ####
 

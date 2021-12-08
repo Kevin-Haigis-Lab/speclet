@@ -1,6 +1,6 @@
 from string import ascii_lowercase
 
-from src import string_functions
+from speclet import string_functions
 
 #### ---- str_replace ---- ####
 

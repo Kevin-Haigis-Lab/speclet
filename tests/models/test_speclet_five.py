@@ -5,8 +5,8 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from src.misc import test_helpers as th
-from src.models.speclet_five import SpecletFive, SpecletFiveConfiguration
+from speclet.misc import test_helpers as th
+from speclet.models.speclet_five import SpecletFive, SpecletFiveConfiguration
 
 
 class TestSpecletFive:

@@ -5,9 +5,9 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from src.misc import test_helpers as th
-from src.modeling import pymc3_helpers as pmhelp
-from src.models.speclet_four import SpecletFour, SpecletFourConfiguration
+from speclet.misc import test_helpers as th
+from speclet.modeling import pymc3_helpers as pmhelp
+from speclet.models.speclet_four import SpecletFour, SpecletFourConfiguration
 
 
 class TestSpecletFour:

@@ -3,7 +3,7 @@ from typing import Any
 
 import pytest
 
-from src.models.speclet_two import SpecletTwo
+from speclet.models.speclet_two import SpecletTwo
 
 
 def monkey_get_data_path(*args: Any, **kwargs: Any) -> Path:

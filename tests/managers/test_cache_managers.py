@@ -5,9 +5,9 @@ import numpy as np
 import pymc3 as pm
 import pytest
 
-from src.managers.cache_managers import ArvizCacheManager
-from src.modeling import pymc3_sampling_api as pmapi
-from src.project_enums import ModelFitMethod
+from speclet.managers.cache_managers import ArvizCacheManager
+from speclet.modeling import pymc3_sampling_api as pmapi
+from speclet.project_enums import ModelFitMethod
 
 UNOBSERVED_VARS = ["mu", "sigma"]
 OBSERVED_VAR = "y"

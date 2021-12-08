@@ -6,7 +6,7 @@ import pytest
 from hypothesis import given, note
 from hypothesis import strategies as st
 
-from src.data_processing import common as dphelp
+from speclet.data_processing import common as dphelp
 
 #### ---- nunique ---- ####
 

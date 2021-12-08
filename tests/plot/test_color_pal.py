@@ -2,7 +2,7 @@ from enum import EnumMeta
 
 import pytest
 
-from src.plot import color_pal
+from speclet.plot import color_pal
 
 
 @pytest.mark.parametrize(

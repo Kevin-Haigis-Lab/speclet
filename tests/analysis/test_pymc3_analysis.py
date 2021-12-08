@@ -9,7 +9,7 @@ import pymc3 as pm
 import pytest
 from numpy.random import standard_normal
 
-from src.analysis import pymc3_analysis as pmanal
+from speclet.analysis import pymc3_analysis as pmanal
 
 MCMCResults = tuple[pm.backends.base.MultiTrace, dict[str, np.ndarray]]
 ADVIResults = tuple[

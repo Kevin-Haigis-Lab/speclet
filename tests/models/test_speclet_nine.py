@@ -3,12 +3,12 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from src.models.speclet_nine import (
+from speclet.models.speclet_nine import (
     SpecletNine,
     SpecletNineConfiguration,
     SpecletNinePriors,
 )
-from src.project_enums import ModelFitMethod, ModelParameterization, assert_never
+from speclet.project_enums import ModelFitMethod, ModelParameterization, assert_never
 
 
 @pytest.fixture(scope="function")

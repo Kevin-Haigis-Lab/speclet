@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from src.models.speclet_eight import SpecletEight
+from speclet.models.speclet_eight import SpecletEight
 
 
 @pytest.fixture(scope="function")

@@ -7,13 +7,16 @@ import pandas as pd
 import pytest
 from typer.testing import CliRunner
 
-from src import project_enums
-from src.command_line_interfaces import simulation_based_calibration_cli as sbc_cli
-from src.misc.test_helpers import assert_dicts
-from src.modeling.pymc3_sampling_api import ApproximationSamplingResults
-from src.modeling.simulation_based_calibration_helpers import SBCFileManager, SBCResults
-from src.models.speclet_pipeline_test_model import SpecletTestModel
-from src.project_enums import MockDataSize, ModelFitMethod
+from speclet import project_enums
+from speclet.command_line_interfaces import simulation_based_calibration_cli as sbc_cli
+from speclet.misc.test_helpers import assert_dicts
+from speclet.modeling.pymc3_sampling_api import ApproximationSamplingResults
+from speclet.modeling.simulation_based_calibration_helpers import (
+    SBCFileManager,
+    SBCResults,
+)
+from speclet.models.speclet_pipeline_test_model import SpecletTestModel
+from speclet.project_enums import MockDataSize, ModelFitMethod
 
 runner = CliRunner()
 

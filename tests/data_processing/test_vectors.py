@@ -6,7 +6,7 @@ from hypothesis import assume, given
 from hypothesis import strategies as st
 from hypothesis.extra import numpy as hnp
 
-from src.data_processing import vectors as vhelp
+from speclet.data_processing import vectors as vhelp
 
 
 @st.composite

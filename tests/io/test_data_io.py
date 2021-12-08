@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from src.io import data_io
+from speclet.io import data_io
 
 
 def test_root_dir() -> None:

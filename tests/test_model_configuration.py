@@ -4,22 +4,22 @@ from uuid import uuid4
 import pytest
 import yaml
 
-from src import model_configuration as model_config
-from src.models.ceres_mimic import CeresMimic
-from src.models.speclet_five import SpecletFive
-from src.models.speclet_four import SpecletFour
-from src.models.speclet_model import SpecletModel
-from src.models.speclet_one import SpecletOne
-from src.models.speclet_pipeline_test_model import (
+from speclet import model_configuration as model_config
+from speclet.models.ceres_mimic import CeresMimic
+from speclet.models.speclet_five import SpecletFive
+from speclet.models.speclet_four import SpecletFour
+from speclet.models.speclet_model import SpecletModel
+from speclet.models.speclet_one import SpecletOne
+from speclet.models.speclet_pipeline_test_model import (
     SpecletTestModel,
     SpecletTestModelConfiguration,
 )
-from src.models.speclet_seven import SpecletSeven
-from src.models.speclet_six import SpecletSix
-from src.models.speclet_two import SpecletTwo
-from src.project_enums import ModelFitMethod, ModelOption
-from src.project_enums import ModelParameterization as MP
-from src.project_enums import SpecletPipeline
+from speclet.models.speclet_seven import SpecletSeven
+from speclet.models.speclet_six import SpecletSix
+from speclet.models.speclet_two import SpecletTwo
+from speclet.project_enums import ModelFitMethod, ModelOption
+from speclet.project_enums import ModelParameterization as MP
+from speclet.project_enums import SpecletPipeline
 
 
 @pytest.fixture(scope="function")

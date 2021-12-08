@@ -7,11 +7,11 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from src.data_processing import achilles as achelp
-from src.misc import test_helpers as th
-from src.modeling import pymc3_helpers as pmhelp
-from src.models.speclet_model import SpecletModelDataManager
-from src.models.speclet_six import SpecletSix, SpecletSixConfiguration
+from speclet.data_processing import achilles as achelp
+from speclet.misc import test_helpers as th
+from speclet.modeling import pymc3_helpers as pmhelp
+from speclet.models.speclet_model import SpecletModelDataManager
+from speclet.models.speclet_six import SpecletSix, SpecletSixConfiguration
 
 
 def make_column_tiled(

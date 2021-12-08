@@ -9,8 +9,8 @@ import pymc3 as pm
 import pytest
 import seaborn as sns
 
-from src.exceptions import IncorrectNumberOfFilesFoundError
-from src.modeling import simulation_based_calibration_helpers as sbc
+from speclet.exceptions import IncorrectNumberOfFilesFoundError
+from speclet.modeling import simulation_based_calibration_helpers as sbc
 
 chars = list(ascii_letters) + [str(i) for i in (range(10))]
 

@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from src.data_processing import biology as biohelp
+from speclet.data_processing import biology as biohelp
 
 
 @pytest.mark.parametrize(

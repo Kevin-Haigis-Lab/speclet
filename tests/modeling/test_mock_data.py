@@ -9,8 +9,8 @@ from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 from hypothesis.strategies import DataObject
 
-from src.data_processing import common as dphelp
-from src.modeling import mock_data
+from speclet.data_processing import common as dphelp
+from speclet.modeling import mock_data
 
 chars = list(ascii_letters) + [str(i) for i in (range(10))]
 

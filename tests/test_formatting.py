@@ -2,7 +2,7 @@ from datetime import timedelta
 
 import pytest
 
-from src import formatting
+from speclet import formatting
 
 
 @pytest.mark.parametrize(

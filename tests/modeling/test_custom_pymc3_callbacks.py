@@ -3,7 +3,7 @@ import pymc3 as pm
 import pytest
 from pytest import CaptureFixture
 
-from src.modeling import custom_pymc3_callbacks as pymc3calls
+from speclet.modeling import custom_pymc3_callbacks as pymc3calls
 
 
 @pytest.fixture(scope="module")

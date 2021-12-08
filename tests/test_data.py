@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 from dask.distributed import Client
 
-from src.io.data_io import DataFile, data_path
+from speclet.io.data_io import DataFile, data_path
 
 SKIP_DATA_TESTS = os.getenv("DATA_TESTS") is None
 FULL_DEPMAP_DATASET_PATH: Final = data_path(DataFile.DEPMAP_DATA)

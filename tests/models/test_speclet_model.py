@@ -8,13 +8,13 @@ import pandas as pd
 import pymc3 as pm
 import pytest
 
-from src.exceptions import CacheDoesNotExistError
-from src.managers.data_managers import CrisprScreenDataManager
-from src.misc.test_helpers import do_nothing
-from src.modeling import simulation_based_calibration_helpers as sbc
-from src.modeling.pymc3_sampling_api import ApproximationSamplingResults
-from src.models import speclet_model
-from src.project_enums import MockDataSize, ModelFitMethod
+from speclet.exceptions import CacheDoesNotExistError
+from speclet.managers.data_managers import CrisprScreenDataManager
+from speclet.misc.test_helpers import do_nothing
+from speclet.modeling import simulation_based_calibration_helpers as sbc
+from speclet.modeling.pymc3_sampling_api import ApproximationSamplingResults
+from speclet.models import speclet_model
+from speclet.project_enums import MockDataSize, ModelFitMethod
 
 TEST_DATA: Final[Path] = Path("tests", "depmap_test_data.csv")
 
