@@ -8,9 +8,9 @@ from typer.testing import CliRunner
 
 import speclet.command_line_interfaces.sampling_pymc3_models_cli as sampling
 from speclet import model_configuration as model_config
+from speclet.bayesian_models.speclet_pipeline_test_model import SpecletTestModel
 from speclet.misc.test_helpers import assert_dicts, do_nothing
 from speclet.model_configuration import ModelConfigurationNotFound
-from speclet.models.speclet_pipeline_test_model import SpecletTestModel
 from speclet.project_enums import (
     ModelFitMethod,
     ModelOption,

@@ -5,18 +5,18 @@ import pytest
 import yaml
 
 from speclet import model_configuration as model_config
-from speclet.models.ceres_mimic import CeresMimic
-from speclet.models.speclet_five import SpecletFive
-from speclet.models.speclet_four import SpecletFour
-from speclet.models.speclet_model import SpecletModel
-from speclet.models.speclet_one import SpecletOne
-from speclet.models.speclet_pipeline_test_model import (
+from speclet.bayesian_models.ceres_mimic import CeresMimic
+from speclet.bayesian_models.speclet_five import SpecletFive
+from speclet.bayesian_models.speclet_four import SpecletFour
+from speclet.bayesian_models.speclet_model import SpecletModel
+from speclet.bayesian_models.speclet_one import SpecletOne
+from speclet.bayesian_models.speclet_pipeline_test_model import (
     SpecletTestModel,
     SpecletTestModelConfiguration,
 )
-from speclet.models.speclet_seven import SpecletSeven
-from speclet.models.speclet_six import SpecletSix
-from speclet.models.speclet_two import SpecletTwo
+from speclet.bayesian_models.speclet_seven import SpecletSeven
+from speclet.bayesian_models.speclet_six import SpecletSix
+from speclet.bayesian_models.speclet_two import SpecletTwo
 from speclet.project_enums import ModelFitMethod, ModelOption
 from speclet.project_enums import ModelParameterization as MP
 from speclet.project_enums import SpecletPipeline

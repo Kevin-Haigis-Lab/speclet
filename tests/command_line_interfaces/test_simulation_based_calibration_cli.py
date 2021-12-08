@@ -8,6 +8,7 @@ import pytest
 from typer.testing import CliRunner
 
 from speclet import project_enums
+from speclet.bayesian_models.speclet_pipeline_test_model import SpecletTestModel
 from speclet.command_line_interfaces import simulation_based_calibration_cli as sbc_cli
 from speclet.misc.test_helpers import assert_dicts
 from speclet.modeling.pymc3_sampling_api import ApproximationSamplingResults
@@ -15,7 +16,6 @@ from speclet.modeling.simulation_based_calibration_helpers import (
     SBCFileManager,
     SBCResults,
 )
-from speclet.models.speclet_pipeline_test_model import SpecletTestModel
 from speclet.project_enums import MockDataSize, ModelFitMethod
 
 runner = CliRunner()
