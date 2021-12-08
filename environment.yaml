@@ -68,4 +68,5 @@ dependencies:
     - pytest-testmon
     - pytest-watch
     - types-python-dateutil
+    - dotenv
     - -e .  # install the source directory as a package (keep as last)
