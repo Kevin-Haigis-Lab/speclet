@@ -5,13 +5,14 @@ import re
 from typing import Optional, Sequence, Union
 
 import arviz as az
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotnine as gg
 import pymc3 as pm
 import seaborn as sns
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 from pydantic import BaseModel
 from xarray import Dataset
 
@@ -24,7 +25,7 @@ def plot_all_priors(
     figsize: tuple[float, float],
     samples: int = 1000,
     rm_var_regex: str = "log__|logodds_",
-) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]:
+) -> tuple[Figure, Axes]:
     """Plot all priors of a PyMC3 model.
 
     Args:
@@ -39,7 +40,7 @@ def plot_all_priors(
           Defaults to "log__|logodds_".
 
     Returns:
-        tuple[matplotlib.figure.Figure, np.ndarray]: The matplotlib figure and array
+        tuple[Figure, Axes]: The matplotlib figure and array
           of axes.
     """
     model_vars: list[str] = []

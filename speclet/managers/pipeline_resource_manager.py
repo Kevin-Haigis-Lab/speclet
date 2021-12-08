@@ -1,11 +1,12 @@
 """Protocol for pipeline resource managers."""
 
 from datetime import timedelta as td
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
 from speclet.project_enums import SlurmPartitions
 
 
+@runtime_checkable
 class PipelineResourceManager(Protocol):
     """Protocol for pipeline resource managers."""
 

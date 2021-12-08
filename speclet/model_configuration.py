@@ -2,7 +2,7 @@
 
 from collections import Counter
 from pathlib import Path
-from typing import Any, Callable, Iterable, Optional, Union
+from typing import Any, Callable, Iterable, Literal, Optional, Union
 
 import pymc3 as pm
 import yaml
@@ -12,18 +12,6 @@ from pydantic.types import confloat
 from speclet.io.data_io import project_root_dir
 from speclet.loggers import logger
 from speclet.modeling.pymc3_sampling_api import VIMethod
-from speclet.models.ceres_mimic import CeresMimic
-from speclet.models.speclet_eight import SpecletEight
-from speclet.models.speclet_five import SpecletFive
-from speclet.models.speclet_four import SpecletFour
-from speclet.models.speclet_model import SpecletModel
-from speclet.models.speclet_nine import SpecletNine
-from speclet.models.speclet_one import SpecletOne
-from speclet.models.speclet_pipeline_test_model import SpecletTestModel
-from speclet.models.speclet_seven import SpecletSeven
-from speclet.models.speclet_simple import SpecletSimple
-from speclet.models.speclet_six import SpecletSix
-from speclet.models.speclet_two import SpecletTwo
 from speclet.project_enums import (
     ModelFitMethod,
     ModelOption,
@@ -34,23 +22,18 @@ from speclet.types import BasicTypes
 
 # ---- Types ----
 
-SpecletProjectModelTypes = Union[
-    SpecletTestModel,
-    SpecletSimple,
-    CeresMimic,
-    SpecletOne,
-    SpecletTwo,
-    SpecletFour,
-    SpecletFive,
-    SpecletSix,
-    SpecletSeven,
-    SpecletEight,
-    SpecletNine,
-]
+SpecletProjectModelTypes = Literal["none"]
 
 TargetAcceptFloat = confloat(ge=0.5, lt=1.0)
 
 # ----  Configuration classes ----
+
+
+class StanMCMCSamplingArguments(BaseModel):
+    """MCMC sampling arguments for Stan."""  # TODO: this is incomplete...
+
+    num_chains: PositiveInt = 4
+    num_samples: PositiveInt = 1000
 
 
 class Pymc3SampleArguments(BaseModel):
@@ -299,19 +282,7 @@ def get_model_class(model_opt: ModelOption) -> type[SpecletProjectModelTypes]:
     Returns:
         Type[SpecletModel]: The corresponding model class.
     """
-    model_option_map: dict[ModelOption, type[SpecletProjectModelTypes]] = {
-        ModelOption.SPECLET_TEST_MODEL: SpecletTestModel,
-        ModelOption.CRC_CERES_MIMIC: CeresMimic,
-        ModelOption.SPECLET_SIMPLE: SpecletSimple,
-        ModelOption.SPECLET_ONE: SpecletOne,
-        ModelOption.SPECLET_TWO: SpecletTwo,
-        ModelOption.SPECLET_FOUR: SpecletFour,
-        ModelOption.SPECLET_FIVE: SpecletFive,
-        ModelOption.SPECLET_SIX: SpecletSix,
-        ModelOption.SPECLET_SEVEN: SpecletSeven,
-        ModelOption.SPECLET_EIGHT: SpecletEight,
-        ModelOption.SPECLET_NINE: SpecletNine,
-    }
+    model_option_map: dict[ModelOption, type[SpecletProjectModelTypes]] = {}
     if model_opt not in model_option_map:
         raise ModelOptionNotAssociatedWithAClassException(model_opt.value)
     return model_option_map[model_opt]

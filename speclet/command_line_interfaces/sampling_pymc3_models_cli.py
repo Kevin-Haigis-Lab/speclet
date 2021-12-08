@@ -14,7 +14,6 @@ from speclet import model_configuration as model_config
 from speclet.command_line_interfaces import cli_helpers
 from speclet.loggers import logger
 from speclet.modeling.custom_pymc3_callbacks import ProgressPrinterCallback
-from speclet.models.speclet_model import SpecletModel
 from speclet.project_enums import ModelFitMethod, SpecletPipeline, assert_never
 
 cli_helpers.configure_pretty()

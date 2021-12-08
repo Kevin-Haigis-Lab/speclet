@@ -9,7 +9,6 @@ from pydantic import validate_arguments
 from speclet import formatting
 from speclet import model_configuration as model_config
 from speclet.managers import pipeline_resource_manager as prm
-from speclet.managers.pipeline_resource_manager import PipelineResourceManager
 from speclet.project_enums import MockDataSize, ModelFitMethod, ModelOption
 
 T = TypeVar("T")
@@ -140,7 +139,7 @@ sbc_pipeline_time_lookup: TimeLookupDict = {
 }
 
 
-class SBCResourceManager(PipelineResourceManager):
+class SBCResourceManager:
     """Manage the SLURM resource request for a SBC run."""
 
     @validate_arguments

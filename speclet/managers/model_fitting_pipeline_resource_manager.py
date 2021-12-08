@@ -10,7 +10,6 @@ from speclet import formatting
 from speclet import model_configuration as model_config
 from speclet.exceptions import ResourceRequestUnkown
 from speclet.managers import pipeline_resource_manager as prm
-from speclet.managers.pipeline_resource_manager import PipelineResourceManager
 from speclet.project_enums import ModelFitMethod, ModelOption
 
 T = TypeVar("T")
@@ -131,7 +130,7 @@ fitting_pipeline_time_lookup: TimeLookupDict = {
 }
 
 
-class ModelFittingPipelineResourceManager(PipelineResourceManager):
+class ModelFittingPipelineResourceManager:
     """Resource manager for the pipeline to fit models on O2."""
 
     name: str

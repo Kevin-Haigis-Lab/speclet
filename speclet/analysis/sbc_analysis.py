@@ -5,10 +5,10 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, Optional, Sequence
 
-import matplotlib
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from matplotlib.axes import Axes
 
 import speclet.analysis.pymc3_analysis as pmanal
 import speclet.exceptions
@@ -274,7 +274,7 @@ class SBCAnalysis:
         rank_stats: Optional[pd.DataFrame] = None,
         n_sims: Optional[int] = None,
         k_draws: int = SBC_UNIFORMITY_THINNING_DRAWS,
-    ) -> matplotlib.axes.Axes:
+    ) -> Axes:
         """Plot the results of the uniformity test.
 
         Args:
