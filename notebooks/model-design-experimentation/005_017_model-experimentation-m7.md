@@ -1,8 +1,8 @@
 ```python
-import string
 import warnings
 from itertools import product
 from time import time
+from typing import Any
 
 import arviz as az
 import matplotlib.pyplot as plt
@@ -10,9 +10,11 @@ import numpy as np
 import pandas as pd
 import plotnine as gg
 import pymc3 as pm
-import seaborn as sns
-from numpy.random import exponential, normal, seed
+from numpy.random import normal, seed
 from theano import tensor as tt
+
+from speclet.data_processing.common import make_cat
+from speclet.string_functions import prefixed_count
 
 # Remove annoying filters from some dated ArViz functions.
 warnings.simplefilter(action="ignore", category=UserWarning)
@@ -58,20 +60,6 @@ Simulated values:
 - $\sigma = 0.3$
 
 ```python
-def prefixed_count(prefix, n, plus=0):
-    """Make an array of 1-n with the number and some prefix."""
-    return [prefix + str(i + plus) for i in range(n)]
-```
-
-```python
-def make_cat(df, col, ordered=True):
-    """Make a column of a data frame into a categorical data type."""
-    vals = df[col].drop_duplicates().to_list()
-    df[col] = pd.Categorical(df[col], categories=vals, ordered=ordered)
-    return df
-```
-
-```python
 seed(RANDOM_SEED)
 
 num_cell_lines = 20
@@ -84,7 +72,7 @@ genes = prefixed_count("gene_", num_genes)
 sgrnas = prefixed_count("sgRNA_", num_sgrnas)
 
 # RP ("real parameters")
-RP = {
+RP: dict[str, Any] = {
     "mu_gamma": -1.0,
     "sigma_gamma": 0.5,
     "sigma_alpha": 0.2,
@@ -153,41 +141,41 @@ data
   <tbody>
     <tr>
       <th>0</th>
-      <td>cell_0</td>
-      <td>sgRNA_0</td>
-      <td>gene_0</td>
+      <td>cell_0.0</td>
+      <td>sgRNA_0.0</td>
+      <td>gene_0.0</td>
       <td>-1.284686</td>
       <td>-0.974021</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>cell_1</td>
-      <td>sgRNA_0</td>
-      <td>gene_0</td>
+      <td>cell_1.0</td>
+      <td>sgRNA_0.0</td>
+      <td>gene_0.0</td>
       <td>-1.986886</td>
       <td>-2.358464</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>cell_2</td>
-      <td>sgRNA_0</td>
-      <td>gene_0</td>
+      <td>cell_2.0</td>
+      <td>sgRNA_0.0</td>
+      <td>gene_0.0</td>
       <td>-0.883180</td>
       <td>-0.911884</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>cell_3</td>
-      <td>sgRNA_0</td>
-      <td>gene_0</td>
+      <td>cell_3.0</td>
+      <td>sgRNA_0.0</td>
+      <td>gene_0.0</td>
       <td>-0.267206</td>
       <td>-0.774813</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>cell_4</td>
-      <td>sgRNA_0</td>
-      <td>gene_0</td>
+      <td>cell_4.0</td>
+      <td>sgRNA_0.0</td>
+      <td>gene_0.0</td>
       <td>-3.064072</td>
       <td>-2.866197</td>
     </tr>
@@ -201,41 +189,41 @@ data
     </tr>
     <tr>
       <th>1095</th>
-      <td>cell_15</td>
-      <td>sgRNA_54</td>
-      <td>gene_9</td>
+      <td>cell_15.0</td>
+      <td>sgRNA_54.0</td>
+      <td>gene_9.0</td>
       <td>-2.116856</td>
       <td>-2.188318</td>
     </tr>
     <tr>
       <th>1096</th>
-      <td>cell_16</td>
-      <td>sgRNA_54</td>
-      <td>gene_9</td>
+      <td>cell_16.0</td>
+      <td>sgRNA_54.0</td>
+      <td>gene_9.0</td>
       <td>-2.245777</td>
       <td>-1.630069</td>
     </tr>
     <tr>
       <th>1097</th>
-      <td>cell_17</td>
-      <td>sgRNA_54</td>
-      <td>gene_9</td>
+      <td>cell_17.0</td>
+      <td>sgRNA_54.0</td>
+      <td>gene_9.0</td>
       <td>-1.079010</td>
       <td>-0.752161</td>
     </tr>
     <tr>
       <th>1098</th>
-      <td>cell_18</td>
-      <td>sgRNA_54</td>
-      <td>gene_9</td>
+      <td>cell_18.0</td>
+      <td>sgRNA_54.0</td>
+      <td>gene_9.0</td>
       <td>-1.900383</td>
       <td>-1.697479</td>
     </tr>
     <tr>
       <th>1099</th>
-      <td>cell_19</td>
-      <td>sgRNA_54</td>
-      <td>gene_9</td>
+      <td>cell_19.0</td>
+      <td>sgRNA_54.0</td>
+      <td>gene_9.0</td>
       <td>-1.452215</td>
       <td>-1.609552</td>
     </tr>
@@ -261,9 +249,9 @@ real_gene_vals = pd.DataFrame({"gene": genes, "log_fc": RP["gamma_g"]})
 )
 ```
 
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_6_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_4_0.png)
 
-    <ggplot: (8746977751107)>
+    <ggplot: (8741441743373)>
 
 ```python
 real_cellline_vals = pd.DataFrame({"cell_line": cell_lines, "log_fc": RP["beta_c"]})
@@ -282,9 +270,9 @@ real_cellline_vals = pd.DataFrame({"cell_line": cell_lines, "log_fc": RP["beta_c
 )
 ```
 
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_7_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_5_0.png)
 
-    <ggplot: (8746928591996)>
+    <ggplot: (8741431597698)>
 
 ```python
 real_cellline_vals = pd.DataFrame({"cell_line": cell_lines, "log_fc": RP["beta_c"]})
@@ -304,9 +292,9 @@ real_cellline_vals = pd.DataFrame({"cell_line": cell_lines, "log_fc": RP["beta_c
 )
 ```
 
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_8_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_6_0.png)
 
-    <ggplot: (8746930190740)>
+    <ggplot: (8741432659755)>
 
 ## Model 7a. A 2-Dimensional varying intercept.
 
@@ -349,11 +337,8 @@ with pm.Model() as m7a:
     m7a_post_check = pm.sample_posterior_predictive(m7a_trace, random_seed=RANDOM_SEED)
 ```
 
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     Auto-assigning NUTS sampler...
     Initializing NUTS using jitter+adapt_diag...
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     Multiprocess sampling (4 chains in 4 jobs)
     NUTS: [sigma, alpha_gc, sigma_alpha, mu_alpha_gc]
 
@@ -371,11 +356,10 @@ with pm.Model() as m7a:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 00:27<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [16000/16000 00:24<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 28 seconds.
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 25 seconds.
 
 <div>
     <style>
@@ -391,17 +375,14 @@ with pm.Model() as m7a:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:11<00:00]
+  100.00% [8000/8000 00:08<00:00]
 </div>
-
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 ```python
 pm.model_to_graphviz(m7a)
 ```
 
-![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_11_0.svg)
+![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_9_0.svg)
 
 ```python
 az_m7a = az.from_pymc3(
@@ -411,8 +392,6 @@ az_m7a = az.from_pymc3(
     prior=m7a_prior_check,
 )
 ```
-
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 ```python
 m7a_post = (
@@ -486,8 +465,8 @@ m7a_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>0</td>
-      <td>gene_0</td>
-      <td>cell_0</td>
+      <td>gene_0.0</td>
+      <td>cell_0.0</td>
     </tr>
     <tr>
       <th>1</th>
@@ -505,8 +484,8 @@ m7a_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>1</td>
-      <td>gene_0</td>
-      <td>cell_1</td>
+      <td>gene_0.0</td>
+      <td>cell_1.0</td>
     </tr>
     <tr>
       <th>2</th>
@@ -524,8 +503,8 @@ m7a_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>2</td>
-      <td>gene_0</td>
-      <td>cell_2</td>
+      <td>gene_0.0</td>
+      <td>cell_2.0</td>
     </tr>
     <tr>
       <th>3</th>
@@ -543,8 +522,8 @@ m7a_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>3</td>
-      <td>gene_0</td>
-      <td>cell_3</td>
+      <td>gene_0.0</td>
+      <td>cell_3.0</td>
     </tr>
     <tr>
       <th>4</th>
@@ -562,8 +541,8 @@ m7a_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>4</td>
-      <td>gene_0</td>
-      <td>cell_4</td>
+      <td>gene_0.0</td>
+      <td>cell_4.0</td>
     </tr>
     <tr>
       <th>5</th>
@@ -581,8 +560,8 @@ m7a_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>5</td>
-      <td>gene_0</td>
-      <td>cell_5</td>
+      <td>gene_0.0</td>
+      <td>cell_5.0</td>
     </tr>
     <tr>
       <th>6</th>
@@ -600,8 +579,8 @@ m7a_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>6</td>
-      <td>gene_0</td>
-      <td>cell_6</td>
+      <td>gene_0.0</td>
+      <td>cell_6.0</td>
     </tr>
     <tr>
       <th>7</th>
@@ -619,8 +598,8 @@ m7a_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>7</td>
-      <td>gene_0</td>
-      <td>cell_7</td>
+      <td>gene_0.0</td>
+      <td>cell_7.0</td>
     </tr>
     <tr>
       <th>8</th>
@@ -638,8 +617,8 @@ m7a_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>8</td>
-      <td>gene_0</td>
-      <td>cell_8</td>
+      <td>gene_0.0</td>
+      <td>cell_8.0</td>
     </tr>
     <tr>
       <th>9</th>
@@ -657,8 +636,8 @@ m7a_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>9</td>
-      <td>gene_0</td>
-      <td>cell_9</td>
+      <td>gene_0.0</td>
+      <td>cell_9.0</td>
     </tr>
   </tbody>
 </table>
@@ -677,9 +656,9 @@ m7a_post.head(n=10)
 )
 ```
 
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_14_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_12_0.png)
 
-    <ggplot: (8746929095491)>
+    <ggplot: (8741414487209)>
 
 ```python
 real_gene_vals = pd.DataFrame({"gene": genes, "log_fc": RP["gamma_g"]})
@@ -702,9 +681,9 @@ gene_posteriors = m7a_post[["gene", "mean"]].groupby("gene").mean().reset_index(
 )
 ```
 
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_15_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_13_0.png)
 
-    <ggplot: (8746929056756)>
+    <ggplot: (8741396097988)>
 
 The cell line effect is exaggerated and the gene effect is well estimated.
 This is probably because most of the effect is comming from the genes, but the varying intercept only has one value per gene-cell line pair.
@@ -734,9 +713,9 @@ cell_line_posteriors = (
 )
 ```
 
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_17_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_15_0.png)
 
-    <ggplot: (8746929041911)>
+    <ggplot: (8741396096946)>
 
 A model with complete pooling of the data to compare with the hierarhical model to highlight the effects of partial pooling.
 
@@ -766,10 +745,8 @@ with pm.Model() as m7a_pool:
     )
 ```
 
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     Auto-assigning NUTS sampler...
     Initializing NUTS using jitter+adapt_diag...
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     Multiprocess sampling (4 chains in 4 jobs)
     NUTS: [sigma, alpha_gc]
 
@@ -787,10 +764,10 @@ with pm.Model() as m7a_pool:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 00:26<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [16000/16000 00:23<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 26 seconds.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 23 seconds.
 
 <div>
     <style>
@@ -806,16 +783,14 @@ with pm.Model() as m7a_pool:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:11<00:00]
+  100.00% [8000/8000 00:08<00:00]
 </div>
-
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 ```python
 pm.model_to_graphviz(m7a_pool)
 ```
 
-![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_20_0.svg)
+![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_18_0.svg)
 
 ```python
 az_m7a_pool = az.from_pymc3(
@@ -825,8 +800,6 @@ az_m7a_pool = az.from_pymc3(
     prior=m7a_pool_prior_check,
 )
 ```
-
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 ```python
 m7a_pool_post = (
@@ -900,8 +873,8 @@ m7a_pool_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>0</td>
-      <td>gene_0</td>
-      <td>cell_0</td>
+      <td>gene_0.0</td>
+      <td>cell_0.0</td>
     </tr>
     <tr>
       <th>1</th>
@@ -919,8 +892,8 @@ m7a_pool_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>1</td>
-      <td>gene_0</td>
-      <td>cell_1</td>
+      <td>gene_0.0</td>
+      <td>cell_1.0</td>
     </tr>
     <tr>
       <th>2</th>
@@ -938,8 +911,8 @@ m7a_pool_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>2</td>
-      <td>gene_0</td>
-      <td>cell_2</td>
+      <td>gene_0.0</td>
+      <td>cell_2.0</td>
     </tr>
     <tr>
       <th>3</th>
@@ -957,8 +930,8 @@ m7a_pool_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>3</td>
-      <td>gene_0</td>
-      <td>cell_3</td>
+      <td>gene_0.0</td>
+      <td>cell_3.0</td>
     </tr>
     <tr>
       <th>4</th>
@@ -976,8 +949,8 @@ m7a_pool_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>4</td>
-      <td>gene_0</td>
-      <td>cell_4</td>
+      <td>gene_0.0</td>
+      <td>cell_4.0</td>
     </tr>
     <tr>
       <th>5</th>
@@ -995,8 +968,8 @@ m7a_pool_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>5</td>
-      <td>gene_0</td>
-      <td>cell_5</td>
+      <td>gene_0.0</td>
+      <td>cell_5.0</td>
     </tr>
     <tr>
       <th>6</th>
@@ -1014,8 +987,8 @@ m7a_pool_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>6</td>
-      <td>gene_0</td>
-      <td>cell_6</td>
+      <td>gene_0.0</td>
+      <td>cell_6.0</td>
     </tr>
     <tr>
       <th>7</th>
@@ -1033,8 +1006,8 @@ m7a_pool_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>7</td>
-      <td>gene_0</td>
-      <td>cell_7</td>
+      <td>gene_0.0</td>
+      <td>cell_7.0</td>
     </tr>
     <tr>
       <th>8</th>
@@ -1052,8 +1025,8 @@ m7a_pool_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>8</td>
-      <td>gene_0</td>
-      <td>cell_8</td>
+      <td>gene_0.0</td>
+      <td>cell_8.0</td>
     </tr>
     <tr>
       <th>9</th>
@@ -1071,8 +1044,8 @@ m7a_pool_post.head(n=10)
       <td>1.0</td>
       <td>0</td>
       <td>9</td>
-      <td>gene_0</td>
-      <td>cell_9</td>
+      <td>gene_0.0</td>
+      <td>cell_9.0</td>
     </tr>
   </tbody>
 </table>
@@ -1104,9 +1077,9 @@ for col in ["gene", "cell_line"]:
 )
 ```
 
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_24_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_22_0.png)
 
-    <ggplot: (8746929010357)>
+    <ggplot: (8741395543944)>
 
 ```python
 (
@@ -1122,9 +1095,9 @@ for col in ["gene", "cell_line"]:
 )
 ```
 
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_25_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_23_0.png)
 
-    <ggplot: (8746929105902)>
+    <ggplot: (8741432651319)>
 
 ```python
 az.summary(az_m7a, var_names=["mu_alpha_gc", "sigma_alpha"])
@@ -1253,10 +1226,8 @@ with pm.Model() as m7b:
     m7b_post_check = pm.sample_posterior_predictive(m7b_trace, random_seed=RANDOM_SEED)
 ```
 
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     Auto-assigning NUTS sampler...
     Initializing NUTS using jitter+adapt_diag...
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
     Multiprocess sampling (4 chains in 4 jobs)
     NUTS: [sigma, alpha_sc, sigma_alpha, gamma_gc, sigma_gamma, mu_gamma]
 
@@ -1274,12 +1245,14 @@ with pm.Model() as m7b:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 01:55<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [16000/16000 02:29<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 116 seconds.
-    The acceptance probability does not match the target. It is 0.9023624303207955, but should be close to 0.95. Try to increase the number of tuning steps.
-    The rhat statistic is larger than 1.05 for some parameters. This indicates slight problems during sampling.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 149 seconds.
+    The acceptance probability does not match the target. It is 0.9018412241874492, but should be close to 0.95. Try to increase the number of tuning steps.
+    The acceptance probability does not match the target. It is 0.8518349990347887, but should be close to 0.95. Try to increase the number of tuning steps.
+    The acceptance probability does not match the target. It is 0.8414301759523581, but should be close to 0.95. Try to increase the number of tuning steps.
+    The rhat statistic is larger than 1.2 for some parameters.
     The estimated number of effective samples is smaller than 200 for some parameters.
 
 <div>
@@ -1296,16 +1269,14 @@ with pm.Model() as m7b:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:11<00:00]
+  100.00% [8000/8000 00:08<00:00]
 </div>
-
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 ```python
 pm.model_to_graphviz(m7b)
 ```
 
-![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_29_0.svg)
+![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_27_0.svg)
 
 ```python
 az_m7b = az.from_pymc3(
@@ -1315,8 +1286,6 @@ az_m7b = az.from_pymc3(
     prior=m7b_prior_check,
 )
 ```
-
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 Again, to identify the effects of the hierarchcial model on sharing of data, below is a non-hierarchical equivalent.
 
@@ -1365,12 +1334,14 @@ with pm.Model() as m7b_pool:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 01:13<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [16000/16000 00:48<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 73 seconds.
-    The acceptance probability does not match the target. It is 0.9012349306269171, but should be close to 0.95. Try to increase the number of tuning steps.
-    The acceptance probability does not match the target. It is 0.8568385429631933, but should be close to 0.95. Try to increase the number of tuning steps.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 49 seconds.
+    The acceptance probability does not match the target. It is 0.8481062213676296, but should be close to 0.95. Try to increase the number of tuning steps.
+    The acceptance probability does not match the target. It is 0.8867730747877303, but should be close to 0.95. Try to increase the number of tuning steps.
+    The acceptance probability does not match the target. It is 0.842849433900245, but should be close to 0.95. Try to increase the number of tuning steps.
+    The acceptance probability does not match the target. It is 0.8900496404543358, but should be close to 0.95. Try to increase the number of tuning steps.
     The rhat statistic is larger than 1.4 for some parameters. The sampler did not converge.
     The estimated number of effective samples is smaller than 200 for some parameters.
 
@@ -1388,16 +1359,14 @@ with pm.Model() as m7b_pool:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:10<00:00]
+  100.00% [8000/8000 00:08<00:00]
 </div>
-
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 ```python
 pm.model_to_graphviz(m7b_pool)
 ```
 
-![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_33_0.svg)
+![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_31_0.svg)
 
 ```python
 az_m7b_pool = az.from_pymc3(
@@ -1407,8 +1376,6 @@ az_m7b_pool = az.from_pymc3(
     prior=m7b_pool_prior_check,
 )
 ```
-
-    /home/jc604/.conda/envs/speclet/lib/python3.8/site-packages/theano/tensor/subtensor.py:2197: FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated; use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
 
 ```python
 az.summary(az_m7b, var_names=["mu_gamma", "sigma_gamma"])
@@ -1448,30 +1415,30 @@ az.summary(az_m7b, var_names=["mu_gamma", "sigma_gamma"])
   <tbody>
     <tr>
       <th>mu_gamma</th>
-      <td>-0.937</td>
-      <td>0.080</td>
-      <td>-1.091</td>
-      <td>-0.791</td>
+      <td>-0.935</td>
+      <td>0.079</td>
+      <td>-1.075</td>
+      <td>-0.778</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>7195.0</td>
-      <td>7036.0</td>
-      <td>7238.0</td>
-      <td>4670.0</td>
+      <td>8078.0</td>
+      <td>8078.0</td>
+      <td>8098.0</td>
+      <td>5558.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>sigma_gamma</th>
-      <td>1.111</td>
-      <td>0.057</td>
-      <td>1.004</td>
-      <td>1.217</td>
+      <td>1.112</td>
+      <td>0.058</td>
+      <td>1.001</td>
+      <td>1.221</td>
       <td>0.001</td>
       <td>0.000</td>
-      <td>7371.0</td>
-      <td>7240.0</td>
-      <td>7566.0</td>
-      <td>5498.0</td>
+      <td>7646.0</td>
+      <td>7570.0</td>
+      <td>7706.0</td>
+      <td>5474.0</td>
       <td>1.0</td>
     </tr>
   </tbody>
@@ -1537,192 +1504,192 @@ m7b_post.head(n=10)
     <tr>
       <th>0</th>
       <td>gamma_gc[0,0]</td>
-      <td>-0.973</td>
-      <td>0.333</td>
-      <td>-1.581</td>
-      <td>-0.323</td>
-      <td>0.004</td>
+      <td>-0.964</td>
+      <td>0.328</td>
+      <td>-1.594</td>
+      <td>-0.363</td>
+      <td>0.005</td>
       <td>0.003</td>
-      <td>7409.0</td>
-      <td>7210.0</td>
-      <td>7413.0</td>
-      <td>5646.0</td>
+      <td>4996.0</td>
+      <td>4820.0</td>
+      <td>4994.0</td>
+      <td>5109.0</td>
       <td>1.0</td>
       <td>0</td>
       <td>0</td>
-      <td>gene_0</td>
-      <td>cell_0</td>
+      <td>gene_0.0</td>
+      <td>cell_0.0</td>
     </tr>
     <tr>
       <th>1</th>
       <td>gamma_gc[0,1]</td>
-      <td>-2.238</td>
-      <td>0.338</td>
-      <td>-2.845</td>
-      <td>-1.579</td>
-      <td>0.004</td>
+      <td>-2.232</td>
+      <td>0.334</td>
+      <td>-2.862</td>
+      <td>-1.611</td>
+      <td>0.005</td>
       <td>0.003</td>
-      <td>6961.0</td>
-      <td>6710.0</td>
-      <td>6937.0</td>
-      <td>5555.0</td>
+      <td>4665.0</td>
+      <td>4665.0</td>
+      <td>4661.0</td>
+      <td>5234.0</td>
       <td>1.0</td>
       <td>0</td>
       <td>1</td>
-      <td>gene_0</td>
-      <td>cell_1</td>
+      <td>gene_0.0</td>
+      <td>cell_1.0</td>
     </tr>
     <tr>
       <th>2</th>
       <td>gamma_gc[0,2]</td>
-      <td>-0.919</td>
-      <td>0.335</td>
-      <td>-1.535</td>
-      <td>-0.297</td>
+      <td>-0.915</td>
+      <td>0.332</td>
+      <td>-1.542</td>
+      <td>-0.304</td>
+      <td>0.005</td>
       <td>0.004</td>
-      <td>0.003</td>
-      <td>6872.0</td>
-      <td>6710.0</td>
-      <td>6853.0</td>
-      <td>5865.0</td>
+      <td>4198.0</td>
+      <td>4198.0</td>
+      <td>4194.0</td>
+      <td>5345.0</td>
       <td>1.0</td>
       <td>0</td>
       <td>2</td>
-      <td>gene_0</td>
-      <td>cell_2</td>
+      <td>gene_0.0</td>
+      <td>cell_2.0</td>
     </tr>
     <tr>
       <th>3</th>
       <td>gamma_gc[0,3]</td>
-      <td>-0.786</td>
+      <td>-0.791</td>
       <td>0.332</td>
-      <td>-1.411</td>
-      <td>-0.162</td>
-      <td>0.004</td>
+      <td>-1.391</td>
+      <td>-0.136</td>
+      <td>0.005</td>
       <td>0.003</td>
-      <td>7373.0</td>
-      <td>6793.0</td>
-      <td>7375.0</td>
-      <td>5699.0</td>
+      <td>4739.0</td>
+      <td>4642.0</td>
+      <td>4735.0</td>
+      <td>5011.0</td>
       <td>1.0</td>
       <td>0</td>
       <td>3</td>
-      <td>gene_0</td>
-      <td>cell_3</td>
+      <td>gene_0.0</td>
+      <td>cell_3.0</td>
     </tr>
     <tr>
       <th>4</th>
       <td>gamma_gc[0,4]</td>
-      <td>-2.688</td>
-      <td>0.343</td>
-      <td>-3.329</td>
-      <td>-2.043</td>
-      <td>0.004</td>
+      <td>-2.686</td>
+      <td>0.329</td>
+      <td>-3.299</td>
+      <td>-2.057</td>
+      <td>0.005</td>
       <td>0.003</td>
-      <td>6362.0</td>
-      <td>6362.0</td>
-      <td>6365.0</td>
-      <td>4661.0</td>
+      <td>4938.0</td>
+      <td>4938.0</td>
+      <td>4942.0</td>
+      <td>5124.0</td>
       <td>1.0</td>
       <td>0</td>
       <td>4</td>
-      <td>gene_0</td>
-      <td>cell_4</td>
+      <td>gene_0.0</td>
+      <td>cell_4.0</td>
     </tr>
     <tr>
       <th>5</th>
       <td>gamma_gc[0,5]</td>
       <td>-2.933</td>
-      <td>0.332</td>
-      <td>-3.541</td>
-      <td>-2.306</td>
+      <td>0.336</td>
+      <td>-3.558</td>
+      <td>-2.297</td>
+      <td>0.005</td>
       <td>0.004</td>
-      <td>0.003</td>
-      <td>6775.0</td>
-      <td>6698.0</td>
-      <td>6768.0</td>
-      <td>5607.0</td>
+      <td>4063.0</td>
+      <td>4050.0</td>
+      <td>4065.0</td>
+      <td>4757.0</td>
       <td>1.0</td>
       <td>0</td>
       <td>5</td>
-      <td>gene_0</td>
-      <td>cell_5</td>
+      <td>gene_0.0</td>
+      <td>cell_5.0</td>
     </tr>
     <tr>
       <th>6</th>
       <td>gamma_gc[0,6]</td>
-      <td>-0.798</td>
-      <td>0.335</td>
+      <td>-0.799</td>
+      <td>0.330</td>
       <td>-1.407</td>
-      <td>-0.153</td>
-      <td>0.004</td>
+      <td>-0.173</td>
+      <td>0.005</td>
       <td>0.003</td>
-      <td>6232.0</td>
-      <td>6019.0</td>
-      <td>6225.0</td>
-      <td>5431.0</td>
+      <td>4830.0</td>
+      <td>4712.0</td>
+      <td>4837.0</td>
+      <td>5221.0</td>
       <td>1.0</td>
       <td>0</td>
       <td>6</td>
-      <td>gene_0</td>
-      <td>cell_6</td>
+      <td>gene_0.0</td>
+      <td>cell_6.0</td>
     </tr>
     <tr>
       <th>7</th>
       <td>gamma_gc[0,7]</td>
-      <td>-1.659</td>
-      <td>0.333</td>
-      <td>-2.278</td>
-      <td>-1.021</td>
-      <td>0.004</td>
+      <td>-1.661</td>
+      <td>0.338</td>
+      <td>-2.292</td>
+      <td>-1.027</td>
+      <td>0.005</td>
       <td>0.003</td>
-      <td>6903.0</td>
-      <td>6903.0</td>
-      <td>6903.0</td>
-      <td>5653.0</td>
+      <td>5467.0</td>
+      <td>5338.0</td>
+      <td>5470.0</td>
+      <td>5188.0</td>
       <td>1.0</td>
       <td>0</td>
       <td>7</td>
-      <td>gene_0</td>
-      <td>cell_7</td>
+      <td>gene_0.0</td>
+      <td>cell_7.0</td>
     </tr>
     <tr>
       <th>8</th>
       <td>gamma_gc[0,8]</td>
-      <td>-1.630</td>
-      <td>0.336</td>
-      <td>-2.251</td>
-      <td>-0.997</td>
-      <td>0.004</td>
+      <td>-1.625</td>
+      <td>0.330</td>
+      <td>-2.223</td>
+      <td>-0.982</td>
+      <td>0.005</td>
       <td>0.003</td>
-      <td>6776.0</td>
-      <td>6623.0</td>
-      <td>6773.0</td>
-      <td>5693.0</td>
+      <td>4935.0</td>
+      <td>4935.0</td>
+      <td>4954.0</td>
+      <td>4710.0</td>
       <td>1.0</td>
       <td>0</td>
       <td>8</td>
-      <td>gene_0</td>
-      <td>cell_8</td>
+      <td>gene_0.0</td>
+      <td>cell_8.0</td>
     </tr>
     <tr>
       <th>9</th>
       <td>gamma_gc[0,9]</td>
-      <td>-0.461</td>
-      <td>0.325</td>
-      <td>-1.090</td>
-      <td>0.128</td>
+      <td>-0.457</td>
+      <td>0.326</td>
+      <td>-1.066</td>
+      <td>0.162</td>
       <td>0.004</td>
       <td>0.003</td>
-      <td>6099.0</td>
-      <td>5351.0</td>
-      <td>6106.0</td>
-      <td>5485.0</td>
+      <td>5273.0</td>
+      <td>5180.0</td>
+      <td>5284.0</td>
+      <td>5238.0</td>
       <td>1.0</td>
       <td>0</td>
       <td>9</td>
-      <td>gene_0</td>
-      <td>cell_9</td>
+      <td>gene_0.0</td>
+      <td>cell_9.0</td>
     </tr>
   </tbody>
 </table>
@@ -1741,9 +1708,9 @@ m7b_post.head(n=10)
 )
 ```
 
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_37_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_35_0.png)
 
-    <ggplot: (8746921603831)>
+    <ggplot: (8741432533622)>
 
 ```python
 var_names = ["gene", "cell_line", "mean"]
@@ -1776,12 +1743,12 @@ for col in ["gene", "cell_line", "pool"]:
 )
 ```
 
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_38_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_36_0.png)
 
-    <ggplot: (8746921527158)>
+    <ggplot: (8741441154988)>
 
 ```python
-def parse_alpha_sc(az_obj):
+def parse_alpha_sc(az_obj: az.InferenceData) -> pd.DataFrame:
     post_df = (
         az.summary(az_obj, var_names=["alpha_sc"])
         .reset_index()
@@ -1825,9 +1792,9 @@ gene_posteriors = m7b_alpha_sc[["gene", "mean"]].groupby("gene").mean().reset_in
 )
 ```
 
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_40_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_38_0.png)
 
-    <ggplot: (8746929166035)>
+    <ggplot: (8741395469936)>
 
 ```python
 compare_alpha_sc = pd.concat(
@@ -1843,9 +1810,9 @@ compare_alpha_sc = pd.concat(
 )
 ```
 
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_41_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_39_0.png)
 
-    <ggplot: (8746929028280)>
+    <ggplot: (8741395547085)>
 
 One issue is still that the cell line and gene effects are muddled and inseparable.
 Therefore, drawing useful conclusions about the impact of knocking out a gene using a specific guide is very difficult, potentially impossible.
@@ -1897,497 +1864,497 @@ pred_alpha_s
   <tbody>
     <tr>
       <th>0</th>
-      <td>gene_0</td>
-      <td>sgRNA_0</td>
-      <td>-0.778723</td>
-      <td>-1.400583</td>
-      <td>-0.181332</td>
+      <td>gene_0.0</td>
+      <td>sgRNA_0.0</td>
+      <td>-0.759158</td>
+      <td>-1.429401</td>
+      <td>-0.086850</td>
       <td>-1.862128</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>gene_1</td>
-      <td>sgRNA_1</td>
-      <td>-0.108910</td>
-      <td>-0.605927</td>
-      <td>0.331777</td>
+      <td>gene_1.0</td>
+      <td>sgRNA_1.0</td>
+      <td>-0.140265</td>
+      <td>-0.637390</td>
+      <td>0.334182</td>
       <td>-1.070338</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>gene_1</td>
-      <td>sgRNA_2</td>
-      <td>-0.256802</td>
-      <td>-0.760342</td>
-      <td>0.269939</td>
+      <td>gene_1.0</td>
+      <td>sgRNA_2.0</td>
+      <td>-0.224691</td>
+      <td>-0.728134</td>
+      <td>0.285135</td>
       <td>-1.319719</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>gene_2</td>
-      <td>sgRNA_3</td>
-      <td>-0.125926</td>
-      <td>-0.586036</td>
-      <td>0.326831</td>
+      <td>gene_2.0</td>
+      <td>sgRNA_3.0</td>
+      <td>-0.065368</td>
+      <td>-0.531590</td>
+      <td>0.392692</td>
       <td>-1.176780</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>gene_2</td>
-      <td>sgRNA_4</td>
-      <td>0.239965</td>
-      <td>-0.313550</td>
-      <td>0.808423</td>
+      <td>gene_2.0</td>
+      <td>sgRNA_4.0</td>
+      <td>0.144408</td>
+      <td>-0.400708</td>
+      <td>0.675432</td>
       <td>-0.645986</td>
     </tr>
     <tr>
       <th>5</th>
-      <td>gene_2</td>
-      <td>sgRNA_5</td>
-      <td>-0.057022</td>
-      <td>-0.571905</td>
-      <td>0.446365</td>
+      <td>gene_2.0</td>
+      <td>sgRNA_5.0</td>
+      <td>-0.025989</td>
+      <td>-0.522190</td>
+      <td>0.464967</td>
       <td>-0.958555</td>
     </tr>
     <tr>
       <th>6</th>
-      <td>gene_3</td>
-      <td>sgRNA_6</td>
-      <td>-0.262592</td>
-      <td>-0.663229</td>
-      <td>0.137196</td>
+      <td>gene_3.0</td>
+      <td>sgRNA_6.0</td>
+      <td>-0.253599</td>
+      <td>-0.635382</td>
+      <td>0.128207</td>
       <td>-1.280025</td>
     </tr>
     <tr>
       <th>7</th>
-      <td>gene_3</td>
-      <td>sgRNA_7</td>
-      <td>-0.213017</td>
-      <td>-0.684585</td>
-      <td>0.244540</td>
+      <td>gene_3.0</td>
+      <td>sgRNA_7.0</td>
+      <td>-0.225569</td>
+      <td>-0.644519</td>
+      <td>0.181863</td>
       <td>-1.183275</td>
     </tr>
     <tr>
       <th>8</th>
-      <td>gene_3</td>
-      <td>sgRNA_8</td>
-      <td>-0.240960</td>
-      <td>-0.668431</td>
-      <td>0.221597</td>
+      <td>gene_3.0</td>
+      <td>sgRNA_8.0</td>
+      <td>-0.241341</td>
+      <td>-0.638887</td>
+      <td>0.164987</td>
       <td>-1.242896</td>
     </tr>
     <tr>
       <th>9</th>
-      <td>gene_3</td>
-      <td>sgRNA_9</td>
-      <td>-0.269438</td>
-      <td>-0.718198</td>
-      <td>0.197026</td>
+      <td>gene_3.0</td>
+      <td>sgRNA_9.0</td>
+      <td>-0.258000</td>
+      <td>-0.654902</td>
+      <td>0.166913</td>
       <td>-1.159313</td>
     </tr>
     <tr>
       <th>10</th>
-      <td>gene_4</td>
-      <td>sgRNA_10</td>
-      <td>-0.436543</td>
-      <td>-0.866166</td>
-      <td>-0.048008</td>
+      <td>gene_4.0</td>
+      <td>sgRNA_10.0</td>
+      <td>-0.416831</td>
+      <td>-0.795693</td>
+      <td>-0.048826</td>
       <td>-1.409439</td>
     </tr>
     <tr>
       <th>11</th>
-      <td>gene_4</td>
-      <td>sgRNA_11</td>
-      <td>-0.262738</td>
-      <td>-0.674895</td>
-      <td>0.149165</td>
+      <td>gene_4.0</td>
+      <td>sgRNA_11.0</td>
+      <td>-0.317237</td>
+      <td>-0.699618</td>
+      <td>0.065350</td>
       <td>-1.203135</td>
     </tr>
     <tr>
       <th>12</th>
-      <td>gene_4</td>
-      <td>sgRNA_12</td>
-      <td>-0.330748</td>
-      <td>-0.649573</td>
-      <td>-0.012195</td>
+      <td>gene_4.0</td>
+      <td>sgRNA_12.0</td>
+      <td>-0.356737</td>
+      <td>-0.684337</td>
+      <td>-0.037109</td>
       <td>-1.331831</td>
     </tr>
     <tr>
       <th>13</th>
-      <td>gene_4</td>
-      <td>sgRNA_13</td>
-      <td>-0.430378</td>
-      <td>-0.889111</td>
-      <td>-0.027717</td>
+      <td>gene_4.0</td>
+      <td>sgRNA_13.0</td>
+      <td>-0.412891</td>
+      <td>-0.800781</td>
+      <td>-0.033596</td>
       <td>-1.484044</td>
     </tr>
     <tr>
       <th>14</th>
-      <td>gene_4</td>
-      <td>sgRNA_14</td>
-      <td>-0.510773</td>
-      <td>-0.949362</td>
-      <td>-0.072013</td>
+      <td>gene_4.0</td>
+      <td>sgRNA_14.0</td>
+      <td>-0.458564</td>
+      <td>-0.832220</td>
+      <td>-0.053363</td>
       <td>-1.707468</td>
     </tr>
     <tr>
       <th>15</th>
-      <td>gene_5</td>
-      <td>sgRNA_15</td>
-      <td>1.210059</td>
-      <td>0.832455</td>
-      <td>1.593072</td>
+      <td>gene_5.0</td>
+      <td>sgRNA_15.0</td>
+      <td>1.197364</td>
+      <td>0.862914</td>
+      <td>1.546651</td>
       <td>0.183812</td>
     </tr>
     <tr>
       <th>16</th>
-      <td>gene_5</td>
-      <td>sgRNA_16</td>
-      <td>1.307093</td>
-      <td>0.912301</td>
-      <td>1.724179</td>
+      <td>gene_5.0</td>
+      <td>sgRNA_16.0</td>
+      <td>1.253322</td>
+      <td>0.901795</td>
+      <td>1.610755</td>
       <td>0.213355</td>
     </tr>
     <tr>
       <th>17</th>
-      <td>gene_5</td>
-      <td>sgRNA_17</td>
-      <td>1.452508</td>
-      <td>0.995970</td>
-      <td>1.956044</td>
+      <td>gene_5.0</td>
+      <td>sgRNA_17.0</td>
+      <td>1.336128</td>
+      <td>0.918705</td>
+      <td>1.772030</td>
       <td>0.506672</td>
     </tr>
     <tr>
       <th>18</th>
-      <td>gene_5</td>
-      <td>sgRNA_18</td>
-      <td>1.170990</td>
-      <td>0.662711</td>
-      <td>1.611710</td>
+      <td>gene_5.0</td>
+      <td>sgRNA_18.0</td>
+      <td>1.174975</td>
+      <td>0.779345</td>
+      <td>1.572104</td>
       <td>0.088151</td>
     </tr>
     <tr>
       <th>19</th>
-      <td>gene_5</td>
-      <td>sgRNA_19</td>
-      <td>0.927563</td>
-      <td>0.439936</td>
-      <td>1.376086</td>
+      <td>gene_5.0</td>
+      <td>sgRNA_19.0</td>
+      <td>1.036560</td>
+      <td>0.633211</td>
+      <td>1.453533</td>
       <td>-0.256121</td>
     </tr>
     <tr>
       <th>20</th>
-      <td>gene_5</td>
-      <td>sgRNA_20</td>
-      <td>1.101143</td>
-      <td>0.635387</td>
-      <td>1.546210</td>
+      <td>gene_5.0</td>
+      <td>sgRNA_20.0</td>
+      <td>1.135561</td>
+      <td>0.749591</td>
+      <td>1.518218</td>
       <td>0.043019</td>
     </tr>
     <tr>
       <th>21</th>
-      <td>gene_6</td>
-      <td>sgRNA_21</td>
-      <td>0.117491</td>
-      <td>-0.298694</td>
-      <td>0.531630</td>
+      <td>gene_6.0</td>
+      <td>sgRNA_21.0</td>
+      <td>0.120620</td>
+      <td>-0.243539</td>
+      <td>0.491454</td>
       <td>-0.888385</td>
     </tr>
     <tr>
       <th>22</th>
-      <td>gene_6</td>
-      <td>sgRNA_22</td>
-      <td>-0.117770</td>
-      <td>-0.573604</td>
-      <td>0.333768</td>
+      <td>gene_6.0</td>
+      <td>sgRNA_22.0</td>
+      <td>-0.013618</td>
+      <td>-0.433703</td>
+      <td>0.378880</td>
       <td>-1.227153</td>
     </tr>
     <tr>
       <th>23</th>
-      <td>gene_6</td>
-      <td>sgRNA_23</td>
-      <td>0.121497</td>
-      <td>-0.243612</td>
-      <td>0.493045</td>
+      <td>gene_6.0</td>
+      <td>sgRNA_23.0</td>
+      <td>0.122441</td>
+      <td>-0.207457</td>
+      <td>0.455777</td>
       <td>-0.865815</td>
     </tr>
     <tr>
       <th>24</th>
-      <td>gene_6</td>
-      <td>sgRNA_24</td>
-      <td>0.202855</td>
-      <td>-0.197562</td>
-      <td>0.601364</td>
+      <td>gene_6.0</td>
+      <td>sgRNA_24.0</td>
+      <td>0.169749</td>
+      <td>-0.198930</td>
+      <td>0.523396</td>
       <td>-0.843903</td>
     </tr>
     <tr>
       <th>25</th>
-      <td>gene_6</td>
-      <td>sgRNA_25</td>
-      <td>0.251114</td>
-      <td>-0.177150</td>
-      <td>0.709654</td>
+      <td>gene_6.0</td>
+      <td>sgRNA_25.0</td>
+      <td>0.197040</td>
+      <td>-0.195714</td>
+      <td>0.594115</td>
       <td>-0.730256</td>
     </tr>
     <tr>
       <th>26</th>
-      <td>gene_6</td>
-      <td>sgRNA_26</td>
-      <td>0.088825</td>
-      <td>-0.284919</td>
-      <td>0.434666</td>
+      <td>gene_6.0</td>
+      <td>sgRNA_26.0</td>
+      <td>0.104327</td>
+      <td>-0.235173</td>
+      <td>0.444894</td>
       <td>-0.876381</td>
     </tr>
     <tr>
       <th>27</th>
-      <td>gene_6</td>
-      <td>sgRNA_27</td>
-      <td>0.232411</td>
-      <td>-0.205694</td>
-      <td>0.690829</td>
+      <td>gene_6.0</td>
+      <td>sgRNA_27.0</td>
+      <td>0.186050</td>
+      <td>-0.199568</td>
+      <td>0.574821</td>
       <td>-0.691828</td>
     </tr>
     <tr>
       <th>28</th>
-      <td>gene_7</td>
-      <td>sgRNA_28</td>
-      <td>0.116012</td>
-      <td>-0.290056</td>
-      <td>0.502420</td>
+      <td>gene_7.0</td>
+      <td>sgRNA_28.0</td>
+      <td>0.175289</td>
+      <td>-0.183857</td>
+      <td>0.531827</td>
       <td>-0.989358</td>
     </tr>
     <tr>
       <th>29</th>
-      <td>gene_7</td>
-      <td>sgRNA_29</td>
-      <td>0.273582</td>
-      <td>-0.157127</td>
-      <td>0.648921</td>
+      <td>gene_7.0</td>
+      <td>sgRNA_29.0</td>
+      <td>0.264822</td>
+      <td>-0.104726</td>
+      <td>0.605801</td>
       <td>-0.749392</td>
     </tr>
     <tr>
       <th>30</th>
-      <td>gene_7</td>
-      <td>sgRNA_30</td>
-      <td>0.293197</td>
-      <td>-0.082148</td>
-      <td>0.717992</td>
+      <td>gene_7.0</td>
+      <td>sgRNA_30.0</td>
+      <td>0.275510</td>
+      <td>-0.071395</td>
+      <td>0.630757</td>
       <td>-0.665104</td>
     </tr>
     <tr>
       <th>31</th>
-      <td>gene_7</td>
-      <td>sgRNA_31</td>
-      <td>0.234749</td>
-      <td>-0.295798</td>
-      <td>0.639004</td>
+      <td>gene_7.0</td>
+      <td>sgRNA_31.0</td>
+      <td>0.243113</td>
+      <td>-0.158649</td>
+      <td>0.620726</td>
       <td>-0.845472</td>
     </tr>
     <tr>
       <th>32</th>
-      <td>gene_7</td>
-      <td>sgRNA_32</td>
-      <td>0.156232</td>
-      <td>-0.224168</td>
-      <td>0.522039</td>
+      <td>gene_7.0</td>
+      <td>sgRNA_32.0</td>
+      <td>0.197645</td>
+      <td>-0.138627</td>
+      <td>0.548258</td>
       <td>-0.968587</td>
     </tr>
     <tr>
       <th>33</th>
-      <td>gene_7</td>
-      <td>sgRNA_33</td>
-      <td>0.160303</td>
-      <td>-0.264191</td>
-      <td>0.592128</td>
+      <td>gene_7.0</td>
+      <td>sgRNA_33.0</td>
+      <td>0.200275</td>
+      <td>-0.174224</td>
+      <td>0.571602</td>
       <td>-0.924400</td>
     </tr>
     <tr>
       <th>34</th>
-      <td>gene_7</td>
-      <td>sgRNA_34</td>
-      <td>0.326817</td>
-      <td>-0.092062</td>
-      <td>0.765680</td>
+      <td>gene_7.0</td>
+      <td>sgRNA_34.0</td>
+      <td>0.295269</td>
+      <td>-0.065937</td>
+      <td>0.664482</td>
       <td>-0.581153</td>
     </tr>
     <tr>
       <th>35</th>
-      <td>gene_7</td>
-      <td>sgRNA_35</td>
-      <td>0.490441</td>
-      <td>0.096167</td>
-      <td>0.928749</td>
+      <td>gene_7.0</td>
+      <td>sgRNA_35.0</td>
+      <td>0.388137</td>
+      <td>-0.001969</td>
+      <td>0.775968</td>
       <td>-0.478120</td>
     </tr>
     <tr>
       <th>36</th>
-      <td>gene_8</td>
-      <td>sgRNA_36</td>
-      <td>-0.329779</td>
-      <td>-0.770623</td>
-      <td>0.180444</td>
+      <td>gene_8.0</td>
+      <td>sgRNA_36.0</td>
+      <td>-0.347147</td>
+      <td>-0.726509</td>
+      <td>0.038244</td>
       <td>-1.384790</td>
     </tr>
     <tr>
       <th>37</th>
-      <td>gene_8</td>
-      <td>sgRNA_37</td>
-      <td>-0.259593</td>
-      <td>-0.583078</td>
-      <td>0.061469</td>
+      <td>gene_8.0</td>
+      <td>sgRNA_37.0</td>
+      <td>-0.306947</td>
+      <td>-0.608779</td>
+      <td>0.004000</td>
       <td>-1.152245</td>
     </tr>
     <tr>
       <th>38</th>
-      <td>gene_8</td>
-      <td>sgRNA_38</td>
-      <td>-0.450223</td>
-      <td>-0.818707</td>
-      <td>-0.067932</td>
+      <td>gene_8.0</td>
+      <td>sgRNA_38.0</td>
+      <td>-0.415836</td>
+      <td>-0.747693</td>
+      <td>-0.082078</td>
       <td>-1.487493</td>
     </tr>
     <tr>
       <th>39</th>
-      <td>gene_8</td>
-      <td>sgRNA_39</td>
-      <td>-0.306725</td>
-      <td>-0.778048</td>
-      <td>0.180823</td>
+      <td>gene_8.0</td>
+      <td>sgRNA_39.0</td>
+      <td>-0.333477</td>
+      <td>-0.703224</td>
+      <td>0.036198</td>
       <td>-1.321872</td>
     </tr>
     <tr>
       <th>40</th>
-      <td>gene_8</td>
-      <td>sgRNA_40</td>
-      <td>-0.451817</td>
-      <td>-0.893742</td>
-      <td>-0.014955</td>
+      <td>gene_8.0</td>
+      <td>sgRNA_40.0</td>
+      <td>-0.416226</td>
+      <td>-0.777866</td>
+      <td>-0.064319</td>
       <td>-1.508166</td>
     </tr>
     <tr>
       <th>41</th>
-      <td>gene_8</td>
-      <td>sgRNA_41</td>
-      <td>-0.251108</td>
-      <td>-0.664497</td>
-      <td>0.167122</td>
+      <td>gene_8.0</td>
+      <td>sgRNA_41.0</td>
+      <td>-0.302155</td>
+      <td>-0.648747</td>
+      <td>0.057204</td>
       <td>-1.283574</td>
     </tr>
     <tr>
       <th>42</th>
-      <td>gene_8</td>
-      <td>sgRNA_42</td>
-      <td>-0.398168</td>
-      <td>-0.774630</td>
-      <td>-0.041777</td>
+      <td>gene_8.0</td>
+      <td>sgRNA_42.0</td>
+      <td>-0.385597</td>
+      <td>-0.702265</td>
+      <td>-0.069986</td>
       <td>-1.393158</td>
     </tr>
     <tr>
       <th>43</th>
-      <td>gene_8</td>
-      <td>sgRNA_43</td>
-      <td>-0.492080</td>
-      <td>-0.962591</td>
-      <td>-0.086261</td>
+      <td>gene_8.0</td>
+      <td>sgRNA_43.0</td>
+      <td>-0.439982</td>
+      <td>-0.812249</td>
+      <td>-0.088966</td>
       <td>-1.568002</td>
     </tr>
     <tr>
       <th>44</th>
-      <td>gene_8</td>
-      <td>sgRNA_44</td>
-      <td>-0.415149</td>
-      <td>-0.805317</td>
-      <td>-0.026994</td>
+      <td>gene_8.0</td>
+      <td>sgRNA_44.0</td>
+      <td>-0.395876</td>
+      <td>-0.731206</td>
+      <td>-0.060454</td>
       <td>-1.510403</td>
     </tr>
     <tr>
       <th>45</th>
-      <td>gene_9</td>
-      <td>sgRNA_45</td>
-      <td>-0.024745</td>
-      <td>-0.405813</td>
-      <td>0.367533</td>
+      <td>gene_9.0</td>
+      <td>sgRNA_45.0</td>
+      <td>-0.129471</td>
+      <td>-0.474636</td>
+      <td>0.226328</td>
       <td>-0.946443</td>
     </tr>
     <tr>
       <th>46</th>
-      <td>gene_9</td>
-      <td>sgRNA_46</td>
-      <td>-0.163600</td>
-      <td>-0.644673</td>
-      <td>0.313142</td>
+      <td>gene_9.0</td>
+      <td>sgRNA_46.0</td>
+      <td>-0.209398</td>
+      <td>-0.580897</td>
+      <td>0.189292</td>
       <td>-1.181060</td>
     </tr>
     <tr>
       <th>47</th>
-      <td>gene_9</td>
-      <td>sgRNA_47</td>
-      <td>-0.469718</td>
-      <td>-0.866518</td>
-      <td>-0.065697</td>
+      <td>gene_9.0</td>
+      <td>sgRNA_47.0</td>
+      <td>-0.383099</td>
+      <td>-0.739852</td>
+      <td>-0.032106</td>
       <td>-1.594541</td>
     </tr>
     <tr>
       <th>48</th>
-      <td>gene_9</td>
-      <td>sgRNA_48</td>
-      <td>-0.332914</td>
-      <td>-0.686800</td>
-      <td>0.005252</td>
+      <td>gene_9.0</td>
+      <td>sgRNA_48.0</td>
+      <td>-0.305462</td>
+      <td>-0.619763</td>
+      <td>0.008811</td>
       <td>-1.431779</td>
     </tr>
     <tr>
       <th>49</th>
-      <td>gene_9</td>
-      <td>sgRNA_49</td>
-      <td>-0.333479</td>
-      <td>-0.711872</td>
-      <td>0.041447</td>
+      <td>gene_9.0</td>
+      <td>sgRNA_49.0</td>
+      <td>-0.306052</td>
+      <td>-0.635381</td>
+      <td>0.014513</td>
       <td>-1.365683</td>
     </tr>
     <tr>
       <th>50</th>
-      <td>gene_9</td>
-      <td>sgRNA_50</td>
-      <td>-0.304353</td>
-      <td>-0.690348</td>
-      <td>0.073534</td>
+      <td>gene_9.0</td>
+      <td>sgRNA_50.0</td>
+      <td>-0.289178</td>
+      <td>-0.613271</td>
+      <td>0.036653</td>
       <td>-1.420578</td>
     </tr>
     <tr>
       <th>51</th>
-      <td>gene_9</td>
-      <td>sgRNA_51</td>
-      <td>-0.213426</td>
-      <td>-0.698639</td>
-      <td>0.267757</td>
+      <td>gene_9.0</td>
+      <td>sgRNA_51.0</td>
+      <td>-0.237110</td>
+      <td>-0.614011</td>
+      <td>0.137988</td>
       <td>-1.221988</td>
     </tr>
     <tr>
       <th>52</th>
-      <td>gene_9</td>
-      <td>sgRNA_52</td>
-      <td>-0.394072</td>
-      <td>-0.933308</td>
-      <td>0.062759</td>
+      <td>gene_9.0</td>
+      <td>sgRNA_52.0</td>
+      <td>-0.339715</td>
+      <td>-0.736225</td>
+      <td>0.053641</td>
       <td>-1.500064</td>
     </tr>
     <tr>
       <th>53</th>
-      <td>gene_9</td>
-      <td>sgRNA_53</td>
-      <td>-0.236368</td>
-      <td>-0.578915</td>
-      <td>0.117060</td>
+      <td>gene_9.0</td>
+      <td>sgRNA_53.0</td>
+      <td>-0.251071</td>
+      <td>-0.553364</td>
+      <td>0.057065</td>
       <td>-1.322028</td>
     </tr>
     <tr>
       <th>54</th>
-      <td>gene_9</td>
-      <td>sgRNA_54</td>
-      <td>-0.245188</td>
-      <td>-0.580735</td>
-      <td>0.087996</td>
+      <td>gene_9.0</td>
+      <td>sgRNA_54.0</td>
+      <td>-0.254949</td>
+      <td>-0.564514</td>
+      <td>0.045129</td>
       <td>-1.299649</td>
     </tr>
   </tbody>
@@ -2457,11 +2424,10 @@ with pm.Model() as m7c:
         }
     </style>
   <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [16000/16000 01:01<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [16000/16000 00:57<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 62 seconds.
-    The acceptance probability does not match the target. It is 0.8963706202106828, but should be close to 0.95. Try to increase the number of tuning steps.
+    Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 57 seconds.
     The number of effective samples is smaller than 10% for some parameters.
 
 <div>
@@ -2478,14 +2444,14 @@ with pm.Model() as m7c:
         }
     </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:11<00:00]
+  100.00% [8000/8000 00:09<00:00]
 </div>
 
 ```python
 pm.model_to_graphviz(m7c)
 ```
 
-![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_46_0.svg)
+![svg](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_44_0.svg)
 
 ```python
 az_m7c = az.from_pymc3(
@@ -2504,7 +2470,7 @@ az.plot_trace(az_m7c, var_names="alpha_g")
 plt.show()
 ```
 
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_49_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_47_0.png)
 
 ```python
 az.summary(
@@ -2549,61 +2515,61 @@ az.summary(
   <tbody>
     <tr>
       <th>mu_alpha</th>
-      <td>-0.956</td>
-      <td>0.356</td>
-      <td>-1.631</td>
-      <td>-0.301</td>
-      <td>0.016</td>
-      <td>0.011</td>
-      <td>494.0</td>
-      <td>485.0</td>
-      <td>497.0</td>
-      <td>638.0</td>
+      <td>-0.955</td>
+      <td>0.342</td>
+      <td>-1.608</td>
+      <td>-0.305</td>
+      <td>0.014</td>
+      <td>0.010</td>
+      <td>625.0</td>
+      <td>621.0</td>
+      <td>631.0</td>
+      <td>818.0</td>
       <td>1.01</td>
       <td>-1.0</td>
     </tr>
     <tr>
       <th>sigma_alpha</th>
-      <td>0.597</td>
-      <td>0.163</td>
-      <td>0.348</td>
-      <td>0.895</td>
+      <td>0.599</td>
+      <td>0.166</td>
+      <td>0.341</td>
+      <td>0.897</td>
+      <td>0.004</td>
       <td>0.003</td>
-      <td>0.002</td>
-      <td>2557.0</td>
-      <td>2497.0</td>
-      <td>2883.0</td>
-      <td>2801.0</td>
+      <td>2077.0</td>
+      <td>2077.0</td>
+      <td>2184.0</td>
+      <td>2441.0</td>
       <td>1.00</td>
       <td>0.5</td>
     </tr>
     <tr>
       <th>mu_beta</th>
-      <td>0.003</td>
-      <td>0.199</td>
-      <td>-0.381</td>
-      <td>0.363</td>
+      <td>0.004</td>
+      <td>0.200</td>
+      <td>-0.382</td>
+      <td>0.364</td>
       <td>0.007</td>
       <td>0.005</td>
-      <td>849.0</td>
-      <td>849.0</td>
-      <td>850.0</td>
-      <td>1293.0</td>
-      <td>1.00</td>
+      <td>799.0</td>
+      <td>799.0</td>
+      <td>803.0</td>
+      <td>1279.0</td>
+      <td>1.01</td>
       <td>0.0</td>
     </tr>
     <tr>
       <th>sigma_beta</th>
-      <td>1.053</td>
-      <td>0.178</td>
-      <td>0.747</td>
-      <td>1.382</td>
+      <td>1.057</td>
+      <td>0.184</td>
+      <td>0.741</td>
+      <td>1.395</td>
+      <td>0.004</td>
       <td>0.003</td>
-      <td>0.002</td>
-      <td>3021.0</td>
-      <td>2927.0</td>
-      <td>3214.0</td>
-      <td>3535.0</td>
+      <td>2634.0</td>
+      <td>2609.0</td>
+      <td>2732.0</td>
+      <td>3107.0</td>
       <td>1.00</td>
       <td>1.0</td>
     </tr>
@@ -2659,9 +2625,9 @@ purple_color = "#A13786"
 )
 ```
 
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_52_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_50_0.png)
 
-    <ggplot: (8746788908126)>
+    <ggplot: (8741385867671)>
 
 ```python
 m7c_beta_c_post = (
@@ -2707,9 +2673,9 @@ nudge_x = 0.13
 )
 ```
 
-![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_53_0.png)
+![png](005_017_model-experimentation-m7_files/005_017_model-experimentation-m7_51_0.png)
 
-    <ggplot: (8746788909635)>
+    <ggplot: (8741385867716)>
 
 ### Conclusions and final thoughts
 
@@ -2724,30 +2690,36 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 8.90 minutes
+    execution time: 9.26 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    plotnine 0.7.1
-    pymc3    3.9.3
-    seaborn  0.11.0
-    pandas   1.1.3
-    arviz    0.10.0
-    numpy    1.19.2
-    last updated: 2020-12-17
+    Last updated: 2021-01-14
 
-    CPython 3.8.5
-    IPython 7.18.1
+    Python implementation: CPython
+    Python version       : 3.8.6
+    IPython version      : 7.19.0
 
-    compiler   : GCC 7.3.0
-    system     : Linux
-    release    : 3.10.0-1062.el7.x86_64
-    machine    : x86_64
-    processor  : x86_64
-    CPU cores  : 32
-    interpreter: 64bit
-    host name  : compute-a-16-78.o2.rc.hms.harvard.edu
-    Git branch : subset-data
+    Compiler    : GCC 9.3.0
+    OS          : Linux
+    Release     : 3.10.0-1062.el7.x86_64
+    Machine     : x86_64
+    Processor   : x86_64
+    CPU cores   : 28
+    Architecture: 64bit
+
+    Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
+
+    Git branch: typehints
+
+    theano    : 1.0.5
+    numpy     : 1.19.5
+    matplotlib: 3.3.3
+    seaborn   : 0.11.1
+    pandas    : 1.2.0
+    pymc3     : 3.9.3
+    arviz     : 0.10.0
+    plotnine  : 0.7.1

@@ -67,15 +67,13 @@ model {
 
 ```python
 from pprint import pprint
-from statistics import stdev
-from typing import Any, Union
+from typing import Any
 
 import arviz as az
-import janitor
+import janitor  # noqa: F401
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import plotnine as gg
 import pymc3 as pm
 import seaborn as sns
 ```
@@ -95,9 +93,24 @@ This can be induced by using less and more data, but Betancourt chose to just ad
 The following function mimics the data-generating Stan file that Betancourt uses.
 
 ```python
-def generate_data(
-    N: int, K: int, indiv_idx: Union[list[int], np.ndarray], sigma: float
-):
+from dataclasses import dataclass
+
+
+@dataclass
+class MockData:
+    """Mock data."""
+
+    N: int
+    K: int
+    sigma: float
+    mu: float
+    tau: float
+    theta: np.ndarray
+    idx: np.ndarray
+    y: np.ndarray
+
+
+def generate_data(N: int, K: int, indiv_idx: np.ndarray, sigma: float) -> MockData:
     """Generate data for modeling."""
     # Assertions about the input data.
     assert N >= 1
@@ -110,16 +123,9 @@ def generate_data(
     theta = np.random.normal(mu, tau, size=K).flatten()
     y = np.random.normal(theta[indiv_idx], sigma).flatten()
 
-    return {
-        "N": N,
-        "K": K,
-        "sigma": sigma,
-        "mu": mu,
-        "tau": tau,
-        "theta": theta,
-        "idx": indiv_idx,
-        "y": y,
-    }
+    return MockData(
+        N=N, K=K, sigma=sigma, mu=mu, tau=tau, theta=theta, idx=indiv_idx.copy(), y=y
+    )
 ```
 
 The first data set we will build will have all of the individuals uniformly weakly-informed by using a large standard deviation $\sigma=10$.
@@ -135,24 +141,19 @@ data = generate_data(N=N, K=K, indiv_idx=indiv_idx, sigma=sigma)
 pprint(data)
 ```
 
-    {'K': 9,
-     'N': 9,
-     'idx': array([0, 1, 2, 3, 4, 5, 6, 7, 8]),
-     'mu': 4.5,
-     'sigma': 10,
-     'tau': 3.5,
-     'theta': array([6.15002307, 0.33158507, 9.51447439, 3.40571836, 1.97793943,
-           7.60507029, 7.50855945, 2.27216773, 4.5549373 ]),
-     'y': array([-16.27682647,  11.83194232,  19.43393461,  12.93895964,
+    MockData(N=9, K=9, sigma=10, mu=4.5, tau=3.5, theta=array([6.15002307, 0.33158507, 9.51447439, 3.40571836, 1.97793943,
+           7.60507029, 7.50855945, 2.27216773, 4.5549373 ]), idx=array([0, 1, 2, 3, 4, 5, 6, 7, 8]), y=array([-16.27682647,  11.83194232,  19.43393461,  12.93895964,
            -18.23460877,   4.26429663,   7.52974309,   6.32670185,
-             7.44585671])}
+             7.44585671]))
 
 ```python
-df = pd.DataFrame({"y": data["y"], "k": data["idx"].astype(str)})
-sns.scatterplot(data=df, x="k", y="y");
+df = pd.DataFrame({"y": data.y, "k": data.K})
+sns.scatterplot(data=df, x="k", y="y")
 ```
 
-![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_8_0.png)
+    <AxesSubplot:xlabel='k', ylabel='y'>
+
+![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_8_1.png)
 
 #### Monolithically centered parameterization
 
@@ -162,13 +163,13 @@ We expect there to be strong funnel degeneracies because of the weakly-informed 
 
 ```python
 def centered_model(
-    d: dict[str, Any], draws: int = 10000, tune: int = 1000
+    d: MockData, draws: int = 10000, tune: int = 1000
 ) -> tuple[az.InferenceData, dict[str, Any]]:
-    with pm.Model() as cp_model:
+    with pm.Model():
         mu = pm.Normal("mu", 0, 5)
         tau = pm.HalfNormal("tau", 5)
-        theta = pm.Normal("theta", mu, tau, shape=d["K"])
-        y = pm.Normal("y", theta[d["idx"]], d["sigma"], observed=d["y"])
+        theta = pm.Normal("theta", mu, tau, shape=d.K)
+        y = pm.Normal("y", theta[d.idx], d.sigma, observed=d.y)
 
         cp_trace = pm.sample(
             draws=draws,
@@ -179,6 +180,7 @@ def centered_model(
             random_seed=RANDOM_SEED,
             target_accept=0.95,
         )
+        assert isinstance(cp_trace, az.InferenceData)
         cp_y_post_pred = pm.sample_posterior_predictive(
             trace=cp_trace, random_seed=RANDOM_SEED
         )
@@ -211,7 +213,7 @@ cp_trace, cp_y_post_pred = centered_model(data)
   100.00% [44000/44000 01:50<00:00 Sampling 4 chains, 706 divergences]
 </div>
 
-    Sampling 4 chains for 1_000 tune and 10_000 draw iterations (4_000 + 40_000 draws total) took 132 seconds.
+    Sampling 4 chains for 1_000 tune and 10_000 draw iterations (4_000 + 40_000 draws total) took 133 seconds.
     There were 201 divergences after tuning. Increase `target_accept` or reparameterize.
     The acceptance probability does not match the target. It is 0.8878940542236412, but should be close to 0.95. Try to increase the number of tuning steps.
     There were 204 divergences after tuning. Increase `target_accept` or reparameterize.
@@ -235,7 +237,7 @@ cp_trace, cp_y_post_pred = centered_model(data)
         }
     </style>
   <progress value='40000' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [40000/40000 00:33<00:00]
+  100.00% [40000/40000 00:31<00:00]
 </div>
 
 The Bayesian fraction of missing information (BFMI) is quite low indicating that the sampling process was unable to explore very well.
@@ -250,10 +252,15 @@ az.bfmi(cp_trace)
 From the following trace plots, we can see that the posterior distributions for the population parameters were uneven, indicating problems with the sampling.
 
 ```python
-az.plot_trace(cp_trace, ["mu", "tau"], compact=False, combined=False, legend=True);
+az.plot_trace(cp_trace, ["mu", "tau"], compact=False, combined=False, legend=True)
 ```
 
-![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_15_0.png)
+    array([[<AxesSubplot:title={'center':'mu'}>,
+            <AxesSubplot:title={'center':'mu'}>],
+           [<AxesSubplot:title={'center':'tau'}>,
+            <AxesSubplot:title={'center':'tau'}>]], dtype=object)
+
+![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_15_1.png)
 
 We can now look for the funnel relationship between the population dispersion parameter $\tau$ and the individual means $\theta$.
 The general idea of the funnel geometry is that it shows how the possible values for the individual means shrink as the population variance shrinks.
@@ -303,7 +310,7 @@ def get_dispersion_and_individual_posteriors_tidy(
 
 ```python
 theta_tau_post_df = get_dispersion_and_individual_posteriors_tidy(
-    cp_trace, "tau", "theta", data["K"]
+    cp_trace, "tau", "theta", data.K
 )
 theta_tau_post_df.head()
 ```
@@ -415,14 +422,14 @@ Under these circumstances, we expect this parameterization to fix the funnel pat
 
 ```python
 def noncentered_model(
-    d: dict[str, Any], draws: int = 10000, tune: int = 1000
+    d: MockData, draws: int = 10000, tune: int = 1000
 ) -> tuple[az.InferenceData, dict[str, np.ndarray]]:
     with pm.Model() as ncp_model:
         mu = pm.Normal("mu", 0, 5)
         tau = pm.HalfNormal("tau", 5)
-        eta = pm.Normal("eta", 0, 1, shape=d["K"])
+        eta = pm.Normal("eta", 0, 1, shape=d.K)
         theta = pm.Deterministic("theta", mu + (tau * eta))
-        y = pm.Normal("y", theta[d["idx"]], d["sigma"], observed=d["y"])
+        y = pm.Normal("y", theta[d.idx], d.sigma, observed=d.y)
 
         trace = pm.sample(
             draws=draws,
@@ -433,6 +440,7 @@ def noncentered_model(
             random_seed=RANDOM_SEED,
             target_accept=0.95,
         )
+        assert isinstance(trace, az.InferenceData)
         y_post_pred = pm.sample_posterior_predictive(
             trace=trace, random_seed=RANDOM_SEED
         )
@@ -462,10 +470,10 @@ ncp_trace, ncp_y_post_pred = noncentered_model(data)
         }
     </style>
   <progress value='44000' class='' max='44000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [44000/44000 01:12<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [44000/44000 00:48<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 1_000 tune and 10_000 draw iterations (4_000 + 40_000 draws total) took 90 seconds.
+    Sampling 4 chains for 1_000 tune and 10_000 draw iterations (4_000 + 40_000 draws total) took 67 seconds.
 
 <div>
     <style>
@@ -481,7 +489,7 @@ ncp_trace, ncp_y_post_pred = noncentered_model(data)
         }
     </style>
   <progress value='40000' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [40000/40000 01:18<00:00]
+  100.00% [40000/40000 00:54<00:00]
 </div>
 
 We can see the BFMI are much better with the non-centered parameterizations.
@@ -496,19 +504,24 @@ az.bfmi(cp_trace), az.bfmi(ncp_trace)
 And the posteriors for the global distributions are smoother.
 
 ```python
-az.plot_trace(ncp_trace, ["mu", "tau"], compact=False, combined=False);
+az.plot_trace(ncp_trace, ["mu", "tau"], compact=False, combined=False)
 ```
 
-![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_28_0.png)
+    array([[<AxesSubplot:title={'center':'mu'}>,
+            <AxesSubplot:title={'center':'mu'}>],
+           [<AxesSubplot:title={'center':'tau'}>,
+            <AxesSubplot:title={'center':'tau'}>]], dtype=object)
+
+![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_28_1.png)
 
 Now, when we look at the relationship between the population dispersion $\tau$ and the individual distributions $\theta$, there are no funnels.
 
 ```python
 eta_tau_post_df_ncp = get_dispersion_and_individual_posteriors_tidy(
-    ncp_trace, "tau", "eta", data["K"]
+    ncp_trace, "tau", "eta", data.K
 )
 theta_tau_post_df_ncp = get_dispersion_and_individual_posteriors_tidy(
-    ncp_trace, "tau", "theta", data["K"]
+    ncp_trace, "tau", "theta", data.K
 )
 
 plot_funnels(eta_tau_post_df_ncp, x="eta", min_y=-8)
@@ -537,7 +550,7 @@ def plot_overlapping_funnels(
         palette={"centered": "b", "non-centered": "r"},
     )
     plt.ylim(min_y, noncentered_post["log_tau"].max() * 1.02)
-    plt.show();
+    plt.show()
 ```
 
 This leads to a better exploration of smaller values for the population dispersion $\tau$ in the non-centered parameterization (red) than the centered parameterization (blue).
@@ -555,19 +568,28 @@ def plot_prior_against_tau_post(
     real_tau: float,
     tau_prior_sd: float = 5,
 ) -> None:
-    tau_post = pd.DataFrame(
-        {
-            "centered": cp_trace.posterior["tau"].values.flatten(),
-            "non-centered": ncp_trace.posterior["tau"].values.flatten(),
-            "prior": np.abs(
-                np.random.normal(
-                    0,
-                    tau_prior_sd,
-                    ncp_trace.posterior["tau"].values.flatten().shape[0],
-                )
-            ),
-        }
-    ).pivot_longer(names_to="model", values_to="tau")
+    tau_post = (
+        pd.DataFrame(
+            {
+                "centered": cp_trace.posterior["tau"].values.flatten(),
+                "non-centered": ncp_trace.posterior["tau"].values.flatten(),
+                "prior": np.abs(
+                    np.random.normal(
+                        0,
+                        tau_prior_sd,
+                        ncp_trace.posterior["tau"].values.flatten().shape[0],
+                    )
+                ),
+            }
+        )
+        .reset_index(drop=False)
+        .pivot_longer(
+            index="index",
+            column_names=["centered", "non-centered", "prior"],
+            names_to="model",
+            values_to="tau",
+        )
+    )
 
     sns.histplot(
         data=tau_post,
@@ -583,26 +605,28 @@ def plot_prior_against_tau_post(
 We can see the impact on the posterior distribution of $\tau$ in the plot below below; pay particular attention to the near-zero values.
 
 ```python
-plot_prior_against_tau_post(cp_trace, ncp_trace, data["tau"])
+plot_prior_against_tau_post(cp_trace, ncp_trace, data.tau)
 ```
 
 ![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_36_0.png)
 
 ```python
 def plot_comparison_ppc(
-    cp_ppc: dict[str, Any], ncp_ppc: dict[str, Any], data: dict[str, Any]
+    cp_ppc: dict[str, Any], ncp_ppc: dict[str, Any], data: MockData
 ) -> None:
     ppc_df = pd.DataFrame()
 
     for ppc, model in zip([ncp_ppc, cp_ppc], ["non-centered", "centered"]):
         df = pd.DataFrame(ppc["y"])
         df.columns = [f"y{i}" for i in df.columns]
-        df = df.pivot_longer(names_to="y", values_to="value").assign(model=model)
+        df = (
+            df.reset_index()
+            .pivot_longer(index="index", names_to="y", values_to="value")
+            .assign(model=model)
+        )
         ppc_df = pd.concat([ppc_df, df])
 
-    data_df = pd.DataFrame(
-        {"y": [f"y{i}" for i in range(data["K"])], "value": data["y"]}
-    )
+    data_df = pd.DataFrame({"y": [f"y{i}" for i in range(data.K)], "value": data.y})
 
     ax = sns.violinplot(
         data=ppc_df,
@@ -640,23 +664,18 @@ data = generate_data(N=N, K=K, indiv_idx=indiv_idx, sigma=0.1)
 pprint(data)
 ```
 
-    {'K': 9,
-     'N': 9,
-     'idx': array([0, 1, 2, 3, 4, 5, 6, 7, 8]),
-     'mu': 4.5,
-     'sigma': 0.1,
-     'tau': 3.5,
-     'theta': array([ 6.91283813,  4.38900749,  6.83818764,  6.21093237,  2.12074111,
-           -0.07617784,  9.64606529,  0.19140465,  7.85571339]),
-     'y': array([ 6.98688709,  4.45933654,  6.83083539,  6.08350102,  2.09762541,
-           -0.02566351,  9.69733848,  0.32184067,  7.92877661])}
+    MockData(N=9, K=9, sigma=0.1, mu=4.5, tau=3.5, theta=array([ 6.91283813,  4.38900749,  6.83818764,  6.21093237,  2.12074111,
+           -0.07617784,  9.64606529,  0.19140465,  7.85571339]), idx=array([0, 1, 2, 3, 4, 5, 6, 7, 8]), y=array([ 6.98688709,  4.45933654,  6.83083539,  6.08350102,  2.09762541,
+           -0.02566351,  9.69733848,  0.32184067,  7.92877661]))
 
 ```python
-df = pd.DataFrame({"y": data["y"], "k": data["idx"].astype(str)})
-sns.scatterplot(data=df, x="k", y="y");
+df = pd.DataFrame({"y": data.y, "k": data.idx.astype(str)})
+sns.scatterplot(data=df, x="k", y="y")
 ```
 
-![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_42_0.png)
+    <AxesSubplot:xlabel='k', ylabel='y'>
+
+![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_42_1.png)
 
 #### Monolithically centered parameterization
 
@@ -686,10 +705,10 @@ cp_trace, cp_y_post_pred = centered_model(data)
         }
     </style>
   <progress value='44000' class='' max='44000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [44000/44000 00:57<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [44000/44000 00:35<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 1_000 tune and 10_000 draw iterations (4_000 + 40_000 draws total) took 75 seconds.
+    Sampling 4 chains for 1_000 tune and 10_000 draw iterations (4_000 + 40_000 draws total) took 59 seconds.
 
 <div>
     <style>
@@ -705,7 +724,7 @@ cp_trace, cp_y_post_pred = centered_model(data)
         }
     </style>
   <progress value='40000' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [40000/40000 00:32<00:00]
+  100.00% [40000/40000 00:23<00:00]
 </div>
 
 There are no divergences and the BFMI values are near 1 for every chain.
@@ -719,17 +738,22 @@ az.bfmi(cp_trace)
 The traces look great and the posterior distributions for the population parameters are very smooth.
 
 ```python
-az.plot_trace(cp_trace, ["mu", "tau"], compact=False, combined=False);
+az.plot_trace(cp_trace, ["mu", "tau"], compact=False, combined=False)
 ```
 
-![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_48_0.png)
+    array([[<AxesSubplot:title={'center':'mu'}>,
+            <AxesSubplot:title={'center':'mu'}>],
+           [<AxesSubplot:title={'center':'tau'}>,
+            <AxesSubplot:title={'center':'tau'}>]], dtype=object)
+
+![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_48_1.png)
 
 Lastly, there are no funnels to be seen.
 Instead, the distributions are very tight because of the small values of $\sigma$.
 
 ```python
 theta_tau_post_df = get_dispersion_and_individual_posteriors_tidy(
-    cp_trace, "tau", "theta", data["K"]
+    cp_trace, "tau", "theta", data.K
 )
 
 plot_funnels(theta_tau_post_df, min_y=-2)
@@ -765,10 +789,10 @@ ncp_trace, ncp_y_post_pred = noncentered_model(data)
         }
     </style>
   <progress value='44000' class='' max='44000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [44000/44000 04:53<00:00 Sampling 4 chains, 0 divergences]
+  100.00% [44000/44000 03:13<00:00 Sampling 4 chains, 0 divergences]
 </div>
 
-    Sampling 4 chains for 1_000 tune and 10_000 draw iterations (4_000 + 40_000 draws total) took 313 seconds.
+    Sampling 4 chains for 1_000 tune and 10_000 draw iterations (4_000 + 40_000 draws total) took 215 seconds.
     The number of effective samples is smaller than 10% for some parameters.
 
 <div>
@@ -785,7 +809,7 @@ ncp_trace, ncp_y_post_pred = noncentered_model(data)
         }
     </style>
   <progress value='40000' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [40000/40000 01:24<00:00]
+  100.00% [40000/40000 00:52<00:00]
 </div>
 
 The BFMI is lower than the centered parameterization, but not worryingly low.
@@ -815,10 +839,15 @@ The trace plots for the population parameters are not as well-shaped as with the
 This is also highlighted by the increased autocorrelation in the chains of the non-centered model.
 
 ```python
-az.plot_trace(ncp_trace, ["mu", "tau"], compact=False, combined=False);
+az.plot_trace(ncp_trace, ["mu", "tau"], compact=False, combined=False)
 ```
 
-![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_58_0.png)
+    array([[<AxesSubplot:title={'center':'mu'}>,
+            <AxesSubplot:title={'center':'mu'}>],
+           [<AxesSubplot:title={'center':'tau'}>,
+            <AxesSubplot:title={'center':'tau'}>]], dtype=object)
+
+![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_58_1.png)
 
 ```python
 for t, model in zip([cp_trace, ncp_trace], ["centered", "non-centered"]):
@@ -840,10 +869,10 @@ The shape is not as severe as in the pathological case with the centered model b
 
 ```python
 theta_tau_post_df_ncp = get_dispersion_and_individual_posteriors_tidy(
-    ncp_trace, "tau", "theta", data["K"]
+    ncp_trace, "tau", "theta", data.K
 )
 eta_tau_post_df_ncp = get_dispersion_and_individual_posteriors_tidy(
-    ncp_trace, "tau", "eta", data["K"]
+    ncp_trace, "tau", "eta", data.K
 )
 plot_funnels(eta_tau_post_df_ncp, x="eta", min_y=-2)
 ```
@@ -856,10 +885,12 @@ The partial pooling pushes the posterior away from small and large values of $\t
 ncp_population_post = pd.DataFrame(
     {v: ncp_trace.posterior[v].values.flatten() for v in ["mu", "tau"]}
 ).assign(log_tau=lambda d: np.log(d.tau))
-sns.jointplot(data=ncp_population_post, x="mu", y="log_tau");
+sns.jointplot(data=ncp_population_post, x="mu", y="log_tau")
 ```
 
-![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_63_0.png)
+    <seaborn.axisgrid.JointGrid at 0x15b6bc940>
+
+![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_63_1.png)
 
 Below is a comparison of the relationship between the population dispersion $\tau$ and individual parameters $\theta$ between the centered (blue) and non-centered (red, underneath) models.
 There really isn't too much of a difference in this case, though we should still be careful because we know some of the posteriors for $\eta$ in the non-centered model demonstrated some inverted-funnel geometry.
@@ -873,7 +904,7 @@ plot_overlapping_funnels(theta_tau_post_df, theta_tau_post_df_ncp, min_y=-2)
 The posteriors for $\tau$ are also almost identical and quite accurate.
 
 ```python
-plot_prior_against_tau_post(cp_trace, ncp_trace, data["tau"])
+plot_prior_against_tau_post(cp_trace, ncp_trace, data.tau)
 ```
 
 ![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_67_0.png)
@@ -905,11 +936,13 @@ data = generate_data(N=N, K=K, indiv_idx=indiv_idx, sigma=sigma)
 ```
 
 ```python
-df = pd.DataFrame({"idx": data["idx"], "y": data["y"]})
-sns.stripplot(data=df, x="idx", y="y", alpha=0.4, dodge=True);
+df = pd.DataFrame({"idx": data.idx, "y": data.y})
+sns.stripplot(data=df, x="idx", y="y", alpha=0.4, dodge=True)
 ```
 
-![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_72_0.png)
+    <AxesSubplot:xlabel='idx', ylabel='y'>
+
+![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_72_1.png)
 
 #### Monolithically centered parameterization
 
@@ -939,10 +972,10 @@ cp_trace, cp_y_post_pred = centered_model(data)
         }
     </style>
   <progress value='44000' class='' max='44000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [44000/44000 01:24<00:00 Sampling 4 chains, 7 divergences]
+  100.00% [44000/44000 00:54<00:00 Sampling 4 chains, 7 divergences]
 </div>
 
-    Sampling 4 chains for 1_000 tune and 10_000 draw iterations (4_000 + 40_000 draws total) took 106 seconds.
+    Sampling 4 chains for 1_000 tune and 10_000 draw iterations (4_000 + 40_000 draws total) took 76 seconds.
     There was 1 divergence after tuning. Increase `target_accept` or reparameterize.
     There were 4 divergences after tuning. Increase `target_accept` or reparameterize.
     There were 2 divergences after tuning. Increase `target_accept` or reparameterize.
@@ -961,7 +994,7 @@ cp_trace, cp_y_post_pred = centered_model(data)
         }
     </style>
   <progress value='40000' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [40000/40000 00:31<00:00]
+  100.00% [40000/40000 00:23<00:00]
 </div>
 
 The BFMI is lower than when all cases are uniformly well-informed, but it is not at problematic levels, yet.
@@ -975,16 +1008,21 @@ az.bfmi(cp_trace)
 Overall, the posteriors for the population parameters look smooth, but there are some troubling divergences.
 
 ```python
-az.plot_trace(cp_trace, ["mu", "tau"], compact=False, combined=False);
+az.plot_trace(cp_trace, ["mu", "tau"], compact=False, combined=False)
 ```
 
-![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_78_0.png)
+    array([[<AxesSubplot:title={'center':'mu'}>,
+            <AxesSubplot:title={'center':'mu'}>],
+           [<AxesSubplot:title={'center':'tau'}>,
+            <AxesSubplot:title={'center':'tau'}>]], dtype=object)
+
+![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_78_1.png)
 
 We can see that these divergences occur within the funnels of the weakly-informed individuals.
 
 ```python
 theta_tau_post_df = get_dispersion_and_individual_posteriors_tidy(
-    cp_trace, "tau", "theta", data["K"]
+    cp_trace, "tau", "theta", data.K
 )
 
 plot_funnels(theta_tau_post_df, min_y=-2)
@@ -1019,10 +1057,10 @@ ncp_trace, ncp_y_post_pred = noncentered_model(data)
         }
     </style>
   <progress value='44000' class='' max='44000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [44000/44000 03:15<00:00 Sampling 4 chains, 63 divergences]
+  100.00% [44000/44000 01:58<00:00 Sampling 4 chains, 63 divergences]
 </div>
 
-    Sampling 4 chains for 1_000 tune and 10_000 draw iterations (4_000 + 40_000 draws total) took 217 seconds.
+    Sampling 4 chains for 1_000 tune and 10_000 draw iterations (4_000 + 40_000 draws total) took 140 seconds.
     There were 5 divergences after tuning. Increase `target_accept` or reparameterize.
     There were 52 divergences after tuning. Increase `target_accept` or reparameterize.
     There were 6 divergences after tuning. Increase `target_accept` or reparameterize.
@@ -1042,7 +1080,7 @@ ncp_trace, ncp_y_post_pred = noncentered_model(data)
         }
     </style>
   <progress value='40000' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [40000/40000 01:24<00:00]
+  100.00% [40000/40000 01:02<00:00]
 </div>
 
 Interestingly, the BFMI values are very similar to those from the centered model.
@@ -1058,21 +1096,26 @@ There are a lot of divergences here, primarily at the extremes of the population
 In particular, most of the divergences are at high values of the population dispersion $\tau$ which represents the top of the inverted funnel.
 
 ```python
-az.plot_trace(ncp_trace, ["mu", "tau"], compact=False, combined=False);
+az.plot_trace(ncp_trace, ["mu", "tau"], compact=False, combined=False)
 ```
 
-![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_86_0.png)
+    array([[<AxesSubplot:title={'center':'mu'}>,
+            <AxesSubplot:title={'center':'mu'}>],
+           [<AxesSubplot:title={'center':'tau'}>,
+            <AxesSubplot:title={'center':'tau'}>]], dtype=object)
+
+![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_86_1.png)
 
 We can see some inverted funnel geometries in the plot below, particularly for the strongly-informed individual distributions $k=2$ and $k=6$.
 Note that the divergent steps (orange) are right at the tip of the inverted funnels.
 
 ```python
 theta_tau_post_df_ncp = get_dispersion_and_individual_posteriors_tidy(
-    ncp_trace, "tau", "theta", data["K"]
+    ncp_trace, "tau", "theta", data.K
 )
 
 eta_tau_post_df_ncp = get_dispersion_and_individual_posteriors_tidy(
-    ncp_trace, "tau", "eta", data["K"]
+    ncp_trace, "tau", "eta", data.K
 )
 plot_funnels(eta_tau_post_df_ncp, x="eta", min_y=-2)
 ```
@@ -1083,10 +1126,12 @@ plot_funnels(eta_tau_post_df_ncp, x="eta", min_y=-2)
 ncp_population_post = pd.DataFrame(
     {v: ncp_trace.posterior[v].values.flatten() for v in ["mu", "tau"]}
 ).assign(log_tau=lambda d: np.log(d.tau))
-sns.jointplot(data=ncp_population_post, x="mu", y="log_tau");
+sns.jointplot(data=ncp_population_post, x="mu", y="log_tau")
 ```
 
-![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_89_0.png)
+    <seaborn.axisgrid.JointGrid at 0x15bf46520>
+
+![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_89_1.png)
 
 The distributions of the population dispersion $\tau$ and individual parameter $\theta$ are very similar between the two models.
 
@@ -1097,7 +1142,7 @@ plot_overlapping_funnels(theta_tau_post_df, theta_tau_post_df_ncp, min_y=-2)
 ![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_91_0.png)
 
 ```python
-plot_prior_against_tau_post(cp_trace, ncp_trace, data["tau"])
+plot_prior_against_tau_post(cp_trace, ncp_trace, data.tau)
 ```
 
 ![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_92_0.png)
@@ -1114,7 +1159,7 @@ The elements of the list were then concatenated into the model variable `theta` 
 
 ```python
 def mixed_parameterization(
-    d: dict[str, Any],
+    d: MockData,
     cp_idx: np.ndarray,
     ncp_idx: np.ndarray,
     draws: int = 10000,
@@ -1130,7 +1175,7 @@ def mixed_parameterization(
         eta_ncp = pm.Normal("eta_ncp", 0, 1, shape=n_ncp)
         theta_ncp = pm.Deterministic("theta_ncp", mu + tau * eta_ncp)
 
-        _theta = list(range(d["K"]))
+        _theta = list(range(d.K))
         for i, t in enumerate(cp_idx):
             _theta[t] = theta_cp[i]
         for i, t in enumerate(ncp_idx):
@@ -1138,7 +1183,7 @@ def mixed_parameterization(
 
         theta = pm.Deterministic("theta", pm.math.stack(_theta))
 
-        y = pm.Normal("y", theta[d["idx"]], d["sigma"], observed=d["y"])
+        y = pm.Normal("y", theta[d.idx], d.sigma, observed=d.y)
 
         trace = pm.sample(
             draws=draws,
@@ -1149,6 +1194,7 @@ def mixed_parameterization(
             random_seed=RANDOM_SEED,
             target_accept=0.95,
         )
+        assert isinstance(trace, az.InferenceData)
         y_post_pred = pm.sample_posterior_predictive(
             trace=trace, random_seed=RANDOM_SEED
         )
@@ -1183,10 +1229,10 @@ mixp_model, mixp_trace, mixp_post_pred = mixed_parameterization(
         }
     </style>
   <progress value='44000' class='' max='44000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [44000/44000 02:03<00:00 Sampling 4 chains, 6 divergences]
+  100.00% [44000/44000 01:02<00:00 Sampling 4 chains, 6 divergences]
 </div>
 
-    Sampling 4 chains for 1_000 tune and 10_000 draw iterations (4_000 + 40_000 draws total) took 147 seconds.
+    Sampling 4 chains for 1_000 tune and 10_000 draw iterations (4_000 + 40_000 draws total) took 87 seconds.
     There was 1 divergence after tuning. Increase `target_accept` or reparameterize.
     There were 3 divergences after tuning. Increase `target_accept` or reparameterize.
     There was 1 divergence after tuning. Increase `target_accept` or reparameterize.
@@ -1206,7 +1252,7 @@ mixp_model, mixp_trace, mixp_post_pred = mixed_parameterization(
         }
     </style>
   <progress value='40000' class='' max='40000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [40000/40000 02:21<00:00]
+  100.00% [40000/40000 01:00<00:00]
 </div>
 
 ```python
@@ -1228,10 +1274,15 @@ az.bfmi(cp_trace), az.bfmi(ncp_trace), az.bfmi(mixp_trace)
 Also, the trace plots looks fine to me.
 
 ```python
-az.plot_trace(mixp_trace, ["mu", "tau"], compact=False, combined=False);
+az.plot_trace(mixp_trace, ["mu", "tau"], compact=False, combined=False)
 ```
 
-![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_100_0.png)
+    array([[<AxesSubplot:title={'center':'mu'}>,
+            <AxesSubplot:title={'center':'mu'}>],
+           [<AxesSubplot:title={'center':'tau'}>,
+            <AxesSubplot:title={'center':'tau'}>]], dtype=object)
+
+![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_100_1.png)
 
 Lastly, the step sizes are back to the large and fast steps of the centered parameterization.
 
@@ -1279,10 +1330,12 @@ def make_population_post_df(t: az.InferenceData) -> pd.DataFrame:
 
 ```python
 mixp_population_post = make_population_post_df(mixp_trace)
-sns.jointplot(data=mixp_population_post, x="mu", y="log_tau");
+sns.jointplot(data=mixp_population_post, x="mu", y="log_tau")
 ```
 
-![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_108_0.png)
+    <seaborn.axisgrid.JointGrid at 0x15e52f910>
+
+![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_108_1.png)
 
 The following plot shows the relationship between the population dispersion $\tau$ adn centrality $\mu$ for the centered (left), non-centered (middle), and mixed (right) parameterizations.
 We can see that the exploration of lower values of $\tau$ was more successful in the non-centered and mixed parameterizations than in the centered model.
@@ -1297,10 +1350,12 @@ pop_post_df = pd.concat(
     ]
 )
 
-sns.relplot(data=pop_post_df, x="mu", y="log_tau", hue="model", col="model");
+sns.relplot(data=pop_post_df, x="mu", y="log_tau", hue="model", col="model")
 ```
 
-![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_110_0.png)
+    <seaborn.axisgrid.FacetGrid at 0x15eac42e0>
+
+![png](999_032_mixed-centered-parameterization-pymc3-model_files/999_032_mixed-centered-parameterization-pymc3-model_110_1.png)
 
 ## Conclusions
 
@@ -1315,29 +1370,30 @@ I have only replicated the examples that Betancourt presented and briefly includ
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2021-07-16
+    Last updated: 2021-12-08
 
     Python implementation: CPython
-    Python version       : 3.9.2
-    IPython version      : 7.21.0
+    Python version       : 3.9.7
+    IPython version      : 7.30.1
 
-    Compiler    : Clang 11.0.1
+    Compiler    : Clang 11.1.0
     OS          : Darwin
-    Release     : 20.4.0
+    Release     : 20.6.0
     Machine     : x86_64
     Processor   : i386
     CPU cores   : 4
     Architecture: 64bit
 
-    Hostname: JHCookMac.local
+    Hostname: JHCookMac
 
-    Git branch: mixed-parameterization
+    Git branch: refactor-stan
 
-    arviz     : 0.11.2
-    pymc3     : 3.11.1
-    numpy     : 1.20.1
-    plotnine  : 0.8.0
-    matplotlib: 3.3.4
-    janitor   : 0.20.14
-    seaborn   : 0.11.1
-    pandas    : 1.2.3
+    pymc3     : 3.11.4
+    numpy     : 1.21.4
+    pandas    : 1.3.4
+    seaborn   : 0.11.2
+    sys       : 3.9.7 | packaged by conda-forge | (default, Sep 29 2021, 20:33:18)
+    [Clang 11.1.0 ]
+    arviz     : 0.11.4
+    janitor   : 0.22.0
+    matplotlib: 3.5.0

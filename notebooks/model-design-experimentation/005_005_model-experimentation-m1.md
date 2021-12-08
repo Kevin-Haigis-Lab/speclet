@@ -1,7 +1,5 @@
 ```python
-import string
 import warnings
-from itertools import product
 from time import time
 
 import arviz as az
@@ -10,15 +8,14 @@ import numpy as np
 import pandas as pd
 import plotnine as gg
 import pymc3 as pm
-import seaborn as sns
-from numpy.random import exponential, normal
+from numpy.random import normal
 
 notebook_tic = time()
 
 warnings.simplefilter(action="ignore", category=UserWarning)
 
 gg.theme_set(gg.theme_minimal())
-%config InlineBackend.figure_format = 'retina'
+%config InlineBackend.figure_format = "retina"
 
 RANDOM_SEED = 103
 ```

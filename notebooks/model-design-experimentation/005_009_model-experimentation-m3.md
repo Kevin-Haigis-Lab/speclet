@@ -4,14 +4,9 @@ import warnings
 from itertools import product
 from time import time
 
-import arviz as az
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotnine as gg
-import pymc3 as pm
-import seaborn as sns
-from numpy.random import exponential, normal
 
 notebook_tic = time()
 

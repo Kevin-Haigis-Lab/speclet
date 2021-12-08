@@ -79,6 +79,8 @@ sigma_dists = pd.DataFrame(
     <ggplot: (8775666828743)>
 
 ```python
+from typing import List
+
 np.random.seed(RANDOM_SEED)
 
 # Real data parameters.
@@ -111,13 +113,13 @@ rna_data["rna"] = np.random.normal(0, 1, len(rna_data))
 for c in ["gene", "cell_line"]:
     rna_data[c] = pd.Categorical(rna_data[c])
 
-logfc_data = []
+logfc_data_list: List[pd.DataFrame] = []
 for i in range(num_logfc_datum):
     x = rna_data.copy()
     x["sgrna_idx"] = i
-    logfc_data.append(x)
+    logfc_data_list.append(x)
 
-logfc_data = pd.concat(logfc_data).reset_index(drop=True)
+logfc_data: pd.DataFrame = pd.concat(logfc_data_list).reset_index(drop=True)
 
 logfc_data["logfc"] = np.nan
 for i in range(len(logfc_data)):

@@ -1,8 +1,8 @@
 ```python
-import string
 import warnings
 from itertools import product
 from time import time
+from typing import Any
 
 import arviz as az
 import matplotlib.pyplot as plt
@@ -10,8 +10,7 @@ import numpy as np
 import pandas as pd
 import plotnine as gg
 import pymc3 as pm
-import seaborn as sns
-from numpy.random import exponential, normal, seed
+from numpy.random import normal, seed
 from theano import tensor as tt
 
 notebook_tic = time()
@@ -66,7 +65,7 @@ num_genes = 5
 num_sgrna_per_gene = list(range(1, num_genes + 1))
 num_sgrnas = sum(num_sgrna_per_gene)
 
-real_params = {
+real_params: dict[str, Any] = {
     "mu_gamma": -0.5,
     "sigma_gamma": 0.5,
     "sigma_alpha": 0.2,
@@ -77,7 +76,7 @@ real_params = {
 }
 
 
-def prefix_num(prefix, n):
+def prefix_num(prefix: str, n: int) -> list[str]:
     return [prefix + str(i) for i in range(n)]
 
 

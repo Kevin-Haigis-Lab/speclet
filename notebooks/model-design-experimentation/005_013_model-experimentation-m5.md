@@ -3,6 +3,7 @@ import string
 import warnings
 from itertools import product
 from time import time
+from typing import Any, Optional
 
 import arviz as az
 import matplotlib.pyplot as plt
@@ -10,8 +11,7 @@ import numpy as np
 import pandas as pd
 import plotnine as gg
 import pymc3 as pm
-import seaborn as sns
-from numpy.random import exponential, normal
+from numpy.random import normal
 
 notebook_tic = time()
 
@@ -64,7 +64,7 @@ num_sgrna_per_gene = list(range(1, num_genes + 1))  # Different number of guides
 num_sgRNA = sum(num_sgrna_per_gene)
 
 # Model parameters.
-real_params = {
+real_params: dict[str, Any] = {
     "mu_epsilon": -1,
     "sigma_epsilon": 1,
     "sigma_alpha": 0.1,
@@ -91,14 +91,19 @@ real_params["beta_c"] = normal(
 )
 
 
-def alphabet_list(n, prefix=""):
+def alphabet_list(n: int, prefix: str = "") -> list[str]:
     if n > len(string.ascii_uppercase):
         raise Exception(f"Max number of values is {len(string.ascii_uppercase)}")
     return [prefix + a for a in string.ascii_uppercase[:n]]
 
 
-def make_cat(df, col, categories=None, ordered=None):
-    df[col] = pd.Categorical(df[col], categories=categories)
+def make_cat(
+    df: pd.DataFrame,
+    col: str,
+    categories: Optional[list[str]] = None,
+    ordered: bool = True,
+) -> pd.DataFrame:
+    df[col] = pd.Categorical(df[col], categories=categories, ordered=ordered)
     return df
 
 
@@ -429,7 +434,7 @@ pm.model_to_graphviz(model5)
 ![svg](005_013_model-experimentation-m5_files/005_013_model-experimentation-m5_12_0.svg)
 
 ```python
-def plot_variable_prior(prior_check, var):
+def plot_variable_prior(prior_check: dict[str, np.ndarray], var: str) -> gg.ggplot:
     prior_df = prior_check[var]
     prior_df = pd.DataFrame(
         prior_df,

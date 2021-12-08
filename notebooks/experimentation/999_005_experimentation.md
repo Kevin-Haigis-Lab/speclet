@@ -5,6 +5,7 @@ import string
 import warnings
 from itertools import product
 from time import time
+from typing import Any, Dict
 
 import arviz as az
 import matplotlib.pyplot as plt
@@ -68,7 +69,7 @@ num_genes = 3
 n_experiments = 3
 
 # Model parameters.
-real_params = {
+real_params: Dict[str, Any] = {
     "mu_alpha": -1,
     "sigma_alpha": 0.5,
     "mu_beta": 0,

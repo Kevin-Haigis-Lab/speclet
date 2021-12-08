@@ -35,6 +35,7 @@ with pm.Model() as m1:
     trace_1 = pm.sample(draws=100, tune=100, random_seed=123, chains=1)
 ```
 
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_86142/3140635777.py:8: FutureWarning: In v4.0, pm.sample will return an `arviz.InferenceData` object instead of a `MultiTrace` by default. You can pass return_inferencedata=True or return_inferencedata=False to be safe and silence this warning.
     Only 100 samples in chain.
     Auto-assigning NUTS sampler...
     Initializing NUTS using jitter+adapt_diag...
@@ -55,11 +56,11 @@ with pm.Model() as m1:
         }
     </style>
   <progress value='200' class='' max='200' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [200/200 00:00<00:00 Sampling chain 0, 0 divergences]
+  100.00% [200/200 00:02<00:00 Sampling chain 0, 0 divergences]
 </div>
 
-    Sampling 1 chain for 100 tune and 100 draw iterations (100 + 100 draws total) took 1 seconds.
-    The acceptance probability does not match the target. It is 0.9258450554514255, but should be close to 0.8. Try to increase the number of tuning steps.
+    Sampling 1 chain for 100 tune and 100 draw iterations (100 + 100 draws total) took 3 seconds.
+    The acceptance probability does not match the target. It is 0.919247154574031, but should be close to 0.8. Try to increase the number of tuning steps.
     Only one chain was sampled, this makes it impossible to run some convergence checks
 
 ```python
@@ -73,7 +74,7 @@ with pm.Model() as m2:
     trace_2 = pm.sample(draws=100, tune=100, random_seed=456, chains=1)
 ```
 
-    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/pymc3/sampling.py:466: FutureWarning: In an upcoming release, pm.sample will return an `arviz.InferenceData` object instead of a `MultiTrace` by default. You can pass return_inferencedata=True or return_inferencedata=False to be safe and silence this warning.
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_86142/1162493465.py:8: FutureWarning: In v4.0, pm.sample will return an `arviz.InferenceData` object instead of a `MultiTrace` by default. You can pass return_inferencedata=True or return_inferencedata=False to be safe and silence this warning.
     Only 100 samples in chain.
     Auto-assigning NUTS sampler...
     Initializing NUTS using jitter+adapt_diag...
@@ -97,8 +98,8 @@ with pm.Model() as m2:
   100.00% [200/200 00:00<00:00 Sampling chain 0, 0 divergences]
 </div>
 
-    Sampling 1 chain for 100 tune and 100 draw iterations (100 + 100 draws total) took 1 seconds.
-    The acceptance probability does not match the target. It is 0.9277922483669314, but should be close to 0.8. Try to increase the number of tuning steps.
+    Sampling 1 chain for 100 tune and 100 draw iterations (100 + 100 draws total) took 0 seconds.
+    The acceptance probability does not match the target. It is 0.8927277827183024, but should be close to 0.8. Try to increase the number of tuning steps.
     Only one chain was sampled, this makes it impossible to run some convergence checks
 
 ```python
