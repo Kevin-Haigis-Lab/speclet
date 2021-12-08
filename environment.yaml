@@ -51,6 +51,7 @@ dependencies:
   - pytest-sugar
   - python-graphviz
   - requests
+  - rich
   - scikit-learn=1.0.*
   - scikit-misc
   - scipy=1.7.*

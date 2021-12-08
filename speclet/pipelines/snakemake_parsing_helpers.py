@@ -7,12 +7,7 @@ from pydantic import BaseModel, validate_arguments
 
 import speclet.model_configuration as model_config
 from speclet.model_configuration import ModelConfig
-from speclet.project_enums import (
-    ModelFitMethod,
-    ModelOption,
-    SpecletPipeline,
-    assert_never,
-)
+from speclet.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
 
 
 class ParsedPipelineInformation(BaseModel):
@@ -23,6 +18,7 @@ class ParsedPipelineInformation(BaseModel):
     fit_methods: list[str]
 
     def __len__(self) -> int:
+        """Number of models."""
         return len(self.models)
 
 
