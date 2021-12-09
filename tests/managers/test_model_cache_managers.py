@@ -7,7 +7,7 @@ import pymc3 as pm
 import pytest
 
 from speclet.managers.model_cache_managers import Pymc3ModelCacheManager
-from speclet.modeling import pymc3_sampling_api as pmapi
+from speclet.modeling import model_fitting_api as pmapi
 
 UNOBSERVED_VARS: tuple[str, str, str] = ("a", "b", "sigma")
 OBSERVED_VAR = "y"

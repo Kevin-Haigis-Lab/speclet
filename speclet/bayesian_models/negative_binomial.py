@@ -1,8 +1,10 @@
 """Simple negative binomial model."""
+
 from pathlib import Path
 from typing import Any, Final
 
 import pandas as pd
+import pymc3 as pm
 import stan
 from pandera import Column, DataFrameSchema
 from stan.model import Model as StanModel
@@ -12,16 +14,19 @@ from speclet.io import stan_models_dir
 
 
 class NegativeBinomialModel:
+    """Negative binomial generalized linear model."""
 
     _stan_code: Final[Path] = stan_models_dir() / "negative_binomial.stan"
 
     def __init__(self) -> None:
+        """Create a negative binomial Bayesian model object."""
         assert self._stan_code.exists(), "Cannot find Stan code."
         assert self._stan_code.is_file(), "Path to Stan code is not a file."
         return None
 
     @property
     def data_schema(self) -> DataFrameSchema:
+        """Expected data schema for this model."""
         return DataFrameSchema(
             {
                 "counts_initial_adj": Column(
@@ -41,12 +46,30 @@ class NegativeBinomialModel:
             "ct_final": data.counts_final.values,
         }
 
-    def stan_mcmc(
+    def stan_model(
         self,
         data: pd.DataFrame,
     ) -> StanModel:
+        """Stan model for a simple negative binomial model.
+
+        Args:
+            data (pd.DataFrame): Data to model.
+
+        Returns:
+            StanModel: Stan model.
+        """
         stan_data = self._validate_data(data).pipe(self._make_data_structure)
         return stan.build(str(self._stan_code), data=stan_data)
 
-    def __call__(self, data: pd.DataFrame) -> StanModel:
-        return self.stan_mcmc(data=data)
+    def pymc3_model(self, data: pd.DataFrame) -> pm.Model:
+        """PyMC3  model for a simple negative binomial model.
+
+        Not implemented.
+
+        Args:
+            data (pd.DataFrame): Data to model.
+
+        Returns:
+            pm.Model: PyMC3 model.
+        """
+        raise NotImplementedError()

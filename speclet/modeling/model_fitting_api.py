@@ -3,15 +3,32 @@
 """Standardization of the interactions with PyMC3 sampling."""
 
 from dataclasses import dataclass
-from typing import Any, Callable, Literal, Optional
+from typing import Any, Callable, Optional
 
 import arviz as az
 import numpy as np
+import pandas as pd
 import pymc3 as pm
+from pydantic import BaseModel
+from stan.model import Model as StanModel
 
+from speclet.bayesian_models import BayesianModelProtocol
 from speclet.loggers import logger
+from speclet.modeling.fitting_arguments import (
+    ModelingSamplingArguments,
+    StanMCMCSamplingArguments,
+)
+from speclet.project_enums import ModelFitMethod, assert_never
+from speclet.types import VIMethod
 
-#### ---- Result Types ---- ####
+
+def _get_kwargs_dict(data: Optional[BaseModel]) -> dict[str, Any]:
+    if data is None:
+        return {}
+    return data.dict()
+
+
+# ---- Result Types ---- #
 
 
 @dataclass
@@ -22,7 +39,7 @@ class ApproximationSamplingResults:
     approximation: pm.Approximation
 
 
-#### ---- Interface with PyMC3 ---- ####
+# ---- Interface with PyMC3 ---- #
 
 
 def _insert_random_seed_into_kwargs(
@@ -94,9 +111,6 @@ def pymc3_sampling_procedure(
     return trace
 
 
-VIMethod = Literal["advi", "fullrank_advi", "svgd", "asvgd", "nfvi", "nfv"]
-
-
 def pymc3_advi_approximation_procedure(
     model: pm.Model,
     method: VIMethod = "advi",
@@ -148,3 +162,64 @@ def pymc3_advi_approximation_procedure(
 
     _extend_trace_with_prior_and_posterior(trace, prior=prior_pred, post=post_pred)
     return ApproximationSamplingResults(inference_data=trace, approximation=approx)
+
+
+# --- Interface with Stan --- #
+
+
+def fit_stan_mcmc(
+    stan_model: StanModel, sampling_kwargs: Optional[StanMCMCSamplingArguments]
+) -> az.InferenceData:
+    """Fit a Stan model.
+
+    Args:
+        stan_model (StanModel): The Stan model to fit.
+        sampling_kwargs (Optional[StanMCMCSamplingArguments]): Optional fitting keyword
+        arguments.
+
+    Returns:
+        az.InferenceData: Model posterior draws.
+    """
+    kwargs = _get_kwargs_dict(sampling_kwargs)
+    post = stan_model.sample(**kwargs)
+
+    # TODO: add in data for posterior predictive, coordinates, etc.
+
+    return az.from_pystan(posterior=post, posterior_model=stan_model)
+
+
+# ---- Dispatching ---- #
+
+
+def fit_model(
+    model: BayesianModelProtocol,
+    data: pd.DataFrame,
+    fit_method: ModelFitMethod,
+    sampling_kwargs: Optional[ModelingSamplingArguments],
+) -> az.InferenceData:
+    """Fit a model using a specified method.
+
+    Only implemented for Stan MCMC at the moment...
+
+    Args:
+        model (BayesianModelProtocol): Bayesian model to fit.
+        data (pd.DataFrame): CRISPR screen data to use.
+        fit_method (ModelFitMethod): Fitting method.
+        sampling_kwargs (Optional[ModelingSamplingArguments]): Optional sampling keyword
+        arguments.
+
+    Returns:
+        az.InferenceData: Model posterior.
+    """
+    if fit_method is ModelFitMethod.STAN_MCMC:
+        stan_model = model.stan_model(data)
+        kwargs = None
+        if sampling_kwargs is not None:
+            kwargs = sampling_kwargs.stan_mcmc
+        return fit_stan_mcmc(stan_model, sampling_kwargs=kwargs)
+    elif fit_method is ModelFitMethod.PYMC3_MCMC:
+        raise NotImplementedError(fit_method.value)
+    elif fit_method is ModelFitMethod.PYMC3_ADVI:
+        raise NotImplementedError(fit_method.value)
+    else:
+        assert_never(fit_method)

@@ -11,7 +11,7 @@ from speclet import project_enums
 from speclet.bayesian_models.speclet_pipeline_test_model import SpecletTestModel
 from speclet.command_line_interfaces import simulation_based_calibration_cli as sbc_cli
 from speclet.misc.test_helpers import assert_dicts
-from speclet.modeling.pymc3_sampling_api import ApproximationSamplingResults
+from speclet.modeling.model_fitting_api import ApproximationSamplingResults
 from speclet.modeling.simulation_based_calibration_helpers import (
     SBCFileManager,
     SBCResults,
@@ -93,7 +93,7 @@ def test_cache_files_are_removed_if_final_check_fails(
         sbc_cli.run_sbc(
             "my-test-model",
             config_path=mock_model_config,
-            fit_method=ModelFitMethod.MCMC,
+            fit_method=ModelFitMethod.PYMC3_MCMC,
             cache_dir=tmp_path,
             sim_number=1,
             data_size=MockDataSize.SMALL,
@@ -112,9 +112,9 @@ def test_cache_files_are_removed_if_final_check_fails(
 @pytest.mark.parametrize(
     "fit_method, expected_kwargs",
     [
-        (ModelFitMethod.ADVI, {"n_iterations": 100}),
+        (ModelFitMethod.PYMC3_ADVI, {"n_iterations": 100}),
         (
-            ModelFitMethod.MCMC,
+            ModelFitMethod.PYMC3_MCMC,
             {"prior_pred_samples": 50, "sample_kwargs": {"target_accept": 0.83}},
         ),
     ],
@@ -219,14 +219,16 @@ def test_check_sbc_results_fails_without_sampling_statistics(
     setup_mock_sbc_results(tmp_path, mod_ce)
 
     check = sbc_cli._check_sbc_results(tmp_path, fit_method=fit_method)
-    if fit_method is ModelFitMethod.ADVI:
+    if fit_method is ModelFitMethod.PYMC3_ADVI:
         assert check.result
         assert check.message == ""
         assert check.sbc_file_manager is not None
-    elif fit_method is ModelFitMethod.MCMC:
+    elif fit_method is ModelFitMethod.PYMC3_MCMC:
         assert not check.result
         assert check.message == "No sampling statistics."
         assert check.sbc_file_manager is not None
+    elif fit_method is ModelFitMethod.STAN_MCMC:
+        raise NotImplementedError(fit_method.value)
     else:
         project_enums.assert_never(fit_method)
 
@@ -249,13 +251,15 @@ def test_check_sbc_results_fails_with_sampling_stats_wrong_type(
     monkeypatch.setattr(SBCFileManager, "get_sbc_results", mock_sbc_results)
 
     check = sbc_cli._check_sbc_results(tmp_path, fit_method=fit_method)
-    if fit_method is ModelFitMethod.ADVI:
+    if fit_method is ModelFitMethod.PYMC3_ADVI:
         assert check.result
         assert check.message == ""
         assert check.sbc_file_manager is not None
-    elif fit_method is ModelFitMethod.MCMC:
+    elif fit_method is ModelFitMethod.PYMC3_MCMC:
         assert not check.result
         assert check.message == "Sampling statistics is not a xarray.Dataset."
         assert check.sbc_file_manager is not None
+    elif fit_method is ModelFitMethod.STAN_MCMC:
+        raise NotImplementedError(fit_method.value)
     else:
         project_enums.assert_never(fit_method)

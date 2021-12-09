@@ -10,8 +10,9 @@ from typing import NoReturn
 class ModelFitMethod(Enum):
     """Available fit methods."""
 
-    ADVI = "ADVI"
-    MCMC = "MCMC"
+    STAN_MCMC = "STAN_MCMC"
+    PYMC3_MCMC = "PYMC3_MCMC"
+    PYMC3_ADVI = "PYMC3_ADVI"
 
 
 @unique
@@ -20,23 +21,6 @@ class ModelParameterization(Enum):
 
     CENTERED = "centered"
     NONCENTERED = "noncentered"
-
-
-@unique
-class ModelOption(Enum):
-    """Model options."""
-
-    SPECLET_TEST_MODEL = "speclet-test-model"
-    SPECLET_SIMPLE = "speclet-simple"
-    CRC_CERES_MIMIC = "crc-ceres-mimic"
-    SPECLET_ONE = "speclet-one"
-    SPECLET_TWO = "speclet-two"
-    SPECLET_FOUR = "speclet-four"
-    SPECLET_FIVE = "speclet-five"
-    SPECLET_SIX = "speclet-six"
-    SPECLET_SEVEN = "speclet-seven"
-    SPECLET_EIGHT = "speclet-eight"
-    SPECLET_NINE = "speclet-nine"
 
 
 #### ---- SLURM and pipelines ---- ####
