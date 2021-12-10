@@ -12,15 +12,15 @@ import seaborn as sns
 from hypothesis import HealthCheck, Verbosity, settings
 
 import speclet.managers.data_managers
-from speclet.io import data_io
-from speclet.io.data_io import DataFile
+from speclet import io
+from speclet.io import DataFile
 
 TEST_DATA: Final[Path] = Path("tests", "depmap_test_data.csv")
 
 # ---- Test data ----
 
 
-def test_data_path(to: Union[str, data_io.DataFile]) -> Path:
+def test_data_path(to: Union[str, DataFile]) -> Path:
     """Path a to a data file.
 
     Args:
@@ -30,7 +30,7 @@ def test_data_path(to: Union[str, data_io.DataFile]) -> Path:
         Path: Path to the file.
     """
     if isinstance(to, str):
-        to = data_io.DataFile(to)
+        to = DataFile(to)
 
     if to in {
         DataFile.DEPMAP_CRC,
@@ -40,7 +40,7 @@ def test_data_path(to: Union[str, data_io.DataFile]) -> Path:
     }:
         return TEST_DATA
 
-    return data_io.modeling_data_dir() / to.value
+    return io.modeling_data_dir() / to.value
 
 
 mp = pytest.MonkeyPatch()

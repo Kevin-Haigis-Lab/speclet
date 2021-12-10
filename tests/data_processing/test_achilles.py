@@ -149,7 +149,7 @@ def my_arrays(draw: Callable, min_size: int = 1) -> np.ndarray:
 @given(my_arrays())
 def test_zscale_rna_expression(rna_expr_ary: np.ndarray) -> None:
     df = pd.DataFrame({"rna_expr": rna_expr_ary})
-    note(df)
+    note(str(df))
     df_z = achelp.zscale_rna_expression(df, "rna_expr", new_col="rna_expr_z")
     assert df_z["rna_expr_z"].mean() == pytest.approx(0.0, abs=0.01)
 
@@ -167,7 +167,7 @@ def test_zscale_rna_expression_with_bounds(
     rna_expr_ary: list[float], lower_bound: float, upper_bound: float
 ) -> None:
     df = pd.DataFrame({"rna_expr": rna_expr_ary})
-    note(df)
+    note(str(df))
     df_z = achelp.zscale_rna_expression(
         df,
         "rna_expr",
@@ -222,10 +222,13 @@ def mock_gene_data() -> pd.DataFrame:
             gene_list.append(gene)
             sgrna_list.append(make_mock_sgrna(20))
 
-    df = pd.DataFrame({"hugo_symbol": gene_list, "sgrna": sgrna_list}, dtype="category")
+    df: pd.DataFrame = pd.DataFrame(
+        {"hugo_symbol": gene_list, "sgrna": sgrna_list}, dtype="category"
+    )
     df = pd.concat([df] + [df.sample(frac=0.75) for _ in range(10)])
     df = df.sample(frac=1.0)
     df["y"] = np.random.randn(len(df))
+    assert isinstance(df, pd.DataFrame)
     return df
 
 
@@ -386,8 +389,8 @@ def test_make_kras_mutation_index_with_other_colnames() -> None:
 
 def test_data_batch_indices(example_achilles_data: pd.DataFrame) -> None:
     bi = achelp.data_batch_indices(example_achilles_data)
-    n_sources = len(example_achilles_data["screen"].values.unique())
-    n_batches = len(example_achilles_data["p_dna_batch"].values.unique())
+    n_sources = len(example_achilles_data["screen"].unique())
+    n_batches = len(example_achilles_data["p_dna_batch"].unique())
     assert bi.n_screens == n_sources
     assert bi.n_batches == n_batches
 

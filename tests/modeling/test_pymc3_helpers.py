@@ -2,6 +2,7 @@ import arviz as az
 import pandas as pd
 import pymc3 as pm
 import pytest
+from pymc3.model import DeterministicWrapper, FreeRV
 from seaborn import load_dataset
 from theano import tensor as tt
 
@@ -103,12 +104,12 @@ def test_hierarchical_normal(centered: bool) -> None:
 
     if centered:
         assert a.dshape == (2, 5)
-        assert isinstance(a, pm.model.FreeRV)
+        assert isinstance(a, FreeRV)
         with pytest.raises(KeyError):
             _ = m["Δ_var-name"]
     else:
         assert m["Δ_var-name"].dshape == (2, 5)
-        assert isinstance(a, pm.model.DeterministicWrapper)
+        assert isinstance(a, DeterministicWrapper)
 
 
 @pytest.mark.parametrize("centered", (True, False))
@@ -126,13 +127,13 @@ def test_hierarchical_normal_with_avg(centered: bool) -> None:
     assert a.ndim == 1
 
     gamma = m["γ_var-name_other-var_bar"]
-    assert isinstance(gamma, pm.model.FreeRV)
+    assert isinstance(gamma, FreeRV)
 
     if centered:
         assert a.dshape == shape
-        assert isinstance(a, pm.model.FreeRV)
+        assert isinstance(a, FreeRV)
         with pytest.raises(KeyError):
             _ = m["Δ_var-name"]
     else:
         assert m["Δ_var-name"].dshape == shape
-        assert isinstance(a, pm.model.DeterministicWrapper)
+        assert isinstance(a, DeterministicWrapper)

@@ -15,8 +15,6 @@ from speclet.modeling import mock_data
 chars = list(ascii_letters) + [str(i) for i in (range(10))]
 
 
-#### ---- Test mock data generation ---- ####
-
 selection_methods = [a.value for a in mock_data.SelectionMethod]
 
 

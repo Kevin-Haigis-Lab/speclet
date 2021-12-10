@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from speclet.data_processing import common as dphelp
 from speclet.data_processing.vectors import careful_zscore, squish_array
-from speclet.io.data_io import DataFile, data_path
+from speclet.io import DataFile, data_path
 from speclet.loggers import logger
 
 #### ---- Data manipulation ---- ####
