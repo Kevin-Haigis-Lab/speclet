@@ -8,9 +8,12 @@ from typing import Optional
 import arviz as az
 import typer
 
-from speclet import model_configuration as model_config
 from speclet.command_line_interfaces import cli_helpers
+from speclet.exceptions import CacheDoesNotExistError
 from speclet.loggers import logger
+from speclet.managers.cache_manager import PosteriorManager, get_posterior_cache_name
+from speclet.model_configuration import get_configuration_for_model
+from speclet.project_enums import ModelFitMethod
 
 cli_helpers.configure_pretty()
 
@@ -40,48 +43,36 @@ def combine_mcmc_chains(
     logger.info(f"Expecting {n_chains} separate chains.")
 
     all_arviz_data_objects: list[az.InferenceData] = []
+    model_config = get_configuration_for_model(config_path=config_path, name=name)
+    assert model_config is not None
     for chain_dir in chain_dirs:
         logger.info(f"Gather MCMC chain '{chain_dir.as_posix()}'.")
-        sp_model = model_config.get_config_and_instantiate_model(
-            config_path=config_path, name=name, root_cache_dir=chain_dir
+        posterior_manager = PosteriorManager(
+            get_posterior_cache_name(
+                model_name=name, fit_method=ModelFitMethod.STAN_MCMC
+            ),
+            cache_dir=chain_dir,
         )
-
-        logger.debug(f"Cache directory: {sp_model.cache_manager.cache_dir.as_posix()}")
-        logger.debug(
-            f"Cache directory exists: {sp_model.cache_manager.cache_dir.exists()}"
-        )
-        _mcmc_cache_dir = sp_model.cache_manager.mcmc_cache_delegate.cache_dir
-        logger.debug(f"MCMC cache directory: {_mcmc_cache_dir.as_posix()}")
-        logger.debug(f"MCMC cache directory exists: {_mcmc_cache_dir.exists()}")
-
-        if sp_model.cache_manager.mcmc_cache_exists():
-            logger.info(f"Found chain '{chain_dir.as_posix()}'.")
-            sp_model.build_model()
-            assert sp_model.model is not None
-            mcmc_res = sp_model.mcmc_sample_model()
-            all_arviz_data_objects.append(mcmc_res)
+        if posterior_manager.cache_exists:
+            _posterior = posterior_manager.get()
+            assert _posterior is not None
+            all_arviz_data_objects.append(_posterior)
         else:
-            logger.error(
-                f"Cache for SpecletModel '{sp_model.name}' does not exist - skipping."
-            )
+            logger.error(f"Cache for model '{name}' does not exist.")
+            raise CacheDoesNotExistError(posterior_manager.cache_path)
 
     if len(all_arviz_data_objects) != n_chains:
-        logger.error(f"Expected {n_chains} but found {len(all_arviz_data_objects)}.")
+        msg = f"Expected {n_chains} but found {len(all_arviz_data_objects)}."
+        logger.error(msg)
+        raise BaseException(msg)
     else:
         logger.info(f"Collected {len(all_arviz_data_objects)} chains.")
 
     combined_chains = az.concat(all_arviz_data_objects, dim="chain")
-    combined_sp_model = sp_model = model_config.get_config_and_instantiate_model(
-        config_path=config_path, name=name, root_cache_dir=combined_root_cache_dir
+    assert isinstance(combined_chains, az.InferenceData)
+    _ = PosteriorManager(id=name, cache_dir=combined_root_cache_dir).put(
+        combined_chains
     )
-    if isinstance(combined_chains, az.InferenceData):
-        combined_sp_model.mcmc_results = combined_chains
-    else:
-        logger.error(f"`combined_chains` of type '{type(combined_chains)}'")
-        raise TypeError("`combined_chains` was not of type 'arviz.InferenceData'.")
-    combined_sp_model.write_mcmc_cache()
-
-    logger.info(f"Finished combining chains for model '{combined_sp_model.name}'")
 
     if touch is not None:
         logger.info(f"Touching file: '{touch.as_posix()}'.")

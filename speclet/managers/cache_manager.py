@@ -76,6 +76,19 @@ class PosteriorManager:
             return None
 
 
+def get_posterior_cache_name(model_name: str, fit_method: ModelFitMethod) -> str:
+    """Create a posterior cache name using the model name and fit method.
+
+    Args:
+        model_name (str): Model name.
+        fit_method (ModelFitMethod): Model fitting method used.
+
+    Returns:
+        str: Name for the posterior cache.
+    """
+    return model_name + "_" + fit_method.value.lower()
+
+
 def cache_posterior(
     posterior: az.InferenceData, name: str, fit_method: ModelFitMethod, cache_dir: Path
 ) -> None:
@@ -87,7 +100,7 @@ def cache_posterior(
         fit_method (ModelFitMethod): Method used to fit the model.
         cache_dir (Path): Directory to write to.
     """
-    id = name + "_" + fit_method.value.lower()
+    id = get_posterior_cache_name(model_name=name, fit_method=fit_method)
     posterior_manager = PosteriorManager(id=id, cache_dir=cache_dir)
     posterior_manager.put(posterior)
     return None
