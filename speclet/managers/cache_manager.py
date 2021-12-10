@@ -23,6 +23,7 @@ class PosteriorManager:
             cache_dir (Union[Path, str]): Directory for caching the posterior.
         """
         self.id = id
+        self._posterior = None
         if isinstance(cache_dir, str):
             cache_dir = Path(cache_dir)
         self.cache_dir = cache_dir
@@ -30,7 +31,7 @@ class PosteriorManager:
     @property
     def cache_path(self) -> Path:
         """Path to the cache file."""
-        return self.cache_dir / f"{self.id})_posterior.netcdf"
+        return self.cache_dir / f"{self.id}_posterior.netcdf"
 
     @property
     def cache_exists(self) -> bool:
@@ -41,6 +42,12 @@ class PosteriorManager:
         """Clear cached file."""
         if self.cache_exists:
             self.cache_path.unlink(missing_ok=False)
+        return None
+
+    def clear(self) -> None:
+        """Clear posterior from file and in-memory store."""
+        self._posterior = None
+        self.clear_cache()
         return None
 
     def write_to_file(self) -> None:
@@ -70,7 +77,7 @@ class PosteriorManager:
         """
         if not from_file and self._posterior is not None:
             return self._posterior
-        elif self.cache_path.exists:
+        elif self.cache_exists:
             return az.from_netcdf(str(self.cache_path))
         else:
             return None
@@ -91,7 +98,7 @@ def get_posterior_cache_name(model_name: str, fit_method: ModelFitMethod) -> str
 
 def cache_posterior(
     posterior: az.InferenceData, name: str, fit_method: ModelFitMethod, cache_dir: Path
-) -> None:
+) -> Path:
     """Cache the posterior of a model.
 
     Args:
@@ -103,4 +110,4 @@ def cache_posterior(
     id = get_posterior_cache_name(model_name=name, fit_method=fit_method)
     posterior_manager = PosteriorManager(id=id, cache_dir=cache_dir)
     posterior_manager.put(posterior)
-    return None
+    return posterior_manager.cache_path

@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from pandera import Check, Column, DataFrameSchema
 
+from speclet.data_processing.validation import check_finite, check_positive
 from speclet.io import DataFile, data_path
 
 data_transformation = Callable[[pd.DataFrame], pd.DataFrame]
@@ -308,21 +309,15 @@ class CrisprScreenDataManager:
                 "depmap_id": Column("category"),
                 "lfc": Column(
                     float,
-                    checks=[Check(_all_finite), Check(lambda x: -20 <= x <= 20)],
+                    checks=[check_finite(), Check(lambda x: -20 <= x <= 20)],
                 ),
-                "counts_final": Column(
-                    int, checks=[Check(_all_finite), Check(_all_pos)]
-                ),
+                "counts_final": Column(int, checks=[check_finite(), check_positive()]),
                 "counts_initial_adj": Column(
-                    float, checks=[Check(_all_finite), Check(_all_pos)]
+                    float, checks=[check_finite(), check_positive()]
                 ),
-                "copy_number": Column(
-                    float, checks=[Check(_all_finite), Check(_all_pos)]
-                ),
-                "rna_expr": Column(float, checks=[Check(_all_finite), Check(_all_pos)]),
-                "num_mutations": Column(
-                    int, checks=[Check(_all_pos), Check(_all_finite)]
-                ),
+                "copy_number": Column(float, checks=[check_finite(), check_positive()]),
+                "rna_expr": Column(float, checks=[check_finite(), check_positive()]),
+                "num_mutations": Column(int, checks=[check_positive(), check_finite()]),
             }
         )
 
@@ -336,11 +331,3 @@ class CrisprScreenDataManager:
             pd.DataFrame: Validated dataframe.
         """
         return self.data_schema.validate(data)
-
-
-def _all_finite(x: Any) -> bool:
-    return all(np.isfinite(x))
-
-
-def _all_pos(x: Any) -> bool:
-    return all(x >= 0)
