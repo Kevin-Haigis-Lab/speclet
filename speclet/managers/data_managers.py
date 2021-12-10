@@ -2,13 +2,17 @@
 
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Final, Optional, Union
 
-import numpy as np
 import pandas as pd
-from pandera import Check, Column, DataFrameSchema
+from pandera import Column, DataFrameSchema
 
-from speclet.data_processing.validation import check_finite, check_positive
+from speclet.data_processing.crispr import set_achilles_categorical_columns
+from speclet.data_processing.validation import (
+    check_between,
+    check_finite,
+    check_nonnegative,
+)
 from speclet.io import DataFile, data_path
 
 data_transformation = Callable[[pd.DataFrame], pd.DataFrame]
@@ -66,32 +70,23 @@ class CrisprScreenDataManager:
     data_file: Path
     _data: Optional[pd.DataFrame]
     _transformations: list[data_transformation]
-    _columns: Optional[list[str]]
+
+    _supported_filetypes: Final[set[str]] = {".csv", ".tsv", ".pkl"}
 
     def __init__(
         self,
-        data_file: Union[Path, DataFile],
+        data_file: Union[Path, DataFile, str],
         transformations: Optional[list[data_transformation]] = None,
-        columns: Optional[list[str]] = None,
     ) -> None:
         """Create a CRISPR screen data manager.
 
         Args:
-            data_file (Union[Path, DataFile]): CSV file with data.
+            data_file (Union[Path, DataFile, str]): File with data (csv, tsv, or pkl).
             transformations (Optional[list[DataFrameTransformation]], optional): List of
-              functions that take, mutate, and return a data frame (pandas or dask).
-              Defaults to None.
-            columns (Optional[set[str]], optional): Columns to keep from the data.
-              Defaults to None.
+            functions that take, mutate, and return a data frame.
+            Defaults to None.
         """
         self._data = None
-
-        if columns is None:
-            self._columns = None
-        else:
-            if not (len(columns) == len(set(columns))):
-                raise ColumnsNotUnique()
-            self._columns = columns.copy()
 
         if transformations is None:
             self._transformations = []
@@ -100,13 +95,19 @@ class CrisprScreenDataManager:
 
         if isinstance(data_file, DataFile):
             self.data_file = data_path(data_file)
-        else:
+        elif isinstance(data_file, str):
+            self.data_file = Path(data_file)
+        elif isinstance(data_file, Path):
             self.data_file = data_file
+        else:
+            raise BaseException("Type not accepted for data file.")
 
-        if not self.data_file.is_file():
-            raise DataFileIsNotAFile(self.data_file)
         if not self.data_file.exists():
             raise DataFileDoesNotExist(self.data_file)
+        if not self.data_file.is_file():
+            raise DataFileIsNotAFile(self.data_file)
+        if self.data_file.suffix not in self._supported_filetypes:
+            raise UnsupportedDataFileType(self.data_file.suffix)
 
     # ---- Properties ----
 
@@ -128,17 +129,6 @@ class CrisprScreenDataManager:
             list[data_transformation]: List of data transformations.
         """
         return deepcopy(self._transformations)
-
-    @property
-    def columns(self) -> Optional[list[str]]:
-        """Get the list of columns.
-
-        Returns:
-            Optional[list[str]]: If it exists, list of column names to keep in the data.
-        """
-        if self._columns is None:
-            return None
-        return self._columns.copy()
 
     @property
     def num_transformations(self) -> int:
@@ -179,21 +169,18 @@ class CrisprScreenDataManager:
         if self._data is not None and not force_reread:
             return self._data
 
+        if self.data_file.suffix not in self._supported_filetypes:
+            raise UnsupportedDataFileType(self.data_file.suffix)
+
         if read_kwargs is None:
             read_kwargs = {}
 
-        usecols: Optional[np.ndarray] = None
-        if self._columns is not None:
-            usecols = np.array(self._columns)
-
         if self.data_file.suffix == ".csv":
-            self._data = pd.read_csv(self.data_file, usecols=usecols)
+            self._data = pd.read_csv(self.data_file)
         elif self.data_file.suffix == ".tsv":
-            self._data = pd.read_csv(self.data_file, sep="\t", usecols=usecols)
+            self._data = pd.read_csv(self.data_file, sep="\t")
         elif self.data_file.suffix == ".pkl":
             self._data = pd.read_pickle(self.data_file)
-            if usecols is not None and self._data is not None:
-                self._data = self._data[usecols]
         else:
             raise UnsupportedDataFileType(self.data_file.suffix)
 
@@ -224,6 +211,9 @@ class CrisprScreenDataManager:
         self._data = None
 
     # ---- Transformations ----
+
+    def _apply_default_transformations(self, data: pd.DataFrame) -> pd.DataFrame:
+        return set_achilles_categorical_columns(data)
 
     def add_transformation(
         self, fxn: Union[data_transformation, list[data_transformation]]
@@ -285,6 +275,7 @@ class CrisprScreenDataManager:
         Returns:
             pd.DataFrame: Transformed dataframe.
         """
+        data = self._apply_default_transformations(data)
         for fxn in self._transformations:
             data = fxn(data)
         return data
@@ -307,17 +298,22 @@ class CrisprScreenDataManager:
                 "hugo_symbol": Column("category"),
                 "lineage": Column("category"),
                 "depmap_id": Column("category"),
+                "p_dna_batch": Column("category"),
+                "sgrna_target_chr": Column("category"),
                 "lfc": Column(
                     float,
-                    checks=[check_finite(), Check(lambda x: -20 <= x <= 20)],
+                    checks=[check_finite(), check_between(-20, 20)],
                 ),
-                "counts_final": Column(int, checks=[check_finite(), check_positive()]),
-                "counts_initial_adj": Column(
-                    float, checks=[check_finite(), check_positive()]
+                "counts_final": Column(
+                    int, checks=[check_finite(), check_nonnegative()]
                 ),
-                "copy_number": Column(float, checks=[check_finite(), check_positive()]),
-                "rna_expr": Column(float, checks=[check_finite(), check_positive()]),
-                "num_mutations": Column(int, checks=[check_positive(), check_finite()]),
+                "copy_number": Column(
+                    float, checks=[check_finite(), check_nonnegative()]
+                ),
+                "rna_expr": Column(float, checks=[check_finite(), check_nonnegative()]),
+                "num_mutations": Column(
+                    int, checks=[check_nonnegative(), check_finite()]
+                ),
             }
         )
 
@@ -331,3 +327,7 @@ class CrisprScreenDataManager:
             pd.DataFrame: Validated dataframe.
         """
         return self.data_schema.validate(data)
+
+
+# TODO: subclass CrisprScreenDataManager to add specific validations and transforms
+# e.g. for counts modeling, need `counts_initial_adj`...

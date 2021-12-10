@@ -11,8 +11,8 @@ from hypothesis import given, note, settings
 from hypothesis import strategies as st
 from hypothesis.strategies import DataObject
 
-from speclet.data_processing import achilles as achelp
 from speclet.data_processing import common as dphelp
+from speclet.data_processing import crispr as achelp
 
 DATA_PATH = Path("tests", "depmap_test_data.csv")
 

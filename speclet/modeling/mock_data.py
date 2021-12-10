@@ -8,7 +8,7 @@ from typing import Any, Optional, Union
 import numpy as np
 import pandas as pd
 
-from speclet.data_processing import achilles as achelp
+from speclet.data_processing import crispr as achelp
 from speclet.data_processing import vectors as vhelp
 from speclet.io import DataFile, data_path
 from speclet.string_functions import prefixed_count

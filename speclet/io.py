@@ -17,6 +17,7 @@ class DataFile(Enum):
     DEPMAP_CRC_BONE_SUBSAMPLE = "depmap_modeling_dataframe_crc_bone-subsample.csv"
     DEPMAP_DATA = "depmap_modeling_dataframe.csv"
     DEPMAP_ESSENTIALS = "known_essentials.csv"
+    DEPMAP_TEST_DATA = "depmap_test_data.csv"
     ACHILLES_GENE_EFFECT = "achilles_gene_effect.csv"
     CCLE_MUTATIONS = "ccle_mutations.csv"
     CCLE_COPYNUMBER = "ccle_gene_cn.csv"
@@ -74,6 +75,8 @@ def data_path(to: Union[str, DataFile]) -> Path:
     """
     if isinstance(to, str):
         to = DataFile(to)
+    if to is DataFile.DEPMAP_TEST_DATA:
+        return project_root() / "tests" / to.value
     return modeling_data_dir() / to.value
 
 

@@ -9,7 +9,7 @@ import stan
 from pandera import Column, DataFrameSchema
 from stan.model import Model as StanModel
 
-from speclet.data_processing.validation import check_finite, check_positive
+from speclet.data_processing.validation import check_finite, check_nonnegative
 from speclet.io import stan_models_dir
 
 
@@ -30,9 +30,11 @@ class NegativeBinomialModel:
         return DataFrameSchema(
             {
                 "counts_initial_adj": Column(
-                    float, checks=[check_positive(), check_finite()]
+                    float, checks=[check_nonnegative(), check_finite()]
                 ),
-                "counts_final": Column(int, checks=[check_positive(), check_finite()]),
+                "counts_final": Column(
+                    int, checks=[check_nonnegative(), check_finite()]
+                ),
             }
         )
 

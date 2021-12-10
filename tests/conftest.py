@@ -1,7 +1,7 @@
 import os
 from datetime import timedelta
 from pathlib import Path
-from typing import Any, Callable, Final, Union
+from typing import Any, Callable, Final
 
 import arviz as az
 import numpy as np
@@ -11,40 +11,7 @@ import pytest
 import seaborn as sns
 from hypothesis import HealthCheck, Verbosity, settings
 
-import speclet.managers.data_managers
-from speclet import io
-from speclet.io import DataFile
-
 TEST_DATA: Final[Path] = Path("tests", "depmap_test_data.csv")
-
-# ---- Test data ----
-
-
-def test_data_path(to: Union[str, DataFile]) -> Path:
-    """Path a to a data file.
-
-    Args:
-        to (DataFile): The desired data.
-
-    Returns:
-        Path: Path to the file.
-    """
-    if isinstance(to, str):
-        to = DataFile(to)
-
-    if to in {
-        DataFile.DEPMAP_CRC,
-        DataFile.DEPMAP_CRC_SUBSAMPLE,
-        DataFile.DEPMAP_DATA,
-        DataFile.DEPMAP_CRC_BONE,
-    }:
-        return TEST_DATA
-
-    return io.modeling_data_dir() / to.value
-
-
-mp = pytest.MonkeyPatch()
-mp.setattr(speclet.managers.data_managers, "data_path", test_data_path)
 
 
 # ---- Callable fixtures ----
@@ -83,7 +50,9 @@ def monkey_get_data_path(*args: Any, **kwargs: Any) -> Path:
 
 @pytest.fixture
 def iris() -> pd.DataFrame:
-    return sns.load_dataset("iris")
+    iris_df = sns.load_dataset("iris")
+    assert isinstance(iris_df, pd.DataFrame)
+    return iris_df
 
 
 # ---- PyMC3 fixtures ----
