@@ -107,7 +107,7 @@ def read_model_configurations(path: Path) -> BayesianModelConfigurations:
 
 def get_configuration_for_model(
     config_path: Path, name: str
-) -> Optional[BayesianModelConfiguration]:
+) -> BayesianModelConfiguration:
     """Get the configuration information for a named model.
 
     Args:
@@ -115,19 +115,18 @@ def get_configuration_for_model(
         name (str): Model configuration identifier.
 
     Raises:
-        FoundMultipleModelConfigurationsError: Raised if multiple configuration files
-        are found.
+        FoundMultipleModelConfigurationsError: If multiple configurations are found.
+        ModelConfigurationNotFound: If no configuration is found.
 
     Returns:
-        Optional[BayesianModelConfiguration]: If a configuration file is found, it is
-        returned, else None.
+        Optional[BayesianModelConfiguration]: The model configuration.
     """
     configs = read_model_configurations(config_path).configurations
     configs = [config for config in configs if config.name == name]
     if len(configs) > 1:
         raise FoundMultipleModelConfigurationsError(name, len(configs))
     if len(configs) == 0:
-        return None
+        raise ModelConfigurationNotFound(name)
     return configs[0]
 
 

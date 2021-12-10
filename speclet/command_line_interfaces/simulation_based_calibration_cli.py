@@ -3,22 +3,21 @@
 """A helpful command line interface for simulation-based calibration."""
 
 import shutil
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
-import pandas as pd
 import theano
 import typer
 import xarray
 
-from speclet import model_configuration as model_config
+from speclet.bayesian_models import get_bayesian_model
 from speclet.command_line_interfaces import cli_helpers
 from speclet.loggers import logger
+from speclet.model_configuration import get_configuration_for_model
 from speclet.modeling import simulation_based_calibration_helpers as sbc
 from speclet.pipelines.theano_flags import get_theano_compile_dir
-from speclet.project_enums import MockDataSize, ModelFitMethod, SpecletPipeline
+from speclet.project_enums import MockDataSize, ModelFitMethod
 
 cli_helpers.configure_pretty()
 
@@ -51,11 +50,12 @@ def make_mock_data(
         save_path (Optional[Path]): Path to save the data frame to as a CSV.
         random_seed (Optional[int]): Random seed for data generation process.
     """
-    sp_model = model_config.get_config_and_instantiate_model(
-        config_path=config_path, name=name, root_cache_dir=Path(tempfile.gettempdir())
-    )
-    mock_data = sp_model.generate_mock_data(size=data_size, random_seed=random_seed)
-    mock_data.to_csv(save_path)
+    config = get_configuration_for_model(config_path=config_path, name=name)
+    _ = get_bayesian_model(config.model)()
+    raise NotImplementedError("Need to make system for mock data geneteration.")
+    # mock_data = sp_model.generate_mock_data(size=data_size, random_seed=random_seed)
+    # mock_data.to_csv(save_path)
+    return None
 
 
 def _check_theano_config() -> None:
@@ -108,38 +108,10 @@ def run_sbc(
         None: None
     """
     _check_theano_config()
-    sp_model = model_config.get_config_and_instantiate_model(
-        config_path=config_path, name=name, root_cache_dir=cache_dir
-    )
+    config = get_configuration_for_model(config_path=config_path, name=name)
+    _ = get_bayesian_model(config.model)
 
-    config_sampling_kwargs = model_config.get_sampling_kwargs(
-        config_path=config_path,
-        name=name,
-        pipeline=SpecletPipeline.SBC,
-        fit_method=fit_method,
-    )
-
-    fit_kwargs: dict[str, Any]
-    if config_sampling_kwargs is not None:
-        config_sampling_kwargs.random_seed = sim_number
-        fit_kwargs = config_sampling_kwargs.dict()
-    else:
-        fit_kwargs = {"random_seed": sim_number}
-
-    mock_data: Optional[pd.DataFrame] = None
-    if mock_data_path is not None:
-        logger.info("Loading pre-existing mock data for the SBC.")
-        mock_data = pd.read_csv(mock_data_path)
-
-    logger.info(f"Running SBC for model '{sp_model.__class__}' - '{name}'.")
-    sp_model.run_simulation_based_calibration(
-        cache_dir,
-        fit_method=fit_method,
-        random_seed=sim_number,
-        mock_data=mock_data,
-        size=data_size,
-        fit_kwargs=fit_kwargs,
-    )
+    raise NotImplementedError("SBC CLI command needs to be re-made...")
 
     logger.info("SBC finished.")
 
@@ -153,7 +125,7 @@ def run_sbc(
             logger.warn("Clearing cached results of SBC.")
             sbc_check.sbc_file_manager.clear_results()
             sbc_check.sbc_file_manager.clear_saved_data()
-            sp_model.cache_manager.clear_all_caches()
+            # bayesian_model.cache_manager.clear_all_caches()
             if remove_theano_comp_dir:
                 _remove_thenao_comp_dir()
             raise FailedSBCCheckError(sbc_check.message)
@@ -187,7 +159,12 @@ def _check_sbc_results(cache_dir: Path, fit_method: ModelFitMethod) -> SBCCheckR
 
     sbc_res = sbc_fm.get_sbc_results()
 
-    if fit_method is ModelFitMethod.MCMC:
+    _is_mcmc = (
+        fit_method is ModelFitMethod.PYMC3_MCMC
+        or fit_method is ModelFitMethod.STAN_MCMC
+    )
+
+    if _is_mcmc:
         if not hasattr(sbc_res.inference_obj, "sample_stats"):
             return SBCCheckResult(
                 sbc_fm,
@@ -201,7 +178,7 @@ def _check_sbc_results(cache_dir: Path, fit_method: ModelFitMethod) -> SBCCheckR
                 message="Sampling statistics is not a xarray.Dataset.",
             )
 
-    return SBCCheckResult(sbc_fm, True, "")
+    return SBCCheckResult(sbc_fm, True, "Checks successful.")
 
 
 if __name__ == "__main__":
