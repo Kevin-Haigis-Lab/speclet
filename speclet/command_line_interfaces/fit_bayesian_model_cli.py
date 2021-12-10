@@ -16,6 +16,7 @@ from speclet.bayesian_models import get_bayesian_model
 from speclet.command_line_interfaces import cli_helpers
 from speclet.loggers import logger
 from speclet.managers.cache_manager import cache_posterior
+from speclet.managers.data_managers import CrisprScreenDataManager
 from speclet.model_configuration import ModelingSamplingArguments
 from speclet.modeling.model_fitting_api import fit_model
 from speclet.project_enums import ModelFitMethod
@@ -26,19 +27,9 @@ cli_helpers.configure_pretty()
 #### ---- Main ---- ####
 
 
-def read_crispr_screen_data(file: io.DataFile) -> pd.DataFrame:
-    """Read in CRISPR screen data.
-
-    # TODO: move this to a better place once the data manager system is figured out.
-
-    Args:
-        file (io.DataFile): Path to the data file.
-
-    Returns:
-        pd.DataFrame: Pandas dataframe of the CRISPR screen data.
-    """
-    path = io.data_path(file)
-    return pd.read_csv(path)
+def _read_crispr_screen_data(file: io.DataFile) -> pd.DataFrame:
+    """Read in CRISPR screen data."""
+    return CrisprScreenDataManager(data_file=file).get_data()
 
 
 def _augment_sampling_kwargs(
@@ -83,7 +74,7 @@ def fit_bayesian_model(
         config_path=config_path, name=name
     )
     assert config is not None
-    data = read_crispr_screen_data(config.data_file)
+    data = _read_crispr_screen_data(config.data_file)
     model = get_bayesian_model(config.model)()
 
     sampling_kwargs_adj = _augment_sampling_kwargs(

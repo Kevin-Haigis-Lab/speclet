@@ -1,43 +1,16 @@
 """Data management classes."""
 
+from copy import deepcopy
 from pathlib import Path
-from typing import Any, Callable, Final, Optional, TypeVar, Union
+from typing import Any, Callable, Optional, Union
 
-import dask.dataframe as dd
 import numpy as np
 import pandas as pd
+from pandera import Check, Column, DataFrameSchema
 
-from speclet.data_processing import achilles as achelp
-from speclet.io.data_io import DataFile, data_path
-from speclet.loggers import logger
-from speclet.modeling import feature_engineering as feng
-from speclet.modeling import mock_data
-from speclet.project_enums import MockDataSize, assert_never
+from speclet.io import DataFile, data_path
 
-Data = TypeVar("Data", pd.DataFrame, dd.DataFrame)
-DataFrameTransformation = Callable[[Data], Data]
-
-common_crispr_screen_transformations: Final[list[DataFrameTransformation]] = [
-    achelp.set_achilles_categorical_columns,
-    achelp.drop_sgrnas_that_map_to_multiple_genes,
-]
-
-
-def _get_crispr_screen_data_coltypes() -> dict[str, str]:
-    col_types: dict[str, str] = {}
-    for c in [
-        "sgrna",
-        "hugo_symbol",
-        "p_dna_batch",
-        "replicate_id",
-        "depmap_id",
-        "sex",
-        "lineage",
-    ]:
-        col_types[c] = "object"
-    for c in ["counts_final", "counts_final_total"]:
-        col_types[c] = "UInt32"
-    return col_types
+data_transformation = Callable[[pd.DataFrame], pd.DataFrame]
 
 
 class DataNotLoadedException(BaseException):
@@ -46,117 +19,213 @@ class DataNotLoadedException(BaseException):
     pass
 
 
+class DataFileDoesNotExist(BaseException):
+    """Data file does not exist."""
+
+    def __init__(self, file: Path) -> None:
+        """Data file does not exist."""
+        msg = f"Data file '{file}' not found."
+        super().__init__(msg)
+        return None
+
+
+class DataFileIsNotAFile(BaseException):
+    """Data file is not a file."""
+
+    def __init__(self, file: Path) -> None:
+        """Data file is not a file."""
+        msg = f"Path must be to a file: '{file}'."
+        super().__init__(msg)
+        return None
+
+
+class UnsupportedDataFileType(BaseException):
+    """Unsupported data file type."""
+
+    def __init__(self, suffix: str) -> None:
+        """Unsupported data file type."""
+        msg = f"File type '{suffix}' is not supported."
+        super().__init__(msg)
+        return None
+
+
+class ColumnsNotUnique(BaseException):
+    """Column names are not unique."""
+
+    def __init__(self) -> None:
+        """Columns not unique."""
+        msg = "Column names must be unique."
+        super().__init__(msg)
+        return None
+
+
 class CrisprScreenDataManager:
     """Manage CRISPR screen data."""
 
+    data_file: Path
     _data: Optional[pd.DataFrame]
-    data_source: Path
-    _transformations: list[DataFrameTransformation]
-    columns: Optional[set[str]]
-    use_dask: bool
+    _transformations: list[data_transformation]
+    _columns: Optional[list[str]]
 
     def __init__(
         self,
-        data_source: Union[Path, DataFile],
-        transformations: Optional[list[DataFrameTransformation]] = None,
-        columns: Optional[set[str]] = None,
-        use_dask: bool = False,
+        data_file: Union[Path, DataFile],
+        transformations: Optional[list[data_transformation]] = None,
+        columns: Optional[list[str]] = None,
     ) -> None:
         """Create a CRISPR screen data manager.
 
         Args:
-            data_source (Union[Path, DataFile]): CSV file with data.
+            data_file (Union[Path, DataFile]): CSV file with data.
             transformations (Optional[list[DataFrameTransformation]], optional): List of
               functions that take, mutate, and return a data frame (pandas or dask).
               Defaults to None.
             columns (Optional[set[str]], optional): Columns to keep from the data.
               Defaults to None.
-            use_dask (bool, optional): Use a dask backend? Defaults to False.
         """
         self._data = None
-        self.columns = columns
-        self.use_dask = use_dask
-        self._transformations = (
-            [] if transformations is None else transformations.copy()
-        )
 
-        if isinstance(data_source, DataFile):
-            self.data_source = data_path(data_source)
+        if columns is None:
+            self._columns = None
         else:
-            self.data_source = data_source
+            if not (len(columns) == len(set(columns))):
+                raise ColumnsNotUnique()
+            self._columns = columns.copy()
 
-        assert self.data_source.name.endswith("csv")
-        assert self.data_source.is_file()
-        assert self.data_source.exists()
-
-    def _read_data(self, read_kwargs: dict[str, Any]) -> pd.DataFrame:
-        read_csv = dd.read_csv if self.use_dask else pd.read_csv
-        df: Union[pd.DataFrame, dd.DataFrame]
-        col_types = _get_crispr_screen_data_coltypes()
-        if self.columns is None:
-            df = read_csv(self.data_source, dtype=col_types, **read_kwargs)
+        if transformations is None:
+            self._transformations = []
         else:
-            df = read_csv(
-                self.data_source, usecols=self.columns, dtype=col_types, **read_kwargs
-            )
-        df = self._apply_transformations(df)
+            self._transformations = deepcopy(transformations)
 
-        if self.use_dask:
-            df = df.compute()
+        if isinstance(data_file, DataFile):
+            self.data_file = data_path(data_file)
+        else:
+            self.data_file = data_file
 
-        self._data = df
-        return self._data
+        if not self.data_file.is_file():
+            raise DataFileIsNotAFile(self.data_file)
+        if not self.data_file.exists():
+            raise DataFileDoesNotExist(self.data_file)
 
-    def get_data(self, read_kwargs: Optional[dict[str, Any]] = None) -> pd.DataFrame:
-        """Get CRISPR screen data.
+    # ---- Properties ----
+
+    @property
+    def data(self) -> pd.DataFrame:
+        """Get the data from the manager."""
+        return self.get_data()
+
+    @property
+    def data_is_loaded(self) -> bool:
+        """Check if the data has been loaded."""
+        return self._data is not None
+
+    @property
+    def transformations(self) -> list[data_transformation]:
+        """Get the list of data transformations.
+
+        Returns:
+            list[data_transformation]: List of data transformations.
+        """
+        return deepcopy(self._transformations)
+
+    @property
+    def columns(self) -> Optional[list[str]]:
+        """Get the list of columns.
+
+        Returns:
+            Optional[list[str]]: If it exists, list of column names to keep in the data.
+        """
+        if self._columns is None:
+            return None
+        return self._columns.copy()
+
+    @property
+    def num_transformations(self) -> int:
+        """Get the number of transformations.
+
+        Returns:
+            int: Number of transformations.
+        """
+        return len(self._transformations)
+
+    # ---- Data dataframe ----
+
+    def get_data(
+        self,
+        skip_transforms: bool = False,
+        force_reread: bool = False,
+        read_kwargs: Optional[dict[str, Any]] = None,
+    ) -> pd.DataFrame:
+        """Get the dataframe.
 
         If the data has already been loaded, it is returned without re-reading from
         file.
 
         Args:
+            skip_transforms (bool, optional): Skip data transformations. Defaults to
+            False.
+            force_reread (bool, optional): Force the file to be read even if the data
+            object already exists. Defaults to False.
             read_kwargs (Optional[dict[str, Any]], optional): Key-word arguments for the
             CSV-parsing function. Defaults to None.
 
+        Raises:
+            UnsupportedDataFileType: Data file type is not supported.
+
         Returns:
-            pd.DataFrame: CRISPR screen data.
+            pd.DataFrame: Requested dataframe.
         """
-        if self._data is not None:
-            logger.info("Getting data - already loaded.")
+        if self._data is not None and not force_reread:
             return self._data
 
-        logger.info("Getting data - reading from file.")
         if read_kwargs is None:
             read_kwargs = {}
-        return self._read_data(read_kwargs=read_kwargs)
 
-    def set_data(self, data: pd.DataFrame, apply_transformations: bool = False) -> None:
+        usecols: Optional[np.ndarray] = None
+        if self._columns is not None:
+            usecols = np.array(self._columns)
+
+        if self.data_file.suffix == ".csv":
+            self._data = pd.read_csv(self.data_file, usecols=usecols)
+        elif self.data_file.suffix == ".tsv":
+            self._data = pd.read_csv(self.data_file, sep="\t", usecols=usecols)
+        elif self.data_file.suffix == ".pkl":
+            self._data = pd.read_pickle(self.data_file)
+            if usecols is not None and self._data is not None:
+                self._data = self._data[usecols]
+        else:
+            raise UnsupportedDataFileType(self.data_file.suffix)
+
+        assert isinstance(self._data, pd.DataFrame)
+
+        if not skip_transforms:
+            self._data = self.apply_transformations(self._data)
+
+        self._data = self.apply_validation(self._data)
+        return self._data
+
+    def set_data(self, data: pd.DataFrame, apply_transformations: bool = True) -> None:
         """Set the CRISPR screen data.
 
         Args:
-            data (pd.DataFrame): New data.
+            data (pd.DataFrame): New data (a copy is made).
             apply_transformations (bool, optional): Should the transformations be
-              applied? Defaults to False.
-
-        Returns:
-            None
+              applied? Defaults to True.
         """
-        logger.info("Setting data.")
+        self._data = data.copy()
         if apply_transformations:
-            data = self._apply_transformations(data)
-        self._data = data
+            self._data = self.apply_transformations(self._data)
+        self._data = self.apply_validation(self._data)
         return None
 
     def clear_data(self) -> None:
         """Clear the CRISPR screen data."""
-        logger.info("Clearing data.")
         self._data = None
 
-    def data_is_loaded(self) -> bool:
-        """Check if the data has been loaded."""
-        return self._data is not None
+    # ---- Transformations ----
 
     def add_transformation(
-        self, fxn: Union[DataFrameTransformation, list[DataFrameTransformation]]
+        self, fxn: Union[data_transformation, list[data_transformation]]
     ) -> None:
         """Add a new transformation.
 
@@ -169,14 +238,13 @@ class CrisprScreenDataManager:
         Returns:
             None
         """
-        logger.info("Adding new transformation.")
         if isinstance(fxn, list):
             self._transformations += fxn
         else:
             self._transformations.append(fxn)
         return None
 
-    def insert_transformation(self, fxn: DataFrameTransformation, at: int) -> None:
+    def insert_transformation(self, fxn: data_transformation, at: int) -> None:
         """Insert a new transformation at a specified index.
 
         Args:
@@ -186,168 +254,93 @@ class CrisprScreenDataManager:
         Returns:
             None
         """
-        logger.info(f"Inserting transformation at index {at}.")
         self._transformations.insert(at, fxn)
         return None
 
-    def get_transformations(self) -> list[DataFrameTransformation]:
-        """Get (a copty of) the list of transformations.
-
-        Returns:
-            list[DataFrameTransformation]: Copy of the list of transformation.
-        """
-        return self._transformations.copy()
-
     def clear_transformations(self) -> None:
         """Clear the list of transformations."""
-        logger.info("Clearing transformations.")
         self._transformations = []
 
     def set_transformations(
-        self, new_transformations: list[DataFrameTransformation], apply: bool = False
+        self, new_transformations: list[data_transformation]
     ) -> None:
         """Set the list of transformations.
 
+        A deep copy of the list of transformations is make.
+
         Args:
             new_transformations (list[DataFrameTransformation]): New list of data
-              transforming functions.
-            apply (bool, optional): Should the new list be applied to the data? Defaults
-              to False.
-
-        Returns:
-            None
+            transforming functions.
         """
-        logger.info("Setting transformations.")
-        self._transformations = new_transformations
-        if apply:
-            self.apply_transformations()
+        self._transformations = deepcopy(new_transformations)
         return None
 
-    @property
-    def num_transformations(self) -> int:
-        """Get the number of transformations.
+    def apply_transformations(self, data: pd.DataFrame) -> pd.DataFrame:
+        """Apply the transformations to a dataframe.
+
+        Args:
+            data (pd.DataFrame): Dataframe to transform.
 
         Returns:
-            int: Number of transformations.
+            pd.DataFrame: Transformed dataframe.
         """
-        return len(self._transformations)
-
-    def _apply_transformations(self, data: Data) -> Data:
-        logger.debug(f"Applying {self.num_transformations} transformations.")
         for fxn in self._transformations:
             data = fxn(data)
         return data
 
-    def apply_transformations(self) -> None:
-        """Apply the transformations to the data."""
-        logger.info("Applying transformations.")
-        if self._data is None:
-            raise DataNotLoadedException("Data not loaded")
-        self._data = self._apply_transformations(self._data)
+    # ---- Validation ----
 
-    def generate_mock_data(
-        self, size: Union[MockDataSize, str], random_seed: Optional[int] = None
-    ) -> pd.DataFrame:
-        """Generate mock data to be used for testing or SBC.
+    @property
+    def data_schema(self) -> DataFrameSchema:
+        """Data validation schema.
 
-        Args:
-            size (Union[MockDataSize, str]): Size of the final mock dataset.
-            random_seed (Optional[int], optional): Random seed. Defaults to None.
+        # TODO: check for unique pairing of sgRNA and gene.
+        # TODO: check for unique pairing of cell line and lineage.
 
         Returns:
-            pd.DataFrame: Mock data.
+            DataFrameSchema: Pandera data schema.
         """
-        logger.info(f"Generating mock data of size '{size}'.")
-        if random_seed is not None:
-            np.random.seed(random_seed)
+        return DataFrameSchema(
+            {
+                "sgrna": Column("category"),
+                "hugo_symbol": Column("category"),
+                "lineage": Column("category"),
+                "depmap_id": Column("category"),
+                "lfc": Column(
+                    float,
+                    checks=[Check(_all_finite), Check(lambda x: -20 <= x <= 20)],
+                ),
+                "counts_final": Column(
+                    int, checks=[Check(_all_finite), Check(_all_pos)]
+                ),
+                "counts_initial_adj": Column(
+                    float, checks=[Check(_all_finite), Check(_all_pos)]
+                ),
+                "copy_number": Column(
+                    float, checks=[Check(_all_finite), Check(_all_pos)]
+                ),
+                "rna_expr": Column(float, checks=[Check(_all_finite), Check(_all_pos)]),
+                "num_mutations": Column(
+                    int, checks=[Check(_all_pos), Check(_all_finite)]
+                ),
+            }
+        )
 
-        if isinstance(size, str):
-            size = MockDataSize(size)
+    def apply_validation(self, data: pd.DataFrame) -> pd.DataFrame:
+        """Apply data validation to a dataframe.
 
-        df: pd.DataFrame
-        if size is MockDataSize.SMALL:
-            df = mock_data.generate_mock_achilles_data(
-                n_genes=10,
-                n_sgrnas_per_gene=3,
-                n_cell_lines=5,
-                n_lineages=2,
-                n_batches=2,
-                n_screens=1,
-            )
-        elif size is MockDataSize.MEDIUM:
-            df = mock_data.generate_mock_achilles_data(
-                n_genes=25,
-                n_sgrnas_per_gene=5,
-                n_cell_lines=12,
-                n_lineages=2,
-                n_batches=3,
-                n_screens=2,
-            )
-        elif size is MockDataSize.LARGE:
-            df = mock_data.generate_mock_achilles_data(
-                n_genes=100,
-                n_sgrnas_per_gene=5,
-                n_cell_lines=20,
-                n_lineages=3,
-                n_batches=4,
-                n_screens=2,
-            )
-        else:
-            assert_never(size)
+        Args:
+            data (pd.DataFrame): Dataframe to validate.
 
-        self.set_data(df, apply_transformations=True)
-        assert self._data is not None
-        return self.get_data()
+        Returns:
+            pd.DataFrame: Validated dataframe.
+        """
+        return self.data_schema.validate(data)
 
 
-# ---- Data manager generators ----
+def _all_finite(x: Any) -> bool:
+    return all(np.isfinite(x))
 
 
-def _append_total_read_counts(df: Data) -> Data:
-    return achelp.append_total_read_counts(df)
-
-
-def _add_useful_read_count_columns(df: Data) -> Data:
-    return achelp.add_useful_read_count_columns(df)
-
-
-def make_count_model_data_manager(
-    data_source: DataFile,
-    other_transforms: Optional[list[DataFrameTransformation]] = None,
-) -> CrisprScreenDataManager:
-    """Make a data manager good for models of count data.
-
-    Default list of data transformation:
-
-    1. set Achilles categorical columns (`src.data_processing.achilles`)
-    2. drop sgRNAs that map to multiple genes (`src.data_processing.achilles`)
-    3. z-scale RNA expression by gene and lineage (`src.modeling.feature_engineering`)
-    4. append total read counts (`src.data_processing.achilles`)
-    5. add useful read count columns (`src.data_processing.achilles`)
-    6. (optional additional transformations)
-    7. set Achilles categorical columns, again (`src.data_processing.achilles`)
-
-    Args:
-        data_source (DataFile): Data source.
-        other_transforms (Optional[list[DataFrameTransformation]], optional): Additional
-          transformation to include in the data manager's defaults. Defaults to None.
-
-    Returns:
-        CrisprScreenDataManager: Data manager for count modeling.
-    """
-    data_manager = CrisprScreenDataManager(data_source=data_source)
-
-    data_transformations = common_crispr_screen_transformations.copy()
-    data_transformations += [
-        feng.zscale_rna_expression_by_gene_and_lineage,
-        _append_total_read_counts,
-        _add_useful_read_count_columns,
-    ]
-
-    if other_transforms is not None:
-        data_transformations += other_transforms
-
-    data_manager.add_transformation(data_transformations)
-    # Need to add at end because `p_dna_batch` becomes non-categorical.
-    data_manager.add_transformation(achelp.set_achilles_categorical_columns)
-    return data_manager
+def _all_pos(x: Any) -> bool:
+    return all(x >= 0)
