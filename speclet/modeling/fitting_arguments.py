@@ -5,8 +5,7 @@ from typing import Any, Callable, Iterable, Optional, Union
 import pymc3 as pm
 from pydantic import BaseModel, PositiveInt, confloat
 
-from speclet.modeling.model_fitting_api import VIMethod
-from speclet.types import BasicTypes
+from speclet.types import BasicTypes, VIMethod
 
 TargetAcceptFloat = confloat(ge=0.5, lt=1.0)
 

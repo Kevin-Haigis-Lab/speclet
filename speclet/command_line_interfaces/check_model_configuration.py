@@ -4,11 +4,14 @@
 
 import logging
 from pathlib import Path
+from typing import Optional
 
 from typer import Typer, colors, secho
 
 from speclet import model_configuration as model_config
+from speclet.bayesian_models import get_bayesian_model
 from speclet.loggers import set_console_handler_level
+from speclet.project_configuration import get_model_configuration_file
 
 set_console_handler_level(logging.WARNING)
 
@@ -16,7 +19,7 @@ app = Typer()
 
 
 @app.command()
-def check_model_configuration(path: Path) -> None:
+def check_model_configuration(path: Optional[Path] = None) -> None:
     """Check a model configuration file.
 
     Performs the following checks:
@@ -25,8 +28,10 @@ def check_model_configuration(path: Path) -> None:
     2. All names are unique.
 
     Args:
-        path (Path): Path to the config file.
+        path (Optional[Path], optional): Path to the config file. Defaults to None
     """
+    if path is None:
+        path = get_model_configuration_file()
     secho(f"Checking model config: '{path.as_posix()}'", fg=colors.BLUE)
 
     secho("Trying to parse configuration file...")
@@ -40,10 +45,8 @@ def check_model_configuration(path: Path) -> None:
     secho("Checking all models can be instantiated and configured...")
     for config in configs.configurations:
         secho(f"  {config.name}", fg=colors.BRIGHT_BLACK)
-        _ = model_config.instantiate_and_configure_model(
-            config,
-            root_cache_dir=Path("temp"),
-        )
+        _ = get_bayesian_model(config.model)()
+
     secho("All models can be instantiated and configured: ✔︎", fg=colors.GREEN)
 
     secho("Configuration file looks good.", fg=colors.BLUE, bold=True)

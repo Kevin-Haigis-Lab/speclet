@@ -6,7 +6,7 @@ munge:
 
 modeling:
   highest_density_interval: 0.89
-  models_config: "model-configs.yaml"
+  models_config: "models/model-configs.yaml"
 
 fitting_pipeline:
   debug: True

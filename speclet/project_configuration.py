@@ -54,7 +54,7 @@ def read_project_configuration(path: Optional[Path] = None) -> ProjectConfig:
         if (env_config := dotenv_values().get("PROJECT_CONFIG")) is not None:
             path = Path(env_config)
         else:
-            raise BaseException("Configuration file not found.")
+            raise BaseException("Project configuration YAML file not found.")
 
     with open(path) as file:
         config_yaml = yaml.safe_load(file)
