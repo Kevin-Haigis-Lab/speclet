@@ -6,8 +6,9 @@ from typing import Optional
 from pydantic import BaseModel, validate_arguments
 
 import speclet.model_configuration as model_config
-from speclet.model_configuration import ModelConfig
-from speclet.project_enums import ModelFitMethod, ModelOption, SpecletPipeline
+from speclet.bayesian_models import BayesianModel
+from speclet.model_configuration import BayesianModelConfiguration
+from speclet.project_enums import ModelFitMethod, SpecletPipeline
 
 
 class ParsedPipelineInformation(BaseModel):
@@ -25,15 +26,16 @@ class ParsedPipelineInformation(BaseModel):
 class _PipelineIntermediateInformation(BaseModel):
     """An intermediate step in the parsing process."""
 
-    model: ModelOption
+    model: BayesianModel
     model_name: str
     fit_method: ModelFitMethod
 
 
 def _get_pipeline_fit_methods(
-    config: ModelConfig, pipeline: SpecletPipeline
+    config: BayesianModelConfiguration, pipeline: SpecletPipeline
 ) -> Optional[list[ModelFitMethod]]:
-    return config.pipelines.get(pipeline, None)
+    raise NotImplementedError("Need to implement a pipeline configuration system.")
+    # return config.pipelines.get(pipeline, None)
 
 
 @validate_arguments
