@@ -8,12 +8,13 @@ from pydantic import validate_arguments
 
 from speclet import formatting
 from speclet import model_configuration as model_config
+from speclet.bayesian_models import BayesianModel
 from speclet.managers import pipeline_resource_manager as prm
-from speclet.project_enums import MockDataSize, ModelFitMethod, ModelOption
+from speclet.project_enums import MockDataSize, ModelFitMethod
 
 T = TypeVar("T")
 ResourceLookupDict = dict[ModelFitMethod, dict[MockDataSize, T]]
-ModelResourceLookupDict = dict[ModelOption, ResourceLookupDict[T]]
+ModelResourceLookupDict = dict[BayesianModel, ResourceLookupDict[T]]
 
 # RAM required for each configuration (in GB -> mult by 1000).
 #   key: [model][debug][fit_method]
@@ -25,115 +26,31 @@ TimeLookupDict = ModelResourceLookupDict[td]
 
 
 sbc_pipeline_memory_lookup: MemoryLookupDict = {
-    ModelOption.SPECLET_SIMPLE: {
-        ModelFitMethod.ADVI: {
+    BayesianModel.SIMPLE_NEGATIVE_BINOMIAL: {
+        ModelFitMethod.PYMC3_ADVI: {
             MockDataSize.SMALL: 2,
             MockDataSize.MEDIUM: 2,
             MockDataSize.LARGE: 5,
         },
-        ModelFitMethod.MCMC: {
+        ModelFitMethod.PYMC3_MCMC: {
             MockDataSize.SMALL: 2,
             MockDataSize.MEDIUM: 3,
             MockDataSize.LARGE: 5,
         },
     },
-    ModelOption.SPECLET_TWO: {
-        ModelFitMethod.ADVI: {
-            MockDataSize.SMALL: 2,
-            MockDataSize.MEDIUM: 4,
-            MockDataSize.LARGE: 16,
-        },
-        ModelFitMethod.MCMC: {
-            MockDataSize.SMALL: 2,
-            MockDataSize.MEDIUM: 4,
-            MockDataSize.LARGE: 8,
-        },
-    },
-    ModelOption.SPECLET_FOUR: {
-        ModelFitMethod.ADVI: {
-            MockDataSize.SMALL: 2,
-            MockDataSize.MEDIUM: 4,
-            MockDataSize.LARGE: 16,
-        },
-        ModelFitMethod.MCMC: {
-            MockDataSize.SMALL: 2,
-            MockDataSize.MEDIUM: 8,
-            MockDataSize.LARGE: 16,
-        },
-    },
 }
 
 sbc_pipeline_time_lookup: TimeLookupDict = {
-    ModelOption.SPECLET_SIMPLE: {
-        ModelFitMethod.ADVI: {
+    BayesianModel.SIMPLE_NEGATIVE_BINOMIAL: {
+        ModelFitMethod.PYMC3_ADVI: {
             MockDataSize.SMALL: td(minutes=5),
             MockDataSize.MEDIUM: td(minutes=8),
             MockDataSize.LARGE: td(minutes=15),
         },
-        ModelFitMethod.MCMC: {
+        ModelFitMethod.PYMC3_MCMC: {
             MockDataSize.SMALL: td(minutes=3),
             MockDataSize.MEDIUM: td(minutes=4),
             MockDataSize.LARGE: td(minutes=20),
-        },
-    },
-    ModelOption.SPECLET_TWO: {
-        ModelFitMethod.ADVI: {
-            MockDataSize.SMALL: td(minutes=5),
-            MockDataSize.MEDIUM: td(minutes=20),
-            MockDataSize.LARGE: td(hours=1),
-        },
-        ModelFitMethod.MCMC: {
-            MockDataSize.SMALL: td(minutes=10),
-            MockDataSize.MEDIUM: td(minutes=40),
-            MockDataSize.LARGE: td(hours=1.5),
-        },
-    },
-    ModelOption.SPECLET_FOUR: {
-        ModelFitMethod.ADVI: {
-            MockDataSize.SMALL: td(minutes=5),
-            MockDataSize.MEDIUM: td(minutes=40),
-            MockDataSize.LARGE: td(hours=2),
-        },
-        ModelFitMethod.MCMC: {
-            MockDataSize.SMALL: td(minutes=5),
-            MockDataSize.MEDIUM: td(hours=1),
-            MockDataSize.LARGE: td(hours=3),
-        },
-    },
-    ModelOption.SPECLET_FIVE: {
-        ModelFitMethod.ADVI: {
-            MockDataSize.SMALL: td(minutes=10),
-            MockDataSize.MEDIUM: td(minutes=30),
-            MockDataSize.LARGE: td(hours=1),
-        },
-        ModelFitMethod.MCMC: {
-            MockDataSize.SMALL: td(minutes=15),
-            MockDataSize.MEDIUM: td(hours=1),
-            MockDataSize.LARGE: td(hours=2),
-        },
-    },
-    ModelOption.SPECLET_SIX: {
-        ModelFitMethod.ADVI: {
-            MockDataSize.SMALL: td(minutes=10),
-            MockDataSize.MEDIUM: td(minutes=20),
-            MockDataSize.LARGE: td(minutes=30),
-        },
-        ModelFitMethod.MCMC: {
-            MockDataSize.SMALL: td(minutes=20),
-            MockDataSize.MEDIUM: td(hours=1),
-            MockDataSize.LARGE: td(hours=2),
-        },
-    },
-    ModelOption.SPECLET_SEVEN: {
-        ModelFitMethod.ADVI: {
-            MockDataSize.SMALL: td(minutes=10),
-            MockDataSize.MEDIUM: td(hours=1),
-            MockDataSize.LARGE: td(hours=3),
-        },
-        ModelFitMethod.MCMC: {
-            MockDataSize.SMALL: td(minutes=15),
-            MockDataSize.MEDIUM: td(hours=1),
-            MockDataSize.LARGE: td(hours=2),
         },
     },
 }
@@ -186,12 +103,12 @@ class SBCResourceManager:
 
     def _retrieve_memory_requirement(self) -> int:
         default_memory_tbl: ResourceLookupDict[int] = {
-            ModelFitMethod.ADVI: {
+            ModelFitMethod.PYMC3_ADVI: {
                 MockDataSize.SMALL: 2,
                 MockDataSize.MEDIUM: 4,
                 MockDataSize.LARGE: 8,
             },
-            ModelFitMethod.MCMC: {
+            ModelFitMethod.PYMC3_MCMC: {
                 MockDataSize.SMALL: 4,
                 MockDataSize.MEDIUM: 8,
                 MockDataSize.LARGE: 12,
@@ -214,12 +131,12 @@ class SBCResourceManager:
 
     def _retrieve_time_requirement(self) -> td:
         default_time_tbl: ResourceLookupDict[td] = {
-            ModelFitMethod.ADVI: {
+            ModelFitMethod.PYMC3_ADVI: {
                 MockDataSize.SMALL: td(minutes=10),
                 MockDataSize.MEDIUM: td(minutes=20),
                 MockDataSize.LARGE: td(minutes=30),
             },
-            ModelFitMethod.MCMC: {
+            ModelFitMethod.PYMC3_MCMC: {
                 MockDataSize.SMALL: td(minutes=15),
                 MockDataSize.MEDIUM: td(hours=1),
                 MockDataSize.LARGE: td(hours=2),
@@ -246,7 +163,7 @@ class SBCResourceManager:
         Returns:
             str: Number of cores needed for fitting.
         """
-        if self.fit_method is ModelFitMethod.MCMC:
+        if self.fit_method is ModelFitMethod.PYMC3_MCMC:
             return 4
         else:
             return 1

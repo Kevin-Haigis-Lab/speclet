@@ -8,12 +8,13 @@ from pydantic import validate_arguments
 
 from speclet import formatting
 from speclet import model_configuration as model_config
+from speclet.bayesian_models import BayesianModel
 from speclet.exceptions import ResourceRequestUnkown
 from speclet.managers import pipeline_resource_manager as prm
-from speclet.project_enums import ModelFitMethod, ModelOption
+from speclet.project_enums import ModelFitMethod
 
 T = TypeVar("T")
-ResourceLookupDict = dict[ModelOption, dict[bool, dict[ModelFitMethod, T]]]
+ResourceLookupDict = dict[BayesianModel, dict[bool, dict[ModelFitMethod, T]]]
 
 # RAM required for each configuration (in GB -> mult by 1000).
 #   key: [model][debug][fit_method]
@@ -24,49 +25,9 @@ MemoryLookupDict = ResourceLookupDict[int]
 TimeLookupDict = ResourceLookupDict[td]
 
 fitting_pipeline_memory_lookup: MemoryLookupDict = {
-    ModelOption.SPECLET_SIMPLE: {
-        True: {ModelFitMethod.ADVI: 4, ModelFitMethod.MCMC: 4},
-        False: {ModelFitMethod.ADVI: 8, ModelFitMethod.MCMC: 8},
-    },
-    ModelOption.SPECLET_TEST_MODEL: {
-        True: {ModelFitMethod.ADVI: 8, ModelFitMethod.MCMC: 8},
-        False: {ModelFitMethod.ADVI: 8, ModelFitMethod.MCMC: 8},
-    },
-    ModelOption.CRC_CERES_MIMIC: {
-        True: {ModelFitMethod.ADVI: 15, ModelFitMethod.MCMC: 20},
-        False: {ModelFitMethod.ADVI: 20, ModelFitMethod.MCMC: 40},
-    },
-    ModelOption.SPECLET_ONE: {
-        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 30},
-        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
-    },
-    ModelOption.SPECLET_TWO: {
-        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 30},
-        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
-    },
-    ModelOption.SPECLET_FOUR: {
-        True: {ModelFitMethod.ADVI: 4, ModelFitMethod.MCMC: 8},
-        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
-    },
-    ModelOption.SPECLET_FIVE: {
-        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 60},
-        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
-    },
-    ModelOption.SPECLET_SIX: {
-        True: {ModelFitMethod.ADVI: 7, ModelFitMethod.MCMC: 60},
-        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
-    },
-    ModelOption.SPECLET_SEVEN: {
-        True: {ModelFitMethod.ADVI: 6, ModelFitMethod.MCMC: 60},
-        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
-    },
-    ModelOption.SPECLET_EIGHT: {
-        True: {ModelFitMethod.ADVI: 4, ModelFitMethod.MCMC: 4},
-        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 150},
-    },
-    ModelOption.SPECLET_NINE: {
-        True: {ModelFitMethod.ADVI: 4, ModelFitMethod.MCMC: 4},
-        False: {ModelFitMethod.ADVI: 40, ModelFitMethod.MCMC: 64},
+    BayesianModel.SIMPLE_NEGATIVE_BINOMIAL: {
+        True: {ModelFitMethod.PYMC3_ADVI: 4, ModelFitMethod.PYMC3_MCMC: 4},
+        False: {ModelFitMethod.PYMC3_ADVI: 8, ModelFitMethod.PYMC3_MCMC: 8},
     },
 }
 
@@ -74,58 +35,15 @@ fitting_pipeline_memory_lookup: MemoryLookupDict = {
 # Time required for each configuration.
 #   key: [model][debug][fit_method]
 fitting_pipeline_time_lookup: TimeLookupDict = {
-    ModelOption.SPECLET_SIMPLE: {
-        True: {ModelFitMethod.ADVI: td(minutes=5), ModelFitMethod.MCMC: td(minutes=5)},
-        False: {
-            ModelFitMethod.ADVI: td(minutes=10),
-            ModelFitMethod.MCMC: td(minutes=10),
-        },
-    },
-    ModelOption.SPECLET_TEST_MODEL: {
-        True: {ModelFitMethod.ADVI: td(minutes=5), ModelFitMethod.MCMC: td(minutes=5)},
-        False: {
-            ModelFitMethod.ADVI: td(minutes=10),
-            ModelFitMethod.MCMC: td(minutes=10),
-        },
-    },
-    ModelOption.CRC_CERES_MIMIC: {
+    BayesianModel.SIMPLE_NEGATIVE_BINOMIAL: {
         True: {
-            ModelFitMethod.ADVI: td(minutes=30),
-            ModelFitMethod.MCMC: td(minutes=30),
+            ModelFitMethod.PYMC3_ADVI: td(minutes=5),
+            ModelFitMethod.PYMC3_MCMC: td(minutes=5),
         },
-        False: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(hours=6)},
-    },
-    ModelOption.SPECLET_ONE: {
-        True: {ModelFitMethod.ADVI: td(minutes=30), ModelFitMethod.MCMC: td(hours=8)},
-        False: {ModelFitMethod.ADVI: td(hours=12), ModelFitMethod.MCMC: td(days=2)},
-    },
-    ModelOption.SPECLET_TWO: {
-        True: {ModelFitMethod.ADVI: td(minutes=30), ModelFitMethod.MCMC: td(hours=8)},
-        False: {ModelFitMethod.ADVI: td(hours=12), ModelFitMethod.MCMC: td(days=2)},
-    },
-    ModelOption.SPECLET_FOUR: {
-        True: {ModelFitMethod.ADVI: td(minutes=30), ModelFitMethod.MCMC: td(hours=1)},
-        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
-    },
-    ModelOption.SPECLET_FIVE: {
-        True: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(days=1)},
-        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
-    },
-    ModelOption.SPECLET_SIX: {
-        True: {ModelFitMethod.ADVI: td(hours=3), ModelFitMethod.MCMC: td(days=1)},
-        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
-    },
-    ModelOption.SPECLET_SEVEN: {
-        True: {ModelFitMethod.ADVI: td(hours=12), ModelFitMethod.MCMC: td(days=1)},
-        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
-    },
-    ModelOption.SPECLET_EIGHT: {
-        True: {ModelFitMethod.ADVI: td(hours=1), ModelFitMethod.MCMC: td(hours=2)},
-        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=2)},
-    },
-    ModelOption.SPECLET_NINE: {
-        True: {ModelFitMethod.ADVI: td(hours=1), ModelFitMethod.MCMC: td(hours=1.5)},
-        False: {ModelFitMethod.ADVI: td(hours=10), ModelFitMethod.MCMC: td(days=4)},
+        False: {
+            ModelFitMethod.PYMC3_ADVI: td(minutes=10),
+            ModelFitMethod.PYMC3_MCMC: td(minutes=10),
+        },
     },
 }
 
