@@ -25,7 +25,7 @@ def make_chromosome_categorical(
     """
     chr_cats = _chr_cat.copy()
     if drop_unused:
-        used_chrs = set(df[chr_col].unique().tolist())
+        used_chrs = set(list(df[chr_col].unique()))
         chr_cats = [c for c in chr_cats if c in used_chrs]
 
     df[chr_col] = pd.Categorical(
