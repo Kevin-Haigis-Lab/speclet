@@ -4,21 +4,17 @@
 
 import logging
 import os
-import tempfile
 from pathlib import Path
 from typing import Optional
 
-import pymc3 as pm
-import tqdm
 import typer
 
-from speclet import model_configuration as model_config
+from speclet.bayesian_models import BayesianModel, get_bayesian_model
 from speclet.loggers import set_console_handler_level
-from speclet.project_enums import MockDataSize, ModelOption
 
 app = typer.Typer()
 
-set_console_handler_level(logging.ERROR)
+set_console_handler_level(logging.WARNING)
 
 
 # ---- Make document with model details ----
@@ -65,69 +61,22 @@ def model_docs(output_md: Optional[Path] = None, overwrite: bool = True) -> None
             "File already exists and will be added to.", fg=typer.colors.BRIGHT_BLACK
         )
 
-    for model_opt in ModelOption:
-        if model_opt in {ModelOption.SPECLET_TEST_MODEL, ModelOption.SPECLET_SIMPLE}:
+    for bayesian_model in BayesianModel:
+        if bayesian_model in {}:  # Add models to ignore here.
             continue
 
-        model_cls = model_config.get_model_class(model_opt)
+        model_cls = get_bayesian_model(bayesian_model)
         if _write_docstring(model_cls.__doc__, file=output_md):
-            typer.secho(f"doc written for '{model_opt.value}'", fg=typer.colors.BLUE)
+            typer.secho(
+                f"doc written for '{bayesian_model.value}'", fg=typer.colors.BLUE
+            )
         else:
             typer.secho(
-                f"no docstring found for '{model_opt.value}'", fg=typer.colors.RED
+                f"no docstring found for '{bayesian_model.value}'", fg=typer.colors.RED
             )
     _remove_indents(output_md)
 
     return None
-
-
-# ---- Make model graph images ----
-
-
-@app.command()
-def model_graphs(
-    output_dir: Optional[Path] = None,
-    config_path: Optional[Path] = None,
-    skip_existing: bool = False,
-) -> None:
-    """Save PDFs of graphs of each model in a configuration file.
-
-    Args:
-        output_dir (Path, optional): Where to save the PDF files. Defaults to
-          "models/model-graph-images".
-        config_path (Optional[Path], optional): Path to a configuration file. Passing
-          None (default) results in using the default configuration file for the
-          project.
-        skip_existing (bool, optional): Should PDFs that already exist be skipped?
-          Defaults to False.
-    """
-    if output_dir is None:
-        output_dir = Path("models", "model-graph-images")
-    if config_path is None:
-        config_path = model_config.get_model_config()
-    if not output_dir.exists():
-        output_dir.mkdir(parents=True)
-
-    configs = model_config.read_model_configurations(config_path)
-
-    typer.echo(f"Saving images to '{output_dir.as_posix()}'.")
-    typer.echo(f"Found {len(configs.configurations)} model configurations.")
-    for config in tqdm.tqdm(configs.configurations):
-        output_path = output_dir / config.name
-        if (
-            skip_existing
-            and (output_path.parent / (output_path.name + ".pdf")).exists()
-        ):
-            continue
-        sp_model = model_config.instantiate_and_configure_model(
-            config, root_cache_dir=Path(tempfile.mkdtemp())
-        )
-        mock_data = sp_model.generate_mock_data(MockDataSize.SMALL, random_seed=1)
-        sp_model.data_manager.set_data(mock_data)
-        sp_model.build_model()
-        mdl_graph = pm.model_to_graphviz(sp_model.model)
-        mdl_graph.render(output_path.as_posix(), format="pdf", cleanup=True)
-    return
 
 
 # ---- Count number of lines of code ----
@@ -177,7 +126,13 @@ def lines_of_code() -> None:
     """Count the lines of code in the project."""
     # Parameters for the search
     file_types = {".py", ".smk", ".sh", ".zsh", ".R", ".r"}
-    dirs = {Path("src"), Path("pipelines"), Path("tests"), Path("munge"), Path("data")}
+    dirs = {
+        Path("speclet"),
+        Path("pipelines"),
+        Path("tests"),
+        Path("munge"),
+        Path("data"),
+    }
     ignore_dirs = {"__pycache__", ".ipynb_checkpoints", ".DS_Store"}
 
     line_counts: dict[Path, int] = {d: -1 for d in dirs}
@@ -194,6 +149,8 @@ def lines_of_code() -> None:
         typer.secho(
             f"  {dir.as_posix().ljust(10)} -  {n_lines:,}", fg=typer.colors.BLUE
         )
+    _total = sum(line_counts.values())
+    typer.secho(f"TOTAL: {_total:,}", fg=typer.colors.BRIGHT_BLUE)
 
 
 if __name__ == "__main__":

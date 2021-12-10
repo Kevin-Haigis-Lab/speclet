@@ -40,10 +40,12 @@ class ProjectConfig(BaseModel):
 def read_project_configuration(path: Optional[Path] = None) -> ProjectConfig:
     """Read the project configuration.
 
+    Searches the .env for `PROJECT_CONFIG`.
+
     Args:
         path (Optional[Path], optional): Path to the configuration file if different
-          from the default location. Defaults to "project-config.yaml" in the project
-          root directory.
+        from the default location. If no path is passed, searches .env for
+        `PROJECT_CONFIG`.
 
     Returns:
         ProjectConfig: Project configurations broken down by project sections.
@@ -90,3 +92,8 @@ def get_pymc3_constants() -> BayesianModelingConstants:
     return BayesianModelingConstants(
         hdi_prob=project_config.modeling.highest_density_interval
     )
+
+
+def get_model_configuration_file() -> Path:
+    """Get the default model configuration file for the project."""
+    return read_project_configuration().modeling.models_config
