@@ -1,9 +1,7 @@
-#!/usr/bin/env python3
-
-"""Standardization of the interactions with PyMC3 sampling."""
+"""Standardization of the interactions with model sampling."""
 
 from dataclasses import dataclass
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 import arviz as az
 import numpy as np
@@ -16,10 +14,11 @@ from speclet.bayesian_models import BayesianModelProtocol
 from speclet.loggers import logger
 from speclet.modeling.fitting_arguments import (
     ModelingSamplingArguments,
+    Pymc3FitArguments,
+    Pymc3SampleArguments,
     StanMCMCSamplingArguments,
 )
 from speclet.project_enums import ModelFitMethod, assert_never
-from speclet.types import VIMethod
 
 
 def _get_kwargs_dict(data: Optional[BaseModel]) -> dict[str, Any]:
@@ -64,35 +63,43 @@ def _extend_trace_with_prior_and_posterior(
     return None
 
 
-def pymc3_sampling_procedure(
+def _update_return_inferencedata_kwarg(
+    sampling_kwargs: Optional[Pymc3SampleArguments],
+) -> Optional[Pymc3SampleArguments]:
+    if sampling_kwargs is None:
+        return sampling_kwargs
+
+    if not sampling_kwargs.return_inferencedata:
+        logger.warning("Switching `return_inferencedata` to `True`.")
+        sampling_kwargs.return_inferencedata = True
+
+    return sampling_kwargs
+
+
+def fit_pymc3_mcmc(
     model: pm.Model,
-    prior_pred_samples: Optional[int] = 500,
-    random_seed: Optional[int] = None,
-    sample_kwargs: Optional[dict[str, Any]] = None,
+    prior_pred_samples: Optional[int] = None,
+    sampling_kwargs: Optional[Pymc3SampleArguments] = None,
 ) -> az.InferenceData:
     """Run a standardized PyMC3 sampling procedure.
 
     Args:
         model (pm.Model): PyMC3 model.
         prior_pred_samples (Optional[int], optional): Number of samples from the prior
-          distributions. Defaults to 1000. If `None` or less than 1, no prior samples
-          are taken.
-        random_seed (Optional[int], optional): The random seed for sampling.
-          Defaults to `None`.
-        sample_kwargs (Dict[str, Any], optional): Kwargs for the sampling method.
-          Defaults to `None`.
+        distributions. Defaults to None. If `None` or less than 1, no prior samples
+        are taken.
+        sample_kwargs (Dict[str, Any], optional): Keyword arguments for the sampling
+        method. Defaults to `None`.
 
     Returns:
-        az.InferenceData: ArviZ standardized data set.
+        az.InferenceData: Model posterior sample.
     """
-    if sample_kwargs is None:
-        sample_kwargs = {}
-
-    _insert_random_seed_into_kwargs(random_seed, sample_kwargs)
-    sample_kwargs["return_inferencedata"] = True
+    sampling_kwargs = _update_return_inferencedata_kwarg(sampling_kwargs)
+    kwargs = _get_kwargs_dict(sampling_kwargs)
+    random_seed = kwargs.get("random_seed", None)
 
     with model:
-        trace = pm.sample(**sample_kwargs)
+        trace = pm.sample(**kwargs)
         post_pred = pm.sample_posterior_predictive(trace, random_seed=random_seed)
 
     assert isinstance(trace, az.InferenceData)
@@ -108,47 +115,37 @@ def pymc3_sampling_procedure(
 
     with model:
         _extend_trace_with_prior_and_posterior(trace, prior=prior_pred, post=post_pred)
+
     return trace
 
 
-def pymc3_advi_approximation_procedure(
+def fit_pymc3_vi(
     model: pm.Model,
-    method: VIMethod = "advi",
-    n_iterations: int = 100000,
-    draws: int = 1000,
-    prior_pred_samples: Optional[int] = 500,
-    callbacks: Optional[list[Callable]] = None,
-    random_seed: Optional[int] = None,
-    fit_kwargs: Optional[dict[str, Any]] = None,
+    prior_pred_samples: Optional[int] = None,
+    fit_kwargs: Optional[Pymc3FitArguments] = None,
 ) -> ApproximationSamplingResults:
     """Run a standard PyMC3 ADVI fitting procedure.
 
     Args:
         model (pm.Model): PyMC3 model.
-        method (str): VI method to use. Defaults to "advi".
-        n_iterations (int): Maximum number of fitting steps. Defaults to 100000.
-        draws (int, optional): Number of MCMC samples to draw from the fit model.
-          Defaults to 1000.
         prior_pred_samples (int, optional): Number of samples from the prior
-          distributions. Defaults to 1000. If less than 1, no prior samples are taken.
-        callbacks (List[Callable], optional): List of fitting callbacks.
-          Default is None.
-        random_seed (Optional[int], optional): The random seed for sampling.
-          Defaults to None.
-        fit_kwargs (Dict[str, Any], optional): Kwargs for the fitting method.
-          Defaults to None.
+        distributions. Defaults to 1000. If less than 1, no prior samples are taken.
+        fit_kwargs (Optional[Pymc3FitArguments], optional): Keyword arguments for the
+        fit method. Defaults to `None`.
 
     Returns:
         ApproximationSamplingResults: A collection of the fitting and sampling results.
     """
-    if fit_kwargs is None:
-        fit_kwargs = {}
+    kwargs = _get_kwargs_dict(fit_kwargs)
+    random_seed = kwargs.get("random_seed", None)
+    draws = kwargs.pop("draws", Pymc3FitArguments().draws)
 
     with model:
-        approx = pm.fit(n_iterations, method=method, callbacks=callbacks, **fit_kwargs)
+        approx = pm.fit(**kwargs)
         trace = az.from_pymc3(trace=approx.sample(draws))
         post_pred = pm.sample_posterior_predictive(trace=trace, random_seed=random_seed)
 
+    assert isinstance(approx, pm.Approximation)
     assert isinstance(trace, az.InferenceData)
 
     prior_pred: Optional[dict[str, np.ndarray]] = None
@@ -160,7 +157,9 @@ def pymc3_advi_approximation_procedure(
     else:
         logger.info("Not sampling from prior predictive.")
 
-    _extend_trace_with_prior_and_posterior(trace, prior=prior_pred, post=post_pred)
+    with model:
+        _extend_trace_with_prior_and_posterior(trace, prior=prior_pred, post=post_pred)
+
     return ApproximationSamplingResults(inference_data=trace, approximation=approx)
 
 
@@ -168,14 +167,14 @@ def pymc3_advi_approximation_procedure(
 
 
 def fit_stan_mcmc(
-    stan_model: StanModel, sampling_kwargs: Optional[StanMCMCSamplingArguments]
+    stan_model: StanModel, sampling_kwargs: Optional[StanMCMCSamplingArguments] = None
 ) -> az.InferenceData:
     """Fit a Stan model.
 
     Args:
         stan_model (StanModel): The Stan model to fit.
-        sampling_kwargs (Optional[StanMCMCSamplingArguments]): Optional fitting keyword
-        arguments.
+        sampling_kwargs (Optional[StanMCMCSamplingArguments], optional): Optional
+        fitting keyword arguments. Defaults to None
 
     Returns:
         az.InferenceData: Model posterior draws.

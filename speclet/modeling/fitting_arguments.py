@@ -41,7 +41,7 @@ class Pymc3SampleArguments(BaseModel):
     random_seed: PositiveInt = Field(default_factory=_randint)
     discard_tuned_samples: bool = True
     compute_convergence_checks: bool = True
-    return_inferencedata: Optional[bool] = True  # not default
+    return_inferencedata: bool = True  # not default
     idata_kwargs: Optional[dict[str, BasicTypes]] = None
     target_accept: TargetAcceptFloat = 0.8  # type: ignore
 
@@ -65,6 +65,7 @@ class Pymc3FitArguments(BaseModel):
     _pymc3_version: str = "3.11.4"
     n: PositiveInt = 10000
     method: VIMethod = "advi"
+    draws: PositiveInt = 1000
     random_seed: PositiveInt = Field(default_factory=_randint)
     inf_kwargs: Optional[dict[str, BasicTypes]] = None
     progressbar: bool = True
