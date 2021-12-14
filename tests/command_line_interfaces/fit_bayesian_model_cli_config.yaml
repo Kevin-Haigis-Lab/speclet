@@ -1,7 +1,7 @@
 # For testing "fit_bayesian_model_cli".
 - name: example-specification
   description: An example config spec.
-  model: SIMPLE_NEGATIVE_BINOMIAL
+  model: EIGHT_SCHOOLS
   data_file: DEPMAP_TEST_DATA
   sampling_kwargs:
     stan_mcmc:
