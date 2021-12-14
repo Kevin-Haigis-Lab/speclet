@@ -63,7 +63,8 @@ class PosteriorManager:
             trace (az.InferenceData): A model's posterior data.
         """
         self._posterior = trace
-        trace.to_netcdf(str(self.cache_path))
+        # trace.to_netcdf(str(self.cache_path))  # problems with writing as netCDF
+        trace.to_json(str(self.cache_path))
 
     def get(self, from_file: bool = False) -> Optional[az.InferenceData]:
         """Get a model's posterior data.
@@ -78,7 +79,7 @@ class PosteriorManager:
         if not from_file and self._posterior is not None:
             return self._posterior
         elif self.cache_exists:
-            return az.from_netcdf(str(self.cache_path))
+            return az.from_json(str(self.cache_path))
         else:
             return None
 
