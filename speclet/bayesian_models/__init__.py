@@ -1,7 +1,7 @@
 """Organization of the Bayesian model classes."""
 
 from enum import Enum, unique
-from typing import Final, Protocol, Type
+from typing import Final, Optional, Protocol, Type
 
 import pandas as pd
 import pymc3 as pm
@@ -24,11 +24,14 @@ class BayesianModelProtocol(Protocol):
         """Simple initialization method."""
         ...
 
-    def stan_model(self, data: pd.DataFrame) -> StanModel:
+    def stan_model(
+        self, data: pd.DataFrame, random_seed: Optional[int] = None
+    ) -> StanModel:
         """Make a Stan model.
 
         Args:
             data (pd.DataFrame): Data to model.
+            random_seed (Optional[int], optional): Random seed. Defaults to None.
 
         Returns:
             StanModel: A Stan model.

@@ -181,6 +181,7 @@ def fit_stan_mcmc(
         az.InferenceData: Model posterior draws.
     """
     kwargs = _get_kwargs_dict(sampling_kwargs)
+    _ = kwargs.pop("random_seed", None)  # remove 'random_seed'
     post = stan_model.sample(**kwargs)
 
     # TODO: add in data for posterior predictive, coordinates, etc.
@@ -212,10 +213,12 @@ def fit_model(
         az.InferenceData: Model posterior.
     """
     if fit_method is ModelFitMethod.STAN_MCMC:
-        stan_model = model.stan_model(data)
-        kwargs = None
         if sampling_kwargs is not None:
             kwargs = sampling_kwargs.stan_mcmc
+        else:
+            kwargs = None
+        seed = None if kwargs is None else kwargs.random_seed
+        stan_model = model.stan_model(data, random_seed=seed)
         return fit_stan_mcmc(stan_model, sampling_kwargs=kwargs)
     elif fit_method is ModelFitMethod.PYMC3_MCMC:
         raise NotImplementedError(fit_method.value)

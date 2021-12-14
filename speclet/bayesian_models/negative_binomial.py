@@ -2,7 +2,7 @@
 
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Final
+from typing import Final, Optional
 
 import numpy as np
 import pandas as pd
@@ -87,13 +87,13 @@ class NegativeBinomialModel:
         return read_code_file(self._stan_code_file)
 
     def stan_model(
-        self,
-        data: pd.DataFrame,
+        self, data: pd.DataFrame, random_seed: Optional[int] = None
     ) -> StanModel:
         """Stan model for a simple negative binomial model.
 
         Args:
             data (pd.DataFrame): Data to model.
+            random_seed (Optional[int], optional): Random seed. Defaults to None.
 
         Returns:
             StanModel: Stan model.

@@ -2,12 +2,17 @@
 
 from typing import Any, Callable, Iterable, Optional, Union
 
+import numpy as np
 import pymc3 as pm
-from pydantic import BaseModel, PositiveInt, confloat
+from pydantic import BaseModel, Field, PositiveInt, confloat
 
 from speclet.types import BasicTypes, VIMethod
 
 TargetAcceptFloat = confloat(ge=0.5, lt=1.0)
+
+
+def _randint() -> int:
+    return np.random.randint(0, 10000)
 
 
 class StanMCMCSamplingArguments(BaseModel):
@@ -17,7 +22,7 @@ class StanMCMCSamplingArguments(BaseModel):
     num_samples: PositiveInt = 1000
     num_warmup: PositiveInt = 1000
     save_warmup: bool = False
-    thin: PositiveInt = 1
+    random_seed: PositiveInt = Field(default_factory=_randint)
 
 
 class Pymc3SampleArguments(BaseModel):
@@ -33,7 +38,7 @@ class Pymc3SampleArguments(BaseModel):
     cores: Optional[PositiveInt] = None
     tune: PositiveInt = 1000
     progressbar: bool = True
-    random_seed: Optional[PositiveInt] = None
+    random_seed: PositiveInt = Field(default_factory=_randint)
     discard_tuned_samples: bool = True
     compute_convergence_checks: bool = True
     return_inferencedata: Optional[bool] = True  # not default
@@ -60,7 +65,7 @@ class Pymc3FitArguments(BaseModel):
     _pymc3_version: str = "3.11.4"
     n: PositiveInt = 10000
     method: VIMethod = "advi"
-    random_seed: Optional[PositiveInt] = None
+    random_seed: PositiveInt = Field(default_factory=_randint)
     inf_kwargs: Optional[dict[str, BasicTypes]] = None
     progressbar: bool = True
 
