@@ -37,7 +37,6 @@ model {
 """
 
 
-@pytest.mark.DEV
 def test_pytsan_working() -> None:
     schools_data = {
         "J": 8,
