@@ -4,27 +4,45 @@ import os
 import warnings
 from enum import Enum, unique
 from pathlib import Path
-from typing import Union
+from typing import Final, Union
 
 
 @unique
 class DataFile(Enum):
     """Data file names."""
 
-    DEPMAP_CRC = "depmap_modeling_dataframe_crc.csv"
-    DEPMAP_CRC_BONE = "depmap_modeling_dataframe_crc_bone.csv"
-    DEPMAP_CRC_SUBSAMPLE = "depmap_modeling_dataframe_crc-subsample.csv"
-    DEPMAP_CRC_BONE_SUBSAMPLE = "depmap_modeling_dataframe_crc_bone-subsample.csv"
-    DEPMAP_DATA = "depmap_modeling_dataframe.csv"
-    DEPMAP_ESSENTIALS = "known_essentials.csv"
-    DEPMAP_TEST_DATA = "depmap_test_data.csv"
-    ACHILLES_GENE_EFFECT = "achilles_gene_effect.csv"
-    CCLE_MUTATIONS = "ccle_mutations.csv"
-    CCLE_COPYNUMBER = "ccle_gene_cn.csv"
-    COPY_NUMBER_SAMPLE = "copy_number_data_samples.npy"
-    CGC = "sanger_cancer-gene-census.csv"
-    SCREEN_READ_COUNT_TOTALS = "depmap_replicate_total_read_counts.csv"
-    PDNA_READ_COUNT_TOTALS = "depmap_pdna_total_read_counts.csv"
+    DEPMAP_CRC = "DEPMAP_CRC"
+    DEPMAP_CRC_BONE = "DEPMAP_CRC_BONE"
+    DEPMAP_CRC_SUBSAMPLE = "DEPMAP_CRC_SUBSAMPLE"
+    DEPMAP_CRC_BONE_SUBSAMPLE = "DEPMAP_CRC_BONE_SUBSAMPLE"
+    DEPMAP_DATA = "DEPMAP_DATA"
+    DEPMAP_ESSENTIALS = "DEPMAP_ESSENTIALS"
+    DEPMAP_TEST_DATA = "DEPMAP_TEST_DATA"
+    ACHILLES_GENE_EFFECT = "ACHILLES_GENE_EFFECT"
+    CCLE_MUTATIONS = "CCLE_MUTATIONS"
+    CCLE_COPYNUMBER = "CCLE_COPYNUMBER"
+    COPY_NUMBER_SAMPLE = "COPY_NUMBER_SAMPLE"
+    CGC = "CGC"
+    SCREEN_READ_COUNT_TOTALS = "SCREEN_READ_COUNT_TOTALS"
+    PDNA_READ_COUNT_TOTALS = "PDNA_READ_COUNT_TOTALS"
+
+
+_data_file_map: Final[dict[DataFile, str]] = {
+    DataFile.DEPMAP_CRC: "depmap_modeling_dataframe_crc.csv",
+    DataFile.DEPMAP_CRC_BONE: "depmap_modeling_dataframe_crc_bone.csv",
+    DataFile.DEPMAP_CRC_SUBSAMPLE: "depmap_modeling_dataframe_crc-subsample.csv",
+    DataFile.DEPMAP_CRC_BONE_SUBSAMPLE: "depmap_modeling_dataframe_crc_bone-subsample.csv",  # noqa: E501
+    DataFile.DEPMAP_DATA: "depmap_modeling_dataframe.csv",
+    DataFile.DEPMAP_ESSENTIALS: "known_essentials.csv",
+    DataFile.DEPMAP_TEST_DATA: "depmap_test_data.csv",
+    DataFile.ACHILLES_GENE_EFFECT: "achilles_gene_effect.csv",
+    DataFile.CCLE_MUTATIONS: "ccle_mutations.csv",
+    DataFile.CCLE_COPYNUMBER: "ccle_gene_cn.csv",
+    DataFile.COPY_NUMBER_SAMPLE: "copy_number_data_samples.npy",
+    DataFile.CGC: "sanger_cancer-gene-census.csv",
+    DataFile.SCREEN_READ_COUNT_TOTALS: "depmap_replicate_total_read_counts.csv",
+    DataFile.PDNA_READ_COUNT_TOTALS: "depmap_pdna_total_read_counts.csv",
+}
 
 
 def package_root() -> Path:
@@ -68,16 +86,20 @@ def data_path(to: Union[str, DataFile]) -> Path:
     """Path a to a data file.
 
     Args:
-        to (DataFile): The desired data.
+        to (DataFile): Either a string that is the name of the desired file or the
+        DataFile enum that represents a data file.
 
     Returns:
         Path: Path to the file.
     """
     if isinstance(to, str):
-        to = DataFile(to)
+        return modeling_data_dir() / to
+
     if to is DataFile.DEPMAP_TEST_DATA:
-        return project_root() / "tests" / to.value
-    return modeling_data_dir() / to.value
+        _dir = project_root() / "tests"
+    else:
+        _dir = modeling_data_dir()
+    return _dir / _data_file_map[to]
 
 
 def modeling_data_dir() -> Path:
