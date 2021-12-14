@@ -4,12 +4,13 @@
 - name: example-specification          # UUID name of this model and configuration.
   description: An example config spec. # Some helpful description of the model.
   model: SIMPLE_NEGATIVE_BINOMIAL      # Model to fit.
+  data_file: DEPMAP_CRC_BONE_SUBSAMPLE # Data file.
   sampling_kwargs:                     # Optional arguments to provide for posterior sampling methods.
-    - stan_mcmc:
-      - num_chains: 2
-      - num_samples: 1000
-    - pymc3_mcmc:
-      - draws: 1000
-      - init: "advi"
-    - pymc3_advi:
-      - n: 200000
+    stan_mcmc:
+      num_chains: 2
+      num_samples: 1000
+    pymc3_mcmc:
+      draws: 1000
+      init: "advi"
+    pymc3_advi:
+      n: 200000

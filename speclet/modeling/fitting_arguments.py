@@ -15,12 +15,15 @@ class StanMCMCSamplingArguments(BaseModel):
 
     num_chains: PositiveInt = 4
     num_samples: PositiveInt = 1000
+    num_warmup: PositiveInt = 1000
+    save_warmup: bool = False
+    thin: PositiveInt = 1
 
 
 class Pymc3SampleArguments(BaseModel):
-    """Model `sample()` keyword arguments (PyMC3 v3.11.2)."""
+    """Model `sample()` keyword arguments (PyMC3 v3.11.4)."""
 
-    _pymc3_version: str = "3.11.2"
+    _pymc3_version: str = "3.11.4"
     draws: int = 1000
     step: Optional[Union[Callable, Iterable[Callable]]] = None
     init: str = "auto"
@@ -52,9 +55,9 @@ class Pymc3SampleArguments(BaseModel):
 
 
 class Pymc3FitArguments(BaseModel):
-    """Model `fit()` keyword arguments (PyMC3 v3.11.2)."""
+    """Model `fit()` keyword arguments (PyMC3 v3.11.4)."""
 
-    _pymc3_version: str = "3.11.2"
+    _pymc3_version: str = "3.11.4"
     n: PositiveInt = 10000
     method: VIMethod = "advi"
     random_seed: Optional[PositiveInt] = None
