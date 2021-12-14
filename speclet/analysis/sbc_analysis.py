@@ -10,7 +10,7 @@ import pandas as pd
 import seaborn as sns
 from matplotlib.axes import Axes
 
-import speclet.analysis.pymc3_analysis as pmanal
+import speclet.analysis.arviz_analysis as azanal
 import speclet.exceptions
 import speclet.modeling.simulation_based_calibration_helpers as sbc
 from speclet.modeling import pymc3_helpers as pmhelp
@@ -160,10 +160,10 @@ class SBCAnalysis:
             dict[str, float]: Summary statistics on key diagnostics of MCMC.
         """
 
-        def read_mcmc_diagnostics(sbc_fm: sbc.SBCFileManager) -> pmanal.MCMCDescription:
+        def read_mcmc_diagnostics(sbc_fm: sbc.SBCFileManager) -> azanal.MCMCDescription:
             results = sbc_fm.get_sbc_results()
             try:
-                res = pmanal.describe_mcmc(
+                res = azanal.describe_mcmc(
                     results.inference_obj, silent=True, plot=False
                 )
                 return res

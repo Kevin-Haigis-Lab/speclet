@@ -11,7 +11,7 @@ import pandas as pd
 from tqdm import tqdm
 
 import speclet.exceptions
-from speclet.analysis.pymc3_analysis import get_hdi_colnames_from_az_summary
+from speclet.analysis.arviz_analysis import get_hdi_colnames_from_az_summary
 from speclet.data_processing import vectors as vhelp
 
 #### ---- File management ---- ####
