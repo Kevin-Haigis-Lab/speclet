@@ -1,0 +1,12 @@
+# For testing "fit_bayesian_model_cli".
+- name: example-specification
+  description: An example config spec.
+  model: SIMPLE_NEGATIVE_BINOMIAL
+  data_file: DEPMAP_TEST_DATA
+  sampling_kwargs:
+    stan_mcmc:
+      num_samples: 100
+      num_warmup: 100
+    pymc3_mcmc:
+      tune: 100
+      draws: 100

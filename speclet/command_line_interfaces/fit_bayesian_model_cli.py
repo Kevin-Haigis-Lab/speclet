@@ -8,7 +8,7 @@ from time import time
 from typing import Optional
 
 import pandas as pd
-import typer
+from typer import Typer
 
 from speclet import io
 from speclet import model_configuration as model_config
@@ -22,7 +22,7 @@ from speclet.modeling.model_fitting_api import fit_model
 from speclet.project_enums import ModelFitMethod
 
 cli_helpers.configure_pretty()
-
+app = Typer()
 
 #### ---- Main ---- ####
 
@@ -47,6 +47,7 @@ def _augment_sampling_kwargs(
     return sampling_kwargs
 
 
+@app.command()
 def fit_bayesian_model(
     name: str,
     config_path: Path,
@@ -96,4 +97,4 @@ def fit_bayesian_model(
 
 
 if __name__ == "__main__":
-    typer.run(fit_bayesian_model)
+    app()
