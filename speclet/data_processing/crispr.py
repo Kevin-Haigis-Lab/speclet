@@ -323,43 +323,6 @@ def data_batch_indices(achilles_df: pd.DataFrame) -> DataBatchIndices:
     )
 
 
-# class UncommonIndices(BaseModel):
-#     """Object to hold uncommon indices used for modeling Achilles data."""
-
-#     cellline_to_kras_mutation_idx: np.ndarray
-#     n_kras_mutations: int = 0
-
-#     def __init__(self, **data):
-#         """Object to hold common indices used for modeling Achilles data."""
-#         super().__init__(**data)
-#         self.n_kras_mutations = dphelp.nunique(self.cellline_to_kras_mutation_idx)
-
-#     class Config:
-#         """Configuration for pydantic validation."""
-
-#         arbitrary_types_allowed = True
-
-
-# def uncommon_indices(
-#     achilles_df: pd.DataFrame, min_kras_muts: int = 0
-# ) -> UncommonIndices:
-#     """Generate a collection of indices frequently used for modeling Achilles data.
-
-#     Args:
-#         achilles_df (pd.DataFrame): The DataFrame with Achilles data.
-
-#     Returns:
-#         UncommonIndices: A data model with a collection of indices.
-#     """
-#     mod_df = achilles_df.copy()[["depmap_id", "kras_mutation"]]
-#     mod_df["kras_idx"] = make_kras_mutation_index_with_other(
-#         achilles_df, min=min_kras_muts
-#     )
-#     mod_df = mod_df.drop_duplicates().sort_values("depmap_id").reset_index(drop=True)
-#     cl_to_kras_idx = mod_df["kras_idx"].values
-#     return UncommonIndices(cellline_to_kras_mutation_idx=cl_to_kras_idx)
-
-
 #### ---- Data frames ---- ####
 
 _default_achilles_categorical_cols: Final[tuple[str, ...]] = (
@@ -517,7 +480,7 @@ def append_total_read_counts(
 
 
 def add_useful_read_count_columns(
-    achilles_df: pd.DataFrame,
+    crispr_df: pd.DataFrame,
     counts_final: str = "counts_final",
     counts_final_total: str = "counts_final_total",
     counts_initial: str = "counts_initial",
@@ -534,7 +497,7 @@ def add_useful_read_count_columns(
       \\times \\Sigma c_\\text{final}\\)
 
     Args:
-        achilles_df (pd.DataFrame): Achilles data frame
+        crispr_df (pd.DataFrame): Achilles data frame
         counts_final (str, optional): Column of final read counts. Defaults to
           "counts_final".
         counts_final_total (str, optional): Column of total final read counts. Defaults
@@ -553,18 +516,18 @@ def add_useful_read_count_columns(
         pd.DataFrame: The original data frame with the new columns append.
     """
     if copy:
-        achilles_df = achilles_df.copy()
+        crispr_df = crispr_df.copy()
 
     # 1e6 * (counts_f / Σ counts_f) + 1
-    achilles_df[counts_final_rpm] = (
-        1e6 * (achilles_df[counts_final] / achilles_df[counts_final_total]) + 1
+    crispr_df[counts_final_rpm] = (
+        1e6 * (crispr_df[counts_final] / crispr_df[counts_final_total]) + 1
     )
     # (counts_i / Σ counts_i) * Σ counts_f
-    achilles_df[counts_initial_adj] = (
-        achilles_df[counts_initial] / achilles_df[counts_initial_total]
-    ) * achilles_df[counts_final_total]
+    crispr_df[counts_initial_adj] = (
+        crispr_df[counts_initial] / crispr_df[counts_initial_total]
+    ) * crispr_df[counts_final_total]
 
-    return achilles_df
+    return crispr_df
 
 
 def filter_for_broad_source_only(

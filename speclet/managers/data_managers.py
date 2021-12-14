@@ -288,6 +288,7 @@ class CrisprScreenDataManager:
 
         # TODO: check for unique pairing of sgRNA and gene.
         # TODO: check for unique pairing of cell line and lineage.
+        # TODO: add tests for both of these checks
 
         Returns:
             DataFrameSchema: Pandera data schema.
@@ -327,7 +328,3 @@ class CrisprScreenDataManager:
             pd.DataFrame: Validated dataframe.
         """
         return self.data_schema.validate(data)
-
-
-# TODO: subclass CrisprScreenDataManager to add specific validations and transforms
-# e.g. for counts modeling, need `counts_initial_adj`...

@@ -41,6 +41,11 @@ def depmap_test_data() -> Path:
     return TEST_DATA
 
 
+@pytest.fixture
+def depmap_test_df(depmap_test_data: Path) -> pd.DataFrame:
+    return pd.read_csv(depmap_test_data)
+
+
 def monkey_get_data_path(*args: Any, **kwargs: Any) -> Path:
     return TEST_DATA
 
