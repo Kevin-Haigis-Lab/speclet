@@ -41,16 +41,6 @@ class ApproximationSamplingResults:
 # ---- Interface with PyMC3 ---- #
 
 
-def _insert_random_seed_into_kwargs(
-    random_seed: Optional[int], sample_kwargs: dict[str, Any]
-) -> None:
-    kwargs_seed: Optional[int] = sample_kwargs.get("random_seed")
-    if kwargs_seed != random_seed:
-        logger.warning(f"Different random seeds supplied - using {random_seed}")
-    sample_kwargs["random_seed"] = random_seed
-    return
-
-
 def _extend_trace_with_prior_and_posterior(
     trace: az.InferenceData,
     prior: Optional[dict[str, np.ndarray]] = None,
@@ -195,18 +185,16 @@ def fit_model(
     model: BayesianModelProtocol,
     data: pd.DataFrame,
     fit_method: ModelFitMethod,
-    sampling_kwargs: Optional[ModelingSamplingArguments],
+    sampling_kwargs: Optional[ModelingSamplingArguments] = None,
 ) -> az.InferenceData:
     """Fit a model using a specified method.
-
-    Only implemented for Stan MCMC at the moment...
 
     Args:
         model (BayesianModelProtocol): Bayesian model to fit.
         data (pd.DataFrame): CRISPR screen data to use.
         fit_method (ModelFitMethod): Fitting method.
-        sampling_kwargs (Optional[ModelingSamplingArguments]): Optional sampling keyword
-        arguments.
+        sampling_kwargs (Optional[ModelingSamplingArguments], optional): Optional
+        sampling keyword arguments. Defaults to None.
 
     Returns:
         az.InferenceData: Model posterior.
@@ -217,11 +205,25 @@ def fit_model(
         else:
             kwargs = None
         seed = None if kwargs is None else kwargs.random_seed
-        stan_model = model.stan_model(data, random_seed=seed)
+        stan_model = model.stan_model(data=data, random_seed=seed)
         return fit_stan_mcmc(stan_model, sampling_kwargs=kwargs)
     elif fit_method is ModelFitMethod.PYMC3_MCMC:
-        raise NotImplementedError(fit_method.value)
+        if sampling_kwargs is not None:
+            kwargs = sampling_kwargs.pymc3_mcmc
+        else:
+            kwargs = None
+        pymc3_model = model.pymc3_model(data=data)
+        return fit_pymc3_mcmc(
+            model=pymc3_model, prior_pred_samples=0, sampling_kwargs=kwargs
+        )
     elif fit_method is ModelFitMethod.PYMC3_ADVI:
-        raise NotImplementedError(fit_method.value)
+        if sampling_kwargs is not None:
+            kwargs = sampling_kwargs.pymc3_advi
+        else:
+            kwargs = None
+        pymc3_model = model.pymc3_model(data=data)
+        return fit_pymc3_vi(
+            model=pymc3_model, prior_pred_samples=0, fit_kwargs=kwargs
+        ).inference_data
     else:
         assert_never(fit_method)
