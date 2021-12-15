@@ -56,8 +56,8 @@ def test_get_all_variables_rm_log(mock_model: pm.Model) -> None:
     assert expected_rvs == set(rvs)
 
 
-def test_get_posterior_names(centered_eight: az.InferenceData) -> None:
-    got_names = pmhelp.get_posterior_names(centered_eight)
+def test_get_posterior_names(centered_eight_idata: az.InferenceData) -> None:
+    got_names = pmhelp.get_posterior_names(centered_eight_idata)
     expected_names = {"mu", "theta", "tau"}
     assert set(got_names) == expected_names
 
@@ -67,9 +67,11 @@ def test_get_posterior_names(centered_eight: az.InferenceData) -> None:
     [("mu", (4, 100)), ("tau", (4, 100)), ("theta", (4, 100, 8))],
 )
 def test_thin_posterior(
-    centered_eight: az.InferenceData, var_name: str, thinned_shape: tuple[int, ...]
+    centered_eight_idata: az.InferenceData,
+    var_name: str,
+    thinned_shape: tuple[int, ...],
 ) -> None:
-    post = centered_eight["posterior"][var_name]
+    post = centered_eight_idata["posterior"][var_name]
     thinned_post = pmhelp.thin_posterior(post, thin_to=100)
     assert thinned_post.shape == thinned_shape
     thinned_post = pmhelp.thin_posterior(post, step_size=5)
@@ -84,12 +86,12 @@ def test_thin_posterior(
     [("mu", (500,)), ("tau", (500,)), ("theta", (500, 8))],
 )
 def test_get_one_chain(
-    centered_eight: az.InferenceData,
+    centered_eight_idata: az.InferenceData,
     var_name: str,
     new_shape: tuple[int, ...],
     chain_num: int,
 ) -> None:
-    post = centered_eight["posterior"][var_name]
+    post = centered_eight_idata["posterior"][var_name]
     new_post = pmhelp.get_one_chain(post, chain_num=chain_num)
     assert new_post.shape == new_shape
 

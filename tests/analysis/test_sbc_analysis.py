@@ -108,7 +108,7 @@ class TestSBCAnalysis:
         )
 
     def test_mcmc_diagnostics(
-        self, tmp_path: Path, centered_eight: az.InferenceData
+        self, tmp_path: Path, centered_eight_idata: az.InferenceData
     ) -> None:
         n_sims = 10
         pattern = "perm"
@@ -117,7 +117,7 @@ class TestSBCAnalysis:
             dir.mkdir()
             sbchelp.SBCFileManager(dir).save_sbc_results(
                 priors={},
-                inference_obj=centered_eight,
+                inference_obj=centered_eight_idata,
                 posterior_summary=pd.DataFrame(),
             )
 
