@@ -10,3 +10,5 @@
     pymc3_mcmc:
       tune: 100
       draws: 100
+    pymc3_advi:
+      n: 1000
