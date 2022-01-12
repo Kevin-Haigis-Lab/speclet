@@ -4,7 +4,9 @@
 
 import logging
 import os
+from inspect import getdoc
 from pathlib import Path
+from textwrap import dedent
 from typing import Optional
 
 import typer
@@ -24,19 +26,9 @@ def _write_docstring(doc: Optional[str], file: Path) -> bool:
     if doc is None:
         return False
     with open(file, "a") as f:
-        f.write(doc)
+        f.write(dedent(doc))
         f.write("\n---\n\n")
     return True
-
-
-def _remove_indents(file: Path) -> None:
-    clean_lines: list[str] = []
-    with open(file, "r") as open_file:
-        for line in open_file:
-            clean_lines.append(line.strip())
-    with open(file, "w") as open_file:
-        open_file.write("\n".join(clean_lines))
-    return None
 
 
 @app.command()
@@ -66,7 +58,8 @@ def model_docs(output_md: Optional[Path] = None, overwrite: bool = True) -> None
             continue
 
         model_cls = get_bayesian_model(bayesian_model)
-        if _write_docstring(model_cls.__doc__, file=output_md):
+        if _write_docstring(getdoc(model_cls), file=output_md):
+            help()
             typer.secho(
                 f"doc written for '{bayesian_model.value}'", fg=typer.colors.BLUE
             )
@@ -74,8 +67,6 @@ def model_docs(output_md: Optional[Path] = None, overwrite: bool = True) -> None
             typer.secho(
                 f"no docstring found for '{bayesian_model.value}'", fg=typer.colors.RED
             )
-    _remove_indents(output_md)
-
     return None
 
 
