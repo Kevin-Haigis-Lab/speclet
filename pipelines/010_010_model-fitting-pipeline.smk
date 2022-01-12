@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+"""Model fitting pipeline."""
 
 from enum import Enum
 from pathlib import Path
@@ -23,11 +23,11 @@ DEBUG = project_config.fitting_pipeline_debug_status()
 SCRATCH_DIR = "/n/scratch3/users/j/jc604"
 SCRATCH_TEMP_DIR = f"{SCRATCH_DIR}/speclet/fitting-mcmc/"
 PYMC3_MODEL_CACHE_DIR = "models/"
-REPORTS_DIR = "reports/crc_model_sampling_reports/"
+REPORTS_DIR = "reports/model-fitting-pipeline-reports/"
 ENVIRONMENT_YAML = Path("default_environment.yaml").as_posix()
 
 # Benchmarking jobs.
-BENCHMARK_DIR = Path("benchmarks", "010_010_run-crc-sampling-snakemake")
+BENCHMARK_DIR = Path("benchmarks", "010_010_model-fitting-pipeline")
 if not BENCHMARK_DIR.exists():
     BENCHMARK_DIR.mkdir(parents=True)
 

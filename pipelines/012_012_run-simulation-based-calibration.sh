@@ -4,9 +4,9 @@
 #SBATCH -c 1
 #SBATCH -p priority
 #SBATCH -t 1-00:00
-#SBATCH --mem 1G
-#SBATCH -o logs/%j_sample-pipeline.log
-#SBATCH -e logs/%j_sample-pipeline.log
+#SBATCH --mem 2G
+#SBATCH -o logs/%j-sbc-snakemake.log
+#SBATCH -e logs/%j-sbc-snakemake.log
 
 module unload python
 module load gcc conda2 slurm-drmaa/1.1.1
@@ -15,7 +15,7 @@ module load gcc conda2 slurm-drmaa/1.1.1
 source "$HOME/.bashrc"
 conda activate speclet_snakemake
 
-SNAKEFILE="pipelines/010_010_run-crc-sampling-snakemake.smk"
+SNAKEFILE="pipelines/012_010_simulation-based-calibration.smk"
 
 # Copy original env file and ammend import of speclet project modules
 ENV_PATH="pipelines/default_environment.yaml"
@@ -27,16 +27,17 @@ fi
 
 snakemake \
     --snakefile $SNAKEFILE \
-    --jobs 9995 \
-    --restart-times 0 \
+    --jobs 9990 \
+    --restart-times 1 \
     --latency-wait 120 \
     --use-conda \
-    --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
-    --cluster-config pipelines/010_011_smk-config.yaml \
     --keep-going \
-    --printshellcmds
+    --printshellcmds \
+    --cluster-config pipelines/012_011_smk-config.yaml \
+    --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}"
 
 # --conda-cleanup-envs  # use to clean up old conda envs
+
 
 # to make a dag
 # snakemake \
@@ -44,5 +45,6 @@ snakemake \
 #   --dag |  \
 #   dot -Tpdf > analysis/015_snakemake-dag.pdf
 
+
 conda deactivate
-exit 4
+exit 44

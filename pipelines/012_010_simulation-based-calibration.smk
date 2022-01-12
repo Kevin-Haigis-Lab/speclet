@@ -20,7 +20,7 @@ MOCK_DATA_SIZE = MockDataSize.MEDIUM
 # Directory and file paths
 # SCRATCH_DIR = "/n/scratch3/users/j/jc604"
 SCRATCH_DIR = "/n/no_backup2/dbmi/park/jc604"
-REPORTS_DIR = "reports/crc_sbc_reports/"
+REPORTS_DIR = "reports/sbc-reports/"
 ENVIRONMENT_YAML = "default_environment.yaml"
 ROOT_PERMUTATION_DIR = f"{SCRATCH_DIR}/speclet-sbc/"
 CACHE_DIR = "cache/sbc-cache/"
@@ -29,7 +29,7 @@ CACHE_DIR = "cache/sbc-cache/"
 THEANO_FLAG = get_theano_flags(unique_id="{wildcards.model_name}_{wildcards.perm_num}")
 
 # Benchmarking jobs.
-BENCHMARK_DIR = Path("benchmarks", "012_010_simulation-based-calibration-snakemake")
+BENCHMARK_DIR = Path("benchmarks", "012_010_simulation-based-calibration")
 if not BENCHMARK_DIR.exists():
     BENCHMARK_DIR.mkdir(parents=True)
 

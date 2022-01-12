@@ -59,13 +59,13 @@ jobs:
       - name: Model fitting pipeline
         run: |
           snakemake \
-            --snakefile pipelines/010_010_run-crc-sampling-snakemake.smk \
+            --snakefile pipelines/010_010_model-fitting-pipeline.smk \
             --dry-run \
             --forceall
       - name: SBC pipeline
         run: |
           snakemake \
-            --snakefile pipelines/012_010_simulation-based-calibration-snakemake.smk \
+            --snakefile pipelines/012_010_simulation-based-calibration.smk \
             --dry-run \
             --forceall
       # - name: Data download pipeline
