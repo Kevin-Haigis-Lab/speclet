@@ -1,7 +1,7 @@
 # Configurations used throughout the project.
 
 munge:
-  test: True
+  test: false
   temporary_directory: "temp"
 
 modeling:
@@ -9,4 +9,11 @@ modeling:
   models_config: "models/model-configs.yaml"
 
 fitting_pipeline:
-  debug: True
+  debug: true
+  num_chains: 4
+  models_config: "models/model-configs.yaml"
+  temp_dir: "temp/fitting-mcmc"
+  model_cache_dir: "models/"
+  reports_dir: "reports/model-fitting-pipeline-reports/"
+  benchmark_dir: "benchmarks/010_010_model-fitting-pipeline"
+  env_yaml: "default_environment.yaml"

@@ -27,6 +27,13 @@ class FittingPipelineConfig(BaseModel):
     """Fitting pipeline configurations."""
 
     debug: bool
+    num_chains: int
+    models_config: Path
+    temp_dir: Path
+    model_cache_dir: Path
+    reports_dir: Path
+    benchmark_dir: Path
+    env_yaml: Path
 
 
 class ProjectConfig(BaseModel):
@@ -66,13 +73,9 @@ def read_project_configuration(path: Optional[Path] = None) -> ProjectConfig:
 # ---- Access helpers ----
 
 
-def fitting_pipeline_debug_status() -> bool:
-    """Retrieve the fitting pipeline's debug status.
-
-    Returns:
-        bool: Whether or not the pipeline is in debug mode.
-    """
-    return read_project_configuration().fitting_pipeline.debug
+def fitting_pipeline_config() -> FittingPipelineConfig:
+    """The configuration for the model fitting pipeline."""
+    return read_project_configuration().fitting_pipeline
 
 
 @dataclass(frozen=True)
