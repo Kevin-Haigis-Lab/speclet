@@ -1,7 +1,7 @@
 """Classic eight-schools example."""
 
 from dataclasses import asdict, dataclass
-from typing import Optional
+from typing import Any, Optional
 
 import numpy as np
 import pandas as pd
@@ -11,21 +11,40 @@ from stan.model import Model as StanModel
 
 _eight_schools_stan_code = """
 data {
-  int<lower=0> J;         // number of schools
-  real y[J];              // estimated treatment effects
-  real<lower=0> sigma[J]; // standard error of effect estimates
+    int<lower=0> J;
+    real y[J];
+    real<lower=0> sigma[J];
 }
+
 parameters {
-  real mu;                // population treatment effect
-  real<lower=0> tau;      // standard deviation in treatment effects
-  vector[J] eta;          // unscaled deviation from mu by school
+    real mu;
+    real<lower=0> tau;
+    real theta_tilde[J];
 }
+
 transformed parameters {
-  vector[J] theta = mu + tau * eta;        // school treatment effects
+    real theta[J];
+
+    for (j in 1:J) {
+        theta[j] = mu + tau * theta_tilde[j];
+    }
 }
+
 model {
-  target += normal_lpdf(eta | 0, 1);       // prior log-density
-  target += normal_lpdf(y | theta, sigma); // log-likelihood
+    mu ~ normal(0, 5);
+    tau ~ cauchy(0, 5);
+    theta_tilde ~ normal(0, 1);
+    y ~ normal(theta, sigma);
+}
+
+generated quantities {
+    vector[J] log_lik;
+    vector[J] y_hat;
+
+    for (j in 1:J) {
+        log_lik[j] = normal_lpdf(y[j] | theta[j], sigma[j]);
+        y_hat[j] = normal_rng(theta[j], sigma[j]);
+    }
 }
 """
 
@@ -71,6 +90,23 @@ class EightSchoolsModel:
             random_seed=random_seed,
         )
 
+    @property
+    def stan_idata_addons(self) -> dict[str, Any]:
+        """Information to add to the InferenceData posterior object."""
+        return {
+            "posterior_predictive": "y_hat",
+            "observed_data": ["y"],
+            "log_likelihood": {"y": "log_lik"},
+            "coords": {"school": np.arange(self.schools_data.J)},
+            "dims": {
+                "theta": ["school"],
+                "y": ["school"],
+                "log_lik": ["school"],
+                "y_hat": ["school"],
+                "theta_tilde": ["school"],
+            },
+        }
+
     def pymc3_model(self, data: pd.DataFrame) -> pm.Model:
         """PyMC3  model for a simple negative binomial model.
 
@@ -85,9 +121,9 @@ class EightSchoolsModel:
         school_data = self.schools_data
         with pm.Model() as model:
             mu = pm.Normal("mu", 0, 5)
-            tau = pm.HalfNormal("tau", 5)
-            eta = pm.Normal("eta", 0, 1)
-            theta = pm.Deterministic("theta", mu + tau * eta)
+            tau = pm.HalfCauchy("tau", 5)
+            theta_tilde = pm.Normal("eta", 0, 1)
+            theta = pm.Deterministic("theta", mu + tau * theta_tilde)
             y = pm.Normal(  # noqa: F841
                 name="y",
                 mu=theta,

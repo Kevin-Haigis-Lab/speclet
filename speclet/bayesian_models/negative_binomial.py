@@ -2,7 +2,7 @@
 
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Final, Optional
+from typing import Any, Final, Optional
 
 import numpy as np
 import pandas as pd
@@ -99,7 +99,14 @@ class NegativeBinomialModel:
             StanModel: Stan model.
         """
         model_data = self.data_processing_pipeline(data)
-        return stan.build(self.stan_code, data=asdict(model_data))
+        return stan.build(
+            self.stan_code, data=asdict(model_data), random_seed=random_seed
+        )
+
+    @property
+    def stan_idata_addons(self) -> dict[str, Any]:
+        """Information to add to the InferenceData posterior object."""
+        return {"observed_data": ["ct_final"]}
 
     def pymc3_model(self, data: pd.DataFrame) -> pm.Model:
         """PyMC3  model for a simple negative binomial model.

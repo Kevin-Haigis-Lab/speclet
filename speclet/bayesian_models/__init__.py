@@ -1,7 +1,7 @@
 """Organization of the Bayesian model classes."""
 
 from enum import Enum, unique
-from typing import Final, Optional, Protocol, Type
+from typing import Any, Final, Optional, Protocol, Type
 
 import pandas as pd
 import pymc3 as pm
@@ -38,6 +38,11 @@ class BayesianModelProtocol(Protocol):
         Returns:
             StanModel: A Stan model.
         """
+        ...
+
+    @property
+    def stan_idata_addons(self) -> dict[str, Any]:
+        """Information to add to the InferenceData posterior object."""
         ...
 
     def pymc3_model(self, data: pd.DataFrame) -> pm.Model:

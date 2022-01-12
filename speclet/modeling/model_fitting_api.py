@@ -19,6 +19,7 @@ from speclet.modeling.fitting_arguments import (
     StanMCMCSamplingArguments,
 )
 from speclet.project_enums import ModelFitMethod, assert_never
+from speclet.utils.general import resolve_optional_kwargs
 
 
 def _get_kwargs_dict(data: Optional[BaseModel]) -> dict[str, Any]:
@@ -157,7 +158,9 @@ def fit_pymc3_vi(
 
 
 def fit_stan_mcmc(
-    stan_model: StanModel, sampling_kwargs: Optional[StanMCMCSamplingArguments] = None
+    stan_model: StanModel,
+    sampling_kwargs: Optional[StanMCMCSamplingArguments] = None,
+    az_kwargs: Optional[dict[str, Any]] = None,
 ) -> az.InferenceData:
     """Fit a Stan model.
 
@@ -169,13 +172,11 @@ def fit_stan_mcmc(
     Returns:
         az.InferenceData: Model posterior draws.
     """
+    az_kwargs = resolve_optional_kwargs(az_kwargs)
     kwargs = _get_kwargs_dict(sampling_kwargs)
     _ = kwargs.pop("random_seed", None)  # remove 'random_seed'
     post = stan_model.sample(**kwargs)
-
-    # TODO: add in data for posterior predictive, coordinates, etc.
-
-    return az.from_pystan(posterior=post, posterior_model=stan_model)
+    return az.from_pystan(posterior=post, posterior_model=stan_model, **az_kwargs)
 
 
 # ---- Dispatching ---- #
@@ -206,7 +207,10 @@ def fit_model(
             kwargs = None
         seed = None if kwargs is None else kwargs.random_seed
         stan_model = model.stan_model(data=data, random_seed=seed)
-        return fit_stan_mcmc(stan_model, sampling_kwargs=kwargs)
+        posterior = fit_stan_mcmc(
+            stan_model, sampling_kwargs=kwargs, az_kwargs=model.stan_idata_addons
+        )
+        return posterior
     elif fit_method is ModelFitMethod.PYMC3_MCMC:
         if sampling_kwargs is not None:
             kwargs = sampling_kwargs.pymc3_mcmc

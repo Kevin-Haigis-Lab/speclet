@@ -20,7 +20,6 @@ transformed parameters {
     for (i in 1:N) {
         mu[i] = exp(eta) * ct_initial[i];
     }
-
     phi = 1.0 / reciprocal_phi;
 }
 
