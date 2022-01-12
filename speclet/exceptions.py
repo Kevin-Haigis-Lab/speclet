@@ -105,3 +105,49 @@ class RequiredArgumentError(BaseException):
     """Errors concerning required arguments that are not language-enforced."""
 
     pass
+
+
+class DataNotLoadedException(BaseException):
+    """Data not loaded exception."""
+
+    pass
+
+
+class DataFileDoesNotExist(BaseException):
+    """Data file does not exist."""
+
+    def __init__(self, file: Path) -> None:
+        """Data file does not exist."""
+        msg = f"Data file '{file}' not found."
+        super().__init__(msg)
+        return None
+
+
+class DataFileIsNotAFile(BaseException):
+    """Data file is not a file."""
+
+    def __init__(self, file: Path) -> None:
+        """Data file is not a file."""
+        msg = f"Path must be to a file: '{file}'."
+        super().__init__(msg)
+        return None
+
+
+class UnsupportedDataFileType(BaseException):
+    """Unsupported data file type."""
+
+    def __init__(self, suffix: str) -> None:
+        """Unsupported data file type."""
+        msg = f"File type '{suffix}' is not supported."
+        super().__init__(msg)
+        return None
+
+
+class ColumnsNotUnique(BaseException):
+    """Column names are not unique."""
+
+    def __init__(self) -> None:
+        """Columns not unique."""
+        msg = "Column names must be unique."
+        super().__init__(msg)
+        return None

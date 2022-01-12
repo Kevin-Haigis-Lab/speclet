@@ -6,6 +6,8 @@ from enum import Enum, unique
 from pathlib import Path
 from typing import Final, Union
 
+from dotenv import dotenv_values
+
 
 @unique
 class DataFile(Enum):
@@ -63,10 +65,13 @@ def project_root() -> Path:
     Returns:
         Path: Path to the root of the project.
     """
-    if p := os.getenv("PROJECT_ROOT"):
+    var_name = "PROJECT_ROOT"
+    if (p := os.getenv(var_name)) is not None:
+        return Path(p)
+    elif (p := dotenv_values().get(var_name)) is not None:
         return Path(p)
     warnings.warn(
-        "No project root dir found ('PROJECT_ROOT') - using current working dir."
+        f"No project root dir found ('{var_name}') - using current working dir."
     )
     return Path(os.getcwd())
 

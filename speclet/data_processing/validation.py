@@ -7,14 +7,20 @@ import pandas as pd
 from pandera import Check
 
 
-def check_nonnegative() -> Check:
+def check_nonnegative(nullable: bool = False) -> Check:
     """Pandera check that all values are non-negative."""
-    return Check(lambda s: s >= 0)
+    if nullable:
+        return Check(lambda s: s[~np.isnan(s)] >= 0)
+    else:
+        return Check(lambda s: s >= 0)
 
 
-def check_finite() -> Check:
+def check_finite(nullable: bool = False) -> Check:
     """Pandera check that all values are finite."""
-    return Check(lambda x: all(np.isfinite(x)))
+    if nullable:
+        return Check(lambda x: all(np.isfinite(x[~np.isnan(x)])))
+    else:
+        return Check(lambda x: all(np.isfinite(x)))
 
 
 def check_between(a: float, b: float) -> Check:

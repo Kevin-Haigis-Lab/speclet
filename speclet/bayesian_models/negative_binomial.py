@@ -47,10 +47,13 @@ class NegativeBinomialModel:
         return DataFrameSchema(
             {
                 "counts_initial_adj": Column(
-                    float, checks=[check_nonnegative(), check_finite()]
+                    float, checks=[check_nonnegative(), check_finite()], nullable=False
                 ),
                 "counts_final": Column(
-                    int, checks=[check_nonnegative(), check_finite()]
+                    int,
+                    checks=[check_nonnegative(), check_finite()],
+                    nullable=False,
+                    coerce=True,
                 ),
             }
         )
@@ -75,7 +78,8 @@ class NegativeBinomialModel:
             NegativeBinomialModelData: Processed and validated modeling data.
         """
         return (
-            append_total_read_counts(data)
+            data.dropna(axis=0, how="any", subset=["counts_final", "counts_initial"])
+            .pipe(append_total_read_counts)
             .pipe(add_useful_read_count_columns)
             .pipe(self._validate_data)
             .pipe(self._make_data_structure)

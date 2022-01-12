@@ -15,55 +15,14 @@ from speclet.data_processing.validation import (
     check_nonnegative,
     check_unique_groups,
 )
+from speclet.exceptions import (
+    DataFileDoesNotExist,
+    DataFileIsNotAFile,
+    UnsupportedDataFileType,
+)
 from speclet.io import DataFile, data_path
 
 data_transformation = Callable[[pd.DataFrame], pd.DataFrame]
-
-
-class DataNotLoadedException(BaseException):
-    """Data not loaded exception."""
-
-    pass
-
-
-class DataFileDoesNotExist(BaseException):
-    """Data file does not exist."""
-
-    def __init__(self, file: Path) -> None:
-        """Data file does not exist."""
-        msg = f"Data file '{file}' not found."
-        super().__init__(msg)
-        return None
-
-
-class DataFileIsNotAFile(BaseException):
-    """Data file is not a file."""
-
-    def __init__(self, file: Path) -> None:
-        """Data file is not a file."""
-        msg = f"Path must be to a file: '{file}'."
-        super().__init__(msg)
-        return None
-
-
-class UnsupportedDataFileType(BaseException):
-    """Unsupported data file type."""
-
-    def __init__(self, suffix: str) -> None:
-        """Unsupported data file type."""
-        msg = f"File type '{suffix}' is not supported."
-        super().__init__(msg)
-        return None
-
-
-class ColumnsNotUnique(BaseException):
-    """Column names are not unique."""
-
-    def __init__(self) -> None:
-        """Columns not unique."""
-        msg = "Column names must be unique."
-        super().__init__(msg)
-        return None
 
 
 class CrisprScreenDataManager:
@@ -72,7 +31,6 @@ class CrisprScreenDataManager:
     data_file: Path
     _data: Optional[pd.DataFrame]
     _transformations: list[data_transformation]
-
     _supported_filetypes: Final[set[str]] = {".csv", ".tsv", ".pkl"}
 
     def __init__(
@@ -178,9 +136,9 @@ class CrisprScreenDataManager:
             read_kwargs = {}
 
         if self.data_file.suffix == ".csv":
-            self._data = pd.read_csv(self.data_file)
+            self._data = pd.read_csv(self.data_file, **read_kwargs)
         elif self.data_file.suffix == ".tsv":
-            self._data = pd.read_csv(self.data_file, sep="\t")
+            self._data = pd.read_csv(self.data_file, sep="\t", **read_kwargs)
         elif self.data_file.suffix == ".pkl":
             self._data = pd.read_pickle(self.data_file)
         else:
@@ -316,7 +274,12 @@ class CrisprScreenDataManager:
                     checks=[check_finite(), check_between(-20, 20)],
                 ),
                 "counts_final": Column(
-                    int, checks=[check_finite(), check_nonnegative()]
+                    float,
+                    checks=[
+                        check_finite(nullable=True),
+                        check_nonnegative(nullable=True),
+                    ],
+                    nullable=True,
                 ),
                 "copy_number": Column(
                     float, checks=[check_finite(), check_nonnegative()]
