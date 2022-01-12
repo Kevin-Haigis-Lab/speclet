@@ -89,3 +89,39 @@ def test_fail_validation_close() -> None:
         dm.apply_validation(mod_data)
     with pytest.raises(SchemaError):
         dm.set_data(mod_data)
+
+
+def test_fail_validation_nonunique_mapping_of_sgrna_to_gene() -> None:
+    dm = CrisprDM(io.DataFile.DEPMAP_TEST_DATA)
+    data = dm.get_data()
+    # Just shuffle gene assignments.
+    mod_data = data.copy()
+    mod_data["hugo_symbol"] = mod_data.hugo_symbol.sample()
+    with pytest.raises(SchemaError):
+        dm.apply_validation(mod_data)
+
+    # Change a single gene assignment.
+    mod_data = data.copy()
+    genes = mod_data.hugo_symbol.to_list()
+    swap_gene = set(genes).difference(genes[0])
+    mod_data["hugo_symbol"] = [swap_gene] + genes[1:]
+    with pytest.raises(SchemaError):
+        dm.apply_validation(mod_data)
+
+
+def test_fail_validation_nonunique_mapping_of_celllines_to_lineage() -> None:
+    dm = CrisprDM(io.DataFile.DEPMAP_TEST_DATA)
+    data = dm.get_data()
+    # Just shuffle gene assignments.
+    mod_data = data.copy()
+    mod_data["lineage"] = mod_data.lineage.sample()
+    with pytest.raises(SchemaError):
+        dm.apply_validation(mod_data)
+
+    # Change a single gene assignment.
+    mod_data = data.copy()
+    lineages = mod_data.lineage.to_list()
+    swap_lineage = set(lineages).difference(lineages[0])
+    mod_data["lineage"] = [swap_lineage] + lineages[1:]
+    with pytest.raises(SchemaError):
+        dm.apply_validation(mod_data)

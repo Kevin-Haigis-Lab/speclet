@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Callable, Final, Optional, Union
 
 import pandas as pd
+import pandera as pa
 from pandera import Column, DataFrameSchema
 
 from speclet.data_processing.crispr import set_achilles_categorical_columns
@@ -12,6 +13,7 @@ from speclet.data_processing.validation import (
     check_between,
     check_finite,
     check_nonnegative,
+    check_unique_groups,
 )
 from speclet.io import DataFile, data_path
 
@@ -286,18 +288,26 @@ class CrisprScreenDataManager:
     def data_schema(self) -> DataFrameSchema:
         """Data validation schema.
 
-        # TODO: check for unique pairing of sgRNA and gene.
-        # TODO: check for unique pairing of cell line and lineage.
-        # TODO: add tests for both of these checks
-
         Returns:
             DataFrameSchema: Pandera data schema.
         """
         return DataFrameSchema(
             {
                 "sgrna": Column("category"),
-                "hugo_symbol": Column("category"),
-                "lineage": Column("category"),
+                "hugo_symbol": Column(
+                    "category",
+                    checks=[
+                        # A sgRNA maps to a single gene ("hugo_symbol")
+                        pa.Check(check_unique_groups, groupby="sgrna"),
+                    ],
+                ),
+                "lineage": Column(
+                    "category",
+                    checks=[
+                        # Each cell line maps to a single lineage.
+                        pa.Check(check_unique_groups, groupby="depmap_id")
+                    ],
+                ),
                 "depmap_id": Column("category"),
                 "p_dna_batch": Column("category"),
                 "sgrna_target_chr": Column("category"),
