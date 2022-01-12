@@ -1,14 +1,13 @@
 """Parsing complex structures for use in Snakemake pipelines."""
 
 from pathlib import Path
-from typing import Optional
 
 from pydantic import BaseModel, validate_arguments
 
 import speclet.model_configuration as model_config
 from speclet.bayesian_models import BayesianModel
 from speclet.model_configuration import BayesianModelConfiguration
-from speclet.project_enums import ModelFitMethod, SpecletPipeline
+from speclet.project_enums import ModelFitMethod, SpecletPipeline, assert_never
 
 
 class ParsedPipelineInformation(BaseModel):
@@ -33,9 +32,13 @@ class _PipelineIntermediateInformation(BaseModel):
 
 def _get_pipeline_fit_methods(
     config: BayesianModelConfiguration, pipeline: SpecletPipeline
-) -> Optional[list[ModelFitMethod]]:
-    raise NotImplementedError("Need to implement a pipeline configuration system.")
-    # return config.pipelines.get(pipeline, None)
+) -> list[ModelFitMethod]:
+    if pipeline is SpecletPipeline.FITTING:
+        return config.pipelines.fitting
+    elif pipeline is SpecletPipeline.SBC:
+        return config.pipelines.sbc
+    else:
+        assert_never(pipeline)
 
 
 @validate_arguments

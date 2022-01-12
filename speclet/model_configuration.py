@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections import Counter
 from pathlib import Path
-from typing import Optional
 
 import yaml
 from pydantic import BaseModel, Field
@@ -12,8 +11,16 @@ from pydantic import BaseModel, Field
 from speclet import io
 from speclet.bayesian_models import BayesianModel
 from speclet.modeling.fitting_arguments import ModelingSamplingArguments
+from speclet.project_enums import ModelFitMethod
 
 # ----  Configuration classes ----
+
+
+class PipelineChoices(BaseModel):
+    """Selection of fit methods to use for a model per pipeline."""
+
+    fitting: list[ModelFitMethod] = Field(default_factory=list)
+    sbc: list[ModelFitMethod] = Field(default_factory=list)
 
 
 class BayesianModelConfiguration(BaseModel):
@@ -24,9 +31,10 @@ class BayesianModelConfiguration(BaseModel):
     model: BayesianModel
     data_file: io.DataFile
     subsample: bool = False
-    sampling_kwargs: Optional[ModelingSamplingArguments] = Field(
+    sampling_kwargs: ModelingSamplingArguments = Field(
         default_factory=ModelingSamplingArguments
     )
+    pipelines: PipelineChoices = Field(default_factory=PipelineChoices)
 
 
 class BayesianModelConfigurations(BaseModel):

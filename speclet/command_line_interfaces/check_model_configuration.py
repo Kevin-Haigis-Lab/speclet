@@ -32,7 +32,7 @@ def check_model_configuration(path: Optional[Path] = None) -> None:
     """
     if path is None:
         path = get_model_configuration_file()
-    secho(f"Checking model config: '{path.as_posix()}'", fg=colors.BLUE)
+    secho(f"Checking model config: '{str(path)}'", fg=colors.BLUE)
 
     secho("Trying to parse configuration file...")
     configs = model_config.read_model_configurations(path)
