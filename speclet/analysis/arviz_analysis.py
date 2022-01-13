@@ -115,7 +115,7 @@ def _pretty_bfmi(data: az.InferenceData, decimals: int = 3) -> list[str]:
     return np.round(az.bfmi(data), decimals).astype(str).tolist()
 
 
-def get_average_step_size(data: az.InferenceData) -> list[float]:
+def get_average_step_size(data: az.InferenceData) -> Optional[list[float]]:
     """Get the average step size for each chain of MCMC.
 
     Args:
@@ -124,7 +124,12 @@ def get_average_step_size(data: az.InferenceData) -> list[float]:
     Returns:
         list[float]: list of average step sizes for each chain.
     """
-    return data.sample_stats.step_size.mean(axis=1).values.tolist()
+    possible_names = ["step_size", "stepsize"]
+    for stat_name in possible_names:
+        step_sizes = data["sample_stats"].get(stat_name)
+        if step_sizes is not None:
+            return step_sizes.mean(axis=1).values.tolist()
+    return None
 
 
 def _pretty_step_size(data: az.InferenceData, decimals: int = 3) -> list[str]:
@@ -141,7 +146,7 @@ def get_divergences(data: az.InferenceData) -> np.ndarray:
         tuple[list[int], list[float]]: A list of the number of divergent steps and a
         list of the percent of steps that were divergent.
     """
-    return data.sample_stats.diverging.values
+    return data["sample_stats"].diverging.values
 
 
 def get_divergence_summary(data: az.InferenceData) -> tuple[list[int], list[float]]:
@@ -154,7 +159,7 @@ def get_divergence_summary(data: az.InferenceData) -> tuple[list[int], list[floa
         tuple[list[int], list[float]]: A list of the number of divergent steps and a
         list of the percent of steps that were divergent.
     """
-    divs = data.sample_stats.diverging.values
+    divs = data["sample_stats"].diverging.values
     totals = divs.sum(axis=1)
     pct = divs.mean(axis=1) * 100
     return totals.tolist(), pct.tolist()
@@ -171,7 +176,7 @@ class MCMCDescription(BaseModel):
     n_divergences: list[int]
     pct_divergences: list[float]
     bfmi: list[float]
-    avg_step_size: list[float]
+    avg_step_size: Optional[list[float]]
 
     def _pretty_list(self, vals: Sequence[Union[int, float]], round: int = 3) -> str:
         return ", ".join(np.round(vals, round).astype(str).tolist())
@@ -198,7 +203,10 @@ class MCMCDescription(BaseModel):
             f"percent divergences: {self._pretty_list(self.pct_divergences)}"
         )
         messages.append(f"BFMI: {self._pretty_list(self.bfmi)}")
-        messages.append(f"avg. step size: {self._pretty_list(self.avg_step_size)}")
+        if self.avg_step_size is None:
+            messages.append("avg. step size: unknown")
+        else:
+            messages.append(f"avg. step size: {self._pretty_list(self.avg_step_size)}")
         return "\n".join(messages)
 
 

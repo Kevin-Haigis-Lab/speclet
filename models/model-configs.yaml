@@ -15,5 +15,5 @@
     pymc3_advi:
       n: 200000
   pipelines:                          # Which pipelines to include this model config in.
-    fitting: [PYMC3_MCMC, PYMC3_ADVI]
+    fitting: [STAN_MCMC, PYMC3_MCMC, PYMC3_ADVI]
     sbc: [STAN_MCMC, PYMC3_MCMC, PYMC3_ADVI]

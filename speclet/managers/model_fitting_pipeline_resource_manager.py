@@ -26,8 +26,16 @@ TimeLookupDict = ResourceLookupDict[td]
 
 fitting_pipeline_memory_lookup: MemoryLookupDict = {
     BayesianModel.SIMPLE_NEGATIVE_BINOMIAL: {
-        True: {ModelFitMethod.PYMC3_ADVI: 4, ModelFitMethod.PYMC3_MCMC: 4},
-        False: {ModelFitMethod.PYMC3_ADVI: 8, ModelFitMethod.PYMC3_MCMC: 8},
+        True: {
+            ModelFitMethod.STAN_MCMC: 4,
+            ModelFitMethod.PYMC3_MCMC: 4,
+            ModelFitMethod.PYMC3_ADVI: 4,
+        },
+        False: {
+            ModelFitMethod.STAN_MCMC: 8,
+            ModelFitMethod.PYMC3_MCMC: 8,
+            ModelFitMethod.PYMC3_ADVI: 8,
+        },
     },
 }
 
@@ -37,12 +45,14 @@ fitting_pipeline_memory_lookup: MemoryLookupDict = {
 fitting_pipeline_time_lookup: TimeLookupDict = {
     BayesianModel.SIMPLE_NEGATIVE_BINOMIAL: {
         True: {
-            ModelFitMethod.PYMC3_ADVI: td(minutes=5),
+            ModelFitMethod.STAN_MCMC: td(minutes=5),
             ModelFitMethod.PYMC3_MCMC: td(minutes=5),
+            ModelFitMethod.PYMC3_ADVI: td(minutes=5),
         },
         False: {
-            ModelFitMethod.PYMC3_ADVI: td(minutes=10),
+            ModelFitMethod.STAN_MCMC: td(minutes=10),
             ModelFitMethod.PYMC3_MCMC: td(minutes=10),
+            ModelFitMethod.PYMC3_ADVI: td(minutes=10),
         },
     },
 }

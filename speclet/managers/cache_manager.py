@@ -47,7 +47,7 @@ class PosteriorManager:
         """The cache file exists."""
         return self.posterior_path.exists()
 
-    def make_dir(self) -> None:
+    def _make_dir(self) -> None:
         """Make the cache directory for this posterior."""
         if self.cache_path.exists():
             return
@@ -67,7 +67,7 @@ class PosteriorManager:
 
     def write_to_file(self) -> None:
         """If currently in memory, force the posterior object to be written to file."""
-        self.make_dir()
+        self._make_dir()
         if self._posterior is None:
             return None
         self._posterior.to_json(str(self.posterior_path))
@@ -78,6 +78,7 @@ class PosteriorManager:
         Args:
             trace (az.InferenceData): A model's posterior data.
         """
+        self._make_dir()
         self._posterior = trace
         # trace.to_netcdf(str(self.cache_path))  # problems with writing as netCDF
         trace.to_json(str(self.posterior_path))
