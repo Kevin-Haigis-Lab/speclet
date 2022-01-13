@@ -1,4 +1,4 @@
-name: speclet-pipeline-env
+name: speclet_smk
 channels:
   - conda-forge
   - bioconda
@@ -6,38 +6,36 @@ channels:
   - defaults
 dependencies:
   - python=3.9.9
-  - jupyterlab
-  - pymc3=3.11.*
-  - arviz
+  - snakemake=6.13.*
+  - black  # used in pipeline
   - colorama
   - dask
-  - ipython
-  - matplotlib
+  - drmaa
+  - isort  # used in pipeline
+  - jupyterlab
+  - mamba
   - mkl
   - mkl-service
   - nbconvert
+  - nbqa  # used in pipeline
   - numpy
+  - openssl
   - pandas
-  - pandoc
+  - pandera
   - papermill
-  - patsy
   - pip
   - plotnine
   - pretty_errors
   - pydantic
   - pyjanitor
+  - pymc3=3.11.*
   - python-graphviz
-  - requests
   - rich
-  - scikit-learn
-  - scipy
   - seaborn
-  - statsmodels
-  - termcolor
   - theano-pymc=1.1.*
   - typer
   - watermark
-  - xarray
   - pip:
     - pystan>=3.3.0
-    - -e /n/data1/hms/dbmi/park/Cook/speclet/  # install the source directory as a package (keep as last)
+    - python-dotenv
+    - -e .  # install the source directory as a package (keep as last)

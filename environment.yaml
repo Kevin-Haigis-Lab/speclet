@@ -5,26 +5,26 @@ channels:
   - r
   - defaults
 dependencies:
-  - python=3.9
+  - python=3.9.9
   - arviz=0.11.*
   - black
   - colorama
   - coverage
-  - dask=2021.11.*
+  - dask
   - factory_boy
   - faker
   - flake8
   - flake8-bugbear
   - flake8-builtins
   - flake8-comprehensions
-  - graphviz
   - hypothesis
   - ipython
   - isort
   - jupyterlab=3.2.*
   - jupyterlab_code_formatter
+  - jupyterlab-spellchecker
   - matplotlib=3.5.*
-  - mkl=2021.4.*
+  - mkl
   - mkl-service
   - mypy
   - nbconvert
@@ -41,7 +41,7 @@ dependencies:
   - pdoc3
   - pre-commit
   - pretty_errors
-  - pydantic=1.8.*
+  - pydantic
   - pyjanitor
   - pymc3=3.11.*
   - pytest
@@ -57,7 +57,7 @@ dependencies:
   - statsmodels
   - termcolor
   - theano-pymc=1.1.*
-  - typer=0.4.*
+  - typer
   - types-pyyaml
   - watermark
   - xarray=0.20.*
