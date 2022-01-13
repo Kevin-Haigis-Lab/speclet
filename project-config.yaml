@@ -10,7 +10,7 @@ modeling:
 
 fitting_pipeline:
   debug: true
-  num_chains: 4
+  num_chains: 2
   models_config: "models/model-configs.yaml"
   temp_dir: "temp/fitting-mcmc"
   model_cache_dir: "models/"

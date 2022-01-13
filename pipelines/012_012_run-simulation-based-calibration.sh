@@ -13,7 +13,7 @@ module load gcc conda2 slurm-drmaa/1.1.1
 
 # shellcheck source=/dev/null
 source "$HOME/.bashrc"
-conda activate speclet_snakemake
+conda activate speclet_smk
 
 SNAKEFILE="pipelines/012_010_simulation-based-calibration.smk"
 

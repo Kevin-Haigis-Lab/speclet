@@ -9,6 +9,16 @@ Some care had to be taken to ensure that the modules imported by the Snakemake p
 
 The results of the pipelines are saved to the ["reports/"](../reports) directory.
 
+## Setup
+
+The virtual environment must be created before running any of the pipelines.
+
+```bash
+conda install -n base -c conda-forge mamba
+mamba env create -f environment_smk.yaml
+conda activate speclet_smk
+```
+
 ## Pipelines
 
 ### 010. Modeling fitting pipeline
