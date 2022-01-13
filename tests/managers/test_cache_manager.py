@@ -13,7 +13,7 @@ from speclet.project_enums import ModelFitMethod
 
 def test_init_posterior_manager(tmp_path: Path) -> None:
     pm = PosteriorManager("test-post", tmp_path)
-    assert not pm.cache_exists
+    assert not pm.posterior_cache_exists
     assert pm.get() is None
 
 
@@ -21,9 +21,9 @@ def test_caching_posterior(
     tmp_path: Path, centered_eight_idata: az.InferenceData
 ) -> None:
     pm = PosteriorManager("test-post", tmp_path)
-    assert not pm.cache_exists
+    assert not pm.posterior_cache_exists
     pm.put(centered_eight_idata)
-    assert pm.cache_exists
+    assert pm.posterior_cache_exists
     assert pm.get() is centered_eight_idata
 
 
@@ -32,9 +32,9 @@ def test_clearing_cache_file(
 ) -> None:
     pm = PosteriorManager("test-post", tmp_path)
     pm.put(centered_eight_idata)
-    assert pm.cache_exists
+    assert pm.posterior_cache_exists
     pm.clear_cache()
-    assert not pm.cache_exists
+    assert not pm.posterior_cache_exists
     assert pm.get() is centered_eight_idata
 
 
@@ -43,9 +43,9 @@ def test_clearing_posterior(
 ) -> None:
     pm = PosteriorManager("test-post", tmp_path)
     pm.put(centered_eight_idata)
-    assert pm.cache_exists
+    assert pm.posterior_cache_exists
     pm.clear()
-    assert not pm.cache_exists
+    assert not pm.posterior_cache_exists
     assert pm.get() is None
 
 
@@ -54,12 +54,12 @@ def test_intentional_write_to_file(
 ) -> None:
     pm = PosteriorManager("test-post", tmp_path)
     pm.put(centered_eight_idata)
-    assert pm.cache_exists
+    assert pm.posterior_cache_exists
     pm.clear_cache()
-    assert not pm.cache_exists
+    assert not pm.posterior_cache_exists
     assert pm.get() is centered_eight_idata
     pm.write_to_file()
-    assert pm.cache_exists
+    assert pm.posterior_cache_exists
 
 
 # ---- Separate functions ----

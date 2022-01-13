@@ -18,6 +18,10 @@ class PosteriorManager:
     def __init__(self, id: str, cache_dir: Union[Path, str]) -> None:
         """Create a posterior manager.
 
+        The cache directory should be the general location for caching model results. A
+        directory will be made for this specific model using its ID. Then, all cached
+        files will live within this directory under standardized names.
+
         Args:
             id (str): Identifier of the posterior.
             cache_dir (Union[Path, str]): Directory for caching the posterior.
@@ -30,18 +34,29 @@ class PosteriorManager:
 
     @property
     def cache_path(self) -> Path:
-        """Path to the cache file."""
-        return self.cache_dir / f"{self.id}_posterior.netcdf"
+        """Path to the cache."""
+        return self.cache_dir / self.id
 
     @property
-    def cache_exists(self) -> bool:
+    def posterior_path(self) -> Path:
+        """Path to the cache file."""
+        return self.cache_path / "posterior.json"
+
+    @property
+    def posterior_cache_exists(self) -> bool:
         """The cache file exists."""
-        return self.cache_path.exists()
+        return self.posterior_path.exists()
+
+    def make_dir(self) -> None:
+        """Make the cache directory for this posterior."""
+        if self.cache_path.exists():
+            return
+        self.cache_path.mkdir(parents=True)
 
     def clear_cache(self) -> None:
         """Clear cached file."""
-        if self.cache_exists:
-            self.cache_path.unlink(missing_ok=False)
+        if self.posterior_cache_exists:
+            self.posterior_path.unlink(missing_ok=False)
         return None
 
     def clear(self) -> None:
@@ -51,10 +66,11 @@ class PosteriorManager:
         return None
 
     def write_to_file(self) -> None:
-        """If currently in memory, force the posterior object to be written to fil.."""
+        """If currently in memory, force the posterior object to be written to file."""
+        self.make_dir()
         if self._posterior is None:
             return None
-        self._posterior.to_netcdf(str(self.cache_path))
+        self._posterior.to_json(str(self.posterior_path))
 
     def put(self, trace: az.InferenceData) -> None:
         """Put a new posterior object to file.
@@ -64,7 +80,7 @@ class PosteriorManager:
         """
         self._posterior = trace
         # trace.to_netcdf(str(self.cache_path))  # problems with writing as netCDF
-        trace.to_json(str(self.cache_path))
+        trace.to_json(str(self.posterior_path))
 
     def get(self, from_file: bool = False) -> Optional[az.InferenceData]:
         """Get a model's posterior data.
@@ -78,8 +94,8 @@ class PosteriorManager:
         """
         if not from_file and self._posterior is not None:
             return self._posterior
-        elif self.cache_exists:
-            return az.from_json(str(self.cache_path))
+        elif self.posterior_cache_exists:
+            return az.from_json(str(self.posterior_path))
         else:
             return None
 
@@ -94,21 +110,37 @@ def get_posterior_cache_name(model_name: str, fit_method: ModelFitMethod) -> str
     Returns:
         str: Name for the posterior cache.
     """
-    return model_name + "_" + fit_method.value.lower()
+    return model_name + "_" + fit_method.value
 
 
-def cache_posterior(
-    posterior: az.InferenceData, name: str, fit_method: ModelFitMethod, cache_dir: Path
-) -> Path:
+def cache_posterior(posterior: az.InferenceData, id: str, cache_dir: Path) -> Path:
     """Cache the posterior of a model.
 
     Args:
         posterior (az.InferenceData): Posterior samples.
-        name (str): Identifiable name of the model.
-        fit_method (ModelFitMethod): Method used to fit the model.
+        id (str): Uniquely identifiable ID passed to the PosteriorManager.
         cache_dir (Path): Directory to write to.
     """
-    id = get_posterior_cache_name(model_name=name, fit_method=fit_method)
     posterior_manager = PosteriorManager(id=id, cache_dir=cache_dir)
     posterior_manager.put(posterior)
-    return posterior_manager.cache_path
+    return posterior_manager.posterior_path
+
+
+def get_cached_posterior(id: str, cache_dir: Path) -> az.InferenceData:
+    """Retrieve a posterior from cache.
+
+    Args:
+        id (str): Uniquely identifiable ID passed to the PosteriorManager.
+        cache_dir (Path): Directory containing the cache.
+
+    Raises:
+        FileNotFoundError: Error thrown if the posterior cache does not exist.
+
+    Returns:
+        az.InferenceData: Posterior trace.
+    """
+    posterior_manager = PosteriorManager(id=id, cache_dir=cache_dir)
+    trace = posterior_manager.get()
+    if trace is None:
+        raise FileNotFoundError(posterior_manager.posterior_path)
+    return trace

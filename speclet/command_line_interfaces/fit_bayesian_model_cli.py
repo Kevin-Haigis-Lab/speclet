@@ -15,7 +15,7 @@ from speclet import model_configuration as model_config
 from speclet.bayesian_models import get_bayesian_model
 from speclet.command_line_interfaces import cli_helpers
 from speclet.loggers import logger
-from speclet.managers.cache_manager import cache_posterior
+from speclet.managers.cache_manager import cache_posterior, get_posterior_cache_name
 from speclet.managers.data_managers import CrisprScreenDataManager
 from speclet.model_configuration import ModelingSamplingArguments
 from speclet.modeling.model_fitting_api import fit_model
@@ -55,6 +55,7 @@ def fit_bayesian_model(
     cache_dir: Path,
     mcmc_chains: int = 4,
     mcmc_cores: int = 4,
+    cache_name: Optional[str] = None,
 ) -> None:
     """Sample a Bayesian model.
 
@@ -68,6 +69,8 @@ def fit_bayesian_model(
         cache_dir (Path): Directory in which to cache the results.
         mcmc_chains (int, optional): Number of MCMC chains. Defaults to 4.
         mcmc_cores (int, optional): Number of MCMC cores. Defaults to 4.
+        cache_name (Optional[str], optional): A specific name to use for the posterior
+        cache ID. Defaults to None which results in using the `name` for the cache name.
     """
     tic = time()
 
@@ -87,9 +90,11 @@ def fit_bayesian_model(
         fit_method=fit_method,
         sampling_kwargs=sampling_kwargs_adj,
     )
-    cache_posterior(
-        posterior=posterior, name=name, fit_method=fit_method, cache_dir=cache_dir
-    )
+
+    if cache_name is None:
+        cache_name = get_posterior_cache_name(model_name=name, fit_method=fit_method)
+
+    cache_posterior(posterior, id=cache_name, cache_dir=cache_dir)
 
     toc = time()
     logger.info(f"finished; execution time: {(toc - tic) / 60:.2f} minutes")

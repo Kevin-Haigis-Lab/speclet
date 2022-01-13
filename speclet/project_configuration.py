@@ -85,7 +85,7 @@ class BayesianModelingConstants:
     hdi_prob: float
 
 
-def get_pymc3_constants() -> BayesianModelingConstants:
+def get_bayesian_modeling_constants() -> BayesianModelingConstants:
     """Get the global constants for use with Bayesian data analysis and modeling.
 
     Returns:
