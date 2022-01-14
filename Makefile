@@ -9,8 +9,9 @@ CONDA_ACTIVATE=source $$(conda info --base)/etc/profile.d/conda.sh ; conda activ
 help:
 	@echo "available commands"
 	@echo " - help               : information about available commands"
-	@echo " - envs               : install Python virtual environments"
-	@echo " - install            : install Python and R virtual environments"
+	@echo " - pyenvs             : install Python virtual environments"
+	@echo " - renv               : install necessary R packages"
+	@echo " - envs               : install Python and R environments"
 	@echo " - download_data      : download data for the project"
 	@echo " - munge              : prepare the data for analysis"
 	@echo " - munge_o2           : prepare the data for analysis on O2"
@@ -26,15 +27,19 @@ help:
 	@echo " - build              : build the entire project"
 	@echo " - build_o2           : build the entire project (on O2)"
 
-envs:
+pyenvs:
+	@echo "Installing mamba in the base conda env."
+	($(CONDA_SETUP) conda install -n base -c conda-forge mamba)
 	@echo "Installing speclet conda environment."
-	($(CONDA_SETUP) conda env create -f environment.yaml)
+	($(CONDA_SETUP) mamba env create -f environment.yaml)
 	@echo "Installing snakemake conda environment."
-	($(CONDA_SETUP) conda env create -f snakemake_environment.yaml)
+	($(CONDA_SETUP) mamba env create -f environment_smk.yaml)
 
-install: envs
+renv:
 	@echo "Preparing R environment."
-	Rscript -e "renv::restore()"
+	Rscript -e "install.packages('renv'); renv::restore()"
+
+envs: pyenvs renv
 
 download_data:
 	./data/download-data.sh
@@ -62,26 +67,23 @@ style:
 	($(CONDA_ACTIVATE) speclet && black src && black tests)
 	($(CONDA_ACTIVATE) speclet && flake8 src && flake8 tests)
 
-model_desc:
-	python3 src/command_line_interfaces/speclet_cli.py model-docs
-
 docs: model_desc
-	pdoc --html -o docs --force -c latex_math=True src
+	pdoc --html -o docs --force -c latex_math=True speclet
 
 clean: style
 	find ./logs/*.log -mtime +7 | xargs rm || echo "No logs to remove.";
 	find ./temp/* -mtime +7 | xargs rm -r || echo "No temp files to remove.";
 	coverage erase
 
-sbc:
-	sbatch pipelines/012_012_simulation-based-calibration.sh
-
 fit:
-	sbatch pipelines/010_012_run-crc-sampling.sh
+	sbatch pipelines/010_012_run-model-fitting-pipeline.sh
+
+sbc:
+	sbatch pipelines/012_012_run-simulation-based-calibration.sh
 
 check_model_config:
-	$(CONDA_ACTIVATE) speclet && ./src/command_line_interfaces/check_model_configuration.py models/model-configs.yaml
+	$(CONDA_ACTIVATE) speclet && ./speclet/command_line_interfaces/check_model_configuration.py
 
-build: install download_data munge test sbc fit
+build: envs download_data munge test sbc fit
 
-build_o2: install download_data munge_o2 test_o2 sbc fit
+build_o2: envs download_data munge_o2 test_o2 sbc fit
