@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>speclet.modeling.model_fitting_api API documentation</title>
+<meta name="description" content="Standardization of the interactions with model sampling." />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS_CHTML'></script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>speclet.modeling.model_fitting_api</code></h1>
+</header>
+<section id="section-intro">
+<p>Standardization of the interactions with model sampling.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Standardization of the interactions with model sampling.&#34;&#34;&#34;
+
+from dataclasses import dataclass
+from typing import Any, Optional
+
+import arviz as az
+import numpy as np
+import pandas as pd
+import pymc3 as pm
+from pydantic import BaseModel
+from stan.model import Model as StanModel
+
+from speclet.bayesian_models import BayesianModelProtocol
+from speclet.loggers import logger
+from speclet.modeling.fitting_arguments import (
+    ModelingSamplingArguments,
+    Pymc3FitArguments,
+    Pymc3SampleArguments,
+    StanMCMCSamplingArguments,
+)
+from speclet.project_enums import ModelFitMethod, assert_never
+from speclet.utils.general import resolve_optional_kwargs
+
+
+def _get_kwargs_dict(data: Optional[BaseModel]) -&gt; dict[str, Any]:
+    if data is None:
+        return {}
+    return data.dict()
+
+
+# ---- Result Types ---- #
+
+
+@dataclass
+class ApproximationSamplingResults:
+    &#34;&#34;&#34;The results of ADVI fitting and sampling.&#34;&#34;&#34;
+
+    inference_data: az.InferenceData
+    approximation: pm.Approximation
+
+
+# ---- Interface with PyMC3 ---- #
+
+
+def _extend_trace_with_prior_and_posterior(
+    trace: az.InferenceData,
+    prior: Optional[dict[str, np.ndarray]] = None,
+    post: Optional[dict[str, np.ndarray]] = None,
+) -&gt; None:
+    if prior is not None:
+        trace.extend(az.from_pymc3(prior=prior))
+    if post is not None:
+        trace.extend(az.from_pymc3(posterior_predictive=post))
+    return None
+
+
+def _update_return_inferencedata_kwarg(
+    sampling_kwargs: Optional[Pymc3SampleArguments],
+) -&gt; Optional[Pymc3SampleArguments]:
+    if sampling_kwargs is None:
+        return sampling_kwargs
+
+    if not sampling_kwargs.return_inferencedata:
+        logger.warning(&#34;Switching `return_inferencedata` to `True`.&#34;)
+        sampling_kwargs.return_inferencedata = True
+
+    return sampling_kwargs
+
+
+def fit_pymc3_mcmc(
+    model: pm.Model,
+    prior_pred_samples: Optional[int] = None,
+    sampling_kwargs: Optional[Pymc3SampleArguments] = None,
+) -&gt; az.InferenceData:
+    &#34;&#34;&#34;Run a standardized PyMC3 sampling procedure.
+
+    Args:
+        model (pm.Model): PyMC3 model.
+        prior_pred_samples (Optional[int], optional): Number of samples from the prior
+        distributions. Defaults to None. If `None` or less than 1, no prior samples
+        are taken.
+        sample_kwargs (Dict[str, Any], optional): Keyword arguments for the sampling
+        method. Defaults to `None`.
+
+    Returns:
+        az.InferenceData: Model posterior sample.
+    &#34;&#34;&#34;
+    sampling_kwargs = _update_return_inferencedata_kwarg(sampling_kwargs)
+    kwargs = _get_kwargs_dict(sampling_kwargs)
+    random_seed = kwargs.get(&#34;random_seed&#34;, None)
+
+    with model:
+        trace = pm.sample(**kwargs)
+        post_pred = pm.sample_posterior_predictive(trace, random_seed=random_seed)
+
+    assert isinstance(trace, az.InferenceData)
+
+    prior_pred: Optional[dict[str, np.ndarray]] = None
+    if prior_pred_samples is not None and prior_pred_samples &gt; 0:
+        with model:
+            prior_pred = pm.sample_prior_predictive(
+                prior_pred_samples, random_seed=random_seed
+            )
+    else:
+        logger.info(&#34;Not sampling from prior predictive.&#34;)
+
+    with model:
+        _extend_trace_with_prior_and_posterior(trace, prior=prior_pred, post=post_pred)
+
+    return trace
+
+
+def fit_pymc3_vi(
+    model: pm.Model,
+    prior_pred_samples: Optional[int] = None,
+    fit_kwargs: Optional[Pymc3FitArguments] = None,
+) -&gt; ApproximationSamplingResults:
+    &#34;&#34;&#34;Run a standard PyMC3 ADVI fitting procedure.
+
+    Args:
+        model (pm.Model): PyMC3 model.
+        prior_pred_samples (int, optional): Number of samples from the prior
+        distributions. Defaults to 1000. If less than 1, no prior samples are taken.
+        fit_kwargs (Optional[Pymc3FitArguments], optional): Keyword arguments for the
+        fit method. Defaults to `None`.
+
+    Returns:
+        ApproximationSamplingResults: A collection of the fitting and sampling results.
+    &#34;&#34;&#34;
+    kwargs = _get_kwargs_dict(fit_kwargs)
+    random_seed = kwargs.get(&#34;random_seed&#34;, None)
+    draws = kwargs.pop(&#34;draws&#34;, Pymc3FitArguments().draws)
+
+    with model:
+        approx = pm.fit(**kwargs)
+        trace = az.from_pymc3(trace=approx.sample(draws))
+        post_pred = pm.sample_posterior_predictive(trace=trace, random_seed=random_seed)
+
+    assert isinstance(approx, pm.Approximation)
+    assert isinstance(trace, az.InferenceData)
+
+    prior_pred: Optional[dict[str, np.ndarray]] = None
+    if prior_pred_samples is not None and prior_pred_samples &gt; 0:
+        with model:
+            prior_pred = pm.sample_prior_predictive(
+                prior_pred_samples, random_seed=random_seed
+            )
+    else:
+        logger.info(&#34;Not sampling from prior predictive.&#34;)
+
+    with model:
+        _extend_trace_with_prior_and_posterior(trace, prior=prior_pred, post=post_pred)
+
+    return ApproximationSamplingResults(inference_data=trace, approximation=approx)
+
+
+# --- Interface with Stan --- #
+
+
+def fit_stan_mcmc(
+    stan_model: StanModel,
+    sampling_kwargs: Optional[StanMCMCSamplingArguments] = None,
+    az_kwargs: Optional[dict[str, Any]] = None,
+) -&gt; az.InferenceData:
+    &#34;&#34;&#34;Fit a Stan model.
+
+    Args:
+        stan_model (StanModel): The Stan model to fit.
+        sampling_kwargs (Optional[StanMCMCSamplingArguments], optional): Optional
+        fitting keyword arguments. Defaults to None
+
+    Returns:
+        az.InferenceData: Model posterior draws.
+    &#34;&#34;&#34;
+    az_kwargs = resolve_optional_kwargs(az_kwargs)
+    kwargs = _get_kwargs_dict(sampling_kwargs)
+    _ = kwargs.pop(&#34;random_seed&#34;, None)  # remove &#39;random_seed&#39;
+    post = stan_model.sample(**kwargs)
+    return az.from_pystan(posterior=post, posterior_model=stan_model, **az_kwargs)
+
+
+# ---- Dispatching ---- #
+
+
+def fit_model(
+    model: BayesianModelProtocol,
+    data: pd.DataFrame,
+    fit_method: ModelFitMethod,
+    sampling_kwargs: Optional[ModelingSamplingArguments] = None,
+) -&gt; az.InferenceData:
+    &#34;&#34;&#34;Fit a model using a specified method.
+
+    Args:
+        model (BayesianModelProtocol): Bayesian model to fit.
+        data (pd.DataFrame): CRISPR screen data to use.
+        fit_method (ModelFitMethod): Fitting method.
+        sampling_kwargs (Optional[ModelingSamplingArguments], optional): Optional
+        sampling keyword arguments. Defaults to None.
+
+    Returns:
+        az.InferenceData: Model posterior.
+    &#34;&#34;&#34;
+    if fit_method is ModelFitMethod.STAN_MCMC:
+        if sampling_kwargs is not None:
+            kwargs = sampling_kwargs.stan_mcmc
+        else:
+            kwargs = None
+        seed = None if kwargs is None else kwargs.random_seed
+        stan_model = model.stan_model(data=data, random_seed=seed)
+        posterior = fit_stan_mcmc(
+            stan_model, sampling_kwargs=kwargs, az_kwargs=model.stan_idata_addons
+        )
+        return posterior
+    elif fit_method is ModelFitMethod.PYMC3_MCMC:
+        if sampling_kwargs is not None:
+            kwargs = sampling_kwargs.pymc3_mcmc
+        else:
+            kwargs = None
+        pymc3_model = model.pymc3_model(data=data)
+        return fit_pymc3_mcmc(
+            model=pymc3_model, prior_pred_samples=0, sampling_kwargs=kwargs
+        )
+    elif fit_method is ModelFitMethod.PYMC3_ADVI:
+        if sampling_kwargs is not None:
+            kwargs = sampling_kwargs.pymc3_advi
+        else:
+            kwargs = None
+        pymc3_model = model.pymc3_model(data=data)
+        return fit_pymc3_vi(
+            model=pymc3_model, prior_pred_samples=0, fit_kwargs=kwargs
+        ).inference_data
+    else:
+        assert_never(fit_method)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="speclet.modeling.model_fitting_api.fit_model"><code class="name flex">
+<span>def <span class="ident">fit_model</span></span>(<span>model: <a title="speclet.bayesian_models.BayesianModelProtocol" href="../bayesian_models/index.html#speclet.bayesian_models.BayesianModelProtocol">BayesianModelProtocol</a>, data: pandas.core.frame.DataFrame, fit_method: <a title="speclet.project_enums.ModelFitMethod" href="../project_enums.html#speclet.project_enums.ModelFitMethod">ModelFitMethod</a>, sampling_kwargs: Optional[<a title="speclet.modeling.fitting_arguments.ModelingSamplingArguments" href="fitting_arguments.html#speclet.modeling.fitting_arguments.ModelingSamplingArguments">ModelingSamplingArguments</a>] = None) -> arviz.data.inference_data.InferenceData</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Fit a model using a specified method.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model</code></strong> :&ensp;<code>BayesianModelProtocol</code></dt>
+<dd>Bayesian model to fit.</dd>
+<dt><strong><code>data</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>CRISPR screen data to use.</dd>
+<dt><strong><code>fit_method</code></strong> :&ensp;<code>ModelFitMethod</code></dt>
+<dd>Fitting method.</dd>
+<dt><strong><code>sampling_kwargs</code></strong> :&ensp;<code>Optional[ModelingSamplingArguments]</code>, optional</dt>
+<dd>Optional</dd>
+</dl>
+<p>sampling keyword arguments. Defaults to None.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>az.InferenceData</code></dt>
+<dd>Model posterior.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fit_model(
+    model: BayesianModelProtocol,
+    data: pd.DataFrame,
+    fit_method: ModelFitMethod,
+    sampling_kwargs: Optional[ModelingSamplingArguments] = None,
+) -&gt; az.InferenceData:
+    &#34;&#34;&#34;Fit a model using a specified method.
+
+    Args:
+        model (BayesianModelProtocol): Bayesian model to fit.
+        data (pd.DataFrame): CRISPR screen data to use.
+        fit_method (ModelFitMethod): Fitting method.
+        sampling_kwargs (Optional[ModelingSamplingArguments], optional): Optional
+        sampling keyword arguments. Defaults to None.
+
+    Returns:
+        az.InferenceData: Model posterior.
+    &#34;&#34;&#34;
+    if fit_method is ModelFitMethod.STAN_MCMC:
+        if sampling_kwargs is not None:
+            kwargs = sampling_kwargs.stan_mcmc
+        else:
+            kwargs = None
+        seed = None if kwargs is None else kwargs.random_seed
+        stan_model = model.stan_model(data=data, random_seed=seed)
+        posterior = fit_stan_mcmc(
+            stan_model, sampling_kwargs=kwargs, az_kwargs=model.stan_idata_addons
+        )
+        return posterior
+    elif fit_method is ModelFitMethod.PYMC3_MCMC:
+        if sampling_kwargs is not None:
+            kwargs = sampling_kwargs.pymc3_mcmc
+        else:
+            kwargs = None
+        pymc3_model = model.pymc3_model(data=data)
+        return fit_pymc3_mcmc(
+            model=pymc3_model, prior_pred_samples=0, sampling_kwargs=kwargs
+        )
+    elif fit_method is ModelFitMethod.PYMC3_ADVI:
+        if sampling_kwargs is not None:
+            kwargs = sampling_kwargs.pymc3_advi
+        else:
+            kwargs = None
+        pymc3_model = model.pymc3_model(data=data)
+        return fit_pymc3_vi(
+            model=pymc3_model, prior_pred_samples=0, fit_kwargs=kwargs
+        ).inference_data
+    else:
+        assert_never(fit_method)</code></pre>
+</details>
+</dd>
+<dt id="speclet.modeling.model_fitting_api.fit_pymc3_mcmc"><code class="name flex">
+<span>def <span class="ident">fit_pymc3_mcmc</span></span>(<span>model: pymc3.model.Model, prior_pred_samples: Optional[int] = None, sampling_kwargs: Optional[<a title="speclet.modeling.fitting_arguments.Pymc3SampleArguments" href="fitting_arguments.html#speclet.modeling.fitting_arguments.Pymc3SampleArguments">Pymc3SampleArguments</a>] = None) -> arviz.data.inference_data.InferenceData</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Run a standardized PyMC3 sampling procedure.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model</code></strong> :&ensp;<code>pm.Model</code></dt>
+<dd>PyMC3 model.</dd>
+<dt><strong><code>prior_pred_samples</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
+<dd>Number of samples from the prior</dd>
+<dt>distributions. Defaults to None. If <code>None</code> or less than 1, no prior samples</dt>
+<dt>are taken.</dt>
+<dt><strong><code>sample_kwargs</code></strong> :&ensp;<code>Dict[str, Any]</code>, optional</dt>
+<dd>Keyword arguments for the sampling</dd>
+</dl>
+<p>method. Defaults to <code>None</code>.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>az.InferenceData</code></dt>
+<dd>Model posterior sample.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fit_pymc3_mcmc(
+    model: pm.Model,
+    prior_pred_samples: Optional[int] = None,
+    sampling_kwargs: Optional[Pymc3SampleArguments] = None,
+) -&gt; az.InferenceData:
+    &#34;&#34;&#34;Run a standardized PyMC3 sampling procedure.
+
+    Args:
+        model (pm.Model): PyMC3 model.
+        prior_pred_samples (Optional[int], optional): Number of samples from the prior
+        distributions. Defaults to None. If `None` or less than 1, no prior samples
+        are taken.
+        sample_kwargs (Dict[str, Any], optional): Keyword arguments for the sampling
+        method. Defaults to `None`.
+
+    Returns:
+        az.InferenceData: Model posterior sample.
+    &#34;&#34;&#34;
+    sampling_kwargs = _update_return_inferencedata_kwarg(sampling_kwargs)
+    kwargs = _get_kwargs_dict(sampling_kwargs)
+    random_seed = kwargs.get(&#34;random_seed&#34;, None)
+
+    with model:
+        trace = pm.sample(**kwargs)
+        post_pred = pm.sample_posterior_predictive(trace, random_seed=random_seed)
+
+    assert isinstance(trace, az.InferenceData)
+
+    prior_pred: Optional[dict[str, np.ndarray]] = None
+    if prior_pred_samples is not None and prior_pred_samples &gt; 0:
+        with model:
+            prior_pred = pm.sample_prior_predictive(
+                prior_pred_samples, random_seed=random_seed
+            )
+    else:
+        logger.info(&#34;Not sampling from prior predictive.&#34;)
+
+    with model:
+        _extend_trace_with_prior_and_posterior(trace, prior=prior_pred, post=post_pred)
+
+    return trace</code></pre>
+</details>
+</dd>
+<dt id="speclet.modeling.model_fitting_api.fit_pymc3_vi"><code class="name flex">
+<span>def <span class="ident">fit_pymc3_vi</span></span>(<span>model: pymc3.model.Model, prior_pred_samples: Optional[int] = None, fit_kwargs: Optional[<a title="speclet.modeling.fitting_arguments.Pymc3FitArguments" href="fitting_arguments.html#speclet.modeling.fitting_arguments.Pymc3FitArguments">Pymc3FitArguments</a>] = None) -> <a title="speclet.modeling.model_fitting_api.ApproximationSamplingResults" href="#speclet.modeling.model_fitting_api.ApproximationSamplingResults">ApproximationSamplingResults</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Run a standard PyMC3 ADVI fitting procedure.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model</code></strong> :&ensp;<code>pm.Model</code></dt>
+<dd>PyMC3 model.</dd>
+<dt><strong><code>prior_pred_samples</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of samples from the prior</dd>
+<dt>distributions. Defaults to 1000. If less than 1, no prior samples are taken.</dt>
+<dt><strong><code>fit_kwargs</code></strong> :&ensp;<code>Optional[Pymc3FitArguments]</code>, optional</dt>
+<dd>Keyword arguments for the</dd>
+</dl>
+<p>fit method. Defaults to <code>None</code>.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="speclet.modeling.model_fitting_api.ApproximationSamplingResults" href="#speclet.modeling.model_fitting_api.ApproximationSamplingResults">ApproximationSamplingResults</a></code></dt>
+<dd>A collection of the fitting and sampling results.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fit_pymc3_vi(
+    model: pm.Model,
+    prior_pred_samples: Optional[int] = None,
+    fit_kwargs: Optional[Pymc3FitArguments] = None,
+) -&gt; ApproximationSamplingResults:
+    &#34;&#34;&#34;Run a standard PyMC3 ADVI fitting procedure.
+
+    Args:
+        model (pm.Model): PyMC3 model.
+        prior_pred_samples (int, optional): Number of samples from the prior
+        distributions. Defaults to 1000. If less than 1, no prior samples are taken.
+        fit_kwargs (Optional[Pymc3FitArguments], optional): Keyword arguments for the
+        fit method. Defaults to `None`.
+
+    Returns:
+        ApproximationSamplingResults: A collection of the fitting and sampling results.
+    &#34;&#34;&#34;
+    kwargs = _get_kwargs_dict(fit_kwargs)
+    random_seed = kwargs.get(&#34;random_seed&#34;, None)
+    draws = kwargs.pop(&#34;draws&#34;, Pymc3FitArguments().draws)
+
+    with model:
+        approx = pm.fit(**kwargs)
+        trace = az.from_pymc3(trace=approx.sample(draws))
+        post_pred = pm.sample_posterior_predictive(trace=trace, random_seed=random_seed)
+
+    assert isinstance(approx, pm.Approximation)
+    assert isinstance(trace, az.InferenceData)
+
+    prior_pred: Optional[dict[str, np.ndarray]] = None
+    if prior_pred_samples is not None and prior_pred_samples &gt; 0:
+        with model:
+            prior_pred = pm.sample_prior_predictive(
+                prior_pred_samples, random_seed=random_seed
+            )
+    else:
+        logger.info(&#34;Not sampling from prior predictive.&#34;)
+
+    with model:
+        _extend_trace_with_prior_and_posterior(trace, prior=prior_pred, post=post_pred)
+
+    return ApproximationSamplingResults(inference_data=trace, approximation=approx)</code></pre>
+</details>
+</dd>
+<dt id="speclet.modeling.model_fitting_api.fit_stan_mcmc"><code class="name flex">
+<span>def <span class="ident">fit_stan_mcmc</span></span>(<span>stan_model: stan.model.Model, sampling_kwargs: Optional[<a title="speclet.modeling.fitting_arguments.StanMCMCSamplingArguments" href="fitting_arguments.html#speclet.modeling.fitting_arguments.StanMCMCSamplingArguments">StanMCMCSamplingArguments</a>] = None, az_kwargs: Optional[dict[str, Any]] = None) -> arviz.data.inference_data.InferenceData</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Fit a Stan model.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>stan_model</code></strong> :&ensp;<code>StanModel</code></dt>
+<dd>The Stan model to fit.</dd>
+<dt><strong><code>sampling_kwargs</code></strong> :&ensp;<code>Optional[StanMCMCSamplingArguments]</code>, optional</dt>
+<dd>Optional</dd>
+</dl>
+<p>fitting keyword arguments. Defaults to None</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>az.InferenceData</code></dt>
+<dd>Model posterior draws.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fit_stan_mcmc(
+    stan_model: StanModel,
+    sampling_kwargs: Optional[StanMCMCSamplingArguments] = None,
+    az_kwargs: Optional[dict[str, Any]] = None,
+) -&gt; az.InferenceData:
+    &#34;&#34;&#34;Fit a Stan model.
+
+    Args:
+        stan_model (StanModel): The Stan model to fit.
+        sampling_kwargs (Optional[StanMCMCSamplingArguments], optional): Optional
+        fitting keyword arguments. Defaults to None
+
+    Returns:
+        az.InferenceData: Model posterior draws.
+    &#34;&#34;&#34;
+    az_kwargs = resolve_optional_kwargs(az_kwargs)
+    kwargs = _get_kwargs_dict(sampling_kwargs)
+    _ = kwargs.pop(&#34;random_seed&#34;, None)  # remove &#39;random_seed&#39;
+    post = stan_model.sample(**kwargs)
+    return az.from_pystan(posterior=post, posterior_model=stan_model, **az_kwargs)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="speclet.modeling.model_fitting_api.ApproximationSamplingResults"><code class="flex name class">
+<span>class <span class="ident">ApproximationSamplingResults</span></span>
+<span>(</span><span>inference_data: arviz.data.inference_data.InferenceData, approximation: pymc3.variational.opvi.Approximation)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The results of ADVI fitting and sampling.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class ApproximationSamplingResults:
+    &#34;&#34;&#34;The results of ADVI fitting and sampling.&#34;&#34;&#34;
+
+    inference_data: az.InferenceData
+    approximation: pm.Approximation</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="speclet.modeling" href="index.html">speclet.modeling</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="speclet.modeling.model_fitting_api.fit_model" href="#speclet.modeling.model_fitting_api.fit_model">fit_model</a></code></li>
+<li><code><a title="speclet.modeling.model_fitting_api.fit_pymc3_mcmc" href="#speclet.modeling.model_fitting_api.fit_pymc3_mcmc">fit_pymc3_mcmc</a></code></li>
+<li><code><a title="speclet.modeling.model_fitting_api.fit_pymc3_vi" href="#speclet.modeling.model_fitting_api.fit_pymc3_vi">fit_pymc3_vi</a></code></li>
+<li><code><a title="speclet.modeling.model_fitting_api.fit_stan_mcmc" href="#speclet.modeling.model_fitting_api.fit_stan_mcmc">fit_stan_mcmc</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="speclet.modeling.model_fitting_api.ApproximationSamplingResults" href="#speclet.modeling.model_fitting_api.ApproximationSamplingResults">ApproximationSamplingResults</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

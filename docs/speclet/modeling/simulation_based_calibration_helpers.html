@@ -1,0 +1,1087 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>speclet.modeling.simulation_based_calibration_helpers API documentation</title>
+<meta name="description" content="Helpers for organizing simulation-based calibrations." />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS_CHTML'></script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>speclet.modeling.simulation_based_calibration_helpers</code></h1>
+</header>
+<section id="section-intro">
+<p>Helpers for organizing simulation-based calibrations.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Helpers for organizing simulation-based calibrations.&#34;&#34;&#34;
+
+import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+from typing import Any, Iterable, Optional
+
+import arviz as az
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
+
+import speclet.exceptions
+from speclet.analysis.arviz_analysis import get_hdi_colnames_from_az_summary
+from speclet.data_processing import vectors as vhelp
+
+#### ---- File management ---- ####
+
+
+class SBCResults:
+    &#34;&#34;&#34;Results from a single round of SBC.&#34;&#34;&#34;
+
+    priors: dict[str, Any]
+    inference_obj: az.InferenceData
+    posterior_summary: pd.DataFrame
+
+    def __init__(
+        self,
+        priors: dict[str, Any],
+        inference_obj: az.InferenceData,
+        posterior_summary: pd.DataFrame,
+    ):
+        &#34;&#34;&#34;Create an instance of SBCResults.
+
+        Args:
+            priors (dict[str, Any]): Priors representing the &#39;true&#39; values.
+            inference_obj (az.InferenceData): Fitting results.
+            posterior_summary (pd.DataFrame): A summary of the posteriors.
+        &#34;&#34;&#34;
+        self.priors = priors
+        self.inference_obj = inference_obj
+        self.posterior_summary = posterior_summary
+
+
+class SBCFileManager:
+    &#34;&#34;&#34;Manages the results from a round of simulation-based calibration.&#34;&#34;&#34;
+
+    dir: Path
+    sbc_data_path: Path
+    inference_data_path: Path
+    priors_path_set: Path
+    priors_path_get: Path
+    posterior_summary_path: Path
+
+    sbc_data: Optional[pd.DataFrame] = None
+    sbc_results: Optional[SBCResults] = None
+
+    def __init__(self, dir: Path):
+        &#34;&#34;&#34;Create a SBCFileManager.
+
+        Args:
+            dir (Path): The directory where the data is stored.
+        &#34;&#34;&#34;
+        if not dir.is_dir():
+            raise NotADirectoryError(dir)
+        self.dir = dir
+        self.sbc_data_path = dir / &#34;sbc-data.csv&#34;
+        self.inference_data_path = dir / &#34;inference-data.netcdf&#34;
+        self.priors_path_set = dir / &#34;priors&#34;
+        self.priors_path_get = dir / &#34;priors.npz&#34;
+        self.posterior_summary_path = dir / &#34;posterior-summary.csv&#34;
+        _ = self._check_dir_exists()
+
+    def _check_dir_exists(self) -&gt; bool:
+        if self.dir.exists():
+            return True
+        else:
+            self.dir.mkdir()
+            return False
+
+    def get_sbc_data(self, re_read: bool = False) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Get the simulated data for the SBC.
+
+        Args:
+            re_read (bool, optional): Force re-reading from file. Defaults to False.
+
+        Returns:
+            pd.DataFrame: Saved simulated data frame.
+        &#34;&#34;&#34;
+        if self.sbc_data is None or re_read:
+            self.sbc_data = pd.read_csv(self.sbc_data_path)
+        return self.sbc_data
+
+    def save_sbc_data(
+        self, data: pd.DataFrame, index: bool = False, **kwargs: dict[str, Any]
+    ) -&gt; None:
+        &#34;&#34;&#34;Save SBC dataframe to disk.
+
+        Args:
+            data (pd.DataFrame): Simulated data used for the SBC.
+            index (bool, optional): Should the index be included in the file (CSV).
+              Defaults to False.
+            kwargs (dict[str, Any]): Additional keyword arguments for `data.to_csv()`.
+        &#34;&#34;&#34;
+        self.sbc_data = data
+        data.to_csv(self.sbc_data_path, index=index)
+
+    def simulation_data_exists(self) -&gt; bool:
+        &#34;&#34;&#34;Does the simulation dataframe file exist?
+
+        Returns:
+            bool: True if the dataframe file exists.
+        &#34;&#34;&#34;
+        return self.sbc_data_path.exists()
+
+    def clear_saved_data(self) -&gt; None:
+        &#34;&#34;&#34;Clear save SBC dataframe file.&#34;&#34;&#34;
+        if self.simulation_data_exists():
+            self.sbc_data_path.unlink()
+
+    def save_sbc_results(
+        self,
+        priors: dict[str, Any],
+        inference_obj: az.InferenceData,
+        posterior_summary: pd.DataFrame,
+    ) -&gt; None:
+        &#34;&#34;&#34;Save the results from a round of SBC.
+
+        Args:
+            priors (dict[str, Any]): Priors representing the &#39;true&#39; values.
+            inference_obj (az.InferenceData): Fitting results.
+            posterior_summary (pd.DataFrame): A summary of the posteriors.
+        &#34;&#34;&#34;
+        inference_obj.to_netcdf(self.inference_data_path.as_posix())
+        np.savez(self.priors_path_set.as_posix(), **priors)
+        posterior_summary.to_csv(
+            self.posterior_summary_path.as_posix(), index_label=&#34;parameter&#34;
+        )
+
+    def _tidy_numpy_files(self, files: Any) -&gt; dict[str, np.ndarray]:
+        d: dict[str, np.ndarray] = {}
+        for k in files.files:
+            d[k] = files[k]
+        return d
+
+    def get_sbc_results(self, re_read: bool = False) -&gt; SBCResults:
+        &#34;&#34;&#34;Retrieve results of a round of SBC.
+
+        Args:
+            re_read (bool, optional): Should the results be re-read from file?
+              Defaults to False.
+
+        Returns:
+            SBCResults: The results from the round of SBC.
+        &#34;&#34;&#34;
+        if self.sbc_results is not None and not re_read:
+            return self.sbc_results
+
+        inference_obj = az.from_netcdf(self.inference_data_path)
+        priors_files = np.load(self.priors_path_get.as_posix())
+        priors = self._tidy_numpy_files(priors_files)
+        posterior_summary = pd.read_csv(
+            self.posterior_summary_path, index_col=&#34;parameter&#34;
+        )
+
+        self.sbc_results = SBCResults(
+            priors=priors,
+            inference_obj=inference_obj,
+            posterior_summary=posterior_summary,
+        )
+        return self.sbc_results
+
+    def all_data_exists(self) -&gt; bool:
+        &#34;&#34;&#34;Confirm that all data exists.
+
+        Returns:
+            bool: True if all of the data exists, else false.
+        &#34;&#34;&#34;
+        for p in [
+            self.priors_path_get,
+            self.posterior_summary_path,
+            self.inference_data_path,
+        ]:
+            if not p.exists():
+                return False
+        return True
+
+    def clear_results(self) -&gt; None:
+        &#34;&#34;&#34;Clear the stored SBC results (if they exist).&#34;&#34;&#34;
+        for f in (
+            self.inference_data_path,
+            self.priors_path_get,
+            self.posterior_summary_path,
+        ):
+            if f.exists():
+                f.unlink()
+
+
+#### ---- Collate SBC ---- ####
+
+
+def _split_parameter(p: str) -&gt; list[str]:
+    return [a for a in re.split(&#34;\\[|,|\\]&#34;, p) if a != &#34;&#34;]
+
+
+def _get_prior_value_using_index_list(ary: np.ndarray, idx: list[int]) -&gt; float:
+    &#34;&#34;&#34;Extract a prior value from an array by indexes in a list.
+
+    The input array may be any number of dimensions and the indices in the list each
+    correspond to a single dimension. The final result will be a single value extract
+    from the array.
+
+    Args:
+        ary (np.ndarray): Input array of priors of any dimension.
+        idx (list[int]): List of indices, one per dimension.
+
+    Returns:
+        float: The value in the array at a location.
+    &#34;&#34;&#34;
+    if ary.shape == (1,):
+        ary = np.asarray(ary[0])
+    res = vhelp.index_array_by_list(ary, idx)
+    assert len(res.shape) == 0
+    return float(res)
+
+
+def _make_priors_dataframe(
+    priors: dict[str, np.ndarray], parameters: list[str]
+) -&gt; pd.DataFrame:
+    df = pd.DataFrame({&#34;parameter&#34;: parameters, &#34;true_value&#34;: 0}).set_index(&#34;parameter&#34;)
+    for parameter in parameters:
+        split_p = _split_parameter(parameter)
+        param = split_p[0]
+        idx = [int(i) for i in split_p[1:]]
+        value = _get_prior_value_using_index_list(priors[param][0], idx)
+        df.loc[parameter] = value
+    return df
+
+
+def _is_true_value_within_hdi(
+    low_hdi: pd.Series, true_vals: pd.Series, high_hdi: pd.Series
+) -&gt; np.ndarray:
+    return (
+        (low_hdi.values &lt; true_vals.values).astype(int)
+        * (true_vals.values &lt; high_hdi.values).astype(int)
+    ).astype(bool)
+
+
+def _assign_column_for_within_hdi(
+    df: pd.DataFrame, true_value_col: str = &#34;true_value&#34;
+) -&gt; pd.DataFrame:
+    hdi_low, hdi_high = get_hdi_colnames_from_az_summary(df)
+    df[&#34;within_hdi&#34;] = _is_true_value_within_hdi(
+        df[hdi_low], df[&#34;true_value&#34;], df[hdi_high]
+    )
+    return df
+
+
+class SBCResultsNotFoundError(FileNotFoundError):
+    &#34;&#34;&#34;SBC Results not found.&#34;&#34;&#34;
+
+    pass
+
+
+def get_posterior_summary_for_file_manager(sbc_dir: Path) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Create a summary of the results of an SBC sim. cached in a directory.
+
+    Args:
+        sbc_dir (Path): Directory with the results of a SBC simulation.
+
+    Raises:
+        SBCResultsNotFoundError: Raised if the SBC results are not found.
+
+    Returns:
+        pd.DataFrame: Dataframe with the summary of the simulation results.
+    &#34;&#34;&#34;
+    sbc_fm = SBCFileManager(sbc_dir)
+    if not sbc_fm.all_data_exists():
+        raise SBCResultsNotFoundError(f&#34;Not all output from &#39;{sbc_fm.dir.name}&#39; exist.&#34;)
+    res = sbc_fm.get_sbc_results()
+    true_values = _make_priors_dataframe(
+        res.priors, parameters=res.posterior_summary.index.values.tolist()
+    )
+    return res.posterior_summary.merge(true_values, left_index=True, right_index=True)
+
+
+def _index_and_concat_summaries(post_summaries: list[pd.DataFrame]) -&gt; pd.DataFrame:
+    return pd.concat(
+        [
+            d.assign(simulation_id=f&#34;sim_id_{str(i).rjust(4, &#39;0&#39;)}&#34;)
+            for i, d in enumerate(post_summaries)
+        ]
+    )
+
+
+def _extract_parameter_names(df: pd.DataFrame) -&gt; pd.DataFrame:
+    df[&#34;parameter_name&#34;] = [x.split(&#34;[&#34;)[0] for x in df.index.values]
+    df = df.set_index(&#34;parameter_name&#34;, append=True)
+    return df
+
+
+def _collate_sbc_posteriors_singlethreaded(
+    posterior_dirs: Iterable[Path], n_perms: Optional[int]
+) -&gt; list[pd.DataFrame]:
+    tqdm_posterior_dirs = tqdm(posterior_dirs, total=n_perms)
+    return [get_posterior_summary_for_file_manager(d) for d in tqdm_posterior_dirs]
+
+
+def _collate_sbc_posteriors_multithreaded(
+    posterior_dirs: Iterable[Path], n_perms: Optional[int]
+) -&gt; list[pd.DataFrame]:
+    simulation_posteriors = []
+    with tqdm(total=n_perms) as pbar:
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(get_posterior_summary_for_file_manager, d)
+                for d in posterior_dirs
+            ]
+            for future in as_completed(futures):
+                simulation_posteriors.append(future.result())
+                pbar.update(1)
+    return simulation_posteriors
+
+
+def collate_sbc_posteriors(
+    posterior_dirs: Iterable[Path],
+    num_permutations: Optional[int] = None,
+    multithreaded: bool = True,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Collate many SBC posteriors.
+
+    Args:
+        posterior_dirs (Iterable[Path]): The directories containing the stored results
+          of many SBC simulations.
+        num_permutations (Optional[int], optional): Number of permutations expected. If
+          supplied, this will be checked against the number of found simulations.
+          Defaults to None.
+        multithreaded (bool, optional): Should the results be collected using multiple
+          threads? Defaults to True.
+
+    Raises:
+        IncorrectNumberOfFilesFoundError: Raised if the number of found simulations is
+        not equal to the number of expected simulations.
+
+    Returns:
+        pd.DataFrame: A single data frame with all of the results of the simulations.
+    &#34;&#34;&#34;
+    simulation_posteriors: list[pd.DataFrame]
+
+    if multithreaded:
+        simulation_posteriors = _collate_sbc_posteriors_multithreaded(
+            posterior_dirs, n_perms=num_permutations
+        )
+    else:
+        simulation_posteriors = _collate_sbc_posteriors_singlethreaded(
+            posterior_dirs, n_perms=num_permutations
+        )
+
+    if num_permutations is not None and len(simulation_posteriors) != num_permutations:
+        raise speclet.exceptions.IncorrectNumberOfFilesFoundError(
+            num_permutations, len(simulation_posteriors)
+        )
+
+    simulation_posteriors_df = (
+        _index_and_concat_summaries(simulation_posteriors)
+        .pipe(_extract_parameter_names)
+        .pipe(_assign_column_for_within_hdi)
+    )
+
+    return simulation_posteriors_df</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="speclet.modeling.simulation_based_calibration_helpers.collate_sbc_posteriors"><code class="name flex">
+<span>def <span class="ident">collate_sbc_posteriors</span></span>(<span>posterior_dirs: Iterable[pathlib.Path], num_permutations: Optional[int] = None, multithreaded: bool = True) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Collate many SBC posteriors.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>posterior_dirs</code></strong> :&ensp;<code>Iterable[Path]</code></dt>
+<dd>The directories containing the stored results
+of many SBC simulations.</dd>
+<dt><strong><code>num_permutations</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
+<dd>Number of permutations expected. If
+supplied, this will be checked against the number of found simulations.
+Defaults to None.</dd>
+<dt><strong><code>multithreaded</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the results be collected using multiple
+threads? Defaults to True.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>IncorrectNumberOfFilesFoundError</code></dt>
+<dd>Raised if the number of found simulations is</dd>
+</dl>
+<p>not equal to the number of expected simulations.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>A single data frame with all of the results of the simulations.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def collate_sbc_posteriors(
+    posterior_dirs: Iterable[Path],
+    num_permutations: Optional[int] = None,
+    multithreaded: bool = True,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Collate many SBC posteriors.
+
+    Args:
+        posterior_dirs (Iterable[Path]): The directories containing the stored results
+          of many SBC simulations.
+        num_permutations (Optional[int], optional): Number of permutations expected. If
+          supplied, this will be checked against the number of found simulations.
+          Defaults to None.
+        multithreaded (bool, optional): Should the results be collected using multiple
+          threads? Defaults to True.
+
+    Raises:
+        IncorrectNumberOfFilesFoundError: Raised if the number of found simulations is
+        not equal to the number of expected simulations.
+
+    Returns:
+        pd.DataFrame: A single data frame with all of the results of the simulations.
+    &#34;&#34;&#34;
+    simulation_posteriors: list[pd.DataFrame]
+
+    if multithreaded:
+        simulation_posteriors = _collate_sbc_posteriors_multithreaded(
+            posterior_dirs, n_perms=num_permutations
+        )
+    else:
+        simulation_posteriors = _collate_sbc_posteriors_singlethreaded(
+            posterior_dirs, n_perms=num_permutations
+        )
+
+    if num_permutations is not None and len(simulation_posteriors) != num_permutations:
+        raise speclet.exceptions.IncorrectNumberOfFilesFoundError(
+            num_permutations, len(simulation_posteriors)
+        )
+
+    simulation_posteriors_df = (
+        _index_and_concat_summaries(simulation_posteriors)
+        .pipe(_extract_parameter_names)
+        .pipe(_assign_column_for_within_hdi)
+    )
+
+    return simulation_posteriors_df</code></pre>
+</details>
+</dd>
+<dt id="speclet.modeling.simulation_based_calibration_helpers.get_posterior_summary_for_file_manager"><code class="name flex">
+<span>def <span class="ident">get_posterior_summary_for_file_manager</span></span>(<span>sbc_dir: pathlib.Path) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a summary of the results of an SBC sim. cached in a directory.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sbc_dir</code></strong> :&ensp;<code>Path</code></dt>
+<dd>Directory with the results of a SBC simulation.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code><a title="speclet.modeling.simulation_based_calibration_helpers.SBCResultsNotFoundError" href="#speclet.modeling.simulation_based_calibration_helpers.SBCResultsNotFoundError">SBCResultsNotFoundError</a></code></dt>
+<dd>Raised if the SBC results are not found.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>Dataframe with the summary of the simulation results.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_posterior_summary_for_file_manager(sbc_dir: Path) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Create a summary of the results of an SBC sim. cached in a directory.
+
+    Args:
+        sbc_dir (Path): Directory with the results of a SBC simulation.
+
+    Raises:
+        SBCResultsNotFoundError: Raised if the SBC results are not found.
+
+    Returns:
+        pd.DataFrame: Dataframe with the summary of the simulation results.
+    &#34;&#34;&#34;
+    sbc_fm = SBCFileManager(sbc_dir)
+    if not sbc_fm.all_data_exists():
+        raise SBCResultsNotFoundError(f&#34;Not all output from &#39;{sbc_fm.dir.name}&#39; exist.&#34;)
+    res = sbc_fm.get_sbc_results()
+    true_values = _make_priors_dataframe(
+        res.priors, parameters=res.posterior_summary.index.values.tolist()
+    )
+    return res.posterior_summary.merge(true_values, left_index=True, right_index=True)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager"><code class="flex name class">
+<span>class <span class="ident">SBCFileManager</span></span>
+<span>(</span><span>dir: pathlib.Path)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Manages the results from a round of simulation-based calibration.</p>
+<p>Create a SBCFileManager.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dir</code></strong> :&ensp;<code>Path</code></dt>
+<dd>The directory where the data is stored.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SBCFileManager:
+    &#34;&#34;&#34;Manages the results from a round of simulation-based calibration.&#34;&#34;&#34;
+
+    dir: Path
+    sbc_data_path: Path
+    inference_data_path: Path
+    priors_path_set: Path
+    priors_path_get: Path
+    posterior_summary_path: Path
+
+    sbc_data: Optional[pd.DataFrame] = None
+    sbc_results: Optional[SBCResults] = None
+
+    def __init__(self, dir: Path):
+        &#34;&#34;&#34;Create a SBCFileManager.
+
+        Args:
+            dir (Path): The directory where the data is stored.
+        &#34;&#34;&#34;
+        if not dir.is_dir():
+            raise NotADirectoryError(dir)
+        self.dir = dir
+        self.sbc_data_path = dir / &#34;sbc-data.csv&#34;
+        self.inference_data_path = dir / &#34;inference-data.netcdf&#34;
+        self.priors_path_set = dir / &#34;priors&#34;
+        self.priors_path_get = dir / &#34;priors.npz&#34;
+        self.posterior_summary_path = dir / &#34;posterior-summary.csv&#34;
+        _ = self._check_dir_exists()
+
+    def _check_dir_exists(self) -&gt; bool:
+        if self.dir.exists():
+            return True
+        else:
+            self.dir.mkdir()
+            return False
+
+    def get_sbc_data(self, re_read: bool = False) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Get the simulated data for the SBC.
+
+        Args:
+            re_read (bool, optional): Force re-reading from file. Defaults to False.
+
+        Returns:
+            pd.DataFrame: Saved simulated data frame.
+        &#34;&#34;&#34;
+        if self.sbc_data is None or re_read:
+            self.sbc_data = pd.read_csv(self.sbc_data_path)
+        return self.sbc_data
+
+    def save_sbc_data(
+        self, data: pd.DataFrame, index: bool = False, **kwargs: dict[str, Any]
+    ) -&gt; None:
+        &#34;&#34;&#34;Save SBC dataframe to disk.
+
+        Args:
+            data (pd.DataFrame): Simulated data used for the SBC.
+            index (bool, optional): Should the index be included in the file (CSV).
+              Defaults to False.
+            kwargs (dict[str, Any]): Additional keyword arguments for `data.to_csv()`.
+        &#34;&#34;&#34;
+        self.sbc_data = data
+        data.to_csv(self.sbc_data_path, index=index)
+
+    def simulation_data_exists(self) -&gt; bool:
+        &#34;&#34;&#34;Does the simulation dataframe file exist?
+
+        Returns:
+            bool: True if the dataframe file exists.
+        &#34;&#34;&#34;
+        return self.sbc_data_path.exists()
+
+    def clear_saved_data(self) -&gt; None:
+        &#34;&#34;&#34;Clear save SBC dataframe file.&#34;&#34;&#34;
+        if self.simulation_data_exists():
+            self.sbc_data_path.unlink()
+
+    def save_sbc_results(
+        self,
+        priors: dict[str, Any],
+        inference_obj: az.InferenceData,
+        posterior_summary: pd.DataFrame,
+    ) -&gt; None:
+        &#34;&#34;&#34;Save the results from a round of SBC.
+
+        Args:
+            priors (dict[str, Any]): Priors representing the &#39;true&#39; values.
+            inference_obj (az.InferenceData): Fitting results.
+            posterior_summary (pd.DataFrame): A summary of the posteriors.
+        &#34;&#34;&#34;
+        inference_obj.to_netcdf(self.inference_data_path.as_posix())
+        np.savez(self.priors_path_set.as_posix(), **priors)
+        posterior_summary.to_csv(
+            self.posterior_summary_path.as_posix(), index_label=&#34;parameter&#34;
+        )
+
+    def _tidy_numpy_files(self, files: Any) -&gt; dict[str, np.ndarray]:
+        d: dict[str, np.ndarray] = {}
+        for k in files.files:
+            d[k] = files[k]
+        return d
+
+    def get_sbc_results(self, re_read: bool = False) -&gt; SBCResults:
+        &#34;&#34;&#34;Retrieve results of a round of SBC.
+
+        Args:
+            re_read (bool, optional): Should the results be re-read from file?
+              Defaults to False.
+
+        Returns:
+            SBCResults: The results from the round of SBC.
+        &#34;&#34;&#34;
+        if self.sbc_results is not None and not re_read:
+            return self.sbc_results
+
+        inference_obj = az.from_netcdf(self.inference_data_path)
+        priors_files = np.load(self.priors_path_get.as_posix())
+        priors = self._tidy_numpy_files(priors_files)
+        posterior_summary = pd.read_csv(
+            self.posterior_summary_path, index_col=&#34;parameter&#34;
+        )
+
+        self.sbc_results = SBCResults(
+            priors=priors,
+            inference_obj=inference_obj,
+            posterior_summary=posterior_summary,
+        )
+        return self.sbc_results
+
+    def all_data_exists(self) -&gt; bool:
+        &#34;&#34;&#34;Confirm that all data exists.
+
+        Returns:
+            bool: True if all of the data exists, else false.
+        &#34;&#34;&#34;
+        for p in [
+            self.priors_path_get,
+            self.posterior_summary_path,
+            self.inference_data_path,
+        ]:
+            if not p.exists():
+                return False
+        return True
+
+    def clear_results(self) -&gt; None:
+        &#34;&#34;&#34;Clear the stored SBC results (if they exist).&#34;&#34;&#34;
+        for f in (
+            self.inference_data_path,
+            self.priors_path_get,
+            self.posterior_summary_path,
+        ):
+            if f.exists():
+                f.unlink()</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.sbc_data"><code class="name">var <span class="ident">sbc_data</span> : Optional[pandas.core.frame.DataFrame]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.sbc_results"><code class="name">var <span class="ident">sbc_results</span> : Optional[<a title="speclet.modeling.simulation_based_calibration_helpers.SBCResults" href="#speclet.modeling.simulation_based_calibration_helpers.SBCResults">SBCResults</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.all_data_exists"><code class="name flex">
+<span>def <span class="ident">all_data_exists</span></span>(<span>self) -> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Confirm that all data exists.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>True if all of the data exists, else false.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def all_data_exists(self) -&gt; bool:
+    &#34;&#34;&#34;Confirm that all data exists.
+
+    Returns:
+        bool: True if all of the data exists, else false.
+    &#34;&#34;&#34;
+    for p in [
+        self.priors_path_get,
+        self.posterior_summary_path,
+        self.inference_data_path,
+    ]:
+        if not p.exists():
+            return False
+    return True</code></pre>
+</details>
+</dd>
+<dt id="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.clear_results"><code class="name flex">
+<span>def <span class="ident">clear_results</span></span>(<span>self) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Clear the stored SBC results (if they exist).</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clear_results(self) -&gt; None:
+    &#34;&#34;&#34;Clear the stored SBC results (if they exist).&#34;&#34;&#34;
+    for f in (
+        self.inference_data_path,
+        self.priors_path_get,
+        self.posterior_summary_path,
+    ):
+        if f.exists():
+            f.unlink()</code></pre>
+</details>
+</dd>
+<dt id="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.clear_saved_data"><code class="name flex">
+<span>def <span class="ident">clear_saved_data</span></span>(<span>self) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Clear save SBC dataframe file.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clear_saved_data(self) -&gt; None:
+    &#34;&#34;&#34;Clear save SBC dataframe file.&#34;&#34;&#34;
+    if self.simulation_data_exists():
+        self.sbc_data_path.unlink()</code></pre>
+</details>
+</dd>
+<dt id="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.get_sbc_data"><code class="name flex">
+<span>def <span class="ident">get_sbc_data</span></span>(<span>self, re_read: bool = False) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the simulated data for the SBC.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>re_read</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Force re-reading from file. Defaults to False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>Saved simulated data frame.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_sbc_data(self, re_read: bool = False) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Get the simulated data for the SBC.
+
+    Args:
+        re_read (bool, optional): Force re-reading from file. Defaults to False.
+
+    Returns:
+        pd.DataFrame: Saved simulated data frame.
+    &#34;&#34;&#34;
+    if self.sbc_data is None or re_read:
+        self.sbc_data = pd.read_csv(self.sbc_data_path)
+    return self.sbc_data</code></pre>
+</details>
+</dd>
+<dt id="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.get_sbc_results"><code class="name flex">
+<span>def <span class="ident">get_sbc_results</span></span>(<span>self, re_read: bool = False) -> <a title="speclet.modeling.simulation_based_calibration_helpers.SBCResults" href="#speclet.modeling.simulation_based_calibration_helpers.SBCResults">SBCResults</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve results of a round of SBC.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>re_read</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the results be re-read from file?
+Defaults to False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="speclet.modeling.simulation_based_calibration_helpers.SBCResults" href="#speclet.modeling.simulation_based_calibration_helpers.SBCResults">SBCResults</a></code></dt>
+<dd>The results from the round of SBC.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_sbc_results(self, re_read: bool = False) -&gt; SBCResults:
+    &#34;&#34;&#34;Retrieve results of a round of SBC.
+
+    Args:
+        re_read (bool, optional): Should the results be re-read from file?
+          Defaults to False.
+
+    Returns:
+        SBCResults: The results from the round of SBC.
+    &#34;&#34;&#34;
+    if self.sbc_results is not None and not re_read:
+        return self.sbc_results
+
+    inference_obj = az.from_netcdf(self.inference_data_path)
+    priors_files = np.load(self.priors_path_get.as_posix())
+    priors = self._tidy_numpy_files(priors_files)
+    posterior_summary = pd.read_csv(
+        self.posterior_summary_path, index_col=&#34;parameter&#34;
+    )
+
+    self.sbc_results = SBCResults(
+        priors=priors,
+        inference_obj=inference_obj,
+        posterior_summary=posterior_summary,
+    )
+    return self.sbc_results</code></pre>
+</details>
+</dd>
+<dt id="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.save_sbc_data"><code class="name flex">
+<span>def <span class="ident">save_sbc_data</span></span>(<span>self, data: pandas.core.frame.DataFrame, index: bool = False, **kwargs: dict[str, typing.Any]) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Save SBC dataframe to disk.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>Simulated data used for the SBC.</dd>
+<dt><strong><code>index</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the index be included in the file (CSV).
+Defaults to False.</dd>
+<dt><strong><code>kwargs</code></strong> :&ensp;<code>dict[str, Any]</code></dt>
+<dd>Additional keyword arguments for <code>data.to_csv()</code>.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_sbc_data(
+    self, data: pd.DataFrame, index: bool = False, **kwargs: dict[str, Any]
+) -&gt; None:
+    &#34;&#34;&#34;Save SBC dataframe to disk.
+
+    Args:
+        data (pd.DataFrame): Simulated data used for the SBC.
+        index (bool, optional): Should the index be included in the file (CSV).
+          Defaults to False.
+        kwargs (dict[str, Any]): Additional keyword arguments for `data.to_csv()`.
+    &#34;&#34;&#34;
+    self.sbc_data = data
+    data.to_csv(self.sbc_data_path, index=index)</code></pre>
+</details>
+</dd>
+<dt id="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.save_sbc_results"><code class="name flex">
+<span>def <span class="ident">save_sbc_results</span></span>(<span>self, priors: dict[str, typing.Any], inference_obj: arviz.data.inference_data.InferenceData, posterior_summary: pandas.core.frame.DataFrame) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Save the results from a round of SBC.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>priors</code></strong> :&ensp;<code>dict[str, Any]</code></dt>
+<dd>Priors representing the 'true' values.</dd>
+<dt><strong><code>inference_obj</code></strong> :&ensp;<code>az.InferenceData</code></dt>
+<dd>Fitting results.</dd>
+<dt><strong><code>posterior_summary</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>A summary of the posteriors.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_sbc_results(
+    self,
+    priors: dict[str, Any],
+    inference_obj: az.InferenceData,
+    posterior_summary: pd.DataFrame,
+) -&gt; None:
+    &#34;&#34;&#34;Save the results from a round of SBC.
+
+    Args:
+        priors (dict[str, Any]): Priors representing the &#39;true&#39; values.
+        inference_obj (az.InferenceData): Fitting results.
+        posterior_summary (pd.DataFrame): A summary of the posteriors.
+    &#34;&#34;&#34;
+    inference_obj.to_netcdf(self.inference_data_path.as_posix())
+    np.savez(self.priors_path_set.as_posix(), **priors)
+    posterior_summary.to_csv(
+        self.posterior_summary_path.as_posix(), index_label=&#34;parameter&#34;
+    )</code></pre>
+</details>
+</dd>
+<dt id="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.simulation_data_exists"><code class="name flex">
+<span>def <span class="ident">simulation_data_exists</span></span>(<span>self) -> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Does the simulation dataframe file exist?</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>True if the dataframe file exists.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def simulation_data_exists(self) -&gt; bool:
+    &#34;&#34;&#34;Does the simulation dataframe file exist?
+
+    Returns:
+        bool: True if the dataframe file exists.
+    &#34;&#34;&#34;
+    return self.sbc_data_path.exists()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="speclet.modeling.simulation_based_calibration_helpers.SBCResults"><code class="flex name class">
+<span>class <span class="ident">SBCResults</span></span>
+<span>(</span><span>priors: dict[str, typing.Any], inference_obj: arviz.data.inference_data.InferenceData, posterior_summary: pandas.core.frame.DataFrame)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Results from a single round of SBC.</p>
+<p>Create an instance of SBCResults.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>priors</code></strong> :&ensp;<code>dict[str, Any]</code></dt>
+<dd>Priors representing the 'true' values.</dd>
+<dt><strong><code>inference_obj</code></strong> :&ensp;<code>az.InferenceData</code></dt>
+<dd>Fitting results.</dd>
+<dt><strong><code>posterior_summary</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>A summary of the posteriors.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SBCResults:
+    &#34;&#34;&#34;Results from a single round of SBC.&#34;&#34;&#34;
+
+    priors: dict[str, Any]
+    inference_obj: az.InferenceData
+    posterior_summary: pd.DataFrame
+
+    def __init__(
+        self,
+        priors: dict[str, Any],
+        inference_obj: az.InferenceData,
+        posterior_summary: pd.DataFrame,
+    ):
+        &#34;&#34;&#34;Create an instance of SBCResults.
+
+        Args:
+            priors (dict[str, Any]): Priors representing the &#39;true&#39; values.
+            inference_obj (az.InferenceData): Fitting results.
+            posterior_summary (pd.DataFrame): A summary of the posteriors.
+        &#34;&#34;&#34;
+        self.priors = priors
+        self.inference_obj = inference_obj
+        self.posterior_summary = posterior_summary</code></pre>
+</details>
+</dd>
+<dt id="speclet.modeling.simulation_based_calibration_helpers.SBCResultsNotFoundError"><code class="flex name class">
+<span>class <span class="ident">SBCResultsNotFoundError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>SBC Results not found.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SBCResultsNotFoundError(FileNotFoundError):
+    &#34;&#34;&#34;SBC Results not found.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.FileNotFoundError</li>
+<li>builtins.OSError</li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="speclet.modeling" href="index.html">speclet.modeling</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="speclet.modeling.simulation_based_calibration_helpers.collate_sbc_posteriors" href="#speclet.modeling.simulation_based_calibration_helpers.collate_sbc_posteriors">collate_sbc_posteriors</a></code></li>
+<li><code><a title="speclet.modeling.simulation_based_calibration_helpers.get_posterior_summary_for_file_manager" href="#speclet.modeling.simulation_based_calibration_helpers.get_posterior_summary_for_file_manager">get_posterior_summary_for_file_manager</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager" href="#speclet.modeling.simulation_based_calibration_helpers.SBCFileManager">SBCFileManager</a></code></h4>
+<ul class="">
+<li><code><a title="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.all_data_exists" href="#speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.all_data_exists">all_data_exists</a></code></li>
+<li><code><a title="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.clear_results" href="#speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.clear_results">clear_results</a></code></li>
+<li><code><a title="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.clear_saved_data" href="#speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.clear_saved_data">clear_saved_data</a></code></li>
+<li><code><a title="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.get_sbc_data" href="#speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.get_sbc_data">get_sbc_data</a></code></li>
+<li><code><a title="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.get_sbc_results" href="#speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.get_sbc_results">get_sbc_results</a></code></li>
+<li><code><a title="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.save_sbc_data" href="#speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.save_sbc_data">save_sbc_data</a></code></li>
+<li><code><a title="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.save_sbc_results" href="#speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.save_sbc_results">save_sbc_results</a></code></li>
+<li><code><a title="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.sbc_data" href="#speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.sbc_data">sbc_data</a></code></li>
+<li><code><a title="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.sbc_results" href="#speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.sbc_results">sbc_results</a></code></li>
+<li><code><a title="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.simulation_data_exists" href="#speclet.modeling.simulation_based_calibration_helpers.SBCFileManager.simulation_data_exists">simulation_data_exists</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="speclet.modeling.simulation_based_calibration_helpers.SBCResults" href="#speclet.modeling.simulation_based_calibration_helpers.SBCResults">SBCResults</a></code></h4>
+</li>
+<li>
+<h4><code><a title="speclet.modeling.simulation_based_calibration_helpers.SBCResultsNotFoundError" href="#speclet.modeling.simulation_based_calibration_helpers.SBCResultsNotFoundError">SBCResultsNotFoundError</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>speclet.data_processing.vectors API documentation</title>
+<meta name="description" content="Common and general vector operations." />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS_CHTML'></script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>speclet.data_processing.vectors</code></h1>
+</header>
+<section id="section-intro">
+<p>Common and general vector operations.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Common and general vector operations.&#34;&#34;&#34;
+
+from typing import Callable, Optional
+
+import numpy as np
+from scipy import stats
+
+
+def zscale(x: np.ndarray) -&gt; np.ndarray:
+    &#34;&#34;&#34;Z-scale an array.
+
+    Args:
+        x (np.ndarray): Numeric array.
+
+    Returns:
+        np.ndarray: Z-scaled array.
+    &#34;&#34;&#34;
+    return stats.zscore(x)
+
+
+def squish(x: float, lower: float, upper: float) -&gt; float:
+    &#34;&#34;&#34;Squish an array to lie between a lower an upper bound.
+
+    Args:
+        x (float): Numeric array.
+        lower (float): Lower bound (minimum value).
+        upper (float): Upper bound (maximum value).
+
+    Returns:
+        float: The numeric array with no values below the lower bound and none above the
+        upper bound.
+    &#34;&#34;&#34;
+    return max(min(x, upper), lower)
+
+
+squish_array = np.vectorize(squish)
+
+
+def np_identity(x: np.ndarray) -&gt; np.ndarray:
+    &#34;&#34;&#34;Identity function.
+
+    Args:
+        x (np.ndarray): Numpy array.
+
+    Returns:
+        np.ndarray: The exact same numpy array with no changes.
+    &#34;&#34;&#34;
+    return x
+
+
+NumpyTransform = Callable[[np.ndarray], np.ndarray]
+
+
+def careful_zscore(
+    x: np.ndarray,
+    atol: float = 0.01,
+    transform: Optional[NumpyTransform] = None,
+) -&gt; np.ndarray:
+    &#34;&#34;&#34;Z-scale an array carefully.
+
+    Z-scaling can be very unstable if the values are very close together because the
+    standard deviation is very small. For the case of modeling, it is logical to just
+    set the values to 0 so that the covariate is canceled out. If any of the following
+    critera are met, the z-score is ignored and an array of 0&#39;s is returned:
+
+    1. If there is only one value.
+    2. If the values are all close to 0.
+    3. If the values are all very close together.
+
+    Args:
+        x (np.ndarray): Array to rescale.
+        atol (float, optional): Absolute tolerance for variance in values to decide if
+          the z-score should be applied. Defaults to 0.01.
+        transform (Optional[NumpyTransform], optional): A transformation to apply to the
+          array before z-scaling, but after checking the variance. Defaults to None
+          which is equivalent to an identity transform.
+
+    Returns:
+        np.ndarray: Z-scaled array or array of 0&#39;s.
+    &#34;&#34;&#34;
+    if transform is None:
+        transform = np_identity
+
+    if len(x) == 1:
+        # If there is only one value, set z-scaled expr to 0.
+        return np.zeros_like(x)
+    elif np.allclose(x, 0.0, atol=atol):
+        # If all values are close to 0, set value to 0.
+        return np.zeros_like(x)
+    elif np.allclose(x, np.mean(x), atol=atol):
+        # If all values are about equal, set value to 0.
+        return np.zeros_like(x)
+    else:
+        return zscale(transform(x))
+
+
+def index_array_by_list(ary: np.ndarray, idx: list[int]) -&gt; np.ndarray:
+    &#34;&#34;&#34;Extract a value from an array by a list of indices.
+
+    The input array may be any number of dimensions and the indices in the list each
+    correspond to a single dimension. The final result will be a single value extracted
+    from the array.
+
+    An array is always returned to avoid having to return Any. It will always be flat
+    and contain a single value.
+
+    Args:
+        ary (np.ndarray): Input array of any dimension.
+        idx (List[int]): List of indices, one per dimension.
+
+    Returns:
+        np.ndarray: A flattened array of the same type as was input, but contains only
+        a single value.
+    &#34;&#34;&#34;
+    assert len(idx) == len(ary.shape)
+
+    if len(idx) == 0:
+        return np.asarray(ary)
+
+    value: np.ndarray = ary.copy()
+
+    for i in idx:
+        value = value[i]
+
+    return np.asarray(value)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="speclet.data_processing.vectors.careful_zscore"><code class="name flex">
+<span>def <span class="ident">careful_zscore</span></span>(<span>x: numpy.ndarray, atol: float = 0.01, transform: Optional[Callable[[numpy.ndarray], numpy.ndarray]] = None) -> numpy.ndarray</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Z-scale an array carefully.</p>
+<p>Z-scaling can be very unstable if the values are very close together because the
+standard deviation is very small. For the case of modeling, it is logical to just
+set the values to 0 so that the covariate is canceled out. If any of the following
+critera are met, the z-score is ignored and an array of 0's is returned:</p>
+<ol>
+<li>If there is only one value.</li>
+<li>If the values are all close to 0.</li>
+<li>If the values are all very close together.</li>
+</ol>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>x</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>Array to rescale.</dd>
+<dt><strong><code>atol</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Absolute tolerance for variance in values to decide if
+the z-score should be applied. Defaults to 0.01.</dd>
+<dt><strong><code>transform</code></strong> :&ensp;<code>Optional[NumpyTransform]</code>, optional</dt>
+<dd>A transformation to apply to the
+array before z-scaling, but after checking the variance. Defaults to None
+which is equivalent to an identity transform.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>np.ndarray</code></dt>
+<dd>Z-scaled array or array of 0's.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def careful_zscore(
+    x: np.ndarray,
+    atol: float = 0.01,
+    transform: Optional[NumpyTransform] = None,
+) -&gt; np.ndarray:
+    &#34;&#34;&#34;Z-scale an array carefully.
+
+    Z-scaling can be very unstable if the values are very close together because the
+    standard deviation is very small. For the case of modeling, it is logical to just
+    set the values to 0 so that the covariate is canceled out. If any of the following
+    critera are met, the z-score is ignored and an array of 0&#39;s is returned:
+
+    1. If there is only one value.
+    2. If the values are all close to 0.
+    3. If the values are all very close together.
+
+    Args:
+        x (np.ndarray): Array to rescale.
+        atol (float, optional): Absolute tolerance for variance in values to decide if
+          the z-score should be applied. Defaults to 0.01.
+        transform (Optional[NumpyTransform], optional): A transformation to apply to the
+          array before z-scaling, but after checking the variance. Defaults to None
+          which is equivalent to an identity transform.
+
+    Returns:
+        np.ndarray: Z-scaled array or array of 0&#39;s.
+    &#34;&#34;&#34;
+    if transform is None:
+        transform = np_identity
+
+    if len(x) == 1:
+        # If there is only one value, set z-scaled expr to 0.
+        return np.zeros_like(x)
+    elif np.allclose(x, 0.0, atol=atol):
+        # If all values are close to 0, set value to 0.
+        return np.zeros_like(x)
+    elif np.allclose(x, np.mean(x), atol=atol):
+        # If all values are about equal, set value to 0.
+        return np.zeros_like(x)
+    else:
+        return zscale(transform(x))</code></pre>
+</details>
+</dd>
+<dt id="speclet.data_processing.vectors.index_array_by_list"><code class="name flex">
+<span>def <span class="ident">index_array_by_list</span></span>(<span>ary: numpy.ndarray, idx: list[int]) -> numpy.ndarray</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Extract a value from an array by a list of indices.</p>
+<p>The input array may be any number of dimensions and the indices in the list each
+correspond to a single dimension. The final result will be a single value extracted
+from the array.</p>
+<p>An array is always returned to avoid having to return Any. It will always be flat
+and contain a single value.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>ary</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>Input array of any dimension.</dd>
+<dt><strong><code>idx</code></strong> :&ensp;<code>List[int]</code></dt>
+<dd>List of indices, one per dimension.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>np.ndarray</code></dt>
+<dd>A flattened array of the same type as was input, but contains only</dd>
+</dl>
+<p>a single value.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def index_array_by_list(ary: np.ndarray, idx: list[int]) -&gt; np.ndarray:
+    &#34;&#34;&#34;Extract a value from an array by a list of indices.
+
+    The input array may be any number of dimensions and the indices in the list each
+    correspond to a single dimension. The final result will be a single value extracted
+    from the array.
+
+    An array is always returned to avoid having to return Any. It will always be flat
+    and contain a single value.
+
+    Args:
+        ary (np.ndarray): Input array of any dimension.
+        idx (List[int]): List of indices, one per dimension.
+
+    Returns:
+        np.ndarray: A flattened array of the same type as was input, but contains only
+        a single value.
+    &#34;&#34;&#34;
+    assert len(idx) == len(ary.shape)
+
+    if len(idx) == 0:
+        return np.asarray(ary)
+
+    value: np.ndarray = ary.copy()
+
+    for i in idx:
+        value = value[i]
+
+    return np.asarray(value)</code></pre>
+</details>
+</dd>
+<dt id="speclet.data_processing.vectors.np_identity"><code class="name flex">
+<span>def <span class="ident">np_identity</span></span>(<span>x: numpy.ndarray) -> numpy.ndarray</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Identity function.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>x</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>Numpy array.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>np.ndarray</code></dt>
+<dd>The exact same numpy array with no changes.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def np_identity(x: np.ndarray) -&gt; np.ndarray:
+    &#34;&#34;&#34;Identity function.
+
+    Args:
+        x (np.ndarray): Numpy array.
+
+    Returns:
+        np.ndarray: The exact same numpy array with no changes.
+    &#34;&#34;&#34;
+    return x</code></pre>
+</details>
+</dd>
+<dt id="speclet.data_processing.vectors.squish"><code class="name flex">
+<span>def <span class="ident">squish</span></span>(<span>x: float, lower: float, upper: float) -> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Squish an array to lie between a lower an upper bound.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>x</code></strong> :&ensp;<code>float</code></dt>
+<dd>Numeric array.</dd>
+<dt><strong><code>lower</code></strong> :&ensp;<code>float</code></dt>
+<dd>Lower bound (minimum value).</dd>
+<dt><strong><code>upper</code></strong> :&ensp;<code>float</code></dt>
+<dd>Upper bound (maximum value).</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>The numeric array with no values below the lower bound and none above the</dd>
+</dl>
+<p>upper bound.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def squish(x: float, lower: float, upper: float) -&gt; float:
+    &#34;&#34;&#34;Squish an array to lie between a lower an upper bound.
+
+    Args:
+        x (float): Numeric array.
+        lower (float): Lower bound (minimum value).
+        upper (float): Upper bound (maximum value).
+
+    Returns:
+        float: The numeric array with no values below the lower bound and none above the
+        upper bound.
+    &#34;&#34;&#34;
+    return max(min(x, upper), lower)</code></pre>
+</details>
+</dd>
+<dt id="speclet.data_processing.vectors.zscale"><code class="name flex">
+<span>def <span class="ident">zscale</span></span>(<span>x: numpy.ndarray) -> numpy.ndarray</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Z-scale an array.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>x</code></strong> :&ensp;<code>np.ndarray</code></dt>
+<dd>Numeric array.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>np.ndarray</code></dt>
+<dd>Z-scaled array.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def zscale(x: np.ndarray) -&gt; np.ndarray:
+    &#34;&#34;&#34;Z-scale an array.
+
+    Args:
+        x (np.ndarray): Numeric array.
+
+    Returns:
+        np.ndarray: Z-scaled array.
+    &#34;&#34;&#34;
+    return stats.zscore(x)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="speclet.data_processing" href="index.html">speclet.data_processing</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="speclet.data_processing.vectors.careful_zscore" href="#speclet.data_processing.vectors.careful_zscore">careful_zscore</a></code></li>
+<li><code><a title="speclet.data_processing.vectors.index_array_by_list" href="#speclet.data_processing.vectors.index_array_by_list">index_array_by_list</a></code></li>
+<li><code><a title="speclet.data_processing.vectors.np_identity" href="#speclet.data_processing.vectors.np_identity">np_identity</a></code></li>
+<li><code><a title="speclet.data_processing.vectors.squish" href="#speclet.data_processing.vectors.squish">squish</a></code></li>
+<li><code><a title="speclet.data_processing.vectors.zscale" href="#speclet.data_processing.vectors.zscale">zscale</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

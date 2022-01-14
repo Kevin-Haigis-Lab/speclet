@@ -1,0 +1,1146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>speclet.managers.data_managers API documentation</title>
+<meta name="description" content="Data management classes." />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS_CHTML'></script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>speclet.managers.data_managers</code></h1>
+</header>
+<section id="section-intro">
+<p>Data management classes.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Data management classes.&#34;&#34;&#34;
+
+from copy import deepcopy
+from pathlib import Path
+from typing import Any, Callable, Final, Optional, Union
+
+import pandas as pd
+import pandera as pa
+from pandera import Column, DataFrameSchema
+
+from speclet.data_processing.crispr import set_achilles_categorical_columns
+from speclet.data_processing.validation import (
+    check_between,
+    check_finite,
+    check_nonnegative,
+    check_unique_groups,
+)
+from speclet.exceptions import (
+    DataFileDoesNotExist,
+    DataFileIsNotAFile,
+    UnsupportedDataFileType,
+)
+from speclet.io import DataFile, data_path
+
+data_transformation = Callable[[pd.DataFrame], pd.DataFrame]
+
+
+class CrisprScreenDataManager:
+    &#34;&#34;&#34;Manage CRISPR screen data.&#34;&#34;&#34;
+
+    data_file: Path
+    _data: Optional[pd.DataFrame]
+    _transformations: list[data_transformation]
+    _supported_filetypes: Final[set[str]] = {&#34;.csv&#34;, &#34;.tsv&#34;, &#34;.pkl&#34;}
+
+    def __init__(
+        self,
+        data_file: Union[Path, DataFile, str],
+        transformations: Optional[list[data_transformation]] = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;Create a CRISPR screen data manager.
+
+        Args:
+            data_file (Union[Path, DataFile, str]): File with data (csv, tsv, or pkl).
+            transformations (Optional[list[DataFrameTransformation]], optional): List of
+            functions that take, mutate, and return a data frame.
+            Defaults to None.
+        &#34;&#34;&#34;
+        self._data = None
+
+        if transformations is None:
+            self._transformations = []
+        else:
+            self._transformations = deepcopy(transformations)
+
+        if isinstance(data_file, DataFile):
+            self.data_file = data_path(data_file)
+        elif isinstance(data_file, str):
+            self.data_file = Path(data_file)
+        elif isinstance(data_file, Path):
+            self.data_file = data_file
+        else:
+            raise BaseException(&#34;Type not accepted for data file.&#34;)
+
+        if not self.data_file.exists():
+            raise DataFileDoesNotExist(self.data_file)
+        if not self.data_file.is_file():
+            raise DataFileIsNotAFile(self.data_file)
+        if self.data_file.suffix not in self._supported_filetypes:
+            raise UnsupportedDataFileType(self.data_file.suffix)
+
+    # ---- Properties ----
+
+    @property
+    def data(self) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Get the data from the manager.&#34;&#34;&#34;
+        return self.get_data()
+
+    @property
+    def data_is_loaded(self) -&gt; bool:
+        &#34;&#34;&#34;Check if the data has been loaded.&#34;&#34;&#34;
+        return self._data is not None
+
+    @property
+    def transformations(self) -&gt; list[data_transformation]:
+        &#34;&#34;&#34;Get the list of data transformations.
+
+        Returns:
+            list[data_transformation]: List of data transformations.
+        &#34;&#34;&#34;
+        return deepcopy(self._transformations)
+
+    @property
+    def num_transformations(self) -&gt; int:
+        &#34;&#34;&#34;Get the number of transformations.
+
+        Returns:
+            int: Number of transformations.
+        &#34;&#34;&#34;
+        return len(self._transformations)
+
+    # ---- Data dataframe ----
+
+    def get_data(
+        self,
+        skip_transforms: bool = False,
+        force_reread: bool = False,
+        read_kwargs: Optional[dict[str, Any]] = None,
+    ) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Get the dataframe.
+
+        If the data has already been loaded, it is returned without re-reading from
+        file.
+
+        Args:
+            skip_transforms (bool, optional): Skip data transformations. Defaults to
+            False.
+            force_reread (bool, optional): Force the file to be read even if the data
+            object already exists. Defaults to False.
+            read_kwargs (Optional[dict[str, Any]], optional): Key-word arguments for the
+            CSV-parsing function. Defaults to None.
+
+        Raises:
+            UnsupportedDataFileType: Data file type is not supported.
+
+        Returns:
+            pd.DataFrame: Requested dataframe.
+        &#34;&#34;&#34;
+        if self._data is not None and not force_reread:
+            return self._data
+
+        if self.data_file.suffix not in self._supported_filetypes:
+            raise UnsupportedDataFileType(self.data_file.suffix)
+
+        if read_kwargs is None:
+            read_kwargs = {}
+
+        if self.data_file.suffix == &#34;.csv&#34;:
+            self._data = pd.read_csv(self.data_file, **read_kwargs)
+        elif self.data_file.suffix == &#34;.tsv&#34;:
+            self._data = pd.read_csv(self.data_file, sep=&#34;\t&#34;, **read_kwargs)
+        elif self.data_file.suffix == &#34;.pkl&#34;:
+            self._data = pd.read_pickle(self.data_file)
+        else:
+            raise UnsupportedDataFileType(self.data_file.suffix)
+
+        assert isinstance(self._data, pd.DataFrame)
+
+        if not skip_transforms:
+            self._data = self.apply_transformations(self._data)
+
+        self._data = self.apply_validation(self._data)
+        return self._data
+
+    def set_data(self, data: pd.DataFrame, apply_transformations: bool = True) -&gt; None:
+        &#34;&#34;&#34;Set the CRISPR screen data.
+
+        Args:
+            data (pd.DataFrame): New data (a copy is made).
+            apply_transformations (bool, optional): Should the transformations be
+              applied? Defaults to True.
+        &#34;&#34;&#34;
+        self._data = data.copy()
+        if apply_transformations:
+            self._data = self.apply_transformations(self._data)
+        self._data = self.apply_validation(self._data)
+        return None
+
+    def clear_data(self) -&gt; None:
+        &#34;&#34;&#34;Clear the CRISPR screen data.&#34;&#34;&#34;
+        self._data = None
+
+    # ---- Transformations ----
+
+    def _apply_default_transformations(self, data: pd.DataFrame) -&gt; pd.DataFrame:
+        return set_achilles_categorical_columns(data)
+
+    def add_transformation(
+        self, fxn: Union[data_transformation, list[data_transformation]]
+    ) -&gt; None:
+        &#34;&#34;&#34;Add a new transformation.
+
+        The new transformation is added to the end of the current list.
+
+        Args:
+            fxn (Union[DataFrameTransformation, list[DataFrameTransformation]]): Data
+              transforming function(s).
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        if isinstance(fxn, list):
+            self._transformations += fxn
+        else:
+            self._transformations.append(fxn)
+        return None
+
+    def insert_transformation(self, fxn: data_transformation, at: int) -&gt; None:
+        &#34;&#34;&#34;Insert a new transformation at a specified index.
+
+        Args:
+            fxn (DataFrameTransformation): Data transforming function.
+            at (int): Insertion index.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._transformations.insert(at, fxn)
+        return None
+
+    def clear_transformations(self) -&gt; None:
+        &#34;&#34;&#34;Clear the list of transformations.&#34;&#34;&#34;
+        self._transformations = []
+
+    def set_transformations(
+        self, new_transformations: list[data_transformation]
+    ) -&gt; None:
+        &#34;&#34;&#34;Set the list of transformations.
+
+        A deep copy of the list of transformations is make.
+
+        Args:
+            new_transformations (list[DataFrameTransformation]): New list of data
+            transforming functions.
+        &#34;&#34;&#34;
+        self._transformations = deepcopy(new_transformations)
+        return None
+
+    def apply_transformations(self, data: pd.DataFrame) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Apply the transformations to a dataframe.
+
+        Args:
+            data (pd.DataFrame): Dataframe to transform.
+
+        Returns:
+            pd.DataFrame: Transformed dataframe.
+        &#34;&#34;&#34;
+        data = self._apply_default_transformations(data)
+        for fxn in self._transformations:
+            data = fxn(data)
+        return data
+
+    # ---- Validation ----
+
+    @property
+    def data_schema(self) -&gt; DataFrameSchema:
+        &#34;&#34;&#34;Data validation schema.
+
+        Returns:
+            DataFrameSchema: Pandera data schema.
+        &#34;&#34;&#34;
+        return DataFrameSchema(
+            {
+                &#34;sgrna&#34;: Column(&#34;category&#34;),
+                &#34;hugo_symbol&#34;: Column(
+                    &#34;category&#34;,
+                    checks=[
+                        # A sgRNA maps to a single gene (&#34;hugo_symbol&#34;)
+                        pa.Check(check_unique_groups, groupby=&#34;sgrna&#34;),
+                    ],
+                ),
+                &#34;lineage&#34;: Column(
+                    &#34;category&#34;,
+                    checks=[
+                        # Each cell line maps to a single lineage.
+                        pa.Check(check_unique_groups, groupby=&#34;depmap_id&#34;)
+                    ],
+                ),
+                &#34;depmap_id&#34;: Column(&#34;category&#34;),
+                &#34;p_dna_batch&#34;: Column(&#34;category&#34;),
+                &#34;sgrna_target_chr&#34;: Column(&#34;category&#34;),
+                &#34;lfc&#34;: Column(
+                    float,
+                    checks=[check_finite(), check_between(-20, 20)],
+                ),
+                &#34;counts_final&#34;: Column(
+                    float,
+                    checks=[
+                        check_finite(nullable=True),
+                        check_nonnegative(nullable=True),
+                    ],
+                    nullable=True,
+                    coerce=True,
+                ),
+                &#34;copy_number&#34;: Column(
+                    float, checks=[check_finite(), check_nonnegative()]
+                ),
+                &#34;rna_expr&#34;: Column(float, checks=[check_finite(), check_nonnegative()]),
+                &#34;num_mutations&#34;: Column(
+                    int, checks=[check_nonnegative(), check_finite()]
+                ),
+            }
+        )
+
+    def apply_validation(self, data: pd.DataFrame) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Apply data validation to a dataframe.
+
+        Args:
+            data (pd.DataFrame): Dataframe to validate.
+
+        Returns:
+            pd.DataFrame: Validated dataframe.
+        &#34;&#34;&#34;
+        return self.data_schema.validate(data)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="speclet.managers.data_managers.CrisprScreenDataManager"><code class="flex name class">
+<span>class <span class="ident">CrisprScreenDataManager</span></span>
+<span>(</span><span>data_file: Union[pathlib.Path, speclet.io.DataFile, str], transformations: Optional[list[Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]]] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Manage CRISPR screen data.</p>
+<p>Create a CRISPR screen data manager.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data_file</code></strong> :&ensp;<code>Union[Path, DataFile, str]</code></dt>
+<dd>File with data (csv, tsv, or pkl).</dd>
+<dt><strong><code>transformations</code></strong> :&ensp;<code>Optional[list[DataFrameTransformation]]</code>, optional</dt>
+<dd>List of</dd>
+</dl>
+<p>functions that take, mutate, and return a data frame.
+Defaults to None.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CrisprScreenDataManager:
+    &#34;&#34;&#34;Manage CRISPR screen data.&#34;&#34;&#34;
+
+    data_file: Path
+    _data: Optional[pd.DataFrame]
+    _transformations: list[data_transformation]
+    _supported_filetypes: Final[set[str]] = {&#34;.csv&#34;, &#34;.tsv&#34;, &#34;.pkl&#34;}
+
+    def __init__(
+        self,
+        data_file: Union[Path, DataFile, str],
+        transformations: Optional[list[data_transformation]] = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;Create a CRISPR screen data manager.
+
+        Args:
+            data_file (Union[Path, DataFile, str]): File with data (csv, tsv, or pkl).
+            transformations (Optional[list[DataFrameTransformation]], optional): List of
+            functions that take, mutate, and return a data frame.
+            Defaults to None.
+        &#34;&#34;&#34;
+        self._data = None
+
+        if transformations is None:
+            self._transformations = []
+        else:
+            self._transformations = deepcopy(transformations)
+
+        if isinstance(data_file, DataFile):
+            self.data_file = data_path(data_file)
+        elif isinstance(data_file, str):
+            self.data_file = Path(data_file)
+        elif isinstance(data_file, Path):
+            self.data_file = data_file
+        else:
+            raise BaseException(&#34;Type not accepted for data file.&#34;)
+
+        if not self.data_file.exists():
+            raise DataFileDoesNotExist(self.data_file)
+        if not self.data_file.is_file():
+            raise DataFileIsNotAFile(self.data_file)
+        if self.data_file.suffix not in self._supported_filetypes:
+            raise UnsupportedDataFileType(self.data_file.suffix)
+
+    # ---- Properties ----
+
+    @property
+    def data(self) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Get the data from the manager.&#34;&#34;&#34;
+        return self.get_data()
+
+    @property
+    def data_is_loaded(self) -&gt; bool:
+        &#34;&#34;&#34;Check if the data has been loaded.&#34;&#34;&#34;
+        return self._data is not None
+
+    @property
+    def transformations(self) -&gt; list[data_transformation]:
+        &#34;&#34;&#34;Get the list of data transformations.
+
+        Returns:
+            list[data_transformation]: List of data transformations.
+        &#34;&#34;&#34;
+        return deepcopy(self._transformations)
+
+    @property
+    def num_transformations(self) -&gt; int:
+        &#34;&#34;&#34;Get the number of transformations.
+
+        Returns:
+            int: Number of transformations.
+        &#34;&#34;&#34;
+        return len(self._transformations)
+
+    # ---- Data dataframe ----
+
+    def get_data(
+        self,
+        skip_transforms: bool = False,
+        force_reread: bool = False,
+        read_kwargs: Optional[dict[str, Any]] = None,
+    ) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Get the dataframe.
+
+        If the data has already been loaded, it is returned without re-reading from
+        file.
+
+        Args:
+            skip_transforms (bool, optional): Skip data transformations. Defaults to
+            False.
+            force_reread (bool, optional): Force the file to be read even if the data
+            object already exists. Defaults to False.
+            read_kwargs (Optional[dict[str, Any]], optional): Key-word arguments for the
+            CSV-parsing function. Defaults to None.
+
+        Raises:
+            UnsupportedDataFileType: Data file type is not supported.
+
+        Returns:
+            pd.DataFrame: Requested dataframe.
+        &#34;&#34;&#34;
+        if self._data is not None and not force_reread:
+            return self._data
+
+        if self.data_file.suffix not in self._supported_filetypes:
+            raise UnsupportedDataFileType(self.data_file.suffix)
+
+        if read_kwargs is None:
+            read_kwargs = {}
+
+        if self.data_file.suffix == &#34;.csv&#34;:
+            self._data = pd.read_csv(self.data_file, **read_kwargs)
+        elif self.data_file.suffix == &#34;.tsv&#34;:
+            self._data = pd.read_csv(self.data_file, sep=&#34;\t&#34;, **read_kwargs)
+        elif self.data_file.suffix == &#34;.pkl&#34;:
+            self._data = pd.read_pickle(self.data_file)
+        else:
+            raise UnsupportedDataFileType(self.data_file.suffix)
+
+        assert isinstance(self._data, pd.DataFrame)
+
+        if not skip_transforms:
+            self._data = self.apply_transformations(self._data)
+
+        self._data = self.apply_validation(self._data)
+        return self._data
+
+    def set_data(self, data: pd.DataFrame, apply_transformations: bool = True) -&gt; None:
+        &#34;&#34;&#34;Set the CRISPR screen data.
+
+        Args:
+            data (pd.DataFrame): New data (a copy is made).
+            apply_transformations (bool, optional): Should the transformations be
+              applied? Defaults to True.
+        &#34;&#34;&#34;
+        self._data = data.copy()
+        if apply_transformations:
+            self._data = self.apply_transformations(self._data)
+        self._data = self.apply_validation(self._data)
+        return None
+
+    def clear_data(self) -&gt; None:
+        &#34;&#34;&#34;Clear the CRISPR screen data.&#34;&#34;&#34;
+        self._data = None
+
+    # ---- Transformations ----
+
+    def _apply_default_transformations(self, data: pd.DataFrame) -&gt; pd.DataFrame:
+        return set_achilles_categorical_columns(data)
+
+    def add_transformation(
+        self, fxn: Union[data_transformation, list[data_transformation]]
+    ) -&gt; None:
+        &#34;&#34;&#34;Add a new transformation.
+
+        The new transformation is added to the end of the current list.
+
+        Args:
+            fxn (Union[DataFrameTransformation, list[DataFrameTransformation]]): Data
+              transforming function(s).
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        if isinstance(fxn, list):
+            self._transformations += fxn
+        else:
+            self._transformations.append(fxn)
+        return None
+
+    def insert_transformation(self, fxn: data_transformation, at: int) -&gt; None:
+        &#34;&#34;&#34;Insert a new transformation at a specified index.
+
+        Args:
+            fxn (DataFrameTransformation): Data transforming function.
+            at (int): Insertion index.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._transformations.insert(at, fxn)
+        return None
+
+    def clear_transformations(self) -&gt; None:
+        &#34;&#34;&#34;Clear the list of transformations.&#34;&#34;&#34;
+        self._transformations = []
+
+    def set_transformations(
+        self, new_transformations: list[data_transformation]
+    ) -&gt; None:
+        &#34;&#34;&#34;Set the list of transformations.
+
+        A deep copy of the list of transformations is make.
+
+        Args:
+            new_transformations (list[DataFrameTransformation]): New list of data
+            transforming functions.
+        &#34;&#34;&#34;
+        self._transformations = deepcopy(new_transformations)
+        return None
+
+    def apply_transformations(self, data: pd.DataFrame) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Apply the transformations to a dataframe.
+
+        Args:
+            data (pd.DataFrame): Dataframe to transform.
+
+        Returns:
+            pd.DataFrame: Transformed dataframe.
+        &#34;&#34;&#34;
+        data = self._apply_default_transformations(data)
+        for fxn in self._transformations:
+            data = fxn(data)
+        return data
+
+    # ---- Validation ----
+
+    @property
+    def data_schema(self) -&gt; DataFrameSchema:
+        &#34;&#34;&#34;Data validation schema.
+
+        Returns:
+            DataFrameSchema: Pandera data schema.
+        &#34;&#34;&#34;
+        return DataFrameSchema(
+            {
+                &#34;sgrna&#34;: Column(&#34;category&#34;),
+                &#34;hugo_symbol&#34;: Column(
+                    &#34;category&#34;,
+                    checks=[
+                        # A sgRNA maps to a single gene (&#34;hugo_symbol&#34;)
+                        pa.Check(check_unique_groups, groupby=&#34;sgrna&#34;),
+                    ],
+                ),
+                &#34;lineage&#34;: Column(
+                    &#34;category&#34;,
+                    checks=[
+                        # Each cell line maps to a single lineage.
+                        pa.Check(check_unique_groups, groupby=&#34;depmap_id&#34;)
+                    ],
+                ),
+                &#34;depmap_id&#34;: Column(&#34;category&#34;),
+                &#34;p_dna_batch&#34;: Column(&#34;category&#34;),
+                &#34;sgrna_target_chr&#34;: Column(&#34;category&#34;),
+                &#34;lfc&#34;: Column(
+                    float,
+                    checks=[check_finite(), check_between(-20, 20)],
+                ),
+                &#34;counts_final&#34;: Column(
+                    float,
+                    checks=[
+                        check_finite(nullable=True),
+                        check_nonnegative(nullable=True),
+                    ],
+                    nullable=True,
+                    coerce=True,
+                ),
+                &#34;copy_number&#34;: Column(
+                    float, checks=[check_finite(), check_nonnegative()]
+                ),
+                &#34;rna_expr&#34;: Column(float, checks=[check_finite(), check_nonnegative()]),
+                &#34;num_mutations&#34;: Column(
+                    int, checks=[check_nonnegative(), check_finite()]
+                ),
+            }
+        )
+
+    def apply_validation(self, data: pd.DataFrame) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Apply data validation to a dataframe.
+
+        Args:
+            data (pd.DataFrame): Dataframe to validate.
+
+        Returns:
+            pd.DataFrame: Validated dataframe.
+        &#34;&#34;&#34;
+        return self.data_schema.validate(data)</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="speclet.managers.data_managers.CrisprScreenDataManager.data"><code class="name">var <span class="ident">data</span> : pandas.core.frame.DataFrame</code></dt>
+<dd>
+<div class="desc"><p>Get the data from the manager.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def data(self) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Get the data from the manager.&#34;&#34;&#34;
+    return self.get_data()</code></pre>
+</details>
+</dd>
+<dt id="speclet.managers.data_managers.CrisprScreenDataManager.data_is_loaded"><code class="name">var <span class="ident">data_is_loaded</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>Check if the data has been loaded.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def data_is_loaded(self) -&gt; bool:
+    &#34;&#34;&#34;Check if the data has been loaded.&#34;&#34;&#34;
+    return self._data is not None</code></pre>
+</details>
+</dd>
+<dt id="speclet.managers.data_managers.CrisprScreenDataManager.data_schema"><code class="name">var <span class="ident">data_schema</span> : pandera.schemas.DataFrameSchema</code></dt>
+<dd>
+<div class="desc"><p>Data validation schema.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>DataFrameSchema</code></dt>
+<dd>Pandera data schema.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def data_schema(self) -&gt; DataFrameSchema:
+    &#34;&#34;&#34;Data validation schema.
+
+    Returns:
+        DataFrameSchema: Pandera data schema.
+    &#34;&#34;&#34;
+    return DataFrameSchema(
+        {
+            &#34;sgrna&#34;: Column(&#34;category&#34;),
+            &#34;hugo_symbol&#34;: Column(
+                &#34;category&#34;,
+                checks=[
+                    # A sgRNA maps to a single gene (&#34;hugo_symbol&#34;)
+                    pa.Check(check_unique_groups, groupby=&#34;sgrna&#34;),
+                ],
+            ),
+            &#34;lineage&#34;: Column(
+                &#34;category&#34;,
+                checks=[
+                    # Each cell line maps to a single lineage.
+                    pa.Check(check_unique_groups, groupby=&#34;depmap_id&#34;)
+                ],
+            ),
+            &#34;depmap_id&#34;: Column(&#34;category&#34;),
+            &#34;p_dna_batch&#34;: Column(&#34;category&#34;),
+            &#34;sgrna_target_chr&#34;: Column(&#34;category&#34;),
+            &#34;lfc&#34;: Column(
+                float,
+                checks=[check_finite(), check_between(-20, 20)],
+            ),
+            &#34;counts_final&#34;: Column(
+                float,
+                checks=[
+                    check_finite(nullable=True),
+                    check_nonnegative(nullable=True),
+                ],
+                nullable=True,
+                coerce=True,
+            ),
+            &#34;copy_number&#34;: Column(
+                float, checks=[check_finite(), check_nonnegative()]
+            ),
+            &#34;rna_expr&#34;: Column(float, checks=[check_finite(), check_nonnegative()]),
+            &#34;num_mutations&#34;: Column(
+                int, checks=[check_nonnegative(), check_finite()]
+            ),
+        }
+    )</code></pre>
+</details>
+</dd>
+<dt id="speclet.managers.data_managers.CrisprScreenDataManager.num_transformations"><code class="name">var <span class="ident">num_transformations</span> : int</code></dt>
+<dd>
+<div class="desc"><p>Get the number of transformations.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>int</code></dt>
+<dd>Number of transformations.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def num_transformations(self) -&gt; int:
+    &#34;&#34;&#34;Get the number of transformations.
+
+    Returns:
+        int: Number of transformations.
+    &#34;&#34;&#34;
+    return len(self._transformations)</code></pre>
+</details>
+</dd>
+<dt id="speclet.managers.data_managers.CrisprScreenDataManager.transformations"><code class="name">var <span class="ident">transformations</span> : list[typing.Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]]</code></dt>
+<dd>
+<div class="desc"><p>Get the list of data transformations.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[data_transformation]</code></dt>
+<dd>List of data transformations.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def transformations(self) -&gt; list[data_transformation]:
+    &#34;&#34;&#34;Get the list of data transformations.
+
+    Returns:
+        list[data_transformation]: List of data transformations.
+    &#34;&#34;&#34;
+    return deepcopy(self._transformations)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="speclet.managers.data_managers.CrisprScreenDataManager.add_transformation"><code class="name flex">
+<span>def <span class="ident">add_transformation</span></span>(<span>self, fxn: Union[Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame], list[Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]]]) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a new transformation.</p>
+<p>The new transformation is added to the end of the current list.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>fxn</code></strong> :&ensp;<code>Union[DataFrameTransformation, list[DataFrameTransformation]]</code></dt>
+<dd>Data
+transforming function(s).</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_transformation(
+    self, fxn: Union[data_transformation, list[data_transformation]]
+) -&gt; None:
+    &#34;&#34;&#34;Add a new transformation.
+
+    The new transformation is added to the end of the current list.
+
+    Args:
+        fxn (Union[DataFrameTransformation, list[DataFrameTransformation]]): Data
+          transforming function(s).
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    if isinstance(fxn, list):
+        self._transformations += fxn
+    else:
+        self._transformations.append(fxn)
+    return None</code></pre>
+</details>
+</dd>
+<dt id="speclet.managers.data_managers.CrisprScreenDataManager.apply_transformations"><code class="name flex">
+<span>def <span class="ident">apply_transformations</span></span>(<span>self, data: pandas.core.frame.DataFrame) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Apply the transformations to a dataframe.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>Dataframe to transform.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>Transformed dataframe.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def apply_transformations(self, data: pd.DataFrame) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Apply the transformations to a dataframe.
+
+    Args:
+        data (pd.DataFrame): Dataframe to transform.
+
+    Returns:
+        pd.DataFrame: Transformed dataframe.
+    &#34;&#34;&#34;
+    data = self._apply_default_transformations(data)
+    for fxn in self._transformations:
+        data = fxn(data)
+    return data</code></pre>
+</details>
+</dd>
+<dt id="speclet.managers.data_managers.CrisprScreenDataManager.apply_validation"><code class="name flex">
+<span>def <span class="ident">apply_validation</span></span>(<span>self, data: pandas.core.frame.DataFrame) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Apply data validation to a dataframe.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>Dataframe to validate.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>Validated dataframe.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def apply_validation(self, data: pd.DataFrame) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Apply data validation to a dataframe.
+
+    Args:
+        data (pd.DataFrame): Dataframe to validate.
+
+    Returns:
+        pd.DataFrame: Validated dataframe.
+    &#34;&#34;&#34;
+    return self.data_schema.validate(data)</code></pre>
+</details>
+</dd>
+<dt id="speclet.managers.data_managers.CrisprScreenDataManager.clear_data"><code class="name flex">
+<span>def <span class="ident">clear_data</span></span>(<span>self) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Clear the CRISPR screen data.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clear_data(self) -&gt; None:
+    &#34;&#34;&#34;Clear the CRISPR screen data.&#34;&#34;&#34;
+    self._data = None</code></pre>
+</details>
+</dd>
+<dt id="speclet.managers.data_managers.CrisprScreenDataManager.clear_transformations"><code class="name flex">
+<span>def <span class="ident">clear_transformations</span></span>(<span>self) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Clear the list of transformations.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clear_transformations(self) -&gt; None:
+    &#34;&#34;&#34;Clear the list of transformations.&#34;&#34;&#34;
+    self._transformations = []</code></pre>
+</details>
+</dd>
+<dt id="speclet.managers.data_managers.CrisprScreenDataManager.get_data"><code class="name flex">
+<span>def <span class="ident">get_data</span></span>(<span>self, skip_transforms: bool = False, force_reread: bool = False, read_kwargs: Optional[dict[str, Any]] = None) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the dataframe.</p>
+<p>If the data has already been loaded, it is returned without re-reading from
+file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>skip_transforms</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Skip data transformations. Defaults to</dd>
+<dt>False.</dt>
+<dt><strong><code>force_reread</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Force the file to be read even if the data</dd>
+<dt>object already exists. Defaults to False.</dt>
+<dt><strong><code>read_kwargs</code></strong> :&ensp;<code>Optional[dict[str, Any]]</code>, optional</dt>
+<dd>Key-word arguments for the</dd>
+</dl>
+<p>CSV-parsing function. Defaults to None.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>UnsupportedDataFileType</code></dt>
+<dd>Data file type is not supported.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>Requested dataframe.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_data(
+    self,
+    skip_transforms: bool = False,
+    force_reread: bool = False,
+    read_kwargs: Optional[dict[str, Any]] = None,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Get the dataframe.
+
+    If the data has already been loaded, it is returned without re-reading from
+    file.
+
+    Args:
+        skip_transforms (bool, optional): Skip data transformations. Defaults to
+        False.
+        force_reread (bool, optional): Force the file to be read even if the data
+        object already exists. Defaults to False.
+        read_kwargs (Optional[dict[str, Any]], optional): Key-word arguments for the
+        CSV-parsing function. Defaults to None.
+
+    Raises:
+        UnsupportedDataFileType: Data file type is not supported.
+
+    Returns:
+        pd.DataFrame: Requested dataframe.
+    &#34;&#34;&#34;
+    if self._data is not None and not force_reread:
+        return self._data
+
+    if self.data_file.suffix not in self._supported_filetypes:
+        raise UnsupportedDataFileType(self.data_file.suffix)
+
+    if read_kwargs is None:
+        read_kwargs = {}
+
+    if self.data_file.suffix == &#34;.csv&#34;:
+        self._data = pd.read_csv(self.data_file, **read_kwargs)
+    elif self.data_file.suffix == &#34;.tsv&#34;:
+        self._data = pd.read_csv(self.data_file, sep=&#34;\t&#34;, **read_kwargs)
+    elif self.data_file.suffix == &#34;.pkl&#34;:
+        self._data = pd.read_pickle(self.data_file)
+    else:
+        raise UnsupportedDataFileType(self.data_file.suffix)
+
+    assert isinstance(self._data, pd.DataFrame)
+
+    if not skip_transforms:
+        self._data = self.apply_transformations(self._data)
+
+    self._data = self.apply_validation(self._data)
+    return self._data</code></pre>
+</details>
+</dd>
+<dt id="speclet.managers.data_managers.CrisprScreenDataManager.insert_transformation"><code class="name flex">
+<span>def <span class="ident">insert_transformation</span></span>(<span>self, fxn: Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame], at: int) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Insert a new transformation at a specified index.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>fxn</code></strong> :&ensp;<code>DataFrameTransformation</code></dt>
+<dd>Data transforming function.</dd>
+<dt><strong><code>at</code></strong> :&ensp;<code>int</code></dt>
+<dd>Insertion index.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def insert_transformation(self, fxn: data_transformation, at: int) -&gt; None:
+    &#34;&#34;&#34;Insert a new transformation at a specified index.
+
+    Args:
+        fxn (DataFrameTransformation): Data transforming function.
+        at (int): Insertion index.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    self._transformations.insert(at, fxn)
+    return None</code></pre>
+</details>
+</dd>
+<dt id="speclet.managers.data_managers.CrisprScreenDataManager.set_data"><code class="name flex">
+<span>def <span class="ident">set_data</span></span>(<span>self, data: pandas.core.frame.DataFrame, apply_transformations: bool = True) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the CRISPR screen data.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>New data (a copy is made).</dd>
+<dt><strong><code>apply_transformations</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the transformations be
+applied? Defaults to True.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_data(self, data: pd.DataFrame, apply_transformations: bool = True) -&gt; None:
+    &#34;&#34;&#34;Set the CRISPR screen data.
+
+    Args:
+        data (pd.DataFrame): New data (a copy is made).
+        apply_transformations (bool, optional): Should the transformations be
+          applied? Defaults to True.
+    &#34;&#34;&#34;
+    self._data = data.copy()
+    if apply_transformations:
+        self._data = self.apply_transformations(self._data)
+    self._data = self.apply_validation(self._data)
+    return None</code></pre>
+</details>
+</dd>
+<dt id="speclet.managers.data_managers.CrisprScreenDataManager.set_transformations"><code class="name flex">
+<span>def <span class="ident">set_transformations</span></span>(<span>self, new_transformations: list[typing.Callable[[pandas.core.frame.DataFrame], pandas.core.frame.DataFrame]]) -> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the list of transformations.</p>
+<p>A deep copy of the list of transformations is make.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>new_transformations</code></strong> :&ensp;<code>list[DataFrameTransformation]</code></dt>
+<dd>New list of data</dd>
+</dl>
+<p>transforming functions.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_transformations(
+    self, new_transformations: list[data_transformation]
+) -&gt; None:
+    &#34;&#34;&#34;Set the list of transformations.
+
+    A deep copy of the list of transformations is make.
+
+    Args:
+        new_transformations (list[DataFrameTransformation]): New list of data
+        transforming functions.
+    &#34;&#34;&#34;
+    self._transformations = deepcopy(new_transformations)
+    return None</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="speclet.managers" href="index.html">speclet.managers</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="speclet.managers.data_managers.CrisprScreenDataManager" href="#speclet.managers.data_managers.CrisprScreenDataManager">CrisprScreenDataManager</a></code></h4>
+<ul class="">
+<li><code><a title="speclet.managers.data_managers.CrisprScreenDataManager.add_transformation" href="#speclet.managers.data_managers.CrisprScreenDataManager.add_transformation">add_transformation</a></code></li>
+<li><code><a title="speclet.managers.data_managers.CrisprScreenDataManager.apply_transformations" href="#speclet.managers.data_managers.CrisprScreenDataManager.apply_transformations">apply_transformations</a></code></li>
+<li><code><a title="speclet.managers.data_managers.CrisprScreenDataManager.apply_validation" href="#speclet.managers.data_managers.CrisprScreenDataManager.apply_validation">apply_validation</a></code></li>
+<li><code><a title="speclet.managers.data_managers.CrisprScreenDataManager.clear_data" href="#speclet.managers.data_managers.CrisprScreenDataManager.clear_data">clear_data</a></code></li>
+<li><code><a title="speclet.managers.data_managers.CrisprScreenDataManager.clear_transformations" href="#speclet.managers.data_managers.CrisprScreenDataManager.clear_transformations">clear_transformations</a></code></li>
+<li><code><a title="speclet.managers.data_managers.CrisprScreenDataManager.data" href="#speclet.managers.data_managers.CrisprScreenDataManager.data">data</a></code></li>
+<li><code><a title="speclet.managers.data_managers.CrisprScreenDataManager.data_is_loaded" href="#speclet.managers.data_managers.CrisprScreenDataManager.data_is_loaded">data_is_loaded</a></code></li>
+<li><code><a title="speclet.managers.data_managers.CrisprScreenDataManager.data_schema" href="#speclet.managers.data_managers.CrisprScreenDataManager.data_schema">data_schema</a></code></li>
+<li><code><a title="speclet.managers.data_managers.CrisprScreenDataManager.get_data" href="#speclet.managers.data_managers.CrisprScreenDataManager.get_data">get_data</a></code></li>
+<li><code><a title="speclet.managers.data_managers.CrisprScreenDataManager.insert_transformation" href="#speclet.managers.data_managers.CrisprScreenDataManager.insert_transformation">insert_transformation</a></code></li>
+<li><code><a title="speclet.managers.data_managers.CrisprScreenDataManager.num_transformations" href="#speclet.managers.data_managers.CrisprScreenDataManager.num_transformations">num_transformations</a></code></li>
+<li><code><a title="speclet.managers.data_managers.CrisprScreenDataManager.set_data" href="#speclet.managers.data_managers.CrisprScreenDataManager.set_data">set_data</a></code></li>
+<li><code><a title="speclet.managers.data_managers.CrisprScreenDataManager.set_transformations" href="#speclet.managers.data_managers.CrisprScreenDataManager.set_transformations">set_transformations</a></code></li>
+<li><code><a title="speclet.managers.data_managers.CrisprScreenDataManager.transformations" href="#speclet.managers.data_managers.CrisprScreenDataManager.transformations">transformations</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

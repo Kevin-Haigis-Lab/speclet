@@ -1,0 +1,1363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>speclet.analysis.sbc_analysis API documentation</title>
+<meta name="description" content="Analyze simulation-based calibration results." />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS_CHTML'></script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>speclet.analysis.sbc_analysis</code></h1>
+</header>
+<section id="section-intro">
+<p>Analyze simulation-based calibration results.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Analyze simulation-based calibration results.&#34;&#34;&#34;
+
+import statistics
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from typing import Any, Optional, Sequence
+
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from matplotlib.axes import Axes
+
+import speclet.analysis.arviz_analysis as azanal
+import speclet.exceptions
+import speclet.modeling.simulation_based_calibration_helpers as sbc
+from speclet.modeling import pymc3_helpers as pmhelp
+
+SBC_UNIFORMITY_THINNING_DRAWS = 100
+
+
+class SBCAnalysis:
+    &#34;&#34;&#34;Analysis of SBC results.&#34;&#34;&#34;
+
+    root_dir: Path
+    pattern: str
+    n_simulations: Optional[int]
+
+    simulation_results: Optional[list[sbc.SBCResults]] = None
+    simulation_posteriors: Optional[pd.DataFrame] = None
+    accuracy_test_results: Optional[pd.DataFrame] = None
+    uniformity_test_results: Optional[pd.DataFrame] = None
+
+    mcmc_diagnostic_summary: Optional[dict[str, float]] = None
+
+    def __init__(
+        self,
+        root_dir: Path,
+        pattern: str,
+        n_simulations: Optional[int] = None,
+        simulation_results: Optional[list[sbc.SBCResults]] = None,
+        simulation_posteriors: Optional[pd.DataFrame] = None,
+        accuracy_test_results: Optional[pd.DataFrame] = None,
+        uniformity_test_results: Optional[pd.DataFrame] = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;Create a `SBCAnalysis` object.
+
+        Args:
+            root_dir (Path): Path to the directory containing the results of all of
+              the simulations.
+            pattern (str): Pattern used for naming the simulations.
+            n_simulations (Optional[int], optional): Number of simulations expected. If
+              supplied, this number will be used to check the root dir for all of the
+              results. Defaults to None.
+            simulation_results (Optional[list[sbc.SBCResults]], optional): Already
+              existing list of all simulation results. Defaults to None.
+            simulation_posteriors (Optional[pd.DataFrame], optional): Already existing
+              dataframe of the simulation posteriors. Defaults to None.
+            accuracy_test_results (Optional[pd.DataFrame], optional): Already existing
+              results of the accuracy test. Defaults to None.
+            uniformity_test_results (Optional[pd.DataFrame], optional): Already existing
+              results of the uniformity test. Defaults to None.
+        &#34;&#34;&#34;
+        self.root_dir = root_dir
+        self.pattern = pattern
+        self.n_simulations = n_simulations
+        self.simulation_results = simulation_results
+        self.simulation_posteriors = simulation_posteriors
+        self.accuracy_test_results = accuracy_test_results
+        self.uniformity_test_results = uniformity_test_results
+
+    def _check_n_sims(self, ls: Sequence[Any]) -&gt; None:
+        if self.n_simulations is not None and self.n_simulations != len(ls):
+            raise speclet.exceptions.IncorrectNumberOfFilesFoundError(
+                expected=self.n_simulations, found=len(ls)
+            )
+
+    def get_simulation_directories(self) -&gt; list[Path]:
+        &#34;&#34;&#34;Get the directories of all of the simulation results.
+
+        Returns:
+            list[Path]: List of paths.
+        &#34;&#34;&#34;
+        return [p for p in self.root_dir.iterdir() if self.pattern in p.name]
+
+    def random_simulation_directories(self, n: int = 5) -&gt; list[Path]:
+        &#34;&#34;&#34;Get a random sample of the directories of all of the simulation results.
+
+        Args:
+            n (list[int], optional): Number of random samples. Must be less than or
+              equal to the number of directories available. If greater, all directories
+              will be returned. Defaults to 5.
+
+        Returns:
+            list[Path]: List of `n` random SBC result directories.
+        &#34;&#34;&#34;
+        all_dirs = self.get_simulation_directories()
+        r_dirs = np.random.choice(
+            np.array(all_dirs), size=min([n, len(all_dirs)]), replace=False
+        ).tolist()
+        return r_dirs
+
+    def get_simulation_file_managers(self) -&gt; list[sbc.SBCFileManager]:
+        &#34;&#34;&#34;Get the file managers for each simulation.
+
+        Returns:
+            list[sbc.SBCFileManager]: List of SBC file managers.
+        &#34;&#34;&#34;
+        return [sbc.SBCFileManager(p) for p in self.get_simulation_directories()]
+
+    def get_simulation_results(
+        self, multithreaded: bool = True
+    ) -&gt; list[sbc.SBCResults]:
+        &#34;&#34;&#34;Get all of the simulation results.
+
+        Args:
+            multithreaded (bool, optional): Should the results be collected using
+              multiple threads? Defaults to True.
+
+        Raises:
+            src.exceptions.CacheDoesNotExistError: Raised if the results do not exist
+            for a simulation.
+
+        Returns:
+            list[sbc.SBCResults]: List of all simulation results.
+        &#34;&#34;&#34;
+        fms = self.get_simulation_file_managers()
+        if multithreaded:
+            results = self._get_simulation_results_multithreaded(fms)
+        else:
+            results = self._get_simulation_results_singlethreaded(fms)
+        self._check_n_sims(results)
+        self.simulation_results = results
+        return results
+
+    @staticmethod
+    def _get_single_simulation_result(fm: sbc.SBCFileManager) -&gt; sbc.SBCResults:
+        if fm.all_data_exists():
+            return fm.get_sbc_results()
+        else:
+            raise speclet.exceptions.CacheDoesNotExistError(fm.dir)
+
+    def _get_simulation_results_singlethreaded(
+        self, fms: list[sbc.SBCFileManager]
+    ) -&gt; list[sbc.SBCResults]:
+        results = [SBCAnalysis._get_single_simulation_result(fm) for fm in fms]
+        return results
+
+    def _get_simulation_results_multithreaded(
+        self, fms: list[sbc.SBCFileManager]
+    ) -&gt; list[sbc.SBCResults]:
+        with ThreadPoolExecutor() as executor:
+            results_iter = executor.map(SBCAnalysis._get_single_simulation_result, fms)
+
+        return list(results_iter)
+
+    def mcmc_diagnostics(self) -&gt; dict[str, float]:
+        &#34;&#34;&#34;Collect diagnostic information on all simulations (that used MCMC).
+
+        Returns:
+            dict[str, float]: Summary statistics on key diagnostics of MCMC.
+        &#34;&#34;&#34;
+
+        def read_mcmc_diagnostics(sbc_fm: sbc.SBCFileManager) -&gt; azanal.MCMCDescription:
+            results = sbc_fm.get_sbc_results()
+            try:
+                res = azanal.describe_mcmc(
+                    results.inference_obj, silent=True, plot=False
+                )
+                return res
+            except AttributeError as err:
+                raise Exception(
+                    f&#34;Attribute error in SBC &#39;{sbc_fm.dir.name}&#39;: {str(err)}&#34;
+                )
+
+        sbc_file_managers = self.get_simulation_file_managers()
+        with ThreadPoolExecutor() as executor:
+            mcmc_diagnostics = executor.map(read_mcmc_diagnostics, sbc_file_managers)
+
+        pct_divergences: list[float] = []
+        bfmis: list[float] = []
+        step_sizes: list[float] = []
+        durations: list[float] = []
+
+        for diagnostic in mcmc_diagnostics:
+            pct_divergences += diagnostic.pct_divergences
+            bfmis += diagnostic.bfmi
+            step_sizes += diagnostic.avg_step_size
+            if (d := diagnostic.duration) is not None:
+                durations.append(d.total_seconds())
+
+        data: dict[str, float] = {}
+        for data_name, values in zip(
+            (&#34;pct_divegences&#34;, &#34;bfmi&#34;, &#34;step_size&#34;, &#34;duration&#34;),
+            (pct_divergences, bfmis, step_sizes, durations),
+        ):
+            for fxn_name, fxn in zip(
+                (&#34;mean&#34;, &#34;median&#34;, &#34;std_dev&#34;),
+                (statistics.mean, statistics.median, statistics.stdev),
+            ):
+                if len(values) &gt; 0:
+                    key = data_name + &#34;_&#34; + fxn_name
+                    data[key] = fxn(values)  # type: ignore
+
+        self.mcmc_diagnostic_summary = data
+        return data
+
+    def run_posterior_accuracy_test(
+        self, simulation_posteriors_df: Optional[pd.DataFrame] = None
+    ) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Get the accuracy of the simulation results.
+
+        Args:
+          simulation_posteriors_df (Optional[pd.DataFrame], optional): Dataframe of
+            the summaries of the posterior summaries. If None is provided, then the data
+            frame will be made first. Defaults to None.
+
+        Returns:
+            pd.DataFrame: Data frame of the accuracy of each parameter in the model.
+        &#34;&#34;&#34;
+        if simulation_posteriors_df is not None:
+            self.simulation_posteriors = simulation_posteriors_df
+        elif self.simulation_posteriors is not None:
+            simulation_posteriors_df = self.simulation_posteriors
+        else:
+            simulation_posteriors_df = sbc.collate_sbc_posteriors(
+                posterior_dirs=self.get_simulation_directories(),
+                num_permutations=self.n_simulations,
+            )
+            self.simulation_posteriors = simulation_posteriors_df
+
+        self.accuracy_test_results = posterior_accuracy(simulation_posteriors_df)
+        return self.accuracy_test_results
+
+    def run_uniformity_test(
+        self,
+        k_draws: int = SBC_UNIFORMITY_THINNING_DRAWS,
+        multithreaded: bool = True,
+        max_workers: Optional[int] = None,
+    ) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Perform the SBC uniformity analysis.
+
+        Args:
+            k_draws (int, optional): Number of draws to thin the posterior samples down
+              to. Defaults to 100.
+            multithreaded (bool, optional): Should the data processing use multiple
+              threads? Defaults to True.
+            max_workers (Optional[int], optional): Number of threads. Defaults to None.
+
+        Returns:
+            pd.DataFrame: A data frame of the rank statistic of each variable in each
+            simulation.
+        &#34;&#34;&#34;
+        sbc_file_managers = self.get_simulation_file_managers()
+        self._check_n_sims(sbc_file_managers)
+
+        def _calc_rank_stat(sbc_fm: sbc.SBCFileManager) -&gt; pd.DataFrame:
+            return calculate_parameter_rank_statistic(
+                sbc_fm.get_sbc_results(), thin_to=k_draws
+            )
+
+        if multithreaded:
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                results = executor.map(_calc_rank_stat, sbc_file_managers)
+                # print(f&#34;number of workers: {threading.active_count()}&#34;)
+            self.uniformity_test_results = pd.concat(list(results))
+        else:
+            self.uniformity_test_results = pd.concat(
+                [_calc_rank_stat(fm) for fm in sbc_file_managers]
+            )
+        return self.uniformity_test_results
+
+    def plot_uniformity(
+        self,
+        rank_stats: Optional[pd.DataFrame] = None,
+        n_sims: Optional[int] = None,
+        k_draws: int = SBC_UNIFORMITY_THINNING_DRAWS,
+    ) -&gt; Axes:
+        &#34;&#34;&#34;Plot the results of the uniformity test.
+
+        Args:
+          rank_stats (Optional[pd.DataFrame]): Results of the uniformity test with the
+            rank statistics for each variable. Defaults to None.
+          n_sims (Optional[int], optional): Number of simulations performed If None
+            (the default), then the value will be assumed to be the number of simulation
+            directories. Defaults to None.
+          k_draws (int, optional): Number of draws the posterior was thinned down to.
+            Defaults to 100.
+        &#34;&#34;&#34;
+        if rank_stats is None:
+            print(&#34;rank_stats was None&#34;)
+            if self.uniformity_test_results is None:
+                raise speclet.exceptions.RequiredArgumentError(
+                    &#34;Parameter `rank_stats` must be passed because &#34;
+                    + &#34;`self.uniformity_test_results` is None.&#34;
+                )
+            else:
+                rank_stats = self.uniformity_test_results
+
+        if n_sims is None:
+            _sim_dirs = self.get_simulation_directories()
+            self._check_n_sims(_sim_dirs)
+            n_sims = len(_sim_dirs)
+
+        ax = sns.histplot(data=rank_stats, x=&#34;rank_stat&#34;, binwidth=1)
+        expected, lower, upper = expected_range_under_uniform(
+            n_sims=n_sims, k_draws=k_draws
+        )
+        ax.fill_between(
+            x=list(range(k_draws + 1)),
+            y1=[lower] * (k_draws + 1),
+            y2=[upper] * (k_draws + 1),
+            color=&#34;#D3D3D3&#34;,
+        )
+        ax.axhline(expected, color=&#34;k&#34;, linestyle=&#34;-&#34;)
+        return ax
+
+
+def expected_range_under_uniform(
+    n_sims: int, k_draws: int
+) -&gt; tuple[float, float, float]:
+    &#34;&#34;&#34;Use the expected distribution of rank statistics under a random binomial.
+
+    Args:
+        n_sims (int): Number of simulations.
+        k_draws (int): Number of draws from the posterior.
+
+    Returns:
+        tuple[float, float, float]: The expected value and upper and lower 95% CI.
+    &#34;&#34;&#34;
+    # Expected value.
+    expected = n_sims / k_draws
+    sd = np.sqrt((1 / k_draws) * (1 - 1 / k_draws) * n_sims)
+    # 95% CI.
+    upper = expected + 1.96 * sd
+    lower = expected - 1.96 * sd
+    return expected, lower, upper
+
+
+def _fmt_tuple_to_label(tpl: tuple[int, ...]) -&gt; str:
+    if len(tpl) &gt; 0:
+        return &#34;[&#34; + &#34;,&#34;.join([str(i) for i in tpl]) + &#34;]&#34;
+    else:
+        return &#34;&#34;
+
+
+def _rank_statistic_to_dataframe(var_name: str, rank_stats: np.ndarray) -&gt; pd.DataFrame:
+    params: list[str] = []
+    values: list[float] = []
+    for idx, value in np.ndenumerate(rank_stats.squeeze()):
+        params.append(var_name + _fmt_tuple_to_label(idx))
+        values.append(value)
+    return pd.DataFrame({&#34;parameter&#34;: params, &#34;rank_stat&#34;: values})
+
+
+def calculate_parameter_rank_statistic(
+    sbc_res: sbc.SBCResults, thin_to: int = 100
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Calculate the rank statistics for SBC uniformity analysis.
+
+    Args:
+        sbc_res (sbc.SBCResults): The results of an SBC simulation.
+        thin_to (int, optional): How many draws to thin down to. Defaults to 100.
+
+    Returns:
+        pd.DataFrame: A data frame with the rank statistics for each parameter.
+    &#34;&#34;&#34;
+    rank_stats_df = pd.DataFrame()
+    var_names = pmhelp.get_posterior_names(sbc_res.inference_obj)
+    for var_name in var_names:
+        theta = sbc_res.priors[var_name]
+        theta_prime = sbc_res.inference_obj[&#34;posterior&#34;][var_name]
+        theta_prime = pmhelp.thin_posterior(theta_prime, thin_to=thin_to)
+        theta_prime = pmhelp.get_one_chain(theta_prime)
+        rank_stat = (theta &lt; theta_prime).values.sum(axis=0, keepdims=True)
+        stat_df = _rank_statistic_to_dataframe(var_name, rank_stat)
+        rank_stats_df = pd.concat([rank_stats_df, stat_df])
+    rank_stats_df = rank_stats_df.reset_index(drop=True)
+    return rank_stats_df
+
+
+def posterior_accuracy(simulation_posteriors_df: pd.DataFrame) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Get the accuracy of the simulation results.
+
+    Args:
+      simulation_posteriors_df (pd.DataFrame): Data frame of the summaries of the
+        posterior summaries.
+
+    Returns:
+        pd.DataFrame: Data frame of the accuracy of each parameter in the model.
+    &#34;&#34;&#34;
+    return (
+        simulation_posteriors_df.groupby([&#34;parameter_name&#34;])[&#34;within_hdi&#34;]
+        .mean()
+        .reset_index(drop=False)
+        .sort_values(&#34;within_hdi&#34;, ascending=False)
+        .reset_index(drop=True)
+    )</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="speclet.analysis.sbc_analysis.calculate_parameter_rank_statistic"><code class="name flex">
+<span>def <span class="ident">calculate_parameter_rank_statistic</span></span>(<span>sbc_res: <a title="speclet.modeling.simulation_based_calibration_helpers.SBCResults" href="../modeling/simulation_based_calibration_helpers.html#speclet.modeling.simulation_based_calibration_helpers.SBCResults">SBCResults</a>, thin_to: int = 100) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculate the rank statistics for SBC uniformity analysis.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sbc_res</code></strong> :&ensp;<code>sbc.SBCResults</code></dt>
+<dd>The results of an SBC simulation.</dd>
+<dt><strong><code>thin_to</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>How many draws to thin down to. Defaults to 100.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>A data frame with the rank statistics for each parameter.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def calculate_parameter_rank_statistic(
+    sbc_res: sbc.SBCResults, thin_to: int = 100
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Calculate the rank statistics for SBC uniformity analysis.
+
+    Args:
+        sbc_res (sbc.SBCResults): The results of an SBC simulation.
+        thin_to (int, optional): How many draws to thin down to. Defaults to 100.
+
+    Returns:
+        pd.DataFrame: A data frame with the rank statistics for each parameter.
+    &#34;&#34;&#34;
+    rank_stats_df = pd.DataFrame()
+    var_names = pmhelp.get_posterior_names(sbc_res.inference_obj)
+    for var_name in var_names:
+        theta = sbc_res.priors[var_name]
+        theta_prime = sbc_res.inference_obj[&#34;posterior&#34;][var_name]
+        theta_prime = pmhelp.thin_posterior(theta_prime, thin_to=thin_to)
+        theta_prime = pmhelp.get_one_chain(theta_prime)
+        rank_stat = (theta &lt; theta_prime).values.sum(axis=0, keepdims=True)
+        stat_df = _rank_statistic_to_dataframe(var_name, rank_stat)
+        rank_stats_df = pd.concat([rank_stats_df, stat_df])
+    rank_stats_df = rank_stats_df.reset_index(drop=True)
+    return rank_stats_df</code></pre>
+</details>
+</dd>
+<dt id="speclet.analysis.sbc_analysis.expected_range_under_uniform"><code class="name flex">
+<span>def <span class="ident">expected_range_under_uniform</span></span>(<span>n_sims: int, k_draws: int) -> tuple[float, float, float]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Use the expected distribution of rank statistics under a random binomial.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>n_sims</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of simulations.</dd>
+<dt><strong><code>k_draws</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of draws from the posterior.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[float, float, float]</code></dt>
+<dd>The expected value and upper and lower 95% CI.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def expected_range_under_uniform(
+    n_sims: int, k_draws: int
+) -&gt; tuple[float, float, float]:
+    &#34;&#34;&#34;Use the expected distribution of rank statistics under a random binomial.
+
+    Args:
+        n_sims (int): Number of simulations.
+        k_draws (int): Number of draws from the posterior.
+
+    Returns:
+        tuple[float, float, float]: The expected value and upper and lower 95% CI.
+    &#34;&#34;&#34;
+    # Expected value.
+    expected = n_sims / k_draws
+    sd = np.sqrt((1 / k_draws) * (1 - 1 / k_draws) * n_sims)
+    # 95% CI.
+    upper = expected + 1.96 * sd
+    lower = expected - 1.96 * sd
+    return expected, lower, upper</code></pre>
+</details>
+</dd>
+<dt id="speclet.analysis.sbc_analysis.posterior_accuracy"><code class="name flex">
+<span>def <span class="ident">posterior_accuracy</span></span>(<span>simulation_posteriors_df: pandas.core.frame.DataFrame) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the accuracy of the simulation results.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>simulation_posteriors_df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>Data frame of the summaries of the
+posterior summaries.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>Data frame of the accuracy of each parameter in the model.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def posterior_accuracy(simulation_posteriors_df: pd.DataFrame) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Get the accuracy of the simulation results.
+
+    Args:
+      simulation_posteriors_df (pd.DataFrame): Data frame of the summaries of the
+        posterior summaries.
+
+    Returns:
+        pd.DataFrame: Data frame of the accuracy of each parameter in the model.
+    &#34;&#34;&#34;
+    return (
+        simulation_posteriors_df.groupby([&#34;parameter_name&#34;])[&#34;within_hdi&#34;]
+        .mean()
+        .reset_index(drop=False)
+        .sort_values(&#34;within_hdi&#34;, ascending=False)
+        .reset_index(drop=True)
+    )</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="speclet.analysis.sbc_analysis.SBCAnalysis"><code class="flex name class">
+<span>class <span class="ident">SBCAnalysis</span></span>
+<span>(</span><span>root_dir: pathlib.Path, pattern: str, n_simulations: Optional[int] = None, simulation_results: Optional[list[<a title="speclet.modeling.simulation_based_calibration_helpers.SBCResults" href="../modeling/simulation_based_calibration_helpers.html#speclet.modeling.simulation_based_calibration_helpers.SBCResults">SBCResults</a>]] = None, simulation_posteriors: Optional[pandas.core.frame.DataFrame] = None, accuracy_test_results: Optional[pandas.core.frame.DataFrame] = None, uniformity_test_results: Optional[pandas.core.frame.DataFrame] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Analysis of SBC results.</p>
+<p>Create a <code><a title="speclet.analysis.sbc_analysis.SBCAnalysis" href="#speclet.analysis.sbc_analysis.SBCAnalysis">SBCAnalysis</a></code> object.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>root_dir</code></strong> :&ensp;<code>Path</code></dt>
+<dd>Path to the directory containing the results of all of
+the simulations.</dd>
+<dt><strong><code>pattern</code></strong> :&ensp;<code>str</code></dt>
+<dd>Pattern used for naming the simulations.</dd>
+<dt><strong><code>n_simulations</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
+<dd>Number of simulations expected. If
+supplied, this number will be used to check the root dir for all of the
+results. Defaults to None.</dd>
+<dt><strong><code>simulation_results</code></strong> :&ensp;<code>Optional[list[sbc.SBCResults]]</code>, optional</dt>
+<dd>Already
+existing list of all simulation results. Defaults to None.</dd>
+<dt><strong><code>simulation_posteriors</code></strong> :&ensp;<code>Optional[pd.DataFrame]</code>, optional</dt>
+<dd>Already existing
+dataframe of the simulation posteriors. Defaults to None.</dd>
+<dt><strong><code>accuracy_test_results</code></strong> :&ensp;<code>Optional[pd.DataFrame]</code>, optional</dt>
+<dd>Already existing
+results of the accuracy test. Defaults to None.</dd>
+<dt><strong><code>uniformity_test_results</code></strong> :&ensp;<code>Optional[pd.DataFrame]</code>, optional</dt>
+<dd>Already existing
+results of the uniformity test. Defaults to None.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SBCAnalysis:
+    &#34;&#34;&#34;Analysis of SBC results.&#34;&#34;&#34;
+
+    root_dir: Path
+    pattern: str
+    n_simulations: Optional[int]
+
+    simulation_results: Optional[list[sbc.SBCResults]] = None
+    simulation_posteriors: Optional[pd.DataFrame] = None
+    accuracy_test_results: Optional[pd.DataFrame] = None
+    uniformity_test_results: Optional[pd.DataFrame] = None
+
+    mcmc_diagnostic_summary: Optional[dict[str, float]] = None
+
+    def __init__(
+        self,
+        root_dir: Path,
+        pattern: str,
+        n_simulations: Optional[int] = None,
+        simulation_results: Optional[list[sbc.SBCResults]] = None,
+        simulation_posteriors: Optional[pd.DataFrame] = None,
+        accuracy_test_results: Optional[pd.DataFrame] = None,
+        uniformity_test_results: Optional[pd.DataFrame] = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;Create a `SBCAnalysis` object.
+
+        Args:
+            root_dir (Path): Path to the directory containing the results of all of
+              the simulations.
+            pattern (str): Pattern used for naming the simulations.
+            n_simulations (Optional[int], optional): Number of simulations expected. If
+              supplied, this number will be used to check the root dir for all of the
+              results. Defaults to None.
+            simulation_results (Optional[list[sbc.SBCResults]], optional): Already
+              existing list of all simulation results. Defaults to None.
+            simulation_posteriors (Optional[pd.DataFrame], optional): Already existing
+              dataframe of the simulation posteriors. Defaults to None.
+            accuracy_test_results (Optional[pd.DataFrame], optional): Already existing
+              results of the accuracy test. Defaults to None.
+            uniformity_test_results (Optional[pd.DataFrame], optional): Already existing
+              results of the uniformity test. Defaults to None.
+        &#34;&#34;&#34;
+        self.root_dir = root_dir
+        self.pattern = pattern
+        self.n_simulations = n_simulations
+        self.simulation_results = simulation_results
+        self.simulation_posteriors = simulation_posteriors
+        self.accuracy_test_results = accuracy_test_results
+        self.uniformity_test_results = uniformity_test_results
+
+    def _check_n_sims(self, ls: Sequence[Any]) -&gt; None:
+        if self.n_simulations is not None and self.n_simulations != len(ls):
+            raise speclet.exceptions.IncorrectNumberOfFilesFoundError(
+                expected=self.n_simulations, found=len(ls)
+            )
+
+    def get_simulation_directories(self) -&gt; list[Path]:
+        &#34;&#34;&#34;Get the directories of all of the simulation results.
+
+        Returns:
+            list[Path]: List of paths.
+        &#34;&#34;&#34;
+        return [p for p in self.root_dir.iterdir() if self.pattern in p.name]
+
+    def random_simulation_directories(self, n: int = 5) -&gt; list[Path]:
+        &#34;&#34;&#34;Get a random sample of the directories of all of the simulation results.
+
+        Args:
+            n (list[int], optional): Number of random samples. Must be less than or
+              equal to the number of directories available. If greater, all directories
+              will be returned. Defaults to 5.
+
+        Returns:
+            list[Path]: List of `n` random SBC result directories.
+        &#34;&#34;&#34;
+        all_dirs = self.get_simulation_directories()
+        r_dirs = np.random.choice(
+            np.array(all_dirs), size=min([n, len(all_dirs)]), replace=False
+        ).tolist()
+        return r_dirs
+
+    def get_simulation_file_managers(self) -&gt; list[sbc.SBCFileManager]:
+        &#34;&#34;&#34;Get the file managers for each simulation.
+
+        Returns:
+            list[sbc.SBCFileManager]: List of SBC file managers.
+        &#34;&#34;&#34;
+        return [sbc.SBCFileManager(p) for p in self.get_simulation_directories()]
+
+    def get_simulation_results(
+        self, multithreaded: bool = True
+    ) -&gt; list[sbc.SBCResults]:
+        &#34;&#34;&#34;Get all of the simulation results.
+
+        Args:
+            multithreaded (bool, optional): Should the results be collected using
+              multiple threads? Defaults to True.
+
+        Raises:
+            src.exceptions.CacheDoesNotExistError: Raised if the results do not exist
+            for a simulation.
+
+        Returns:
+            list[sbc.SBCResults]: List of all simulation results.
+        &#34;&#34;&#34;
+        fms = self.get_simulation_file_managers()
+        if multithreaded:
+            results = self._get_simulation_results_multithreaded(fms)
+        else:
+            results = self._get_simulation_results_singlethreaded(fms)
+        self._check_n_sims(results)
+        self.simulation_results = results
+        return results
+
+    @staticmethod
+    def _get_single_simulation_result(fm: sbc.SBCFileManager) -&gt; sbc.SBCResults:
+        if fm.all_data_exists():
+            return fm.get_sbc_results()
+        else:
+            raise speclet.exceptions.CacheDoesNotExistError(fm.dir)
+
+    def _get_simulation_results_singlethreaded(
+        self, fms: list[sbc.SBCFileManager]
+    ) -&gt; list[sbc.SBCResults]:
+        results = [SBCAnalysis._get_single_simulation_result(fm) for fm in fms]
+        return results
+
+    def _get_simulation_results_multithreaded(
+        self, fms: list[sbc.SBCFileManager]
+    ) -&gt; list[sbc.SBCResults]:
+        with ThreadPoolExecutor() as executor:
+            results_iter = executor.map(SBCAnalysis._get_single_simulation_result, fms)
+
+        return list(results_iter)
+
+    def mcmc_diagnostics(self) -&gt; dict[str, float]:
+        &#34;&#34;&#34;Collect diagnostic information on all simulations (that used MCMC).
+
+        Returns:
+            dict[str, float]: Summary statistics on key diagnostics of MCMC.
+        &#34;&#34;&#34;
+
+        def read_mcmc_diagnostics(sbc_fm: sbc.SBCFileManager) -&gt; azanal.MCMCDescription:
+            results = sbc_fm.get_sbc_results()
+            try:
+                res = azanal.describe_mcmc(
+                    results.inference_obj, silent=True, plot=False
+                )
+                return res
+            except AttributeError as err:
+                raise Exception(
+                    f&#34;Attribute error in SBC &#39;{sbc_fm.dir.name}&#39;: {str(err)}&#34;
+                )
+
+        sbc_file_managers = self.get_simulation_file_managers()
+        with ThreadPoolExecutor() as executor:
+            mcmc_diagnostics = executor.map(read_mcmc_diagnostics, sbc_file_managers)
+
+        pct_divergences: list[float] = []
+        bfmis: list[float] = []
+        step_sizes: list[float] = []
+        durations: list[float] = []
+
+        for diagnostic in mcmc_diagnostics:
+            pct_divergences += diagnostic.pct_divergences
+            bfmis += diagnostic.bfmi
+            step_sizes += diagnostic.avg_step_size
+            if (d := diagnostic.duration) is not None:
+                durations.append(d.total_seconds())
+
+        data: dict[str, float] = {}
+        for data_name, values in zip(
+            (&#34;pct_divegences&#34;, &#34;bfmi&#34;, &#34;step_size&#34;, &#34;duration&#34;),
+            (pct_divergences, bfmis, step_sizes, durations),
+        ):
+            for fxn_name, fxn in zip(
+                (&#34;mean&#34;, &#34;median&#34;, &#34;std_dev&#34;),
+                (statistics.mean, statistics.median, statistics.stdev),
+            ):
+                if len(values) &gt; 0:
+                    key = data_name + &#34;_&#34; + fxn_name
+                    data[key] = fxn(values)  # type: ignore
+
+        self.mcmc_diagnostic_summary = data
+        return data
+
+    def run_posterior_accuracy_test(
+        self, simulation_posteriors_df: Optional[pd.DataFrame] = None
+    ) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Get the accuracy of the simulation results.
+
+        Args:
+          simulation_posteriors_df (Optional[pd.DataFrame], optional): Dataframe of
+            the summaries of the posterior summaries. If None is provided, then the data
+            frame will be made first. Defaults to None.
+
+        Returns:
+            pd.DataFrame: Data frame of the accuracy of each parameter in the model.
+        &#34;&#34;&#34;
+        if simulation_posteriors_df is not None:
+            self.simulation_posteriors = simulation_posteriors_df
+        elif self.simulation_posteriors is not None:
+            simulation_posteriors_df = self.simulation_posteriors
+        else:
+            simulation_posteriors_df = sbc.collate_sbc_posteriors(
+                posterior_dirs=self.get_simulation_directories(),
+                num_permutations=self.n_simulations,
+            )
+            self.simulation_posteriors = simulation_posteriors_df
+
+        self.accuracy_test_results = posterior_accuracy(simulation_posteriors_df)
+        return self.accuracy_test_results
+
+    def run_uniformity_test(
+        self,
+        k_draws: int = SBC_UNIFORMITY_THINNING_DRAWS,
+        multithreaded: bool = True,
+        max_workers: Optional[int] = None,
+    ) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;Perform the SBC uniformity analysis.
+
+        Args:
+            k_draws (int, optional): Number of draws to thin the posterior samples down
+              to. Defaults to 100.
+            multithreaded (bool, optional): Should the data processing use multiple
+              threads? Defaults to True.
+            max_workers (Optional[int], optional): Number of threads. Defaults to None.
+
+        Returns:
+            pd.DataFrame: A data frame of the rank statistic of each variable in each
+            simulation.
+        &#34;&#34;&#34;
+        sbc_file_managers = self.get_simulation_file_managers()
+        self._check_n_sims(sbc_file_managers)
+
+        def _calc_rank_stat(sbc_fm: sbc.SBCFileManager) -&gt; pd.DataFrame:
+            return calculate_parameter_rank_statistic(
+                sbc_fm.get_sbc_results(), thin_to=k_draws
+            )
+
+        if multithreaded:
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                results = executor.map(_calc_rank_stat, sbc_file_managers)
+                # print(f&#34;number of workers: {threading.active_count()}&#34;)
+            self.uniformity_test_results = pd.concat(list(results))
+        else:
+            self.uniformity_test_results = pd.concat(
+                [_calc_rank_stat(fm) for fm in sbc_file_managers]
+            )
+        return self.uniformity_test_results
+
+    def plot_uniformity(
+        self,
+        rank_stats: Optional[pd.DataFrame] = None,
+        n_sims: Optional[int] = None,
+        k_draws: int = SBC_UNIFORMITY_THINNING_DRAWS,
+    ) -&gt; Axes:
+        &#34;&#34;&#34;Plot the results of the uniformity test.
+
+        Args:
+          rank_stats (Optional[pd.DataFrame]): Results of the uniformity test with the
+            rank statistics for each variable. Defaults to None.
+          n_sims (Optional[int], optional): Number of simulations performed If None
+            (the default), then the value will be assumed to be the number of simulation
+            directories. Defaults to None.
+          k_draws (int, optional): Number of draws the posterior was thinned down to.
+            Defaults to 100.
+        &#34;&#34;&#34;
+        if rank_stats is None:
+            print(&#34;rank_stats was None&#34;)
+            if self.uniformity_test_results is None:
+                raise speclet.exceptions.RequiredArgumentError(
+                    &#34;Parameter `rank_stats` must be passed because &#34;
+                    + &#34;`self.uniformity_test_results` is None.&#34;
+                )
+            else:
+                rank_stats = self.uniformity_test_results
+
+        if n_sims is None:
+            _sim_dirs = self.get_simulation_directories()
+            self._check_n_sims(_sim_dirs)
+            n_sims = len(_sim_dirs)
+
+        ax = sns.histplot(data=rank_stats, x=&#34;rank_stat&#34;, binwidth=1)
+        expected, lower, upper = expected_range_under_uniform(
+            n_sims=n_sims, k_draws=k_draws
+        )
+        ax.fill_between(
+            x=list(range(k_draws + 1)),
+            y1=[lower] * (k_draws + 1),
+            y2=[upper] * (k_draws + 1),
+            color=&#34;#D3D3D3&#34;,
+        )
+        ax.axhline(expected, color=&#34;k&#34;, linestyle=&#34;-&#34;)
+        return ax</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="speclet.analysis.sbc_analysis.SBCAnalysis.accuracy_test_results"><code class="name">var <span class="ident">accuracy_test_results</span> : Optional[pandas.core.frame.DataFrame]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="speclet.analysis.sbc_analysis.SBCAnalysis.mcmc_diagnostic_summary"><code class="name">var <span class="ident">mcmc_diagnostic_summary</span> : Optional[dict[str, float]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="speclet.analysis.sbc_analysis.SBCAnalysis.simulation_posteriors"><code class="name">var <span class="ident">simulation_posteriors</span> : Optional[pandas.core.frame.DataFrame]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="speclet.analysis.sbc_analysis.SBCAnalysis.simulation_results"><code class="name">var <span class="ident">simulation_results</span> : Optional[list[<a title="speclet.modeling.simulation_based_calibration_helpers.SBCResults" href="../modeling/simulation_based_calibration_helpers.html#speclet.modeling.simulation_based_calibration_helpers.SBCResults">SBCResults</a>]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="speclet.analysis.sbc_analysis.SBCAnalysis.uniformity_test_results"><code class="name">var <span class="ident">uniformity_test_results</span> : Optional[pandas.core.frame.DataFrame]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="speclet.analysis.sbc_analysis.SBCAnalysis.get_simulation_directories"><code class="name flex">
+<span>def <span class="ident">get_simulation_directories</span></span>(<span>self) -> list[pathlib.Path]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the directories of all of the simulation results.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[Path]</code></dt>
+<dd>List of paths.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_simulation_directories(self) -&gt; list[Path]:
+    &#34;&#34;&#34;Get the directories of all of the simulation results.
+
+    Returns:
+        list[Path]: List of paths.
+    &#34;&#34;&#34;
+    return [p for p in self.root_dir.iterdir() if self.pattern in p.name]</code></pre>
+</details>
+</dd>
+<dt id="speclet.analysis.sbc_analysis.SBCAnalysis.get_simulation_file_managers"><code class="name flex">
+<span>def <span class="ident">get_simulation_file_managers</span></span>(<span>self) -> list[<a title="speclet.modeling.simulation_based_calibration_helpers.SBCFileManager" href="../modeling/simulation_based_calibration_helpers.html#speclet.modeling.simulation_based_calibration_helpers.SBCFileManager">SBCFileManager</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the file managers for each simulation.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[sbc.SBCFileManager]</code></dt>
+<dd>List of SBC file managers.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_simulation_file_managers(self) -&gt; list[sbc.SBCFileManager]:
+    &#34;&#34;&#34;Get the file managers for each simulation.
+
+    Returns:
+        list[sbc.SBCFileManager]: List of SBC file managers.
+    &#34;&#34;&#34;
+    return [sbc.SBCFileManager(p) for p in self.get_simulation_directories()]</code></pre>
+</details>
+</dd>
+<dt id="speclet.analysis.sbc_analysis.SBCAnalysis.get_simulation_results"><code class="name flex">
+<span>def <span class="ident">get_simulation_results</span></span>(<span>self, multithreaded: bool = True) -> list[<a title="speclet.modeling.simulation_based_calibration_helpers.SBCResults" href="../modeling/simulation_based_calibration_helpers.html#speclet.modeling.simulation_based_calibration_helpers.SBCResults">SBCResults</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get all of the simulation results.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>multithreaded</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the results be collected using
+multiple threads? Defaults to True.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>src.exceptions.CacheDoesNotExistError</code></dt>
+<dd>Raised if the results do not exist</dd>
+</dl>
+<p>for a simulation.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[sbc.SBCResults]</code></dt>
+<dd>List of all simulation results.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_simulation_results(
+    self, multithreaded: bool = True
+) -&gt; list[sbc.SBCResults]:
+    &#34;&#34;&#34;Get all of the simulation results.
+
+    Args:
+        multithreaded (bool, optional): Should the results be collected using
+          multiple threads? Defaults to True.
+
+    Raises:
+        src.exceptions.CacheDoesNotExistError: Raised if the results do not exist
+        for a simulation.
+
+    Returns:
+        list[sbc.SBCResults]: List of all simulation results.
+    &#34;&#34;&#34;
+    fms = self.get_simulation_file_managers()
+    if multithreaded:
+        results = self._get_simulation_results_multithreaded(fms)
+    else:
+        results = self._get_simulation_results_singlethreaded(fms)
+    self._check_n_sims(results)
+    self.simulation_results = results
+    return results</code></pre>
+</details>
+</dd>
+<dt id="speclet.analysis.sbc_analysis.SBCAnalysis.mcmc_diagnostics"><code class="name flex">
+<span>def <span class="ident">mcmc_diagnostics</span></span>(<span>self) -> dict[str, float]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Collect diagnostic information on all simulations (that used MCMC).</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict[str, float]</code></dt>
+<dd>Summary statistics on key diagnostics of MCMC.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mcmc_diagnostics(self) -&gt; dict[str, float]:
+    &#34;&#34;&#34;Collect diagnostic information on all simulations (that used MCMC).
+
+    Returns:
+        dict[str, float]: Summary statistics on key diagnostics of MCMC.
+    &#34;&#34;&#34;
+
+    def read_mcmc_diagnostics(sbc_fm: sbc.SBCFileManager) -&gt; azanal.MCMCDescription:
+        results = sbc_fm.get_sbc_results()
+        try:
+            res = azanal.describe_mcmc(
+                results.inference_obj, silent=True, plot=False
+            )
+            return res
+        except AttributeError as err:
+            raise Exception(
+                f&#34;Attribute error in SBC &#39;{sbc_fm.dir.name}&#39;: {str(err)}&#34;
+            )
+
+    sbc_file_managers = self.get_simulation_file_managers()
+    with ThreadPoolExecutor() as executor:
+        mcmc_diagnostics = executor.map(read_mcmc_diagnostics, sbc_file_managers)
+
+    pct_divergences: list[float] = []
+    bfmis: list[float] = []
+    step_sizes: list[float] = []
+    durations: list[float] = []
+
+    for diagnostic in mcmc_diagnostics:
+        pct_divergences += diagnostic.pct_divergences
+        bfmis += diagnostic.bfmi
+        step_sizes += diagnostic.avg_step_size
+        if (d := diagnostic.duration) is not None:
+            durations.append(d.total_seconds())
+
+    data: dict[str, float] = {}
+    for data_name, values in zip(
+        (&#34;pct_divegences&#34;, &#34;bfmi&#34;, &#34;step_size&#34;, &#34;duration&#34;),
+        (pct_divergences, bfmis, step_sizes, durations),
+    ):
+        for fxn_name, fxn in zip(
+            (&#34;mean&#34;, &#34;median&#34;, &#34;std_dev&#34;),
+            (statistics.mean, statistics.median, statistics.stdev),
+        ):
+            if len(values) &gt; 0:
+                key = data_name + &#34;_&#34; + fxn_name
+                data[key] = fxn(values)  # type: ignore
+
+    self.mcmc_diagnostic_summary = data
+    return data</code></pre>
+</details>
+</dd>
+<dt id="speclet.analysis.sbc_analysis.SBCAnalysis.plot_uniformity"><code class="name flex">
+<span>def <span class="ident">plot_uniformity</span></span>(<span>self, rank_stats: Optional[pandas.core.frame.DataFrame] = None, n_sims: Optional[int] = None, k_draws: int = 100) -> matplotlib.axes._axes.Axes</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Plot the results of the uniformity test.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>rank_stats</code></strong> :&ensp;<code>Optional[pd.DataFrame]</code></dt>
+<dd>Results of the uniformity test with the
+rank statistics for each variable. Defaults to None.</dd>
+<dt><strong><code>n_sims</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
+<dd>Number of simulations performed If None
+(the default), then the value will be assumed to be the number of simulation
+directories. Defaults to None.</dd>
+<dt><strong><code>k_draws</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of draws the posterior was thinned down to.
+Defaults to 100.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_uniformity(
+    self,
+    rank_stats: Optional[pd.DataFrame] = None,
+    n_sims: Optional[int] = None,
+    k_draws: int = SBC_UNIFORMITY_THINNING_DRAWS,
+) -&gt; Axes:
+    &#34;&#34;&#34;Plot the results of the uniformity test.
+
+    Args:
+      rank_stats (Optional[pd.DataFrame]): Results of the uniformity test with the
+        rank statistics for each variable. Defaults to None.
+      n_sims (Optional[int], optional): Number of simulations performed If None
+        (the default), then the value will be assumed to be the number of simulation
+        directories. Defaults to None.
+      k_draws (int, optional): Number of draws the posterior was thinned down to.
+        Defaults to 100.
+    &#34;&#34;&#34;
+    if rank_stats is None:
+        print(&#34;rank_stats was None&#34;)
+        if self.uniformity_test_results is None:
+            raise speclet.exceptions.RequiredArgumentError(
+                &#34;Parameter `rank_stats` must be passed because &#34;
+                + &#34;`self.uniformity_test_results` is None.&#34;
+            )
+        else:
+            rank_stats = self.uniformity_test_results
+
+    if n_sims is None:
+        _sim_dirs = self.get_simulation_directories()
+        self._check_n_sims(_sim_dirs)
+        n_sims = len(_sim_dirs)
+
+    ax = sns.histplot(data=rank_stats, x=&#34;rank_stat&#34;, binwidth=1)
+    expected, lower, upper = expected_range_under_uniform(
+        n_sims=n_sims, k_draws=k_draws
+    )
+    ax.fill_between(
+        x=list(range(k_draws + 1)),
+        y1=[lower] * (k_draws + 1),
+        y2=[upper] * (k_draws + 1),
+        color=&#34;#D3D3D3&#34;,
+    )
+    ax.axhline(expected, color=&#34;k&#34;, linestyle=&#34;-&#34;)
+    return ax</code></pre>
+</details>
+</dd>
+<dt id="speclet.analysis.sbc_analysis.SBCAnalysis.random_simulation_directories"><code class="name flex">
+<span>def <span class="ident">random_simulation_directories</span></span>(<span>self, n: int = 5) -> list[pathlib.Path]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get a random sample of the directories of all of the simulation results.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>n</code></strong> :&ensp;<code>list[int]</code>, optional</dt>
+<dd>Number of random samples. Must be less than or
+equal to the number of directories available. If greater, all directories
+will be returned. Defaults to 5.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[Path]</code></dt>
+<dd>List of <code>n</code> random SBC result directories.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def random_simulation_directories(self, n: int = 5) -&gt; list[Path]:
+    &#34;&#34;&#34;Get a random sample of the directories of all of the simulation results.
+
+    Args:
+        n (list[int], optional): Number of random samples. Must be less than or
+          equal to the number of directories available. If greater, all directories
+          will be returned. Defaults to 5.
+
+    Returns:
+        list[Path]: List of `n` random SBC result directories.
+    &#34;&#34;&#34;
+    all_dirs = self.get_simulation_directories()
+    r_dirs = np.random.choice(
+        np.array(all_dirs), size=min([n, len(all_dirs)]), replace=False
+    ).tolist()
+    return r_dirs</code></pre>
+</details>
+</dd>
+<dt id="speclet.analysis.sbc_analysis.SBCAnalysis.run_posterior_accuracy_test"><code class="name flex">
+<span>def <span class="ident">run_posterior_accuracy_test</span></span>(<span>self, simulation_posteriors_df: Optional[pandas.core.frame.DataFrame] = None) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the accuracy of the simulation results.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>simulation_posteriors_df</code></strong> :&ensp;<code>Optional[pd.DataFrame]</code>, optional</dt>
+<dd>Dataframe of
+the summaries of the posterior summaries. If None is provided, then the data
+frame will be made first. Defaults to None.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>Data frame of the accuracy of each parameter in the model.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run_posterior_accuracy_test(
+    self, simulation_posteriors_df: Optional[pd.DataFrame] = None
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Get the accuracy of the simulation results.
+
+    Args:
+      simulation_posteriors_df (Optional[pd.DataFrame], optional): Dataframe of
+        the summaries of the posterior summaries. If None is provided, then the data
+        frame will be made first. Defaults to None.
+
+    Returns:
+        pd.DataFrame: Data frame of the accuracy of each parameter in the model.
+    &#34;&#34;&#34;
+    if simulation_posteriors_df is not None:
+        self.simulation_posteriors = simulation_posteriors_df
+    elif self.simulation_posteriors is not None:
+        simulation_posteriors_df = self.simulation_posteriors
+    else:
+        simulation_posteriors_df = sbc.collate_sbc_posteriors(
+            posterior_dirs=self.get_simulation_directories(),
+            num_permutations=self.n_simulations,
+        )
+        self.simulation_posteriors = simulation_posteriors_df
+
+    self.accuracy_test_results = posterior_accuracy(simulation_posteriors_df)
+    return self.accuracy_test_results</code></pre>
+</details>
+</dd>
+<dt id="speclet.analysis.sbc_analysis.SBCAnalysis.run_uniformity_test"><code class="name flex">
+<span>def <span class="ident">run_uniformity_test</span></span>(<span>self, k_draws: int = 100, multithreaded: bool = True, max_workers: Optional[int] = None) -> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Perform the SBC uniformity analysis.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>k_draws</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of draws to thin the posterior samples down
+to. Defaults to 100.</dd>
+<dt><strong><code>multithreaded</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Should the data processing use multiple
+threads? Defaults to True.</dd>
+<dt><strong><code>max_workers</code></strong> :&ensp;<code>Optional[int]</code>, optional</dt>
+<dd>Number of threads. Defaults to None.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pd.DataFrame</code></dt>
+<dd>A data frame of the rank statistic of each variable in each</dd>
+</dl>
+<p>simulation.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run_uniformity_test(
+    self,
+    k_draws: int = SBC_UNIFORMITY_THINNING_DRAWS,
+    multithreaded: bool = True,
+    max_workers: Optional[int] = None,
+) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Perform the SBC uniformity analysis.
+
+    Args:
+        k_draws (int, optional): Number of draws to thin the posterior samples down
+          to. Defaults to 100.
+        multithreaded (bool, optional): Should the data processing use multiple
+          threads? Defaults to True.
+        max_workers (Optional[int], optional): Number of threads. Defaults to None.
+
+    Returns:
+        pd.DataFrame: A data frame of the rank statistic of each variable in each
+        simulation.
+    &#34;&#34;&#34;
+    sbc_file_managers = self.get_simulation_file_managers()
+    self._check_n_sims(sbc_file_managers)
+
+    def _calc_rank_stat(sbc_fm: sbc.SBCFileManager) -&gt; pd.DataFrame:
+        return calculate_parameter_rank_statistic(
+            sbc_fm.get_sbc_results(), thin_to=k_draws
+        )
+
+    if multithreaded:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            results = executor.map(_calc_rank_stat, sbc_file_managers)
+            # print(f&#34;number of workers: {threading.active_count()}&#34;)
+        self.uniformity_test_results = pd.concat(list(results))
+    else:
+        self.uniformity_test_results = pd.concat(
+            [_calc_rank_stat(fm) for fm in sbc_file_managers]
+        )
+    return self.uniformity_test_results</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="speclet.analysis" href="index.html">speclet.analysis</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="speclet.analysis.sbc_analysis.calculate_parameter_rank_statistic" href="#speclet.analysis.sbc_analysis.calculate_parameter_rank_statistic">calculate_parameter_rank_statistic</a></code></li>
+<li><code><a title="speclet.analysis.sbc_analysis.expected_range_under_uniform" href="#speclet.analysis.sbc_analysis.expected_range_under_uniform">expected_range_under_uniform</a></code></li>
+<li><code><a title="speclet.analysis.sbc_analysis.posterior_accuracy" href="#speclet.analysis.sbc_analysis.posterior_accuracy">posterior_accuracy</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="speclet.analysis.sbc_analysis.SBCAnalysis" href="#speclet.analysis.sbc_analysis.SBCAnalysis">SBCAnalysis</a></code></h4>
+<ul class="">
+<li><code><a title="speclet.analysis.sbc_analysis.SBCAnalysis.accuracy_test_results" href="#speclet.analysis.sbc_analysis.SBCAnalysis.accuracy_test_results">accuracy_test_results</a></code></li>
+<li><code><a title="speclet.analysis.sbc_analysis.SBCAnalysis.get_simulation_directories" href="#speclet.analysis.sbc_analysis.SBCAnalysis.get_simulation_directories">get_simulation_directories</a></code></li>
+<li><code><a title="speclet.analysis.sbc_analysis.SBCAnalysis.get_simulation_file_managers" href="#speclet.analysis.sbc_analysis.SBCAnalysis.get_simulation_file_managers">get_simulation_file_managers</a></code></li>
+<li><code><a title="speclet.analysis.sbc_analysis.SBCAnalysis.get_simulation_results" href="#speclet.analysis.sbc_analysis.SBCAnalysis.get_simulation_results">get_simulation_results</a></code></li>
+<li><code><a title="speclet.analysis.sbc_analysis.SBCAnalysis.mcmc_diagnostic_summary" href="#speclet.analysis.sbc_analysis.SBCAnalysis.mcmc_diagnostic_summary">mcmc_diagnostic_summary</a></code></li>
+<li><code><a title="speclet.analysis.sbc_analysis.SBCAnalysis.mcmc_diagnostics" href="#speclet.analysis.sbc_analysis.SBCAnalysis.mcmc_diagnostics">mcmc_diagnostics</a></code></li>
+<li><code><a title="speclet.analysis.sbc_analysis.SBCAnalysis.plot_uniformity" href="#speclet.analysis.sbc_analysis.SBCAnalysis.plot_uniformity">plot_uniformity</a></code></li>
+<li><code><a title="speclet.analysis.sbc_analysis.SBCAnalysis.random_simulation_directories" href="#speclet.analysis.sbc_analysis.SBCAnalysis.random_simulation_directories">random_simulation_directories</a></code></li>
+<li><code><a title="speclet.analysis.sbc_analysis.SBCAnalysis.run_posterior_accuracy_test" href="#speclet.analysis.sbc_analysis.SBCAnalysis.run_posterior_accuracy_test">run_posterior_accuracy_test</a></code></li>
+<li><code><a title="speclet.analysis.sbc_analysis.SBCAnalysis.run_uniformity_test" href="#speclet.analysis.sbc_analysis.SBCAnalysis.run_uniformity_test">run_uniformity_test</a></code></li>
+<li><code><a title="speclet.analysis.sbc_analysis.SBCAnalysis.simulation_posteriors" href="#speclet.analysis.sbc_analysis.SBCAnalysis.simulation_posteriors">simulation_posteriors</a></code></li>
+<li><code><a title="speclet.analysis.sbc_analysis.SBCAnalysis.simulation_results" href="#speclet.analysis.sbc_analysis.SBCAnalysis.simulation_results">simulation_results</a></code></li>
+<li><code><a title="speclet.analysis.sbc_analysis.SBCAnalysis.uniformity_test_results" href="#speclet.analysis.sbc_analysis.SBCAnalysis.uniformity_test_results">uniformity_test_results</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

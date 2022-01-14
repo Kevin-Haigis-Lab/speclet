@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>speclet.model_configuration API documentation</title>
+<meta name="description" content="Handle model configuration." />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS_CHTML'></script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>speclet.model_configuration</code></h1>
+</header>
+<section id="section-intro">
+<p>Handle model configuration.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Handle model configuration.&#34;&#34;&#34;
+
+from __future__ import annotations
+
+from collections import Counter
+from pathlib import Path
+
+import yaml
+from pydantic import BaseModel, Field
+
+from speclet import io
+from speclet.bayesian_models import BayesianModel
+from speclet.modeling.fitting_arguments import ModelingSamplingArguments
+from speclet.project_enums import ModelFitMethod
+
+# ----  Configuration classes ----
+
+
+class PipelineChoices(BaseModel):
+    &#34;&#34;&#34;Selection of fit methods to use for a model per pipeline.&#34;&#34;&#34;
+
+    fitting: list[ModelFitMethod] = Field(default_factory=list)
+    sbc: list[ModelFitMethod] = Field(default_factory=list)
+
+
+class BayesianModelConfiguration(BaseModel):
+    &#34;&#34;&#34;Bayesian model configuration.&#34;&#34;&#34;
+
+    name: str
+    description: str
+    model: BayesianModel
+    data_file: io.DataFile
+    subsample: bool = False
+    sampling_kwargs: ModelingSamplingArguments = Field(
+        default_factory=ModelingSamplingArguments
+    )
+    pipelines: PipelineChoices = Field(default_factory=PipelineChoices)
+
+
+class BayesianModelConfigurations(BaseModel):
+    &#34;&#34;&#34;Bayesian model configurations.&#34;&#34;&#34;
+
+    _idx: int = 0
+    configurations: list[BayesianModelConfiguration]
+
+
+# ---- Exceptions ----
+
+
+class FoundMultipleModelConfigurationsError(BaseException):
+    &#34;&#34;&#34;Found multiple model configurations.&#34;&#34;&#34;
+
+    def __init__(self, name: str, n_configs: int) -&gt; None:
+        &#34;&#34;&#34;Create a FoundMultipleModelConfigurationsError error.
+
+        Args:
+            name (str): Name of the model whose configuration was searched for.
+            n_configs (int): Number of configs found.
+        &#34;&#34;&#34;
+        self.name = name
+        self.n_configs = n_configs
+        self.message = f&#34;Found {self.n_configs} configuration files for &#39;{self.name}&#39;.&#34;
+        super().__init__(self.message)
+
+
+class ModelConfigurationNotFound(BaseException):
+    &#34;&#34;&#34;Model configuration not found.&#34;&#34;&#34;
+
+    def __init__(self, model_name: str) -&gt; None:
+        &#34;&#34;&#34;Create a ModelConfigurationNotFound error.
+
+        Args:
+            model_name (str): Name of the model.
+        &#34;&#34;&#34;
+        self.model_name = model_name
+        self.message = f&#34;Configuration not found for model: &#39;{self.model_name}&#39;.&#34;
+        super().__init__(self.message)
+
+
+class ModelNamesAreNotAllUnique(BaseException):
+    &#34;&#34;&#34;Model names are not all unique.&#34;&#34;&#34;
+
+    def __init__(self, nonunique_ids: set[str]) -&gt; None:
+        &#34;&#34;&#34;Create a ModelNamesAreNotAllUnique error.
+
+        Args:
+            nonunique_ids (Set[str]): Set of non-unique IDs.
+        &#34;&#34;&#34;
+        self.nonunique_ids = nonunique_ids
+        self.message = f&#34;Non-unique IDs: {&#39;, &#39;.join(nonunique_ids)}&#34;
+        super().__init__(self.message)
+
+
+class ModelOptionNotAssociatedWithAClassException(BaseException):
+    &#34;&#34;&#34;Model option not yet associated with a class.&#34;&#34;&#34;
+
+    pass
+
+
+# ---- Files and I/O ----
+
+
+def read_model_configurations(path: Path) -&gt; BayesianModelConfigurations:
+    &#34;&#34;&#34;Read the file of Bayesian model configurations.
+
+    Args:
+        path (Path): Path to the configuration file.
+
+    Returns:
+        BayesianModelConfigurations: Bayesian model configurations.
+    &#34;&#34;&#34;
+    with open(path) as file:
+        return BayesianModelConfigurations(configurations=yaml.safe_load(file))
+
+
+def get_configuration_for_model(
+    config_path: Path, name: str
+) -&gt; BayesianModelConfiguration:
+    &#34;&#34;&#34;Get the configuration information for a named model.
+
+    Args:
+        config_path (Path): Path to the configuration file.
+        name (str): Model configuration identifier.
+
+    Raises:
+        FoundMultipleModelConfigurationsError: If multiple configurations are found.
+        ModelConfigurationNotFound: If no configuration is found.
+
+    Returns:
+        Optional[BayesianModelConfiguration]: The model configuration.
+    &#34;&#34;&#34;
+    configs = read_model_configurations(config_path).configurations
+    configs = [config for config in configs if config.name == name]
+    if len(configs) &gt; 1:
+        raise FoundMultipleModelConfigurationsError(name, len(configs))
+    if len(configs) == 0:
+        raise ModelConfigurationNotFound(name)
+    return configs[0]
+
+
+# ---- Checks ----
+
+
+def check_model_names_are_unique(configs: BayesianModelConfigurations) -&gt; bool:
+    &#34;&#34;&#34;Check that all model names are unique in a collection of configurations.
+
+    Args:
+        configs (BayesianModelConfigurations): Configurations to check.
+
+    Raises:
+        ModelNamesAreNotAllUnique: Raised if there are some non-unique names.
+
+    Returns:
+        bool: True is model names are unique.
+    &#34;&#34;&#34;
+    counter = Counter([config.name for config in configs.configurations])
+    if not all(i == 1 for i in counter.values()):
+        nonunique_ids = {v for v, c in counter.items() if c != 1}  # noqa: C403
+        raise ModelNamesAreNotAllUnique(nonunique_ids)
+    return True</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="speclet.model_configuration.check_model_names_are_unique"><code class="name flex">
+<span>def <span class="ident">check_model_names_are_unique</span></span>(<span>configs: BayesianModelConfigurations) -> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Check that all model names are unique in a collection of configurations.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>configs</code></strong> :&ensp;<code><a title="speclet.model_configuration.BayesianModelConfigurations" href="#speclet.model_configuration.BayesianModelConfigurations">BayesianModelConfigurations</a></code></dt>
+<dd>Configurations to check.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code><a title="speclet.model_configuration.ModelNamesAreNotAllUnique" href="#speclet.model_configuration.ModelNamesAreNotAllUnique">ModelNamesAreNotAllUnique</a></code></dt>
+<dd>Raised if there are some non-unique names.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>True is model names are unique.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check_model_names_are_unique(configs: BayesianModelConfigurations) -&gt; bool:
+    &#34;&#34;&#34;Check that all model names are unique in a collection of configurations.
+
+    Args:
+        configs (BayesianModelConfigurations): Configurations to check.
+
+    Raises:
+        ModelNamesAreNotAllUnique: Raised if there are some non-unique names.
+
+    Returns:
+        bool: True is model names are unique.
+    &#34;&#34;&#34;
+    counter = Counter([config.name for config in configs.configurations])
+    if not all(i == 1 for i in counter.values()):
+        nonunique_ids = {v for v, c in counter.items() if c != 1}  # noqa: C403
+        raise ModelNamesAreNotAllUnique(nonunique_ids)
+    return True</code></pre>
+</details>
+</dd>
+<dt id="speclet.model_configuration.get_configuration_for_model"><code class="name flex">
+<span>def <span class="ident">get_configuration_for_model</span></span>(<span>config_path: Path, name: str) -> <a title="speclet.model_configuration.BayesianModelConfiguration" href="#speclet.model_configuration.BayesianModelConfiguration">BayesianModelConfiguration</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the configuration information for a named model.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config_path</code></strong> :&ensp;<code>Path</code></dt>
+<dd>Path to the configuration file.</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Model configuration identifier.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code><a title="speclet.model_configuration.FoundMultipleModelConfigurationsError" href="#speclet.model_configuration.FoundMultipleModelConfigurationsError">FoundMultipleModelConfigurationsError</a></code></dt>
+<dd>If multiple configurations are found.</dd>
+<dt><code><a title="speclet.model_configuration.ModelConfigurationNotFound" href="#speclet.model_configuration.ModelConfigurationNotFound">ModelConfigurationNotFound</a></code></dt>
+<dd>If no configuration is found.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Optional[<a title="speclet.model_configuration.BayesianModelConfiguration" href="#speclet.model_configuration.BayesianModelConfiguration">BayesianModelConfiguration</a>]</code></dt>
+<dd>The model configuration.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_configuration_for_model(
+    config_path: Path, name: str
+) -&gt; BayesianModelConfiguration:
+    &#34;&#34;&#34;Get the configuration information for a named model.
+
+    Args:
+        config_path (Path): Path to the configuration file.
+        name (str): Model configuration identifier.
+
+    Raises:
+        FoundMultipleModelConfigurationsError: If multiple configurations are found.
+        ModelConfigurationNotFound: If no configuration is found.
+
+    Returns:
+        Optional[BayesianModelConfiguration]: The model configuration.
+    &#34;&#34;&#34;
+    configs = read_model_configurations(config_path).configurations
+    configs = [config for config in configs if config.name == name]
+    if len(configs) &gt; 1:
+        raise FoundMultipleModelConfigurationsError(name, len(configs))
+    if len(configs) == 0:
+        raise ModelConfigurationNotFound(name)
+    return configs[0]</code></pre>
+</details>
+</dd>
+<dt id="speclet.model_configuration.read_model_configurations"><code class="name flex">
+<span>def <span class="ident">read_model_configurations</span></span>(<span>path: Path) -> <a title="speclet.model_configuration.BayesianModelConfigurations" href="#speclet.model_configuration.BayesianModelConfigurations">BayesianModelConfigurations</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Read the file of Bayesian model configurations.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong> :&ensp;<code>Path</code></dt>
+<dd>Path to the configuration file.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="speclet.model_configuration.BayesianModelConfigurations" href="#speclet.model_configuration.BayesianModelConfigurations">BayesianModelConfigurations</a></code></dt>
+<dd>Bayesian model configurations.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def read_model_configurations(path: Path) -&gt; BayesianModelConfigurations:
+    &#34;&#34;&#34;Read the file of Bayesian model configurations.
+
+    Args:
+        path (Path): Path to the configuration file.
+
+    Returns:
+        BayesianModelConfigurations: Bayesian model configurations.
+    &#34;&#34;&#34;
+    with open(path) as file:
+        return BayesianModelConfigurations(configurations=yaml.safe_load(file))</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="speclet.model_configuration.BayesianModelConfiguration"><code class="flex name class">
+<span>class <span class="ident">BayesianModelConfiguration</span></span>
+<span>(</span><span>*, name: str, description: str, model: <a title="speclet.bayesian_models.BayesianModel" href="bayesian_models/index.html#speclet.bayesian_models.BayesianModel">BayesianModel</a>, data_file: <a title="speclet.io.DataFile" href="io.html#speclet.io.DataFile">DataFile</a>, subsample: bool = False, sampling_kwargs: <a title="speclet.modeling.fitting_arguments.ModelingSamplingArguments" href="modeling/fitting_arguments.html#speclet.modeling.fitting_arguments.ModelingSamplingArguments">ModelingSamplingArguments</a> = None, pipelines: <a title="speclet.model_configuration.PipelineChoices" href="#speclet.model_configuration.PipelineChoices">PipelineChoices</a> = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Bayesian model configuration.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BayesianModelConfiguration(BaseModel):
+    &#34;&#34;&#34;Bayesian model configuration.&#34;&#34;&#34;
+
+    name: str
+    description: str
+    model: BayesianModel
+    data_file: io.DataFile
+    subsample: bool = False
+    sampling_kwargs: ModelingSamplingArguments = Field(
+        default_factory=ModelingSamplingArguments
+    )
+    pipelines: PipelineChoices = Field(default_factory=PipelineChoices)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+</dd>
+<dt id="speclet.model_configuration.BayesianModelConfigurations"><code class="flex name class">
+<span>class <span class="ident">BayesianModelConfigurations</span></span>
+<span>(</span><span>*, configurations: list[<a title="speclet.model_configuration.BayesianModelConfiguration" href="#speclet.model_configuration.BayesianModelConfiguration">BayesianModelConfiguration</a>])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Bayesian model configurations.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BayesianModelConfigurations(BaseModel):
+    &#34;&#34;&#34;Bayesian model configurations.&#34;&#34;&#34;
+
+    _idx: int = 0
+    configurations: list[BayesianModelConfiguration]</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+</dd>
+<dt id="speclet.model_configuration.FoundMultipleModelConfigurationsError"><code class="flex name class">
+<span>class <span class="ident">FoundMultipleModelConfigurationsError</span></span>
+<span>(</span><span>name: str, n_configs: int)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Found multiple model configurations.</p>
+<p>Create a FoundMultipleModelConfigurationsError error.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the model whose configuration was searched for.</dd>
+<dt><strong><code>n_configs</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of configs found.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FoundMultipleModelConfigurationsError(BaseException):
+    &#34;&#34;&#34;Found multiple model configurations.&#34;&#34;&#34;
+
+    def __init__(self, name: str, n_configs: int) -&gt; None:
+        &#34;&#34;&#34;Create a FoundMultipleModelConfigurationsError error.
+
+        Args:
+            name (str): Name of the model whose configuration was searched for.
+            n_configs (int): Number of configs found.
+        &#34;&#34;&#34;
+        self.name = name
+        self.n_configs = n_configs
+        self.message = f&#34;Found {self.n_configs} configuration files for &#39;{self.name}&#39;.&#34;
+        super().__init__(self.message)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="speclet.model_configuration.ModelConfigurationNotFound"><code class="flex name class">
+<span>class <span class="ident">ModelConfigurationNotFound</span></span>
+<span>(</span><span>model_name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Model configuration not found.</p>
+<p>Create a ModelConfigurationNotFound error.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the model.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ModelConfigurationNotFound(BaseException):
+    &#34;&#34;&#34;Model configuration not found.&#34;&#34;&#34;
+
+    def __init__(self, model_name: str) -&gt; None:
+        &#34;&#34;&#34;Create a ModelConfigurationNotFound error.
+
+        Args:
+            model_name (str): Name of the model.
+        &#34;&#34;&#34;
+        self.model_name = model_name
+        self.message = f&#34;Configuration not found for model: &#39;{self.model_name}&#39;.&#34;
+        super().__init__(self.message)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="speclet.model_configuration.ModelNamesAreNotAllUnique"><code class="flex name class">
+<span>class <span class="ident">ModelNamesAreNotAllUnique</span></span>
+<span>(</span><span>nonunique_ids: set[str])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Model names are not all unique.</p>
+<p>Create a ModelNamesAreNotAllUnique error.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>nonunique_ids</code></strong> :&ensp;<code>Set[str]</code></dt>
+<dd>Set of non-unique IDs.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ModelNamesAreNotAllUnique(BaseException):
+    &#34;&#34;&#34;Model names are not all unique.&#34;&#34;&#34;
+
+    def __init__(self, nonunique_ids: set[str]) -&gt; None:
+        &#34;&#34;&#34;Create a ModelNamesAreNotAllUnique error.
+
+        Args:
+            nonunique_ids (Set[str]): Set of non-unique IDs.
+        &#34;&#34;&#34;
+        self.nonunique_ids = nonunique_ids
+        self.message = f&#34;Non-unique IDs: {&#39;, &#39;.join(nonunique_ids)}&#34;
+        super().__init__(self.message)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="speclet.model_configuration.ModelOptionNotAssociatedWithAClassException"><code class="flex name class">
+<span>class <span class="ident">ModelOptionNotAssociatedWithAClassException</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Model option not yet associated with a class.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ModelOptionNotAssociatedWithAClassException(BaseException):
+    &#34;&#34;&#34;Model option not yet associated with a class.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="speclet.model_configuration.PipelineChoices"><code class="flex name class">
+<span>class <span class="ident">PipelineChoices</span></span>
+<span>(</span><span>*, fitting: list[<a title="speclet.project_enums.ModelFitMethod" href="project_enums.html#speclet.project_enums.ModelFitMethod">ModelFitMethod</a>] = None, sbc: list[<a title="speclet.project_enums.ModelFitMethod" href="project_enums.html#speclet.project_enums.ModelFitMethod">ModelFitMethod</a>] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Selection of fit methods to use for a model per pipeline.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PipelineChoices(BaseModel):
+    &#34;&#34;&#34;Selection of fit methods to use for a model per pipeline.&#34;&#34;&#34;
+
+    fitting: list[ModelFitMethod] = Field(default_factory=list)
+    sbc: list[ModelFitMethod] = Field(default_factory=list)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+<li>pydantic.utils.Representation</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="speclet" href="index.html">speclet</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="speclet.model_configuration.check_model_names_are_unique" href="#speclet.model_configuration.check_model_names_are_unique">check_model_names_are_unique</a></code></li>
+<li><code><a title="speclet.model_configuration.get_configuration_for_model" href="#speclet.model_configuration.get_configuration_for_model">get_configuration_for_model</a></code></li>
+<li><code><a title="speclet.model_configuration.read_model_configurations" href="#speclet.model_configuration.read_model_configurations">read_model_configurations</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="speclet.model_configuration.BayesianModelConfiguration" href="#speclet.model_configuration.BayesianModelConfiguration">BayesianModelConfiguration</a></code></h4>
+</li>
+<li>
+<h4><code><a title="speclet.model_configuration.BayesianModelConfigurations" href="#speclet.model_configuration.BayesianModelConfigurations">BayesianModelConfigurations</a></code></h4>
+</li>
+<li>
+<h4><code><a title="speclet.model_configuration.FoundMultipleModelConfigurationsError" href="#speclet.model_configuration.FoundMultipleModelConfigurationsError">FoundMultipleModelConfigurationsError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="speclet.model_configuration.ModelConfigurationNotFound" href="#speclet.model_configuration.ModelConfigurationNotFound">ModelConfigurationNotFound</a></code></h4>
+</li>
+<li>
+<h4><code><a title="speclet.model_configuration.ModelNamesAreNotAllUnique" href="#speclet.model_configuration.ModelNamesAreNotAllUnique">ModelNamesAreNotAllUnique</a></code></h4>
+</li>
+<li>
+<h4><code><a title="speclet.model_configuration.ModelOptionNotAssociatedWithAClassException" href="#speclet.model_configuration.ModelOptionNotAssociatedWithAClassException">ModelOptionNotAssociatedWithAClassException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="speclet.model_configuration.PipelineChoices" href="#speclet.model_configuration.PipelineChoices">PipelineChoices</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

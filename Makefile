@@ -67,7 +67,7 @@ style:
 	($(CONDA_ACTIVATE) speclet && black src && black tests)
 	($(CONDA_ACTIVATE) speclet && flake8 src && flake8 tests)
 
-docs: model_desc
+docs:
 	pdoc --html -o docs --force -c latex_math=True speclet
 
 clean: style
