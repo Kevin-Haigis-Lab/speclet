@@ -246,7 +246,7 @@ rule sample_pymc3_advi:
 
 rule papermill_report:
     input:
-        template_nb=str(REPORTS_DIR / "model-report-template.ipynb"),
+        template_nb=str(REPORTS_DIR / "_model-report-template.ipynb"),
     output:
         notebook=str(REPORTS_DIR / "{model_name}_{fit_method}.ipynb"),
     version:

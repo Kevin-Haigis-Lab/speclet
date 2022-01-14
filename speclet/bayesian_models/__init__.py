@@ -9,6 +9,7 @@ from stan.model import Model as StanModel
 
 from speclet.bayesian_models.eight_schools import EightSchoolsModel
 from speclet.bayesian_models.negative_binomial import NegativeBinomialModel
+from speclet.project_enums import ModelFitMethod
 
 
 @unique
@@ -24,6 +25,10 @@ class BayesianModelProtocol(Protocol):
 
     def __init__(self) -> None:
         """Simple initialization method."""
+        ...
+
+    def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
+        """Regular expression to help with plotting only interesting variables."""
         ...
 
     def stan_model(

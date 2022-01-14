@@ -31,3 +31,13 @@ model {
     // Likelihood
     ct_final ~ neg_binomial_2(mu, phi);
 }
+
+generated quantities {
+  vector[N] log_lik;
+  vector[N] y_hat;
+
+  for (i in 1:N) {
+    log_lik[i] = neg_binomial_2_lpmf(ct_final[i] | mu[i], phi);
+    y_hat[i] = neg_binomial_2_rng(mu[i], phi);
+  }
+}

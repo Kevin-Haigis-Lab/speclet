@@ -19,6 +19,7 @@ from speclet.data_processing.crispr import (
 from speclet.data_processing.validation import check_finite, check_nonnegative
 from speclet.io import stan_models_dir
 from speclet.modeling.stan_helpers import read_code_file
+from speclet.project_enums import ModelFitMethod
 
 
 @dataclass
@@ -57,6 +58,10 @@ class NegativeBinomialModel:
                 ),
             }
         )
+
+    def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
+        """Regular expression to help with plotting only interesting variables."""
+        return ["~reciprocal_phi", "~mu"]
 
     def _validate_data(self, data: pd.DataFrame) -> pd.DataFrame:
         return self.data_schema.validate(data)
@@ -110,7 +115,12 @@ class NegativeBinomialModel:
     @property
     def stan_idata_addons(self) -> dict[str, Any]:
         """Information to add to the InferenceData posterior object."""
-        return {"observed_data": ["ct_final"]}
+        return {
+            "posterior_predictive": ["y_hat"],
+            "observed_data": ["ct_final"],
+            "log_likelihood": {"ct_final": "log_lik"},
+            "constant_data": ["ct_initial"],
+        }
 
     def pymc3_model(self, data: pd.DataFrame) -> pm.Model:
         """PyMC3  model for a simple negative binomial model.

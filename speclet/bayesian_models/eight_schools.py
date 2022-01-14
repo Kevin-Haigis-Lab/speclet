@@ -9,6 +9,8 @@ import pymc3 as pm
 import stan
 from stan.model import Model as StanModel
 
+from speclet.project_enums import ModelFitMethod
+
 _eight_schools_stan_code = """
 data {
     int<lower=0> J;
@@ -65,6 +67,10 @@ class EightSchoolsModel:
         """Classic eight-schools example model."""
         return None
 
+    def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
+        """Regular expression to help with plotting only interesting variables."""
+        return [r".*"]
+
     @property
     def schools_data(self) -> SchoolsData:
         """Eight-schools data."""
@@ -97,6 +103,7 @@ class EightSchoolsModel:
             "posterior_predictive": "y_hat",
             "observed_data": ["y"],
             "log_likelihood": {"y": "log_lik"},
+            "constant_data": ["sigma"],
             "coords": {"school": np.arange(self.schools_data.J)},
             "dims": {
                 "theta": ["school"],
