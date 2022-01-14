@@ -5,7 +5,7 @@ import arviz as az
 import pytest
 
 from speclet.managers import cache_manager as cm
-from speclet.managers.cache_manager import PosteriorManager
+from speclet.managers.cache_manager import PosteriorManager, get_posterior_cache_name
 from speclet.project_enums import ModelFitMethod
 
 # ---- PosteriorManager ----
@@ -79,8 +79,7 @@ def test_cache_posterior(
 ) -> None:
     dest = cm.cache_posterior(
         centered_eight_idata,
-        name="test-posterior",
-        fit_method=fit_method,
+        id=get_posterior_cache_name("test-model", fit_method),
         cache_dir=tmp_path,
     )
     assert dest.exists()

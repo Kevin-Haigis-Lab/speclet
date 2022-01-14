@@ -280,6 +280,7 @@ class CrisprScreenDataManager:
                         check_nonnegative(nullable=True),
                     ],
                     nullable=True,
+                    coerce=True,
                 ),
                 "copy_number": Column(
                     float, checks=[check_finite(), check_nonnegative()]
