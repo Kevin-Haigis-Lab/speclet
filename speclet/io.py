@@ -33,7 +33,7 @@ _data_file_map: Final[dict[DataFile, str]] = {
     DataFile.DEPMAP_CRC: "depmap_modeling_dataframe_crc.csv",
     DataFile.DEPMAP_CRC_BONE: "depmap_modeling_dataframe_crc_bone.csv",
     DataFile.DEPMAP_CRC_SUBSAMPLE: "depmap_modeling_dataframe_crc-subsample.csv",
-    DataFile.DEPMAP_CRC_BONE_SUBSAMPLE: "depmap_modeling_dataframe_crc_bone-subsample.csv",  # noqa: E501
+    DataFile.DEPMAP_CRC_BONE_SUBSAMPLE: "depmap_modeling_dataframe_crc_bone-subsample.csv",  # noqa: B950,E501
     DataFile.DEPMAP_DATA: "depmap_modeling_dataframe.csv",
     DataFile.DEPMAP_ESSENTIALS: "known_essentials.csv",
     DataFile.DEPMAP_TEST_DATA: "depmap_test_data.csv",

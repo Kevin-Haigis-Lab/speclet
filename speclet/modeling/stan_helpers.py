@@ -13,5 +13,5 @@ def read_code_file(stan_file: Path) -> str:
         str: Stan code as a string.
     """
     with open(stan_file, "r") as file:
-        code = "".join([line for line in file])
+        code = "".join(list(file))
     return code

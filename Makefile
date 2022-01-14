@@ -63,9 +63,9 @@ style:
 	Rscript -e "styler::style_dir('data', recursive = FALSE)"
 	Rscript -e "styler::style_dir('munge', recursive = FALSE)"
 	Rscript -e "styler::style_dir('.', recursive = FALSE)"
-	($(CONDA_ACTIVATE) speclet && isort --profile=black src && isort --profile=black tests)
-	($(CONDA_ACTIVATE) speclet && black src && black tests)
-	($(CONDA_ACTIVATE) speclet && flake8 src && flake8 tests)
+	($(CONDA_ACTIVATE) speclet && isort --profile=black speclet && isort --profile=black tests)
+	($(CONDA_ACTIVATE) speclet && black speclet && black tests)
+	($(CONDA_ACTIVATE) speclet && flake8 speclet && flake8 tests)
 
 docs:
 	pdoc --html -o docs --force -c latex_math=True speclet
