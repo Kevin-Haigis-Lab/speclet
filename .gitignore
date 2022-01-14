@@ -250,7 +250,7 @@ Temporary Items
 
 ######
 
-project-config.yaml
+.env
 data/*
 .mustashe/*
 cache/*
