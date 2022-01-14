@@ -1,6 +1,6 @@
 # *speclet* - Bayesian modeling of genome-wide CRISPR-Cas9 LOF screens
 
-**Use Bayesian data analysis to create flexible and informative models of genome-wide CRISPR-Cas9 loss-of-function genetic screens.**
+**Use Bayesian data analysis to create informative models of genome-wide CRISPR-Cas9 loss-of-function genetic screens.**
 
 [![python](https://img.shields.io/badge/Python-3.9-3776AB.svg?style=flat&logo=python)](https://www.python.org)
 [![jupyerlab](https://img.shields.io/badge/Jupyter-Lab-F37626.svg?style=flat&logo=jupyter)](https://jupyter.org) <br>
@@ -16,29 +16,106 @@
 
 ---
 
-## Index
+> Many setup and running commands have been added as `make` commands.
+> Run `make help` to see the options available.
 
-### [Data preparation](munge/)
+## Setup
 
-The data is downloaded to the ["data/"](data) directory and prepared in the ["munge/"](munge) directory.
-The prepared data is available in ["modeling_data/"](modeling_data).
+### Python virtual environments
 
-All of the data can be downloaded and prepared using the following command.
+There are two ['conda'](https://docs.conda.io/en/latest/) environments for this project: the first `speclet` for modeling and analysis, the second `speclet_smk` for the pipelines.
+They can be created using the following commands.
+Hee, we use ['mamba'](https://github.com/mamba-org/mamba) as a drop-in replacement for 'conda' to speed up the installation process.
+
+```bash
+conda install -n base -c conda-forge mamba
+mamba env create -f environment.yaml      # creates `speclet` env
+mamba env create -f environment_smk.yaml  # creates `speclet_smk` env
+```
+
+Either environment can then be used like a normal 'conda' environment.
+For example, below is the command it activate the `speclet` environment.
+
+```bash
+conda activate speclet
+```
+
+Alternatively, the above commands can be accomplished using the `make pyenvs` command.
+
+```bash
+# Same as above.
+make pyenvs
+```
+
+### R environment
+
+The ['renv']() package is used to manage the R packages.
+R is only used for data processing in this project.
+The environment can be setup in multiple ways.
+The first is by entering R and following the prompts to install the necessary packages.
+Another option is to install 'renv' and running its restore command, as shown below in the R console.
+
+```r
+install.packages("renv")
+renv::restore()
+```
+
+This can simply be accomplished with the following `make` command.
+
+```bash
+make renv
+```
+
+### Confirm installation
+
+Installation of the Python virtual environment can be confirmed by running the 'speclet' test suite.
+
+```bash
+conda activate speclet
+pytest
+# Alternatively
+make test  # or make test_o2 if on O2 HPC
+```
+
+### Pre-commit
+
+If you plan to work on the code in this project, I recommend install ['precommit']() so that all git commits are first checked for various style and code features.
+The package is included in the `speclet` virtual environment so you just need to run the following command once.
+
+```bash
+precommit install
+```
+
+### Configuration
+
+There are options for configuration in the ["project-config.yaml"](project-config.yaml) file.
+There are controls for various constants and parameters for analyses and pipelines.
+Most will likely need not be changed.
+
+## Project organization
+
+### Data preparation
+
+The data is downloaded to the ["data/"](data/) directory and prepared in the ["munge/"](munge/) directory.
+The prepared data is available in ["modeling_data/"](modeling_data/).
+Please see the READMEs in the respective directories for more information.
+
+All of the data can be downloaded and prepared using the following commands.
 
 ```bash
 make download_data
 make munge # or `make munge_o2` if on O2 HPC
 ```
 
-### [Notebooks](notebooks/)
+### Notebooks
 
-Exploratory and small-scale analyses are conducted in the "notebooks/" directory.
+Exploratory and small-scale analyses are conducted in the ["notebooks/"](notebooks/) directory.
 Subdirectories divide related notebooks.
 See the README in that directory for further details.
 
-### [Python Modules](src/)
+### Python Module
 
-All shared Python code is contained in the ["src/"](src) directory.
+All shared Python code is contained in the ["speclet/"](speclet) directory.
 The installation of this directory as an editable module should be done automatically when the conda environment is created.
 If this failed, the module can be installed using the following command.
 
@@ -48,40 +125,68 @@ pip install -e .
 ```
 
 The modules are tested using ['pytest'](https://docs.pytest.org/en/stable/) –  see below for how to run the tests.
-They also conform to the ['black'](https://github.com/psf/black) formatter and make heavy use of Python's type-hinting system checked by ['mypy'](http://mypy-lang.org/).
+They also conform to the ['black'](https://github.com/psf/black) and ['isort'](https://pycqa.github.io/isort/) formatters and make heavy use of Python's type-hinting system checked by ['mypy'](http://mypy-lang.org/).
 The functions are well documented using the Google documentation style and are checked by ['pydocstyle'](http://www.pydocstyle.org/en/stable/).
 
-### [Pipelines](pipelines/)
+### Pipelines
 
 All pipelines and associated files (e.g. configurations and runners) are in the ["pipelines/"](pipelines) directory.
-Each pipeline should contain an associated bash script and `make` command that can be used to run the pipeline (usually on O2).
+Each pipeline contains an associated `bash` script and `make` command that can be used to run the pipeline (usually on O2).
+See the README in the ["pipelines/"](pipelines/) directory for more information.
 
-### [Reports](reports/)
+### Reports
 
 Standardized reports are available in the ["reports/"](reports) directory.
-Each annalysis pipeline should have a corresponding subdirectory in the reports directory.
+Each analysis pipeline has a corresponding subdirectory in the reports directory.
+These notebooks are meant as quick, standardized reports to check on the results of a pipeline.
+More detailed analyses are in the ["notebooks/"](notebooks/) section.
 
-### [Presentations](presentations/)
+### Presentations
 
 Presentations that involved this project are stored in the ["presentations/"](presentations) directory.
+More information is available in the README in that directory.
 
-### [Testing](tests/)
+### Testing
 
-Tests in the ["tests/"](tests) directory have been written against the modules in ["src/"](src) using ['pytest'](https://docs.pytest.org/en/stable/) and ['hypothesis'](https://hypothesis.readthedocs.io/en/latest/).
+Tests in the ["tests/"](tests) directory have been written against the modules in ["speclet/"](speclet) using ['pytest'](https://docs.pytest.org/en/stable/) and ['hypothesis'](https://hypothesis.readthedocs.io/en/latest/).
 They can be run using the following command.
 
 ```python
 # Run full test suite.
 pytest
 # Or run the tests in two groups simultaneously.
-make test  # `test_o2` on O2
+make test  # `test_o2` on O2 HPC
 ```
 
-The coverage report can be shown by adding the `--cov="src"` flag.
-Some tests are slow because they involve the creation of PyMC3 models or sampling/fitting them.
-These can be skipped using the `-m "not slow"` argument.
+The coverage report can be shown by adding the `--cov="speclet"` flag.
+Some tests are slow because they involve the creation of models or sampling/fitting them.
+These can be skipped using the `-m "not slow"` flag.
 Some tests require the ability to construct plots (using the 'matplotlib' library), but not all platforms (notably the HMS research computing cluster) provide this ability.
-These tests can be skipped using the `-m "not plots"` argument.
+These tests can be skipped using the `-m "not plots"` flag.
 
 These tests are automatically run on GitHub Actions on pushes or PRs with the `master` git branch.
 The most recent results can be seen [here](https://github.com/Kevin-Haigis-Lab/speclet/actions).
+
+## Running analyses
+
+### Pipelines
+
+Each individual pipeline can be run through a `bash` script or a `make`command.
+See the pipelines [README](pipelines/README.md) for full details.
+
+### Notebooks
+
+The notebooks contain the majority of the model analysis.
+They are still a work in progress and this section will be updated when a full build-system is available.
+
+```bash
+# TODO
+```
+
+### Full project build
+
+The entire project can be installed from scratch and all analysis run with the following `make` command.
+
+```bash
+make build  # or `build_o2` on O2 HPC
+```
