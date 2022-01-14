@@ -1,6 +1,6 @@
 import pytest
 
-from src.plot import plotnine_helpers
+from speclet.plot import plotnine_helpers
 
 
 def test_margin_format() -> None:

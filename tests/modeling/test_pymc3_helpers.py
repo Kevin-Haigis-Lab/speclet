@@ -2,11 +2,12 @@ import arviz as az
 import pandas as pd
 import pymc3 as pm
 import pytest
+from pymc3.model import DeterministicWrapper, FreeRV
 from seaborn import load_dataset
 from theano import tensor as tt
 
-import src.exceptions
-from src.modeling import pymc3_helpers as pmhelp
+import speclet.exceptions
+from speclet.modeling import pymc3_helpers as pmhelp
 
 
 @pytest.fixture(scope="module")
@@ -55,8 +56,8 @@ def test_get_all_variables_rm_log(mock_model: pm.Model) -> None:
     assert expected_rvs == set(rvs)
 
 
-def test_get_posterior_names(centered_eight: az.InferenceData) -> None:
-    got_names = pmhelp.get_posterior_names(centered_eight)
+def test_get_posterior_names(centered_eight_idata: az.InferenceData) -> None:
+    got_names = pmhelp.get_posterior_names(centered_eight_idata)
     expected_names = {"mu", "theta", "tau"}
     assert set(got_names) == expected_names
 
@@ -66,14 +67,16 @@ def test_get_posterior_names(centered_eight: az.InferenceData) -> None:
     [("mu", (4, 100)), ("tau", (4, 100)), ("theta", (4, 100, 8))],
 )
 def test_thin_posterior(
-    centered_eight: az.InferenceData, var_name: str, thinned_shape: tuple[int, ...]
+    centered_eight_idata: az.InferenceData,
+    var_name: str,
+    thinned_shape: tuple[int, ...],
 ) -> None:
-    post = centered_eight["posterior"][var_name]
+    post = centered_eight_idata["posterior"][var_name]
     thinned_post = pmhelp.thin_posterior(post, thin_to=100)
     assert thinned_post.shape == thinned_shape
     thinned_post = pmhelp.thin_posterior(post, step_size=5)
     assert thinned_post.shape == thinned_shape
-    with pytest.raises(src.exceptions.RequiredArgumentError):
+    with pytest.raises(speclet.exceptions.RequiredArgumentError):
         pmhelp.thin_posterior(post)
 
 
@@ -83,12 +86,12 @@ def test_thin_posterior(
     [("mu", (500,)), ("tau", (500,)), ("theta", (500, 8))],
 )
 def test_get_one_chain(
-    centered_eight: az.InferenceData,
+    centered_eight_idata: az.InferenceData,
     var_name: str,
     new_shape: tuple[int, ...],
     chain_num: int,
 ) -> None:
-    post = centered_eight["posterior"][var_name]
+    post = centered_eight_idata["posterior"][var_name]
     new_post = pmhelp.get_one_chain(post, chain_num=chain_num)
     assert new_post.shape == new_shape
 
@@ -103,12 +106,12 @@ def test_hierarchical_normal(centered: bool) -> None:
 
     if centered:
         assert a.dshape == (2, 5)
-        assert isinstance(a, pm.model.FreeRV)
+        assert isinstance(a, FreeRV)
         with pytest.raises(KeyError):
             _ = m["Δ_var-name"]
     else:
         assert m["Δ_var-name"].dshape == (2, 5)
-        assert isinstance(a, pm.model.DeterministicWrapper)
+        assert isinstance(a, DeterministicWrapper)
 
 
 @pytest.mark.parametrize("centered", (True, False))
@@ -126,13 +129,13 @@ def test_hierarchical_normal_with_avg(centered: bool) -> None:
     assert a.ndim == 1
 
     gamma = m["γ_var-name_other-var_bar"]
-    assert isinstance(gamma, pm.model.FreeRV)
+    assert isinstance(gamma, FreeRV)
 
     if centered:
         assert a.dshape == shape
-        assert isinstance(a, pm.model.FreeRV)
+        assert isinstance(a, FreeRV)
         with pytest.raises(KeyError):
             _ = m["Δ_var-name"]
     else:
         assert m["Δ_var-name"].dshape == shape
-        assert isinstance(a, pm.model.DeterministicWrapper)
+        assert isinstance(a, DeterministicWrapper)

@@ -1,0 +1,41 @@
+name: speclet_smk
+channels:
+  - conda-forge
+  - bioconda
+  - r
+  - defaults
+dependencies:
+  - python=3.9.9
+  - snakemake=6.13.*
+  - black  # used in pipeline
+  - colorama
+  - dask
+  - drmaa
+  - isort  # used in pipeline
+  - jupyterlab
+  - mamba
+  - mkl
+  - mkl-service
+  - nbconvert
+  - nbqa  # used in pipeline
+  - numpy
+  - openssl
+  - pandas
+  - pandera
+  - papermill
+  - pip
+  - plotnine
+  - pretty_errors
+  - pydantic
+  - pyjanitor
+  - pymc3=3.11.*
+  - python-graphviz
+  - rich
+  - seaborn
+  - theano-pymc=1.1.*
+  - typer
+  - watermark
+  - pip:
+    - pystan>=3.3.0
+    - python-dotenv
+    - -e .  # install the source directory as a package (keep as last)

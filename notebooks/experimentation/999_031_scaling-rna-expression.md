@@ -3,11 +3,10 @@
 ```python
 from pathlib import Path
 
-import janitor
+import janitor  # noqa: F401
 import numpy as np
 import pandas as pd
 import plotnine as gg
-import seaborn as sns
 from tqdm import tqdm
 ```
 
@@ -464,7 +463,7 @@ df_rna[df_rna["rna_expr"].isna()]
 </div>
 
 ```python
-def plot_by_lineage(df, y: str = "rna_expr") -> gg.ggplot:
+def plot_by_lineage(df: pd.DataFrame, y: str = "rna_expr") -> gg.ggplot:
     return (
         gg.ggplot(df, gg.aes(x="hugo_symbol", y=y))
         + gg.geom_point(gg.aes(color="lineage"), size=0.2, alpha=0.2)
@@ -509,7 +508,7 @@ def squish(x: float, lower: float, upper: float) -> float:
 squish_array = np.vectorize(squish)
 
 
-def rna_zscale(df):
+def rna_zscale(df: pd.DataFrame) -> pd.DataFrame:
     rna = df["rna_expr"].values
 
     if np.allclose(rna, 0.0):

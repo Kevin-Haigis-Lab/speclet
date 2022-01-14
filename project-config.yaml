@@ -1,14 +1,19 @@
 # Configurations used throughout the project.
 
 munge:
-  test: False
-  temporary_directory: "/n/no_backup2/dbmi/park/jc604/speclet/munge-intermediates"
-  # test: True
-  # temporary_directory: "temp"
+  test: false
+  temporary_directory: "temp"
 
 modeling:
   highest_density_interval: 0.89
-  models_config: "model-configs.yaml"
+  models_config: "models/model-configs.yaml"
 
 fitting_pipeline:
-  debug: false
+  debug: true
+  num_chains: 2
+  models_config: "models/model-configs.yaml"
+  temp_dir: "temp/fitting-mcmc"
+  model_cache_dir: "models/"
+  reports_dir: "reports/model-fitting-pipeline-reports/"
+  benchmark_dir: "benchmarks/010_010_model-fitting-pipeline"
+  env_yaml: "default_environment.yaml"

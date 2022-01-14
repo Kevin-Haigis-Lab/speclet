@@ -250,16 +250,16 @@ Temporary Items
 
 ######
 
-
+.env
 data/*
-.mustashe/
-cache/
+.mustashe/*
+cache/*
 models/*
-temp/
+temp/*
 modeling_data/*
-.snakemake/
-.virtual_documents/
-.vscode/settings.json
+.snakemake/*
+.virtual_documents/*
+.vscode/*
 docs/.docs-env
 .testmondata
 benchmarks/*

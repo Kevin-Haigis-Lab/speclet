@@ -4,32 +4,22 @@
 ```
 
 ```python
-import re
-import string
 import warnings
 from pathlib import Path
 from time import time
 
 import arviz as az
-import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotnine as gg
 import pymc3 as pm
 import seaborn as sns
-from theano import tensor as tt
 ```
 
 ```python
-from src.data_processing import achilles as achelp
-from src.data_processing import common as dphelp
-from src.globals import PYMC3
-from src.io import cache_io
-from src.loggers import logger
-from src.modeling import pymc3_analysis as pmanal
-from src.modeling import pymc3_sampling_api as pmapi
-from src.plot.color_pal import FitMethodColors, ModelColors, SeabornColor
+from speclet.plot.plotnine_helpers import set_gg_theme
+from speclet.project_config import read_project_configuration
 ```
 
 ```python
@@ -37,18 +27,12 @@ notebook_tic = time()
 
 warnings.simplefilter(action="ignore", category=UserWarning)
 
-gg.theme_set(
-    gg.theme_bw()
-    + gg.theme(
-        figure_size=(4, 4),
-        axis_ticks_major=gg.element_blank(),
-        strip_background=gg.element_blank(),
-    )
-)
+set_gg_theme()
 %config InlineBackend.figure_format = "retina"
 
 RANDOM_SEED = 847
 np.random.seed(RANDOM_SEED)
+HDI_PROB = read_project_configuration().modeling.highest_density_interval
 ```
 
 ```python

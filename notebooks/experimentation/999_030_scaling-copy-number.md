@@ -6,17 +6,15 @@
 ```
 
 ```python
-from pathlib import Path
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotnine as gg
 import seaborn as sns
 
-from src.data_processing import achilles as achelp
-from src.io import data_io
-from src.io.data_io import DataFile
+from speclet.data_processing import achilles as achelp
+from speclet.io import data_io
+from speclet.io.data_io import DataFile
 ```
 
 ```python
@@ -25,7 +23,7 @@ _ = gg.theme_set(gg.theme_bw())
 ```
 
 ```python
-real_df = achelp.read_achilles_data(data_io.data_path(DataFile.crc_subsample))
+real_df = achelp.read_achilles_data(data_io.data_path(DataFile.DEPMAP_CRC_SUBSAMPLE))
 real_df.head(5)
 ```
 
@@ -73,16 +71,16 @@ real_df.head(5)
   <tbody>
     <tr>
       <th>0</th>
-      <td>CTTGTTAGATAATGGAACT</td>
-      <td>LS513_c903R1</td>
-      <td>-1.100620</td>
-      <td>ERS717283.plasmid</td>
-      <td>chr2_157544604_-</td>
+      <td>ATAACACTGCACCTTCCAAC</td>
+      <td>LS513-311Cas9_RepA_p6_batch2</td>
+      <td>0.179367</td>
+      <td>2</td>
+      <td>chr2_157587191_-</td>
       <td>ACVR1C</td>
-      <td>sanger</td>
+      <td>broad</td>
       <td>True</td>
       <td>2</td>
-      <td>157544604</td>
+      <td>157587191</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
@@ -97,16 +95,16 @@ real_df.head(5)
     </tr>
     <tr>
       <th>1</th>
-      <td>CTTGTTAGATAATGGAACT</td>
-      <td>CL11_c903R1</td>
-      <td>-0.572939</td>
-      <td>ERS717283.plasmid</td>
-      <td>chr2_157544604_-</td>
+      <td>ATAACACTGCACCTTCCAAC</td>
+      <td>CL-11-311Cas9_RepB_p6_batch3</td>
+      <td>-0.139505</td>
+      <td>3</td>
+      <td>chr2_157587191_-</td>
       <td>ACVR1C</td>
-      <td>sanger</td>
-      <td>True</td>
+      <td>broad</td>
+      <td>False</td>
       <td>2</td>
-      <td>157544604</td>
+      <td>157587191</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
@@ -121,16 +119,40 @@ real_df.head(5)
     </tr>
     <tr>
       <th>2</th>
-      <td>CTTGTTAGATAATGGAACT</td>
-      <td>HT29_c904R1</td>
-      <td>0.054573</td>
-      <td>ERS717283.plasmid</td>
-      <td>chr2_157544604_-</td>
+      <td>ATAACACTGCACCTTCCAAC</td>
+      <td>SW1463-311cas9 Rep A p5_batch2</td>
+      <td>-0.192216</td>
+      <td>2</td>
+      <td>chr2_157587191_-</td>
       <td>ACVR1C</td>
-      <td>sanger</td>
+      <td>broad</td>
       <td>True</td>
       <td>2</td>
-      <td>157544604</td>
+      <td>157587191</td>
+      <td>...</td>
+      <td>0</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>False</td>
+      <td>0.923384</td>
+      <td>colorectal</td>
+      <td>primary</td>
+      <td>False</td>
+      <td>66.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ATAACACTGCACCTTCCAAC</td>
+      <td>HT29-311Cas9_RepA_p6 AVANA_batch3</td>
+      <td>0.282499</td>
+      <td>3</td>
+      <td>chr2_157587191_-</td>
+      <td>ACVR1C</td>
+      <td>broad</td>
+      <td>True</td>
+      <td>2</td>
+      <td>157587191</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
@@ -144,41 +166,17 @@ real_df.head(5)
       <td>44.0</td>
     </tr>
     <tr>
-      <th>3</th>
-      <td>CTTGTTAGATAATGGAACT</td>
-      <td>SNUC1_c903R4</td>
-      <td>0.700923</td>
-      <td>ERS717283.plasmid</td>
-      <td>chr2_157544604_-</td>
-      <td>ACVR1C</td>
-      <td>sanger</td>
-      <td>True</td>
-      <td>2</td>
-      <td>157544604</td>
-      <td>...</td>
-      <td>0</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>False</td>
-      <td>0.946028</td>
-      <td>colorectal</td>
-      <td>metastasis</td>
-      <td>True</td>
-      <td>71.0</td>
-    </tr>
-    <tr>
       <th>4</th>
-      <td>CTTGTTAGATAATGGAACT</td>
-      <td>KM12_c908R1_100</td>
-      <td>-1.123352</td>
-      <td>CRISPR_C6596666.sample</td>
-      <td>chr2_157544604_-</td>
+      <td>ATAACACTGCACCTTCCAAC</td>
+      <td>KM12-311Cas9 Rep A p5_batch3</td>
+      <td>0.253698</td>
+      <td>3</td>
+      <td>chr2_157587191_-</td>
       <td>ACVR1C</td>
-      <td>sanger</td>
+      <td>broad</td>
       <td>True</td>
       <td>2</td>
-      <td>157544604</td>
+      <td>157587191</td>
       <td>...</td>
       <td>0</td>
       <td>NaN</td>
@@ -193,7 +191,7 @@ real_df.head(5)
     </tr>
   </tbody>
 </table>
-<p>5 rows × 22 columns</p>
+<p>5 rows × 24 columns</p>
 </div>
 
 ```python
@@ -234,7 +232,7 @@ real_df["cn_log_z"] = real_cn_log2_p1_z
 ```
 
 ```python
-def histogram(df, x):
+def histogram(df: pd.DataFrame, x: str) -> gg.ggplot:
     return (
         gg.ggplot(df, gg.aes(x=x))
         + gg.geom_histogram(bins=100)
@@ -249,7 +247,7 @@ histogram(real_df, "copy_number")
 
 ![png](999_030_scaling-copy-number_files/999_030_scaling-copy-number_9_0.png)
 
-    <ggplot: (334245816)>
+    <ggplot: (348635886)>
 
 ```python
 real_cn_sqrt = np.sqrt(real_cn)
@@ -292,13 +290,13 @@ plot_df = pd.DataFrame(
 
 ![png](999_030_scaling-copy-number_files/999_030_scaling-copy-number_10_0.png)
 
-    <ggplot: (334233429)>
+    <ggplot: (348759748)>
 
 ```python
 real_df.shape
 ```
 
-    (1443, 28)
+    (2598, 29)
 
 ```python
 (
@@ -315,7 +313,7 @@ real_df.shape
 
 ![png](999_030_scaling-copy-number_files/999_030_scaling-copy-number_12_0.png)
 
-    <ggplot: (336173038)>
+    <ggplot: (348821986)>
 
 ```python
 

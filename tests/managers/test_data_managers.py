@@ -2,185 +2,126 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+from pandera.errors import SchemaError
 
-from src.context_managers import dask_client
-from src.managers.data_managers import CrisprScreenDataManager
-
-
-def reverse_sgrna(df: pd.DataFrame) -> pd.DataFrame:
-    return df.assign(rev_sgrna=lambda d: d.sgrna.values[::-1])
-
-
-dask_kwargs = {"n_workers": 2, "threads_per_worker": 1, "memory_limit": "500MB"}
-
-
-# ---- Reading data ----
+from speclet import io
+from speclet.managers.data_managers import CrisprScreenDataManager as CrisprDM
+from speclet.managers.data_managers import (
+    DataFileDoesNotExist,
+    DataFileIsNotAFile,
+    UnsupportedDataFileType,
+)
 
 
-@pytest.mark.parametrize("use_dask", (False, True))
-def test_get_real_data(depmap_test_data: Path, use_dask: bool) -> None:
-    dm = CrisprScreenDataManager(depmap_test_data, use_dask=use_dask)
-    if use_dask:
-        with dask_client(**dask_kwargs):  # type: ignore
-            df = dm.get_data()
-    else:
-        df = dm.get_data()
-    assert df.shape[0] > 0 and df.shape[1] > 0
-    assert all([c in df.columns for c in ("sgrna", "hugo_symbol", "depmap_id")])
+def test_fails_on_nonexistent_datafile(tmp_path: Path) -> None:
+    fake_file = tmp_path / "does-not-exists-datafile.csv"
+    with pytest.raises(DataFileDoesNotExist):
+        CrisprDM(fake_file)  # as a Path object
+    with pytest.raises(DataFileDoesNotExist):
+        CrisprDM(str(fake_file))  # as a string
 
 
-@pytest.mark.parametrize("use_dask", (False, True))
-def test_custom_transformation(depmap_test_data: Path, use_dask: bool) -> None:
-    dm = CrisprScreenDataManager(depmap_test_data, transformations=[reverse_sgrna])
-    if use_dask:
-        with dask_client(**dask_kwargs):  # type: ignore
-            df = dm.get_data()
-    else:
-        df = dm.get_data()
-    assert df.shape[0] > 0 and df.shape[1] > 0
-    assert "rev_sgrna" in df.columns
-    assert all(df.sgrna.values == df.rev_sgrna.values[::-1])
-    assert all([c in df.columns for c in ("sgrna", "hugo_symbol", "depmap_id")])
+def test_fails_on_notafile_datafile(tmp_path: Path) -> None:
+    fake_file = tmp_path / "does-not-exists-datafile.csv"
+    fake_file.mkdir()
+    with pytest.raises(DataFileIsNotAFile):
+        CrisprDM(fake_file)  # as a Path object
+    with pytest.raises(DataFileIsNotAFile):
+        CrisprDM(str(fake_file))  # as a string
 
 
-@pytest.mark.parametrize("use_dask", (False, True))
-def test_select_columns(depmap_test_data: Path, use_dask: bool) -> None:
-    keep_cols = {"sgrna", "hugo_symbol"}
-    dm = CrisprScreenDataManager(depmap_test_data, columns=keep_cols.copy())
-    if use_dask:
-        with dask_client(**dask_kwargs):  # type: ignore
-            df = dm.get_data()
-    else:
-        df = dm.get_data()
-    assert df.shape[0] > 0 and df.shape[1] == 2
-    assert all([c in df.columns for c in keep_cols])
-    assert "depmap_id" not in df.columns
+@pytest.mark.parametrize("suffix", [".cssv", ".txt", "csv", "_csv"])
+def test_fails_on_noncsv_datafile(tmp_path: Path, suffix: str) -> None:
+    fake_file = tmp_path / ("fake-datafile" + suffix)
+    fake_file.touch()
+    with pytest.raises(UnsupportedDataFileType):
+        CrisprDM(fake_file)  # as a Path object
+    with pytest.raises(UnsupportedDataFileType):
+        CrisprDM(str(fake_file))  # as a string
 
 
-@pytest.mark.parametrize("use_dask", (False, True))
-def test_select_columns_and_transformation(
-    depmap_test_data: Path, use_dask: bool
-) -> None:
-    keep_cols = {"sgrna", "hugo_symbol"}
-    dm = CrisprScreenDataManager(
-        depmap_test_data, transformations=[reverse_sgrna], columns=keep_cols.copy()
-    )
-    if use_dask:
-        with dask_client(**dask_kwargs):  # type: ignore
-            df = dm.get_data()
-    else:
-        df = dm.get_data()
-    assert df.shape[0] > 0 and df.shape[1] == 3
-    assert all(df.sgrna.values == df.rev_sgrna.values[::-1])
-    assert all([c in df.columns for c in keep_cols])
-    assert "rev_sgrna" in df.columns
-    assert "depmap_id" not in df.columns
+def test_init_crispr_dm_with_data_file() -> None:
+    _ = CrisprDM(io.DataFile.DEPMAP_TEST_DATA)
+    return None
 
 
-def test_clear_data(depmap_test_data: Path) -> None:
-    dm = CrisprScreenDataManager(depmap_test_data)
-    _ = dm.get_data()
-    assert dm.data_is_loaded()
-    dm.clear_data()
-    assert not dm.data_is_loaded()
+@pytest.mark.parametrize("suffix", [".csv", ".tsv", ".pkl"])
+def test_init_crispr_dm_with_path(tmp_path: Path, suffix: str) -> None:
+    f = tmp_path / ("fake-data" + suffix)
+    f.touch()
+    _ = CrisprDM(f)
+    _ = CrisprDM(str(f))
 
 
-# ---- Transformations ----
+def _head(df: pd.DataFrame) -> pd.DataFrame:
+    _df = df.copy().head(5)
+    assert isinstance(_df, pd.DataFrame)
+    return _df
 
 
-def double_log_fold_change(df: pd.DataFrame) -> pd.DataFrame:
-    df["lfc"] = df["lfc"] * 2.0
-    return df
+def test_get_data() -> None:
+    dm = CrisprDM(io.DataFile.DEPMAP_TEST_DATA)
+    data = dm.get_data()
+    assert data.shape[0] > 0
+    assert data is dm.get_data()
 
 
-def add_one_to_log_fold_change(df: pd.DataFrame) -> pd.DataFrame:
-    df["lfc"] = df["lfc"] + 1.0
-    return df
+def test_get_data_with_transforms() -> None:
+    dm = CrisprDM(io.DataFile.DEPMAP_TEST_DATA, transformations=[_head])
+    data = dm.get_data()
+    assert data.shape[0] == 5
+    assert data is dm.get_data()
 
 
-def test_add_transformation(depmap_test_data: Path) -> None:
-    dm = CrisprScreenDataManager(depmap_test_data)
-    df = dm.get_data()
-    assert len(dm.get_transformations()) == 0
-    dm.add_transformation(double_log_fold_change)
-    assert len(dm.get_transformations()) == 1
-    dm.clear_data()
-    assert not dm.data_is_loaded()
-    new_df = dm.get_data()
-    assert all(new_df["lfc"].values == (df["lfc"].values * 2.0))
+def test_fail_validation_completely_different(iris: pd.DataFrame) -> None:
+    dm = CrisprDM(io.DataFile.DEPMAP_TEST_DATA)
+    with pytest.raises(SchemaError):
+        dm.apply_validation(iris)
+    with pytest.raises(SchemaError):
+        dm.set_data(iris)
 
 
-def test_add_transformations(depmap_test_data: Path) -> None:
-    dm = CrisprScreenDataManager(depmap_test_data)
-    assert len(dm.get_transformations()) == 0
-    dm.add_transformation([double_log_fold_change, add_one_to_log_fold_change])
-    assert len(dm.get_transformations()) == 2
+def test_fail_validation_close() -> None:
+    dm = CrisprDM(io.DataFile.DEPMAP_TEST_DATA)
+    data = dm.get_data()
+    mod_data = data.copy().drop(columns=["sgrna"])
+    with pytest.raises(SchemaError):
+        dm.apply_validation(mod_data)
+    with pytest.raises(SchemaError):
+        dm.set_data(mod_data)
 
 
-def test_insert_transformation(depmap_test_data: Path) -> None:
-    dm = CrisprScreenDataManager(
-        depmap_test_data, transformations=[add_one_to_log_fold_change]
-    )
+def test_fail_validation_nonunique_mapping_of_sgrna_to_gene() -> None:
+    dm = CrisprDM(io.DataFile.DEPMAP_TEST_DATA)
+    data = dm.get_data()
+    # Just shuffle gene assignments.
+    mod_data = data.copy()
+    mod_data["hugo_symbol"] = mod_data.hugo_symbol.sample()
+    with pytest.raises(SchemaError):
+        dm.apply_validation(mod_data)
 
-    df1 = dm.get_data()  # lfc = lfc + 1
-
-    dm.clear_data()
-    dm.insert_transformation(double_log_fold_change, at=0)
-    df2 = dm.get_data()  # lfc = (2 * lfc) + 1
-
-    dm.clear_transformations()
-    dm.clear_data()
-    df0 = dm.get_data()  # lfc = lfc
-    assert all((df0["lfc"].values + 1.0) == df1["lfc"].values)
-    assert all(((2.0 * df0["lfc"].values) + 1.0) == df2["lfc"].values)
-
-
-def test_get_transformations(depmap_test_data: Path) -> None:
-    dm = CrisprScreenDataManager(
-        depmap_test_data, transformations=[double_log_fold_change]
-    )
-    assert len(dm.get_transformations()) == 1
-    dm.clear_transformations()
-    assert len(dm.get_transformations()) == 0
-    dm.set_transformations([double_log_fold_change, add_one_to_log_fold_change])
-    assert len(dm.get_transformations()) == 2
-    dm.insert_transformation(reverse_sgrna, at=1)
-    assert len(dm.get_transformations()) == 3
-    dm.clear_transformations()
-    assert len(dm.get_transformations()) == 0
+    # Change a single gene assignment.
+    mod_data = data.copy()
+    genes = mod_data.hugo_symbol.to_list()
+    swap_gene = set(genes).difference(genes[0])
+    mod_data["hugo_symbol"] = [swap_gene] + genes[1:]
+    with pytest.raises(SchemaError):
+        dm.apply_validation(mod_data)
 
 
-def test_mock_data_generation(depmap_test_data: Path) -> None:
-    dm = CrisprScreenDataManager(data_source=depmap_test_data)
-    small_mock_data = dm.generate_mock_data(size="small")
-    medium_mock_data = dm.generate_mock_data(size="medium")
-    large_mock_data = dm.generate_mock_data(size="large")
-    assert (
-        small_mock_data.shape[1]
-        == medium_mock_data.shape[1]
-        == large_mock_data.shape[1]
-    )
-    assert (
-        small_mock_data.shape[0] < medium_mock_data.shape[0] < large_mock_data.shape[0]
-    )
+def test_fail_validation_nonunique_mapping_of_celllines_to_lineage() -> None:
+    dm = CrisprDM(io.DataFile.DEPMAP_TEST_DATA)
+    data = dm.get_data()
+    # Just shuffle gene assignments.
+    mod_data = data.copy()
+    mod_data["lineage"] = mod_data.lineage.sample()
+    with pytest.raises(SchemaError):
+        dm.apply_validation(mod_data)
 
-
-def head(df: pd.DataFrame) -> pd.DataFrame:
-    return df.head(10)
-
-
-@pytest.mark.DEV
-def test_cannot_mutate_transformations_externally(depmap_test_data: Path) -> None:
-    transformations = [double_log_fold_change, add_one_to_log_fold_change]
-    dm = CrisprScreenDataManager(
-        data_source=depmap_test_data, transformations=transformations
-    )
-    assert dm.num_transformations == 2
-    assert dm.get_transformations() is not transformations
-    transformations.append(head)
-    assert len(transformations) == 3
-    assert dm.num_transformations == 2
-
-    new_trans = dm.get_transformations()
-    new_trans.append(head)
-    assert dm.num_transformations == 2
+    # Change a single gene assignment.
+    mod_data = data.copy()
+    lineages = mod_data.lineage.to_list()
+    swap_lineage = set(lineages).difference(lineages[0])
+    mod_data["lineage"] = [swap_lineage] + lineages[1:]
+    with pytest.raises(SchemaError):
+        dm.apply_validation(mod_data)
