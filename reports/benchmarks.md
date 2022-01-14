@@ -38,7 +38,8 @@ Organization of benchmarks directory:
 list(benchmark_dir.iterdir())
 ```
 
-    [PosixPath('/Users/admin/Developer/haigis-lab/speclet/benchmarks/010_010_model-fitting-pipeline')]
+    [PosixPath('/Users/admin/Developer/haigis-lab/speclet/benchmarks/.DS_Store'),
+     PosixPath('/Users/admin/Developer/haigis-lab/speclet/benchmarks/010_010_model-fitting-pipeline')]
 
 ```python
 def process_benchmark_file(bench_f: Path) -> pd.DataFrame:
@@ -66,6 +67,8 @@ def get_benchmark_data_for_rule_dir(
 benchmark_df_list: list[pd.DataFrame] = []
 
 for pipeline_dir in benchmark_dir.iterdir():
+    if pipeline_dir.name in {".DS_Store"}:
+        continue
     for rule_dir in pipeline_dir.iterdir():
         df = get_benchmark_data_for_rule_dir(rule_dir, pipeline_name=pipeline_dir.name)
         if df is not None:
@@ -111,8 +114,8 @@ benchmark_df.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>47.7928</td>
-      <td>0:00:47</td>
+      <td>55.1094</td>
+      <td>0:00:55</td>
       <td>-</td>
       <td>-</td>
       <td>-</td>
@@ -127,8 +130,8 @@ benchmark_df.head()
     </tr>
     <tr>
       <th>1</th>
-      <td>51.1992</td>
-      <td>0:00:51</td>
+      <td>55.5505</td>
+      <td>0:00:55</td>
       <td>-</td>
       <td>-</td>
       <td>-</td>
@@ -143,8 +146,40 @@ benchmark_df.head()
     </tr>
     <tr>
       <th>2</th>
-      <td>104.1671</td>
-      <td>0:01:44</td>
+      <td>50.6351</td>
+      <td>0:00:50</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>example-specification_chain0</td>
+      <td>sample_stan_mcmc</td>
+      <td>010_010_model-fitting-pipeline</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>49.6582</td>
+      <td>0:00:49</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>example-specification_chain1</td>
+      <td>sample_stan_mcmc</td>
+      <td>010_010_model-fitting-pipeline</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>110.2113</td>
+      <td>0:01:50</td>
       <td>-</td>
       <td>-</td>
       <td>-</td>
@@ -215,15 +250,21 @@ benchmark_df.groupby(["pipeline", "rule"]).mean().round(2)
   </thead>
   <tbody>
     <tr>
-      <th rowspan="2" valign="top">010_010_model-fitting-pipeline</th>
+      <th rowspan="3" valign="top">010_010_model-fitting-pipeline</th>
       <th>sample_pymc3_advi</th>
-      <td>104.17</td>
+      <td>110.21</td>
       <td>0.0</td>
       <td>0.0</td>
     </tr>
     <tr>
       <th>sample_pymc3_mcmc</th>
-      <td>49.50</td>
+      <td>55.33</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>sample_stan_mcmc</th>
+      <td>50.15</td>
       <td>0.0</td>
       <td>0.0</td>
     </tr>
@@ -289,25 +330,25 @@ benchmark_df_long.head()
     <tr>
       <th>2</th>
       <td>010_010_model-fitting-pipeline</td>
-      <td>sample_pymc3_advi</td>
-      <td>example-specification</td>
+      <td>sample_stan_mcmc</td>
+      <td>example-specification_chain0</td>
       <td>cpu_time</td>
       <td>0.0</td>
     </tr>
     <tr>
-      <th>6</th>
+      <th>3</th>
       <td>010_010_model-fitting-pipeline</td>
-      <td>sample_pymc3_mcmc</td>
-      <td>example-specification_chain0</td>
-      <td>mean_load</td>
+      <td>sample_stan_mcmc</td>
+      <td>example-specification_chain1</td>
+      <td>cpu_time</td>
       <td>0.0</td>
     </tr>
     <tr>
-      <th>7</th>
+      <th>4</th>
       <td>010_010_model-fitting-pipeline</td>
-      <td>sample_pymc3_mcmc</td>
-      <td>example-specification_chain1</td>
-      <td>mean_load</td>
+      <td>sample_pymc3_advi</td>
+      <td>example-specification</td>
+      <td>cpu_time</td>
       <td>0.0</td>
     </tr>
   </tbody>
@@ -326,7 +367,7 @@ sns.catplot(
 )
 ```
 
-    <seaborn.axisgrid.FacetGrid at 0x12da6ecd0>
+    <seaborn.axisgrid.FacetGrid at 0x1240f3dc0>
 
 ![png](benchmarks_files/benchmarks_13_1.png)
 
@@ -337,7 +378,7 @@ sns.catplot(
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-01-13
+    Last updated: 2022-01-14
 
     Python implementation: CPython
     Python version       : 3.9.9
@@ -356,8 +397,8 @@ sns.catplot(
     Git branch: refactor-stan
 
     janitor: 0.22.0
-    pandas : 1.3.5
     seaborn: 0.11.2
+    pandas : 1.3.5
 
 ```python
 
