@@ -13,7 +13,7 @@ module load gcc conda2 slurm-drmaa/1.1.1
 
 # shellcheck source=/dev/null
 source "$HOME/.bashrc"
-conda activate speclet_smk
+conda activate ./.speclet_smk_venv
 
 SNAKEFILE="pipelines/010_010_model-fitting-pipeline.smk"
 

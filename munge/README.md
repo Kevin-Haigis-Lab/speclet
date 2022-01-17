@@ -8,7 +8,7 @@ A single Snakemake workflow prepares all of the data.
 It can be run using the following command in the root directory of the project.
 
 ```bash
-conda activate
+conda activate ./.speclet_smk_venv
 make munge
 ```
 

@@ -10,6 +10,7 @@ If using a conda environment, follow these [instructions](https://docs.conda.io/
 The data can be downloaded using the following command (from the root directory of the project).
 
 ```bash
+conda activate ./.speclet_smk_venv
 make download_data
 ```
 

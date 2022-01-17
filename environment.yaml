@@ -23,6 +23,7 @@ dependencies:
   - jupyterlab=3.2.*
   - jupyterlab_code_formatter
   - jupyterlab-spellchecker
+  - mamba
   - matplotlib=3.5.*
   - mkl
   - mkl-service

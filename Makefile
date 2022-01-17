@@ -31,9 +31,9 @@ pyenvs:
 	@echo "Installing mamba in the base conda env."
 	($(CONDA_SETUP) conda install -n base -c conda-forge mamba)
 	@echo "Installing speclet conda environment."
-	($(CONDA_SETUP) mamba env create -f environment.yaml)
+	($(CONDA_SETUP) mamba env create -f environment.yaml -p ./.speclet_venv)
 	@echo "Installing snakemake conda environment."
-	($(CONDA_SETUP) mamba env create -f environment_smk.yaml)
+	($(CONDA_SETUP) mamba env create -f environment_smk.yaml -p ./.speclet_smk_venv)
 
 renv:
 	@echo "Preparing R environment."
@@ -51,21 +51,21 @@ munge_o2:
 	sbatch munge/munge.sh
 
 test:
-	($(CONDA_ACTIVATE) speclet ; pytest -m "slow" & pytest -m "not slow" & wait)
+	($(CONDA_ACTIVATE) ./.speclet_venv ; pytest -m "slow" & pytest -m "not slow" & wait)
 
 test_o2:
-	($(CONDA_ACTIVATE) speclet ; pytest -m "slow and not plots" & pytest -m "not slow and not plots" & wait)
+	($(CONDA_ACTIVATE) ./.speclet_venv ; pytest -m "slow and not plots" & pytest -m "not slow and not plots" & wait)
 
 test_modeling_data:
-	($(CONDA_ACTIVATE) speclet ; DATA_TESTS="yes" pytest tests/test_data.py
+	($(CONDA_ACTIVATE) ./.speclet_venv ; DATA_TESTS="yes" pytest tests/test_data.py
 
 style:
 	Rscript -e "styler::style_dir('data', recursive = FALSE)"
 	Rscript -e "styler::style_dir('munge', recursive = FALSE)"
 	Rscript -e "styler::style_dir('.', recursive = FALSE)"
-	($(CONDA_ACTIVATE) speclet && isort --profile=black speclet && isort --profile=black tests)
-	($(CONDA_ACTIVATE) speclet && black speclet && black tests)
-	($(CONDA_ACTIVATE) speclet && flake8 speclet && flake8 tests)
+	($(CONDA_ACTIVATE) ./.speclet_venv && isort --profile=black speclet && isort --profile=black tests)
+	($(CONDA_ACTIVATE) ./.speclet_venv && black speclet && black tests)
+	($(CONDA_ACTIVATE) ./.speclet_venv && flake8 speclet && flake8 tests)
 
 docs:
 	pdoc --html -o docs --force -c latex_math=True speclet
