@@ -56,3 +56,13 @@ The pipeline can be run using the following make command.
 ```bash
 make sbc
 ```
+
+---
+
+## Miscellaneous
+
+On O2, I linked the "temp/" directory to Scratch.
+
+```bash
+ln -s $JHC_SCRATCH/speclet-temp temp
+```

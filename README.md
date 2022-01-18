@@ -92,6 +92,13 @@ There are options for configuration in the ["project-config.yaml"](project-confi
 There are controls for various constants and parameters for analyses and pipelines.
 Most will likely need not be changed.
 
+**There is a required ".env" file that should be configured as follows.**
+
+```text
+PROJECT_ROOT=${PWD}                                 # location of the root directory
+PROJECT_CONFIG=${PROJECT_ROOT}/project-config.yaml  # location of project config file
+```
+
 ## Project organization
 
 ### Data preparation
