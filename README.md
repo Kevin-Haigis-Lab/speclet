@@ -29,8 +29,8 @@ Hee, we use ['mamba'](https://github.com/mamba-org/mamba) as a drop-in replaceme
 
 ```bash
 conda install -n base -c conda-forge mamba
-mamba env create -f environment.yaml      # creates `speclet` env
-mamba env create -f environment_smk.yaml  # creates `speclet_smk` env
+mamba env create -f environment.yaml
+mamba env create -f environment_smk.yaml
 ```
 
 Either environment can then be used like a normal 'conda' environment.
@@ -79,7 +79,7 @@ make test  # or make test_o2 if on O2 HPC
 
 ### Pre-commit
 
-If you plan to work on the code in this project, I recommend install ['precommit']() so that all git commits are first checked for various style and code features.
+If you plan to work on the code in this project, I recommend install ['precommit'](/Users/admin/Developer/haigis-lab/speclet/.speclet_env) so that all git commits are first checked for various style and code features.
 The package is included in the `speclet` virtual environment so you just need to run the following command once.
 
 ```bash

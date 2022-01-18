@@ -11,9 +11,10 @@ Quick, diagnostic results of the pipelines are saved to the ["reports/"](../repo
 The virtual environment must be created before running any of the pipelines.
 
 ```bash
+# Run from the porject root.
 conda install -n base -c conda-forge mamba
-mamba env create -f environment_smk.yaml
-conda activate speclet_smk
+mamba env create -f environment_smk.yaml -p ./.speclet_smk_venv
+conda activate ./.speclet_smk_venv
 # Alternatively
 make pyenvs
 ```
