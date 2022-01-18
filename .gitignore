@@ -255,7 +255,7 @@ data/*
 .mustashe/
 cache/*
 models/*
-temp/
+temp
 modeling_data/*
 .snakemake/
 .virtual_documents/
