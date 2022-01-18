@@ -29,7 +29,6 @@ dependencies:
   - pydantic
   - pyjanitor
   - pymc3=3.11.*
-  - pystan=3.2.*
   - python-graphviz
   - rich
   - seaborn
@@ -37,5 +36,6 @@ dependencies:
   - typer
   - watermark
   - pip:
+    - pystan==3.1.1  # latest version for O2
     - python-dotenv
     - -e .  # install the source directory as a package (keep as last)
