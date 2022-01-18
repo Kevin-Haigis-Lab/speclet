@@ -45,7 +45,6 @@ dependencies:
   - pydantic
   - pyjanitor
   - pymc3=3.11.*
-  - pystan=3.2.*
   - pytest
   - pytest-cov
   - pytest-sugar
@@ -64,6 +63,7 @@ dependencies:
   - watermark
   - xarray=0.20.*
   - pip:
+    - pystan==3.1.1  # latest version for O2
     - pytest-pythonpath
     - pytest-testmon
     - pytest-watch
