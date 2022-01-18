@@ -29,6 +29,7 @@ dependencies:
   - pydantic
   - pyjanitor
   - pymc3=3.11.*
+  - pystan=3.2.*
   - python-graphviz
   - rich
   - seaborn
@@ -36,6 +37,5 @@ dependencies:
   - typer
   - watermark
   - pip:
-    - pystan>=3.3.0
     - python-dotenv
     - -e .  # install the source directory as a package (keep as last)

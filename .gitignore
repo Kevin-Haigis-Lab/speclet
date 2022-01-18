@@ -250,8 +250,6 @@ Temporary Items
 
 ######
 
-.speclet_venv
-.speclet_smk_venv
 .env
 data/*
 .mustashe/

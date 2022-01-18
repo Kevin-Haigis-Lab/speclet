@@ -29,15 +29,15 @@ Hee, we use ['mamba'](https://github.com/mamba-org/mamba) as a drop-in replaceme
 
 ```bash
 conda install -n base -c conda-forge mamba
-mamba env create -f environment.yaml -p ./.speclet_venv
-mamba env create -f environment_smk.yaml -p ./.speclet_smk_venv
+mamba env create -f environment.yaml
+mamba env create -f environment_smk.yaml
 ```
 
 Either environment can then be used like a normal 'conda' environment.
 For example, below is the command it activate the `speclet` environment.
 
 ```bash
-conda activate ./.speclet_venv
+conda activate speclet
 ```
 
 Alternatively, the above commands can be accomplished using the `make pyenvs` command.
@@ -46,8 +46,6 @@ Alternatively, the above commands can be accomplished using the `make pyenvs` co
 # Same as above.
 make pyenvs
 ```
-
-**Note:** Sometimes the `pip` installs fail and need to be completed manually.
 
 ### R environment
 
@@ -73,7 +71,7 @@ make renv
 Installation of the Python virtual environment can be confirmed by running the 'speclet' test suite.
 
 ```bash
-conda activate ./.speclet_venv
+conda activate speclet
 pytest
 # Alternatively
 make test  # or make test_o2 if on O2 HPC
