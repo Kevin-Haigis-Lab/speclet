@@ -1,4 +1,4 @@
-"""Simple negative binomial model."""
+"""A hierarchical negative binomial generialzed linear model."""
 
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -9,14 +9,21 @@ import pandas as pd
 import pymc3 as pm
 import pymc3.math as pmmath
 import stan
-from pandera import Column, DataFrameSchema
+from pandera import Check, Column, DataFrameSchema
 from stan.model import Model as StanModel
 
+from speclet.data_processing.common import get_cats
 from speclet.data_processing.crispr import (
     add_useful_read_count_columns,
     append_total_read_counts,
+    common_indices,
+    set_achilles_categorical_columns,
 )
-from speclet.data_processing.validation import check_finite, check_nonnegative
+from speclet.data_processing.validation import (
+    check_finite,
+    check_nonnegative,
+    check_unique_groups,
+)
 from speclet.io import stan_models_dir
 from speclet.modeling.stan_helpers import read_code_file
 from speclet.project_enums import ModelFitMethod
@@ -26,15 +33,19 @@ from speclet.project_enums import ModelFitMethod
 class NegativeBinomialModelData:
     """Data for `NegativeBinomialModel`."""
 
-    N: int
+    N: int  # total number of data points
+    S: int  # number of sgRNAs
+    G: int  # number of genes
     ct_initial: np.ndarray
     ct_final: np.ndarray
+    sgrna_idx: np.ndarray
+    sgrna_to_gene_idx: np.ndarray
 
 
-class NegativeBinomialModel:
-    """Negative binomial generalized linear model."""
+class HierarchcalNegativeBinomialModel:
+    """A hierarchical negative binomial generialzed linear model."""
 
-    _stan_code_file: Final[Path] = stan_models_dir() / "negative_binomial.stan"
+    _stan_code_file: Final[Path] = stan_models_dir() / "hierarchical_nb.stan"
 
     def __init__(self) -> None:
         """Create a negative binomial Bayesian model object."""
@@ -56,21 +67,34 @@ class NegativeBinomialModel:
                     nullable=False,
                     coerce=True,
                 ),
+                "sgrna": Column("category"),
+                "hugo_symbol": Column(
+                    "category",
+                    checks=[
+                        # A sgRNA maps to a single gene ("hugo_symbol")
+                        Check(check_unique_groups, groupby="sgrna"),
+                    ],
+                ),
             }
         )
 
     def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
-        return ["~reciprocal_phi", "~mu"]
+        return ["~mu", "~log_lik", "~y_hat"]
 
     def _validate_data(self, data: pd.DataFrame) -> pd.DataFrame:
         return self.data_schema.validate(data)
 
     def _make_data_structure(self, data: pd.DataFrame) -> NegativeBinomialModelData:
+        indices = common_indices(data)
         return NegativeBinomialModelData(
             N=data.shape[0],
-            ct_initial=data.counts_initial_adj.values.tolist(),
-            ct_final=data.counts_final.values.tolist(),
+            S=indices.n_sgrnas,
+            G=indices.n_genes,
+            ct_initial=data.counts_initial_adj.values.astype(float),
+            ct_final=data.counts_final.values.astype(int),
+            sgrna_idx=indices.sgrna_idx,
+            sgrna_to_gene_idx=indices.sgrna_to_gene_idx,
         )
 
     def data_processing_pipeline(self, data: pd.DataFrame) -> NegativeBinomialModelData:
@@ -86,6 +110,8 @@ class NegativeBinomialModel:
             data.dropna(axis=0, how="any", subset=["counts_final", "counts_initial"])
             .pipe(append_total_read_counts)
             .pipe(add_useful_read_count_columns)
+            .pipe(set_achilles_categorical_columns)
+            # .pipe(add_one_to_counts)
             .pipe(self._validate_data)
             .pipe(self._make_data_structure)
         )
@@ -108,6 +134,8 @@ class NegativeBinomialModel:
             StanModel: Stan model.
         """
         model_data = self.data_processing_pipeline(data)
+        model_data.sgrna_idx = model_data.sgrna_idx + 1
+        model_data.sgrna_to_gene_idx = model_data.sgrna_to_gene_idx + 1
         return stan.build(
             self.stan_code, data=asdict(model_data), random_seed=random_seed
         )
@@ -123,7 +151,7 @@ class NegativeBinomialModel:
         }
 
     def pymc3_model(self, data: pd.DataFrame) -> pm.Model:
-        """PyMC3 model for a simple negative binomial model.
+        """PyMC3 model for a hierarchical negative binomial model.
 
         Args:
             data (pd.DataFrame): Data to model.
@@ -132,9 +160,22 @@ class NegativeBinomialModel:
             pm.Model: PyMC3 model.
         """
         model_data = self.data_processing_pipeline(data)
-        with pm.Model() as model:
-            beta = pm.Normal("beta", 0, 5)
-            eta = pm.Deterministic("eta", beta)
+        coords = {
+            "sgrna": get_cats(data, "sgrna"),
+            "gene": get_cats(data, "hugo_symbol"),
+        }
+        with pm.Model(coords=coords) as model:
+            mu_mu_beta = pm.Normal("mu_mu_beta", 0, 5)
+            sigma_mu_beta = pm.Gamma("sigma_mu_beta", 2.0, 0.5)
+            mu_beta = pm.Normal("mu_beta", mu_mu_beta, sigma_mu_beta, dims=("gene"))
+            sigma_beta = pm.Gamma("sigma_beta", 2.0, 0.5)
+            beta_s = pm.Normal(
+                "beta_s",
+                mu_beta[model_data.sgrna_to_gene_idx],
+                sigma_beta,
+                dims=("sgrna"),
+            )
+            eta = pm.Deterministic("eta", beta_s[model_data.sgrna_idx])
             mu = pm.Deterministic("mu", pmmath.exp(eta))
             alpha = pm.Gamma("alpha", 2, 0.3)
             y = pm.NegativeBinomial(  # noqa: F841

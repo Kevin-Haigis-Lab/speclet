@@ -25,6 +25,7 @@ class StanMCMCSamplingArguments(BaseModel):
     delta: TargetAcceptFloat = 0.8  # type: ignore
     max_depth: PositiveInt = 10
     random_seed: PositiveInt = Field(default_factory=_randint)
+    refresh: PositiveInt = 100
 
 
 class Pymc3SampleArguments(BaseModel):

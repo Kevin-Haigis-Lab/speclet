@@ -530,6 +530,26 @@ def add_useful_read_count_columns(
     return crispr_df
 
 
+def add_one_to_counts(
+    crispr_df: pd.DataFrame, cols: Optional[Iterable[str]] = None
+) -> pd.DataFrame:
+    """Add 1 to counts columns.
+
+    Args:
+        crispr_df (pd.DataFrame): CRISPR screen data frame.
+        cols (Optional[Iterable[str]], optional): Columns to add 1 to. Defaults to
+        `counts_final` and `counts_initial_adj`.
+
+    Returns:
+        pd.DataFrame: Modified data frame.
+    """
+    if cols is None:
+        cols = ["counts_final", "counts_initial_adj"]
+    for col in cols:
+        crispr_df[col] = crispr_df[col] + 1
+    return crispr_df
+
+
 def filter_for_broad_source_only(
     df: pd.DataFrame, screen_col: str = "screen"
 ) -> pd.DataFrame:

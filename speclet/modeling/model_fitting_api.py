@@ -1,7 +1,7 @@
 """Standardization of the interactions with model sampling."""
 
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 import arviz as az
 import numpy as np
@@ -22,10 +22,15 @@ from speclet.project_enums import ModelFitMethod, assert_never
 from speclet.utils.general import resolve_optional_kwargs
 
 
-def _get_kwargs_dict(data: Optional[BaseModel]) -> dict[str, Any]:
+def _get_kwargs_dict(
+    data: Optional[Union[BaseModel, dict[str, Any]]]
+) -> dict[str, Any]:
     if data is None:
         return {}
-    return data.dict()
+    elif isinstance(data, BaseModel):
+        return data.dict()
+    else:
+        return data
 
 
 # ---- Result Types ---- #
@@ -70,7 +75,7 @@ def _update_return_inferencedata_kwarg(
 def fit_pymc3_mcmc(
     model: pm.Model,
     prior_pred_samples: Optional[int] = None,
-    sampling_kwargs: Optional[Pymc3SampleArguments] = None,
+    sampling_kwargs: Optional[Union[Pymc3SampleArguments, dict[str, Any]]] = None,
 ) -> az.InferenceData:
     """Run a standardized PyMC3 sampling procedure.
 
@@ -113,7 +118,7 @@ def fit_pymc3_mcmc(
 def fit_pymc3_vi(
     model: pm.Model,
     prior_pred_samples: Optional[int] = None,
-    fit_kwargs: Optional[Pymc3FitArguments] = None,
+    fit_kwargs: Optional[Union[Pymc3FitArguments, dict[str, Any]]] = None,
 ) -> ApproximationSamplingResults:
     """Run a standard PyMC3 ADVI fitting procedure.
 
@@ -159,7 +164,7 @@ def fit_pymc3_vi(
 
 def fit_stan_mcmc(
     stan_model: StanModel,
-    sampling_kwargs: Optional[StanMCMCSamplingArguments] = None,
+    sampling_kwargs: Optional[Union[StanMCMCSamplingArguments, dict[str, Any]]] = None,
     az_kwargs: Optional[dict[str, Any]] = None,
 ) -> az.InferenceData:
     """Fit a Stan model.
