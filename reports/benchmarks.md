@@ -38,9 +38,8 @@ Organization of benchmarks directory:
 list(benchmark_dir.iterdir())
 ```
 
-    [PosixPath('/n/data1/hms/dbmi/park/Cook/speclet/benchmarks/010_010_run-crc-sampling-snakemake'),
-     PosixPath('/n/data1/hms/dbmi/park/Cook/speclet/benchmarks/010_010_model-fitting-pipeline'),
-     PosixPath('/n/data1/hms/dbmi/park/Cook/speclet/benchmarks/012_010_simulation-based-calibration-snakemake')]
+    [PosixPath('/Users/admin/Developer/haigis-lab/speclet/benchmarks/.DS_Store'),
+     PosixPath('/Users/admin/Developer/haigis-lab/speclet/benchmarks/010_010_model-fitting-pipeline')]
 
 ```python
 def process_benchmark_file(bench_f: Path) -> pd.DataFrame:
@@ -115,83 +114,83 @@ benchmark_df.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>221.5452</td>
-      <td>0:03:41</td>
-      <td>1419.73</td>
-      <td>2140.38</td>
-      <td>1417.16</td>
-      <td>1417.25</td>
-      <td>908.23</td>
-      <td>16.45</td>
-      <td>17.16</td>
-      <td>38.26</td>
-      <td>simple-default_chain0</td>
-      <td>sample_mcmc</td>
-      <td>010_010_run-crc-sampling-snakemake</td>
+      <td>294.6768</td>
+      <td>0:04:54</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>hierarchical-nb_chain1</td>
+      <td>sample_pymc3_mcmc</td>
+      <td>010_010_model-fitting-pipeline</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>321.1937</td>
-      <td>0:05:21</td>
-      <td>465.15</td>
-      <td>1062.94</td>
-      <td>462.39</td>
-      <td>462.47</td>
-      <td>289.45</td>
-      <td>104.28</td>
-      <td>63.86</td>
-      <td>205.30</td>
-      <td>nine-noncentered_chain2</td>
-      <td>sample_mcmc</td>
-      <td>010_010_run-crc-sampling-snakemake</td>
+      <td>65.7246</td>
+      <td>0:01:05</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>hierarchical-nb_chain0</td>
+      <td>sample_pymc3_mcmc</td>
+      <td>010_010_model-fitting-pipeline</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>313.5864</td>
-      <td>0:05:13</td>
-      <td>407.55</td>
-      <td>1052.50</td>
-      <td>365.42</td>
-      <td>385.26</td>
-      <td>158.54</td>
-      <td>77.25</td>
-      <td>58.78</td>
-      <td>174.10</td>
-      <td>nine-noncentered_chain1</td>
-      <td>sample_mcmc</td>
-      <td>010_010_run-crc-sampling-snakemake</td>
+      <td>216.3007</td>
+      <td>0:03:36</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>simple-nb_chain1</td>
+      <td>sample_pymc3_mcmc</td>
+      <td>010_010_model-fitting-pipeline</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>319.5655</td>
-      <td>0:05:19</td>
-      <td>423.44</td>
-      <td>1051.12</td>
-      <td>378.94</td>
-      <td>387.15</td>
-      <td>97.58</td>
-      <td>124.66</td>
-      <td>60.99</td>
-      <td>197.01</td>
-      <td>nine-default_chain1</td>
-      <td>sample_mcmc</td>
-      <td>010_010_run-crc-sampling-snakemake</td>
+      <td>216.3948</td>
+      <td>0:03:36</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>simple-nb_chain0</td>
+      <td>sample_pymc3_mcmc</td>
+      <td>010_010_model-fitting-pipeline</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>224.0925</td>
-      <td>0:03:44</td>
-      <td>1419.79</td>
-      <td>2140.32</td>
-      <td>1417.19</td>
-      <td>1417.29</td>
-      <td>959.60</td>
-      <td>12.40</td>
-      <td>17.09</td>
-      <td>38.29</td>
-      <td>simple-default_chain1</td>
-      <td>sample_mcmc</td>
-      <td>010_010_run-crc-sampling-snakemake</td>
+      <td>55.1094</td>
+      <td>0:00:55</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>example-specification_chain0</td>
+      <td>sample_pymc3_mcmc</td>
+      <td>010_010_model-fitting-pipeline</td>
     </tr>
   </tbody>
 </table>
@@ -238,12 +237,6 @@ benchmark_df.groupby(["pipeline", "rule"]).mean().round(2)
       <th></th>
       <th></th>
       <th>s</th>
-      <th>max_rss</th>
-      <th>max_vms</th>
-      <th>max_uss</th>
-      <th>max_pss</th>
-      <th>io_in</th>
-      <th>io_out</th>
       <th>mean_load</th>
       <th>cpu_time</th>
     </tr>
@@ -253,125 +246,27 @@ benchmark_df.groupby(["pipeline", "rule"]).mean().round(2)
       <th></th>
       <th></th>
       <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th rowspan="3" valign="top">010_010_model-fitting-pipeline</th>
       <th>sample_pymc3_advi</th>
-      <td>273.26</td>
-      <td>334.38</td>
-      <td>945.97</td>
-      <td>287.92</td>
-      <td>309.51</td>
-      <td>2.88</td>
-      <td>132.27</td>
-      <td>45.35</td>
-      <td>123.36</td>
+      <td>110.21</td>
+      <td>0.0</td>
+      <td>0.0</td>
     </tr>
     <tr>
       <th>sample_pymc3_mcmc</th>
-      <td>228.63</td>
-      <td>385.99</td>
-      <td>979.62</td>
-      <td>340.08</td>
-      <td>361.68</td>
-      <td>9.98</td>
-      <td>171.55</td>
-      <td>12.26</td>
-      <td>24.86</td>
+      <td>150.63</td>
+      <td>0.0</td>
+      <td>0.0</td>
     </tr>
     <tr>
       <th>sample_stan_mcmc</th>
-      <td>47.53</td>
-      <td>806.60</td>
-      <td>2187.02</td>
-      <td>602.32</td>
-      <td>704.21</td>
-      <td>117.32</td>
-      <td>126.24</td>
-      <td>31.34</td>
-      <td>14.68</td>
-    </tr>
-    <tr>
-      <th rowspan="2" valign="top">010_010_run-crc-sampling-snakemake</th>
-      <th>sample_advi</th>
-      <td>220.61</td>
-      <td>1418.07</td>
-      <td>2197.32</td>
-      <td>1415.48</td>
-      <td>1415.64</td>
-      <td>967.38</td>
-      <td>25.52</td>
-      <td>19.70</td>
-      <td>43.53</td>
-    </tr>
-    <tr>
-      <th>sample_mcmc</th>
-      <td>1419.45</td>
-      <td>725.94</td>
-      <td>1345.14</td>
-      <td>708.15</td>
-      <td>711.92</td>
-      <td>372.02</td>
-      <td>88.66</td>
-      <td>59.05</td>
-      <td>1265.54</td>
-    </tr>
-    <tr>
-      <th rowspan="4" valign="top">012_010_simulation-based-calibration-snakemake</th>
-      <th>collate_sbc</th>
-      <td>641.62</td>
-      <td>803.26</td>
-      <td>2913.11</td>
-      <td>799.93</td>
-      <td>802.38</td>
-      <td>26585.63</td>
-      <td>0.86</td>
-      <td>60.40</td>
-      <td>399.18</td>
-    </tr>
-    <tr>
-      <th>generate_mockdata</th>
-      <td>20.44</td>
-      <td>173.16</td>
-      <td>880.76</td>
-      <td>170.72</td>
-      <td>170.77</td>
-      <td>216.71</td>
-      <td>0.37</td>
-      <td>19.58</td>
-      <td>3.01</td>
-    </tr>
-    <tr>
-      <th>run_sbc</th>
-      <td>602.97</td>
-      <td>1744.51</td>
-      <td>3399.60</td>
-      <td>742.90</td>
-      <td>751.64</td>
-      <td>52.41</td>
-      <td>198.71</td>
-      <td>95.33</td>
-      <td>86.48</td>
-    </tr>
-    <tr>
-      <th>sbc_uniformity_test</th>
-      <td>858.15</td>
-      <td>5310.08</td>
-      <td>6813.24</td>
-      <td>5305.28</td>
-      <td>5307.70</td>
-      <td>47729.32</td>
-      <td>0.38</td>
-      <td>55.34</td>
-      <td>488.02</td>
+      <td>51.25</td>
+      <td>0.0</td>
+      <td>0.0</td>
     </tr>
   </tbody>
 </table>
@@ -418,43 +313,43 @@ benchmark_df_long.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>010_010_run-crc-sampling-snakemake</td>
-      <td>sample_mcmc</td>
-      <td>simple-default_chain0</td>
+      <td>010_010_model-fitting-pipeline</td>
+      <td>sample_pymc3_mcmc</td>
+      <td>hierarchical-nb_chain1</td>
       <td>cpu_time</td>
-      <td>38.26</td>
+      <td>0.0</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>010_010_run-crc-sampling-snakemake</td>
-      <td>sample_mcmc</td>
-      <td>nine-noncentered_chain2</td>
+      <td>010_010_model-fitting-pipeline</td>
+      <td>sample_pymc3_mcmc</td>
+      <td>hierarchical-nb_chain0</td>
       <td>cpu_time</td>
-      <td>205.30</td>
+      <td>0.0</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>010_010_run-crc-sampling-snakemake</td>
-      <td>sample_mcmc</td>
-      <td>nine-noncentered_chain1</td>
+      <td>010_010_model-fitting-pipeline</td>
+      <td>sample_pymc3_mcmc</td>
+      <td>simple-nb_chain1</td>
       <td>cpu_time</td>
-      <td>174.10</td>
+      <td>0.0</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>010_010_run-crc-sampling-snakemake</td>
-      <td>sample_mcmc</td>
-      <td>nine-default_chain1</td>
+      <td>010_010_model-fitting-pipeline</td>
+      <td>sample_pymc3_mcmc</td>
+      <td>simple-nb_chain0</td>
       <td>cpu_time</td>
-      <td>197.01</td>
+      <td>0.0</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>010_010_run-crc-sampling-snakemake</td>
-      <td>sample_mcmc</td>
-      <td>simple-default_chain1</td>
+      <td>010_010_model-fitting-pipeline</td>
+      <td>sample_pymc3_mcmc</td>
+      <td>example-specification_chain0</td>
       <td>cpu_time</td>
-      <td>38.29</td>
+      <td>0.0</td>
     </tr>
   </tbody>
 </table>
@@ -472,7 +367,7 @@ sns.catplot(
 )
 ```
 
-    <seaborn.axisgrid.FacetGrid at 0x7f5be94938e0>
+    <seaborn.axisgrid.FacetGrid at 0x12ce4c400>
 
 ![png](benchmarks_files/benchmarks_13_1.png)
 
@@ -483,27 +378,27 @@ sns.catplot(
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-01-18
+    Last updated: 2022-01-20
 
     Python implementation: CPython
     Python version       : 3.9.9
-    IPython version      : 8.0.0
+    IPython version      : 8.0.1
 
-    Compiler    : GCC 9.4.0
-    OS          : Linux
-    Release     : 3.10.0-1160.45.1.el7.x86_64
+    Compiler    : Clang 11.1.0
+    OS          : Darwin
+    Release     : 21.2.0
     Machine     : x86_64
-    Processor   : x86_64
-    CPU cores   : 28
+    Processor   : i386
+    CPU cores   : 4
     Architecture: 64bit
 
-    Hostname: compute-e-16-237.o2.rc.hms.harvard.edu
+    Hostname: JHCookMac
 
-    Git branch: run-on-o2
+    Git branch: nb-model
 
-    janitor: 0.22.0
-    seaborn: 0.11.2
     pandas : 1.3.5
+    seaborn: 0.11.2
+    janitor: 0.22.0
 
 ```python
 

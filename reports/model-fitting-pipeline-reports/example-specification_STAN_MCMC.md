@@ -21,8 +21,6 @@ from speclet.project_configuration import get_bayesian_modeling_constants
 from speclet.project_enums import ModelFitMethod
 ```
 
-    WARNING (theano.tensor.blas): Using NumPy C-API based implementation for BLAS functions.
-
 ```python
 notebook_tic = time()
 set_console_handler_level(logging.WARNING)
@@ -86,19 +84,19 @@ if "MCMC" in FIT_METHOD.value:
       * log_lik_dim_0   (log_lik_dim_0) int64 0 1 2 3 4 ... 2183 2184 2185 2186 2187
       * y_hat_dim_0     (y_hat_dim_0) int64 0 1 2 3 4 5 ... 2183 2184 2185 2186 2187
     Data variables:
-        beta            float64 1.001
-        reciprocal_phi  float64 1.001
-        eta             float64 1.001
-        mu              (mu_dim_0) float64 1.001 1.001 1.001 ... 1.001 1.001 1.001
-        phi             float64 1.001
-        log_lik         (log_lik_dim_0) float64 1.0 1.0 1.0 ... 1.002 1.001 1.001
-        y_hat           (y_hat_dim_0) float64 1.0 1.0 1.003 ... 0.9995 1.0 1.002
+        beta            float64 1.0
+        reciprocal_phi  float64 1.003
+        eta             float64 1.0
+        mu              (mu_dim_0) float64 1.0 1.0 1.0 1.0 1.0 ... 1.0 1.0 1.0 1.0
+        phi             float64 1.003
+        log_lik         (log_lik_dim_0) float64 1.002 0.9995 1.002 ... 1.003 1.0
+        y_hat           (y_hat_dim_0) float64 1.0 1.0 1.001 ... 1.001 1.001 1.001
     ============================================================
     sampled 2 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0
     percent divergences: 0.0, 0.0
-    BFMI: 1.154, 1.162
-    avg. step size: 0.868, 0.883
+    BFMI: 1.191, 1.098
+    avg. step size: 0.976, 0.817
 
 ![png](example-specification_STAN_MCMC_files/example-specification_STAN_MCMC_10_1.png)
 
@@ -121,7 +119,7 @@ az.summary(
 
 <style type="text/css">
 </style>
-<table id="T_bde5d_">
+<table id="T_506d0_">
   <thead>
     <tr>
       <th class="blank level0" >&nbsp;</th>
@@ -138,40 +136,40 @@ az.summary(
   </thead>
   <tbody>
     <tr>
-      <th id="T_bde5d_level0_row0" class="row_heading level0 row0" >beta</th>
-      <td id="T_bde5d_row0_col0" class="data row0 col0" >0.09</td>
-      <td id="T_bde5d_row0_col1" class="data row0 col1" >0.01</td>
-      <td id="T_bde5d_row0_col2" class="data row0 col2" >0.07</td>
-      <td id="T_bde5d_row0_col3" class="data row0 col3" >0.12</td>
-      <td id="T_bde5d_row0_col4" class="data row0 col4" >0.00</td>
-      <td id="T_bde5d_row0_col5" class="data row0 col5" >0.00</td>
-      <td id="T_bde5d_row0_col6" class="data row0 col6" >2155</td>
-      <td id="T_bde5d_row0_col7" class="data row0 col7" >1369</td>
-      <td id="T_bde5d_row0_col8" class="data row0 col8" >1.00</td>
+      <th id="T_506d0_level0_row0" class="row_heading level0 row0" >beta</th>
+      <td id="T_506d0_row0_col0" class="data row0 col0" >0.09</td>
+      <td id="T_506d0_row0_col1" class="data row0 col1" >0.01</td>
+      <td id="T_506d0_row0_col2" class="data row0 col2" >0.07</td>
+      <td id="T_506d0_row0_col3" class="data row0 col3" >0.11</td>
+      <td id="T_506d0_row0_col4" class="data row0 col4" >0.00</td>
+      <td id="T_506d0_row0_col5" class="data row0 col5" >0.00</td>
+      <td id="T_506d0_row0_col6" class="data row0 col6" >1686</td>
+      <td id="T_506d0_row0_col7" class="data row0 col7" >1296</td>
+      <td id="T_506d0_row0_col8" class="data row0 col8" >1.00</td>
     </tr>
     <tr>
-      <th id="T_bde5d_level0_row1" class="row_heading level0 row1" >eta</th>
-      <td id="T_bde5d_row1_col0" class="data row1 col0" >0.09</td>
-      <td id="T_bde5d_row1_col1" class="data row1 col1" >0.01</td>
-      <td id="T_bde5d_row1_col2" class="data row1 col2" >0.07</td>
-      <td id="T_bde5d_row1_col3" class="data row1 col3" >0.12</td>
-      <td id="T_bde5d_row1_col4" class="data row1 col4" >0.00</td>
-      <td id="T_bde5d_row1_col5" class="data row1 col5" >0.00</td>
-      <td id="T_bde5d_row1_col6" class="data row1 col6" >2155</td>
-      <td id="T_bde5d_row1_col7" class="data row1 col7" >1369</td>
-      <td id="T_bde5d_row1_col8" class="data row1 col8" >1.00</td>
+      <th id="T_506d0_level0_row1" class="row_heading level0 row1" >eta</th>
+      <td id="T_506d0_row1_col0" class="data row1 col0" >0.09</td>
+      <td id="T_506d0_row1_col1" class="data row1 col1" >0.01</td>
+      <td id="T_506d0_row1_col2" class="data row1 col2" >0.07</td>
+      <td id="T_506d0_row1_col3" class="data row1 col3" >0.11</td>
+      <td id="T_506d0_row1_col4" class="data row1 col4" >0.00</td>
+      <td id="T_506d0_row1_col5" class="data row1 col5" >0.00</td>
+      <td id="T_506d0_row1_col6" class="data row1 col6" >1686</td>
+      <td id="T_506d0_row1_col7" class="data row1 col7" >1296</td>
+      <td id="T_506d0_row1_col8" class="data row1 col8" >1.00</td>
     </tr>
     <tr>
-      <th id="T_bde5d_level0_row2" class="row_heading level0 row2" >phi</th>
-      <td id="T_bde5d_row2_col0" class="data row2 col0" >2.62</td>
-      <td id="T_bde5d_row2_col1" class="data row2 col1" >0.08</td>
-      <td id="T_bde5d_row2_col2" class="data row2 col2" >2.50</td>
-      <td id="T_bde5d_row2_col3" class="data row2 col3" >2.76</td>
-      <td id="T_bde5d_row2_col4" class="data row2 col4" >0.00</td>
-      <td id="T_bde5d_row2_col5" class="data row2 col5" >0.00</td>
-      <td id="T_bde5d_row2_col6" class="data row2 col6" >1982</td>
-      <td id="T_bde5d_row2_col7" class="data row2 col7" >1435</td>
-      <td id="T_bde5d_row2_col8" class="data row2 col8" >1.00</td>
+      <th id="T_506d0_level0_row2" class="row_heading level0 row2" >phi</th>
+      <td id="T_506d0_row2_col0" class="data row2 col0" >2.63</td>
+      <td id="T_506d0_row2_col1" class="data row2 col1" >0.08</td>
+      <td id="T_506d0_row2_col2" class="data row2 col2" >2.49</td>
+      <td id="T_506d0_row2_col3" class="data row2 col3" >2.75</td>
+      <td id="T_506d0_row2_col4" class="data row2 col4" >0.00</td>
+      <td id="T_506d0_row2_col5" class="data row2 col5" >0.00</td>
+      <td id="T_506d0_row2_col6" class="data row2 col6" >1691</td>
+      <td id="T_506d0_row2_col7" class="data row2 col7" >1238</td>
+      <td id="T_506d0_row2_col8" class="data row2 col8" >1.00</td>
     </tr>
   </tbody>
 </table>
@@ -182,7 +180,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /tmp/ipykernel_15996/2160019948.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_96950/2160019948.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
       plt.tight_layout()
 
 ![png](example-specification_STAN_MCMC_files/example-specification_STAN_MCMC_14_1.png)
@@ -195,7 +193,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /tmp/ipykernel_15996/263103266.py:4: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_96950/263103266.py:4: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
       plt.tight_layout()
 
 ![png](example-specification_STAN_MCMC_files/example-specification_STAN_MCMC_15_1.png)
@@ -205,9 +203,12 @@ plt.show()
 ```python
 data_pairs: Optional[dict[str, str]] = None
 
+# NOTE: This is a bit of a hack for now...
 if FIT_METHOD is ModelFitMethod.STAN_MCMC:
-    obs_var = model.stan_idata_addons["observed_data"][0]
-    ppc_var = model.stan_idata_addons["posterior_predictive"][0]
+    # obs_var = model.stan_idata_addons["observed_data"][0]
+    # ppc_var = model.stan_idata_addons["posterior_predictive"][0]
+    obs_var = list(trace.observed_data.data_vars.keys())[0]
+    ppc_var = list(trace.posterior_predictive.data_vars.keys())[0]
     data_pairs = {obs_var: ppc_var}
 
 
@@ -216,7 +217,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /tmp/ipykernel_15996/438930909.py:10: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_96950/1880208410.py:13: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
       plt.tight_layout()
 
 ![png](example-specification_STAN_MCMC_files/example-specification_STAN_MCMC_17_1.png)
@@ -229,8 +230,8 @@ psis_loo
     Computed from 2000 by 2188 log-likelihood matrix
 
              Estimate       SE
-    elpd_loo -15080.85    54.60
-    p_loo        4.70        -
+    elpd_loo -15080.83    54.68
+    p_loo        4.74        -
     ------
 
     Pareto k diagnostic values:
@@ -246,7 +247,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /tmp/ipykernel_15996/3910446358.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_96950/3910446358.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
       plt.tight_layout()
 
 ![png](example-specification_STAN_MCMC_files/example-specification_STAN_MCMC_19_1.png)
@@ -258,32 +259,32 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.43 minutes
+    execution time: 0.36 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-01-18
+    Last updated: 2022-01-20
 
     Python implementation: CPython
     Python version       : 3.9.9
-    IPython version      : 8.0.0
+    IPython version      : 8.0.1
 
-    Compiler    : GCC 9.4.0
-    OS          : Linux
-    Release     : 3.10.0-1160.45.1.el7.x86_64
+    Compiler    : Clang 11.1.0
+    OS          : Darwin
+    Release     : 21.2.0
     Machine     : x86_64
-    Processor   : x86_64
-    CPU cores   : 28
+    Processor   : i386
+    CPU cores   : 4
     Architecture: 64bit
 
-    Hostname: compute-e-16-237.o2.rc.hms.harvard.edu
+    Hostname: JHCookMac
 
-    Git branch: run-on-o2
+    Git branch: nb-model
 
+    arviz     : 0.11.2
     logging   : 0.5.1.2
     speclet   : 0.0.9000
     matplotlib: 3.5.1
-    arviz     : 0.11.2

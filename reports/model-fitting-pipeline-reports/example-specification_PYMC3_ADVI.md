@@ -21,8 +21,6 @@ from speclet.project_configuration import get_bayesian_modeling_constants
 from speclet.project_enums import ModelFitMethod
 ```
 
-    WARNING (theano.tensor.blas): Using NumPy C-API based implementation for BLAS functions.
-
 ```python
 notebook_tic = time()
 set_console_handler_level(logging.WARNING)
@@ -95,13 +93,13 @@ az.summary(
 ).style.format(formatter={"ess_bulk": _as_int, "ess_tail": _as_int}, precision=2)
 ```
 
-    /home/jc604/.conda/envs/speclet_smk/lib/python3.9/site-packages/arviz/utils.py:124: UserWarning: Items starting with ~: ['reciprocal_phi', 'log_lik', 'y_hat'] have not been found and will be ignored
+    /usr/local/Caskroom/miniconda/base/envs/speclet_smk/lib/python3.9/site-packages/arviz/utils.py:124: UserWarning: Items starting with ~: ['reciprocal_phi', 'log_lik', 'y_hat'] have not been found and will be ignored
       warnings.warn(
     arviz - WARNING - Shape validation failed: input_shape: (1, 1000), minimum_shape: (chains=2, draws=4)
 
 <style type="text/css">
 </style>
-<table id="T_a25d0_">
+<table id="T_21eb8_">
   <thead>
     <tr>
       <th class="blank level0" >&nbsp;</th>
@@ -118,40 +116,40 @@ az.summary(
   </thead>
   <tbody>
     <tr>
-      <th id="T_a25d0_level0_row0" class="row_heading level0 row0" >beta</th>
-      <td id="T_a25d0_row0_col0" class="data row0 col0" >0.09</td>
-      <td id="T_a25d0_row0_col1" class="data row0 col1" >0.01</td>
-      <td id="T_a25d0_row0_col2" class="data row0 col2" >0.07</td>
-      <td id="T_a25d0_row0_col3" class="data row0 col3" >0.11</td>
-      <td id="T_a25d0_row0_col4" class="data row0 col4" >0.00</td>
-      <td id="T_a25d0_row0_col5" class="data row0 col5" >0.00</td>
-      <td id="T_a25d0_row0_col6" class="data row0 col6" >1109</td>
-      <td id="T_a25d0_row0_col7" class="data row0 col7" >891</td>
-      <td id="T_a25d0_row0_col8" class="data row0 col8" >nan</td>
+      <th id="T_21eb8_level0_row0" class="row_heading level0 row0" >beta</th>
+      <td id="T_21eb8_row0_col0" class="data row0 col0" >0.09</td>
+      <td id="T_21eb8_row0_col1" class="data row0 col1" >0.01</td>
+      <td id="T_21eb8_row0_col2" class="data row0 col2" >0.07</td>
+      <td id="T_21eb8_row0_col3" class="data row0 col3" >0.11</td>
+      <td id="T_21eb8_row0_col4" class="data row0 col4" >0.00</td>
+      <td id="T_21eb8_row0_col5" class="data row0 col5" >0.00</td>
+      <td id="T_21eb8_row0_col6" class="data row0 col6" >997</td>
+      <td id="T_21eb8_row0_col7" class="data row0 col7" >944</td>
+      <td id="T_21eb8_row0_col8" class="data row0 col8" >nan</td>
     </tr>
     <tr>
-      <th id="T_a25d0_level0_row1" class="row_heading level0 row1" >eta</th>
-      <td id="T_a25d0_row1_col0" class="data row1 col0" >0.09</td>
-      <td id="T_a25d0_row1_col1" class="data row1 col1" >0.01</td>
-      <td id="T_a25d0_row1_col2" class="data row1 col2" >0.07</td>
-      <td id="T_a25d0_row1_col3" class="data row1 col3" >0.11</td>
-      <td id="T_a25d0_row1_col4" class="data row1 col4" >0.00</td>
-      <td id="T_a25d0_row1_col5" class="data row1 col5" >0.00</td>
-      <td id="T_a25d0_row1_col6" class="data row1 col6" >1109</td>
-      <td id="T_a25d0_row1_col7" class="data row1 col7" >891</td>
-      <td id="T_a25d0_row1_col8" class="data row1 col8" >nan</td>
+      <th id="T_21eb8_level0_row1" class="row_heading level0 row1" >eta</th>
+      <td id="T_21eb8_row1_col0" class="data row1 col0" >0.09</td>
+      <td id="T_21eb8_row1_col1" class="data row1 col1" >0.01</td>
+      <td id="T_21eb8_row1_col2" class="data row1 col2" >0.07</td>
+      <td id="T_21eb8_row1_col3" class="data row1 col3" >0.11</td>
+      <td id="T_21eb8_row1_col4" class="data row1 col4" >0.00</td>
+      <td id="T_21eb8_row1_col5" class="data row1 col5" >0.00</td>
+      <td id="T_21eb8_row1_col6" class="data row1 col6" >997</td>
+      <td id="T_21eb8_row1_col7" class="data row1 col7" >944</td>
+      <td id="T_21eb8_row1_col8" class="data row1 col8" >nan</td>
     </tr>
     <tr>
-      <th id="T_a25d0_level0_row2" class="row_heading level0 row2" >alpha</th>
-      <td id="T_a25d0_row2_col0" class="data row2 col0" >2.63</td>
-      <td id="T_a25d0_row2_col1" class="data row2 col1" >0.09</td>
-      <td id="T_a25d0_row2_col2" class="data row2 col2" >2.49</td>
-      <td id="T_a25d0_row2_col3" class="data row2 col3" >2.77</td>
-      <td id="T_a25d0_row2_col4" class="data row2 col4" >0.00</td>
-      <td id="T_a25d0_row2_col5" class="data row2 col5" >0.00</td>
-      <td id="T_a25d0_row2_col6" class="data row2 col6" >1001</td>
-      <td id="T_a25d0_row2_col7" class="data row2 col7" >1025</td>
-      <td id="T_a25d0_row2_col8" class="data row2 col8" >nan</td>
+      <th id="T_21eb8_level0_row2" class="row_heading level0 row2" >alpha</th>
+      <td id="T_21eb8_row2_col0" class="data row2 col0" >2.63</td>
+      <td id="T_21eb8_row2_col1" class="data row2 col1" >0.08</td>
+      <td id="T_21eb8_row2_col2" class="data row2 col2" >2.51</td>
+      <td id="T_21eb8_row2_col3" class="data row2 col3" >2.77</td>
+      <td id="T_21eb8_row2_col4" class="data row2 col4" >0.00</td>
+      <td id="T_21eb8_row2_col5" class="data row2 col5" >0.00</td>
+      <td id="T_21eb8_row2_col6" class="data row2 col6" >908</td>
+      <td id="T_21eb8_row2_col7" class="data row2 col7" >859</td>
+      <td id="T_21eb8_row2_col8" class="data row2 col8" >nan</td>
     </tr>
   </tbody>
 </table>
@@ -162,9 +160,9 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /home/jc604/.conda/envs/speclet_smk/lib/python3.9/site-packages/arviz/utils.py:124: UserWarning: Items starting with ~: ['reciprocal_phi', 'log_lik', 'y_hat'] have not been found and will be ignored
+    /usr/local/Caskroom/miniconda/base/envs/speclet_smk/lib/python3.9/site-packages/arviz/utils.py:124: UserWarning: Items starting with ~: ['reciprocal_phi', 'log_lik', 'y_hat'] have not been found and will be ignored
       warnings.warn(
-    /tmp/ipykernel_13193/2160019948.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_96836/2160019948.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
       plt.tight_layout()
 
 ![png](example-specification_PYMC3_ADVI_files/example-specification_PYMC3_ADVI_14_1.png)
@@ -177,9 +175,9 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /home/jc604/.conda/envs/speclet_smk/lib/python3.9/site-packages/arviz/utils.py:124: UserWarning: Items starting with ~: ['reciprocal_phi', 'log_lik', 'y_hat'] have not been found and will be ignored
+    /usr/local/Caskroom/miniconda/base/envs/speclet_smk/lib/python3.9/site-packages/arviz/utils.py:124: UserWarning: Items starting with ~: ['reciprocal_phi', 'log_lik', 'y_hat'] have not been found and will be ignored
       warnings.warn(
-    /tmp/ipykernel_13193/263103266.py:4: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_96836/263103266.py:4: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
       plt.tight_layout()
 
 ![png](example-specification_PYMC3_ADVI_files/example-specification_PYMC3_ADVI_15_1.png)
@@ -189,9 +187,12 @@ plt.show()
 ```python
 data_pairs: Optional[dict[str, str]] = None
 
+# NOTE: This is a bit of a hack for now...
 if FIT_METHOD is ModelFitMethod.STAN_MCMC:
-    obs_var = model.stan_idata_addons["observed_data"][0]
-    ppc_var = model.stan_idata_addons["posterior_predictive"][0]
+    # obs_var = model.stan_idata_addons["observed_data"][0]
+    # ppc_var = model.stan_idata_addons["posterior_predictive"][0]
+    obs_var = list(trace.observed_data.data_vars.keys())[0]
+    ppc_var = list(trace.posterior_predictive.data_vars.keys())[0]
     data_pairs = {obs_var: ppc_var}
 
 
@@ -200,7 +201,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /tmp/ipykernel_13193/438930909.py:10: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_96836/1880208410.py:13: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
       plt.tight_layout()
 
 ![png](example-specification_PYMC3_ADVI_files/example-specification_PYMC3_ADVI_17_1.png)
@@ -213,8 +214,8 @@ psis_loo
     Computed from 1000 by 2188 log-likelihood matrix
 
              Estimate       SE
-    elpd_loo -15081.26    54.85
-    p_loo        5.28        -
+    elpd_loo -15081.03    54.82
+    p_loo        4.94        -
     ------
 
     Pareto k diagnostic values:
@@ -230,7 +231,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /tmp/ipykernel_13193/3910446358.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_96836/3910446358.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
       plt.tight_layout()
 
 ![png](example-specification_PYMC3_ADVI_files/example-specification_PYMC3_ADVI_19_1.png)
@@ -242,32 +243,32 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.08 minutes
+    execution time: 0.07 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-01-18
+    Last updated: 2022-01-20
 
     Python implementation: CPython
     Python version       : 3.9.9
-    IPython version      : 8.0.0
+    IPython version      : 8.0.1
 
-    Compiler    : GCC 9.4.0
-    OS          : Linux
-    Release     : 3.10.0-1160.45.1.el7.x86_64
+    Compiler    : Clang 11.1.0
+    OS          : Darwin
+    Release     : 21.2.0
     Machine     : x86_64
-    Processor   : x86_64
-    CPU cores   : 28
+    Processor   : i386
+    CPU cores   : 4
     Architecture: 64bit
 
-    Hostname: compute-e-16-237.o2.rc.hms.harvard.edu
+    Hostname: JHCookMac
 
-    Git branch: run-on-o2
+    Git branch: nb-model
 
     matplotlib: 3.5.1
-    logging   : 0.5.1.2
-    speclet   : 0.0.9000
     arviz     : 0.11.2
+    speclet   : 0.0.9000
+    logging   : 0.5.1.2

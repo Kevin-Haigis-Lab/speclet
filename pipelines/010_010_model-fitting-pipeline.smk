@@ -23,7 +23,7 @@ N_CHAINS = pipeline_config.num_chains
 DEBUG = pipeline_config.debug
 
 # Directory and file paths.
-TEMP_DIR = pipeline_config.temp_dir  # TODO: on 02, symlink to Scratch.
+TEMP_DIR = pipeline_config.temp_dir
 MODEL_CACHE_DIR = pipeline_config.model_cache_dir
 REPORTS_DIR = pipeline_config.reports_dir
 ENVIRONMENT_YAML = str(pipeline_config.env_yaml)
