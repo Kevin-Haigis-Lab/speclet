@@ -36,10 +36,12 @@ class NegativeBinomialModelData:
     N: int  # total number of data points
     S: int  # number of sgRNAs
     G: int  # number of genes
+    C: int  # number of cell lines
     ct_initial: np.ndarray
     ct_final: np.ndarray
     sgrna_idx: np.ndarray
     sgrna_to_gene_idx: np.ndarray
+    cellline_idx: np.ndarray
 
 
 class HierarchcalNegativeBinomialModel:
@@ -71,8 +73,16 @@ class HierarchcalNegativeBinomialModel:
                 "hugo_symbol": Column(
                     "category",
                     checks=[
-                        # A sgRNA maps to a single gene ("hugo_symbol")
+                        # A sgRNA maps to a single gene ("hugo_symbol").
                         Check(check_unique_groups, groupby="sgrna"),
+                    ],
+                ),
+                "depmap_id": Column("category"),
+                "lineage": Column(
+                    "category",
+                    checks=[
+                        # A lineage maps to a single cell line.
+                        Check(check_unique_groups, groupby="depmap_id"),
                     ],
                 ),
             }
@@ -80,9 +90,9 @@ class HierarchcalNegativeBinomialModel:
 
     def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
-        _vars = ["~^mu$", "~log_lik", "~y_hat"]
-        if fit_method in {ModelFitMethod.PYMC3_MCMC, ModelFitMethod.PYMC3_ADVI}:
-            _vars.append("~^eta$")
+        _vars = ["~^mu$", "~^eta$"]
+        if fit_method is ModelFitMethod.STAN_MCMC:
+            _vars += ["~log_lik", "~y_hat"]
         return _vars
 
     def validate_data(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -102,10 +112,12 @@ class HierarchcalNegativeBinomialModel:
             N=data.shape[0],
             S=indices.n_sgrnas,
             G=indices.n_genes,
+            C=indices.n_celllines,
             ct_initial=data.counts_initial_adj.values.astype(float),
             ct_final=data.counts_final.values.astype(int),
             sgrna_idx=indices.sgrna_idx,
             sgrna_to_gene_idx=indices.sgrna_to_gene_idx,
+            cellline_idx=indices.cellline_idx,
         )
 
     def data_processing_pipeline(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -145,9 +157,17 @@ class HierarchcalNegativeBinomialModel:
         model_data = self.data_processing_pipeline(data).pipe(self._make_data_structure)
         model_data.sgrna_idx = model_data.sgrna_idx + 1
         model_data.sgrna_to_gene_idx = model_data.sgrna_to_gene_idx + 1
+        model_data.cellline_idx = model_data.cellline_idx + 1
         return stan.build(
             self.stan_code, data=asdict(model_data), random_seed=random_seed
         )
+
+    def _model_coords(self, valid_data: pd.DataFrame) -> dict[str, list[str]]:
+        return {
+            "sgrna": get_cats(valid_data, "sgrna"),
+            "gene": get_cats(valid_data, "hugo_symbol"),
+            "cell_line": get_cats(valid_data, "depmap_id"),
+        }
 
     def stan_idata_addons(self, data: pd.DataFrame) -> dict[str, Any]:
         """Information to add to the InferenceData posterior object."""
@@ -157,13 +177,11 @@ class HierarchcalNegativeBinomialModel:
             "observed_data": ["ct_final"],
             "log_likelihood": {"ct_final": "log_lik"},
             "constant_data": ["ct_initial"],
-            "coords": {
-                "sgrna": get_cats(valid_data, "sgrna"),
-                "gene": get_cats(valid_data, "hugo_symbol"),
-            },
+            "coords": self._model_coords(valid_data),
             "dims": {
                 "beta_s": ["sgrna"],
                 "mu_beta": ["gene"],
+                "gamma_c": ["cell_line"],
             },
         }
 
@@ -178,10 +196,7 @@ class HierarchcalNegativeBinomialModel:
         """
         valid_data = self.data_processing_pipeline(data)
         model_data = self._make_data_structure(valid_data)
-        coords = {
-            "sgrna": get_cats(valid_data, "sgrna"),
-            "gene": get_cats(valid_data, "hugo_symbol"),
-        }
+        coords = self._model_coords(valid_data)
 
         with pm.Model(coords=coords) as model:
             mu_mu_beta = pm.Normal("mu_mu_beta", 0, 5)
@@ -194,7 +209,13 @@ class HierarchcalNegativeBinomialModel:
                 sigma_beta,
                 dims=("sgrna"),
             )
-            eta = pm.Deterministic("eta", beta_s[model_data.sgrna_idx])
+
+            sigma_gamma = pm.Gamma("sigma_gamma", 2.0, 0.5)
+            gamma_c = pm.Normal("gamma_c", 0, sigma_gamma, dims=("cell_line"))
+
+            eta = pm.Deterministic(
+                "eta", beta_s[model_data.sgrna_idx] + gamma_c[model_data.cellline_idx]
+            )
             mu = pm.Deterministic("mu", pmmath.exp(eta))
             alpha = pm.Gamma("alpha", 2, 0.3)
             y = pm.NegativeBinomial(  # noqa: F841
