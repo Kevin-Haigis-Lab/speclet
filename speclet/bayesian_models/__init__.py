@@ -19,7 +19,7 @@ class BayesianModel(Enum):
 
     SIMPLE_NEGATIVE_BINOMIAL = "SIMPLE_NEGATIVE_BINOMIAL"
     EIGHT_SCHOOLS = "EIGHT_SCHOOLS"
-    HEIRARCHICAL_NB = "HEIRARCHICAL_NB"
+    HIERARCHICAL_NB = "HIERARCHICAL_NB"
 
 
 class BayesianModelProtocol(Protocol):
@@ -47,8 +47,7 @@ class BayesianModelProtocol(Protocol):
         """
         ...
 
-    @property
-    def stan_idata_addons(self) -> dict[str, Any]:
+    def stan_idata_addons(self, data: pd.DataFrame) -> dict[str, Any]:
         """Information to add to the InferenceData posterior object."""
         ...
 
@@ -67,7 +66,7 @@ class BayesianModelProtocol(Protocol):
 BAYESIAN_MODEL_LOOKUP: Final[dict[BayesianModel, Type[BayesianModelProtocol]]] = {
     BayesianModel.EIGHT_SCHOOLS: EightSchoolsModel,
     BayesianModel.SIMPLE_NEGATIVE_BINOMIAL: NegativeBinomialModel,
-    BayesianModel.HEIRARCHICAL_NB: HierarchcalNegativeBinomialModel,
+    BayesianModel.HIERARCHICAL_NB: HierarchcalNegativeBinomialModel,
 }
 
 

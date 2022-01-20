@@ -112,8 +112,7 @@ class NegativeBinomialModel:
             self.stan_code, data=asdict(model_data), random_seed=random_seed
         )
 
-    @property
-    def stan_idata_addons(self) -> dict[str, Any]:
+    def stan_idata_addons(self, data: pd.DataFrame) -> dict[str, Any]:
         """Information to add to the InferenceData posterior object."""
         return {
             "posterior_predictive": ["y_hat"],

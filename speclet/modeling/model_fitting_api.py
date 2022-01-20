@@ -213,7 +213,9 @@ def fit_model(
         seed = None if kwargs is None else kwargs.random_seed
         stan_model = model.stan_model(data=data, random_seed=seed)
         posterior = fit_stan_mcmc(
-            stan_model, sampling_kwargs=kwargs, az_kwargs=model.stan_idata_addons
+            stan_model,
+            sampling_kwargs=kwargs,
+            az_kwargs=model.stan_idata_addons(data=data),
         )
         return posterior
     elif fit_method is ModelFitMethod.PYMC3_MCMC:

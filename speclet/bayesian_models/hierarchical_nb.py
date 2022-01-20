@@ -80,9 +80,20 @@ class HierarchcalNegativeBinomialModel:
 
     def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
-        return ["~mu", "~log_lik", "~y_hat"]
+        _vars = ["~^mu$", "~log_lik", "~y_hat"]
+        if fit_method in {ModelFitMethod.PYMC3_MCMC, ModelFitMethod.PYMC3_ADVI}:
+            _vars.append("~^eta$")
+        return _vars
 
-    def _validate_data(self, data: pd.DataFrame) -> pd.DataFrame:
+    def validate_data(self, data: pd.DataFrame) -> pd.DataFrame:
+        """Validate input data according to this model's requirements.
+
+        Args:
+            data (pd.DataFrame): Input data.
+
+        Returns:
+            pd.DataFrame: Validated data.
+        """
         return self.data_schema.validate(data)
 
     def _make_data_structure(self, data: pd.DataFrame) -> NegativeBinomialModelData:
@@ -97,7 +108,7 @@ class HierarchcalNegativeBinomialModel:
             sgrna_to_gene_idx=indices.sgrna_to_gene_idx,
         )
 
-    def data_processing_pipeline(self, data: pd.DataFrame) -> NegativeBinomialModelData:
+    def data_processing_pipeline(self, data: pd.DataFrame) -> pd.DataFrame:
         """Data processing pipeline.
 
         Args:
@@ -111,9 +122,7 @@ class HierarchcalNegativeBinomialModel:
             .pipe(append_total_read_counts)
             .pipe(add_useful_read_count_columns)
             .pipe(set_achilles_categorical_columns)
-            # .pipe(add_one_to_counts)
-            .pipe(self._validate_data)
-            .pipe(self._make_data_structure)
+            .pipe(self.validate_data)
         )
 
     @property
@@ -133,21 +142,29 @@ class HierarchcalNegativeBinomialModel:
         Returns:
             StanModel: Stan model.
         """
-        model_data = self.data_processing_pipeline(data)
+        model_data = self.data_processing_pipeline(data).pipe(self._make_data_structure)
         model_data.sgrna_idx = model_data.sgrna_idx + 1
         model_data.sgrna_to_gene_idx = model_data.sgrna_to_gene_idx + 1
         return stan.build(
             self.stan_code, data=asdict(model_data), random_seed=random_seed
         )
 
-    @property
-    def stan_idata_addons(self) -> dict[str, Any]:
+    def stan_idata_addons(self, data: pd.DataFrame) -> dict[str, Any]:
         """Information to add to the InferenceData posterior object."""
+        valid_data = self.data_processing_pipeline(data)
         return {
             "posterior_predictive": ["y_hat"],
             "observed_data": ["ct_final"],
             "log_likelihood": {"ct_final": "log_lik"},
             "constant_data": ["ct_initial"],
+            "coords": {
+                "sgrna": get_cats(valid_data, "sgrna"),
+                "gene": get_cats(valid_data, "hugo_symbol"),
+            },
+            "dims": {
+                "beta_s": ["sgrna"],
+                "mu_beta": ["gene"],
+            },
         }
 
     def pymc3_model(self, data: pd.DataFrame) -> pm.Model:
@@ -159,11 +176,13 @@ class HierarchcalNegativeBinomialModel:
         Returns:
             pm.Model: PyMC3 model.
         """
-        model_data = self.data_processing_pipeline(data)
+        valid_data = self.data_processing_pipeline(data)
+        model_data = self._make_data_structure(valid_data)
         coords = {
-            "sgrna": get_cats(data, "sgrna"),
-            "gene": get_cats(data, "hugo_symbol"),
+            "sgrna": get_cats(valid_data, "sgrna"),
+            "gene": get_cats(valid_data, "hugo_symbol"),
         }
+
         with pm.Model(coords=coords) as model:
             mu_mu_beta = pm.Normal("mu_mu_beta", 0, 5)
             sigma_mu_beta = pm.Gamma("sigma_mu_beta", 2.0, 0.5)

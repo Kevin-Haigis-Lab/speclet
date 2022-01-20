@@ -18,6 +18,10 @@ from speclet.loggers import logger
 from speclet.managers.cache_manager import cache_posterior, get_posterior_cache_name
 from speclet.managers.data_managers import CrisprScreenDataManager
 from speclet.model_configuration import ModelingSamplingArguments
+from speclet.modeling.fitting_arguments import (
+    Pymc3SampleArguments,
+    StanMCMCSamplingArguments,
+)
 from speclet.modeling.model_fitting_api import fit_model
 from speclet.project_enums import ModelFitMethod
 
@@ -38,12 +42,21 @@ def _augment_sampling_kwargs(
     mcmc_cores: int,
 ) -> Optional[ModelingSamplingArguments]:
     if sampling_kwargs is None:
-        return None
+        sampling_kwargs = ModelingSamplingArguments()
+
     if sampling_kwargs.stan_mcmc is not None:
         sampling_kwargs.stan_mcmc.num_chains = mcmc_chains
+    else:
+        sampling_kwargs.stan_mcmc = StanMCMCSamplingArguments(num_chains=mcmc_chains)
+
     if sampling_kwargs.pymc3_mcmc is not None:
         sampling_kwargs.pymc3_mcmc.chains = mcmc_chains
         sampling_kwargs.pymc3_mcmc.cores = mcmc_cores
+    else:
+        sampling_kwargs.pymc3_mcmc = Pymc3SampleArguments(
+            chains=mcmc_chains, cores=mcmc_cores
+        )
+
     return sampling_kwargs
 
 
@@ -82,7 +95,9 @@ def fit_bayesian_model(
     model = get_bayesian_model(config.model)()
 
     sampling_kwargs_adj = _augment_sampling_kwargs(
-        config.sampling_kwargs, mcmc_chains=mcmc_chains, mcmc_cores=mcmc_cores
+        config.sampling_kwargs,
+        mcmc_chains=mcmc_chains,
+        mcmc_cores=mcmc_cores,
     )
     posterior = fit_model(
         model=model,
