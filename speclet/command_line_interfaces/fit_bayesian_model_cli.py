@@ -99,17 +99,19 @@ def fit_bayesian_model(
         mcmc_chains=mcmc_chains,
         mcmc_cores=mcmc_cores,
     )
-    posterior = fit_model(
+    trace = fit_model(
         model=model,
         data=data,
         fit_method=fit_method,
         sampling_kwargs=sampling_kwargs_adj,
     )
 
+    print(trace.posterior.data_vars)
+
     if cache_name is None:
         cache_name = get_posterior_cache_name(model_name=name, fit_method=fit_method)
 
-    cache_posterior(posterior, id=cache_name, cache_dir=cache_dir)
+    cache_posterior(trace, id=cache_name, cache_dir=cache_dir)
 
     toc = time()
     logger.info(f"finished; execution time: {(toc - tic) / 60:.2f} minutes")
