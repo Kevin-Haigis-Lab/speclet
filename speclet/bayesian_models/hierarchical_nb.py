@@ -90,7 +90,7 @@ class HierarchcalNegativeBinomialModel:
 
     def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
-        _vars = ["~^mu$", "~^eta$"]
+        _vars = ["~^mu$", "~^eta$", "~^delta_kappa$"]
         if fit_method is ModelFitMethod.STAN_MCMC:
             _vars += ["~log_lik", "~y_hat"]
         return _vars
@@ -182,6 +182,7 @@ class HierarchcalNegativeBinomialModel:
                 "beta_s": ["sgrna"],
                 "mu_beta": ["gene"],
                 "gamma_c": ["cell_line"],
+                "kappa_sc": ["sgrna", "cell_line"],
             },
         }
 
@@ -213,8 +214,17 @@ class HierarchcalNegativeBinomialModel:
             sigma_gamma = pm.Gamma("sigma_gamma", 2.0, 0.5)
             gamma_c = pm.Normal("gamma_c", 0, sigma_gamma, dims=("cell_line"))
 
+            sigma_kappa = pm.Gamma("sigma_kappa", 1.1, 0.5)
+            delta_kappa = pm.Normal("delta_kappa", 0, 1, dims=("sgrna", "cell_line"))
+            kappa_sc = pm.Deterministic(
+                "kappa_sc", 0 + delta_kappa * sigma_kappa, dims=("sgrna", "cell_line")
+            )
+
             eta = pm.Deterministic(
-                "eta", beta_s[model_data.sgrna_idx] + gamma_c[model_data.cellline_idx]
+                "eta",
+                beta_s[model_data.sgrna_idx]
+                + gamma_c[model_data.cellline_idx]
+                + kappa_sc[model_data.sgrna_idx, model_data.cellline_idx],
             )
             mu = pm.Deterministic("mu", pmmath.exp(eta))
             alpha = pm.Gamma("alpha", 2, 0.3)
