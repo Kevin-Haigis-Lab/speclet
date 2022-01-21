@@ -9,6 +9,9 @@ from stan.model import Model as StanModel
 
 from speclet.bayesian_models.eight_schools import EightSchoolsModel
 from speclet.bayesian_models.hierarchical_nb import HierarchcalNegativeBinomialModel
+from speclet.bayesian_models.hierarchical_nb_secondtier import (
+    HierarchcalNegativeBinomialSecondTier,
+)
 from speclet.bayesian_models.negative_binomial import NegativeBinomialModel
 from speclet.project_enums import ModelFitMethod
 
@@ -20,6 +23,7 @@ class BayesianModel(Enum):
     SIMPLE_NEGATIVE_BINOMIAL = "SIMPLE_NEGATIVE_BINOMIAL"
     EIGHT_SCHOOLS = "EIGHT_SCHOOLS"
     HIERARCHICAL_NB = "HIERARCHICAL_NB"
+    HIERARCHICAL_NB_SECONDTIER = "HIERARCHICAL_NB_SECONDTIER"
 
 
 class BayesianModelProtocol(Protocol):
@@ -67,6 +71,7 @@ BAYESIAN_MODEL_LOOKUP: Final[dict[BayesianModel, Type[BayesianModelProtocol]]] =
     BayesianModel.EIGHT_SCHOOLS: EightSchoolsModel,
     BayesianModel.SIMPLE_NEGATIVE_BINOMIAL: NegativeBinomialModel,
     BayesianModel.HIERARCHICAL_NB: HierarchcalNegativeBinomialModel,
+    BayesianModel.HIERARCHICAL_NB_SECONDTIER: HierarchcalNegativeBinomialSecondTier,
 }
 
 

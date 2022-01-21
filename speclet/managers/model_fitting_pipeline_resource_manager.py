@@ -49,6 +49,18 @@ fitting_pipeline_memory_lookup: MemoryLookupDict = {
             ModelFitMethod.PYMC3_ADVI: 8,
         },
     },
+    BayesianModel.HIERARCHICAL_NB_SECONDTIER: {
+        True: {
+            ModelFitMethod.STAN_MCMC: 4,
+            ModelFitMethod.PYMC3_MCMC: 4,
+            ModelFitMethod.PYMC3_ADVI: 4,
+        },
+        False: {
+            ModelFitMethod.STAN_MCMC: 8,
+            ModelFitMethod.PYMC3_MCMC: 8,
+            ModelFitMethod.PYMC3_ADVI: 8,
+        },
+    },
 }
 
 
@@ -68,6 +80,18 @@ fitting_pipeline_time_lookup: TimeLookupDict = {
         },
     },
     BayesianModel.HIERARCHICAL_NB: {
+        True: {
+            ModelFitMethod.STAN_MCMC: td(minutes=5),
+            ModelFitMethod.PYMC3_MCMC: td(minutes=5),
+            ModelFitMethod.PYMC3_ADVI: td(minutes=5),
+        },
+        False: {
+            ModelFitMethod.STAN_MCMC: td(minutes=10),
+            ModelFitMethod.PYMC3_MCMC: td(minutes=10),
+            ModelFitMethod.PYMC3_ADVI: td(minutes=10),
+        },
+    },
+    BayesianModel.HIERARCHICAL_NB_SECONDTIER: {
         True: {
             ModelFitMethod.STAN_MCMC: td(minutes=5),
             ModelFitMethod.PYMC3_MCMC: td(minutes=5),
