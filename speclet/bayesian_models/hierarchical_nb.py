@@ -40,6 +40,7 @@ class NegativeBinomialModelData:
     ct_initial: np.ndarray
     ct_final: np.ndarray
     sgrna_idx: np.ndarray
+    gene_idx: np.ndarray
     sgrna_to_gene_idx: np.ndarray
     cellline_idx: np.ndarray
 
@@ -90,9 +91,12 @@ class HierarchcalNegativeBinomialModel:
 
     def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
-        _vars = ["~^mu$", "~^eta$", "~^delta_kappa$"]
+        _vars = ["mu", "eta", "delta_kappa"]
         if fit_method is ModelFitMethod.STAN_MCMC:
-            _vars += ["~log_lik", "~y_hat"]
+            _vars += ["log_lik", "y_hat"]
+        else:
+            _vars += ["delta_beta", "delta_gamma"]
+        _vars = [f"~^{v}$" for v in _vars]
         return _vars
 
     def validate_data(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -116,6 +120,7 @@ class HierarchcalNegativeBinomialModel:
             ct_initial=data.counts_initial_adj.values.astype(float),
             ct_final=data.counts_final.values.astype(int),
             sgrna_idx=indices.sgrna_idx,
+            gene_idx=indices.gene_idx,
             sgrna_to_gene_idx=indices.sgrna_to_gene_idx,
             cellline_idx=indices.cellline_idx,
         )
@@ -156,6 +161,7 @@ class HierarchcalNegativeBinomialModel:
         """
         model_data = self.data_processing_pipeline(data).pipe(self._make_data_structure)
         model_data.sgrna_idx = model_data.sgrna_idx + 1
+        model_data.gene_idx = model_data.gene_idx + 1
         model_data.sgrna_to_gene_idx = model_data.sgrna_to_gene_idx + 1
         model_data.cellline_idx = model_data.cellline_idx + 1
         return stan.build(
@@ -212,9 +218,12 @@ class HierarchcalNegativeBinomialModel:
             )
 
             sigma_gamma = pm.Gamma("sigma_gamma", 2.0, 0.5)
-            gamma_c = pm.Normal("gamma_c", 0, sigma_gamma, dims=("cell_line"))
+            delta_gamma = pm.Normal("delta_gamma", 0.0, 1.0, dims=("cell_line"))
+            gamma_c = pm.Deterministic(
+                "gamma_c", 0.0 + delta_gamma * sigma_gamma, dims=("cell_line")
+            )
 
-            sigma_kappa = pm.Gamma("sigma_kappa", 1.1, 0.5)
+            sigma_kappa = pm.Gamma("sigma_kappa", 2.0, 0.5)
             delta_kappa = pm.Normal("delta_kappa", 0, 1, dims=("sgrna", "cell_line"))
             kappa_sc = pm.Deterministic(
                 "kappa_sc", 0 + delta_kappa * sigma_kappa, dims=("sgrna", "cell_line")
@@ -227,11 +236,14 @@ class HierarchcalNegativeBinomialModel:
                 + kappa_sc[model_data.sgrna_idx, model_data.cellline_idx],
             )
             mu = pm.Deterministic("mu", pmmath.exp(eta))
-            alpha = pm.Gamma("alpha", 2, 0.3)
+
+            alpha_alpha = pm.HalfNormal("alpha_alpha", 2.5)
+            beta_alpha = pm.HalfNormal("beta_alpha", 1.0)
+            alpha = pm.Gamma("alpha", alpha_alpha, beta_alpha, dims=("gene"))
             y = pm.NegativeBinomial(  # noqa: F841
                 "ct_final",
                 mu * model_data.ct_initial,
-                alpha,
+                alpha[model_data.gene_idx],
                 observed=model_data.ct_final,
             )
         return model
