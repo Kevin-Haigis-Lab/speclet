@@ -61,7 +61,10 @@ class NegativeBinomialModel:
 
     def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
-        return ["~reciprocal_phi", "~mu"]
+        _vars = ["~^mu$"]
+        if fit_method is ModelFitMethod.STAN_MCMC:
+            _vars += ["~^reciprocal_phi$", "~^log_lik$", "~^y_hat$"]
+        return _vars
 
     def _validate_data(self, data: pd.DataFrame) -> pd.DataFrame:
         return self.data_schema.validate(data)

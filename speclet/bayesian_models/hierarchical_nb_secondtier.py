@@ -40,6 +40,7 @@ class NegativeBinomialModelData:
     ct_initial: np.ndarray
     ct_final: np.ndarray
     sgrna_idx: np.ndarray
+    gene_idx: np.ndarray
     sgrna_to_gene_idx: np.ndarray
     cellline_idx: np.ndarray
 
@@ -90,11 +91,12 @@ class HierarchcalNegativeBinomialSecondTier:
 
     def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
-        _vars = ["~^mu$", "~^eta$"]
+        _vars = ["mu", "eta", "delta_gamma", "delta_beta", "delta_b"]
         if fit_method in {ModelFitMethod.PYMC3_ADVI, ModelFitMethod.PYMC3_MCMC}:
-            _vars += ["delta_gamma", "delta_beta"]
-        elif fit_method is ModelFitMethod.STAN_MCMC:
-            _vars += ["~log_lik", "~y_hat"]
+            _vars += []
+        if fit_method is ModelFitMethod.STAN_MCMC:
+            _vars += ["log_lik", "y_hat"]
+        _vars = [f"~^{v}$" for v in _vars]
         return _vars
 
     def validate_data(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -118,6 +120,7 @@ class HierarchcalNegativeBinomialSecondTier:
             ct_initial=data.counts_initial_adj.values.astype(float),
             ct_final=data.counts_final.values.astype(int),
             sgrna_idx=indices.sgrna_idx,
+            gene_idx=indices.gene_idx,
             sgrna_to_gene_idx=indices.sgrna_to_gene_idx,
             cellline_idx=indices.cellline_idx,
         )
@@ -142,7 +145,6 @@ class HierarchcalNegativeBinomialSecondTier:
     @property
     def stan_code(self) -> str:
         """Stan code for the model."""
-        raise NotImplementedError("Stan model not yet implemented.")
         return read_code_file(self._stan_code_file)
 
     def stan_model(
@@ -159,6 +161,7 @@ class HierarchcalNegativeBinomialSecondTier:
         """
         model_data = self.data_processing_pipeline(data).pipe(self._make_data_structure)
         model_data.sgrna_idx = model_data.sgrna_idx + 1
+        model_data.gene_idx = model_data.gene_idx + 1
         model_data.sgrna_to_gene_idx = model_data.sgrna_to_gene_idx + 1
         model_data.cellline_idx = model_data.cellline_idx + 1
         return stan.build(
@@ -182,8 +185,15 @@ class HierarchcalNegativeBinomialSecondTier:
             "constant_data": ["ct_initial"],
             "coords": self._model_coords(valid_data),
             "dims": {
-                "beta_s": ["sgrna", "cell_line"],
-                "mu_beta": ["gene"],
+                "a_g": ["gene"],
+                "b_c": ["cell_line"],
+                "delta_b": ["cell_line"],
+                "gamma_gc": ["gene", "cell_line"],
+                "delta_gamma": ["gene", "cell_line"],
+                "mu_beta": ["gene", "cell_line"],
+                "beta_sc": ["sgrna", "cell_line"],
+                "delta_beta": ["sgrna", "cell_line"],
+                "alpha": ["gene"],
             },
         }
 
@@ -204,12 +214,15 @@ class HierarchcalNegativeBinomialSecondTier:
         with pm.Model(coords=coords) as model:
 
             mu_a = pm.Normal("mu_a", 0, 5)
-            sigma_a = pm.Gamma("sigma_a", 2.0, 0.5)
-            sigma_b = pm.Gamma("sigma_b", 2.0, 0.5)
-            sigma_gamma = pm.Gamma("sigma_gamma", 2.0, 0.5)
+            sigma_a = pm.Gamma("sigma_a", 2, 0.5)
+            sigma_b = pm.Gamma("sigma_b", 1.1, 0.5)
+            sigma_gamma = pm.Gamma("sigma_gamma", 1.1, 0.5)
 
             a_g = pm.Normal("a_g", mu_a, sigma_a, dims=("gene", "one"))
-            b_c = pm.Normal("b_c", 0, sigma_b, dims=("one", "cell_line"))
+            delta_b = pm.Normal("delta_b", 0, 1, dims=("one", "cell_line"))
+            b_c = pm.Deterministic(
+                "b_c", 0 + delta_b * sigma_b, dims=("one", "cell_line")
+            )
             delta_gamma = pm.Normal("delta_gamma", 0, 1, dims=("gene", "cell_line"))
             gamma_gc = pm.Deterministic(
                 "gamma_gc", 0 + delta_gamma * sigma_gamma, dims=("gene", "cell_line")
@@ -218,23 +231,27 @@ class HierarchcalNegativeBinomialSecondTier:
             mu_beta = pm.Deterministic(
                 "mu_beta", gamma_gc + a_g + b_c, dims=("gene", "cell_line")
             )
-            sigma_beta = pm.Gamma("sigma_beta", 2.0, 0.5)
+            sigma_beta = pm.Gamma("sigma_beta", 2, 0.5)
             delta_beta = pm.Normal("delta_beta", 0, 1, dims=("sgrna", "cell_line"))
-            beta_s = pm.Deterministic(
-                "beta_s",
+            beta_sc = pm.Deterministic(
+                "beta_sc",
                 mu_beta[model_data.sgrna_to_gene_idx, :] + delta_beta * sigma_beta,
                 dims=("sgrna", "cell_line"),
             )
 
             eta = pm.Deterministic(
-                "eta", beta_s[model_data.sgrna_idx, model_data.cellline_idx]
+                "eta", beta_sc[model_data.sgrna_idx, model_data.cellline_idx]
             )
             mu = pm.Deterministic("mu", pmmath.exp(eta))
-            alpha = pm.Gamma("alpha", 2, 0.3)
+
+            alpha_alpha = pm.HalfNormal("alpha_alpha", 2.5)
+            beta_alpha = pm.HalfNormal("beta_alpha", 1)
+            alpha = pm.Gamma("alpha", alpha_alpha, beta_alpha, dims=("gene"))
+
             y = pm.NegativeBinomial(  # noqa: F841
                 "ct_final",
                 mu * model_data.ct_initial,
-                alpha,
+                alpha[model_data.gene_idx],
                 observed=model_data.ct_final,
             )
         return model
