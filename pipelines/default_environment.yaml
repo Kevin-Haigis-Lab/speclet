@@ -40,4 +40,4 @@ dependencies:
   - xarray
   - pip:
     - pystan>=3.3.0
-    - -e /n/data1/hms/dbmi/park/Cook/speclet/  # install the source directory as a package (keep as last)
+    - -e .  # install the source directory as a package (keep as last)
