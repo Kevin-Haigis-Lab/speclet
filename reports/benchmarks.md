@@ -114,8 +114,8 @@ benchmark_df.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>294.6768</td>
-      <td>0:04:54</td>
+      <td>135.3639</td>
+      <td>0:02:15</td>
       <td>-</td>
       <td>-</td>
       <td>-</td>
@@ -130,8 +130,8 @@ benchmark_df.head()
     </tr>
     <tr>
       <th>1</th>
-      <td>65.7246</td>
-      <td>0:01:05</td>
+      <td>135.4909</td>
+      <td>0:02:15</td>
       <td>-</td>
       <td>-</td>
       <td>-</td>
@@ -146,8 +146,40 @@ benchmark_df.head()
     </tr>
     <tr>
       <th>2</th>
-      <td>216.3007</td>
-      <td>0:03:36</td>
+      <td>150.2537</td>
+      <td>0:02:30</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>hierarchical-nb-second-tier_chain0</td>
+      <td>sample_pymc3_mcmc</td>
+      <td>010_010_model-fitting-pipeline</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>151.6974</td>
+      <td>0:02:31</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>hierarchical-nb-second-tier_chain1</td>
+      <td>sample_pymc3_mcmc</td>
+      <td>010_010_model-fitting-pipeline</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>37.6858</td>
+      <td>0:00:37</td>
       <td>-</td>
       <td>-</td>
       <td>-</td>
@@ -157,38 +189,6 @@ benchmark_df.head()
       <td>0.0</td>
       <td>0</td>
       <td>simple-nb_chain1</td>
-      <td>sample_pymc3_mcmc</td>
-      <td>010_010_model-fitting-pipeline</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>216.3948</td>
-      <td>0:03:36</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-      <td>0.0</td>
-      <td>0</td>
-      <td>simple-nb_chain0</td>
-      <td>sample_pymc3_mcmc</td>
-      <td>010_010_model-fitting-pipeline</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>55.1094</td>
-      <td>0:00:55</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-      <td>0.0</td>
-      <td>0</td>
-      <td>example-specification_chain0</td>
       <td>sample_pymc3_mcmc</td>
       <td>010_010_model-fitting-pipeline</td>
     </tr>
@@ -258,13 +258,13 @@ benchmark_df.groupby(["pipeline", "rule"]).mean().round(2)
     </tr>
     <tr>
       <th>sample_pymc3_mcmc</th>
-      <td>150.63</td>
+      <td>94.52</td>
       <td>0.0</td>
       <td>0.0</td>
     </tr>
     <tr>
       <th>sample_stan_mcmc</th>
-      <td>51.25</td>
+      <td>149.79</td>
       <td>0.0</td>
       <td>0.0</td>
     </tr>
@@ -331,7 +331,7 @@ benchmark_df_long.head()
       <th>2</th>
       <td>010_010_model-fitting-pipeline</td>
       <td>sample_pymc3_mcmc</td>
-      <td>simple-nb_chain1</td>
+      <td>hierarchical-nb-second-tier_chain0</td>
       <td>cpu_time</td>
       <td>0.0</td>
     </tr>
@@ -339,7 +339,7 @@ benchmark_df_long.head()
       <th>3</th>
       <td>010_010_model-fitting-pipeline</td>
       <td>sample_pymc3_mcmc</td>
-      <td>simple-nb_chain0</td>
+      <td>hierarchical-nb-second-tier_chain1</td>
       <td>cpu_time</td>
       <td>0.0</td>
     </tr>
@@ -347,7 +347,7 @@ benchmark_df_long.head()
       <th>4</th>
       <td>010_010_model-fitting-pipeline</td>
       <td>sample_pymc3_mcmc</td>
-      <td>example-specification_chain0</td>
+      <td>simple-nb_chain1</td>
       <td>cpu_time</td>
       <td>0.0</td>
     </tr>
@@ -367,7 +367,7 @@ sns.catplot(
 )
 ```
 
-    <seaborn.axisgrid.FacetGrid at 0x12ce4c400>
+    <seaborn.axisgrid.FacetGrid at 0x12aa8ea00>
 
 ![png](benchmarks_files/benchmarks_13_1.png)
 
@@ -378,7 +378,7 @@ sns.catplot(
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-01-20
+    Last updated: 2022-01-27
 
     Python implementation: CPython
     Python version       : 3.9.9

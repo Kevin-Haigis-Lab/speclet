@@ -1,32 +1,32 @@
 
 # ---- Configuration specification ----
 
-- name: example-specification          # UUID name of this model and configuration.
-  description: An example config spec. # Some helpful description of the model.
-  model: SIMPLE_NEGATIVE_BINOMIAL      # Model to fit.
-  data_file: DEPMAP_CRC_BONE_SUBSAMPLE # Data file.
-  sampling_kwargs:                     # Optional arguments to provide for posterior sampling methods.
-    stan_mcmc:
-      num_chains: 2
-      num_samples: 1000
-    pymc3_mcmc:
-      draws: 1000
-      init: "advi"
-    pymc3_advi:
-      n: 200000
-  pipelines:                          # Which pipelines to include this model config in.
-    fitting: [STAN_MCMC, PYMC3_MCMC, PYMC3_ADVI]
-    sbc: [STAN_MCMC, PYMC3_MCMC, PYMC3_ADVI]
+# - name: example-specification          # UUID name of this model and configuration.
+#   description: An example config spec. # Some helpful description of the model.
+#   model: SIMPLE_NEGATIVE_BINOMIAL      # Model to fit.
+#   data_file: DEPMAP_CRC_BONE_SUBSAMPLE # Data file.
+#   sampling_kwargs:                     # Optional arguments to provide for posterior sampling methods.
+#     stan_mcmc:
+#       num_chains: 2
+#       num_samples: 1000
+#     pymc3_mcmc:
+#       draws: 1000
+#       init: "advi"
+#     pymc3_advi:
+#       n: 200000
+#   pipelines:                          # Which pipelines to include this model config in.
+#     fitting: [STAN_MCMC, PYMC3_MCMC, PYMC3_ADVI]
+#     sbc: [STAN_MCMC, PYMC3_MCMC, PYMC3_ADVI]
 
 
 # ---- Negative binomial model ----
 
-- name: simple-nb
-  description: A simple negative binomial model.
-  model: SIMPLE_NEGATIVE_BINOMIAL
-  data_file: DEPMAP_CRC_BONE_SUBSAMPLE
-  pipelines:
-    fitting: [STAN_MCMC, PYMC3_MCMC]
+# - name: simple-nb
+#   description: A simple negative binomial model.
+#   model: SIMPLE_NEGATIVE_BINOMIAL
+#   data_file: DEPMAP_CRC_BONE_SUBSAMPLE
+#   pipelines:
+#     fitting: [PYMC3_MCMC, STAN_MCMC]
 
 
 # ---- Hierarchical negative binomial model ----
@@ -35,5 +35,26 @@
   description: A hierarchical negative binomial model.
   model: HIERARCHICAL_NB
   data_file: DEPMAP_CRC_BONE_SUBSAMPLE
+  sampling_kwargs:
+    pymc3_mcmc:
+      target_accept: 0.95
+    stan_mcmc:
+      delta: 0.95
+      refresh: 1
   pipelines:
-    fitting: [STAN_MCMC, PYMC3_MCMC]
+    fitting: [PYMC3_MCMC, STAN_MCMC]
+
+# ---- Hierarchical negative binomial model ----
+
+# - name: hierarchical-nb-second-tier
+#   description: A hierarchical negative binomial model with a second tier.
+#   model: HIERARCHICAL_NB_SECONDTIER
+#   data_file: DEPMAP_CRC_BONE_SUBSAMPLE
+#   sampling_kwargs:
+#     pymc3_mcmc:
+#       target_accept: 0.9
+#     stan_mcmc:
+#       delta: 0.9
+#       refresh: 1
+#   pipelines:
+#     fitting: [PYMC3_MCMC, STAN_MCMC]

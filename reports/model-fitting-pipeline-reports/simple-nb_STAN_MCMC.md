@@ -85,18 +85,18 @@ if "MCMC" in FIT_METHOD.value:
       * y_hat_dim_0     (y_hat_dim_0) int64 0 1 2 3 4 5 ... 2183 2184 2185 2186 2187
     Data variables:
         beta            float64 1.001
-        reciprocal_phi  float64 1.0
+        reciprocal_phi  float64 1.003
         eta             float64 1.001
         mu              (mu_dim_0) float64 1.001 1.001 1.001 ... 1.001 1.001 1.001
-        phi             float64 1.0
-        log_lik         (log_lik_dim_0) float64 1.001 1.001 1.001 ... 0.9996 1.001
-        y_hat           (y_hat_dim_0) float64 0.9997 1.0 0.9998 ... 1.003 0.9992 1.0
+        phi             float64 1.003
+        log_lik         (log_lik_dim_0) float64 1.002 1.0 1.003 ... 1.002 1.001
+        y_hat           (y_hat_dim_0) float64 0.9992 0.9994 1.001 ... 1.001 0.9993
     ============================================================
     sampled 2 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0
     percent divergences: 0.0, 0.0
-    BFMI: 1.14, 1.153
-    avg. step size: 0.908, 0.922
+    BFMI: 1.157, 1.22
+    avg. step size: 0.843, 0.868
 
 ![png](simple-nb_STAN_MCMC_files/simple-nb_STAN_MCMC_10_1.png)
 
@@ -108,71 +108,14 @@ var_regex += ["~log_lik", "~y_hat"]
 ```
 
 ```python
-def _as_int(x: float) -> str:
-    return str(int(x))
+# def _as_int(x: float) -> str:
+#     return str(int(x))
 
 
-az.summary(
-    trace, var_names=var_regex, filter_vars="regex", hdi_prob=HDI_PROB
-).style.format(formatter={"ess_bulk": _as_int, "ess_tail": _as_int}, precision=2)
+# az.summary(
+#     trace, var_names=var_regex, filter_vars="regex", hdi_prob=HDI_PROB
+# ).style.format(formatter={"ess_bulk": _as_int, "ess_tail": _as_int}, precision=2)
 ```
-
-<style type="text/css">
-</style>
-<table id="T_358ea_">
-  <thead>
-    <tr>
-      <th class="blank level0" >&nbsp;</th>
-      <th class="col_heading level0 col0" >mean</th>
-      <th class="col_heading level0 col1" >sd</th>
-      <th class="col_heading level0 col2" >hdi_5.5%</th>
-      <th class="col_heading level0 col3" >hdi_94.5%</th>
-      <th class="col_heading level0 col4" >mcse_mean</th>
-      <th class="col_heading level0 col5" >mcse_sd</th>
-      <th class="col_heading level0 col6" >ess_bulk</th>
-      <th class="col_heading level0 col7" >ess_tail</th>
-      <th class="col_heading level0 col8" >r_hat</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th id="T_358ea_level0_row0" class="row_heading level0 row0" >beta</th>
-      <td id="T_358ea_row0_col0" class="data row0 col0" >0.09</td>
-      <td id="T_358ea_row0_col1" class="data row0 col1" >0.01</td>
-      <td id="T_358ea_row0_col2" class="data row0 col2" >0.07</td>
-      <td id="T_358ea_row0_col3" class="data row0 col3" >0.11</td>
-      <td id="T_358ea_row0_col4" class="data row0 col4" >0.00</td>
-      <td id="T_358ea_row0_col5" class="data row0 col5" >0.00</td>
-      <td id="T_358ea_row0_col6" class="data row0 col6" >2073</td>
-      <td id="T_358ea_row0_col7" class="data row0 col7" >1481</td>
-      <td id="T_358ea_row0_col8" class="data row0 col8" >1.00</td>
-    </tr>
-    <tr>
-      <th id="T_358ea_level0_row1" class="row_heading level0 row1" >eta</th>
-      <td id="T_358ea_row1_col0" class="data row1 col0" >0.09</td>
-      <td id="T_358ea_row1_col1" class="data row1 col1" >0.01</td>
-      <td id="T_358ea_row1_col2" class="data row1 col2" >0.07</td>
-      <td id="T_358ea_row1_col3" class="data row1 col3" >0.11</td>
-      <td id="T_358ea_row1_col4" class="data row1 col4" >0.00</td>
-      <td id="T_358ea_row1_col5" class="data row1 col5" >0.00</td>
-      <td id="T_358ea_row1_col6" class="data row1 col6" >2073</td>
-      <td id="T_358ea_row1_col7" class="data row1 col7" >1481</td>
-      <td id="T_358ea_row1_col8" class="data row1 col8" >1.00</td>
-    </tr>
-    <tr>
-      <th id="T_358ea_level0_row2" class="row_heading level0 row2" >phi</th>
-      <td id="T_358ea_row2_col0" class="data row2 col0" >2.62</td>
-      <td id="T_358ea_row2_col1" class="data row2 col1" >0.08</td>
-      <td id="T_358ea_row2_col2" class="data row2 col2" >2.49</td>
-      <td id="T_358ea_row2_col3" class="data row2 col3" >2.74</td>
-      <td id="T_358ea_row2_col4" class="data row2 col4" >0.00</td>
-      <td id="T_358ea_row2_col5" class="data row2 col5" >0.00</td>
-      <td id="T_358ea_row2_col6" class="data row2 col6" >1856</td>
-      <td id="T_358ea_row2_col7" class="data row2 col7" >1218</td>
-      <td id="T_358ea_row2_col8" class="data row2 col8" >1.00</td>
-    </tr>
-  </tbody>
-</table>
 
 ```python
 az.plot_trace(trace, var_names=var_regex, filter_vars="regex")
@@ -180,23 +123,18 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_96731/2160019948.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_23500/2160019948.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
       plt.tight_layout()
 
 ![png](simple-nb_STAN_MCMC_files/simple-nb_STAN_MCMC_14_1.png)
 
 ```python
-az.plot_forest(
-    trace, var_names=var_regex, filter_vars="regex", hdi_prob=HDI_PROB, combined=True
-)
-plt.tight_layout()
-plt.show()
+# az.plot_forest(
+#     trace, var_names=var_regex, filter_vars="regex", hdi_prob=HDI_PROB, combined=True
+# )
+# plt.tight_layout()
+# plt.show()
 ```
-
-    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_96731/263103266.py:4: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
-      plt.tight_layout()
-
-![png](simple-nb_STAN_MCMC_files/simple-nb_STAN_MCMC_15_1.png)
 
 ## Model predictions
 
@@ -217,7 +155,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_96731/1880208410.py:13: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_23500/1880208410.py:13: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
       plt.tight_layout()
 
 ![png](simple-nb_STAN_MCMC_files/simple-nb_STAN_MCMC_17_1.png)
@@ -230,8 +168,8 @@ psis_loo
     Computed from 2000 by 2188 log-likelihood matrix
 
              Estimate       SE
-    elpd_loo -15080.76    54.64
-    p_loo        4.59        -
+    elpd_loo -15080.61    54.60
+    p_loo        4.39        -
     ------
 
     Pareto k diagnostic values:
@@ -247,7 +185,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_96731/3910446358.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_23500/3910446358.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
       plt.tight_layout()
 
 ![png](simple-nb_STAN_MCMC_files/simple-nb_STAN_MCMC_19_1.png)
@@ -259,14 +197,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.45 minutes
+    execution time: 0.32 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-01-20
+    Last updated: 2022-01-21
 
     Python implementation: CPython
     Python version       : 3.9.9
@@ -286,5 +224,5 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     logging   : 0.5.1.2
     matplotlib: 3.5.1
-    speclet   : 0.0.9000
     arviz     : 0.11.2
+    speclet   : 0.0.9000

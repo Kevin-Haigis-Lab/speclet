@@ -48,8 +48,8 @@ ROOT_CACHE_DIR = ""
 
 ```python
 # Parameters
-MODEL_NAME = "hierarchical-nb"
-FIT_METHOD_STR = "STAN_MCMC"
+MODEL_NAME = "hierarchical-nb-second-tier"
+FIT_METHOD_STR = "PYMC3_MCMC"
 CONFIG_PATH = "models/model-configs.yaml"
 ROOT_CACHE_DIR = "models"
 ```
@@ -78,41 +78,36 @@ if "MCMC" in FIT_METHOD.value:
 
     R-HAT
     <xarray.Dataset>
-    Dimensions:        (sgrna: 338, delta_b_dim_0: 10, delta_d_dim_0: 114, delta_d_dim_1: 2, gene: 114, eta_dim_0: 2188, mu_dim_0: 2188, cell_line: 10, lineage: 2, log_lik_dim_0: 2188, y_hat_dim_0: 2188)
+    Dimensions:      (gene: 114, one: 1, cell_line: 10, sgrna: 338, eta_dim_0: 2188, mu_dim_0: 2188)
     Coordinates:
-      * sgrna          (sgrna) object 'AAACTTGCTGACGTGCCTGG' ... 'TTTGTTGGGACCAAT...
-      * gene           (gene) object 'ACVR1C' 'ADAMTS2' ... 'ZC2HC1C' 'ZNF44'
-      * cell_line      (cell_line) object 'ACH-000007' 'ACH-000087' ... 'ACH-002116'
-      * delta_b_dim_0  (delta_b_dim_0) int64 0 1 2 3 4 5 6 7 8 9
-      * delta_d_dim_0  (delta_d_dim_0) int64 0 1 2 3 4 5 ... 108 109 110 111 112 113
-      * delta_d_dim_1  (delta_d_dim_1) int64 0 1
-      * eta_dim_0      (eta_dim_0) int64 0 1 2 3 4 5 ... 2183 2184 2185 2186 2187
-      * mu_dim_0       (mu_dim_0) int64 0 1 2 3 4 5 ... 2183 2184 2185 2186 2187
-      * lineage        (lineage) object 'colorectal' 'bone'
-      * log_lik_dim_0  (log_lik_dim_0) int64 0 1 2 3 4 ... 2183 2184 2185 2186 2187
-      * y_hat_dim_0    (y_hat_dim_0) int64 0 1 2 3 4 5 ... 2183 2184 2185 2186 2187
-    Data variables: (12/16)
-        z              float64 1.003
-        sigma_a        float64 1.003
-        a              (sgrna) float64 1.0 1.001 1.0 1.001 ... 1.002 1.002 1.003 1.0
-        sigma_b        float64 1.0
-        delta_b        (delta_b_dim_0) float64 1.005 1.232 1.04 ... 1.0 1.025 1.437
-        sigma_d        float64 1.01
-        ...             ...
-        eta            (eta_dim_0) float64 1.0 0.9994 1.0 1.002 ... 1.001 1.001 1.0
-        mu             (mu_dim_0) float64 1.0 0.9994 1.0 1.002 ... 1.001 1.0 1.0
-        b              (cell_line) float64 1.001 1.001 1.003 ... 1.001 1.002 0.9996
-        d              (gene, lineage) float64 1.004 1.008 1.003 ... 1.003 1.003
-        log_lik        (log_lik_dim_0) float64 1.005 0.9996 0.9995 ... 1.0 1.002
-        y_hat          (y_hat_dim_0) float64 1.001 1.0 1.001 ... 0.9995 1.0 1.0
+      * gene         (gene) object 'ACVR1C' 'ADAMTS2' ... 'ZC2HC1C' 'ZNF44'
+      * cell_line    (cell_line) object 'ACH-000007' 'ACH-000087' ... 'ACH-002116'
+      * sgrna        (sgrna) object 'AAACTTGCTGACGTGCCTGG' ... 'TTTGTTGGGACCAATGGAA'
+      * one          (one) object '1'
+      * eta_dim_0    (eta_dim_0) int64 0 1 2 3 4 5 ... 2182 2183 2184 2185 2186 2187
+      * mu_dim_0     (mu_dim_0) int64 0 1 2 3 4 5 ... 2182 2183 2184 2185 2186 2187
+    Data variables: (12/18)
+        mu_a         float64 0.9993
+        a_g          (gene, one) float64 1.0 1.001 1.001 0.9995 ... 1.0 1.001 1.001
+        delta_b      (one, cell_line) float64 1.001 0.9991 1.001 ... 1.001 1.001
+        delta_gamma  (gene, cell_line) float64 1.005 1.001 0.9997 ... 1.003 1.004
+        delta_beta   (sgrna, cell_line) float64 1.001 1.004 0.9994 ... 1.001 1.001
+        sigma_a      float64 1.0
+        ...           ...
+        beta_sc      (sgrna, cell_line) float64 1.002 1.002 1.002 ... 1.003 1.002
+        eta          (eta_dim_0) float64 1.0 1.0 1.002 0.9996 ... 1.002 1.005 1.002
+        mu           (mu_dim_0) float64 1.0 1.0 1.002 0.9996 ... 1.003 1.005 1.001
+        alpha_alpha  float64 1.003
+        beta_alpha   float64 1.002
+        alpha        (gene) float64 1.0 1.0 1.003 1.004 ... 0.9997 0.9998 1.001
     ============================================================
     sampled 2 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0
     percent divergences: 0.0, 0.0
-    BFMI: 0.68, 0.658
-    avg. step size: 0.086, 0.098
+    BFMI: 0.924, 0.946
+    avg. step size: 0.152, 0.237
 
-![png](hierarchical-nb_STAN_MCMC_files/hierarchical-nb_STAN_MCMC_10_1.png)
+![png](hierarchical-nb-second-tier_PYMC3_MCMC_files/hierarchical-nb-second-tier_PYMC3_MCMC_10_1.png)
 
 ## Model parameters
 
@@ -127,10 +122,12 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_10187/2160019948.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
+    /usr/local/Caskroom/miniconda/base/envs/speclet_smk/lib/python3.9/site-packages/arviz/utils.py:124: UserWarning: Items starting with ~: ['^log_lik$', '^y_hat$'] have not been found and will be ignored
+      warnings.warn(
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_3174/2160019948.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
       plt.tight_layout()
 
-![png](hierarchical-nb_STAN_MCMC_files/hierarchical-nb_STAN_MCMC_13_1.png)
+![png](hierarchical-nb-second-tier_PYMC3_MCMC_files/hierarchical-nb-second-tier_PYMC3_MCMC_13_1.png)
 
 ## Model predictions
 
@@ -151,10 +148,10 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_10187/1880208410.py:13: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_3174/1880208410.py:13: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
       plt.tight_layout()
 
-![png](hierarchical-nb_STAN_MCMC_files/hierarchical-nb_STAN_MCMC_15_1.png)
+![png](hierarchical-nb-second-tier_PYMC3_MCMC_files/hierarchical-nb-second-tier_PYMC3_MCMC_15_1.png)
 
 ```python
 psis_loo = az.loo(trace, pointwise=True)
@@ -171,18 +168,18 @@ psis_loo
     Computed from 2000 by 2188 log-likelihood matrix
 
              Estimate       SE
-    elpd_loo -14620.79    52.93
-    p_loo      337.52        -
+    elpd_loo -14685.54    52.91
+    p_loo      271.19        -
 
     There has been a warning during the calculation. Please check the results.
     ------
 
     Pareto k diagnostic values:
                              Count   Pct.
-    (-Inf, 0.5]   (good)     2061   94.2%
-     (0.5, 0.7]   (ok)         95    4.3%
-       (0.7, 1]   (bad)        30    1.4%
-       (1, Inf)   (very bad)    2    0.1%
+    (-Inf, 0.5]   (good)     2064   94.3%
+     (0.5, 0.7]   (ok)        100    4.6%
+       (0.7, 1]   (bad)        20    0.9%
+       (1, Inf)   (very bad)    4    0.2%
 
 ```python
 az.plot_khat(psis_loo)
@@ -190,10 +187,10 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_10187/3910446358.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_3174/3910446358.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
       plt.tight_layout()
 
-![png](hierarchical-nb_STAN_MCMC_files/hierarchical-nb_STAN_MCMC_17_1.png)
+![png](hierarchical-nb-second-tier_PYMC3_MCMC_files/hierarchical-nb-second-tier_PYMC3_MCMC_17_1.png)
 
 ---
 
@@ -202,14 +199,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.82 minutes
+    execution time: 6.54 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-01-27
+    Last updated: 2022-01-26
 
     Python implementation: CPython
     Python version       : 3.9.9
@@ -228,6 +225,6 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Git branch: nb-model
 
     logging   : 0.5.1.2
-    arviz     : 0.11.2
     speclet   : 0.0.9000
+    arviz     : 0.11.2
     matplotlib: 3.5.1

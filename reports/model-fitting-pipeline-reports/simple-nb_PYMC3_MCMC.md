@@ -80,16 +80,16 @@ if "MCMC" in FIT_METHOD.value:
     <xarray.Dataset>
     Dimensions:  ()
     Data variables:
-        beta     float64 1.003
-        eta      float64 1.003
-        mu       float64 1.003
-        alpha    float64 1.003
+        beta     float64 1.0
+        eta      float64 1.0
+        mu       float64 0.9999
+        alpha    float64 1.004
     ============================================================
     sampled 2 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0
     percent divergences: 0.0, 0.0
-    BFMI: 1.295, 1.109
-    avg. step size: 1.054, 1.459
+    BFMI: 1.338, 1.296
+    avg. step size: 1.294, 0.869
 
 ![png](simple-nb_PYMC3_MCMC_files/simple-nb_PYMC3_MCMC_10_1.png)
 
@@ -101,74 +101,14 @@ var_regex += ["~log_lik", "~y_hat"]
 ```
 
 ```python
-def _as_int(x: float) -> str:
-    return str(int(x))
+# def _as_int(x: float) -> str:
+#     return str(int(x))
 
 
-az.summary(
-    trace, var_names=var_regex, filter_vars="regex", hdi_prob=HDI_PROB
-).style.format(formatter={"ess_bulk": _as_int, "ess_tail": _as_int}, precision=2)
+# az.summary(
+#     trace, var_names=var_regex, filter_vars="regex", hdi_prob=HDI_PROB
+# ).style.format(formatter={"ess_bulk": _as_int, "ess_tail": _as_int}, precision=2)
 ```
-
-    /usr/local/Caskroom/miniconda/base/envs/speclet_smk/lib/python3.9/site-packages/arviz/utils.py:124: UserWarning: Items starting with ~: ['reciprocal_phi', 'log_lik', 'y_hat'] have not been found and will be ignored
-      warnings.warn(
-
-<style type="text/css">
-</style>
-<table id="T_88fdd_">
-  <thead>
-    <tr>
-      <th class="blank level0" >&nbsp;</th>
-      <th class="col_heading level0 col0" >mean</th>
-      <th class="col_heading level0 col1" >sd</th>
-      <th class="col_heading level0 col2" >hdi_5.5%</th>
-      <th class="col_heading level0 col3" >hdi_94.5%</th>
-      <th class="col_heading level0 col4" >mcse_mean</th>
-      <th class="col_heading level0 col5" >mcse_sd</th>
-      <th class="col_heading level0 col6" >ess_bulk</th>
-      <th class="col_heading level0 col7" >ess_tail</th>
-      <th class="col_heading level0 col8" >r_hat</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th id="T_88fdd_level0_row0" class="row_heading level0 row0" >beta</th>
-      <td id="T_88fdd_row0_col0" class="data row0 col0" >0.09</td>
-      <td id="T_88fdd_row0_col1" class="data row0 col1" >0.01</td>
-      <td id="T_88fdd_row0_col2" class="data row0 col2" >0.07</td>
-      <td id="T_88fdd_row0_col3" class="data row0 col3" >0.11</td>
-      <td id="T_88fdd_row0_col4" class="data row0 col4" >0.00</td>
-      <td id="T_88fdd_row0_col5" class="data row0 col5" >0.00</td>
-      <td id="T_88fdd_row0_col6" class="data row0 col6" >1859</td>
-      <td id="T_88fdd_row0_col7" class="data row0 col7" >1507</td>
-      <td id="T_88fdd_row0_col8" class="data row0 col8" >1.00</td>
-    </tr>
-    <tr>
-      <th id="T_88fdd_level0_row1" class="row_heading level0 row1" >eta</th>
-      <td id="T_88fdd_row1_col0" class="data row1 col0" >0.09</td>
-      <td id="T_88fdd_row1_col1" class="data row1 col1" >0.01</td>
-      <td id="T_88fdd_row1_col2" class="data row1 col2" >0.07</td>
-      <td id="T_88fdd_row1_col3" class="data row1 col3" >0.11</td>
-      <td id="T_88fdd_row1_col4" class="data row1 col4" >0.00</td>
-      <td id="T_88fdd_row1_col5" class="data row1 col5" >0.00</td>
-      <td id="T_88fdd_row1_col6" class="data row1 col6" >1859</td>
-      <td id="T_88fdd_row1_col7" class="data row1 col7" >1507</td>
-      <td id="T_88fdd_row1_col8" class="data row1 col8" >1.00</td>
-    </tr>
-    <tr>
-      <th id="T_88fdd_level0_row2" class="row_heading level0 row2" >alpha</th>
-      <td id="T_88fdd_row2_col0" class="data row2 col0" >2.63</td>
-      <td id="T_88fdd_row2_col1" class="data row2 col1" >0.08</td>
-      <td id="T_88fdd_row2_col2" class="data row2 col2" >2.48</td>
-      <td id="T_88fdd_row2_col3" class="data row2 col3" >2.74</td>
-      <td id="T_88fdd_row2_col4" class="data row2 col4" >0.00</td>
-      <td id="T_88fdd_row2_col5" class="data row2 col5" >0.00</td>
-      <td id="T_88fdd_row2_col6" class="data row2 col6" >2078</td>
-      <td id="T_88fdd_row2_col7" class="data row2 col7" >1340</td>
-      <td id="T_88fdd_row2_col8" class="data row2 col8" >1.00</td>
-    </tr>
-  </tbody>
-</table>
 
 ```python
 az.plot_trace(trace, var_names=var_regex, filter_vars="regex")
@@ -178,25 +118,18 @@ plt.show()
 
     /usr/local/Caskroom/miniconda/base/envs/speclet_smk/lib/python3.9/site-packages/arviz/utils.py:124: UserWarning: Items starting with ~: ['reciprocal_phi', 'log_lik', 'y_hat'] have not been found and will be ignored
       warnings.warn(
-    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_96472/2160019948.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_23228/2160019948.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
       plt.tight_layout()
 
 ![png](simple-nb_PYMC3_MCMC_files/simple-nb_PYMC3_MCMC_14_1.png)
 
 ```python
-az.plot_forest(
-    trace, var_names=var_regex, filter_vars="regex", hdi_prob=HDI_PROB, combined=True
-)
-plt.tight_layout()
-plt.show()
+# az.plot_forest(
+#     trace, var_names=var_regex, filter_vars="regex", hdi_prob=HDI_PROB, combined=True
+# )
+# plt.tight_layout()
+# plt.show()
 ```
-
-    /usr/local/Caskroom/miniconda/base/envs/speclet_smk/lib/python3.9/site-packages/arviz/utils.py:124: UserWarning: Items starting with ~: ['reciprocal_phi', 'log_lik', 'y_hat'] have not been found and will be ignored
-      warnings.warn(
-    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_96472/263103266.py:4: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
-      plt.tight_layout()
-
-![png](simple-nb_PYMC3_MCMC_files/simple-nb_PYMC3_MCMC_15_1.png)
 
 ## Model predictions
 
@@ -217,7 +150,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_96472/1880208410.py:13: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_23228/1880208410.py:13: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
       plt.tight_layout()
 
 ![png](simple-nb_PYMC3_MCMC_files/simple-nb_PYMC3_MCMC_17_1.png)
@@ -230,8 +163,8 @@ psis_loo
     Computed from 2000 by 2188 log-likelihood matrix
 
              Estimate       SE
-    elpd_loo -15080.72    54.66
-    p_loo        4.58        -
+    elpd_loo -15080.51    54.73
+    p_loo        4.27        -
     ------
 
     Pareto k diagnostic values:
@@ -247,7 +180,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_96472/3910446358.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
+    /var/folders/r4/qpcdgl_14hbd412snp1jnv300000gn/T/ipykernel_23228/3910446358.py:2: UserWarning: This figure was using constrained_layout, but that is incompatible with subplots_adjust and/or tight_layout; disabling constrained_layout.
       plt.tight_layout()
 
 ![png](simple-nb_PYMC3_MCMC_files/simple-nb_PYMC3_MCMC_19_1.png)
@@ -259,14 +192,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.11 minutes
+    execution time: 0.09 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-01-20
+    Last updated: 2022-01-21
 
     Python implementation: CPython
     Python version       : 3.9.9
@@ -285,6 +218,6 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Git branch: nb-model
 
     speclet   : 0.0.9000
-    arviz     : 0.11.2
-    matplotlib: 3.5.1
     logging   : 0.5.1.2
+    matplotlib: 3.5.1
+    arviz     : 0.11.2
