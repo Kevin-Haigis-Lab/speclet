@@ -5,24 +5,24 @@ data {
     int<lower=1> S;  // number of sgRNAs
     int<lower=1> G;  // number of genes
     int<lower=1> C;  // number of cell lines
+    int<lower=1> L;  // number of lineages
     array[N] real<lower=0> ct_initial;
     array[N] int<lower=0> ct_final;
     array[N] int<lower=1, upper=S> sgrna_idx;
     array[N] int<lower=1, upper=G> gene_idx;
-    array[S] int<lower=1, upper=G> sgrna_to_gene_idx;
     array[N] int<lower=1, upper=C> cellline_idx;
+    array[N] int<lower=1, upper=L> lineage_idx;
+
 }
 
 parameters {
-    real mu_mu_beta;
-    real<lower=0> sigma_mu_beta;
-    array[G] real mu_beta;
-    real<lower=0> sigma_beta;
-    array[S] real beta_s;
-    real<lower=0> sigma_gamma;
-    array[C] real delta_gamma;
-    real<lower=0> sigma_kappa;
-    array[S,C] real delta_kappa;
+    real z;
+    real<lower=0> sigma_a;
+    array[S] real a;
+    real<lower=0> sigma_b;
+    array[C] real delta_b;
+    real<lower=0> sigma_d;
+    array[G,L] real delta_d;
     real<lower=0> alpha_alpha;
     real<lower=0> beta_alpha;
     array[G] real<lower=0> alpha;
@@ -31,40 +31,40 @@ parameters {
 transformed parameters {
     array[N] real eta;
     array[N] real<lower=0> mu;
-    array[S,C] real kappa_sc;
-    array[C] real gamma_c;
+    array[C] real b;
+    array[G,L] real d;
 
-    for (c in 1:C) {
-        gamma_c[c] = 0.0 + delta_gamma[c] * sigma_gamma;
-    }
-
-    for (s in 1:S) {
-        for (c in 1:C) {
-            kappa_sc[s,c] = 0.0 + delta_kappa[s,c] * sigma_kappa;
+    for (g in 1:G) {
+        for (l in 1:L) {
+            d[g,l] = 0.0 + delta_d[g,l] * sigma_d;
         }
     }
 
+    for (c in 1:C) {
+        b[c] = 0.0 + delta_b[c] * sigma_b;
+    }
+
     for (n in 1:N) {
-        eta[n] = beta_s[sgrna_idx[n]] + gamma_c[cellline_idx[n]] + kappa_sc[sgrna_idx[n]][cellline_idx[n]];
+        eta[n] = z + a[sgrna_idx[n]] + b[cellline_idx[n]] + d[gene_idx[n]][lineage_idx[n]];
         mu[n] = exp(eta[n]) * ct_initial[n];
     }
 }
 
 model {
     // Priors
-    mu_mu_beta ~ normal(0.0, 5.0);
-    sigma_mu_beta ~ gamma(2.0, 0.5);
-    sigma_beta ~ gamma(2.0, 0.5);
-    sigma_gamma ~ gamma(2.0, 0.5);
-    sigma_kappa ~ gamma(1.1, 0.5);
+    sigma_a ~ normal(0.0, 2.5);
+    sigma_b ~ normal(0.0, 2.5);
+    sigma_d ~ normal(0.0, 2.5);
+
+    z ~ normal(0.0, 5.0);
+    a ~ normal(0.0, sigma_a);
+    delta_b ~ normal(0.0, 1.0);
+
     alpha_alpha ~ gamma(2.0, 0.5);
     beta_alpha ~ gamma(2.0, 0.5);
-    mu_beta ~ normal(mu_mu_beta, sigma_mu_beta);
-    delta_gamma ~ normal(0.0, 1.0);
-    beta_s ~ normal(mu_beta[sgrna_to_gene_idx], sigma_beta);
 
-    for (s in 1:S) {
-        delta_kappa[s] ~ normal(0.0, 1.0);
+    for (g in 1:G) {
+        delta_d[g] ~ normal(0.0, 1.0);
     }
 
     alpha ~ gamma(alpha_alpha, beta_alpha);

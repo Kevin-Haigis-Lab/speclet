@@ -244,8 +244,8 @@ class HierarchcalNegativeBinomialSecondTier:
             )
             mu = pm.Deterministic("mu", pmmath.exp(eta))
 
-            alpha_alpha = pm.HalfNormal("alpha_alpha", 2.5)
-            beta_alpha = pm.HalfNormal("beta_alpha", 1)
+            alpha_alpha = pm.Gamma("alpha_alpha", 2, 0.5)
+            beta_alpha = pm.Gamma("beta_alpha", 2, 0.5)
             alpha = pm.Gamma("alpha", alpha_alpha, beta_alpha, dims=("gene"))
 
             y = pm.NegativeBinomial(  # noqa: F841

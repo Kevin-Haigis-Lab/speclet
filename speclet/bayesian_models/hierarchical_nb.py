@@ -37,12 +37,15 @@ class NegativeBinomialModelData:
     S: int  # number of sgRNAs
     G: int  # number of genes
     C: int  # number of cell lines
+    L: int  # number of lineages
     ct_initial: np.ndarray
     ct_final: np.ndarray
     sgrna_idx: np.ndarray
     gene_idx: np.ndarray
-    sgrna_to_gene_idx: np.ndarray
+    # sgrna_to_gene_idx: np.ndarray
     cellline_idx: np.ndarray
+    lineage_idx: np.ndarray
+    # cellline_to_lineage_idx: np.ndarray
 
 
 class HierarchcalNegativeBinomialModel:
@@ -91,12 +94,11 @@ class HierarchcalNegativeBinomialModel:
 
     def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
-        _vars = ["mu", "eta", "delta_kappa", "delta_gamma"]
+        _vars = ["~^mu$", "~^eta$", "~^delta_.*"]
         if fit_method is ModelFitMethod.STAN_MCMC:
-            _vars += ["log_lik", "y_hat"]
+            _vars += ["~^log_lik$", "~^y_hat$"]
         else:
             _vars += []
-        _vars = [f"~^{v}$" for v in _vars]
         return _vars
 
     def validate_data(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -117,12 +119,15 @@ class HierarchcalNegativeBinomialModel:
             S=indices.n_sgrnas,
             G=indices.n_genes,
             C=indices.n_celllines,
+            L=indices.n_lineages,
             ct_initial=data.counts_initial_adj.values.astype(float),
             ct_final=data.counts_final.values.astype(int),
             sgrna_idx=indices.sgrna_idx,
             gene_idx=indices.gene_idx,
-            sgrna_to_gene_idx=indices.sgrna_to_gene_idx,
+            # sgrna_to_gene_idx=indices.sgrna_to_gene_idx,
             cellline_idx=indices.cellline_idx,
+            lineage_idx=indices.lineage_idx,
+            # cellline_to_lineage_idx=indices.cellline_to_lineage_idx,
         )
 
     def data_processing_pipeline(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -162,7 +167,7 @@ class HierarchcalNegativeBinomialModel:
         model_data = self.data_processing_pipeline(data).pipe(self._make_data_structure)
         model_data.sgrna_idx = model_data.sgrna_idx + 1
         model_data.gene_idx = model_data.gene_idx + 1
-        model_data.sgrna_to_gene_idx = model_data.sgrna_to_gene_idx + 1
+        model_data.lineage_idx = model_data.lineage_idx + 1
         model_data.cellline_idx = model_data.cellline_idx + 1
         return stan.build(
             self.stan_code, data=asdict(model_data), random_seed=random_seed
@@ -173,6 +178,7 @@ class HierarchcalNegativeBinomialModel:
             "sgrna": get_cats(valid_data, "sgrna"),
             "gene": get_cats(valid_data, "hugo_symbol"),
             "cell_line": get_cats(valid_data, "depmap_id"),
+            "lineage": get_cats(valid_data, "lineage"),
         }
 
     def stan_idata_addons(self, data: pd.DataFrame) -> dict[str, Any]:
@@ -185,10 +191,10 @@ class HierarchcalNegativeBinomialModel:
             "constant_data": ["ct_initial"],
             "coords": self._model_coords(valid_data),
             "dims": {
-                "beta_s": ["sgrna"],
-                "mu_beta": ["gene"],
-                "gamma_c": ["cell_line"],
-                "kappa_sc": ["sgrna", "cell_line"],
+                "a": ["sgrna"],
+                "b": ["cell_line"],
+                "d": ["gene", "lineage"],
+                "alpha": ["gene"],
             },
         }
 
@@ -205,36 +211,26 @@ class HierarchcalNegativeBinomialModel:
         model_data = self._make_data_structure(valid_data)
         coords = self._model_coords(valid_data)
 
+        s = model_data.sgrna_idx
+        c = model_data.cellline_idx
+        g = model_data.gene_idx
+        ll = model_data.lineage_idx
+
         with pm.Model(coords=coords) as model:
-            mu_mu_beta = pm.Normal("mu_mu_beta", 0, 5)
-            sigma_mu_beta = pm.Gamma("sigma_mu_beta", 2, 0.5)
-            mu_beta = pm.Normal("mu_beta", mu_mu_beta, sigma_mu_beta, dims=("gene"))
-            sigma_beta = pm.Gamma("sigma_beta", 2, 0.5)
-            beta_s = pm.Normal(
-                "beta_s",
-                mu_beta[model_data.sgrna_to_gene_idx],
-                sigma_beta,
-                dims=("sgrna"),
-            )
+            z = pm.Normal("z", 0, 5)
 
-            sigma_gamma = pm.Gamma("sigma_gamma", 2, 0.5)
-            delta_gamma = pm.Normal("delta_gamma", 0, 1, dims=("cell_line"))
-            gamma_c = pm.Deterministic(
-                "gamma_c", 0 + delta_gamma * sigma_gamma, dims=("cell_line")
-            )
+            sigma_a = pm.HalfNormal("sigma_a", 2.5)
+            a = pm.Normal("a", 0, sigma_a, dims=("sgrna"))
 
-            sigma_kappa = pm.Gamma("sigma_kappa", 2, 0.5)
-            delta_kappa = pm.Normal("delta_kappa", 0, 1, dims=("sgrna", "cell_line"))
-            kappa_sc = pm.Deterministic(
-                "kappa_sc", 0 + delta_kappa * sigma_kappa, dims=("sgrna", "cell_line")
-            )
+            sigma_b = pm.HalfNormal("sigma_b", 2.5)
+            delta_b = pm.Normal("delta_b", 0, 1, dims=("cell_line"))
+            b = pm.Deterministic("b", 0 + delta_b * sigma_b, dims=("cell_line"))
 
-            eta = pm.Deterministic(
-                "eta",
-                beta_s[model_data.sgrna_idx]
-                + gamma_c[model_data.cellline_idx]
-                + kappa_sc[model_data.sgrna_idx, model_data.cellline_idx],
-            )
+            sigma_d = pm.HalfNormal("sigma_d", 2.5)
+            delta_d = pm.Normal("delta_d", 0, 1, dims=("gene", "lineage"))
+            d = pm.Deterministic("d", 0 + delta_d * sigma_d, dims=("gene", "lineage"))
+
+            eta = pm.Deterministic("eta", z + a[s] + b[c] + d[g, ll])
             mu = pm.Deterministic("mu", pmmath.exp(eta))
 
             alpha_alpha = pm.Gamma("alpha_alpha", 2, 0.5)
