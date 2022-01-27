@@ -6,18 +6,24 @@ channels:
   - defaults
 dependencies:
   - python=3.9.9
-  - jupyterlab
-  - pymc3=3.11.*
-  - arviz
+  - arviz=0.11.*
+  - black
   - colorama
   - dask
   - ipython
-  - matplotlib
+  - isort
+  - jupyterlab=3.2.*
+  - mamba
+  - matplotlib=3.5.*
   - mkl
   - mkl-service
+  - mypy
   - nbconvert
-  - numpy
-  - pandas
+  - nbformat
+  - nbqa
+  - numpy=1.22.*
+  - pandas=1.3.*
+  - pandera=0.8.*
   - pandoc
   - papermill
   - patsy
@@ -26,18 +32,22 @@ dependencies:
   - pretty_errors
   - pydantic
   - pyjanitor
+  - pymc3=3.11.*
   - python-graphviz
   - requests
   - rich
-  - scikit-learn
-  - scipy
+  - scikit-learn=1.0.*
+  - scikit-misc
+  - scipy=1.7.*
   - seaborn
   - statsmodels
   - termcolor
   - theano-pymc=1.1.*
   - typer
+  - types-pyyaml
   - watermark
-  - xarray
+  - xarray=0.20.*
   - pip:
-    - pystan>=3.3.0
-    - -e .  # install the source directory as a package (keep as last)
+    - pystan==3.1.1  # latest version for O2
+    - python-dotenv
+    - -e /n/data1/hms/dbmi/park/Cook/speclet/  # install the source directory as a package (keep as last)
