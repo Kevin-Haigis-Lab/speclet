@@ -7,24 +7,36 @@ __default__:
   err: "logs/%j_{rule}.log"
   mail: "NONE"
   J: "snakejob"
-sample_mcmc:
+rule sample_stan_mcmc:
   partition: "{params.partition}"
   cores: 1
   mem: "{params.mem}"
   time: "{params.time}"
-  J: "mcmc"
-combine_mcmc:
+  J: "stan-mc"
+combine_stan_mcmc:
   partition: "short"
   cores: 1
   mem: "32000"
   time: "00:15:00"
-  J: "combine"
-sample_advi:
+  J: "stan-comb"
+rule sample_pymc_mcmc:
   partition: "{params.partition}"
   cores: 1
   mem: "{params.mem}"
   time: "{params.time}"
-  J: "advi"
+  J: "pymc-mc"
+combine_pymc3_mcmc:
+  partition: "short"
+  cores: 1
+  mem: "32000"
+  time: "00:15:00"
+  J: "pymc-comb"
+sample_pymc3_advi:
+  partition: "{params.partition}"
+  cores: 1
+  mem: "{params.mem}"
+  time: "{params.time}"
+  J: "pymc3-advi"
 papermill_report:
   partition: "short"
   cores: 1

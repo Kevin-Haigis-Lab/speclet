@@ -19,17 +19,13 @@ SNAKEFILE="pipelines/010_010_model-fitting-pipeline.smk"
 
 # Copy original env file and ammend import of speclet project modules
 ENV_PATH="pipelines/default_environment.yaml"
-if [ ! -f "$ENV_PATH" ]; then
-    cp environment.yaml $ENV_PATH
-    sed -i "s|-e .|-e $(pwd)/|" $ENV_PATH
-    sed -i '/jupyter_contrib_nbextensions/d' $ENV_PATH
-fi
 
 snakemake \
     --snakefile $SNAKEFILE \
     --jobs 9995 \
     --restart-times 0 \
     --latency-wait 120 \
+    --rerun-incomplete \
     --use-conda \
     --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
     --cluster-config pipelines/010_011_smk-config.yaml \
