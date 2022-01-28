@@ -8,6 +8,7 @@ from time import time
 from typing import Optional
 
 import pandas as pd
+from dotenv import load_dotenv
 from typer import Typer
 
 from speclet import io
@@ -25,10 +26,15 @@ from speclet.modeling.fitting_arguments import (
 from speclet.modeling.model_fitting_api import fit_model
 from speclet.project_enums import ModelFitMethod
 
+# ---- Setup ----
+
+
+load_dotenv()
 cli_helpers.configure_pretty()
 app = Typer()
 
-#### ---- Main ---- ####
+
+# ---- Helpers ----
 
 
 def _read_crispr_screen_data(file: io.DataFile) -> pd.DataFrame:
@@ -58,6 +64,9 @@ def _augment_sampling_kwargs(
         )
 
     return sampling_kwargs
+
+
+# ---- Main ----
 
 
 @app.command()

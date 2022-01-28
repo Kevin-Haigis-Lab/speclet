@@ -12,12 +12,14 @@ from stan.model import Model as StanModel
 
 from speclet.bayesian_models import BayesianModelProtocol
 from speclet.loggers import logger
+from speclet.modeling.custom_pymc3_callbacks import ProgressPrinterCallback
 from speclet.modeling.fitting_arguments import (
     ModelingSamplingArguments,
     Pymc3FitArguments,
     Pymc3SampleArguments,
     StanMCMCSamplingArguments,
 )
+from speclet.project_configuration import on_o2
 from speclet.project_enums import ModelFitMethod, assert_never
 from speclet.utils.general import resolve_optional_kwargs
 
@@ -72,6 +74,16 @@ def _update_return_inferencedata_kwarg(
     return sampling_kwargs
 
 
+def _specific_o2_progress(sampling_kwargs: dict[str, Any]) -> None:
+    if "callback" in sampling_kwargs:
+        return
+    if not on_o2():
+        return
+    sampling_kwargs["callback"] = ProgressPrinterCallback()
+    sampling_kwargs["progressbar"] = False
+    return
+
+
 def fit_pymc3_mcmc(
     model: pm.Model,
     prior_pred_samples: Optional[int] = None,
@@ -93,6 +105,8 @@ def fit_pymc3_mcmc(
     sampling_kwargs = _update_return_inferencedata_kwarg(sampling_kwargs)
     kwargs = _get_kwargs_dict(sampling_kwargs)
     random_seed = kwargs.get("random_seed", None)
+
+    _specific_o2_progress(kwargs)
 
     with model:
         trace = pm.sample(**kwargs)

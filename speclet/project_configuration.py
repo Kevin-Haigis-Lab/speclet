@@ -1,5 +1,6 @@
 """Read project configuration."""
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -100,3 +101,18 @@ def get_bayesian_modeling_constants() -> BayesianModelingConstants:
 def get_model_configuration_file() -> Path:
     """Get the default model configuration file for the project."""
     return read_project_configuration().modeling.models_config
+
+
+# ---- Not in the YAML file ----
+
+
+def on_o2() -> bool:
+    """Determine if on O2 or not.
+
+    Returns:
+        bool: Whether the current program is running on O2.
+    """
+    hostname = os.getenv("HOSTNAME")
+    if hostname is None:
+        return False
+    return "o2.rc.hms.harvard.edu" in hostname.lower()
