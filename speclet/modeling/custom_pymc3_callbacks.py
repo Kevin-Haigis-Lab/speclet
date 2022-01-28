@@ -1,6 +1,8 @@
 """Sampling and fitting callbacks for PyMC3 models."""
 
+from collections import defaultdict
 from datetime import datetime
+from typing import DefaultDict
 
 from pymc3.backends.ndarray import NDArray
 from pymc3.parallel_sampling import Draw
@@ -86,7 +88,7 @@ class ProgressPrinterCallback:
 
     every_n: int
     tuning: bool
-    _num_divergences: int
+    _num_divergences: DefaultDict[int, int]
 
     def __init__(self, every_n: int = 50, tuning: bool = True) -> None:
         """Create a ProgressPrinterCallback object.
@@ -97,7 +99,7 @@ class ProgressPrinterCallback:
         """
         self.every_n = every_n
         self.tuning = tuning
-        self._num_divergences = 0
+        self._num_divergences = defaultdict(lambda: 0)
         return None
 
     def __call__(self, trace: NDArray, draw: Draw) -> None:
@@ -112,9 +114,9 @@ class ProgressPrinterCallback:
 
         if not draw.tuning:
             # Do not count divergences during tuning.
-            self._num_divergences += draw.stats[0]["diverging"]
+            self._num_divergences[draw.chain] += draw.stats[0]["diverging"]
 
         if draw.draw_idx % self.every_n == 0 or draw.is_last:
-            _print_draw_table(draw, n_divergences=self._num_divergences)
+            _print_draw_table(draw, n_divergences=self._num_divergences[draw.chain])
 
         return None
