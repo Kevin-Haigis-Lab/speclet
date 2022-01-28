@@ -283,9 +283,21 @@ class CrisprScreenDataManager:
                     coerce=True,
                 ),
                 "copy_number": Column(
-                    float, checks=[check_finite(), check_nonnegative()]
+                    float,
+                    checks=[
+                        check_finite(nullable=True),
+                        check_nonnegative(nullable=True),
+                    ],
+                    nullable=True,
                 ),
-                "rna_expr": Column(float, checks=[check_finite(), check_nonnegative()]),
+                "rna_expr": Column(
+                    float,
+                    checks=[
+                        check_finite(nullable=True),
+                        check_nonnegative(nullable=True),
+                    ],
+                    nullable=True,
+                ),
                 "num_mutations": Column(
                     int, checks=[check_nonnegative(), check_finite()]
                 ),
