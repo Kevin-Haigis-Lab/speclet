@@ -86,19 +86,23 @@ def fit_bayesian_model(
         cache ID. Defaults to None which results in using the `name` for the cache name.
     """
     tic = time()
-
+    logger.info("Reading model configuration.")
     config = model_config.get_configuration_for_model(
         config_path=config_path, name=name
     )
     assert config is not None
+    logger.info("Loading data.")
     data = _read_crispr_screen_data(config.data_file)
+    logger.info("Retrieving Bayesian model object.")
     model = get_bayesian_model(config.model)()
 
+    logger.info("Augmenting sampling kwargs (MCMC chains and cores).")
     sampling_kwargs_adj = _augment_sampling_kwargs(
         config.sampling_kwargs,
         mcmc_chains=mcmc_chains,
         mcmc_cores=mcmc_cores,
     )
+    logger.info("Sampling model.")
     trace = fit_model(
         model=model,
         data=data,
@@ -106,11 +110,14 @@ def fit_bayesian_model(
         sampling_kwargs=sampling_kwargs_adj,
     )
 
+    logger.info("Sampling finished.")
     print(trace.posterior.data_vars)
 
     if cache_name is None:
+        logger.warn("No cache name provided - one will be generated automatically.")
         cache_name = get_posterior_cache_name(model_name=name, fit_method=fit_method)
 
+    logger.info(f"Caching posterior data: '{str(cache_name)}'")
     cache_posterior(trace, id=cache_name, cache_dir=cache_dir)
 
     toc = time()
