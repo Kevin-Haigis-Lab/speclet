@@ -69,11 +69,11 @@ def get_memory(w: Wildcards, fit_method: ModelFitMethod) -> str:
 
 
 def get_time(w: Wildcards, fit_method: ModelFitMethod) -> str:
-    return create_resource_manager(w=w, fit_method=fit_method).memory
+    return create_resource_manager(w=w, fit_method=fit_method).time
 
 
 def get_partition(w: Wildcards, fit_method: ModelFitMethod) -> str:
-    return create_resource_manager(w=w, fit_method=fit_method).memory
+    return create_resource_manager(w=w, fit_method=fit_method).partition
 
 
 #### ---- Rules ---- ####
