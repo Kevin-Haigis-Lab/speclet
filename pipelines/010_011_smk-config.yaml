@@ -7,9 +7,9 @@ __default__:
   err: "logs/%j_{rule}.log"
   mail: "NONE"
   J: "snakejob"
-rule sample_stan_mcmc:
+sample_stan_mcmc:
   partition: "{params.partition}"
-  cores: 1
+  cores: 2
   mem: "{params.mem}"
   time: "{params.time}"
   J: "stan-mc"
@@ -19,9 +19,9 @@ combine_stan_mcmc:
   mem: "32000"
   time: "00:15:00"
   J: "stan-comb"
-rule sample_pymc_mcmc:
+sample_pymc3_mcmc:
   partition: "{params.partition}"
-  cores: 1
+  cores: 2
   mem: "{params.mem}"
   time: "{params.time}"
   J: "pymc-mc"
