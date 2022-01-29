@@ -19,7 +19,7 @@ from speclet.modeling.fitting_arguments import (
     Pymc3SampleArguments,
     StanMCMCSamplingArguments,
 )
-from speclet.project_configuration import on_o2
+from speclet.project_configuration import on_hms_cluster
 from speclet.project_enums import ModelFitMethod, assert_never
 from speclet.utils.general import resolve_optional_kwargs
 
@@ -77,7 +77,7 @@ def _update_return_inferencedata_kwarg(
 def _specific_o2_progress(sampling_kwargs: dict[str, Any]) -> None:
     if "callback" in sampling_kwargs:
         return
-    if not on_o2():
+    if not on_hms_cluster():
         return
     sampling_kwargs["callback"] = ProgressPrinterCallback()
     sampling_kwargs["progressbar"] = False

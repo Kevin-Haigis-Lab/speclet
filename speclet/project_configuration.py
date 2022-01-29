@@ -106,13 +106,11 @@ def get_model_configuration_file() -> Path:
 # ---- Not in the YAML file ----
 
 
-def on_o2() -> bool:
-    """Determine if on O2 or not.
+def on_hms_cluster() -> bool:
+    """Determine if on the HMS cluster or not.
 
     Returns:
-        bool: Whether the current program is running on O2.
+        bool: Whether the current program is running on the HMS cluster.
     """
-    hostname = os.getenv("HOSTNAME")
-    if hostname is None:
-        return False
-    return "o2.rc.hms.harvard.edu" in hostname.lower()
+    env_var = "HMS_CLUSTER"
+    return os.getenv(env_var) is not None
