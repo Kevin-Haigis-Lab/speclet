@@ -39,14 +39,14 @@ def margin(
     return {"t": t, "b": b, "l": l, "r": r, "units": units.value}
 
 
-def set_gg_theme(figure_size: tuple[float, float] = (4, 4)) -> None:
+def set_gg_theme(figure_size: tuple[float, float] = (4.0, 4.0)) -> None:
     """Set the default plotnine theme.
 
     Args:
         figure_size (tuple[float, float], optional): Figure size. Defaults to (4, 4).
     """
     gg.theme_set(
-        gg.theme_classic()
+        gg.theme_bw()
         + gg.theme(
             figure_size=figure_size,
             axis_ticks_major=gg.element_blank(),

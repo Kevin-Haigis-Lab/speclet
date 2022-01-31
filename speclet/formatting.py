@@ -4,6 +4,8 @@ from datetime import timedelta
 from enum import Enum, unique
 from typing import Callable, Optional, Union
 
+from IPython.display import Markdown, display
+
 
 @unique
 class TimeDeltaFormat(str, Enum):
@@ -44,3 +46,12 @@ def format_timedelta(
     if callback is not None:
         callback(d)
     return fmt.format(**d)
+
+
+def print_md(text: str) -> None:
+    """Print text in IPython as markdown.
+
+    Args:
+        text (str): Text to print.
+    """
+    display(Markdown(text))

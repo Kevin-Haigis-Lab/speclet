@@ -20,11 +20,12 @@ class StanMCMCSamplingArguments(BaseModel):
     num_chains: PositiveInt = 4
     num_samples: PositiveInt = 1000
     num_warmup: PositiveInt = 1000
-    save_warmup: bool = False
+    save_warmup: int = 0
     num_thin: int = 1
     delta: TargetAcceptFloat = 0.8  # type: ignore
     max_depth: PositiveInt = 10
     random_seed: PositiveInt = Field(default_factory=_randint)
+    refresh: PositiveInt = 100
 
 
 class Pymc3SampleArguments(BaseModel):

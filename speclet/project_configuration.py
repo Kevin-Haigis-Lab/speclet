@@ -1,5 +1,6 @@
 """Read project configuration."""
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -100,3 +101,16 @@ def get_bayesian_modeling_constants() -> BayesianModelingConstants:
 def get_model_configuration_file() -> Path:
     """Get the default model configuration file for the project."""
     return read_project_configuration().modeling.models_config
+
+
+# ---- Not in the YAML file ----
+
+
+def on_hms_cluster() -> bool:
+    """Determine if on the HMS cluster or not.
+
+    Returns:
+        bool: Whether the current program is running on the HMS cluster.
+    """
+    env_var = "HMS_CLUSTER"
+    return os.getenv(env_var) is not None

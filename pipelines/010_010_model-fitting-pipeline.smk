@@ -23,7 +23,7 @@ N_CHAINS = pipeline_config.num_chains
 DEBUG = pipeline_config.debug
 
 # Directory and file paths.
-TEMP_DIR = pipeline_config.temp_dir  # TODO: on 02, symlink to Scratch.
+TEMP_DIR = pipeline_config.temp_dir
 MODEL_CACHE_DIR = pipeline_config.model_cache_dir
 REPORTS_DIR = pipeline_config.reports_dir
 ENVIRONMENT_YAML = str(pipeline_config.env_yaml)
@@ -69,11 +69,11 @@ def get_memory(w: Wildcards, fit_method: ModelFitMethod) -> str:
 
 
 def get_time(w: Wildcards, fit_method: ModelFitMethod) -> str:
-    return create_resource_manager(w=w, fit_method=fit_method).memory
+    return create_resource_manager(w=w, fit_method=fit_method).time
 
 
 def get_partition(w: Wildcards, fit_method: ModelFitMethod) -> str:
-    return create_resource_manager(w=w, fit_method=fit_method).memory
+    return create_resource_manager(w=w, fit_method=fit_method).partition
 
 
 #### ---- Rules ---- ####
@@ -100,7 +100,7 @@ rule all:
 rule sample_stan_mcmc:
     output:
         idata_path=str(
-            TEMP_DIR / "{model_name}_STAN_MCMC_chain{chain}" / "posterior.json"
+            TEMP_DIR / "{model_name}_STAN_MCMC_chain{chain}" / "posterior.netcdf"
         ),
     params:
         mem=lambda w: get_memory(w, ModelFitMethod.STAN_MCMC),
@@ -128,12 +128,14 @@ rule sample_stan_mcmc:
 rule combine_stan_mcmc:
     input:
         chains=expand(
-            str(TEMP_DIR / "{{model_name}}_STAN_MCMC_chain{chain}" / "posterior.json"),
+            str(
+                TEMP_DIR / "{{model_name}}_STAN_MCMC_chain{chain}" / "posterior.netcdf"
+            ),
             chain=list(range(N_CHAINS)),
         ),
     output:
         combined_chains=str(
-            MODEL_CACHE_DIR / "{model_name}_STAN_MCMC" / "posterior.json"
+            MODEL_CACHE_DIR / "{model_name}_STAN_MCMC" / "posterior.netcdf"
         ),
     params:
         n_chains=N_CHAINS,
@@ -158,7 +160,7 @@ rule combine_stan_mcmc:
 rule sample_pymc3_mcmc:
     output:
         idata_path=str(
-            TEMP_DIR / "{model_name}_PYMC3_MCMC_chain{chain}" / "posterior.json"
+            TEMP_DIR / "{model_name}_PYMC3_MCMC_chain{chain}" / "posterior.netcdf"
         ),
     params:
         mem=lambda w: get_memory(w, ModelFitMethod.PYMC3_MCMC),
@@ -188,13 +190,15 @@ rule combine_pymc3_mcmc:
     input:
         chains=expand(
             str(
-                TEMP_DIR / "{{model_name}}_PYMC3_MCMC_chain{chain}" / "posterior.json"
+                TEMP_DIR
+                / "{{model_name}}_PYMC3_MCMC_chain{chain}"
+                / "posterior.netcdf"
             ),
             chain=list(range(N_CHAINS)),
         ),
     output:
         combined_chains=str(
-            MODEL_CACHE_DIR / "{model_name}_PYMC3_MCMC" / "posterior.json"
+            MODEL_CACHE_DIR / "{model_name}_PYMC3_MCMC" / "posterior.netcdf"
         ),
     params:
         n_chains=N_CHAINS,
@@ -219,7 +223,7 @@ rule combine_pymc3_mcmc:
 
 rule sample_pymc3_advi:
     output:
-        idata_path=str(MODEL_CACHE_DIR / "{model_name}_PYMC3_ADVI" / "posterior.json"),
+        idata_path=str(MODEL_CACHE_DIR / "{model_name}_PYMC3_ADVI" / "posterior.netcdf"),
     params:
         mem=lambda w: get_memory(w, ModelFitMethod.PYMC3_ADVI),
         time=lambda w: get_time(w, ModelFitMethod.PYMC3_ADVI),
@@ -267,7 +271,9 @@ rule papermill_report:
 
 rule execute_report:
     input:
-        idata_path=str(MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "posterior.json"),
+        idata_path=str(
+            MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "posterior.netcdf"
+        ),
         notebook=rules.papermill_report.output.notebook,
     output:
         markdown=str(REPORTS_DIR / "{model_name}_{fit_method}.md"),
@@ -293,5 +299,5 @@ onsuccess:
     shell(run_benchmark_nb_cmd)
 
 
-onerror:
-    shell(run_benchmark_nb_cmd)
+# onerror:
+#     shell(run_benchmark_nb_cmd)

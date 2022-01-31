@@ -277,27 +277,27 @@ benchmark_df.groupby(["pipeline", "rule"]).mean().round(2)
     </tr>
     <tr>
       <th>sample_pymc3_mcmc</th>
-      <td>228.63</td>
-      <td>385.99</td>
-      <td>979.62</td>
-      <td>340.08</td>
-      <td>361.68</td>
-      <td>9.98</td>
-      <td>171.55</td>
-      <td>12.26</td>
-      <td>24.86</td>
+      <td>216.78</td>
+      <td>368.32</td>
+      <td>1020.36</td>
+      <td>336.46</td>
+      <td>349.71</td>
+      <td>184.28</td>
+      <td>65.66</td>
+      <td>55.74</td>
+      <td>117.33</td>
     </tr>
     <tr>
       <th>sample_stan_mcmc</th>
-      <td>47.53</td>
-      <td>806.60</td>
-      <td>2187.02</td>
-      <td>602.32</td>
-      <td>704.21</td>
-      <td>117.32</td>
-      <td>126.24</td>
-      <td>31.34</td>
-      <td>14.68</td>
+      <td>179.14</td>
+      <td>724.40</td>
+      <td>2014.28</td>
+      <td>428.20</td>
+      <td>574.09</td>
+      <td>246.31</td>
+      <td>83.27</td>
+      <td>67.69</td>
+      <td>160.94</td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">010_010_run-crc-sampling-snakemake</th>
@@ -472,7 +472,7 @@ sns.catplot(
 )
 ```
 
-    <seaborn.axisgrid.FacetGrid at 0x7f5be94938e0>
+    <seaborn.axisgrid.FacetGrid at 0x7ff82c6b8670>
 
 ![png](benchmarks_files/benchmarks_13_1.png)
 
@@ -483,7 +483,7 @@ sns.catplot(
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-01-18
+    Last updated: 2022-01-29
 
     Python implementation: CPython
     Python version       : 3.9.9
@@ -497,13 +497,13 @@ sns.catplot(
     CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-e-16-237.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
 
-    Git branch: run-on-o2
+    Git branch: nb-model
 
     janitor: 0.22.0
-    seaborn: 0.11.2
     pandas : 1.3.5
+    seaborn: 0.11.2
 
 ```python
 

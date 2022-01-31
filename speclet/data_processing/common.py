@@ -47,6 +47,19 @@ def get_indices(df: pd.DataFrame, col: str) -> np.ndarray:
     return df[col].cat.codes.to_numpy()
 
 
+def get_cats(df: pd.DataFrame, col: str) -> list[str]:
+    """Get the categories from a categorical column.
+
+    Args:
+        df (pd.DataFrame): Pandas data frame.
+        col (str): Column name.
+
+    Returns:
+        list[str]: List of categories.
+    """
+    return df[col].cat.categories.to_list()
+
+
 def get_indices_and_count(df: pd.DataFrame, col: str) -> tuple[np.ndarray, int]:
     """Get the indices and number of unique values for a categorical column.
 

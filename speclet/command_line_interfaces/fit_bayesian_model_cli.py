@@ -8,6 +8,7 @@ from time import time
 from typing import Optional
 
 import pandas as pd
+from dotenv import load_dotenv
 from typer import Typer
 
 from speclet import io
@@ -18,13 +19,22 @@ from speclet.loggers import logger
 from speclet.managers.cache_manager import cache_posterior, get_posterior_cache_name
 from speclet.managers.data_managers import CrisprScreenDataManager
 from speclet.model_configuration import ModelingSamplingArguments
+from speclet.modeling.fitting_arguments import (
+    Pymc3SampleArguments,
+    StanMCMCSamplingArguments,
+)
 from speclet.modeling.model_fitting_api import fit_model
 from speclet.project_enums import ModelFitMethod
 
+# ---- Setup ----
+
+
+load_dotenv()
 cli_helpers.configure_pretty()
 app = Typer()
 
-#### ---- Main ---- ####
+
+# ---- Helpers ----
 
 
 def _read_crispr_screen_data(file: io.DataFile) -> pd.DataFrame:
@@ -38,13 +48,25 @@ def _augment_sampling_kwargs(
     mcmc_cores: int,
 ) -> Optional[ModelingSamplingArguments]:
     if sampling_kwargs is None:
-        return None
+        sampling_kwargs = ModelingSamplingArguments()
+
     if sampling_kwargs.stan_mcmc is not None:
         sampling_kwargs.stan_mcmc.num_chains = mcmc_chains
+    else:
+        sampling_kwargs.stan_mcmc = StanMCMCSamplingArguments(num_chains=mcmc_chains)
+
     if sampling_kwargs.pymc3_mcmc is not None:
         sampling_kwargs.pymc3_mcmc.chains = mcmc_chains
         sampling_kwargs.pymc3_mcmc.cores = mcmc_cores
+    else:
+        sampling_kwargs.pymc3_mcmc = Pymc3SampleArguments(
+            chains=mcmc_chains, cores=mcmc_cores
+        )
+
     return sampling_kwargs
+
+
+# ---- Main ----
 
 
 @app.command()
@@ -73,28 +95,39 @@ def fit_bayesian_model(
         cache ID. Defaults to None which results in using the `name` for the cache name.
     """
     tic = time()
-
+    logger.info("Reading model configuration.")
     config = model_config.get_configuration_for_model(
         config_path=config_path, name=name
     )
     assert config is not None
+    logger.info("Loading data.")
     data = _read_crispr_screen_data(config.data_file)
+    logger.info("Retrieving Bayesian model object.")
     model = get_bayesian_model(config.model)()
 
+    logger.info("Augmenting sampling kwargs (MCMC chains and cores).")
     sampling_kwargs_adj = _augment_sampling_kwargs(
-        config.sampling_kwargs, mcmc_chains=mcmc_chains, mcmc_cores=mcmc_cores
+        config.sampling_kwargs,
+        mcmc_chains=mcmc_chains,
+        mcmc_cores=mcmc_cores,
     )
-    posterior = fit_model(
+    logger.info("Sampling model.")
+    trace = fit_model(
         model=model,
         data=data,
         fit_method=fit_method,
         sampling_kwargs=sampling_kwargs_adj,
     )
 
+    logger.info("Sampling finished.")
+    print(trace.posterior.data_vars)
+
     if cache_name is None:
+        logger.warn("No cache name provided - one will be generated automatically.")
         cache_name = get_posterior_cache_name(model_name=name, fit_method=fit_method)
 
-    cache_posterior(posterior, id=cache_name, cache_dir=cache_dir)
+    logger.info(f"Caching posterior data: '{str(cache_name)}'")
+    cache_posterior(trace, id=cache_name, cache_dir=cache_dir)
 
     toc = time()
     logger.info(f"finished; execution time: {(toc - tic) / 60:.2f} minutes")

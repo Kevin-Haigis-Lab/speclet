@@ -61,7 +61,10 @@ class NegativeBinomialModel:
 
     def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
-        return ["~reciprocal_phi", "~mu"]
+        _vars = ["~^mu$"]
+        if fit_method is ModelFitMethod.STAN_MCMC:
+            _vars += ["~^reciprocal_phi$", "~^log_lik$", "~^y_hat$"]
+        return _vars
 
     def _validate_data(self, data: pd.DataFrame) -> pd.DataFrame:
         return self.data_schema.validate(data)
@@ -112,8 +115,7 @@ class NegativeBinomialModel:
             self.stan_code, data=asdict(model_data), random_seed=random_seed
         )
 
-    @property
-    def stan_idata_addons(self) -> dict[str, Any]:
+    def stan_idata_addons(self, data: pd.DataFrame) -> dict[str, Any]:
         """Information to add to the InferenceData posterior object."""
         return {
             "posterior_predictive": ["y_hat"],
@@ -123,9 +125,7 @@ class NegativeBinomialModel:
         }
 
     def pymc3_model(self, data: pd.DataFrame) -> pm.Model:
-        """PyMC3  model for a simple negative binomial model.
-
-        Not implemented.
+        """PyMC3 model for a simple negative binomial model.
 
         Args:
             data (pd.DataFrame): Data to model.

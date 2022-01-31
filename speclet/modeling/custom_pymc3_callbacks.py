@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
-
 """Sampling and fitting callbacks for PyMC3 models."""
 
+from collections import defaultdict
 from datetime import datetime
+from typing import DefaultDict
 
 from pymc3.backends.ndarray import NDArray
 from pymc3.parallel_sampling import Draw
@@ -65,16 +65,30 @@ class DivergenceFractionCallback:
             raise TooManyDivergences(msg)
 
 
-def _print_draw_table(draw: Draw) -> None:
+def _print_draw_table(draw: Draw, n_divergences: int) -> None:
     tuning = "tune" if draw.tuning else "sampling"
-    print(f"{str(datetime.now())}, chain {draw.chain}, draw {draw.draw_idx}, {tuning}")
+    msg = ", ".join(
+        [
+            f"{str(datetime.now())}",
+            f"chain={draw.chain}",
+            f"draw={draw.draw_idx}",
+            tuning,
+            f"divergences={n_divergences}",
+        ]
+    )
+    return print(msg)
 
 
 class ProgressPrinterCallback:
-    """A simpler replacement to the progress bar for use in log files."""
+    """A simpler replacement to the progress bar for use in log files.
+
+    With this callback, it is recommended to set `progressbar=False` in
+    `pymc3.sample()`.
+    """
 
     every_n: int
     tuning: bool
+    _num_divergences: DefaultDict[int, int]
 
     def __init__(self, every_n: int = 50, tuning: bool = True) -> None:
         """Create a ProgressPrinterCallback object.
@@ -85,6 +99,7 @@ class ProgressPrinterCallback:
         """
         self.every_n = every_n
         self.tuning = tuning
+        self._num_divergences = defaultdict(lambda: 0)
         return None
 
     def __call__(self, trace: NDArray, draw: Draw) -> None:
@@ -96,6 +111,12 @@ class ProgressPrinterCallback:
         """
         if not self.tuning and draw.tuning:
             return None
-        if draw.draw_idx % self.every_n == 0:
-            _print_draw_table(draw)
+
+        if not draw.tuning:
+            # Do not count divergences during tuning.
+            self._num_divergences[draw.chain] += draw.stats[0]["diverging"]
+
+        if draw.draw_idx % self.every_n == 0 or draw.is_last:
+            _print_draw_table(draw, n_divergences=self._num_divergences[draw.chain])
+
         return None

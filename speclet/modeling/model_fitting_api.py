@@ -1,7 +1,7 @@
 """Standardization of the interactions with model sampling."""
 
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 import arviz as az
 import numpy as np
@@ -12,20 +12,27 @@ from stan.model import Model as StanModel
 
 from speclet.bayesian_models import BayesianModelProtocol
 from speclet.loggers import logger
+from speclet.modeling.custom_pymc3_callbacks import ProgressPrinterCallback
 from speclet.modeling.fitting_arguments import (
     ModelingSamplingArguments,
     Pymc3FitArguments,
     Pymc3SampleArguments,
     StanMCMCSamplingArguments,
 )
+from speclet.project_configuration import on_hms_cluster
 from speclet.project_enums import ModelFitMethod, assert_never
 from speclet.utils.general import resolve_optional_kwargs
 
 
-def _get_kwargs_dict(data: Optional[BaseModel]) -> dict[str, Any]:
+def _get_kwargs_dict(
+    data: Optional[Union[BaseModel, dict[str, Any]]]
+) -> dict[str, Any]:
     if data is None:
         return {}
-    return data.dict()
+    elif isinstance(data, BaseModel):
+        return data.dict()
+    else:
+        return data
 
 
 # ---- Result Types ---- #
@@ -67,10 +74,20 @@ def _update_return_inferencedata_kwarg(
     return sampling_kwargs
 
 
+def _specific_o2_progress(sampling_kwargs: dict[str, Any]) -> None:
+    if "callback" in sampling_kwargs:
+        return
+    if not on_hms_cluster():
+        return
+    sampling_kwargs["callback"] = ProgressPrinterCallback(every_n=5)
+    sampling_kwargs["progressbar"] = False
+    return
+
+
 def fit_pymc3_mcmc(
     model: pm.Model,
     prior_pred_samples: Optional[int] = None,
-    sampling_kwargs: Optional[Pymc3SampleArguments] = None,
+    sampling_kwargs: Optional[Union[Pymc3SampleArguments, dict[str, Any]]] = None,
 ) -> az.InferenceData:
     """Run a standardized PyMC3 sampling procedure.
 
@@ -88,6 +105,8 @@ def fit_pymc3_mcmc(
     sampling_kwargs = _update_return_inferencedata_kwarg(sampling_kwargs)
     kwargs = _get_kwargs_dict(sampling_kwargs)
     random_seed = kwargs.get("random_seed", None)
+
+    _specific_o2_progress(kwargs)
 
     with model:
         trace = pm.sample(**kwargs)
@@ -113,7 +132,7 @@ def fit_pymc3_mcmc(
 def fit_pymc3_vi(
     model: pm.Model,
     prior_pred_samples: Optional[int] = None,
-    fit_kwargs: Optional[Pymc3FitArguments] = None,
+    fit_kwargs: Optional[Union[Pymc3FitArguments, dict[str, Any]]] = None,
 ) -> ApproximationSamplingResults:
     """Run a standard PyMC3 ADVI fitting procedure.
 
@@ -159,7 +178,7 @@ def fit_pymc3_vi(
 
 def fit_stan_mcmc(
     stan_model: StanModel,
-    sampling_kwargs: Optional[StanMCMCSamplingArguments] = None,
+    sampling_kwargs: Optional[Union[StanMCMCSamplingArguments, dict[str, Any]]] = None,
     az_kwargs: Optional[dict[str, Any]] = None,
 ) -> az.InferenceData:
     """Fit a Stan model.
@@ -208,7 +227,9 @@ def fit_model(
         seed = None if kwargs is None else kwargs.random_seed
         stan_model = model.stan_model(data=data, random_seed=seed)
         posterior = fit_stan_mcmc(
-            stan_model, sampling_kwargs=kwargs, az_kwargs=model.stan_idata_addons
+            stan_model,
+            sampling_kwargs=kwargs,
+            az_kwargs=model.stan_idata_addons(data=data),
         )
         return posterior
     elif fit_method is ModelFitMethod.PYMC3_MCMC:
