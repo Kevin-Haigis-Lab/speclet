@@ -79,7 +79,7 @@ def _specific_o2_progress(sampling_kwargs: dict[str, Any]) -> None:
         return
     if not on_hms_cluster():
         return
-    sampling_kwargs["callback"] = ProgressPrinterCallback()
+    sampling_kwargs["callback"] = ProgressPrinterCallback(every_n=5)
     sampling_kwargs["progressbar"] = False
     return
 

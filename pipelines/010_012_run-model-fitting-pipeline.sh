@@ -9,7 +9,7 @@
 #SBATCH -e logs/%j_sample-pipeline.log
 
 module unload python
-module load gcc conda2 slurm-drmaa/1.1.1
+module load gcc conda2 slurm-drmaa/1.1.3
 
 # shellcheck source=/dev/null
 source "$HOME/.bashrc"
@@ -27,9 +27,10 @@ snakemake \
     --rerun-incomplete \
     --use-conda \
     --conda-frontend 'mamba' \
-    --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
+    --drmaa " --account=park -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
     --cluster-config pipelines/010_011_smk-config.yaml \
     --keep-going \
+    --forceall \
     --printshellcmds
 
 # --conda-cleanup-envs  # use to clean up old conda envs
