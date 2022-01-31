@@ -10,7 +10,7 @@ source(".Rprofile")
 library(magrittr)
 library(tidyverse)
 
-
+set.seed(1009)
 
 # ---- Load data ----
 
@@ -35,7 +35,6 @@ write_csv(crc_data, snakemake@output[["crc_subset"]])
 
 # ---- Sub-sample of CRC data ----
 
-set.seed(0)
 
 crc_cell_lines <- sample(unique(crc_data$depmap_id), 10)
 genes <- sample(unique(crc_data$hugo_symbol), 100)
@@ -95,9 +94,20 @@ data %>%
   write_csv(snakemake@output[["crc_bone_subsample"]])
 
 
+# ---- Larger sub-sample of CRC + BONE data ----
+
+cell_lines <- c(unique(bone_data$depmap_id), unique(crc_data$depmap_id))
+
+genes <- sample(unique(data$hugo_symbol), 2000)
+
+data %>%
+  filter(depmap_id %in% !!cell_lines) %>%
+  filter(hugo_symbol %in% !!genes) %>%
+  write_csv(snakemake@output[["crc_bone_large_subsample"]])
+
+
 # ---- Small random subset for Python module testing ----
 
-set.seed(123)
 
 lineages <- sample(unique(data$lineage), 2)
 cell_lines <- data %>%

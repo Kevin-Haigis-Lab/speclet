@@ -133,10 +133,10 @@ rule all:
         MODELING_DATA_DIR / "score_log_fold_change_filtered.csv",
         MODELING_DATA_DIR / "score_read_counts.csv",
         # rules.combine_data
-        MODELING_DATA_DIR / "depmap_modeling_dataframe.csv",
+        MODELING_DATA_DIR / "depmap-modeling-data.csv",
         # rules.modeling_data_subsets.output
-        MODELING_DATA_DIR / "depmap_modeling_dataframe_crc.csv",
-        MODELING_DATA_DIR / "depmap_modeling_dataframe_crc-subsample.csv",
+        MODELING_DATA_DIR / "depmap-modeling-data_crc.csv",
+        MODELING_DATA_DIR / "depmap-modeling-data_crc-subsample.csv",
         TESTS_DIR / "depmap_test_data.csv",
         # rules.auxillary_data_subsets
         MODELING_DATA_DIR / "copy_number_data_samples.npy",
@@ -393,7 +393,7 @@ rule combine_data:
             (TEMP_DIR / "merged_{depmapid}.qs").as_posix(), depmapid=all_depmap_ids
         ),
     output:
-        out_file=MODELING_DATA_DIR / "depmap_modeling_dataframe.csv",
+        out_file=MODELING_DATA_DIR / "depmap-modeling-data.csv",
     script:
         "040_combine-modeling-data.R"
 
@@ -443,15 +443,15 @@ rule modeling_data_subsets:
         check_output=rules.check_depmap_modeling_data.output.output_md,
         modeling_df=rules.combine_data.output.out_file,
     output:
-        crc_subset=MODELING_DATA_DIR / "depmap_modeling_dataframe_crc.csv",
-        crc_subsample=(
-            MODELING_DATA_DIR / "depmap_modeling_dataframe_crc-subsample.csv"
-        ),
-        test_data=TESTS_DIR / "depmap_test_data.csv",
-        bone_subset=MODELING_DATA_DIR / "depmap_modeling_dataframe_bone.csv",
-        crc_bone_subset=MODELING_DATA_DIR / "depmap_modeling_dataframe_crc_bone.csv",
+        crc_subset=MODELING_DATA_DIR / "depmap-modeling-data_crc.csv",
+        crc_subsample=(MODELING_DATA_DIR / "depmap-modeling-data_crc-subsample.csv"),
+        test_data=TESTS_DIR / "depmap-modeling-data_test-data.csv",
+        bone_subset=MODELING_DATA_DIR / "depmap-modeling-data_bone.csv",
+        crc_bone_subset=MODELING_DATA_DIR / "depmap-modeling-data_crc-bone.csv",
         crc_bone_subsample=MODELING_DATA_DIR
-        / "depmap_modeling_dataframe_crc_bone-subsample.csv",
+        / "depmap-modeling-data_crc-bone-subsample.csv",
+        crc_bone_large_subsample=MODELING_DATA_DIR
+        / "depmap-modeling-data_crc-bone-large-subsample.csv",
     script:
         "050_depmap-subset-dataframes.R"
 
