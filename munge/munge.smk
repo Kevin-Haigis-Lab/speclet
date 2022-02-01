@@ -398,23 +398,6 @@ rule combine_data:
         "040_combine-modeling-data.R"
 
 
-rule check_depmap_modeling_data:
-    input:
-        modeling_df=rules.combine_data.output.out_file,
-        check_nb=MUNGE_DIR / "045_check-depmap-modeling-data.ipynb",
-    output:
-        output_md=MUNGE_DIR / "045_check-depmap-modeling-data.md",
-    conda:
-        ENVIRONMENT_YAML
-    version:
-        "1.1"
-    shell:
-        "jupyter nbconvert --to notebook --inplace --execute {input.check_nb} && "
-        "nbqa black {input.check_nb} --nbqa-mutate && "
-        "nbqa isort {input.check_nb} --nbqa-mutate && "
-        "jupyter nbconvert --to markdown {input.check_nb}"
-
-
 rule screen_total_counts_tables:
     input:
         depmap_modeling_df=rules.combine_data.output.out_file,
@@ -435,7 +418,44 @@ rule screen_total_counts_tables:
         " {output.pdna_table_out}"
 
 
-# ---- Generate additional useful files
+# ---- Check modeling data ----
+
+
+rule papermill_check_depmap_modeling_data:
+    input:
+        modeling_df=rules.combine_data.output.out_file,
+        template_nb=MUNGE_DIR / "045_check-depmap-modeling-data_original.ipynb",
+    output:
+        notebook=MUNGE_DIR / "045_check-depmap-modeling-data_exec.ipynb",
+    run:
+        papermill.execute_notebook(
+            input.template_nb,
+            output.notebook,
+            parameters={
+                "DEPMAP_MODELING_DF": input.modeling_df,
+            },
+            prepare_only=True,
+        )
+
+
+rule check_depmap_modeling_data:
+    input:
+        modeling_df=rules.combine_data.output.out_file,
+        check_nb=rules.papermill_check_depmap_modeling_data.output.notebook,
+    output:
+        output_md=MUNGE_DIR / "045_check-depmap-modeling-data_exec.md",
+    conda:
+        ENVIRONMENT_YAML
+    version:
+        "1.1"
+    shell:
+        "jupyter nbconvert --to notebook --inplace --execute {input.check_nb} && "
+        "nbqa black {input.check_nb} --nbqa-mutate && "
+        "nbqa isort {input.check_nb} --nbqa-mutate && "
+        "jupyter nbconvert --to markdown {input.check_nb}"
+
+
+# ---- Generate additional useful files ----
 
 
 rule modeling_data_subsets:
