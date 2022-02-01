@@ -9,7 +9,7 @@
 #SBATCH -e logs/%j_munge-pipeline.log
 
 module unload python
-module load gcc conda2 slurm-drmaa/1.1.1
+module load gcc conda2 slurm-drmaa
 
 # shellcheck source=/dev/null
 source "$HOME/.bashrc"
@@ -23,10 +23,12 @@ snakemake \
     --restart-times 0 \
     --keep-going \
     --latency-wait 120 \
+    --rerun-incomplete \
     --printshellcmds \
     --use-conda \
-    --drmaa " -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
+    --conda-frontend 'mamba' \
+    --drmaa "  --account=park -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
     --cluster-config munge/munge-config.json
 
 conda deactivate
-exit
+exit 123

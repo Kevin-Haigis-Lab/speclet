@@ -25,8 +25,8 @@
         "J": "ach-pdna"
     },
     "collate_score_readcounts": {
-        "mem": "4000",
-        "time": "00:10:00",
+        "mem": "8000",
+        "time": "00:30:00",
         "J": "col-sc-rc"
     },
     "extract_score_pdna": {

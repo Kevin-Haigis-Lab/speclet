@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+import papermill
 from colorama import init, Fore, Back, Style
 
 from speclet import project_configuration as project_config
@@ -114,6 +115,7 @@ if os.getenv("CI") is not None:
 
 localrules:
     all,
+    papermill_check_depmap_modeling_data,
 
 
 rule all:
@@ -432,7 +434,7 @@ rule papermill_check_depmap_modeling_data:
             input.template_nb,
             output.notebook,
             parameters={
-                "DEPMAP_MODELING_DF": input.modeling_df,
+                "DEPMAP_MODELING_DF": "../" + input.modeling_df,
             },
             prepare_only=True,
         )
