@@ -7,7 +7,7 @@ from typing import Any
 import pandas as pd
 from colorama import init, Fore, Back, Style
 
-from src import project_config
+from speclet import project_configuration as project_config
 
 init(autoreset=True)
 
