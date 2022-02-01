@@ -41,8 +41,7 @@ genes <- sample(unique(crc_data$hugo_symbol), 100)
 
 genes <- c(
   genes, "KRAS", "BRAF", "NRAS", "PIK3CA", "TP53", "MDM2", "MDM4", "APC", "FBXW7",
-  "STK11", "PTK2", "CTNNB1", "KLF5",
-  "GATA6"
+  "STK11", "PTK2", "CTNNB1", "KLF5", "GATA6"
 )
 genes <- unique(genes)
 
@@ -50,8 +49,9 @@ sample_sgrna_from_gene <- function(df, genes, n_sgrna) {
   df %>%
     filter(hugo_symbol %in% !!genes) %>%
     distinct(hugo_symbol, sgrna) %>%
+    slice_sample(prop = 1) %>%
     group_by(hugo_symbol) %>%
-    sample_n(n_sgrna) %>%
+    slice_head(n = n_sgrna) %>%
     pull(sgrna) %>%
     unlist()
 }
