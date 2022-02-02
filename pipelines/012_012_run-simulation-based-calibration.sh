@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Run SBC pipeline.
+
 #SBATCH --account=park
 #SBATCH -c 1
 #SBATCH -p priority
@@ -8,8 +10,7 @@
 #SBATCH -o logs/%j-sbc-snakemake.log
 #SBATCH -e logs/%j-sbc-snakemake.log
 
-module unload python
-module load gcc conda2 slurm-drmaa/1.1.1
+module load conda2 slurm-drmaa
 
 # shellcheck source=/dev/null
 source "$HOME/.bashrc"
@@ -38,13 +39,11 @@ snakemake \
 
 # --conda-cleanup-envs  # use to clean up old conda envs
 
-
 # to make a dag
 # snakemake \
 #   --snakefile $SNAKEFILE \
 #   --dag |  \
 #   dot -Tpdf > analysis/015_snakemake-dag.pdf
-
 
 conda deactivate
 exit 44

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Run model fitting pipeline.
+
 #SBATCH --account=park
 #SBATCH -c 2
 #SBATCH -p priority
@@ -8,15 +10,13 @@
 #SBATCH -o logs/%j_sample-pipeline.log
 #SBATCH -e logs/%j_sample-pipeline.log
 
-module unload python
-module load gcc conda2 slurm-drmaa/1.1.3
+module load conda2 slurm-drmaa
 
 # shellcheck source=/dev/null
 source "$HOME/.bashrc"
 conda activate speclet_smk
 
 SNAKEFILE="pipelines/010_010_model-fitting-pipeline.smk"
-
 ENV_PATH="pipelines/default_environment.yaml"
 
 snakemake \
