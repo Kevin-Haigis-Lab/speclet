@@ -123,7 +123,7 @@ def fit_bayesian_model(
     print(trace.posterior.data_vars)
 
     if cache_name is None:
-        logger.warn("No cache name provided - one will be generated automatically.")
+        logger.warning("No cache name provided - one will be generated automatically.")
         cache_name = get_posterior_cache_name(model_name=name, fit_method=fit_method)
 
     logger.info(f"Caching posterior data: '{str(cache_name)}'")

@@ -17,6 +17,7 @@ class DataFile(Enum):
     DEPMAP_CRC_BONE = "DEPMAP_CRC_BONE"
     DEPMAP_CRC_SUBSAMPLE = "DEPMAP_CRC_SUBSAMPLE"
     DEPMAP_CRC_BONE_SUBSAMPLE = "DEPMAP_CRC_BONE_SUBSAMPLE"
+    DEPMAP_CRC_BONE_LARGE_SUBSAMPLE = "DEPMAP_CRC_BONE_LARGE_SUBSAMPLE"
     DEPMAP_DATA = "DEPMAP_DATA"
     DEPMAP_ESSENTIALS = "DEPMAP_ESSENTIALS"
     DEPMAP_TEST_DATA = "DEPMAP_TEST_DATA"
@@ -30,13 +31,14 @@ class DataFile(Enum):
 
 
 _data_file_map: Final[dict[DataFile, str]] = {
-    DataFile.DEPMAP_CRC: "depmap_modeling_dataframe_crc.csv",
-    DataFile.DEPMAP_CRC_BONE: "depmap_modeling_dataframe_crc_bone.csv",
-    DataFile.DEPMAP_CRC_SUBSAMPLE: "depmap_modeling_dataframe_crc-subsample.csv",
-    DataFile.DEPMAP_CRC_BONE_SUBSAMPLE: "depmap_modeling_dataframe_crc_bone-subsample.csv",  # noqa: B950,E501
-    DataFile.DEPMAP_DATA: "depmap_modeling_dataframe.csv",
+    DataFile.DEPMAP_CRC: "depmap-modeling-data_crc.csv",
+    DataFile.DEPMAP_CRC_BONE: "depmap-modeling-data_crc_bone.csv",
+    DataFile.DEPMAP_CRC_SUBSAMPLE: "depmap-modeling-data_crc-subsample.csv",
+    DataFile.DEPMAP_CRC_BONE_SUBSAMPLE: "depmap-modeling-data_crc_bone-subsample.csv",
+    DataFile.DEPMAP_CRC_BONE_LARGE_SUBSAMPLE: "depmap-modeling-data_crc-bone-large-subsample.csv",  # noqa: B950,E501
+    DataFile.DEPMAP_DATA: "depmap-modeling-data.csv",
     DataFile.DEPMAP_ESSENTIALS: "known_essentials.csv",
-    DataFile.DEPMAP_TEST_DATA: "depmap_test_data.csv",
+    DataFile.DEPMAP_TEST_DATA: "depmap-modeling-data_test-data.csv",
     DataFile.ACHILLES_GENE_EFFECT: "achilles_gene_effect.csv",
     DataFile.CCLE_MUTATIONS: "ccle_mutations.csv",
     DataFile.CCLE_COPYNUMBER: "ccle_gene_cn.csv",
