@@ -32,9 +32,9 @@ class DataFile(Enum):
 
 _data_file_map: Final[dict[DataFile, str]] = {
     DataFile.DEPMAP_CRC: "depmap-modeling-data_crc.csv",
-    DataFile.DEPMAP_CRC_BONE: "depmap-modeling-data_crc_bone.csv",
+    DataFile.DEPMAP_CRC_BONE: "depmap-modeling-data_crc-bone.csv",
     DataFile.DEPMAP_CRC_SUBSAMPLE: "depmap-modeling-data_crc-subsample.csv",
-    DataFile.DEPMAP_CRC_BONE_SUBSAMPLE: "depmap-modeling-data_crc_bone-subsample.csv",
+    DataFile.DEPMAP_CRC_BONE_SUBSAMPLE: "depmap-modeling-data_crc-bone-subsample.csv",
     DataFile.DEPMAP_CRC_BONE_LARGE_SUBSAMPLE: "depmap-modeling-data_crc-bone-large-subsample.csv",  # noqa: B950,E501
     DataFile.DEPMAP_DATA: "depmap-modeling-data.csv",
     DataFile.DEPMAP_ESSENTIALS: "known_essentials.csv",
