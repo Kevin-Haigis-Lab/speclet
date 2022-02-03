@@ -2,6 +2,7 @@
 
 # Run model fitting pipeline.
 
+#SBATCH --job-name=fit-pipe
 #SBATCH --account=park
 #SBATCH -c 2
 #SBATCH -p priority
@@ -10,7 +11,7 @@
 #SBATCH -o logs/%j_sample-pipeline.log
 #SBATCH -e logs/%j_sample-pipeline.log
 
-module load conda2 slurm-drmaa
+module load gcc/6.2.0 slurm-drmaa/1.1.3 conda2
 
 # shellcheck source=/dev/null
 source "$HOME/.bashrc"
