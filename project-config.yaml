@@ -17,3 +17,6 @@ fitting_pipeline:
   reports_dir: "reports/model-fitting-pipeline-reports/"
   benchmark_dir: "benchmarks/010_010_model-fitting-pipeline"
   env_yaml: "default_environment.yaml"
+
+misc:
+  theano_gcc_flag: "cxx='/home/jc604/.conda/envs/speclet/bin/g++',blas__ldflags='-L/home/jc604/.conda/envs/speclet/lib -lcblas -lblas -lcblas -lblas'"
