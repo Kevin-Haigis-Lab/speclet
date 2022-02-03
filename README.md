@@ -88,9 +88,17 @@ precommit install
 
 ### Configuration
 
+#### Project configuration YAML
+
 There are options for configuration in the ["project-config.yaml"](project-config.yaml) file.
 There are controls for various constants and parameters for analyses and pipelines.
-Most will likely need not be changed.
+Most are intuitively named.
+
+One configuration parameter that is not obvious is the `theano_gcc_flag` under `misc`.
+This should be set with any gcc or blas configuration variables for theano.
+I need to have it set so that theano uses the correct gcc and blas modules when running in pipelines on O2 (see issue [#151](https://github.com/Kevin-Haigis-Lab/speclet/issues/151) for details)
+
+#### Environment variables
 
 **There is a required ".env" file that should be configured as follows.**
 
