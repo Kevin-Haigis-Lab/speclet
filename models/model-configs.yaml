@@ -34,15 +34,27 @@
 - name: hierarchical-nb
   description: A hierarchical negative binomial model.
   model: HIERARCHICAL_NB
-  data_file: DEPMAP_CRC_BONE  # _SUBSAMPLE
+  data_file: DEPMAP_CRC_BONE_LARGE_SUBSAMPLE
   sampling_kwargs:
     pymc3_mcmc:
       target_accept: 0.95
     stan_mcmc:
       delta: 0.95
-      refresh: 1
+      refresh: 5
   pipelines:
-    fitting: [PYMC3_MCMC, STAN_MCMC]
+    fitting: [PYMC3_MCMC] # STAN_MCMC
+
+- name: hierarchical-nb_advi-init
+  description: A hierarchical negative binomial model. Initialized using ADVI in PyMC3.
+  model: HIERARCHICAL_NB
+  data_file: DEPMAP_CRC_BONE_LARGE_SUBSAMPLE
+  sampling_kwargs:
+    pymc3_mcmc:
+      target_accept: 0.95
+      init: "advi"
+      n_init: 50000
+  pipelines:
+    fitting: [PYMC3_MCMC]
 
 # ---- Hierarchical negative binomial model ----
 
