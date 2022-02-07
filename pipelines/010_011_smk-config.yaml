@@ -37,12 +37,12 @@ sample_pymc3_advi:
   mem: "{params.mem}"
   time: "{params.time}"
   J: "pymc3-advi"
-papermill_report:
+summarize_posterior:
   partition: "short"
-  cores: 1
-  mem: "100"
-  time: "00:01:00"
-  J: "papermill"
+  cores: 2
+  mem: "70000"
+  time: "05:00:00"
+  J: "summary"
 execute_report:
   partition: "short"
   cores: 1
