@@ -98,6 +98,20 @@ def _posterior_summary(
     return None
 
 
+def _posterior_predictions(
+    post_pred_summary_path: Path, trace: az.InferenceData
+) -> None:
+    logger.info("Retrieving posterior predictive distribution.")
+    ppc = trace.get("posterior_predictive")
+    if ppc is None:
+        logger.error("Model posterior predictions not found.")
+        return None
+    logger.info(f"Writing posterior predictions to '{str(post_pred_summary_path)}'.")
+    ppc.to_dataframe().to_csv(post_pred_summary_path)
+    logger.info("Finished writing posterior predictions.")
+    return None
+
+
 @app.command()
 def summarize_posterior(
     name: str,
@@ -106,6 +120,7 @@ def summarize_posterior(
     cache_dir: Path,
     description_path: Path,
     posterior_summary_path: Path,
+    post_pred_path: Path,
     cache_name: Optional[str] = None,
 ) -> None:
     """Summarize a model posterior.
@@ -115,8 +130,9 @@ def summarize_posterior(
         config_path (Path): Path the the model configuration file.
         fit_method (ModelFitMethod): Method used to fit the model.
         cache_dir (Path): Directory where the posterior file is cached.
-        description_path (Path): Path to write the description file to.
-        posterior_summary_path (Path): Path to write the posterior summary CSV to.
+        description_path (Path): Path to write the description file.
+        posterior_summary_path (Path): Path to write the posterior summary CSV.
+        post_pred_path (Path): Path to write the posterior predictions as a CSV.
         cache_name (Optional[str], optional): Cache name to override the default one
         built with the model and name fit method. Defaults to None.
     """
@@ -140,8 +156,9 @@ def summarize_posterior(
         description_path, name=name, config=config, trace=trace, fit_method=fit_method
     )
     _posterior_summary(
-        posterior_summary_path, trace, vars_regex=model.vars_regex(fit_method)
+        posterior_summary_path, trace=trace, vars_regex=model.vars_regex(fit_method)
     )
+    _posterior_predictions(post_pred_path, trace=trace)
     return None
 
 

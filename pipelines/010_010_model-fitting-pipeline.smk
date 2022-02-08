@@ -272,6 +272,9 @@ rule summarize_posterior:
         posterior_summary=MODEL_CACHE_DIR
         / "{model_name}_{fit_method}"
         / "posterior-summary.csv",
+        post_pred=MODEL_CACHE_DIR
+        / "{model_name}_{fit_method}"
+        / "posterior-predictions.csv",
     params:
         config_file=str(MODEL_CONFIG),
         cache_dir=str(MODEL_CACHE_DIR),
@@ -281,8 +284,9 @@ rule summarize_posterior:
         "  {params.config_file}"
         "  {wildcards.fit_method}"
         "  {params.cache_dir}"
-        "  {outputs.description}"
-        "  {outputs.posterior_summary}"
+        "  {output.description}"
+        "  {output.posterior_summary}"
+        "  {output.post_pred}"
 
 
 rule papermill_report:
