@@ -108,6 +108,16 @@ rule all:
             model_name=model_configuration_lists.model_names,
             fit_method=model_configuration_lists.fit_methods,
         ),
+        post_pred=expand(
+            str(
+                MODEL_CACHE_DIR
+                / "{model_name}_{fit_method}"
+                / "posterior-predictions.csv",
+            ),
+            zip,
+            model_name=model_configuration_lists.model_names,
+            fit_method=model_configuration_lists.fit_methods,
+        ),
 
 
 # --- Stan MCMC ---
