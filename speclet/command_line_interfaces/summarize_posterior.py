@@ -108,10 +108,18 @@ def _posterior_predictions(
     if ppc is None:
         logger.error("Model posterior predictions not found.")
         return None
-    logger.info("Converting xarray'Dataset' to pandas 'DataFrame' and thinning.")
-    ppc_df = ppc.to_dataframe().loc[:, ::thin, :]
+
+    # Only expecting a single post. pred. variable. Can change to a more flexible system
+    # if needed.
+    n_post_preds = len(ppc.keys())
+    if n_post_preds != 1:
+        raise BaseException(f"Only 1 post. pred. expected; found {n_post_preds}")
+
     logger.info(f"Writing posterior predictions to '{str(post_pred_summary_path)}'.")
-    ppc_df.to_csv(post_pred_summary_path)
+    # Iterating through a collection of length 1.
+    for ppc_ary in ppc.values():
+        ppc_ary[:, ::thin, :].to_dataframe().to_csv(post_pred_summary_path)
+
     logger.info("Finished writing posterior predictions.")
     return None
 
