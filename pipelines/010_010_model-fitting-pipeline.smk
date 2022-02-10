@@ -297,6 +297,7 @@ rule summarize_posterior:
         "  {output.description}"
         "  {output.posterior_summary}"
         "  {output.post_pred}"
+        "  --post-pred-thin=40"
 
 
 rule papermill_report:

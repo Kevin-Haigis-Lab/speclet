@@ -99,15 +99,19 @@ def _posterior_summary(
 
 
 def _posterior_predictions(
-    post_pred_summary_path: Path, trace: az.InferenceData
+    post_pred_summary_path: Path,
+    trace: az.InferenceData,
+    thin: int,
 ) -> None:
     logger.info("Retrieving posterior predictive distribution.")
     ppc = trace.get("posterior_predictive")
     if ppc is None:
         logger.error("Model posterior predictions not found.")
         return None
+    logger.info("Converting xarray'Dataset' to pandas 'DataFrame' and thinning.")
+    ppc_df = ppc.to_dataframe().loc[:, ::thin, :]
     logger.info(f"Writing posterior predictions to '{str(post_pred_summary_path)}'.")
-    ppc.to_dataframe().to_csv(post_pred_summary_path)
+    ppc_df.to_csv(post_pred_summary_path)
     logger.info("Finished writing posterior predictions.")
     return None
 
@@ -121,6 +125,7 @@ def summarize_posterior(
     description_path: Path,
     posterior_summary_path: Path,
     post_pred_path: Path,
+    post_pred_thin: int = 50,
     cache_name: Optional[str] = None,
 ) -> None:
     """Summarize a model posterior.
@@ -133,6 +138,9 @@ def summarize_posterior(
         description_path (Path): Path to write the description file.
         posterior_summary_path (Path): Path to write the posterior summary CSV.
         post_pred_path (Path): Path to write the posterior predictions as a CSV.
+        post_pred_thin (int, optional): Step-size for thinning posterior predictive
+        draws. Defaults to 50. Will end up with the number of draws divided by the step
+        size.
         cache_name (Optional[str], optional): Cache name to override the default one
         built with the model and name fit method. Defaults to None.
     """
@@ -158,7 +166,7 @@ def summarize_posterior(
     _posterior_summary(
         posterior_summary_path, trace=trace, vars_regex=model.vars_regex(fit_method)
     )
-    _posterior_predictions(post_pred_path, trace=trace)
+    _posterior_predictions(post_pred_path, trace=trace, thin=post_pred_thin)
     return None
 
 
