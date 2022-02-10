@@ -66,9 +66,12 @@ def combine_mcmc_chains(
     else:
         logger.info(f"Collected {len(all_idata_objects)} chains.")
 
+    logger.info("Merging all chains.")
     combined_chains = az.concat(all_idata_objects, dim="chain")
     assert isinstance(combined_chains, az.InferenceData)
+    logger.info("Writing posterior samples to file.")
     PosteriorManager(id=cache_name, cache_dir=output_dir).put(combined_chains)
+    logger.info("Finished writing posterior samples to file.")
     return None
 
 
