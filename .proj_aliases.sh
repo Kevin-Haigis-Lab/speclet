@@ -1,14 +1,15 @@
 #!/bin/bash
 
 # Bash aliases used in this project.
-alias speclet_srun="srunp --pty -p priority --mem 80G -c 4 -t 0-15:00 --tunnel 7012:7012 /bin/bash"
+alias speclet_srun_tunnel="srunp --pty -p interactive --mem 16G -c 2 -t 0-12:00 --tunnel 7012:7012 /bin/bash"
+alias speclet_srun="srunp --pty -p interactive --mem 16G -c 2 -t 0-12:00 /bin/bash"
 alias speclet_env="conda activate speclet && bash .proj_aliases.sh"
 alias speclet_jl="jupyter lab --port=7012 --browser='none'"
 alias speclet_sshlab="ssh -N -L 7012:127.0.0.1:7012"
 
-alias speclet_snakemake_env="conda activate speclet_snakemake && bash .proj_aliases.sh"
-alias smk_fit="snakemake --snakefile pipelines/010_010_run-crc-sampling-snakemake.smk"
-alias smk_sbc="snakemake --snakefile pipelines/012_010_simulation-based-calibration-snakemake.smk"
+alias speclet_smk_env="conda activate speclet_smk && bash .proj_aliases.sh"
+alias smk_fit="snakemake --snakefile pipelines/010_010_model-fitting-pipeline.smk"
+alias smk_sbc="snakemake --snakefile pipelines/012_010_simulation-based-calibration.smk"
 alias smk_data="snakemake --snakefile data/download-data.smk"
 alias smk_munge="snakemake --snakefile munge/munge.smk"
 
