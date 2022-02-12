@@ -51,7 +51,7 @@ ROOT_CACHE_DIR = ""
 ```python
 # Parameters
 MODEL_NAME = "hierarchical-nb"
-FIT_METHOD_STR = "PYMC3_MCMC"
+FIT_METHOD_STR = "STAN_MCMC"
 CONFIG_PATH = "models/model-configs.yaml"
 ROOT_CACHE_DIR = "models"
 ```
@@ -80,36 +80,41 @@ if "MCMC" in FIT_METHOD.value:
 
     R-HAT
     <xarray.Dataset>
-    Dimensions:      (sgrna: 16954, cell_line: 87, gene: 2000, lineage: 2, eta_dim_0: 874194, mu_dim_0: 874194)
+    Dimensions:        (sgrna: 332, delta_b_dim_0: 10, delta_d_dim_0: 113, delta_d_dim_1: 2, gene: 113, eta_dim_0: 1976, mu_dim_0: 1976, cell_line: 10, lineage: 2, log_lik_dim_0: 1976, y_hat_dim_0: 1976)
     Coordinates:
-      * sgrna        (sgrna) object 'AAAAAAAAATCCAGAACCT' ... 'TTTTGTTAAGTGACCACCT'
-      * cell_line    (cell_line) object 'ACH-000007' 'ACH-000009' ... 'ACH-002233'
-      * gene         (gene) object 'A1BG' 'AAK1' 'AAR2' ... 'ZSWIM2' 'ZSWIM4'
-      * lineage      (lineage) object 'bone' 'colorectal'
-      * eta_dim_0    (eta_dim_0) int64 0 1 2 3 4 ... 874190 874191 874192 874193
-      * mu_dim_0     (mu_dim_0) int64 0 1 2 3 4 ... 874190 874191 874192 874193
-    Data variables: (12/14)
-        z            float64 1.021
-        a            (sgrna) float64 1.003 0.9998 1.002 1.0 ... 1.002 1.002 0.9998
-        delta_b      (cell_line) float64 1.016 1.016 1.009 ... 1.008 1.016 1.014
-        delta_d      (gene, lineage) float64 1.001 1.001 1.005 ... 1.001 1.002 1.003
-        sigma_a      float64 1.003
-        sigma_b      float64 1.01
-        ...           ...
-        d            (gene, lineage) float64 1.002 1.001 1.006 ... 1.001 1.001 1.003
-        eta          (eta_dim_0) float64 1.001 1.0 1.0 1.001 ... 1.001 1.002 1.0
-        mu           (mu_dim_0) float64 1.001 1.0 1.0 1.001 ... 1.001 1.002 1.0
-        alpha_alpha  float64 1.0
-        beta_alpha   float64 1.0
-        alpha        (gene) float64 1.003 1.002 1.003 1.002 ... 1.0 1.001 1.0 1.001
+      * sgrna          (sgrna) object 'AAAACGCGTTTCTTAGCCG' ... 'TTTTAGAAGGCCCTAG...
+      * gene           (gene) object 'ADH1B' 'ADH5' 'APC' ... 'ZNF428' 'ZNF620'
+      * cell_line      (cell_line) object 'ACH-000253' 'ACH-000279' ... 'ACH-002105'
+      * delta_b_dim_0  (delta_b_dim_0) int64 0 1 2 3 4 5 6 7 8 9
+      * delta_d_dim_0  (delta_d_dim_0) int64 0 1 2 3 4 5 ... 107 108 109 110 111 112
+      * delta_d_dim_1  (delta_d_dim_1) int64 0 1
+      * eta_dim_0      (eta_dim_0) int64 0 1 2 3 4 5 ... 1971 1972 1973 1974 1975
+      * mu_dim_0       (mu_dim_0) int64 0 1 2 3 4 5 ... 1971 1972 1973 1974 1975
+      * lineage        (lineage) object 'colorectal' 'bone'
+      * log_lik_dim_0  (log_lik_dim_0) int64 0 1 2 3 4 ... 1971 1972 1973 1974 1975
+      * y_hat_dim_0    (y_hat_dim_0) int64 0 1 2 3 4 5 ... 1971 1972 1973 1974 1975
+    Data variables: (12/16)
+        z              float64 1.015
+        sigma_a        float64 1.01
+        a              (sgrna) float64 1.002 1.001 1.0 0.9998 ... 1.0 1.0 1.001
+        sigma_b        float64 1.006
+        delta_b        (delta_b_dim_0) float64 1.001 1.001 1.001 ... 1.222 1.017
+        sigma_d        float64 1.002
+        ...             ...
+        eta            (eta_dim_0) float64 1.0 1.0 1.003 1.0 ... 0.9993 1.001 1.001
+        mu             (mu_dim_0) float64 1.0 1.0 1.003 1.0 ... 0.9994 1.001 1.001
+        b              (cell_line) float64 1.0 1.0 1.003 1.0 ... 1.001 1.006 1.002
+        d              (gene, lineage) float64 1.003 1.0 1.002 ... 1.009 1.001 1.001
+        log_lik        (log_lik_dim_0) float64 1.001 1.001 1.001 ... 1.0 1.001 1.002
+        y_hat          (y_hat_dim_0) float64 0.9999 0.9998 0.9993 ... 1.001 1.0
     ============================================================
-    sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 0, 0, 0, 0
-    percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 0.763, 0.832, 0.86, 0.766
-    avg. step size: 0.055, 0.065, 0.067, 0.072
+    sampled 2 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 0, 0
+    percent divergences: 0.0, 0.0
+    BFMI: 0.827, 0.754
+    avg. step size: 0.114, 0.108
 
-![png](hierarchical-nb_PYMC3_MCMC_files/hierarchical-nb_PYMC3_MCMC_10_1.png)
+![png](hierarchical-nb_STAN_MCMC_files/hierarchical-nb_STAN_MCMC_10_1.png)
 
 ## Model parameters
 
@@ -124,10 +129,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/6337336a7c816194e7bf8de34b0d1ef5/lib/python3.9/site-packages/arviz/utils.py:129: UserWarning: Items starting with ~: ['^log_lik$', '^y_hat$'] have not been found and will be ignored
-      warnings.warn(
-
-![png](hierarchical-nb_PYMC3_MCMC_files/hierarchical-nb_PYMC3_MCMC_13_1.png)
+![png](hierarchical-nb_STAN_MCMC_files/hierarchical-nb_STAN_MCMC_13_0.png)
 
 ## Model predictions
 
@@ -148,7 +150,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-![png](hierarchical-nb_PYMC3_MCMC_files/hierarchical-nb_PYMC3_MCMC_15_0.png)
+![png](hierarchical-nb_STAN_MCMC_files/hierarchical-nb_STAN_MCMC_15_0.png)
 
 ```python
 psis_loo = az.loo(trace, pointwise=True)
@@ -162,21 +164,21 @@ psis_loo
 
 
 
-    Computed from 4000 by 874194 log-likelihood matrix
+    Computed from 2000 by 1976 log-likelihood matrix
 
              Estimate       SE
-    elpd_loo -5760684.30  1199.65
-    p_loo    23828.65        -
+    elpd_loo -12532.23    49.86
+    p_loo      348.89        -
 
     There has been a warning during the calculation. Please check the results.
     ------
 
     Pareto k diagnostic values:
-                              Count   Pct.
-    (-Inf, 0.5]   (good)     873586   99.9%
-     (0.5, 0.7]   (ok)          431    0.0%
-       (0.7, 1]   (bad)         131    0.0%
-       (1, Inf)   (very bad)     46    0.0%
+                             Count   Pct.
+    (-Inf, 0.5]   (good)     1840   93.1%
+     (0.5, 0.7]   (ok)         96    4.9%
+       (0.7, 1]   (bad)        35    1.8%
+       (1, Inf)   (very bad)    5    0.3%
 
 ```python
 az.plot_khat(psis_loo)
@@ -184,7 +186,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-![png](hierarchical-nb_PYMC3_MCMC_files/hierarchical-nb_PYMC3_MCMC_17_0.png)
+![png](hierarchical-nb_STAN_MCMC_files/hierarchical-nb_STAN_MCMC_17_0.png)
 
 ---
 
@@ -193,14 +195,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 1343.40 minutes
+    execution time: 1.02 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-02-11
+    Last updated: 2022-02-03
 
     Python implementation: CPython
     Python version       : 3.9.9
@@ -214,11 +216,11 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-a-16-90.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-160.o2.rc.hms.harvard.edu
 
     Git branch: theano-blas-warning
 
     logging   : 0.5.1.2
-    speclet   : 0.0.9000
     arviz     : 0.11.4
     matplotlib: 3.5.1
+    speclet   : 0.0.9000

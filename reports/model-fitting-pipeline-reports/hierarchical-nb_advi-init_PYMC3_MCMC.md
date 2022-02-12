@@ -50,7 +50,7 @@ ROOT_CACHE_DIR = ""
 
 ```python
 # Parameters
-MODEL_NAME = "hierarchical-nb"
+MODEL_NAME = "hierarchical-nb_advi-init"
 FIT_METHOD_STR = "PYMC3_MCMC"
 CONFIG_PATH = "models/model-configs.yaml"
 ROOT_CACHE_DIR = "models"
@@ -89,27 +89,27 @@ if "MCMC" in FIT_METHOD.value:
       * eta_dim_0    (eta_dim_0) int64 0 1 2 3 4 ... 874190 874191 874192 874193
       * mu_dim_0     (mu_dim_0) int64 0 1 2 3 4 ... 874190 874191 874192 874193
     Data variables: (12/14)
-        z            float64 1.021
-        a            (sgrna) float64 1.003 0.9998 1.002 1.0 ... 1.002 1.002 0.9998
-        delta_b      (cell_line) float64 1.016 1.016 1.009 ... 1.008 1.016 1.014
-        delta_d      (gene, lineage) float64 1.001 1.001 1.005 ... 1.001 1.002 1.003
+        z            float64 1.163
+        a            (sgrna) float64 1.0 1.002 1.001 1.0 1.0 ... 1.0 1.0 1.0 1.001
+        delta_b      (cell_line) float64 1.104 1.109 1.077 ... 1.078 1.092 1.096
+        delta_d      (gene, lineage) float64 1.001 1.001 1.003 ... 1.0 1.001 1.003
         sigma_a      float64 1.003
-        sigma_b      float64 1.01
+        sigma_b      float64 1.028
         ...           ...
-        d            (gene, lineage) float64 1.002 1.001 1.006 ... 1.001 1.001 1.003
-        eta          (eta_dim_0) float64 1.001 1.0 1.0 1.001 ... 1.001 1.002 1.0
-        mu           (mu_dim_0) float64 1.001 1.0 1.0 1.001 ... 1.001 1.002 1.0
-        alpha_alpha  float64 1.0
-        beta_alpha   float64 1.0
-        alpha        (gene) float64 1.003 1.002 1.003 1.002 ... 1.0 1.001 1.0 1.001
+        d            (gene, lineage) float64 1.001 1.001 1.003 ... 1.0 1.001 1.003
+        eta          (eta_dim_0) float64 1.0 1.001 1.002 1.001 ... 0.9999 1.0 1.001
+        mu           (mu_dim_0) float64 1.0 1.001 1.002 1.001 ... 0.9999 1.0 1.001
+        alpha_alpha  float64 1.004
+        beta_alpha   float64 1.004
+        alpha        (gene) float64 1.001 1.002 1.0 1.002 ... 0.9998 0.9995 1.001
     ============================================================
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0, 0, 0
     percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 0.763, 0.832, 0.86, 0.766
-    avg. step size: 0.055, 0.065, 0.067, 0.072
+    BFMI: 1.061, 0.847, 0.788, 0.872
+    avg. step size: 0.038, 0.044, 0.039, 0.043
 
-![png](hierarchical-nb_PYMC3_MCMC_files/hierarchical-nb_PYMC3_MCMC_10_1.png)
+![png](hierarchical-nb_advi-init_PYMC3_MCMC_files/hierarchical-nb_advi-init_PYMC3_MCMC_10_1.png)
 
 ## Model parameters
 
@@ -127,7 +127,7 @@ plt.show()
     /n/data1/hms/dbmi/park/Cook/speclet/.snakemake/conda/6337336a7c816194e7bf8de34b0d1ef5/lib/python3.9/site-packages/arviz/utils.py:129: UserWarning: Items starting with ~: ['^log_lik$', '^y_hat$'] have not been found and will be ignored
       warnings.warn(
 
-![png](hierarchical-nb_PYMC3_MCMC_files/hierarchical-nb_PYMC3_MCMC_13_1.png)
+![png](hierarchical-nb_advi-init_PYMC3_MCMC_files/hierarchical-nb_advi-init_PYMC3_MCMC_13_1.png)
 
 ## Model predictions
 
@@ -148,7 +148,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-![png](hierarchical-nb_PYMC3_MCMC_files/hierarchical-nb_PYMC3_MCMC_15_0.png)
+![png](hierarchical-nb_advi-init_PYMC3_MCMC_files/hierarchical-nb_advi-init_PYMC3_MCMC_15_0.png)
 
 ```python
 psis_loo = az.loo(trace, pointwise=True)
@@ -165,18 +165,18 @@ psis_loo
     Computed from 4000 by 874194 log-likelihood matrix
 
              Estimate       SE
-    elpd_loo -5760684.30  1199.65
-    p_loo    23828.65        -
+    elpd_loo -5760687.92  1200.15
+    p_loo    23835.31        -
 
     There has been a warning during the calculation. Please check the results.
     ------
 
     Pareto k diagnostic values:
                               Count   Pct.
-    (-Inf, 0.5]   (good)     873586   99.9%
-     (0.5, 0.7]   (ok)          431    0.0%
-       (0.7, 1]   (bad)         131    0.0%
-       (1, Inf)   (very bad)     46    0.0%
+    (-Inf, 0.5]   (good)     873571   99.9%
+     (0.5, 0.7]   (ok)          445    0.1%
+       (0.7, 1]   (bad)         122    0.0%
+       (1, Inf)   (very bad)     56    0.0%
 
 ```python
 az.plot_khat(psis_loo)
@@ -184,7 +184,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-![png](hierarchical-nb_PYMC3_MCMC_files/hierarchical-nb_PYMC3_MCMC_17_0.png)
+![png](hierarchical-nb_advi-init_PYMC3_MCMC_files/hierarchical-nb_advi-init_PYMC3_MCMC_17_0.png)
 
 ---
 
@@ -193,7 +193,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 1343.40 minutes
+    execution time: 490.16 minutes
 
 ```python
 %load_ext watermark
@@ -214,11 +214,11 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-a-16-90.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-165.o2.rc.hms.harvard.edu
 
     Git branch: theano-blas-warning
 
-    logging   : 0.5.1.2
-    speclet   : 0.0.9000
-    arviz     : 0.11.4
     matplotlib: 3.5.1
+    speclet   : 0.0.9000
+    logging   : 0.5.1.2
+    arviz     : 0.11.4

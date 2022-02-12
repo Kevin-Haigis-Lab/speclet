@@ -40,12 +40,12 @@ sample_pymc3_advi:
 summarize_posterior:
   partition: "short"
   cores: 2
-  mem: "70000"
-  time: "05:00:00"
+  mem: "16000"
+  time: "00:30:00"
   J: "summary"
 execute_report:
-  partition: "short"
+  partition: "medium"
   cores: 1
-  mem: "70000"
-  time: "08:00:00"
+  mem: "200000"
+  time: "30:00:00"
   J: "report"
