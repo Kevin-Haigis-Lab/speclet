@@ -110,18 +110,15 @@ def data_path(to: Union[str, DataFile]) -> Path:
 
 
 def modeling_data_dir() -> Path:
-    """Path to modeling data directory.
-
-    Returns:
-        Path: Path to the modeling data directory.
-    """
+    """Path to modeling data directory."""
     return project_root() / "modeling_data"
 
 
 def stan_models_dir() -> Path:
-    """Path to the directory with the Stan model code.
-
-    Returns:
-        Path: Directory with the Stan model code.
-    """
+    """Path to the directory with the Stan model code."""
     return package_root() / "bayesian_models" / "stan_model_code"
+
+
+def data_dir() -> Path:
+    """Path to (raw) data directory."""
+    return project_root() / "data"
