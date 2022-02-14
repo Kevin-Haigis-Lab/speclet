@@ -80,34 +80,34 @@ if "MCMC" in FIT_METHOD.value:
 
     R-HAT
     <xarray.Dataset>
-    Dimensions:      (sgrna: 338, cell_line: 10, gene: 114, lineage: 2, eta_dim_0: 2188, mu_dim_0: 2188)
+    Dimensions:      (sgrna: 16954, cell_line: 87, gene: 2000, lineage: 2, eta_dim_0: 874194, mu_dim_0: 874194)
     Coordinates:
-      * sgrna        (sgrna) object 'AAACTTGCTGACGTGCCTGG' ... 'TTTGTTGGGACCAATGGAA'
-      * cell_line    (cell_line) object 'ACH-000007' 'ACH-000087' ... 'ACH-002116'
-      * gene         (gene) object 'ACVR1C' 'ADAMTS2' ... 'ZC2HC1C' 'ZNF44'
+      * sgrna        (sgrna) object 'AAAAAAAAATCCAGAACCT' ... 'TTTTGTTAAGTGACCACCT'
+      * cell_line    (cell_line) object 'ACH-000007' 'ACH-000009' ... 'ACH-002233'
+      * gene         (gene) object 'A1BG' 'AAK1' 'AAR2' ... 'ZSWIM2' 'ZSWIM4'
       * lineage      (lineage) object 'bone' 'colorectal'
-      * eta_dim_0    (eta_dim_0) int64 0 1 2 3 4 5 ... 2182 2183 2184 2185 2186 2187
-      * mu_dim_0     (mu_dim_0) int64 0 1 2 3 4 5 ... 2182 2183 2184 2185 2186 2187
+      * eta_dim_0    (eta_dim_0) int64 0 1 2 3 4 ... 874190 874191 874192 874193
+      * mu_dim_0     (mu_dim_0) int64 0 1 2 3 4 ... 874190 874191 874192 874193
     Data variables: (12/14)
-        z            float64 1.002
-        a            (sgrna) float64 1.0 1.001 1.001 1.0 ... 1.002 0.9996 1.001
-        delta_b      (cell_line) float64 1.002 1.004 1.0 ... 1.001 1.001 1.001
-        delta_d      (gene, lineage) float64 1.002 1.001 1.004 ... 1.0 1.002 1.001
-        sigma_a      float64 1.004
-        sigma_b      float64 1.004
+        z            float64 1.021
+        a            (sgrna) float64 1.003 0.9998 1.002 1.0 ... 1.002 1.002 0.9998
+        delta_b      (cell_line) float64 1.016 1.016 1.009 ... 1.008 1.016 1.014
+        delta_d      (gene, lineage) float64 1.001 1.001 1.005 ... 1.001 1.002 1.003
+        sigma_a      float64 1.003
+        sigma_b      float64 1.01
         ...           ...
-        d            (gene, lineage) float64 1.003 1.006 1.003 ... 1.005 1.009 1.006
-        eta          (eta_dim_0) float64 1.001 1.001 1.0 1.002 ... 1.001 1.001 1.001
-        mu           (mu_dim_0) float64 1.001 1.001 1.0 1.002 ... 1.001 1.001 1.001
+        d            (gene, lineage) float64 1.002 1.001 1.006 ... 1.001 1.001 1.003
+        eta          (eta_dim_0) float64 1.001 1.0 1.0 1.001 ... 1.001 1.002 1.0
+        mu           (mu_dim_0) float64 1.001 1.0 1.0 1.001 ... 1.001 1.002 1.0
         alpha_alpha  float64 1.0
-        beta_alpha   float64 1.001
-        alpha        (gene) float64 1.001 1.002 1.002 1.002 ... 0.9996 1.0 0.9998
+        beta_alpha   float64 1.0
+        alpha        (gene) float64 1.003 1.002 1.003 1.002 ... 1.0 1.001 1.0 1.001
     ============================================================
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 0, 0, 0, 1
-    percent divergences: 0.0, 0.0, 0.0, 0.1
-    BFMI: 0.772, 0.743, 0.677, 0.705
-    avg. step size: 0.124, 0.088, 0.111, 0.129
+    num. divergences: 0, 0, 0, 0
+    percent divergences: 0.0, 0.0, 0.0, 0.0
+    BFMI: 0.763, 0.832, 0.86, 0.766
+    avg. step size: 0.055, 0.065, 0.067, 0.072
 
 ![png](hierarchical-nb_PYMC3_MCMC_files/hierarchical-nb_PYMC3_MCMC_10_1.png)
 
@@ -162,21 +162,21 @@ psis_loo
 
 
 
-    Computed from 4000 by 2188 log-likelihood matrix
+    Computed from 4000 by 874194 log-likelihood matrix
 
              Estimate       SE
-    elpd_loo -14625.76    53.48
-    p_loo      342.66        -
+    elpd_loo -5760684.30  1199.65
+    p_loo    23828.65        -
 
     There has been a warning during the calculation. Please check the results.
     ------
 
     Pareto k diagnostic values:
-                             Count   Pct.
-    (-Inf, 0.5]   (good)     2072   94.7%
-     (0.5, 0.7]   (ok)         87    4.0%
-       (0.7, 1]   (bad)        21    1.0%
-       (1, Inf)   (very bad)    8    0.4%
+                              Count   Pct.
+    (-Inf, 0.5]   (good)     873586   99.9%
+     (0.5, 0.7]   (ok)          431    0.0%
+       (0.7, 1]   (bad)         131    0.0%
+       (1, Inf)   (very bad)     46    0.0%
 
 ```python
 az.plot_khat(psis_loo)
@@ -193,14 +193,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 1.35 minutes
+    execution time: 1343.40 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-01-29
+    Last updated: 2022-02-11
 
     Python implementation: CPython
     Python version       : 3.9.9
@@ -211,14 +211,14 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1160.45.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-245.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-90.o2.rc.hms.harvard.edu
 
-    Git branch: nb-model
+    Git branch: theano-blas-warning
 
-    matplotlib: 3.5.1
-    arviz     : 0.11.4
     logging   : 0.5.1.2
     speclet   : 0.0.9000
+    arviz     : 0.11.4
+    matplotlib: 3.5.1

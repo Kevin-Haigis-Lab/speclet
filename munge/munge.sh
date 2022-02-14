@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Run munge pipeline.
+
 #SBATCH --account=park
 #SBATCH -c 1
 #SBATCH -p priority
@@ -8,8 +10,7 @@
 #SBATCH -o logs/%j_munge-pipeline.log
 #SBATCH -e logs/%j_munge-pipeline.log
 
-module unload python
-module load gcc conda2 slurm-drmaa
+module load conda2 slurm-drmaa
 
 # shellcheck source=/dev/null
 source "$HOME/.bashrc"

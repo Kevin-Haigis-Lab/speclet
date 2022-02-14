@@ -37,12 +37,19 @@ class FittingPipelineConfig(BaseModel):
     env_yaml: Path
 
 
+class Misc(BaseModel):
+    """Miscellaneous configuration."""
+
+    theano_gcc_flag: Optional[str] = None
+
+
 class ProjectConfig(BaseModel):
     """Project configurations."""
 
     munge: MungeConfig
     modeling: ModelingConfig
     fitting_pipeline: FittingPipelineConfig
+    misc: Misc
 
 
 def read_project_configuration(path: Optional[Path] = None) -> ProjectConfig:

@@ -9,7 +9,7 @@ __default__:
   J: "snakejob"
 sample_stan_mcmc:
   partition: "{params.partition}"
-  cores: 2
+  cores: 1
   mem: "{params.mem}"
   time: "{params.time}"
   J: "stan-mc"
@@ -21,15 +21,15 @@ combine_stan_mcmc:
   J: "stan-comb"
 sample_pymc3_mcmc:
   partition: "{params.partition}"
-  cores: 2
+  cores: 1
   mem: "{params.mem}"
   time: "{params.time}"
   J: "pymc-mc"
 combine_pymc3_mcmc:
   partition: "short"
   cores: 1
-  mem: "32000"
-  time: "00:15:00"
+  mem: "164000"
+  time: "02:00:00"
   J: "pymc-comb"
 sample_pymc3_advi:
   partition: "{params.partition}"
@@ -37,15 +37,15 @@ sample_pymc3_advi:
   mem: "{params.mem}"
   time: "{params.time}"
   J: "pymc3-advi"
-papermill_report:
+summarize_posterior:
   partition: "short"
-  cores: 1
-  mem: "100"
-  time: "00:01:00"
-  J: "papermill"
+  cores: 2
+  mem: "16000"
+  time: "00:30:00"
+  J: "summary"
 execute_report:
-  partition: "short"
+  partition: "medium"
   cores: 1
-  mem: "100000"
-  time: "01:30:00"
+  mem: "200000"
+  time: "30:00:00"
   J: "report"

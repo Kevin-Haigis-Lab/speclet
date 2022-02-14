@@ -1,7 +1,8 @@
 #!/bin/bash
 
-module unload python
-module load gcc conda2 slurm-drmaa/1.1.1
+# Run data downloading pipeline.
+
+module load conda2 slurm-drmaa
 
 # shellcheck source=/dev/null
 source "$HOME/.bashrc"
@@ -15,7 +16,6 @@ snakemake \
     --restart-times 0 \
     --latency-wait 120 \
     --keep-going
-
 
 conda deactivate
 exit

@@ -86,8 +86,34 @@ localrules:
 
 rule all:
     input:
-        expand(
+        report=expand(
             str(REPORTS_DIR / "{model_name}_{fit_method}.md"),
+            zip,
+            model_name=model_configuration_lists.model_names,
+            fit_method=model_configuration_lists.fit_methods,
+        ),
+        description=expand(
+            str(MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "description.txt"),
+            zip,
+            model_name=model_configuration_lists.model_names,
+            fit_method=model_configuration_lists.fit_methods,
+        ),
+        summary=expand(
+            str(
+                MODEL_CACHE_DIR
+                / "{model_name}_{fit_method}"
+                / "posterior-summary.csv",
+            ),
+            zip,
+            model_name=model_configuration_lists.model_names,
+            fit_method=model_configuration_lists.fit_methods,
+        ),
+        post_pred=expand(
+            str(
+                MODEL_CACHE_DIR
+                / "{model_name}_{fit_method}"
+                / "posterior-predictions.csv",
+            ),
             zip,
             model_name=model_configuration_lists.model_names,
             fit_method=model_configuration_lists.fit_methods,
@@ -245,7 +271,33 @@ rule sample_pymc3_advi:
         "  --mcmc-cores 1"
 
 
-# --- Summary Reports ---
+# --- Summaries ---
+
+
+rule summarize_posterior:
+    input:
+        idata_path=MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "posterior.netcdf",
+    output:
+        description=MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "description.txt",
+        posterior_summary=MODEL_CACHE_DIR
+        / "{model_name}_{fit_method}"
+        / "posterior-summary.csv",
+        post_pred=MODEL_CACHE_DIR
+        / "{model_name}_{fit_method}"
+        / "posterior-predictions.csv",
+    params:
+        config_file=str(MODEL_CONFIG),
+        cache_dir=str(MODEL_CACHE_DIR),
+    shell:
+        "speclet/command_line_interfaces/summarize_posterior.py"
+        '  "{wildcards.model_name}"'
+        "  {params.config_file}"
+        "  {wildcards.fit_method}"
+        "  {params.cache_dir}"
+        "  {output.description}"
+        "  {output.posterior_summary}"
+        "  {output.post_pred}"
+        "  --post-pred-thin=40"
 
 
 rule papermill_report:
@@ -297,7 +349,3 @@ run_benchmark_nb_cmd = f"""
 
 onsuccess:
     shell(run_benchmark_nb_cmd)
-
-
-# onerror:
-#     shell(run_benchmark_nb_cmd)
