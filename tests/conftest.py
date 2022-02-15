@@ -14,7 +14,7 @@ import stan
 from hypothesis import HealthCheck, Verbosity, settings
 from stan.model import Model as StanModel
 
-TEST_DATA: Final[Path] = Path("tests", "depmap_test_data.csv")
+TEST_DATA: Final[Path] = Path("tests", "depmap-modeling-data_test-data.csv")
 
 
 # ---- Callable fixtures ----

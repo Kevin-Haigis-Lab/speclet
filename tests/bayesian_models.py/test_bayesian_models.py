@@ -38,7 +38,6 @@ model {
 """
 
 
-@pytest.mark.skip
 def test_pytsan_working() -> None:
     schools_data = {
         "J": 8,
@@ -57,8 +56,6 @@ def test_pytsan_working() -> None:
 @pytest.mark.parametrize(
     "method", [ModelFitMethod.PYMC3_MCMC, ModelFitMethod.STAN_MCMC]
 )
-# @pytest.mark.parametrize("bayesian_model", [bayes.BayesianModel.HIERARCHICAL_NB])
-# @pytest.mark.parametrize("method", [ModelFitMethod.PYMC3_MCMC])
 def test_all_bayesian_models_build(
     bayesian_model: bayes.BayesianModel,
     method: ModelFitMethod,
@@ -76,8 +73,6 @@ def test_all_bayesian_models_build(
 @pytest.mark.slow
 @pytest.mark.parametrize("bayesian_model", bayes.BayesianModel)
 @pytest.mark.parametrize("method", ModelFitMethod)
-# @pytest.mark.parametrize("bayesian_model", [bayes.BayesianModel.HIERARCHICAL_NB])
-# @pytest.mark.parametrize("method", [ModelFitMethod.PYMC3_MCMC])
 def test_all_bayesian_models_sample(
     bayesian_model: bayes.BayesianModel,
     method: ModelFitMethod,
