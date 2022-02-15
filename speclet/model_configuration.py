@@ -28,6 +28,7 @@ class BayesianModelConfiguration(BaseModel):
 
     name: str
     description: str
+    active: bool = True
     model: BayesianModel
     data_file: io.DataFile
     subsample: bool = False
