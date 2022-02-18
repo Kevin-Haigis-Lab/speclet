@@ -3,6 +3,7 @@
 
 # - name: example-specification          # UUID name of this model and configuration.
 #   description: An example config spec. # Some helpful description of the model.
+  # active: true                         # Activate/deactivate a model config.
 #   model: SIMPLE_NEGATIVE_BINOMIAL      # Model to fit.
 #   data_file: DEPMAP_CRC_BONE_SUBSAMPLE # Data file.
 #   sampling_kwargs:                     # Optional arguments to provide for posterior sampling methods.
@@ -15,8 +16,8 @@
 #     pymc3_advi:
 #       n: 200000
 #   pipelines:                          # Which pipelines to include this model config in.
-#     fitting: [STAN_MCMC, PYMC3_MCMC, PYMC3_ADVI]
-#     sbc: [STAN_MCMC, PYMC3_MCMC, PYMC3_ADVI]
+#     fitting: [STAN_MCMC, PYMC_MCMC, PYMC_ADVI]
+#     sbc: [STAN_MCMC, PYMC_MCMC, PYMC_ADVI]
 
 
 # ---- Negative binomial model ----
@@ -26,7 +27,7 @@
 #   model: SIMPLE_NEGATIVE_BINOMIAL
 #   data_file: DEPMAP_CRC_BONE_SUBSAMPLE
 #   pipelines:
-#     fitting: [PYMC3_MCMC, STAN_MCMC]
+#     fitting: [PYMC_MCMC, STAN_MCMC]
 
 
 # ---- Hierarchical negative binomial model ----
@@ -43,7 +44,7 @@
       delta: 0.95
       refresh: 5
   pipelines:
-    fitting: [PYMC3_MCMC] #, STAN_MCMC]
+    fitting: [PYMC_MCMC, STAN_MCMC]
 
 - name: hierarchical-nb-blaswarning
   active: false
@@ -54,7 +55,7 @@
     pymc3_mcmc:
       target_accept: 0.95
   pipelines:
-    fitting: [] #[PYMC3_MCMC]
+    fitting: [PYMC_MCMC]
 
 - name: hierarchical-nb_advi-init
   active: false
@@ -67,12 +68,12 @@
       init: "advi"
       n_init: 50000
   pipelines:
-    fitting: [PYMC3_MCMC]
+    fitting: [PYMC_MCMC]
 
-- name:
+- name: hier-nb-copynum
   description: A hierarchical negative binomial model.
   model: HIERARCHICAL_NB
-  data_file: DEPMAP_CRC_BONE_LARGE_SUBSAMPLE
+  data_file: DEPMAP_CRC_BONE_SUBSAMPLE
   sampling_kwargs:
     pymc3_mcmc:
       target_accept: 0.95
@@ -80,7 +81,7 @@
       delta: 0.95
       refresh: 5
   pipelines:
-    fitting: [PYMC3_MCMC] #, STAN_MCMC]
+    fitting: [PYMC_MCMC]
 
 # ---- 2-Tier hierarchical negative binomial model ----
 
@@ -95,4 +96,4 @@
 #       delta: 0.9
 #       refresh: 1
 #   pipelines:
-#     fitting: [PYMC3_MCMC, STAN_MCMC]
+#     fitting: [PYMC_MCMC, STAN_MCMC]

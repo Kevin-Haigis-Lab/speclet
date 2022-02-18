@@ -1,9 +1,9 @@
 import numpy as np
-import pymc3 as pm
+import pymc as pm
 import pytest
 from pytest import CaptureFixture
 
-from speclet.modeling import custom_pymc3_callbacks as pymc3calls
+from speclet.modeling import custom_pymc_callbacks as pymc_calls
 
 
 @pytest.fixture(scope="module")
@@ -25,10 +25,10 @@ def mock_model() -> pm.Model:
 class TestDivergenceFractionCallback:
     def test_divergences(self, mock_model: pm.Model) -> None:
         n_tune_steps = 200
-        cb = pymc3calls.DivergenceFractionCallback(
+        cb = pymc_calls.DivergenceFractionCallback(
             n_tune_steps=n_tune_steps, max_frac=0.01
         )
-        with pytest.raises(pymc3calls.TooManyDivergences):
+        with pytest.raises(pymc_calls.TooManyDivergences):
             with mock_model:
                 _ = pm.sample(
                     draws=1000,
@@ -42,7 +42,7 @@ class TestDivergenceFractionCallback:
 
     def test_min_samples_param(self, mock_model: pm.Model) -> None:
         n_tune_steps = 200
-        cb = pymc3calls.DivergenceFractionCallback(
+        cb = pymc_calls.DivergenceFractionCallback(
             n_tune_steps=n_tune_steps, min_samples=10000
         )
         with mock_model:
@@ -60,7 +60,7 @@ class TestDivergenceFractionCallback:
 
     def test_max_frac_param(self, mock_model: pm.Model) -> None:
         n_tune_steps = 200
-        cb = pymc3calls.DivergenceFractionCallback(
+        cb = pymc_calls.DivergenceFractionCallback(
             n_tune_steps=n_tune_steps, max_frac=1.1
         )
         with mock_model:
@@ -97,7 +97,7 @@ class TestProgressPrinterCallback:
         tuning: bool,
         expected_rows: int,
     ) -> None:
-        cb = pymc3calls.ProgressPrinterCallback(every_n=every_n, tuning=tuning)
+        cb = pymc_calls.ProgressPrinterCallback(every_n=every_n, tuning=tuning)
         with mock_model:
             _ = pm.sample(
                 draws=draws,

@@ -4,8 +4,8 @@ from collections import defaultdict
 from datetime import datetime
 from typing import DefaultDict
 
-from pymc3.backends.ndarray import NDArray
-from pymc3.parallel_sampling import Draw
+from pymc.backends.ndarray import NDArray
+from pymc.parallel_sampling import Draw
 
 
 class TooManyDivergences(Exception):
@@ -83,7 +83,7 @@ class ProgressPrinterCallback:
     """A simpler replacement to the progress bar for use in log files.
 
     With this callback, it is recommended to set `progressbar=False` in
-    `pymc3.sample()`.
+    `pymc.sample()`.
     """
 
     every_n: int

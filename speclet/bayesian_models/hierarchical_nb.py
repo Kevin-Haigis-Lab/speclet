@@ -6,8 +6,8 @@ from typing import Any, Final, Optional
 
 import numpy as np
 import pandas as pd
-import pymc3 as pm
-import pymc3.math as pmmath
+import pymc as pm
+import pymc.math as pmmath
 import stan
 from pandera import Check, Column, DataFrameSchema
 from stan.model import Model as StanModel
@@ -24,6 +24,7 @@ from speclet.data_processing.validation import (
     check_nonnegative,
     check_unique_groups,
 )
+from speclet.data_processing.vectors import careful_zscore
 from speclet.io import stan_models_dir
 from speclet.modeling.stan_helpers import read_code_file
 from speclet.project_enums import ModelFitMethod
@@ -42,10 +43,9 @@ class NegativeBinomialModelData:
     ct_final: np.ndarray
     sgrna_idx: np.ndarray
     gene_idx: np.ndarray
-    # sgrna_to_gene_idx: np.ndarray
     cellline_idx: np.ndarray
     lineage_idx: np.ndarray
-    # cellline_to_lineage_idx: np.ndarray
+    z_copy_number: np.ndarray
 
 
 class HierarchcalNegativeBinomialModel:
@@ -89,6 +89,7 @@ class HierarchcalNegativeBinomialModel:
                         Check(check_unique_groups, groupby="depmap_id"),
                     ],
                 ),
+                "z_copy_number": Column(float, checks=[check_finite()]),
             }
         )
 
@@ -124,10 +125,9 @@ class HierarchcalNegativeBinomialModel:
             ct_final=data.counts_final.values.astype(int),
             sgrna_idx=indices.sgrna_idx,
             gene_idx=indices.gene_idx,
-            # sgrna_to_gene_idx=indices.sgrna_to_gene_idx,
             cellline_idx=indices.cellline_idx,
             lineage_idx=indices.lineage_idx,
-            # cellline_to_lineage_idx=indices.cellline_to_lineage_idx,
+            z_copy_number=data.z_copy_number.values,
         )
 
     def data_processing_pipeline(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -140,7 +140,12 @@ class HierarchcalNegativeBinomialModel:
             NegativeBinomialModelData: Processed and validated modeling data.
         """
         return (
-            data.dropna(axis=0, how="any", subset=["counts_final", "counts_initial"])
+            data.dropna(
+                axis=0,
+                how="any",
+                subset=["counts_final", "counts_initial", "copy_number"],
+            )
+            .assign(z_copy_number=lambda d: careful_zscore(d.copy_number.values))
             .pipe(append_total_read_counts)
             .pipe(add_useful_read_count_columns)
             .pipe(set_achilles_categorical_columns)
@@ -198,14 +203,14 @@ class HierarchcalNegativeBinomialModel:
             },
         }
 
-    def pymc3_model(self, data: pd.DataFrame) -> pm.Model:
-        """PyMC3 model for a hierarchical negative binomial model.
+    def pymc_model(self, data: pd.DataFrame) -> pm.Model:
+        """PyMC model for a hierarchical negative binomial model.
 
         Args:
             data (pd.DataFrame): Data to model.
 
         Returns:
-            pm.Model: PyMC3 model.
+            pm.Model: PyMC model.
         """
         valid_data = self.data_processing_pipeline(data)
         model_data = self._make_data_structure(valid_data)
@@ -215,6 +220,7 @@ class HierarchcalNegativeBinomialModel:
         c = model_data.cellline_idx
         g = model_data.gene_idx
         ll = model_data.lineage_idx
+        # z_cn = model_data.z_copy_number
 
         with pm.Model(coords=coords) as model:
             z = pm.Normal("z", 0, 5)
@@ -230,12 +236,15 @@ class HierarchcalNegativeBinomialModel:
             delta_d = pm.Normal("delta_d", 0, 1, dims=("gene", "lineage"))
             d = pm.Deterministic("d", 0 + delta_d * sigma_d, dims=("gene", "lineage"))
 
-            eta = pm.Deterministic("eta", z + a[s] + b[c] + d[g, ll])
+            # f = pm.Normal("f", 0, 2.5)
+
+            eta = pm.Deterministic("eta", z + a[s] + b[c] + d[g, ll])  # + (z_cn * f))
             mu = pm.Deterministic("mu", pmmath.exp(eta))
 
-            alpha_alpha = pm.Gamma("alpha_alpha", 2, 0.5)
-            beta_alpha = pm.Gamma("beta_alpha", 2, 0.5)
-            alpha = pm.Gamma("alpha", alpha_alpha, beta_alpha, dims=("gene"))
+            alpha_hyperparams = pm.Gamma("alpha_hyperparams", 2, 0.5, shape=2)
+            alpha = pm.Gamma(
+                "alpha", alpha_hyperparams[0], alpha_hyperparams[1], dims=("gene")
+            )
             y = pm.NegativeBinomial(  # noqa: F841
                 "ct_final",
                 mu * model_data.ct_initial,

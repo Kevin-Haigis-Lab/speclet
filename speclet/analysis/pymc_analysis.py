@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotnine as gg
-import pymc3 as pm
+import pymc as pm
 import seaborn as sns
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure

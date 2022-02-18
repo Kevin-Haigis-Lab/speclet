@@ -160,8 +160,7 @@ def _check_sbc_results(cache_dir: Path, fit_method: ModelFitMethod) -> SBCCheckR
     sbc_res = sbc_fm.get_sbc_results()
 
     _is_mcmc = (
-        fit_method is ModelFitMethod.PYMC3_MCMC
-        or fit_method is ModelFitMethod.STAN_MCMC
+        fit_method is ModelFitMethod.PYMC_MCMC or fit_method is ModelFitMethod.STAN_MCMC
     )
 
     if _is_mcmc:

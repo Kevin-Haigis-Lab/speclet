@@ -1,76 +1,54 @@
-"""Simple functions for common interactions with PyMC3."""
+"""Simple functions for common interactions with PyMC."""
 
 from math import floor
 from typing import Optional, Union
 
 import arviz as az
-import pymc3 as pm
+import pymc as pm
 import xarray as xr
-from pymc3.model import PyMC3Variable
+from pymc.model import Variable as PyMCVariable
 
 from speclet.exceptions import RequiredArgumentError
 
-# import numpy as np
-# from theano import tensor as tt
 
-
-def _rm_log(model_vars: list[str]) -> list[str]:
-    return [v.replace("_log__", "") for v in model_vars]
-
-
-def get_random_variable_names(m: pm.Model, rm_log: bool = False) -> list[str]:
+def get_random_variable_names(m: pm.Model) -> set[str]:
     """Retrieve the names of the random variables in a model.
 
     Args:
-        m (pm.Model): PyMC3 model.
-        rm_log (bool, optional): Should the '_log__' suffixes be removed? Defaults to
-          False.
+        m (pm.Model): PyMC model.
 
     Returns:
         list[str]: A list of the random variable names.
     """
-    model_vars: list[str] = [v.name for v in m.free_RVs]
-    if rm_log:
-        model_vars = _rm_log(model_vars)
-    return model_vars
+    return {v.name for v in m.basic_RVs}
 
 
-def get_deterministic_variable_names(m: pm.Model, rm_log: bool = False) -> list[str]:
+def get_deterministic_variable_names(m: pm.Model) -> set[str]:
     """Retrieve the names of the deterministic variables in a model.
 
     Args:
-        m (pm.Model): PyMC3 model.
-        rm_log (bool, optional): Should the '_log__' suffixes be removed? Defaults to
-          False.
+        m (pm.Model): PyMC model.
 
     Returns:
         list[str]: A list of the deterministic variable names.
     """
-    model_vars = list(
-        {v.name for v in m.unobserved_RVs}  # noqa: C403
-        .difference(get_random_variable_names(m))
-        .difference(get_random_variable_names(m, rm_log=True))
-    )
-    if rm_log:
-        model_vars = _rm_log(model_vars)
-    return model_vars
+    rvs = get_random_variable_names(m)
+    unobs_vars = {v.name for v in m.unobserved_RVs}
+    return unobs_vars.difference(rvs)
 
 
-def get_variable_names(m: pm.Model, rm_log: bool = False) -> list[str]:
+def get_variable_names(m: pm.Model) -> set[str]:
     """Get all variable names from a model.
 
     Args:
-        m (pm.Model): PyMC3 model.
-        rm_log (bool, optional): Should the '_log__' suffices be removed? Defaults to
-          False.
+        m (pm.Model): PyMC model.
 
     Returns:
         list[str]: list of unique variable names.
     """
-    rvs = [v.name for v in m.unobserved_RVs] + [v.name for v in m.observed_RVs]
-    if rm_log:
-        rvs = _rm_log(rvs)
-    return list(set(rvs))
+    rvs = get_random_variable_names(m)
+    obs_vars = {v.name for v in m.unobserved_RVs}
+    return rvs.union(obs_vars)
 
 
 def get_posterior_names(data: az.InferenceData) -> list[str]:
@@ -134,11 +112,11 @@ def hierarchical_normal(
     name: str,
     dims: tuple[str, ...],
     centered: bool = True,
-    mu: Union[float, PyMC3Variable] = 0.0,
+    mu: Union[float, PyMCVariable] = 0.0,
     mu_param: Optional[tuple[float, float]] = (0.0, 2.5),
-    sigma: Optional[PyMC3Variable] = None,
+    sigma: Optional[PyMCVariable] = None,
     sigma_params: Optional[tuple[float, float]] = (1.1, 0.5),
-) -> PyMC3Variable:
+) -> PyMCVariable:
     """Create a non-centered parameterized hierarchical variable."""
     if mu is None:
         assert mu_param is not None
@@ -162,19 +140,19 @@ def hierarchical_normal(
 #     avg_map: dict[str, Union[float, np.ndarray, tt.TensorConstant]],
 #     shape: Union[int, tuple[int, ...]],
 #     centered: bool = True,
-#     mu: Optional[PyMC3Variable] = None,
+#     mu: Optional[PyMCVariable] = None,
 #     mu_mean: float = 0.0,
 #     mu_sd: float = 2.5,
 #     sigma_sd: float = 2.5,
 #     gamma_mean: float = 0.0,
 #     gamma_sd: float = 2.5,
-# ) -> PyMC3Variable:
+# ) -> PyMCVariable:
 #     """Create a non-centered hierarchical variable with group-level mean predictors.
 
 #     In a hierarchical model, "when one or more predictors correlate with the group or
 #     unit effects, a key Gauss-Markov assumption is violated," and this may result in
 #     poor estimates of parameter uncertainty. This function implements
-#     `src.modeling.pymc3_helpers.hierarchical_normal()` except includes predictors for
+#     `src.modeling.pymc_helpers.hierarchical_normal()` except includes predictors for
 #     group-level means to overcome this problem. See *Fitting Multilevel Models When
 #     Predictors and GroupEffects Correlate* by Bafumi and Gelman for details.
 
@@ -185,7 +163,7 @@ def hierarchical_normal(
 #         shape (Union[int, tuple[int, ...]]): Variable shape.
 #         centered (bool, optional): Centered or non-centered parameterization? Defaults
 #           to `True` (centered).
-#         mu (Optional[PyMC3Variable], optional): Optional pre-made hyper-distribution
+#         mu (Optional[PyMCVariable], optional): Optional pre-made hyper-distribution
 #           mean. Defaults to None.
 #         mu_mean (float, optional): Mean of the hyper-distribution mean hyperparameter.
 #           Defaults to 0.0.
@@ -199,10 +177,10 @@ def hierarchical_normal(
 #           variables. Defaults to 2.5.
 
 #     Returns:
-#         PyMC3Variable: The create variable.
+#         PyMCVariable: The create variable.
 
 #     Example:
-#         Example from *Modeling Shark Attacks in Python with PyMC3* in "Mixed Effects."
+#         Example from *Modeling Shark Attacks in Python with PyMC* in "Mixed Effects."
 #         (https://austinrochford.com/posts/2021-06-27-sharks-pymc3.html#mixed-effects)
 #         >>> def standardize(x: np.ndarray) -> np.ndarray:
 #         ...     return (x - x.mean()) / x.std()

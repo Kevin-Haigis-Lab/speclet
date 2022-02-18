@@ -11,8 +11,8 @@ class ModelFitMethod(Enum):
     """Available fit methods."""
 
     STAN_MCMC = "STAN_MCMC"
-    PYMC3_MCMC = "PYMC3_MCMC"
-    PYMC3_ADVI = "PYMC3_ADVI"
+    PYMC_MCMC = "PYMC_MCMC"
+    PYMC_ADVI = "PYMC_ADVI"
 
 
 @unique

@@ -1,13 +1,11 @@
 import arviz as az
 import pandas as pd
-import pymc3 as pm
+import pymc as pm
 import pytest
-from pymc3.model import DeterministicWrapper, FreeRV
 from seaborn import load_dataset
-from theano import tensor as tt
 
 import speclet.exceptions
-from speclet.modeling import pymc3_helpers as pmhelp
+from speclet.modeling import pymc_helpers as pmhelp
 
 
 @pytest.fixture(scope="module")
@@ -28,13 +26,7 @@ def mock_model(iris_df: pd.DataFrame) -> pm.Model:
 
 def test_get_random_variables(mock_model: pm.Model) -> None:
     rvs = pmhelp.get_random_variable_names(mock_model)
-    expected_rvs = {"a", "b", "sigma_log__"}
-    assert expected_rvs == set(rvs)
-
-
-def test_get_random_variables_without_log(mock_model: pm.Model) -> None:
-    rvs = pmhelp.get_random_variable_names(mock_model, rm_log=True)
-    expected_rvs = {"a", "b", "sigma"}
+    expected_rvs = {"a", "b", "sigma", "y"}
     assert expected_rvs == set(rvs)
 
 
@@ -46,12 +38,6 @@ def test_get_deterministic_variables(mock_model: pm.Model) -> None:
 
 def test_get_all_variables(mock_model: pm.Model) -> None:
     rvs = pmhelp.get_variable_names(mock_model)
-    expected_rvs = {"a", "b", "sigma_log__", "mu", "sigma", "y"}
-    assert expected_rvs == set(rvs)
-
-
-def test_get_all_variables_rm_log(mock_model: pm.Model) -> None:
-    rvs = pmhelp.get_variable_names(mock_model, rm_log=True)
     expected_rvs = {"a", "b", "mu", "sigma", "y"}
     assert expected_rvs == set(rvs)
 
@@ -96,46 +82,46 @@ def test_get_one_chain(
     assert new_post.shape == new_shape
 
 
-@pytest.mark.parametrize("centered", (True, False))
-def test_hierarchical_normal(centered: bool) -> None:
-    with pm.Model() as m:
-        a = pmhelp.hierarchical_normal("var-name", shape=(2, 5), centered=centered)
+# @pytest.mark.parametrize("centered", (True, False))
+# def test_hierarchical_normal(centered: bool) -> None:
+#     with pm.Model() as m:
+#         a = pmhelp.hierarchical_normal("var-name", shape=(2, 5), centered=centered)
 
-    assert a.name == "var-name"
-    assert a.ndim == 2
+#     assert a.name == "var-name"
+#     assert a.ndim == 2
 
-    if centered:
-        assert a.dshape == (2, 5)
-        assert isinstance(a, FreeRV)
-        with pytest.raises(KeyError):
-            _ = m["Δ_var-name"]
-    else:
-        assert m["Δ_var-name"].dshape == (2, 5)
-        assert isinstance(a, DeterministicWrapper)
+#     if centered:
+#         assert a.dshape == (2, 5)
+#         assert isinstance(a, RandomVariable)
+#         with pytest.raises(KeyError):
+#             _ = m["Δ_var-name"]
+#     else:
+#         assert m["Δ_var-name"].dshape == (2, 5)
+#         assert isinstance(a, Deterministic)
 
 
-@pytest.mark.parametrize("centered", (True, False))
-def test_hierarchical_normal_with_avg(centered: bool) -> None:
+# @pytest.mark.parametrize("centered", (True, False))
+# def test_hierarchical_normal_with_avg(centered: bool) -> None:
 
-    avgs = tt.constant([1, 2, 3, 4, 5])
-    shape = (5,)
+#     avgs = at.constant([1, 2, 3, 4, 5])
+#     shape = (5,)
 
-    with pm.Model() as m:
-        a = pmhelp.hierarchical_normal_with_avg(
-            "var-name", avg_map={"other-var": avgs}, shape=shape, centered=centered
-        )
+#     with pm.Model() as m:
+#         a = pmhelp.hierarchical_normal_with_avg(
+#             "var-name", avg_map={"other-var": avgs}, shape=shape, centered=centered
+#         )
 
-    assert a.name == "var-name"
-    assert a.ndim == 1
+#     assert a.name == "var-name"
+#     assert a.ndim == 1
 
-    gamma = m["γ_var-name_other-var_bar"]
-    assert isinstance(gamma, FreeRV)
+#     gamma = m["γ_var-name_other-var_bar"]
+#     assert isinstance(gamma, RandomVariable)
 
-    if centered:
-        assert a.dshape == shape
-        assert isinstance(a, FreeRV)
-        with pytest.raises(KeyError):
-            _ = m["Δ_var-name"]
-    else:
-        assert m["Δ_var-name"].dshape == shape
-        assert isinstance(a, DeterministicWrapper)
+#     if centered:
+#         assert a.dshape == shape
+#         assert isinstance(a, RandomVariable)
+#         with pytest.raises(KeyError):
+#             _ = m["Δ_var-name"]
+#     else:
+#         assert m["Δ_var-name"].dshape == shape
+#         assert isinstance(a, Deterministic)

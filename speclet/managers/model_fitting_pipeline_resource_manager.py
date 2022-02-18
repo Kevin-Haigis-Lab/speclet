@@ -28,37 +28,37 @@ fitting_pipeline_memory_lookup: MemoryLookupDict = {
     BayesianModel.SIMPLE_NEGATIVE_BINOMIAL: {
         True: {
             ModelFitMethod.STAN_MCMC: 4,
-            ModelFitMethod.PYMC3_MCMC: 4,
-            ModelFitMethod.PYMC3_ADVI: 4,
+            ModelFitMethod.PYMC_MCMC: 4,
+            ModelFitMethod.PYMC_ADVI: 4,
         },
         False: {
             ModelFitMethod.STAN_MCMC: 8,
-            ModelFitMethod.PYMC3_MCMC: 8,
-            ModelFitMethod.PYMC3_ADVI: 8,
+            ModelFitMethod.PYMC_MCMC: 8,
+            ModelFitMethod.PYMC_ADVI: 8,
         },
     },
     BayesianModel.HIERARCHICAL_NB: {
         True: {
             ModelFitMethod.STAN_MCMC: 2,
-            ModelFitMethod.PYMC3_MCMC: 4,
-            ModelFitMethod.PYMC3_ADVI: 4,
+            ModelFitMethod.PYMC_MCMC: 4,
+            ModelFitMethod.PYMC_ADVI: 4,
         },
         False: {
             ModelFitMethod.STAN_MCMC: 64,
-            ModelFitMethod.PYMC3_MCMC: 64,
-            ModelFitMethod.PYMC3_ADVI: 64,
+            ModelFitMethod.PYMC_MCMC: 64,
+            ModelFitMethod.PYMC_ADVI: 64,
         },
     },
     BayesianModel.HIERARCHICAL_NB_SECONDTIER: {
         True: {
             ModelFitMethod.STAN_MCMC: 4,
-            ModelFitMethod.PYMC3_MCMC: 4,
-            ModelFitMethod.PYMC3_ADVI: 4,
+            ModelFitMethod.PYMC_MCMC: 4,
+            ModelFitMethod.PYMC_ADVI: 4,
         },
         False: {
             ModelFitMethod.STAN_MCMC: 8,
-            ModelFitMethod.PYMC3_MCMC: 8,
-            ModelFitMethod.PYMC3_ADVI: 8,
+            ModelFitMethod.PYMC_MCMC: 8,
+            ModelFitMethod.PYMC_ADVI: 8,
         },
     },
 }
@@ -70,37 +70,37 @@ fitting_pipeline_time_lookup: TimeLookupDict = {
     BayesianModel.SIMPLE_NEGATIVE_BINOMIAL: {
         True: {
             ModelFitMethod.STAN_MCMC: td(minutes=5),
-            ModelFitMethod.PYMC3_MCMC: td(minutes=5),
-            ModelFitMethod.PYMC3_ADVI: td(minutes=5),
+            ModelFitMethod.PYMC_MCMC: td(minutes=5),
+            ModelFitMethod.PYMC_ADVI: td(minutes=5),
         },
         False: {
             ModelFitMethod.STAN_MCMC: td(minutes=10),
-            ModelFitMethod.PYMC3_MCMC: td(minutes=10),
-            ModelFitMethod.PYMC3_ADVI: td(minutes=10),
+            ModelFitMethod.PYMC_MCMC: td(minutes=10),
+            ModelFitMethod.PYMC_ADVI: td(minutes=10),
         },
     },
     BayesianModel.HIERARCHICAL_NB: {
         True: {
             ModelFitMethod.STAN_MCMC: td(minutes=7),
-            ModelFitMethod.PYMC3_MCMC: td(minutes=15),
-            ModelFitMethod.PYMC3_ADVI: td(minutes=15),
+            ModelFitMethod.PYMC_MCMC: td(minutes=15),
+            ModelFitMethod.PYMC_ADVI: td(minutes=15),
         },
         False: {
             ModelFitMethod.STAN_MCMC: td(days=5),
-            ModelFitMethod.PYMC3_MCMC: td(days=5),
-            ModelFitMethod.PYMC3_ADVI: td(hours=5),
+            ModelFitMethod.PYMC_MCMC: td(days=5),
+            ModelFitMethod.PYMC_ADVI: td(hours=5),
         },
     },
     BayesianModel.HIERARCHICAL_NB_SECONDTIER: {
         True: {
             ModelFitMethod.STAN_MCMC: td(minutes=5),
-            ModelFitMethod.PYMC3_MCMC: td(minutes=5),
-            ModelFitMethod.PYMC3_ADVI: td(minutes=5),
+            ModelFitMethod.PYMC_MCMC: td(minutes=5),
+            ModelFitMethod.PYMC_ADVI: td(minutes=5),
         },
         False: {
             ModelFitMethod.STAN_MCMC: td(minutes=10),
-            ModelFitMethod.PYMC3_MCMC: td(minutes=10),
-            ModelFitMethod.PYMC3_ADVI: td(minutes=10),
+            ModelFitMethod.PYMC_MCMC: td(minutes=10),
+            ModelFitMethod.PYMC_ADVI: td(minutes=10),
         },
     },
 }

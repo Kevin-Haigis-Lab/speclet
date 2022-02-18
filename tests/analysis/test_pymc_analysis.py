@@ -2,16 +2,15 @@ import matplotlib
 import numpy as np
 import pandas as pd
 import plotnine as gg
-import pymc3 as pm
+import pymc as pm
 import pytest
 from numpy.random import standard_normal
+from pymc.backends.base import MultiTrace
 
-from speclet.analysis import pymc3_analysis as pmanal
+from speclet.analysis import pymc_analysis as pmanal
 
-MCMCResults = tuple[pm.backends.base.MultiTrace, dict[str, np.ndarray]]
-ADVIResults = tuple[
-    pm.backends.base.MultiTrace, dict[str, np.ndarray], pm.Approximation
-]
+MCMCResults = tuple[MultiTrace, dict[str, np.ndarray]]
+ADVIResults = tuple[MultiTrace, dict[str, np.ndarray], pm.Approximation]
 PriorPrediction = dict[str, np.ndarray]
 
 
