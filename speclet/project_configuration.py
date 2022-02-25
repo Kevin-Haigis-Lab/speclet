@@ -40,7 +40,7 @@ class FittingPipelineConfig(BaseModel):
 class Misc(BaseModel):
     """Miscellaneous configuration."""
 
-    theano_gcc_flag: Optional[str] = None
+    aesara_gcc_flag: Optional[str] = None
 
 
 class ProjectConfig(BaseModel):

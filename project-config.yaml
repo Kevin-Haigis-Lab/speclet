@@ -19,4 +19,4 @@ fitting_pipeline:
   env_yaml: "default_environment.yaml"
 
 misc:
-  theano_gcc_flag: 'cxx="$CONDA_PREFIX/bin/g++",blas__ldflags="-L$CONDA_PREFIX/lib -lcblas -lblas -lcblas -lblas"'
+  aesara_gcc_flag: 'cxx="$CONDA_PREFIX/bin/g++",blas__ldflags="-L$CONDA_PREFIX/lib -lcblas -lblas -lcblas -lblas"'
