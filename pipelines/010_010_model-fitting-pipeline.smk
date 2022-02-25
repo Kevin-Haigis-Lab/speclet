@@ -87,33 +87,27 @@ localrules:
 rule all:
     input:
         report=expand(
-            str(REPORTS_DIR / "{model_name}_{fit_method}.md"),
+            REPORTS_DIR / "{model_name}_{fit_method}.md",
             zip,
             model_name=model_configuration_lists.model_names,
             fit_method=model_configuration_lists.fit_methods,
         ),
         description=expand(
-            str(MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "description.txt"),
+            MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "description.txt",
             zip,
             model_name=model_configuration_lists.model_names,
             fit_method=model_configuration_lists.fit_methods,
         ),
         summary=expand(
-            str(
-                MODEL_CACHE_DIR
-                / "{model_name}_{fit_method}"
-                / "posterior-summary.csv",
-            ),
+            MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "posterior-summary.csv",
             zip,
             model_name=model_configuration_lists.model_names,
             fit_method=model_configuration_lists.fit_methods,
         ),
         post_pred=expand(
-            str(
-                MODEL_CACHE_DIR
-                / "{model_name}_{fit_method}"
-                / "posterior-predictions.csv",
-            ),
+            MODEL_CACHE_DIR
+            / "{model_name}_{fit_method}"
+            / "posterior-predictions.csv",
             zip,
             model_name=model_configuration_lists.model_names,
             fit_method=model_configuration_lists.fit_methods,
@@ -125,20 +119,18 @@ rule all:
 
 rule sample_stan_mcmc:
     output:
-        idata_path=str(
-            TEMP_DIR / "{model_name}_STAN_MCMC_chain{chain}" / "posterior.netcdf"
-        ),
+        idata_path=TEMP_DIR / "{model_name}_STAN_MCMC_chain{chain}" / "posterior.netcdf",
     params:
         mem=lambda w: get_memory(w, ModelFitMethod.STAN_MCMC),
         time=lambda w: get_time(w, ModelFitMethod.STAN_MCMC),
         partition=lambda w: get_partition(w, ModelFitMethod.STAN_MCMC),
-        config_file=str(MODEL_CONFIG),
-        tempdir=str(TEMP_DIR),
+        config_file=MODEL_CONFIG,
+        tempdir=TEMP_DIR,
         cache_name=lambda w: f"{w.model_name}_STAN_MCMC_chain{w.chain}",
     conda:
         ENVIRONMENT_YAML
     benchmark:
-        str(BENCHMARK_DIR / "sample_stan_mcmc/{model_name}_chain{chain}.tsv")
+        BENCHMARK_DIR / "sample_stan_mcmc/{model_name}_chain{chain}.tsv"
     priority: 20
     shell:
         "speclet/command_line_interfaces/fit_bayesian_model_cli.py"
@@ -154,20 +146,16 @@ rule sample_stan_mcmc:
 rule combine_stan_mcmc:
     input:
         chains=expand(
-            str(
-                TEMP_DIR / "{{model_name}}_STAN_MCMC_chain{chain}" / "posterior.netcdf"
-            ),
+            TEMP_DIR / "{{model_name}}_STAN_MCMC_chain{chain}" / "posterior.netcdf",
             chain=list(range(N_CHAINS)),
         ),
     output:
-        combined_chains=str(
-            MODEL_CACHE_DIR / "{model_name}_STAN_MCMC" / "posterior.netcdf"
-        ),
+        combined_chains=MODEL_CACHE_DIR / "{model_name}_STAN_MCMC" / "posterior.netcdf",
     params:
         n_chains=N_CHAINS,
-        combined_cache_dir=str(MODEL_CACHE_DIR),
-        config_file=str(MODEL_CONFIG),
-        cache_dir=str(TEMP_DIR),
+        combined_cache_dir=MODEL_CACHE_DIR,
+        config_file=MODEL_CONFIG,
+        cache_dir=TEMP_DIR,
     conda:
         ENVIRONMENT_YAML
     shell:
@@ -185,27 +173,25 @@ rule combine_stan_mcmc:
 
 rule sample_pymc3_mcmc:
     output:
-        idata_path=str(
-            TEMP_DIR / "{model_name}_PYMC3_MCMC_chain{chain}" / "posterior.netcdf"
-        ),
+        idata_path=TEMP_DIR / "{model_name}_PYMC_MCMC_chain{chain}" / "posterior.netcdf",
     params:
-        mem=lambda w: get_memory(w, ModelFitMethod.PYMC3_MCMC),
-        time=lambda w: get_time(w, ModelFitMethod.PYMC3_MCMC),
-        partition=lambda w: get_partition(w, ModelFitMethod.PYMC3_MCMC),
-        config_file=str(MODEL_CONFIG),
-        tempdir=str(TEMP_DIR),
-        cache_name=lambda w: f"{w.model_name}_PYMC3_MCMC_chain{w.chain}",
+        mem=lambda w: get_memory(w, ModelFitMethod.PYMC_MCMC),
+        time=lambda w: get_time(w, ModelFitMethod.PYMC_MCMC),
+        partition=lambda w: get_partition(w, ModelFitMethod.PYMC_MCMC),
+        config_file=MODEL_CONFIG,
+        tempdir=TEMP_DIR,
+        cache_name=lambda w: f"{w.model_name}_PYMC_MCMC_chain{w.chain}",
     conda:
         ENVIRONMENT_YAML
     benchmark:
-        str(BENCHMARK_DIR / "sample_pymc3_mcmc/{model_name}_chain{chain}.tsv")
+        BENCHMARK_DIR / "sample_pymc3_mcmc/{model_name}_chain{chain}.tsv"
     priority: 20
     shell:
         get_aesara_flags("{wildcards.model_name}_{wildcards.chain}_mcmc") + " "
         "speclet/command_line_interfaces/fit_bayesian_model_cli.py"
         '  "{wildcards.model_name}"'
         "  {params.config_file}"
-        "  PYMC3_MCMC"
+        "  PYMC_MCMC"
         "  {params.tempdir}"
         "  --mcmc-chains 1"
         "  --mcmc-cores 1"
@@ -215,29 +201,23 @@ rule sample_pymc3_mcmc:
 rule combine_pymc3_mcmc:
     input:
         chains=expand(
-            str(
-                TEMP_DIR
-                / "{{model_name}}_PYMC3_MCMC_chain{chain}"
-                / "posterior.netcdf"
-            ),
+            TEMP_DIR / "{{model_name}}_PYMC_MCMC_chain{chain}" / "posterior.netcdf",
             chain=list(range(N_CHAINS)),
         ),
     output:
-        combined_chains=str(
-            MODEL_CACHE_DIR / "{model_name}_PYMC3_MCMC" / "posterior.netcdf"
-        ),
+        combined_chains=MODEL_CACHE_DIR / "{model_name}_PYMC_MCMC" / "posterior.netcdf",
     params:
         n_chains=N_CHAINS,
-        combined_cache_dir=str(MODEL_CACHE_DIR),
-        config_file=str(MODEL_CONFIG),
-        cache_dir=str(TEMP_DIR),
+        combined_cache_dir=MODEL_CACHE_DIR,
+        config_file=MODEL_CONFIG,
+        cache_dir=TEMP_DIR,
     conda:
         ENVIRONMENT_YAML
     shell:
         get_aesara_flags("{wildcards.model_name}_combine-mcmc") + " "
         "speclet/command_line_interfaces/combine_mcmc_chains_cli.py"
         "  {wildcards.model_name}"
-        "  PYMC3_MCMC"
+        "  PYMC_MCMC"
         "  {params.n_chains}"
         "  {params.config_file}"
         "  {params.cache_dir}"
@@ -249,13 +229,13 @@ rule combine_pymc3_mcmc:
 
 rule sample_pymc3_advi:
     output:
-        idata_path=str(MODEL_CACHE_DIR / "{model_name}_PYMC3_ADVI" / "posterior.netcdf"),
+        idata_path=MODEL_CACHE_DIR / "{model_name}_PYMC_ADVI" / "posterior.netcdf",
     params:
-        mem=lambda w: get_memory(w, ModelFitMethod.PYMC3_ADVI),
-        time=lambda w: get_time(w, ModelFitMethod.PYMC3_ADVI),
-        partition=lambda w: get_partition(w, ModelFitMethod.PYMC3_ADVI),
-        config_file=str(MODEL_CONFIG),
-        cache_dir=str(MODEL_CACHE_DIR),
+        mem=lambda w: get_memory(w, ModelFitMethod.PYMC_ADVI),
+        time=lambda w: get_time(w, ModelFitMethod.PYMC_ADVI),
+        partition=lambda w: get_partition(w, ModelFitMethod.PYMC_ADVI),
+        config_file=MODEL_CONFIG,
+        cache_dir=MODEL_CACHE_DIR,
     conda:
         ENVIRONMENT_YAML
     benchmark:
@@ -266,7 +246,7 @@ rule sample_pymc3_advi:
         "speclet/command_line_interfaces/fit_bayesian_model_cli.py"
         '  "{wildcards.model_name}"'
         "  {params.config_file}"
-        "  PYMC3_ADVI"
+        "  PYMC_ADVI"
         "  {params.cache_dir}"
         "  --mcmc-cores 1"
 
@@ -286,8 +266,8 @@ rule summarize_posterior:
         / "{model_name}_{fit_method}"
         / "posterior-predictions.csv",
     params:
-        config_file=str(MODEL_CONFIG),
-        cache_dir=str(MODEL_CACHE_DIR),
+        config_file=MODEL_CONFIG,
+        cache_dir=MODEL_CACHE_DIR,
     shell:
         "speclet/command_line_interfaces/summarize_posterior.py"
         '  "{wildcards.model_name}"'
@@ -302,9 +282,9 @@ rule summarize_posterior:
 
 rule papermill_report:
     input:
-        template_nb=str(REPORTS_DIR / "_model-report-template.ipynb"),
+        template_nb=REPORTS_DIR / "_model-report-template.ipynb",
     output:
-        notebook=str(REPORTS_DIR / "{model_name}_{fit_method}.ipynb"),
+        notebook=REPORTS_DIR / "{model_name}_{fit_method}.ipynb",
     version:
         "1.0"
     run:
@@ -323,12 +303,10 @@ rule papermill_report:
 
 rule execute_report:
     input:
-        idata_path=str(
-            MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "posterior.netcdf"
-        ),
+        idata_path=MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "posterior.netcdf",
         notebook=rules.papermill_report.output.notebook,
     output:
-        markdown=str(REPORTS_DIR / "{model_name}_{fit_method}.md"),
+        markdown=REPORTS_DIR / "{model_name}_{fit_method}.md",
     conda:
         ENVIRONMENT_YAML
     shell:
