@@ -29,6 +29,9 @@ from speclet.io import stan_models_dir
 from speclet.modeling.stan_helpers import read_code_file
 from speclet.project_enums import ModelFitMethod
 
+# from patsy.highlevel import dmatrix, build_design_matrices, DesignMatrix
+# from aesara import tensor as at
+
 
 @dataclass
 class NegativeBinomialModelData:
@@ -45,7 +48,10 @@ class NegativeBinomialModelData:
     gene_idx: np.ndarray
     cellline_idx: np.ndarray
     lineage_idx: np.ndarray
-    z_copy_number: np.ndarray
+    # copy_number: np.ndarray
+    # z_copy_number: np.ndarray
+    # cn_spline_basis: DesignMatrix
+    # knots: np.ndarray
 
 
 class HierarchcalNegativeBinomialModel:
@@ -89,7 +95,10 @@ class HierarchcalNegativeBinomialModel:
                         Check(check_unique_groups, groupby="depmap_id"),
                     ],
                 ),
-                "z_copy_number": Column(float, checks=[check_finite()]),
+                # "copy_number": Column(
+                #     float, checks=[check_nonnegative(), check_finite()]
+                # ),
+                # "z_copy_number": Column(float, checks=[check_finite()]),
             }
         )
 
@@ -113,8 +122,15 @@ class HierarchcalNegativeBinomialModel:
         """
         return self.data_schema.validate(data)
 
+    # def _make_spline_basis(self, data: pd.DataFrame) -> tuple[np.ndarray, DesignMatrix]:
+    #     cn = data.copy_number.values.flatten()
+    #     knots = make_knot_list(cn, num_knots=5)
+    #     basis = build_spline(cn, knots)
+    #     return knots, basis
+
     def _make_data_structure(self, data: pd.DataFrame) -> NegativeBinomialModelData:
         indices = common_indices(data)
+        # knots, spline_b = self._make_spline_basis(data)
         return NegativeBinomialModelData(
             N=data.shape[0],
             S=indices.n_sgrnas,
@@ -127,7 +143,10 @@ class HierarchcalNegativeBinomialModel:
             gene_idx=indices.gene_idx,
             cellline_idx=indices.cellline_idx,
             lineage_idx=indices.lineage_idx,
-            z_copy_number=data.z_copy_number.values,
+            # copy_number=data.copy_number.values,
+            # z_copy_number=data.z_copy_number.values,
+            # cn_spline_basis=spline_b,
+            # knots=knots,
         )
 
     def data_processing_pipeline(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -220,7 +239,11 @@ class HierarchcalNegativeBinomialModel:
         c = model_data.cellline_idx
         g = model_data.gene_idx
         ll = model_data.lineage_idx
-        # z_cn = model_data.z_copy_number
+
+        # copy_num_basis = model_data.cn_spline_basis
+        # cn_B = np.asarray(copy_num_basis)
+        # cn_B_dim = cn_B.shape[1]
+        # coords["cn_spline"] = np.arange(0, cn_B_dim).tolist()
 
         with pm.Model(coords=coords) as model:
             z = pm.Normal("z", 0, 5)
@@ -236,9 +259,15 @@ class HierarchcalNegativeBinomialModel:
             delta_d = pm.Normal("delta_d", 0, 1, dims=("gene", "lineage"))
             d = pm.Deterministic("d", 0 + delta_d * sigma_d, dims=("gene", "lineage"))
 
-            # f = pm.Normal("f", 0, 2.5)
+            # mu_f = pm.Normal("mu_f", 0, 2.5)
+            # sigma_f = pm.HalfNormal("sigma_f", 2.5)
+            # f = pm.Normal("f", mu_f, sigma_f, dims=("cn_spline", "cell_line"))
+            # _cn_effect = []
+            # for i in range(model_data.C):
+            #     _cn_effect.append(pmmath.dot(cn_B[c == i, :], f[:, i]).reshape((-1, 1)))
 
-            eta = pm.Deterministic("eta", z + a[s] + b[c] + d[g, ll])  # + (z_cn * f))
+            eta = pm.Deterministic("eta", z + a[s] + b[c] + d[g, ll])
+            # + at.vertical_stack(*_cn_effect).squeeze(),
             mu = pm.Deterministic("mu", pmmath.exp(eta))
 
             alpha_hyperparams = pm.Gamma("alpha_hyperparams", 2, 0.5, shape=2)
@@ -252,3 +281,15 @@ class HierarchcalNegativeBinomialModel:
                 observed=model_data.ct_final,
             )
         return model
+
+
+# def build_spline(x: np.ndarray, knot_list: np.ndarray) -> DesignMatrix:
+#     B = dmatrix(
+#         "bs(x, knots=knots, degree=3, include_intercept=True) - 1",
+#         {"x": x, "knots": knot_list[1:-1]},
+#     )
+#     return B
+
+
+# def make_knot_list(x: np.ndarray, num_knots: int) -> np.ndarray:
+#     return np.quantile(x, np.linspace(0, 1, num_knots))

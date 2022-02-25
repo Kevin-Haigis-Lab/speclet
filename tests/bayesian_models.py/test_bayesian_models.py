@@ -52,8 +52,10 @@ def test_pytsan_working() -> None:
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("bayesian_model", bayes.BayesianModel)
-@pytest.mark.parametrize("method", [ModelFitMethod.PYMC_MCMC, ModelFitMethod.STAN_MCMC])
+# @pytest.mark.parametrize("bayesian_model", bayes.BayesianModel)
+# @pytest.mark.parametrize("method", [ModelFitMethod.PYMC_MCMC, ModelFitMethod.STAN_MCMC])
+@pytest.mark.parametrize("bayesian_model", [bayes.BayesianModel.HIERARCHICAL_NB])
+@pytest.mark.parametrize("method", [ModelFitMethod.PYMC_MCMC])
 def test_all_bayesian_models_build(
     bayesian_model: bayes.BayesianModel,
     method: ModelFitMethod,
@@ -69,8 +71,10 @@ def test_all_bayesian_models_build(
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("bayesian_model", bayes.BayesianModel)
-@pytest.mark.parametrize("method", [ModelFitMethod.PYMC_MCMC, ModelFitMethod.STAN_MCMC])
+# @pytest.mark.parametrize("bayesian_model", bayes.BayesianModel)
+# @pytest.mark.parametrize("method", [ModelFitMethod.PYMC_MCMC, ModelFitMethod.STAN_MCMC])
+@pytest.mark.parametrize("bayesian_model", [bayes.BayesianModel.HIERARCHICAL_NB])
+@pytest.mark.parametrize("method", [ModelFitMethod.PYMC_MCMC])
 def test_all_bayesian_models_sample(
     bayesian_model: bayes.BayesianModel,
     method: ModelFitMethod,

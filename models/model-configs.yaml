@@ -70,16 +70,14 @@
   pipelines:
     fitting: [PYMC_MCMC]
 
-- name: hier-nb-copynum
-  description: A hierarchical negative binomial model.
+- name: hier-nb-pymc4
+  description: A hierarchical negative binomial model with PyMC v4.
+  active: true
   model: HIERARCHICAL_NB
-  data_file: DEPMAP_CRC_BONE_SUBSAMPLE
+  data_file: DEPMAP_CRC_BONE_LARGE_SUBSAMPLE
   sampling_kwargs:
     pymc3_mcmc:
       target_accept: 0.95
-    stan_mcmc:
-      delta: 0.95
-      refresh: 5
   pipelines:
     fitting: [PYMC_MCMC]
 
