@@ -11,7 +11,7 @@ from speclet.managers.model_fitting_pipeline_resource_manager import (
     ModelFittingPipelineResourceManager as RM,
 )
 from speclet.pipelines.snakemake_parsing_helpers import get_models_names_fit_methods
-from speclet.pipelines.theano_flags import get_theano_flags
+from speclet.pipelines.aesara_flags import get_aesara_flags
 from speclet.project_enums import ModelFitMethod, SpecletPipeline
 from speclet.project_configuration import fitting_pipeline_config
 
@@ -201,7 +201,7 @@ rule sample_pymc3_mcmc:
         str(BENCHMARK_DIR / "sample_pymc3_mcmc/{model_name}_chain{chain}.tsv")
     priority: 20
     shell:
-        get_theano_flags("{wildcards.model_name}_{wildcards.chain}_mcmc") + " "
+        get_aesara_flags("{wildcards.model_name}_{wildcards.chain}_mcmc") + " "
         "speclet/command_line_interfaces/fit_bayesian_model_cli.py"
         '  "{wildcards.model_name}"'
         "  {params.config_file}"
@@ -234,7 +234,7 @@ rule combine_pymc3_mcmc:
     conda:
         ENVIRONMENT_YAML
     shell:
-        get_theano_flags("{wildcards.model_name}_combine-mcmc") + " "
+        get_aesara_flags("{wildcards.model_name}_combine-mcmc") + " "
         "speclet/command_line_interfaces/combine_mcmc_chains_cli.py"
         "  {wildcards.model_name}"
         "  PYMC3_MCMC"
@@ -262,7 +262,7 @@ rule sample_pymc3_advi:
         BENCHMARK_DIR / "sample_pymc3_advi/{model_name}.tsv"
     priority: 10
     shell:
-        get_theano_flags("{wildcards.model_name}_advi") + " "
+        get_aesara_flags("{wildcards.model_name}_advi") + " "
         "speclet/command_line_interfaces/fit_bayesian_model_cli.py"
         '  "{wildcards.model_name}"'
         "  {params.config_file}"
