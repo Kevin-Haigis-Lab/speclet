@@ -66,7 +66,6 @@ dependencies:
   - h5py>=2.7
   - ipython>=7.16
   - myst-nb
-  - python-graphviz
   - scipy>=1.4.1,<1.8.0
   - typing-extensions>=3.7.4
   - pip:

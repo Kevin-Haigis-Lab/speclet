@@ -7,6 +7,7 @@ channels:
 dependencies:
   - python=3.9.9
   - snakemake=6.13.*
+  - arviz>=0.11.0
   - black  # used in pipeline
   - colorama
   - dask
@@ -14,8 +15,6 @@ dependencies:
   - isort  # used in pipeline
   - jupyterlab
   - mamba
-  - mkl
-  - mkl-service
   - nbconvert
   - nbqa  # used in pipeline
   - numpy
@@ -28,14 +27,25 @@ dependencies:
   - pretty_errors
   - pydantic
   - pyjanitor
-  - pymc3=3.11.*
   - python-graphviz
   - rich
   - seaborn
-  - theano-pymc=1.1.*
   - typer
   - watermark
+  - aeppl=0.0.26
+  - aesara=2.3.8
+  - blas
+  - cachetools>=4.2.1
+  - cloudpickle
+  - fastprogress>=0.2.0
+  - h5py>=2.7
+  - ipython>=7.16
+  - myst-nb
+  - scipy>=1.4.1,<1.8.0
+  - typing-extensions>=3.7.4
   - pip:
+    - polyagamma
     - pystan==3.1.1  # latest version for O2
     - python-dotenv
+    - git+https://github.com/pymc-devs/pymc.git
     - -e .  # install the source directory as a package (keep as last)
