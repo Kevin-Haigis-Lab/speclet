@@ -168,10 +168,10 @@ rule combine_stan_mcmc:
         "  {params.combined_cache_dir}"
 
 
-# --- PyMC3 MCMC ---
+# --- PyMC MCMC ---
 
 
-rule sample_pymc3_mcmc:
+rule sample_pymc_mcmc:
     output:
         idata_path=TEMP_DIR / "{model_name}_PYMC_MCMC_chain{chain}" / "posterior.netcdf",
     params:
@@ -184,7 +184,7 @@ rule sample_pymc3_mcmc:
     conda:
         ENVIRONMENT_YAML
     benchmark:
-        BENCHMARK_DIR / "sample_pymc3_mcmc/{model_name}_chain{chain}.tsv"
+        BENCHMARK_DIR / "sample_pymc_mcmc/{model_name}_chain{chain}.tsv"
     priority: 20
     shell:
         get_aesara_flags("{wildcards.model_name}_{wildcards.chain}_mcmc") + " "
@@ -198,7 +198,7 @@ rule sample_pymc3_mcmc:
         "  --cache-name {params.cache_name}"
 
 
-rule combine_pymc3_mcmc:
+rule combine_pymc_mcmc:
     input:
         chains=expand(
             TEMP_DIR / "{{model_name}}_PYMC_MCMC_chain{chain}" / "posterior.netcdf",
@@ -224,10 +224,10 @@ rule combine_pymc3_mcmc:
         "  {params.combined_cache_dir}"
 
 
-# --- PyMC3 ADVI ---
+# --- PyMC ADVI ---
 
 
-rule sample_pymc3_advi:
+rule sample_pymc_advi:
     output:
         idata_path=MODEL_CACHE_DIR / "{model_name}_PYMC_ADVI" / "posterior.netcdf",
     params:
@@ -239,7 +239,7 @@ rule sample_pymc3_advi:
     conda:
         ENVIRONMENT_YAML
     benchmark:
-        BENCHMARK_DIR / "sample_pymc3_advi/{model_name}.tsv"
+        BENCHMARK_DIR / "sample_pymc_advi/{model_name}.tsv"
     priority: 10
     shell:
         get_aesara_flags("{wildcards.model_name}_advi") + " "

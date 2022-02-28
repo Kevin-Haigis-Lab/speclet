@@ -19,24 +19,24 @@ combine_stan_mcmc:
   mem: "32000"
   time: "00:15:00"
   J: "stan-comb"
-sample_pymc3_mcmc:
+sample_pymc_mcmc:
   partition: "{params.partition}"
   cores: 1
   mem: "{params.mem}"
   time: "{params.time}"
   J: "pymc-mc"
-combine_pymc3_mcmc:
+combine_pymc_mcmc:
   partition: "short"
   cores: 1
   mem: "164000"
   time: "02:00:00"
   J: "pymc-comb"
-sample_pymc3_advi:
+sample_pymc_advi:
   partition: "{params.partition}"
   cores: 1
   mem: "{params.mem}"
   time: "{params.time}"
-  J: "pymc3-advi"
+  J: "pymc-advi"
 summarize_posterior:
   partition: "short"
   cores: 2
