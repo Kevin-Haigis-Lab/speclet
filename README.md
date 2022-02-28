@@ -33,6 +33,16 @@ mamba env create -f environment.yaml
 mamba env create -f environment_smk.yaml
 ```
 
+If wokring on a linux distribution, you'll need to install `gcc` and `g++`, also.
+
+```bash
+conda activate speclet
+mamba install -c conda-forge gcc gxx
+
+conda deactivate && conda activate speclet_smk
+mamba install -c conda-forge gcc gxx
+```
+
 Either environment can then be used like a normal 'conda' environment.
 For example, below is the command it activate the `speclet` environment.
 

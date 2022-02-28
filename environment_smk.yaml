@@ -12,13 +12,14 @@ dependencies:
   - colorama
   - dask
   - drmaa
+  # - gcc
+  # - gxx
   - isort  # used in pipeline
   - jupyterlab
   - mamba
   - nbconvert
   - nbqa  # used in pipeline
   - numpy
-  - openssl
   - pandas
   - pandera
   - papermill
@@ -29,7 +30,10 @@ dependencies:
   - pyjanitor
   - python-graphviz
   - rich
+  - scikit-learn>=1.0.0
+  - scikit-misc
   - seaborn
+  - statsmodels
   - typer
   - watermark
   - aeppl=0.0.26

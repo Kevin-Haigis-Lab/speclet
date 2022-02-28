@@ -26,7 +26,7 @@ DEBUG = pipeline_config.debug
 TEMP_DIR = pipeline_config.temp_dir
 MODEL_CACHE_DIR = pipeline_config.model_cache_dir
 REPORTS_DIR = pipeline_config.reports_dir
-ENVIRONMENT_YAML = str(pipeline_config.env_yaml)
+# ENVIRONMENT_YAML = str(pipeline_config.env_yaml)
 
 # Benchmarking jobs.
 BENCHMARK_DIR = pipeline_config.benchmark_dir
@@ -127,8 +127,8 @@ rule sample_stan_mcmc:
         config_file=MODEL_CONFIG,
         tempdir=TEMP_DIR,
         cache_name=lambda w: f"{w.model_name}_STAN_MCMC_chain{w.chain}",
-    conda:
-        ENVIRONMENT_YAML
+    # conda:
+    #     ENVIRONMENT_YAML
     benchmark:
         BENCHMARK_DIR / "sample_stan_mcmc/{model_name}_chain{chain}.tsv"
     priority: 20
@@ -156,8 +156,8 @@ rule combine_stan_mcmc:
         combined_cache_dir=MODEL_CACHE_DIR,
         config_file=MODEL_CONFIG,
         cache_dir=TEMP_DIR,
-    conda:
-        ENVIRONMENT_YAML
+    # conda:
+    #     ENVIRONMENT_YAML
     shell:
         "speclet/command_line_interfaces/combine_mcmc_chains_cli.py"
         "  {wildcards.model_name}"
@@ -181,8 +181,8 @@ rule sample_pymc_mcmc:
         config_file=MODEL_CONFIG,
         tempdir=TEMP_DIR,
         cache_name=lambda w: f"{w.model_name}_PYMC_MCMC_chain{w.chain}",
-    conda:
-        ENVIRONMENT_YAML
+    # conda:
+    #     ENVIRONMENT_YAML
     benchmark:
         BENCHMARK_DIR / "sample_pymc_mcmc/{model_name}_chain{chain}.tsv"
     priority: 20
@@ -211,8 +211,8 @@ rule combine_pymc_mcmc:
         combined_cache_dir=MODEL_CACHE_DIR,
         config_file=MODEL_CONFIG,
         cache_dir=TEMP_DIR,
-    conda:
-        ENVIRONMENT_YAML
+    # conda:
+    #     ENVIRONMENT_YAML
     shell:
         get_aesara_flags("{wildcards.model_name}_combine-mcmc") + " "
         "speclet/command_line_interfaces/combine_mcmc_chains_cli.py"
@@ -236,8 +236,8 @@ rule sample_pymc_advi:
         partition=lambda w: get_partition(w, ModelFitMethod.PYMC_ADVI),
         config_file=MODEL_CONFIG,
         cache_dir=MODEL_CACHE_DIR,
-    conda:
-        ENVIRONMENT_YAML
+    # conda:
+    #     ENVIRONMENT_YAML
     benchmark:
         BENCHMARK_DIR / "sample_pymc_advi/{model_name}.tsv"
     priority: 10
@@ -307,8 +307,8 @@ rule execute_report:
         notebook=rules.papermill_report.output.notebook,
     output:
         markdown=REPORTS_DIR / "{model_name}_{fit_method}.md",
-    conda:
-        ENVIRONMENT_YAML
+    # conda:
+    #     ENVIRONMENT_YAML
     shell:
         "jupyter nbconvert --to notebook --inplace --execute {input.notebook} && "
         "nbqa isort --profile=black {input.notebook} && "

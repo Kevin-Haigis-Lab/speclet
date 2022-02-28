@@ -26,12 +26,13 @@ snakemake \
     --restart-times 0 \
     --latency-wait 120 \
     --rerun-incomplete \
-    --use-conda \
-    --conda-frontend 'mamba' \
     --drmaa " --account=park -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
     --cluster-config pipelines/010_011_smk-config.yaml \
     --keep-going \
     --printshellcmds
+
+    # --use-conda \
+    # --conda-frontend 'mamba' \
 
 # --conda-cleanup-envs  # use to clean up old conda envs
 
