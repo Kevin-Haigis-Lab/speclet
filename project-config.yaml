@@ -18,5 +18,5 @@ fitting_pipeline:
   benchmark_dir: "benchmarks/010_010_model-fitting-pipeline"
   env_yaml: "default_environment.yaml"
 
-misc:
-  aesara_gcc_flag: 'cxx="$CONDA_PREFIX/bin/g++",blas__ldflags="-L$CONDA_PREFIX/lib -lcblas -lblas -lcblas -lblas"'
+# misc:
+#   aesara_gcc_flag: 'cxx="$CONDA_PREFIX/bin/g++",blas__ldflags="-L$CONDA_PREFIX/lib -lopenblas -lopenblas -Wl,-rpath,$CONDA_PREFIX/lib"'

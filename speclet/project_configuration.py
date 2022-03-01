@@ -7,7 +7,7 @@ from typing import Optional
 
 import yaml
 from dotenv import dotenv_values
-from pydantic import BaseModel, Field
+from pydantic import BaseModel  # , Field
 
 
 class MungeConfig(BaseModel):
@@ -37,10 +37,10 @@ class FittingPipelineConfig(BaseModel):
     env_yaml: Path
 
 
-class Misc(BaseModel):
-    """Miscellaneous configuration."""
+# class Misc(BaseModel):
+#     """Miscellaneous configuration."""
 
-    aesara_gcc_flag: Optional[str] = None
+#     aesara_gcc_flag: Optional[str] = None
 
 
 class ProjectConfig(BaseModel):
@@ -49,7 +49,7 @@ class ProjectConfig(BaseModel):
     munge: MungeConfig
     modeling: ModelingConfig
     fitting_pipeline: FittingPipelineConfig
-    misc: Misc = Field(default_factory=Misc)
+    # misc: Misc = Field(default_factory=Misc)
 
 
 def read_project_configuration(path: Optional[Path] = None) -> ProjectConfig:
