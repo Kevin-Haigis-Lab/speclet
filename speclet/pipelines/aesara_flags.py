@@ -1,10 +1,9 @@
 """Aesara flags for pipelines."""
 
+import os
 from typing import Optional
 
 import aesara
-
-from speclet.project_configuration import read_project_configuration
 
 
 def get_aesara_compile_dir() -> str:
@@ -18,8 +17,7 @@ def get_aesara_compile_dir() -> str:
 
 
 def _aesara_gcc_config() -> Optional[str]:
-    gcc_vars = read_project_configuration().misc.aesara_gcc_flag
-    return gcc_vars
+    return os.getenv("AESARA_GCC_FLAG")
 
 
 def get_aesara_flags(
