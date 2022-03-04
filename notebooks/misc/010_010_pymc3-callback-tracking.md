@@ -188,6 +188,10 @@ chain_groups = {
     "48364681_sample_pymc3_mcmc.log": "BLAS warning",
     "48364682_sample_pymc3_mcmc.log": "BLAS warning",
     "48364686_sample_pymc3_mcmc.log": "BLAS warning",
+    "49622311_sample_pymc_mcmc.log": "PyMC v4",
+    "49534706_sample_pymc_mcmc.log": "PyMC v4",
+    "49534705_sample_pymc_mcmc.log": "PyMC v4",
+    "49534704_sample_pymc_mcmc.log": "PyMC v4",
 }
 
 log_data["chain_group"] = [chain_groups[log_name] for log_name in log_data.log_file]
@@ -198,6 +202,11 @@ if True:
     log_data = log_data.filter_column_isin(
         "chain_group", ["advi"], complement=True
     ).reset_index(drop=True)
+    log_data["chain_group"] = pd.Categorical(
+        log_data["chain_group"],
+        categories=["BLAS warning", "no warning", "PyMC v4"],
+        ordered=True,
+    )
 ```
 
 ```python
@@ -220,7 +229,12 @@ log_data = log_data.merge(chain_indices, on=["log_file", "chain_group"])
 ```
 
 ```python
-log_data[["chain", "chain_group", "log_file"]].drop_duplicates().sort_values("chain")
+(
+    log_data[["chain", "chain_group", "log_file"]]
+    .drop_duplicates()
+    .sort_values("chain")
+    .reset_index(drop=True)
+)
 ```
 
 <div>
@@ -248,52 +262,76 @@ log_data[["chain", "chain_group", "log_file"]].drop_duplicates().sort_values("ch
   </thead>
   <tbody>
     <tr>
-      <th>1600</th>
+      <th>0</th>
       <td>BLAS warning (1)</td>
       <td>BLAS warning</td>
       <td>48364681_sample_pymc3_mcmc.log</td>
     </tr>
     <tr>
-      <th>2000</th>
+      <th>1</th>
       <td>BLAS warning (2)</td>
       <td>BLAS warning</td>
       <td>48364682_sample_pymc3_mcmc.log</td>
     </tr>
     <tr>
-      <th>2400</th>
+      <th>2</th>
       <td>BLAS warning (3)</td>
       <td>BLAS warning</td>
       <td>48364686_sample_pymc3_mcmc.log</td>
     </tr>
     <tr>
-      <th>2736</th>
+      <th>3</th>
       <td>BLAS warning (4)</td>
       <td>BLAS warning</td>
       <td>48364687_sample_pymc3_mcmc.log</td>
     </tr>
     <tr>
-      <th>0</th>
+      <th>4</th>
       <td>no warning (5)</td>
       <td>no warning</td>
       <td>48226954_sample_pymc3_mcmc.log</td>
     </tr>
     <tr>
-      <th>400</th>
+      <th>5</th>
       <td>no warning (6)</td>
       <td>no warning</td>
       <td>48226955_sample_pymc3_mcmc.log</td>
     </tr>
     <tr>
-      <th>800</th>
+      <th>6</th>
       <td>no warning (7)</td>
       <td>no warning</td>
       <td>48226956_sample_pymc3_mcmc.log</td>
     </tr>
     <tr>
-      <th>1200</th>
+      <th>7</th>
       <td>no warning (8)</td>
       <td>no warning</td>
       <td>48226957_sample_pymc3_mcmc.log</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>PyMC v4 (9)</td>
+      <td>PyMC v4</td>
+      <td>49534704_sample_pymc_mcmc.log</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>PyMC v4 (10)</td>
+      <td>PyMC v4</td>
+      <td>49534705_sample_pymc_mcmc.log</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>PyMC v4 (11)</td>
+      <td>PyMC v4</td>
+      <td>49534706_sample_pymc_mcmc.log</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>PyMC v4 (12)</td>
+      <td>PyMC v4</td>
+      <td>49622311_sample_pymc_mcmc.log</td>
     </tr>
   </tbody>
 </table>
@@ -589,6 +627,50 @@ sec_to_hour = 60 * 60
       <td>0</td>
       <td>48226957_sample_pymc3_mcmc.log</td>
     </tr>
+    <tr>
+      <th>8</th>
+      <td>PyMC v4 (9)</td>
+      <td>PyMC v4</td>
+      <td>18.0</td>
+      <td>1995</td>
+      <td>sampling</td>
+      <td>0.30</td>
+      <td>0</td>
+      <td>49534704_sample_pymc_mcmc.log</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>PyMC v4 (10)</td>
+      <td>PyMC v4</td>
+      <td>30.3</td>
+      <td>1995</td>
+      <td>sampling</td>
+      <td>0.32</td>
+      <td>0</td>
+      <td>49534705_sample_pymc_mcmc.log</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>PyMC v4 (11)</td>
+      <td>PyMC v4</td>
+      <td>25.6</td>
+      <td>1995</td>
+      <td>sampling</td>
+      <td>0.30</td>
+      <td>0</td>
+      <td>49534706_sample_pymc_mcmc.log</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>PyMC v4 (12)</td>
+      <td>PyMC v4</td>
+      <td>23.6</td>
+      <td>1995</td>
+      <td>sampling</td>
+      <td>0.30</td>
+      <td>0</td>
+      <td>49622311_sample_pymc_mcmc.log</td>
+    </tr>
   </tbody>
 </table>
 </div>
@@ -600,7 +682,7 @@ line_kwargs = {"size": 0.5, "alpha": 0.5}
 point_kwargs = {"size": 0.1, "alpha": 0.2}
 smooth_kwargs = {
     "size": 0.8,
-    "alpha": 0.5,
+    "alpha": 0.25,
     "method": "loess",
 }
 tune_line_kwargs = {"linetype": "--", "color": "gray"}
@@ -629,9 +711,14 @@ tune_line_kwargs = {"linetype": "--", "color": "gray"}
 )
 ```
 
-![png](010_010_pymc3-callback-tracking_files/010_010_pymc3-callback-tracking_21_0.png)
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/plotnine/facets/facet.py:487: FutureWarning: Passing a set as an indexer is deprecated and will raise in a future version. Use a list instead.
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/plotnine/utils.py:371: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/plotnine/utils.py:371: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/plotnine/utils.py:371: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
 
-    <ggplot: (342726172)>
+![png](010_010_pymc3-callback-tracking_files/010_010_pymc3-callback-tracking_21_1.png)
+
+    <ggplot: (333378654)>
 
 ```python
 (
@@ -659,7 +746,7 @@ tune_line_kwargs = {"linetype": "--", "color": "gray"}
 
 ![png](010_010_pymc3-callback-tracking_files/010_010_pymc3-callback-tracking_22_0.png)
 
-    <ggplot: (342893303)>
+    <ggplot: (333784564)>
 
 ```python
 (
@@ -687,7 +774,7 @@ tune_line_kwargs = {"linetype": "--", "color": "gray"}
 
 ![png](010_010_pymc3-callback-tracking_files/010_010_pymc3-callback-tracking_23_0.png)
 
-    <ggplot: (342929851)>
+    <ggplot: (333786143)>
 
 ```python
 (
@@ -705,18 +792,24 @@ tune_line_kwargs = {"linetype": "--", "color": "gray"}
 )
 ```
 
-![png](010_010_pymc3-callback-tracking_files/010_010_pymc3-callback-tracking_24_0.png)
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/plotnine/facets/facet.py:487: FutureWarning: Passing a set as an indexer is deprecated and will raise in a future version. Use a list instead.
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/plotnine/utils.py:371: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/plotnine/utils.py:371: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/plotnine/utils.py:371: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/plotnine/utils.py:371: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
 
-    <ggplot: (343057797)>
+![png](010_010_pymc3-callback-tracking_files/010_010_pymc3-callback-tracking_24_1.png)
+
+    <ggplot: (333983657)>
 
 ```python
 (
     gg.ggplot(draw_durations, gg.aes(x="draw", y="time_per_draw"))
     + gg.geom_vline(xintercept=n_tune, **tune_line_kwargs)
     + gg.geom_line(gg.aes(group="chain", color="chain_group"), **line_kwargs)
-    + gg.geom_point(gg.aes(color="chain_group"), **point_kwargs)
+    # + gg.geom_point(gg.aes(color="chain_group"), **point_kwargs)
     + gg.geom_smooth(
-        gg.aes(color="chain_group"), **smooth_kwargs, linetype="--", show_legend=False
+        gg.aes(color="chain_group"), **smooth_kwargs, linetype="-", show_legend=False
     )
     + gg.scale_x_continuous(expand=(0.02, 0.02))
     + gg.scale_y_timedelta(expand=(0.01, 0, 0.02, 0))
@@ -730,7 +823,7 @@ tune_line_kwargs = {"linetype": "--", "color": "gray"}
 
 ![png](010_010_pymc3-callback-tracking_files/010_010_pymc3-callback-tracking_25_0.png)
 
-    <ggplot: (343166603)>
+    <ggplot: (333878812)>
 
 Same plot as above except with the outlier removed.
 
@@ -742,9 +835,9 @@ Same plot as above except with the outlier removed.
     )
     + gg.geom_vline(xintercept=n_tune, **tune_line_kwargs)
     + gg.geom_line(gg.aes(group="chain", color="chain_group"), **line_kwargs)
-    + gg.geom_point(gg.aes(color="chain_group"), **point_kwargs)
+    # + gg.geom_point(gg.aes(color="chain_group"), **point_kwargs)
     + gg.geom_smooth(
-        gg.aes(color="chain_group"), **smooth_kwargs, linetype="--", show_legend=False
+        gg.aes(color="chain_group"), **smooth_kwargs, linetype="-", show_legend=False
     )
     + gg.scale_x_continuous(expand=(0.02, 0.02))
     + gg.scale_y_timedelta(expand=(0.01, 0, 0.02, 0))
@@ -758,13 +851,9 @@ Same plot as above except with the outlier removed.
 
 ![png](010_010_pymc3-callback-tracking_files/010_010_pymc3-callback-tracking_27_0.png)
 
-    <ggplot: (342849744)>
+    <ggplot: (333240441)>
 
 ```python
-def _fct_chain_lbls(x: str) -> str:
-    return f"chain {x}"
-
-
 (
     gg.ggplot(draw_durations, gg.aes(x="time_per_draw", color="chain", fill="chain"))
     + gg.facet_wrap(" ~ chain_group")
@@ -787,17 +876,16 @@ def _fct_chain_lbls(x: str) -> str:
 )
 ```
 
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/plotnine/utils.py:371: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/plotnine/positions/position.py:204: PlotnineWarning: position_stack requires non-overlapping x intervals
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/plotnine/positions/position.py:204: PlotnineWarning: position_stack requires non-overlapping x intervals
     /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/plotnine/positions/position.py:204: PlotnineWarning: position_stack requires non-overlapping x intervals
 
 ![png](010_010_pymc3-callback-tracking_files/010_010_pymc3-callback-tracking_28_1.png)
 
-    <ggplot: (342976341)>
+    <ggplot: (334191984)>
 
 ```python
-def _fct_chain_lbls(x: str) -> str:
-    return f"chain {x}"
-
-
 (
     gg.ggplot(
         draw_durations,
@@ -822,9 +910,11 @@ def _fct_chain_lbls(x: str) -> str:
 )
 ```
 
-![png](010_010_pymc3-callback-tracking_files/010_010_pymc3-callback-tracking_29_0.png)
+    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/plotnine/utils.py:371: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
 
-    <ggplot: (343399406)>
+![png](010_010_pymc3-callback-tracking_files/010_010_pymc3-callback-tracking_29_1.png)
+
+    <ggplot: (334376292)>
 
 ## Summary table
 
@@ -885,27 +975,27 @@ full_summary.style.format(precision=1)
 
 <style type="text/css">
 </style>
-<table id="T_e0c9c_">
+<table id="T_7fb06">
   <thead>
     <tr>
       <th class="blank" >&nbsp;</th>
       <th class="blank" >&nbsp;</th>
       <th class="blank level0" >&nbsp;</th>
-      <th class="col_heading level0 col0" >total (hr.)</th>
-      <th class="col_heading level0 col1" colspan="7">draw rate (min.)</th>
+      <th id="T_7fb06_level0_col0" class="col_heading level0 col0" >total (hr.)</th>
+      <th id="T_7fb06_level0_col1" class="col_heading level0 col1" colspan="7">draw rate (min.)</th>
     </tr>
     <tr>
       <th class="blank" >&nbsp;</th>
       <th class="blank" >&nbsp;</th>
       <th class="blank level1" >&nbsp;</th>
-      <th class="col_heading level1 col0" >duration</th>
-      <th class="col_heading level1 col1" >mean</th>
-      <th class="col_heading level1 col2" >std</th>
-      <th class="col_heading level1 col3" >min</th>
-      <th class="col_heading level1 col4" >25%</th>
-      <th class="col_heading level1 col5" >50%</th>
-      <th class="col_heading level1 col6" >75%</th>
-      <th class="col_heading level1 col7" >max</th>
+      <th id="T_7fb06_level1_col0" class="col_heading level1 col0" >duration</th>
+      <th id="T_7fb06_level1_col1" class="col_heading level1 col1" >mean</th>
+      <th id="T_7fb06_level1_col2" class="col_heading level1 col2" >std</th>
+      <th id="T_7fb06_level1_col3" class="col_heading level1 col3" >min</th>
+      <th id="T_7fb06_level1_col4" class="col_heading level1 col4" >25%</th>
+      <th id="T_7fb06_level1_col5" class="col_heading level1 col5" >50%</th>
+      <th id="T_7fb06_level1_col6" class="col_heading level1 col6" >75%</th>
+      <th id="T_7fb06_level1_col7" class="col_heading level1 col7" >max</th>
     </tr>
     <tr>
       <th class="index_name level0" >chain group</th>
@@ -923,190 +1013,283 @@ full_summary.style.format(precision=1)
   </thead>
   <tbody>
     <tr>
-      <th id="T_e0c9c_level0_row0" class="row_heading level0 row0" rowspan="8">BLAS warning</th>
-      <th id="T_e0c9c_level1_row0" class="row_heading level1 row0" rowspan="2">0</th>
-      <th id="T_e0c9c_level2_row0" class="row_heading level2 row0" >tune</th>
-      <td id="T_e0c9c_row0_col0" class="data row0 col0" >30.9</td>
-      <td id="T_e0c9c_row0_col1" class="data row0 col1" >9.3</td>
-      <td id="T_e0c9c_row0_col2" class="data row0 col2" >11.2</td>
-      <td id="T_e0c9c_row0_col3" class="data row0 col3" >0.9</td>
-      <td id="T_e0c9c_row0_col4" class="data row0 col4" >2.5</td>
-      <td id="T_e0c9c_row0_col5" class="data row0 col5" >2.6</td>
-      <td id="T_e0c9c_row0_col6" class="data row0 col6" >10.1</td>
-      <td id="T_e0c9c_row0_col7" class="data row0 col7" >40.5</td>
+      <th id="T_7fb06_level0_row0" class="row_heading level0 row0" rowspan="8">BLAS warning</th>
+      <th id="T_7fb06_level1_row0" class="row_heading level1 row0" rowspan="2">0</th>
+      <th id="T_7fb06_level2_row0" class="row_heading level2 row0" >tune</th>
+      <td id="T_7fb06_row0_col0" class="data row0 col0" >30.9</td>
+      <td id="T_7fb06_row0_col1" class="data row0 col1" >9.3</td>
+      <td id="T_7fb06_row0_col2" class="data row0 col2" >11.2</td>
+      <td id="T_7fb06_row0_col3" class="data row0 col3" >0.9</td>
+      <td id="T_7fb06_row0_col4" class="data row0 col4" >2.5</td>
+      <td id="T_7fb06_row0_col5" class="data row0 col5" >2.6</td>
+      <td id="T_7fb06_row0_col6" class="data row0 col6" >10.1</td>
+      <td id="T_7fb06_row0_col7" class="data row0 col7" >40.5</td>
     </tr>
     <tr>
-      <th id="T_e0c9c_level2_row1" class="row_heading level2 row1" >sampling</th>
-      <td id="T_e0c9c_row1_col0" class="data row1 col0" >39.5</td>
-      <td id="T_e0c9c_row1_col1" class="data row1 col1" >2.6</td>
-      <td id="T_e0c9c_row1_col2" class="data row1 col2" >0.0</td>
-      <td id="T_e0c9c_row1_col3" class="data row1 col3" >2.5</td>
-      <td id="T_e0c9c_row1_col4" class="data row1 col4" >2.5</td>
-      <td id="T_e0c9c_row1_col5" class="data row1 col5" >2.6</td>
-      <td id="T_e0c9c_row1_col6" class="data row1 col6" >2.6</td>
-      <td id="T_e0c9c_row1_col7" class="data row1 col7" >2.6</td>
+      <th id="T_7fb06_level2_row1" class="row_heading level2 row1" >sampling</th>
+      <td id="T_7fb06_row1_col0" class="data row1 col0" >39.5</td>
+      <td id="T_7fb06_row1_col1" class="data row1 col1" >2.6</td>
+      <td id="T_7fb06_row1_col2" class="data row1 col2" >0.0</td>
+      <td id="T_7fb06_row1_col3" class="data row1 col3" >2.5</td>
+      <td id="T_7fb06_row1_col4" class="data row1 col4" >2.5</td>
+      <td id="T_7fb06_row1_col5" class="data row1 col5" >2.6</td>
+      <td id="T_7fb06_row1_col6" class="data row1 col6" >2.6</td>
+      <td id="T_7fb06_row1_col7" class="data row1 col7" >2.6</td>
     </tr>
     <tr>
-      <th id="T_e0c9c_level1_row2" class="row_heading level1 row2" rowspan="2">1</th>
-      <th id="T_e0c9c_level2_row2" class="row_heading level2 row2" >tune</th>
-      <td id="T_e0c9c_row2_col0" class="data row2 col0" >35.9</td>
-      <td id="T_e0c9c_row2_col1" class="data row2 col1" >10.8</td>
-      <td id="T_e0c9c_row2_col2" class="data row2 col2" >12.5</td>
-      <td id="T_e0c9c_row2_col3" class="data row2 col3" >0.8</td>
-      <td id="T_e0c9c_row2_col4" class="data row2 col4" >2.7</td>
-      <td id="T_e0c9c_row2_col5" class="data row2 col5" >2.7</td>
-      <td id="T_e0c9c_row2_col6" class="data row2 col6" >10.5</td>
-      <td id="T_e0c9c_row2_col7" class="data row2 col7" >42.6</td>
+      <th id="T_7fb06_level1_row2" class="row_heading level1 row2" rowspan="2">1</th>
+      <th id="T_7fb06_level2_row2" class="row_heading level2 row2" >tune</th>
+      <td id="T_7fb06_row2_col0" class="data row2 col0" >35.9</td>
+      <td id="T_7fb06_row2_col1" class="data row2 col1" >10.8</td>
+      <td id="T_7fb06_row2_col2" class="data row2 col2" >12.5</td>
+      <td id="T_7fb06_row2_col3" class="data row2 col3" >0.8</td>
+      <td id="T_7fb06_row2_col4" class="data row2 col4" >2.7</td>
+      <td id="T_7fb06_row2_col5" class="data row2 col5" >2.7</td>
+      <td id="T_7fb06_row2_col6" class="data row2 col6" >10.5</td>
+      <td id="T_7fb06_row2_col7" class="data row2 col7" >42.6</td>
     </tr>
     <tr>
-      <th id="T_e0c9c_level2_row3" class="row_heading level2 row3" >sampling</th>
-      <td id="T_e0c9c_row3_col0" class="data row3 col0" >44.9</td>
-      <td id="T_e0c9c_row3_col1" class="data row3 col1" >2.7</td>
-      <td id="T_e0c9c_row3_col2" class="data row3 col2" >0.0</td>
-      <td id="T_e0c9c_row3_col3" class="data row3 col3" >2.6</td>
-      <td id="T_e0c9c_row3_col4" class="data row3 col4" >2.7</td>
-      <td id="T_e0c9c_row3_col5" class="data row3 col5" >2.7</td>
-      <td id="T_e0c9c_row3_col6" class="data row3 col6" >2.7</td>
-      <td id="T_e0c9c_row3_col7" class="data row3 col7" >2.8</td>
+      <th id="T_7fb06_level2_row3" class="row_heading level2 row3" >sampling</th>
+      <td id="T_7fb06_row3_col0" class="data row3 col0" >44.9</td>
+      <td id="T_7fb06_row3_col1" class="data row3 col1" >2.7</td>
+      <td id="T_7fb06_row3_col2" class="data row3 col2" >0.0</td>
+      <td id="T_7fb06_row3_col3" class="data row3 col3" >2.6</td>
+      <td id="T_7fb06_row3_col4" class="data row3 col4" >2.7</td>
+      <td id="T_7fb06_row3_col5" class="data row3 col5" >2.7</td>
+      <td id="T_7fb06_row3_col6" class="data row3 col6" >2.7</td>
+      <td id="T_7fb06_row3_col7" class="data row3 col7" >2.8</td>
     </tr>
     <tr>
-      <th id="T_e0c9c_level1_row4" class="row_heading level1 row4" rowspan="2">2</th>
-      <th id="T_e0c9c_level2_row4" class="row_heading level2 row4" >tune</th>
-      <td id="T_e0c9c_row4_col0" class="data row4 col0" >73.7</td>
-      <td id="T_e0c9c_row4_col1" class="data row4 col1" >22.2</td>
-      <td id="T_e0c9c_row4_col2" class="data row4 col2" >14.3</td>
-      <td id="T_e0c9c_row4_col3" class="data row4 col3" >0.1</td>
-      <td id="T_e0c9c_row4_col4" class="data row4 col4" >10.0</td>
-      <td id="T_e0c9c_row4_col5" class="data row4 col5" >20.2</td>
-      <td id="T_e0c9c_row4_col6" class="data row4 col6" >39.2</td>
-      <td id="T_e0c9c_row4_col7" class="data row4 col7" >40.5</td>
+      <th id="T_7fb06_level1_row4" class="row_heading level1 row4" rowspan="2">2</th>
+      <th id="T_7fb06_level2_row4" class="row_heading level2 row4" >tune</th>
+      <td id="T_7fb06_row4_col0" class="data row4 col0" >73.7</td>
+      <td id="T_7fb06_row4_col1" class="data row4 col1" >22.2</td>
+      <td id="T_7fb06_row4_col2" class="data row4 col2" >14.3</td>
+      <td id="T_7fb06_row4_col3" class="data row4 col3" >0.1</td>
+      <td id="T_7fb06_row4_col4" class="data row4 col4" >10.0</td>
+      <td id="T_7fb06_row4_col5" class="data row4 col5" >20.2</td>
+      <td id="T_7fb06_row4_col6" class="data row4 col6" >39.2</td>
+      <td id="T_7fb06_row4_col7" class="data row4 col7" >40.5</td>
     </tr>
     <tr>
-      <th id="T_e0c9c_level2_row5" class="row_heading level2 row5" >sampling</th>
-      <td id="T_e0c9c_row5_col0" class="data row5 col0" >119.8</td>
-      <td id="T_e0c9c_row5_col1" class="data row5 col1" >20.3</td>
-      <td id="T_e0c9c_row5_col2" class="data row5 col2" >0.8</td>
-      <td id="T_e0c9c_row5_col3" class="data row5 col3" >12.1</td>
-      <td id="T_e0c9c_row5_col4" class="data row5 col4" >20.2</td>
-      <td id="T_e0c9c_row5_col5" class="data row5 col5" >20.2</td>
-      <td id="T_e0c9c_row5_col6" class="data row5 col6" >20.6</td>
-      <td id="T_e0c9c_row5_col7" class="data row5 col7" >21.0</td>
+      <th id="T_7fb06_level2_row5" class="row_heading level2 row5" >sampling</th>
+      <td id="T_7fb06_row5_col0" class="data row5 col0" >119.8</td>
+      <td id="T_7fb06_row5_col1" class="data row5 col1" >20.3</td>
+      <td id="T_7fb06_row5_col2" class="data row5 col2" >0.8</td>
+      <td id="T_7fb06_row5_col3" class="data row5 col3" >12.1</td>
+      <td id="T_7fb06_row5_col4" class="data row5 col4" >20.2</td>
+      <td id="T_7fb06_row5_col5" class="data row5 col5" >20.2</td>
+      <td id="T_7fb06_row5_col6" class="data row5 col6" >20.6</td>
+      <td id="T_7fb06_row5_col7" class="data row5 col7" >21.0</td>
     </tr>
     <tr>
-      <th id="T_e0c9c_level1_row6" class="row_heading level1 row6" rowspan="2">3</th>
-      <th id="T_e0c9c_level2_row6" class="row_heading level2 row6" >tune</th>
-      <td id="T_e0c9c_row6_col0" class="data row6 col0" >28.0</td>
-      <td id="T_e0c9c_row6_col1" class="data row6 col1" >8.4</td>
-      <td id="T_e0c9c_row6_col2" class="data row6 col2" >8.7</td>
-      <td id="T_e0c9c_row6_col3" class="data row6 col3" >0.8</td>
-      <td id="T_e0c9c_row6_col4" class="data row6 col4" >2.7</td>
-      <td id="T_e0c9c_row6_col5" class="data row6 col5" >3.2</td>
-      <td id="T_e0c9c_row6_col6" class="data row6 col6" >10.6</td>
-      <td id="T_e0c9c_row6_col7" class="data row6 col7" >42.0</td>
+      <th id="T_7fb06_level1_row6" class="row_heading level1 row6" rowspan="2">3</th>
+      <th id="T_7fb06_level2_row6" class="row_heading level2 row6" >tune</th>
+      <td id="T_7fb06_row6_col0" class="data row6 col0" >28.0</td>
+      <td id="T_7fb06_row6_col1" class="data row6 col1" >8.4</td>
+      <td id="T_7fb06_row6_col2" class="data row6 col2" >8.7</td>
+      <td id="T_7fb06_row6_col3" class="data row6 col3" >0.8</td>
+      <td id="T_7fb06_row6_col4" class="data row6 col4" >2.7</td>
+      <td id="T_7fb06_row6_col5" class="data row6 col5" >3.2</td>
+      <td id="T_7fb06_row6_col6" class="data row6 col6" >10.6</td>
+      <td id="T_7fb06_row6_col7" class="data row6 col7" >42.0</td>
     </tr>
     <tr>
-      <th id="T_e0c9c_level2_row7" class="row_heading level2 row7" >sampling</th>
-      <td id="T_e0c9c_row7_col0" class="data row7 col0" >37.0</td>
-      <td id="T_e0c9c_row7_col1" class="data row7 col1" >2.7</td>
-      <td id="T_e0c9c_row7_col2" class="data row7 col2" >0.1</td>
-      <td id="T_e0c9c_row7_col3" class="data row7 col3" >2.7</td>
-      <td id="T_e0c9c_row7_col4" class="data row7 col4" >2.7</td>
-      <td id="T_e0c9c_row7_col5" class="data row7 col5" >2.7</td>
-      <td id="T_e0c9c_row7_col6" class="data row7 col6" >2.7</td>
-      <td id="T_e0c9c_row7_col7" class="data row7 col7" >3.8</td>
+      <th id="T_7fb06_level2_row7" class="row_heading level2 row7" >sampling</th>
+      <td id="T_7fb06_row7_col0" class="data row7 col0" >37.0</td>
+      <td id="T_7fb06_row7_col1" class="data row7 col1" >2.7</td>
+      <td id="T_7fb06_row7_col2" class="data row7 col2" >0.1</td>
+      <td id="T_7fb06_row7_col3" class="data row7 col3" >2.7</td>
+      <td id="T_7fb06_row7_col4" class="data row7 col4" >2.7</td>
+      <td id="T_7fb06_row7_col5" class="data row7 col5" >2.7</td>
+      <td id="T_7fb06_row7_col6" class="data row7 col6" >2.7</td>
+      <td id="T_7fb06_row7_col7" class="data row7 col7" >3.8</td>
     </tr>
     <tr>
-      <th id="T_e0c9c_level0_row8" class="row_heading level0 row8" rowspan="8">no warning</th>
-      <th id="T_e0c9c_level1_row8" class="row_heading level1 row8" rowspan="2">4</th>
-      <th id="T_e0c9c_level2_row8" class="row_heading level2 row8" >tune</th>
-      <td id="T_e0c9c_row8_col0" class="data row8 col0" >31.4</td>
-      <td id="T_e0c9c_row8_col1" class="data row8 col1" >9.4</td>
-      <td id="T_e0c9c_row8_col2" class="data row8 col2" >11.9</td>
-      <td id="T_e0c9c_row8_col3" class="data row8 col3" >0.8</td>
-      <td id="T_e0c9c_row8_col4" class="data row8 col4" >2.6</td>
-      <td id="T_e0c9c_row8_col5" class="data row8 col5" >2.6</td>
-      <td id="T_e0c9c_row8_col6" class="data row8 col6" >10.2</td>
-      <td id="T_e0c9c_row8_col7" class="data row8 col7" >41.3</td>
+      <th id="T_7fb06_level0_row8" class="row_heading level0 row8" rowspan="8">no warning</th>
+      <th id="T_7fb06_level1_row8" class="row_heading level1 row8" rowspan="2">4</th>
+      <th id="T_7fb06_level2_row8" class="row_heading level2 row8" >tune</th>
+      <td id="T_7fb06_row8_col0" class="data row8 col0" >31.4</td>
+      <td id="T_7fb06_row8_col1" class="data row8 col1" >9.4</td>
+      <td id="T_7fb06_row8_col2" class="data row8 col2" >11.9</td>
+      <td id="T_7fb06_row8_col3" class="data row8 col3" >0.8</td>
+      <td id="T_7fb06_row8_col4" class="data row8 col4" >2.6</td>
+      <td id="T_7fb06_row8_col5" class="data row8 col5" >2.6</td>
+      <td id="T_7fb06_row8_col6" class="data row8 col6" >10.2</td>
+      <td id="T_7fb06_row8_col7" class="data row8 col7" >41.3</td>
     </tr>
     <tr>
-      <th id="T_e0c9c_level2_row9" class="row_heading level2 row9" >sampling</th>
-      <td id="T_e0c9c_row9_col0" class="data row9 col0" >40.0</td>
-      <td id="T_e0c9c_row9_col1" class="data row9 col1" >2.6</td>
-      <td id="T_e0c9c_row9_col2" class="data row9 col2" >0.0</td>
-      <td id="T_e0c9c_row9_col3" class="data row9 col3" >2.6</td>
-      <td id="T_e0c9c_row9_col4" class="data row9 col4" >2.6</td>
-      <td id="T_e0c9c_row9_col5" class="data row9 col5" >2.6</td>
-      <td id="T_e0c9c_row9_col6" class="data row9 col6" >2.6</td>
-      <td id="T_e0c9c_row9_col7" class="data row9 col7" >2.6</td>
+      <th id="T_7fb06_level2_row9" class="row_heading level2 row9" >sampling</th>
+      <td id="T_7fb06_row9_col0" class="data row9 col0" >40.0</td>
+      <td id="T_7fb06_row9_col1" class="data row9 col1" >2.6</td>
+      <td id="T_7fb06_row9_col2" class="data row9 col2" >0.0</td>
+      <td id="T_7fb06_row9_col3" class="data row9 col3" >2.6</td>
+      <td id="T_7fb06_row9_col4" class="data row9 col4" >2.6</td>
+      <td id="T_7fb06_row9_col5" class="data row9 col5" >2.6</td>
+      <td id="T_7fb06_row9_col6" class="data row9 col6" >2.6</td>
+      <td id="T_7fb06_row9_col7" class="data row9 col7" >2.6</td>
     </tr>
     <tr>
-      <th id="T_e0c9c_level1_row10" class="row_heading level1 row10" rowspan="2">5</th>
-      <th id="T_e0c9c_level2_row10" class="row_heading level2 row10" >tune</th>
-      <td id="T_e0c9c_row10_col0" class="data row10 col0" >31.7</td>
-      <td id="T_e0c9c_row10_col1" class="data row10 col1" >9.6</td>
-      <td id="T_e0c9c_row10_col2" class="data row10 col2" >12.6</td>
-      <td id="T_e0c9c_row10_col3" class="data row10 col3" >1.4</td>
-      <td id="T_e0c9c_row10_col4" class="data row10 col4" >2.9</td>
-      <td id="T_e0c9c_row10_col5" class="data row10 col5" >2.9</td>
-      <td id="T_e0c9c_row10_col6" class="data row10 col6" >11.4</td>
-      <td id="T_e0c9c_row10_col7" class="data row10 col7" >45.9</td>
+      <th id="T_7fb06_level1_row10" class="row_heading level1 row10" rowspan="2">5</th>
+      <th id="T_7fb06_level2_row10" class="row_heading level2 row10" >tune</th>
+      <td id="T_7fb06_row10_col0" class="data row10 col0" >31.7</td>
+      <td id="T_7fb06_row10_col1" class="data row10 col1" >9.6</td>
+      <td id="T_7fb06_row10_col2" class="data row10 col2" >12.6</td>
+      <td id="T_7fb06_row10_col3" class="data row10 col3" >1.4</td>
+      <td id="T_7fb06_row10_col4" class="data row10 col4" >2.9</td>
+      <td id="T_7fb06_row10_col5" class="data row10 col5" >2.9</td>
+      <td id="T_7fb06_row10_col6" class="data row10 col6" >11.4</td>
+      <td id="T_7fb06_row10_col7" class="data row10 col7" >45.9</td>
     </tr>
     <tr>
-      <th id="T_e0c9c_level2_row11" class="row_heading level2 row11" >sampling</th>
-      <td id="T_e0c9c_row11_col0" class="data row11 col0" >41.4</td>
-      <td id="T_e0c9c_row11_col1" class="data row11 col1" >2.9</td>
-      <td id="T_e0c9c_row11_col2" class="data row11 col2" >0.0</td>
-      <td id="T_e0c9c_row11_col3" class="data row11 col3" >2.8</td>
-      <td id="T_e0c9c_row11_col4" class="data row11 col4" >2.9</td>
-      <td id="T_e0c9c_row11_col5" class="data row11 col5" >2.9</td>
-      <td id="T_e0c9c_row11_col6" class="data row11 col6" >2.9</td>
-      <td id="T_e0c9c_row11_col7" class="data row11 col7" >2.9</td>
+      <th id="T_7fb06_level2_row11" class="row_heading level2 row11" >sampling</th>
+      <td id="T_7fb06_row11_col0" class="data row11 col0" >41.4</td>
+      <td id="T_7fb06_row11_col1" class="data row11 col1" >2.9</td>
+      <td id="T_7fb06_row11_col2" class="data row11 col2" >0.0</td>
+      <td id="T_7fb06_row11_col3" class="data row11 col3" >2.8</td>
+      <td id="T_7fb06_row11_col4" class="data row11 col4" >2.9</td>
+      <td id="T_7fb06_row11_col5" class="data row11 col5" >2.9</td>
+      <td id="T_7fb06_row11_col6" class="data row11 col6" >2.9</td>
+      <td id="T_7fb06_row11_col7" class="data row11 col7" >2.9</td>
     </tr>
     <tr>
-      <th id="T_e0c9c_level1_row12" class="row_heading level1 row12" rowspan="2">6</th>
-      <th id="T_e0c9c_level2_row12" class="row_heading level2 row12" >tune</th>
-      <td id="T_e0c9c_row12_col0" class="data row12 col0" >21.5</td>
-      <td id="T_e0c9c_row12_col1" class="data row12 col1" >6.5</td>
-      <td id="T_e0c9c_row12_col2" class="data row12 col2" >7.0</td>
-      <td id="T_e0c9c_row12_col3" class="data row12 col3" >0.8</td>
-      <td id="T_e0c9c_row12_col4" class="data row12 col4" >2.6</td>
-      <td id="T_e0c9c_row12_col5" class="data row12 col5" >2.6</td>
-      <td id="T_e0c9c_row12_col6" class="data row12 col6" >10.2</td>
-      <td id="T_e0c9c_row12_col7" class="data row12 col7" >41.2</td>
+      <th id="T_7fb06_level1_row12" class="row_heading level1 row12" rowspan="2">6</th>
+      <th id="T_7fb06_level2_row12" class="row_heading level2 row12" >tune</th>
+      <td id="T_7fb06_row12_col0" class="data row12 col0" >21.5</td>
+      <td id="T_7fb06_row12_col1" class="data row12 col1" >6.5</td>
+      <td id="T_7fb06_row12_col2" class="data row12 col2" >7.0</td>
+      <td id="T_7fb06_row12_col3" class="data row12 col3" >0.8</td>
+      <td id="T_7fb06_row12_col4" class="data row12 col4" >2.6</td>
+      <td id="T_7fb06_row12_col5" class="data row12 col5" >2.6</td>
+      <td id="T_7fb06_row12_col6" class="data row12 col6" >10.2</td>
+      <td id="T_7fb06_row12_col7" class="data row12 col7" >41.2</td>
     </tr>
     <tr>
-      <th id="T_e0c9c_level2_row13" class="row_heading level2 row13" >sampling</th>
-      <td id="T_e0c9c_row13_col0" class="data row13 col0" >30.2</td>
-      <td id="T_e0c9c_row13_col1" class="data row13 col1" >2.6</td>
-      <td id="T_e0c9c_row13_col2" class="data row13 col2" >0.0</td>
-      <td id="T_e0c9c_row13_col3" class="data row13 col3" >2.6</td>
-      <td id="T_e0c9c_row13_col4" class="data row13 col4" >2.6</td>
-      <td id="T_e0c9c_row13_col5" class="data row13 col5" >2.6</td>
-      <td id="T_e0c9c_row13_col6" class="data row13 col6" >2.6</td>
-      <td id="T_e0c9c_row13_col7" class="data row13 col7" >2.6</td>
+      <th id="T_7fb06_level2_row13" class="row_heading level2 row13" >sampling</th>
+      <td id="T_7fb06_row13_col0" class="data row13 col0" >30.2</td>
+      <td id="T_7fb06_row13_col1" class="data row13 col1" >2.6</td>
+      <td id="T_7fb06_row13_col2" class="data row13 col2" >0.0</td>
+      <td id="T_7fb06_row13_col3" class="data row13 col3" >2.6</td>
+      <td id="T_7fb06_row13_col4" class="data row13 col4" >2.6</td>
+      <td id="T_7fb06_row13_col5" class="data row13 col5" >2.6</td>
+      <td id="T_7fb06_row13_col6" class="data row13 col6" >2.6</td>
+      <td id="T_7fb06_row13_col7" class="data row13 col7" >2.6</td>
     </tr>
     <tr>
-      <th id="T_e0c9c_level1_row14" class="row_heading level1 row14" rowspan="2">7</th>
-      <th id="T_e0c9c_level2_row14" class="row_heading level2 row14" >tune</th>
-      <td id="T_e0c9c_row14_col0" class="data row14 col0" >31.1</td>
-      <td id="T_e0c9c_row14_col1" class="data row14 col1" >9.4</td>
-      <td id="T_e0c9c_row14_col2" class="data row14 col2" >11.6</td>
-      <td id="T_e0c9c_row14_col3" class="data row14 col3" >0.2</td>
-      <td id="T_e0c9c_row14_col4" class="data row14 col4" >2.6</td>
-      <td id="T_e0c9c_row14_col5" class="data row14 col5" >2.6</td>
-      <td id="T_e0c9c_row14_col6" class="data row14 col6" >10.3</td>
-      <td id="T_e0c9c_row14_col7" class="data row14 col7" >41.4</td>
+      <th id="T_7fb06_level1_row14" class="row_heading level1 row14" rowspan="2">7</th>
+      <th id="T_7fb06_level2_row14" class="row_heading level2 row14" >tune</th>
+      <td id="T_7fb06_row14_col0" class="data row14 col0" >31.1</td>
+      <td id="T_7fb06_row14_col1" class="data row14 col1" >9.4</td>
+      <td id="T_7fb06_row14_col2" class="data row14 col2" >11.6</td>
+      <td id="T_7fb06_row14_col3" class="data row14 col3" >0.2</td>
+      <td id="T_7fb06_row14_col4" class="data row14 col4" >2.6</td>
+      <td id="T_7fb06_row14_col5" class="data row14 col5" >2.6</td>
+      <td id="T_7fb06_row14_col6" class="data row14 col6" >10.3</td>
+      <td id="T_7fb06_row14_col7" class="data row14 col7" >41.4</td>
     </tr>
     <tr>
-      <th id="T_e0c9c_level2_row15" class="row_heading level2 row15" >sampling</th>
-      <td id="T_e0c9c_row15_col0" class="data row15 col0" >39.8</td>
-      <td id="T_e0c9c_row15_col1" class="data row15 col1" >2.6</td>
-      <td id="T_e0c9c_row15_col2" class="data row15 col2" >0.0</td>
-      <td id="T_e0c9c_row15_col3" class="data row15 col3" >2.6</td>
-      <td id="T_e0c9c_row15_col4" class="data row15 col4" >2.6</td>
-      <td id="T_e0c9c_row15_col5" class="data row15 col5" >2.6</td>
-      <td id="T_e0c9c_row15_col6" class="data row15 col6" >2.6</td>
-      <td id="T_e0c9c_row15_col7" class="data row15 col7" >2.6</td>
+      <th id="T_7fb06_level2_row15" class="row_heading level2 row15" >sampling</th>
+      <td id="T_7fb06_row15_col0" class="data row15 col0" >39.8</td>
+      <td id="T_7fb06_row15_col1" class="data row15 col1" >2.6</td>
+      <td id="T_7fb06_row15_col2" class="data row15 col2" >0.0</td>
+      <td id="T_7fb06_row15_col3" class="data row15 col3" >2.6</td>
+      <td id="T_7fb06_row15_col4" class="data row15 col4" >2.6</td>
+      <td id="T_7fb06_row15_col5" class="data row15 col5" >2.6</td>
+      <td id="T_7fb06_row15_col6" class="data row15 col6" >2.6</td>
+      <td id="T_7fb06_row15_col7" class="data row15 col7" >2.6</td>
+    </tr>
+    <tr>
+      <th id="T_7fb06_level0_row16" class="row_heading level0 row16" rowspan="8">PyMC v4</th>
+      <th id="T_7fb06_level1_row16" class="row_heading level1 row16" rowspan="2">8</th>
+      <th id="T_7fb06_level2_row16" class="row_heading level2 row16" >tune</th>
+      <td id="T_7fb06_row16_col0" class="data row16 col0" >12.8</td>
+      <td id="T_7fb06_row16_col1" class="data row16 col1" >3.8</td>
+      <td id="T_7fb06_row16_col2" class="data row16 col2" >4.1</td>
+      <td id="T_7fb06_row16_col3" class="data row16 col3" >0.4</td>
+      <td id="T_7fb06_row16_col4" class="data row16 col4" >1.3</td>
+      <td id="T_7fb06_row16_col5" class="data row16 col5" >1.5</td>
+      <td id="T_7fb06_row16_col6" class="data row16 col6" >6.1</td>
+      <td id="T_7fb06_row16_col7" class="data row16 col7" >19.2</td>
+    </tr>
+    <tr>
+      <th id="T_7fb06_level2_row17" class="row_heading level2 row17" >sampling</th>
+      <td id="T_7fb06_row17_col0" class="data row17 col0" >18.0</td>
+      <td id="T_7fb06_row17_col1" class="data row17 col1" >1.6</td>
+      <td id="T_7fb06_row17_col2" class="data row17 col2" >0.1</td>
+      <td id="T_7fb06_row17_col3" class="data row17 col3" >1.5</td>
+      <td id="T_7fb06_row17_col4" class="data row17 col4" >1.6</td>
+      <td id="T_7fb06_row17_col5" class="data row17 col5" >1.6</td>
+      <td id="T_7fb06_row17_col6" class="data row17 col6" >1.6</td>
+      <td id="T_7fb06_row17_col7" class="data row17 col7" >2.2</td>
+    </tr>
+    <tr>
+      <th id="T_7fb06_level1_row18" class="row_heading level1 row18" rowspan="2">9</th>
+      <th id="T_7fb06_level2_row18" class="row_heading level2 row18" >tune</th>
+      <td id="T_7fb06_row18_col0" class="data row18 col0" >25.1</td>
+      <td id="T_7fb06_row18_col1" class="data row18 col1" >7.6</td>
+      <td id="T_7fb06_row18_col2" class="data row18 col2" >10.2</td>
+      <td id="T_7fb06_row18_col3" class="data row18 col3" >0.3</td>
+      <td id="T_7fb06_row18_col4" class="data row18 col4" >1.5</td>
+      <td id="T_7fb06_row18_col5" class="data row18 col5" >2.6</td>
+      <td id="T_7fb06_row18_col6" class="data row18 col6" >9.2</td>
+      <td id="T_7fb06_row18_col7" class="data row18 col7" >47.1</td>
+    </tr>
+    <tr>
+      <th id="T_7fb06_level2_row19" class="row_heading level2 row19" >sampling</th>
+      <td id="T_7fb06_row19_col0" class="data row19 col0" >30.3</td>
+      <td id="T_7fb06_row19_col1" class="data row19 col1" >1.6</td>
+      <td id="T_7fb06_row19_col2" class="data row19 col2" >0.0</td>
+      <td id="T_7fb06_row19_col3" class="data row19 col3" >1.5</td>
+      <td id="T_7fb06_row19_col4" class="data row19 col4" >1.5</td>
+      <td id="T_7fb06_row19_col5" class="data row19 col5" >1.6</td>
+      <td id="T_7fb06_row19_col6" class="data row19 col6" >1.6</td>
+      <td id="T_7fb06_row19_col7" class="data row19 col7" >1.6</td>
+    </tr>
+    <tr>
+      <th id="T_7fb06_level1_row20" class="row_heading level1 row20" rowspan="2">10</th>
+      <th id="T_7fb06_level2_row20" class="row_heading level2 row20" >tune</th>
+      <td id="T_7fb06_row20_col0" class="data row20 col0" >20.6</td>
+      <td id="T_7fb06_row20_col1" class="data row20 col1" >6.2</td>
+      <td id="T_7fb06_row20_col2" class="data row20 col2" >8.7</td>
+      <td id="T_7fb06_row20_col3" class="data row20 col3" >0.2</td>
+      <td id="T_7fb06_row20_col4" class="data row20 col4" >1.5</td>
+      <td id="T_7fb06_row20_col5" class="data row20 col5" >1.8</td>
+      <td id="T_7fb06_row20_col6" class="data row20 col6" >9.5</td>
+      <td id="T_7fb06_row20_col7" class="data row20 col7" >47.2</td>
+    </tr>
+    <tr>
+      <th id="T_7fb06_level2_row21" class="row_heading level2 row21" >sampling</th>
+      <td id="T_7fb06_row21_col0" class="data row21 col0" >25.6</td>
+      <td id="T_7fb06_row21_col1" class="data row21 col1" >1.5</td>
+      <td id="T_7fb06_row21_col2" class="data row21 col2" >0.0</td>
+      <td id="T_7fb06_row21_col3" class="data row21 col3" >1.2</td>
+      <td id="T_7fb06_row21_col4" class="data row21 col4" >1.5</td>
+      <td id="T_7fb06_row21_col5" class="data row21 col5" >1.5</td>
+      <td id="T_7fb06_row21_col6" class="data row21 col6" >1.5</td>
+      <td id="T_7fb06_row21_col7" class="data row21 col7" >1.5</td>
+    </tr>
+    <tr>
+      <th id="T_7fb06_level1_row22" class="row_heading level1 row22" rowspan="2">11</th>
+      <th id="T_7fb06_level2_row22" class="row_heading level2 row22" >tune</th>
+      <td id="T_7fb06_row22_col0" class="data row22 col0" >18.5</td>
+      <td id="T_7fb06_row22_col1" class="data row22 col1" >5.6</td>
+      <td id="T_7fb06_row22_col2" class="data row22 col2" >6.6</td>
+      <td id="T_7fb06_row22_col3" class="data row22 col3" >0.2</td>
+      <td id="T_7fb06_row22_col4" class="data row22 col4" >1.5</td>
+      <td id="T_7fb06_row22_col5" class="data row22 col5" >1.6</td>
+      <td id="T_7fb06_row22_col6" class="data row22 col6" >9.4</td>
+      <td id="T_7fb06_row22_col7" class="data row22 col7" >31.1</td>
+    </tr>
+    <tr>
+      <th id="T_7fb06_level2_row23" class="row_heading level2 row23" >sampling</th>
+      <td id="T_7fb06_row23_col0" class="data row23 col0" >23.6</td>
+      <td id="T_7fb06_row23_col1" class="data row23 col1" >1.5</td>
+      <td id="T_7fb06_row23_col2" class="data row23 col2" >0.0</td>
+      <td id="T_7fb06_row23_col3" class="data row23 col3" >1.5</td>
+      <td id="T_7fb06_row23_col4" class="data row23 col4" >1.5</td>
+      <td id="T_7fb06_row23_col5" class="data row23 col5" >1.5</td>
+      <td id="T_7fb06_row23_col6" class="data row23 col6" >1.5</td>
+      <td id="T_7fb06_row23_col7" class="data row23 col7" >1.5</td>
     </tr>
   </tbody>
 </table>
@@ -1120,11 +1303,11 @@ full_summary.style.format(precision=1)
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-02-14
+    Last updated: 2022-03-04
 
     Python implementation: CPython
     Python version       : 3.9.9
-    IPython version      : 8.0.0
+    IPython version      : 8.0.1
 
     Compiler    : Clang 11.1.0
     OS          : Darwin
@@ -1136,11 +1319,11 @@ full_summary.style.format(precision=1)
 
     Hostname: JHCookMac
 
-    Git branch: theano-blas-warning
+    Git branch: add-nb-model
 
-    plotnine: 0.8.0
-    pandas  : 1.3.5
     janitor : 0.22.0
+    plotnine: 0.8.0
+    pandas  : 1.4.1
 
 ```python
 
