@@ -43,6 +43,25 @@ def extract_matrix_variable_indices(
     return d
 
 
+def extract_matrix_variable_coords(
+    d: pd.DataFrame, col: str, idx1name: str, idx2name: str
+) -> pd.DataFrame:
+    """Extract coordinates from the parameter names for matrix variables.
+
+    Args:
+        d (pd.DataFrame): Summary data frame.
+        col (str): Column containing the parameter names.
+        idx1name (str): Name for the first index.
+        idx2name (str): Name for the second index.
+
+    Returns:
+        pd.DataFrame: Modified data frame with the two new columns.
+    """
+    d[idx1name] = [re.findall(r"(?<=\[)\w+(?=,)", x)[0] for x in d[col]]
+    d[idx2name] = [re.findall(r"(?<=, )\w+(?=\])", x)[0] for x in d[col]]
+    return d
+
+
 def _reshape_mcmc_chains_to_2d(a: np.ndarray) -> np.ndarray:
     z = a.shape[2]
     return a.reshape(1, -1, z).squeeze()

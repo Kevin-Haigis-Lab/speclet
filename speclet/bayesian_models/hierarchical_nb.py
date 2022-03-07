@@ -18,19 +18,17 @@ from speclet.data_processing.crispr import (
     append_total_read_counts,
     common_indices,
     set_achilles_categorical_columns,
+    zscale_cna_by_group,
+    zscale_rna_expression_by_gene_lineage,
 )
 from speclet.data_processing.validation import (
     check_finite,
     check_nonnegative,
     check_unique_groups,
 )
-from speclet.data_processing.vectors import careful_zscore
 from speclet.io import stan_models_dir
 from speclet.modeling.stan_helpers import read_code_file
 from speclet.project_enums import ModelFitMethod
-
-# from patsy.highlevel import dmatrix, build_design_matrices, DesignMatrix
-# from aesara import tensor as at
 
 
 @dataclass
@@ -48,19 +46,29 @@ class NegativeBinomialModelData:
     gene_idx: np.ndarray
     cellline_idx: np.ndarray
     lineage_idx: np.ndarray
-    # copy_number: np.ndarray
-    # z_copy_number: np.ndarray
-    # cn_spline_basis: DesignMatrix
-    # knots: np.ndarray
+    copy_number: np.ndarray
+    copy_number_z_gene: np.ndarray
+    copy_number_z_cell: np.ndarray
+    rna_z_gene_lineage: np.ndarray
+    is_mutated: np.ndarray
+
+
+@dataclass
+class HierarchicalNegativeBinomialConfig:
+    """Configuration for `HierarchcalNegativeBinomialModel`."""
+
+    num_knots: int = 5
 
 
 class HierarchcalNegativeBinomialModel:
     """A hierarchical negative binomial generialzed linear model."""
 
+    _config: HierarchicalNegativeBinomialConfig
     _stan_code_file: Final[Path] = stan_models_dir() / "hierarchical_nb.stan"
 
     def __init__(self) -> None:
         """Create a negative binomial Bayesian model object."""
+        self._config = HierarchicalNegativeBinomialConfig()
         assert self._stan_code_file.exists(), "Cannot find Stan code."
         assert self._stan_code_file.is_file(), "Path to Stan code is not a file."
         return None
@@ -95,10 +103,13 @@ class HierarchcalNegativeBinomialModel:
                         Check(check_unique_groups, groupby="depmap_id"),
                     ],
                 ),
-                # "copy_number": Column(
-                #     float, checks=[check_nonnegative(), check_finite()]
-                # ),
-                # "z_copy_number": Column(float, checks=[check_finite()]),
+                "copy_number": Column(
+                    float, checks=[check_nonnegative(), check_finite()]
+                ),
+                "z_rna_gene_lineage": Column(float, checks=[check_finite()]),
+                "z_cn_gene": Column(float, checks=[check_finite()]),
+                "z_cn_cell_line": Column(float, checks=[check_finite()]),
+                "is_mutated": Column(bool, nullable=False),
             }
         )
 
@@ -122,15 +133,8 @@ class HierarchcalNegativeBinomialModel:
         """
         return self.data_schema.validate(data)
 
-    # def _make_spline_basis(self, data: pd.DataFrame) -> tuple[np.ndarray, DesignMatrix]:
-    #     cn = data.copy_number.values.flatten()
-    #     knots = make_knot_list(cn, num_knots=5)
-    #     basis = build_spline(cn, knots)
-    #     return knots, basis
-
     def _make_data_structure(self, data: pd.DataFrame) -> NegativeBinomialModelData:
         indices = common_indices(data)
-        # knots, spline_b = self._make_spline_basis(data)
         return NegativeBinomialModelData(
             N=data.shape[0],
             S=indices.n_sgrnas,
@@ -143,10 +147,11 @@ class HierarchcalNegativeBinomialModel:
             gene_idx=indices.gene_idx,
             cellline_idx=indices.cellline_idx,
             lineage_idx=indices.lineage_idx,
-            # copy_number=data.copy_number.values,
-            # z_copy_number=data.z_copy_number.values,
-            # cn_spline_basis=spline_b,
-            # knots=knots,
+            copy_number=data.copy_number.values,
+            copy_number_z_gene=data.z_cn_gene.values,
+            copy_number_z_cell=data.z_cn_cell_line.values,
+            rna_z_gene_lineage=data.z_rna_gene_lineage.values,
+            is_mutated=data.is_mutated.values,
         )
 
     def data_processing_pipeline(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -164,7 +169,15 @@ class HierarchcalNegativeBinomialModel:
                 how="any",
                 subset=["counts_final", "counts_initial", "copy_number"],
             )
-            .assign(z_copy_number=lambda d: careful_zscore(d.copy_number.values))
+            .pipe(zscale_rna_expression_by_gene_lineage, new_col="z_rna_gene_lineage")
+            .pipe(
+                zscale_cna_by_group, groupby_cols=["hugo_symbol"], new_col="z_cn_gene"
+            )
+            .pipe(
+                zscale_cna_by_group,
+                groupby_cols=["depmap_id"],
+                new_col="z_cn_cell_line",
+            )
             .pipe(append_total_read_counts)
             .pipe(add_useful_read_count_columns)
             .pipe(set_achilles_categorical_columns)
@@ -223,7 +236,7 @@ class HierarchcalNegativeBinomialModel:
         }
 
     def pymc_model(self, data: pd.DataFrame) -> pm.Model:
-        """PyMC model for a hierarchical negative binomial model.
+        """Hierarchical negative binomial model in PyMC.
 
         Args:
             data (pd.DataFrame): Data to model.
@@ -240,10 +253,10 @@ class HierarchcalNegativeBinomialModel:
         g = model_data.gene_idx
         ll = model_data.lineage_idx
 
-        # copy_num_basis = model_data.cn_spline_basis
-        # cn_B = np.asarray(copy_num_basis)
-        # cn_B_dim = cn_B.shape[1]
-        # coords["cn_spline"] = np.arange(0, cn_B_dim).tolist()
+        cn_gene = model_data.copy_number_z_gene
+        cn_cell = model_data.copy_number_z_cell
+        rna = model_data.rna_z_gene_lineage
+        mut = model_data.is_mutated
 
         with pm.Model(coords=coords) as model:
             z = pm.Normal("z", 0, 5)
@@ -259,37 +272,52 @@ class HierarchcalNegativeBinomialModel:
             delta_d = pm.Normal("delta_d", 0, 1, dims=("gene", "lineage"))
             d = pm.Deterministic("d", 0 + delta_d * sigma_d, dims=("gene", "lineage"))
 
-            # mu_f = pm.Normal("mu_f", 0, 2.5)
-            # sigma_f = pm.HalfNormal("sigma_f", 2.5)
-            # f = pm.Normal("f", mu_f, sigma_f, dims=("cn_spline", "cell_line"))
-            # _cn_effect = []
-            # for i in range(model_data.C):
-            #     _cn_effect.append(pmmath.dot(cn_B[c == i, :], f[:, i]).reshape((-1, 1)))
+            mu_f = pm.Normal("mu_f", -1, 1)
+            sigma_f = pm.HalfNormal("sigma_f", 2.5)
+            delta_f = pm.Normal("delta_f", 0, 1, dims=("cell_line"))
+            f = pm.Deterministic("f", mu_f + delta_f * sigma_f, dims=("cell_line"))
 
-            eta = pm.Deterministic("eta", z + a[s] + b[c] + d[g, ll])
-            # + at.vertical_stack(*_cn_effect).squeeze(),
+            mu_h = pm.Normal("mu_h", -1, 1)
+            sigma_h = pm.HalfNormal("sigma_h", 2.5)
+            delta_h = pm.Normal("delta_h", 0, 1, dims=("gene"))
+            h = pm.Deterministic("h", mu_h + delta_h * sigma_h, dims=("gene"))
+
+            mu_k = pm.Normal("mu_k", -1, 1)
+            sigma_k = pm.HalfNormal("sigma_k", 2.5)
+            delta_k = pm.Normal("delta_k", 0, 1, dims=("gene", "lineage"))
+            k = pm.Deterministic(
+                "k", mu_k + delta_k * sigma_k, dims=("gene", "lineage")
+            )
+
+            mu_m = pm.Normal("mu_m", -1, 1)
+            sigma_m = pm.HalfNormal("sigma_m", 2.5)
+            delta_m = pm.Normal("delta_m", 0, 1, dims=("gene", "lineage"))
+            m = pm.Deterministic(
+                "m", mu_m + delta_m * sigma_m, dims=("gene", "lineage")
+            )
+
+            eta = pm.Deterministic(
+                "eta",
+                z
+                + a[s]
+                + b[c]
+                + d[g, ll]
+                + cn_cell * f[c]
+                + cn_gene * h[g]
+                + rna * k[g, ll]
+                + mut * m[g, ll],
+            )
             mu = pm.Deterministic("mu", pmmath.exp(eta))
 
-            alpha_hyperparams = pm.Gamma("alpha_hyperparams", 2, 0.5, shape=2)
-            alpha = pm.Gamma(
-                "alpha", alpha_hyperparams[0], alpha_hyperparams[1], dims=("gene")
-            )
+            # alpha_hyperparams = pm.Gamma("alpha_hyperparams", 2, 0.5, shape=2)
+            # alpha = pm.Gamma(
+            #     "alpha", alpha_hyperparams[0], alpha_hyperparams[1], dims=("gene")
+            # )
+            alpha = pm.Gamma("alpha", 2.0, 0.5)
             y = pm.NegativeBinomial(  # noqa: F841
                 "ct_final",
                 mu * model_data.ct_initial,
-                alpha[model_data.gene_idx],
+                alpha,
                 observed=model_data.ct_final,
             )
         return model
-
-
-# def build_spline(x: np.ndarray, knot_list: np.ndarray) -> DesignMatrix:
-#     B = dmatrix(
-#         "bs(x, knots=knots, degree=3, include_intercept=True) - 1",
-#         {"x": x, "knots": knot_list[1:-1]},
-#     )
-#     return B
-
-
-# def make_knot_list(x: np.ndarray, num_knots: int) -> np.ndarray:
-#     return np.quantile(x, np.linspace(0, 1, num_knots))
