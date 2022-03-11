@@ -48,19 +48,6 @@ class ApproximationSamplingResults:
 # ---- Interface with PyMC ----
 
 
-def _update_return_inferencedata_kwarg(
-    sampling_kwargs: Optional[PymcSampleArguments],
-) -> Optional[PymcSampleArguments]:
-    if sampling_kwargs is None:
-        return sampling_kwargs
-
-    if not sampling_kwargs.return_inferencedata:
-        logger.warning("Switching `return_inferencedata` to `True`.")
-        sampling_kwargs.return_inferencedata = True
-
-    return sampling_kwargs
-
-
 def _specific_o2_progress(sampling_kwargs: dict[str, Any]) -> None:
     if "callback" in sampling_kwargs:
         return
@@ -106,7 +93,6 @@ def fit_pymc_mcmc(
     Returns:
         az.InferenceData: Model posterior sample.
     """
-    sampling_kwargs = _update_return_inferencedata_kwarg(sampling_kwargs)
     kwargs = _get_kwargs_dict(sampling_kwargs)
     _specific_o2_progress(kwargs)
     with model:

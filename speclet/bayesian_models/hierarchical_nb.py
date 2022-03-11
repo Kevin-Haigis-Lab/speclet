@@ -26,6 +26,7 @@ from speclet.data_processing.validation import (
     check_nonnegative,
     check_unique_groups,
 )
+from speclet.data_processing.vectors import squish_array
 from speclet.io import stan_models_dir
 from speclet.modeling.stan_helpers import read_code_file
 from speclet.project_enums import ModelFitMethod
@@ -49,7 +50,7 @@ class NegativeBinomialModelData:
     copy_number: np.ndarray
     copy_number_z_gene: np.ndarray
     copy_number_z_cell: np.ndarray
-    rna_z_gene_lineage: np.ndarray
+    log_rna_expr: np.ndarray
     is_mutated: np.ndarray
 
 
@@ -106,7 +107,9 @@ class HierarchcalNegativeBinomialModel:
                 "copy_number": Column(
                     float, checks=[check_nonnegative(), check_finite()]
                 ),
+                "rna_expr": Column(float, nullable=False),
                 "z_rna_gene_lineage": Column(float, checks=[check_finite()]),
+                "log_rna_expr": Column(float, checks=[check_finite()]),
                 "z_cn_gene": Column(float, checks=[check_finite()]),
                 "z_cn_cell_line": Column(float, checks=[check_finite()]),
                 "is_mutated": Column(bool, nullable=False),
@@ -150,7 +153,7 @@ class HierarchcalNegativeBinomialModel:
             copy_number=data.copy_number.values,
             copy_number_z_gene=data.z_cn_gene.values,
             copy_number_z_cell=data.z_cn_cell_line.values,
-            rna_z_gene_lineage=data.z_rna_gene_lineage.values,
+            log_rna_expr=data.log_rna_expr.values,
             is_mutated=data.is_mutated.values,
         )
 
@@ -171,12 +174,23 @@ class HierarchcalNegativeBinomialModel:
             )
             .pipe(zscale_rna_expression_by_gene_lineage, new_col="z_rna_gene_lineage")
             .pipe(
-                zscale_cna_by_group, groupby_cols=["hugo_symbol"], new_col="z_cn_gene"
+                zscale_cna_by_group,
+                groupby_cols=["hugo_symbol"],
+                new_col="z_cn_gene",
+                cn_max=10,
             )
             .pipe(
                 zscale_cna_by_group,
                 groupby_cols=["depmap_id"],
                 new_col="z_cn_cell_line",
+                cn_max=10,
+            )
+            .assign(
+                z_cn_gene=lambda d: squish_array(d.z_cn_gene, lower=-5, upper=5),
+                z_cn_cell_line=lambda d: squish_array(
+                    d.z_cn_cell_line, lower=-5, upper=5
+                ),
+                log_rna_expr=lambda d: np.log(d.rna_expr + 1.0),
             )
             .pipe(append_total_read_counts)
             .pipe(add_useful_read_count_columns)
@@ -255,46 +269,38 @@ class HierarchcalNegativeBinomialModel:
 
         cn_gene = model_data.copy_number_z_gene
         cn_cell = model_data.copy_number_z_cell
-        rna = model_data.rna_z_gene_lineage
+        rna = model_data.log_rna_expr
         mut = model_data.is_mutated
 
         with pm.Model(coords=coords) as model:
-            z = pm.Normal("z", 0, 5)
+            z = pm.Normal("z", 0, 5, initval=0)
 
-            sigma_a = pm.HalfNormal("sigma_a", 2.5)
+            sigma_a = pm.Gamma("sigma_a", 3, 1)
             a = pm.Normal("a", 0, sigma_a, dims=("sgrna"))
 
-            sigma_b = pm.HalfNormal("sigma_b", 2.5)
+            sigma_b = pm.Gamma("sigma_b", 3, 1)
             delta_b = pm.Normal("delta_b", 0, 1, dims=("cell_line"))
             b = pm.Deterministic("b", 0 + delta_b * sigma_b, dims=("cell_line"))
 
-            sigma_d = pm.HalfNormal("sigma_d", 2.5)
+            sigma_d = pm.Gamma("sigma_d", 3, 1)
             delta_d = pm.Normal("delta_d", 0, 1, dims=("gene", "lineage"))
             d = pm.Deterministic("d", 0 + delta_d * sigma_d, dims=("gene", "lineage"))
 
-            mu_f = pm.Normal("mu_f", -1, 1)
-            sigma_f = pm.HalfNormal("sigma_f", 2.5)
+            sigma_f = pm.Gamma("sigma_f", 3, 1)
             delta_f = pm.Normal("delta_f", 0, 1, dims=("cell_line"))
-            f = pm.Deterministic("f", mu_f + delta_f * sigma_f, dims=("cell_line"))
+            f = pm.Deterministic("f", 0 + delta_f * sigma_f, dims=("cell_line"))
 
-            mu_h = pm.Normal("mu_h", -1, 1)
-            sigma_h = pm.HalfNormal("sigma_h", 2.5)
+            sigma_h = pm.Gamma("sigma_h", 3, 1)
             delta_h = pm.Normal("delta_h", 0, 1, dims=("gene"))
-            h = pm.Deterministic("h", mu_h + delta_h * sigma_h, dims=("gene"))
+            h = pm.Deterministic("h", 0 + delta_h * sigma_h, dims=("gene"))
 
-            mu_k = pm.Normal("mu_k", -1, 1)
-            sigma_k = pm.HalfNormal("sigma_k", 2.5)
+            sigma_k = pm.Gamma("sigma_k", 3, 1)
             delta_k = pm.Normal("delta_k", 0, 1, dims=("gene", "lineage"))
-            k = pm.Deterministic(
-                "k", mu_k + delta_k * sigma_k, dims=("gene", "lineage")
-            )
+            k = pm.Deterministic("k", 0 + delta_k * sigma_k, dims=("gene", "lineage"))
 
-            mu_m = pm.Normal("mu_m", -1, 1)
-            sigma_m = pm.HalfNormal("sigma_m", 2.5)
+            sigma_m = pm.Gamma("sigma_m", 3, 1)
             delta_m = pm.Normal("delta_m", 0, 1, dims=("gene", "lineage"))
-            m = pm.Deterministic(
-                "m", mu_m + delta_m * sigma_m, dims=("gene", "lineage")
-            )
+            m = pm.Deterministic("m", 0 + delta_m * sigma_m, dims=("gene", "lineage"))
 
             eta = pm.Deterministic(
                 "eta",
