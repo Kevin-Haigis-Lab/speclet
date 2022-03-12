@@ -16,11 +16,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotnine as gg
-import pymc3 as pm
-import pymc3_helpers as pmhelp
+import pymc as pm
 import seaborn as sns
+from aesara import tensor as at
 from patsy import dmatrix
-from theano import tensor as tt
 
 notebook_tic = time()
 warnings.simplefilter(action="ignore", category=UserWarning)
@@ -32,11 +31,20 @@ gg.theme_set(gg.theme_minimal())
 
 RANDOM_SEED = 847
 np.random.seed(RANDOM_SEED)
+```
 
-pymc3_cache_dir = Path("pymc3_model_cache")
-rethinking_data_path = Path("../data/rethinking_data")
-modeling_data_path = Path("../modeling_data/depmap_modeling_dataframe_subsample.csv")
-modeling_data2_path = Path("../modeling_data/depmap_modeling_dataframe_subsample2.csv")
+```python
+from speclet.io import data_dir, modeling_data_dir
+```
+
+```python
+modeling_data_dir()
+```
+
+    PosixPath('/Users/admin/Developer/haigis-lab/speclet/modeling_data')
+
+```python
+rethinking_data_path = data_dir() / "rethinking_data"
 ```
 
 ## Replicate the example from *Statistical Rethinking*
@@ -246,13 +254,13 @@ knot_list
     gg.ggplot(d2, gg.aes(x="year", y="doy"))
     + gg.geom_point(color="black", alpha=0.4, size=1.3)
     + gg.theme(figure_size=(10, 5))
-    + gg.labs(x="year", y="days of year", title="Cherry blossom data")
+    + gg.labs(x="year", y="day of year", title="Cherry blossom data")
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_8_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_11_0.png)
 
-    <ggplot: (8777839850749)>
+    <ggplot: (350206865)>
 
 ```python
 (
@@ -260,13 +268,13 @@ knot_list
     + gg.geom_point(color="black", alpha=0.4, size=1.3)
     + gg.geom_vline(xintercept=knot_list, color="gray", alpha=0.8)
     + gg.theme(figure_size=(10, 5))
-    + gg.labs(x="year", y="days of year", title="Cherry blossom data with spline knots")
+    + gg.labs(x="year", y="day of year", title="Cherry blossom data with spline knots")
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_9_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_12_0.png)
 
-    <ggplot: (8777932894356)>
+    <ggplot: (350313725)>
 
 ```python
 (
@@ -275,13 +283,13 @@ knot_list
     + gg.geom_smooth(method="loess", span=0.3, size=1.5, color="blue", linetype="-")
     + gg.geom_vline(xintercept=knot_list, color="gray", alpha=0.8)
     + gg.theme(figure_size=(10, 5))
-    + gg.labs(x="year", y="days of year", title="Cherry blossom data with spline knots")
+    + gg.labs(x="year", y="day of year", title="Cherry blossom data with spline knots")
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_10_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_13_0.png)
 
-    <ggplot: (8777838407099)>
+    <ggplot: (350361588)>
 
 ```python
 d2["knot_group"] = [np.where(a <= knot_list)[0][0] for a in d2.year]
@@ -297,13 +305,13 @@ d2["knot_group"] = pd.Categorical(d2["knot_group"], ordered=True)
     )
     + gg.geom_vline(xintercept=knot_list, color="gray", alpha=0.8)
     + gg.theme(figure_size=(10, 5))
-    + gg.labs(x="year", y="days of year", title="Cherry blossom data with spline knots")
+    + gg.labs(x="year", y="day of year", title="Cherry blossom data with spline knots")
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_12_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_15_0.png)
 
-    <ggplot: (8777838412334)>
+    <ggplot: (350259026)>
 
 ```python
 B = dmatrix(
@@ -352,12 +360,12 @@ spline_df = (
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_14_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_17_0.png)
 
-    <ggplot: (8777839720439)>
+    <ggplot: (350524371)>
 
 ```python
-with pm.Model() as m4_7:
+with pm.Model(rng_seeder=RANDOM_SEED) as m4_7:
     a = pm.Normal("a", 100, 5)
     w = pm.Normal("w", mu=0, sd=3, shape=B.shape[1])
     mu = pm.Deterministic("mu", a + pm.math.dot(np.asarray(B, order="F"), w.T))
@@ -369,64 +377,59 @@ with pm.Model() as m4_7:
 pm.model_to_graphviz(m4_7)
 ```
 
-![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_16_0.svg)
+![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_19_0.svg)
 
 ```python
 with m4_7:
-    prior_pc = pm.sample_prior_predictive(random_seed=RANDOM_SEED)
-    trace_m4_7 = pm.sample(2000, tune=2000, random_seed=RANDOM_SEED, chains=2)
-    post_pc = pm.sample_posterior_predictive(trace_m4_7, random_seed=RANDOM_SEED)
+    trace_m4_7 = pm.sample(2000, tune=2000, chains=2, return_inferencedata=True)
+    _ = pm.sample_posterior_predictive(trace_m4_7, extend_inferencedata=True)
 ```
 
     Auto-assigning NUTS sampler...
     Initializing NUTS using jitter+adapt_diag...
-    Multiprocess sampling (2 chains in 4 jobs)
-    NUTS: [sigma, w, a]
+    Multiprocess sampling (2 chains in 2 jobs)
+    NUTS: [a, w, sigma]
+
+<style>
+    /*Turns off some styling*/
+    progress {
+        /*gets rid of default border in Firefox and Opera.*/
+        border: none;
+        /*Needs to be in here for Safari polyfill so background images work as expected.*/
+        background-size: auto;
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
 
 <div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
   <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [8000/8000 00:12<00:00 Sampling 2 chains, 0 divergences]
+  100.00% [8000/8000 00:41<00:00 Sampling 2 chains, 0 divergences]
 </div>
 
-    Sampling 2 chains for 2_000 tune and 2_000 draw iterations (4_000 + 4_000 draws total) took 12 seconds.
+    Sampling 2 chains for 2_000 tune and 2_000 draw iterations (4_000 + 4_000 draws total) took 57 seconds.
+
+<style>
+    /*Turns off some styling*/
+    progress {
+        /*gets rid of default border in Firefox and Opera.*/
+        border: none;
+        /*Needs to be in here for Safari polyfill so background images work as expected.*/
+        background-size: auto;
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
 
 <div>
-    <style>
-        /*Turns off some styling*/
-        progress {
-            /*gets rid of default border in Firefox and Opera.*/
-            border: none;
-            /*Needs to be in here for Safari polyfill so background images work as expected.*/
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
   <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 00:04<00:00]
+  100.00% [4000/4000 00:00<00:00]
 </div>
 
 ```python
-az_m4_7 = az.from_pymc3(
-    model=m4_7, trace=trace_m4_7, posterior_predictive=post_pc, prior=prior_pc
-)
-```
-
-```python
-az.summary(az_m4_7, var_names=["a", "w", "sigma"])
+az.summary(trace_m4_7, var_names=["a", "w", "sigma"])
 ```
 
 <div>
@@ -453,8 +456,6 @@ az.summary(az_m4_7, var_names=["a", "w", "sigma"])
       <th>hdi_97%</th>
       <th>mcse_mean</th>
       <th>mcse_sd</th>
-      <th>ess_mean</th>
-      <th>ess_sd</th>
       <th>ess_bulk</th>
       <th>ess_tail</th>
       <th>r_hat</th>
@@ -463,268 +464,230 @@ az.summary(az_m4_7, var_names=["a", "w", "sigma"])
   <tbody>
     <tr>
       <th>a</th>
-      <td>103.633</td>
-      <td>0.795</td>
-      <td>102.191</td>
-      <td>105.114</td>
-      <td>0.020</td>
-      <td>0.014</td>
-      <td>1530.0</td>
-      <td>1530.0</td>
-      <td>1538.0</td>
-      <td>1765.0</td>
+      <td>103.651</td>
+      <td>0.755</td>
+      <td>102.296</td>
+      <td>105.120</td>
+      <td>0.018</td>
+      <td>0.013</td>
+      <td>1691.0</td>
+      <td>1572.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[0]</th>
-      <td>-1.832</td>
-      <td>2.191</td>
-      <td>-5.989</td>
-      <td>2.275</td>
-      <td>0.033</td>
-      <td>0.029</td>
-      <td>4472.0</td>
-      <td>2939.0</td>
-      <td>4487.0</td>
-      <td>3054.0</td>
+      <td>-1.795</td>
+      <td>2.202</td>
+      <td>-6.027</td>
+      <td>2.212</td>
+      <td>0.037</td>
+      <td>0.031</td>
+      <td>3496.0</td>
+      <td>2923.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[1]</th>
-      <td>-1.628</td>
-      <td>2.074</td>
-      <td>-5.728</td>
-      <td>1.970</td>
+      <td>-1.654</td>
+      <td>2.057</td>
+      <td>-5.351</td>
+      <td>2.409</td>
       <td>0.037</td>
       <td>0.027</td>
-      <td>3062.0</td>
-      <td>2858.0</td>
-      <td>3071.0</td>
-      <td>2872.0</td>
+      <td>3028.0</td>
+      <td>2949.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[2]</th>
-      <td>-0.214</td>
-      <td>1.915</td>
-      <td>-3.885</td>
-      <td>3.329</td>
-      <td>0.036</td>
-      <td>0.027</td>
-      <td>2812.0</td>
-      <td>2557.0</td>
-      <td>2828.0</td>
-      <td>2824.0</td>
+      <td>-0.252</td>
+      <td>1.935</td>
+      <td>-4.041</td>
+      <td>3.326</td>
+      <td>0.035</td>
+      <td>0.026</td>
+      <td>3042.0</td>
+      <td>2976.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[3]</th>
-      <td>3.353</td>
-      <td>1.477</td>
-      <td>0.692</td>
-      <td>6.166</td>
-      <td>0.030</td>
-      <td>0.021</td>
-      <td>2487.0</td>
-      <td>2487.0</td>
-      <td>2490.0</td>
-      <td>2722.0</td>
+      <td>3.326</td>
+      <td>1.481</td>
+      <td>0.632</td>
+      <td>6.144</td>
+      <td>0.029</td>
+      <td>0.020</td>
+      <td>2632.0</td>
+      <td>2603.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[4]</th>
-      <td>0.184</td>
-      <td>1.549</td>
-      <td>-2.702</td>
-      <td>3.046</td>
-      <td>0.029</td>
-      <td>0.022</td>
-      <td>2888.0</td>
-      <td>2458.0</td>
-      <td>2886.0</td>
-      <td>2788.0</td>
+      <td>0.204</td>
+      <td>1.512</td>
+      <td>-2.574</td>
+      <td>3.114</td>
+      <td>0.027</td>
+      <td>0.020</td>
+      <td>3063.0</td>
+      <td>2893.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[5]</th>
-      <td>2.125</td>
-      <td>1.584</td>
-      <td>-0.773</td>
-      <td>5.195</td>
-      <td>0.029</td>
-      <td>0.021</td>
-      <td>2977.0</td>
-      <td>2977.0</td>
-      <td>2991.0</td>
-      <td>3014.0</td>
+      <td>2.104</td>
+      <td>1.635</td>
+      <td>-1.024</td>
+      <td>5.124</td>
+      <td>0.031</td>
+      <td>0.022</td>
+      <td>2818.0</td>
+      <td>2936.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[6]</th>
-      <td>-3.533</td>
-      <td>1.482</td>
-      <td>-6.422</td>
-      <td>-0.793</td>
-      <td>0.029</td>
-      <td>0.021</td>
-      <td>2535.0</td>
-      <td>2381.0</td>
-      <td>2530.0</td>
-      <td>2475.0</td>
+      <td>-3.561</td>
+      <td>1.472</td>
+      <td>-6.320</td>
+      <td>-0.720</td>
+      <td>0.025</td>
+      <td>0.018</td>
+      <td>3349.0</td>
+      <td>3466.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[7]</th>
-      <td>5.510</td>
-      <td>1.498</td>
-      <td>2.748</td>
-      <td>8.278</td>
-      <td>0.029</td>
-      <td>0.021</td>
-      <td>2687.0</td>
-      <td>2628.0</td>
-      <td>2685.0</td>
-      <td>2716.0</td>
+      <td>5.536</td>
+      <td>1.422</td>
+      <td>2.802</td>
+      <td>8.075</td>
+      <td>0.027</td>
+      <td>0.019</td>
+      <td>2787.0</td>
+      <td>3028.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[8]</th>
-      <td>-0.037</td>
-      <td>1.600</td>
-      <td>-3.129</td>
-      <td>2.864</td>
-      <td>0.031</td>
-      <td>0.023</td>
-      <td>2692.0</td>
-      <td>2479.0</td>
-      <td>2696.0</td>
-      <td>2576.0</td>
+      <td>-0.067</td>
+      <td>1.512</td>
+      <td>-2.861</td>
+      <td>2.788</td>
+      <td>0.026</td>
+      <td>0.019</td>
+      <td>3322.0</td>
+      <td>3377.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[9]</th>
-      <td>2.237</td>
-      <td>1.608</td>
-      <td>-0.735</td>
-      <td>5.307</td>
-      <td>0.032</td>
-      <td>0.023</td>
-      <td>2607.0</td>
-      <td>2467.0</td>
-      <td>2600.0</td>
-      <td>2825.0</td>
+      <td>2.227</td>
+      <td>1.561</td>
+      <td>-0.665</td>
+      <td>5.200</td>
+      <td>0.029</td>
+      <td>0.021</td>
+      <td>2973.0</td>
+      <td>3255.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[10]</th>
-      <td>3.792</td>
-      <td>1.597</td>
-      <td>0.767</td>
-      <td>6.737</td>
-      <td>0.030</td>
-      <td>0.021</td>
-      <td>2823.0</td>
-      <td>2795.0</td>
-      <td>2818.0</td>
-      <td>2689.0</td>
+      <td>3.766</td>
+      <td>1.485</td>
+      <td>0.909</td>
+      <td>6.471</td>
+      <td>0.029</td>
+      <td>0.020</td>
+      <td>2681.0</td>
+      <td>2929.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[11]</th>
-      <td>0.340</td>
-      <td>1.547</td>
-      <td>-2.595</td>
-      <td>3.070</td>
-      <td>0.031</td>
-      <td>0.022</td>
-      <td>2546.0</td>
-      <td>2546.0</td>
-      <td>2548.0</td>
-      <td>2880.0</td>
+      <td>0.311</td>
+      <td>1.493</td>
+      <td>-2.428</td>
+      <td>3.196</td>
+      <td>0.028</td>
+      <td>0.021</td>
+      <td>2917.0</td>
+      <td>2911.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[12]</th>
-      <td>4.178</td>
-      <td>1.531</td>
-      <td>1.215</td>
-      <td>7.000</td>
-      <td>0.029</td>
+      <td>4.143</td>
+      <td>1.537</td>
+      <td>1.292</td>
+      <td>7.047</td>
+      <td>0.030</td>
       <td>0.021</td>
-      <td>2741.0</td>
-      <td>2725.0</td>
-      <td>2737.0</td>
-      <td>3336.0</td>
+      <td>2574.0</td>
+      <td>2562.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[13]</th>
-      <td>1.083</td>
-      <td>1.655</td>
-      <td>-2.053</td>
-      <td>4.110</td>
-      <td>0.035</td>
-      <td>0.025</td>
-      <td>2211.0</td>
-      <td>2176.0</td>
-      <td>2215.0</td>
-      <td>2557.0</td>
+      <td>1.077</td>
+      <td>1.601</td>
+      <td>-1.686</td>
+      <td>4.270</td>
+      <td>0.030</td>
+      <td>0.021</td>
+      <td>2938.0</td>
+      <td>3144.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[14]</th>
-      <td>-1.821</td>
-      <td>1.850</td>
-      <td>-5.324</td>
-      <td>1.564</td>
+      <td>-1.818</td>
+      <td>1.795</td>
+      <td>-4.994</td>
+      <td>1.719</td>
       <td>0.035</td>
-      <td>0.027</td>
-      <td>2762.0</td>
-      <td>2372.0</td>
-      <td>2762.0</td>
-      <td>2961.0</td>
+      <td>0.025</td>
+      <td>2665.0</td>
+      <td>2802.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[15]</th>
-      <td>-5.956</td>
-      <td>1.943</td>
-      <td>-9.580</td>
-      <td>-2.308</td>
-      <td>0.036</td>
-      <td>0.025</td>
-      <td>2942.0</td>
-      <td>2942.0</td>
-      <td>2959.0</td>
-      <td>3004.0</td>
+      <td>-5.979</td>
+      <td>1.834</td>
+      <td>-9.503</td>
+      <td>-2.679</td>
+      <td>0.032</td>
+      <td>0.023</td>
+      <td>3262.0</td>
+      <td>2979.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>w[16]</th>
-      <td>-6.212</td>
-      <td>1.861</td>
-      <td>-9.654</td>
-      <td>-2.668</td>
-      <td>0.030</td>
-      <td>0.021</td>
-      <td>3913.0</td>
-      <td>3787.0</td>
-      <td>3909.0</td>
-      <td>3005.0</td>
+      <td>-6.190</td>
+      <td>1.876</td>
+      <td>-9.943</td>
+      <td>-2.839</td>
+      <td>0.032</td>
+      <td>0.023</td>
+      <td>3370.0</td>
+      <td>2896.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>sigma</th>
-      <td>5.953</td>
-      <td>0.151</td>
-      <td>5.675</td>
-      <td>6.238</td>
+      <td>5.954</td>
+      <td>0.145</td>
+      <td>5.684</td>
+      <td>6.230</td>
       <td>0.002</td>
-      <td>0.002</td>
-      <td>4036.0</td>
-      <td>4036.0</td>
-      <td>4007.0</td>
-      <td>2844.0</td>
+      <td>0.001</td>
+      <td>5054.0</td>
+      <td>3315.0</td>
       <td>1.0</td>
     </tr>
   </tbody>
@@ -732,21 +695,20 @@ az.summary(az_m4_7, var_names=["a", "w", "sigma"])
 </div>
 
 ```python
-az.plot_trace(az_m4_7, var_names=["a", "sigma"])
-plt.show()
+az.plot_trace(trace_m4_7, var_names=["a", "w", "sigma"])
+plt.tight_layout();
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_20_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_22_0.png)
 
 ```python
-az.plot_forest(az_m4_7, var_names=["w"], combined=True)
-plt.show()
+az.plot_forest(trace_m4_7, var_names=["w"], combined=True);
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_21_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_23_0.png)
 
 ```python
-wp = trace_m4_7["w"].mean(0)
+wp = trace_m4_7.posterior["w"].values.mean(axis=(0, 1))
 
 spline_df = (
     pd.DataFrame(B * wp.T)
@@ -771,12 +733,12 @@ spline_df_merged = (
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_22_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_24_0.png)
 
-    <ggplot: (8777839838212)>
+    <ggplot: (350363775)>
 
 ```python
-post_pred = az.summary(az_m4_7, var_names=["mu"]).reset_index(drop=True)
+post_pred = az.summary(trace_m4_7, var_names=["mu"]).reset_index(drop=True)
 d2_post = d2.copy().reset_index(drop=True)
 d2_post["pred_mean"] = post_pred["mean"]
 d2_post["pred_hdi_lower"] = post_pred["hdi_3%"]
@@ -795,15 +757,21 @@ d2_post["pred_hdi_upper"] = post_pred["hdi_97%"]
     + gg.theme(figure_size=(10, 5))
     + gg.labs(
         x="year",
-        y="days of year",
+        y="day of year",
         title="Cherry blossom data with posterior predictions",
     )
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_24_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_26_0.png)
 
-    <ggplot: (8777789467965)>
+    <ggplot: (353279398)>
+
+---
+
+> **NOTE:** I have update the above code for PyMC v4, but not the code below this point.
+
+---
 
 ## Example with gene CN data of a single gene
 
@@ -1042,7 +1010,7 @@ ptk2_data = modeling_data[modeling_data.hugo_symbol == "PTK2"]
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_28_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_31_0.png)
 
     <ggplot: (8777789352340)>
 
@@ -1081,7 +1049,7 @@ ptk2_spline_df = (
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_31_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_34_0.png)
 
     <ggplot: (8777789347675)>
 
@@ -1098,7 +1066,7 @@ with pm.Model() as m_ptk2:
 pm.model_to_graphviz(m_ptk2)
 ```
 
-![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_33_0.svg)
+![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_36_0.svg)
 
 ```python
 with m_ptk2:
@@ -1349,7 +1317,7 @@ ptk2_post.head()
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_37_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_40_0.png)
 
     <ggplot: (8777820522557)>
 
@@ -1372,7 +1340,7 @@ mdm2_data["log_gene_cn"] = np.log10(mdm2_data.gene_cn.values)
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_39_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_42_0.png)
 
     <ggplot: (8777789211787)>
 
@@ -1417,7 +1385,7 @@ mdm2_spline_df = (
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_42_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_45_0.png)
 
     <ggplot: (8777815498807)>
 
@@ -1434,7 +1402,7 @@ with pm.Model() as m_mdm2:
 pm.model_to_graphviz(m_mdm2)
 ```
 
-![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_44_0.svg)
+![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_47_0.svg)
 
 ```python
 with m_mdm2:
@@ -1525,7 +1493,7 @@ az.plot_trace(az_mdm2, var_names=["a", "sigma"])
 plt.show()
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_47_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_50_0.png)
 
 ```python
 post_pred = az.summary(az_mdm2, var_names=["mu"]).reset_index(drop=True)
@@ -1723,7 +1691,7 @@ p = (
 p
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_49_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_52_0.png)
 
     <ggplot: (8777789206848)>
 
@@ -1735,7 +1703,7 @@ p
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_50_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_53_0.png)
 
     <ggplot: (8777797987338)>
 
@@ -1999,7 +1967,7 @@ d["gene_cn_max"] = [np.min((10.0, x)) for x in d.gene_cn]
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_55_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_58_0.png)
 
     <ggplot: (8777797987452)>
 
@@ -2014,7 +1982,7 @@ d["gene_cn_max"] = [np.min((10.0, x)) for x in d.gene_cn]
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_56_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_59_0.png)
 
     <ggplot: (8777907651970)>
 
@@ -2031,7 +1999,7 @@ d["gene_cn_log"] = np.log2(d.gene_cn.values + 1)
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_57_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_60_0.png)
 
     <ggplot: (8777718326004)>
 
@@ -2047,7 +2015,7 @@ d["gene_cn_log"] = np.log2(d.gene_cn.values + 1)
 )
 ```
 
-![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_58_0.png)
+![png](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_61_0.png)
 
     <ggplot: (8777836371920)>
 
@@ -2162,7 +2130,7 @@ with pm.Model() as m_cn_multi:
 pm.model_to_graphviz(m_cn_multi)
 ```
 
-![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_67_0.svg)
+![svg](999_015_splines-in-pymc3_files/999_015_splines-in-pymc3_70_0.svg)
 
 ```python
 # > Fails after taking more than 100 GB of RAM (that's the most I have tried).
