@@ -31,8 +31,6 @@ snakemake \
     --keep-going \
     --printshellcmds
 
-    # --use-conda \
-    # --conda-frontend 'mamba' \
 
 # --conda-cleanup-envs  # use to clean up old conda envs
 
