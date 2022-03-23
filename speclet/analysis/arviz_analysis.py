@@ -57,8 +57,8 @@ def extract_matrix_variable_coords(
     Returns:
         pd.DataFrame: Modified data frame with the two new columns.
     """
-    d[idx1name] = [re.findall(r"(?<=\[)\w+(?=,)", x)[0] for x in d[col]]
-    d[idx2name] = [re.findall(r"(?<=, )\w+(?=\])", x)[0] for x in d[col]]
+    d[idx1name] = [re.findall(r"(?<=\[).+(?=,)", x)[0].strip() for x in d[col]]
+    d[idx2name] = [re.findall(r"(?<=, ).+(?=\])", x)[0].strip() for x in d[col]]
     return d
 
 
