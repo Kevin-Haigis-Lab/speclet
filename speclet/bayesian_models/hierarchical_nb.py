@@ -17,6 +17,7 @@ from speclet.data_processing.crispr import (
     add_useful_read_count_columns,
     append_total_read_counts,
     common_indices,
+    data_batch_indices,
     set_achilles_categorical_columns,
     zscale_cna_by_group,
     zscale_rna_expression_by_gene_lineage,
@@ -41,12 +42,14 @@ class NegativeBinomialModelData:
     G: int  # number of genes
     C: int  # number of cell lines
     L: int  # number of lineages
+    SC: int  # number of screens
     ct_initial: np.ndarray
     ct_final: np.ndarray
     sgrna_idx: np.ndarray
     gene_idx: np.ndarray
     cellline_idx: np.ndarray
     lineage_idx: np.ndarray
+    screen_idx: np.ndarray
     copy_number: np.ndarray
     copy_number_z_gene: np.ndarray
     copy_number_z_cell: np.ndarray
@@ -113,6 +116,7 @@ class HierarchcalNegativeBinomialModel:
                 "z_cn_gene": Column(float, checks=[check_finite()]),
                 "z_cn_cell_line": Column(float, checks=[check_finite()]),
                 "is_mutated": Column(bool, nullable=False),
+                "screen": Column("category", nullable=False),
             }
         )
 
@@ -138,18 +142,21 @@ class HierarchcalNegativeBinomialModel:
 
     def _make_data_structure(self, data: pd.DataFrame) -> NegativeBinomialModelData:
         indices = common_indices(data)
+        batch_indices = data_batch_indices(data)
         return NegativeBinomialModelData(
             N=data.shape[0],
             S=indices.n_sgrnas,
             G=indices.n_genes,
             C=indices.n_celllines,
             L=indices.n_lineages,
+            SC=batch_indices.n_screens,
             ct_initial=data.counts_initial_adj.values.astype(float),
             ct_final=data.counts_final.values.astype(int),
             sgrna_idx=indices.sgrna_idx,
             gene_idx=indices.gene_idx,
             cellline_idx=indices.cellline_idx,
             lineage_idx=indices.lineage_idx,
+            screen_idx=batch_indices.screen_idx,
             copy_number=data.copy_number.values,
             copy_number_z_gene=data.z_cn_gene.values,
             copy_number_z_cell=data.z_cn_cell_line.values,
@@ -230,6 +237,7 @@ class HierarchcalNegativeBinomialModel:
             "gene": get_cats(valid_data, "hugo_symbol"),
             "cell_line": get_cats(valid_data, "depmap_id"),
             "lineage": get_cats(valid_data, "lineage"),
+            "screen": get_cats(valid_data, "screen"),
         }
 
     def stan_idata_addons(self, data: pd.DataFrame) -> dict[str, Any]:
@@ -266,6 +274,7 @@ class HierarchcalNegativeBinomialModel:
         c = model_data.cellline_idx
         g = model_data.gene_idx
         ll = model_data.lineage_idx
+        s = model_data.screen_idx
 
         cn_gene = model_data.copy_number_z_gene
         cn_cell = model_data.copy_number_z_cell
@@ -302,6 +311,9 @@ class HierarchcalNegativeBinomialModel:
             delta_m = pm.Normal("delta_m", 0, 1, dims=("gene", "lineage"))
             m = pm.Deterministic("m", 0 + delta_m * sigma_m, dims=("gene", "lineage"))
 
+            sigma_p = pm.Gamma("sigma_p", 3, 1)
+            p = pm.Normal("p", 0, sigma_p, dims="screen")
+
             eta = pm.Deterministic(
                 "eta",
                 z
@@ -311,14 +323,11 @@ class HierarchcalNegativeBinomialModel:
                 + cn_cell * f[c]
                 + cn_gene * h[g]
                 + rna * k[g, ll]
-                + mut * m[g, ll],
+                + mut * m[g, ll]
+                + p[s],
             )
             mu = pm.Deterministic("mu", pmmath.exp(eta))
 
-            # alpha_hyperparams = pm.Gamma("alpha_hyperparams", 2, 0.5, shape=2)
-            # alpha = pm.Gamma(
-            #     "alpha", alpha_hyperparams[0], alpha_hyperparams[1], dims=("gene")
-            # )
             alpha = pm.Gamma("alpha", 2.0, 0.5)
             y = pm.NegativeBinomial(  # noqa: F841
                 "ct_final",
