@@ -17,10 +17,10 @@ dependencies:
   - flake8-bugbear
   - flake8-builtins
   - flake8-comprehensions
-  - gcc
-  - gxx
+  # - gcc  # not needed on macOS
+  # - gxx  # not needed on macOS
   - hypothesis
-  - ipython
+  - ipython>=7.16
   - isort
   - jupyterlab=3.2.*
   - jupyterlab_code_formatter
@@ -59,16 +59,18 @@ dependencies:
   - types-pyyaml
   - watermark
   - xarray=0.20.*
-  - aeppl=0.0.26
-  - aesara=2.3.8
+  - aeppl=0.0.27
+  - aesara=2.5.1
   - blas
   - cachetools>=4.2.1
   - cloudpickle
   - fastprogress>=0.2.0
   - h5py>=2.7
-  - ipython>=7.16
-  - myst-nb
-  - scipy>=1.4.1,<1.8.0
+  - jax
+  - jaxlib>=0.3.0
+  - libblas=*=*mkl
+  - mkl-service
+  - scipy>=1.4.1
   - typing-extensions>=3.7.4
   - pip:
     - polyagamma

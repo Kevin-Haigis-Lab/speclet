@@ -6,19 +6,19 @@ channels:
   - defaults
 dependencies:
   - python=3.9.9
-  - snakemake=6.13.*
+  - snakemake=7.3.*
   - arviz>=0.11.0
-  - black  # used in pipeline
+  - black  # KEEP! used in pipeline
   - colorama
   - dask
   - drmaa
-  # - gcc
-  # - gxx
-  - isort  # used in pipeline
+  # - gcc  # not needed on macOS
+  # - gxx  # not needed on macOS
+  - isort  # KEEP! used in pipeline
   - jupyterlab
   - mamba
   - nbconvert
-  - nbqa  # used in pipeline
+  - nbqa  # KEEP! used in pipeline
   - numpy
   - pandas
   - pandera
@@ -36,17 +36,20 @@ dependencies:
   - statsmodels
   - typer
   - watermark
-  - aeppl=0.0.26
-  - aesara=2.3.8
+  - aeppl=0.0.27
+  - aesara=2.5.1
   - blas
   - cachetools>=4.2.1
   - cloudpickle
   - fastprogress>=0.2.0
   - h5py>=2.7
-  - ipython>=7.16
-  - myst-nb
-  - scipy>=1.4.1,<1.8.0
+  - jax
+  - jaxlib>=0.3.0
+  - libblas=*=*mkl
+  - mkl-service
+  - scipy>=1.4.1
   - typing-extensions>=3.7.4
+  - ipython>=7.16
   - pip:
     - polyagamma
     - pystan==3.1.1  # latest version for O2
