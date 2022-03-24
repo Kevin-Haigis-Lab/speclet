@@ -27,12 +27,12 @@ TimeLookupDict = ModelResourceLookupDict[td]
 
 sbc_pipeline_memory_lookup: MemoryLookupDict = {
     BayesianModel.SIMPLE_NEGATIVE_BINOMIAL: {
-        ModelFitMethod.PYMC3_ADVI: {
+        ModelFitMethod.PYMC_ADVI: {
             MockDataSize.SMALL: 2,
             MockDataSize.MEDIUM: 2,
             MockDataSize.LARGE: 5,
         },
-        ModelFitMethod.PYMC3_MCMC: {
+        ModelFitMethod.PYMC_MCMC: {
             MockDataSize.SMALL: 2,
             MockDataSize.MEDIUM: 3,
             MockDataSize.LARGE: 5,
@@ -42,12 +42,12 @@ sbc_pipeline_memory_lookup: MemoryLookupDict = {
 
 sbc_pipeline_time_lookup: TimeLookupDict = {
     BayesianModel.SIMPLE_NEGATIVE_BINOMIAL: {
-        ModelFitMethod.PYMC3_ADVI: {
+        ModelFitMethod.PYMC_ADVI: {
             MockDataSize.SMALL: td(minutes=5),
             MockDataSize.MEDIUM: td(minutes=8),
             MockDataSize.LARGE: td(minutes=15),
         },
-        ModelFitMethod.PYMC3_MCMC: {
+        ModelFitMethod.PYMC_MCMC: {
             MockDataSize.SMALL: td(minutes=3),
             MockDataSize.MEDIUM: td(minutes=4),
             MockDataSize.LARGE: td(minutes=20),
@@ -103,12 +103,12 @@ class SBCResourceManager:
 
     def _retrieve_memory_requirement(self) -> int:
         default_memory_tbl: ResourceLookupDict[int] = {
-            ModelFitMethod.PYMC3_ADVI: {
+            ModelFitMethod.PYMC_ADVI: {
                 MockDataSize.SMALL: 2,
                 MockDataSize.MEDIUM: 4,
                 MockDataSize.LARGE: 8,
             },
-            ModelFitMethod.PYMC3_MCMC: {
+            ModelFitMethod.PYMC_MCMC: {
                 MockDataSize.SMALL: 4,
                 MockDataSize.MEDIUM: 8,
                 MockDataSize.LARGE: 12,
@@ -131,12 +131,12 @@ class SBCResourceManager:
 
     def _retrieve_time_requirement(self) -> td:
         default_time_tbl: ResourceLookupDict[td] = {
-            ModelFitMethod.PYMC3_ADVI: {
+            ModelFitMethod.PYMC_ADVI: {
                 MockDataSize.SMALL: td(minutes=10),
                 MockDataSize.MEDIUM: td(minutes=20),
                 MockDataSize.LARGE: td(minutes=30),
             },
-            ModelFitMethod.PYMC3_MCMC: {
+            ModelFitMethod.PYMC_MCMC: {
                 MockDataSize.SMALL: td(minutes=15),
                 MockDataSize.MEDIUM: td(hours=1),
                 MockDataSize.LARGE: td(hours=2),
@@ -163,7 +163,7 @@ class SBCResourceManager:
         Returns:
             str: Number of cores needed for fitting.
         """
-        if self.fit_method is ModelFitMethod.PYMC3_MCMC:
+        if self.fit_method is ModelFitMethod.PYMC_MCMC:
             return 4
         else:
             return 1

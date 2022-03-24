@@ -14,30 +14,25 @@ from hypothesis.strategies import DataObject
 from speclet.data_processing import common as dphelp
 from speclet.data_processing import crispr as achelp
 
-DATA_PATH = Path("tests", "depmap_test_data.csv")
-
 
 @pytest.fixture
-def data() -> pd.DataFrame:
-    return achelp.read_achilles_data(DATA_PATH, low_memory=True)
+def data(depmap_test_data: Path) -> pd.DataFrame:
+    return achelp.read_achilles_data(depmap_test_data, low_memory=True)
 
 
 #### ---- Reading and modifying Achilles data ---- ####
 
 
 class TestHandlingAchillesData:
-    def setup_class(self) -> None:
-        self.file_path = DATA_PATH
-
-    def test_reading_data(self) -> None:
-        df = achelp.read_achilles_data(self.file_path, low_memory=True)
+    def test_reading_data(self, depmap_test_data: Path) -> None:
+        df = achelp.read_achilles_data(depmap_test_data, low_memory=True)
         required_cols = ["sgrna", "depmap_id", "hugo_symbol", "lfc", "copy_number"]
         for col in required_cols:
             assert col in df.columns
 
-    def test_factor_columns_exist(self) -> None:
+    def test_factor_columns_exist(self, depmap_test_data: Path) -> None:
         test_data = achelp.read_achilles_data(
-            self.file_path, low_memory=True, set_categorical_cols=False
+            depmap_test_data, low_memory=True, set_categorical_cols=False
         )
         assert "category" not in test_data.dtypes
 
@@ -63,14 +58,14 @@ class TestModifyingAchillesData:
         for col in required_factor_cols:
             assert data[col].dtype == "category"
 
-    def test_setting_achilles_categorical_columns(self) -> None:
-        data = achelp.read_achilles_data(DATA_PATH, set_categorical_cols=False)
+    def test_setting_achilles_categorical_columns(self, depmap_test_data: Path) -> None:
+        data = achelp.read_achilles_data(depmap_test_data, set_categorical_cols=False)
         assert "category" not in data.dtypes
         data = achelp.set_achilles_categorical_columns(data=data)
         assert sum(data.dtypes == "category") == 7
 
-    def test_custom_achilles_categorical_columns(self) -> None:
-        data = achelp.read_achilles_data(DATA_PATH, set_categorical_cols=False)
+    def test_custom_achilles_categorical_columns(self, depmap_test_data: Path) -> None:
+        data = achelp.read_achilles_data(depmap_test_data, set_categorical_cols=False)
         data = achelp.set_achilles_categorical_columns(
             data, cols=["hugo_symbol", "sgrna"]
         )
@@ -232,9 +227,9 @@ def mock_gene_data() -> pd.DataFrame:
     return df
 
 
-@pytest.fixture(scope="module")
-def example_achilles_data() -> pd.DataFrame:
-    return achelp.read_achilles_data(Path("tests", "depmap_test_data.csv"))
+@pytest.fixture
+def example_achilles_data(depmap_test_data: Path) -> pd.DataFrame:
+    return achelp.read_achilles_data(depmap_test_data)
 
 
 def test_make_mapping_df() -> None:

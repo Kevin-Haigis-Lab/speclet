@@ -13,7 +13,7 @@ from matplotlib.axes import Axes
 import speclet.analysis.arviz_analysis as azanal
 import speclet.exceptions
 import speclet.modeling.simulation_based_calibration_helpers as sbc
-from speclet.modeling import pymc3_helpers as pmhelp
+from speclet.modeling import pymc_helpers as pmhelp
 
 SBC_UNIFORMITY_THINNING_DRAWS = 100
 

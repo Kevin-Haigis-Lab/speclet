@@ -6,8 +6,8 @@ from typing import Any, Final, Optional
 
 import numpy as np
 import pandas as pd
-import pymc3 as pm
-import pymc3.math as pmmath
+import pymc as pm
+import pymc.math as pmmath
 import stan
 from pandera import Column, DataFrameSchema
 from stan.model import Model as StanModel
@@ -124,14 +124,14 @@ class NegativeBinomialModel:
             "constant_data": ["ct_initial"],
         }
 
-    def pymc3_model(self, data: pd.DataFrame) -> pm.Model:
-        """PyMC3 model for a simple negative binomial model.
+    def pymc_model(self, data: pd.DataFrame) -> pm.Model:
+        """PyMC model for a simple negative binomial model.
 
         Args:
             data (pd.DataFrame): Data to model.
 
         Returns:
-            pm.Model: PyMC3 model.
+            pm.Model: PyMC model.
         """
         model_data = self.data_processing_pipeline(data)
         with pm.Model() as model:

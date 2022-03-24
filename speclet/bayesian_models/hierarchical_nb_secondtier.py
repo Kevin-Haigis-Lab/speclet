@@ -6,8 +6,8 @@ from typing import Any, Final, Optional
 
 import numpy as np
 import pandas as pd
-import pymc3 as pm
-import pymc3.math as pmmath
+import pymc as pm
+import pymc.math as pmmath
 import stan
 from pandera import Check, Column, DataFrameSchema
 from stan.model import Model as StanModel
@@ -92,7 +92,7 @@ class HierarchcalNegativeBinomialSecondTier:
     def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
         _vars = ["mu", "eta", "delta_gamma", "delta_beta", "delta_b"]
-        if fit_method in {ModelFitMethod.PYMC3_ADVI, ModelFitMethod.PYMC3_MCMC}:
+        if fit_method in {ModelFitMethod.PYMC_ADVI, ModelFitMethod.PYMC_MCMC}:
             _vars += []
         if fit_method is ModelFitMethod.STAN_MCMC:
             _vars += ["log_lik", "y_hat"]
@@ -197,14 +197,14 @@ class HierarchcalNegativeBinomialSecondTier:
             },
         }
 
-    def pymc3_model(self, data: pd.DataFrame) -> pm.Model:
-        """PyMC3 model.
+    def pymc_model(self, data: pd.DataFrame) -> pm.Model:
+        """PyMC model.
 
         Args:
             data (pd.DataFrame): Data to model.
 
         Returns:
-            pm.Model: PyMC3 model.
+            pm.Model: PyMC model.
         """
         valid_data = self.data_processing_pipeline(data)
         model_data = self._make_data_structure(valid_data)

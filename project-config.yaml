@@ -10,7 +10,7 @@ modeling:
 
 fitting_pipeline:
   debug: false
-  num_chains: 4
+  num_chains: 3
   models_config: "models/model-configs.yaml"
   temp_dir: "temp/fitting-mcmc"
   model_cache_dir: "models/"
@@ -18,5 +18,5 @@ fitting_pipeline:
   benchmark_dir: "benchmarks/010_010_model-fitting-pipeline"
   env_yaml: "default_environment.yaml"
 
-misc:
-  theano_gcc_flag: 'cxx="$CONDA_PREFIX/bin/g++",blas__ldflags="-L$CONDA_PREFIX/lib -lcblas -lblas -lcblas -lblas"'
+# misc:
+#   aesara_gcc_flag: 'cxx="$CONDA_PREFIX/bin/g++",blas__ldflags="-L$CONDA_PREFIX/lib -lopenblas -lopenblas -Wl,-rpath,$CONDA_PREFIX/lib"'

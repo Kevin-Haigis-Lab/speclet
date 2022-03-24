@@ -5,7 +5,7 @@ from typing import Any, Optional
 
 import numpy as np
 import pandas as pd
-import pymc3 as pm
+import pymc as pm
 import stan
 from stan.model import Model as StanModel
 
@@ -113,7 +113,7 @@ class EightSchoolsModel:
             },
         }
 
-    def pymc3_model(self, data: pd.DataFrame) -> pm.Model:
+    def pymc_model(self, data: pd.DataFrame) -> pm.Model:
         """PyMC3  model for a simple negative binomial model.
 
         Not implemented.

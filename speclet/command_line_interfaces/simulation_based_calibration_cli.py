@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-import theano
+import aesara
 import typer
 import xarray
 
@@ -16,7 +16,7 @@ from speclet.command_line_interfaces import cli_helpers
 from speclet.loggers import logger
 from speclet.model_configuration import get_configuration_for_model
 from speclet.modeling import simulation_based_calibration_helpers as sbc
-from speclet.pipelines.theano_flags import get_theano_compile_dir
+from speclet.pipelines.aesara_flags import get_aesara_compile_dir
 from speclet.project_enums import MockDataSize, ModelFitMethod
 
 cli_helpers.configure_pretty()
@@ -58,16 +58,16 @@ def make_mock_data(
     return None
 
 
-def _check_theano_config() -> None:
-    logger.info(f"theano.config.compile__wait: {theano.config.compile__wait}")
-    logger.info(f"theano.config.compile__timeout: {theano.config.compile__timeout}")
+def _check_aesara_config() -> None:
+    logger.info(f"aesara.config.compile__wait: {aesara.config.compile__wait}")
+    logger.info(f"aesara.config.compile__timeout: {aesara.config.compile__timeout}")
     return None
 
 
 def _remove_thenao_comp_dir() -> None:
-    _theano_comp_dir = get_theano_compile_dir()
-    logger.info(f"Removing Theano compilation directory: '{_theano_comp_dir}'.")
-    shutil.rmtree(_theano_comp_dir, ignore_errors=True)
+    _aesara_comp_dir = get_aesara_compile_dir()
+    logger.info(f"Removing Theano compilation directory: '{_aesara_comp_dir}'.")
+    shutil.rmtree(_aesara_comp_dir, ignore_errors=True)
 
 
 @app.command()
@@ -80,7 +80,7 @@ def run_sbc(
     mock_data_path: Optional[Path] = None,
     data_size: Optional[MockDataSize] = None,
     check_results: bool = True,
-    remove_theano_comp_dir: bool = False,
+    remove_aesara_comp_dir: bool = False,
 ) -> None:
     """CLI for running a round of simulation-based calibration for a model.
 
@@ -99,7 +99,7 @@ def run_sbc(
         check_results (bool, optional): Should the results be checked for completeness
           (based off of known issues with the SBC pipeline's fidelity)? Defaults to
           True.
-        remove_theano_comp_dir (bool, optional): Should the Theano compilation
+        remove_aesara_comp_dir (bool, optional): Should the Theano compilation
           directory be removed when the SBC finishes? Only use this if you are
           certain that no other job is using this compilation directory. Defaults to
           False.
@@ -107,7 +107,7 @@ def run_sbc(
     Returns:
         None: None
     """
-    _check_theano_config()
+    _check_aesara_config()
     config = get_configuration_for_model(config_path=config_path, name=name)
     _ = get_bayesian_model(config.model)
 
@@ -126,11 +126,11 @@ def run_sbc(
             sbc_check.sbc_file_manager.clear_results()
             sbc_check.sbc_file_manager.clear_saved_data()
             # bayesian_model.cache_manager.clear_all_caches()
-            if remove_theano_comp_dir:
+            if remove_aesara_comp_dir:
                 _remove_thenao_comp_dir()
             raise FailedSBCCheckError(sbc_check.message)
 
-    if remove_theano_comp_dir:
+    if remove_aesara_comp_dir:
         _remove_thenao_comp_dir()
 
     return None
@@ -160,8 +160,7 @@ def _check_sbc_results(cache_dir: Path, fit_method: ModelFitMethod) -> SBCCheckR
     sbc_res = sbc_fm.get_sbc_results()
 
     _is_mcmc = (
-        fit_method is ModelFitMethod.PYMC3_MCMC
-        or fit_method is ModelFitMethod.STAN_MCMC
+        fit_method is ModelFitMethod.PYMC_MCMC or fit_method is ModelFitMethod.STAN_MCMC
     )
 
     if _is_mcmc:

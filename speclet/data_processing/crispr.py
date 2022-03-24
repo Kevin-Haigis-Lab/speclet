@@ -87,7 +87,8 @@ def zscale_rna_expression(
         new_col = rna_col + "_z"
 
     rna = df[rna_col].values
-    rna_z = careful_zscore(rna, atol=0.01, transform=lambda x: np.log10(x + 1))
+
+    rna_z = careful_zscore(rna, atol=0.01)
 
     if lower_bound is not None and upper_bound is not None:
         rna_z = squish_array(rna_z, lower=lower_bound, upper=upper_bound)
@@ -101,6 +102,7 @@ ArgToZscaleByExpression = Union[str, Optional[str], Optional[float]]
 
 def zscale_rna_expression_by_gene_lineage(
     df: pd.DataFrame,
+    rna_col: str = "rna_expr",
     *args: ArgToZscaleByExpression,
     **kwargs: ArgToZscaleByExpression,
 ) -> pd.DataFrame:
@@ -115,9 +117,14 @@ def zscale_rna_expression_by_gene_lineage(
         pd.DataFrame: The original data frame with a new column with the z-scaled RNA
           expression values.
     """
-    return df.groupby(["lineage", "hugo_symbol"]).apply(
-        zscale_rna_expression, *args, **kwargs
+    rna_expr_df = (
+        df.copy()[["hugo_symbol", "lineage", "depmap_id", rna_col]]
+        .drop_duplicates()
+        .groupby(["hugo_symbol", "lineage"])
+        .apply(zscale_rna_expression, rna_col=rna_col, *args, **kwargs)
+        .drop(columns=[rna_col])
     )
+    return df.merge(rna_expr_df, how="left", on=["hugo_symbol", "lineage", "depmap_id"])
 
 
 #### ---- Indices ---- ####

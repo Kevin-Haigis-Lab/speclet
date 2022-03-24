@@ -33,6 +33,16 @@ mamba env create -f environment.yaml
 mamba env create -f environment_smk.yaml
 ```
 
+If wokring on a linux distribution, you'll need to install `gcc` and `g++`, also.
+
+```bash
+conda activate speclet
+mamba install -c conda-forge gcc gxx
+
+conda deactivate && conda activate speclet_smk
+mamba install -c conda-forge gcc gxx
+```
+
 Either environment can then be used like a normal 'conda' environment.
 For example, below is the command it activate the `speclet` environment.
 
@@ -45,6 +55,15 @@ Alternatively, the above commands can be accomplished using the `make pyenvs` co
 ```bash
 # Same as above.
 make pyenvs
+```
+
+On O2, because I don't have control over the `base` conda environment, I follow the incantations below for each environment:
+
+```bash
+conda create -n speclet -c conda-forge python=3.9.9 mamba
+conda activate speclet
+mamba env update --name speclet --file environment.yaml
+mamba install -c conda-forge gcc gxx
 ```
 
 ### R environment
@@ -94,10 +113,6 @@ There are options for configuration in the ["project-config.yaml"](project-confi
 There are controls for various constants and parameters for analyses and pipelines.
 Most are intuitively named.
 
-One configuration parameter that is not obvious is the `theano_gcc_flag` under `misc`.
-This should be set with any gcc or blas configuration variables for theano.
-I need to have it set so that theano uses the correct gcc and blas modules when running in pipelines on O2 (see issue [#151](https://github.com/Kevin-Haigis-Lab/speclet/issues/151) for details)
-
 #### Environment variables
 
 **There is a required ".env" file that should be configured as follows.**
@@ -106,6 +121,9 @@ I need to have it set so that theano uses the correct gcc and blas modules when 
 PROJECT_ROOT=${PWD}                                 # location of the root directory
 PROJECT_CONFIG=${PROJECT_ROOT}/project-config.yaml  # location of project config file
 ```
+
+An optional global environment that is used by 'speclet' is `AESARA_GCC_FLAG` to set any desired Aesara gcc/g++ flags in the pipelines.
+I need to have it set so that theano uses the correct gcc and blas modules when running in pipelines on O2 (see issue [#151](https://github.com/Kevin-Haigis-Lab/speclet/issues/151) for details).
 
 ## Project organization
 

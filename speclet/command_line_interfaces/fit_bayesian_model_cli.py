@@ -20,7 +20,7 @@ from speclet.managers.cache_manager import cache_posterior, get_posterior_cache_
 from speclet.managers.data_managers import CrisprScreenDataManager
 from speclet.model_configuration import ModelingSamplingArguments
 from speclet.modeling.fitting_arguments import (
-    Pymc3SampleArguments,
+    PymcSampleArguments,
     StanMCMCSamplingArguments,
 )
 from speclet.modeling.model_fitting_api import fit_model
@@ -55,11 +55,11 @@ def _augment_sampling_kwargs(
     else:
         sampling_kwargs.stan_mcmc = StanMCMCSamplingArguments(num_chains=mcmc_chains)
 
-    if sampling_kwargs.pymc3_mcmc is not None:
-        sampling_kwargs.pymc3_mcmc.chains = mcmc_chains
-        sampling_kwargs.pymc3_mcmc.cores = mcmc_cores
+    if sampling_kwargs.pymc_mcmc is not None:
+        sampling_kwargs.pymc_mcmc.chains = mcmc_chains
+        sampling_kwargs.pymc_mcmc.cores = mcmc_cores
     else:
-        sampling_kwargs.pymc3_mcmc = Pymc3SampleArguments(
+        sampling_kwargs.pymc_mcmc = PymcSampleArguments(
             chains=mcmc_chains, cores=mcmc_cores
         )
 

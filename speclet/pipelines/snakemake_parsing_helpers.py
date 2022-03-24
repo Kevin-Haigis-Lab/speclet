@@ -61,6 +61,8 @@ def get_models_names_fit_methods(
     pipeline_informations: list[_PipelineIntermediateInformation] = []
 
     for config in model_configurations.configurations:
+        if not config.active:
+            continue
         fit_methods = _get_pipeline_fit_methods(config, pipeline)
         if fit_methods is None:
             continue

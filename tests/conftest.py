@@ -7,14 +7,14 @@ from typing import Any, Callable, Final, Union
 import arviz as az
 import numpy as np
 import pandas as pd
-import pymc3 as pm
+import pymc as pm
 import pytest
 import seaborn as sns
 import stan
 from hypothesis import HealthCheck, Verbosity, settings
 from stan.model import Model as StanModel
 
-TEST_DATA: Final[Path] = Path("tests", "depmap_test_data.csv")
+TEST_DATA: Final[Path] = Path("tests", "depmap-modeling-data_test-data.csv")
 
 
 # ---- Callable fixtures ----
@@ -93,7 +93,7 @@ def centered_eight_data() -> dict[str, Union[int, list[float]]]:
 
 
 @pytest.fixture
-def centered_eight_pymc3_model(
+def centered_eight_pymc_model(
     centered_eight_data: dict[str, Union[int, list[float]]]
 ) -> pm.Model:
     with pm.Model() as model:

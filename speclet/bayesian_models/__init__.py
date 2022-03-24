@@ -4,7 +4,7 @@ from enum import Enum, unique
 from typing import Any, Final, Optional, Protocol, Type
 
 import pandas as pd
-import pymc3 as pm
+import pymc as pm
 from stan.model import Model as StanModel
 
 from speclet.bayesian_models.eight_schools import EightSchoolsModel
@@ -55,14 +55,14 @@ class BayesianModelProtocol(Protocol):
         """Information to add to the InferenceData posterior object."""
         ...
 
-    def pymc3_model(self, data: pd.DataFrame) -> pm.Model:
-        """Make a PyMC3 model.
+    def pymc_model(self, data: pd.DataFrame) -> pm.Model:
+        """Make a PyMC model.
 
         Args:
             data (pd.DataFrame): Data to model.
 
         Returns:
-            pm.Model: A PyMC3 model.
+            pm.Model: A PyMC model.
         """
         ...
 

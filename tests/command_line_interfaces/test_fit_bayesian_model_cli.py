@@ -20,10 +20,10 @@ def write_config(fpath: Path) -> None:
             stan_mcmc:
                 num_samples: 1000
                 num_warmup: 1000
-            pymc3_mcmc:
+            pymc_mcmc:
                 tune: 1000
                 draws: 1000
-            pymc3_advi:
+            pymc_advi:
                 n: 1000
     """
     with open(fpath, "w") as file:
