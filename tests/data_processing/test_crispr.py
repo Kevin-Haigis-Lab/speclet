@@ -20,7 +20,7 @@ def data(depmap_test_data: Path) -> pd.DataFrame:
     return achelp.read_achilles_data(depmap_test_data, low_memory=True)
 
 
-#### ---- Reading and modifying Achilles data ---- ####
+# --- Reading and modifying Achilles data ---
 
 
 class TestHandlingAchillesData:
@@ -101,9 +101,7 @@ class TestModifyingAchillesData:
             _ = achelp.subsample_achilles_data(data, n_cell_lines=-1)
 
     def test_z_scaling_means(self, mock_data: pd.DataFrame) -> None:
-        print(mock_data)
         z_data = achelp.zscale_cna_by_group(mock_data)
-        print(z_data)
         for gene in z_data["hugo_symbol"].unique():
             m = z_data.query(f"hugo_symbol == '{gene}'")["copy_number_z"].mean()
             assert m == pytest.approx(0.0, abs=0.01)
@@ -179,28 +177,32 @@ def test_zscale_rna_expression_with_bounds(
 @settings(settings.get_profile("slow-adaptive"))
 def test_zscale_rna_expression_by_gene_lineage(hyp_data: DataObject) -> None:
     n_lineages = hyp_data.draw(st.integers(min_value=1, max_value=4))
-    n_genes = hyp_data.draw(st.integers(min_value=1, max_value=7))
+    n_cells_per_line = hyp_data.draw(st.integers(min_value=1, max_value=4))
+    n_genes = hyp_data.draw(st.integers(min_value=3, max_value=7))
     lineages = [f"lineage_{i}" for i in range(n_lineages)]
+    celllines = [f"cell_line_{i}" for i in range(n_lineages * n_cells_per_line)]
     genes = [f"gene_{i}" for i in range(n_genes)]
-    df = pd.DataFrame(
-        list(product(lineages, genes)), columns=["lineage", "hugo_symbol"]
+    cell_to_lineage_df = pd.DataFrame(
+        {"depmap_id": celllines, "lineage": np.repeat(lineages, n_cells_per_line)}
     )
+    df = pd.DataFrame(
+        list(product(celllines, genes)), columns=["depmap_id", "hugo_symbol"]
+    ).merge(cell_to_lineage_df, on="depmap_id")
     df["rna_expr"] = np.random.uniform(0.0, 100.0, size=len(df))
     note(df.__str__())
-    df_z = achelp.zscale_rna_expression(df, "rna_expr", new_col="rna_expr_z")
+    df_z = achelp.zscale_rna_expression(df.copy(), "rna_expr", new_col="rna_expr_z")
     assert df_z["rna_expr_z"].mean() == pytest.approx(0.0, abs=0.01)
     df_z_g = achelp.zscale_rna_expression_by_gene_lineage(
-        df, "rna_expr", new_col="rna_expr_z"
+        df.copy(), "rna_expr", new_col="rna_expr_z"
     )
-    for gene in genes:
-        for lineage in lineages:
-            rna_expr_z = df_z_g.query(f"hugo_symbol == '{gene}'").query(
-                f"lineage == '{lineage}'"
-            )["rna_expr_z"]
-            assert np.mean(rna_expr_z) == pytest.approx(0, abs=0.01)
+    for gene, lineage in product(genes, lineages):
+        rna_expr_z = df_z_g.query(f"hugo_symbol == '{gene}'").query(
+            f"lineage == '{lineage}'"
+        )["rna_expr_z"]
+        assert np.mean(rna_expr_z) == pytest.approx(0, abs=0.01)
 
 
-#### ---- Index helpers ---- ####
+# --- Index helpers ---
 
 
 def make_mock_sgrna(of_length: int = 20) -> str:
