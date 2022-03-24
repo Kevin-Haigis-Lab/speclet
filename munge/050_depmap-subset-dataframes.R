@@ -1,4 +1,3 @@
-
 # Isolate the DepMap data for CRC cell lines.
 
 if (basename(getwd()) == "munge") {
@@ -12,7 +11,13 @@ library(tidyverse)
 
 set.seed(1009)
 
-# ---- Load data ----
+genes_of_interest <- c(
+  "KRAS", "BRAF", "NRAS", "PIK3CA", "TP53", "MDM2", "MDM4", "APC", "FBXW7",
+  "STK11", "PTK2", "CTNNB1", "KLF5", "GATA6"
+)
+
+
+# --- Load data ---
 
 modeling_df_path <- snakemake@input[["modeling_df"]]
 
@@ -23,7 +28,7 @@ data <- data.table::fread(
 data <- as_tibble(data)
 
 
-# ---- CRC data ----
+# --- CRC data ---
 
 crc_lineages <- c("colorectal")
 
@@ -33,16 +38,12 @@ crc_data <- data %>%
 write_csv(crc_data, snakemake@output[["crc_subset"]])
 
 
-# ---- Sub-sample of CRC data ----
-
+# --- Sub-sample of CRC data ---
 
 crc_cell_lines <- sample(unique(crc_data$depmap_id), 10)
 genes <- sample(unique(crc_data$hugo_symbol), 100)
 
-genes <- c(
-  genes, "KRAS", "BRAF", "NRAS", "PIK3CA", "TP53", "MDM2", "MDM4", "APC", "FBXW7",
-  "STK11", "PTK2", "CTNNB1", "KLF5", "GATA6"
-)
+genes <- c(genes, genes_of_interest)
 genes <- unique(genes)
 
 sample_sgrna_from_gene <- function(df, genes, n_sgrna) {
@@ -64,7 +65,7 @@ crc_data %>%
   write_csv(snakemake@output[["crc_subsample"]])
 
 
-# ---- CRC + BONE data ----
+# --- CRC + BONE data ---
 
 bone_lineages <- c("bone")
 
@@ -76,7 +77,7 @@ bind_rows(crc_data, bone_data) %>%
   write_csv(snakemake@output[["crc_bone_subset"]])
 
 
-# ---- Sub-sample of CRC + BONE data ----
+# --- Sub-sample of CRC + BONE data ---
 
 bone_cell_lines <- sample(
   unique(bone_data$depmap_id),
@@ -94,10 +95,9 @@ data %>%
   write_csv(snakemake@output[["crc_bone_subsample"]])
 
 
-# ---- Larger sub-sample of CRC + BONE data ----
+# --- Larger sub-sample of CRC + BONE data ---
 
 cell_lines <- c(unique(bone_data$depmap_id), unique(crc_data$depmap_id))
-
 genes <- sample(unique(data$hugo_symbol), 2000)
 
 data %>%
@@ -106,8 +106,19 @@ data %>%
   write_csv(snakemake@output[["crc_bone_large_subsample"]])
 
 
-# ---- Small random subset for Python module testing ----
+# --- Larger sub-sample of colorectal + pancreas + cervix ---
 
+lineages <- c("colorectal", "pancreas", "cervix")
+cervix_genes <- c("POLRMT", "LATS1")
+pancreas_genes <- c("EEF2", "CDKN2A")
+
+data %>%
+  filter(lineage %in% !!lineages) %>%
+  filter(hugo_symbol %in% c(genes, genes_of_interest, cervix_genes, pancreas_genes)) %>%
+  write_csv(snakemake@output[["crc_panc_cervix_large_subsample"]])
+
+
+# --- Small random subset for Python module testing ---
 
 lineages <- sample(unique(data$lineage), 2)
 cell_lines <- data %>%

@@ -139,6 +139,7 @@ rule all:
         # rules.modeling_data_subsets.output
         MODELING_DATA_DIR / "depmap-modeling-data_crc.csv",
         MODELING_DATA_DIR / "depmap-modeling-data_crc-subsample.csv",
+        MODELING_DATA_DIR / "depmap-modeling-data_crc-panc-cervix-large-subsample.csv",
         TESTS_DIR / "depmap_test_data.csv",
         # rules.auxillary_data_subsets
         MODELING_DATA_DIR / "copy_number_data_samples.npy",
@@ -474,6 +475,8 @@ rule modeling_data_subsets:
         / "depmap-modeling-data_crc-bone-subsample.csv",
         crc_bone_large_subsample=MODELING_DATA_DIR
         / "depmap-modeling-data_crc-bone-large-subsample.csv",
+        crc_panc_cervix_large_subsample=MODELING_DATA_DIR
+        / "depmap-modeling-data_crc-panc-cervix-large-subsample.csv",
     script:
         "050_depmap-subset-dataframes.R"
 
