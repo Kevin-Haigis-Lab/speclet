@@ -21,20 +21,23 @@ def zscale_cna_by_group(
     new_col: str = "copy_number_z",
     groupby_cols: Optional[Union[list[str], tuple[str, ...]]] = ("hugo_symbol",),
     cn_max: Optional[float] = None,
+    center: Optional[float] = None,
 ) -> pd.DataFrame:
     """Z-scale the copy number values.
 
     Args:
         df (pd.DataFrame): The DataFrame to modify.
         cn_col (str, optional): Column with the gene copy number values.
-          Defaults to "copy_number".
+        Defaults to "copy_number".
         new_col (str, optional): The name of the column to store the calculated values.
-          Defaults to "copy_number_z".
+        Defaults to "copy_number_z".
         groupby_cols (Optional[Union[List[str], Tuple[str, ...]]], optional): A list or
-          tuple of columns to group the DataFrame by. If None, the rows are not grouped.
-          Defaults to ("hugo_symbol").
+        tuple of columns to group the DataFrame by. If None, the rows are not grouped.
+        Defaults to ("hugo_symbol").
         cn_max (Optional[float], optional): The maximum copy number to use.
-          Defaults to None.
+        Defaults to None.
+        center (Optional[float], optional): The value to use for the center. If `None`
+        (default), the average is used.
 
     Returns:
         pd.DataFrame: The modified DataFrame.
@@ -45,7 +48,10 @@ def zscale_cna_by_group(
         df[new_col] = df[cn_col]
 
     def zscore_cna_col(d: pd.DataFrame) -> pd.DataFrame:
+        _avg = d[new_col].mean()
         d[new_col] = careful_zscore(d[new_col].values)
+        if center is not None:
+            d[new_col] = d[new_col] + _avg - center
         return d
 
     if groupby_cols is None:

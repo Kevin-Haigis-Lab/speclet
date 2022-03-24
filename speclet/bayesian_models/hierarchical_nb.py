@@ -184,13 +184,15 @@ class HierarchcalNegativeBinomialModel:
                 zscale_cna_by_group,
                 groupby_cols=["hugo_symbol"],
                 new_col="z_cn_gene",
-                cn_max=10,
+                cn_max=7,
+                center=1,
             )
             .pipe(
                 zscale_cna_by_group,
                 groupby_cols=["depmap_id"],
                 new_col="z_cn_cell_line",
-                cn_max=10,
+                cn_max=7,
+                center=1,
             )
             .assign(
                 z_cn_gene=lambda d: squish_array(d.z_cn_gene, lower=-5, upper=5),
@@ -300,8 +302,8 @@ class HierarchcalNegativeBinomialModel:
             f = pm.Deterministic("f", 0 + delta_f * sigma_f, dims=("cell_line"))
 
             sigma_h = pm.Gamma("sigma_h", 3, 1)
-            delta_h = pm.Normal("delta_h", 0, 1, dims=("gene"))
-            h = pm.Deterministic("h", 0 + delta_h * sigma_h, dims=("gene"))
+            delta_h = pm.Normal("delta_h", 0, 1, dims=("gene", "lineage"))
+            h = pm.Deterministic("h", 0 + delta_h * sigma_h, dims=("gene", "lineage"))
 
             sigma_k = pm.Gamma("sigma_k", 3, 1)
             delta_k = pm.Normal("delta_k", 0, 1, dims=("gene", "lineage"))
@@ -314,17 +316,17 @@ class HierarchcalNegativeBinomialModel:
             sigma_p = pm.Gamma("sigma_p", 3, 1)
             p = pm.Normal("p", 0, sigma_p, dims="screen")
 
+            gene_effect = pm.Deterministic(
+                "gene_effect",
+                d[g, ll] + cn_gene * h[g, ll] + rna * k[g, ll] + mut * m[g, ll],
+            )
+            cell_effect = pm.Deterministic("cell_line_effect", b[c] + cn_cell * f[c])
             eta = pm.Deterministic(
                 "eta",
-                z
-                + a[s]
-                + b[c]
-                + d[g, ll]
-                + cn_cell * f[c]
-                + cn_gene * h[g]
-                + rna * k[g, ll]
-                + mut * m[g, ll]
-                + p[s],
+                z + a[s] + p[s] + gene_effect + cell_effect
+                # + d[g, ll]
+                # + cn_gene * h[g]
+                # + rna * k[g, ll] + mut * m[g, ll]
             )
             mu = pm.Deterministic("mu", pmmath.exp(eta))
 
