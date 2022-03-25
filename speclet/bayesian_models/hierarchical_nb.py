@@ -203,7 +203,7 @@ class HierarchcalNegativeBinomialModel:
             )
             .pipe(append_total_read_counts)
             .pipe(add_useful_read_count_columns)
-            .pipe(set_achilles_categorical_columns)
+            .pipe(set_achilles_categorical_columns, sort_cats=True, skip_if_cat=True)
             .pipe(self.validate_data)
         )
 

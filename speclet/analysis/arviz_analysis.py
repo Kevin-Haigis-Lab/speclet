@@ -69,8 +69,8 @@ def _reshape_mcmc_chains_to_2d(a: np.ndarray) -> np.ndarray:
 
 
 def summarize_posterior_predictions(
-    a: np.ndarray,
-    hdi_prob: float = 0.89,
+    ppc_ary: np.ndarray,
+    hdi_prob: Optional[float] = None,
     merge_with: Optional[pd.DataFrame] = None,
     calc_error: bool = False,
     observed_y: Optional[str] = None,
@@ -78,7 +78,7 @@ def summarize_posterior_predictions(
     """Summarizing PyMC3 PPCs.
 
     Args:
-        a (np.ndarray): The posterior predictions.
+        ppc_ary (np.ndarray): The posterior predictions.
         hdi_prob (float, optional): The HDI probability to use. Defaults to 0.89.
         merge_with (Optional[pd.DataFrame], optional): The original data to merge with
           the predictions. Defaults to None.
@@ -92,15 +92,12 @@ def summarize_posterior_predictions(
         pd.DataFrame: A data frame with one row per data point and columns describing
           the posterior predictions.
     """
-    if len(a.shape) == 3:
-        a = _reshape_mcmc_chains_to_2d(a)
-    hdi = az.hdi(a, hdi_prob=hdi_prob)
-
+    ppc_hdi = az.hdi(ppc_ary, hdi_prob=hdi_prob)
     d = pd.DataFrame(
         {
-            "pred_mean": a.mean(axis=0),
-            "pred_hdi_low": hdi[:, 0],
-            "pred_hdi_high": hdi[:, 1],
+            "pred_mean": ppc_ary.mean(axis=(0, 1)),
+            "pred_hdi_low": ppc_hdi[:, 0],
+            "pred_hdi_high": ppc_hdi[:, 1],
         }
     )
 
