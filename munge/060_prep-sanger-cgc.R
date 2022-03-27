@@ -1,4 +1,3 @@
-
 # Prepare Sanger CGC data.
 
 if (basename(getwd()) == "munge") {
@@ -10,13 +9,13 @@ library(glue)
 library(tidyverse)
 
 
-#### ---- Snakemake interfacing ---- ####
+# --- Snakemake interfacing ---
 
 raw_cgc_file <- unlist(snakemake@input["cgc_input"])
 cgc_out_file <- unlist(snakemake@output["cgc_output"])
 
 
-#### ---- Data Processing ---- ####
+# --- Data Processing ---
 
 # Skip empty strings in an array of strings.
 skip_empty <- function(l) {
@@ -80,7 +79,7 @@ cgc_df <- read_csv(raw_cgc_file) %>%
   arrange(hugo_symbol, tier, hallmark, tumor_types_somatic)
 
 
-#### ---- Check for missing data ---- ####
+# --- Check for missing data ---
 
 if (any(is.na(cgc_df))) {
   any_na <- apply(cgc_df, 1, function(r) {
@@ -93,15 +92,15 @@ if (any(is.na(cgc_df))) {
 }
 
 
-#### ---- Info ---- ####
+# --- Info ---
 
 print(
   knitr::kable(head(cgc_df), format = "markdown")
 )
-
 print(glue("dimensions: {nrow(cgc_df)}, {ncol(cgc_df)}"))
 
-#### ---- Write data ---- ####
+
+# --- Write data ---
 
 print(glue("writing data frame to file: '{cgc_out_file}'"))
 write_csv(cgc_df, cgc_out_file)
