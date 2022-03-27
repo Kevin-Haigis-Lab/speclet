@@ -173,7 +173,7 @@ class CrisprScreenDataManager:
     # ---- Transformations ----
 
     def _apply_default_transformations(self, data: pd.DataFrame) -> pd.DataFrame:
-        return set_achilles_categorical_columns(data)
+        return set_achilles_categorical_columns(data, ordered=True, sort_cats=True)
 
     def add_transformation(
         self, fxn: Union[data_transformation, list[data_transformation]]

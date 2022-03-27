@@ -2,12 +2,13 @@
 
 import datetime
 import re
-from typing import Optional, Sequence, Union
+from typing import Any, Optional, Sequence, Union
 
 import arviz as az
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from pydantic import BaseModel
 from xarray import Dataset
 
@@ -68,8 +69,8 @@ def _reshape_mcmc_chains_to_2d(a: np.ndarray) -> np.ndarray:
 
 
 def summarize_posterior_predictions(
-    a: np.ndarray,
-    hdi_prob: float = 0.89,
+    ppc_ary: np.ndarray,
+    hdi_prob: Optional[float] = None,
     merge_with: Optional[pd.DataFrame] = None,
     calc_error: bool = False,
     observed_y: Optional[str] = None,
@@ -77,7 +78,7 @@ def summarize_posterior_predictions(
     """Summarizing PyMC3 PPCs.
 
     Args:
-        a (np.ndarray): The posterior predictions.
+        ppc_ary (np.ndarray): The posterior predictions.
         hdi_prob (float, optional): The HDI probability to use. Defaults to 0.89.
         merge_with (Optional[pd.DataFrame], optional): The original data to merge with
           the predictions. Defaults to None.
@@ -91,15 +92,12 @@ def summarize_posterior_predictions(
         pd.DataFrame: A data frame with one row per data point and columns describing
           the posterior predictions.
     """
-    if len(a.shape) == 3:
-        a = _reshape_mcmc_chains_to_2d(a)
-    hdi = az.hdi(a, hdi_prob=hdi_prob)
-
+    ppc_hdi = az.hdi(ppc_ary, hdi_prob=hdi_prob)
     d = pd.DataFrame(
         {
-            "pred_mean": a.mean(axis=0),
-            "pred_hdi_low": hdi[:, 0],
-            "pred_hdi_high": hdi[:, 1],
+            "pred_mean": ppc_ary.mean(axis=(0, 1)),
+            "pred_hdi_low": ppc_hdi[:, 0],
+            "pred_hdi_high": ppc_hdi[:, 1],
         }
     )
 
@@ -297,3 +295,75 @@ def describe_mcmc(
         plt.show()
 
     return mcmc_descr
+
+
+def rhat_table(
+    trace: az.InferenceData, rhat_kwargs: Optional[dict[str, Any]] = None
+) -> pd.DataFrame:
+    """Get a table of R hat values.
+
+    Args:
+        trace (az.InferenceData): MCMC trace.
+        rhat_kwargs (Optional[dict[str, Any]], optional): Keyword arguments to pass to
+        ArviZ `rhat()` function. Defaults to None.
+
+    Returns:
+        pd.DataFrame: _description_
+    """
+    rhat_kwargs = rhat_kwargs if rhat_kwargs is not None else {}
+    rhat: Dataset = az.rhat(trace, **rhat_kwargs)
+    rhat_df_list = []
+    for dv in rhat.data_vars:
+        df = pd.DataFrame({"rhat": rhat[dv].values.flatten(), "var_name": dv})
+        rhat_df_list.append(df)
+    return pd.concat(rhat_df_list).reset_index(drop=True)
+
+
+def summarize_rhat(
+    trace: Optional[az.InferenceData] = None,
+    rhat_tbl: Optional[pd.DataFrame] = None,
+    ncol: int = 4,
+    binwidth: float = 0.01,
+) -> pd.DataFrame:
+    """Summarize R hat values.
+
+    Plot a histogram of R hat values for each variable and provide a data frame
+    summarizing the R hat values for each variable.
+
+    Args:
+        trace (Optional[az.InferenceData], optional): MCMC trace. Defaults to None.
+        rhat_tbl (Optional[pd.DataFrame], optional): R hat table for a MCMC trace.
+        Defaults to None.
+        ncol (int, optional): Number of columns in the histogram of R hat values.
+        Defaults to 4.
+        binwidth (float, optional): Bin width for the histogram of R hat values.
+        Defaults to 0.01.
+
+    Raises:
+        BaseException: If neither the trace nor R hat table are provided (are both
+        None).
+
+    Returns:
+        pd.DataFrame: Data frame of summary statistics of R hat values for each
+        parameter.
+    """
+    if rhat_tbl is None and trace is None:
+        msg = "The trace or R hat table must be provided"
+        raise BaseException(msg)
+    elif rhat_tbl is None:
+        assert trace is not None
+        rhat_tbl = rhat_table(trace)
+
+    fg = sns.displot(
+        data=rhat_tbl,
+        x="rhat",
+        col="var_name",
+        binwidth=binwidth,
+        col_wrap=ncol,
+        facet_kws={"sharey": False},
+    )
+    fg.set_titles(col_template="{col_name}")
+    plt.show()
+
+    rhat_summary = rhat_tbl.groupby("var_name")["rhat"].describe()
+    return rhat_summary

@@ -128,9 +128,10 @@ def zscale_rna_expression_by_gene_lineage(
         .drop_duplicates()
         .groupby(["hugo_symbol", "lineage"])
         .apply(zscale_rna_expression, rna_col=rna_col, *args, **kwargs)
-        .drop(columns=[rna_col])
     )
-    return df.merge(rna_expr_df, how="left", on=["hugo_symbol", "lineage", "depmap_id"])
+    return df.merge(
+        rna_expr_df, how="left", on=["hugo_symbol", "lineage", "depmap_id", rna_col]
+    )
 
 
 #### ---- Indices ---- ####
@@ -354,6 +355,7 @@ def set_achilles_categorical_columns(
     cols: Iterable[str] = _default_achilles_categorical_cols,
     ordered: bool = True,
     sort_cats: bool = False,
+    skip_if_cat: bool = False,
 ) -> pd.DataFrame:
     """Set the appropriate columns of the Achilles data as factors.
 
@@ -373,8 +375,11 @@ def set_achilles_categorical_columns(
         pd.DataFrame: The modified DataFrame.
     """
     for col in cols:
-        if col in data.columns:
-            data = dphelp.make_cat(data, col, ordered=ordered, sort_cats=sort_cats)
+        if col not in data.columns:
+            continue
+        if skip_if_cat and data[col].dtype.name == "category":
+            continue
+        data = dphelp.make_cat(data, col, ordered=ordered, sort_cats=sort_cats)
     return data
 
 
