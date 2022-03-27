@@ -314,7 +314,7 @@ class HierarchcalNegativeBinomialModel:
             m = pm.Deterministic("m", 0 + delta_m * sigma_m, dims=("gene", "lineage"))
 
             sigma_p = pm.Gamma("sigma_p", 3, 1)
-            p = pm.Normal("p", 0, sigma_p, dims="screen")
+            p = pm.Normal("p", 0, sigma_p, dims=("gene", "screen"))
 
             gene_effect = pm.Deterministic(
                 "gene_effect",
@@ -322,11 +322,7 @@ class HierarchcalNegativeBinomialModel:
             )
             cell_effect = pm.Deterministic("cell_line_effect", b[c] + cn_cell * f[c])
             eta = pm.Deterministic(
-                "eta",
-                z + a[s] + p[s] + gene_effect + cell_effect
-                # + d[g, ll]
-                # + cn_gene * h[g]
-                # + rna * k[g, ll] + mut * m[g, ll]
+                "eta", z + a[s] + p[g, s] + gene_effect + cell_effect
             )
             mu = pm.Deterministic("mu", pmmath.exp(eta))
 
