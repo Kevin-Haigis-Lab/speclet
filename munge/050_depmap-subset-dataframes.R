@@ -1,4 +1,4 @@
-# Isolate the DepMap data for CRC cell lines.
+# Make various sub-samples of the DepMap modeling data.
 
 if (basename(getwd()) == "munge") {
   setwd("..")
@@ -21,10 +21,7 @@ genes_of_interest <- c(
 
 modeling_df_path <- snakemake@input[["modeling_df"]]
 
-data <- data.table::fread(
-  modeling_df_path,
-  showProgress = FALSE
-)
+data <- data.table::fread(modeling_df_path, showProgress = FALSE)
 data <- as_tibble(data)
 
 

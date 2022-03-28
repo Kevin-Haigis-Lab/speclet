@@ -7,10 +7,14 @@ source(".Rprofile")
 
 library(tidyverse)
 
+
+# --- Snakemake interface ---
+
 input_files <- unlist(snakemake@input["input_files"])
 output_file <- snakemake@output[["out_file"]]
 
-# map_dfr(input_files, qs::qread) %>% write_csv(output_file)
+
+# --- Process each file and append to complete table ---
 
 append <- FALSE
 for (f in input_files) {
@@ -21,5 +25,6 @@ for (f in input_files) {
   }
 }
 
+# Print out a preview.
 read_csv(output_file, n_max = 100) %>%
   glimpse()

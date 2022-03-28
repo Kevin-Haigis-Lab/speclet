@@ -557,7 +557,7 @@ fill_in_missing_copy_number <- function(lfc_data, segment_cn) {
 join_with_sample_info <- function(lfc_data, sample_info) {
   info(logger, "Joining LFC data and sample info.")
   si <- sample_info %>%
-    dplyr::select(lineage, primary_or_metastasis, is_male, age)
+    dplyr::select(lineage, lineage_subtype, primary_or_metastasis, is_male, age)
   stopifnot(nrow(si) == 1)
   return(bind_cols(lfc_data, si))
 }

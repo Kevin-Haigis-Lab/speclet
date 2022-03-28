@@ -10,7 +10,7 @@ library(tidyverse)
 source("munge/munge_functions.R")
 
 
-#### ---- Data tidying functions ---- ####
+# --- Data tidying functions ---
 
 tidy_rna_expression <- function(file_in, file_out) {
   read_csv(file_in) %>%
@@ -99,7 +99,7 @@ tidy_sample_info <- function(file_in, file_out) {
 }
 
 
-#### ---- Function calls ---- ####
+# --- Function calls ---
 
 print("Tidying RNA expression.")
 tidy_rna_expression(
