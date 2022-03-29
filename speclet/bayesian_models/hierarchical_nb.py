@@ -29,6 +29,8 @@ from speclet.data_processing.validation import (
 )
 from speclet.data_processing.vectors import squish_array
 from speclet.io import stan_models_dir
+from speclet.loggers import logger
+from speclet.managers.data_managers import CancerGeneDataManager, CancerGeneMap
 from speclet.modeling.stan_helpers import read_code_file
 from speclet.project_enums import ModelFitMethod
 
@@ -49,6 +51,7 @@ class NegativeBinomialModelData:
     gene_idx: np.ndarray
     cellline_idx: np.ndarray
     lineage_idx: np.ndarray
+    cellline_to_lineage_idx: np.ndarray
     screen_idx: np.ndarray
     copy_number: np.ndarray
     copy_number_z_gene: np.ndarray
@@ -155,6 +158,7 @@ class HierarchcalNegativeBinomialModel:
             sgrna_idx=indices.sgrna_idx,
             gene_idx=indices.gene_idx,
             cellline_idx=indices.cellline_idx,
+            cellline_to_lineage_idx=indices.cellline_to_lineage_idx,
             lineage_idx=indices.lineage_idx,
             screen_idx=batch_indices.screen_idx,
             copy_number=data.copy_number.values,
@@ -233,14 +237,20 @@ class HierarchcalNegativeBinomialModel:
             self.stan_code, data=asdict(model_data), random_seed=random_seed
         )
 
-    def _model_coords(self, valid_data: pd.DataFrame) -> dict[str, list[str]]:
-        return {
+    def _model_coords(
+        self, valid_data: pd.DataFrame, cancer_genes: Optional[CancerGeneMap] = None
+    ) -> dict[str, list[str]]:
+        coords = {
             "sgrna": get_cats(valid_data, "sgrna"),
             "gene": get_cats(valid_data, "hugo_symbol"),
             "cell_line": get_cats(valid_data, "depmap_id"),
             "lineage": get_cats(valid_data, "lineage"),
             "screen": get_cats(valid_data, "screen"),
         }
+        if cancer_genes is not None:
+            coords["cancer_gene"] = _collect_all_cancer_genes(cancer_genes)
+
+        return coords
 
     def stan_idata_addons(self, data: pd.DataFrame) -> dict[str, Any]:
         """Information to add to the InferenceData posterior object."""
@@ -270,18 +280,30 @@ class HierarchcalNegativeBinomialModel:
         """
         valid_data = self.data_processing_pipeline(data)
         model_data = self._make_data_structure(valid_data)
-        coords = self._model_coords(valid_data)
+
+        cancer_genes = CancerGeneDataManager().bailey_2018_cancer_genes()
+        coords = self._model_coords(valid_data, cancer_genes)
 
         s = model_data.sgrna_idx
         c = model_data.cellline_idx
         g = model_data.gene_idx
         ll = model_data.lineage_idx
         s = model_data.screen_idx
+        c_to_l = model_data.cellline_to_lineage_idx
+
+        # TODO: refactor to move data management out of model constructor.
 
         cn_gene = model_data.copy_number_z_gene
         cn_cell = model_data.copy_number_z_cell
         rna = model_data.log_rna_expr
-        mut = model_data.is_mutated
+        mut = _augmented_mutation_data(valid_data, cancer_genes=cancer_genes)
+        M = _make_cancer_gene_mutation_matrix(
+            valid_data,
+            cancer_genes,
+            cell_lines=coords["cell_line"],
+            genes=coords["cancer_gene"],
+        )
+        M = M[None, :, :]  # Add a 3rd dimension of length 1.
 
         with pm.Model(coords=coords) as model:
             z = pm.Normal("z", 0, 5, initval=0)
@@ -291,34 +313,46 @@ class HierarchcalNegativeBinomialModel:
 
             sigma_b = pm.Gamma("sigma_b", 3, 1)
             delta_b = pm.Normal("delta_b", 0, 1, dims=("cell_line"))
-            b = pm.Deterministic("b", 0 + delta_b * sigma_b, dims=("cell_line"))
+            b = pm.Deterministic("b", delta_b * sigma_b, dims=("cell_line"))
 
             sigma_d = pm.Gamma("sigma_d", 3, 1)
             delta_d = pm.Normal("delta_d", 0, 1, dims=("gene", "lineage"))
-            d = pm.Deterministic("d", 0 + delta_d * sigma_d, dims=("gene", "lineage"))
+            d = pm.Deterministic("d", delta_d * sigma_d, dims=("gene", "lineage"))
 
             sigma_f = pm.Gamma("sigma_f", 3, 1)
             delta_f = pm.Normal("delta_f", 0, 1, dims=("cell_line"))
-            f = pm.Deterministic("f", 0 + delta_f * sigma_f, dims=("cell_line"))
+            f = pm.Deterministic("f", delta_f * sigma_f, dims=("cell_line"))
 
             sigma_h = pm.Gamma("sigma_h", 3, 1)
             delta_h = pm.Normal("delta_h", 0, 1, dims=("gene", "lineage"))
-            h = pm.Deterministic("h", 0 + delta_h * sigma_h, dims=("gene", "lineage"))
+            h = pm.Deterministic("h", delta_h * sigma_h, dims=("gene", "lineage"))
 
             sigma_k = pm.Gamma("sigma_k", 3, 1)
             delta_k = pm.Normal("delta_k", 0, 1, dims=("gene", "lineage"))
-            k = pm.Deterministic("k", 0 + delta_k * sigma_k, dims=("gene", "lineage"))
+            k = pm.Deterministic("k", delta_k * sigma_k, dims=("gene", "lineage"))
 
             sigma_m = pm.Gamma("sigma_m", 3, 1)
             delta_m = pm.Normal("delta_m", 0, 1, dims=("gene", "lineage"))
-            m = pm.Deterministic("m", 0 + delta_m * sigma_m, dims=("gene", "lineage"))
+            m = pm.Deterministic("m", delta_m * sigma_m, dims=("gene", "lineage"))
+
+            sigma_w = pm.Gamma("sigma_w", 3, 1)
+            delta_w = pm.Normal(
+                "delta_w", 0, 1, dims=("gene", "cancer_gene", "lineage")
+            )
+            w = pm.Deterministic(
+                "w", delta_w * sigma_w, dims=("gene", "cancer_gene", "lineage")
+            )
 
             sigma_p = pm.Gamma("sigma_p", 3, 1)
             p = pm.Normal("p", 0, sigma_p, dims=("gene", "screen"))
 
             gene_effect = pm.Deterministic(
                 "gene_effect",
-                d[g, ll] + cn_gene * h[g, ll] + rna * k[g, ll] + mut * m[g, ll],
+                d[g, ll]
+                + cn_gene * h[g, ll]
+                + rna * k[g, ll]
+                + mut * m[g, ll]
+                + (w[:, :, c_to_l] * M).sum(axis=1)[g, c],
             )
             cell_effect = pm.Deterministic("cell_line_effect", b[c] + cn_cell * f[c])
             eta = pm.Deterministic(
@@ -334,3 +368,66 @@ class HierarchcalNegativeBinomialModel:
                 observed=model_data.ct_final,
             )
         return model
+
+
+def _collect_all_cancer_genes(cancer_genes: CancerGeneMap) -> list[str]:
+    gene_set: set[str] = set()
+    for genes in cancer_genes.values():
+        gene_set = gene_set.union(genes)
+    gene_list = list(gene_set)
+    gene_list.sort()
+    return gene_list
+
+
+def _collect_mutations_per_cell_line(data: pd.DataFrame) -> dict[str, set[str]]:
+    mut_data = (
+        data[["depmap_id", "hugo_symbol", "is_mutated"]]
+        .drop_duplicates()
+        .query("is_mutated")
+        .reset_index(drop=True)
+    )
+    mutations: CancerGeneMap = {}
+    for cl in data.depmap_id.unique():
+        mutations[cl] = set(mut_data.query(f"depmap_id == '{cl}'").hugo_symbol.unique())
+    return mutations
+
+
+def _make_cancer_gene_mutation_matrix(
+    data: pd.DataFrame,
+    cancer_genes: CancerGeneMap,
+    cell_lines: list[str],
+    genes: list[str],
+) -> np.ndarray:
+    lineages = (
+        data[["depmap_id", "lineage"]]
+        .drop_duplicates()
+        .sort_values("depmap_id")
+        .lineage.values
+    )
+    assert len(cell_lines) == len(lineages)
+    cell_mutations = _collect_mutations_per_cell_line(data)
+    mut_mat = np.zeros(shape=(len(genes), len(cell_lines)), dtype=int)
+    for j, (cl, lineage) in enumerate(zip(cell_lines, lineages)):
+        if lineage not in cancer_genes:
+            logger.warn(f"Lineage {lineage} not found in cancer genes.")
+            continue
+
+        cell_muts = cell_mutations[cl].intersection(cancer_genes[lineage])
+        if len(cell_muts) == 0:
+            continue
+
+        mut_ary = np.array([g in cell_muts for g in genes])
+        mut_mat[:, j] = mut_ary
+
+    return mut_mat
+
+
+def _augmented_mutation_data(
+    data: pd.DataFrame, cancer_genes: CancerGeneMap
+) -> np.ndarray:
+    mut = data["is_mutated"].values.astype(int)
+    _empty_set: set[str] = set()
+    for i, (gene, lineage) in enumerate(zip(data["hugo_symbol"], data["lineage"])):
+        if gene in cancer_genes.get(lineage, _empty_set):
+            mut[i] = 0
+    return mut

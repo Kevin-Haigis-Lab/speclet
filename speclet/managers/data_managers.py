@@ -314,3 +314,29 @@ class CrisprScreenDataManager:
             pd.DataFrame: Validated dataframe.
         """
         return self.data_schema.validate(data)
+
+
+CancerGeneMap = dict[str, set[str]]
+
+
+class CancerGeneDataManager:
+    """Manage cancer gene data."""
+
+    # TODO: update when I have the data from Bailey et al.
+    # TODO: add function for getting CGC data.
+
+    def __init__(self) -> None:
+        """Create a cancer gene data manager."""
+        return None
+
+    def bailey_2018_cancer_genes(self) -> CancerGeneMap:
+        """The cancer genes from Bailey et al., Cell, 2018.
+
+        Returns:
+            CancerGeneMap: Map of cancer types to their associated genes.
+        """
+        cancer_genes = {
+            "colorectal": {"KRAS", "APC", "PIK3CA"},
+            "bone": {"TP53", "SCRG1"},
+        }
+        return cancer_genes

@@ -251,12 +251,12 @@ I modified the data to insert a synthetic lethal interaction in each lineage.
 def _modify_comutation(
     df: pd.DataFrame, target: str, cancer_gene: str, lineage: str, change: float
 ) -> pd.DataFrame:
-    genes = valid_counts_data.hugo_symbol.values
-    lineages = valid_counts_data.lineage.values
-    cell_lines = valid_counts_data.depmap_id.values
+    genes = df.hugo_symbol.values
+    lineages = df.lineage.values
+    cell_lines = df.depmap_id.values
 
     cancer_muts = (
-        valid_counts_data.query(
+        df.query(
             f"hugo_symbol == '{cancer_gene}' and lineage == '{lineage}'"
         )
         .query("is_mutated")
@@ -271,10 +271,10 @@ def _modify_comutation(
     )
     print(f"number of changes: {sum(ary)}")
 
-    ct_final = valid_counts_data["counts_final"].values
+    ct_final = df["counts_final"].values
     ct_final[ary] = ct_final[ary] * change
-    valid_counts_data["counts_final"] = ct_final
-    return valid_counts_data
+    df["counts_final"] = ct_final
+    return df
 ```
 
 ```python
