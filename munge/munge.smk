@@ -137,20 +137,19 @@ rule all:
         # rules.combine_data
         MODELING_DATA_DIR / "depmap-modeling-data.csv",
         # cell_line_info
-        MODELING_DATA_DIR / "depmap-modeling-data_cell-line-info.csv",
+        MODELING_DATA_DIR / "depmap_cell-line-info.csv",
         # rules.modeling_data_subsets.output
         MODELING_DATA_DIR / "depmap-modeling-data_crc.csv",
         MODELING_DATA_DIR / "depmap-modeling-data_crc-subsample.csv",
         MODELING_DATA_DIR / "depmap-modeling-data_crc-panc-cervix-large-subsample.csv",
-        TESTS_DIR / "depmap_test_data.csv",
+        TESTS_DIR / "depmap-modeling-data_test-data.csv",
         # rules.auxillary_data_subsets
         MODELING_DATA_DIR / "copy_number_data_samples.npy",
         # rules.clean_sanger_cgc.output
         MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",
         # rules.screen_total_counts_tables
-        final_counts_table_out=MODELING_DATA_DIR
-        / "depmap_replicate_total_read_counts.csv",
-        pdna_table_out=MODELING_DATA_DIR / "depmap_pdna_total_read_counts.csv",
+        MODELING_DATA_DIR / "depmap_replicate_total_read_counts.csv",
+        MODELING_DATA_DIR / "depmap_pdna_total_read_counts.csv",
 
 
 # --- Prepare raw CCLE data ---

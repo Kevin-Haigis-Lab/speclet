@@ -2,7 +2,7 @@
 
 munge:
   test: false
-  temporary_directory: "temp"
+  temporary_directory: "temp/munge-temp"
 
 modeling:
   highest_density_interval: 0.89
