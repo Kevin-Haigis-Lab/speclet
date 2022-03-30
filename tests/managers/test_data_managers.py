@@ -5,12 +5,16 @@ import pytest
 from pandera.errors import SchemaError
 
 from speclet import io
+from speclet.managers.data_managers import CancerGeneDataManager as CancerGeneDM
 from speclet.managers.data_managers import CrisprScreenDataManager as CrisprDM
 from speclet.managers.data_managers import (
     DataFileDoesNotExist,
     DataFileIsNotAFile,
+    LineageSubtypeGeneMap,
     UnsupportedDataFileType,
 )
+
+# --- CrisprScreenDataManager ---
 
 
 def test_fails_on_nonexistent_datafile(tmp_path: Path) -> None:
@@ -125,3 +129,32 @@ def test_fail_validation_nonunique_mapping_of_celllines_to_lineage() -> None:
     mod_data["lineage"] = [swap_lineage] + lineages[1:]
     with pytest.raises(SchemaError):
         dm.apply_validation(mod_data)
+
+
+# --- CancerGeneDataManager ---
+
+
+def test_read_bailey_2018_gene_map() -> None:
+    dm = CancerGeneDM()
+    gene_map = dm.bailey_2018_cancer_genes()
+    assert "bile_duct" in gene_map
+    assert "colorectal" in gene_map
+
+
+def test_read_cosmic_gene_map() -> None:
+    dm = CancerGeneDM()
+    gene_map = dm.cosmic_cancer_genes()
+    assert "bile_duct" in gene_map
+    assert "colorectal" in gene_map
+
+
+@pytest.mark.parametrize(
+    "gene_map",
+    [CancerGeneDM().bailey_2018_cancer_genes(), CancerGeneDM().cosmic_cancer_genes()],
+)
+def test_reduce_gene_map(gene_map: LineageSubtypeGeneMap) -> None:
+    dm = CancerGeneDM()
+    reduced_gene_map = dm.reduce_to_lineage(gene_map)
+    assert len(reduced_gene_map) == len(gene_map)
+    assert set(reduced_gene_map.keys()) == set(gene_map.keys())
+    assert isinstance(reduced_gene_map["colorectal"], set)

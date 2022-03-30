@@ -30,7 +30,7 @@ from speclet.data_processing.validation import (
 from speclet.data_processing.vectors import squish_array
 from speclet.io import stan_models_dir
 from speclet.loggers import logger
-from speclet.managers.data_managers import CancerGeneDataManager, CancerGeneMap
+from speclet.managers.data_managers import CancerGeneDataManager, LineageGeneMap
 from speclet.modeling.stan_helpers import read_code_file
 from speclet.project_enums import ModelFitMethod
 
@@ -238,7 +238,9 @@ class HierarchcalNegativeBinomialModel:
         )
 
     def _model_coords(
-        self, valid_data: pd.DataFrame, cancer_genes: Optional[CancerGeneMap] = None
+        self,
+        valid_data: pd.DataFrame,
+        cancer_genes: Optional[LineageGeneMap] = None,
     ) -> dict[str, list[str]]:
         coords = {
             "sgrna": get_cats(valid_data, "sgrna"),
@@ -281,7 +283,10 @@ class HierarchcalNegativeBinomialModel:
         valid_data = self.data_processing_pipeline(data)
         model_data = self._make_data_structure(valid_data)
 
-        cancer_genes = CancerGeneDataManager().bailey_2018_cancer_genes()
+        cancer_gene_manager = CancerGeneDataManager()
+        cancer_genes = cancer_gene_manager.reduce_to_lineage(
+            cancer_gene_manager.bailey_2018_cancer_genes()
+        )
         coords = self._model_coords(valid_data, cancer_genes)
 
         s = model_data.sgrna_idx
@@ -370,7 +375,7 @@ class HierarchcalNegativeBinomialModel:
         return model
 
 
-def _collect_all_cancer_genes(cancer_genes: CancerGeneMap) -> list[str]:
+def _collect_all_cancer_genes(cancer_genes: LineageGeneMap) -> list[str]:
     gene_set: set[str] = set()
     for genes in cancer_genes.values():
         gene_set = gene_set.union(genes)
@@ -386,7 +391,7 @@ def _collect_mutations_per_cell_line(data: pd.DataFrame) -> dict[str, set[str]]:
         .query("is_mutated")
         .reset_index(drop=True)
     )
-    mutations: CancerGeneMap = {}
+    mutations: LineageGeneMap = {}
     for cl in data.depmap_id.unique():
         mutations[cl] = set(mut_data.query(f"depmap_id == '{cl}'").hugo_symbol.unique())
     return mutations
@@ -394,7 +399,7 @@ def _collect_mutations_per_cell_line(data: pd.DataFrame) -> dict[str, set[str]]:
 
 def _make_cancer_gene_mutation_matrix(
     data: pd.DataFrame,
-    cancer_genes: CancerGeneMap,
+    cancer_genes: LineageGeneMap,
     cell_lines: list[str],
     genes: list[str],
 ) -> np.ndarray:
@@ -423,7 +428,7 @@ def _make_cancer_gene_mutation_matrix(
 
 
 def _augmented_mutation_data(
-    data: pd.DataFrame, cancer_genes: CancerGeneMap
+    data: pd.DataFrame, cancer_genes: LineageGeneMap
 ) -> np.ndarray:
     mut = data["is_mutated"].values.astype(int)
     _empty_set: set[str] = set()

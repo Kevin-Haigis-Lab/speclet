@@ -1,6 +1,6 @@
 """General utilities."""
 
-from typing import Optional, TypeVar
+from typing import Iterable, Optional, TypeVar
 
 _T = TypeVar("_T")
 _U = TypeVar("_U")
@@ -19,3 +19,18 @@ def resolve_optional_kwargs(d: Optional[dict[_T, _U]]) -> dict[_T, _U]:
         empty_d: dict[_T, _U] = {}
         return empty_d
     return d
+
+
+def merge_sets(sets: Iterable[set[_T]]) -> set[_T]:
+    """Set a collection of sets.
+
+    Args:
+        sets (Iterable[set[_T]]): Collections of sets.
+
+    Returns:
+        set[_T]: Merged set.
+    """
+    new_set: set[_T] = set()
+    for sub_set in sets:
+        new_set = new_set.union(sub_set)
+    return new_set
