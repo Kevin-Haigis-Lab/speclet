@@ -150,7 +150,7 @@ rule all:
         # rules.screen_total_counts_tables
         MODELING_DATA_DIR / "depmap_replicate_total_read_counts.csv",
         MODELING_DATA_DIR / "depmap_pdna_total_read_counts.csv",
-        # rules.clean_bailey_cancer_genes
+        # rules.cancer_gene_maps
         MODELING_DATA_DIR / "bailey-cancer-genes.csv",
         MODELING_DATA_DIR / "bailey-cancer-genes-dict.json",
         MODELING_DATA_DIR / "cgc-cancer-genes-dict.json",
@@ -516,7 +516,7 @@ rule clean_sanger_cgc:
         "060_prep-sanger-cgc.R"
 
 
-rule clean_bailey_cancer_genes:
+rule cancer_gene_maps:
     input:
         bailey_supp_excel=DATA_DIR / "bailey-2018-cell" / "bailey-cancer-genes.xlsx",
         cgc_genes=rules.clean_sanger_cgc.output.cgc_output,

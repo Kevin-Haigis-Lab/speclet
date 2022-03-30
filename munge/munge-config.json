@@ -125,9 +125,13 @@
         "J": "subsample"
     },
     "auxillary_data_subsets": {
-        "cores": 1,
         "mem": "8000",
         "time": "00:01:30",
         "J": "aux-sub"
+    },
+    "cancer_gene_maps": {
+        "mem": "4000",
+        "time": "00:02:00",
+        "J": "cancer-map"
     }
 }
