@@ -272,7 +272,7 @@ benchmarks/
 !modeling_data/sanger_cancer-gene-census.csv
 !modeling_data/depmap_pdna_total_read_counts.csv
 !modeling_data/depmap_replicate_total_read_counts.csv
-!modeling_data/depmap-modeling-data_cell-line-info.csv
+!modeling_data/depmap_cell-line-info.csv
 
 !data/download-data.sh
 !data/download-data.smk
