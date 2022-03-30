@@ -45,6 +45,7 @@ class NegativeBinomialModelData:
     C: int  # number of cell lines
     L: int  # number of lineages
     SC: int  # number of screens
+    CG: int  # number of cancer genes
     ct_initial: np.ndarray
     ct_final: np.ndarray
     sgrna_idx: np.ndarray
@@ -58,6 +59,9 @@ class NegativeBinomialModelData:
     copy_number_z_cell: np.ndarray
     log_rna_expr: np.ndarray
     is_mutated: np.ndarray
+    cancer_genes: LineageGeneMap
+    comutation_matrix: np.ndarray
+    coords: dict[str, list[str]]
 
 
 @dataclass
@@ -146,6 +150,24 @@ class HierarchcalNegativeBinomialModel:
     def _make_data_structure(self, data: pd.DataFrame) -> NegativeBinomialModelData:
         indices = common_indices(data)
         batch_indices = data_batch_indices(data)
+
+        cancer_gene_manager = CancerGeneDataManager()
+        cancer_genes = cancer_gene_manager.reduce_to_lineage(
+            cancer_gene_manager.bailey_2018_cancer_genes()
+        )
+
+        coords = self._model_coords(data, cancer_genes)
+
+        mut = _augmented_mutation_data(data, cancer_genes=cancer_genes)
+        comutation_matrix = _make_cancer_gene_mutation_matrix(
+            data,
+            cancer_genes,
+            cell_lines=coords["cell_line"],
+            genes=coords["cancer_gene"],
+        )
+        # Add a 3rd dimension of length 1.
+        comutation_matrix = comutation_matrix[None, :, :]
+
         return NegativeBinomialModelData(
             N=data.shape[0],
             S=indices.n_sgrnas,
@@ -153,6 +175,7 @@ class HierarchcalNegativeBinomialModel:
             C=indices.n_celllines,
             L=indices.n_lineages,
             SC=batch_indices.n_screens,
+            CG=len(_collect_all_cancer_genes(cancer_genes)),
             ct_initial=data.counts_initial_adj.values.astype(float),
             ct_final=data.counts_final.values.astype(int),
             sgrna_idx=indices.sgrna_idx,
@@ -165,7 +188,10 @@ class HierarchcalNegativeBinomialModel:
             copy_number_z_gene=data.z_cn_gene.values,
             copy_number_z_cell=data.z_cn_cell_line.values,
             log_rna_expr=data.log_rna_expr.values,
-            is_mutated=data.is_mutated.values,
+            is_mutated=mut,
+            cancer_genes=cancer_genes,
+            comutation_matrix=comutation_matrix,
+            coords=coords,
         )
 
     def data_processing_pipeline(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -283,32 +309,21 @@ class HierarchcalNegativeBinomialModel:
         valid_data = self.data_processing_pipeline(data)
         model_data = self._make_data_structure(valid_data)
 
-        cancer_gene_manager = CancerGeneDataManager()
-        cancer_genes = cancer_gene_manager.reduce_to_lineage(
-            cancer_gene_manager.bailey_2018_cancer_genes()
-        )
-        coords = self._model_coords(valid_data, cancer_genes)
-
+        # Multi-dimensional parameter coordinates (labels).
+        coords = model_data.coords
+        # Indexing arrays.
         s = model_data.sgrna_idx
         c = model_data.cellline_idx
         g = model_data.gene_idx
         ll = model_data.lineage_idx
         s = model_data.screen_idx
         c_to_l = model_data.cellline_to_lineage_idx
-
-        # TODO: refactor to move data management out of model constructor.
-
+        # Data.
         cn_gene = model_data.copy_number_z_gene
         cn_cell = model_data.copy_number_z_cell
         rna = model_data.log_rna_expr
-        mut = _augmented_mutation_data(valid_data, cancer_genes=cancer_genes)
-        M = _make_cancer_gene_mutation_matrix(
-            valid_data,
-            cancer_genes,
-            cell_lines=coords["cell_line"],
-            genes=coords["cancer_gene"],
-        )
-        M = M[None, :, :]  # Add a 3rd dimension of length 1.
+        mut = model_data.is_mutated
+        M = model_data.comutation_matrix
 
         with pm.Model(coords=coords) as model:
             z = pm.Normal("z", 0, 5, initval=0)
