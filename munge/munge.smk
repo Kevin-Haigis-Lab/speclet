@@ -150,6 +150,10 @@ rule all:
         # rules.screen_total_counts_tables
         MODELING_DATA_DIR / "depmap_replicate_total_read_counts.csv",
         MODELING_DATA_DIR / "depmap_pdna_total_read_counts.csv",
+        # rules.clean_bailey_cancer_genes
+        MODELING_DATA_DIR / "bailey-cancer-genes.csv",
+        MODELING_DATA_DIR / "bailey-cancer-genes-dict.json",
+        MODELING_DATA_DIR / "cgc-cancer-genes-dict.json",
 
 
 # --- Prepare raw CCLE data ---
@@ -512,13 +516,15 @@ rule clean_sanger_cgc:
         "060_prep-sanger-cgc.R"
 
 
-# # TODO: rule for script 061
-# rule clean_bailey_cancer_genes:
-#     input:
-#         bailey_supp_excel=DATA_DIR / "bailey-2018-cell" / "bailey-cancer-genes.xlsx",
-#         cell_line_info=rules.modeling_data_subsets.output.cell_line_info,
-#     output:
-#         bailey_genes_df=MODELING_DATA_DIR / "bailey-cancer-genes.csv",
-#         cancer_genes_dict=MODELING_DATA_DIR / "bailey-cancer-genes-dict.json",
-#     script:
-#         "061_prep-bailey-2018-cancer-genes.R"
+rule clean_bailey_cancer_genes:
+    input:
+        bailey_supp_excel=DATA_DIR / "bailey-2018-cell" / "bailey-cancer-genes.xlsx",
+        cgc_genes=rules.clean_sanger_cgc.output.cgc_output,
+        cell_line_info=rules.cell_line_info.output.cell_line_info,
+        depmap_cancer_map=DATA_DIR / "depmap-lineage-cancer-types.tsv",
+    output:
+        bailey_genes_df=MODELING_DATA_DIR / "bailey-cancer-genes.csv",
+        bailey_genes_dict=MODELING_DATA_DIR / "bailey-cancer-genes-dict.json",
+        cgc_genes_dict=MODELING_DATA_DIR / "cgc-cancer-genes-dict.json",
+    script:
+        "061_prep-bailey-2018-cancer-genes.R"

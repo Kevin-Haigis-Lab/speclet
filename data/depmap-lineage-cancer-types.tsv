@@ -1,0 +1,88 @@
+lineage	lineage_subtype	tcga_code	cgc_code
+bile_duct	cholangiocarcinoma	CHOL	"cholangiocarcinoma,biliary tract"
+bile_duct	gallbladder_adenocarcinoma		biliary tract
+blood	ALL		"ALL,B-ALL"
+blood	AML	LAML	"AML,AML (CML blast transformation),de novo AML,sAML"
+blood	CLL		"chemorefractory CLL,CLL"
+blood	CML		aCML
+blood	unspecified_leukemia		"ALL,AML"
+bone	chondrosarcoma	SARC	chondrosarcoma
+bone	chordoma	SARC	chordoma
+bone	Ewing_sarcoma	SARC	"Ewing sarcoma,Ewing's sarcoma"
+bone	osteosarcoma	SARC	osteosarcoma
+breast	breast_adenocarcinoma	BRCA	"breast,breast cancer,breast adenocarcinoma"
+breast	breast_carcinoma	BRCA	"breast,breast cancer,breast carcinoma"
+breast	breast_ductal_carcinoma		"breast,breast cancer,breast ductal carcinoma"
+breast	NA		"breast,breast cancer"
+central_nervous_system	glioma	LGG	"central nervous system tumours,glioma,CNS tumours,glioma"
+central_nervous_system	medulloblastoma		"central nervous system tumours,medulloblastoma,CNS tumours"
+central_nervous_system	meningioma		"central nervous system tumours,meningioma,CNS tumours"
+central_nervous_system	PNET		"central nervous system tumours,PNET,CNS tumours"
+cervix	cervical_adenocarcinoma	CESC	cervical adenocarcinoma
+cervix	cervical_carcinoma	CESC	cervical carcinoma
+cervix	cervical_squamous	CESC	cervical squamous
+cervix	glassy_cell_carcinoma		glassy cell carcinoma
+colorectal	colorectal_adenocarcinoma	COAD	"colorectal adenocarcinoma,colon,colon carcinoma,colorectal,colorectal adenocarcinoma,colorectal cancer,colorectal carcinoma,CRC"
+epidermoid_carcinoma	skin_squamous		skin squamous
+esophagus	esophagus_adenocarcinoma	ESCA	esophagus adenocarcinoma
+esophagus	esophagus_squamous	ESCA	"esophagus squamous,oesophageal SCC,oesophageal squamous carcinoma,oesophageal squamous cell carcinoma"
+eye	retinoblastoma		retinoblastoma
+eye	uveal_melanoma	UVM	uveal melanoma
+fibroblast	fibroblast_soft_tissue		fibroblast soft tissue
+gastric	choriocarcinoma		"choriocarcinoma,gastric,gastric cancer"
+gastric	gastric_adenocarcinoma		"gastric adenocarcinoma,gastric,gastric cancer"
+kidney	malignant_rhabdoid_tumor		"malignant rhabdoid tumor,renal"
+kidney	renal_cell_carcinoma	KICH	"clear cell renal carcinoma,clear cell renal cell carcinoma,renal cell carcinoma,renal"
+kidney	NA		renal
+liver	hepatoblastoma	LIHC	"hepatoblastoma,hepatocellular"
+liver	hepatocellular_carcinoma	LIHC	"hepatocellular carcinoma,hepatocellular"
+liver	NA		"hepatocellular,hepatocellular carcinoma"
+lung	lung_carcinoid		lung carcinoid
+lung	mesothelioma		mesothelioma
+lung	NSCLC	LUAD	"NSCLC,lung adenocarcinoma"
+lung	SCLC	LUSC	"SCLC,small cell lung carcinoma"
+lymphocyte	ATL		ATL
+lymphocyte	hodgkin_lymphoma		"hodgkin lymphoma,Hodgkin lymphoma"
+lymphocyte	lymphoma_unspecified		lymphoma unspecified
+lymphocyte	non_hodgkin_lymphoma	DLBC	non-hodgkin lymphoma
+ovary	brenner_tumor		"brenner tumor,ovarian,ovarian cancer,ovary"
+ovary	mixed_germ_cell		"mixed germ cell,ovarian,ovarian cancer,ovary,ovarian mixed germ cell tumour"
+ovary	ovary_adenocarcinoma	OV	"ovary adenocarcinoma,ovarian,ovarian cancer,ovary"
+ovary	ovary_carcinoma	OV	"ovary carcinoma,ovarian,ovarian cancer,ovary"
+ovary	SCCOHT		"SCCOHT,ovarian,ovarian cancer,ovary"
+pancreas	exocrine	PAAD	"pancreas,pancreatic,pancreatic ductal adenocarcinoma,pancreatic carcinoma"
+peripheral_nervous_system	neuroblastoma		neuroblastoma
+peripheral_nervous_system	PNET		PNET
+plasma_cell	multiple_myeloma		"multiple myeloma,myeloma"
+prostate	prostate_adenocarcinoma	PRAD	"prostate adenocarcinoma,prostate,prostate cancer"
+prostate	prostate_hyperplasia	PRAD	"prostate hyperplasia,prostate,prostate cancer"
+skin	melanoma	SKCM	"melanoma,skin,skin cancer"
+skin	merkel_cell_carcinoma		"merkel cell carcinoma,skin,skin cancer"
+skin	skin_squamous	SKCM	"skin squamous,skin,skin cancer"
+skin	NA		"skin,skin cancer"
+soft_tissue	ATRT		ATRT
+soft_tissue	epithelioid_sarcoma	SARC	epithelioid sarcoma
+soft_tissue	fibrosarcoma	SARC	fibrosarcoma
+soft_tissue	leiomyosarcoma	SARC	leiomyosarcoma
+soft_tissue	liposarcoma	SARC	liposarcoma
+soft_tissue	malignant_rhabdoid_tumor		"malignant rhabdoid tumor,malignant rhabdoid"
+soft_tissue	pleomorphic_sarcoma	SARC	pleomorphic sarcoma
+soft_tissue	rhabdomyosarcoma	SARC	rhabdomyosarcoma
+soft_tissue	synovial_sarcoma	SARC	synovial sarcoma
+soft_tissue	thyroid_sarcoma	SARC	thyroid sarcoma
+soft_tissue	undifferentiated_sarcoma	SARC	undifferentiated sarcoma
+thyroid	thyroid_carcinoma	THCA	"thyroid carcinoma,thyroid,thyroid cancer"
+thyroid	thyroid_squamous	THCA	"thyroid squamous,thyroid,thyroid cancer"
+upper_aerodigestive	upper_aerodigestive_carcinoma		upper aerodigestive carcinoma
+upper_aerodigestive	upper_aerodigestive_squamous		upper aerodigestive squamous
+upper_aerodigestive	NA
+urinary_tract	bladder_carcinoma	BLCA	"bladder,bladder carcinoma"
+uterus	choriocarcinoma		choriocarcinoma
+uterus	clear_cell_carcinoma	UCEC	endometrial carcinoma
+uterus	endometrial_adenocarcinoma	UCEC	"endometrial adenocarcinoma,endometrial,endometrial carcinoma"
+uterus	endometrial_adenosquamous	UCEC	"endometrial adenosquamous,endometrial,endometrial carcinoma"
+uterus	endometrial_squamous	UCEC	"endometrial squamous,endometrial,endometrial carcinoma"
+uterus	endometrial_stromal_sarcoma	UCEC	"endometrial stromal sarcoma,endometrial"
+uterus	MMMT	UCS	"MMMT,endometrial,endometrial carcinoma"
+uterus	mullerian_carcinoma	UCS	"mullerian carcinoma,endometrial,endometrial carcinoma"
+uterus	uterine_carcinosarcoma	UCS	"uterine carcinosarcoma,endometrial,endometrial carcinoma"
