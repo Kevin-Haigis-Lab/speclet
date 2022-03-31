@@ -325,14 +325,24 @@ LineageGeneMap = dict[str, set[str]]
 class CancerGeneDataManager:
     """Manage cancer gene data."""
 
+    # TODO: change the API to make it easier to "reduce".
+    # TODO: add other API features for filter lineages, sublineages, etc.
+
     def __init__(self) -> None:
         """Create a cancer gene data manager."""
         return None
 
     def _read_cancer_gene_dict(self, json_path: Path) -> LineageSubtypeGeneMap:
         with open(json_path, "r") as json_file:
-            res = json.load(json_file)
-        return res
+            lineage_genes = json.load(json_file)
+
+        for lineage, sublineage_genes in lineage_genes.items():
+            for sublineage, genes in sublineage_genes.items():
+                if isinstance(genes, str):
+                    sublineage_genes[sublineage] = set([genes])
+                elif isinstance(genes, list):
+                    sublineage_genes[sublineage] = set(genes)
+        return lineage_genes
 
     def bailey_2018_cancer_genes(self) -> LineageSubtypeGeneMap:
         """The cancer genes from Bailey et al., Cell, 2018.

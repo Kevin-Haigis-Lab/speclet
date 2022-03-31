@@ -153,8 +153,11 @@ class HierarchcalNegativeBinomialModel:
 
         cancer_gene_manager = CancerGeneDataManager()
         cancer_genes = cancer_gene_manager.reduce_to_lineage(
-            cancer_gene_manager.bailey_2018_cancer_genes()
+            cancer_gene_manager.cosmic_cancer_genes()
         )
+        cancer_genes = {
+            line: cancer_genes[line] for line in data.lineage.cat.categories
+        }
 
         coords = self._model_coords(data, cancer_genes)
 
@@ -329,7 +332,8 @@ class HierarchcalNegativeBinomialModel:
             z = pm.Normal("z", 0, 5, initval=0)
 
             sigma_a = pm.Gamma("sigma_a", 3, 1)
-            a = pm.Normal("a", 0, sigma_a, dims=("sgrna"))
+            delta_a = pm.Normal("delta_a", 0, 1, dims=("sgrna"))
+            a = pm.Deterministic("a", delta_a * sigma_a, dims=("sgrna"))
 
             sigma_b = pm.Gamma("sigma_b", 3, 1)
             delta_b = pm.Normal("delta_b", 0, 1, dims=("cell_line"))

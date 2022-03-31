@@ -28,7 +28,10 @@ from speclet.bayesian_models.hierarchical_nb import HierarchcalNegativeBinomialM
 from speclet.data_processing.common import get_cats
 from speclet.data_processing.crispr import common_indices
 from speclet.io import DataFile
-from speclet.managers.data_managers import CrisprScreenDataManager
+from speclet.managers.data_managers import (
+    CancerGeneDataManager,
+    CrisprScreenDataManager,
+)
 from speclet.plot.plotnine_helpers import set_gg_theme
 from speclet.project_configuration import read_project_configuration
 from speclet.project_enums import ModelFitMethod
@@ -232,12 +235,68 @@ hnb = HierarchcalNegativeBinomialModel()
 valid_counts_data = hnb.data_processing_pipeline(counts_data)
 ```
 
+## Cancer genes
+
+```python
+lineages = valid_counts_data.lineage.cat.categories.tolist()
+lineages
+```
+
+    ['bone', 'colorectal']
+
+```python
+cancer_gene_manager = CancerGeneDataManager()
+cosmic_cancer_genes = cancer_gene_manager.reduce_to_lineage(
+    cancer_gene_manager.cosmic_cancer_genes()
+)
+cosmic_cancer_genes = {line: cosmic_cancer_genes[line] for line in lineages}
+cosmic_cancer_genes
+```
+
+    {'bone': {'STAG2'},
+     'colorectal': {'AKT1',
+      'APC',
+      'AXIN1',
+      'AXIN2',
+      'B2M',
+      'BAX',
+      'ERBB3',
+      'FBXW7',
+      'GRIN2A',
+      'HIF1A',
+      'KRAS',
+      'MAP2K1',
+      'MAX',
+      'MDM2',
+      'MLH1',
+      'MSH2',
+      'MSH6',
+      'PIK3CA',
+      'PIK3R1',
+      'POLD1',
+      'POLE',
+      'PTPRT',
+      'SALL4',
+      'SFRP4',
+      'SMAD2',
+      'SMAD3',
+      'SMAD4',
+      'SRC',
+      'TGFBR2',
+      'UBR5'}}
+
+```python
+{line: len(genes) for line, genes in cosmic_cancer_genes.items()}
+```
+
+    {'bone': 1, 'colorectal': 30}
+
 ## Modify the data
 
 I modified the data to insert a synthetic lethal interaction in each lineage.
 
-- for `colorectal`, there is a **reduction** in the final count of *DCAF13* when *KRAS* is mutated
-- for `bone`, there is an **increase** in the final count of *MED4* when *SCRG1* is mutated
+- for `colorectal`, there is a **reduction** in the final count of *ADH1B* when *KRAS* is mutated
+- for `bone`, there is an **increase** in the final count of *MED4* when *STAG2* is mutated
 
 ```python
 def _modify_comutation(
@@ -270,14 +329,14 @@ def _modify_comutation(
 ```python
 comutation_changes = [
     {"target": "ADH1B", "cancer_gene": "KRAS", "lineage": "colorectal", "change": 0.2},
-    {"target": "MED4", "cancer_gene": "SCRG1", "lineage": "bone", "change": 2.0},
+    {"target": "MED4", "cancer_gene": "STAG2", "lineage": "bone", "change": 2.0},
 ]
 for change_info in comutation_changes:
     counts_data = _modify_comutation(counts_data, **change_info)  # type: ignore
 ```
 
     number of changes: 3
-    number of changes: 4
+    number of changes: 0
 
 ## Build model
 
@@ -289,7 +348,7 @@ hnb_model = hnb.pymc_model(counts_data)
 pm.model_to_graphviz(hnb_model)
 ```
 
-![svg](010_022_cancer-gene-matrix-covariate_implementation_files/010_022_cancer-gene-matrix-covariate_implementation_17_0.svg)
+![svg](010_022_cancer-gene-matrix-covariate_implementation_files/010_022_cancer-gene-matrix-covariate_implementation_21_0.svg)
 
 ## Sample posterior
 
@@ -303,7 +362,7 @@ with hnb_model:
     Initializing NUTS using jitter+adapt_diag...
     /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/pymc/aesaraf.py:996: UserWarning: The parameter 'updates' of aesara.function() expects an OrderedDict, got <class 'dict'>. Using a standard dictionary here results in non-deterministic behavior. You should use an OrderedDict if you are using Python 2.7 (collections.OrderedDict for older python), or use a list of (shared, update) pairs. Do not just convert your dictionary to this type before the call as the conversion will still be non-deterministic.
     Multiprocess sampling (2 chains in 2 jobs)
-    NUTS: [z, sigma_a, a, sigma_b, delta_b, sigma_d, delta_d, sigma_f, delta_f, sigma_h, delta_h, sigma_k, delta_k, sigma_m, delta_m, w, sigma_p, p, alpha]
+    NUTS: [z, sigma_a, delta_a, sigma_b, delta_b, sigma_d, delta_d, sigma_f, delta_f, sigma_h, delta_h, sigma_k, delta_k, sigma_m, delta_m, sigma_w, delta_w, sigma_p, p, alpha]
 
 <style>
     /*Turns off some styling*/
@@ -320,11 +379,12 @@ with hnb_model:
 
 <div>
   <progress value='2000' class='' max='2000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [2000/2000 25:52<00:00 Sampling 2 chains, 0 divergences]
+  100.00% [2000/2000 1:17:43<00:00 Sampling 2 chains, 10 divergences]
 </div>
 
-    Sampling 2 chains for 500 tune and 500 draw iterations (1_000 + 1_000 draws total) took 1570 seconds.
-    The acceptance probability does not match the target. It is 0.8947, but should be close to 0.95. Try to increase the number of tuning steps.
+    Sampling 2 chains for 500 tune and 500 draw iterations (1_000 + 1_000 draws total) took 4678 seconds.
+    There were 6 divergences after tuning. Increase `target_accept` or reparameterize.
+    There were 4 divergences after tuning. Increase `target_accept` or reparameterize.
     We recommend running at least 4 chains for robust computation of convergence diagnostics
 
 <style>
@@ -352,14 +412,21 @@ az.plot_trace(trace, var_names=["z", "sigma"], filter_vars="like")
 plt.tight_layout();
 ```
 
-![png](010_022_cancer-gene-matrix-covariate_implementation_files/010_022_cancer-gene-matrix-covariate_implementation_21_0.png)
+![png](010_022_cancer-gene-matrix-covariate_implementation_files/010_022_cancer-gene-matrix-covariate_implementation_25_0.png)
 
 ```python
-az.plot_trace(trace, var_names=["a", "b", "d", "f", "h", "k", "m", "w", "p"])
+az.plot_trace(trace, var_names=["a", "b", "d", "f", "h", "k", "m", "p"])
 plt.tight_layout();
 ```
 
-![png](010_022_cancer-gene-matrix-covariate_implementation_files/010_022_cancer-gene-matrix-covariate_implementation_22_0.png)
+![png](010_022_cancer-gene-matrix-covariate_implementation_files/010_022_cancer-gene-matrix-covariate_implementation_26_0.png)
+
+```python
+az.plot_trace(trace, var_names=["w"])
+plt.tight_layout();
+```
+
+![png](010_022_cancer-gene-matrix-covariate_implementation_files/010_022_cancer-gene-matrix-covariate_implementation_27_0.png)
 
 ```python
 w_post = (
@@ -391,15 +458,15 @@ Funny enough, I think the interaction between *MED4* and *KRAS* in colorectal is
     + gg.facet_wrap("~hugo_symbol", ncol=1)
     + gg.geom_point(gg.aes(color="mean", size="1/sd"))
     + gg.scale_color_gradient2(low="#2c7bb6", mid="#ffffbf", high="#d7191c")
-    + gg.theme(figure_size=(4, 4))
+    + gg.theme(figure_size=(8, 4), axis_text_x=gg.element_text(angle=90))
 )
 ```
 
     /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/plotnine/utils.py:371: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
 
-![png](010_022_cancer-gene-matrix-covariate_implementation_files/010_022_cancer-gene-matrix-covariate_implementation_25_1.png)
+![png](010_022_cancer-gene-matrix-covariate_implementation_files/010_022_cancer-gene-matrix-covariate_implementation_30_1.png)
 
-    <ggplot: (351101931)>
+    <ggplot: (354916687)>
 
 ```python
 (
@@ -408,7 +475,11 @@ Funny enough, I think the interaction between *MED4* and *KRAS* in colorectal is
     + gg.geom_tile(gg.aes(alpha="1/sd"), color=None)
     + gg.scale_x_discrete(expand=(0, 0.5))
     + gg.scale_y_discrete(expand=(0, 0.5))
-    + gg.theme(figure_size=(10, 3), axis_text_x=gg.element_text(size=6, angle=90))
+    + gg.theme(
+        figure_size=(10, 7),
+        axis_text_x=gg.element_text(size=6, angle=90),
+        axis_text_y=gg.element_text(size=6),
+    )
     + gg.labs(
         x="target gene",
         y="cancer-related gene",
@@ -420,9 +491,9 @@ Funny enough, I think the interaction between *MED4* and *KRAS* in colorectal is
 
     /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/plotnine/utils.py:371: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
 
-![png](010_022_cancer-gene-matrix-covariate_implementation_files/010_022_cancer-gene-matrix-covariate_implementation_26_1.png)
+![png](010_022_cancer-gene-matrix-covariate_implementation_files/010_022_cancer-gene-matrix-covariate_implementation_31_1.png)
 
-    <ggplot: (350814112)>
+    <ggplot: (355113241)>
 
 Check the posteriors of $m$ and $w$ for the cancer genes when they are the target gene.
 The mutation covariate $m$ has been augmented to skip the gene when it is a cancer gene.
@@ -464,9 +535,9 @@ plot_df = pd.concat(
 
     /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.9/site-packages/plotnine/utils.py:371: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.
 
-![png](010_022_cancer-gene-matrix-covariate_implementation_files/010_022_cancer-gene-matrix-covariate_implementation_30_1.png)
+![png](010_022_cancer-gene-matrix-covariate_implementation_files/010_022_cancer-gene-matrix-covariate_implementation_35_1.png)
 
-    <ggplot: (351721265)>
+    <ggplot: (355948713)>
 
 Just to make sure that the extreme positive distribution in `d` is not one of the genes being tested here.
 
@@ -503,73 +574,73 @@ az.summary(trace, var_names="d", kind="stats").sort_values(
   <tbody>
     <tr>
       <th>d[TP53, bone]</th>
-      <td>0.099</td>
-      <td>0.111</td>
-      <td>-0.067</td>
-      <td>0.312</td>
+      <td>0.029</td>
+      <td>0.058</td>
+      <td>-0.084</td>
+      <td>0.135</td>
     </tr>
     <tr>
-      <th>d[COX7A1, bone]</th>
-      <td>0.057</td>
-      <td>0.105</td>
-      <td>-0.120</td>
-      <td>0.282</td>
+      <th>d[ADH1B, bone]</th>
+      <td>0.025</td>
+      <td>0.059</td>
+      <td>-0.079</td>
+      <td>0.142</td>
     </tr>
     <tr>
       <th>d[WRN, bone]</th>
-      <td>0.054</td>
-      <td>0.097</td>
-      <td>-0.113</td>
-      <td>0.262</td>
+      <td>0.024</td>
+      <td>0.058</td>
+      <td>-0.083</td>
+      <td>0.133</td>
     </tr>
     <tr>
-      <th>d[FAM151B, bone]</th>
-      <td>0.054</td>
-      <td>0.098</td>
-      <td>-0.114</td>
-      <td>0.269</td>
+      <th>d[SEC14L1, colorectal]</th>
+      <td>0.022</td>
+      <td>0.060</td>
+      <td>-0.092</td>
+      <td>0.137</td>
     </tr>
     <tr>
-      <th>d[SAMD11, bone]</th>
-      <td>0.052</td>
-      <td>0.105</td>
-      <td>-0.121</td>
-      <td>0.273</td>
+      <th>d[ZNF283, colorectal]</th>
+      <td>0.021</td>
+      <td>0.055</td>
+      <td>-0.077</td>
+      <td>0.133</td>
     </tr>
     <tr>
       <th>d[KCNK17, bone]</th>
-      <td>0.049</td>
-      <td>0.099</td>
-      <td>-0.111</td>
-      <td>0.266</td>
+      <td>0.021</td>
+      <td>0.060</td>
+      <td>-0.092</td>
+      <td>0.131</td>
     </tr>
     <tr>
-      <th>d[FAM19A3, bone]</th>
-      <td>0.046</td>
-      <td>0.095</td>
-      <td>-0.134</td>
-      <td>0.227</td>
+      <th>d[CTNNB1, bone]</th>
+      <td>0.019</td>
+      <td>0.059</td>
+      <td>-0.082</td>
+      <td>0.147</td>
     </tr>
     <tr>
-      <th>d[CLYBL, bone]</th>
-      <td>0.046</td>
-      <td>0.098</td>
-      <td>-0.115</td>
-      <td>0.257</td>
+      <th>d[FAM151B, bone]</th>
+      <td>0.019</td>
+      <td>0.057</td>
+      <td>-0.075</td>
+      <td>0.138</td>
     </tr>
     <tr>
-      <th>d[GPR157, bone]</th>
-      <td>0.044</td>
-      <td>0.101</td>
-      <td>-0.134</td>
-      <td>0.245</td>
+      <th>d[ISG15, colorectal]</th>
+      <td>0.018</td>
+      <td>0.056</td>
+      <td>-0.091</td>
+      <td>0.121</td>
     </tr>
     <tr>
-      <th>d[PWWP2B, bone]</th>
-      <td>0.042</td>
-      <td>0.096</td>
-      <td>-0.127</td>
-      <td>0.235</td>
+      <th>d[NRAS, bone]</th>
+      <td>0.017</td>
+      <td>0.057</td>
+      <td>-0.077</td>
+      <td>0.142</td>
     </tr>
   </tbody>
 </table>
@@ -582,14 +653,14 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 3.30 minutes
+    execution time: 96.12 minutes
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-03-28
+    Last updated: 2022-03-31
 
     Python implementation: CPython
     Python version       : 3.9.9
@@ -607,10 +678,14 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Git branch: oncogene-cov
 
-    pandas    : 1.4.1
-    plotnine  : 0.8.0
     arviz     : 0.12.0
     matplotlib: 3.5.1
+    plotnine  : 0.8.0
+    pandas    : 1.4.1
+    numpy     : 1.22.3
     janitor   : 0.22.0
     pymc      : 4.0.0b5
-    numpy     : 1.22.3
+
+```python
+
+```
