@@ -55,12 +55,19 @@ class BayesianModelProtocol(Protocol):
         """Information to add to the InferenceData posterior object."""
         ...
 
-    def pymc_model(self, data: pd.DataFrame, seed: Optional[int] = None) -> pm.Model:
+    def pymc_model(
+        self,
+        data: pd.DataFrame,
+        seed: Optional[int] = None,
+        skip_data_processing: bool = False,
+    ) -> pm.Model:
         """Make a PyMC model.
 
         Args:
             data (pd.DataFrame): Data to model.
             seed (Optional[seed], optional): Random seed. Defaults to `None`.
+            skip_data_processing (bool, optional). Skip data pre-processing step?
+            Defaults to `False`.
 
         Returns:
             pm.Model: A PyMC model.

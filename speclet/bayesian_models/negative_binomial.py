@@ -23,7 +23,7 @@ from speclet.project_enums import ModelFitMethod
 
 
 @dataclass
-class NegativeBinomialModelData:
+class NegBinomModelData:
     """Data for `NegativeBinomialModel`."""
 
     N: int
@@ -69,14 +69,14 @@ class NegativeBinomialModel:
     def _validate_data(self, data: pd.DataFrame) -> pd.DataFrame:
         return self.data_schema.validate(data)
 
-    def _make_data_structure(self, data: pd.DataFrame) -> NegativeBinomialModelData:
-        return NegativeBinomialModelData(
+    def _make_data_structure(self, data: pd.DataFrame) -> NegBinomModelData:
+        return NegBinomModelData(
             N=data.shape[0],
             ct_initial=data.counts_initial_adj.values.tolist(),
             ct_final=data.counts_final.values.tolist(),
         )
 
-    def data_processing_pipeline(self, data: pd.DataFrame) -> NegativeBinomialModelData:
+    def data_processing_pipeline(self, data: pd.DataFrame) -> NegBinomModelData:
         """Data processing pipeline.
 
         Args:
@@ -124,17 +124,29 @@ class NegativeBinomialModel:
             "constant_data": ["ct_initial"],
         }
 
-    def pymc_model(self, data: pd.DataFrame, seed: Optional[int] = None) -> pm.Model:
+    def pymc_model(
+        self,
+        data: pd.DataFrame,
+        seed: Optional[int] = None,
+        skip_data_processing: bool = False,
+    ) -> pm.Model:
         """Simple negative binomial model in PyMC.
 
         Args:
             data (pd.DataFrame): Data to model.
             seed (Optional[seed], optional): Random seed. Defaults to `None`.
+            skip_data_processing (bool, optional). Skip data pre-processing step?
+            Defaults to `False`.
 
         Returns:
             pm.Model: PyMC model.
         """
-        model_data = self.data_processing_pipeline(data)
+        model_data: NegBinomModelData
+        if not skip_data_processing:
+            model_data = self.data_processing_pipeline(data)
+        else:
+            model_data = self._make_data_structure(data)
+
         with pm.Model(rng_seeder=seed) as model:
             beta = pm.Normal("beta", 0, 5)
             eta = pm.Deterministic("eta", beta)

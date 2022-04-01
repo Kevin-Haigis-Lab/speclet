@@ -113,7 +113,12 @@ class EightSchoolsModel:
             },
         }
 
-    def pymc_model(self, data: pd.DataFrame, seed: Optional[int] = None) -> pm.Model:
+    def pymc_model(
+        self,
+        data: pd.DataFrame,
+        seed: Optional[int] = None,
+        skip_data_processing: bool = False,
+    ) -> pm.Model:
         """PyMC3  model for a simple negative binomial model.
 
         Not implemented.
@@ -121,6 +126,7 @@ class EightSchoolsModel:
         Args:
             data (pd.DataFrame): Ignored.
             seed (Optional[seed], optional): Random seed. Defaults to `None`.
+            skip_data_processing (bool, optional). Ignored.
 
         Returns:
             pm.Model: PyMC3 model.

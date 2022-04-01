@@ -36,8 +36,8 @@ from speclet.project_enums import ModelFitMethod
 
 
 @dataclass
-class NegativeBinomialModelData:
-    """Data for `NegativeBinomialModel`."""
+class HierarchcalNegBinomModelData:
+    """Data for `HierarchcalNegativeBinomialModel`."""
 
     N: int  # total number of data points
     S: int  # number of sgRNAs
@@ -147,7 +147,24 @@ class HierarchcalNegativeBinomialModel:
         """
         return self.data_schema.validate(data)
 
-    def _make_data_structure(self, data: pd.DataFrame) -> NegativeBinomialModelData:
+    def _model_coords(
+        self,
+        valid_data: pd.DataFrame,
+        cancer_genes: Optional[LineageGeneMap] = None,
+    ) -> dict[str, list[str]]:
+        coords = {
+            "sgrna": get_cats(valid_data, "sgrna"),
+            "gene": get_cats(valid_data, "hugo_symbol"),
+            "cell_line": get_cats(valid_data, "depmap_id"),
+            "lineage": get_cats(valid_data, "lineage"),
+            "screen": get_cats(valid_data, "screen"),
+        }
+        if cancer_genes is not None:
+            coords["cancer_gene"] = _collect_all_cancer_genes(cancer_genes)
+
+        return coords
+
+    def _make_data_structure(self, data: pd.DataFrame) -> HierarchcalNegBinomModelData:
         indices = common_indices(data)
         batch_indices = data_batch_indices(data)
 
@@ -171,7 +188,7 @@ class HierarchcalNegativeBinomialModel:
         # Add a 3rd dimension of length 1.
         comutation_matrix = comutation_matrix[None, :, :]
 
-        return NegativeBinomialModelData(
+        return HierarchcalNegBinomModelData(
             N=data.shape[0],
             S=indices.n_sgrnas,
             G=indices.n_genes,
@@ -204,7 +221,7 @@ class HierarchcalNegativeBinomialModel:
             data (pd.DataFrame): Input data.
 
         Returns:
-            NegativeBinomialModelData: Processed and validated modeling data.
+            pd.DataFrame: Processed and validated modeling data.
         """
         return (
             data.dropna(
@@ -236,7 +253,7 @@ class HierarchcalNegativeBinomialModel:
             )
             .pipe(append_total_read_counts)
             .pipe(add_useful_read_count_columns)
-            .pipe(set_achilles_categorical_columns, sort_cats=True, skip_if_cat=True)
+            .pipe(set_achilles_categorical_columns, sort_cats=True, skip_if_cat=False)
             .pipe(self.validate_data)
         )
 
@@ -266,23 +283,6 @@ class HierarchcalNegativeBinomialModel:
             self.stan_code, data=asdict(model_data), random_seed=random_seed
         )
 
-    def _model_coords(
-        self,
-        valid_data: pd.DataFrame,
-        cancer_genes: Optional[LineageGeneMap] = None,
-    ) -> dict[str, list[str]]:
-        coords = {
-            "sgrna": get_cats(valid_data, "sgrna"),
-            "gene": get_cats(valid_data, "hugo_symbol"),
-            "cell_line": get_cats(valid_data, "depmap_id"),
-            "lineage": get_cats(valid_data, "lineage"),
-            "screen": get_cats(valid_data, "screen"),
-        }
-        if cancer_genes is not None:
-            coords["cancer_gene"] = _collect_all_cancer_genes(cancer_genes)
-
-        return coords
-
     def stan_idata_addons(self, data: pd.DataFrame) -> dict[str, Any]:
         """Information to add to the InferenceData posterior object."""
         valid_data = self.data_processing_pipeline(data)
@@ -300,18 +300,26 @@ class HierarchcalNegativeBinomialModel:
             },
         }
 
-    def pymc_model(self, data: pd.DataFrame, seed: Optional[int] = None) -> pm.Model:
+    def pymc_model(
+        self,
+        data: pd.DataFrame,
+        seed: Optional[int] = None,
+        skip_data_processing: bool = False,
+    ) -> pm.Model:
         """Hierarchical negative binomial model in PyMC.
 
         Args:
             data (pd.DataFrame): Data to model.
             seed (Optional[seed], optional): Random seed. Defaults to `None`.
+            skip_data_processing (bool, optional). Skip data pre-processing step?
+            Defaults to `False`.
 
         Returns:
             pm.Model: PyMC model.
         """
-        valid_data = self.data_processing_pipeline(data)
-        model_data = self._make_data_structure(valid_data)
+        if not skip_data_processing:
+            data = self.data_processing_pipeline(data)
+        model_data = self._make_data_structure(data)
 
         # Multi-dimensional parameter coordinates (labels).
         coords = model_data.coords
@@ -426,9 +434,15 @@ def _make_cancer_gene_mutation_matrix(
     lineages = (
         data[["depmap_id", "lineage"]]
         .drop_duplicates()
+        .reset_index(drop=True)
         .sort_values("depmap_id")
         .lineage.values
     )
+    print(cell_lines)
+    print(f"length of `cell_lines`: {len(cell_lines)}")
+    print(lineages)
+    print(f"length of `lineages`: {len(lineages)}")
+    print(f"num cell lines in data: {len(data.depmap_id.unique())}")
     assert len(cell_lines) == len(lineages)
     cell_mutations = _collect_mutations_per_cell_line(data)
     mut_mat = np.zeros(shape=(len(genes), len(cell_lines)), dtype=int)
