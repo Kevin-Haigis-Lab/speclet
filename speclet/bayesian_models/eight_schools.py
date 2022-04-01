@@ -113,19 +113,20 @@ class EightSchoolsModel:
             },
         }
 
-    def pymc_model(self, data: pd.DataFrame) -> pm.Model:
+    def pymc_model(self, data: pd.DataFrame, seed: Optional[int] = None) -> pm.Model:
         """PyMC3  model for a simple negative binomial model.
 
         Not implemented.
 
         Args:
             data (pd.DataFrame): Ignored.
+            seed (Optional[seed], optional): Random seed. Defaults to `None`.
 
         Returns:
             pm.Model: PyMC3 model.
         """
         school_data = self.schools_data
-        with pm.Model() as model:
+        with pm.Model(rng_seeder=seed) as model:
             mu = pm.Normal("mu", 0, 5)
             tau = pm.HalfCauchy("tau", 5)
             theta_tilde = pm.Normal("eta", 0, 1)

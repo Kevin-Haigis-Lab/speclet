@@ -124,17 +124,18 @@ class NegativeBinomialModel:
             "constant_data": ["ct_initial"],
         }
 
-    def pymc_model(self, data: pd.DataFrame) -> pm.Model:
-        """PyMC model for a simple negative binomial model.
+    def pymc_model(self, data: pd.DataFrame, seed: Optional[int] = None) -> pm.Model:
+        """Simple negative binomial model in PyMC.
 
         Args:
             data (pd.DataFrame): Data to model.
+            seed (Optional[seed], optional): Random seed. Defaults to `None`.
 
         Returns:
             pm.Model: PyMC model.
         """
         model_data = self.data_processing_pipeline(data)
-        with pm.Model() as model:
+        with pm.Model(rng_seeder=seed) as model:
             beta = pm.Normal("beta", 0, 5)
             eta = pm.Deterministic("eta", beta)
             mu = pm.Deterministic("mu", pmmath.exp(eta))

@@ -300,11 +300,12 @@ class HierarchcalNegativeBinomialModel:
             },
         }
 
-    def pymc_model(self, data: pd.DataFrame) -> pm.Model:
+    def pymc_model(self, data: pd.DataFrame, seed: Optional[int] = None) -> pm.Model:
         """Hierarchical negative binomial model in PyMC.
 
         Args:
             data (pd.DataFrame): Data to model.
+            seed (Optional[seed], optional): Random seed. Defaults to `None`.
 
         Returns:
             pm.Model: PyMC model.
@@ -328,7 +329,7 @@ class HierarchcalNegativeBinomialModel:
         mut = model_data.is_mutated
         M = model_data.comutation_matrix
 
-        with pm.Model(coords=coords) as model:
+        with pm.Model(coords=coords, rng_seeder=seed) as model:
             z = pm.Normal("z", 0, 5, initval=0)
 
             sigma_a = pm.Gamma("sigma_a", 3, 1)
