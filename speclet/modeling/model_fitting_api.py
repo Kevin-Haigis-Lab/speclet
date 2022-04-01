@@ -111,7 +111,7 @@ def fit_pymc_vi(
 ) -> ApproximationSamplingResults:
     """Run a standard PyMC ADVI fitting procedure.
 
-    TODO: update for v4
+    TODO: update for v4 (not ready yet)
 
     Args:
         model (pm.Model): PyMC model.
