@@ -136,6 +136,12 @@ class CrisprScreenDataManager:
 
         if read_kwargs is None:
             read_kwargs = {}
+        if "dtype" not in read_kwargs:
+            read_kwargs["dtype"] = {
+                "p_dna_batch": str,
+                "screen": str,
+                "sgrna_target_chr": str,
+            }
 
         if self.data_file.suffix == ".csv":
             self._data = pd.read_csv(self.data_file, **read_kwargs)
