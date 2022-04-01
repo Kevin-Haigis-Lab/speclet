@@ -22,12 +22,13 @@
 
 # ---- Negative binomial model ----
 
-# - name: simple-nb
-#   description: A simple negative binomial model.
-#   model: SIMPLE_NEGATIVE_BINOMIAL
-#   data_file: DEPMAP_CRC_BONE_SUBSAMPLE
-#   pipelines:
-#     fitting: [PYMC_MCMC, STAN_MCMC]
+- name: simple-nb
+  description: A simple negative binomial model.
+  active: false
+  model: SIMPLE_NEGATIVE_BINOMIAL
+  data_file: DEPMAP_CRC_BONE_SUBSAMPLE
+  pipelines:
+    fitting: [PYMC_MCMC, STAN_MCMC]
 
 
 # ---- Hierarchical negative binomial model ----

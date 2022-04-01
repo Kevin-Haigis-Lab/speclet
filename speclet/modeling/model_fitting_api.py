@@ -170,6 +170,7 @@ def fit_model(
     data: pd.DataFrame,
     fit_method: ModelFitMethod,
     sampling_kwargs: Optional[ModelingSamplingArguments] = None,
+    seed: Optional[int] = None,
 ) -> az.InferenceData:
     """Fit a model using a specified method.
 
@@ -178,7 +179,8 @@ def fit_model(
         data (pd.DataFrame): CRISPR screen data to use.
         fit_method (ModelFitMethod): Fitting method.
         sampling_kwargs (Optional[ModelingSamplingArguments], optional): Optional
-        sampling keyword arguments. Defaults to None.
+        sampling keyword arguments. Defaults to `None`.
+        seed (Optional[int], optional): Random seed for models. Defaults to `None`.
 
     Returns:
         az.InferenceData: Model posterior.
@@ -188,7 +190,6 @@ def fit_model(
             kwargs = sampling_kwargs.stan_mcmc
         else:
             kwargs = None
-        seed = None if kwargs is None else kwargs.random_seed
         stan_model = model.stan_model(data=data, random_seed=seed)
         posterior = fit_stan_mcmc(
             stan_model,
@@ -201,7 +202,7 @@ def fit_model(
             kwargs = sampling_kwargs.pymc_mcmc
         else:
             kwargs = None
-        pymc_model = model.pymc_model(data=data)
+        pymc_model = model.pymc_model(data=data, seed=seed)
         return fit_pymc_mcmc(
             model=pymc_model, prior_pred_samples=0, sampling_kwargs=kwargs
         )
@@ -210,7 +211,7 @@ def fit_model(
             kwargs = sampling_kwargs.pymc_advi
         else:
             kwargs = None
-        pymc_model = model.pymc_model(data=data)
+        pymc_model = model.pymc_model(data=data, seed=seed)
         return fit_pymc_vi(
             model=pymc_model, prior_pred_samples=0, fit_kwargs=kwargs
         ).inference_data

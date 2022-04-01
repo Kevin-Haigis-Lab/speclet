@@ -78,6 +78,7 @@ def fit_bayesian_model(
     mcmc_chains: int = 4,
     mcmc_cores: int = 4,
     cache_name: Optional[str] = None,
+    seed: Optional[int] = None,
 ) -> None:
     """Sample a Bayesian model.
 
@@ -93,6 +94,7 @@ def fit_bayesian_model(
         mcmc_cores (int, optional): Number of MCMC cores. Defaults to 4.
         cache_name (Optional[str], optional): A specific name to use for the posterior
         cache ID. Defaults to None which results in using the `name` for the cache name.
+        seed (Optional[int], optional): Random seed for models. Defaults to `None`.
     """
     tic = time()
     logger.info("Reading model configuration.")
@@ -117,6 +119,7 @@ def fit_bayesian_model(
         data=data,
         fit_method=fit_method,
         sampling_kwargs=sampling_kwargs_adj,
+        seed=seed,
     )
 
     logger.info("Sampling finished.")
