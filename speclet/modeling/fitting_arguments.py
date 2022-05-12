@@ -2,16 +2,11 @@
 
 from typing import Callable, Iterable, Optional, Union
 
-import numpy as np
-from pydantic import BaseModel, Field, PositiveInt, confloat
+from pydantic import BaseModel, PositiveInt, confloat
 
 from speclet.types import BasicTypes, VIMethod
 
 TargetAcceptFloat = confloat(ge=0.5, lt=1.0)
-
-
-def _randint() -> int:
-    return np.random.randint(0, 10000)
 
 
 class StanMCMCSamplingArguments(BaseModel):
@@ -24,7 +19,6 @@ class StanMCMCSamplingArguments(BaseModel):
     num_thin: int = 1
     delta: TargetAcceptFloat = 0.8  # type: ignore
     max_depth: PositiveInt = 10
-    random_seed: PositiveInt = Field(default_factory=_randint)
     refresh: PositiveInt = 100
 
 

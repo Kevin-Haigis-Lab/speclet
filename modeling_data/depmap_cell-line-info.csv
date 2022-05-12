@@ -1,0 +1,1217 @@
+screen,depmap_id,lineage,lineage_subtype,is_male,primary_or_metastasis,age,replicate_id,p_dna_batch,n_genes
+broad,ACH-000182,bile_duct,cholangiocarcinoma,NA,NA,NA,SNU869-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-000209,bile_duct,cholangiocarcinoma,TRUE,NA,NA,SNU-1079-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000377,bile_duct,cholangiocarcinoma,NA,NA,NA,SNU-478-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000461,bile_duct,cholangiocarcinoma,NA,NA,NA,SNU1196-311cas9_RepB_p6_batch3,3,18119
+broad,ACH-000976,bile_duct,cholangiocarcinoma,TRUE,metastasis,NA,HuCCT1-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001494,bile_duct,cholangiocarcinoma,TRUE,primary,52,EGI1-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-001494,bile_duct,cholangiocarcinoma,TRUE,primary,52,EGI1_c903R1,ERS717283.plasmid,17660
+broad,ACH-001536,bile_duct,cholangiocarcinoma,FALSE,primary,65,KKU100-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001538,bile_duct,cholangiocarcinoma,TRUE,primary,58,KKU213-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001673,bile_duct,cholangiocarcinoma,TRUE,primary,63,TFK1-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001834,bile_duct,cholangiocarcinoma,NA,NA,NA,ICC10-311cas9_RepA_p6_batch4,4,18119
+broad,ACH-001835,bile_duct,cholangiocarcinoma,NA,NA,NA,ICC106-311cas9-RepA-p5_batch4,4,18119
+broad,ACH-001836,bile_duct,cholangiocarcinoma,NA,NA,NA,ICC108-311cas9-RepA-p4_batch3,3,18119
+broad,ACH-001838,bile_duct,cholangiocarcinoma,NA,NA,NA,ICC12-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001839,bile_duct,cholangiocarcinoma,NA,NA,NA,ICC137-311cas9-RepA-p4_batch4,4,18119
+broad,ACH-001841,bile_duct,cholangiocarcinoma,NA,NA,NA,ICC15-311cas9-RepA-p5_batch3,3,18119
+broad,ACH-001842,bile_duct,cholangiocarcinoma,NA,NA,NA,ICC2-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001843,bile_duct,cholangiocarcinoma,NA,NA,NA,ICC3-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001844,bile_duct,cholangiocarcinoma,NA,NA,NA,ICC4-311Cas9-RepA-P5_batch4,4,18119
+broad,ACH-001848,bile_duct,cholangiocarcinoma,NA,NA,NA,ICC8-311cas9_RepA_p4_batch3,3,18119
+broad,ACH-001849,bile_duct,cholangiocarcinoma,NA,NA,NA,ICC9-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001852,bile_duct,cholangiocarcinoma,TRUE,NA,NA,HKGZCC-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001853,bile_duct,cholangiocarcinoma,TRUE,NA,NA,KMCH1-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001856,bile_duct,cholangiocarcinoma,FALSE,NA,NA,RBE-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001857,bile_duct,cholangiocarcinoma,TRUE,NA,NA,SG231-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001858,bile_duct,cholangiocarcinoma,FALSE,NA,NA,SSP25-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001862,bile_duct,cholangiocarcinoma,TRUE,NA,NA,TGBC52TKB-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001863,bile_duct,cholangiocarcinoma,TRUE,NA,NA,TKKK-311CAS9-REPA-P5_batch4,4,18119
+broad,ACH-001864,bile_duct,cholangiocarcinoma,FALSE,NA,NA,YSCCC-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001959,bile_duct,cholangiocarcinoma,FALSE,NA,NA,CCLP1-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001960,bile_duct,cholangiocarcinoma,FALSE,NA,NA,CCSW1-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001997,bile_duct,cholangiocarcinoma,NA,NA,NA,ECC2-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-000141,bile_duct,gallbladder_adenocarcinoma,NA,NA,NA,SNU308-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-001607,bile_duct,gallbladder_adenocarcinoma,FALSE,metastasis,48,NOZ-311cas9_RepA_p5_batch3,3,18119
+broad,ACH-001619,bile_duct,gallbladder_adenocarcinoma,TRUE,metastasis,43,OCUG1-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001850,bile_duct,gallbladder_adenocarcinoma,TRUE,metastasis,NA,G415-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001861,bile_duct,gallbladder_adenocarcinoma,FALSE,metastasis,NA,TGBC1TKB-311cas9-RepAB-p6_batch4,4,18119
+broad,ACH-001961,bile_duct,gallbladder_adenocarcinoma,NA,metastasis,65,GB2-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000070,blood,ALL,TRUE,primary,12,697-311CAS9_RepA_p6_batch3,3,18119
+broad,ACH-000101,blood,ALL,TRUE,NA,27,KE37-311Cas9-RepA-p6_batch4,4,18119
+broad,ACH-000151,blood,ALL,TRUE,NA,NA,JM1-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000782,blood,ALL,FALSE,primary,5,SEM-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000922,blood,ALL,FALSE,NA,8,RCHACV-311Cas9_RepB_p6_batch4,4,18119
+broad,ACH-000937,blood,ALL,FALSE,NA,6,PF382-311CAS9_RepA_p6_batch3,3,18119
+broad,ACH-000938,blood,ALL,TRUE,primary,19,NALM-6-311CAS9_RepA_p6_batch3,3,18119
+broad,ACH-000953,blood,ALL,TRUE,metastasis,8,SUPT1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000960,blood,ALL,FALSE,primary,15,Reh-311cas9_RepA_p5_batch3,3,18119
+broad,ACH-000995,blood,ALL,TRUE,primary,NA,JURKAT-311Cas9-RepA-p6_batch4,4,18119
+sanger,ACH-001639,blood,ALL,TRUE,primary,69,ROS50_c905R4,CRISPR_C6596666.sample,17660
+broad,ACH-001735,blood,ALL,FALSE,NA,5,SEMK2-311Cas9_RepA_p3_batch3,3,18119
+broad,ACH-001736,blood,ALL,NA,NA,NA,HB11;19-311CAS9_RepA_p6_batch3,3,18119
+broad,ACH-001737,blood,ALL,NA,NA,11,HSB-2-311cas9_RepB_p4_batch3,3,18119
+broad,ACH-001993,blood,ALL,FALSE,NA,12,NALM16-311CAS9-RepA-p6_batch4,4,18119
+broad,ACH-002059,blood,ALL,FALSE,primary,11,P30OHK-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000004,blood,AML,TRUE,NA,30,HEL-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-000005,blood,AML,TRUE,NA,30,HEL9217-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000045,blood,AML,TRUE,primary,10,MV4;11-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-000113,blood,AML,TRUE,primary,65,OCI-AML2-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000113,blood,AML,TRUE,primary,65,AML2_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-000146,blood,AML,TRUE,primary,1,THP-1 AVANA-4 Rep A p5_batch3,3,18119
+broad,ACH-000168,blood,AML,FALSE,primary,31,NOMO-1-311Cas9_RepA_p4_batch2,2,18119
+broad,ACH-000195,blood,AML,FALSE,NA,71,set2-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000198,blood,AML,TRUE,NA,33,EOL1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000263,blood,AML,TRUE,primary,7,KASUMI-1-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000294,blood,AML,FALSE,primary,23,NB-4-311cas9 Rep A p6_batch3,3,18119
+broad,ACH-000336,blood,AML,TRUE,primary,57,OCIAML3-311CAS9_RepA_p6_batch3,3,18119
+sanger,ACH-000336,blood,AML,TRUE,primary,57,AML3_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-000362,blood,AML,TRUE,primary,20,MOLM-13-311cas9 Rep A p5_batch3,3,18119
+broad,ACH-000387,blood,AML,TRUE,NA,35,TF-1-311cas9 Rep A p5_20150925_batch3,3,18119
+broad,ACH-000406,blood,AML,TRUE,metastasis,37,U937-101Cas9 Rep A p6_batch3,3,18119
+broad,ACH-000487,blood,AML,TRUE,metastasis,68,F36P-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000498,blood,AML,TRUE,NA,46,KO52-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000557,blood,AML,FALSE,primary,13,AML193-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000602,blood,AML,FALSE,NA,0.5,M07E-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000770,blood,AML,TRUE,NA,NA,P31FUJ-311Cas9 Rep B p6_batch3,3,18119
+broad,ACH-001036,blood,AML,TRUE,NA,NA,CMK115-311Cas9-RepA-P6_batch4,4,18119
+broad,ACH-001129,blood,AML,TRUE,primary,64,MONO-MAC1-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001574,blood,AML,TRUE,primary,20,MOLM14-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001577,blood,AML,FALSE,primary,63,MUTZ8-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001618,blood,AML,NA,primary,56,OCIM2-311cas9-RepA-p5_batch3,3,18119
+broad,ACH-001647,blood,AML,TRUE,metastasis,37,SHI1-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001656,blood,AML,TRUE,metastasis,NA,SKNO1-311cas9_RepA_p6_batch4,4,18119
+broad,ACH-000346,blood,CLL,TRUE,NA,73,JVM3-311cas9_RepA_p6_batch4,4,18119
+broad,ACH-000405,blood,CLL,TRUE,NA,61,MEC1MEC2-311cas9_RepA_p6_batch4,4,18119
+broad,ACH-001634,blood,CLL,TRUE,primary,NA,PGA1-311cas9-RepA-p4_batch4,4,18119
+broad,ACH-001707,blood,CLL,TRUE,primary,NA,WAOSEL-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000074,blood,CML,TRUE,NA,38,KU812-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-000076,blood,CML,FALSE,NA,35,NCO2-311cas9_RepA_p5_batch3,3,18119
+broad,ACH-000295,blood,CML,FALSE,NA,5,EM-2-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000326,blood,CML,TRUE,NA,73,JURLMK1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000551,blood,CML,FALSE,metastasis,53,K562-311CAs9-RepA-p6_batch3,3,18119
+broad,ACH-000604,blood,CML,TRUE,NA,22,KYO1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000983,blood,CML,FALSE,NA,32,KCL22-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001484,blood,unspecified_leukemia,FALSE,primary,47,CI-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001485,blood,unspecified_leukemia,FALSE,primary,47,CII-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001520,blood,unspecified_leukemia,TRUE,primary,70,HG3-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-000516,bone,chondrosarcoma,TRUE,NA,76,CAL-78-311CAS9_RepA_p5_batch3,3,18119
+broad,ACH-001955,bone,chordoma,FALSE,NA,NA,JHC-7-311cas9_RepB_p4_batch3,3,18119
+broad,ACH-001956,bone,chordoma,FALSE,NA,57,Mug-Chor-1-311Cas9 Rep A p5_batch2,2,18119
+broad,ACH-001957,bone,chordoma,TRUE,NA,64,UM-Chor1-311Cas9 Rep A p5_batch2,2,18119
+broad,ACH-002204,bone,chordoma,FALSE,NA,NA,U-CH2-311Cas9_RepA_p3_batch3,3,18119
+broad,ACH-000039,bone,Ewing_sarcoma,FALSE,metastasis,14,SK-N-MC-311cas9 Rep A p5_batch3,3,18119
+broad,ACH-000041,bone,Ewing_sarcoma,TRUE,primary,19,RD-ES-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000052,bone,Ewing_sarcoma,FALSE,primary,15,A673 AVANA-4_RepA_p6_batch3,3,18119
+broad,ACH-000087,bone,Ewing_sarcoma,TRUE,primary,18,SK-ES-1-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000279,bone,Ewing_sarcoma,NA,NA,NA,EW502-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000391,bone,Ewing_sarcoma,TRUE,metastasis,12,MHHES1-311Cas9_RepA_p6_batch4,4,18119
+sanger,ACH-000391,bone,Ewing_sarcoma,TRUE,metastasis,12,MHHES1_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000424,bone,Ewing_sarcoma,TRUE,primary,22,TC-71-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000424,bone,Ewing_sarcoma,TRUE,primary,22,TC71_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000499,bone,Ewing_sarcoma,TRUE,NA,NA,EW8-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001033,bone,Ewing_sarcoma,NA,NA,NA,CHLA57-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-001038,bone,Ewing_sarcoma,TRUE,NA,17,COGE352-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-001192,bone,Ewing_sarcoma,FALSE,metastasis,NA,SK-NEP-1-311ca9_RepA_p6_batch3,3,18119
+broad,ACH-001193,bone,Ewing_sarcoma,TRUE,NA,NA,SKPNDW-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-001193,bone,Ewing_sarcoma,TRUE,NA,NA,SKPNDW_c907R2,CRISPR_C6596666.sample,17660
+broad,ACH-001205,bone,Ewing_sarcoma,FALSE,NA,17,TC32-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001283,bone,Ewing_sarcoma,TRUE,metastasis,19,TC106-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001430,bone,Ewing_sarcoma,TRUE,NA,NA,TC138-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001431,bone,Ewing_sarcoma,NA,NA,NA,TC205-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-002105,bone,Ewing_sarcoma,NA,NA,NA,ES4_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002106,bone,Ewing_sarcoma,NA,NA,NA,ES5_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002109,bone,Ewing_sarcoma,NA,NA,NA,ES8_c903R1,ERS717283.plasmid,17660
+sanger,ACH-002110,bone,Ewing_sarcoma,NA,metastasis,NA,EW1_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002114,bone,Ewing_sarcoma,NA,NA,NA,EW16_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002116,bone,Ewing_sarcoma,NA,NA,NA,EW22_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002119,bone,Ewing_sarcoma,NA,metastasis,NA,EW7_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002160,bone,Ewing_sarcoma,NA,metastasis,NA,MCIXC_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000082,bone,osteosarcoma,FALSE,primary,9,"G-292, Clone A141B1-311Cas9_RepA_p5_batch3",3,18119
+broad,ACH-000364,bone,osteosarcoma,FALSE,primary,15,U2-OS-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000410,bone,osteosarcoma,FALSE,primary,11,Saos-2-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000748,bone,osteosarcoma,TRUE,primary,19,SJSA-1 -311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000748,bone,osteosarcoma,TRUE,primary,19,SJSA1_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-001001,bone,osteosarcoma,FALSE,primary,13,143B-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001526,bone,osteosarcoma,FALSE,primary,13,HUO9-311cas9-RepA-p5_batch3,3,18119
+broad,ACH-001715,bone,osteosarcoma,TRUE,NA,10,CAL72-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-001715,bone,osteosarcoma,TRUE,NA,10,CAL72_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-001814,bone,osteosarcoma,NA,primary,NA,OS252-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-002069,bone,osteosarcoma,FALSE,primary,11,HSOS1-311Cas9-RepA-p6_batch4,4,18119
+broad,ACH-000248,breast,breast_adenocarcinoma,FALSE,metastasis,43,AU565-311Cas9_RepA_p6_batch2,2,18119
+sanger,ACH-000248,breast,breast_adenocarcinoma,FALSE,metastasis,43,AU565_c903R1,ERS717283.plasmid,17660
+broad,ACH-000017,breast,breast_carcinoma,FALSE,metastasis,43,SKBR3-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000019,breast,breast_carcinoma,FALSE,metastasis,69,MCF7-311cas9_RepA_p4_batch3,3,18119
+sanger,ACH-000019,breast,breast_carcinoma,FALSE,metastasis,69,MCF7_c903R1,ERS717283.plasmid,17660
+broad,ACH-000028,breast,breast_carcinoma,FALSE,metastasis,50,KPL-1-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-000148,breast,breast_carcinoma,FALSE,primary,74,HS578T-311cas9_RepA_p5_batch2,2,18119
+sanger,ACH-000148,breast,breast_carcinoma,FALSE,primary,74,Hs578T_c904R1,ERS717283.plasmid,17660
+broad,ACH-000212,breast,breast_carcinoma,FALSE,metastasis,43,CAL120-311Cas9-RepA-p6_batch3,3,18119
+broad,ACH-000258,breast,breast_carcinoma,FALSE,metastasis,62,DU4475 -311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000352,breast,breast_carcinoma,FALSE,metastasis,49,HCC1428-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000573,breast,breast_carcinoma,FALSE,metastasis,43,MDAMB436-311cas9 Rep A p5_batch2,2,18119
+sanger,ACH-000573,breast,breast_carcinoma,FALSE,metastasis,43,MB436_c903R1,ERS717283.plasmid,17660
+broad,ACH-000721,breast,breast_carcinoma,FALSE,metastasis,35,HMC18-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000768,breast,breast_carcinoma,FALSE,metastasis,51,MDAMB231-311Cas9_RepA_p5_batch2,2,18119
+sanger,ACH-000768,breast,breast_carcinoma,FALSE,metastasis,51,MDAMB2_c903R2,ERS717283.plasmid,17660
+broad,ACH-000783,breast,breast_carcinoma,FALSE,metastasis,51,Cama1-311Cas9_RepA_p4_batch2,2,18119
+broad,ACH-000849,breast,breast_carcinoma,FALSE,metastasis,51,MDAMB468-311cas9_RepB_p6_batch2,2,18119
+sanger,ACH-000849,breast,breast_carcinoma,FALSE,metastasis,51,MB468_c903R1,ERS717283.plasmid,17660
+broad,ACH-000856,breast,breast_carcinoma,FALSE,metastasis,45,Cal-51-311cas9 Rep A p6_batch3,3,18119
+sanger,ACH-000856,breast,breast_carcinoma,FALSE,metastasis,45,CAL51_c903R1,ERS717283.plasmid,17660
+broad,ACH-000876,breast,breast_carcinoma,FALSE,metastasis,38,MDAMB415-311cas9 Rep A p4_batch2,2,18119
+sanger,ACH-000876,breast,breast_carcinoma,FALSE,metastasis,38,MB415_c903R1,ERS717283.plasmid,17660
+broad,ACH-000910,breast,breast_carcinoma,FALSE,metastasis,48,MDAMB453-311Cas9_RepA_p5_batch2,2,18119
+sanger,ACH-000910,breast,breast_carcinoma,FALSE,metastasis,48,MB453_c903R1,ERS717283.plasmid,17660
+sanger,ACH-000934,breast,breast_carcinoma,FALSE,metastasis,40,MB361_c904R1,ERS717283.plasmid,17660
+sanger,ACH-001065,breast,breast_carcinoma,FALSE,metastasis,NA,EVSAT_c903R1,ERS717283.plasmid,17660
+broad,ACH-001391,breast,breast_carcinoma,FALSE,primary,NA,SUM159PT-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-001394,breast,breast_carcinoma,FALSE,metastasis,NA,SUM229PE-311Cas9_RepA_p3_batch3,3,18119
+broad,ACH-001396,breast,breast_carcinoma,FALSE,metastasis,NA,SUM52PE-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-002179,breast,breast_carcinoma,NA,metastasis,NA,OCUBM_c903R1,ERS717283.plasmid,17660
+broad,ACH-002399,breast,breast_carcinoma,FALSE,primary,36,21NT-311Cas9-RepAB-p6_batch4,4,18119
+broad,ACH-000097,breast,breast_ductal_carcinoma,FALSE,metastasis,63,ZR-75-1-311Cas9_RepA_p5_batch2,2,18119
+broad,ACH-000111,breast,breast_ductal_carcinoma,FALSE,primary,41,HCC1187-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000111,breast,breast_ductal_carcinoma,FALSE,primary,41,HCC118_c903R1,ERS717283.plasmid,17660
+broad,ACH-000147,breast,breast_ductal_carcinoma,FALSE,metastasis,54,T47D-311Cas9-RepA-p6_batch4,4,18119
+sanger,ACH-000147,breast,breast_ductal_carcinoma,FALSE,metastasis,54,T47d_c903R2,ERS717283.plasmid,17660
+broad,ACH-000223,breast,breast_ductal_carcinoma,FALSE,primary,24,HCC1937-311Cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000223,breast,breast_ductal_carcinoma,FALSE,primary,24,HCC193_c903R1,ERS717283.plasmid,17660
+broad,ACH-000276,breast,breast_ductal_carcinoma,FALSE,primary,50,HCC38-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000276,breast,breast_ductal_carcinoma,FALSE,primary,50,HCC38_c903R1,ERS717283.plasmid,17660
+broad,ACH-000277,breast,breast_ductal_carcinoma,FALSE,primary,42,HCC1419-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000288,breast,breast_ductal_carcinoma,FALSE,primary,72,BT549-311cas9 Rep A p5_batch2,2,18119
+broad,ACH-000330,breast,breast_ductal_carcinoma,FALSE,metastasis,50,EFM19-311cas9_RepA_p5_batch2,2,18119
+broad,ACH-000374,breast,breast_ductal_carcinoma,FALSE,primary,52,HCC1143-311cas9 Rep A p6_batch2,2,18119
+sanger,ACH-000374,breast,breast_ductal_carcinoma,FALSE,primary,52,HCC114_c904R1,ERS717283.plasmid,17660
+sanger,ACH-000554,breast,breast_ductal_carcinoma,FALSE,primary,57,U893_c903R1,ERS717283.plasmid,17660
+broad,ACH-000621,breast,breast_ductal_carcinoma,FALSE,metastasis,44,MDAMB157-311cas9 Rep A p4_batch2,2,18119
+broad,ACH-000624,breast,breast_ductal_carcinoma,FALSE,primary,60,HCC1806-311cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000624,breast,breast_ductal_carcinoma,FALSE,primary,60,HCC180_c904R1,ERS717283.plasmid,17660
+sanger,ACH-000668,breast,breast_ductal_carcinoma,FALSE,primary,49,HCC70_c903R1,ERS717283.plasmid,17660
+broad,ACH-000699,breast,breast_ductal_carcinoma,FALSE,primary,43,HCC1395-311Cas9_RepA_p3_batch2,2,18119
+sanger,ACH-000699,breast,breast_ductal_carcinoma,FALSE,primary,43,HCC139_c903R1,ERS717283.plasmid,17660
+broad,ACH-000711,breast,breast_ductal_carcinoma,FALSE,metastasis,62,JIMT1-P6 RepA Unmodified primers_batch3,3,18119
+sanger,ACH-000711,breast,breast_ductal_carcinoma,FALSE,metastasis,62,JIMT1_c903R1,ERS717283.plasmid,17660
+broad,ACH-000725,breast,breast_ductal_carcinoma,FALSE,primary,82,HCC202-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000859,breast,breast_ductal_carcinoma,FALSE,primary,61,HCC1954-311Cas9_RepB_p6_batch2,2,18119
+sanger,ACH-000859,breast,breast_ductal_carcinoma,FALSE,primary,61,HCC195_c903R1,ERS717283.plasmid,17660
+broad,ACH-001389,breast,breast_ductal_carcinoma,FALSE,metastasis,NA,SUM1315MO2-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001390,breast,breast_ductal_carcinoma,FALSE,primary,NA,SUM149PT-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001419,breast,breast_ductal_carcinoma,FALSE,primary,47,VP229-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001819,breast,breast_ductal_carcinoma,FALSE,metastasis,NA,MFM223-311cas9-RepA-p6_batch4,4,18119
+sanger,ACH-001819,breast,breast_ductal_carcinoma,FALSE,metastasis,NA,MFM223_c903R1,ERS717283.plasmid,17660
+broad,ACH-001820,breast,NA,FALSE,metastasis,NA,COLO824-RepA-p6_batch4,4,18119
+sanger,ACH-001820,breast,NA,FALSE,metastasis,NA,CO824_c903R1,ERS717283.plasmid,17660
+broad,ACH-000036,central_nervous_system,glioma,NA,NA,64,U343-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000040,central_nervous_system,glioma,TRUE,primary,NA,U118MG-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000067,central_nervous_system,glioma,TRUE,primary,76,HS683-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000067,central_nervous_system,glioma,TRUE,primary,76,Hs683_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000075,central_nervous_system,glioma,NA,primary,44,U87-MG-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000075,central_nervous_system,glioma,NA,primary,44,U87MG_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000098,central_nervous_system,glioma,FALSE,primary,42,GAMG-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000098,central_nervous_system,glioma,FALSE,primary,42,GAMG_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000128,central_nervous_system,glioma,TRUE,NA,67,LN319-311CAS9_RepA_p6_batch3,3,18119
+broad,ACH-000137,central_nervous_system,glioma,FALSE,primary,54,8-MG-BA-311Cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000137,central_nervous_system,glioma,FALSE,primary,54,8MGBA_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000152,central_nervous_system,glioma,TRUE,primary,33,M059K-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000200,central_nervous_system,glioma,FALSE,primary,NA,NMC-G1-311Cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000200,central_nervous_system,glioma,FALSE,primary,NA,NMCG1_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000215,central_nervous_system,glioma,TRUE,NA,NA,LN382-311CAS9_RepA_p6_batch3,3,18119
+broad,ACH-000231,central_nervous_system,glioma,FALSE,primary,NA,KALS1 -311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000232,central_nervous_system,glioma,TRUE,primary,NA,U251MG-311Cas9_RepA_p6_batch2,2,18119
+sanger,ACH-000232,central_nervous_system,glioma,TRUE,primary,NA,U251_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000244,central_nervous_system,glioma,FALSE,primary,67,DKMG-311Cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000244,central_nervous_system,glioma,FALSE,primary,67,DKMG_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-000269,central_nervous_system,glioma,TRUE,primary,36,AM38_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000273,central_nervous_system,glioma,FALSE,primary,NA,SF539-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000273,central_nervous_system,glioma,FALSE,primary,NA,SF539_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000323,central_nervous_system,glioma,TRUE,primary,63,42-MG-BA-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000323,central_nervous_system,glioma,TRUE,primary,63,42MGBA_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000329,central_nervous_system,glioma,FALSE,primary,68,CCF-STTG1-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000368,central_nervous_system,glioma,TRUE,primary,61,SNU-1105-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000370,central_nervous_system,glioma,TRUE,NA,65,SNU626-311Cas9-RepB-p5_batch3,3,18119
+broad,ACH-000376,central_nervous_system,glioma,FALSE,primary,67,SF-295-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000376,central_nervous_system,glioma,FALSE,primary,67,SF295_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000389,central_nervous_system,glioma,TRUE,primary,37,H4-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000437,central_nervous_system,glioma,TRUE,primary,72,SW1088-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000437,central_nervous_system,glioma,TRUE,primary,72,SW1088_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000445,central_nervous_system,glioma,TRUE,primary,55,KNS60-311cas9_RepB_p6_batch3,3,18119
+broad,ACH-000455,central_nervous_system,glioma,TRUE,NA,NA,LN428-311Cas9_RepA_p6_batch4,4,18119
+broad,ACH-000464,central_nervous_system,glioma,TRUE,primary,63,Cas1-311Cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000464,central_nervous_system,glioma,TRUE,primary,63,CAS1_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000469,central_nervous_system,glioma,TRUE,primary,40,YH-13-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000469,central_nervous_system,glioma,TRUE,primary,40,YH13_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000490,central_nervous_system,glioma,FALSE,metastasis,NA,SF767-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000504,central_nervous_system,glioma,FALSE,primary,NA,SNB75-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000504,central_nervous_system,glioma,FALSE,primary,NA,SNB75_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-000558,central_nervous_system,glioma,TRUE,primary,53,A172_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000570,central_nervous_system,glioma,FALSE,primary,NA,YKG1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000571,central_nervous_system,glioma,TRUE,primary,61,T98G-311Cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000571,central_nervous_system,glioma,TRUE,primary,61,T98G_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000591,central_nervous_system,glioma,TRUE,NA,38,LN-235-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000592,central_nervous_system,glioma,FALSE,NA,42,TM-31-311Cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000595,central_nervous_system,glioma,FALSE,primary,60,LN229_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-000609,central_nervous_system,glioma,FALSE,primary,NA,SF126_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000622,central_nervous_system,glioma,TRUE,primary,16,KNS42-311Cas9_RepA_p4_batch3,3,18119
+sanger,ACH-000622,central_nervous_system,glioma,TRUE,primary,16,KNS42_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000623,central_nervous_system,glioma,TRUE,primary,58,SNU-201-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-000634,central_nervous_system,glioma,TRUE,NA,NA,LN340-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000655,central_nervous_system,glioma,FALSE,primary,NA,SF268-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000673,central_nervous_system,glioma,NA,NA,NA,LN443-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000676,central_nervous_system,glioma,TRUE,NA,NA,LN464-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000738,central_nervous_system,glioma,TRUE,primary,35,GB1-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000738,central_nervous_system,glioma,TRUE,primary,35,GB1_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000756,central_nervous_system,glioma,TRUE,primary,61,GI-1-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000756,central_nervous_system,glioma,TRUE,primary,61,GI1_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000760,central_nervous_system,glioma,NA,NA,NA,LNZ308-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000807,central_nervous_system,glioma,TRUE,NA,40,SNU738-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000819,central_nervous_system,glioma,TRUE,primary,65,LN18-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000863,central_nervous_system,glioma,FALSE,primary,59,DBTRG0_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000887,central_nervous_system,glioma,FALSE,NA,NA,SF172-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-001016,central_nervous_system,glioma,TRUE,NA,57,Becker_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-001126,central_nervous_system,glioma,TRUE,NA,NA,MOGGUV_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-001172,central_nervous_system,glioma,TRUE,primary,NA,R256-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-001329,central_nervous_system,glioma,TRUE,primary,65,ANGMCSS-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-001605,central_nervous_system,glioma,TRUE,primary,62,no10_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-001606,central_nervous_system,glioma,FALSE,primary,64,no11_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-001608,central_nervous_system,glioma,TRUE,primary,63,NP2-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001609,central_nervous_system,glioma,TRUE,primary,64,NP3-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001610,central_nervous_system,glioma,TRUE,primary,27,NP5-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001611,central_nervous_system,glioma,FALSE,primary,38,NP8-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001622,central_nervous_system,glioma,TRUE,primary,51,ONDA7-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001623,central_nervous_system,glioma,FALSE,primary,31,ONDA8-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001624,central_nervous_system,glioma,TRUE,primary,58,ONDA9-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-002228,central_nervous_system,glioma,NA,NA,NA,D423MG_c907R2,CRISPR_C6596666.sample,17660
+sanger,ACH-002229,central_nervous_system,glioma,NA,NA,NA,D502MG_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002230,central_nervous_system,glioma,NA,NA,NA,D542MG_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002257,central_nervous_system,glioma,NA,NA,NA,KINGS1_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002269,central_nervous_system,glioma,NA,NA,NA,LNZTA3_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002304,central_nervous_system,glioma,NA,NA,NA,SKMG_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000055,central_nervous_system,medulloblastoma,TRUE,metastasis,6,D283MED-311cas9_RepA_p6_batch2,2,18119
+broad,ACH-000095,central_nervous_system,medulloblastoma,TRUE,NA,3.5,D341MED-311cas9 Rep A p5_batch3,3,18119
+broad,ACH-000211,central_nervous_system,medulloblastoma,TRUE,primary,4,Daoy-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000776,central_nervous_system,medulloblastoma,FALSE,primary,2,ONS-76-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001053,central_nervous_system,medulloblastoma,NA,NA,NA,D425-311cas9_RepA_p6_batch2,2,18119
+broad,ACH-001054,central_nervous_system,medulloblastoma,NA,NA,NA,D458-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-001232,central_nervous_system,medulloblastoma,FALSE,NA,NA,UW228-311Cas9_RepB_p6_batch2,2,18119
+broad,ACH-000025,central_nervous_system,meningioma,FALSE,NA,NA,CH157MN-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001067,central_nervous_system,meningioma,TRUE,NA,NA,F5-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001711,central_nervous_system,PNET,TRUE,primary,2,PFSK1-311Cas9-RepA-P6_batch4,4,18119
+broad,ACH-001341,cervix,cervical_adenocarcinoma,FALSE,primary,NA,Dotc2 4510-311Cas9_RepA_p5_batch4,4,18119
+broad,ACH-001513,cervix,cervical_adenocarcinoma,FALSE,metastasis,NA,HCA1-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001650,cervix,cervical_adenocarcinoma,FALSE,primary,67,SISO-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000556,cervix,cervical_carcinoma,FALSE,NA,NA,SiHa-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001333,cervix,cervical_carcinoma,FALSE,primary,66,C-33 A-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001334,cervix,cervical_carcinoma,FALSE,primary,41,C4I-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001335,cervix,cervical_carcinoma,FALSE,primary,41,C4II-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001525,cervix,cervical_carcinoma,FALSE,metastasis,59,HT3-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001336,cervix,cervical_squamous,FALSE,metastasis,40,CASKI-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001400,cervix,cervical_squamous,FALSE,primary,86,SW954-311cas9_RepB_p6_batch4,4,18119
+broad,ACH-001402,cervix,cervical_squamous,FALSE,primary,46,SW756-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-001451,cervix,cervical_squamous,FALSE,primary,NA,BOKU-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001515,cervix,cervical_squamous,FALSE,metastasis,42,HCS2-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-002019,cervix,glassy_cell_carcinoma,FALSE,primary,53,HOKUG-311cas9-RepA-p4_batch4,4,18119
+broad,ACH-000007,colorectal,colorectal_adenocarcinoma,TRUE,primary,63,LS513-311Cas9_RepA_p6_batch2,2,18119
+sanger,ACH-000007,colorectal,colorectal_adenocarcinoma,TRUE,primary,63,LS513_c903R1,ERS717283.plasmid,17660
+broad,ACH-000009,colorectal,colorectal_adenocarcinoma,TRUE,primary,72,C2BBE1-311Cas9 Rep A p5_batch3,3,18119
+sanger,ACH-000009,colorectal,colorectal_adenocarcinoma,TRUE,primary,72,C2BBe1_c903R1,ERS717283.plasmid,17660
+broad,ACH-000202,colorectal,colorectal_adenocarcinoma,FALSE,primary,55,COLO320-311Cas9 Rep A p6_batch3,3,18119
+broad,ACH-000249,colorectal,colorectal_adenocarcinoma,TRUE,primary,NA,CL-11-311Cas9_RepB_p6_batch3,3,18119
+sanger,ACH-000249,colorectal,colorectal_adenocarcinoma,TRUE,primary,NA,CL11_c903R1,ERS717283.plasmid,17660
+sanger,ACH-000252,colorectal,colorectal_adenocarcinoma,TRUE,primary,54,LS1034_c903R1,ERS717283.plasmid,17660
+broad,ACH-000253,colorectal,colorectal_adenocarcinoma,TRUE,metastasis,70,COLO201-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000286,colorectal,colorectal_adenocarcinoma,FALSE,primary,45,SNU-1033-311Cas9_RepA_p3_batch3,3,18119
+broad,ACH-000296,colorectal,colorectal_adenocarcinoma,TRUE,metastasis,NA,OUMS-23-311Cas9 Rep A p5_batch3,3,18119
+broad,ACH-000350,colorectal,colorectal_adenocarcinoma,TRUE,metastasis,69,COLO-678-311Cas9 Rep A p5_batch3,3,18119
+sanger,ACH-000350,colorectal,colorectal_adenocarcinoma,TRUE,metastasis,69,CO678_c903R4,ERS717283.plasmid,17660
+broad,ACH-000381,colorectal,colorectal_adenocarcinoma,TRUE,metastasis,72,T84-311Cas9 Rep A p6_batch3,3,18119
+sanger,ACH-000381,colorectal,colorectal_adenocarcinoma,TRUE,metastasis,72,T84_c903R4,ERS717283.plasmid,17660
+broad,ACH-000403,colorectal,colorectal_adenocarcinoma,TRUE,metastasis,69,NCI-H747-311cas9 Rep A p3_batch2,2,18119
+broad,ACH-000421,colorectal,colorectal_adenocarcinoma,TRUE,primary,53,SW837-311cas9 Rep A p5_batch2,2,18119
+sanger,ACH-000421,colorectal,colorectal_adenocarcinoma,TRUE,primary,53,SW837_c903R1,ERS717283.plasmid,17660
+broad,ACH-000467,colorectal,colorectal_adenocarcinoma,NA,NA,NA,HCC56-311Cas9_RepA_p4_batch2,2,18119
+broad,ACH-000470,colorectal,colorectal_adenocarcinoma,FALSE,primary,66,SW1463-311cas9 Rep A p5_batch2,2,18119
+broad,ACH-000491,colorectal,colorectal_adenocarcinoma,TRUE,metastasis,33,NCI-H716-311cas9 Rep A p5_batch2,2,18119
+sanger,ACH-000501,colorectal,colorectal_adenocarcinoma,FALSE,primary,65,LS123_c903R1,ERS717283.plasmid,17660
+sanger,ACH-000532,colorectal,colorectal_adenocarcinoma,TRUE,metastasis,48,SNU61_c903R1,ERS717283.plasmid,17660
+broad,ACH-000552,colorectal,colorectal_adenocarcinoma,FALSE,primary,44,HT29-311Cas9_RepA_p6 AVANA_batch3,3,18119
+sanger,ACH-000552,colorectal,colorectal_adenocarcinoma,FALSE,primary,44,HT29_c904R1,ERS717283.plasmid,17660
+sanger,ACH-000565,colorectal,colorectal_adenocarcinoma,FALSE,primary,73,RCM1_c903R1,ERS717283.plasmid,17660
+broad,ACH-000651,colorectal,colorectal_adenocarcinoma,TRUE,metastasis,51,SW620-311Cas9_RepA_p6_batch2,2,18119
+sanger,ACH-000651,colorectal,colorectal_adenocarcinoma,TRUE,metastasis,51,SW620_C902R1_P1D14,ERS717283.plasmid,17660
+broad,ACH-000680,colorectal,colorectal_adenocarcinoma,FALSE,primary,81,SW948-311Cas9_RepB_p6_batch3,3,18119
+broad,ACH-000683,colorectal,colorectal_adenocarcinoma,TRUE,metastasis,52,SNU-503-311Cas9 Rep A p3_batch2,2,18119
+sanger,ACH-000722,colorectal,colorectal_adenocarcinoma,TRUE,metastasis,71,SNUC1_c903R4,ERS717283.plasmid,17660
+broad,ACH-000820,colorectal,colorectal_adenocarcinoma,FALSE,primary,51,SW403-311Cas9_RepB_p5_batch2,2,18119
+broad,ACH-000926,colorectal,colorectal_adenocarcinoma,NA,primary,NA,HT55-311Cas9_RepA_p4_batch2,2,18119
+sanger,ACH-000926,colorectal,colorectal_adenocarcinoma,NA,primary,NA,HT55_C902R1_P1D14,ERS717283.plasmid,17660
+broad,ACH-000935,colorectal,colorectal_adenocarcinoma,NA,NA,NA,MDST8-311Cas9 Rep A p6_batch3,3,18119
+sanger,ACH-000935,colorectal,colorectal_adenocarcinoma,NA,NA,NA,MDST8_c903R3,ERS717283.plasmid,17660
+broad,ACH-000943,colorectal,colorectal_adenocarcinoma,NA,primary,NA,RKO-311Cas9_RepA_p6_batch2,2,18119
+sanger,ACH-000943,colorectal,colorectal_adenocarcinoma,NA,primary,NA,RKO_C902R1_P1D14,ERS717283.plasmid,17660
+broad,ACH-000950,colorectal,colorectal_adenocarcinoma,TRUE,metastasis,56,LOVO-311Cas9_RepA_p6_batch2,2,18119
+sanger,ACH-000950,colorectal,colorectal_adenocarcinoma,TRUE,metastasis,56,Lovo_c903R4,ERS717283.plasmid,17660
+broad,ACH-000957,colorectal,colorectal_adenocarcinoma,FALSE,primary,58,LS 180-311Cas9 Rep A p4_batch2,2,18119
+sanger,ACH-000957,colorectal,colorectal_adenocarcinoma,FALSE,primary,58,LS180_C902R1_P1D14,ERS717283.plasmid,17660
+broad,ACH-000958,colorectal,colorectal_adenocarcinoma,FALSE,primary,82,SW48-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000958,colorectal,colorectal_adenocarcinoma,FALSE,primary,82,SW48_C902R1_P1D14,ERS717283.plasmid,17660
+broad,ACH-000959,colorectal,colorectal_adenocarcinoma,TRUE,NA,35,SNUC4-311Cas9-Rep-A-p6_batch3,3,18119
+broad,ACH-000963,colorectal,colorectal_adenocarcinoma,FALSE,metastasis,NA,CCK-81-311cas9 Rep A p2_batch2,2,18119
+broad,ACH-000969,colorectal,colorectal_adenocarcinoma,NA,primary,NA,KM12-311Cas9 Rep A p5_batch3,3,18119
+sanger,ACH-000969,colorectal,colorectal_adenocarcinoma,NA,primary,NA,KM12_c908R1_100,CRISPR_C6596666.sample,17660
+sanger,ACH-000970,colorectal,colorectal_adenocarcinoma,FALSE,NA,77,SNUC5_C902R1_P1D14,ERS717283.plasmid,17660
+sanger,ACH-000971,colorectal,colorectal_adenocarcinoma,TRUE,primary,NA,HCT116_C902R1_P1D14,ERS717283.plasmid,17660
+sanger,ACH-000985,colorectal,colorectal_adenocarcinoma,TRUE,primary,32,LS411N_c903R1,ERS717283.plasmid,17660
+broad,ACH-000986,colorectal,colorectal_adenocarcinoma,NA,NA,NA,HT115-Avana 4 Rep A p6_batch3,3,18119
+sanger,ACH-000991,colorectal,colorectal_adenocarcinoma,TRUE,NA,53,SNU81_c903R1,ERS717283.plasmid,17660
+sanger,ACH-000997,colorectal,colorectal_adenocarcinoma,TRUE,primary,NA,HCT15_C902R1_P1D14,ERS717283.plasmid,17660
+sanger,ACH-001039,colorectal,colorectal_adenocarcinoma,TRUE,metastasis,70,CO205_c903R1,ERS717283.plasmid,17660
+broad,ACH-001061,colorectal,colorectal_adenocarcinoma,TRUE,primary,NA,DLD1-311Cas9_RepA_p7_batch2,2,18119
+sanger,ACH-001081,colorectal,colorectal_adenocarcinoma,NA,NA,NA,HCC299_c903R1,ERS717283.plasmid,17660
+broad,ACH-001345,colorectal,colorectal_adenocarcinoma,FALSE,primary,71,GP5d-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-001345,colorectal,colorectal_adenocarcinoma,FALSE,primary,71,GP5d_c903R1,ERS717283.plasmid,17660
+sanger,ACH-001399,colorectal,colorectal_adenocarcinoma,FALSE,metastasis,46,SW626_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-001454,colorectal,colorectal_adenocarcinoma,TRUE,primary,71,C10-311cas9_RepA_p4_batch3,3,18119
+broad,ACH-001458,colorectal,colorectal_adenocarcinoma,TRUE,primary,56,C75-311cas9_RepA_p5_batch3,3,18119
+broad,ACH-001459,colorectal,colorectal_adenocarcinoma,TRUE,primary,69,C80-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001460,colorectal,colorectal_adenocarcinoma,TRUE,primary,67,C84-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001461,colorectal,colorectal_adenocarcinoma,TRUE,primary,69,C99-311cas9_RepA_p4_batch3,3,18119
+broad,ACH-001786,colorectal,colorectal_adenocarcinoma,FALSE,primary,38,SNU1544-311cas9-RepA-p4_batch3,3,18119
+broad,ACH-002023,colorectal,colorectal_adenocarcinoma,FALSE,primary,79,TGBC18TKB-311Cas9-RepA-p6_batch4,4,18119
+broad,ACH-002024,colorectal,colorectal_adenocarcinoma,TRUE,primary,45,ECC4-311Cas9-RepA-p6_batch4,4,18119
+broad,ACH-002025,colorectal,colorectal_adenocarcinoma,TRUE,primary,NA,TT1TKB-311Cas9-RepA-p6_batch4,4,18119
+sanger,ACH-002219,colorectal,colorectal_adenocarcinoma,FALSE,NA,55,CO320H_c903R1,ERS717283.plasmid,17660
+sanger,ACH-002233,colorectal,colorectal_adenocarcinoma,NA,metastasis,NA,DIFI_C902R1_P1D14,ERS717283.plasmid,17660
+broad,ACH-001442,epidermoid_carcinoma,skin_squamous,TRUE,metastasis,86,A388-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-000383,esophagus,esophagus_adenocarcinoma,FALSE,primary,73,OE33-311Cas9_RepA_p4_batch2,2,18119
+sanger,ACH-000383,esophagus,esophagus_adenocarcinoma,FALSE,primary,73,OE33_C907R1,CRISPR_C6596666.sample,17660
+broad,ACH-001368,esophagus,esophagus_adenocarcinoma,FALSE,metastasis,47,OACM51-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-001368,esophagus,esophagus_adenocarcinoma,FALSE,metastasis,47,OACM51_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-001496,esophagus,esophagus_adenocarcinoma,TRUE,primary,56,ESO26-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-001496,esophagus,esophagus_adenocarcinoma,TRUE,primary,56,ESO26_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-001497,esophagus,esophagus_adenocarcinoma,TRUE,primary,NA,ESO51_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-001500,esophagus,esophagus_adenocarcinoma,TRUE,primary,NA,FLO1-311Cas9-Rep B-P6_batch4,4,18119
+sanger,ACH-001500,esophagus,esophagus_adenocarcinoma,TRUE,primary,NA,FLO1_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-001544,esophagus,esophagus_adenocarcinoma,TRUE,metastasis,NA,KYAE1_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-001654,esophagus,esophagus_adenocarcinoma,TRUE,primary,NA,SKGT4-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-001654,esophagus,esophagus_adenocarcinoma,TRUE,primary,NA,SKGT4_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000305,esophagus,esophagus_squamous,TRUE,NA,65,ECGI10-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000305,esophagus,esophagus_squamous,TRUE,NA,65,ECGI10_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000318,esophagus,esophagus_squamous,TRUE,primary,NA,TE10-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000318,esophagus,esophagus_squamous,TRUE,primary,NA,TE10_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000408,esophagus,esophagus_squamous,FALSE,NA,73,TE-5-311Cas9_RepA_p6_batch2,2,18119
+sanger,ACH-000408,esophagus,esophagus_squamous,FALSE,NA,73,TE5_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000452,esophagus,esophagus_squamous,TRUE,NA,NA,TE-8-311Cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000452,esophagus,esophagus_squamous,TRUE,NA,NA,TE8_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000488,esophagus,esophagus_squamous,TRUE,primary,58,TE11-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000544,esophagus,esophagus_squamous,TRUE,primary,74,OE21-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000544,esophagus,esophagus_squamous,TRUE,primary,74,OE21_C907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-000561,esophagus,esophagus_squamous,TRUE,metastasis,NA,TT1_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000605,esophagus,esophagus_squamous,TRUE,NA,NA,TE6-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000637,esophagus,esophagus_squamous,FALSE,primary,58,KYSE-520-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000637,esophagus,esophagus_squamous,FALSE,primary,58,KYSE52_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000647,esophagus,esophagus_squamous,TRUE,primary,NA,TE-1 -311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000693,esophagus,esophagus_squamous,TRUE,primary,53,KYSE180-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000694,esophagus,esophagus_squamous,TRUE,metastasis,NA,TE-9-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000694,esophagus,esophagus_squamous,TRUE,metastasis,NA,TE9_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-000717,esophagus,esophagus_squamous,FALSE,NA,57,CO680N_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000777,esophagus,esophagus_squamous,TRUE,primary,64,KYSE-30-311Cas9_RepB_p6_batch3,3,18119
+broad,ACH-000784,esophagus,esophagus_squamous,TRUE,primary,77,KYSE70-311Cas9_RepA_p5_batch2,2,18119
+sanger,ACH-000784,esophagus,esophagus_squamous,TRUE,primary,77,KYSE70_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000809,esophagus,esophagus_squamous,TRUE,primary,51,KYSE-410-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000809,esophagus,esophagus_squamous,TRUE,primary,51,KYSE41_C908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000823,esophagus,esophagus_squamous,TRUE,primary,54,KYSE-140-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000823,esophagus,esophagus_squamous,TRUE,primary,54,KYSE14_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000824,esophagus,esophagus_squamous,FALSE,primary,67,KYSE-510-311cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000824,esophagus,esophagus_squamous,FALSE,primary,67,KYSE51_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000855,esophagus,esophagus_squamous,FALSE,primary,49,KYSE-150-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000855,esophagus,esophagus_squamous,FALSE,primary,49,KYSE15_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000865,esophagus,esophagus_squamous,TRUE,primary,59,KYSE450-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000865,esophagus,esophagus_squamous,TRUE,primary,59,KYSE45_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000873,esophagus,esophagus_squamous,TRUE,primary,79,KYSE270-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000873,esophagus,esophagus_squamous,TRUE,primary,79,KYSE27_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000917,esophagus,esophagus_squamous,FALSE,NA,NA,TE-4-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000917,esophagus,esophagus_squamous,FALSE,NA,NA,TE4_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002243,esophagus,esophagus_squamous,NA,NA,NA,HCE4_c908R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002263,esophagus,esophagus_squamous,NA,NA,NA,KYSE22_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-001295,eye,retinoblastoma,FALSE,NA,2.5,Y79-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001421,eye,retinoblastoma,FALSE,primary,1,WERIRB1-311Cas9-RepA-P4_batch4,4,18119
+broad,ACH-001554,eye,uveal_melanoma,FALSE,primary,NA,MEL202-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-002015,eye,uveal_melanoma,FALSE,primary,49,MEL285-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-002016,eye,uveal_melanoma,FALSE,primary,67,MEL290-311cas9-RepA-p4_batch4,4,18119
+broad,ACH-002017,eye,uveal_melanoma,TRUE,metastasis,NA,OMM1-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-002018,eye,uveal_melanoma,TRUE,metastasis,NA,OMM25-311Cas9-RepA-p6_batch4,4,18119
+broad,ACH-000133,fibroblast,fibroblast_soft_tissue,TRUE,primary,74,Hs729-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-002198,gastric,choriocarcinoma,NA,metastasis,NA,SCH_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000047,gastric,gastric_adenocarcinoma,FALSE,metastasis,NA,GCIY -311Cas9_RepA_p4_batch3,3,18119
+sanger,ACH-000144,gastric,gastric_adenocarcinoma,TRUE,metastasis,41,GC1B_C908R2,CRISPR_C6596666.sample,17660
+broad,ACH-000247,gastric,gastric_adenocarcinoma,FALSE,metastasis,38,OCUM-1-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-000255,gastric,gastric_adenocarcinoma,FALSE,metastasis,27,LMSU-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000303,gastric,gastric_adenocarcinoma,FALSE,metastasis,33,SNU-5-311Cas9_RepA_p6_batch4,4,18119
+broad,ACH-000325,gastric,gastric_adenocarcinoma,FALSE,metastasis,59,SNU620-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000344,gastric,gastric_adenocarcinoma,TRUE,metastasis,63,SNU668-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000356,gastric,gastric_adenocarcinoma,FALSE,metastasis,62,MKN45 -311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000427,gastric,gastric_adenocarcinoma,TRUE,metastasis,NA,NCI-N87-311Cas9_RepA_p4_batch3,3,18119
+sanger,ACH-000427,gastric,gastric_adenocarcinoma,TRUE,metastasis,NA,N87_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000466,gastric,gastric_adenocarcinoma,FALSE,metastasis,46,SNU-216-311cas9_RepA_p4_batch3,3,18119
+broad,ACH-000485,gastric,gastric_adenocarcinoma,TRUE,metastasis,37,GSU-311cas9_RepA_p5_batch3,3,18119
+broad,ACH-000507,gastric,gastric_adenocarcinoma,TRUE,metastasis,77,KE39-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000581,gastric,gastric_adenocarcinoma,FALSE,metastasis,33,SNU16-311cas9-RepA-p6_batch3,3,18119
+sanger,ACH-000581,gastric,gastric_adenocarcinoma,FALSE,metastasis,33,SNU16_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000616,gastric,gastric_adenocarcinoma,TRUE,metastasis,74,HS746T-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000633,gastric,gastric_adenocarcinoma,FALSE,primary,66,FU97-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000736,gastric,gastric_adenocarcinoma,TRUE,metastasis,34,SNU601-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000746,gastric,gastric_adenocarcinoma,TRUE,metastasis,75,GSS-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000758,gastric,gastric_adenocarcinoma,TRUE,metastasis,37,MKN74-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000764,gastric,gastric_adenocarcinoma,NA,primary,NA,SH10TC-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000793,gastric,gastric_adenocarcinoma,TRUE,metastasis,55,KatO III Rep A P6_batch3,3,18119
+sanger,ACH-000793,gastric,gastric_adenocarcinoma,TRUE,metastasis,55,KATOII_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000847,gastric,gastric_adenocarcinoma,NA,metastasis,NA,HGC27-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000847,gastric,gastric_adenocarcinoma,NA,metastasis,NA,HGC27_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000880,gastric,gastric_adenocarcinoma,FALSE,primary,54,AGS-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000880,gastric,gastric_adenocarcinoma,FALSE,primary,54,AGS_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000898,gastric,gastric_adenocarcinoma,TRUE,primary,53,SNU719-311cas9_RepA_p4_batch3,3,18119
+broad,ACH-000911,gastric,gastric_adenocarcinoma,TRUE,metastasis,72,NUGC3-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000911,gastric,gastric_adenocarcinoma,TRUE,metastasis,72,NUGC3_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-000919,gastric,gastric_adenocarcinoma,TRUE,primary,63,IM95_c908R3,CRISPR_C6596666.sample,17660
+broad,ACH-000932,gastric,gastric_adenocarcinoma,TRUE,metastasis,44,SNU-1-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000932,gastric,gastric_adenocarcinoma,TRUE,metastasis,44,SNU1_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000948,gastric,gastric_adenocarcinoma,TRUE,primary,72,2313287-311Cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000948,gastric,gastric_adenocarcinoma,TRUE,primary,72,231328_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-001653,gastric,gastric_adenocarcinoma,TRUE,primary,72,SKGT2-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001664,gastric,gastric_adenocarcinoma,TRUE,metastasis,48,SNU638-311cas9-RepA-p6_batch3,3,18119
+sanger,ACH-002141,gastric,gastric_adenocarcinoma,NA,metastasis,NA,HSC39_c908R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002161,gastric,gastric_adenocarcinoma,NA,metastasis,NA,MKN28_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002202,gastric,gastric_adenocarcinoma,NA,metastasis,NA,TMK1_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-002446,gastric,gastric_adenocarcinoma,NA,metastasis,NA,CCLFUPGI0005T-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000096,kidney,malignant_rhabdoid_tumor,TRUE,primary,0.25,G-401-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-001532,kidney,malignant_rhabdoid_tumor,FALSE,metastasis,1,JMURTK2-311cas9_RepA_p5_batch3,3,18119
+broad,ACH-000127,kidney,renal_cell_carcinoma,NA,primary,NA,SLR20-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000159,kidney,renal_cell_carcinoma,TRUE,primary,NA,OSRC2-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000189,kidney,renal_cell_carcinoma,TRUE,primary,NA,RCC10RGB-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000234,kidney,renal_cell_carcinoma,TRUE,primary,69,CAKI-2-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000246,kidney,renal_cell_carcinoma,NA,metastasis,NA,SLR23-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000250,kidney,renal_cell_carcinoma,NA,primary,NA,KMRC20-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000262,kidney,renal_cell_carcinoma,FALSE,NA,NA,UOK101-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000272,kidney,renal_cell_carcinoma,NA,primary,NA,SLR24-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-000313,kidney,renal_cell_carcinoma,TRUE,primary,NA,KMRC3-311Cas9-RepA-p6_batch4,4,18119
+broad,ACH-000317,kidney,renal_cell_carcinoma,TRUE,primary,NA,TUHR14TKB-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000385,kidney,renal_cell_carcinoma,NA,NA,NA,SKRC20-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000411,kidney,renal_cell_carcinoma,FALSE,primary,63,769-P-311Cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000411,kidney,renal_cell_carcinoma,FALSE,primary,63,769P_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000433,kidney,renal_cell_carcinoma,TRUE,metastasis,49,CAKI-1-311Cas9_RepA_p4_batch2,2,18119
+broad,ACH-000459,kidney,renal_cell_carcinoma,TRUE,primary,69,TUHR-10-TKB-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000484,kidney,renal_cell_carcinoma,TRUE,primary,NA,VMRC-RCW-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-000495,kidney,renal_cell_carcinoma,TRUE,primary,60,TUHR4TKB-311Cas9_RepB_p5_batch3,3,18119
+broad,ACH-000600,kidney,renal_cell_carcinoma,NA,primary,NA,SLR26-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000649,kidney,renal_cell_carcinoma,TRUE,primary,58,786O-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-000684,kidney,renal_cell_carcinoma,TRUE,primary,NA,KMRC1-311Cas9_RepA_p5_batch2,2,18119
+broad,ACH-000709,kidney,renal_cell_carcinoma,TRUE,primary,NA,KMRC2-311Cas9-RepA_p6_batch4,4,18119
+broad,ACH-000792,kidney,renal_cell_carcinoma,TRUE,primary,64,BFTC909-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000907,kidney,renal_cell_carcinoma,TRUE,primary,68,SNU349-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-001163,kidney,renal_cell_carcinoma,TRUE,metastasis,NA,PEDS005TPFAD-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-001194,kidney,renal_cell_carcinoma,NA,metastasis,NA,SKRC31-311cas9-RepAB-p6_batch4,4,18119
+sanger,ACH-002150,kidney,renal_cell_carcinoma,NA,NA,NA,LB1047_C908r1,CRISPR_C6596666.sample,17660
+sanger,ACH-002189,kidney,renal_cell_carcinoma,NA,NA,NA,RCCFG2_C908R1,CRISPR_C6596666.sample,17660
+broad,ACH-001687,kidney,NA,NA,primary,NA,UMRC3-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001688,kidney,NA,TRUE,primary,NA,UMRC7-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000671,liver,hepatoblastoma,TRUE,NA,NA,HuH-6-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000217,liver,hepatocellular_carcinoma,FALSE,primary,57,JHH-6-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000221,liver,hepatocellular_carcinoma,TRUE,primary,42,SNU-398-31Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000316,liver,hepatocellular_carcinoma,TRUE,NA,57,SNU-886-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000361,liver,hepatocellular_carcinoma,TRUE,metastasis,52,SKHEP1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000393,liver,hepatocellular_carcinoma,TRUE,primary,69,HLF-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000420,liver,hepatocellular_carcinoma,TRUE,primary,52,SNU449-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000422,liver,hepatocellular_carcinoma,TRUE,primary,43,SNU-475-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000475,liver,hepatocellular_carcinoma,TRUE,primary,53,HUH1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000476,liver,hepatocellular_carcinoma,TRUE,primary,51,JHH-4-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000478,liver,hepatocellular_carcinoma,FALSE,primary,41,SNU-387-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000480,liver,hepatocellular_carcinoma,TRUE,primary,57,HUH7-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-000483,liver,hepatocellular_carcinoma,TRUE,primary,24,SNU-182-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-000493,liver,hepatocellular_carcinoma,TRUE,primary,40,SNU423-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000537,liver,hepatocellular_carcinoma,TRUE,NA,49,SNU761-311Cas9_RepB_p6_batch3,3,18119
+broad,ACH-000577,liver,hepatocellular_carcinoma,TRUE,metastasis,57,JHH2-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-000620,liver,hepatocellular_carcinoma,TRUE,primary,50,JHH1-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000734,liver,hepatocellular_carcinoma,TRUE,primary,50,JHH5-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-000739,liver,hepatocellular_carcinoma,TRUE,primary,15,HEPG2-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000848,liver,hepatocellular_carcinoma,TRUE,primary,53,JHH7-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001318,liver,hepatocellular_carcinoma,TRUE,primary,24,PLCPRF5-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000471,liver,NA,TRUE,NA,45,Li-7-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000775,lung,lung_carcinoid,FALSE,primary,65,NCI-H727-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000086,lung,mesothelioma,FALSE,NA,61,ACCMES01-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000092,lung,mesothelioma,TRUE,metastasis,NA,NCI-H2452-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000153,lung,mesothelioma,TRUE,metastasis,65,NCI-H2052-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000319,lung,mesothelioma,TRUE,NA,67,MPP 89-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000331,lung,mesothelioma,TRUE,NA,71,IST-MES2-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000335,lung,mesothelioma,TRUE,metastasis,62,MSTO-211H-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000645,lung,mesothelioma,TRUE,primary,54,JL-1-311Cas9_RepA_p6_batch4,4,18119
+broad,ACH-000648,lung,mesothelioma,TRUE,metastasis,48,NCIH28-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001555,lung,mesothelioma,TRUE,primary,60,MERO14-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001556,lung,mesothelioma,TRUE,primary,60,MERO25-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001559,lung,mesothelioma,NA,primary,NA,MERO82-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001560,lung,mesothelioma,TRUE,primary,NA,MERO83-311cas9-RepB-p6_batch4,4,18119
+broad,ACH-001992,lung,mesothelioma,TRUE,primary,NA,ONE58-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000012,lung,NSCLC,FALSE,primary,39,HCC827-311Cas9 Rep A p6_batch3,3,18119
+broad,ACH-000015,lung,NSCLC,TRUE,primary,44,NCI-H1581-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-000021,lung,NSCLC,FALSE,metastasis,55,NCI-H1693-311Cas9 Rep A p4_batch3,3,18119
+broad,ACH-000029,lung,NSCLC,FALSE,primary,39,HCC827GR5-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000030,lung,NSCLC,TRUE,primary,NA,PC-14-311Cas9 Rep A p6_batch3,3,18119
+sanger,ACH-000030,lung,NSCLC,TRUE,primary,NA,PC14_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000035,lung,NSCLC,TRUE,metastasis,27,NCI-H1650-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000035,lung,NSCLC,TRUE,metastasis,27,H1650_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000143,lung,NSCLC,FALSE,NA,34,HCC2429-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000150,lung,NSCLC,TRUE,primary,39,HCC2935-311CAS9_RepA_p6_batch3,3,18119
+broad,ACH-000161,lung,NSCLC,TRUE,metastasis,NA,CORL105-311Cas9-RepA-p6_batch4,4,18119
+sanger,ACH-000176,lung,NSCLC,FALSE,primary,64,LOUNH9_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000251,lung,NSCLC,TRUE,NA,NA,NCI-H2887-311cas9_RepB_p5_batch2,2,18119
+broad,ACH-000261,lung,NSCLC,NA,metastasis,NA,RERF-LC-AI-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000264,lung,NSCLC,FALSE,metastasis,61,Calu-6-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000282,lung,NSCLC,FALSE,metastasis,65,H1755_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000311,lung,NSCLC,FALSE,metastasis,46,NCI-H2122-311cas9 Rep A p5_batch3,3,18119
+broad,ACH-000337,lung,NSCLC,NA,NA,NA,NCIH3122-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000337,lung,NSCLC,NA,NA,NA,H3122_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000339,lung,NSCLC,TRUE,NA,NA,HCC461-Avana4 Rep A p6_batch3,3,18119
+broad,ACH-000343,lung,NSCLC,TRUE,primary,60,NCIH522-311Cas9_RepA_p6_batch4,4,18119
+sanger,ACH-000367,lung,NSCLC,TRUE,metastasis,NA,H226_c90R1,CRISPR_C6596666.sample,17660
+broad,ACH-000378,lung,NSCLC,TRUE,metastasis,56,NCI-H647-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000390,lung,NSCLC,TRUE,primary,72,LUDLU1-311Cas9_RepA_p4_batch2,2,18119
+broad,ACH-000395,lung,NSCLC,TRUE,primary,NA,NCI-H520-311Cas9 Rep A p6_batch3,3,18119
+sanger,ACH-000395,lung,NSCLC,TRUE,primary,NA,H520_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000414,lung,NSCLC,FALSE,metastasis,62,NCI-H1944-311cas9 Rep A p5_batch3,3,18119
+sanger,ACH-000414,lung,NSCLC,FALSE,metastasis,62,H1944_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000416,lung,NSCLC,TRUE,metastasis,59,NCI-H838-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-000434,lung,NSCLC,FALSE,metastasis,61,NCI-H1915-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000434,lung,NSCLC,FALSE,metastasis,61,H1915_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000438,lung,NSCLC,TRUE,primary,64,LU65-311cas9-RepA-p6_batch3,3,18119
+sanger,ACH-000438,lung,NSCLC,TRUE,primary,64,LU65_c906R4,CRISPR_C6596666.sample,17660
+sanger,ACH-000442,lung,NSCLC,FALSE,primary,74,LCSq1_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000444,lung,NSCLC,TRUE,metastasis,63,LU99-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000448,lung,NSCLC,FALSE,metastasis,50,NCIH1666-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000454,lung,NSCLC,TRUE,metastasis,65,HCC-95-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-000463,lung,NSCLC,TRUE,metastasis,NA,NCI-H460-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-000481,lung,NSCLC,TRUE,primary,NA,NCI-H2170-311Cas9 Rep A p4_batch2,2,18119
+sanger,ACH-000481,lung,NSCLC,TRUE,primary,NA,H2170_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000496,lung,NSCLC,TRUE,metastasis,50,NCI-H1792-311Cas9 Rep A p6_batch3,3,18119
+broad,ACH-000510,lung,NSCLC,TRUE,metastasis,43,NCI-H1299-311Cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000510,lung,NSCLC,TRUE,metastasis,43,H1299_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000511,lung,NSCLC,TRUE,metastasis,47,Calu-1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000521,lung,NSCLC,TRUE,metastasis,NA,NCI-H2030-311Cas9 Rep A p6_batch3,3,18119
+broad,ACH-000528,lung,NSCLC,TRUE,metastasis,47,ABC-1-311Cas9 Rep A p5_20150925_batch3,3,18119
+sanger,ACH-000562,lung,NSCLC,TRUE,metastasis,65,HCC78_c906R3,CRISPR_C6596666.sample,17660
+broad,ACH-000563,lung,NSCLC,TRUE,metastasis,69,EBC1-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000563,lung,NSCLC,TRUE,metastasis,69,EBC1_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000585,lung,NSCLC,TRUE,primary,57,EPLC-272H-311Cas9 Rep A p6_batch2,2,18119
+sanger,ACH-000585,lung,NSCLC,TRUE,primary,57,EPLC27_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000587,lung,NSCLC,FALSE,primary,NA,NCIH1975-311Cas9-RepA-p6_batch3,3,18119
+sanger,ACH-000587,lung,NSCLC,FALSE,primary,NA,H1975_c906R4,CRISPR_C6596666.sample,17660
+broad,ACH-000589,lung,NSCLC,TRUE,metastasis,60,NCI-H1437-311Cas9 Rep A p5_batch3,3,18119
+broad,ACH-000596,lung,NSCLC,TRUE,primary,44,LCLC-97TM1-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000596,lung,NSCLC,TRUE,primary,44,LCLC97_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000627,lung,NSCLC,TRUE,metastasis,61,LCLC-103H-311Cas9 Rep B p6_batch3,3,18119
+broad,ACH-000638,lung,NSCLC,TRUE,metastasis,NA,NCI-H441-311Cas9 Rep A p6_batch3,3,18119
+broad,ACH-000662,lung,NSCLC,TRUE,metastasis,62,CORL23-311cas9_RepA_p4_batch3,3,18119
+sanger,ACH-000662,lung,NSCLC,TRUE,metastasis,62,L23_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000665,lung,NSCLC,TRUE,metastasis,65,SKMES1-311cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000665,lung,NSCLC,TRUE,metastasis,65,SKMES1_c906R1,CRISPR_C6596666.sample,17660
+sanger,ACH-000666,lung,NSCLC,TRUE,metastasis,53,H1355_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000667,lung,NSCLC,FALSE,primary,54,HCC44-311Cas9-RepA-p6_batch3,3,18119
+broad,ACH-000677,lung,NSCLC,FALSE,primary,44,SW-1573-311Cas9_RepA_p4_batch3,3,18119
+sanger,ACH-000677,lung,NSCLC,FALSE,primary,44,SW1573_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000681,lung,NSCLC,TRUE,primary,52,A549-311Cas9 Rep A p5_batch3,3,18119
+sanger,ACH-000681,lung,NSCLC,TRUE,primary,52,A549_c906R2,CRISPR_C6596666.sample,17660
+broad,ACH-000700,lung,NSCLC,FALSE,NA,NA,NCI-H2882-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000706,lung,NSCLC,TRUE,primary,NA,EKVX-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000718,lung,NSCLC,TRUE,metastasis,NA,NCI-H2291-311Cas9 Rep A p4_batch3,3,18119
+broad,ACH-000747,lung,NSCLC,TRUE,primary,54,NCIH1703-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000757,lung,NSCLC,TRUE,NA,NA,A427-311cas9 Rep A p4_batch3,3,18119
+broad,ACH-000766,lung,NSCLC,TRUE,metastasis,39,NCI-H1648-311Cas9 Rep A p4_batch3,3,18119
+broad,ACH-000769,lung,NSCLC,TRUE,primary,NA,LK-2-311Cas9 Rep A p6_batch3,3,18119
+sanger,ACH-000769,lung,NSCLC,TRUE,primary,NA,LK2_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000774,lung,NSCLC,TRUE,primary,NA,RERF-LC-Ad2-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000781,lung,NSCLC,TRUE,metastasis,26,NCI-H2023-311Cas9 Rep A p6_batch3,3,18119
+sanger,ACH-000781,lung,NSCLC,TRUE,metastasis,26,H2023_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000785,lung,NSCLC,TRUE,metastasis,65,NCI-H2126-311Cas9 Rep B p5_batch3,3,18119
+broad,ACH-000787,lung,NSCLC,TRUE,primary,63,LXF-289-311cas9 Rep B p6_batch3,3,18119
+sanger,ACH-000787,lung,NSCLC,TRUE,primary,63,LXF289_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000791,lung,NSCLC,TRUE,primary,70,RERF-LC-Ad1-311Cas9 Rep A p5_batch3,3,18119
+broad,ACH-000826,lung,NSCLC,TRUE,primary,NA,CAL12T-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000837,lung,NSCLC,TRUE,primary,52,NCI-H322-311Cas9 Rep A p6_batch3,3,18119
+broad,ACH-000840,lung,NSCLC,FALSE,primary,80,HCC366-311cas9_RepA_p5_batch3,3,18119
+broad,ACH-000841,lung,NSCLC,TRUE,metastasis,69,NCI-H2087-311Cas9 Rep A p4_batch3,3,18119
+sanger,ACH-000841,lung,NSCLC,TRUE,metastasis,69,H2087_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000843,lung,NSCLC,TRUE,metastasis,57,HARA-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000843,lung,NSCLC,TRUE,metastasis,57,HARA_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000845,lung,NSCLC,TRUE,primary,56,NCIH1373-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000851,lung,NSCLC,NA,primary,NA,MOR/CPR-311cas9 Rep A p4_batch3,3,18119
+broad,ACH-000853,lung,NSCLC,TRUE,metastasis,43,NCI-H661-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000858,lung,NSCLC,TRUE,metastasis,49,KNS62-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000858,lung,NSCLC,TRUE,metastasis,49,KNS62_c906R4,CRISPR_C6596666.sample,17660
+broad,ACH-000860,lung,NSCLC,TRUE,primary,NA,NCIH358-311cas9-RepA-p6_batch4,4,18119
+sanger,ACH-000860,lung,NSCLC,TRUE,primary,NA,H358_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000861,lung,NSCLC,FALSE,primary,NA,HOP-62-311CAS9 Rep A p6_batch3,3,18119
+sanger,ACH-000861,lung,NSCLC,FALSE,primary,NA,HOP62_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000867,lung,NSCLC,TRUE,metastasis,45,CHAGOK1-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-000869,lung,NSCLC,FALSE,metastasis,48,NCI-H1568-311Cas9_RepA_p4_batch3,3,18119
+sanger,ACH-000869,lung,NSCLC,FALSE,metastasis,48,H1568_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000872,lung,NSCLC,FALSE,NA,NA,HCC515-311Cas9 Rep A p6_batch2,2,18119
+broad,ACH-000878,lung,NSCLC,TRUE,primary,47,HCC15-311Cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000878,lung,NSCLC,TRUE,primary,47,HCC15_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000886,lung,NSCLC,FALSE,metastasis,68,NCI-H2009-311CAS9-RepA-p6_batch4,4,18119
+broad,ACH-000888,lung,NSCLC,FALSE,primary,52,NCIH1793-2Acas9-RepA-p6_batch3,3,18119
+sanger,ACH-000894,lung,NSCLC,TRUE,metastasis,58,H1869_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000900,lung,NSCLC,TRUE,primary,51,NCI-H23-311Cas9 Rep A p5_batch3,3,18119
+sanger,ACH-000900,lung,NSCLC,TRUE,primary,51,H23_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000901,lung,NSCLC,FALSE,primary,55,HCC-1359-311Cas9 Rep A p5_batch3,3,18119
+broad,ACH-000916,lung,NSCLC,FALSE,metastasis,35,NCIH1573-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000924,lung,NSCLC,FALSE,primary,NA,NCI-H2172-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000929,lung,NSCLC,NA,metastasis,NA,NCI-H2110-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000945,lung,NSCLC,TRUE,metastasis,NA,H650_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000975,lung,NSCLC,TRUE,NA,52,HCC2450-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000980,lung,NSCLC,TRUE,metastasis,36,NCI-H1155-311Cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000980,lung,NSCLC,TRUE,metastasis,36,H1155_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-001041,lung,NSCLC,FALSE,metastasis,57,Colo699-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001075,lung,NSCLC,FALSE,metastasis,32,NCIH292-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-001137,lung,NSCLC,FALSE,metastasis,NA,H1993_c906R1,CRISPR_C6596666.sample,17660
+sanger,ACH-001233,lung,NSCLC,TRUE,primary,NA,LCD_c906R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002156,lung,NSCLC,NA,NA,NA,LC1sq_c906R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002158,lung,NSCLC,TRUE,NA,63,LU99A_c906R4,CRISPR_C6596666.sample,17660
+sanger,ACH-002172,lung,NSCLC,NA,NA,NA,H322M_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000187,lung,SCLC,TRUE,primary,63,COR-L311-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000257,lung,SCLC,TRUE,metastasis,63,CORL279-311cas9_RepA_p4_batch3,3,18119
+broad,ACH-000290,lung,SCLC,TRUE,metastasis,55,NCI-H209-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000292,lung,SCLC,TRUE,metastasis,51,NCI-H841-311as9_RepA_p6_batch3,3,18119
+broad,ACH-000355,lung,SCLC,TRUE,metastasis,41,NCI-H82-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000431,lung,SCLC,TRUE,metastasis,61,NCIH1694-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-000514,lung,SCLC,TRUE,metastasis,67,NCIH1092-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-000639,lung,SCLC,FALSE,metastasis,50,NCI-H211-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000695,lung,SCLC,TRUE,metastasis,67,CORL47-311Cas9_RepB_p5_batch3,3,18119
+broad,ACH-000698,lung,SCLC,TRUE,primary,54,DMS53-311Cas9_RepA_p6_renamed_batch2,2,18119
+broad,ACH-000767,lung,SCLC,TRUE,metastasis,55,NCI-H526-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000790,lung,SCLC,TRUE,primary,54,SHP77-311cas9_RepA_p5_batch3,3,18119
+broad,ACH-000800,lung,SCLC,TRUE,metastasis,61,NCI-H446-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000866,lung,SCLC,FALSE,metastasis,NA,NCI-H1048-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000890,lung,SCLC,TRUE,primary,69,SW1271-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000912,lung,SCLC,FALSE,primary,57,NCI-H2286-311caa9_RepA_p6_batch3,3,18119
+broad,ACH-000921,lung,SCLC,FALSE,metastasis,49,NCIH1339-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001386,lung,SCLC,TRUE,metastasis,46,SCLC22H-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001549,lung,SCLC,TRUE,primary,69,LU135-311cas9-RepA-p5_batch3,3,18119
+broad,ACH-000206,lymphocyte,ATL,NA,NA,NA,C8166-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000190,lymphocyte,hodgkin_lymphoma,TRUE,NA,29,HDMYZ-311Cas9-RepA-P6_batch4,4,18119
+broad,ACH-000702,lymphocyte,hodgkin_lymphoma,TRUE,NA,34,L1236-311cas9_RepA_p4_batch3,3,18119
+broad,ACH-000754,lymphocyte,hodgkin_lymphoma,FALSE,NA,37,L428-311cas9-RepA-p4_batch4,4,18119
+broad,ACH-001685,lymphocyte,hodgkin_lymphoma,TRUE,primary,23,UHO1-311cas9-RepA-p5_batch3,3,18119
+broad,ACH-001134,lymphocyte,lymphoma_unspecified,NA,NA,NA,My-La-311cas9 Rep A p6_batch2,2,18119
+broad,ACH-001197,lymphocyte,lymphoma_unspecified,TRUE,NA,NA,SMZ1-311Cas9 Rep A p6_batch3,3,18119
+broad,ACH-001677,lymphocyte,lymphoma_unspecified,TRUE,primary,59,U2904-311cas9_RepA_p4_batch3,3,18119
+broad,ACH-001709,lymphocyte,lymphoma_unspecified,FALSE,primary,46,WSUNHL-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-002062,lymphocyte,lymphoma_unspecified,FALSE,primary,70,SLVL-311cas9-RepB-p6_batch4,4,18119
+broad,ACH-000053,lymphocyte,non_hodgkin_lymphoma,TRUE,NA,25,Karpas-299-311Cas9 Rep A p5_batch3,3,18119
+sanger,ACH-000124,lymphocyte,non_hodgkin_lymphoma,FALSE,primary,27,LY19_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000226,lymphocyte,non_hodgkin_lymphoma,FALSE,NA,5,SUP-M2-311Cas9 Rep A p4_batch3,3,18119
+broad,ACH-000233,lymphocyte,non_hodgkin_lymphoma,TRUE,NA,12,DEL-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000271,lymphocyte,non_hodgkin_lymphoma,TRUE,metastasis,25,SU10_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000315,lymphocyte,non_hodgkin_lymphoma,FALSE,metastasis,73,KARPAS-422-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000334,lymphocyte,non_hodgkin_lymphoma,TRUE,metastasis,45,DB-311Cas9_RepA_p3_batch3,3,18119
+broad,ACH-000365,lymphocyte,non_hodgkin_lymphoma,TRUE,metastasis,38,SUDHL4-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000371,lymphocyte,non_hodgkin_lymphoma,TRUE,NA,52,RL-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-000398,lymphocyte,non_hodgkin_lymphoma,FALSE,NA,57,Ri1-311cas9_RepA_p6_batch4,4,18119
+broad,ACH-000402,lymphocyte,non_hodgkin_lymphoma,TRUE,NA,16,BL70-311cas9_RepB_p6_batch3,3,18119
+broad,ACH-000583,lymphocyte,non_hodgkin_lymphoma,TRUE,NA,NA,MC116-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000654,lymphocyte,non_hodgkin_lymphoma,TRUE,NA,12,Raji-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000656,lymphocyte,non_hodgkin_lymphoma,TRUE,metastasis,59,SU8_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-000660,lymphocyte,non_hodgkin_lymphoma,FALSE,primary,17,SU5_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000697,lymphocyte,non_hodgkin_lymphoma,FALSE,primary,NA,A3/KAW-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000773,lymphocyte,non_hodgkin_lymphoma,TRUE,NA,15,Ki-JK-311cas9 Rep A p4_batch3,3,18119
+broad,ACH-000914,lymphocyte,non_hodgkin_lymphoma,TRUE,NA,70,HT-311cas9_RepA_p4_batch3,3,18119
+broad,ACH-000944,lymphocyte,non_hodgkin_lymphoma,FALSE,NA,3,NAMALWA-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001450,lymphocyte,non_hodgkin_lymphoma,TRUE,primary,29,Blue1-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001498,lymphocyte,non_hodgkin_lymphoma,FALSE,metastasis,NA,FARAGE-311cas9-RepAB-p6_batch4,4,18119
+broad,ACH-001533,lymphocyte,non_hodgkin_lymphoma,TRUE,primary,NA,KARPAS1718-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001539,lymphocyte,non_hodgkin_lymphoma,FALSE,primary,28,KML1-311cas9-RepA-p4_batch3,3,18119
+broad,ACH-001616,lymphocyte,non_hodgkin_lymphoma,TRUE,primary,56,OCILY18-311cas9-RepA-p5_batch3,3,18119
+broad,ACH-000280,ovary,brenner_tumor,FALSE,primary,45,SNU-840 311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-001374,ovary,mixed_germ_cell,FALSE,metastasis,12,Pa-1-311cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000001,ovary,ovary_adenocarcinoma,FALSE,metastasis,60,OVR3_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-000013,ovary,ovary_adenocarcinoma,FALSE,metastasis,60,ONCO-DG-1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000048,ovary,ovary_adenocarcinoma,FALSE,primary,42,TOV112D-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000048,ovary,ovary_adenocarcinoma,FALSE,primary,42,TOV112_c905R1,CRISPR_C6596666.sample,17660
+sanger,ACH-000103,ovary,ovary_adenocarcinoma,FALSE,metastasis,45,Caov4_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-000116,ovary,ovary_adenocarcinoma,FALSE,metastasis,NA,OAW28-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-000123,ovary,ovary_adenocarcinoma,FALSE,primary,NA,COV434-311cas9 Rep A p6_batch3,3,18119
+broad,ACH-000132,ovary,ovary_adenocarcinoma,FALSE,primary,45,JHOS-2-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000132,ovary,ovary_adenocarcinoma,FALSE,primary,45,JHOS2_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-000237,ovary,ovary_adenocarcinoma,FALSE,primary,88,JHOM-1-311cas9 Rep A p6_batch2,2,18119
+broad,ACH-000256,ovary,ovary_adenocarcinoma,FALSE,metastasis,NA,Cov318-311cas9_RepA_p4_batch2,2,18119
+broad,ACH-000278,ovary,ovary_adenocarcinoma,FALSE,metastasis,NA,COV362-311Cas9 Rep A p4_batch2,2,18119
+broad,ACH-000291,ovary,ovary_adenocarcinoma,FALSE,metastasis,64,OV90-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000291,ovary,ovary_adenocarcinoma,FALSE,metastasis,64,OV90_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-000308,ovary,ovary_adenocarcinoma,FALSE,metastasis,56,EFO-21 311Cas9_RepA_p5_batch2,2,18119
+sanger,ACH-000308,ovary,ovary_adenocarcinoma,FALSE,metastasis,56,EFO21_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-000324,ovary,ovary_adenocarcinoma,FALSE,primary,NA,JHOC5-311cas9 Rep A p6_20150925_batch3,3,18119
+sanger,ACH-000430,ovary,ovary_adenocarcinoma,FALSE,primary,NA,TYKnu_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-000460,ovary,ovary_adenocarcinoma,FALSE,metastasis,55,SNU-8-311Cas9 Rep A p5_batch3,3,18119
+broad,ACH-000520,ovary,ovary_adenocarcinoma,FALSE,metastasis,NA,59M-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-000524,ovary,ovary_adenocarcinoma,FALSE,metastasis,NA,Kuramochi-311cas9 Rep A p3_batch3,3,18119
+sanger,ACH-000524,ovary,ovary_adenocarcinoma,FALSE,metastasis,NA,KURAMO_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-000527,ovary,ovary_adenocarcinoma,FALSE,metastasis,40,OVISE-311cas9 Rep A p6_batch2,2,18119
+sanger,ACH-000527,ovary,ovary_adenocarcinoma,FALSE,metastasis,40,OVISE_c905R2,CRISPR_C6596666.sample,17660
+broad,ACH-000542,ovary,ovary_adenocarcinoma,FALSE,metastasis,NA,Hey-A8-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-000584,ovary,ovary_adenocarcinoma,FALSE,primary,44,JHOS-4-311cas9 Rep A p4_batch2,2,18119
+sanger,ACH-000584,ovary,ovary_adenocarcinoma,FALSE,primary,44,JHOS4_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-000608,ovary,ovary_adenocarcinoma,FALSE,primary,NA,COV644-311cas9 Rep A p4_batch2,2,18119
+broad,ACH-000646,ovary,ovary_adenocarcinoma,FALSE,primary,51,OVMANA-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000657,ovary,ovary_adenocarcinoma,FALSE,primary,NA,A2780-311cas9 Rep A p6_batch2,2,18119
+sanger,ACH-000657,ovary,ovary_adenocarcinoma,FALSE,primary,NA,A2780_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-000663,ovary,ovary_adenocarcinoma,FALSE,metastasis,78,OVTOKO-311Cas9_RepA_p5_batch2,2,18119
+broad,ACH-000688,ovary,ovary_adenocarcinoma,FALSE,primary,78,OV7-311cas9_RepA_p4_batch2,2,18119
+broad,ACH-000696,ovary,ovary_adenocarcinoma,FALSE,primary,64,OVCAR8-311Cas9_RepA_p6_batch2,2,18119
+sanger,ACH-000696,ovary,ovary_adenocarcinoma,FALSE,primary,64,OVR8_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-000701,ovary,ovary_adenocarcinoma,FALSE,primary,62,RMUG-S-311cas9 Rep B p4_batch2,2,18119
+broad,ACH-000713,ovary,ovary_adenocarcinoma,FALSE,primary,54,Caov-3-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-000719,ovary,ovary_adenocarcinoma,FALSE,metastasis,34,RMGI-311Cas9-RepA-P6_batch4,4,18119
+sanger,ACH-000719,ovary,ovary_adenocarcinoma,FALSE,metastasis,34,RMGI_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-000796,ovary,ovary_adenocarcinoma,FALSE,primary,NA,MCAS-311Cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000796,ovary,ovary_adenocarcinoma,FALSE,primary,NA,MCAS_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-000811,ovary,ovary_adenocarcinoma,FALSE,metastasis,64,SK-OV-3-311cas9 Rep A p5_batch2,2,18119
+broad,ACH-000885,ovary,ovary_adenocarcinoma,FALSE,primary,62,TOV-21G-311Cas9 Rep A p6_batch3,3,18119
+sanger,ACH-000885,ovary,ovary_adenocarcinoma,FALSE,primary,62,TOV21G_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-000906,ovary,ovary_adenocarcinoma,FALSE,primary,47,ES-2-311Cas9 Rep A p7_batch3,3,18119
+sanger,ACH-000906,ovary,ovary_adenocarcinoma,FALSE,primary,47,ES2_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-000936,ovary,ovary_adenocarcinoma,FALSE,metastasis,36,EFO-27-311Cas9_RepA_p6_batch2,2,18119
+sanger,ACH-000936,ovary,ovary_adenocarcinoma,FALSE,metastasis,36,EFO27_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-000947,ovary,ovary_adenocarcinoma,FALSE,metastasis,NA,OVK18-311cas9 Rep A p5_batch2,2,18119
+sanger,ACH-000947,ovary,ovary_adenocarcinoma,FALSE,metastasis,NA,OVK18_c905R1,CRISPR_C6596666.sample,17660
+sanger,ACH-000962,ovary,ovary_adenocarcinoma,FALSE,metastasis,39,OC314_c905R1,CRISPR_C6596666.sample,17660
+sanger,ACH-000966,ovary,ovary_adenocarcinoma,FALSE,primary,47,IGROV1_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-001048,ovary,ovary_adenocarcinoma,FALSE,metastasis,NA,Cov504-311Cas9_RepA_p6_batch2,2,18119
+sanger,ACH-001063,ovary,ovary_adenocarcinoma,FALSE,primary,NA,DOV13_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-001145,ovary,ovary_adenocarcinoma,FALSE,metastasis,60,OC316-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001151,ovary,ovary_adenocarcinoma,FALSE,metastasis,NA,OVCAR-5-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-001151,ovary,ovary_adenocarcinoma,FALSE,metastasis,NA,OVR5_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-001370,ovary,ovary_adenocarcinoma,FALSE,primary,NA,OCI5X-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001403,ovary,ovary_adenocarcinoma,FALSE,metastasis,NA,TO14-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-001418,ovary,ovary_adenocarcinoma,FALSE,primary,56,UWB1289-311cas9-RepA-p5_batch3,3,18119
+sanger,ACH-001418,ovary,ovary_adenocarcinoma,FALSE,primary,56,UWB12_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-001628,ovary,ovary_adenocarcinoma,FALSE,metastasis,NA,PEA1-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001630,ovary,ovary_adenocarcinoma,FALSE,metastasis,NA,UACC62SKINCJ1-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-001630,ovary,ovary_adenocarcinoma,FALSE,metastasis,NA,PEO1_c905R1,CRISPR_C6596666.sample,17660
+sanger,ACH-001632,ovary,ovary_adenocarcinoma,FALSE,metastasis,NA,PEO4_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-001719,ovary,ovary_adenocarcinoma,FALSE,primary,NA,OCIC4P-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001991,ovary,ovary_adenocarcinoma,FALSE,primary,47,NZOV9-311Cas9-RepA-p6_batch4,4,18119
+sanger,ACH-002140,ovary,ovary_adenocarcinoma,NA,NA,NA,Hey_c905R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002181,ovary,ovary_adenocarcinoma,NA,NA,NA,OV420_c905R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002183,ovary,ovary_adenocarcinoma,NA,NA,NA,OVMIU_c905R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002517,ovary,ovary_adenocarcinoma,FALSE,NA,NA,A2780A_c905R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002518,ovary,ovary_adenocarcinoma,FALSE,NA,NA,A2780c_c905R1,CRISPR_C6596666.sample,17660
+sanger,ACH-000704,ovary,ovary_carcinoma,FALSE,metastasis,NA,OAW42_c905R1,CRISPR_C6596666.sample,17660
+broad,ACH-001340,ovary,ovary_carcinoma,FALSE,metastasis,NA,COV413A-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-001278,ovary,SCCOHT,FALSE,metastasis,NA,BIN-67-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-001279,ovary,SCCOHT,NA,NA,NA,SCCOHT1-311cas9_RepA_p5_batch3,3,18119
+broad,ACH-000022,pancreas,exocrine,FALSE,metastasis,64,PA-TU-8988S_PA-TU-8988T-311cas9_RepAB_p6_batch3,3,18119
+sanger,ACH-000023,pancreas,exocrine,FALSE,metastasis,64,P8988T_c904R1,ERS717283.plasmid,17660
+broad,ACH-000042,pancreas,exocrine,FALSE,primary,70,Panc.02.03-311cas9 Rep A p6_batch3,3,18119
+sanger,ACH-000042,pancreas,exocrine,FALSE,primary,70,P0203_c904R2,ERS717283.plasmid,17660
+broad,ACH-000060,pancreas,exocrine,TRUE,primary,56,PANC1005-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000060,pancreas,exocrine,TRUE,primary,56,P1005_c904R1,ERS717283.plasmid,17660
+broad,ACH-000085,pancreas,exocrine,TRUE,primary,64,T3M-4-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000093,pancreas,exocrine,FALSE,primary,77,PANC0504-311cas9-RepA-p6_batch4,4,18119
+sanger,ACH-000094,pancreas,exocrine,TRUE,metastasis,44,HPAFII_c904R1,ERS717283.plasmid,17660
+broad,ACH-000108,pancreas,exocrine,TRUE,metastasis,75,KP-3-311Cas9 Rep A p5_batch3,3,18119
+sanger,ACH-000108,pancreas,exocrine,TRUE,metastasis,75,KP3_c904R1,ERS717283.plasmid,17660
+broad,ACH-000114,pancreas,exocrine,FALSE,metastasis,57,SU8686-311Cas9-RepA-p6_batch3,3,18119
+sanger,ACH-000114,pancreas,exocrine,FALSE,metastasis,57,SU8686_c904R1,ERS717283.plasmid,17660
+broad,ACH-000118,pancreas,exocrine,TRUE,metastasis,66,HUP-T3-311cas9 Rep A p6_batch3,3,18119
+sanger,ACH-000118,pancreas,exocrine,TRUE,metastasis,66,HuPT3_c904R1,ERS717283.plasmid,17660
+broad,ACH-000138,pancreas,exocrine,TRUE,metastasis,26,CFPAC-1-311Cas9 Rep A p6_batch3,3,18119
+sanger,ACH-000139,pancreas,exocrine,FALSE,primary,65,P0327_c904R1,ERS717283.plasmid,17660
+sanger,ACH-000155,pancreas,exocrine,TRUE,primary,56,SW1990_c904R1,ERS717283.plasmid,17660
+broad,ACH-000164,pancreas,exocrine,TRUE,primary,NA,Panc1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000178,pancreas,exocrine,TRUE,metastasis,46,Hs766T-311Cas9_RepA_p6_batch2,2,18119
+sanger,ACH-000213,pancreas,exocrine,TRUE,metastasis,60,HuPT4_c904R1,ERS717283.plasmid,17660
+broad,ACH-000222,pancreas,exocrine,FALSE,metastasis,62,ASPC-1-311Cas9 Rep A p6_batch3,3,18119
+sanger,ACH-000222,pancreas,exocrine,FALSE,metastasis,62,AsPC1_c904R1,ERS717283.plasmid,17660
+broad,ACH-000235,pancreas,exocrine,TRUE,primary,70,Panc.04.03-311Cas9 Rep A p5_batch3,3,18119
+sanger,ACH-000235,pancreas,exocrine,TRUE,primary,70,P0403_c904R1,ERS717283.plasmid,17660
+broad,ACH-000243,pancreas,exocrine,FALSE,NA,NA,DAN-G-311Cas9 Rep A p6_batch3,3,18119
+sanger,ACH-000243,pancreas,exocrine,FALSE,NA,NA,DANG_c904R1,ERS717283.plasmid,17660
+broad,ACH-000265,pancreas,exocrine,TRUE,metastasis,50,KP4-311Cas9 Rep A p7_batch3,3,18119
+sanger,ACH-000265,pancreas,exocrine,TRUE,metastasis,50,KP4_c904R1,ERS717283.plasmid,17660
+broad,ACH-000266,pancreas,exocrine,TRUE,NA,65,SNU-213-311Cas9 Rep A p5_batch3,3,18119
+broad,ACH-000281,pancreas,exocrine,FALSE,primary,65,KP-2-311Cas9 Rep A p5_batch3,3,18119
+broad,ACH-000307,pancreas,exocrine,TRUE,metastasis,NA,PK-1_KLM-1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000320,pancreas,exocrine,TRUE,primary,NA,PSN-1-311Cas9 Rep A p6_batch3,3,18119
+sanger,ACH-000320,pancreas,exocrine,TRUE,primary,NA,PSN1_c904R1,ERS717283.plasmid,17660
+broad,ACH-000332,pancreas,exocrine,TRUE,metastasis,43,YAPC-311Cas9 Rep A p6_batch3,3,18119
+sanger,ACH-000354,pancreas,exocrine,TRUE,metastasis,40,CAPAN1_c904R1,ERS717283.plasmid,17660
+broad,ACH-000417,pancreas,exocrine,TRUE,primary,85,PANC0813-311Cas9-RepA-p6_batch4,4,18119
+sanger,ACH-000417,pancreas,exocrine,TRUE,primary,85,P0813_c904R1,ERS717283.plasmid,17660
+broad,ACH-000468,pancreas,exocrine,NA,primary,NA,PK-45H-311cas9 Rep A p6_batch3,3,18119
+broad,ACH-000502,pancreas,exocrine,FALSE,metastasis,68,TCC-PAN2-311Cas9 Rep A p6_batch3,3,18119
+broad,ACH-000517,pancreas,exocrine,TRUE,metastasis,53,SNU-410-311cas9 Rep A p5_batch3,3,18119
+broad,ACH-000535,pancreas,exocrine,FALSE,primary,61,BXPC3-311Cas9-RepA-p6_batch3,3,18119
+sanger,ACH-000535,pancreas,exocrine,FALSE,primary,61,BxPC3_c904R1,ERS717283.plasmid,17660
+broad,ACH-000599,pancreas,exocrine,FALSE,primary,44,PATU8902-311Cas9-RepA-p6_batch3,3,18119
+sanger,ACH-000599,pancreas,exocrine,FALSE,primary,44,P8902_c904R1,ERS717283.plasmid,17660
+broad,ACH-000601,pancreas,exocrine,TRUE,primary,65,MIA Paca-2-311Cas9 Rep A p6_batch3,3,18119
+sanger,ACH-000601,pancreas,exocrine,TRUE,primary,65,MIAPac_c904R1,ERS717283.plasmid,17660
+broad,ACH-000652,pancreas,exocrine,TRUE,metastasis,73,SUIT-2-311Cas9_RepA_p5_batch3,3,18119
+sanger,ACH-000652,pancreas,exocrine,TRUE,metastasis,73,SUIT2_c904R1,ERS717283.plasmid,17660
+broad,ACH-000685,pancreas,exocrine,FALSE,metastasis,NA,L33-311Cas9-RepA-p6_batch3,3,18119
+broad,ACH-001098,pancreas,exocrine,FALSE,NA,64,KCIMOH1-RepA-p6_batch4,4,18119
+sanger,ACH-001107,pancreas,exocrine,TRUE,NA,69,KP1N_c904R1,ERS717283.plasmid,17660
+broad,ACH-001353,pancreas,exocrine,TRUE,primary,46,JOPACA1-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001375,pancreas,exocrine,TRUE,primary,59,PACADD119-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001377,pancreas,exocrine,FALSE,primary,75,PACADD137-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001379,pancreas,exocrine,FALSE,metastasis,63,PACADD161--311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001380,pancreas,exocrine,TRUE,metastasis,54,PACADD165-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001382,pancreas,exocrine,FALSE,metastasis,68,PACADD188-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001999,pancreas,exocrine,NA,NA,NA,9505BIK-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-002039,pancreas,exocrine,NA,metastasis,NA,PK8-311cas9-RepA-p6_batch4,4,18119
+sanger,ACH-002186,pancreas,exocrine,NA,NA,NA,PL4_c904R2,ERS717283.plasmid,17660
+broad,ACH-000078,peripheral_nervous_system,neuroblastoma,TRUE,metastasis,4,MHH-NB-11-311Cas9 Rep A p4_batch3,3,18119
+broad,ACH-000099,peripheral_nervous_system,neuroblastoma,TRUE,NA,1.67,Sima-311cas9 Rep A p6_batch3,3,18119
+broad,ACH-000120,peripheral_nervous_system,neuroblastoma,TRUE,NA,NA,CHP-212-311CAS9 Rep A p5_batch3,3,18119
+sanger,ACH-000120,peripheral_nervous_system,neuroblastoma,TRUE,NA,NA,CHP212_c906R2,CRISPR_C6596666.sample,17660
+sanger,ACH-000149,peripheral_nervous_system,neuroblastoma,FALSE,metastasis,4,SKNSH_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000227,peripheral_nervous_system,neuroblastoma,TRUE,metastasis,2,KP-N-YN-311Cas9 Rep A p3_batch2,2,18119
+sanger,ACH-000227,peripheral_nervous_system,neuroblastoma,TRUE,metastasis,2,KPNYN_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000259,peripheral_nervous_system,neuroblastoma,FALSE,primary,NA,KELLY-311Cas9 Rep A p6_batch3,3,18119
+broad,ACH-000260,peripheral_nervous_system,neuroblastoma,FALSE,metastasis,6,SK-N-AS-311Cas9 Rep A p6_batch3,3,18119
+sanger,ACH-000260,peripheral_nervous_system,neuroblastoma,FALSE,metastasis,6,SKNAS_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000310,peripheral_nervous_system,neuroblastoma,TRUE,metastasis,1,IMR32-311cas9 Rep A p3_batch3,3,18119
+broad,ACH-000312,peripheral_nervous_system,neuroblastoma,TRUE,metastasis,2,SK-N-BE_2_-311Cas9 Rep A p6_batch3,3,18119
+broad,ACH-000341,peripheral_nervous_system,neuroblastoma,TRUE,metastasis,11,SK-N-FI-311Cas9 Rep A p3_batch2,2,18119
+sanger,ACH-000341,peripheral_nervous_system,neuroblastoma,TRUE,metastasis,11,SKNFI_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000366,peripheral_nervous_system,neuroblastoma,FALSE,metastasis,2,SK-N-DZ-311Cas9_RepA_p5_batch2,2,18119
+sanger,ACH-000366,peripheral_nervous_system,neuroblastoma,FALSE,metastasis,2,SKNDZ_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-000804,peripheral_nervous_system,neuroblastoma,TRUE,metastasis,2,NB-1-311Cas9 Rep A p6_batch3,3,18119
+broad,ACH-001300,peripheral_nervous_system,neuroblastoma,FALSE,NA,1.5,CHLA15-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001301,peripheral_nervous_system,neuroblastoma,NA,NA,NA,COGN278-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001302,peripheral_nervous_system,neuroblastoma,NA,NA,NA,COGN-305-311cas9_RepA_p5_batch3,3,18119
+broad,ACH-001303,peripheral_nervous_system,neuroblastoma,TRUE,NA,3,NB1643-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-001344,peripheral_nervous_system,neuroblastoma,TRUE,metastasis,4,GIMEN-311cas9_RepB_p6_batch3,3,18119
+broad,ACH-001354,peripheral_nervous_system,neuroblastoma,FALSE,primary,3,LAN2-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-001366,peripheral_nervous_system,neuroblastoma,TRUE,metastasis,1.5,NGP-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001548,peripheral_nervous_system,neuroblastoma,FALSE,metastasis,1.3,LS-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-001603,peripheral_nervous_system,neuroblastoma,TRUE,primary,1,NH12_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-001674,peripheral_nervous_system,neuroblastoma,TRUE,primary,NA,TGW-311Cas9-RepA-P6_batch4,4,18119
+sanger,ACH-001674,peripheral_nervous_system,neuroblastoma,TRUE,primary,NA,TGW_c906R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002083,peripheral_nervous_system,neuroblastoma,TRUE,primary,1.5,NB69_c906R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002217,peripheral_nervous_system,neuroblastoma,NA,metastasis,NA,BE2M17_c906R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002261,peripheral_nervous_system,neuroblastoma,NA,NA,NA,KPNYS_c906R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002278,peripheral_nervous_system,neuroblastoma,NA,NA,NA,NB10_c906R2,CRISPR_C6596666.sample,17660
+sanger,ACH-002280,peripheral_nervous_system,neuroblastoma,NA,NA,NA,NB13_c906R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002282,peripheral_nervous_system,neuroblastoma,NA,NA,NA,NB17_c906R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002283,peripheral_nervous_system,neuroblastoma,NA,metastasis,NA,NB5_c906R2,CRISPR_C6596666.sample,17660
+sanger,ACH-002284,peripheral_nervous_system,neuroblastoma,NA,NA,NA,NB6_c906R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002285,peripheral_nervous_system,neuroblastoma,NA,NA,NA,NB7_c906R1,CRISPR_C6596666.sample,17660
+broad,ACH-001670,peripheral_nervous_system,PNET,FALSE,primary,21,TASK1-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000024,plasma_cell,multiple_myeloma,FALSE,primary,56,OPM2-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000024,plasma_cell,multiple_myeloma,FALSE,primary,56,OPM2_c907R4,CRISPR_C6596666.sample,17660
+broad,ACH-000167,plasma_cell,multiple_myeloma,TRUE,metastasis,52,KE97-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000183,plasma_cell,multiple_myeloma,FALSE,primary,36,L363-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000183,plasma_cell,multiple_myeloma,FALSE,primary,36,L363_c907R4,CRISPR_C6596666.sample,17660
+broad,ACH-000204,plasma_cell,multiple_myeloma,FALSE,primary,56,LP-1-311Cas9_RepA_p6_batch2,2,18119
+sanger,ACH-000204,plasma_cell,multiple_myeloma,FALSE,primary,56,LP1_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000363,plasma_cell,multiple_myeloma,TRUE,primary,54,SK-MM-2-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000426,plasma_cell,multiple_myeloma,FALSE,primary,65,KMS20-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-000436,plasma_cell,multiple_myeloma,NA,NA,NA,OCI-MY7-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000512,plasma_cell,multiple_myeloma,TRUE,NA,NA,INA-6-311cas9_RepA_p5_batch3,3,18119
+broad,ACH-000541,plasma_cell,multiple_myeloma,FALSE,primary,60,KMS34-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000576,plasma_cell,multiple_myeloma,TRUE,primary,52,KMS27-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000588,plasma_cell,multiple_myeloma,TRUE,primary,50,KMS-26-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-000653,plasma_cell,multiple_myeloma,FALSE,primary,57,JJN-3-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000658,plasma_cell,multiple_myeloma,TRUE,primary,58,KMS18-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000714,plasma_cell,multiple_myeloma,FALSE,primary,67,KMS-11-311Cas9_RepA_p5_batch2,2,18119
+sanger,ACH-000714,plasma_cell,multiple_myeloma,FALSE,primary,67,KMS11_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000763,plasma_cell,multiple_myeloma,FALSE,primary,NA,MM1-S-311cas9_RepA_p3_batch3,3,18119
+broad,ACH-000817,plasma_cell,multiple_myeloma,TRUE,primary,61,RPMI8226-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000817,plasma_cell,multiple_myeloma,TRUE,primary,61,R8226_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000821,plasma_cell,multiple_myeloma,FALSE,primary,58,EJM -311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-000829,plasma_cell,multiple_myeloma,TRUE,NA,NA,HUNS1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000838,plasma_cell,multiple_myeloma,FALSE,primary,64,AMO1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000854,plasma_cell,multiple_myeloma,NA,NA,NA,OCIMY5-311Cas9_RepB_p5_batch3,3,18119
+broad,ACH-000889,plasma_cell,multiple_myeloma,TRUE,primary,62,KMM-1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000115,prostate,prostate_adenocarcinoma,TRUE,metastasis,59,Vcap-304Cas9_RepA_p4_batch3,3,18119
+sanger,ACH-000956,prostate,prostate_adenocarcinoma,TRUE,primary,NA,22RV1_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000977,prostate,prostate_adenocarcinoma,TRUE,metastasis,50,LNCAPCLONEFGC-311Cas9-RepA-p4_batch4,4,18119
+sanger,ACH-000977,prostate,prostate_adenocarcinoma,TRUE,metastasis,50,LNCaPC_c908R1,CRISPR_C6596666.sample,17660
+sanger,ACH-000979,prostate,prostate_adenocarcinoma,TRUE,metastasis,69,DU145_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-001627,prostate,prostate_adenocarcinoma,TRUE,primary,NA,P4E6-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001648,prostate,prostate_adenocarcinoma,NA,primary,NA,SHMAC4-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001453,prostate,prostate_hyperplasia,TRUE,primary,68,BPH1-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000014,skin,melanoma,TRUE,metastasis,56,Hs 294T_A101D-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000219,skin,melanoma,FALSE,primary,54,A375-311cas9-RepA-p6_batch3,3,18119
+sanger,ACH-000219,skin,melanoma,FALSE,primary,54,A375_C902R1_P1D14,ERS717283.plasmid,17660
+broad,ACH-000274,skin,melanoma,TRUE,NA,53,Hs852.T-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000304,skin,melanoma,FALSE,metastasis,59,Wm-115-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000322,skin,melanoma,TRUE,metastasis,29,HT144-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000348,skin,melanoma,FALSE,metastasis,18,RPMI7951-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000401,skin,melanoma,TRUE,metastasis,14,COLO-800-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000404,skin,melanoma,NA,primary,NA,K029AX-311cas9_RepB_p6_batch3,3,18119
+broad,ACH-000425,skin,melanoma,NA,NA,NA,UACC62-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000441,skin,melanoma,FALSE,metastasis,60,SH4-311Cas9-RepA-p6_batch4,4,18119
+broad,ACH-000450,skin,melanoma,FALSE,primary,NA,MELHO-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000458,skin,melanoma,NA,metastasis,NA,CJM-311Cas9_RepA_p7_batch3,3,18119
+broad,ACH-000477,skin,melanoma,TRUE,metastasis,43,MALME-3M-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000550,skin,melanoma,TRUE,primary,26,IGR-39-311Cas9_RepA_p5_batch2,2,18119
+broad,ACH-000579,skin,melanoma,NA,primary,NA,UACC-257 -311Cas9_RepA_p5_batch2,2,18119
+broad,ACH-000580,skin,melanoma,TRUE,primary,53,C32-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000614,skin,melanoma,TRUE,metastasis,28,RVH421-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000632,skin,melanoma,TRUE,metastasis,51,Hs 944.T-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000661,skin,melanoma,TRUE,NA,NA,WM1799-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000765,skin,melanoma,TRUE,metastasis,NA,WM983B-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000788,skin,melanoma,TRUE,metastasis,43,A2058-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000788,skin,melanoma,TRUE,metastasis,43,A2058_c903R1,ERS717283.plasmid,17660
+broad,ACH-000799,skin,melanoma,TRUE,metastasis,26,Hs695T-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-000801,skin,melanoma,TRUE,NA,NA,Hs936.T-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000805,skin,melanoma,FALSE,metastasis,47,COLO-679-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000810,skin,melanoma,TRUE,metastasis,67,SKMEL30-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000814,skin,melanoma,FALSE,NA,24,Hs939.T-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000822,skin,melanoma,TRUE,metastasis,67,SKMEL-24-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000827,skin,melanoma,TRUE,NA,NA,WM793-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-000881,skin,melanoma,FALSE,primary,58,MelJuso-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-000882,skin,melanoma,TRUE,metastasis,42,IGR1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000884,skin,melanoma,NA,metastasis,31,MDAMB435S-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000899,skin,melanoma,TRUE,metastasis,NA,WM88-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000915,skin,melanoma,FALSE,primary,64,IPC298-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000968,skin,melanoma,TRUE,metastasis,62,COLO-792-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001190,skin,melanoma,TRUE,metastasis,60,SKMEL2-311Cas9_RepA_p4_batch3,3,18119
+sanger,ACH-001190,skin,melanoma,TRUE,metastasis,60,MEL2_C908R1,CRISPR_C6596666.sample,17660
+broad,ACH-001239,skin,melanoma,FALSE,metastasis,58,WM2664_RepA_p5_batch3,3,18119
+broad,ACH-001522,skin,melanoma,TRUE,metastasis,62,HMY1-311Cas9-RepA-P6_batch4,4,18119
+broad,ACH-001563,skin,melanoma,TRUE,metastasis,NA,MM127-311cas9_RepA_p5_batch3,3,18119
+broad,ACH-001566,skin,melanoma,TRUE,metastasis,NA,MM370-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001567,skin,melanoma,TRUE,metastasis,NA,MM383-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001568,skin,melanoma,TRUE,metastasis,NA,MM386-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001570,skin,melanoma,TRUE,metastasis,NA,MM426-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001645,skin,melanoma,FALSE,primary,28,SEKI-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001970,skin,melanoma,TRUE,metastasis,NA,MM253-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001973,skin,melanoma,TRUE,metastasis,NA,MM485-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-002001,skin,melanoma,NA,NA,NA,A375SKINCJ1-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-002002,skin,melanoma,NA,NA,NA,A375SKINCJ2-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-002003,skin,melanoma,NA,NA,NA,A375SKINCJ3-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-002004,skin,melanoma,NA,NA,NA,PEO1-311cas9_RepA_p6_batch4,4,18119
+broad,ACH-002005,skin,melanoma,TRUE,NA,50,SKMEL19-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-002084,skin,melanoma,FALSE,metastasis,39,MMAC-311cas9-RepA-p6_batch4,4,18119
+sanger,ACH-002143,skin,melanoma,NA,NA,NA,ISTMEL1_c904R1,ERS717283.plasmid,17660
+broad,ACH-002458,skin,melanoma,TRUE,NA,29,HT144SKINFV1-311Cas9-RepA-p6_batch4,4,18119
+broad,ACH-002459,skin,melanoma,TRUE,NA,29,HT144SKINFV3-311Cas9-RepA-p6_batch4,4,18119
+broad,ACH-002460,skin,melanoma,TRUE,NA,29,HT144SKINFV2-311Cas9-RepA-p6_batch4,4,18119
+broad,ACH-002508,skin,melanoma,FALSE,metastasis,34,WM3211-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-002510,skin,melanoma,TRUE,metastasis,54,M040416-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-002512,skin,melanoma,TRUE,metastasis,86,M1610113-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001550,skin,merkel_cell_carcinoma,FALSE,metastasis,NA,MCC13-311Cas9-RepA-P6_batch4,4,18119
+broad,ACH-001551,skin,merkel_cell_carcinoma,TRUE,metastasis,80,MCC14/2-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001552,skin,merkel_cell_carcinoma,FALSE,primary,NA,MCC26-311cas9_RepA_p5_batch3,3,18119
+broad,ACH-001328,skin,skin_squamous,FALSE,primary,85,A431-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001521,skin,skin_squamous,FALSE,primary,77,HKA1-311cas9_RepA_p5_batch3,3,18119
+broad,ACH-001523,skin,skin_squamous,TRUE,primary,75,HSC1-311Cas9_RepA_P6_batch3,3,18119
+broad,ACH-001524,skin,skin_squamous,TRUE,primary,75,HSC5-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-002875,skin,NA,TRUE,metastasis,28,RVH421RPMI-311Cas9-RepA-p6_batch4,4,18119
+broad,ACH-000160,soft_tissue,ATRT,FALSE,NA,0.1,BT-12-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001020,soft_tissue,ATRT,TRUE,NA,2,BT16-311Cas9-RepA-P6_batch4,4,18119
+broad,ACH-001028,soft_tissue,ATRT,FALSE,NA,0.33,CHLA06-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001031,soft_tissue,ATRT,FALSE,NA,2.5,CHLA266-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001289,soft_tissue,ATRT,TRUE,NA,NA,COGAR359-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001433,soft_tissue,epithelioid_sarcoma,NA,metastasis,NA,PEDS092T-311CAS9_RepA_p4_batch3,3,18119
+broad,ACH-001702,soft_tissue,epithelioid_sarcoma,TRUE,metastasis,41,VAESBJ-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000054,soft_tissue,fibrosarcoma,TRUE,metastasis,35,HT1080 -311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000505,soft_tissue,leiomyosarcoma,FALSE,primary,45,RKN-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000505,soft_tissue,leiomyosarcoma,FALSE,primary,45,RKN_c905R4,CRISPR_C6596666.sample,17660
+broad,ACH-000939,soft_tissue,leiomyosarcoma,FALSE,primary,75,SK-UT-1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001791,soft_tissue,liposarcoma,NA,NA,NA,LPS6-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001793,soft_tissue,liposarcoma,NA,NA,NA,LPS27-311cas9-RepA-p4_batch3,3,18119
+broad,ACH-001794,soft_tissue,liposarcoma,NA,primary,NA,93T449-311cas9-RepA-p4_batch4,4,18119
+broad,ACH-001795,soft_tissue,liposarcoma,FALSE,NA,NA,94T778-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001796,soft_tissue,liposarcoma,NA,NA,NA,95T1000-311cas9_RepA_p3_batch3,3,18119
+broad,ACH-001799,soft_tissue,liposarcoma,NA,NA,NA,LPS141-311cas9-RepA-p5_batch3,3,18119
+broad,ACH-001802,soft_tissue,liposarcoma,NA,NA,NA,LPS853-RepA-p5_batch4,4,18119
+broad,ACH-001804,soft_tissue,liposarcoma,NA,NA,NA,LPS510-RepB-p6_batch4,4,18119
+broad,ACH-000172,soft_tissue,malignant_rhabdoid_tumor,NA,metastasis,NA,TM87-311Cas9_RepA_p6_batch4,4,18119
+broad,ACH-000375,soft_tissue,malignant_rhabdoid_tumor,FALSE,primary,0.75,G402-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000533,soft_tissue,malignant_rhabdoid_tumor,NA,NA,NA,NCIH2004RT-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000597,soft_tissue,malignant_rhabdoid_tumor,NA,NA,NA,TTC709-311Cas9-RepA-P5_batch4,4,18119
+broad,ACH-000607,soft_tissue,malignant_rhabdoid_tumor,TRUE,primary,1,KYM1-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001099,soft_tissue,malignant_rhabdoid_tumor,NA,NA,NA,KD-311Cas9_RepA_p6_batch4,4,18119
+broad,ACH-001211,soft_tissue,malignant_rhabdoid_tumor,FALSE,NA,NA,TTC549-311Cas9-RepA-P6_batch4,4,18119
+broad,ACH-001212,soft_tissue,malignant_rhabdoid_tumor,FALSE,NA,NA,TTC642-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000835,soft_tissue,pleomorphic_sarcoma,TRUE,metastasis,29,GCT-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000169,soft_tissue,rhabdomyosarcoma,FALSE,primary,7,RD-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000833,soft_tissue,rhabdomyosarcoma,TRUE,metastasis,17,RH-30-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001050,soft_tissue,rhabdomyosarcoma,NA,NA,NA,CW9019-311Cas9_RepA_p4_batch3,3,18119
+broad,ACH-001096,soft_tissue,rhabdomyosarcoma,NA,NA,NA,JR-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001184,soft_tissue,rhabdomyosarcoma,FALSE,metastasis,11,SCMCRM2-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001196,soft_tissue,rhabdomyosarcoma,TRUE,NA,1,SMS-CTR-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001740,soft_tissue,rhabdomyosarcoma,TRUE,metastasis,17,Rh28-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-001745,soft_tissue,rhabdomyosarcoma,NA,NA,NA,RhJT-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001750,soft_tissue,rhabdomyosarcoma,TRUE,NA,NA,TTC442-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001765,soft_tissue,rhabdomyosarcoma,FALSE,metastasis,NA,Rh4-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001274,soft_tissue,synovial_sarcoma,FALSE,NA,NA,SW982-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001275,soft_tissue,synovial_sarcoma,FALSE,NA,NA,SYO1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001277,soft_tissue,synovial_sarcoma,NA,metastasis,NA,YAMATO-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001280,soft_tissue,synovial_sarcoma,NA,NA,NA,SCS214-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-001322,soft_tissue,synovial_sarcoma,NA,NA,NA,CME-1-311CAS9_RepA_p6_batch3,3,18119
+broad,ACH-000037,soft_tissue,thyroid_sarcoma,FALSE,NA,47,S-117-311Cs9_RepA_p6_batch3,3,18119
+broad,ACH-001164,soft_tissue,undifferentiated_sarcoma,NA,NA,NA,PEDS015T-311CAS9_RepA_p6_batch3,3,18119
+broad,ACH-000174,thyroid,thyroid_carcinoma,FALSE,primary,70,CAL62-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-000191,thyroid,thyroid_carcinoma,FALSE,metastasis,63,BHT101-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000716,thyroid,thyroid_carcinoma,TRUE,NA,57,TT2609C02-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000903,thyroid,thyroid_carcinoma,TRUE,metastasis,42,FTC133-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001306,thyroid,thyroid_carcinoma,FALSE,primary,67,8305C-311cas9_RepA_p5_batch3,3,18119
+broad,ACH-001307,thyroid,thyroid_carcinoma,FALSE,primary,78,8505C-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001356,thyroid,thyroid_carcinoma,TRUE,primary,57,MB1-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001443,thyroid,thyroid_carcinoma,FALSE,primary,68,ASH3-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-002041,thyroid,thyroid_carcinoma,FALSE,primary,NA,HOTHC-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000163,thyroid,thyroid_squamous,TRUE,primary,59,SW579-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-002042,thyroid,thyroid_squamous,FALSE,primary,71,T3M5-311cas9-RepA-p6_batch4,4,18119
+sanger,ACH-002043,upper_aerodigestive,upper_aerodigestive_carcinoma,TRUE,primary,NA,Ca922_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-000181,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,25,SCC9_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000188,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,70,SCC25-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000207,upper_aerodigestive,upper_aerodigestive_squamous,FALSE,metastasis,NA,DETROIT562-311Cas9_RepA_p3_batch3,3,18119
+sanger,ACH-000207,upper_aerodigestive,upper_aerodigestive_squamous,FALSE,metastasis,NA,Detroi_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000228,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,NA,BICR31-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000238,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,55,SCC4-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000238,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,55,SCC4_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000415,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,NA,BICR-6-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000472,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,metastasis,69,HSC2-311cas9_RepA_p5_batch3,3,18119
+broad,ACH-000500,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,NA,66,SNU46-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000503,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,NA,BICR16-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000518,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,69,Cal33-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000518,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,69,CAL33_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-000546,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,metastasis,64,HSC4_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000548,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,52,BHY-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000548,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,52,BHY_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000549,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,NA,60,SNU1076-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000606,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,60,PE_CA-PJ-34Clone C12-311Cas9_RepB_p5_batch2,2,18119
+broad,ACH-000618,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,NA,NA,SNU-1041-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000619,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,45,PECAPJ15-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000619,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,45,PECAPJ_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000630,upper_aerodigestive,upper_aerodigestive_squamous,FALSE,NA,46,YD8-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000682,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,NA,62,SNU-1066-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000732,upper_aerodigestive,upper_aerodigestive_squamous,FALSE,primary,67,PE/CA-PJ41(cloneD2)-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000735,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,57,PECAPJ49-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000740,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,54,A253-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000740,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,54,A253_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000762,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,NA,67,YD38-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000771,upper_aerodigestive,upper_aerodigestive_squamous,FALSE,primary,NA,BICR56-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000778,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,metastasis,64,HSC3-311Cas9_RepA_p4_batch2,2,18119
+sanger,ACH-000778,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,metastasis,64,HSC3_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000794,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,metastasis,NA,BICR22-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000794,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,metastasis,NA,BICR22_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000832,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,56,CAL27-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000832,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,56,CAL27_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000836,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,NA,39,YD-15-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000846,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,56,FADU-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000846,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,56,FADU_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-001228,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,NA,NA,UPCISCC152-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-001229,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,54,UPCISCC154-311Cas9-RepA-P6_batch4,4,18119
+sanger,ACH-001331,upper_aerodigestive,upper_aerodigestive_squamous,FALSE,primary,NA,BICR10_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-001332,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,NA,BICR78-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-001332,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,NA,BICR78_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-001346,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,32,H103-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001347,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,84,H157-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001385,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,metastasis,52,RPMI2650-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001509,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,74,H357-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001510,upper_aerodigestive,upper_aerodigestive_squamous,FALSE,primary,40,H376-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001511,upper_aerodigestive,upper_aerodigestive_squamous,FALSE,primary,53,H413-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001542,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,metastasis,76,KON-311cas9-RepA-p6_batch3,3,18119
+sanger,ACH-001542,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,metastasis,76,KON_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-001543,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,51,KOSC2CL343-311cas9-RepB-p5_batch4,4,18119
+sanger,ACH-001625,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,metastasis,61,OSC19_c908R5,CRISPR_C6596666.sample,17660
+sanger,ACH-001626,upper_aerodigestive,upper_aerodigestive_squamous,FALSE,metastasis,59,OSC20_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-001641,upper_aerodigestive,upper_aerodigestive_squamous,NA,primary,NA,SAT-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001690,upper_aerodigestive,upper_aerodigestive_squamous,FALSE,primary,82,UPCISCC026-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001692,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,50,UPCISCC040-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001694,upper_aerodigestive,upper_aerodigestive_squamous,FALSE,primary,51,UPCISCC074-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-001698,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,47,UPCISCC116-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001699,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,73,UPCISCC131-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-002029,upper_aerodigestive,upper_aerodigestive_squamous,FALSE,primary,NA,SAS-311cas9-RepA-p6_batch4,4,18119
+sanger,ACH-002029,upper_aerodigestive,upper_aerodigestive_squamous,FALSE,primary,NA,SAS_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-002044,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,74,HSQ89-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-002045,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,NA,HO1U1-311cas9-RepAB-p6_batch4,4,18119
+sanger,ACH-002045,upper_aerodigestive,upper_aerodigestive_squamous,TRUE,primary,NA,HO1u1_c908R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002212,upper_aerodigestive,upper_aerodigestive_squamous,NA,NA,NA,BB30HN_c908R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002249,upper_aerodigestive,upper_aerodigestive_squamous,NA,NA,NA,JHU011_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002250,upper_aerodigestive,upper_aerodigestive_squamous,NA,NA,NA,JHU022_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002251,upper_aerodigestive,upper_aerodigestive_squamous,NA,NA,NA,JHU029_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002265,upper_aerodigestive,upper_aerodigestive_squamous,NA,NA,NA,LB771H_c908R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002294,upper_aerodigestive,upper_aerodigestive_squamous,NA,NA,NA,PCI15A_c908R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002295,upper_aerodigestive,upper_aerodigestive_squamous,NA,NA,NA,PCI30_c908R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002296,upper_aerodigestive,upper_aerodigestive_squamous,NA,NA,NA,PCI38_c908R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002297,upper_aerodigestive,upper_aerodigestive_squamous,NA,metastasis,NA,PCI4B_c908R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002298,upper_aerodigestive,upper_aerodigestive_squamous,NA,NA,NA,PCI6A_c908R4,CRISPR_C6596666.sample,17660
+sanger,ACH-002305,upper_aerodigestive,upper_aerodigestive_squamous,NA,NA,NA,SKN3_c908R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002315,upper_aerodigestive,upper_aerodigestive_squamous,NA,NA,44,SCC90_c907R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002234,upper_aerodigestive,NA,NA,NA,NA,DOK_c908R1,CRISPR_C6596666.sample,17660
+sanger,ACH-002239,upper_aerodigestive,NA,NA,NA,NA,H3118_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000011,urinary_tract,bladder_carcinoma,TRUE,metastasis,53,253J-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000018,urinary_tract,bladder_carcinoma,FALSE,primary,81,T24-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000142,urinary_tract,bladder_carcinoma,FALSE,primary,80,CAL-29-311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-000473,urinary_tract,bladder_carcinoma,FALSE,primary,NA,RT112 -311Cas9_RepA_p6_batch2,2,18119
+broad,ACH-000486,urinary_tract,bladder_carcinoma,TRUE,NA,76,KU-19-19-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000522,urinary_tract,bladder_carcinoma,TRUE,primary,NA,UM-UC-3-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000545,urinary_tract,bladder_carcinoma,TRUE,primary,NA,VM-CUB1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000547,urinary_tract,bladder_carcinoma,TRUE,primary,44,HT1197-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000593,urinary_tract,bladder_carcinoma,FALSE,primary,82,BC-3C-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000720,urinary_tract,bladder_carcinoma,FALSE,primary,67,TCCSUP-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000724,urinary_tract,bladder_carcinoma,FALSE,primary,58,HT-1376-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000741,urinary_tract,bladder_carcinoma,FALSE,primary,NA,UBLC1-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000753,urinary_tract,bladder_carcinoma,TRUE,metastasis,75,JMSU-1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000802,urinary_tract,bladder_carcinoma,FALSE,primary,51,BFTC-905-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000834,urinary_tract,bladder_carcinoma,TRUE,metastasis,NA,UM-UC-1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000839,urinary_tract,bladder_carcinoma,TRUE,primary,58,SCaBER-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000862,urinary_tract,bladder_carcinoma,NA,primary,NA,KMBC-2-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000896,urinary_tract,bladder_carcinoma,TRUE,primary,NA,647-V-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000905,urinary_tract,bladder_carcinoma,TRUE,NA,68,5637-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000973,urinary_tract,bladder_carcinoma,TRUE,primary,69,639V-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001183,urinary_tract,bladder_carcinoma,FALSE,NA,NA,RT11284-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001407,urinary_tract,bladder_carcinoma,TRUE,metastasis,NA,UMUC13-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001408,urinary_tract,bladder_carcinoma,TRUE,metastasis,NA,UMUC14-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001409,urinary_tract,bladder_carcinoma,NA,primary,NA,UMUC16_311Cas9_RepA_B_P6_batch3,3,18119
+broad,ACH-001411,urinary_tract,bladder_carcinoma,FALSE,primary,NA,UMUC5-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001412,urinary_tract,bladder_carcinoma,NA,primary,NA,UM-UC-10-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001413,urinary_tract,bladder_carcinoma,TRUE,primary,NA,UmUC11-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001414,urinary_tract,bladder_carcinoma,TRUE,primary,NA,UMUC6-311cas9_RepB_p6_batch3,3,18119
+broad,ACH-001415,urinary_tract,bladder_carcinoma,TRUE,primary,NA,UMUC7-311cas9_RepA_p3_batch3,3,18119
+broad,ACH-001416,urinary_tract,bladder_carcinoma,TRUE,primary,NA,UMUC9-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001529,uterus,choriocarcinoma,TRUE,primary,0,JAR-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-001530,uterus,choriocarcinoma,TRUE,metastasis,NA,JEG3-311cas9-RepA-p4_batch3,3,18119
+broad,ACH-002021,uterus,choriocarcinoma,FALSE,primary,NA,T3M3-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000397,uterus,clear_cell_carcinoma,FALSE,primary,74,TEN-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000192,uterus,endometrial_adenocarcinoma,FALSE,primary,77,MFE280_C908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000293,uterus,endometrial_adenocarcinoma,FALSE,primary,64,KLE-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000293,uterus,endometrial_adenocarcinoma,FALSE,primary,64,KLE_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000435,uterus,endometrial_adenocarcinoma,FALSE,metastasis,69,EFE-184-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000831,uterus,endometrial_adenocarcinoma,FALSE,metastasis,NA,HEC-50B_RepA_p6_batch3,3,18119
+sanger,ACH-000864,uterus,endometrial_adenocarcinoma,FALSE,primary,63,CO684_C908R2,CRISPR_C6596666.sample,17660
+sanger,ACH-000879,uterus,endometrial_adenocarcinoma,FALSE,primary,68,MFE296_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-000928,uterus,endometrial_adenocarcinoma,FALSE,primary,56,JHUEM1-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000941,uterus,endometrial_adenocarcinoma,FALSE,primary,71,HEC-1-B-311CAS9_RepA_p6_batch3,3,18119
+broad,ACH-000946,uterus,endometrial_adenocarcinoma,FALSE,primary,NA,HEC265-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000961,uterus,endometrial_adenocarcinoma,FALSE,primary,39,Ishikawa (Heraklio) 02 ER-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-000974,uterus,endometrial_adenocarcinoma,FALSE,metastasis,52,SNGM-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000974,uterus,endometrial_adenocarcinoma,FALSE,metastasis,52,SNGM_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-000978,uterus,endometrial_adenocarcinoma,FALSE,primary,50,EN-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000984,uterus,endometrial_adenocarcinoma,FALSE,primary,NA,HEC6-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000988,uterus,endometrial_adenocarcinoma,FALSE,NA,81,MFE-319-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000993,uterus,endometrial_adenocarcinoma,FALSE,primary,58,JHUEM7-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-000994,uterus,endometrial_adenocarcinoma,FALSE,primary,NA,HEC-59-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-000996,uterus,endometrial_adenocarcinoma,FALSE,primary,NA,HEC-251-311Cas9_RepA_p5_batch3,3,18119
+broad,ACH-001517,uterus,endometrial_adenocarcinoma,FALSE,primary,71,HEC1-311cas9-RepA-p4_batch4,4,18119
+sanger,ACH-001517,uterus,endometrial_adenocarcinoma,FALSE,primary,71,HEC1_c907R1,CRISPR_C6596666.sample,17660
+broad,ACH-001518,uterus,endometrial_adenocarcinoma,FALSE,primary,NA,HEC116-311Cas9-RepAB-p6_batch4,4,18119
+broad,ACH-002026,uterus,endometrial_adenocarcinoma,FALSE,primary,54,HHUA-311cas9-RepB-p6_batch4,4,18119
+broad,ACH-002027,uterus,endometrial_adenocarcinoma,FALSE,primary,55,HOUAI-311cas9-RepB-p6_batch4,4,18119
+broad,ACH-000965,uterus,endometrial_adenosquamous,FALSE,primary,65,RL952-311cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000965,uterus,endometrial_adenosquamous,FALSE,primary,65,RL952_c908R1,CRISPR_C6596666.sample,17660
+broad,ACH-001651,uterus,endometrial_squamous,FALSE,primary,NA,SKGI-311cas9_RepA_p3_batch3,3,18119
+broad,ACH-001652,uterus,endometrial_squamous,FALSE,primary,NA,SKGII-311cas9-RepA-p6_batch3,3,18119
+broad,ACH-001655,uterus,endometrial_squamous,FALSE,primary,52,SKN-311cas9_RepA_p6_batch3,3,18119
+broad,ACH-000913,uterus,endometrial_stromal_sarcoma,FALSE,primary,76,ESS1-311Cas9_RepA_p6_batch3,3,18119
+sanger,ACH-000913,uterus,endometrial_stromal_sarcoma,FALSE,primary,76,ESS1_C908R2,CRISPR_C6596666.sample,17660
+broad,ACH-000407,uterus,MMMT,FALSE,primary,70,SNU-685-311CAS9_RepA_p5_batch3,3,18119
+broad,ACH-002046,uterus,MMMT,FALSE,primary,66,HTMMT-311cas9-RepA-p6_batch4,4,18119
+broad,ACH-000302,uterus,mullerian_carcinoma,FALSE,primary,60,SNU1077-311Cas9_RepA_p6_batch3,3,18119
+broad,ACH-001495,uterus,uterine_carcinosarcoma,FALSE,primary,64,EMTOKA-311Cas9 -RepA-p6_batch3,3,18119

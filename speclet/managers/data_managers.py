@@ -1,5 +1,6 @@
 """Data management classes."""
 
+import json
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Callable, Final, Optional, Union
@@ -20,7 +21,8 @@ from speclet.exceptions import (
     DataFileIsNotAFile,
     UnsupportedDataFileType,
 )
-from speclet.io import DataFile, data_path
+from speclet.io import DataFile, data_path, modeling_data_dir
+from speclet.utils.general import merge_sets
 
 data_transformation = Callable[[pd.DataFrame], pd.DataFrame]
 
@@ -134,6 +136,12 @@ class CrisprScreenDataManager:
 
         if read_kwargs is None:
             read_kwargs = {}
+        if "dtype" not in read_kwargs:
+            read_kwargs["dtype"] = {
+                "p_dna_batch": str,
+                "screen": str,
+                "sgrna_target_chr": str,
+            }
 
         if self.data_file.suffix == ".csv":
             self._data = pd.read_csv(self.data_file, **read_kwargs)
@@ -314,3 +322,63 @@ class CrisprScreenDataManager:
             pd.DataFrame: Validated dataframe.
         """
         return self.data_schema.validate(data)
+
+
+LineageSubtypeGeneMap = dict[str, dict[str, set[str]]]
+LineageGeneMap = dict[str, set[str]]
+
+
+class CancerGeneDataManager:
+    """Manage cancer gene data."""
+
+    # TODO: change the API to make it easier to "reduce".
+    # TODO: add other API features for filter lineages, sublineages, etc.
+
+    def __init__(self) -> None:
+        """Create a cancer gene data manager."""
+        return None
+
+    def _read_cancer_gene_dict(self, json_path: Path) -> LineageSubtypeGeneMap:
+        with open(json_path, "r") as json_file:
+            lineage_genes = json.load(json_file)
+
+        for lineage, sublineage_genes in lineage_genes.items():
+            for sublineage, genes in sublineage_genes.items():
+                if isinstance(genes, str):
+                    sublineage_genes[sublineage] = set([genes])
+                elif isinstance(genes, list):
+                    sublineage_genes[sublineage] = set(genes)
+        return lineage_genes
+
+    def bailey_2018_cancer_genes(self) -> LineageSubtypeGeneMap:
+        """The cancer genes from Bailey et al., Cell, 2018.
+
+        Returns:
+            CancerGeneMap: Map of cancer types to their associated genes.
+        """
+        return self._read_cancer_gene_dict(
+            modeling_data_dir() / "bailey-cancer-genes-dict.json"
+        )
+
+    def cosmic_cancer_genes(self) -> LineageSubtypeGeneMap:
+        """The cancer genes from COSMIC.
+
+        Returns:
+            CancerGeneMap: Map of cancer types to their associated genes.
+        """
+        return self._read_cancer_gene_dict(
+            modeling_data_dir() / "cgc-cancer-genes-dict.json"
+        )
+
+    def reduce_to_lineage(self, gene_map: LineageSubtypeGeneMap) -> LineageGeneMap:
+        """Reduce a lineage-subtype-specific gene map to lineage-specific.
+
+        Args:
+            gene_map (LineageSubtypeGeneMap): Lineage-subtype-specific gene map.
+
+        Returns:
+            LineageGeneMap: Lineage-specific gene map.
+        """
+        return {
+            line: merge_sets(sublines.values()) for line, sublines in gene_map.items()
+        }

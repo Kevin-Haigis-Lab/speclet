@@ -2,7 +2,7 @@
 
 munge:
   test: false
-  temporary_directory: "temp"
+  temporary_directory: "temp/munge-temp"
 
 modeling:
   highest_density_interval: 0.89
@@ -10,7 +10,7 @@ modeling:
 
 fitting_pipeline:
   debug: false
-  num_chains: 3
+  num_chains: 4
   models_config: "models/model-configs.yaml"
   temp_dir: "temp/fitting-mcmc"
   model_cache_dir: "models/"

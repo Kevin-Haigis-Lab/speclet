@@ -22,12 +22,13 @@
 
 # ---- Negative binomial model ----
 
-# - name: simple-nb
-#   description: A simple negative binomial model.
-#   model: SIMPLE_NEGATIVE_BINOMIAL
-#   data_file: DEPMAP_CRC_BONE_SUBSAMPLE
-#   pipelines:
-#     fitting: [PYMC_MCMC, STAN_MCMC]
+- name: simple-nb
+  description: A simple negative binomial model.
+  active: false
+  model: SIMPLE_NEGATIVE_BINOMIAL
+  data_file: DEPMAP_CRC_BONE_SUBSAMPLE
+  pipelines:
+    fitting: [PYMC_MCMC, STAN_MCMC]
 
 
 # ---- Hierarchical negative binomial model ----
@@ -48,7 +49,9 @@
 
 - name: hierarchical-nb-blaswarning
   active: false
-  description: A hierarchical negative binomial model run with the BLAS warning from theano.
+  description: "
+    A hierarchical negative binomial model run with the BLAS warning from theano.
+  "
   model: HIERARCHICAL_NB
   data_file: DEPMAP_CRC_BONE_LARGE_SUBSAMPLE
   sampling_kwargs:
@@ -75,9 +78,25 @@
     A hierarchical negative binomial model with copy number, RNA expression, and
     mutation status covariates..
   "
-  active: true
+  active: false
   model: HIERARCHICAL_NB
   data_file: DEPMAP_CRC_BONE_LARGE_SUBSAMPLE
+  sampling_kwargs:
+    pymc_mcmc:
+      target_accept: 0.95
+      init: "adapt_diag"
+  pipelines:
+    fitting: [PYMC_MCMC]
+
+- name: hnb-comutation-synlet
+  description: "
+    A hierarchical negative binomical generalized linear model with covariates for
+    different molecular covariates and a covariate for co-mutation with known cancer-
+    related genes. The cancer genes are from COSMIC's CGC and lineage-specific.
+  "
+  active: true
+  model: HIERARCHICAL_NB
+  data_file: DEPMAP_CRC_PANC_CERVIX_LARGE_SUBSAMPLE
   sampling_kwargs:
     pymc_mcmc:
       target_accept: 0.95

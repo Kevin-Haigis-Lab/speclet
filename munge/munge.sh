@@ -10,7 +10,7 @@
 #SBATCH -o logs/%j_munge-pipeline.log
 #SBATCH -e logs/%j_munge-pipeline.log
 
-module load conda2 slurm-drmaa
+module load conda2 gcc slurm-drmaa R
 
 # shellcheck source=/dev/null
 source "$HOME/.bashrc"

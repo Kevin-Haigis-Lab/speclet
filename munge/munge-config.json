@@ -100,9 +100,10 @@
         "J": "comb"
     },
     "check_depmap_modeling_data": {
+        "partition": "priority",
         "cores": 4,
-        "mem": "20000",
-        "time": "00:13:00",
+        "mem": "80000",
+        "time": "01:30:00",
         "J": "data-check"
     },
     "screen_total_counts_tables": {
@@ -111,6 +112,12 @@
         "time": "00:20:00",
         "J": "cts-total"
     },
+    "cell_line_info": {
+        "cores": 4,
+        "mem": "70000",
+        "time": "00:30:00",
+        "J": "cell-info"
+    },
     "modeling_data_subsets": {
         "cores": 4,
         "mem": "70000",
@@ -118,9 +125,13 @@
         "J": "subsample"
     },
     "auxillary_data_subsets": {
-        "cores": 1,
-        "mem": "4500",
+        "mem": "8000",
         "time": "00:01:30",
         "J": "aux-sub"
+    },
+    "cancer_gene_maps": {
+        "mem": "4000",
+        "time": "00:02:00",
+        "J": "cancer-map"
     }
 }

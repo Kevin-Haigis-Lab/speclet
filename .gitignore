@@ -272,6 +272,10 @@ benchmarks/
 !modeling_data/sanger_cancer-gene-census.csv
 !modeling_data/depmap_pdna_total_read_counts.csv
 !modeling_data/depmap_replicate_total_read_counts.csv
+!modeling_data/depmap_cell-line-info.csv
+!modeling_data/bailey-cancer-genes.csv
+!modeling_data/bailey-cancer-genes-dict.json
+!modeling_data/cgc-cancer-genes-dict.json
 
 !data/download-data.sh
 !data/download-data.smk
@@ -279,6 +283,9 @@ benchmarks/
 !data/list_all_depmapids.py
 !data/README.md
 !data/Tzelepis_2016/TableS1_Lists-of-gRNAs-in-the-Mouse-v2-and-Human-v1-CRISPR-Libraries.xlsx
+!data/bailey-2018-cell/bailey-cancer-genes.xlsx
+!data/sanger-cosmic/cancer_gene_census.csv
+!data/depmap-lineage-cancer-types.tsv
 
 # Dask
 */dask-worker-space/*

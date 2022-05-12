@@ -10,7 +10,8 @@ import typer
 
 app = typer.Typer()
 
-#### ---- Sample copy number data for use in generating mock data ---- ####
+
+# --- Sample copy number data for use in generating mock data ---
 
 np.random.seed(826)
 

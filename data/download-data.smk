@@ -115,6 +115,8 @@ rule all:
             / "Tzelepis_2016"
             / "TableS1_Lists-of-gRNAs-in-the-Mouse-v2-and-Human-v1-CRISPR-Libraries.xlsx"
         ),
+        # download_bailey_mutations
+        bailey_mutations=data_dir / "bailey-2018-cell" / "bailey-cancer-genes.xlsx",
 
 
 rule download_depmap:
@@ -197,3 +199,14 @@ rule make_depmap_id_list:
         "  --achilles={input.achilles_replicate_map}"
         "  --score={input.score_replicate_map}"
         "  --score-reads-dir={params.raw_counts_dir}"
+
+
+rule download_bailey_mutations:
+    params:
+        url="https://www.cell.com/cms/10.1016/j.cell.2018.02.060/attachment/b0abfafa-a1ff-4f7d-8842-b49ba8d32e08/mmc1.xlsx",
+    output:
+        out_file=data_dir / "bailey-2018-cell" / "bailey-cancer-genes.xlsx",
+    version:
+        "1.0"
+    shell:
+        "wget --output-document {output.out_file} {params.url}"

@@ -30,13 +30,13 @@ ENVIRONMENT_YAML = "pipeline-environment.yml"
 all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list()
 
 if MUNGE_CONFIG.test:
-    print("---- TESTING WITH A FEW CELL LINES ----")
+    print("--- TESTING WITH A FEW CELL LINES ---")
     all_depmap_ids = all_depmap_ids[:10]
     all_depmap_ids += ["ACH-002227", "ACH-001738", "ACH-000956"]
 # all_depmap_ids = ["ACH-000956"]
 
 
-#### ---- Inputs ---- ####
+#### --- Inputs --- ####
 
 
 def tidy_ccle_input(*args: Any, **kwargs: Any) -> dict[str, Path]:
@@ -83,7 +83,7 @@ def clean_sanger_cgc_input(*args: Any, **kwargs: Any) -> dict[str, Path]:
     return {"cgc_input": SANGER_COSMIC_DIR / "cancer_gene_census.csv"}
 
 
-#### ---- CI ---- ####
+#### --- CI --- ####
 
 
 def _touch_input_dict(input_dict: dict[str, Path]) -> None:
@@ -110,7 +110,7 @@ if os.getenv("CI") is not None:
         _touch_input_dict(input_dict)
 
 
-#### ---- Rules ---- ####
+#### --- Rules --- ####
 
 
 localrules:
@@ -136,22 +136,27 @@ rule all:
         MODELING_DATA_DIR / "score_read_counts.csv",
         # rules.combine_data
         MODELING_DATA_DIR / "depmap-modeling-data.csv",
+        # cell_line_info
+        MODELING_DATA_DIR / "depmap_cell-line-info.csv",
         # rules.modeling_data_subsets.output
         MODELING_DATA_DIR / "depmap-modeling-data_crc.csv",
         MODELING_DATA_DIR / "depmap-modeling-data_crc-subsample.csv",
         MODELING_DATA_DIR / "depmap-modeling-data_crc-panc-cervix-large-subsample.csv",
-        TESTS_DIR / "depmap_test_data.csv",
+        TESTS_DIR / "depmap-modeling-data_test-data.csv",
         # rules.auxillary_data_subsets
         MODELING_DATA_DIR / "copy_number_data_samples.npy",
         # rules.clean_sanger_cgc.output
         MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",
         # rules.screen_total_counts_tables
-        final_counts_table_out=MODELING_DATA_DIR
-        / "depmap_replicate_total_read_counts.csv",
-        pdna_table_out=MODELING_DATA_DIR / "depmap_pdna_total_read_counts.csv",
+        MODELING_DATA_DIR / "depmap_replicate_total_read_counts.csv",
+        MODELING_DATA_DIR / "depmap_pdna_total_read_counts.csv",
+        # rules.cancer_gene_maps
+        MODELING_DATA_DIR / "bailey-cancer-genes.csv",
+        MODELING_DATA_DIR / "bailey-cancer-genes-dict.json",
+        MODELING_DATA_DIR / "cgc-cancer-genes-dict.json",
 
 
-# ---- Prepare raw CCLE data ----
+# --- Prepare raw CCLE data ---
 
 
 rule tidy_ccle:
@@ -167,7 +172,7 @@ rule tidy_ccle:
         "010_prepare-ccle-raw-data.R"
 
 
-# ---- Prepare raw DepMap / Achilles data ----
+# --- Prepare raw DepMap / Achilles data ---
 
 
 rule tidy_depmap:
@@ -199,7 +204,7 @@ rule prep_achilles_pdna:
         "020_prepare-achilles-pdna-batch-read-counts.R"
 
 
-# ---- Prepare raw Score data ----
+# --- Prepare raw Score data ---
 
 
 rule prep_score_sgrna_library:
@@ -249,7 +254,7 @@ rule tidy_score:
         "025_prepare-score-raw-data.R"
 
 
-# ---- Split data by DepMap ID ----
+# --- Split data by DepMap ID ---
 
 
 rule split_ccle_rna_expression:
@@ -366,7 +371,7 @@ rule split_crispr_geneeffect:
         "030_split-file-by-depmapid.R"
 
 
-# ---- Merge all data for a DepMapID and combine into a single data set ----
+# --- Merge all data for a DepMapID and combine into a single data set ---
 
 
 rule merge_data:
@@ -421,7 +426,7 @@ rule screen_total_counts_tables:
         " {output.pdna_table_out}"
 
 
-# ---- Check modeling data ----
+# --- Check modeling data ---
 
 
 rule papermill_check_depmap_modeling_data:
@@ -458,7 +463,16 @@ rule check_depmap_modeling_data:
         "jupyter nbconvert --to markdown {input.check_nb}"
 
 
-# ---- Generate additional useful files ----
+# --- Generate additional useful files ---
+
+
+rule cell_line_info:
+    input:
+        modeling_df=rules.combine_data.output.out_file,
+    output:
+        cell_line_info=MODELING_DATA_DIR / "depmap_cell-line-info.csv",
+    script:
+        "057_cell-line-information.R"
 
 
 rule modeling_data_subsets:
@@ -500,3 +514,17 @@ rule clean_sanger_cgc:
         cgc_output=MODELING_DATA_DIR / "sanger_cancer-gene-census.csv",
     script:
         "060_prep-sanger-cgc.R"
+
+
+rule cancer_gene_maps:
+    input:
+        bailey_supp_excel=DATA_DIR / "bailey-2018-cell" / "bailey-cancer-genes.xlsx",
+        cgc_genes=rules.clean_sanger_cgc.output.cgc_output,
+        cell_line_info=rules.cell_line_info.output.cell_line_info,
+        depmap_cancer_map=DATA_DIR / "depmap-lineage-cancer-types.tsv",
+    output:
+        bailey_genes_df=MODELING_DATA_DIR / "bailey-cancer-genes.csv",
+        bailey_genes_dict=MODELING_DATA_DIR / "bailey-cancer-genes-dict.json",
+        cgc_genes_dict=MODELING_DATA_DIR / "cgc-cancer-genes-dict.json",
+    script:
+        "061_prep-bailey-2018-cancer-genes.R"

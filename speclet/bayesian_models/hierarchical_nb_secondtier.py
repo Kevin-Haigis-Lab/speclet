@@ -197,21 +197,31 @@ class HierarchcalNegativeBinomialSecondTier:
             },
         }
 
-    def pymc_model(self, data: pd.DataFrame) -> pm.Model:
-        """PyMC model.
+    def pymc_model(
+        self,
+        data: pd.DataFrame,
+        seed: Optional[int] = None,
+        skip_data_processing: bool = False,
+    ) -> pm.Model:
+        """Model in PyMC.
 
         Args:
             data (pd.DataFrame): Data to model.
+            seed (Optional[seed], optional): Random seed. Defaults to `None`.
+            skip_data_processing (bool, optional). Skip data pre-processing step?
+            Defaults to `False`.
 
         Returns:
             pm.Model: PyMC model.
         """
-        valid_data = self.data_processing_pipeline(data)
-        model_data = self._make_data_structure(valid_data)
-        coords = self._model_coords(valid_data)
+        if not skip_data_processing:
+            data = self.data_processing_pipeline(data)
+
+        model_data = self._make_data_structure(data)
+        coords = self._model_coords(data)
         coords["one"] = ["1"]
 
-        with pm.Model(coords=coords) as model:
+        with pm.Model(coords=coords, rng_seeder=seed) as model:
 
             mu_a = pm.Normal("mu_a", 0, 5)
             sigma_a = pm.Gamma("sigma_a", 2, 0.5)
