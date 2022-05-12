@@ -45,7 +45,7 @@ fitting_pipeline_memory_lookup: MemoryLookupDict = {
         },
         False: {
             ModelFitMethod.STAN_MCMC: 64,
-            ModelFitMethod.PYMC_MCMC: 72,
+            ModelFitMethod.PYMC_MCMC: 100,
             ModelFitMethod.PYMC_ADVI: 64,
         },
     },
@@ -87,7 +87,7 @@ fitting_pipeline_time_lookup: TimeLookupDict = {
         },
         False: {
             ModelFitMethod.STAN_MCMC: td(days=9),
-            ModelFitMethod.PYMC_MCMC: td(days=9),
+            ModelFitMethod.PYMC_MCMC: td(days=21),
             ModelFitMethod.PYMC_ADVI: td(hours=9),
         },
     },

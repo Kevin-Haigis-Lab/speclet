@@ -438,11 +438,6 @@ def _make_cancer_gene_mutation_matrix(
         .sort_values("depmap_id")
         .lineage.values
     )
-    print(cell_lines)
-    print(f"length of `cell_lines`: {len(cell_lines)}")
-    print(lineages)
-    print(f"length of `lineages`: {len(lineages)}")
-    print(f"num cell lines in data: {len(data.depmap_id.unique())}")
     assert len(cell_lines) == len(lineages)
     cell_mutations = _collect_mutations_per_cell_line(data)
     mut_mat = np.zeros(shape=(len(genes), len(cell_lines)), dtype=int)
