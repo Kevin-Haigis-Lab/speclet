@@ -10,7 +10,6 @@ from typing import NoReturn
 class ModelFitMethod(Enum):
     """Available fit methods."""
 
-    STAN_MCMC = "STAN_MCMC"
     PYMC_MCMC = "PYMC_MCMC"
     PYMC_ADVI = "PYMC_ADVI"
 

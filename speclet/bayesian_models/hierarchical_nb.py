@@ -1,16 +1,13 @@
 """A hierarchical negative binomial generialzed linear model."""
 
-from dataclasses import asdict, dataclass
-from pathlib import Path
-from typing import Any, Final, Optional
+from dataclasses import dataclass
+from typing import Optional
 
 import numpy as np
 import pandas as pd
 import pymc as pm
 import pymc.math as pmmath
-import stan
 from pandera import Check, Column, DataFrameSchema
-from stan.model import Model as StanModel
 
 from speclet.data_processing.common import get_cats
 from speclet.data_processing.crispr import (
@@ -28,10 +25,8 @@ from speclet.data_processing.validation import (
     check_unique_groups,
 )
 from speclet.data_processing.vectors import squish_array
-from speclet.io import stan_models_dir
 from speclet.loggers import logger
 from speclet.managers.data_managers import CancerGeneDataManager, LineageGeneMap
-from speclet.modeling.stan_helpers import read_code_file
 from speclet.project_enums import ModelFitMethod
 
 
@@ -74,14 +69,9 @@ class HierarchicalNegativeBinomialConfig:
 class HierarchcalNegativeBinomialModel:
     """A hierarchical negative binomial generialzed linear model."""
 
-    _config: HierarchicalNegativeBinomialConfig
-    _stan_code_file: Final[Path] = stan_models_dir() / "hierarchical_nb.stan"
-
     def __init__(self) -> None:
         """Create a negative binomial Bayesian model object."""
         self._config = HierarchicalNegativeBinomialConfig()
-        assert self._stan_code_file.exists(), "Cannot find Stan code."
-        assert self._stan_code_file.is_file(), "Path to Stan code is not a file."
         return None
 
     @property
@@ -130,10 +120,6 @@ class HierarchcalNegativeBinomialModel:
     def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
         _vars = ["~^mu$", "~^eta$", "~^delta_.*"]
-        if fit_method is ModelFitMethod.STAN_MCMC:
-            _vars += ["~^log_lik$", "~^y_hat$"]
-        else:
-            _vars += []
         return _vars
 
     def validate_data(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -256,49 +242,6 @@ class HierarchcalNegativeBinomialModel:
             .pipe(set_achilles_categorical_columns, sort_cats=True, skip_if_cat=False)
             .pipe(self.validate_data)
         )
-
-    @property
-    def stan_code(self) -> str:
-        """Stan code for the Negative Binomial model."""
-        return read_code_file(self._stan_code_file)
-
-    def stan_model(
-        self, data: pd.DataFrame, random_seed: Optional[int] = None
-    ) -> StanModel:
-        """Stan model for a simple negative binomial model.
-
-        Args:
-            data (pd.DataFrame): Data to model.
-            random_seed (Optional[int], optional): Random seed. Defaults to None.
-
-        Returns:
-            StanModel: Stan model.
-        """
-        model_data = self.data_processing_pipeline(data).pipe(self._make_data_structure)
-        model_data.sgrna_idx = model_data.sgrna_idx + 1
-        model_data.gene_idx = model_data.gene_idx + 1
-        model_data.lineage_idx = model_data.lineage_idx + 1
-        model_data.cellline_idx = model_data.cellline_idx + 1
-        return stan.build(
-            self.stan_code, data=asdict(model_data), random_seed=random_seed
-        )
-
-    def stan_idata_addons(self, data: pd.DataFrame) -> dict[str, Any]:
-        """Information to add to the InferenceData posterior object."""
-        valid_data = self.data_processing_pipeline(data)
-        return {
-            "posterior_predictive": ["y_hat"],
-            "observed_data": ["ct_final"],
-            "log_likelihood": {"ct_final": "log_lik"},
-            "constant_data": ["ct_initial"],
-            "coords": self._model_coords(valid_data),
-            "dims": {
-                "a": ["sgrna"],
-                "b": ["cell_line"],
-                "d": ["gene", "lineage"],
-                "alpha": ["gene"],
-            },
-        }
 
     def pymc_model(
         self,

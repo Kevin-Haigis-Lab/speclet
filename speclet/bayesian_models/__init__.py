@@ -1,11 +1,10 @@
 """Organization of the Bayesian model classes."""
 
 from enum import Enum, unique
-from typing import Any, Final, Optional, Protocol, Type
+from typing import Final, Optional, Protocol, Type
 
 import pandas as pd
 import pymc as pm
-from stan.model import Model as StanModel
 
 from speclet.bayesian_models.eight_schools import EightSchoolsModel
 from speclet.bayesian_models.hierarchical_nb import HierarchcalNegativeBinomialModel
@@ -35,24 +34,6 @@ class BayesianModelProtocol(Protocol):
 
     def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
-        ...
-
-    def stan_model(
-        self, data: pd.DataFrame, random_seed: Optional[int] = None
-    ) -> StanModel:
-        """Make a Stan model.
-
-        Args:
-            data (pd.DataFrame): Data to model.
-            random_seed (Optional[int], optional): Random seed. Defaults to None.
-
-        Returns:
-            StanModel: A Stan model.
-        """
-        ...
-
-    def stan_idata_addons(self, data: pd.DataFrame) -> dict[str, Any]:
-        """Information to add to the InferenceData posterior object."""
         ...
 
     def pymc_model(

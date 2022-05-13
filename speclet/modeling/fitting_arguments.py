@@ -9,19 +9,6 @@ from speclet.types import BasicTypes, VIMethod
 TargetAcceptFloat = confloat(ge=0.5, lt=1.0)
 
 
-class StanMCMCSamplingArguments(BaseModel):
-    """MCMC sampling arguments for Pystan."""
-
-    num_chains: PositiveInt = 4
-    num_samples: PositiveInt = 1000
-    num_warmup: PositiveInt = 1000
-    save_warmup: int = 0
-    num_thin: int = 1
-    delta: TargetAcceptFloat = 0.8  # type: ignore
-    max_depth: PositiveInt = 10
-    refresh: PositiveInt = 100
-
-
 class PymcSampleArguments(BaseModel):
     """PyMC model `sample()` keyword arguments."""
 
@@ -54,6 +41,5 @@ class PymcFitArguments(BaseModel):
 class ModelingSamplingArguments(BaseModel):
     """Keyword sampling arguments for methods of fitting a Bayesian models."""
 
-    stan_mcmc: Optional[StanMCMCSamplingArguments] = None
     pymc_mcmc: Optional[PymcSampleArguments] = None
     pymc_advi: Optional[PymcFitArguments] = None

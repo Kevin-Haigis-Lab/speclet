@@ -7,7 +7,6 @@ import arviz as az
 import pandas as pd
 import pymc as pm
 from pydantic import BaseModel
-from stan.model import Model as StanModel
 
 from speclet.bayesian_models import BayesianModelProtocol
 from speclet.loggers import logger
@@ -16,11 +15,9 @@ from speclet.modeling.fitting_arguments import (
     ModelingSamplingArguments,
     PymcFitArguments,
     PymcSampleArguments,
-    StanMCMCSamplingArguments,
 )
 from speclet.project_configuration import on_hms_cluster
 from speclet.project_enums import ModelFitMethod, assert_never
-from speclet.utils.general import resolve_optional_kwargs
 
 
 def _get_kwargs_dict(
@@ -137,31 +134,6 @@ def fit_pymc_vi(
     return ApproximationSamplingResults(inference_data=trace, approximation=approx)
 
 
-# --- Interface with Stan ---
-
-
-def fit_stan_mcmc(
-    stan_model: StanModel,
-    sampling_kwargs: Optional[Union[StanMCMCSamplingArguments, dict[str, Any]]] = None,
-    az_kwargs: Optional[dict[str, Any]] = None,
-) -> az.InferenceData:
-    """Fit a Stan model.
-
-    Args:
-        stan_model (StanModel): The Stan model to fit.
-        sampling_kwargs (Optional[StanMCMCSamplingArguments], optional): Optional
-        fitting keyword arguments. Defaults to None
-
-    Returns:
-        az.InferenceData: Model posterior draws.
-    """
-    az_kwargs = resolve_optional_kwargs(az_kwargs)
-    kwargs = _get_kwargs_dict(sampling_kwargs)
-    _ = kwargs.pop("random_seed", None)  # remove 'random_seed'
-    post = stan_model.sample(**kwargs)
-    return az.from_pystan(posterior=post, posterior_model=stan_model, **az_kwargs)
-
-
 # ---- Dispatching ----
 
 
@@ -185,19 +157,7 @@ def fit_model(
     Returns:
         az.InferenceData: Model posterior.
     """
-    if fit_method is ModelFitMethod.STAN_MCMC:
-        if sampling_kwargs is not None:
-            kwargs = sampling_kwargs.stan_mcmc
-        else:
-            kwargs = None
-        stan_model = model.stan_model(data=data, random_seed=seed)
-        posterior = fit_stan_mcmc(
-            stan_model,
-            sampling_kwargs=kwargs,
-            az_kwargs=model.stan_idata_addons(data=data),
-        )
-        return posterior
-    elif fit_method is ModelFitMethod.PYMC_MCMC:
+    if fit_method is ModelFitMethod.PYMC_MCMC:
         if sampling_kwargs is not None:
             kwargs = sampling_kwargs.pymc_mcmc
         else:

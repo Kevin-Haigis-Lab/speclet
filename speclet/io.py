@@ -116,11 +116,6 @@ def modeling_data_dir() -> Path:
     return project_root() / "modeling_data"
 
 
-def stan_models_dir() -> Path:
-    """Path to the directory with the Stan model code."""
-    return package_root() / "bayesian_models" / "stan_model_code"
-
-
 def data_dir() -> Path:
     """Path to (raw) data directory."""
     return project_root() / "data"

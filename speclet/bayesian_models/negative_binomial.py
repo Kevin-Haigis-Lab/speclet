@@ -1,24 +1,19 @@
 """Simple negative binomial model."""
 
-from dataclasses import asdict, dataclass
-from pathlib import Path
-from typing import Any, Final, Optional
+from dataclasses import dataclass
+from typing import Optional
 
 import numpy as np
 import pandas as pd
 import pymc as pm
 import pymc.math as pmmath
-import stan
 from pandera import Column, DataFrameSchema
-from stan.model import Model as StanModel
 
 from speclet.data_processing.crispr import (
     add_useful_read_count_columns,
     append_total_read_counts,
 )
 from speclet.data_processing.validation import check_finite, check_nonnegative
-from speclet.io import stan_models_dir
-from speclet.modeling.stan_helpers import read_code_file
 from speclet.project_enums import ModelFitMethod
 
 
@@ -34,12 +29,8 @@ class NegBinomModelData:
 class NegativeBinomialModel:
     """Negative binomial generalized linear model."""
 
-    _stan_code_file: Final[Path] = stan_models_dir() / "negative_binomial.stan"
-
     def __init__(self) -> None:
         """Create a negative binomial Bayesian model object."""
-        assert self._stan_code_file.exists(), "Cannot find Stan code."
-        assert self._stan_code_file.is_file(), "Path to Stan code is not a file."
         return None
 
     @property
@@ -62,8 +53,6 @@ class NegativeBinomialModel:
     def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
         _vars = ["~^mu$"]
-        if fit_method is ModelFitMethod.STAN_MCMC:
-            _vars += ["~^reciprocal_phi$", "~^log_lik$", "~^y_hat$"]
         return _vars
 
     def _validate_data(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -92,37 +81,6 @@ class NegativeBinomialModel:
             .pipe(self._validate_data)
             .pipe(self._make_data_structure)
         )
-
-    @property
-    def stan_code(self) -> str:
-        """Stan code for the Negative Binomial model."""
-        return read_code_file(self._stan_code_file)
-
-    def stan_model(
-        self, data: pd.DataFrame, random_seed: Optional[int] = None
-    ) -> StanModel:
-        """Stan model for a simple negative binomial model.
-
-        Args:
-            data (pd.DataFrame): Data to model.
-            random_seed (Optional[int], optional): Random seed. Defaults to None.
-
-        Returns:
-            StanModel: Stan model.
-        """
-        model_data = self.data_processing_pipeline(data)
-        return stan.build(
-            self.stan_code, data=asdict(model_data), random_seed=random_seed
-        )
-
-    def stan_idata_addons(self, data: pd.DataFrame) -> dict[str, Any]:
-        """Information to add to the InferenceData posterior object."""
-        return {
-            "posterior_predictive": ["y_hat"],
-            "observed_data": ["ct_final"],
-            "log_likelihood": {"ct_final": "log_lik"},
-            "constant_data": ["ct_initial"],
-        }
 
     def pymc_model(
         self,
