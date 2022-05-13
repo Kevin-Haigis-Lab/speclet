@@ -29,8 +29,8 @@ Hee, we use ['mamba'](https://github.com/mamba-org/mamba) as a drop-in replaceme
 
 ```bash
 conda install -n base -c conda-forge mamba
-mamba env create -f environment.yaml
-mamba env create -f environment_smk.yaml
+mamba env create -f conda.yaml
+mamba env create -f conda_smk.yaml
 ```
 
 If wokring on a linux distribution, you'll need to install `gcc` and `g++`, also.
@@ -62,7 +62,7 @@ On O2, because I don't have control over the `base` conda environment, I follow 
 ```bash
 conda create -n speclet -c conda-forge python=3.9.9 mamba
 conda activate speclet
-mamba env update --name speclet --file environment.yaml
+mamba env update --name speclet --file conda.yaml
 mamba install -c conda-forge gcc gxx
 ```
 
