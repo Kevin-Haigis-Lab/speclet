@@ -2,13 +2,13 @@
 
 **Use Bayesian data analysis to create informative models of genome-wide CRISPR-Cas9 loss-of-function genetic screens.**
 
-[![python](https://img.shields.io/badge/Python-3.9-3776AB.svg?style=flat&logo=python)](https://www.python.org)
+[![python](https://img.shields.io/badge/Python-3.10-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org)
 [![jupyerlab](https://img.shields.io/badge/Jupyter-Lab-F37626.svg?style=flat&logo=jupyter)](https://jupyter.org) <br>
 [![project-build](https://github.com/Kevin-Haigis-Lab/speclet/actions/workflows/project-build.yaml/badge.svg)](https://github.com/Kevin-Haigis-Lab/speclet/actions/workflows/project-build.yaml)
-[![pytest](https://github.com/Kevin-Haigis-Lab/speclet/actions/workflows/CI.yaml/badge.svg)](https://github.com/Kevin-Haigis-Lab/speclet/actions/workflows/CI.yaml)
+[![pytest](https://github.com/Kevin-Haigis-Lab/speclet/actions/workflows/CI.yaml/badge.svg)](https://github.com/Kevin-Haigis-Lab/speclet/actions/workflows/CI.yaml) <br>
 [![Tested with Hypothesis](https://img.shields.io/badge/hypothesis-tested-brightgreen.svg)](https://hypothesis.readthedocs.io/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Code style: snakefmt](https://img.shields.io/badge/code%20style-snakefmt-000000.svg)](https://github.com/snakemake/snakefmt)
+[![snakefmt: black](https://img.shields.io/badge/snakefmt-black-000000.svg)](https://github.com/snakemake/snakefmt)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![pydocstyle](https://img.shields.io/badge/pydocstyle-enabled-AD4CD3)](http://www.pydocstyle.org/en/stable/) <br>
