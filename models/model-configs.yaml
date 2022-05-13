@@ -20,73 +20,7 @@
 #     sbc: [STAN_MCMC, PYMC_MCMC, PYMC_ADVI]
 
 
-# ---- Negative binomial model ----
-
-- name: simple-nb
-  description: A simple negative binomial model.
-  active: false
-  model: SIMPLE_NEGATIVE_BINOMIAL
-  data_file: DEPMAP_CRC_BONE_SUBSAMPLE
-  pipelines:
-    fitting: [PYMC_MCMC, STAN_MCMC]
-
-
 # ---- Hierarchical negative binomial model ----
-
-- name: hierarchical-nb
-  description: A hierarchical negative binomial model.
-  active: false
-  model: HIERARCHICAL_NB
-  data_file: DEPMAP_CRC_BONE_LARGE_SUBSAMPLE
-  sampling_kwargs:
-    pymc3_mcmc:
-      target_accept: 0.95
-    stan_mcmc:
-      delta: 0.95
-      refresh: 5
-  pipelines:
-    fitting: [PYMC_MCMC, STAN_MCMC]
-
-- name: hierarchical-nb-blaswarning
-  active: false
-  description: "
-    A hierarchical negative binomial model run with the BLAS warning from theano.
-  "
-  model: HIERARCHICAL_NB
-  data_file: DEPMAP_CRC_BONE_LARGE_SUBSAMPLE
-  sampling_kwargs:
-    pymc3_mcmc:
-      target_accept: 0.95
-  pipelines:
-    fitting: [PYMC_MCMC]
-
-- name: hierarchical-nb_advi-init
-  active: false
-  description: A hierarchical negative binomial model. Initialized using ADVI in PyMC3.
-  model: HIERARCHICAL_NB
-  data_file: DEPMAP_CRC_BONE_LARGE_SUBSAMPLE
-  sampling_kwargs:
-    pymc3_mcmc:
-      target_accept: 0.95
-      init: "advi"
-      n_init: 50000
-  pipelines:
-    fitting: [PYMC_MCMC]
-
-- name: hnb-copynum-rna-mut-covariates
-  description: "
-    A hierarchical negative binomial model with copy number, RNA expression, and
-    mutation status covariates..
-  "
-  active: false
-  model: HIERARCHICAL_NB
-  data_file: DEPMAP_CRC_BONE_LARGE_SUBSAMPLE
-  sampling_kwargs:
-    pymc_mcmc:
-      target_accept: 0.95
-      init: "adapt_diag"
-  pipelines:
-    fitting: [PYMC_MCMC]
 
 - name: hnb-comutation-synlet
   description: "
@@ -103,18 +37,3 @@
       init: "adapt_diag"
   pipelines:
     fitting: [PYMC_MCMC]
-
-# ---- 2-Tier hierarchical negative binomial model ----
-
-# - name: hierarchical-nb-second-tier
-#   description: A hierarchical negative binomial model with a second tier.
-#   model: HIERARCHICAL_NB_SECONDTIER
-#   data_file: DEPMAP_CRC_BONE_SUBSAMPLE
-#   sampling_kwargs:
-#     pymc3_mcmc:
-#       target_accept: 0.9
-#     stan_mcmc:
-#       delta: 0.9
-#       refresh: 1
-#   pipelines:
-#     fitting: [PYMC_MCMC, STAN_MCMC]

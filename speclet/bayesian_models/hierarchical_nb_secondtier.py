@@ -1,16 +1,13 @@
 """A hierarchical negative binomial model with a second tier."""
 
-from dataclasses import asdict, dataclass
-from pathlib import Path
-from typing import Any, Final, Optional
+from dataclasses import dataclass
+from typing import Optional
 
 import numpy as np
 import pandas as pd
 import pymc as pm
 import pymc.math as pmmath
-import stan
 from pandera import Check, Column, DataFrameSchema
-from stan.model import Model as StanModel
 
 from speclet.data_processing.common import get_cats
 from speclet.data_processing.crispr import (
@@ -24,8 +21,6 @@ from speclet.data_processing.validation import (
     check_nonnegative,
     check_unique_groups,
 )
-from speclet.io import stan_models_dir
-from speclet.modeling.stan_helpers import read_code_file
 from speclet.project_enums import ModelFitMethod
 
 
@@ -48,12 +43,8 @@ class NegativeBinomialModelData:
 class HierarchcalNegativeBinomialSecondTier:
     """A hierarchical negative binomial model with a second tier."""
 
-    _stan_code_file: Final[Path] = stan_models_dir() / "hierarchical_nb_secondtier.stan"
-
     def __init__(self) -> None:
         """Create a negative binomial Bayesian model object."""
-        assert self._stan_code_file.exists(), "Cannot find Stan code."
-        assert self._stan_code_file.is_file(), "Path to Stan code is not a file."
         return None
 
     @property
@@ -92,10 +83,6 @@ class HierarchcalNegativeBinomialSecondTier:
     def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
         _vars = ["mu", "eta", "delta_gamma", "delta_beta", "delta_b"]
-        if fit_method in {ModelFitMethod.PYMC_ADVI, ModelFitMethod.PYMC_MCMC}:
-            _vars += []
-        if fit_method is ModelFitMethod.STAN_MCMC:
-            _vars += ["log_lik", "y_hat"]
         _vars = [f"~^{v}$" for v in _vars]
         return _vars
 
@@ -142,59 +129,11 @@ class HierarchcalNegativeBinomialSecondTier:
             .pipe(self.validate_data)
         )
 
-    @property
-    def stan_code(self) -> str:
-        """Stan code for the model."""
-        return read_code_file(self._stan_code_file)
-
-    def stan_model(
-        self, data: pd.DataFrame, random_seed: Optional[int] = None
-    ) -> StanModel:
-        """Stan model for a simple negative binomial model.
-
-        Args:
-            data (pd.DataFrame): Data to model.
-            random_seed (Optional[int], optional): Random seed. Defaults to None.
-
-        Returns:
-            StanModel: Stan model.
-        """
-        model_data = self.data_processing_pipeline(data).pipe(self._make_data_structure)
-        model_data.sgrna_idx = model_data.sgrna_idx + 1
-        model_data.gene_idx = model_data.gene_idx + 1
-        model_data.sgrna_to_gene_idx = model_data.sgrna_to_gene_idx + 1
-        model_data.cellline_idx = model_data.cellline_idx + 1
-        return stan.build(
-            self.stan_code, data=asdict(model_data), random_seed=random_seed
-        )
-
     def _model_coords(self, valid_data: pd.DataFrame) -> dict[str, list[str]]:
         return {
             "sgrna": get_cats(valid_data, "sgrna"),
             "gene": get_cats(valid_data, "hugo_symbol"),
             "cell_line": get_cats(valid_data, "depmap_id"),
-        }
-
-    def stan_idata_addons(self, data: pd.DataFrame) -> dict[str, Any]:
-        """Information to add to the InferenceData posterior object."""
-        valid_data = self.data_processing_pipeline(data)
-        return {
-            "posterior_predictive": ["y_hat"],
-            "observed_data": ["ct_final"],
-            "log_likelihood": {"ct_final": "log_lik"},
-            "constant_data": ["ct_initial"],
-            "coords": self._model_coords(valid_data),
-            "dims": {
-                "a_g": ["gene"],
-                "b_c": ["cell_line"],
-                "delta_b": ["cell_line"],
-                "gamma_gc": ["gene", "cell_line"],
-                "delta_gamma": ["gene", "cell_line"],
-                "mu_beta": ["gene", "cell_line"],
-                "beta_sc": ["sgrna", "cell_line"],
-                "delta_beta": ["sgrna", "cell_line"],
-                "alpha": ["gene"],
-            },
         }
 
     def pymc_model(

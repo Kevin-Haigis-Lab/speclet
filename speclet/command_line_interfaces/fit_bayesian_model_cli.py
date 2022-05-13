@@ -2,7 +2,6 @@
 
 """CLI for standardized fitting Bayesian models."""
 
-
 from pathlib import Path
 from time import time
 from typing import Optional
@@ -19,10 +18,7 @@ from speclet.loggers import logger
 from speclet.managers.cache_manager import cache_posterior, get_posterior_cache_name
 from speclet.managers.data_managers import CrisprScreenDataManager
 from speclet.model_configuration import ModelingSamplingArguments
-from speclet.modeling.fitting_arguments import (
-    PymcSampleArguments,
-    StanMCMCSamplingArguments,
-)
+from speclet.modeling.fitting_arguments import PymcSampleArguments
 from speclet.modeling.model_fitting_api import fit_model
 from speclet.project_enums import ModelFitMethod
 
@@ -49,11 +45,6 @@ def _augment_sampling_kwargs(
 ) -> Optional[ModelingSamplingArguments]:
     if sampling_kwargs is None:
         sampling_kwargs = ModelingSamplingArguments()
-
-    if sampling_kwargs.stan_mcmc is not None:
-        sampling_kwargs.stan_mcmc.num_chains = mcmc_chains
-    else:
-        sampling_kwargs.stan_mcmc = StanMCMCSamplingArguments(num_chains=mcmc_chains)
 
     if sampling_kwargs.pymc_mcmc is not None:
         sampling_kwargs.pymc_mcmc.chains = mcmc_chains

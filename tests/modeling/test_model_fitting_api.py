@@ -4,7 +4,6 @@ import arviz as az
 import pandas as pd
 import pymc as pm
 import pytest
-from stan.model import Model as StanModel
 
 from speclet.bayesian_models.eight_schools import EightSchoolsModel
 from speclet.modeling import model_fitting_api as mf_api
@@ -12,14 +11,8 @@ from speclet.modeling.fitting_arguments import (
     ModelingSamplingArguments,
     PymcFitArguments,
     PymcSampleArguments,
-    StanMCMCSamplingArguments,
 )
 from speclet.project_enums import ModelFitMethod
-
-
-def test_fit_stan_mcmc(centered_eight_stan_model: StanModel) -> None:
-    post = mf_api.fit_stan_mcmc(centered_eight_stan_model)
-    assert isinstance(post, az.InferenceData)
 
 
 @pytest.mark.slow
@@ -54,7 +47,6 @@ def test_fit_pymc_vi(
 @pytest.mark.parametrize("fit_method", ModelFitMethod)
 def test_fit_model_dispatcher(fit_method: ModelFitMethod) -> None:
     args = ModelingSamplingArguments(
-        stan_mcmc=StanMCMCSamplingArguments(num_chains=1),
         pymc_mcmc=PymcSampleArguments(chains=1),
         pymc_advi=PymcFitArguments(n=100),
     )

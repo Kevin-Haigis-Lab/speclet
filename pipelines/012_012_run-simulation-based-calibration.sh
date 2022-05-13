@@ -18,14 +18,6 @@ conda activate speclet_smk
 
 SNAKEFILE="pipelines/012_010_simulation-based-calibration.smk"
 
-# Copy original env file and ammend import of speclet project modules
-ENV_PATH="pipelines/default_environment.yaml"
-if [ ! -f "$ENV_PATH" ]; then
-    cp environment.yaml $ENV_PATH
-    sed -i "s|-e .|-e $(pwd)/|" $ENV_PATH
-    sed -i '/jupyter_contrib_nbextensions/d' $ENV_PATH
-fi
-
 snakemake \
     --snakefile $SNAKEFILE \
     --jobs 9990 \

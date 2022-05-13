@@ -31,9 +31,9 @@ pyenvs:
 	@echo "Installing mamba in the base conda env."
 	($(CONDA_SETUP) conda install -n base -c conda-forge mamba)
 	@echo "Installing speclet conda environment."
-	($(CONDA_SETUP) mamba env create -f environment.yaml)
+	($(CONDA_SETUP) mamba env create -f conda.yaml)
 	@echo "Installing snakemake conda environment."
-	($(CONDA_SETUP) mamba env create -f environment_smk.yaml)
+	($(CONDA_SETUP) mamba env create -f conda_smk.yaml)
 
 renv:
 	@echo "Preparing R environment."
