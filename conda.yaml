@@ -37,6 +37,7 @@ dependencies:
   - nbqa
   - nbterm
   - numpy>=1.22.0
+  - numpyro>=0.9.0
   - pandas>=1.3.0
   - pandera>=0.8.0
   - pandoc
