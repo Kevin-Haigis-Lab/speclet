@@ -3,7 +3,7 @@
 import json
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Callable, Final, Optional, Union
+from typing import Any, Callable, Optional, Union
 
 import pandas as pd
 import pandera as pa
@@ -26,14 +26,11 @@ from speclet.utils.general import merge_sets
 
 data_transformation = Callable[[pd.DataFrame], pd.DataFrame]
 
+SUPPORTED_DATA_FILES = {".csv", ".tsv", ".pkl"}
+
 
 class CrisprScreenDataManager:
     """Manage CRISPR screen data."""
-
-    data_file: Path
-    _data: Optional[pd.DataFrame]
-    _transformations: list[data_transformation]
-    _supported_filetypes: Final[set[str]] = {".csv", ".tsv", ".pkl"}
 
     def __init__(
         self,
@@ -68,7 +65,7 @@ class CrisprScreenDataManager:
             raise DataFileDoesNotExist(self.data_file)
         if not self.data_file.is_file():
             raise DataFileIsNotAFile(self.data_file)
-        if self.data_file.suffix not in self._supported_filetypes:
+        if self.data_file.suffix not in SUPPORTED_DATA_FILES:
             raise UnsupportedDataFileType(self.data_file.suffix)
 
     # ---- Properties ----
@@ -131,7 +128,7 @@ class CrisprScreenDataManager:
         if self._data is not None and not force_reread:
             return self._data
 
-        if self.data_file.suffix not in self._supported_filetypes:
+        if self.data_file.suffix not in SUPPORTED_DATA_FILES:
             raise UnsupportedDataFileType(self.data_file.suffix)
 
         if read_kwargs is None:
