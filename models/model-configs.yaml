@@ -3,7 +3,7 @@
 
 - name: hnb-comutation-synlet
   description: "
-    A hierarchical negative binomical generalized linear model with covariates for
+    A hierarchical negative binomial generalized linear model with covariates for
     different molecular covariates and a covariate for co-mutation with known cancer-
     related genes. The cancer genes are from COSMIC's CGC and lineage-specific.
   "

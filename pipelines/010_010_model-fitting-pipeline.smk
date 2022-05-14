@@ -104,56 +104,6 @@ rule all:
         ),
 
 
-# --- Stan MCMC ---
-
-
-rule sample_stan_mcmc:
-    output:
-        idata_path=TEMP_DIR / "{model_name}_STAN_MCMC_chain{chain}" / "posterior.netcdf",
-    params:
-        mem=lambda w: get_memory(w, ModelFitMethod.STAN_MCMC),
-        time=lambda w: get_time(w, ModelFitMethod.STAN_MCMC),
-        partition=lambda w: get_partition(w, ModelFitMethod.STAN_MCMC),
-        config_file=MODEL_CONFIG,
-        tempdir=TEMP_DIR,
-        cache_name=lambda w: f"{w.model_name}_STAN_MCMC_chain{w.chain}",
-    benchmark:
-        BENCHMARK_DIR / "sample_stan_mcmc/{model_name}_chain{chain}.tsv"
-    priority: 20
-    shell:
-        "speclet/command_line_interfaces/fit_bayesian_model_cli.py"
-        '  "{wildcards.model_name}"'
-        "  {params.config_file}"
-        "  STAN_MCMC"
-        "  {params.tempdir}"
-        "  --mcmc-chains 1"
-        "  --mcmc-cores 1"
-        "  --cache-name {params.cache_name}"
-
-
-rule combine_stan_mcmc:
-    input:
-        chains=expand(
-            TEMP_DIR / "{{model_name}}_STAN_MCMC_chain{chain}" / "posterior.netcdf",
-            chain=list(range(N_CHAINS)),
-        ),
-    output:
-        combined_chains=MODEL_CACHE_DIR / "{model_name}_STAN_MCMC" / "posterior.netcdf",
-    params:
-        n_chains=N_CHAINS,
-        combined_cache_dir=MODEL_CACHE_DIR,
-        config_file=MODEL_CONFIG,
-        cache_dir=TEMP_DIR,
-    shell:
-        "speclet/command_line_interfaces/combine_mcmc_chains_cli.py"
-        "  {wildcards.model_name}"
-        "  STAN_MCMC"
-        "  {params.n_chains}"
-        "  {params.config_file}"
-        "  {params.cache_dir}"
-        "  {params.combined_cache_dir}"
-
-
 # --- PyMC MCMC ---
 
 

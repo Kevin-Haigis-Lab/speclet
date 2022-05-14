@@ -27,7 +27,7 @@ class PymcSamplingNumpyroArguments(BaseModel):
     tune: PositiveInt = 1000
     chains: PositiveInt = 4
     target_accept: TargetAcceptFloat = 0.8  # type: ignore
-    progressbar: bool = True
+    progress_bar: bool = True
     chain_method: str = "parallel"
     postprocessing_backend: str | None = None
 

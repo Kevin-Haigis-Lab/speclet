@@ -39,7 +39,7 @@ class SlurmResourceManager:
         Returns:
             str: Amount of RAM required.
         """
-        return str(self.slurm_resources.mem * 1000)
+        return str(int(self.slurm_resources.mem * 1000))
 
     @property
     def time(self) -> str:
