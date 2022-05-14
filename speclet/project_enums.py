@@ -27,7 +27,7 @@ class ModelParameterization(Enum):
 
 
 @unique
-class SlurmPartitions(Enum):
+class SlurmPartition(Enum):
     """Partitions of the HPC available through SLURM."""
 
     PRIORITY = "priority"

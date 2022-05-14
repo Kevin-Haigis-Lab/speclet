@@ -31,11 +31,9 @@ class BayesianModelConfiguration(BaseModel):
     active: bool = True
     model: BayesianModel
     data_file: io.DataFile
-    subsample: bool = False
     sampling_kwargs: ModelingSamplingArguments = Field(
         default_factory=ModelingSamplingArguments
     )
-    pipelines: PipelineChoices = Field(default_factory=PipelineChoices)
 
 
 class BayesianModelConfigurations(BaseModel):
@@ -110,7 +108,7 @@ def read_model_configurations(path: Path) -> BayesianModelConfigurations:
     Returns:
         BayesianModelConfigurations: Bayesian model configurations.
     """
-    with open(path) as file:
+    with open(path, "r") as file:
         return BayesianModelConfigurations(configurations=yaml.safe_load(file))
 
 
