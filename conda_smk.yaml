@@ -9,11 +9,10 @@ dependencies:
   - snakemake=7.3.*
   - arviz>=0.12.0
   - black  # KEEP! used in pipeline
+  - blas  # may be able to remove in next PyMC beta release
   - colorama
   - dask
   - drmaa
-  # - gcc  # not needed on macOS
-  # - gxx  # not needed on macOS
   - isort  # KEEP! used in pipeline
   - jax>=0.3.0
   - jaxlib>=0.3.0
@@ -22,6 +21,7 @@ dependencies:
   - nbconvert
   - nbqa  # KEEP! used in pipeline
   - numpy
+  - numpyro
   - pandas
   - pandera
   - papermill
