@@ -12,6 +12,7 @@ class ModelFitMethod(Enum):
 
     PYMC_MCMC = "PYMC_MCMC"
     PYMC_ADVI = "PYMC_ADVI"
+    PYMC_NUMPYRO = "PYMC_NUMPYRO"
 
 
 @unique

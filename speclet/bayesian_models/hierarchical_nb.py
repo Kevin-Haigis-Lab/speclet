@@ -119,7 +119,7 @@ class HierarchcalNegativeBinomialModel:
 
     def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
-        _vars = ["~^mu$", "~^eta$", "~^delta_.*"]
+        _vars = ["~^mu$", "~^eta$", "~^delta_.*", "~.*effect$"]
         return _vars
 
     def validate_data(self, data: pd.DataFrame) -> pd.DataFrame:

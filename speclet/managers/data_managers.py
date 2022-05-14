@@ -3,7 +3,7 @@
 import json
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Callable, Final, Optional, Union
+from typing import Any, Callable, Final
 
 import pandas as pd
 import pandera as pa
@@ -26,25 +26,22 @@ from speclet.utils.general import merge_sets
 
 data_transformation = Callable[[pd.DataFrame], pd.DataFrame]
 
+SUPPORTED_DATA_FILES: Final[set[str]] = {".csv", ".tsv", ".pkl"}
+
 
 class CrisprScreenDataManager:
     """Manage CRISPR screen data."""
 
-    data_file: Path
-    _data: Optional[pd.DataFrame]
-    _transformations: list[data_transformation]
-    _supported_filetypes: Final[set[str]] = {".csv", ".tsv", ".pkl"}
-
     def __init__(
         self,
-        data_file: Union[Path, DataFile, str],
-        transformations: Optional[list[data_transformation]] = None,
+        data_file: Path | DataFile | str,
+        transformations: list[data_transformation] | None = None,
     ) -> None:
         """Create a CRISPR screen data manager.
 
         Args:
-            data_file (Union[Path, DataFile, str]): File with data (csv, tsv, or pkl).
-            transformations (Optional[list[DataFrameTransformation]], optional): List of
+            data_file (Path | DataFile | str): File with data (csv, tsv, or pkl).
+            transformations (list[data_transformation] | None, optional): List of
             functions that take, mutate, and return a data frame.
             Defaults to None.
         """
@@ -68,7 +65,7 @@ class CrisprScreenDataManager:
             raise DataFileDoesNotExist(self.data_file)
         if not self.data_file.is_file():
             raise DataFileIsNotAFile(self.data_file)
-        if self.data_file.suffix not in self._supported_filetypes:
+        if self.data_file.suffix not in SUPPORTED_DATA_FILES:
             raise UnsupportedDataFileType(self.data_file.suffix)
 
     # ---- Properties ----
@@ -107,7 +104,7 @@ class CrisprScreenDataManager:
         self,
         skip_transforms: bool = False,
         force_reread: bool = False,
-        read_kwargs: Optional[dict[str, Any]] = None,
+        read_kwargs: dict[str, Any] | None = None,
     ) -> pd.DataFrame:
         """Get the dataframe.
 
@@ -119,7 +116,7 @@ class CrisprScreenDataManager:
             False.
             force_reread (bool, optional): Force the file to be read even if the data
             object already exists. Defaults to False.
-            read_kwargs (Optional[dict[str, Any]], optional): Key-word arguments for the
+            read_kwargs (dict[str, Any] | None, optional): Key-word arguments for the
             CSV-parsing function. Defaults to None.
 
         Raises:
@@ -131,7 +128,7 @@ class CrisprScreenDataManager:
         if self._data is not None and not force_reread:
             return self._data
 
-        if self.data_file.suffix not in self._supported_filetypes:
+        if self.data_file.suffix not in SUPPORTED_DATA_FILES:
             raise UnsupportedDataFileType(self.data_file.suffix)
 
         if read_kwargs is None:
@@ -184,15 +181,15 @@ class CrisprScreenDataManager:
         return set_achilles_categorical_columns(data, ordered=True, sort_cats=True)
 
     def add_transformation(
-        self, fxn: Union[data_transformation, list[data_transformation]]
+        self, fxn: data_transformation | list[data_transformation]
     ) -> None:
         """Add a new transformation.
 
         The new transformation is added to the end of the current list.
 
         Args:
-            fxn (Union[DataFrameTransformation, list[DataFrameTransformation]]): Data
-              transforming function(s).
+            fxn (data_transformation | list[data_transformation]: Data transforming
+            function(s).
 
         Returns:
             None

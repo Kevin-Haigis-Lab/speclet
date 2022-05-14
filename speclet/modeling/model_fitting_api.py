@@ -1,11 +1,12 @@
 """Standardization of the interactions with model sampling."""
 
 from dataclasses import dataclass
-from typing import Any, Optional, Union
+from typing import Any
 
 import arviz as az
 import pandas as pd
 import pymc as pm
+import pymc.sampling_jax
 from pydantic import BaseModel
 
 from speclet.bayesian_models import BayesianModelProtocol
@@ -16,13 +17,14 @@ from speclet.modeling.fitting_arguments import (
     PymcFitArguments,
     PymcSampleArguments,
 )
+from speclet.modeling.fitting_arguments import (
+    PymcSamplingNumpyroArguments as PymcSamplingNumpyroArgs,
+)
 from speclet.project_configuration import on_hms_cluster
 from speclet.project_enums import ModelFitMethod, assert_never
 
 
-def _get_kwargs_dict(
-    data: Optional[Union[BaseModel, dict[str, Any]]]
-) -> dict[str, Any]:
+def _get_kwargs_dict(data: BaseModel | dict[str, Any] | None) -> dict[str, Any]:
     if data is None:
         return {}
     elif isinstance(data, BaseModel):
@@ -56,7 +58,7 @@ def _specific_o2_progress(sampling_kwargs: dict[str, Any]) -> None:
 
 
 def _sample_prior(
-    model: pm.Model, prior_pred_samples: Optional[int], trace: az.InferenceData
+    model: pm.Model, prior_pred_samples: int | None, trace: az.InferenceData
 ) -> None:
     if prior_pred_samples is not None and prior_pred_samples > 0:
         with model:
@@ -72,8 +74,8 @@ def _sample_prior(
 
 def fit_pymc_mcmc(
     model: pm.Model,
-    prior_pred_samples: Optional[int] = None,
-    sampling_kwargs: Optional[Union[PymcSampleArguments, dict[str, Any]]] = None,
+    prior_pred_samples: int | None = None,
+    sampling_kwargs: PymcSampleArguments | dict[str, Any] | None = None,
 ) -> az.InferenceData:
     """Run a standardized PyMC sampling procedure.
 
@@ -81,11 +83,11 @@ def fit_pymc_mcmc(
 
     Args:
         model (pm.Model): PyMC model.
-        prior_pred_samples (Optional[int], optional): Number of samples from the prior
+        prior_pred_samples (int | None, optional): Number of samples from the prior
         distributions. Defaults to None. If `None` or less than 1, no prior samples
         are taken.
-        sample_kwargs (Dict[str, Any], optional): Keyword arguments for the sampling
-        method. Defaults to `None`.
+        sample_kwargs (PymcSampleArguments | dict[str, Any] | None, optional): Keyword
+        arguments for the sampling method. Defaults to `None`.
 
     Returns:
         az.InferenceData: Model posterior sample.
@@ -101,10 +103,40 @@ def fit_pymc_mcmc(
     return trace
 
 
+def fit_pymc_mcmc_numpyro(
+    model: pm.Model,
+    prior_pred_samples: int | None = None,
+    sampling_kwargs: PymcSamplingNumpyroArgs | dict[str, Any] | None = None,
+) -> az.InferenceData:
+    """Run a standardized PyMC sampling procedure using the Numpyro JAX backend.
+
+    The value for `return_inferencedata` will be set to `True`.
+
+    Args:
+        model (pm.Model): PyMC model.
+        prior_pred_samples (int | None, optional): Number of samples from the prior
+        distributions. Defaults to None. If `None` or less than 1, no prior samples
+        are taken.
+        sample_kwargs (PymcSamplingNumpyroArgs | dict[str, Any] | None): Keyword
+        arguments for the sampling method. Defaults to `None`.
+
+    Returns:
+        az.InferenceData: Model posterior sample.
+    """
+    kwargs = _get_kwargs_dict(sampling_kwargs)
+    with model:
+        trace = pymc.sampling_jax.sample_numpyro_nuts(**kwargs)
+        _ = pm.sample_posterior_predictive(trace=trace, extend_inferencedata=True)
+
+    assert isinstance(trace, az.InferenceData)
+    _sample_prior(model, prior_pred_samples, trace)
+    return trace
+
+
 def fit_pymc_vi(
     model: pm.Model,
-    prior_pred_samples: Optional[int] = None,
-    fit_kwargs: Optional[Union[PymcFitArguments, dict[str, Any]]] = None,
+    prior_pred_samples: int | None = None,
+    fit_kwargs: PymcFitArguments | dict[str, Any] | None = None,
 ) -> ApproximationSamplingResults:
     """Run a standard PyMC ADVI fitting procedure.
 
@@ -114,8 +146,8 @@ def fit_pymc_vi(
         model (pm.Model): PyMC model.
         prior_pred_samples (int, optional): Number of samples from the prior
         distributions. Defaults to 1000. If less than 1, no prior samples are taken.
-        fit_kwargs (Optional[Pymc3FitArguments], optional): Keyword arguments for the
-        fit method. Defaults to `None`.
+        fit_kwargs (PymcFitArguments | dict[str, Any] | None, optional): Keyword
+        arguments for the fit method. Defaults to `None`.
 
     Returns:
         ApproximationSamplingResults: A collection of the fitting and sampling results.
@@ -141,8 +173,8 @@ def fit_model(
     model: BayesianModelProtocol,
     data: pd.DataFrame,
     fit_method: ModelFitMethod,
-    sampling_kwargs: Optional[ModelingSamplingArguments] = None,
-    seed: Optional[int] = None,
+    sampling_kwargs: ModelingSamplingArguments | None = None,
+    seed: int | None = None,
 ) -> az.InferenceData:
     """Fit a model using a specified method.
 
@@ -150,28 +182,26 @@ def fit_model(
         model (BayesianModelProtocol): Bayesian model to fit.
         data (pd.DataFrame): CRISPR screen data to use.
         fit_method (ModelFitMethod): Fitting method.
-        sampling_kwargs (Optional[ModelingSamplingArguments], optional): Optional
-        sampling keyword arguments. Defaults to `None`.
-        seed (Optional[int], optional): Random seed for models. Defaults to `None`.
+        sampling_kwargs (ModelingSamplingArguments | None, optional): Optional sampling
+        keyword arguments. Defaults to `None`.
+        seed (int | None, optional): Random seed for models. Defaults to `None`.
 
     Returns:
         az.InferenceData: Model posterior.
     """
+    pymc_model = model.pymc_model(data=data, seed=seed)
     if fit_method is ModelFitMethod.PYMC_MCMC:
-        if sampling_kwargs is not None:
-            kwargs = sampling_kwargs.pymc_mcmc
-        else:
-            kwargs = None
-        pymc_model = model.pymc_model(data=data, seed=seed)
+        kwargs = sampling_kwargs.pymc_mcmc if sampling_kwargs is not None else None
         return fit_pymc_mcmc(
             model=pymc_model, prior_pred_samples=0, sampling_kwargs=kwargs
         )
+    elif fit_method is ModelFitMethod.PYMC_NUMPYRO:
+        kwargs = sampling_kwargs.pymc_numpyro if sampling_kwargs is not None else None
+        return fit_pymc_mcmc_numpyro(
+            model=pymc_model, prior_pred_samples=0, sampling_kwargs=kwargs
+        )
     elif fit_method is ModelFitMethod.PYMC_ADVI:
-        if sampling_kwargs is not None:
-            kwargs = sampling_kwargs.pymc_advi
-        else:
-            kwargs = None
-        pymc_model = model.pymc_model(data=data, seed=seed)
+        kwargs = sampling_kwargs.pymc_advi if sampling_kwargs is not None else None
         return fit_pymc_vi(
             model=pymc_model, prior_pred_samples=0, fit_kwargs=kwargs
         ).inference_data
