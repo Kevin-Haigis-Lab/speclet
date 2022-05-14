@@ -29,7 +29,6 @@ class PymcSamplingNumpyroArguments(BaseModel):
     target_accept: TargetAcceptFloat = 0.8  # type: ignore
     progress_bar: bool = True
     chain_method: str = "parallel"
-    postprocessing_backend: str | None = None
 
 
 class PymcFitArguments(BaseModel):

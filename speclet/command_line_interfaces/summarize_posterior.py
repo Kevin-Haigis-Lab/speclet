@@ -68,7 +68,7 @@ def _posterior_description(
 
     output += br
 
-    if fit_method in {ModelFitMethod.PYMC_MCMC, ModelFitMethod.STAN_MCMC}:
+    if fit_method in {ModelFitMethod.PYMC_MCMC, ModelFitMethod.PYMC_NUMPYRO}:
         logger.info("Recording MCMC description.")
         output += "MCMC DESCRIPTION\n\n"
         mcmc_desc = describe_mcmc(trace, silent=True, plot=False)
