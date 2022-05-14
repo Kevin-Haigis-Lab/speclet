@@ -1,7 +1,5 @@
 """Concerning arguments for fitting Bayesian models."""
 
-from typing import Callable, Iterable, Optional, Union
-
 from pydantic import BaseModel, PositiveInt, confloat
 
 from speclet.types import BasicTypes, VIMethod
@@ -14,18 +12,24 @@ class PymcSampleArguments(BaseModel):
 
     draws: int = 1000
     init: str = "auto"
-    step: Optional[Union[Callable, Iterable[Callable]]] = None
     n_init: int = 200000
-    chain_idx: PositiveInt = 0
-    chains: Optional[PositiveInt] = None
-    cores: Optional[PositiveInt] = None
+    chains: PositiveInt | None = None
+    cores: PositiveInt | None = None
     tune: PositiveInt = 1000
     progressbar: bool = True
-    discard_tuned_samples: bool = True
-    compute_convergence_checks: bool = True
-    return_inferencedata: bool = True
-    idata_kwargs: Optional[dict[str, BasicTypes]] = None
     target_accept: TargetAcceptFloat = 0.8  # type: ignore
+
+
+class PymcSamplingNumpyroArguments(BaseModel):
+    """PyMC model `sampling_jax.sample_numpyro_nuts()` keyword arguments."""
+
+    draws: PositiveInt = 1000
+    tune: PositiveInt = 1000
+    chains: PositiveInt = 4
+    target_accept: TargetAcceptFloat = 0.8  # type: ignore
+    progressbar: bool = True
+    chain_method: str = "parallel"
+    postprocessing_backend: str | None = None
 
 
 class PymcFitArguments(BaseModel):
@@ -34,12 +38,13 @@ class PymcFitArguments(BaseModel):
     n: PositiveInt = 10000
     method: VIMethod = "advi"
     draws: PositiveInt = 1000
-    inf_kwargs: Optional[dict[str, BasicTypes]] = None
+    inf_kwargs: dict[str, BasicTypes] | None = None
     progressbar: bool = True
 
 
 class ModelingSamplingArguments(BaseModel):
     """Keyword sampling arguments for methods of fitting a Bayesian models."""
 
-    pymc_mcmc: Optional[PymcSampleArguments] = None
-    pymc_advi: Optional[PymcFitArguments] = None
+    pymc_mcmc: PymcSampleArguments | None = None
+    pymc_advi: PymcFitArguments | None = None
+    pymc_numpyro: PymcSamplingNumpyroArguments | None = None
