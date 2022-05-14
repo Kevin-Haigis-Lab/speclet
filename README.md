@@ -33,16 +33,6 @@ mamba env create -f conda.yaml
 mamba env create -f conda_smk.yaml
 ```
 
-If wokring on a linux distribution, you'll need to install `gcc` and `g++`, also.
-
-```bash
-conda activate speclet
-mamba install -c conda-forge gcc gxx
-
-conda deactivate && conda activate speclet_smk
-mamba install -c conda-forge gcc gxx
-```
-
 Either environment can then be used like a normal 'conda' environment.
 For example, below is the command it activate the `speclet` environment.
 
@@ -60,10 +50,9 @@ make pyenvs
 On O2, because I don't have control over the `base` conda environment, I follow the incantations below for each environment:
 
 ```bash
-conda create -n speclet -c conda-forge python=3.9.9 mamba
+conda create -n speclet -c conda-forge python=3.10.4 mamba
 conda activate speclet
 mamba env update --name speclet --file conda.yaml
-mamba install -c conda-forge gcc gxx
 ```
 
 ### R environment

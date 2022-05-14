@@ -10,6 +10,7 @@ dependencies:
   - aesara
   - arviz>=0.12.0
   - black
+  - blas  # may be able to remove in next PyMC beta release
   - colorama
   - coverage
   - dask
@@ -19,8 +20,6 @@ dependencies:
   - flake8-bugbear
   - flake8-builtins
   - flake8-comprehensions
-  # - gcc  # not needed on macOS
-  # - gxx  # not needed on macOS
   - hypothesis
   - ipython
   - isort
