@@ -1,19 +1,17 @@
 
 # --- Hierarchical negative binomial model ---
 
-- name: hnb-comutation-synlet
+- name: hnb-small-data
   description: "
-    A hierarchical negative binomial generalized linear model with covariates for
-    different molecular covariates and a covariate for co-mutation with known cancer-
-    related genes. The cancer genes are from COSMIC's CGC and lineage-specific.
+    Fit the model with a relatively small amount of data for testing purposes.
   "
   active: true
   model: HIERARCHICAL_NB
-  data_file: DEPMAP_CRC_BONE_SUBSAMPLE
+  data_file: DEPMAP_CRC_PANC_ESO_SUBSAMPLE
   sampling_kwargs:
     pymc_mcmc:
       target_accept: 0.99
-      init: "adapt_diag"
+      init: "advi+adapt_diag"
     pymc_numpyro:
       target_accept: 0.99
   slurm_resources:
