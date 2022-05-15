@@ -36,7 +36,7 @@ if MUNGE_CONFIG.test:
 # all_depmap_ids = ["ACH-000956"]
 
 
-#### --- Inputs --- ####
+# --- Inputs ---
 
 
 def tidy_ccle_input(*args: Any, **kwargs: Any) -> dict[str, Path]:
@@ -83,7 +83,7 @@ def clean_sanger_cgc_input(*args: Any, **kwargs: Any) -> dict[str, Path]:
     return {"cgc_input": SANGER_COSMIC_DIR / "cancer_gene_census.csv"}
 
 
-#### --- CI --- ####
+# --- CI ---
 
 
 def _touch_input_dict(input_dict: dict[str, Path]) -> None:
@@ -110,7 +110,7 @@ if os.getenv("CI") is not None:
         _touch_input_dict(input_dict)
 
 
-#### --- Rules --- ####
+# --- Rules ---
 
 
 localrules:
@@ -491,6 +491,11 @@ rule modeling_data_subsets:
         / "depmap-modeling-data_crc-bone-large-subsample.csv",
         crc_panc_cervix_large_subsample=MODELING_DATA_DIR
         / "depmap-modeling-data_crc-panc-cervix-large-subsample.csv",
+        crc_panc_eso_subsample=MODELING_DATA_DIR
+        / "depmap-modeling-data_crc-panc-eso-subsample.csv",
+        crc_panc_eso_large_subsample=MODELING_DATA_DIR
+        / "depmap-modeling-data_crc-panc-eso-large-subsample.csv",
+        crc_panc_eso_subset=MODELING_DATA_DIR / "depmap-modeling-data_crc-panc-eso.csv",
     script:
         "050_depmap-subset-dataframes.R"
 
