@@ -44,8 +44,8 @@ summarize_posterior:
   time: "00:30:00"
   J: "summary"
 execute_report:
-  partition: "medium"
+  partition: "short"
   cores: 1
-  mem: "200000"
-  time: "30:00:00"
+  mem: "16000"
+  time: "02:00:00"
   J: "report"
