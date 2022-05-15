@@ -3,10 +3,10 @@
 # Run munge pipeline.
 
 #SBATCH --account=park
-#SBATCH -c 1
+#SBATCH -c 4
 #SBATCH -p priority
-#SBATCH -t 0-05:00
-#SBATCH --mem 2G
+#SBATCH -t 0-12:00
+#SBATCH --mem 32G
 #SBATCH -o logs/%j_munge-pipeline.log
 #SBATCH -e logs/%j_munge-pipeline.log
 
@@ -26,8 +26,6 @@ snakemake \
     --latency-wait 120 \
     --rerun-incomplete \
     --printshellcmds \
-    # --use-conda \
-    # --conda-frontend 'mamba' \
     --drmaa " --account=park -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
     --cluster-config munge/munge-config.json
 

@@ -127,7 +127,7 @@ write_csv(crc_panc_eso_data, snakemake@output[["crc_panc_eso_subset"]])
 # Smaller sub-sample.
 gene_var <- data %>%
   group_by(hugo_symbol) %>%
-  summary(lfc_var = var(lfc)) %>%
+  summarize(lfc_var = var(lfc)) %>%
   ungroup() %>%
   arrange(desc(lfc_var))
 
@@ -149,7 +149,7 @@ crc_panc_eso_data %>%
 # Larger sub-sample.
 gene_var <- data %>%
   group_by(hugo_symbol) %>%
-  summary(lfc_var = var(lfc)) %>%
+  summarize(lfc_var = var(lfc)) %>%
   ungroup() %>%
   arrange(desc(lfc_var))
 
