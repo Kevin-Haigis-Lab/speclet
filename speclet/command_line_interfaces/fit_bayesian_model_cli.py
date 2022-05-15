@@ -18,7 +18,10 @@ from speclet.loggers import logger
 from speclet.managers.cache_manager import cache_posterior, get_posterior_cache_name
 from speclet.managers.data_managers import CrisprScreenDataManager
 from speclet.model_configuration import ModelingSamplingArguments
-from speclet.modeling.fitting_arguments import PymcSampleArguments
+from speclet.modeling.fitting_arguments import (
+    PymcSampleArguments,
+    PymcSamplingNumpyroArguments,
+)
 from speclet.modeling.model_fitting_api import fit_model
 from speclet.project_enums import ModelFitMethod
 
@@ -53,6 +56,11 @@ def _augment_sampling_kwargs(
         sampling_kwargs.pymc_mcmc = PymcSampleArguments(
             chains=mcmc_chains, cores=mcmc_cores
         )
+
+    if sampling_kwargs.pymc_numpyro is not None:
+        sampling_kwargs.pymc_numpyro.chains = mcmc_chains
+    else:
+        sampling_kwargs.pymc_numpyro = PymcSamplingNumpyroArguments(chains=mcmc_chains)
 
     return sampling_kwargs
 

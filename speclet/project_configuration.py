@@ -27,7 +27,6 @@ class ModelingConfig(BaseModel):
 class FittingPipelineConfig(BaseModel):
     """Fitting pipeline configurations."""
 
-    debug: bool
     num_chains: int
     models_config: Path
     temp_dir: Path

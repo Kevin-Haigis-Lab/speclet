@@ -7,18 +7,6 @@ __default__:
   err: "logs/%j_{rule}.log"
   mail: "NONE"
   J: "snakejob"
-sample_stan_mcmc:
-  partition: "{params.partition}"
-  cores: 1
-  mem: "{params.mem}"
-  time: "{params.time}"
-  J: "stan-mc"
-combine_stan_mcmc:
-  partition: "short"
-  cores: 1
-  mem: "32000"
-  time: "00:15:00"
-  J: "stan-comb"
 sample_pymc_mcmc:
   partition: "{params.partition}"
   cores: 1
@@ -28,9 +16,21 @@ sample_pymc_mcmc:
 combine_pymc_mcmc:
   partition: "short"
   cores: 1
-  mem: "164000"
-  time: "02:00:00"
+  mem: "32000"
+  time: "01:00:00"
   J: "pymc-comb"
+sample_pymc_numpyro:
+  partition: "{params.partition}"
+  cores: 1
+  mem: "{params.mem}"
+  time: "{params.time}"
+  J: "pyro-mc"
+combine_pymc_numpyro:
+  partition: "short"
+  cores: 1
+  mem: "32000"
+  time: "01:00:00"
+  J: "pyro-comb"
 sample_pymc_advi:
   partition: "{params.partition}"
   cores: 1
@@ -44,8 +44,8 @@ summarize_posterior:
   time: "00:30:00"
   J: "summary"
 execute_report:
-  partition: "medium"
+  partition: "short"
   cores: 1
-  mem: "200000"
-  time: "30:00:00"
+  mem: "16000"
+  time: "02:00:00"
   J: "report"

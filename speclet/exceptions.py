@@ -151,3 +151,9 @@ class ColumnsNotUnique(BaseException):
         msg = "Column names must be unique."
         super().__init__(msg)
         return None
+
+
+class ConfigurationNotFound(BaseException):
+    """Configuration not found in a configuration file."""
+
+    ...
