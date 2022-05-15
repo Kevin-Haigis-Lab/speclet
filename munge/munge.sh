@@ -26,10 +26,9 @@ snakemake \
     --latency-wait 120 \
     --rerun-incomplete \
     --printshellcmds \
-    --use-conda \
-    --conda-frontend 'mamba' \
-    --drmaa "  --account=park -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
+    # --use-conda \
+    # --conda-frontend 'mamba' \
+    --drmaa " --account=park -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
     --cluster-config munge/munge-config.json
 
 conda deactivate
-exit 123

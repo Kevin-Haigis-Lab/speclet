@@ -25,7 +25,7 @@ TESTS_DIR = Path("tests")
 MUNGE_CONFIG = project_config.read_project_configuration().munge
 TEMP_DIR = MUNGE_CONFIG.temporary_directory
 
-ENVIRONMENT_YAML = "pipeline-environment.yml"
+# ENVIRONMENT_YAML = "pipeline-environment.yml"
 
 all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list()
 
@@ -143,6 +143,9 @@ rule all:
         MODELING_DATA_DIR / "depmap-modeling-data_crc-subsample.csv",
         MODELING_DATA_DIR / "depmap-modeling-data_crc-panc-cervix-large-subsample.csv",
         TESTS_DIR / "depmap-modeling-data_test-data.csv",
+        MODELING_DATA_DIR / "depmap-modeling-data_crc-panc-eso-subsample.csv",
+        MODELING_DATA_DIR / "depmap-modeling-data_crc-panc-eso-large-subsample.csv",
+        MODELING_DATA_DIR / "depmap-modeling-data_crc-panc-eso.csv",
         # rules.auxillary_data_subsets
         MODELING_DATA_DIR / "copy_number_data_samples.npy",
         # rules.clean_sanger_cgc.output
@@ -415,8 +418,8 @@ rule screen_total_counts_tables:
         final_counts_table_out=MODELING_DATA_DIR
         / "depmap_replicate_total_read_counts.csv",
         pdna_table_out=MODELING_DATA_DIR / "depmap_pdna_total_read_counts.csv",
-    conda:
-        ENVIRONMENT_YAML
+    # conda:
+    #     ENVIRONMENT_YAML
     shell:
         "munge/065_total-read-count-tables.py"
         " {input.depmap_modeling_df}"
@@ -452,8 +455,8 @@ rule check_depmap_modeling_data:
         check_nb=rules.papermill_check_depmap_modeling_data.output.notebook,
     output:
         output_md=MUNGE_DIR / "045_check-depmap-modeling-data_exec.md",
-    conda:
-        ENVIRONMENT_YAML
+    # conda:
+    #     ENVIRONMENT_YAML
     version:
         "1.1"
     shell:
@@ -506,8 +509,8 @@ rule auxillary_data_subsets:
         crc_subset=rules.modeling_data_subsets.output.crc_subset,
     output:
         cna_sample=MODELING_DATA_DIR / "copy_number_data_samples.npy",
-    conda:
-        ENVIRONMENT_YAML
+    # conda:
+    #     ENVIRONMENT_YAML
     shell:
         "munge/055_auxiliary-data-files.py {input.crc_subset} {output.cna_sample}"
 
