@@ -19,6 +19,9 @@ class DataFile(Enum):
     DEPMAP_CRC_BONE_SUBSAMPLE = "DEPMAP_CRC_BONE_SUBSAMPLE"
     DEPMAP_CRC_BONE_LARGE_SUBSAMPLE = "DEPMAP_CRC_BONE_LARGE_SUBSAMPLE"
     DEPMAP_CRC_PANC_CERVIX_LARGE_SUBSAMPLE = "DEPMAP_CRC_PANC_CERVIX_LARGE_SUBSAMPLE"
+    DEPMAP_CRC_PANC_ESO = "DEPMAP_CRC_PANC_ESO"
+    DEPMAP_CRC_PANC_ESO_SUBSAMPLE = "DEPMAP_CRC_PANC_ESO_SUBSAMPLE"
+    DEPMAP_CRC_PANC_ESO_LARGE_SUBSAMPLE = "DEPMAP_CRC_PANC_ESO_LARGE_SUBSAMPLE"
     DEPMAP_DATA = "DEPMAP_DATA"
     DEPMAP_ESSENTIALS = "DEPMAP_ESSENTIALS"
     DEPMAP_TEST_DATA = "DEPMAP_TEST_DATA"
@@ -38,6 +41,9 @@ _data_file_map: Final[dict[DataFile, str]] = {
     DataFile.DEPMAP_CRC_BONE_SUBSAMPLE: "depmap-modeling-data_crc-bone-subsample.csv",
     DataFile.DEPMAP_CRC_BONE_LARGE_SUBSAMPLE: "depmap-modeling-data_crc-bone-large-subsample.csv",  # noqa: B950,E501
     DataFile.DEPMAP_CRC_PANC_CERVIX_LARGE_SUBSAMPLE: "depmap-modeling-data_crc-panc-cervix-large-subsample.csv",  # noqa: B950,E501
+    DataFile.DEPMAP_CRC_PANC_ESO: "depmap-modeling-data_crc-panc-eso.csv",  # noqa: B950,E501
+    DataFile.DEPMAP_CRC_PANC_ESO_SUBSAMPLE: "depmap-modeling-data_crc-panc-eso-subsample.csv",  # noqa: B950,E501
+    DataFile.DEPMAP_CRC_PANC_ESO_LARGE_SUBSAMPLE: "depmap-modeling-data_crc-panc-eso-large-subsample.csv",  # noqa: B950,E501
     DataFile.DEPMAP_DATA: "depmap-modeling-data.csv",
     DataFile.DEPMAP_ESSENTIALS: "known_essentials.csv",
     DataFile.DEPMAP_TEST_DATA: "depmap-modeling-data_test-data.csv",

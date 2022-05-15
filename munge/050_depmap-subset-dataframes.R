@@ -114,6 +114,62 @@ data %>%
   filter(hugo_symbol %in% c(genes, genes_of_interest, cervix_genes, pancreas_genes)) %>%
   write_csv(snakemake@output[["crc_panc_cervix_large_subsample"]])
 
+# --- Colorectal, pancreatic, and esophagus (3 different sub-samples) ---
+
+lineages <- c("colorectal", "pancreas", "esophagus")
+
+# Full data set for these cancers.
+crc_panc_eso_data <- data %>%
+  filter(lineage %in% !!lineages)
+
+write_csv(crc_panc_eso_data, snakemake@output[["crc_panc_eso_subset"]])
+
+# Smaller sub-sample.
+gene_var <- data %>%
+  group_by(hugo_symbol) %>%
+  summarize(lfc_var = var(lfc)) %>%
+  ungroup() %>%
+  arrange(desc(lfc_var))
+
+top_var_genes <- gene_var %>%
+  head(25) %>%
+  pull(hugo_symbol) %>%
+  unlist()
+
+random_genes <- gene_var %>%
+  filter(!(hugo_symbol %in% top_var_genes)) %>%
+  sample_n(75) %>%
+  pull(hugo_symbol) %>%
+  unlist()
+
+crc_panc_eso_data %>%
+  filter(hugo_symbol %in% c(top_var_genes, random_genes)) %>%
+  write_csv(snakemake@output[["crc_panc_eso_subsample"]])
+
+# Larger sub-sample.
+gene_var <- data %>%
+  group_by(hugo_symbol) %>%
+  summarize(lfc_var = var(lfc)) %>%
+  ungroup() %>%
+  arrange(desc(lfc_var))
+
+new_top_var_genes <- gene_var %>%
+  head(100) %>%
+  pull(hugo_symbol) %>%
+  unlist()
+top_var_genes <- unique(c(top_var_genes, new_top_var_genes))
+
+new_random_genes <- gene_var %>%
+  filter(!(hugo_symbol %in% top_var_genes)) %>%
+  sample_n(900) %>%
+  pull(hugo_symbol) %>%
+  unlist()
+random_genes <- unique(c(random_genes, new_random_genes))
+
+crc_panc_eso_data %>%
+  filter(hugo_symbol %in% c(top_var_genes, random_genes)) %>%
+  write_csv(snakemake@output[["crc_panc_eso_large_subsample"]])
+
 
 # --- Small random subset for Python module testing ---
 

@@ -1,5 +1,6 @@
 # Check of modeling data
 
+
 ```python
 from pathlib import Path
 
@@ -9,21 +10,20 @@ import pandas as pd
 from dask.distributed import Client, progress
 ```
 
+
 ```python
 client = Client(n_workers=4, threads_per_worker=2, memory_limit="32GB")
 client
 ```
 
-    2022-03-29 13:58:42,006 - distributed.diskutils - INFO - Found stale lock file and directory '/n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-67t8a1hw', purging
-    2022-03-29 13:58:42,021 - distributed.diskutils - INFO - Found stale lock file and directory '/n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-k70wgark', purging
-    2022-03-29 13:58:42,059 - distributed.diskutils - INFO - Found stale lock file and directory '/n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-yvs8d7fu', purging
-    2022-03-29 13:58:42,082 - distributed.diskutils - INFO - Found stale lock file and directory '/n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-spbh8kpf', purging
+
+
 
 <div>
     <div style="width: 24px; height: 24px; background-color: #e1e1e1; border: 3px solid #9D9D9D; border-radius: 5px; position: absolute;"> </div>
     <div style="margin-left: 48px;">
         <h3 style="margin-bottom: 0px;">Client</h3>
-        <p style="color: #9D9D9D; margin-bottom: 0px;">Client-dd0b50b1-af89-11ec-b604-149ecf442daf</p>
+        <p style="color: #9D9D9D; margin-bottom: 0px;">Client-a0bffcc0-d460-11ec-966f-0cc47abb5ba9</p>
         <table style="width: 100%; text-align: left;">
 
         <tr>
@@ -52,7 +52,7 @@ client
     </div>
     <div style="margin-left: 48px;">
         <h3 style="margin-bottom: 0px; margin-top: 0px;">LocalCluster</h3>
-        <p style="color: #9D9D9D; margin-bottom: 0px;">53bd3680</p>
+        <p style="color: #9D9D9D; margin-bottom: 0px;">b0418a2c</p>
         <table style="width: 100%; text-align: left;">
             <tr>
                 <td style="text-align: left;">
@@ -76,6 +76,7 @@ client
     <td style="text-align: left;"><strong>Using processes:</strong> True</td>
 </tr>
 
+
         </table>
 
         <details>
@@ -88,11 +89,11 @@ client
         <div style="width: 24px; height: 24px; background-color: #FFF7E5; border: 3px solid #FF6132; border-radius: 5px; position: absolute;"> </div>
         <div style="margin-left: 48px;">
             <h3 style="margin-bottom: 0px;">Scheduler</h3>
-            <p style="color: #9D9D9D; margin-bottom: 0px;">Scheduler-62450277-5e56-4640-af8e-3cdc4776194a</p>
+            <p style="color: #9D9D9D; margin-bottom: 0px;">Scheduler-f16bbf05-5845-4a24-8a36-61209f07b1f7</p>
             <table style="width: 100%; text-align: left;">
                 <tr>
                     <td style="text-align: left;">
-                        <strong>Comm:</strong> tcp://127.0.0.1:34723
+                        <strong>Comm:</strong> tcp://127.0.0.1:39738
                     </td>
                     <td style="text-align: left;">
                         <strong>Workers:</strong> 4
@@ -134,7 +135,7 @@ client
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:41652
+                            <strong>Comm: </strong> tcp://127.0.0.1:36028
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 2
@@ -142,7 +143,7 @@ client
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:41329/status" target="_blank">http://127.0.0.1:41329/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:37602/status" target="_blank">http://127.0.0.1:37602/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 29.80 GiB
@@ -150,13 +151,13 @@ client
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:36665
+                            <strong>Nanny: </strong> tcp://127.0.0.1:46828
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-qzrjtsly
+                            <strong>Local directory: </strong> /n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-yh7xum9x
                         </td>
                     </tr>
 
@@ -179,7 +180,7 @@ client
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:40586
+                            <strong>Comm: </strong> tcp://127.0.0.1:39969
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 2
@@ -187,7 +188,7 @@ client
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:36754/status" target="_blank">http://127.0.0.1:36754/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:34959/status" target="_blank">http://127.0.0.1:34959/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 29.80 GiB
@@ -195,13 +196,13 @@ client
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:38460
+                            <strong>Nanny: </strong> tcp://127.0.0.1:42595
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-z9sea165
+                            <strong>Local directory: </strong> /n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-_oq0d05k
                         </td>
                     </tr>
 
@@ -224,7 +225,7 @@ client
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:39145
+                            <strong>Comm: </strong> tcp://127.0.0.1:34284
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 2
@@ -232,7 +233,7 @@ client
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:40171/status" target="_blank">http://127.0.0.1:40171/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:33028/status" target="_blank">http://127.0.0.1:33028/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 29.80 GiB
@@ -240,13 +241,13 @@ client
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:43411
+                            <strong>Nanny: </strong> tcp://127.0.0.1:38905
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-6ltj_yr9
+                            <strong>Local directory: </strong> /n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-45idy0hx
                         </td>
                     </tr>
 
@@ -269,7 +270,7 @@ client
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:32992
+                            <strong>Comm: </strong> tcp://127.0.0.1:38011
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 2
@@ -277,7 +278,7 @@ client
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:41000/status" target="_blank">http://127.0.0.1:41000/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:35466/status" target="_blank">http://127.0.0.1:35466/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 29.80 GiB
@@ -285,13 +286,13 @@ client
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:35079
+                            <strong>Nanny: </strong> tcp://127.0.0.1:33823
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-ft58skon
+                            <strong>Local directory: </strong> /n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-t03_79ea
                         </td>
                     </tr>
 
@@ -313,25 +314,32 @@ client
 </div>
             </details>
 
+
     </div>
 </div>
+
+
 
 Papermill parameters:
 
 `depmap_modeling_df`: The path to the full DepMap modeling data set.
 
+
 ```python
 DEPMAP_MODELING_DF: str = ""
 ```
+
 
 ```python
 # Parameters
 DEPMAP_MODELING_DF = "../modeling_data/depmap-modeling-data.csv"
 ```
 
+
 ```python
 assert DEPMAP_MODELING_DF != "", "No path provided for the modeling data."
 ```
+
 
 ```python
 depmap_modeling_df_path = Path(DEPMAP_MODELING_DF)
@@ -340,9 +348,13 @@ if not depmap_modeling_df_path.exists():
     raise FileNotFoundError(f"Could not find '{str(depmap_modeling_df_path)}'")
 ```
 
+
 ```python
 pd.read_csv(depmap_modeling_df_path, low_memory=False, nrows=200)
 ```
+
+
+
 
 <div>
 <style scoped>
@@ -655,6 +667,9 @@ pd.read_csv(depmap_modeling_df_path, low_memory=False, nrows=200)
 <p>200 rows × 25 columns</p>
 </div>
 
+
+
+
 ```python
 depmap_modeling_df = dd.read_csv(
     depmap_modeling_df_path,
@@ -669,9 +684,13 @@ depmap_modeling_df = dd.read_csv(
 )
 ```
 
+
 ```python
 depmap_modeling_df.head()
 ```
+
+
+
 
 <div>
 <style scoped>
@@ -840,9 +859,15 @@ depmap_modeling_df.head()
 <p>5 rows × 25 columns</p>
 </div>
 
+
+
+
 ```python
 depmap_modeling_df.columns
 ```
+
+
+
 
     Index(['sgrna', 'replicate_id', 'lfc', 'p_dna_batch', 'genome_alignment',
            'hugo_symbol', 'screen', 'multiple_hits_on_gene', 'sgrna_target_chr',
@@ -852,13 +877,17 @@ depmap_modeling_df.columns
            'lineage_subtype', 'primary_or_metastasis', 'is_male', 'age'],
           dtype='object')
 
+
+
 ## Basic checks
+
 
 ```python
 FAILED_CHECKS = 0
 ```
 
 Check that specific columns exist (prevents some really bonehead discoveries later on...).
+
 
 ```python
 cols_that_should_exist = [
@@ -886,6 +915,7 @@ if len(missing_cols) != 0:
 
 Check that specific columns have no missing (`NA`) values.
 
+
 ```python
 cols_without_na = [
     "depmap_id",
@@ -906,9 +936,13 @@ if num_missed_checks > 0:
     print(na_checks[na_checks])
 ```
 
+
 ```python
 na_checks
 ```
+
+
+
 
     depmap_id        False
     sgrna            False
@@ -920,7 +954,10 @@ na_checks
     lineage          False
     dtype: bool
 
+
+
 Check that all combinations of cell line, sgRNA, and experimental replicate only appear once.
+
 
 ```python
 grp_cols = ["depmap_id", "sgrna", "replicate_id"]
@@ -938,6 +975,7 @@ if not ct_df.shape[0] == 0:
     FAILED_CHECKS += 1
 ```
 
+
 ```python
 if FAILED_CHECKS > 0:
     raise Exception(f"There were {FAILED_CHECKS} failed checks.")
@@ -945,32 +983,36 @@ if FAILED_CHECKS > 0:
 
 ---
 
+
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-03-29
+    Last updated: 2022-05-15
 
     Python implementation: CPython
-    Python version       : 3.9.9
-    IPython version      : 8.2.0
+    Python version       : 3.10.4
+    IPython version      : 8.3.0
 
-    Compiler    : GCC 9.4.0
+    Compiler    : GCC 10.3.0
     OS          : Linux
-    Release     : 3.10.0-1160.49.1.el7.x86_64
+    Release     : 3.10.0-1160.45.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-a-16-130.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-229.o2.rc.hms.harvard.edu
 
-    Git branch: oncogene-cov
+    Git branch: crc-panc-eso
 
-    pandas: 1.3.5
     numpy : 1.22.3
-    dask  : 2022.3.0
+    dask  : 2022.5.0
+    pandas: 1.4.2
+
+
+
 
 ```python
 
