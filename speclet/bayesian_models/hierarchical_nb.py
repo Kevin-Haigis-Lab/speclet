@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import pymc as pm
 import pymc.math as pmmath
+from aesara import tensor as at
 from pandera import Check, Column, DataFrameSchema
 
 from speclet.data_processing.common import get_cats
@@ -144,6 +145,7 @@ class HierarchcalNegativeBinomialModel:
             "cell_line": get_cats(valid_data, "depmap_id"),
             "lineage": get_cats(valid_data, "lineage"),
             "screen": get_cats(valid_data, "screen"),
+            "one": ["1"],
         }
         if cancer_genes is not None:
             coords["cancer_gene"] = _collect_all_cancer_genes(cancer_genes)
@@ -209,13 +211,6 @@ class HierarchcalNegativeBinomialModel:
         Returns:
             pd.DataFrame: Processed and validated modeling data.
         """
-
-        def f(df: pd.DataFrame, step: str | None = None) -> pd.DataFrame:
-            if step:
-                print(f"step: {step}")
-            print(df["z_cn_cell_line"])
-            return df
-
         return (
             data.dropna(
                 axis=0,
@@ -237,7 +232,6 @@ class HierarchcalNegativeBinomialModel:
                 cn_max=7,
                 center=1,
             )
-            .pipe(f, step="zscale_cna_by_group")
             .assign(
                 z_cn_gene=lambda d: squish_array(d.z_cn_gene, lower=-5.0, upper=5.0),
                 z_cn_cell_line=lambda d: squish_array(
@@ -245,13 +239,9 @@ class HierarchcalNegativeBinomialModel:
                 ),
                 log_rna_expr=lambda d: np.log(d.rna_expr + 1.0),
             )
-            .pipe(f, step="squish")
             .pipe(append_total_read_counts)
-            .pipe(f, step="append total reads")
             .pipe(add_useful_read_count_columns)
-            .pipe(f, step="add useful cols")
             .pipe(set_achilles_categorical_columns, sort_cats=True, skip_if_cat=False)
-            .pipe(f, step="set cat cols")
             .pipe(self.validate_data)
         )
 
@@ -334,13 +324,25 @@ class HierarchcalNegativeBinomialModel:
             sigma_p = pm.Gamma("sigma_p", 3, 1)
             p = pm.Normal("p", 0, sigma_p, dims=("gene", "screen"))
 
+            # Note: This is a hack to get around some weird error with sampling with
+            # the Numpyro JAX backend.
+            _w_pieces = []
+            for cell_i, line_i in enumerate(c_to_l):
+                _m_slice = M[:, :, cell_i]
+                _w_slice = w[:, :, line_i]
+                _w_piece = (_w_slice * _m_slice).sum(axis=1)[:, None]
+                _w_pieces.append(_w_piece)
+            _w = pm.Deterministic(
+                "_w", at.horizontal_stack(*_w_pieces), dims=("gene", "cell_line")
+            )
+
             gene_effect = pm.Deterministic(
                 "gene_effect",
                 d[g, ll]
                 + cn_gene * h[g, ll]
                 + rna * k[g, ll]
                 + mut * m[g, ll]
-                + (w[:, :, c_to_l] * M).sum(axis=1)[g, c],
+                + _w[g, c],
             )
             cell_effect = pm.Deterministic("cell_line_effect", b[c] + cn_cell * f[c])
             eta = pm.Deterministic(
