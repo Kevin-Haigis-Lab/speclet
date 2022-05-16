@@ -209,6 +209,13 @@ class HierarchcalNegativeBinomialModel:
         Returns:
             pd.DataFrame: Processed and validated modeling data.
         """
+
+        def f(df: pd.DataFrame, step: str | None = None) -> pd.DataFrame:
+            if step:
+                print(f"step: {step}")
+            print(df["z_cn_cell_line"])
+            return df
+
         return (
             data.dropna(
                 axis=0,
@@ -230,16 +237,21 @@ class HierarchcalNegativeBinomialModel:
                 cn_max=7,
                 center=1,
             )
+            .pipe(f, step="zscale_cna_by_group")
             .assign(
-                z_cn_gene=lambda d: squish_array(d.z_cn_gene, lower=-5, upper=5),
+                z_cn_gene=lambda d: squish_array(d.z_cn_gene, lower=-5.0, upper=5.0),
                 z_cn_cell_line=lambda d: squish_array(
-                    d.z_cn_cell_line, lower=-5, upper=5
+                    d.z_cn_cell_line, lower=-5.0, upper=5.0
                 ),
                 log_rna_expr=lambda d: np.log(d.rna_expr + 1.0),
             )
+            .pipe(f, step="squish")
             .pipe(append_total_read_counts)
+            .pipe(f, step="append total reads")
             .pipe(add_useful_read_count_columns)
+            .pipe(f, step="add useful cols")
             .pipe(set_achilles_categorical_columns, sort_cats=True, skip_if_cat=False)
+            .pipe(f, step="set cat cols")
             .pipe(self.validate_data)
         )
 

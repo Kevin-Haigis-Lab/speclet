@@ -1,5 +1,4 @@
 import os
-import textwrap
 from datetime import timedelta
 from pathlib import Path
 from typing import Any, Callable, Final, Union
@@ -10,9 +9,7 @@ import pandas as pd
 import pymc as pm
 import pytest
 import seaborn as sns
-import stan
 from hypothesis import HealthCheck, Verbosity, settings
-from stan.model import Model as StanModel
 
 TEST_DATA: Final[Path] = Path("tests", "depmap-modeling-data_test-data.csv")
 
@@ -130,40 +127,6 @@ def hierarchical_model() -> pm.Model:
             "y", alpha[np.array([0, 0, 1, 1])], sigma, observed=[1, 2, 3, 4]
         )
     return model
-
-
-# ---- Stan fixtures ----
-
-
-@pytest.fixture
-def centered_eight_code() -> str:
-    _code = """
-    data {
-        int<lower=0> J;         // number of schools
-        real y[J];              // estimated treatment effects
-        real<lower=0> sigma[J]; // standard error of effect estimates
-    }
-    parameters {
-        real mu;                // population treatment effect
-        real<lower=0> tau;      // standard deviation in treatment effects
-        vector[J] eta;          // unscaled deviation from mu by school
-    }
-    transformed parameters {
-        vector[J] theta = mu + tau * eta;        // school treatment effects
-    }
-    model {
-        target += normal_lpdf(eta | 0, 1);       // prior log-density
-        target += normal_lpdf(y | theta, sigma); // log-likelihood
-    }
-    """
-    return textwrap.dedent(_code)
-
-
-@pytest.fixture
-def centered_eight_stan_model(
-    centered_eight_code: str, centered_eight_data: dict[str, Union[int, list[int]]]
-) -> StanModel:
-    return stan.build(centered_eight_code, data=centered_eight_data, random_seed=1234)
 
 
 # ---- Hypothesis profiles ----

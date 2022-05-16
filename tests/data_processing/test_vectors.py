@@ -11,19 +11,15 @@ from speclet.data_processing import vectors as vhelp
 
 @st.composite
 def my_arrays(draw: Callable, min_size: int = 1) -> np.ndarray:
-    return np.array(
-        draw(
-            st.lists(
-                st.floats(
-                    min_value=0.0,
-                    max_value=100.0,
-                    allow_infinity=False,
-                    allow_nan=False,
-                ),
-                min_size=min_size,
-            )
+    draws = draw(
+        st.lists(
+            st.floats(
+                min_value=0.0, max_value=100.0, allow_infinity=False, allow_nan=False
+            ),
+            min_size=min_size,
         )
     )
+    return np.array(draws)
 
 
 @given(
@@ -35,10 +31,12 @@ def test_squish(val: float, lower_bound: float, upper_bound: float) -> None:
     assert lower_bound <= squished_val <= upper_bound
 
 
+@pytest.mark.DEV
 @given(my_arrays(), st.floats(allow_nan=False), st.floats(allow_nan=False))
 def test_squish_array(ary: np.ndarray, lower_bound: float, upper_bound: float) -> None:
     assume(lower_bound < upper_bound)
     squished_ary = vhelp.squish_array(ary, lower=lower_bound, upper=upper_bound)
+    assert squished_ary.dtype == ary.dtype
     assert np.all(lower_bound <= squished_ary)
     assert np.all(squished_ary <= upper_bound)
 

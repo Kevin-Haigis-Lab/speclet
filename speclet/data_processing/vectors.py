@@ -21,6 +21,9 @@ def zscale(x: np.ndarray) -> np.ndarray:
 def squish(x: float, lower: float, upper: float) -> float:
     """Squish an array to lie between a lower an upper bound.
 
+    Warning: If the bounds are integers, this may cause the results to be converted to
+    integers.
+
     Args:
         x (float): Numeric array.
         lower (float): Lower bound (minimum value).
