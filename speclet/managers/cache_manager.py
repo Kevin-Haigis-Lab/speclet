@@ -1,7 +1,7 @@
 """Cache manager for Bayesian model posterior sampling data."""
 
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 
 import arviz as az
 
@@ -11,11 +11,7 @@ from speclet.project_enums import ModelFitMethod
 class PosteriorManager:
     """Model posterior manager."""
 
-    id: str
-    cache_dir: Path
-    _posterior: Optional[az.InferenceData]
-
-    def __init__(self, id: str, cache_dir: Union[Path, str]) -> None:
+    def __init__(self, id: str, cache_dir: Path | str) -> None:
         """Create a posterior manager.
 
         The cache directory should be the general location for caching model results. A
@@ -24,7 +20,7 @@ class PosteriorManager:
 
         Args:
             id (str): Identifier of the posterior.
-            cache_dir (Union[Path, str]): Directory for caching the posterior.
+            cache_dir (Path | str): Directory for caching the posterior.
         """
         self.id = id
         self._posterior = None
