@@ -11,15 +11,44 @@
   sampling_kwargs:
     pymc_mcmc:
       target_accept: 0.99
-      init: "advi+adapt_diag"
+      init: "adapt_diag"
     pymc_numpyro:
       target_accept: 0.99
   slurm_resources:
     PYMC_MCMC:
-      mem: 32
-      time: 8
+      mem: 64
+      time: 48
       cores: 1
     PYMC_NUMPYRO:
-      mem: 32
-      time: 8
+      mem: 64
+      time: 48
+      cores: 1
+
+- name: hnb-small-data_v2
+  description: "
+    Fit the model with a relatively small amount of data for testing purposes.
+    Changes from v1:
+      - only use Broad data and remove the screen batch effect `p`
+      - reduce the width of the prior for `z`
+      - replace priors on `sigma_*` with `HalfNormal(0, 1)`
+      - reduce target_accept to 0.98 to help with searching of posterior space
+      - update O2 resources based on past performance
+  "
+  active: true
+  model: HIERARCHICAL_NB
+  data_file: DEPMAP_CRC_PANC_ESO_SUBSAMPLE
+  sampling_kwargs:
+    pymc_mcmc:
+      target_accept: 0.98
+      init: "adapt_diag"
+    pymc_numpyro:
+      target_accept: 0.98
+  slurm_resources:
+    PYMC_MCMC:
+      mem: 16
+      time: 48
+      cores: 1
+    PYMC_NUMPYRO:
+      mem: 28
+      time: 32
       cores: 1
