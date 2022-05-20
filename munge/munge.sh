@@ -3,10 +3,10 @@
 # Run munge pipeline.
 
 #SBATCH --account=park
-#SBATCH -c 4
+#SBATCH -c 2
 #SBATCH -p priority
 #SBATCH -t 0-12:00
-#SBATCH --mem 32G
+#SBATCH --mem 2G
 #SBATCH -o logs/%j_munge-pipeline.log
 #SBATCH -e logs/%j_munge-pipeline.log
 
