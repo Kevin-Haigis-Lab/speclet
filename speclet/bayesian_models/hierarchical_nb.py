@@ -289,7 +289,7 @@ class HierarchcalNegativeBinomialModel:
         M = model_data.comutation_matrix
 
         def _sigma_dist(name: str) -> RandomVariable:
-            return pm.HalfNormal(name, 1)
+            return pm.HalfNormal(name, 2.5)
 
         with pm.Model(coords=coords, rng_seeder=seed) as model:
             z = pm.Normal("z", 0, 2.5, initval=0)

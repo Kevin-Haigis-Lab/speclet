@@ -52,3 +52,34 @@
       mem: 28
       time: 32
       cores: 1
+
+- name: hnb-largesub-data
+  description: "
+    Fit the model with a larger subs-sample of the full data set.
+    Notable features (compared to `hnb-small-data_v2`):
+      - (still) only use Broad data and remove the screen batch effect `p`
+      - widen the priors on `sigma_*` with `HalfNormal(0, 2.5)`
+      - reduce the number of tuning steps and increase the number of draws
+  "
+  active: true
+  model: HIERARCHICAL_NB
+  data_file: DEPMAP_CRC_PANC_ESO_LARGE_SUBSAMPLE
+  sampling_kwargs:
+    pymc_mcmc:
+      draws: 2000
+      tune: 700
+      target_accept: 0.98
+      init: "adapt_diag"
+    pymc_numpyro:
+      draws: 2000
+      tune: 700
+      target_accept: 0.98
+  slurm_resources:
+    PYMC_MCMC:
+      mem: 64
+      time: 200
+      cores: 1
+    PYMC_NUMPYRO:
+      mem: 72
+      time: 200
+      cores: 1
