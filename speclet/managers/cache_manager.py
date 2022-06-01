@@ -66,7 +66,6 @@ class PosteriorManager:
         self._make_dir()
         if self._posterior is None:
             return None
-        # self._posterior.to_json(str(self.posterior_path))
         self._posterior.to_netcdf(str(self.posterior_path))
 
     def put(self, trace: az.InferenceData) -> None:

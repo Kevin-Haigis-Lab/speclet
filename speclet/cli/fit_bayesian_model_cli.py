@@ -13,7 +13,7 @@ from typer import Typer
 from speclet import io
 from speclet import model_configuration as model_config
 from speclet.bayesian_models import get_bayesian_model
-from speclet.command_line_interfaces import cli_helpers
+from speclet.cli import cli_helpers
 from speclet.loggers import logger
 from speclet.managers.cache_manager import cache_posterior, get_posterior_cache_name
 from speclet.managers.data_managers import CrisprScreenDataManager
