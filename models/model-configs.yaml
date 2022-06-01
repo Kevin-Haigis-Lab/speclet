@@ -1,15 +1,13 @@
 
 # --- Hierarchical negative binomial model ---
 
-- name: hnb-comutation-synlet
+- name: hnb-small-data
   description: "
-    A hierarchical negative binomial generalized linear model with covariates for
-    different molecular covariates and a covariate for co-mutation with known cancer-
-    related genes. The cancer genes are from COSMIC's CGC and lineage-specific.
+    Fit the model with a relatively small amount of data for testing purposes.
   "
   active: true
   model: HIERARCHICAL_NB
-  data_file: DEPMAP_CRC_BONE_SUBSAMPLE
+  data_file: DEPMAP_CRC_PANC_ESO_SUBSAMPLE
   sampling_kwargs:
     pymc_mcmc:
       target_accept: 0.99
@@ -18,10 +16,70 @@
       target_accept: 0.99
   slurm_resources:
     PYMC_MCMC:
-      mem: 32
-      time: 8
+      mem: 64
+      time: 48
       cores: 1
     PYMC_NUMPYRO:
-      mem: 32
-      time: 8
+      mem: 64
+      time: 48
+      cores: 1
+
+- name: hnb-small-data_v2
+  description: "
+    Fit the model with a relatively small amount of data for testing purposes.
+    Changes from v1:
+      - only use Broad data and remove the screen batch effect `p`
+      - reduce the width of the prior for `z`
+      - replace priors on `sigma_*` with `HalfNormal(0, 1)`
+      - reduce target_accept to 0.98 to help with searching of posterior space
+      - update O2 resources based on past performance
+  "
+  active: true
+  model: HIERARCHICAL_NB
+  data_file: DEPMAP_CRC_PANC_ESO_SUBSAMPLE
+  sampling_kwargs:
+    pymc_mcmc:
+      target_accept: 0.98
+      init: "adapt_diag"
+    pymc_numpyro:
+      target_accept: 0.98
+  slurm_resources:
+    PYMC_MCMC:
+      mem: 16
+      time: 48
+      cores: 1
+    PYMC_NUMPYRO:
+      mem: 28
+      time: 32
+      cores: 1
+
+- name: hnb-largesub-data
+  description: "
+    Fit the model with a larger subs-sample of the full data set.
+    Notable features (compared to `hnb-small-data_v2`):
+      - (still) only use Broad data and remove the screen batch effect `p`
+      - widen the priors on `sigma_*` with `HalfNormal(0, 2.5)`
+      - reduce the number of tuning steps and increase the number of draws
+  "
+  active: true
+  model: HIERARCHICAL_NB
+  data_file: DEPMAP_CRC_PANC_ESO_LARGE_SUBSAMPLE
+  sampling_kwargs:
+    pymc_mcmc:
+      draws: 2000
+      tune: 700
+      target_accept: 0.98
+      init: "adapt_diag"
+    pymc_numpyro:
+      draws: 2000
+      tune: 700
+      target_accept: 0.98
+  slurm_resources:
+    PYMC_MCMC:
+      mem: 64
+      time: 200
+      cores: 1
+    PYMC_NUMPYRO:
+      mem: 72
+      time: 200
       cores: 1

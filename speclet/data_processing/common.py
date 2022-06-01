@@ -3,7 +3,7 @@
 """Functions for modifying the everyday pandas DataFrame."""
 
 import warnings
-from typing import Any, Iterable, Union
+from typing import Any, Iterable, Optional, Union
 
 import janitor  # noqa: F401
 import numpy as np
@@ -179,3 +179,28 @@ def dataframe_to_matrix(
         .drop(columns=[rows])
         .values
     )
+
+
+def head_tail(
+    df: pd.DataFrame,
+    n: int = 10,
+    n_head: Optional[int] = None,
+    n_tail: Optional[int] = None,
+) -> pd.DataFrame:
+    """Get the 'head' and 'tail' of a data frame.
+
+    Args:
+        df (pd.DataFrame): Data frame.
+        n (int, optional): Number of rows from both top and bottom. Defaults to 10.
+        n_head (Optional[int], optional): Number of rows from the top. Defaults to None.
+        n_tail (Optional[int], optional): Number of rows from the bottom. Defaults to
+        None.
+
+    Returns:
+        pd.DataFrame: 'Head' and 'tail' of the input data frame.
+    """
+    if n_head is None:
+        n_head = n
+    if n_tail is None:
+        n_tail = n
+    return pd.concat([df.head(n_head), df.tail(n_tail)])

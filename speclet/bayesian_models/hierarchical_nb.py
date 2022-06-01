@@ -7,6 +7,8 @@ import numpy as np
 import pandas as pd
 import pymc as pm
 import pymc.math as pmmath
+from aesara import tensor as at
+from aesara.tensor.random.op import RandomVariable
 from pandera import Check, Column, DataFrameSchema
 
 from speclet.data_processing.common import get_cats
@@ -119,7 +121,7 @@ class HierarchcalNegativeBinomialModel:
 
     def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
-        _vars = ["~^mu$", "~^eta$", "~^delta_.*", "~.*effect$"]
+        _vars = ["~^mu$", "~^eta$", "~^delta_.*", "~.*effect$", "~^_w$"]
         return _vars
 
     def validate_data(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -144,6 +146,7 @@ class HierarchcalNegativeBinomialModel:
             "cell_line": get_cats(valid_data, "depmap_id"),
             "lineage": get_cats(valid_data, "lineage"),
             "screen": get_cats(valid_data, "screen"),
+            "one": ["1"],
         }
         if cancer_genes is not None:
             coords["cancer_gene"] = _collect_all_cancer_genes(cancer_genes)
@@ -231,9 +234,9 @@ class HierarchcalNegativeBinomialModel:
                 center=1,
             )
             .assign(
-                z_cn_gene=lambda d: squish_array(d.z_cn_gene, lower=-5, upper=5),
+                z_cn_gene=lambda d: squish_array(d.z_cn_gene, lower=-5.0, upper=5.0),
                 z_cn_cell_line=lambda d: squish_array(
-                    d.z_cn_cell_line, lower=-5, upper=5
+                    d.z_cn_cell_line, lower=-5.0, upper=5.0
                 ),
                 log_rna_expr=lambda d: np.log(d.rna_expr + 1.0),
             )
@@ -251,6 +254,8 @@ class HierarchcalNegativeBinomialModel:
     ) -> pm.Model:
         """Hierarchical negative binomial model in PyMC.
 
+        NOTE: Filtering out the Sanger data for now and only using the Broad data.
+
         Args:
             data (pd.DataFrame): Data to model.
             seed (Optional[seed], optional): Random seed. Defaults to `None`.
@@ -260,6 +265,9 @@ class HierarchcalNegativeBinomialModel:
         Returns:
             pm.Model: PyMC model.
         """
+        logger.warn("Only using Broad screen data and excluding the batch effect 'p'.")
+        data = data.query("screen == 'broad'").reset_index(drop=True)
+
         if not skip_data_processing:
             data = self.data_processing_pipeline(data)
         model_data = self._make_data_structure(data)
@@ -280,38 +288,41 @@ class HierarchcalNegativeBinomialModel:
         mut = model_data.is_mutated
         M = model_data.comutation_matrix
 
-        with pm.Model(coords=coords, rng_seeder=seed) as model:
-            z = pm.Normal("z", 0, 5, initval=0)
+        def _sigma_dist(name: str) -> RandomVariable:
+            return pm.HalfNormal(name, 2.5)
 
-            sigma_a = pm.Gamma("sigma_a", 3, 1)
+        with pm.Model(coords=coords, rng_seeder=seed) as model:
+            z = pm.Normal("z", 0, 2.5, initval=0)
+
+            sigma_a = _sigma_dist("sigma_a")
             delta_a = pm.Normal("delta_a", 0, 1, dims=("sgrna"))
             a = pm.Deterministic("a", delta_a * sigma_a, dims=("sgrna"))
 
-            sigma_b = pm.Gamma("sigma_b", 3, 1)
+            sigma_b = _sigma_dist("sigma_b")
             delta_b = pm.Normal("delta_b", 0, 1, dims=("cell_line"))
             b = pm.Deterministic("b", delta_b * sigma_b, dims=("cell_line"))
 
-            sigma_d = pm.Gamma("sigma_d", 3, 1)
+            sigma_d = _sigma_dist("sigma_d")
             delta_d = pm.Normal("delta_d", 0, 1, dims=("gene", "lineage"))
             d = pm.Deterministic("d", delta_d * sigma_d, dims=("gene", "lineage"))
 
-            sigma_f = pm.Gamma("sigma_f", 3, 1)
+            sigma_f = _sigma_dist("sigma_f")
             delta_f = pm.Normal("delta_f", 0, 1, dims=("cell_line"))
             f = pm.Deterministic("f", delta_f * sigma_f, dims=("cell_line"))
 
-            sigma_h = pm.Gamma("sigma_h", 3, 1)
+            sigma_h = _sigma_dist("sigma_h")
             delta_h = pm.Normal("delta_h", 0, 1, dims=("gene", "lineage"))
             h = pm.Deterministic("h", delta_h * sigma_h, dims=("gene", "lineage"))
 
-            sigma_k = pm.Gamma("sigma_k", 3, 1)
+            sigma_k = _sigma_dist("sigma_k")
             delta_k = pm.Normal("delta_k", 0, 1, dims=("gene", "lineage"))
             k = pm.Deterministic("k", delta_k * sigma_k, dims=("gene", "lineage"))
 
-            sigma_m = pm.Gamma("sigma_m", 3, 1)
+            sigma_m = _sigma_dist("sigma_m")
             delta_m = pm.Normal("delta_m", 0, 1, dims=("gene", "lineage"))
             m = pm.Deterministic("m", delta_m * sigma_m, dims=("gene", "lineage"))
 
-            sigma_w = pm.Gamma("sigma_w", 3, 1)
+            sigma_w = _sigma_dist("sigma_w")
             delta_w = pm.Normal(
                 "delta_w", 0, 1, dims=("gene", "cancer_gene", "lineage")
             )
@@ -319,8 +330,21 @@ class HierarchcalNegativeBinomialModel:
                 "w", delta_w * sigma_w, dims=("gene", "cancer_gene", "lineage")
             )
 
-            sigma_p = pm.Gamma("sigma_p", 3, 1)
-            p = pm.Normal("p", 0, sigma_p, dims=("gene", "screen"))
+            # Filtered out Sanger data - only using a single screen.
+            # sigma_p = _sigma_dist("sigma_p")
+            # p = pm.Normal("p", 0, sigma_p, dims=("gene", "screen"))
+
+            # Note: This is a hack to get around some weird error with sampling with
+            # the Numpyro JAX backend.
+            _w_pieces = []
+            for cell_i, line_i in enumerate(c_to_l):
+                _m_slice = M[:, :, cell_i]
+                _w_slice = w[:, :, line_i]
+                _w_piece = (_w_slice * _m_slice).sum(axis=1)[:, None]
+                _w_pieces.append(_w_piece)
+            _w = pm.Deterministic(
+                "_w", at.horizontal_stack(*_w_pieces), dims=("gene", "cell_line")
+            )
 
             gene_effect = pm.Deterministic(
                 "gene_effect",
@@ -328,11 +352,11 @@ class HierarchcalNegativeBinomialModel:
                 + cn_gene * h[g, ll]
                 + rna * k[g, ll]
                 + mut * m[g, ll]
-                + (w[:, :, c_to_l] * M).sum(axis=1)[g, c],
+                + _w[g, c],
             )
             cell_effect = pm.Deterministic("cell_line_effect", b[c] + cn_cell * f[c])
             eta = pm.Deterministic(
-                "eta", z + a[s] + p[g, s] + gene_effect + cell_effect
+                "eta", z + a[s] + gene_effect + cell_effect  # + p[g, s]
             )
             mu = pm.Deterministic("mu", pmmath.exp(eta))
 
