@@ -22,6 +22,7 @@ dependencies:
   - flake8-comprehensions
   - hypothesis
   - ipython
+  - ipywidgets
   - isort
   - jax>=0.3.0
   - jaxlib>=0.3.0

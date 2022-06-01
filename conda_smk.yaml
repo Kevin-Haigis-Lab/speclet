@@ -13,6 +13,7 @@ dependencies:
   - colorama
   - dask
   - drmaa
+  - ipywidgets
   - isort  # KEEP! used in pipeline
   - jax>=0.3.0
   - jaxlib>=0.3.0
