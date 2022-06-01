@@ -23,7 +23,7 @@ class PosteriorManager:
             cache_dir (Path | str): Directory for caching the posterior.
         """
         self.id = id
-        self._posterior = None
+        self._posterior: az.InferenceData | None = None
         if isinstance(cache_dir, str):
             cache_dir = Path(cache_dir)
         self.cache_dir = cache_dir
@@ -66,7 +66,6 @@ class PosteriorManager:
         self._make_dir()
         if self._posterior is None:
             return None
-        # self._posterior.to_json(str(self.posterior_path))
         self._posterior.to_netcdf(str(self.posterior_path))
 
     def put(self, trace: az.InferenceData) -> None:

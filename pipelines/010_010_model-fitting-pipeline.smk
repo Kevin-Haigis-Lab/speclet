@@ -122,7 +122,7 @@ rule sample_pymc_mcmc:
     priority: 20
     shell:
         get_aesara_flags("{wildcards.model_name}_{wildcards.chain}_mcmc") + " "
-        "speclet/command_line_interfaces/fit_bayesian_model_cli.py"
+        "speclet/cli/fit_bayesian_model_cli.py"
         '  "{wildcards.model_name}"'
         "  {params.config_file}"
         "  PYMC_MCMC"
@@ -147,7 +147,7 @@ rule combine_pymc_mcmc:
         cache_dir=TEMP_DIR,
     shell:
         get_aesara_flags("{wildcards.model_name}_combine-mcmc") + " "
-        "speclet/command_line_interfaces/combine_mcmc_chains_cli.py"
+        "speclet/cli/combine_mcmc_chains_cli.py"
         "  {wildcards.model_name}"
         "  PYMC_MCMC"
         "  {params.n_chains}"
@@ -176,7 +176,7 @@ rule sample_pymc_numpyro:
     priority: 20
     shell:
         get_aesara_flags("{wildcards.model_name}_{wildcards.chain}_mcmc") + " "
-        "speclet/command_line_interfaces/fit_bayesian_model_cli.py"
+        "speclet/cli/fit_bayesian_model_cli.py"
         '  "{wildcards.model_name}"'
         "  {params.config_file}"
         "  PYMC_NUMPYRO"
@@ -203,7 +203,7 @@ rule combine_pymc_numpyro:
         cache_dir=TEMP_DIR,
     shell:
         get_aesara_flags("{wildcards.model_name}_combine-mcmc") + " "
-        "speclet/command_line_interfaces/combine_mcmc_chains_cli.py"
+        "speclet/cli/combine_mcmc_chains_cli.py"
         "  {wildcards.model_name}"
         "  PYMC_NUMPYRO"
         "  {params.n_chains}"
@@ -229,7 +229,7 @@ rule sample_pymc_advi:
     priority: 10
     shell:
         get_aesara_flags("{wildcards.model_name}_advi") + " "
-        "speclet/command_line_interfaces/fit_bayesian_model_cli.py"
+        "speclet/cli/fit_bayesian_model_cli.py"
         '  "{wildcards.model_name}"'
         "  {params.config_file}"
         "  PYMC_ADVI"
@@ -255,7 +255,7 @@ rule summarize_posterior:
         config_file=MODEL_CONFIG,
         cache_dir=MODEL_CACHE_DIR,
     shell:
-        "speclet/command_line_interfaces/summarize_posterior.py"
+        "speclet/cli/summarize_posterior.py"
         '  "{wildcards.model_name}"'
         "  {params.config_file}"
         "  {wildcards.fit_method}"

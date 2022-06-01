@@ -3,7 +3,7 @@
 """Functions for modifying the everyday pandas DataFrame."""
 
 import warnings
-from typing import Any, Iterable, Optional, Union
+from typing import Any, Collection, Optional, Union
 
 import janitor  # noqa: F401
 import numpy as np
@@ -27,7 +27,7 @@ def make_cat(
     Returns:
         pd.DataFrame: The modified DataFrame.
     """
-    categories: list[Any] = df[col].unique().tolist()
+    categories: list[Any] = list(df[col].unique())
     if sort_cats:
         categories.sort()
     df[col] = pd.Categorical(df[col], categories=categories, ordered=ordered)
@@ -84,7 +84,7 @@ def extract_flat_ary(s: pd.Series) -> np.ndarray:
         np.ndarray: The flattened numpy array.
     """
     warnings.warn("Use `df.values` instead of `extract_flat_ary()` 🤦🏻‍♂️", UserWarning)
-    return s.values
+    return np.asarray(s.values)
 
 
 def nmutations_to_binary_array(m: pd.Series) -> np.ndarray:
@@ -102,21 +102,21 @@ def nmutations_to_binary_array(m: pd.Series) -> np.ndarray:
     return m.values.astype(bool).astype(int)
 
 
-def nunique(x: Iterable[Any]) -> int:
+def nunique(x: Collection[Any]) -> int:
     """Count the number of unique values in an iterable object.
 
     Args:
-        x (Iterable[Any]): The iterable to search over.
+        x (Collection[Any]): The collection of items.
 
     Raises:
-        ValueError: An error is thrown if the length of the input is 0.
+        ValueError: Cannot return number of unique values in a dictionary.
 
     Returns:
-        int: The number of unique items in the innput.
+        int: The number of unique items in the input.
     """
     if isinstance(x, dict):
         raise ValueError("Cannot count the number of unique values in a dict.")
-    return len(np.unique(x))
+    return len(set(x))
 
 
 def center_column_grouped_dataframe(

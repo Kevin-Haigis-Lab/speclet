@@ -1,8 +1,8 @@
 name: project-build
 on:
   workflow_dispatch:
-  schedule:
-    - cron:  '0 4 * * MON'
+  # schedule:
+  #   - cron:  '0 4 * * MON'
 defaults:
   run:
     shell: bash -l {0}

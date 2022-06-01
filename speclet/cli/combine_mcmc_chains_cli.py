@@ -7,7 +7,7 @@ from pathlib import Path
 import arviz as az
 from typer import Typer
 
-from speclet.command_line_interfaces import cli_helpers
+from speclet.cli import cli_helpers
 from speclet.exceptions import CacheDoesNotExistError
 from speclet.loggers import logger
 from speclet.managers.cache_manager import PosteriorManager, get_posterior_cache_name

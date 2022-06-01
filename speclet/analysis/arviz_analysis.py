@@ -136,7 +136,7 @@ def summarize_posterior_predictions(
         if calc_error and observed_y is not None:
             if observed_y not in d.columns:
                 raise TypeError(f"Column '{observed_y}' is not in data.")
-            d["error"] = d[observed_y].values - d["pred_mean"].values
+            d["error"] = d[observed_y] - d["pred_mean"]
 
     return d
 
@@ -160,7 +160,7 @@ def _pretty_bfmi(data: az.InferenceData, decimals: int = 3) -> list[str]:
     return np.round(az.bfmi(data), decimals).astype(str).tolist()
 
 
-def get_average_step_size(data: az.InferenceData) -> Optional[list[float]]:
+def get_average_step_size(data: az.InferenceData) -> list[float]:
     """Get the average step size for each chain of MCMC.
 
     Args:
@@ -174,7 +174,7 @@ def get_average_step_size(data: az.InferenceData) -> Optional[list[float]]:
         step_sizes = data["sample_stats"].get(stat_name)
         if step_sizes is not None:
             return step_sizes.mean(axis=1).values.tolist()
-    return None
+    raise AttributeError("Could not find the step size values for posterior object.")
 
 
 def _pretty_step_size(data: az.InferenceData, decimals: int = 3) -> list[str]:

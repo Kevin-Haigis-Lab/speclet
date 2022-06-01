@@ -14,7 +14,7 @@ from typer import Typer
 from speclet import model_configuration as model_config
 from speclet.analysis.arviz_analysis import describe_mcmc
 from speclet.bayesian_models import get_bayesian_model
-from speclet.command_line_interfaces import cli_helpers
+from speclet.cli import cli_helpers
 from speclet.loggers import logger
 from speclet.managers.cache_manager import (
     get_cached_posterior,
