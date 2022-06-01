@@ -45,7 +45,7 @@ class CrisprScreenDataManager:
             functions that take, mutate, and return a data frame.
             Defaults to None.
         """
-        self._data = None
+        self._data: pd.DataFrame | None = None
 
         if transformations is None:
             self._transformations = []

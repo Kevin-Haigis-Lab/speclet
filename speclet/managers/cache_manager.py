@@ -23,7 +23,7 @@ class PosteriorManager:
             cache_dir (Path | str): Directory for caching the posterior.
         """
         self.id = id
-        self._posterior = None
+        self._posterior: az.InferenceData | None = None
         if isinstance(cache_dir, str):
             cache_dir = Path(cache_dir)
         self.cache_dir = cache_dir
