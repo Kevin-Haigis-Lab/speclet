@@ -1,7 +1,7 @@
 """Functions for handling common modifications and processing of the Achilles data."""
 
 from pathlib import Path
-from typing import Final, Iterable, Optional, Union
+from typing import Final, Iterable
 
 import numpy as np
 import pandas as pd
@@ -12,16 +12,16 @@ from speclet.data_processing.vectors import careful_zscore, squish_array
 from speclet.io import DataFile, data_path
 from speclet.loggers import logger
 
-#### ---- Data manipulation ---- ####
+# ---- Data manipulation ----
 
 
 def zscale_cna_by_group(
     df: pd.DataFrame,
     cn_col: str = "copy_number",
     new_col: str = "copy_number_z",
-    groupby_cols: Optional[Union[list[str], tuple[str, ...]]] = ("hugo_symbol",),
-    cn_max: Optional[float] = None,
-    center: Optional[float] = None,
+    groupby_cols: list[str] | tuple[str, ...] | None = ("hugo_symbol",),
+    cn_max: float | None = None,
+    center: float | None = None,
 ) -> pd.DataFrame:
     """Z-scale the copy number values.
 
@@ -31,12 +31,12 @@ def zscale_cna_by_group(
         Defaults to "copy_number".
         new_col (str, optional): The name of the column to store the calculated values.
         Defaults to "copy_number_z".
-        groupby_cols (Optional[Union[List[str], Tuple[str, ...]]], optional): A list or
+        groupby_cols (list[str] | tuple[str, ...] | None, optional): A list or
         tuple of columns to group the DataFrame by. If None, the rows are not grouped.
         Defaults to ("hugo_symbol").
-        cn_max (Optional[float], optional): The maximum copy number to use.
+        cn_max (float | None, optional): The maximum copy number to use.
         Defaults to None.
-        center (Optional[float], optional): The value to use for the center. If `None`
+        center (float | None, optional): The value to use for the center. If `None`
         (default), the average is used.
 
     Returns:
@@ -65,9 +65,9 @@ def zscale_cna_by_group(
 def zscale_rna_expression(
     df: pd.DataFrame,
     rna_col: str = "rna_expr",
-    new_col: Optional[str] = None,
-    lower_bound: Optional[float] = None,
-    upper_bound: Optional[float] = None,
+    new_col: str | None = None,
+    lower_bound: float | None = None,
+    upper_bound: float | None = None,
 ) -> pd.DataFrame:
     """Z-scale RNA expression data.
 
@@ -78,11 +78,11 @@ def zscale_rna_expression(
     Args:
         df (pd.DataFrame): Data frame.
         rna_col (str, optional): Column with RNA expr data. Defaults to "rna_expr".
-        new_col (Optional[str], optional): Name of the new column to be generated.
+        new_col (str | None, optional): Name of the new column to be generated.
           Defaults to `f"{rna_col}_z"` if None.
-        lower_bound (Optional[float], optional): Hard lower bound on the scaled values.
+        lower_bound (float | None, optional): Hard lower bound on the scaled values.
           Defaults to None.
-        upper_bound (Optional[float], optional): Hard upper bound on the scaled values.
+        upper_bound (float | None, optional): Hard upper bound on the scaled values.
           Defaults to None.
 
     Returns:
@@ -92,8 +92,7 @@ def zscale_rna_expression(
     if new_col is None:
         new_col = rna_col + "_z"
 
-    rna = df[rna_col].values
-
+    rna = np.asarray(df[rna_col].values)
     rna_z = careful_zscore(rna, atol=0.01)
 
     if lower_bound is not None and upper_bound is not None:
@@ -103,14 +102,49 @@ def zscale_rna_expression(
     return df
 
 
-ArgToZscaleByExpression = Union[str, Optional[str], Optional[float]]
+def zscale_rna_expression_by_gene(
+    df: pd.DataFrame,
+    rna_col: str = "rna_expr",
+    new_col: str | None = None,
+    lower_bound: float | None = None,
+    upper_bound: float | None = None,
+) -> pd.DataFrame:
+    """Z-scale RNA expression by gene.
+
+    Args:
+        df (pd.DataFrame): Data.
+        rna_col (str, optional): RNA expression column. Defaults to "rna_expr".
+        new_col (str | None, optional): Name for the new column. Defaults to `None`
+        which results in the new column `rna_col + "_z"`.
+        lower_bound (float | None, optional): Lower bound on the z-scale values.
+        Defaults to None.
+        upper_bound (float | None, optional): Upper bound on the z-scale values.
+        Defaults to None.
+
+    Returns:
+        pd.DataFrame: Modified data frame.
+    """
+    rna_expr_df = (
+        df.copy()[["hugo_symbol", "depmap_id", rna_col]]
+        .drop_duplicates()
+        .groupby(["hugo_symbol"])
+        .apply(
+            zscale_rna_expression,
+            rna_col=rna_col,
+            new_col=new_col,
+            lower_bound=lower_bound,
+            upper_bound=upper_bound,
+        )
+    )
+    return df.merge(rna_expr_df, how="left", on=["hugo_symbol", "depmap_id", rna_col])
 
 
 def zscale_rna_expression_by_gene_lineage(
     df: pd.DataFrame,
     rna_col: str = "rna_expr",
-    *args: ArgToZscaleByExpression,
-    **kwargs: ArgToZscaleByExpression,
+    new_col: str | None = None,
+    lower_bound: float | None = None,
+    upper_bound: float | None = None,
 ) -> pd.DataFrame:
     """Z-scale RNA expression data grouping by lineage and gene.
 
@@ -127,14 +161,20 @@ def zscale_rna_expression_by_gene_lineage(
         df.copy()[["hugo_symbol", "lineage", "depmap_id", rna_col]]
         .drop_duplicates()
         .groupby(["hugo_symbol", "lineage"])
-        .apply(zscale_rna_expression, rna_col=rna_col, *args, **kwargs)
+        .apply(
+            zscale_rna_expression,
+            rna_col=rna_col,
+            new_col=new_col,
+            lower_bound=lower_bound,
+            upper_bound=upper_bound,
+        )
     )
     return df.merge(
         rna_expr_df, how="left", on=["hugo_symbol", "lineage", "depmap_id", rna_col]
     )
 
 
-#### ---- Indices ---- ####
+# ---- Indices ----
 
 
 def make_mapping_df(data: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
@@ -257,7 +297,7 @@ class CommonIndices(BaseModel):
     cellline_to_lineage_map: pd.DataFrame
     cellline_to_lineage_idx: np.ndarray
 
-    def __init__(self, **data: Union[int, np.ndarray, pd.DataFrame]):
+    def __init__(self, **data: int | np.ndarray | pd.DataFrame):
         """Object to hold common indices used for modeling Achilles data."""
         super().__init__(**data)
         self.n_sgrnas = dphelp.nunique(self.sgrna_idx)
@@ -305,7 +345,7 @@ class DataBatchIndices(BaseModel):
     batch_to_screen_map: pd.DataFrame
     batch_to_screen_idx: np.ndarray
 
-    def __init__(self, **data: Union[int, np.ndarray, pd.DataFrame]):
+    def __init__(self, **data: int | np.ndarray | pd.DataFrame):
         """Object to hold indices relating to data screens and batches."""
         super().__init__(**data)
         self.n_batches = dphelp.nunique(self.batch_idx)
@@ -337,7 +377,7 @@ def data_batch_indices(achilles_df: pd.DataFrame) -> DataBatchIndices:
     )
 
 
-#### ---- Data frames ---- ####
+# ---- Data frames ----
 
 _default_achilles_categorical_cols: Final[tuple[str, ...]] = (
     "hugo_symbol",
@@ -421,15 +461,15 @@ def read_achilles_data(
 
 
 def subsample_achilles_data(
-    df: pd.DataFrame, n_genes: Optional[int] = 100, n_cell_lines: Optional[int] = None
+    df: pd.DataFrame, n_genes: int | None = 100, n_cell_lines: int | None = None
 ) -> pd.DataFrame:
     """Subsample an Achilles data set to a number of genes and/or cell lines.
 
     Args:
         df (pd.DataFrame): Achilles data.
-        n_genes (Optional[int], optional): Number of genes to subsample.
+        n_genes (int | None, optional): Number of genes to subsample.
           Defaults to 100.
-        n_cell_lines (Optional[int], optional): Number of cell lines to subsample.
+        n_cell_lines (int | None, optional): Number of cell lines to subsample.
           Defaults to None.
 
     Raises:
@@ -460,8 +500,8 @@ def subsample_achilles_data(
 
 def append_total_read_counts(
     achilles_df: pd.DataFrame,
-    final_reads_total: Optional[Path] = None,
-    p_dna_reads_total: Optional[Path] = None,
+    final_reads_total: Path | None = None,
+    p_dna_reads_total: Path | None = None,
     final_reads_total_colname: str = "counts_final_total",
     initial_reads_total_colname: str = "counts_initial_total",
 ) -> pd.DataFrame:
@@ -469,9 +509,9 @@ def append_total_read_counts(
 
     Args:
         achilles_df (pd.DataFrame): Achilles data frame.
-        final_reads_total (Optional[Path], optional): Path to the final read totals
+        final_reads_total (Path | None, optional): Path to the final read totals
           table (as a CSV). Defaults to None.
-        p_dna_reads_total (Optional[Path], optional): Path to the initial read totals
+        p_dna_reads_total (Path | None, optional): Path to the initial read totals
           table (as a CSV). Defaults to None.
         final_reads_total_colname (str, optional): Name for the column with the total
           number of final read counts. Defaults to "counts_final_total".
@@ -549,13 +589,13 @@ def add_useful_read_count_columns(
 
 
 def add_one_to_counts(
-    crispr_df: pd.DataFrame, cols: Optional[Iterable[str]] = None
+    crispr_df: pd.DataFrame, cols: Iterable[str] | None = None
 ) -> pd.DataFrame:
     """Add 1 to counts columns.
 
     Args:
         crispr_df (pd.DataFrame): CRISPR screen data frame.
-        cols (Optional[Iterable[str]], optional): Columns to add 1 to. Defaults to
+        cols (Iterable[str] | None, optional): Columns to add 1 to. Defaults to
         `counts_final` and `counts_initial_adj`.
 
     Returns:
