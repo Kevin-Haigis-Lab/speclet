@@ -7,6 +7,11 @@ import pandas as pd
 from pandera import Check
 
 
+def check_single_unique_value() -> Check:
+    """Pandera check that there is only a single unique value."""
+    return Check(lambda s: s.nunique() == 1)
+
+
 def check_nonnegative(nullable: bool = False) -> Check:
     """Pandera check that all values are non-negative."""
     if nullable:
