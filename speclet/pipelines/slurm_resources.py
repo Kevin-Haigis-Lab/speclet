@@ -24,6 +24,7 @@ class ResourceConfiguration(BaseModel):
     """Resource requirement configuration."""
 
     name: str
+    active: bool = True
     slurm_resources: dict[ModelFitMethod, SlurmResources] = Field(default_factory=dict)
 
 

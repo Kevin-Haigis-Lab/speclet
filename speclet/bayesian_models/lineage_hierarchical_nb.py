@@ -64,8 +64,9 @@ class LineageHierNegBinomModelData:
 class LineageHierNegBinomModel:
     """A hierarchical negative binomial generalized linear model fora single lineage."""
 
-    def __init__(self, lineage: str) -> None:
+    def __init__(self, lineage: str = "colorectal") -> None:
         """Create a negative binomial Bayesian model object."""
+        logger.warning("Colorectal set at the default lineage for now.")
         self.lineage = lineage
         return None
 
@@ -263,8 +264,11 @@ class LineageHierNegBinomModel:
         Returns:
             pm.Model: PyMC model.
         """
+        logger.warning("Filtering for data from the Broad only.")
+        data = data.query("screen == 'broad'").reset_index(drop=True)
+
         if seed:
-            logger.warn("Seed is no longer passed to PyMC models.")
+            logger.warning("Seed is no longer passed to PyMC models.")
         if not skip_data_processing:
             data = self.data_processing_pipeline(data)
         model_data = self.make_data_structure(data)

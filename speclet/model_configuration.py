@@ -39,8 +39,12 @@ class BayesianModelConfiguration(BaseModel):
 class BayesianModelConfigurations(BaseModel):
     """Bayesian model configurations."""
 
-    _idx: int = 0
     configurations: list[BayesianModelConfiguration]
+
+    def active_only(self) -> None:
+        """Filter only active configurations."""
+        self.configurations = [c for c in self.configurations if c.active]
+        return None
 
 
 # ---- Exceptions ----
@@ -99,17 +103,24 @@ class ModelOptionNotAssociatedWithAClassException(BaseException):
 # ---- Files and I/O ----
 
 
-def read_model_configurations(path: Path) -> BayesianModelConfigurations:
+def read_model_configurations(
+    path: Path, active_only: bool = False
+) -> BayesianModelConfigurations:
     """Read the file of Bayesian model configurations.
 
     Args:
         path (Path): Path to the configuration file.
+        active_only (bool, optional): Filter for only "active" model configurations.
+        Defaults to `False`.
 
     Returns:
         BayesianModelConfigurations: Bayesian model configurations.
     """
     with open(path, "r") as file:
-        return BayesianModelConfigurations(configurations=yaml.safe_load(file))
+        configs = BayesianModelConfigurations(configurations=yaml.safe_load(file))
+    if active_only:
+        configs.active_only()
+    return configs
 
 
 def get_configuration_for_model(

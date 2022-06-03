@@ -34,6 +34,8 @@ def get_models_names_fit_methods(config_path: Path) -> ParsedPipelineInformation
     names: list[str] = []
     fit_methods: list[str] = []
     for config in configs:
+        if not config.active:
+            continue
         fms = list(config.slurm_resources.keys())
         names += [config.name] * len(fms)
         fit_methods += [fm.value for fm in fms]
