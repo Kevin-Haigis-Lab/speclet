@@ -80,7 +80,7 @@ class HierarchcalNegativeBinomialSecondTier:
             }
         )
 
-    def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
+    def vars_regex(self, fit_method: ModelFitMethod | None = None) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
         _vars = ["mu", "eta", "delta_gamma", "delta_beta", "delta_b"]
         _vars = [f"~^{v}$" for v in _vars]

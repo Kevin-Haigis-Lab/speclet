@@ -26,7 +26,7 @@ class EightSchoolsModel:
         """Classic eight-schools example model."""
         return None
 
-    def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
+    def vars_regex(self, fit_method: ModelFitMethod | None = None) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
         return [r".*"]
 

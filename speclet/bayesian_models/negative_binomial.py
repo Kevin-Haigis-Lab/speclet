@@ -50,7 +50,7 @@ class NegativeBinomialModel:
             }
         )
 
-    def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
+    def vars_regex(self, fit_method: ModelFitMethod | None = None) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
         _vars = ["~^mu$"]
         return _vars

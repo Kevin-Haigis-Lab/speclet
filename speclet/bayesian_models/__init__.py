@@ -7,10 +7,11 @@ import pandas as pd
 import pymc as pm
 
 from speclet.bayesian_models.eight_schools import EightSchoolsModel
-from speclet.bayesian_models.hierarchical_nb import HierarchcalNegativeBinomialModel
+from speclet.bayesian_models.hierarchical_nb import HierarchicalNegativeBinomialModel
 from speclet.bayesian_models.hierarchical_nb_secondtier import (
     HierarchcalNegativeBinomialSecondTier,
 )
+from speclet.bayesian_models.lineage_hierarchical_nb import LineageHierNegBinomModel
 from speclet.bayesian_models.negative_binomial import NegativeBinomialModel
 from speclet.project_enums import ModelFitMethod
 
@@ -23,16 +24,13 @@ class BayesianModel(Enum):
     EIGHT_SCHOOLS = "EIGHT_SCHOOLS"
     HIERARCHICAL_NB = "HIERARCHICAL_NB"
     HIERARCHICAL_NB_SECONDTIER = "HIERARCHICAL_NB_SECONDTIER"
+    LINEAGE_HIERARCHICAL_NB = "LINEAGE_HIERARCHICAL_NB"
 
 
 class BayesianModelProtocol(Protocol):
     """Protocol for Bayesian model objects."""
 
-    def __init__(self) -> None:
-        """Simple initialization method."""
-        ...
-
-    def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
+    def vars_regex(self, fit_method: ModelFitMethod | None = None) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
         ...
 
@@ -59,8 +57,9 @@ class BayesianModelProtocol(Protocol):
 BAYESIAN_MODEL_LOOKUP: Final[dict[BayesianModel, Type[BayesianModelProtocol]]] = {
     BayesianModel.EIGHT_SCHOOLS: EightSchoolsModel,
     BayesianModel.SIMPLE_NEGATIVE_BINOMIAL: NegativeBinomialModel,
-    BayesianModel.HIERARCHICAL_NB: HierarchcalNegativeBinomialModel,
+    BayesianModel.HIERARCHICAL_NB: HierarchicalNegativeBinomialModel,
     BayesianModel.HIERARCHICAL_NB_SECONDTIER: HierarchcalNegativeBinomialSecondTier,
+    BayesianModel.LINEAGE_HIERARCHICAL_NB: LineageHierNegBinomModel,
 }
 
 

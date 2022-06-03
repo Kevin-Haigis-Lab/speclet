@@ -182,14 +182,13 @@ def _pretty_step_size(data: az.InferenceData, decimals: int = 3) -> list[str]:
 
 
 def get_divergences(data: az.InferenceData) -> np.ndarray:
-    """Get the number and percent of steps that were divergences of each MCMC chain.
+    """Get the divergence values of each MCMC chain.
 
     Args:
         data (az.InferenceData): Data object.
 
     Returns:
-        tuple[list[int], list[float]]: A list of the number of divergent steps and a
-        list of the percent of steps that were divergent.
+        np.ndarray: Divergence values.
     """
     return data["sample_stats"].diverging.values
 

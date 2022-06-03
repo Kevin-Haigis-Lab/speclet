@@ -339,7 +339,7 @@ class CancerGeneDataManager:
         with open(json_path, "r") as json_file:
             lineage_genes = json.load(json_file)
 
-        for lineage, sublineage_genes in lineage_genes.items():
+        for sublineage_genes in lineage_genes.values():
             for sublineage, genes in sublineage_genes.items():
                 if isinstance(genes, str):
                     sublineage_genes[sublineage] = set([genes])
