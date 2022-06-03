@@ -107,3 +107,24 @@
       mem: 64
       time: 8
       cores: 1
+
+- name: hnb-single-lineage-CRC
+  description: "
+    An experimental run of the new 'single lineage' hierarchical GLM model. This model
+    will run on the CRC data set and only on data from the Broad.
+
+    Only running this model with the Numpyro JAX backend.
+  "
+  active: true
+  model: LINEAGE_HIERARCHICAL_NB
+  data_file: DEPMAP_CRC
+  sampling_kwargs:
+    pymc_numpyro:
+      draws: 2000
+      tune: 700
+      target_accept: 0.99
+  slurm_resources:
+    PYMC_NUMPYRO:
+      mem: 150
+      time: 240
+      cores: 1
