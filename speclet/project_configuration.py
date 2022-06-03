@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
+import arviz as az
 import yaml
 from dotenv import dotenv_values
 from pydantic import BaseModel
@@ -113,3 +114,8 @@ def on_hms_cluster() -> bool:
     """
     env_var = "HMS_CLUSTER"
     return os.getenv(env_var) is not None
+
+
+def arviz_config() -> None:
+    """Set common ArviZ defaults."""
+    az.rcParams["stats.hdi_prob"] = get_bayesian_modeling_constants().hdi_prob
