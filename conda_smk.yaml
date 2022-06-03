@@ -7,6 +7,8 @@ channels:
 dependencies:
   - python=3.10.*
   - snakemake=7.3.*
+  - aeppl==0.0.31
+  - aesara==2.6.2
   - arviz>=0.12.0
   - black  # KEEP! used in pipeline
   - blas  # may be able to remove in next PyMC beta release
@@ -15,14 +17,14 @@ dependencies:
   - drmaa
   - ipywidgets
   - isort  # KEEP! used in pipeline
-  - jax>=0.3.0
-  - jaxlib>=0.3.0
+  - jax==0.2.*  # bug in PyMC/Aesara
+  - jaxlib
   - jupyterlab
   - mamba
   - nbconvert
   - nbqa  # KEEP! used in pipeline
   - numpy
-  - numpyro
+  - numpyro>=0.9.0
   - pandas
   - pandera
   - papermill
@@ -31,7 +33,7 @@ dependencies:
   - pretty_errors
   - pydantic
   - pyjanitor
-  - pymc>=4.0.0b5
+  # - pymc>=4.0.0b5
   - python-graphviz
   - rich
   - scikit-learn>=1.0.0
@@ -42,4 +44,5 @@ dependencies:
   - watermark
   - pip:
     - python-dotenv
+    - git+https://github.com/pymc-devs/pymc.git@main  # get latest version of PyMC
     - -e .  # install the source directory as a package (keep as last)

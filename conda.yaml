@@ -6,8 +6,8 @@ channels:
   - defaults
 dependencies:
   - python=3.10.*
-  - aeppl
-  - aesara
+  - aeppl==0.0.31
+  - aesara==2.6.2
   - arviz>=0.12.0
   - black
   - blas  # may be able to remove in next PyMC beta release
@@ -24,8 +24,8 @@ dependencies:
   - ipython
   - ipywidgets
   - isort
-  - jax>=0.3.0
-  - jaxlib>=0.3.0
+  - jax==0.2.*  # bug in PyMC/Aesara
+  - jaxlib
   - jupyterlab
   - jupyterlab_code_formatter
   - jupyterlab-spellchecker
@@ -50,7 +50,7 @@ dependencies:
   - pretty_errors
   - pydantic
   - pyjanitor
-  - pymc>=4.0.0b5
+  # - pymc>=4.0.0b5
   - pytest
   - pytest-cov
   - pytest-sugar
@@ -70,4 +70,5 @@ dependencies:
     - pytest-pythonpath
     - python-dotenv
     - types-python-dateutil
+    - git+https://github.com/pymc-devs/pymc.git@main  # get latest version of PyMC
     - -e .  # install the source directory as a package (keep as last)
