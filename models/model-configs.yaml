@@ -104,6 +104,6 @@
       target_accept: 0.99
   slurm_resources:
     PYMC_NUMPYRO:
-      mem: 150
-      time: 200
+      mem: 64
+      time: 8
       cores: 1
