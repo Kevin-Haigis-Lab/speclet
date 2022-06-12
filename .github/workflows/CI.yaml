@@ -23,7 +23,7 @@ jobs:
 
       - name: "Create and setup conda environment"
         shell: bash -l {0}
-        run:
+        run: |
           conda install -n base -c conda-forge mamba
           mamba env create -f conda.yaml
           conda activate speclet
