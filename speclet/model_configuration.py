@@ -116,7 +116,7 @@ def read_model_configurations(
     Returns:
         BayesianModelConfigurations: Bayesian model configurations.
     """
-    with open(path, "r") as file:
+    with open(path) as file:
         configs = BayesianModelConfigurations(configurations=yaml.safe_load(file))
     if active_only:
         configs.active_only()

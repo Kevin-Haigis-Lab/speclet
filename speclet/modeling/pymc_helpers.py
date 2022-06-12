@@ -1,7 +1,6 @@
 """Simple functions for common interactions with PyMC."""
 
 from math import floor
-from typing import Optional, Union
 
 import arviz as az
 import pymc as pm
@@ -71,8 +70,8 @@ def get_posterior_names(data: az.InferenceData) -> list[str]:
 
 def thin_posterior(
     posterior: xr.DataArray,
-    thin_to: Optional[int] = None,
-    step_size: Optional[int] = None,
+    thin_to: int | None = None,
+    step_size: int | None = None,
 ) -> xr.DataArray:
     """Thin a posterior to a specific number of values or by ever n steps.
 
@@ -112,10 +111,10 @@ def hierarchical_normal(
     name: str,
     dims: tuple[str, ...],
     centered: bool = True,
-    mu: Union[float, PyMCVariable] = 0.0,
-    mu_param: Optional[tuple[float, float]] = (0.0, 2.5),
-    sigma: Optional[PyMCVariable] = None,
-    sigma_params: Optional[tuple[float, float]] = (1.1, 0.5),
+    mu: float | PyMCVariable = 0.0,
+    mu_param: tuple[float, float] | None = (0.0, 2.5),
+    sigma: PyMCVariable | None = None,
+    sigma_params: tuple[float, float] | None = (1.1, 0.5),
 ) -> PyMCVariable:
     """Create a non-centered parameterized hierarchical variable."""
     if mu is None:

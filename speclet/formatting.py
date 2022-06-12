@@ -2,7 +2,7 @@
 
 from datetime import timedelta
 from enum import Enum, unique
-from typing import Callable, Optional, Union
+from typing import Callable
 
 from IPython.display import Markdown, display
 
@@ -21,8 +21,8 @@ def _drmaa_timedelta_format_callabck(d: dict[str, int]) -> None:
 
 def format_timedelta(
     tdelta: timedelta,
-    fmt: Union[str, TimeDeltaFormat],
-    callback: Optional[Callable[[dict[str, int]], None]] = None,
+    fmt: str | TimeDeltaFormat,
+    callback: Callable[[dict[str, int]], None] | None = None,
 ) -> str:
     """Format time delta object.
 

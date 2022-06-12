@@ -4,7 +4,7 @@ import os
 import warnings
 from enum import Enum, unique
 from pathlib import Path
-from typing import Final, Union
+from typing import Final
 
 from dotenv import dotenv_values
 
@@ -97,7 +97,7 @@ def models_dir() -> Path:
     return project_root() / "models"
 
 
-def data_path(to: Union[str, DataFile]) -> Path:
+def data_path(to: str | DataFile) -> Path:
     """Path a to a data file.
 
     Args:

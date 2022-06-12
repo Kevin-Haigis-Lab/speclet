@@ -1,6 +1,6 @@
 """Common and general vector operations."""
 
-from typing import Callable, Optional
+from typing import Callable
 
 import numpy as np
 from scipy import stats
@@ -57,7 +57,7 @@ NumpyTransform = Callable[[np.ndarray], np.ndarray]
 def careful_zscore(
     x: np.ndarray,
     atol: float = 0.01,
-    transform: Optional[NumpyTransform] = None,
+    transform: NumpyTransform | None = None,
 ) -> np.ndarray:
     """Z-scale an array carefully.
 

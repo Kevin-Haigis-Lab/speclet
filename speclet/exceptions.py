@@ -1,10 +1,6 @@
 """Custom exceptions for the project."""
 
-# NOTE: Only import built in libraries so can use in any venv.
-
-
 from pathlib import Path
-from typing import Union
 
 
 class UnsupportedFitMethod(Exception):
@@ -68,7 +64,7 @@ class ResourceRequestUnkown(NotImplementedError):
 class CacheDoesNotExistError(FileNotFoundError):
     """Cache does not exist."""
 
-    def __init__(self, dir: Union[Path, str]) -> None:
+    def __init__(self, dir: Path | str) -> None:
         """Create a CacheDoesNotExistError error.
 
         Args:
@@ -84,8 +80,8 @@ class ShapeError(BaseException):
 
     def __init__(
         self,
-        expected_shape: Union[int, tuple[int, ...]],
-        actual_shape: Union[int, tuple[int, ...]],
+        expected_shape: int | tuple[int, ...],
+        actual_shape: int | tuple[int, ...],
     ) -> None:
         """Create a ShapeError error.
 

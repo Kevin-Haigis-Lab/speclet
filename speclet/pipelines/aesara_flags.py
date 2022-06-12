@@ -1,7 +1,6 @@
 """Aesara flags for pipelines."""
 
 import os
-from typing import Optional
 
 import aesara
 
@@ -15,7 +14,7 @@ def get_aesara_compile_dir() -> str:
     return aesara.config.compiledir
 
 
-def aesara_gcc_config() -> Optional[str]:
+def aesara_gcc_config() -> str | None:
     """Collect the Aesara gcc/g++ flags.
 
     Any flags should be in the "AESARA_GCC_FLAG" environment variable.
@@ -27,7 +26,7 @@ def aesara_gcc_config() -> Optional[str]:
 
 
 def get_aesara_flags(
-    unique_id: str, aesara_compiledir: Optional[str] = None, gcc_flags: bool = True
+    unique_id: str, aesara_compiledir: str | None = None, gcc_flags: bool = True
 ) -> str:
     """Get shell statement to set Aesara flags for a pipeline submission.
 

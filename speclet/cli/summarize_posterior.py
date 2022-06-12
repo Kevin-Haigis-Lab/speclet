@@ -4,7 +4,6 @@
 
 import json
 from pathlib import Path
-from typing import Optional
 
 import arviz as az
 import pandas as pd
@@ -85,7 +84,7 @@ def _posterior_description(
 def _posterior_summary(
     posterior_summary_path: Path,
     trace: az.InferenceData,
-    vars_regex: Optional[list[str]] = None,
+    vars_regex: list[str] | None = None,
 ) -> None:
     logger.info("Summarizing model posterior.")
     post_summ = az.summary(
@@ -134,7 +133,7 @@ def summarize_posterior(
     posterior_summary_path: Path,
     post_pred_path: Path,
     post_pred_thin: int = 50,
-    cache_name: Optional[str] = None,
+    cache_name: str | None = None,
 ) -> None:
     """Summarize a model posterior.
 

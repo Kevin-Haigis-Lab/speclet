@@ -3,7 +3,6 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 import arviz as az
 import yaml
@@ -45,7 +44,7 @@ class ProjectConfig(BaseModel):
     fitting_pipeline: FittingPipelineConfig
 
 
-def read_project_configuration(path: Optional[Path] = None) -> ProjectConfig:
+def read_project_configuration(path: Path | None = None) -> ProjectConfig:
     """Read the project configuration.
 
     Searches the .env for `PROJECT_CONFIG`.

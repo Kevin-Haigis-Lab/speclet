@@ -1,7 +1,7 @@
 """Organization of the Bayesian model classes."""
 
 from enum import Enum, unique
-from typing import Final, Protocol, Type
+from typing import Final, Protocol
 
 import pandas as pd
 import pymc as pm
@@ -52,7 +52,7 @@ class BayesianModelProtocol(Protocol):
         ...
 
 
-BAYESIAN_MODEL_LOOKUP: Final[dict[BayesianModel, Type[BayesianModelProtocol]]] = {
+BAYESIAN_MODEL_LOOKUP: Final[dict[BayesianModel, type[BayesianModelProtocol]]] = {
     BayesianModel.EIGHT_SCHOOLS: EightSchoolsModel,
     BayesianModel.SIMPLE_NEGATIVE_BINOMIAL: NegativeBinomialModel,
     BayesianModel.HIERARCHICAL_NB: HierarchicalNegativeBinomialModel,
@@ -61,7 +61,7 @@ BAYESIAN_MODEL_LOOKUP: Final[dict[BayesianModel, Type[BayesianModelProtocol]]] =
 }
 
 
-def get_bayesian_model(mdl: BayesianModel) -> Type[BayesianModelProtocol]:
+def get_bayesian_model(mdl: BayesianModel) -> type[BayesianModelProtocol]:
     """Get a Bayesian model object.
 
     Args:

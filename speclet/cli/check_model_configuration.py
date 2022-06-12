@@ -4,7 +4,6 @@
 
 import logging
 from pathlib import Path
-from typing import Optional
 
 from typer import Typer, colors, secho
 
@@ -19,7 +18,7 @@ app = Typer()
 
 
 @app.command()
-def check_model_configuration(path: Optional[Path] = None) -> None:
+def check_model_configuration(path: Path | None = None) -> None:
     """Check a model configuration file.
 
     Performs the following checks:

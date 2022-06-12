@@ -4,7 +4,6 @@
 
 from pathlib import Path
 from time import time
-from typing import Optional
 
 import pandas as pd
 from dotenv import load_dotenv
@@ -42,10 +41,10 @@ def _read_crispr_screen_data(file: io.DataFile) -> pd.DataFrame:
 
 
 def _augment_sampling_kwargs(
-    sampling_kwargs: Optional[ModelingSamplingArguments],
+    sampling_kwargs: ModelingSamplingArguments | None,
     mcmc_chains: int,
     mcmc_cores: int,
-) -> Optional[ModelingSamplingArguments]:
+) -> ModelingSamplingArguments | None:
     if sampling_kwargs is None:
         sampling_kwargs = ModelingSamplingArguments()
 
@@ -76,8 +75,8 @@ def fit_bayesian_model(
     cache_dir: Path,
     mcmc_chains: int = 4,
     mcmc_cores: int = 4,
-    cache_name: Optional[str] = None,
-    seed: Optional[int] = None,
+    cache_name: str | None = None,
+    seed: int | None = None,
 ) -> None:
     """Sample a Bayesian model.
 

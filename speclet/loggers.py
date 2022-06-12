@@ -5,7 +5,6 @@
 
 import logging
 import pathlib
-from typing import Union
 
 from rich.logging import RichHandler
 
@@ -50,7 +49,7 @@ if len(logger.handlers) == 0:
     # Update `_idx_console_loggers` in `set_console_handler_level()` if needed.
 
 
-def set_console_handler_level(to: Union[int, str]) -> None:
+def set_console_handler_level(to: int | str) -> None:
     """Set the consle handler level.
 
     Args:

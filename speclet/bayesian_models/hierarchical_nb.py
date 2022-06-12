@@ -1,7 +1,6 @@
 """A hierarchical negative binomial generalized linear model."""
 
 from dataclasses import dataclass
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -138,7 +137,7 @@ class HierarchicalNegativeBinomialModel:
     def _model_coords(
         self,
         valid_data: pd.DataFrame,
-        cancer_genes: Optional[LineageGeneMap] = None,
+        cancer_genes: LineageGeneMap | None = None,
     ) -> dict[str, list[str]]:
         coords = {
             "sgrna": get_cats(valid_data, "sgrna"),

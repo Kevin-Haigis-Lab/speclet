@@ -37,7 +37,7 @@ def read_resource_configs(config_path: Path) -> list[ResourceConfiguration]:
     Returns:
         list[ResourceConfiguration]: List of SLURM configurations.
     """
-    with open(config_path, "r") as file:
+    with open(config_path) as file:
         config_infos = yaml.safe_load(file)
     return [ResourceConfiguration(**info) for info in config_infos]
 
@@ -55,7 +55,7 @@ def get_resource_config(config_path: Path, name: str) -> ResourceConfiguration:
     Returns:
         ResourceConfiguration: Resources for SLURM for the model.
     """
-    with open(config_path, "r") as file:
+    with open(config_path) as file:
         config_infos = yaml.safe_load(file)
     for info in config_infos:
         config = ResourceConfiguration(**info)

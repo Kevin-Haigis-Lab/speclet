@@ -3,7 +3,7 @@
 """Functions for modifying the everyday pandas DataFrame."""
 
 import warnings
-from typing import Any, Collection, Optional, Union
+from typing import Any, Collection
 
 import janitor  # noqa: F401
 import numpy as np
@@ -117,7 +117,7 @@ def nunique(x: Collection[Any]) -> int:
 
 
 def center_column_grouped_dataframe(
-    df: pd.DataFrame, grp_col: Union[str, list[str]], val_col: str, new_col_name: str
+    df: pd.DataFrame, grp_col: str | list[str], val_col: str, new_col_name: str
 ) -> pd.DataFrame:
     """Center the values of a column after grouping by another.
 
@@ -181,8 +181,8 @@ def dataframe_to_matrix(
 def head_tail(
     df: pd.DataFrame,
     n: int = 10,
-    n_head: Optional[int] = None,
-    n_tail: Optional[int] = None,
+    n_head: int | None = None,
+    n_tail: int | None = None,
 ) -> pd.DataFrame:
     """Get the 'head' and 'tail' of a data frame.
 

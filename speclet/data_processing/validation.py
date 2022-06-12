@@ -1,6 +1,6 @@
 """Custom data validation checks and processes."""
 
-from typing import Any, Union
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -33,7 +33,7 @@ def check_between(a: float, b: float) -> Check:
     return Check(lambda x: (a <= x) * (x <= b))
 
 
-def check_unique_groups(grps: dict[Any, pd.Series]) -> Union[bool, pd.Series]:
+def check_unique_groups(grps: dict[Any, pd.Series]) -> bool | pd.Series:
     """Check that all values in a group are the same.
 
     This pandera check should be used with the `groupby=` option.

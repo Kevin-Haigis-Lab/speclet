@@ -1,7 +1,6 @@
 """Cache manager for Bayesian model posterior sampling data."""
 
 from pathlib import Path
-from typing import Optional
 
 import arviz as az
 
@@ -78,7 +77,7 @@ class PosteriorManager:
         self._posterior = trace
         self.write_to_file()
 
-    def get(self, from_file: bool = False) -> Optional[az.InferenceData]:
+    def get(self, from_file: bool = False) -> az.InferenceData | None:
         """Get a model's posterior data.
 
         Args:

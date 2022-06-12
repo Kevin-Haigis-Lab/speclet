@@ -59,5 +59,5 @@ class PosteriorSummaryManager:
     def read_description(self) -> str:
         """Read the description file."""
         files = self.files()
-        with open(files.description, "r") as file:
-            return "".join([line for line in file])
+        with open(files.description) as file:
+            return "".join(list(file))
