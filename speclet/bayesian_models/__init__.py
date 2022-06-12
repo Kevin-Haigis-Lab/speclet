@@ -1,7 +1,7 @@
 """Organization of the Bayesian model classes."""
 
 from enum import Enum, unique
-from typing import Final, Optional, Protocol, Type
+from typing import Final, Protocol, Type
 
 import pandas as pd
 import pymc as pm
@@ -37,14 +37,12 @@ class BayesianModelProtocol(Protocol):
     def pymc_model(
         self,
         data: pd.DataFrame,
-        seed: Optional[int] = None,
         skip_data_processing: bool = False,
     ) -> pm.Model:
         """Make a PyMC model.
 
         Args:
             data (pd.DataFrame): Data to model.
-            seed (Optional[seed], optional): Random seed. Defaults to `None`.
             skip_data_processing (bool, optional). Skip data pre-processing step?
             Defaults to `False`.
 

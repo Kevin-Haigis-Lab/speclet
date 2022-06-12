@@ -76,6 +76,7 @@ def fit_pymc_mcmc(
     model: pm.Model,
     prior_pred_samples: int | None = None,
     sampling_kwargs: PymcSampleArguments | dict[str, Any] | None = None,
+    seed: int | None = None,
 ) -> az.InferenceData:
     """Run a standardized PyMC sampling procedure.
 
@@ -88,6 +89,7 @@ def fit_pymc_mcmc(
         are taken.
         sample_kwargs (PymcSampleArguments | dict[str, Any] | None, optional): Keyword
         arguments for the sampling method. Defaults to `None`.
+        seed (int | None, optional). Random seed. Defaults to `None`.
 
     Returns:
         az.InferenceData: Model posterior sample.
@@ -95,7 +97,7 @@ def fit_pymc_mcmc(
     kwargs = _get_kwargs_dict(sampling_kwargs)
     _specific_o2_progress(kwargs)
     with model:
-        trace = pm.sample(**kwargs)
+        trace = pm.sample(**kwargs, random_seed=seed)
         _ = pm.sample_posterior_predictive(trace=trace, extend_inferencedata=True)
 
     assert isinstance(trace, az.InferenceData)
@@ -107,6 +109,7 @@ def fit_pymc_mcmc_numpyro(
     model: pm.Model,
     prior_pred_samples: int | None = None,
     sampling_kwargs: PymcSamplingNumpyroArgs | dict[str, Any] | None = None,
+    seed: int | None = None,
 ) -> az.InferenceData:
     """Run a standardized PyMC sampling procedure using the Numpyro JAX backend.
 
@@ -119,13 +122,14 @@ def fit_pymc_mcmc_numpyro(
         are taken.
         sample_kwargs (PymcSamplingNumpyroArgs | dict[str, Any] | None): Keyword
         arguments for the sampling method. Defaults to `None`.
+        seed (int | None, optional). Random seed. Defaults to `None`.
 
     Returns:
         az.InferenceData: Model posterior sample.
     """
     kwargs = _get_kwargs_dict(sampling_kwargs)
     with model:
-        trace = pymc.sampling_jax.sample_numpyro_nuts(**kwargs)
+        trace = pymc.sampling_jax.sample_numpyro_nuts(**kwargs, random_seed=seed)
         _ = pm.sample_posterior_predictive(trace=trace, extend_inferencedata=True)
 
     assert isinstance(trace, az.InferenceData)
@@ -137,6 +141,7 @@ def fit_pymc_vi(
     model: pm.Model,
     prior_pred_samples: int | None = None,
     fit_kwargs: PymcFitArguments | dict[str, Any] | None = None,
+    seed: int | None = None,
 ) -> ApproximationSamplingResults:
     """Run a standard PyMC ADVI fitting procedure.
 
@@ -148,6 +153,7 @@ def fit_pymc_vi(
         distributions. Defaults to 1000. If less than 1, no prior samples are taken.
         fit_kwargs (PymcFitArguments | dict[str, Any] | None, optional): Keyword
         arguments for the fit method. Defaults to `None`.
+        seed (int | None, optional). Random seed. Defaults to `None`.
 
     Returns:
         ApproximationSamplingResults: A collection of the fitting and sampling results.
@@ -156,8 +162,9 @@ def fit_pymc_vi(
     draws = kwargs.pop("draws", PymcFitArguments().draws)
 
     with model:
-        approx = pm.fit(**kwargs)
-        trace = az.from_pymc3(trace=approx.sample(draws))
+        approx = pm.fit(**kwargs, random_seed=seed)
+        # trace = az.from_pymc3(trace=approx.sample(draws, random_seed=seed))
+        trace = pm.to_inference_data(trace=approx.sample(draws, random_seed=seed))
         _ = pm.sample_posterior_predictive(trace=trace, extend_inferencedata=True)
 
     assert isinstance(approx, pm.Approximation)
@@ -189,21 +196,30 @@ def fit_model(
     Returns:
         az.InferenceData: Model posterior.
     """
-    pymc_model = model.pymc_model(data=data, seed=seed)
+    pymc_model = model.pymc_model(data=data)
     if fit_method is ModelFitMethod.PYMC_MCMC:
         kwargs = sampling_kwargs.pymc_mcmc if sampling_kwargs is not None else None
         return fit_pymc_mcmc(
-            model=pymc_model, prior_pred_samples=0, sampling_kwargs=kwargs
+            model=pymc_model,
+            prior_pred_samples=0,
+            sampling_kwargs=kwargs,
+            seed=seed,
         )
     elif fit_method is ModelFitMethod.PYMC_NUMPYRO:
         kwargs = sampling_kwargs.pymc_numpyro if sampling_kwargs is not None else None
         return fit_pymc_mcmc_numpyro(
-            model=pymc_model, prior_pred_samples=0, sampling_kwargs=kwargs
+            model=pymc_model,
+            prior_pred_samples=0,
+            sampling_kwargs=kwargs,
+            seed=seed,
         )
     elif fit_method is ModelFitMethod.PYMC_ADVI:
         kwargs = sampling_kwargs.pymc_advi if sampling_kwargs is not None else None
         return fit_pymc_vi(
-            model=pymc_model, prior_pred_samples=0, fit_kwargs=kwargs
+            model=pymc_model,
+            prior_pred_samples=0,
+            fit_kwargs=kwargs,
+            seed=seed,
         ).inference_data
     else:
         assert_never(fit_method)

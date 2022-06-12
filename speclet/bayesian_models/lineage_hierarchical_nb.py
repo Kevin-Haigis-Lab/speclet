@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from itertools import product
-from typing import Optional
 
 import numpy as np
 import numpy.typing as npt
@@ -159,14 +158,15 @@ class LineageHierNegBinomModel:
         for genes in lineage_cancer_genes.values():
             cancer_gene_set = cancer_gene_set.union(genes)
 
+        # Only keep cancer genes that are included in the CRISPR screen data.
+        cancer_gene_set = cancer_gene_set.intersection(data["hugo_symbol"])
+        if len(cancer_gene_set) == 0:
+            logger.warning("No cancer genes are in the data set.")
+
         cancer_genes = list(cancer_gene_set)
         cancer_genes.sort()
-
-        check_df = data.filter_column_isin("hugo_symbol", cancer_genes)
-        if check_df.shape[0] == 0:
-            raise ValueError("No cancer genes are in the data set.")
-
         coords = self._model_coords(data, cancer_genes)
+
         comutation_matrix = make_cancer_gene_mutation_matrix(
             data, cancer_genes=cancer_genes, cell_lines=coords["cell_line"]
         )
@@ -249,15 +249,12 @@ class LineageHierNegBinomModel:
     def pymc_model(
         self,
         data: pd.DataFrame,
-        seed: Optional[int] = None,
         skip_data_processing: bool = False,
     ) -> pm.Model:
         """Hierarchical negative binomial model in PyMC.
 
         Args:
             data (pd.DataFrame): Data to model.
-            seed (Optional[seed], optional): (deprecated) Random seed. Defaults to
-            `None`.
             skip_data_processing (bool, optional). Skip data pre-processing step?
             Defaults to `False`.
 
@@ -267,8 +264,6 @@ class LineageHierNegBinomModel:
         logger.warning("Filtering for data from the Broad only.")
         data = data.query("screen == 'broad'").reset_index(drop=True)
 
-        if seed:
-            logger.warning("Seed is no longer passed to PyMC models.")
         if not skip_data_processing:
             data = self.data_processing_pipeline(data)
         model_data = self.make_data_structure(data)
@@ -341,8 +336,12 @@ class LineageHierNegBinomModel:
             h = pm.Deterministic("h", genes[:, 1], dims="gene")
             k = pm.Deterministic("k", genes[:, 2], dims="gene")
             m = pm.Deterministic("m", genes[:, 3], dims="gene")
+
+            w: RandomVariable | np.ndarray
             if n_CG > 0:
                 w = pm.Deterministic("w", genes[:, 4:], dims=("gene", "cancer_gene"))
+            else:
+                w = np.zeros((n_G, n_CG))
 
             p: RandomVariable | np.ndarray
             if model_data.SC > 1:

@@ -108,14 +108,11 @@ def nunique(x: Collection[Any]) -> int:
     Args:
         x (Collection[Any]): The collection of items.
 
-    Raises:
-        ValueError: Cannot return number of unique values in a dictionary.
-
     Returns:
         int: The number of unique items in the input.
     """
     if isinstance(x, dict):
-        raise ValueError("Cannot count the number of unique values in a dict.")
+        return len(x)
     return len(set(x))
 
 

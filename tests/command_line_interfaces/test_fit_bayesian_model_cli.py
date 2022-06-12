@@ -4,7 +4,7 @@ from textwrap import dedent
 import pytest
 from typer.testing import CliRunner
 
-from speclet.command_line_interfaces.fit_bayesian_model_cli import app
+from speclet.cli.fit_bayesian_model_cli import app
 from speclet.project_enums import ModelFitMethod
 
 runner = CliRunner()

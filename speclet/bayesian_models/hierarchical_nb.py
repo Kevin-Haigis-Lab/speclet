@@ -249,7 +249,6 @@ class HierarchicalNegativeBinomialModel:
     def pymc_model(
         self,
         data: pd.DataFrame,
-        seed: Optional[int] = None,
         skip_data_processing: bool = False,
     ) -> pm.Model:
         """Hierarchical negative binomial model in PyMC.
@@ -258,7 +257,6 @@ class HierarchicalNegativeBinomialModel:
 
         Args:
             data (pd.DataFrame): Data to model.
-            seed (Optional[seed], optional): Random seed. Defaults to `None`.
             skip_data_processing (bool, optional). Skip data pre-processing step?
             Defaults to `False`.
 
@@ -291,7 +289,7 @@ class HierarchicalNegativeBinomialModel:
         def _sigma_dist(name: str) -> RandomVariable:
             return pm.HalfNormal(name, 2.5)
 
-        with pm.Model(coords=coords, rng_seeder=seed) as model:
+        with pm.Model(coords=coords) as model:
             z = pm.Normal("z", 0, 2.5, initval=0)
 
             sigma_a = _sigma_dist("sigma_a")

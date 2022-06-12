@@ -1,7 +1,6 @@
 """A hierarchical negative binomial model with a second tier."""
 
 from dataclasses import dataclass
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -139,14 +138,12 @@ class HierarchcalNegativeBinomialSecondTier:
     def pymc_model(
         self,
         data: pd.DataFrame,
-        seed: Optional[int] = None,
         skip_data_processing: bool = False,
     ) -> pm.Model:
         """Model in PyMC.
 
         Args:
             data (pd.DataFrame): Data to model.
-            seed (Optional[seed], optional): Random seed. Defaults to `None`.
             skip_data_processing (bool, optional). Skip data pre-processing step?
             Defaults to `False`.
 
@@ -160,7 +157,7 @@ class HierarchcalNegativeBinomialSecondTier:
         coords = self._model_coords(data)
         coords["one"] = ["1"]
 
-        with pm.Model(coords=coords, rng_seeder=seed) as model:
+        with pm.Model(coords=coords) as model:
 
             mu_a = pm.Normal("mu_a", 0, 5)
             sigma_a = pm.Gamma("sigma_a", 2, 0.5)
