@@ -32,6 +32,7 @@ jobs:
       - name: "Describe environment"
         shell: bash -l {0}
         run: |
+          conda activate speclet
           pwd
           ls -lha
           python3 --version
@@ -42,6 +43,7 @@ jobs:
       - name: "Run test suite"
         shell: bash -l {0}
         run: |
+          conda activate speclet
           python3 -m pytest \
             --disable-warnings \
             --force-sugar \
