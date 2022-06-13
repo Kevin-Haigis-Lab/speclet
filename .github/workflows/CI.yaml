@@ -4,12 +4,19 @@ name: "pytest"
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron:  '0 3 * * MON'
   push:
     branches:
       - master
+      - gh-action-ci
   pull_request:
     branches:
       - master
+
+defaults:
+  run:
+    shell: bash -l {0}
 
 jobs:
   pytest:
@@ -22,15 +29,14 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
 
       - name: "Create and setup conda environment"
-        shell: bash -l {0}
-        run:
-          conda install -n base -c conda-forge mamba
+        run: |
+          conda install -n base --yes -c conda-forge mamba
           mamba env create -f conda.yaml
           conda activate speclet
 
       - name: "Describe environment"
-        shell: bash -l {0}
         run: |
+          conda activate speclet
           pwd
           ls -lha
           python3 --version
@@ -39,8 +45,8 @@ jobs:
           conda list
 
       - name: "Run test suite"
-        shell: bash -l {0}
         run: |
+          conda activate speclet
           python3 -m pytest \
             --disable-warnings \
             --force-sugar \

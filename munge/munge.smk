@@ -25,7 +25,6 @@ TESTS_DIR = Path("tests")
 MUNGE_CONFIG = project_config.read_project_configuration().munge
 TEMP_DIR = MUNGE_CONFIG.temporary_directory
 
-# ENVIRONMENT_YAML = "pipeline-environment.yml"
 
 all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list()
 
@@ -83,6 +82,10 @@ def clean_sanger_cgc_input(*args: Any, **kwargs: Any) -> dict[str, Path]:
     return {"cgc_input": SANGER_COSMIC_DIR / "cancer_gene_census.csv"}
 
 
+def misc_input(*args: Any, **kwargs: Any) -> dict[str, Path]:
+    return {"unzip_complete_touch": TEMP_DIR / "unzip_score_readcounts.done"}
+
+
 # --- CI ---
 
 
@@ -104,6 +107,7 @@ if os.getenv("CI") is not None:
         tidy_depmap_input,
         tidy_score_input,
         clean_sanger_cgc_input,
+        misc_input,
     )
     for input_dict_fxn in input_dict_fxns:
         input_dict = input_dict_fxn()
@@ -236,7 +240,7 @@ rule collate_score_readcounts:
 
 rule extract_score_pdna:
     input:
-        unzip_complete_touch=Path("temp") / "unzip_score_readcounts.done",
+        unzip_complete_touch=misc_input()["unzip_complete_touch"],
         replicate_map=tidy_score_input()["score_replicate_map"],
     params:
         raw_counts_dir=str(SCORE_DIR / "Score_raw_sgrna_counts"),

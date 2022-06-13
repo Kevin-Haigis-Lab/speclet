@@ -1,107 +1,98 @@
-name: project-build
+name: "project-build"
+
 on:
   workflow_dispatch:
-  # schedule:
-  #   - cron:  '0 4 * * MON'
+  schedule:
+    - cron:  '0 3 * * MON'
+  push:
+    branches:
+      - master
+      - gh-action-ci
+
 defaults:
   run:
     shell: bash -l {0}
+
+env:
+  PROJECT_CONFIG: "project-config.yaml"
+
 jobs:
-  pytest:
-    name: pytest suite
+  snakemake:
+    name: "Snakemake pipelines"
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v2
-      - name: Install conda
+
+      - name: "Install conda"
         uses: conda-incubator/setup-miniconda@v2
-        with:
-          activate-environment: speclet
-          auto-activate-base: false
-          channel-priority: strict
-          environment-file: conda.yaml
-      - name: Activate conda environment
-        run: conda activate speclet
-      - name: Describe virtual environment
+
+      - name: "Create and setup conda environment"
         run: |
+          conda install -n base --yes -c conda-forge mamba
+          mamba env create -f conda_smk.yaml
+          conda activate speclet_smk
+
+      - name: "Describe environment"
+        run: |
+          conda activate speclet_smk
+          pwd
+          ls -lha
           python3 --version
           which python3
           conda env list
           conda list
-      - name: Run tests
-        run: |
-          python3 -m pytest \
-            --disable-warnings \
-            --cov="speclet" \
-            --force-sugar \
-            --hypothesis-profile "ci" \
-            tests/
 
-  # snakemake:
-  #   name: snakemake pipelines
-  #   runs-on: "ubuntu-latest"
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - name: Install conda
-  #       uses: conda-incubator/setup-miniconda@v2
-  #       with:
-  #         activate-environment: speclet_snakemake
-  #         auto-activate-base: false
-  #         channel-priority: strict
-  #         environment-file: conda_sml.yaml
-  #     - name: Activate conda environment
-  #       run: conda activate speclet_snakemake
-  #     - name: Describe virtual environment
-  #       run: |
-  #         python3 --version
-  #         which python3
-  #         conda env list
-  #         conda list
-  #     - name: Model fitting pipeline
-  #       run: |
-  #         snakemake \
-  #           --snakefile pipelines/010_010_model-fitting-pipeline.smk \
-  #           --dry-run \
-  #           --forceall
-  #     - name: SBC pipeline
-  #       run: |
-  #         snakemake \
-  #           --snakefile pipelines/012_010_simulation-based-calibration.smk \
-  #           --dry-run \
-  #           --forceall
-  #     - name: Data download pipeline
-  #       run: |
-  #         snakemake \
-  #           --snakefile data/download-data.smk \
-  #           --dry-run \
-  #           --forceall
-  #     - name: Data preparation pipeline
-  #       run: |
-  #         snakemake \
-  #           --snakefile munge/munge.smk \
-  #           --dry-run \
-  #           --forceall
+      - name: "Data download pipeline"
+        run: |
+          conda activate speclet_smk
+          snakemake \
+            --snakefile data/download-data.smk \
+            --dry-run \
+            --forceall
+
+      - name: "Data preparation pipeline"
+        run: |
+          conda activate speclet_smk
+          snakemake \
+            --snakefile munge/munge.smk \
+            --dry-run \
+            --forceall
+
+      - name: "Model fitting pipeline"
+        run: |
+          conda activate speclet_smk
+          snakemake \
+            --snakefile pipelines/010_010_model-fitting-pipeline.smk \
+            --dry-run \
+            --forceall
 
   model-config-check:
-    name: model configurations
+    name: "Model configurations"
     runs-on: "ubuntu-latest"
+
     steps:
       - uses: actions/checkout@v2
-      - name: Install conda
+
+      - name: "Install conda"
         uses: conda-incubator/setup-miniconda@v2
-        with:
-          activate-environment: speclet
-          auto-activate-base: false
-          channel-priority: strict
-          environment-file: conda.yaml
-      - name: Activate conda environment
-        run: conda activate speclet
-      - name: Describe virtual environment
+
+      - name: "Create and setup conda environment"
         run: |
+          conda install -n base --yes -c conda-forge mamba
+          mamba env create -f conda.yaml
+          conda activate speclet
+
+      - name: "Describe environment"
+        run: |
+          conda activate speclet
+          pwd
+          ls -lha
           python3 --version
           which python3
           conda env list
           conda list
-      - name: Check main model configuration
-        run: python3 speclet/command_line_interfaces/check_model_configuration.py
-      # - name: Check test configuration
-      #   run: python3 speclet/command_line_interfaces/check_model_configuration.py tests/models/mock-model-config.yaml
+
+      - name: "Check model configuration"
+        run: |
+          conda activate speclet
+          python3 speclet/cli/check_model_configuration.py
