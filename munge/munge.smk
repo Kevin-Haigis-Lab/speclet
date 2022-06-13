@@ -82,7 +82,7 @@ def clean_sanger_cgc_input(*args: Any, **kwargs: Any) -> dict[str, Path]:
     return {"cgc_input": SANGER_COSMIC_DIR / "cancer_gene_census.csv"}
 
 
-def misc_input(*args, Any, **kwargs: Any) -> dict[str, Path]:
+def misc_input(*args: Any, **kwargs: Any) -> dict[str, Path]:
     return {"unzip_complete_touch": TEMP_DIR / "unzip_score_readcounts.done"}
 
 
