@@ -9,7 +9,6 @@ on:
   push:
     branches:
       - master
-      - gh-action-ci
   pull_request:
     branches:
       - master
