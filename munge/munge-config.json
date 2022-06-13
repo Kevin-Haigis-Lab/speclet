@@ -118,6 +118,12 @@
         "time": "00:30:00",
         "J": "cell-info"
     },
+    "data_per_lineage": {
+        "cores": 4,
+        "mem": "80000",
+        "time": "05:00:00",
+        "J": "line-split"
+    },
     "modeling_data_subsets": {
         "cores": 4,
         "mem": "70000",

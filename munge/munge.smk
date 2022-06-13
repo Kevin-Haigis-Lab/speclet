@@ -142,6 +142,9 @@ rule all:
         MODELING_DATA_DIR / "depmap-modeling-data.csv",
         # cell_line_info
         MODELING_DATA_DIR / "depmap_cell-line-info.csv",
+        MODELING_DATA_DIR / "depmap_num-lines-per-lineage.csv",
+        # check_lineage_data_files
+        MODELING_DATA_DIR / "lineage-modeling-data" / "lineage-data-files-check.touch",
         # rules.modeling_data_subsets.output
         MODELING_DATA_DIR / "depmap-modeling-data_crc.csv",
         MODELING_DATA_DIR / "depmap-modeling-data_crc-subsample.csv",
@@ -422,8 +425,6 @@ rule screen_total_counts_tables:
         final_counts_table_out=MODELING_DATA_DIR
         / "depmap_replicate_total_read_counts.csv",
         pdna_table_out=MODELING_DATA_DIR / "depmap_pdna_total_read_counts.csv",
-    # conda:
-    #     ENVIRONMENT_YAML
     shell:
         "munge/065_total-read-count-tables.py"
         " {input.depmap_modeling_df}"
@@ -459,8 +460,6 @@ rule check_depmap_modeling_data:
         check_nb=rules.papermill_check_depmap_modeling_data.output.notebook,
     output:
         output_md=MUNGE_DIR / "045_check-depmap-modeling-data_exec.md",
-    # conda:
-    #     ENVIRONMENT_YAML
     version:
         "1.1"
     shell:
@@ -473,13 +472,50 @@ rule check_depmap_modeling_data:
 # --- Generate additional useful files ---
 
 
-rule cell_line_info:
+checkpoint cell_line_info:
     input:
         modeling_df=rules.combine_data.output.out_file,
     output:
         cell_line_info=MODELING_DATA_DIR / "depmap_cell-line-info.csv",
+        num_lines_per_lineage=MODELING_DATA_DIR / "depmap_num-lines-per-lineage.csv",
     script:
         "057_cell-line-information.R"
+
+
+checkpoint data_per_lineage:
+    input:
+        cell_line_info=rules.cell_line_info.output.cell_line_info,
+        modeling_df=rules.combine_data.output.out_file,
+    params:
+        file_name_template="depmap-modeling-data_{lineage}.csv",
+    output:
+        split_lineage_dir=directory(MODELING_DATA_DIR / "lineage-modeling-data"),
+    script:
+        "058_split-modeling-data-per-lineage.R"
+
+
+def aggregate_lineage_data_files(wildcards):
+    lineages_file = checkpoints.cell_line_info.get().output.num_lines_per_lineage
+    lineages = pd.read_csv(lineages_file)["lineage"]
+    target = str(
+        MODELING_DATA_DIR
+        / "lineage-modeling-data"
+        / "depmap-modeling-data_{lineage}.csv"
+    )
+    return expand(target_dir, lineage=lineages)
+
+
+rule check_lineage_data_files:
+    input:
+        aggregate_lineage_data_files,
+    output:
+        touch(
+            MODELING_DATA_DIR
+            / "lineage-modeling-data"
+            / "lineage-data-files-check.touch"
+        ),
+    shell:
+        "echo 'files checked'"
 
 
 rule modeling_data_subsets:
@@ -513,8 +549,6 @@ rule auxillary_data_subsets:
         crc_subset=rules.modeling_data_subsets.output.crc_subset,
     output:
         cna_sample=MODELING_DATA_DIR / "copy_number_data_samples.npy",
-    # conda:
-    #     ENVIRONMENT_YAML
     shell:
         "munge/055_auxiliary-data-files.py {input.crc_subset} {output.cna_sample}"
 
