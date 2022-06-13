@@ -240,7 +240,7 @@ rule collate_score_readcounts:
 
 rule extract_score_pdna:
     input:
-        unzip_complete_touch=misc_input["unzip_complete_touch"],
+        unzip_complete_touch=misc_input()["unzip_complete_touch"],
         replicate_map=tidy_score_input()["score_replicate_map"],
     params:
         raw_counts_dir=str(SCORE_DIR / "Score_raw_sgrna_counts"),
