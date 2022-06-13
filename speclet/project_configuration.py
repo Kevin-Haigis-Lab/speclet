@@ -9,6 +9,8 @@ import yaml
 from dotenv import dotenv_values
 from pydantic import BaseModel
 
+from speclet.loggers import logger
+
 
 class MungeConfig(BaseModel):
     """Munge configurations."""
@@ -57,9 +59,16 @@ def read_project_configuration(path: Path | None = None) -> ProjectConfig:
     Returns:
         ProjectConfig: Project configurations broken down by project sections.
     """
+    DEFAULT_CONFIG = Path("project-config.yaml")
+    ENV_VAR = "PROJECT_CONFIG"
     if path is None:
-        if (env_config := dotenv_values().get("PROJECT_CONFIG")) is not None:
+        if (env_config := dotenv_values().get(ENV_VAR)) is not None:
             path = Path(env_config)
+        elif (env_config := os.getenv(ENV_VAR)) is not None:
+            path = Path(env_config)
+        elif DEFAULT_CONFIG.exists():
+            logger.info("Using default project configuration file.")
+            path = DEFAULT_CONFIG
         else:
             raise BaseException("Project configuration YAML file not found.")
 
