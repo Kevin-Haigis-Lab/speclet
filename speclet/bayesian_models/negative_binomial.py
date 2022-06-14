@@ -1,6 +1,7 @@
 """Simple negative binomial model."""
 
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -28,7 +29,7 @@ class NegBinomModelData:
 class NegativeBinomialModel:
     """Negative binomial generalized linear model."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Create a negative binomial Bayesian model object."""
         return None
 
