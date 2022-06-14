@@ -68,6 +68,8 @@ class CrisprScreenDataManager:
         if self.data_file.suffix not in SUPPORTED_DATA_FILES:
             raise UnsupportedDataFileType(self.data_file.suffix)
 
+        return None
+
     # ---- Properties ----
 
     @property

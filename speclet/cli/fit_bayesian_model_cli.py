@@ -35,7 +35,7 @@ app = Typer()
 # ---- Helpers ----
 
 
-def _read_crispr_screen_data(file: io.DataFile) -> pd.DataFrame:
+def _read_crispr_screen_data(file: io.DataFile | Path) -> pd.DataFrame:
     """Read in CRISPR screen data."""
     return CrisprScreenDataManager(data_file=file).get_data()
 
