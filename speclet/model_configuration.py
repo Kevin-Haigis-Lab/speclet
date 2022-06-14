@@ -30,7 +30,7 @@ class BayesianModelConfiguration(BaseModel):
     description: str
     active: bool = True
     model: BayesianModel
-    data_file: io.DataFile
+    data_file: io.DataFile | Path
     sampling_kwargs: ModelingSamplingArguments = Field(
         default_factory=ModelingSamplingArguments
     )
