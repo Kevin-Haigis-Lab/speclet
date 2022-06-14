@@ -1,6 +1,7 @@
 """Classic eight-schools example."""
 
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -21,7 +22,7 @@ class SchoolsData:
 class EightSchoolsModel:
     """Classic eight-schools example model."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Classic eight-schools example model."""
         return None
 
