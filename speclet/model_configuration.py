@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import Counter
 from pathlib import Path
+from typing import Any
 
 import yaml
 from pydantic import BaseModel, Field
@@ -31,6 +32,7 @@ class BayesianModelConfiguration(BaseModel):
     active: bool = True
     model: BayesianModel
     data_file: io.DataFile | Path
+    model_kwargs: dict[str, Any] = Field(default_factory=dict)
     sampling_kwargs: ModelingSamplingArguments = Field(
         default_factory=ModelingSamplingArguments
     )

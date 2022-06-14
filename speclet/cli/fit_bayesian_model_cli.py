@@ -103,7 +103,7 @@ def fit_bayesian_model(
     logger.info("Loading data.")
     data = _read_crispr_screen_data(config.data_file)
     logger.info("Retrieving Bayesian model object.")
-    model = get_bayesian_model(config.model)()
+    model = get_bayesian_model(config.model)(**config.model_kwargs)
 
     logger.info("Augmenting sampling kwargs (MCMC chains and cores).")
     sampling_kwargs_adj = _augment_sampling_kwargs(

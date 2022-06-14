@@ -7,9 +7,24 @@ import pandas as pd
 from pandera import Check
 
 
-def check_single_unique_value() -> Check:
-    """Pandera check that there is only a single unique value."""
-    return Check(lambda s: s.nunique() == 1)
+def check_single_unique_value(x: Any | None = None) -> Check:
+    """Pandera check that there is only a single unique value.
+
+    Args:
+        x (Any | None, optional): Expected value. Defaults to None.
+
+    Returns:
+        Check: Pandera checker.
+    """
+
+    def _check_fxn(s: pd.Series) -> bool:
+        if s.nunique() != 1:
+            return False
+        if x is not None:
+            return s.unique()[0] == x
+        return True
+
+    return Check(_check_fxn)
 
 
 def check_nonnegative(nullable: bool = False) -> Check:

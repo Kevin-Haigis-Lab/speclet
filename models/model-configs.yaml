@@ -97,6 +97,8 @@
   active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: DEPMAP_CRC_SUBSAMPLE
+  model_kwargs:
+    lineage: "colorectal"
   sampling_kwargs:
     pymc_numpyro:
       draws: 2000
@@ -118,6 +120,8 @@
   active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: DEPMAP_CRC
+  model_kwargs:
+    lineage: "colorectal"
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
