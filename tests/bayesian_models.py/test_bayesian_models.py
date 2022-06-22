@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 import arviz as az
 import pandas as pd
@@ -22,12 +23,20 @@ def _modify_for_single_lineage(crispr_df: pd.DataFrame) -> pd.DataFrame:
     return crispr_df
 
 
+def _model_kwargs(model: bayes.BayesianModel) -> dict[str, Any]:
+    if model is bayes.BayesianModel.LINEAGE_HIERARCHICAL_NB:
+        return {"lineage": "colorectal"}
+    return {}
+
+
 @pytest.mark.slow
 @pytest.mark.parametrize("bayesian_model", bayes.BayesianModel)
 def test_all_bayesian_pymc_models_build(
     bayesian_model: bayes.BayesianModel, valid_crispr_data: pd.DataFrame
 ) -> None:
-    model_obj = bayes.get_bayesian_model(bayesian_model)()
+    model_obj = bayes.get_bayesian_model(bayesian_model)(
+        **_model_kwargs(bayesian_model)
+    )
     if bayesian_model is bayes.BayesianModel.LINEAGE_HIERARCHICAL_NB:
         valid_crispr_data = _modify_for_single_lineage(valid_crispr_data)
     pymc_model = model_obj.pymc_model(data=valid_crispr_data)
@@ -43,7 +52,9 @@ def test_all_bayesian_models_sample(
     method: ModelFitMethod,
     valid_crispr_data: pd.DataFrame,
 ) -> None:
-    model_obj = bayes.get_bayesian_model(bayesian_model)()
+    model_obj = bayes.get_bayesian_model(bayesian_model)(
+        **_model_kwargs(bayesian_model)
+    )
     n_draws = 103
 
     if bayesian_model is bayes.BayesianModel.LINEAGE_HIERARCHICAL_NB:
