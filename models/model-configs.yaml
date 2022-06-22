@@ -120,11 +120,11 @@
   data_file: DEPMAP_CRC
   sampling_kwargs:
     pymc_numpyro:
-      draws: 2000
-      tune: 700
-      target_accept: 0.99
+      draws: 1000
+      tune: 500
+      target_accept: 0.98
   slurm_resources:
     PYMC_NUMPYRO:
       mem: 150
-      time: 240
+      time: 600
       cores: 1
