@@ -30,3 +30,4 @@ snakemake \
     --cluster-config munge/munge-config.json
 
 conda deactivate
+exit 44

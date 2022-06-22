@@ -144,7 +144,7 @@ rule all:
         MODELING_DATA_DIR / "depmap_cell-line-info.csv",
         MODELING_DATA_DIR / "depmap_num-lines-per-lineage.csv",
         # check_lineage_data_files
-        MODELING_DATA_DIR / "lineage-modeling-data" / "lineage-data-files-check.touch",
+        MODELING_DATA_DIR / "lineage-data-files-check.touch",
         # rules.modeling_data_subsets.output
         MODELING_DATA_DIR / "depmap-modeling-data_crc.csv",
         MODELING_DATA_DIR / "depmap-modeling-data_crc-subsample.csv",
@@ -472,7 +472,7 @@ rule check_depmap_modeling_data:
 # --- Generate additional useful files ---
 
 
-checkpoint cell_line_info:
+rule cell_line_info:
     input:
         modeling_df=rules.combine_data.output.out_file,
     output:
@@ -487,7 +487,7 @@ checkpoint data_per_lineage:
         cell_line_info=rules.cell_line_info.output.cell_line_info,
         modeling_df=rules.combine_data.output.out_file,
     params:
-        file_name_template="depmap-modeling-data_{lineage}.csv",
+        file_name_template="depmap-modeling-data_::lineage::.csv",
     output:
         split_lineage_dir=directory(MODELING_DATA_DIR / "lineage-modeling-data"),
     script:
@@ -495,25 +495,23 @@ checkpoint data_per_lineage:
 
 
 def aggregate_lineage_data_files(wildcards):
-    lineages_file = checkpoints.cell_line_info.get().output.num_lines_per_lineage
-    lineages = pd.read_csv(lineages_file)["lineage"]
-    target = str(
-        MODELING_DATA_DIR
-        / "lineage-modeling-data"
-        / "depmap-modeling-data_{lineage}.csv"
-    )
-    return expand(target_dir, lineage=lineages)
+    # lineages_file = checkpoints.cell_line_info.get().output.num_lines_per_lineage
+    # lineages = pd.read_csv(lineages_file)["lineage"]
+    checkpoint_output = checkpoints.data_per_lineage.get(**wildcards).output[0]
+    # target = str(
+    #    MODELING_DATA_DIR
+    #    / "lineage-modeling-data"
+    #    / "depmap-modeling-data_{lineage}.csv"
+    # )
+    # return expand(target, lineage=lineages)
+    return checkpoint_output
 
 
 rule check_lineage_data_files:
     input:
         aggregate_lineage_data_files,
     output:
-        touch(
-            MODELING_DATA_DIR
-            / "lineage-modeling-data"
-            / "lineage-data-files-check.touch"
-        ),
+        touch(MODELING_DATA_DIR / "lineage-data-files-check.touch"),
     shell:
         "echo 'files checked'"
 

@@ -33,13 +33,15 @@ modeling_data <- as_tibble(modeling_data)
 
 # --- Write data per lineage ---
 
-lineages <- unqiue(modeling_data$lineage)
+lineages <- unique(modeling_data$lineage)
 
 lineage_data_file_name <- function(lineage) {
-    file.path(split_lineage_dir, glue::glue(file_name_template))
+    file.path(split_lineage_dir, glue::glue(file_name_template, .open = "::", .close = "::"))
 }
 
+
 for (lineage in lineages) {
+    print(lineage)
     modeling_data %>%
         filter(lineage == !!lineage) %>%
         write_csv(lineage_data_file_name(lineage))

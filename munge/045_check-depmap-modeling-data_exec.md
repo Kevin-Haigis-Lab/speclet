@@ -16,6 +16,10 @@ client = Client(n_workers=4, threads_per_worker=2, memory_limit="32GB")
 client
 ```
 
+    2022-06-22 14:19:38,777 - distributed.diskutils - INFO - Found stale lock file and directory '/n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-bvxablb0', purging
+    2022-06-22 14:19:38,806 - distributed.diskutils - INFO - Found stale lock file and directory '/n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-tlv8wp0b', purging
+
+
 
 
 
@@ -23,7 +27,7 @@ client
     <div style="width: 24px; height: 24px; background-color: #e1e1e1; border: 3px solid #9D9D9D; border-radius: 5px; position: absolute;"> </div>
     <div style="margin-left: 48px;">
         <h3 style="margin-bottom: 0px;">Client</h3>
-        <p style="color: #9D9D9D; margin-bottom: 0px;">Client-a0bffcc0-d460-11ec-966f-0cc47abb5ba9</p>
+        <p style="color: #9D9D9D; margin-bottom: 0px;">Client-dfe4d0ce-f257-11ec-814d-149ecf16877d</p>
         <table style="width: 100%; text-align: left;">
 
         <tr>
@@ -52,7 +56,7 @@ client
     </div>
     <div style="margin-left: 48px;">
         <h3 style="margin-bottom: 0px; margin-top: 0px;">LocalCluster</h3>
-        <p style="color: #9D9D9D; margin-bottom: 0px;">b0418a2c</p>
+        <p style="color: #9D9D9D; margin-bottom: 0px;">6467eec9</p>
         <table style="width: 100%; text-align: left;">
             <tr>
                 <td style="text-align: left;">
@@ -89,11 +93,11 @@ client
         <div style="width: 24px; height: 24px; background-color: #FFF7E5; border: 3px solid #FF6132; border-radius: 5px; position: absolute;"> </div>
         <div style="margin-left: 48px;">
             <h3 style="margin-bottom: 0px;">Scheduler</h3>
-            <p style="color: #9D9D9D; margin-bottom: 0px;">Scheduler-f16bbf05-5845-4a24-8a36-61209f07b1f7</p>
+            <p style="color: #9D9D9D; margin-bottom: 0px;">Scheduler-e7379a1d-1481-40b2-a909-d3b6be83fd8c</p>
             <table style="width: 100%; text-align: left;">
                 <tr>
                     <td style="text-align: left;">
-                        <strong>Comm:</strong> tcp://127.0.0.1:39738
+                        <strong>Comm:</strong> tcp://127.0.0.1:33892
                     </td>
                     <td style="text-align: left;">
                         <strong>Workers:</strong> 4
@@ -135,7 +139,7 @@ client
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:36028
+                            <strong>Comm: </strong> tcp://127.0.0.1:42837
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 2
@@ -143,7 +147,7 @@ client
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:37602/status" target="_blank">http://127.0.0.1:37602/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:43415/status" target="_blank">http://127.0.0.1:43415/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 29.80 GiB
@@ -151,13 +155,13 @@ client
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:46828
+                            <strong>Nanny: </strong> tcp://127.0.0.1:33033
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-yh7xum9x
+                            <strong>Local directory: </strong> /n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-91bw34nx
                         </td>
                     </tr>
 
@@ -180,7 +184,7 @@ client
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:39969
+                            <strong>Comm: </strong> tcp://127.0.0.1:46733
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 2
@@ -188,7 +192,7 @@ client
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:34959/status" target="_blank">http://127.0.0.1:34959/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:45956/status" target="_blank">http://127.0.0.1:45956/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 29.80 GiB
@@ -196,13 +200,13 @@ client
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:42595
+                            <strong>Nanny: </strong> tcp://127.0.0.1:41014
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-_oq0d05k
+                            <strong>Local directory: </strong> /n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-f1t_hati
                         </td>
                     </tr>
 
@@ -225,7 +229,7 @@ client
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:34284
+                            <strong>Comm: </strong> tcp://127.0.0.1:36788
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 2
@@ -233,7 +237,7 @@ client
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:33028/status" target="_blank">http://127.0.0.1:33028/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:35840/status" target="_blank">http://127.0.0.1:35840/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 29.80 GiB
@@ -241,13 +245,13 @@ client
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:38905
+                            <strong>Nanny: </strong> tcp://127.0.0.1:38395
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-45idy0hx
+                            <strong>Local directory: </strong> /n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-o986ch3t
                         </td>
                     </tr>
 
@@ -270,7 +274,7 @@ client
                 <table style="width: 100%; text-align: left;">
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Comm: </strong> tcp://127.0.0.1:38011
+                            <strong>Comm: </strong> tcp://127.0.0.1:34655
                         </td>
                         <td style="text-align: left;">
                             <strong>Total threads: </strong> 2
@@ -278,7 +282,7 @@ client
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:35466/status" target="_blank">http://127.0.0.1:35466/status</a>
+                            <strong>Dashboard: </strong> <a href="http://127.0.0.1:38084/status" target="_blank">http://127.0.0.1:38084/status</a>
                         </td>
                         <td style="text-align: left;">
                             <strong>Memory: </strong> 29.80 GiB
@@ -286,13 +290,13 @@ client
                     </tr>
                     <tr>
                         <td style="text-align: left;">
-                            <strong>Nanny: </strong> tcp://127.0.0.1:33823
+                            <strong>Nanny: </strong> tcp://127.0.0.1:39735
                         </td>
                         <td style="text-align: left;"></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left;">
-                            <strong>Local directory: </strong> /n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-t03_79ea
+                            <strong>Local directory: </strong> /n/data1/hms/dbmi/park/Cook/speclet/munge/dask-worker-space/worker-ams7d6y9
                         </td>
                     </tr>
 
@@ -989,27 +993,27 @@ if FAILED_CHECKS > 0:
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-05-15
+    Last updated: 2022-06-22
 
     Python implementation: CPython
     Python version       : 3.10.4
-    IPython version      : 8.3.0
+    IPython version      : 8.4.0
 
     Compiler    : GCC 10.3.0
     OS          : Linux
     Release     : 3.10.0-1160.45.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-229.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-152.o2.rc.hms.harvard.edu
 
-    Git branch: crc-panc-eso
+    Git branch: per-lineage
 
-    numpy : 1.22.3
-    dask  : 2022.5.0
+    dask  : 2022.6.0
     pandas: 1.4.2
+    numpy : 1.22.4
 
 
 
