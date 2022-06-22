@@ -1,7 +1,7 @@
 """Organization of the Bayesian model classes."""
 
 from enum import Enum, unique
-from typing import Final, Protocol
+from typing import Any, Final, Protocol
 
 import pandas as pd
 import pymc as pm
@@ -29,6 +29,13 @@ class BayesianModel(Enum):
 
 class BayesianModelProtocol(Protocol):
     """Protocol for Bayesian model objects."""
+
+    def __init__(self, **kwargs: Any) -> None:
+        """Initialize with keyword-only arguments.
+
+        Best practice is to pass this datainto a Pydantic configuration model.
+        """
+        ...
 
     def vars_regex(self, fit_method: ModelFitMethod | None = None) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""

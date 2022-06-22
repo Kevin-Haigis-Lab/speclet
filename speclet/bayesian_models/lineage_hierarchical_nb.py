@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from itertools import product
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -11,6 +12,7 @@ import pymc.math as pmmath
 from aesara import tensor as at
 from aesara.tensor.random.op import RandomVariable
 from pandera import Check, Column, DataFrameSchema
+from pydantic import BaseModel
 
 from speclet.data_processing.common import get_cats
 from speclet.data_processing.crispr import (
@@ -60,13 +62,26 @@ class LineageHierNegBinomModelData:
     coords: dict[str, list[str]]
 
 
+class LineageHierNegBinomModelConfig(BaseModel):
+    """Single-lineage hierarchical negative binominal model configuration."""
+
+    lineage: str
+
+
 class LineageHierNegBinomModel:
     """A hierarchical negative binomial generalized linear model fora single lineage."""
 
-    def __init__(self, lineage: str = "colorectal") -> None:
-        """Create a negative binomial Bayesian model object."""
-        logger.warning("Colorectal set at the default lineage for now.")
-        self.lineage = lineage
+    def __init__(self, **kwargs: Any) -> None:
+        """Single-lineage hierarchical negative binominal model.
+
+        All keyword-arguments are passed into a configuration pydantic model for
+        data validation.
+
+        Args:
+            lineage (str): Lineage to model.
+        """
+        self._config = LineageHierNegBinomModelConfig(**kwargs)
+        self.lineage = self._config.lineage
         return None
 
     @property
@@ -92,7 +107,9 @@ class LineageHierNegBinomModel:
                     ],
                 ),
                 "depmap_id": Column("category"),
-                "lineage": Column("category", checks=[check_single_unique_value()]),
+                "lineage": Column(
+                    "category", checks=[check_single_unique_value(self.lineage)]
+                ),
                 "copy_number": Column(
                     float, checks=[check_nonnegative(), check_finite()]
                 ),

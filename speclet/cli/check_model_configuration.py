@@ -44,7 +44,7 @@ def check_model_configuration(path: Path | None = None) -> None:
     secho("Checking all models can be instantiated and configured...")
     for config in configs.configurations:
         secho(f"  {config.name}", fg=colors.BRIGHT_BLACK)
-        _ = get_bayesian_model(config.model)()
+        _ = get_bayesian_model(config.model)(**config.model_kwargs)
 
     secho("All models can be instantiated and configured: ✔︎", fg=colors.GREEN)
 

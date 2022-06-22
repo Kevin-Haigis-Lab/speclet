@@ -1,6 +1,7 @@
 """A hierarchical negative binomial model with a second tier."""
 
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -42,7 +43,7 @@ class NegativeBinomialModelData:
 class HierarchcalNegativeBinomialSecondTier:
     """A hierarchical negative binomial model with a second tier."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Create a negative binomial Bayesian model object."""
         return None
 
