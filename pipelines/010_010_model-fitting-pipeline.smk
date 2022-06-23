@@ -130,6 +130,8 @@ rule sample_pymc_mcmc:
         "  --mcmc-chains 1"
         "  --mcmc-cores 1"
         "  --cache-name {params.cache_name}"
+        "  --seed {wildcards.chain}"
+        "  --broad-only"
 
 
 rule combine_pymc_mcmc:
@@ -184,6 +186,8 @@ rule sample_pymc_numpyro:
         "  --mcmc-chains 1"
         "  --mcmc-cores 1"
         "  --cache-name {params.cache_name}"
+        "  --seed {wildcards.chain}"
+        "  --broad-only"
 
 
 rule combine_pymc_numpyro:
@@ -235,6 +239,8 @@ rule sample_pymc_advi:
         "  PYMC_ADVI"
         "  {params.cache_dir}"
         "  --mcmc-cores 1"
+        "  --seed {wildcards.chain}"
+        "  --broad-only"
 
 
 # --- Summaries ---

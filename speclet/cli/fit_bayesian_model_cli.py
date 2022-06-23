@@ -15,7 +15,7 @@ from speclet.bayesian_models import get_bayesian_model
 from speclet.cli import cli_helpers
 from speclet.loggers import logger
 from speclet.managers.cache_manager import cache_posterior, get_posterior_cache_name
-from speclet.managers.data_managers import CrisprScreenDataManager
+from speclet.managers.data_managers import CrisprScreenDataManager, data_transformation
 from speclet.model_configuration import ModelingSamplingArguments
 from speclet.modeling.fitting_arguments import (
     PymcSampleArguments,
@@ -35,9 +35,18 @@ app = Typer()
 # ---- Helpers ----
 
 
-def _read_crispr_screen_data(file: io.DataFile | Path) -> pd.DataFrame:
+def _broad_only(df: pd.DataFrame) -> pd.DataFrame:
+    return df[df["screen"] == "broad"].reset_index(drop=True)
+
+
+def _read_crispr_screen_data(
+    file: io.DataFile | Path, broad_only: bool
+) -> pd.DataFrame:
     """Read in CRISPR screen data."""
-    return CrisprScreenDataManager(data_file=file).get_data()
+    trans: list[data_transformation] = []
+    if broad_only:
+        trans = [_broad_only]
+    return CrisprScreenDataManager(data_file=file, transformations=trans).get_data()
 
 
 def _augment_sampling_kwargs(
@@ -77,6 +86,7 @@ def fit_bayesian_model(
     mcmc_cores: int = 4,
     cache_name: str | None = None,
     seed: int | None = None,
+    broad_only: bool = False,
 ) -> None:
     """Sample a Bayesian model.
 
@@ -93,6 +103,8 @@ def fit_bayesian_model(
         cache_name (Optional[str], optional): A specific name to use for the posterior
         cache ID. Defaults to None which results in using the `name` for the cache name.
         seed (Optional[int], optional): Random seed for models. Defaults to `None`.
+        broad_only (bool, optional): Only include Broad screen data. Defaults to
+        `False` to include all data.
     """
     tic = time()
     logger.info("Reading model configuration.")
@@ -101,7 +113,7 @@ def fit_bayesian_model(
     )
     assert config is not None
     logger.info("Loading data.")
-    data = _read_crispr_screen_data(config.data_file)
+    data = _read_crispr_screen_data(config.data_file, broad_only=broad_only)
     logger.info("Retrieving Bayesian model object.")
     model = get_bayesian_model(config.model)(**config.model_kwargs)
 
