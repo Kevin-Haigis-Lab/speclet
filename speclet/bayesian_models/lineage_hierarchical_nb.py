@@ -37,6 +37,18 @@ from speclet.managers.data_managers import LineageGeneMap
 from speclet.project_enums import ModelFitMethod
 
 
+class TooFewGenes(BaseException):
+    """Too few genes."""
+
+    ...
+
+
+class TooFewCellLines(BaseException):
+    """Too few cell lines."""
+
+    ...
+
+
 @dataclass
 class LineageHierNegBinomModelData:
     """Data for `LineageHierNegBinomModel`."""
@@ -278,9 +290,6 @@ class LineageHierNegBinomModel:
         Returns:
             pm.Model: PyMC model.
         """
-        logger.warning("Filtering for data from the Broad only.")
-        data = data.query("screen == 'broad'").reset_index(drop=True)
-
         if not skip_data_processing:
             data = self.data_processing_pipeline(data)
         model_data = self.make_data_structure(data)
@@ -303,6 +312,11 @@ class LineageHierNegBinomModel:
         n_G = model_data.G
         n_CG = model_data.CG
         n_gene_vars = 4 + n_CG
+
+        if n_G < 2:
+            raise TooFewGenes(n_G)
+        if n_C < 2:
+            raise TooFewCellLines(n_C)
 
         def _sigma_dist(name: str) -> RandomVariable:
             return pm.HalfNormal(name, 1)
