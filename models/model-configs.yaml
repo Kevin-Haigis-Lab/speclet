@@ -110,16 +110,14 @@
       time: 8
       cores: 1
 
-- name: hnb-single-lineage-CRC
+- name: hnb-single-lineage-colorectal
   description: "
-    An experimental run of the new 'single lineage' hierarchical GLM model. This model
-    will run on the CRC data set and only on data from the Broad.
-
-    Only running this model with the Numpyro JAX backend.
+    Single lineage hierarchical negative binomial model for colorectal data from the
+    Broad. Only running this model with the Numpyro JAX backend.
   "
   active: true
   model: LINEAGE_HIERARCHICAL_NB
-  data_file: DEPMAP_CRC
+  data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_colorectal.csv"
   model_kwargs:
     lineage: "colorectal"
   sampling_kwargs:
@@ -130,5 +128,50 @@
   slurm_resources:
     PYMC_NUMPYRO:
       mem: 150
-      time: 600
+      time: 650
+      cores: 1
+
+
+- name: hnb-single-lineage-liver
+  description: "
+    Single lineage hierarchical negative binomial model for liver data from the
+    Broad. Only running this model with the Numpyro JAX backend.
+  "
+  active: true
+  model: LINEAGE_HIERARCHICAL_NB
+  data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_liver.csv"
+  model_kwargs:
+    lineage: "liver"
+  sampling_kwargs:
+    pymc_numpyro:
+      draws: 1000
+      tune: 500
+      target_accept: 0.98
+  slurm_resources:
+    PYMC_NUMPYRO:
+      mem: 100
+      time: 300
+      cores: 1
+
+
+
+- name: hnb-single-lineage-prostate
+  description: "
+    Single lineage hierarchical negative binomial model for prostate data from the
+    Broad. Only running this model with the Numpyro JAX backend.
+  "
+  active: true
+  model: LINEAGE_HIERARCHICAL_NB
+  data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_prostate.csv"
+  model_kwargs:
+    lineage: "prostate"
+  sampling_kwargs:
+    pymc_numpyro:
+      draws: 1000
+      tune: 500
+      target_accept: 0.98
+  slurm_resources:
+    PYMC_NUMPYRO:
+      mem: 100
+      time: 300
       cores: 1

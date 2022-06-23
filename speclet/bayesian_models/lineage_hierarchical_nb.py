@@ -313,6 +313,14 @@ class LineageHierNegBinomModel:
         n_CG = model_data.CG
         n_gene_vars = 4 + n_CG
 
+        logger.info(f"Lineage: {self.lineage}")
+        logger.info(f"Number of genes: {model_data.G}")
+        logger.info(f"Number of sgRNA: {model_data.S}")
+        logger.info(f"Number of cell lines: {model_data.C}")
+        logger.info(f"Number of cancer genes: {model_data.CG}")
+        logger.info(f"Number of screens: {model_data.SC}")
+        logger.info(f"Number of data points: {model_data.N}")
+
         if n_G < 2:
             raise TooFewGenes(n_G)
         if n_C < 2:
