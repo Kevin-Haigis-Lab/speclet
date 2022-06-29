@@ -162,7 +162,7 @@ def summarize_posterior(
         cache_name = get_posterior_cache_name(model_name=name, fit_method=fit_method)
 
     logger.info("Retrieving Bayesian model object.")
-    model = get_bayesian_model(config.model)()
+    model = get_bayesian_model(config.model)(**config.model_kwargs)
 
     logger.info("Reading model posterior from file.")
     trace = get_cached_posterior(id=cache_name, cache_dir=cache_dir)

@@ -66,7 +66,7 @@ ROOT_CACHE_DIR = ""
 
 ```python
 # Parameters
-MODEL_NAME = "hnb-single-lineage-CRC-subsample"
+MODEL_NAME = "hnb-single-lineage-prostate"
 FIT_METHOD_STR = "PYMC_NUMPYRO"
 CONFIG_PATH = "models/model-configs.yaml"
 ROOT_CACHE_DIR = "models"
@@ -108,7 +108,7 @@ plt.show()
 
 
 
-![png](hnb-single-lineage-CRC-subsample_PYMC_NUMPYRO_files/hnb-single-lineage-CRC-subsample_PYMC_NUMPYRO_12_0.png)
+![png](hnb-single-lineage-prostate_PYMC_NUMPYRO_files/hnb-single-lineage-prostate_PYMC_NUMPYRO_12_0.png)
 
 
 
@@ -118,6 +118,10 @@ psis_loo = az.loo(trace, pointwise=True)
 psis_loo
 ```
 
+    /home/jc604/.conda/envs/speclet_smk/lib/python3.10/site-packages/arviz/stats/stats.py:1048: RuntimeWarning: overflow encountered in exp
+      weights = 1 / np.exp(len_scale - len_scale[:, None]).sum(axis=1)
+    /home/jc604/.conda/envs/speclet_smk/lib/python3.10/site-packages/numpy/core/_methods.py:48: RuntimeWarning: overflow encountered in reduce
+      return umr_sum(a, axis, dtype, out, keepdims, initial, where)
     /home/jc604/.conda/envs/speclet_smk/lib/python3.10/site-packages/arviz/stats/stats.py:812: UserWarning: Estimated shape parameter of Pareto distribution is greater than 0.7 for one or more samples. You should consider using a more robust model, this is because importance sampling is less likely to work well if the marginal posterior and LOO posterior are very different. This is more likely to happen with a non-robust model and highly influential observations.
       warnings.warn(
 
@@ -125,21 +129,21 @@ psis_loo
 
 
 
-    Computed from 8000 posterior samples and 1296 observations log-likelihood matrix.
+    Computed from 4000 posterior samples and 355310 observations log-likelihood matrix.
 
              Estimate       SE
-    elpd_loo -8658.86    44.03
-    p_loo      161.94        -
+    elpd_loo -2297042.42  2279.99
+    p_loo    64208.39        -
 
     There has been a warning during the calculation. Please check the results.
     ------
 
     Pareto k diagnostic values:
-                             Count   Pct.
-    (-Inf, 0.5]   (good)     1239   95.6%
-     (0.5, 0.7]   (ok)         47    3.6%
-       (0.7, 1]   (bad)         9    0.7%
-       (1, Inf)   (very bad)    1    0.1%
+                              Count   Pct.
+    (-Inf, 0.5]   (good)     280145   78.8%
+     (0.5, 0.7]   (ok)        14893    4.2%
+       (0.7, 1]   (bad)       15610    4.4%
+       (1, Inf)   (very bad)  44662   12.6%
 
 
 
@@ -152,7 +156,7 @@ plt.show()
 
 
 
-![png](hnb-single-lineage-CRC-subsample_PYMC_NUMPYRO_files/hnb-single-lineage-CRC-subsample_PYMC_NUMPYRO_14_0.png)
+![png](hnb-single-lineage-prostate_PYMC_NUMPYRO_files/hnb-single-lineage-prostate_PYMC_NUMPYRO_14_0.png)
 
 
 
@@ -164,7 +168,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 0.30 minutes
+    execution time: 248.20 minutes
 
 
 
@@ -191,7 +195,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Git branch: per-lineage
 
-    logging   : 0.5.1.2
     arviz     : 0.12.1
+    logging   : 0.5.1.2
     speclet   : 0.0.9000
     matplotlib: 3.5.2
