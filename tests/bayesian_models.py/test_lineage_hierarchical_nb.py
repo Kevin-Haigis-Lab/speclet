@@ -19,7 +19,6 @@ def crc_lhnb_model() -> LHNBModel:
     return LHNBModel(lineage="colorectal")
 
 
-@pytest.mark.DEV
 def test_adjusting_to_number_of_screens(
     crc_data: pd.DataFrame, crc_lhnb_model: LHNBModel
 ) -> None:
@@ -40,7 +39,6 @@ def test_adjusting_to_number_of_screens(
     return None
 
 
-@pytest.mark.DEV
 def test_raise_error_only_one_cell_line(
     crc_data: pd.DataFrame, crc_lhnb_model: LHNBModel
 ) -> None:
@@ -50,7 +48,6 @@ def test_raise_error_only_one_cell_line(
     return None
 
 
-@pytest.mark.DEV
 def test_raise_error_only_one_gene(
     crc_data: pd.DataFrame, crc_lhnb_model: LHNBModel
 ) -> None:

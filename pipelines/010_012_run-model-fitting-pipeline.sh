@@ -18,7 +18,6 @@ source "$HOME/.bashrc"
 conda activate speclet_smk
 
 SNAKEFILE="pipelines/010_010_model-fitting-pipeline.smk"
-# ENV_PATH="pipelines/default_conda.yaml"
 
 snakemake \
     --snakefile $SNAKEFILE \

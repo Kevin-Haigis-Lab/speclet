@@ -46,7 +46,9 @@ def _read_crispr_screen_data(
     trans: list[data_transformation] = []
     if broad_only:
         trans = [_broad_only]
-    return CrisprScreenDataManager(data_file=file, transformations=trans).get_data()
+    return CrisprScreenDataManager(data_file=file, transformations=trans).get_data(
+        read_kwargs={"low_memory": False}
+    )
 
 
 def _augment_sampling_kwargs(
