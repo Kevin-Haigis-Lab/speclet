@@ -3,7 +3,7 @@
 import math
 from enum import Enum, unique
 from random import choices
-from typing import Any, Optional, Union
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -49,7 +49,7 @@ class SelectionMethod(str, Enum):
 
 
 def select_n_elements_from_l(
-    n: int, list: Union[list[Any], np.ndarray], method: Union[SelectionMethod, str]
+    n: int, list: list[Any] | np.ndarray, method: SelectionMethod | str
 ) -> np.ndarray:
     """Select `n` elements from a collection `l` using a specified method.
 
@@ -91,7 +91,7 @@ def select_n_elements_from_l(
 
 
 def generate_mock_cell_line_information(
-    genes: Union[list[str], np.ndarray],
+    genes: list[str] | np.ndarray,
     n_cell_lines: int,
     n_lineages: int,
     n_batches: int,
@@ -214,7 +214,7 @@ def generate_mock_achilles_categorical_groups(
 
 
 def _make_mock_grouped_copy(
-    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]]
+    mock_df: pd.DataFrame, grouping_cols: list[str] | None
 ) -> pd.DataFrame:
     df_copy = mock_df.copy()
     if grouping_cols is not None:
@@ -223,7 +223,7 @@ def _make_mock_grouped_copy(
 
 
 def _merge_mock_and_grouped_copy(
-    mock_df: pd.DataFrame, df_copy: pd.DataFrame, grouping_cols: Optional[list[str]]
+    mock_df: pd.DataFrame, df_copy: pd.DataFrame, grouping_cols: list[str] | None
 ) -> pd.DataFrame:
     if grouping_cols is not None:
         return mock_df.merge(df_copy, left_index=False, right_index=False)
@@ -231,7 +231,7 @@ def _merge_mock_and_grouped_copy(
 
 
 def add_mock_copynumber_data(
-    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]] = None
+    mock_df: pd.DataFrame, grouping_cols: list[str] | None = None
 ) -> pd.DataFrame:
     """Add mock copy number data to mock Achilles data.
 
@@ -260,8 +260,8 @@ def add_mock_copynumber_data(
 
 def add_mock_rna_expression_data(
     mock_df: pd.DataFrame,
-    grouping_cols: Optional[list[str]] = None,
-    subgroups: Optional[list[str]] = None,
+    grouping_cols: list[str] | None = None,
+    subgroups: list[str] | None = None,
 ) -> pd.DataFrame:
     """Add fake RNA expression data to a mock Achilles data frame.
 
@@ -305,7 +305,7 @@ def add_mock_rna_expression_data(
 
 
 def add_mock_is_mutated_data(
-    mock_df: pd.DataFrame, grouping_cols: Optional[list[str]] = None, prob: float = 0.01
+    mock_df: pd.DataFrame, grouping_cols: list[str] | None = None, prob: float = 0.01
 ) -> pd.DataFrame:
     """Add a mutation column to mock Achilles data.
 

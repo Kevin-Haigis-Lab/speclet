@@ -1,10 +1,30 @@
 """Custom data validation checks and processes."""
 
-from typing import Any, Union
+from typing import Any
 
 import numpy as np
 import pandas as pd
 from pandera import Check
+
+
+def check_single_unique_value(x: Any | None = None) -> Check:
+    """Pandera check that there is only a single unique value.
+
+    Args:
+        x (Any | None, optional): Expected value. Defaults to None.
+
+    Returns:
+        Check: Pandera checker.
+    """
+
+    def _check_fxn(s: pd.Series) -> bool:
+        if s.nunique() != 1:
+            return False
+        if x is not None:
+            return s.unique()[0] == x
+        return True
+
+    return Check(_check_fxn)
 
 
 def check_nonnegative(nullable: bool = False) -> Check:
@@ -28,7 +48,7 @@ def check_between(a: float, b: float) -> Check:
     return Check(lambda x: (a <= x) * (x <= b))
 
 
-def check_unique_groups(grps: dict[Any, pd.Series]) -> Union[bool, pd.Series]:
+def check_unique_groups(grps: dict[Any, pd.Series]) -> bool | pd.Series:
     """Check that all values in a group are the same.
 
     This pandera check should be used with the `groupby=` option.

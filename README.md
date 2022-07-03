@@ -51,13 +51,14 @@ On O2, because I don't have control over the `base` conda environment, I follow 
 
 ```bash
 conda create -n speclet -c conda-forge python=3.10.4 mamba
-conda activate speclet
-mamba env update --name speclet --file conda.yaml
+conda activate speclet && mamba env update --name speclet --file conda.yaml
 ```
+
+In addition to that fun, there is also a problem with installing Python 3.10 on the installed version of conda, so I find I need to instead install 3.9 and then let the mamba install step update it.
 
 ### R environment
 
-The ['renv']() package is used to manage the R packages.
+The ['renv'](https://rstudio.github.io/renv/) package is used to manage the R packages.
 R is only used for data processing in this project.
 The environment can be setup in multiple ways.
 The first is by entering R and following the prompts to install the necessary packages.

@@ -1,7 +1,7 @@
 """Classic eight-schools example."""
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -22,11 +22,11 @@ class SchoolsData:
 class EightSchoolsModel:
     """Classic eight-schools example model."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Classic eight-schools example model."""
         return None
 
-    def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
+    def vars_regex(self, fit_method: ModelFitMethod | None = None) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
         return [r".*"]
 
@@ -40,7 +40,6 @@ class EightSchoolsModel:
     def pymc_model(
         self,
         data: pd.DataFrame,
-        seed: Optional[int] = None,
         skip_data_processing: bool = False,
     ) -> pm.Model:
         """PyMC3  model for a simple negative binomial model.
@@ -56,7 +55,7 @@ class EightSchoolsModel:
             pm.Model: PyMC3 model.
         """
         school_data = self.schools_data
-        with pm.Model(rng_seeder=seed) as model:
+        with pm.Model() as model:
             mu = pm.Normal("mu", 0, 5)
             tau = pm.HalfCauchy("tau", 5)
             theta_tilde = pm.Normal("eta", 0, 1)

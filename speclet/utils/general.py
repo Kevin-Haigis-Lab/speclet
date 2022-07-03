@@ -1,12 +1,12 @@
 """General utilities."""
 
-from typing import Iterable, Optional, TypeVar
+from typing import Iterable, TypeVar
 
 _T = TypeVar("_T")
 _U = TypeVar("_U")
 
 
-def resolve_optional_kwargs(d: Optional[dict[_T, _U]]) -> dict[_T, _U]:
+def resolve_optional_kwargs(d: dict[_T, _U] | None) -> dict[_T, _U]:
     """Resolve optional dictionary to an empty dictionary instead of None.
 
     Args:

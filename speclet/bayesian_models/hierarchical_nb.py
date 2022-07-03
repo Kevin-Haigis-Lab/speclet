@@ -1,7 +1,7 @@
-"""A hierarchical negative binomial generialzed linear model."""
+"""A hierarchical negative binomial generalized linear model."""
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -33,8 +33,8 @@ from speclet.project_enums import ModelFitMethod
 
 
 @dataclass
-class HierarchcalNegBinomModelData:
-    """Data for `HierarchcalNegativeBinomialModel`."""
+class HierarchicalNegBinomModelData:
+    """Data for `HierarchicalNegativeBinomialModel`."""
 
     N: int  # total number of data points
     S: int  # number of sgRNAs
@@ -63,15 +63,15 @@ class HierarchcalNegBinomModelData:
 
 @dataclass
 class HierarchicalNegativeBinomialConfig:
-    """Configuration for `HierarchcalNegativeBinomialModel`."""
+    """Configuration for `HierarchicalNegativeBinomialModel`."""
 
     num_knots: int = 5
 
 
-class HierarchcalNegativeBinomialModel:
-    """A hierarchical negative binomial generialzed linear model."""
+class HierarchicalNegativeBinomialModel:
+    """A hierarchical negative binomial generalized linear model."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Create a negative binomial Bayesian model object."""
         self._config = HierarchicalNegativeBinomialConfig()
         return None
@@ -119,7 +119,7 @@ class HierarchcalNegativeBinomialModel:
             }
         )
 
-    def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
+    def vars_regex(self, fit_method: ModelFitMethod | None = None) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
         _vars = ["~^mu$", "~^eta$", "~^delta_.*", "~.*effect$", "~^_w$"]
         return _vars
@@ -138,7 +138,7 @@ class HierarchcalNegativeBinomialModel:
     def _model_coords(
         self,
         valid_data: pd.DataFrame,
-        cancer_genes: Optional[LineageGeneMap] = None,
+        cancer_genes: LineageGeneMap | None = None,
     ) -> dict[str, list[str]]:
         coords = {
             "sgrna": get_cats(valid_data, "sgrna"),
@@ -153,7 +153,7 @@ class HierarchcalNegativeBinomialModel:
 
         return coords
 
-    def _make_data_structure(self, data: pd.DataFrame) -> HierarchcalNegBinomModelData:
+    def _make_data_structure(self, data: pd.DataFrame) -> HierarchicalNegBinomModelData:
         indices = common_indices(data)
         batch_indices = data_batch_indices(data)
 
@@ -177,7 +177,7 @@ class HierarchcalNegativeBinomialModel:
         # Add a 3rd dimension of length 1.
         comutation_matrix = comutation_matrix[None, :, :]
 
-        return HierarchcalNegBinomModelData(
+        return HierarchicalNegBinomModelData(
             N=data.shape[0],
             S=indices.n_sgrnas,
             G=indices.n_genes,
@@ -249,7 +249,6 @@ class HierarchcalNegativeBinomialModel:
     def pymc_model(
         self,
         data: pd.DataFrame,
-        seed: Optional[int] = None,
         skip_data_processing: bool = False,
     ) -> pm.Model:
         """Hierarchical negative binomial model in PyMC.
@@ -258,7 +257,6 @@ class HierarchcalNegativeBinomialModel:
 
         Args:
             data (pd.DataFrame): Data to model.
-            seed (Optional[seed], optional): Random seed. Defaults to `None`.
             skip_data_processing (bool, optional). Skip data pre-processing step?
             Defaults to `False`.
 
@@ -291,7 +289,7 @@ class HierarchcalNegativeBinomialModel:
         def _sigma_dist(name: str) -> RandomVariable:
             return pm.HalfNormal(name, 2.5)
 
-        with pm.Model(coords=coords, rng_seeder=seed) as model:
+        with pm.Model(coords=coords) as model:
             z = pm.Normal("z", 0, 2.5, initval=0)
 
             sigma_a = _sigma_dist("sigma_a")

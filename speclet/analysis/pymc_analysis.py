@@ -1,7 +1,6 @@
 """Functions to aid in the analysis of PyMC3 models."""
 
 import re
-from typing import Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -57,7 +56,7 @@ def plot_all_priors(
 
 
 def _plot_vi_axes_limits(
-    yvals: np.ndarray, x_start: Optional[Union[int, float]]
+    yvals: np.ndarray, x_start: int | float | None
 ) -> tuple[list[int], list[float]]:
     yvals = yvals.copy()[np.isfinite(yvals)]
     x_lims: list[int] = [0, len(yvals)]
@@ -83,7 +82,7 @@ def _advi_hist_rolling_avg(df: pd.DataFrame, window: int) -> pd.DataFrame:
 def plot_vi_hist(
     approx: pm.Approximation,
     y_log: bool = False,
-    x_start: Optional[Union[int, float]] = None,
+    x_start: int | float | None = None,
     rolling_window: int = 100,
 ) -> gg.ggplot:
     """Plot the history of fitting using Variational Inference.

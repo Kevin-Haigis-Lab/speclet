@@ -1,7 +1,7 @@
 """A hierarchical negative binomial model with a second tier."""
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -43,7 +43,7 @@ class NegativeBinomialModelData:
 class HierarchcalNegativeBinomialSecondTier:
     """A hierarchical negative binomial model with a second tier."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Create a negative binomial Bayesian model object."""
         return None
 
@@ -80,7 +80,7 @@ class HierarchcalNegativeBinomialSecondTier:
             }
         )
 
-    def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
+    def vars_regex(self, fit_method: ModelFitMethod | None = None) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
         _vars = ["mu", "eta", "delta_gamma", "delta_beta", "delta_b"]
         _vars = [f"~^{v}$" for v in _vars]
@@ -139,14 +139,12 @@ class HierarchcalNegativeBinomialSecondTier:
     def pymc_model(
         self,
         data: pd.DataFrame,
-        seed: Optional[int] = None,
         skip_data_processing: bool = False,
     ) -> pm.Model:
         """Model in PyMC.
 
         Args:
             data (pd.DataFrame): Data to model.
-            seed (Optional[seed], optional): Random seed. Defaults to `None`.
             skip_data_processing (bool, optional). Skip data pre-processing step?
             Defaults to `False`.
 
@@ -160,7 +158,7 @@ class HierarchcalNegativeBinomialSecondTier:
         coords = self._model_coords(data)
         coords["one"] = ["1"]
 
-        with pm.Model(coords=coords, rng_seeder=seed) as model:
+        with pm.Model(coords=coords) as model:
 
             mu_a = pm.Normal("mu_a", 0, 5)
             sigma_a = pm.Gamma("sigma_a", 2, 0.5)

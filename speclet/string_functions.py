@@ -1,10 +1,10 @@
 """Common string handling functions."""
 
 import textwrap
-from typing import Iterable, Union
+from typing import Iterable
 
 
-def str_wrap(strings: Union[str, Iterable[str]], width: int = 80) -> Iterable[str]:
+def str_wrap(strings: str | Iterable[str], width: int = 80) -> Iterable[str]:
     """Wrap long strings to multiple lines (vectorized).
 
     Args:
@@ -21,7 +21,7 @@ def str_wrap(strings: Union[str, Iterable[str]], width: int = 80) -> Iterable[st
 
 
 def str_replace(
-    strings: Union[Iterable[str], str], pattern: str, replace_with: str = " "
+    strings: Iterable[str] | str, pattern: str, replace_with: str = " "
 ) -> Iterable[str]:
     """Replace patterns in strings (vectorized).
 

@@ -3,11 +3,13 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
+import arviz as az
 import yaml
 from dotenv import dotenv_values
 from pydantic import BaseModel
+
+from speclet.loggers import logger
 
 
 class MungeConfig(BaseModel):
@@ -44,7 +46,7 @@ class ProjectConfig(BaseModel):
     fitting_pipeline: FittingPipelineConfig
 
 
-def read_project_configuration(path: Optional[Path] = None) -> ProjectConfig:
+def read_project_configuration(path: Path | None = None) -> ProjectConfig:
     """Read the project configuration.
 
     Searches the .env for `PROJECT_CONFIG`.
@@ -57,9 +59,16 @@ def read_project_configuration(path: Optional[Path] = None) -> ProjectConfig:
     Returns:
         ProjectConfig: Project configurations broken down by project sections.
     """
+    DEFAULT_CONFIG = Path("project-config.yaml")
+    ENV_VAR = "PROJECT_CONFIG"
     if path is None:
-        if (env_config := dotenv_values().get("PROJECT_CONFIG")) is not None:
+        if (env_config := dotenv_values().get(ENV_VAR)) is not None:
             path = Path(env_config)
+        elif (env_config := os.getenv(ENV_VAR)) is not None:
+            path = Path(env_config)
+        elif DEFAULT_CONFIG.exists():
+            logger.info("Using default project configuration file.")
+            path = DEFAULT_CONFIG
         else:
             raise BaseException("Project configuration YAML file not found.")
 
@@ -113,3 +122,8 @@ def on_hms_cluster() -> bool:
     """
     env_var = "HMS_CLUSTER"
     return os.getenv(env_var) is not None
+
+
+def arviz_config() -> None:
+    """Set common ArviZ defaults."""
+    az.rcParams["stats.hdi_prob"] = get_bayesian_modeling_constants().hdi_prob

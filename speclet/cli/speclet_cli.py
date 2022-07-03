@@ -7,7 +7,6 @@ import os
 from inspect import getdoc
 from pathlib import Path
 from textwrap import dedent
-from typing import Optional
 
 import typer
 
@@ -22,7 +21,7 @@ set_console_handler_level(logging.WARNING)
 # ---- Make document with model details ----
 
 
-def _write_docstring(doc: Optional[str], file: Path) -> bool:
+def _write_docstring(doc: str | None, file: Path) -> bool:
     if doc is None:
         return False
     with open(file, "a") as f:
@@ -32,7 +31,7 @@ def _write_docstring(doc: Optional[str], file: Path) -> bool:
 
 
 @app.command()
-def model_docs(output_md: Optional[Path] = None, overwrite: bool = True) -> None:
+def model_docs(output_md: Path | None = None, overwrite: bool = True) -> None:
     """Make a document with all SpecletModel descriptions.
 
     Args:
@@ -91,8 +90,8 @@ def _count_lines_in_file(f: Path) -> int:
 
 def _recursively_count_lines_in_dir(
     dir: Path,
-    file_types: Optional[set[str]] = None,
-    ignore_dirs: Optional[set[str]] = None,
+    file_types: set[str] | None = None,
+    ignore_dirs: set[str] | None = None,
 ) -> int:
     n_lines = 0
 

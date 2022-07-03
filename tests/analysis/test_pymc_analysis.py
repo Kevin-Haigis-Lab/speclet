@@ -39,7 +39,7 @@ def mock_advi(mock_model: pm.Model) -> ADVIResults:
     with mock_model:
         approx = pm.fit(1000, callbacks=[pm.callbacks.CheckParametersConvergence()])
         trace = approx.sample(100)
-        post_pred = pm.sample_posterior_predictive(trace, samples=50, random_seed=0)
+        post_pred = pm.sample_posterior_predictive(trace, random_seed=0)
     return trace, post_pred, approx
 
 

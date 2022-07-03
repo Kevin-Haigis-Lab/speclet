@@ -1,61 +1,52 @@
+# Run test suite.
+
+name: "pytest"
+
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - master
-  # pull_request:
-  #   branches:
-  #     - master
-name: pytest
+  schedule:
+    - cron:  '0 3 * * MON'
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+defaults:
+  run:
+    shell: bash -l {0}
+
 jobs:
   pytest:
-    name: pytest suite
+    name: "pytest suite"
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v2
-      - name: Cache conda environment
-        uses: actions/cache@v2
-        env:
-          # Increase this value to reset cache if conda.yaml has not changed
-          CACHE_NUMBER: 1
-        with:
-          path: ~/conda_pkgs_dir
-          key:
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('conda.yaml') }}
-      - name: Cache pytest-testmon database
-        uses: actions/cache@v2
-        env:
-          # Increase this value to reset cache for pytest-testmon
-          CACHE_NUMBER: 2
-        with:
-          path: .testmondata
-          key:
-            ${{ runner.os }}-testmon-${{ env.CACHE_NUMBER }}
-      - name: Install conda
+
+      - name: "Install conda"
         uses: conda-incubator/setup-miniconda@v2
-        with:
-          activate-environment: speclet
-          auto-activate-base: false
-          channel-priority: strict
-          environment-file: conda.yaml
-          use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work!
-      - name: Activate conda environment
-        shell: bash -l {0}
-        run: conda activate speclet
-      - name: Describe environment
-        shell: bash -l {0}
+
+      - name: "Create and setup conda environment"
         run: |
+          conda install -n base --yes -c conda-forge mamba
+          mamba env create -f conda.yaml
+          conda activate speclet
+
+      - name: "Describe environment"
+        run: |
+          conda activate speclet
           pwd
           ls -lha
           python3 --version
           which python3
           conda env list
           conda list
-      - name: Run tests
-        shell: bash -l {0}
+
+      - name: "Run test suite"
         run: |
+          conda activate speclet
           python3 -m pytest \
             --disable-warnings \
             --force-sugar \
-            --testmon \
             tests

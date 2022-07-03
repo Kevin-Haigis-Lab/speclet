@@ -13,7 +13,7 @@ from speclet.data_processing import common as dphelp
 
 class TestNunique:
     def test_nunique_string(self) -> None:
-        assert dphelp.nunique("abc") == 1
+        assert dphelp.nunique("abc") == 3
 
     def test_nunique_list_int(self) -> None:
         assert dphelp.nunique([1, 3, 2, 1]) == 3
@@ -22,9 +22,8 @@ class TestNunique:
         assert dphelp.nunique((1, 2, 3, 1, 3)) == 3
 
     def test_nunique_dict(self) -> None:
-        with pytest.raises(ValueError):
-            d = {"a": 1, "b": 2, "c": 3}
-            dphelp.nunique(d)
+        d = {"a": 1, "b": 2, "c": 3}
+        assert dphelp.nunique(d) == 3
 
 
 #### ---- nmutations_to_binary_array ---- ####

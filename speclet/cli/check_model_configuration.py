@@ -4,7 +4,6 @@
 
 import logging
 from pathlib import Path
-from typing import Optional
 
 from typer import Typer, colors, secho
 
@@ -19,7 +18,7 @@ app = Typer()
 
 
 @app.command()
-def check_model_configuration(path: Optional[Path] = None) -> None:
+def check_model_configuration(path: Path | None = None) -> None:
     """Check a model configuration file.
 
     Performs the following checks:
@@ -45,7 +44,7 @@ def check_model_configuration(path: Optional[Path] = None) -> None:
     secho("Checking all models can be instantiated and configured...")
     for config in configs.configurations:
         secho(f"  {config.name}", fg=colors.BRIGHT_BLACK)
-        _ = get_bayesian_model(config.model)()
+        _ = get_bayesian_model(config.model)(**config.model_kwargs)
 
     secho("All models can be instantiated and configured: ✔︎", fg=colors.GREEN)
 

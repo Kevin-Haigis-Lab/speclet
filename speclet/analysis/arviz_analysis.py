@@ -2,7 +2,7 @@
 
 import datetime
 import re
-from typing import Any, Optional, Sequence, Union
+from typing import Any, Sequence
 
 import arviz as az
 import matplotlib.pyplot as plt
@@ -14,7 +14,7 @@ from xarray import Dataset
 
 
 def extract_coords_param_names(
-    post_summ: pd.DataFrame, names: list[str], col: Optional[str] = None
+    post_summ: pd.DataFrame, names: list[str], col: str | None = None
 ) -> pd.DataFrame:
     """Extract coordinates from parameter names (from ArviZ summary).
 
@@ -98,10 +98,10 @@ def _reshape_mcmc_chains_to_2d(a: np.ndarray) -> np.ndarray:
 
 def summarize_posterior_predictions(
     ppc_ary: np.ndarray,
-    hdi_prob: Optional[float] = None,
-    merge_with: Optional[pd.DataFrame] = None,
+    hdi_prob: float | None = None,
+    merge_with: pd.DataFrame | None = None,
     calc_error: bool = False,
-    observed_y: Optional[str] = None,
+    observed_y: str | None = None,
 ) -> pd.DataFrame:
     """Summarizing PyMC3 PPCs.
 
@@ -182,14 +182,13 @@ def _pretty_step_size(data: az.InferenceData, decimals: int = 3) -> list[str]:
 
 
 def get_divergences(data: az.InferenceData) -> np.ndarray:
-    """Get the number and percent of steps that were divergences of each MCMC chain.
+    """Get the divergence values of each MCMC chain.
 
     Args:
         data (az.InferenceData): Data object.
 
     Returns:
-        tuple[list[int], list[float]]: A list of the number of divergent steps and a
-        list of the percent of steps that were divergent.
+        np.ndarray: Divergence values.
     """
     return data["sample_stats"].diverging.values
 
@@ -213,17 +212,17 @@ def get_divergence_summary(data: az.InferenceData) -> tuple[list[int], list[floa
 class MCMCDescription(BaseModel):
     """Descriptive information for a MCMC."""
 
-    created: Optional[datetime.datetime]
-    duration: Optional[datetime.timedelta]
+    created: datetime.datetime | None
+    duration: datetime.timedelta | None
     n_chains: int
-    n_tuning_steps: Optional[int]
+    n_tuning_steps: int | None
     n_draws: int
     n_divergences: list[int]
     pct_divergences: list[float]
     bfmi: list[float]
-    avg_step_size: Optional[list[float]]
+    avg_step_size: list[float] | None
 
-    def _pretty_list(self, vals: Sequence[Union[int, float]], round: int = 3) -> str:
+    def _pretty_list(self, vals: Sequence[int | float], round: int = 3) -> str:
         return ", ".join(np.round(vals, round).astype(str).tolist())
 
     def __str__(self) -> str:
@@ -285,12 +284,12 @@ def describe_mcmc(
 
     # Date and duration.
     created_at = sample_stats.get("created_at")
-    duration: Optional[datetime.timedelta] = None
+    duration: datetime.timedelta | None = None
     if (duration_sec := sample_stats.get("sampling_time")) is not None:
         duration = datetime.timedelta(seconds=duration_sec)
 
     # Sampling dimensions
-    n_tuning_steps: Optional[int] = sample_stats.get("tuning_steps")
+    n_tuning_steps: int | None = sample_stats.get("tuning_steps")
     n_draws: int = len(sample_stats.draw)
     n_chains: int = len(sample_stats.chain)
 
@@ -326,7 +325,7 @@ def describe_mcmc(
 
 
 def rhat_table(
-    trace: az.InferenceData, rhat_kwargs: Optional[dict[str, Any]] = None
+    trace: az.InferenceData, rhat_kwargs: dict[str, Any] | None = None
 ) -> pd.DataFrame:
     """Get a table of R hat values.
 
@@ -348,8 +347,8 @@ def rhat_table(
 
 
 def summarize_rhat(
-    trace: Optional[az.InferenceData] = None,
-    rhat_tbl: Optional[pd.DataFrame] = None,
+    trace: az.InferenceData | None = None,
+    rhat_tbl: pd.DataFrame | None = None,
     ncol: int = 4,
     binwidth: float = 0.01,
 ) -> pd.DataFrame:

@@ -10,7 +10,6 @@ dependencies:
   - aesara
   - arviz>=0.12.0
   - black
-  - blas  # may be able to remove in next PyMC beta release
   - colorama
   - coverage
   - dask
@@ -22,9 +21,10 @@ dependencies:
   - flake8-comprehensions
   - hypothesis
   - ipython
+  - ipywidgets
   - isort
-  - jax>=0.3.0
-  - jaxlib>=0.3.0
+  - jax
+  - jaxlib
   - jupyterlab
   - jupyterlab_code_formatter
   - jupyterlab-spellchecker
@@ -49,7 +49,7 @@ dependencies:
   - pretty_errors
   - pydantic
   - pyjanitor
-  - pymc>=4.0.0b5
+  - pymc>=4.0.0
   - pytest
   - pytest-cov
   - pytest-sugar

@@ -25,7 +25,6 @@ TESTS_DIR = Path("tests")
 MUNGE_CONFIG = project_config.read_project_configuration().munge
 TEMP_DIR = MUNGE_CONFIG.temporary_directory
 
-# ENVIRONMENT_YAML = "pipeline-environment.yml"
 
 all_depmap_ids = pd.read_csv(DATA_DIR / "all-depmap-ids.csv").depmap_id.to_list()
 
@@ -83,6 +82,10 @@ def clean_sanger_cgc_input(*args: Any, **kwargs: Any) -> dict[str, Path]:
     return {"cgc_input": SANGER_COSMIC_DIR / "cancer_gene_census.csv"}
 
 
+def misc_input(*args: Any, **kwargs: Any) -> dict[str, Path]:
+    return {"unzip_complete_touch": TEMP_DIR / "unzip_score_readcounts.done"}
+
+
 # --- CI ---
 
 
@@ -104,6 +107,7 @@ if os.getenv("CI") is not None:
         tidy_depmap_input,
         tidy_score_input,
         clean_sanger_cgc_input,
+        misc_input,
     )
     for input_dict_fxn in input_dict_fxns:
         input_dict = input_dict_fxn()
@@ -138,6 +142,9 @@ rule all:
         MODELING_DATA_DIR / "depmap-modeling-data.csv",
         # cell_line_info
         MODELING_DATA_DIR / "depmap_cell-line-info.csv",
+        MODELING_DATA_DIR / "depmap_num-lines-per-lineage.csv",
+        # check_lineage_data_files
+        MODELING_DATA_DIR / "lineage-data-files-check.touch",
         # rules.modeling_data_subsets.output
         MODELING_DATA_DIR / "depmap-modeling-data_crc.csv",
         MODELING_DATA_DIR / "depmap-modeling-data_crc-subsample.csv",
@@ -236,7 +243,7 @@ rule collate_score_readcounts:
 
 rule extract_score_pdna:
     input:
-        unzip_complete_touch=Path("temp") / "unzip_score_readcounts.done",
+        unzip_complete_touch=misc_input()["unzip_complete_touch"],
         replicate_map=tidy_score_input()["score_replicate_map"],
     params:
         raw_counts_dir=str(SCORE_DIR / "Score_raw_sgrna_counts"),
@@ -418,8 +425,6 @@ rule screen_total_counts_tables:
         final_counts_table_out=MODELING_DATA_DIR
         / "depmap_replicate_total_read_counts.csv",
         pdna_table_out=MODELING_DATA_DIR / "depmap_pdna_total_read_counts.csv",
-    # conda:
-    #     ENVIRONMENT_YAML
     shell:
         "munge/065_total-read-count-tables.py"
         " {input.depmap_modeling_df}"
@@ -455,8 +460,6 @@ rule check_depmap_modeling_data:
         check_nb=rules.papermill_check_depmap_modeling_data.output.notebook,
     output:
         output_md=MUNGE_DIR / "045_check-depmap-modeling-data_exec.md",
-    # conda:
-    #     ENVIRONMENT_YAML
     version:
         "1.1"
     shell:
@@ -474,8 +477,43 @@ rule cell_line_info:
         modeling_df=rules.combine_data.output.out_file,
     output:
         cell_line_info=MODELING_DATA_DIR / "depmap_cell-line-info.csv",
+        num_lines_per_lineage=MODELING_DATA_DIR / "depmap_num-lines-per-lineage.csv",
     script:
         "057_cell-line-information.R"
+
+
+checkpoint data_per_lineage:
+    input:
+        cell_line_info=rules.cell_line_info.output.cell_line_info,
+        modeling_df=rules.combine_data.output.out_file,
+    params:
+        file_name_template="depmap-modeling-data_::lineage::.csv",
+    output:
+        split_lineage_dir=directory(MODELING_DATA_DIR / "lineage-modeling-data"),
+    script:
+        "058_split-modeling-data-per-lineage.R"
+
+
+def aggregate_lineage_data_files(wildcards):
+    # lineages_file = checkpoints.cell_line_info.get().output.num_lines_per_lineage
+    # lineages = pd.read_csv(lineages_file)["lineage"]
+    checkpoint_output = checkpoints.data_per_lineage.get(**wildcards).output[0]
+    # target = str(
+    #    MODELING_DATA_DIR
+    #    / "lineage-modeling-data"
+    #    / "depmap-modeling-data_{lineage}.csv"
+    # )
+    # return expand(target, lineage=lineages)
+    return checkpoint_output
+
+
+rule check_lineage_data_files:
+    input:
+        aggregate_lineage_data_files,
+    output:
+        touch(MODELING_DATA_DIR / "lineage-data-files-check.touch"),
+    shell:
+        "echo 'files checked'"
 
 
 rule modeling_data_subsets:
@@ -509,8 +547,6 @@ rule auxillary_data_subsets:
         crc_subset=rules.modeling_data_subsets.output.crc_subset,
     output:
         cna_sample=MODELING_DATA_DIR / "copy_number_data_samples.npy",
-    # conda:
-    #     ENVIRONMENT_YAML
     shell:
         "munge/055_auxiliary-data-files.py {input.crc_subset} {output.cna_sample}"
 

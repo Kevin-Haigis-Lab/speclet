@@ -4,7 +4,7 @@ import os
 import warnings
 from enum import Enum, unique
 from pathlib import Path
-from typing import Final, Union
+from typing import Final
 
 from dotenv import dotenv_values
 
@@ -32,6 +32,8 @@ class DataFile(Enum):
     CGC = "CGC"
     SCREEN_READ_COUNT_TOTALS = "SCREEN_READ_COUNT_TOTALS"
     PDNA_READ_COUNT_TOTALS = "PDNA_READ_COUNT_TOTALS"
+    DEPMAP_CELL_LINE_INFO = "DEPMAP_CELLLINE_INFO"
+    DEPMAP_NUM_CELL_LINES_PER_LINEAGE = "DEPMAP_NUM_LINES_PER_LINEAGE"
 
 
 _data_file_map: Final[dict[DataFile, str]] = {
@@ -54,6 +56,8 @@ _data_file_map: Final[dict[DataFile, str]] = {
     DataFile.CGC: "sanger_cancer-gene-census.csv",
     DataFile.SCREEN_READ_COUNT_TOTALS: "depmap_replicate_total_read_counts.csv",
     DataFile.PDNA_READ_COUNT_TOTALS: "depmap_pdna_total_read_counts.csv",
+    DataFile.DEPMAP_CELL_LINE_INFO: "depmap_cell-line-info.csv",
+    DataFile.DEPMAP_NUM_CELL_LINES_PER_LINEAGE: "depmap_num-lines-per-lineage.csv",
 }
 
 
@@ -97,7 +101,7 @@ def models_dir() -> Path:
     return project_root() / "models"
 
 
-def data_path(to: Union[str, DataFile]) -> Path:
+def data_path(to: str | DataFile) -> Path:
     """Path a to a data file.
 
     Args:

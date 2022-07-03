@@ -1,7 +1,7 @@
 """Simple negative binomial model."""
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -29,7 +29,7 @@ class NegBinomModelData:
 class NegativeBinomialModel:
     """Negative binomial generalized linear model."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Create a negative binomial Bayesian model object."""
         return None
 
@@ -50,7 +50,7 @@ class NegativeBinomialModel:
             }
         )
 
-    def vars_regex(self, fit_method: ModelFitMethod) -> list[str]:
+    def vars_regex(self, fit_method: ModelFitMethod | None = None) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
         _vars = ["~^mu$"]
         return _vars
@@ -85,14 +85,12 @@ class NegativeBinomialModel:
     def pymc_model(
         self,
         data: pd.DataFrame,
-        seed: Optional[int] = None,
         skip_data_processing: bool = False,
     ) -> pm.Model:
         """Simple negative binomial model in PyMC.
 
         Args:
             data (pd.DataFrame): Data to model.
-            seed (Optional[seed], optional): Random seed. Defaults to `None`.
             skip_data_processing (bool, optional). Skip data pre-processing step?
             Defaults to `False`.
 
@@ -105,7 +103,7 @@ class NegativeBinomialModel:
         else:
             model_data = self._make_data_structure(data)
 
-        with pm.Model(rng_seeder=seed) as model:
+        with pm.Model() as model:
             beta = pm.Normal("beta", 0, 5)
             eta = pm.Deterministic("eta", beta)
             mu = pm.Deterministic("mu", pmmath.exp(eta))

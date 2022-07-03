@@ -68,6 +68,8 @@ class CrisprScreenDataManager:
         if self.data_file.suffix not in SUPPORTED_DATA_FILES:
             raise UnsupportedDataFileType(self.data_file.suffix)
 
+        return None
+
     # ---- Properties ----
 
     @property
@@ -336,13 +338,13 @@ class CancerGeneDataManager:
         return None
 
     def _read_cancer_gene_dict(self, json_path: Path) -> LineageSubtypeGeneMap:
-        with open(json_path, "r") as json_file:
+        with open(json_path) as json_file:
             lineage_genes = json.load(json_file)
 
-        for lineage, sublineage_genes in lineage_genes.items():
+        for sublineage_genes in lineage_genes.values():
             for sublineage, genes in sublineage_genes.items():
                 if isinstance(genes, str):
-                    sublineage_genes[sublineage] = set([genes])
+                    sublineage_genes[sublineage] = {genes}
                 elif isinstance(genes, list):
                     sublineage_genes[sublineage] = set(genes)
         return lineage_genes

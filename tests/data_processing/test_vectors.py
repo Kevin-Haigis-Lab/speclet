@@ -31,7 +31,6 @@ def test_squish(val: float, lower_bound: float, upper_bound: float) -> None:
     assert lower_bound <= squished_val <= upper_bound
 
 
-@pytest.mark.DEV
 @given(my_arrays(), st.floats(allow_nan=False), st.floats(allow_nan=False))
 def test_squish_array(ary: np.ndarray, lower_bound: float, upper_bound: float) -> None:
     assume(lower_bound < upper_bound)

@@ -4,7 +4,7 @@ import os
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 from dask.distributed import Client
 
@@ -12,7 +12,7 @@ import speclet.utils.dask
 
 
 @contextmanager
-def set_directory(path: Union[Path, str]) -> Generator[None, None, None]:
+def set_directory(path: Path | str) -> Generator[None, None, None]:
     """Set the current working directory within the context.
 
     Source:

@@ -3,7 +3,7 @@
 """Functions for modifying the everyday pandas DataFrame."""
 
 import warnings
-from typing import Any, Collection, Optional, Union
+from typing import Any, Collection
 
 import janitor  # noqa: F401
 import numpy as np
@@ -108,19 +108,16 @@ def nunique(x: Collection[Any]) -> int:
     Args:
         x (Collection[Any]): The collection of items.
 
-    Raises:
-        ValueError: Cannot return number of unique values in a dictionary.
-
     Returns:
         int: The number of unique items in the input.
     """
     if isinstance(x, dict):
-        raise ValueError("Cannot count the number of unique values in a dict.")
+        return len(x)
     return len(set(x))
 
 
 def center_column_grouped_dataframe(
-    df: pd.DataFrame, grp_col: Union[str, list[str]], val_col: str, new_col_name: str
+    df: pd.DataFrame, grp_col: str | list[str], val_col: str, new_col_name: str
 ) -> pd.DataFrame:
     """Center the values of a column after grouping by another.
 
@@ -184,8 +181,8 @@ def dataframe_to_matrix(
 def head_tail(
     df: pd.DataFrame,
     n: int = 10,
-    n_head: Optional[int] = None,
-    n_tail: Optional[int] = None,
+    n_head: int | None = None,
+    n_tail: int | None = None,
 ) -> pd.DataFrame:
     """Get the 'head' and 'tail' of a data frame.
 
