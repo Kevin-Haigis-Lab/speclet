@@ -36,6 +36,8 @@ from speclet.managers.data_managers import CancerGeneDataManager as CancerGeneDM
 from speclet.managers.data_managers import LineageGeneMap
 from speclet.project_enums import ModelFitMethod
 
+# import bambi as bmb
+
 
 class TooFewGenes(BaseException):
     """Too few genes."""
@@ -59,10 +61,11 @@ class LineageHierNegBinomModelData:
     C: int  # number of cell lines
     SC: int  # number of screens
     CG: int  # number of cancer genes
-    ct_initial: npt.NDArray[np.int32]
-    ct_final: npt.NDArray[np.float32]
+    ct_initial: npt.NDArray[np.float32]
+    ct_final: npt.NDArray[np.int32]
     sgrna_idx: npt.NDArray[np.int32]
     gene_idx: npt.NDArray[np.int32]
+    sgrna_to_gene_idx: npt.NDArray[np.int32]
     cellline_idx: npt.NDArray[np.int32]
     screen_idx: npt.NDArray[np.int32]
     copy_number: npt.NDArray[np.float32]
@@ -217,10 +220,11 @@ class LineageHierNegBinomModel:
             C=indices.n_celllines,
             SC=batch_indices.n_screens,
             CG=len(cancer_genes),
-            ct_initial=data.counts_initial_adj.values.astype(np.int32),
+            ct_initial=data.counts_initial_adj.values.astype(np.float32),
             ct_final=data.counts_final.values.astype(np.int32),
             sgrna_idx=indices.sgrna_idx.astype(np.int32),
             gene_idx=indices.gene_idx.astype(np.int32),
+            sgrna_to_gene_idx=indices.sgrna_to_gene_idx.astype(np.int32),
             cellline_idx=indices.cellline_idx.astype(np.int32),
             screen_idx=batch_indices.screen_idx.astype(np.int32),
             copy_number=data.copy_number.values.astype(np.float32),
@@ -275,6 +279,21 @@ class LineageHierNegBinomModel:
             .pipe(self.validate_data)
         )
 
+    def _pre_model_messages(self, model_data: LineageHierNegBinomModelData) -> None:
+        logger.info(f"Lineage: {self.lineage}")
+        logger.info(f"Number of genes: {model_data.G}")
+        logger.info(f"Number of sgRNA: {model_data.S}")
+        logger.info(f"Number of cell lines: {model_data.C}")
+        logger.info(f"Number of cancer genes: {model_data.CG}")
+        logger.info(f"Number of screens: {model_data.SC}")
+        logger.info(f"Number of data points: {model_data.N}")
+
+        if model_data.G < 2:
+            raise TooFewGenes(model_data.G)
+        if model_data.C < 2:
+            raise TooFewCellLines(model_data.C)
+        return None
+
     def pymc_model(
         self,
         data: pd.DataFrame,
@@ -293,6 +312,7 @@ class LineageHierNegBinomModel:
         if not skip_data_processing:
             data = self.data_processing_pipeline(data)
         model_data = self.make_data_structure(data)
+        self._pre_model_messages(model_data)
 
         # Multi-dimensional parameter coordinates (labels).
         coords = model_data.coords
@@ -300,7 +320,9 @@ class LineageHierNegBinomModel:
         s = model_data.sgrna_idx
         c = model_data.cellline_idx
         g = model_data.gene_idx
-        s = model_data.screen_idx
+        s_to_g = model_data.sgrna_to_gene_idx
+        sc = model_data.screen_idx
+
         # Data.
         cn_gene = model_data.copy_number_z_gene
         cn_cell = model_data.copy_number_z_cell
@@ -313,37 +335,21 @@ class LineageHierNegBinomModel:
         n_CG = model_data.CG
         n_gene_vars = 4 + n_CG
 
-        logger.info(f"Lineage: {self.lineage}")
-        logger.info(f"Number of genes: {model_data.G}")
-        logger.info(f"Number of sgRNA: {model_data.S}")
-        logger.info(f"Number of cell lines: {model_data.C}")
-        logger.info(f"Number of cancer genes: {model_data.CG}")
-        logger.info(f"Number of screens: {model_data.SC}")
-        logger.info(f"Number of data points: {model_data.N}")
-
-        if n_G < 2:
-            raise TooFewGenes(n_G)
-        if n_C < 2:
-            raise TooFewCellLines(n_C)
-
-        def _sigma_dist(name: str) -> RandomVariable:
-            return pm.HalfNormal(name, 1)
-
         with pm.Model(coords=coords) as model:
-            z = pm.Normal("z", 0, 2.5, initval=0)
+            # z = pm.Normal("z", 0, 0.5)
 
-            sigma_a = _sigma_dist("sigma_a")
-            delta_a = pm.Normal("delta_a", 0, 1, dims=("sgrna"))
-            a = pm.Deterministic("a", delta_a * sigma_a, dims=("sgrna"))
+            # sigma_a = pm.HalfNormal("sigma_a", 0.1)
+            # delta_a = pm.Normal("delta_a", 0, 1, dims=("sgrna"))
+            # a = pm.Deterministic("a", delta_a * sigma_a, dims=("sgrna"))
 
             cl_chol, _, cl_sigmas = pm.LKJCholeskyCov(
-                "celllines_chol_cov", eta=2, n=2, sd_dist=pm.HalfNormal.dist(1)
+                "celllines_chol_cov", eta=2, n=2, sd_dist=pm.Gamma.dist(1.5, 5)
             )
-            pm.Deterministic("sigma_b", cl_sigmas[0])
-            pm.Deterministic("sigma_f", cl_sigmas[1])
+            for i, var_name in enumerate(["b", "f"]):
+                pm.Deterministic(f"sigma_{var_name}", cl_sigmas[i])
 
             mu_b = 0
-            mu_f = pm.Normal("mu_f", -0.5, 0.5)
+            mu_f = pm.Normal("mu_f", 0, 0.2)
             mu_celllines = at.stack([mu_b, mu_f])
             delta_celllines = pm.Normal("delta_celllines", 0, 1, shape=(n_C, 2))
             celllines = pm.Deterministic(
@@ -353,25 +359,25 @@ class LineageHierNegBinomModel:
             f = pm.Deterministic("f", celllines[:, 1], dims="cell_line")
 
             g_chol, _, g_sigmas = pm.LKJCholeskyCov(
-                "genes_chol_cov", eta=2, n=n_gene_vars, sd_dist=pm.HalfNormal.dist(1)
+                "genes_chol_cov", eta=2, n=n_gene_vars, sd_dist=pm.Gamma.dist(1.5, 5)
             )
-            for i, var_name in enumerate(["d", "h", "k", "m"]):
+            for i, var_name in enumerate(["mu_d", "h", "k", "m"]):
                 pm.Deterministic(f"sigma_{var_name}", g_sigmas[i])
 
             if n_CG > 0:
                 pm.Deterministic("sigma_w", g_sigmas[4:])
 
-            mu_d = 0
+            mu_mu_d = pm.Normal("mu_mu_d", 0, 0.5)
             mu_h = 0
-            mu_k = pm.Normal("mu_k", -0.5, 0.5)
+            mu_k = pm.Normal("mu_k", 0, 0.2)
             mu_m = 0
             mu_w = [0] * n_CG
-            mu_genes = at.stack([mu_d, mu_h, mu_k, mu_m] + mu_w)
+            mu_genes = at.stack([mu_mu_d, mu_h, mu_k, mu_m] + mu_w)
             delta_genes = pm.Normal("delta_genes", 0, 1, shape=(n_G, n_gene_vars))
             genes = pm.Deterministic(
                 "genes", mu_genes + at.dot(g_chol, delta_genes.T).T
             )
-            d = pm.Deterministic("d", genes[:, 0], dims="gene")
+            mu_d = pm.Deterministic("mu_d", genes[:, 0], dims="gene")
             h = pm.Deterministic("h", genes[:, 1], dims="gene")
             k = pm.Deterministic("k", genes[:, 2], dims="gene")
             m = pm.Deterministic("m", genes[:, 3], dims="gene")
@@ -385,7 +391,7 @@ class LineageHierNegBinomModel:
             p: RandomVariable | np.ndarray
             if model_data.SC > 1:
                 # Multiple screens.
-                sigma_p = _sigma_dist("sigma_p")
+                sigma_p = pm.HalfNormal("sigma_p", 0.25)
                 delta_p = pm.Normal("delta_p", 0, 1, dims=("gene", "screen"))
                 p = pm.Deterministic("p", delta_p * sigma_p, dims=("gene", "screen"))
             else:
@@ -393,17 +399,18 @@ class LineageHierNegBinomModel:
                 logger.warning("Only 1 screen detected - ignoring variable `p`.")
                 p = np.zeros(shape=(model_data.G, 1))
 
+            sigma_d = pm.HalfNormal("sigma_d", 0.1)
+            d = pm.Normal("d", mu_d[s_to_g], sigma_d, dims="sgrna")
+
             gene_effect = pm.Deterministic(
                 "gene_effect",
-                d[g] + cn_gene * h[g] + rna * k[g] + mut * m[g] + at.dot(w, M)[g, c],
+                d[s] + cn_gene * h[g] + rna * k[g] + mut * m[g] + at.dot(w, M)[g, c],
             )
             cell_effect = pm.Deterministic("cell_line_effect", b[c] + cn_cell * f[c])
-            eta = pm.Deterministic(
-                "eta", z + a[s] + gene_effect + cell_effect + p[g, s]
-            )
+            eta = pm.Deterministic("eta", gene_effect + cell_effect + p[g, sc])
             mu = pm.Deterministic("mu", pmmath.exp(eta))
 
-            alpha = pm.Gamma("alpha", 2.0, 0.5)
+            alpha = pm.Gamma("alpha", 1.9, 1)
             pm.NegativeBinomial(
                 "ct_final",
                 mu * model_data.ct_initial,

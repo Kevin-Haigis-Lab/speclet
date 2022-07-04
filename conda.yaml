@@ -69,4 +69,5 @@ dependencies:
     - pytest-pythonpath
     - python-dotenv
     - types-python-dateutil
+    # - git+https://github.com/bambinos/bambi.git@main
     - -e .  # install the source directory as a package (keep as last)

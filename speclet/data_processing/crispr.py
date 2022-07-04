@@ -549,10 +549,8 @@ def add_useful_read_count_columns(
 ) -> pd.DataFrame:
     """Add some useful columns for modeling read count data.
 
-    - final counts RPM =
-      \\(1^6 \\times (c_\\text{final} / \\Sigma c_\\text{final}) + 1\\)
-    - adjusted initial counts = \\((c_\\text{initial} / \\Sigma c_\\text{initial})
-      \\times \\Sigma c_\\text{final}\\)
+    - final counts RPM = 10^6 x (c_{final} / Σ c_{final} + 1
+    - adjusted initial counts = (c_{initial} / Σ c_{initial}) x Σ c_{final}
 
     Args:
         crispr_df (pd.DataFrame): Achilles data frame
