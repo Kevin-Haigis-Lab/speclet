@@ -36,8 +36,6 @@ from speclet.managers.data_managers import CancerGeneDataManager as CancerGeneDM
 from speclet.managers.data_managers import LineageGeneMap
 from speclet.project_enums import ModelFitMethod
 
-# import bambi as bmb
-
 
 class TooFewGenes(BaseException):
     """Too few genes."""
