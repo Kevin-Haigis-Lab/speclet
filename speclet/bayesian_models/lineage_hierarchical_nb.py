@@ -336,11 +336,6 @@ class LineageHierNegBinomModel:
         n_gene_vars = 4 + n_CG
 
         with pm.Model(coords=coords) as model:
-            # z = pm.Normal("z", 0, 0.5)
-
-            # sigma_a = pm.HalfNormal("sigma_a", 0.1)
-            # delta_a = pm.Normal("delta_a", 0, 1, dims=("sgrna"))
-            # a = pm.Deterministic("a", delta_a * sigma_a, dims=("sgrna"))
 
             cl_chol, _, cl_sigmas = pm.LKJCholeskyCov(
                 "celllines_chol_cov", eta=2, n=2, sd_dist=pm.Gamma.dist(1.5, 5)
