@@ -103,6 +103,7 @@
     pymc_numpyro:
       draws: 2000
       tune: 700
+      chain_method: "vectorized"
       target_accept: 0.99
   slurm_resources:
     PYMC_NUMPYRO:
@@ -115,7 +116,7 @@
     Single lineage hierarchical negative binomial model for colorectal data from the
     Broad. Only running this model with the Numpyro JAX backend.
   "
-  active: true
+  active: false
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_colorectal.csv"
   model_kwargs:
@@ -137,7 +138,7 @@
     Single lineage hierarchical negative binomial model for liver data from the
     Broad. Only running this model with the Numpyro JAX backend.
   "
-  active: true
+  active: false
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_liver.csv"
   model_kwargs:
@@ -152,7 +153,6 @@
       mem: 100
       time: 300
       cores: 1
-
 
 
 - name: hnb-single-lineage-prostate
