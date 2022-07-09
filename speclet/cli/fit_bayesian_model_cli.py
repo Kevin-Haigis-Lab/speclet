@@ -89,7 +89,7 @@ def fit_bayesian_model(
     cache_name: str | None = None,
     seed: int | None = None,
     broad_only: bool = False,
-    log_level: str | int | None = None,
+    log_level: str | None = None,
 ) -> None:
     """Sample a Bayesian model.
 
