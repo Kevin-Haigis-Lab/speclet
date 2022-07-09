@@ -13,7 +13,7 @@ from speclet import io
 from speclet import model_configuration as model_config
 from speclet.bayesian_models import get_bayesian_model
 from speclet.cli import cli_helpers
-from speclet.loggers import logger
+from speclet.loggers import logger, set_console_handler_level
 from speclet.managers.cache_manager import cache_posterior, get_posterior_cache_name
 from speclet.managers.data_managers import CrisprScreenDataManager, data_transformation
 from speclet.model_configuration import ModelingSamplingArguments
@@ -89,6 +89,7 @@ def fit_bayesian_model(
     cache_name: str | None = None,
     seed: int | None = None,
     broad_only: bool = False,
+    log_level: str | int | None = None,
 ) -> None:
     """Sample a Bayesian model.
 
@@ -107,8 +108,11 @@ def fit_bayesian_model(
         seed (Optional[int], optional): Random seed for models. Defaults to `None`.
         broad_only (bool, optional): Only include Broad screen data. Defaults to
         `False` to include all data.
+        log_level (str | int | None, optional): Set a log level. Defaults to `None`.
     """
     tic = time()
+    if log_level is not None:
+        set_console_handler_level(log_level)
     logger.info("Reading model configuration.")
     config = model_config.get_configuration_for_model(
         config_path=config_path, name=name

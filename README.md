@@ -25,7 +25,7 @@
 
 There are two ['conda'](https://docs.conda.io/en/latest/) environments for this project: the first `speclet` for modeling and analysis, the second `speclet_smk` for the pipelines.
 They can be created using the following commands.
-Hee, we use ['mamba'](https://github.com/mamba-org/mamba) as a drop-in replacement for 'conda' to speed up the installation process.
+Here, we use ['mamba'](https://github.com/mamba-org/mamba) as a drop-in replacement for 'conda' to speed up the installation process.
 
 ```bash
 conda install -n base -c conda-forge mamba
@@ -50,11 +50,27 @@ make pyenvs
 On O2, because I don't have control over the `base` conda environment, I follow the incantations below for each environment:
 
 ```bash
-conda create -n speclet -c conda-forge python=3.10.4 mamba
+conda create -n speclet --yes -c conda-forge python=3.9 mamba
 conda activate speclet && mamba env update --name speclet --file conda.yaml
 ```
 
 In addition to that fun, there is also a problem with installing Python 3.10 on the installed version of conda, so I find I need to instead install 3.9 and then let the mamba install step update it.
+
+### GPU
+
+Some additions to the environment need to be made in order to use a GPU for sampling from posterior distributions with the JAX backend in PyMC.
+There are instructions provided on the [JAX GitHub repo](https://github.com/google/jax#pip-installation-gpu-cuda) and the [PyMC repo](https://github.com/pymc-devs/pymc/wiki/Set-up-JAX-sampling-with-GPUs-in-PyMC-v4)
+First, the `cuda` and `cudnn` libraries need to be installed.
+Second, a specific distribution of `jax` should be installed.
+At the time of writing, the following commands work, but I would recommend consulting the two links above if doing this again in the future.
+
+```bash
+mamba install -c nvidia "cuda>=11.1" "cudnn>=8.2"
+pip install --upgrade "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+```
+
+These commands have been added to the Makefile under the command `make gpu`.
+
 
 ### R environment
 

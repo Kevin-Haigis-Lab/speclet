@@ -50,7 +50,7 @@ if len(logger.handlers) == 0:
 
 
 def set_console_handler_level(to: int | str) -> None:
-    """Set the consle handler level.
+    """Set the console handler level.
 
     Args:
         to (Union[int, str]): New log level for console handlers.
