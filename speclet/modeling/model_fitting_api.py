@@ -128,6 +128,7 @@ def fit_pymc_mcmc_numpyro(
         az.InferenceData: Model posterior sample.
     """
     kwargs = _get_kwargs_dict(sampling_kwargs)
+    logger.debug(kwargs)
     with model:
         trace = pymc.sampling_jax.sample_numpyro_nuts(**kwargs, random_seed=seed)
         _ = pm.sample_posterior_predictive(trace=trace, extend_inferencedata=True)
