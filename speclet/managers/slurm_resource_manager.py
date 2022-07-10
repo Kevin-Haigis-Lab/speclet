@@ -53,6 +53,20 @@ class SlurmResourceManager:
     def _duration(self) -> td:
         return td(hours=self.slurm_resources.time)
 
+    def _format_duration_for_slurm(self, duration: td) -> str:
+        return formatting.format_timedelta(
+            duration, fmt=formatting.TimeDeltaFormat.DRMAA
+        )
+
+    @property
+    def gpu_res(self) -> slurm.GPUResource | None:
+        """GPU resources."""
+        return self.slurm_resources.gpu
+
+    @property
+    def _using_gpu(self) -> bool:
+        return self.gpu_res is not None
+
     @property
     def partition(self) -> str:
         """Partition on SLURM to request.
@@ -62,7 +76,7 @@ class SlurmResourceManager:
         """
         if self.slurm_resources.partition is not None:
             return self.slurm_resources.partition.value
-        return slurm.partition_required_for_duration(self._duration()).value
+        return slurm.determine_necessary_partition(self._duration(), self.gpu_res).value
 
     @property
     def cores(self) -> int:
@@ -73,7 +87,18 @@ class SlurmResourceManager:
         """
         return self.slurm_resources.cores
 
-    def _format_duration_for_slurm(self, duration: td) -> str:
-        return formatting.format_timedelta(
-            duration, fmt=formatting.TimeDeltaFormat.DRMAA
-        )
+    @property
+    def gres(self) -> str:
+        """String for 'gres' option for SLURM.
+
+        If not GPUs are being used, then "none" is returned to have no effect on the
+        job submission. Otherwise, the pattern is `--gres="gpu:<gpu module>:<cores>"`.
+        """
+        gpu_res = self.gpu_res
+        if gpu_res is None:
+            return "none"
+        gres = "gpu:"
+        if gpu_res.gpu is not None:
+            gres += slurm.get_gres_name(gpu_res.gpu) + ":"
+        gres += str(gpu_res.cores)
+        return gres
