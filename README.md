@@ -70,7 +70,7 @@ pip install --upgrade "jax[cuda]" -f https://storage.googleapis.com/jax-releases
 ```
 
 These commands have been added to the Makefile under the command `make gpu`.
-
+Use the same commands with the `speclet_smk` environment active to be able to use the GPU in the pipelines.
 
 ### R environment
 

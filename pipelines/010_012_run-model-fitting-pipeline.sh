@@ -6,7 +6,7 @@
 #SBATCH --account=park
 #SBATCH -c 1
 #SBATCH -p priority
-#SBATCH -t 1-00:00
+#SBATCH -t 0-00:30
 #SBATCH --mem 4G
 #SBATCH -o logs/%j_sample-pipeline.log
 #SBATCH -e logs/%j_sample-pipeline.log
@@ -18,6 +18,7 @@ source "$HOME/.bashrc"
 conda activate speclet_smk
 
 SNAKEFILE="pipelines/010_010_model-fitting-pipeline.smk"
+DRMAA_TEMPLATE=" --account=park -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J} --gres={cluster.gres}"
 
 snakemake \
     --snakefile $SNAKEFILE \
@@ -25,7 +26,7 @@ snakemake \
     --restart-times 0 \
     --latency-wait 120 \
     --rerun-incomplete \
-    --drmaa " --account=park -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
+    --drmaa "${DRMAA_TEMPLATE}" \
     --cluster-config pipelines/010_011_smk-config.yaml \
     --keep-going \
     --printshellcmds

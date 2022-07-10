@@ -3,6 +3,7 @@ __default__:
   cores: 1
   mem: "1000"
   time: "00:10:00"
+  gres: "none"
   out: "logs/%j_{rule}.log"
   err: "logs/%j_{rule}.log"
   mail: "NONE"
@@ -24,6 +25,7 @@ sample_pymc_numpyro:
   cores: 1
   mem: "{params.mem}"
   time: "{params.time}"
+  gres: "{params.gres}"
   J: "pyro-mc"
 combine_pymc_numpyro:
   partition: "short"

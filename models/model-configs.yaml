@@ -94,7 +94,7 @@
 
     Only running this model with the Numpyro JAX backend.
   "
-  active: true
+  active: false
   model: LINEAGE_HIERARCHICAL_NB
   data_file: DEPMAP_CRC_SUBSAMPLE
   model_kwargs:
@@ -138,7 +138,7 @@
     Single lineage hierarchical negative binomial model for liver data from the
     Broad. Only running this model with the Numpyro JAX backend.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_liver.csv"
   model_kwargs:
@@ -150,15 +150,17 @@
       target_accept: 0.98
   slurm_resources:
     PYMC_NUMPYRO:
-      mem: 100
-      time: 300
+      mem: 150
+      time: 10
       cores: 1
+      gpu:
+        gpu: "RTX 8000"
 
 
 - name: hnb-single-lineage-prostate
   description: "
     Single lineage hierarchical negative binomial model for prostate data from the
-    Broad. Only running this model with the Numpyro JAX backend.
+    Broad. Only running this model with the Numpyro JAX backend using a GPU.
   "
   active: true
   model: LINEAGE_HIERARCHICAL_NB
@@ -172,6 +174,8 @@
       target_accept: 0.98
   slurm_resources:
     PYMC_NUMPYRO:
-      mem: 100
-      time: 300
+      mem: 125
+      time: 4
       cores: 1
+      gpu:
+        gpu: "RTX 8000"
