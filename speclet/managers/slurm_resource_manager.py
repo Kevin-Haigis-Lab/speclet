@@ -96,7 +96,7 @@ class SlurmResourceManager:
         """
         gpu_res = self.gpu_res
         if gpu_res is None:
-            return "none"
+            return "gpu:0"
         gres = "gpu:"
         if gpu_res.gpu is not None:
             gres += slurm.get_gres_name(gpu_res.gpu) + ":"
