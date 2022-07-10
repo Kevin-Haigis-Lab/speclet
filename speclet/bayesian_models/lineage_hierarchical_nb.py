@@ -360,7 +360,7 @@ class LineageHierNegBinomModel:
             if n_CG > 0:
                 pm.Deterministic("sigma_w", g_sigmas[4:])
 
-            mu_mu_d = pm.Normal("mu_mu_d", 0, 0.5)
+            mu_mu_d = 0  # pm.Normal("mu_mu_d", 0, 0.2)
             mu_h = 0
             mu_k = pm.Normal("mu_k", 0, 0.2)
             mu_m = 0
@@ -393,7 +393,8 @@ class LineageHierNegBinomModel:
                 p = np.zeros(shape=(model_data.G, 1))
 
             sigma_d = pm.HalfNormal("sigma_d", 0.1)
-            d = pm.Normal("d", mu_d[s_to_g], sigma_d, dims="sgrna")
+            delta_d = pm.Normal("delta_d", 0, 1, dims="sgrna")
+            d = pm.Normal("d", mu_d[s_to_g] + delta_d * sigma_d, dims="sgrna")
 
             gene_effect = pm.Deterministic(
                 "gene_effect",
