@@ -1,6 +1,7 @@
 name: speclet_smk
 channels:
   - conda-forge
+  - nvidia
   - bioconda
   - r
   - defaults
@@ -16,8 +17,8 @@ dependencies:
   - drmaa
   - ipywidgets
   - isort  # KEEP! used in pipeline
-  - jax
-  - jaxlib
+  - jax>=0.3.0
+  - jaxlib>=0.3.0
   - jupyterlab
   - mamba
   - nbconvert
@@ -32,7 +33,7 @@ dependencies:
   - pretty_errors
   - pydantic
   - pyjanitor
-  - pymc>=4.0.0
+  - pymc>=4.1.0
   - python-graphviz
   - rich
   - scikit-learn>=1.0.0
