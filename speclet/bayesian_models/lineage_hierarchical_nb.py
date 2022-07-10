@@ -360,7 +360,7 @@ class LineageHierNegBinomModel:
             if n_CG > 0:
                 pm.Deterministic("sigma_w", g_sigmas[4:])
 
-            mu_mu_d = 0  # pm.Normal("mu_mu_d", 0, 0.2)
+            mu_mu_d = pm.Normal("mu_mu_d", 0, 0.05)
             mu_h = 0
             mu_k = pm.Normal("mu_k", 0, 0.2)
             mu_m = 0
