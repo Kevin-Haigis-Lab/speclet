@@ -95,7 +95,7 @@ def test_resource_manager_partition(
 @pytest.mark.parametrize(
     ["fit_method", "gres"],
     [
-        (ModelFitMethod.PYMC_MCMC, "none"),
+        (ModelFitMethod.PYMC_MCMC, "gpu:0"),
         (ModelFitMethod.PYMC_NUMPYRO, "gpu:rtx8000:1"),
     ],
 )
