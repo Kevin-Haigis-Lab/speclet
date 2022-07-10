@@ -138,15 +138,15 @@
     Single lineage hierarchical negative binomial model for liver data from the
     Broad. Only running this model with the Numpyro JAX backend.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_liver.csv"
   model_kwargs:
     lineage: "liver"
   sampling_kwargs:
     pymc_numpyro:
-      draws: 1000
-      tune: 500
+      draws: 10 #1000
+      tune: 10 #500
       target_accept: 0.98
   slurm_resources:
     PYMC_NUMPYRO:
@@ -167,8 +167,8 @@
     lineage: "prostate"
   sampling_kwargs:
     pymc_numpyro:
-      draws: 1000
-      tune: 500
+      draws: 10 #1000
+      tune: 10 #500
       target_accept: 0.98
   slurm_resources:
     PYMC_NUMPYRO:
