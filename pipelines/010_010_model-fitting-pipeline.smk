@@ -164,12 +164,6 @@ rule combine_pymc_mcmc:
 
 # --- PyMC MCMC Numpyro backend ---
 
-BATCHES = {"hnb-single-lineage-prostate": 1, "hnb-single-lineage-liver": 2}
-
-
-def _get_batch_number(w: Wildcards) -> int:
-    return BATCHES[w.model_name]
-
 
 rule sample_pymc_numpyro:
     output:
@@ -186,9 +180,7 @@ rule sample_pymc_numpyro:
         cache_name=lambda w: f"{w.model_name}_PYMC_NUMPYRO_chain{w.chain}",
     benchmark:
         BENCHMARK_DIR / "sample_pymc_mcmc/{model_name}_chain{chain}.tsv"
-    resources:
-        batch=_get_batch_number,
-    priority: 20
+    priority: 30
     shell:
         get_aesara_flags("{wildcards.model_name}_{wildcards.chain}_mcmc") + " "
         "speclet/cli/fit_bayesian_model_cli.py"

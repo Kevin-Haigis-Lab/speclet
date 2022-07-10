@@ -145,14 +145,16 @@
     lineage: "liver"
   sampling_kwargs:
     pymc_numpyro:
-      draws: 10 #1000
-      tune: 10 #500
+      draws: 1000
+      tune: 500
       target_accept: 0.98
   slurm_resources:
     PYMC_NUMPYRO:
-      mem: 100
-      time: 300
+      mem: 150
+      time: 10
       cores: 1
+      gpu:
+        gpu: "RTX 8000"
 
 
 - name: hnb-single-lineage-prostate
@@ -167,8 +169,8 @@
     lineage: "prostate"
   sampling_kwargs:
     pymc_numpyro:
-      draws: 10 #1000
-      tune: 10 #500
+      draws: 1000
+      tune: 500
       target_accept: 0.98
   slurm_resources:
     PYMC_NUMPYRO:
