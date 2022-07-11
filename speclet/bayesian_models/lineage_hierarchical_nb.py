@@ -334,15 +334,15 @@ class LineageHierNegBinomModel:
         n_gene_vars = 4 + n_CG
 
         with pm.Model(coords=coords) as model:
-
+            # Cell line varying effects covariance matix.
             cl_chol, _, cl_sigmas = pm.LKJCholeskyCov(
-                "celllines_chol_cov", eta=2, n=2, sd_dist=pm.Gamma.dist(1.5, 5)
+                "celllines_chol_cov", eta=2, n=2, sd_dist=pm.Exponential.dist(5)
             )
             for i, var_name in enumerate(["b", "f"]):
                 pm.Deterministic(f"sigma_{var_name}", cl_sigmas[i])
 
             mu_b = 0
-            mu_f = pm.Normal("mu_f", 0, 0.2)
+            mu_f = 0  # pm.Normal("mu_f", 0, 0.1)
             mu_celllines = at.stack([mu_b, mu_f])
             delta_celllines = pm.Normal("delta_celllines", 0, 1, shape=(n_C, 2))
             celllines = pm.Deterministic(
@@ -351,18 +351,19 @@ class LineageHierNegBinomModel:
             b = pm.Deterministic("b", celllines[:, 0], dims="cell_line")
             f = pm.Deterministic("f", celllines[:, 1], dims="cell_line")
 
+            # Gene carying effects covariance matrix.
             g_chol, _, g_sigmas = pm.LKJCholeskyCov(
-                "genes_chol_cov", eta=2, n=n_gene_vars, sd_dist=pm.Gamma.dist(1.5, 5)
+                "genes_chol_cov", eta=2, n=n_gene_vars, sd_dist=pm.Exponential.dist(5)
             )
             for i, var_name in enumerate(["mu_d", "h", "k", "m"]):
                 pm.Deterministic(f"sigma_{var_name}", g_sigmas[i])
 
             if n_CG > 0:
-                pm.Deterministic("sigma_w", g_sigmas[4:])
+                pm.Deterministic("sigma_w", g_sigmas[4:], dims=("cancer_gene"))
 
-            mu_mu_d = pm.Normal("mu_mu_d", 0, 0.05)
+            mu_mu_d = 0  # pm.Normal("mu_mu_d", 0, 0.05)
             mu_h = 0
-            mu_k = pm.Normal("mu_k", 0, 0.2)
+            mu_k = 0  # pm.Normal("mu_k", 0, 0.1)
             mu_m = 0
             mu_w = [0] * n_CG
             mu_genes = at.stack([mu_mu_d, mu_h, mu_k, mu_m] + mu_w)
@@ -384,7 +385,7 @@ class LineageHierNegBinomModel:
             p: RandomVariable | np.ndarray
             if model_data.SC > 1:
                 # Multiple screens.
-                sigma_p = pm.HalfNormal("sigma_p", 0.25)
+                sigma_p = pm.HalfNormal("sigma_p", 0.1)
                 delta_p = pm.Normal("delta_p", 0, 1, dims=("gene", "screen"))
                 p = pm.Deterministic("p", delta_p * sigma_p, dims=("gene", "screen"))
             else:
