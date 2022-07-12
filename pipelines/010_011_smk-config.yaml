@@ -3,7 +3,7 @@ __default__:
   cores: 1
   mem: "1000"
   time: "00:10:00"
-  gres: "none"
+  gres: "gpu:0"
   out: "logs/%j_{rule}.log"
   err: "logs/%j_{rule}.log"
   mail: "NONE"
@@ -42,12 +42,12 @@ sample_pymc_advi:
 summarize_posterior:
   partition: "short"
   cores: 2
-  mem: "100000"
-  time: "02:00:00"
+  mem: "16000"
+  time: "2:00:00"
   J: "summary"
 execute_report:
   partition: "short"
   cores: 1
   mem: "120000"
-  time: "05:00:00"
+  time: "06:00:00"
   J: "report"
