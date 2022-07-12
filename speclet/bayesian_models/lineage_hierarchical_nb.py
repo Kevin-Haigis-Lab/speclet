@@ -200,14 +200,9 @@ class LineageHierNegBinomModel:
         comutation_matrix = make_cancer_gene_mutation_matrix(
             data, cancer_genes=cancer_genes, cell_lines=coords["cell_line"]
         )
-
-        n_cancer_genes = len(cancer_genes)
-        while n_cancer_genes == len(cancer_genes) and n_cancer_genes > 0:
-            n_cancer_genes = len(cancer_genes)
-            comutation_matrix, cancer_genes = drop_cancer_genes_without_wt_and_mutation(
-                comutation_matrix, cancer_genes
-            )
-
+        comutation_matrix, cancer_genes = remove_collinearity_in_comutation_matrix(
+            comutation_matrix, cancer_genes
+        )
         coords = self._model_coords(data, cancer_genes)
         mut = augmented_mutation_data(data, cancer_genes=set(cancer_genes))
 
@@ -243,6 +238,7 @@ class LineageHierNegBinomModel:
         Returns:
             pd.DataFrame: Processed and validated modeling data.
         """
+        logger.info("Processing data for modeling.")
         return (
             data.dropna(
                 axis=0,
@@ -380,6 +376,7 @@ class LineageHierNegBinomModel:
             if n_CG > 0:
                 w = pm.Deterministic("w", genes[:, 4:], dims=("gene", "cancer_gene"))
             else:
+                logger.warning("No cancer genes in the model - ignoring variable `w`.")
                 w = np.zeros((n_G, n_CG))
 
             p: RandomVariable | np.ndarray
@@ -474,49 +471,62 @@ def augmented_mutation_data(
     return mut
 
 
-def drop_cancer_genes_without_wt_and_mutation(
-    comutation_matrix: npt.NDArray[np.int32], cancer_genes: list[str]
+def _remove_cancer_genes_never_mutated(
+    comut_mat: npt.NDArray[np.int32], cancer_genes: list[str]
 ) -> tuple[npt.NDArray[np.int32], list[str]]:
-    """Drop cancer genes without any mutations.
-
-    Args:
-        comutation_matrix (npt.NDArray[np.int32]): Co-mutation matrix.
-        cancer_genes (list[str]): Ordered list of cancer genes.
-
-    Returns:
-        tuple[npt.NDArray[np.int32], list[str]]: Modified co-mutation matrix and list of
-        cancer genes.
-    """
-    any_muts = np.any(comutation_matrix, axis=1)
-    all_muts = np.all(comutation_matrix, axis=1)
-    assert any_muts.ndim == all_muts.ndim == 1
-    assert any_muts.shape[0] == all_muts.shape[0] == len(cancer_genes)
-    keep_idx = any_muts * ~all_muts
-    new_comut_mat = comutation_matrix.copy()[keep_idx, :]
-    new_cancer_genes = [g for g, i in zip(cancer_genes, keep_idx) if i]
+    any_muts = np.any(comut_mat, axis=1)
+    new_comut_mat = comut_mat.copy()[any_muts, :]
+    new_cancer_genes = [g for g, i in zip(cancer_genes, any_muts) if i]
     return new_comut_mat, new_cancer_genes
 
 
-def genes_with_mutations_switch(
-    genes: npt.NDArray[np.str_], muts: npt.NDArray[np.int32]
-) -> npt.NDArray[np.bool_]:
-    """Make a switch array for if a gene has any mutations or not.
+def _remove_cancer_genes_always_mutated(
+    comut_mat: npt.NDArray[np.int32], cancer_genes: list[str]
+) -> tuple[npt.NDArray[np.int32], list[str]]:
+    all_muts = np.all(comut_mat, axis=1)
+    new_comut_mat = comut_mat.copy()[~all_muts, :]
+    new_cancer_genes = [g for g, i in zip(cancer_genes, all_muts) if not i]
+    return new_comut_mat, new_cancer_genes
+
+
+def _set_mutations_false_if_all_mutated_in_cell(
+    comut_mat: npt.NDArray[np.int32],
+) -> npt.NDArray[np.int32]:
+    all_mut = np.all(comut_mat, axis=0)
+    new_comut_mat = comut_mat.copy()
+    new_comut_mat[:, all_mut] = 0
+    return new_comut_mat
+
+
+def remove_collinearity_in_comutation_matrix(
+    comutation_matrix: npt.NDArray[np.int32], cancer_genes: list[str]
+) -> tuple[npt.NDArray[np.int32], list[str]]:
+    """Remove patterns that produce colinearity in the comutation matrix.
 
     Args:
-        genes (npt.NDArray[np.str_]): Gene array from the data frame.
-        muts (npt.NDArray[np.int32]): Mutation data.
+        comutation_matrix (npt.NDArray[np.int32]): Comutation matrix.
+        cancer_genes (list[str]): Cancer genes.
 
     Returns:
-        npt.NDArray[np.bool_]: Boolean array where `True` marks genes with at least one
-        mutation and `False` for genes without any mutations.
+        tuple[npt.NDArray[np.int32], list[str]]: Update comutation matrix and list of
+        cancer genes.
     """
-    assert genes.ndim == 1
-    assert muts.ndim == 1
-    assert len(genes) == len(muts)
-    switch_ary = np.ones_like(genes, dtype=np.bool_)
-    for gene in np.unique(genes):
-        g_idx = genes == gene
-        num_muts = np.sum(muts[g_idx] > 0)
-        if num_muts == 0:
-            switch_ary[g_idx] = False
-    return switch_ary
+    n_cancer_genes = len(cancer_genes) + 1
+    prev_comut_mat = np.zeros_like(comutation_matrix)
+    while (
+        n_cancer_genes != len(cancer_genes)
+        and not np.all(comutation_matrix == prev_comut_mat)
+        and n_cancer_genes > 0
+    ):
+        n_cancer_genes = len(cancer_genes)
+        prev_comut_mat = comutation_matrix.copy()
+        comutation_matrix = _set_mutations_false_if_all_mutated_in_cell(
+            comutation_matrix
+        )
+        comutation_matrix, cancer_genes = _remove_cancer_genes_never_mutated(
+            comutation_matrix, cancer_genes
+        )
+        comutation_matrix, cancer_genes = _remove_cancer_genes_always_mutated(
+            comutation_matrix, cancer_genes
+        )
+    return comutation_matrix, cancer_genes
