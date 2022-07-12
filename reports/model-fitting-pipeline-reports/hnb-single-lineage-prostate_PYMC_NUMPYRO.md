@@ -101,85 +101,79 @@ if FIT_METHOD is ModelFitMethod.PYMC_NUMPYRO or FIT_METHOD is ModelFitMethod.PYM
 
                                 count      mean       std       min       25%  \
     var_name
-    alpha                         1.0  1.570502       NaN  1.570502  1.570502
-    b                             5.0  3.180170  0.128538  2.973945  3.137678
-    cell_line_effect         355310.0  3.146699  0.134089  2.596185  3.066556
-    celllines                    10.0  2.300329  0.943666  1.019821  1.528760
-    celllines_chol_cov            3.0  1.808008  0.552692  1.403251  1.493162
-    celllines_chol_cov_corr       3.0  1.393304  0.337029  1.004137  1.296012
-    celllines_chol_cov_stds       2.0  1.756325  0.963611  1.074949  1.415637
-    d                         71062.0  2.086415  0.204563  1.521951  1.952083
-    delta_celllines              10.0  1.961427  0.655561  1.113916  1.527776
-    delta_d                   71062.0  1.320554  0.206403  1.057946  1.101571
-    delta_genes              163071.0  1.322540  0.197479  1.059817  1.120645
-    eta                      355310.0  1.469235  0.150995  1.035666  1.403007
-    f                             5.0  1.420488  0.227631  1.019821  1.456023
-    gene_effect              355310.0  2.075798  0.190288  1.493946  1.942148
-    genes                    163071.0  1.605477  0.534120  1.046232  1.319895
-    genes_chol_cov               45.0  1.693474  0.347190  1.176996  1.551234
-    genes_chol_cov_corr          80.0  1.428098  0.397536  1.000862  1.163250
-    genes_chol_cov_stds           9.0  1.698477  0.189352  1.536064  1.560796
-    h                         18119.0  1.362962  0.188643  1.059145  1.152597
-    k                         18119.0  1.497214  0.118639  1.063498  1.528693
-    m                         18119.0  1.344710  0.157367  1.046232  1.216048
-    mu                       355310.0  1.469245  0.151008  1.036101  1.403013
-    mu_d                      18119.0  3.034826  0.192141  2.401678  2.853115
-    mu_f                          1.0  1.622173       NaN  1.622173  1.622173
-    mu_k                          1.0  1.551966       NaN  1.551966  1.551966
-    mu_mu_d                       1.0  2.954362       NaN  2.954362  2.954362
-    sigma_b                       1.0  2.437701       NaN  2.437701  2.437701
-    sigma_d                       1.0  1.536830       NaN  1.536830  1.536830
-    sigma_f                       1.0  1.074949       NaN  1.074949  1.074949
-    sigma_h                       1.0  1.536064       NaN  1.536064  1.536064
-    sigma_k                       1.0  1.560796       NaN  1.560796  1.560796
-    sigma_m                       1.0  2.093208       NaN  2.093208  2.093208
-    sigma_mu_d                    1.0  1.564658       NaN  1.564658  1.564658
-    sigma_w                       5.0  1.706314  0.129878  1.537104  1.636042
-    w                         90595.0  1.441915  0.167853  1.061190  1.317896
+    alpha                         1.0  1.000909       NaN  1.000909  1.000909
+    b                             5.0  1.011968  0.000525  1.011195  1.011698
+    cell_line_effect         355310.0  1.010942  0.002217  1.000507  1.010703
+    celllines                    10.0  1.006406  0.005879  1.000406  1.000825
+    celllines_chol_cov            3.0  1.001364  0.000965  1.000661  1.000814
+    celllines_chol_cov_corr       3.0  1.000688  0.000776  0.999792  1.000464
+    celllines_chol_cov_stds       2.0  1.001153  0.000695  1.000661  1.000907
+    d                         71062.0  1.000872  0.000923  0.999131  1.000206
+    delta_celllines              10.0  1.000904  0.000674  1.000243  1.000579
+    delta_d                   71062.0  1.001332  0.001235  0.999157  1.000419
+    delta_genes              163071.0  1.012180  0.025624  0.999196  1.001550
+    eta                      355310.0  1.000882  0.000978  0.999113  1.000170
+    f                             5.0  1.000844  0.000382  1.000406  1.000694
+    gene_effect              355310.0  1.000882  0.000975  0.999109  1.000174
+    genes                    163071.0  1.048427  0.051842  0.999165  1.001355
+    genes_chol_cov               45.0  1.240294  0.313199  1.015185  1.084821
+    genes_chol_cov_corr          80.0  1.113192  0.248458  0.999898  1.016583
+    genes_chol_cov_stds           9.0  1.161959  0.213158  1.002686  1.014534
+    h                         18119.0  1.001062  0.001089  0.999165  1.000261
+    k                         18119.0  1.000979  0.000934  0.999252  1.000329
+    m                         18119.0  1.054216  0.010005  1.013207  1.048698
+    mu                       355310.0  1.000849  0.000959  0.999111  1.000151
+    mu_d                      18119.0  1.023953  0.006934  1.000715  1.020465
+    sigma_b                       1.0  1.000661       NaN  1.000661  1.000661
+    sigma_d                       1.0  1.000158       NaN  1.000158  1.000158
+    sigma_f                       1.0  1.001644       NaN  1.001644  1.001644
+    sigma_h                       1.0  1.006099       NaN  1.006099  1.006099
+    sigma_k                       1.0  1.014534       NaN  1.014534  1.014534
+    sigma_m                       1.0  1.180998       NaN  1.180998  1.180998
+    sigma_mu_d                    1.0  1.024743       NaN  1.024743  1.024743
+    sigma_w                       5.0  1.246252  0.256293  1.002686  1.140781
+    w                         90595.0  1.071126  0.057157  0.999203  1.040264
 
                                   50%       75%       max
     var_name
-    alpha                    1.570502  1.570502  1.570502
-    b                        3.237435  3.267306  3.284484
-    cell_line_effect         3.173553  3.266162  3.284637
-    celllines                2.271141  3.212496  3.284484
-    celllines_chol_cov       1.583074  2.010387  2.437701
-    celllines_chol_cov_corr  1.587888  1.587888  1.587888
-    celllines_chol_cov_stds  1.756325  2.097013  2.437701
-    d                        2.118948  2.224104  2.704973
-    delta_celllines          1.778213  2.514657  2.893243
-    delta_d                  1.299382  1.528282  1.593255
-    delta_genes              1.280681  1.528355  2.108712
-    eta                      1.538057  1.576867  1.627887
-    f                        1.528390  1.529871  1.568336
-    gene_effect              2.115422  2.213726  2.702285
-    genes                    1.528885  1.581281  3.552855
-    genes_chol_cov           1.612247  1.748540  2.897412
-    genes_chol_cov_corr      1.341276  1.544139  2.970989
-    genes_chol_cov_stds      1.636042  1.824647  2.093208
-    h                        1.526834  1.529151  1.594430
-    k                        1.537514  1.555355  1.629098
-    m                        1.334790  1.489065  1.720025
-    mu                       1.538072  1.576887  1.627887
-    mu_d                     3.037480  3.170011  3.552855
-    mu_f                     1.622173  1.622173  1.622173
-    mu_k                     1.551966  1.551966  1.551966
-    mu_mu_d                  2.954362  2.954362  2.954362
-    sigma_b                  2.437701  2.437701  2.437701
-    sigma_d                  1.536830  1.536830  1.536830
-    sigma_f                  1.074949  1.074949  1.074949
-    sigma_h                  1.536064  1.536064  1.536064
-    sigma_k                  1.560796  1.560796  1.560796
-    sigma_m                  2.093208  2.093208  2.093208
-    sigma_mu_d               1.564658  1.564658  1.564658
-    sigma_w                  1.687637  1.824647  1.846140
-    w                        1.507288  1.576788  2.019255
+    alpha                    1.000909  1.000909  1.000909
+    b                        1.012108  1.012371  1.012468
+    cell_line_effect         1.011762  1.012288  1.013058
+    celllines                1.006323  1.012005  1.012468
+    celllines_chol_cov       1.000967  1.001715  1.002464
+    celllines_chol_cov_corr  1.001136  1.001136  1.001136
+    celllines_chol_cov_stds  1.001153  1.001398  1.001644
+    d                        1.000693  1.001344  1.008786
+    delta_celllines          1.000628  1.001041  1.002299
+    delta_d                  1.001096  1.001989  1.011374
+    delta_genes              1.004240  1.012056  1.527316
+    eta                      1.000681  1.001384  1.022192
+    f                        1.000815  1.000855  1.001452
+    gene_effect              1.000680  1.001382  1.022242
+    genes                    1.042619  1.065695  1.438466
+    genes_chol_cov           1.126476  1.191798  2.370640
+    genes_chol_cov_corr      1.032848  1.101292  2.307072
+    genes_chol_cov_stds      1.140781  1.189422  1.680165
+    h                        1.000843  1.001622  1.009514
+    k                        1.000809  1.001446  1.012093
+    m                        1.055074  1.060881  1.087743
+    mu                       1.000653  1.001343  1.022192
+    mu_d                     1.024435  1.027883  1.142280
+    sigma_b                  1.000661  1.000661  1.000661
+    sigma_d                  1.000158  1.000158  1.000158
+    sigma_f                  1.001644  1.001644  1.001644
+    sigma_h                  1.006099  1.006099  1.006099
+    sigma_k                  1.014534  1.014534  1.014534
+    sigma_m                  1.180998  1.180998  1.180998
+    sigma_mu_d               1.024743  1.024743  1.024743
+    sigma_w                  1.189422  1.218207  1.680165
+    w                        1.062360  1.082061  1.438466
     ============================================================
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0, 0, 0
     percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 0.88, 0.818, 0.803, 0.909
-    avg. step size: 0.0, 0.005, 0.004, 0.002
+    BFMI: 0.829, 0.916, 0.846, 0.861
+    avg. step size: 0.004, 0.006, 0.006, 0.003
 
 
 
@@ -209,10 +203,6 @@ psis_loo = az.loo(trace, pointwise=True)
 psis_loo
 ```
 
-    /home/jc604/.conda/envs/speclet_smk/lib/python3.10/site-packages/arviz/stats/stats.py:1048: RuntimeWarning: overflow encountered in exp
-      weights = 1 / np.exp(len_scale - len_scale[:, None]).sum(axis=1)
-    /home/jc604/.conda/envs/speclet_smk/lib/python3.10/site-packages/numpy/core/_methods.py:48: RuntimeWarning: overflow encountered in reduce
-      return umr_sum(a, axis, dtype, out, keepdims, initial, where)
     /home/jc604/.conda/envs/speclet_smk/lib/python3.10/site-packages/arviz/stats/stats.py:812: UserWarning: Estimated shape parameter of Pareto distribution is greater than 0.7 for one or more samples. You should consider using a more robust model, this is because importance sampling is less likely to work well if the marginal posterior and LOO posterior are very different. This is more likely to happen with a non-robust model and highly influential observations.
       warnings.warn(
 
@@ -223,18 +213,18 @@ psis_loo
     Computed from 4000 posterior samples and 355310 observations log-likelihood matrix.
 
              Estimate       SE
-    elpd_loo -2327750.08   705.42
-    p_loo    172218.79        -
+    elpd_loo -2190104.29   632.59
+    p_loo    86951.24        -
 
     There has been a warning during the calculation. Please check the results.
     ------
 
     Pareto k diagnostic values:
                               Count   Pct.
-    (-Inf, 0.5]   (good)     179515   50.5%
-     (0.5, 0.7]   (ok)        45272   12.7%
-       (0.7, 1]   (bad)       39564   11.1%
-       (1, Inf)   (very bad)  90959   25.6%
+    (-Inf, 0.5]   (good)     308048   86.7%
+     (0.5, 0.7]   (ok)        40221   11.3%
+       (0.7, 1]   (bad)        6512    1.8%
+       (1, Inf)   (very bad)    529    0.1%
 
 
 
@@ -259,7 +249,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 297.77 minutes
+    execution time: 191.16 minutes
 
 
 
@@ -268,7 +258,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-07-11
+    Last updated: 2022-07-12
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -276,17 +266,17 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Compiler    : GCC 10.3.0
     OS          : Linux
-    Release     : 3.10.0-1160.45.1.el7.x86_64
+    Release     : 3.10.0-1160.66.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 20
     Architecture: 64bit
 
-    Hostname: compute-a-16-170.o2.rc.hms.harvard.edu
+    Hostname: compute-f-17-13.o2.rc.hms.harvard.edu
 
     Git branch: simplify
 
     logging   : 0.5.1.2
-    arviz     : 0.12.1
     speclet   : 0.0.9000
+    arviz     : 0.12.1
     matplotlib: 3.5.2
