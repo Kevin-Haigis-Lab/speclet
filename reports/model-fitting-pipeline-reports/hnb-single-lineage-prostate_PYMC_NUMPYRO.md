@@ -245,7 +245,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 131.73 minutes
+    execution time: 128.08 minutes
 
 
 
@@ -254,7 +254,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-07-12
+    Last updated: 2022-07-13
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -268,11 +268,11 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-h-17-54.o2.rc.hms.harvard.edu
+    Hostname: compute-h-17-50.o2.rc.hms.harvard.edu
 
     Git branch: simplify
 
-    logging   : 0.5.1.2
-    arviz     : 0.12.1
     speclet   : 0.0.9000
+    arviz     : 0.12.1
     matplotlib: 3.5.2
+    logging   : 0.5.1.2
