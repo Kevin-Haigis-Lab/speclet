@@ -193,6 +193,7 @@ rule sample_pymc_numpyro:
         "  --cache-name {params.cache_name}"
         "  --seed {wildcards.chain}"
         "  --broad-only"
+        "  --log-level DEBUG"
 
 
 rule combine_pymc_numpyro:
