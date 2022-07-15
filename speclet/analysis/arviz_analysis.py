@@ -14,13 +14,13 @@ from xarray import Dataset
 
 
 def extract_coords_param_names(
-    post_summ: pd.DataFrame, names: list[str], col: str | None = None
+    post_summ: pd.DataFrame, names: list[str] | str, col: str | None = None
 ) -> pd.DataFrame:
     """Extract coordinates from parameter names (from ArviZ summary).
 
     Args:
         post_summ (pd.DataFrame): Posterior summary from ArviZ.
-        names (list[str]): Names for the coordinates.
+        names (list[str] | str): Names for the coordinates.
         col (Optional[str], optional): Column containing the parameter names. If `None`
         (default), uses the row index for parameter names.
 
@@ -31,6 +31,10 @@ def extract_coords_param_names(
         coord_col = post_summ.index.tolist()
     else:
         coord_col = post_summ[col]
+
+    if isinstance(names, str):
+        names = [names]
+
     coords = [x.split("[")[1] for x in coord_col]
     coords = [x.replace("]", "") for x in coords]
     coords_split = [[y.strip() for y in x.split(",")] for x in coords]
