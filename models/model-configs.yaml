@@ -150,8 +150,8 @@
       target_accept: 0.98
   slurm_resources:
     PYMC_NUMPYRO:
-      mem: 150
-      time: 10
+      mem: 250
+      time: 5
       cores: 1
       gpu:
         gpu: "RTX 8000"

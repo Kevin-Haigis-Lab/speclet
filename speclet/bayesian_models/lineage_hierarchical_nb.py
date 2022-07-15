@@ -70,6 +70,7 @@ class LineageHierNegBinomModelData:
     copy_number_z_gene: npt.NDArray[np.float32]
     copy_number_z_cell: npt.NDArray[np.float32]
     log_rna_expr: npt.NDArray[np.float32]
+    z_log_rna_gene: npt.NDArray[np.float32]
     is_mutated: npt.NDArray[np.int32]
     comutation_matrix: npt.NDArray[np.int32]
     coords: dict[str, list[str]]
@@ -224,6 +225,7 @@ class LineageHierNegBinomModel:
             copy_number_z_gene=data.z_cn_gene.values.astype(np.float32),
             copy_number_z_cell=data.z_cn_cell_line.values.astype(np.float32),
             log_rna_expr=data.log_rna_expr.values.astype(np.float32),
+            z_log_rna_gene=data.z_log_rna_gene.values.astype(np.float32),
             is_mutated=mut.astype(np.int32),
             comutation_matrix=comutation_matrix.astype(np.int32),
             coords=coords,
@@ -251,14 +253,14 @@ class LineageHierNegBinomModel:
                 groupby_cols=["hugo_symbol"],
                 new_col="z_cn_gene",
                 cn_max=7,
-                center=1,
+                center=None,
             )
             .pipe(
                 zscale_cna_by_group,
                 groupby_cols=["depmap_id"],
                 new_col="z_cn_cell_line",
                 cn_max=7,
-                center=1,
+                center=None,  # 1,
             )
             .assign(
                 z_cn_gene=lambda d: squish_array(d.z_cn_gene, lower=-5.0, upper=5.0),
@@ -266,6 +268,11 @@ class LineageHierNegBinomModel:
                     d.z_cn_cell_line, lower=-5.0, upper=5.0
                 ),
                 log_rna_expr=lambda d: np.log(d.rna_expr + 1.0),
+            )
+            .pipe(
+                zscale_rna_expression_by_gene,
+                rna_col="log_rna_expr",
+                new_col="z_log_rna_gene",
             )
             .pipe(append_total_read_counts)
             .pipe(add_useful_read_count_columns)
@@ -320,7 +327,7 @@ class LineageHierNegBinomModel:
         # Data.
         cn_gene = model_data.copy_number_z_gene
         cn_cell = model_data.copy_number_z_cell
-        rna = model_data.log_rna_expr
+        rna = model_data.z_log_rna_gene
         mut = model_data.is_mutated
         M = model_data.comutation_matrix
 
@@ -390,13 +397,13 @@ class LineageHierNegBinomModel:
                 logger.warning("Only 1 screen detected - ignoring variable `p`.")
                 p = np.zeros(shape=(model_data.G, 1))
 
-            sigma_d = pm.HalfNormal("sigma_d", 0.1)
-            delta_d = pm.Normal("delta_d", 0, 1, dims="sgrna")
-            d = pm.Normal("d", mu_d[s_to_g] + delta_d * sigma_d, dims="sgrna")
+            # sigma_d = pm.HalfNormal("sigma_d", 0.1)
+            # delta_d = pm.Normal("delta_d", 0, 1, dims="sgrna")
+            # d = pm.Normal("d", mu_d[s_to_g] + delta_d * sigma_d, dims="sgrna")
 
             gene_effect = pm.Deterministic(
                 "gene_effect",
-                d[s] + cn_gene * h[g] + rna * k[g] + mut * m[g] + at.dot(w, M)[g, c],
+                mu_d[g] + cn_gene * h[g] + rna * k[g] + mut * m[g] + at.dot(w, M)[g, c],
             )
             cell_effect = pm.Deterministic("cell_line_effect", b[c] + cn_cell * f[c])
             eta = pm.Deterministic("eta", gene_effect + cell_effect + p[g, sc])
