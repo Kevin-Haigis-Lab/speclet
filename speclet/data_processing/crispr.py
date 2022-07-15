@@ -27,15 +27,15 @@ def zscale_cna_by_group(
 
     Args:
         df (pd.DataFrame): The DataFrame to modify.
-        cn_col (str, optional): Column with the gene copy number values.
-        Defaults to "copy_number".
+        cn_col (str, optional): Column with the gene copy number values. Defaults to
+        "copy_number".
         new_col (str, optional): The name of the column to store the calculated values.
         Defaults to "copy_number_z".
-        groupby_cols (list[str] | tuple[str, ...] | None, optional): A list or
-        tuple of columns to group the DataFrame by. If None, the rows are not grouped.
-        Defaults to ("hugo_symbol").
-        cn_max (float | None, optional): The maximum copy number to use.
-        Defaults to None.
+        groupby_cols (list[str] | tuple[str, ...] | None, optional): A list or tuple of
+        columns to group the DataFrame by. If None, the rows are not grouped. Defaults
+        to `("hugo_symbol", )`.
+        cn_max (float | None, optional): The maximum copy number to use. Defaults to
+        `None`.
         center (float | None, optional): The value to use for the center. If `None`
         (default), the average is used.
 
@@ -96,6 +96,7 @@ def zscale_rna_expression(
     rna_z = careful_zscore(rna, atol=0.01)
 
     if lower_bound is not None and upper_bound is not None:
+        print(rna_z)
         rna_z = squish_array(rna_z, lower=lower_bound, upper=upper_bound)
 
     df[new_col] = rna_z
