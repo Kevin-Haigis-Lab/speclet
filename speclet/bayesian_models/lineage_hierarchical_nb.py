@@ -318,10 +318,10 @@ class LineageHierNegBinomModel:
         # Multi-dimensional parameter coordinates (labels).
         coords = model_data.coords
         # Indexing arrays.
-        s = model_data.sgrna_idx
+        # s = model_data.sgrna_idx
         c = model_data.cellline_idx
         g = model_data.gene_idx
-        s_to_g = model_data.sgrna_to_gene_idx
+        # s_to_g = model_data.sgrna_to_gene_idx
         sc = model_data.screen_idx
 
         # Data.
@@ -348,9 +348,7 @@ class LineageHierNegBinomModel:
             mu_f = 0  # pm.Normal("mu_f", 0, 0.1)
             mu_celllines = at.stack([mu_b, mu_f])
             delta_celllines = pm.Normal("delta_celllines", 0, 1, shape=(n_C, 2))
-            celllines = pm.Deterministic(
-                "celllines", mu_celllines + at.dot(cl_chol, delta_celllines.T).T
-            )
+            celllines = mu_celllines + at.dot(cl_chol, delta_celllines.T).T
             b = pm.Deterministic("b", celllines[:, 0], dims="cell_line")
             f = pm.Deterministic("f", celllines[:, 1], dims="cell_line")
 
@@ -371,9 +369,7 @@ class LineageHierNegBinomModel:
             mu_w = [0] * n_CG
             mu_genes = at.stack([mu_mu_d, mu_h, mu_k, mu_m] + mu_w)
             delta_genes = pm.Normal("delta_genes", 0, 1, shape=(n_G, n_gene_vars))
-            genes = pm.Deterministic(
-                "genes", mu_genes + at.dot(g_chol, delta_genes.T).T
-            )
+            genes = mu_genes + at.dot(g_chol, delta_genes.T).T
             mu_d = pm.Deterministic("mu_d", genes[:, 0], dims="gene")
             h = pm.Deterministic("h", genes[:, 1], dims="gene")
             k = pm.Deterministic("k", genes[:, 2], dims="gene")
@@ -401,13 +397,12 @@ class LineageHierNegBinomModel:
             # delta_d = pm.Normal("delta_d", 0, 1, dims="sgrna")
             # d = pm.Normal("d", mu_d[s_to_g] + delta_d * sigma_d, dims="sgrna")
 
-            gene_effect = pm.Deterministic(
-                "gene_effect",
-                mu_d[g] + cn_gene * h[g] + rna * k[g] + mut * m[g] + at.dot(w, M)[g, c],
+            gene_effect = (
+                mu_d[g] + cn_gene * h[g] + rna * k[g] + mut * m[g] + at.dot(w, M)[g, c]
             )
-            cell_effect = pm.Deterministic("cell_line_effect", b[c] + cn_cell * f[c])
-            eta = pm.Deterministic("eta", gene_effect + cell_effect + p[g, sc])
-            mu = pm.Deterministic("mu", pmmath.exp(eta))
+            cell_effect = b[c] + cn_cell * f[c]
+            eta = gene_effect + cell_effect + p[g, sc]
+            mu = pmmath.exp(eta)
 
             alpha = pm.Gamma("alpha", 1.9, 1)
             pm.NegativeBinomial(
