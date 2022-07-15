@@ -80,6 +80,7 @@ class LineageHierNegBinomModelConfig(BaseModel):
     """Single-lineage hierarchical negative binominal model configuration."""
 
     lineage: str
+    lfc_limits: tuple[float, float] = (-5.0, 5.0)
 
 
 class LineageHierNegBinomModel:
@@ -93,9 +94,12 @@ class LineageHierNegBinomModel:
 
         Args:
             lineage (str): Lineage to model.
+            lfc_limits (tuple[float, float]): Data points with log-fold change values
+            outside of this range are dropped. Defaults to (-5, 5).
         """
         self._config = LineageHierNegBinomModelConfig(**kwargs)
         self.lineage = self._config.lineage
+        self.lfc_limits = self._config.lfc_limits
         return None
 
     @property
@@ -111,6 +115,18 @@ class LineageHierNegBinomModel:
                     checks=[check_nonnegative(), check_finite()],
                     nullable=False,
                     coerce=True,
+                ),
+                "lfc": Column(
+                    float,
+                    checks=[
+                        Check.in_range(
+                            min_value=self.lfc_limits[0],
+                            max_value=self.lfc_limits[1],
+                            include_min=True,
+                            include_max=True,
+                        )
+                    ],
+                    nullable=False,
                 ),
                 "sgrna": Column("category"),
                 "hugo_symbol": Column(
@@ -205,7 +221,16 @@ class LineageHierNegBinomModel:
             comutation_matrix, cancer_genes
         )
         coords = self._model_coords(data, cancer_genes)
-        mut = augmented_mutation_data(data, cancer_genes=set(cancer_genes))
+        data = remove_cancer_gene_mutations_from_mutation_data(
+            data,
+            cancer_genes=set(cancer_genes),
+            mut_col="is_mutated",
+            new_col="is_mutated_adj",
+        )
+        data = remove_mutations_for_fully_mutated_genes(
+            data, mut_col="is_mutated_adj", new_col="is_mutated_adj"
+        )
+        mut = data["is_mutated_adj"].values
 
         return LineageHierNegBinomModelData(
             N=data.shape[0],
@@ -241,12 +266,17 @@ class LineageHierNegBinomModel:
             pd.DataFrame: Processed and validated modeling data.
         """
         logger.info("Processing data for modeling.")
-        return (
+        logger.info(f"LFC limits: {self.lfc_limits}")
+        min_lfc, max_lfc = self.lfc_limits
+        initial_size = data.shape[0]
+        data = (
             data.dropna(
                 axis=0,
                 how="any",
                 subset=["counts_final", "counts_initial", "copy_number"],
             )
+            .query(f"{min_lfc} <= lfc <= {max_lfc}")
+            .reset_index(drop=True)
             .pipe(zscale_rna_expression_by_gene, new_col="z_rna_gene")
             .pipe(
                 zscale_cna_by_group,
@@ -260,7 +290,7 @@ class LineageHierNegBinomModel:
                 groupby_cols=["depmap_id"],
                 new_col="z_cn_cell_line",
                 cn_max=7,
-                center=None,  # 1,
+                center=None,
             )
             .assign(
                 z_cn_gene=lambda d: squish_array(d.z_cn_gene, lower=-5.0, upper=5.0),
@@ -279,6 +309,9 @@ class LineageHierNegBinomModel:
             .pipe(set_achilles_categorical_columns, sort_cats=True, skip_if_cat=False)
             .pipe(self.validate_data)
         )
+        final_size = data.shape[0]
+        logger.warning(f"number of data points dropped: {initial_size - final_size}")
+        return data
 
     def _pre_model_messages(self, model_data: LineageHierNegBinomModelData) -> None:
         logger.info(f"Lineage: {self.lineage}")
@@ -449,9 +482,9 @@ def make_cancer_gene_mutation_matrix(
     return mut_mat
 
 
-def augmented_mutation_data(
-    data: pd.DataFrame, cancer_genes: set[str]
-) -> npt.NDArray[np.int_]:
+def remove_cancer_gene_mutations_from_mutation_data(
+    data: pd.DataFrame, cancer_genes: set[str], mut_col: str, new_col: str
+) -> pd.DataFrame:
     """Augment mutation data to account for cancer gene co-mutations.
 
     If the gene is in the collection of cancer genes, then set its mutation status in
@@ -462,15 +495,42 @@ def augmented_mutation_data(
     Args:
         data (pd.DataFrame): DepMap data frame.
         cancer_genes (set[str]): Collection of cancer genes.
+        mut_col (str): Mutation column name.
+        new_col (str): New column name.
 
     Returns:
-        np.ndarray: Augmented mutation data.
+        pd.DataFrame: Augmented mutation data.
     """
-    mut = data["is_mutated"].values.astype(int)
+    mut = data[mut_col].values.astype(int)
     for i, gene in enumerate(data["hugo_symbol"]):
         if gene in cancer_genes:
             mut[i] = 0
-    return mut
+    data[new_col] = mut
+    return data
+
+
+def remove_mutations_for_fully_mutated_genes(
+    data: pd.DataFrame, mut_col: str, new_col: str
+) -> pd.DataFrame:
+    """Remove mutations for genes mutated in every cell line.
+
+    If a gene is mutated in every cell line, the varying mutation effect for that gene
+    in `m` will be perfectly co-linear with the varying intercept for the gene.
+
+    Args:
+        data (pd.DataFrame): CRISPR data.
+        mut_col (str): Mutation column.
+        new_col (str): New mutation column.
+
+    Returns:
+        pd.DataFrame: Adjusted data frame.
+    """
+    mut_freq = data.copy().groupby(["hugo_symbol"])[mut_col].mean()
+    all_mut_genes = mut_freq[mut_freq == 1].index.tolist()
+    adj_muts = data[mut_col].copy()
+    adj_muts[data["hugo_symbol"].isin(all_mut_genes)] = 0
+    data[new_col] = adj_muts
+    return data
 
 
 def _remove_cancer_genes_never_mutated(
