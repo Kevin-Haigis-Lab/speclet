@@ -41,7 +41,7 @@ sample_pymc_advi:
   J: "pymc-advi"
 summarize_posterior:
   partition: "short"
-  cores: 2
+  cores: 1
   mem: "16000"
   time: "2:00:00"
   J: "summary"
