@@ -117,7 +117,7 @@
     Single lineage hierarchical negative binomial model for colorectal data from the
     Broad. Only running this model with the Numpyro JAX backend.
   "
-  active: true
+  active: false
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_colorectal.csv"
   model_kwargs:
@@ -143,7 +143,7 @@
     Single lineage hierarchical negative binomial model for liver data from the
     Broad. Only running this model with the Numpyro JAX backend.
   "
-  active: true
+  active: false
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_liver.csv"
   model_kwargs:
