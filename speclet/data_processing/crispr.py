@@ -1,7 +1,7 @@
 """Functions for handling common modifications and processing of the Achilles data."""
 
 from pathlib import Path
-from typing import Final, Iterable
+from typing import Final, Iterable, Literal
 
 import numpy as np
 import pandas as pd
@@ -42,7 +42,8 @@ def zscale_cna_by_group(
     Returns:
         pd.DataFrame: The modified DataFrame.
     """
-    if cn_max is not None and cn_max > 0:
+    if cn_max is not None:
+        assert cn_max > 0, "`cn_max` must be greater than 0."
         df[new_col] = squish_array(df[cn_col].values, lower=0, upper=cn_max)
     else:
         df[new_col] = df[cn_col]
@@ -68,6 +69,7 @@ def zscale_rna_expression(
     new_col: str | None = None,
     lower_bound: float | None = None,
     upper_bound: float | None = None,
+    center_metric: Literal["mean", "median"] = "mean",
 ) -> pd.DataFrame:
     """Z-scale RNA expression data.
 
@@ -93,10 +95,9 @@ def zscale_rna_expression(
         new_col = rna_col + "_z"
 
     rna = np.asarray(df[rna_col].values)
-    rna_z = careful_zscore(rna, atol=0.01)
+    rna_z = careful_zscore(rna, atol=0.01, center_metric=center_metric)
 
     if lower_bound is not None and upper_bound is not None:
-        print(rna_z)
         rna_z = squish_array(rna_z, lower=lower_bound, upper=upper_bound)
 
     df[new_col] = rna_z
@@ -109,6 +110,7 @@ def zscale_rna_expression_by_gene(
     new_col: str | None = None,
     lower_bound: float | None = None,
     upper_bound: float | None = None,
+    center_metric: Literal["mean", "median"] = "mean",
 ) -> pd.DataFrame:
     """Z-scale RNA expression by gene.
 
@@ -135,6 +137,7 @@ def zscale_rna_expression_by_gene(
             new_col=new_col,
             lower_bound=lower_bound,
             upper_bound=upper_bound,
+            center_metric=center_metric,
         )
     )
     return df.merge(rna_expr_df, how="left", on=["hugo_symbol", "depmap_id", rna_col])
@@ -420,7 +423,9 @@ def set_achilles_categorical_columns(
             continue
         if skip_if_cat and data[col].dtype.name == "category":
             continue
-        data = dphelp.make_cat(data, col, ordered=ordered, sort_cats=sort_cats)
+        data = data.astype({col: str}).pipe(
+            dphelp.make_cat, col=col, ordered=ordered, sort_cats=sort_cats
+        )
     return data
 
 
