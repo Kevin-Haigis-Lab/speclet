@@ -9,7 +9,6 @@ import numpy.typing as npt
 import pandas as pd
 import pymc as pm
 import pymc.math as pmmath
-from aesara import tensor as at
 from pandera import Check, Column, DataFrameSchema
 from pydantic import BaseModel
 
@@ -357,103 +356,37 @@ class LineageHierNegBinomModel:
 
         # Multi-dimensional parameter coordinates (labels).
         coords = model_data.coords
-        # Indexing arrays.
-        s = model_data.sgrna_idx
-        c = model_data.cellline_idx
-        g = model_data.gene_idx
-        s_to_g = model_data.sgrna_to_gene_idx
-        sc = model_data.screen_idx
-
-        # Data.
-        # cn_gene = model_data.copy_number_z_gene
-        cn_cell = model_data.copy_number_z_cell
+        # Data
         rna = model_data.m_log_rna_gene
-        # mut = model_data.is_mutated
-        # M = model_data.comutation_matrix
-
-        n_C = model_data.C
-        n_G = model_data.G
-        # n_CG = model_data.CG
-        n_gene_vars = 2  # + n_CG
+        # Indexing arrays.
+        s_to_g = model_data.sgrna_to_gene_idx
+        s = model_data.sgrna_idx
+        g = model_data.gene_idx
 
         with pm.Model(coords=coords) as model:
-            # Cell line varying effects covariance matix.
-            cl_chol, _, cl_sigmas = pm.LKJCholeskyCov(
-                "celllines_chol_cov", eta=2, n=2, sd_dist=pm.Exponential.dist(5)
-            )
-            for i, var_name in enumerate(["b", "f"]):
-                pm.Deterministic(f"sigma_{var_name}", cl_sigmas[i])
 
-            mu_b = 0
-            mu_f = pm.Normal("mu_f", -1, 2)
-            mu_celllines = at.stack([mu_b, mu_f])
-            delta_celllines = pm.Normal("delta_celllines", 0, 1, shape=(n_C, 2))
-            celllines = mu_celllines + at.dot(cl_chol, delta_celllines.T).T
-            b = pm.Deterministic("b", celllines[:, 0], dims="cell_line")
-            f = pm.Deterministic("f", celllines[:, 1], dims="cell_line")
+            mu_b = pm.Normal("mu_b", -0.5, 1)
+            sigma_b = pm.Exponential("sigma_b", 2)
+            delta_b = pm.Normal("delta_b", 0, 1, dims="gene")
+            b = pm.Normal("b", mu_b + delta_b * sigma_b, dims="gene")
 
-            # Gene carying effects covariance matrix.
-            g_chol, _, g_sigmas = pm.LKJCholeskyCov(
-                "genes_chol_cov", eta=2, n=n_gene_vars, sd_dist=pm.Exponential.dist(5)
-            )
-            # for i, var_name in enumerate(["mu_d", "h", "k", "m"]):
-            for i, var_name in enumerate(["mu_d", "k"]):
-                pm.Deterministic(f"sigma_{var_name}", g_sigmas[i])
+            mu_mu_a = pm.Normal("mu_mu_a", 0, 1)
+            sigma_mu_a = pm.Exponential("sigma_mu_a", 2)
+            delta_mu_a = pm.Normal("delta_mu_a", 0, 1, dims="gene")
+            mu_a = pm.Normal("mu_a", mu_mu_a + delta_mu_a * sigma_mu_a, dims="gene")
+            sigma_a = pm.Exponential("sigma_a", 2)
+            delta_a = pm.Normal("delta_a", 0, 1, dims="sgrna")
+            a = pm.Normal("a", mu_a[s_to_g] + delta_a * sigma_a, dims="sgrna")
 
-            # if n_CG > 0:
-            #     pm.Deterministic("sigma_w", g_sigmas[4:], dims=("cancer_gene"))
-
-            mu_mu_d = pm.Normal("mu_mu_d", 0, 2)
-            # mu_h = 0
-            mu_k = pm.Normal("mu_k", -1, 2)
-            # mu_m = 0
-            # mu_w = [0] * n_CG
-            # mu_genes = at.stack([mu_mu_d, mu_h, mu_k, mu_m] + mu_w)
-            mu_genes = at.stack([mu_mu_d, mu_k])
-            delta_genes = pm.Normal("delta_genes", 0, 1, shape=(n_G, n_gene_vars))
-            genes = mu_genes + at.dot(g_chol, delta_genes.T).T
-            mu_d = pm.Deterministic("mu_d", genes[:, 0], dims="gene")
-            # h = pm.Deterministic("h", genes[:, 1], dims="gene")
-            # k = pm.Deterministic("k", genes[:, 2], dims="gene")
-            k = pm.Deterministic("k", genes[:, 1], dims="gene")
-            # m = pm.Deterministic("m", genes[:, 3], dims="gene")
-
-            # w: RandomVariable | np.ndarray
-            # if n_CG > 0:
-            #     w = pm.Deterministic("w", genes[:, 4:], dims=("gene", "cancer_gene"))
-            # else:
-            #     logger.warning("No cancer genes in the model - ignoring variable `w`.")
-            #     w = np.zeros((n_G, n_CG))
-
-            # TODO: try with a hierarchical structure for sigma_d, too.
-            sigma_d = pm.HalfNormal("sigma_d", 0.1)
-            delta_d = pm.Normal("delta_d", 0, 1, dims="sgrna")
-            d = pm.Normal("d", mu_d[s_to_g] + delta_d * sigma_d, dims="sgrna")
-
-            # gene_effect = (
-            #     mu_d[g] + cn_gene * h[g] + rna * k[g] + mut * m[g] + at.dot(w, M)[g, c]
-            # )
-            gene_effect = d[s] + k[g] * rna
-            cell_effect = b[c] + f[c] * cn_cell
-            eta = gene_effect + cell_effect
-
-            if model_data.SC > 1:
-                # Multiple screens.
-                sigma_p = pm.HalfNormal("sigma_p", 0.1)
-                delta_p = pm.Normal("delta_p", 0, 1, dims=("gene", "screen"))
-                p = pm.Deterministic("p", delta_p * sigma_p, dims=("gene", "screen"))
-                eta += p[g, sc]
-            else:
-                # Single screen.
-                logger.warning("Only 1 screen detected - ignoring variable `p`.")
+            gene_effect = a[s] + b[g] * rna
+            eta = pm.Deterministic("eta", gene_effect + np.log(model_data.ct_initial))
 
             mu = pmmath.exp(eta)
 
-            # alpha = pm.Exponential("alpha", 0.5)
             alpha = pm.Gamma("alpha", 10, 1)
             pm.NegativeBinomial(
                 "ct_final",
-                mu * model_data.ct_initial,
+                mu,
                 alpha,
                 observed=model_data.ct_final,
             )
