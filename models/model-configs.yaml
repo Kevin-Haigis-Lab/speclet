@@ -183,8 +183,8 @@
         log_likelihood: false
   slurm_resources:
     PYMC_NUMPYRO:
-      mem: 50
-      time: 6
+      mem: 32
+      time: 3
       cores: 1
       gpu:
         gpu: "RTX 8000"

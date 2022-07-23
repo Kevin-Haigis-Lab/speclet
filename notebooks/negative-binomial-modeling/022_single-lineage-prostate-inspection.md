@@ -14,6 +14,7 @@ import arviz as az
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import qnorm
 import seaborn as sns
 ```
 
@@ -25,6 +26,7 @@ from speclet.data_processing.common import head_tail
 from speclet.io import modeling_data_dir, models_dir
 from speclet.managers.data_managers import CrisprScreenDataManager
 from speclet.plot import set_speclet_theme
+from speclet.project_configuration import arviz_config
 ```
 
 
@@ -35,6 +37,7 @@ notebook_tic = time()
 # Plotting setup.
 set_speclet_theme()
 %config InlineBackend.figure_format = "retina"
+arviz_config()
 ```
 
 ## Data
@@ -86,73 +89,73 @@ prostate_post_summary.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>d[AAAAAAATCCAGCAATGCAG]</td>
-      <td>0.150</td>
-      <td>0.149</td>
-      <td>-0.086</td>
-      <td>0.386</td>
-      <td>0.002</td>
-      <td>0.002</td>
-      <td>4083.0</td>
-      <td>2885.0</td>
+      <td>mu_b</td>
+      <td>-0.000</td>
+      <td>0.008</td>
+      <td>-0.012</td>
+      <td>0.012</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>5836.0</td>
+      <td>3091.0</td>
       <td>1.0</td>
-      <td>d</td>
+      <td>mu_b</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>d[AAAAAACCCGTAGATAGCCT]</td>
-      <td>0.093</td>
-      <td>0.159</td>
+      <td>b[A1BG]</td>
+      <td>-0.037</td>
+      <td>0.067</td>
       <td>-0.148</td>
-      <td>0.355</td>
-      <td>0.003</td>
-      <td>0.002</td>
-      <td>3517.0</td>
-      <td>3221.0</td>
+      <td>0.064</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>5267.0</td>
+      <td>2895.0</td>
       <td>1.0</td>
-      <td>d</td>
+      <td>b</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>d[AAAAAAGAAGAAAAAACCAG]</td>
-      <td>-0.660</td>
-      <td>0.165</td>
-      <td>-0.941</td>
-      <td>-0.410</td>
-      <td>0.002</td>
-      <td>0.002</td>
-      <td>4850.0</td>
-      <td>2734.0</td>
+      <td>b[A1CF]</td>
+      <td>-0.008</td>
+      <td>0.067</td>
+      <td>-0.109</td>
+      <td>0.101</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>4757.0</td>
+      <td>2877.0</td>
       <td>1.0</td>
-      <td>d</td>
+      <td>b</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>d[AAAAAAGCTCAAGAAGGAGG]</td>
-      <td>-0.215</td>
-      <td>0.154</td>
-      <td>-0.450</td>
-      <td>0.042</td>
-      <td>0.002</td>
-      <td>0.002</td>
-      <td>3930.0</td>
-      <td>3270.0</td>
+      <td>b[A2M]</td>
+      <td>0.038</td>
+      <td>0.070</td>
+      <td>-0.076</td>
+      <td>0.150</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>5439.0</td>
+      <td>2917.0</td>
       <td>1.0</td>
-      <td>d</td>
+      <td>b</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>d[AAAAAAGGCTGTAAAAGCGT]</td>
-      <td>-0.018</td>
+      <td>b[A2ML1]</td>
+      <td>0.032</td>
+      <td>0.068</td>
+      <td>-0.078</td>
       <td>0.134</td>
-      <td>-0.233</td>
-      <td>0.192</td>
-      <td>0.002</td>
-      <td>0.002</td>
-      <td>5989.0</td>
-      <td>2999.0</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>6742.0</td>
+      <td>3014.0</td>
       <td>1.0</td>
-      <td>d</td>
+      <td>b</td>
     </tr>
   </tbody>
 </table>
@@ -370,13 +373,35 @@ prostate_data.head()
 prostate_model = LineageHierNegBinomModel(lineage="prostate")
 ```
 
-## Analysis
 
-### Summary
+```python
+valid_prostate_data = prostate_model.data_processing_pipeline(prostate_data.copy())
+prostate_mdl_data = prostate_model.make_data_structure(valid_prostate_data)
+```
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/23/22 03:19:08] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Processing data for modeling.     <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#267" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">267</span></a>
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> LFC limits: <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-5.0</span>, <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.0</span><span style="font-weight: bold">)</span>           <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#268" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">268</span></a>
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/23/22 03:20:09] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> number of data points dropped: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span>  <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#319" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">319</span></a>
+</pre>
+
+
+
+## Analysis
 
 
 ```python
-sns.kdeplot(x=prostate_post_summary["r_hat"]);
+sns.histplot(x=prostate_post_summary["r_hat"], binwidth=0.01, stat="proportion");
 ```
 
 
@@ -401,6 +426,17 @@ plt.show()
 
 
 ```python
+az.plot_energy(trace);
+```
+
+
+
+![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_19_0.png)
+
+
+
+
+```python
 sgrna_to_gene_map = (
     prostate_data.copy()[["hugo_symbol", "sgrna"]]
     .drop_duplicates()
@@ -408,61 +444,394 @@ sgrna_to_gene_map = (
 )
 ```
 
-The posteriors for the varying sgRNA effect $d$ are far more variable than $\mu_d$ which basically collapsed to 0.
-
 
 ```python
-d_post = (
-    prostate_post_summary.query("var_name == 'd'")
+(
+    prostate_post_summary.query("var_name == 'mu_a'")
+    .sort_values("mean")
     .reset_index(drop=True)
-    .pipe(extract_coords_param_names, names=["sgrna"], col="parameter")
-    .merge(sgrna_to_gene_map, on="sgrna", how="left")
+    .pipe(head_tail, n=5)
 )
-
-mu_d_post = (
-    prostate_post_summary.query("var_name == 'mu_d'")
-    .reset_index(drop=True)
-    .pipe(extract_coords_param_names, names=["hugo_symbol"], col="parameter")
-)
-
-fig, axes = plt.subplots(ncols=2, figsize=(8, 4))
-
-sns.kdeplot(d_post["mean"], ax=axes[0])
-axes[0].set_title(r"$d$")
-
-sns.kdeplot(mu_d_post["mean"], ax=axes[1])
-axes[1].set_title(r"$\mu_d$")
-
-plt.tight_layout()
-plt.show()
 ```
 
 
 
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_21_0.png)
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>parameter</th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>var_name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>mu_a[RAN]</td>
+      <td>-1.404</td>
+      <td>0.447</td>
+      <td>-2.118</td>
+      <td>-0.693</td>
+      <td>0.006</td>
+      <td>0.004</td>
+      <td>5525.0</td>
+      <td>2968.0</td>
+      <td>1.0</td>
+      <td>mu_a</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>mu_a[KIF11]</td>
+      <td>-1.383</td>
+      <td>0.439</td>
+      <td>-2.092</td>
+      <td>-0.695</td>
+      <td>0.006</td>
+      <td>0.005</td>
+      <td>5079.0</td>
+      <td>3191.0</td>
+      <td>1.0</td>
+      <td>mu_a</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>mu_a[HSPE1]</td>
+      <td>-1.357</td>
+      <td>0.458</td>
+      <td>-2.056</td>
+      <td>-0.589</td>
+      <td>0.006</td>
+      <td>0.005</td>
+      <td>5068.0</td>
+      <td>2798.0</td>
+      <td>1.0</td>
+      <td>mu_a</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>mu_a[CENPW]</td>
+      <td>-1.344</td>
+      <td>0.452</td>
+      <td>-2.061</td>
+      <td>-0.624</td>
+      <td>0.006</td>
+      <td>0.004</td>
+      <td>5257.0</td>
+      <td>3046.0</td>
+      <td>1.0</td>
+      <td>mu_a</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>mu_a[RPL9]</td>
+      <td>-1.273</td>
+      <td>0.444</td>
+      <td>-1.992</td>
+      <td>-0.583</td>
+      <td>0.006</td>
+      <td>0.005</td>
+      <td>5068.0</td>
+      <td>2750.0</td>
+      <td>1.0</td>
+      <td>mu_a</td>
+    </tr>
+    <tr>
+      <th>18114</th>
+      <td>mu_a[FOPNL]</td>
+      <td>0.455</td>
+      <td>0.451</td>
+      <td>-0.269</td>
+      <td>1.154</td>
+      <td>0.007</td>
+      <td>0.006</td>
+      <td>4467.0</td>
+      <td>2811.0</td>
+      <td>1.0</td>
+      <td>mu_a</td>
+    </tr>
+    <tr>
+      <th>18115</th>
+      <td>mu_a[ZNF611]</td>
+      <td>0.458</td>
+      <td>0.458</td>
+      <td>-0.292</td>
+      <td>1.174</td>
+      <td>0.007</td>
+      <td>0.006</td>
+      <td>4558.0</td>
+      <td>2941.0</td>
+      <td>1.0</td>
+      <td>mu_a</td>
+    </tr>
+    <tr>
+      <th>18116</th>
+      <td>mu_a[TMPRSS11F]</td>
+      <td>0.471</td>
+      <td>0.492</td>
+      <td>-0.270</td>
+      <td>1.270</td>
+      <td>0.007</td>
+      <td>0.006</td>
+      <td>5616.0</td>
+      <td>3391.0</td>
+      <td>1.0</td>
+      <td>mu_a</td>
+    </tr>
+    <tr>
+      <th>18117</th>
+      <td>mu_a[EPHA2]</td>
+      <td>0.503</td>
+      <td>0.457</td>
+      <td>-0.226</td>
+      <td>1.217</td>
+      <td>0.006</td>
+      <td>0.006</td>
+      <td>4994.0</td>
+      <td>2721.0</td>
+      <td>1.0</td>
+      <td>mu_a</td>
+    </tr>
+    <tr>
+      <th>18118</th>
+      <td>mu_a[NF2]</td>
+      <td>0.536</td>
+      <td>0.442</td>
+      <td>-0.207</td>
+      <td>1.213</td>
+      <td>0.006</td>
+      <td>0.005</td>
+      <td>5824.0</td>
+      <td>2857.0</td>
+      <td>1.0</td>
+      <td>mu_a</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 
 
 
 ```python
+(
+    prostate_post_summary.query("var_name == 'b'")
+    .sort_values("mean")
+    .reset_index(drop=True)
+    .pipe(head_tail, n=5)
+)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>parameter</th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>var_name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>b[EP300]</td>
+      <td>-0.944</td>
+      <td>0.066</td>
+      <td>-1.043</td>
+      <td>-0.833</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>4953.0</td>
+      <td>3081.0</td>
+      <td>1.0</td>
+      <td>b</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>b[ZC3H11A]</td>
+      <td>-0.692</td>
+      <td>0.157</td>
+      <td>-0.930</td>
+      <td>-0.441</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>4386.0</td>
+      <td>2714.0</td>
+      <td>1.0</td>
+      <td>b</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>b[HOXB13]</td>
+      <td>-0.681</td>
+      <td>0.083</td>
+      <td>-0.817</td>
+      <td>-0.555</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>5387.0</td>
+      <td>3107.0</td>
+      <td>1.0</td>
+      <td>b</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>b[EBP]</td>
+      <td>-0.661</td>
+      <td>0.080</td>
+      <td>-0.792</td>
+      <td>-0.537</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>5285.0</td>
+      <td>3038.0</td>
+      <td>1.0</td>
+      <td>b</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>b[IRS2]</td>
+      <td>-0.604</td>
+      <td>0.076</td>
+      <td>-0.722</td>
+      <td>-0.480</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>5076.0</td>
+      <td>2756.0</td>
+      <td>1.0</td>
+      <td>b</td>
+    </tr>
+    <tr>
+      <th>18114</th>
+      <td>b[NDUFB11]</td>
+      <td>0.604</td>
+      <td>0.079</td>
+      <td>0.479</td>
+      <td>0.733</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>4840.0</td>
+      <td>3061.0</td>
+      <td>1.0</td>
+      <td>b</td>
+    </tr>
+    <tr>
+      <th>18115</th>
+      <td>b[NDUFA10]</td>
+      <td>0.606</td>
+      <td>0.072</td>
+      <td>0.493</td>
+      <td>0.723</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>4985.0</td>
+      <td>3061.0</td>
+      <td>1.0</td>
+      <td>b</td>
+    </tr>
+    <tr>
+      <th>18116</th>
+      <td>b[GRB2]</td>
+      <td>0.613</td>
+      <td>0.072</td>
+      <td>0.501</td>
+      <td>0.730</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>4620.0</td>
+      <td>2955.0</td>
+      <td>1.0</td>
+      <td>b</td>
+    </tr>
+    <tr>
+      <th>18117</th>
+      <td>b[NARS2]</td>
+      <td>0.644</td>
+      <td>0.071</td>
+      <td>0.527</td>
+      <td>0.754</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>5381.0</td>
+      <td>3110.0</td>
+      <td>1.0</td>
+      <td>b</td>
+    </tr>
+    <tr>
+      <th>18118</th>
+      <td>b[AIFM1]</td>
+      <td>0.697</td>
+      <td>0.071</td>
+      <td>0.587</td>
+      <td>0.811</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>4395.0</td>
+      <td>3063.0</td>
+      <td>1.0</td>
+      <td>b</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+example_genes = ["KIF11", "AR", "NF2"]
 az.plot_trace(
-    trace, var_names="mu_d", coords={"gene": ["KRAS", "A1BG", "ZZZ3"]}, compact=False
+    trace, var_names=["mu_a", "b"], coords={"gene": example_genes}, compact=False
 )
-plt.tight_layout()
-plt.show()
-```
-
-
-
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_22_0.png)
-
-
-
-
-```python
-sgrnas_sample = trace.posterior.coords["sgrna"].values[:5]
-
-az.plot_trace(trace, var_names="d", coords={"sgrna": sgrnas_sample}, compact=False)
 plt.tight_layout()
 plt.show()
 ```
@@ -473,149 +842,56 @@ plt.show()
 
 
 
-The averages of the sgRNA posteriors for each gene have variability that never made it to $\mu_d$.
-
 
 ```python
-d_post.groupby("hugo_symbol")[["mean", "hdi_5.5%", "hdi_94.5%"]].mean().reset_index(
-    drop=False
-).head()
+sgrnas_sample = trace.posterior.coords["sgrna"].values[:5]
+
+az.plot_trace(trace, var_names="a", coords={"sgrna": sgrnas_sample}, compact=False)
+plt.tight_layout()
+plt.show()
 ```
 
 
 
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>hugo_symbol</th>
-      <th>mean</th>
-      <th>hdi_5.5%</th>
-      <th>hdi_94.5%</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>A1BG</td>
-      <td>0.24975</td>
-      <td>0.02650</td>
-      <td>0.47075</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>A1CF</td>
-      <td>0.22550</td>
-      <td>0.01625</td>
-      <td>0.43650</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>A2M</td>
-      <td>0.00875</td>
-      <td>-0.20450</td>
-      <td>0.22325</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>A2ML1</td>
-      <td>0.32950</td>
-      <td>0.10900</td>
-      <td>0.55225</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>A3GALT2</td>
-      <td>0.14800</td>
-      <td>-0.06425</td>
-      <td>0.36500</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_24_0.png)
 
 
 
 
 ```python
-mu_d_post.query("hugo_symbol == 'A1BG'")
+example_gene = "KIF11"
+sgrna_AR = sgrna_to_gene_map.query(f"hugo_symbol == '{example_gene}'")["sgrna"].tolist()
+az.plot_forest(
+    trace,
+    var_names=["mu_mu_a", "sigma_mu_a", "mu_a", "sigma_a", "a", "mu_b", "b"],
+    coords={"gene": [example_gene], "sgrna": sgrna_AR},
+    combined=False,
+    figsize=(6, 5),
+)
+plt.show()
 ```
 
 
 
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>parameter</th>
-      <th>mean</th>
-      <th>sd</th>
-      <th>hdi_5.5%</th>
-      <th>hdi_94.5%</th>
-      <th>mcse_mean</th>
-      <th>mcse_sd</th>
-      <th>ess_bulk</th>
-      <th>ess_tail</th>
-      <th>r_hat</th>
-      <th>var_name</th>
-      <th>hugo_symbol</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>mu_d[A1BG]</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>-0.001</td>
-      <td>0.001</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>3542.0</td>
-      <td>1844.0</td>
-      <td>1.03</td>
-      <td>mu_d</td>
-      <td>A1BG</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_25_0.png)
 
 
 
 
 ```python
-az.plot_trace(trace, var_names=["^sigma_*"], filter_vars="regex")
+az.plot_trace(trace, var_names=["mu_mu_a", "mu_b"], compact=False)
+plt.tight_layout()
+```
+
+
+
+![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_26_0.png)
+
+
+
+
+```python
+az.plot_trace(trace, var_names=["^sigma_*"], filter_vars="regex", compact=False)
 plt.tight_layout()
 ```
 
@@ -625,252 +901,9 @@ plt.tight_layout()
 
 
 
-I wanted to briefly see if the sgRNA-to-gene indexing is incorrect, but everything seems fine.
-
 
 ```python
-valid_prostate_data = prostate_model.data_processing_pipeline(prostate_data.copy())
-prostate_mdl_data = prostate_model.make_data_structure(valid_prostate_data)
-```
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/12/22 16:19:08] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Processing data for modeling.     <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#241" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">241</span></a>
-</pre>
-
-
-
-
-```python
-gene = "A1BG"
-gene_codes = valid_prostate_data["hugo_symbol"][
-    valid_prostate_data["hugo_symbol"] == gene
-].cat.codes.unique()
-assert len(gene_codes) == 1
-gene_code = gene_codes[0]
-assert trace.posterior.coords["gene"][gene_code].values == gene
-
-sgrna_idx = np.where(prostate_mdl_data.sgrna_to_gene_idx == gene_code)
-sgrnas = trace.posterior.coords["sgrna"][sgrna_idx].values
-sgrna_to_gene_map.filter_column_isin("sgrna", sgrnas)
-```
-
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>hugo_symbol</th>
-      <th>sgrna</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>44225</th>
-      <td>A1BG</td>
-      <td>GGAAGTCTGGAGTCTCCAGG</td>
-    </tr>
-    <tr>
-      <th>54943</th>
-      <td>A1BG</td>
-      <td>GTGGACTTCCAGCTACGGCG</td>
-    </tr>
-    <tr>
-      <th>55251</th>
-      <td>A1BG</td>
-      <td>GTGTGCCGAGGTGTGCTGCG</td>
-    </tr>
-    <tr>
-      <th>58549</th>
-      <td>A1BG</td>
-      <td>TCAATGGTCACAGTAGCGCT</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
-
-
-```python
-len(prostate_mdl_data.sgrna_to_gene_idx), len(set(prostate_mdl_data.sgrna_to_gene_idx))
-```
-
-
-
-
-    (71062, 18119)
-
-
-
-The trace for $b$ is highly autocorrelated.
-It's very obvious when compared to the trace of $f$.
-
-
-```python
-az.plot_trace(trace, var_names=["b", "f"], compact=False)
-plt.tight_layout()
-plt.show()
-```
-
-
-
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_33_0.png)
-
-
-
-
-```python
-az.plot_forest(trace, var_names=["b", "f"], figsize=(7, 4));
-```
-
-
-
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_34_0.png)
-
-
-
-A little analysis of $w$ comutation variable.
-All of the $\sigma_w$ were poorly sampled except for *ZFHX3*.
-
-
-```python
-az.plot_trace(trace, var_names="sigma_w", compact=False)
-plt.tight_layout()
-plt.show()
-```
-
-
-
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_36_0.png)
-
-
-
-
-```python
-cancer_genes_mutations = (
-    valid_prostate_data.filter_column_isin(
-        "hugo_symbol", trace.posterior.coords["cancer_gene"].values
-    )[["depmap_id", "hugo_symbol", "is_mutated"]]
-    .drop_duplicates()
-    .reset_index(drop=True)
-    .sort_values(["depmap_id", "hugo_symbol"])
-    .pivot_wider("hugo_symbol", names_from="depmap_id", values_from="is_mutated")
-    .set_index("hugo_symbol")
-)
-cancer_genes_mutations
-```
-
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>ACH-000115</th>
-      <th>ACH-000977</th>
-      <th>ACH-001453</th>
-      <th>ACH-001627</th>
-      <th>ACH-001648</th>
-    </tr>
-    <tr>
-      <th>hugo_symbol</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>AR</th>
-      <td>False</td>
-      <td>True</td>
-      <td>False</td>
-      <td>False</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>FOXA1</th>
-      <td>False</td>
-      <td>True</td>
-      <td>False</td>
-      <td>False</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>NCOR2</th>
-      <td>False</td>
-      <td>True</td>
-      <td>False</td>
-      <td>False</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>PTEN</th>
-      <td>False</td>
-      <td>True</td>
-      <td>False</td>
-      <td>False</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>ZFHX3</th>
-      <td>False</td>
-      <td>True</td>
-      <td>False</td>
-      <td>True</td>
-      <td>False</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
-
-
-```python
-w_post_summary = (
-    prostate_post_summary.query("var_name == 'w'")
-    .reset_index(drop=True)
-    .pipe(
-        extract_coords_param_names,
-        names=["target_gene", "cancer_gene"],
-        col="parameter",
-    )
-)
-w_post_summary.head()
+prostate_post_summary.filter_string("var_name", "^sigma_*")
 ```
 
 
@@ -905,90 +938,50 @@ w_post_summary.head()
       <th>ess_tail</th>
       <th>r_hat</th>
       <th>var_name</th>
-      <th>target_gene</th>
-      <th>cancer_gene</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
-      <td>w[A1BG, AR]</td>
-      <td>0.002</td>
-      <td>0.091</td>
-      <td>-0.134</td>
-      <td>0.159</td>
-      <td>0.001</td>
+      <th>107302</th>
+      <td>sigma_b</td>
+      <td>0.006</td>
       <td>0.005</td>
-      <td>4661.0</td>
-      <td>1418.0</td>
-      <td>1.05</td>
-      <td>w</td>
-      <td>A1BG</td>
-      <td>AR</td>
+      <td>0.0</td>
+      <td>0.012</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3095.0</td>
+      <td>1663.0</td>
+      <td>1.0</td>
+      <td>sigma_b</td>
     </tr>
     <tr>
-      <th>1</th>
-      <td>w[A1BG, FOXA1]</td>
+      <th>107303</th>
+      <td>sigma_mu_a</td>
       <td>0.007</td>
-      <td>0.100</td>
-      <td>-0.155</td>
-      <td>0.158</td>
-      <td>0.002</td>
       <td>0.005</td>
-      <td>4274.0</td>
-      <td>781.0</td>
-      <td>1.06</td>
-      <td>w</td>
-      <td>A1BG</td>
-      <td>FOXA1</td>
+      <td>0.0</td>
+      <td>0.014</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2321.0</td>
+      <td>1220.0</td>
+      <td>1.0</td>
+      <td>sigma_mu_a</td>
     </tr>
     <tr>
-      <th>2</th>
-      <td>w[A1BG, NCOR2]</td>
-      <td>0.002</td>
-      <td>0.093</td>
-      <td>-0.143</td>
-      <td>0.151</td>
-      <td>0.001</td>
-      <td>0.007</td>
-      <td>5152.0</td>
-      <td>213.0</td>
-      <td>1.06</td>
-      <td>w</td>
-      <td>A1BG</td>
-      <td>NCOR2</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>w[A1BG, PTEN]</td>
+      <th>107304</th>
+      <td>sigma_a</td>
       <td>0.003</td>
-      <td>0.118</td>
-      <td>-0.193</td>
-      <td>0.191</td>
-      <td>0.002</td>
-      <td>0.013</td>
-      <td>4025.0</td>
-      <td>409.0</td>
-      <td>1.21</td>
-      <td>w</td>
-      <td>A1BG</td>
-      <td>PTEN</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>w[A1BG, ZFHX3]</td>
-      <td>-0.029</td>
-      <td>0.133</td>
-      <td>-0.246</td>
-      <td>0.180</td>
-      <td>0.002</td>
-      <td>0.002</td>
-      <td>4153.0</td>
-      <td>3495.0</td>
-      <td>1.00</td>
-      <td>w</td>
-      <td>A1BG</td>
-      <td>ZFHX3</td>
+      <td>0.003</td>
+      <td>0.0</td>
+      <td>0.007</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2553.0</td>
+      <td>1581.0</td>
+      <td>1.0</td>
+      <td>sigma_a</td>
     </tr>
   </tbody>
 </table>
@@ -998,107 +991,7 @@ w_post_summary.head()
 
 
 ```python
-sns.kdeplot(data=w_post_summary, x="mean", hue="cancer_gene");
-```
-
-
-
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_39_0.png)
-
-
-
-
-```python
-plt_df = w_post_summary.pivot_wider(
-    "target_gene", names_from="cancer_gene", values_from="mean"
-).set_index("target_gene")
-
-sns.clustermap(plt_df, cmap="seismic", vmin=-1, vmax=1)
-```
-
-    /home/jc604/.conda/envs/speclet/lib/python3.10/site-packages/seaborn/matrix.py:654: UserWarning: Clustering large matrix with scipy. Installing `fastcluster` may give better performance.
-      warnings.warn(msg)
-
-
-
-
-
-    <seaborn.matrix.ClusterGrid at 0x7f7e7d1f2350>
-
-
-
-
-
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_40_2.png)
-
-
-
-
-```python
-example_cancer_gene = "ZFHX3"
-example_w = w_post_summary.query(f"cancer_gene == '{example_cancer_gene}'")
-
-example_hits = (
-    example_w.sort_values("mean").pipe(head_tail, n=10)["target_gene"].tolist()
-)
-```
-
-
-```python
-cancer_gene_muts = list(
-    prostate_data.query(f"hugo_symbol == '{example_cancer_gene}'")
-    .query("is_mutated")["depmap_id"]
-    .unique()
-)
-```
-
-
-```python
-example_hit_data = (
-    prostate_data.filter_column_isin("hugo_symbol", example_hits)
-    .assign(cancer_gene_mut=lambda d: [cl in cancer_gene_muts for cl in d["depmap_id"]])
-    .astype({"hugo_symbol": str})
-)
-example_hit_data["hugo_symbol"] = pd.Categorical(
-    example_hit_data["hugo_symbol"], categories=example_hits, ordered=True
-)
-```
-
-
-```python
-fig, ax = plt.subplots(figsize=(8, 5))
-sns.boxplot(
-    data=example_hit_data,
-    x="hugo_symbol",
-    y="lfc",
-    hue="cancer_gene_mut",
-    ax=ax,
-    fliersize=0,
-    boxprops={"alpha": 0.25},
-)
-sns.stripplot(
-    data=example_hit_data,
-    x="hugo_symbol",
-    y="lfc",
-    hue="cancer_gene_mut",
-    dodge=True,
-    ax=ax,
-)
-ax.tick_params(rotation=90)
-plt.show()
-```
-
-
-
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_44_0.png)
-
-
-
-Some of the other parameters (note that they share the same x-axis).
-
-
-```python
-var_names = ["d", "h", "k", "m"]
+var_names = ["a", "mu_a", "b"]
 _, axes = plt.subplots(2, 2, figsize=(8, 4), sharex=True)
 for ax, var_name in zip(axes.flatten(), var_names):
     x = prostate_post_summary.query(f"var_name == '{var_name}'")["mean"]
@@ -1112,9 +1005,144 @@ plt.show()
 
 
 
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_46_0.png)
+![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_29_0.png)
 
 
+
+
+```python
+eg_gene = trace.posterior.coords["gene"].values[0]
+
+for gene in [eg_gene, "KIF11"]:
+    az.plot_pair(
+        trace,
+        var_names=["mu_a", "b"],
+        coords={"gene": [gene]},
+    )
+    plt.tight_layout()
+    plt.show()
+```
+
+
+
+![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_30_0.png)
+
+
+
+
+
+![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_30_1.png)
+
+
+
+
+```python
+mu_a_post_avg = trace.posterior["mu_a"].mean(axis=(0, 1))
+b_post_avg = trace.posterior["b"].mean(axis=(0, 1))
+
+ax = sns.scatterplot(x=mu_a_post_avg, y=b_post_avg, alpha=0.1, linewidth=0)
+ax.axhline(color="black")
+ax.axvline(color="black")
+ax.set_xlabel(r"$\mu_a$")
+ax.set_ylabel(r"$b$")
+ax.set_title("Joint posterior distribution")
+plt.show()
+```
+
+
+
+![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_31_0.png)
+
+
+
+
+```python
+n_examples = 40
+n_chains, n_draws, n_data = trace.posterior_predictive["ct_final"].shape
+ex_draws_idx = np.random.choice(
+    np.arange(n_draws), size=n_examples // n_chains, replace=False
+)
+example_ppc_draws = trace.posterior_predictive["ct_final"][
+    :, ex_draws_idx, :
+].values.reshape(-1, n_data)
+example_ppc_draws.shape
+```
+
+
+
+
+    (40, 355308)
+
+
+
+
+```python
+fig, axes = plt.subplots(ncols=2, figsize=(9, 4), sharex=False, sharey=False)
+ax1 = axes[0]
+ax2 = axes[1]
+
+pp_avg = trace.posterior_predictive["ct_final"].mean(axis=(0, 1))
+
+for i in range(example_ppc_draws.shape[0]):
+    sns.kdeplot(
+        x=np.log10(example_ppc_draws[i, :] + 1), alpha=0.2, color="tab:blue", ax=ax1
+    )
+
+sns.kdeplot(x=np.log10(pp_avg + 1), color="tab:orange", ax=ax1)
+sns.kdeplot(x=np.log10(valid_prostate_data["counts_final"] + 1), color="k", ax=ax1)
+ax1.set_xlabel("log10(counts final + 1)")
+ax1.set_ylabel("density")
+
+
+for i in range(example_ppc_draws.shape[0]):
+    sns.kdeplot(x=example_ppc_draws[i, :], alpha=0.2, color="tab:blue", ax=ax2)
+
+sns.kdeplot(x=pp_avg, color="tab:orange", ax=ax2)
+sns.kdeplot(x=valid_prostate_data["counts_final"], color="k", ax=ax2)
+ax2.set_xlabel("counts final")
+ax2.set_ylabel("density")
+ax2.set_xlim(0, 1000)
+
+fig.suptitle("PPC")
+fig.tight_layout()
+plt.show()
+```
+
+
+
+![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_33_0.png)
+
+
+
+
+```python
+
+```
+
+
+```python
+
+```
+
+
+```python
+
+```
+
+
+```python
+
+```
+
+
+```python
+
+```
+
+
+```python
+
+```
 
 ---
 
@@ -1126,7 +1154,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 2.13 minutes
+    execution time: 5.48 minutes
 
 
 
@@ -1135,7 +1163,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-07-12
+    Last updated: 2022-07-23
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -1146,15 +1174,16 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1160.45.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-a-17-83.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
 
     Git branch: simplify
 
-    seaborn   : 0.11.2
-    numpy     : 1.23.0
-    pandas    : 1.4.3
     arviz     : 0.12.1
+    qnorm     : 0.8.1
+    pandas    : 1.4.3
     matplotlib: 3.5.2
+    numpy     : 1.22.4
+    seaborn   : 0.11.2
