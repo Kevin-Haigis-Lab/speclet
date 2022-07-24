@@ -6,7 +6,7 @@
 #SBATCH --account=park
 #SBATCH -c 1
 #SBATCH -p priority
-#SBATCH -t 1-00:00
+#SBATCH -t 0-12:00
 #SBATCH --mem 4G
 #SBATCH -o logs/%j_sample-pipeline.log
 #SBATCH -e logs/%j_sample-pipeline.log
@@ -30,8 +30,8 @@ snakemake \
     --drmaa "${DRMAA_TEMPLATE}" \
     --cluster-config pipelines/010_011_smk-config.yaml \
     --keep-going \
-    --printshellcmds #\
-    #--forceall
+    --printshellcmds \
+    --forceall
 
 
 # --conda-cleanup-envs  # use to clean up old conda envs

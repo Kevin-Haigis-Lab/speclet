@@ -94,54 +94,64 @@ if FIT_METHOD in {ModelFitMethod.PYMC_NUMPYRO, ModelFitMethod.PYMC_MCMC}:
     R-HAT
 
 
+    /home/jc604/.conda/envs/speclet_smk/lib/python3.10/site-packages/arviz/stats/diagnostics.py:586: RuntimeWarning: invalid value encountered in double_scalars
+      (between_chain_variance / within_chain_variance + num_samples - 1) / (num_samples)
 
 
-![png](hnb-single-lineage-prostate_PYMC_NUMPYRO_files/hnb-single-lineage-prostate_PYMC_NUMPYRO_10_1.png)
+
+
+![png](hnb-single-lineage-prostate_PYMC_NUMPYRO_files/hnb-single-lineage-prostate_PYMC_NUMPYRO_10_2.png)
 
 
 
-                   count      mean       std       min       25%       50%  \
+                           count      mean       std       min       25%  \
     var_name
-    a            71062.0  1.000988  0.000999  0.999114  1.000258  1.000786
-    alpha            1.0  1.002090       NaN  1.002090  1.002090  1.002090
-    b            18119.0  1.000983  0.000997  0.999221  1.000253  1.000780
-    delta_a      71062.0  1.000996  0.001013  0.999130  1.000257  1.000788
-    delta_b      18119.0  1.000997  0.001007  0.999138  1.000261  1.000791
-    delta_mu_a   18119.0  1.000992  0.001010  0.999124  1.000259  1.000785
-    eta         355308.0  1.000986  0.000995  0.999099  1.000257  1.000787
-    mu_a         18119.0  1.000974  0.000988  0.999120  1.000255  1.000775
-    mu_b             1.0  1.000122       NaN  1.000122  1.000122  1.000122
-    mu_mu_a          1.0  1.000791       NaN  1.000791  1.000791  1.000791
-    sigma_a          1.0  1.000625       NaN  1.000625  1.000625  1.000625
-    sigma_b          1.0  1.000116       NaN  1.000116  1.000116  1.000116
-    sigma_mu_a       1.0  1.000942       NaN  1.000942  1.000942  1.000942
+    a                    71062.0  1.000777  0.000908  0.999107  1.000109
+    alpha                    1.0  1.001556       NaN  1.001556  1.001556
+    b                    18119.0  1.001277  0.001223  0.999169  1.000383
+    d                    18119.0  1.001342  0.001277  0.999177  1.000404
+    delta_a              71062.0  1.000569  0.000754  0.999116  1.000024
+    delta_genes          54357.0  1.001098  0.001155  0.999163  1.000274
+    genes_chol_cov           6.0  1.001309  0.001317  0.999972  1.000276
+    genes_chol_cov_corr      8.0  1.000446  0.001140  0.999599  0.999684
+    genes_chol_cov_stds      3.0  1.001003  0.000895  1.000242  1.000510
+    mu_a                 18119.0  1.000632  0.000702  0.999226  1.000130
+    mu_b                     1.0  1.000047       NaN  1.000047  1.000047
+    mu_d                     1.0  0.999817       NaN  0.999817  0.999817
+    mu_mu_a                  1.0  1.003342       NaN  1.003342  1.003342
+    sigma_a                  1.0  1.001328       NaN  1.001328  1.001328
+    sigma_b                  1.0  1.000242       NaN  1.000242  1.000242
+    sigma_mu_a               1.0  1.000777       NaN  1.000777  1.000777
 
-                     75%       max
+                              50%       75%       max
     var_name
-    a           1.001514  1.009380
-    alpha       1.002090  1.002090
-    b           1.001509  1.008099
-    delta_a     1.001525  1.009188
-    delta_b     1.001519  1.007595
-    delta_mu_a  1.001517  1.007949
-    eta         1.001510  1.009903
-    mu_a        1.001494  1.007848
-    mu_b        1.000122  1.000122
-    mu_mu_a     1.000791  1.000791
-    sigma_a     1.000625  1.000625
-    sigma_b     1.000116  1.000116
-    sigma_mu_a  1.000942  1.000942
+    a                    1.000592  1.001259  1.009886
+    alpha                1.001556  1.001556  1.001556
+    b                    1.001048  1.001935  1.008991
+    d                    1.001104  1.002017  1.010336
+    delta_a              1.000423  1.000955  1.007374
+    delta_genes          1.000841  1.001648  1.011007
+    genes_chol_cov       1.001160  1.001879  1.003462
+    genes_chol_cov_corr  0.999998  1.000664  1.002265
+    genes_chol_cov_stds  1.000777  1.001383  1.001989
+    mu_a                 1.000518  1.001013  1.005056
+    mu_b                 1.000047  1.000047  1.000047
+    mu_d                 0.999817  0.999817  0.999817
+    mu_mu_a              1.003342  1.003342  1.003342
+    sigma_a              1.001328  1.001328  1.001328
+    sigma_b              1.000242  1.000242  1.000242
+    sigma_mu_a           1.000777  1.000777  1.000777
     ============================================================
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0, 0, 0
     percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 0.892, 0.906, 0.931, 1.024
-    avg. step size: 0.03, 0.029, 0.027, 0.028
+    BFMI: 0.635, 0.622, 0.626, 0.572
+    avg. step size: 0.019, 0.02, 0.02, 0.02
 
 
 
 
-![png](hnb-single-lineage-prostate_PYMC_NUMPYRO_files/hnb-single-lineage-prostate_PYMC_NUMPYRO_10_3.png)
+![png](hnb-single-lineage-prostate_PYMC_NUMPYRO_files/hnb-single-lineage-prostate_PYMC_NUMPYRO_10_4.png)
 
 
 
@@ -224,7 +234,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 29.74 minutes
+    execution time: 15.10 minutes
 
 
 
@@ -233,7 +243,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-07-23
+    Last updated: 2022-07-24
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -241,19 +251,19 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Compiler    : GCC 10.3.0
     OS          : Linux
-    Release     : 3.10.0-1160.71.1.el7.x86_64
+    Release     : 3.10.0-1160.66.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 20
     Architecture: 64bit
 
-    Hostname: compute-e-16-182.o2.rc.hms.harvard.edu
+    Hostname: compute-f-17-14.o2.rc.hms.harvard.edu
 
     Git branch: simplify
 
     arviz     : 0.12.1
-    numpy     : 1.23.0
     logging   : 0.5.1.2
-    speclet   : 0.0.9000
     matplotlib: 3.5.2
+    numpy     : 1.23.0
+    speclet   : 0.0.9000
     seaborn   : 0.11.2

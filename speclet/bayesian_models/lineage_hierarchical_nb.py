@@ -396,7 +396,8 @@ class LineageHierNegBinomModel:
             a = pm.Deterministic("a", mu_a[s_to_g] + delta_a * sigma_a, dims="sgrna")
 
             gene_effect = a[s] + b[g] * rna + d[g] * cn_gene
-            eta = pm.Deterministic("eta", gene_effect + np.log(model_data.ct_initial))
+            # eta = pm.Deterministic("eta", gene_effect + np.log(model_data.ct_initial))
+            eta = gene_effect + np.log(model_data.ct_initial)
             mu = pmmath.exp(eta)
 
             alpha = pm.Gamma("alpha", 10, 1)
