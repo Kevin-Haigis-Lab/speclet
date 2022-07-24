@@ -412,7 +412,7 @@ sns.histplot(x=prostate_post_summary["r_hat"], binwidth=0.01, stat="proportion")
 
 
 
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_18_0.png)
+![png](022_single-lineage-prostate-inspection_001_files/022_single-lineage-prostate-inspection_001_18_0.png)
 
 
 
@@ -426,7 +426,7 @@ plt.show()
 
 
 
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_19_0.png)
+![png](022_single-lineage-prostate-inspection_001_files/022_single-lineage-prostate-inspection_001_19_0.png)
 
 
 
@@ -437,7 +437,7 @@ az.plot_energy(trace);
 
 
 
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_20_0.png)
+![png](022_single-lineage-prostate-inspection_001_files/022_single-lineage-prostate-inspection_001_20_0.png)
 
 
 
@@ -457,7 +457,7 @@ plt.show()
 
 
 
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_21_0.png)
+![png](022_single-lineage-prostate-inspection_001_files/022_single-lineage-prostate-inspection_001_21_0.png)
 
 
 
@@ -1055,7 +1055,7 @@ plt.show()
 
 
 
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_26_0.png)
+![png](022_single-lineage-prostate-inspection_001_files/022_single-lineage-prostate-inspection_001_26_0.png)
 
 
 
@@ -1070,7 +1070,7 @@ plt.show()
 
 
 
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_27_0.png)
+![png](022_single-lineage-prostate-inspection_001_files/022_single-lineage-prostate-inspection_001_27_0.png)
 
 
 
@@ -1092,7 +1092,7 @@ plt.show()
 
 
 
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_28_0.png)
+![png](022_single-lineage-prostate-inspection_001_files/022_single-lineage-prostate-inspection_001_28_0.png)
 
 
 
@@ -1104,7 +1104,7 @@ plt.tight_layout()
 
 
 
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_29_0.png)
+![png](022_single-lineage-prostate-inspection_001_files/022_single-lineage-prostate-inspection_001_29_0.png)
 
 
 
@@ -1116,7 +1116,7 @@ plt.tight_layout()
 
 
 
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_30_0.png)
+![png](022_single-lineage-prostate-inspection_001_files/022_single-lineage-prostate-inspection_001_30_0.png)
 
 
 
@@ -1229,13 +1229,13 @@ for gene in [eg_gene, "KIF11"]:
 
 
 
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_32_0.png)
+![png](022_single-lineage-prostate-inspection_001_files/022_single-lineage-prostate-inspection_001_32_0.png)
 
 
 
 
 
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_32_1.png)
+![png](022_single-lineage-prostate-inspection_001_files/022_single-lineage-prostate-inspection_001_32_1.png)
 
 
 
@@ -1271,7 +1271,7 @@ plt.show()
 
 
 
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_33_0.png)
+![png](022_single-lineage-prostate-inspection_001_files/022_single-lineage-prostate-inspection_001_33_0.png)
 
 
 
@@ -1436,7 +1436,7 @@ plt.show()
 
 
 
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_35_0.png)
+![png](022_single-lineage-prostate-inspection_001_files/022_single-lineage-prostate-inspection_001_35_0.png)
 
 
 
@@ -1495,7 +1495,7 @@ plt.show()
 
 
 
-![png](022_single-lineage-prostate-inspection_files/022_single-lineage-prostate-inspection_37_0.png)
+![png](022_single-lineage-prostate-inspection_001_files/022_single-lineage-prostate-inspection_001_37_0.png)
 
 
 
