@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from itertools import product
 from typing import Any
 
+import aesara.tensor as at
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -356,31 +357,46 @@ class LineageHierNegBinomModel:
 
         # Multi-dimensional parameter coordinates (labels).
         coords = model_data.coords
-        # Data
+        # Data.
         rna = model_data.m_log_rna_gene
+        cn_gene = model_data.copy_number_z_gene
         # Indexing arrays.
         s_to_g = model_data.sgrna_to_gene_idx
         s = model_data.sgrna_idx
         g = model_data.gene_idx
+        # Sizes.
+        n_G = model_data.G
+        n_gene_vars = 3
 
         with pm.Model(coords=coords) as model:
+            # Gene varying effects covariance matrix.
+            g_chol, _, g_sigmas = pm.LKJCholeskyCov(
+                "genes_chol_cov",
+                eta=2,
+                n=n_gene_vars,
+                sd_dist=pm.Exponential.dist(2, shape=n_gene_vars),
+                compute_corr=True,
+            )
+            for i, var_name in enumerate(["mu_a", "b"]):
+                pm.Deterministic(f"sigma_{var_name}", g_sigmas[i])
 
+            # Gene varying effects.
+            mu_mu_a = pm.Normal("mu_mu_a", 0, 0.5)
             mu_b = pm.Normal("mu_b", -0.5, 1)
-            sigma_b = pm.Exponential("sigma_b", 2)
-            delta_b = pm.Normal("delta_b", 0, 1, dims="gene")
-            b = pm.Normal("b", mu_b + delta_b * sigma_b, dims="gene")
+            mu_d = pm.Normal("mu_d", 0, 0.5)
+            mu_genes = at.stack([mu_mu_a, mu_b, mu_d], axis=0)
+            delta_genes = pm.Normal("delta_genes", 0, 1, shape=(n_gene_vars, n_G))
+            genes = mu_genes + at.dot(g_chol, delta_genes).T
+            mu_a = pm.Deterministic("mu_a", genes[:, 0], dims="gene")
+            b = pm.Deterministic("b", genes[:, 1], dims="gene")
+            d = pm.Deterministic("d", genes[:, 2], dims="gene")
 
-            mu_mu_a = pm.Normal("mu_mu_a", 0, 1)
-            sigma_mu_a = pm.Exponential("sigma_mu_a", 2)
-            delta_mu_a = pm.Normal("delta_mu_a", 0, 1, dims="gene")
-            mu_a = pm.Normal("mu_a", mu_mu_a + delta_mu_a * sigma_mu_a, dims="gene")
             sigma_a = pm.Exponential("sigma_a", 2)
             delta_a = pm.Normal("delta_a", 0, 1, dims="sgrna")
-            a = pm.Normal("a", mu_a[s_to_g] + delta_a * sigma_a, dims="sgrna")
+            a = pm.Deterministic("a", mu_a[s_to_g] + delta_a * sigma_a, dims="sgrna")
 
-            gene_effect = a[s] + b[g] * rna
+            gene_effect = a[s] + b[g] * rna + d[g] * cn_gene
             eta = pm.Deterministic("eta", gene_effect + np.log(model_data.ct_initial))
-
             mu = pmmath.exp(eta)
 
             alpha = pm.Gamma("alpha", 10, 1)
