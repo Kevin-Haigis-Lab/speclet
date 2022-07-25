@@ -164,10 +164,11 @@
         gpu: "RTX 8000"
 
 
-- name: hnb-single-lineage-prostate
+- name: hnb-single-lineage-prostate-002
   description: "
     Single lineage hierarchical negative binomial model for prostate data from the
-    Broad. Only running this model with the Numpyro JAX backend using a GPU.
+    Broad. This model builds on 001 with a variable for the mutation of the target gene
+    and a variable for the mutation of cancer genes.
   "
   active: true
   model: LINEAGE_HIERARCHICAL_NB
@@ -178,7 +179,7 @@
     pymc_numpyro:
       draws: 1000
       tune: 1000
-      target_accept: 0.98
+      target_accept: 0.97
       idata_kwargs:
         log_likelihood: false
   slurm_resources:

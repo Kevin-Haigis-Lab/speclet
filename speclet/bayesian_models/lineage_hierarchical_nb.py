@@ -411,8 +411,8 @@ class LineageHierNegBinomModel:
                 + f[g] * mut
                 + at.sum(h[g, :] * cg_mut, axis=1)
             )
-            eta = pm.Deterministic("eta", gene_effect + np.log(model_data.ct_initial))
-            # eta = gene_effect + np.log(model_data.ct_initial)
+            # eta = pm.Deterministic("eta", gene_effect + np.log(model_data.ct_initial))
+            eta = gene_effect + np.log(model_data.ct_initial)
             mu = pmmath.exp(eta)
 
             alpha = pm.Gamma("alpha", 10, 1)
