@@ -12,6 +12,7 @@ from itertools import product
 from pathlib import Path
 from time import time
 
+import aesara
 import arviz as az
 import matplotlib.pyplot as plt
 import numpy as np
@@ -31,7 +32,9 @@ from matplotlib.lines import Line2D
 ```python
 from speclet.analysis.arviz_analysis import extract_coords_param_names
 from speclet.bayesian_models.lineage_hierarchical_nb import LineageHierNegBinomModel
+from speclet.data_processing.common import head_tail
 from speclet.io import DataFile, data_path
+from speclet.loggers import set_console_handler_level
 from speclet.managers.data_managers import CrisprScreenDataManager
 from speclet.plot import set_speclet_theme
 from speclet.project_configuration import arviz_config
@@ -39,6 +42,10 @@ from speclet.project_configuration import arviz_config
 
 
 ```python
+# Logging.
+set_console_handler_level("DEBUG")
+aesara.config.exception_verbosity = "high"
+
 # Notebook execution timer.
 notebook_tic = time()
 
@@ -116,6 +123,32 @@ plt.show()
 
 
 ```python
+N = 2000
+df = pd.concat(
+    [
+        pd.DataFrame(
+            {"value": pm.draw(pm.Normal.dist(0, 0.2), N), "dist": "N(0, 0.2)"}
+        ),
+        pd.DataFrame(
+            {"value": pm.draw(pm.Normal.dist(0, 0.5), N), "dist": "N(0, 0.5)"}
+        ),
+        pd.DataFrame({"value": pm.draw(pm.Normal.dist(0, 1), N), "dist": "N(0, 1.0)"}),
+    ]
+).reset_index(drop=True)
+
+fig, ax = plt.subplots(figsize=(5, 4))
+sns.histplot(data=df, x="value", hue="dist", ax=ax, kde=True)
+plt.show()
+```
+
+
+
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_11_0.png)
+
+
+
+
+```python
 df.groupby("dist").describe()
 ```
 
@@ -171,81 +204,37 @@ df.groupby("dist").describe()
   </thead>
   <tbody>
     <tr>
-      <th>Exp(0.5)</th>
+      <th>N(0, 0.2)</th>
       <td>2000.0</td>
-      <td>5.096003</td>
-      <td>5.042091</td>
-      <td>0.000748</td>
-      <td>1.521280</td>
-      <td>3.610589</td>
-      <td>7.150561</td>
-      <td>41.953588</td>
+      <td>-0.000459</td>
+      <td>0.205834</td>
+      <td>-0.626704</td>
+      <td>-0.143254</td>
+      <td>-0.001944</td>
+      <td>0.133784</td>
+      <td>0.735502</td>
     </tr>
     <tr>
-      <th>Exp(1)</th>
+      <th>N(0, 0.5)</th>
       <td>2000.0</td>
-      <td>0.994186</td>
-      <td>0.956910</td>
-      <td>0.000286</td>
-      <td>0.286173</td>
-      <td>0.688827</td>
-      <td>1.389971</td>
-      <td>6.780838</td>
+      <td>0.002351</td>
+      <td>0.504981</td>
+      <td>-1.790798</td>
+      <td>-0.356570</td>
+      <td>0.002581</td>
+      <td>0.358139</td>
+      <td>1.780401</td>
     </tr>
     <tr>
-      <th>Exp(2)</th>
+      <th>N(0, 1.0)</th>
       <td>2000.0</td>
-      <td>0.511599</td>
-      <td>0.517408</td>
-      <td>0.000417</td>
-      <td>0.145785</td>
-      <td>0.350494</td>
-      <td>0.706067</td>
-      <td>4.434141</td>
-    </tr>
-    <tr>
-      <th>Gamma(10,1)</th>
-      <td>2000.0</td>
-      <td>10.064206</td>
-      <td>3.172722</td>
-      <td>2.603871</td>
-      <td>7.743451</td>
-      <td>9.757335</td>
-      <td>12.002344</td>
-      <td>22.671441</td>
-    </tr>
-    <tr>
-      <th>Gamma(3,1)</th>
-      <td>2000.0</td>
-      <td>3.016068</td>
-      <td>1.760194</td>
-      <td>0.166258</td>
-      <td>1.690546</td>
-      <td>2.616145</td>
-      <td>3.958118</td>
-      <td>11.738172</td>
-    </tr>
-    <tr>
-      <th>Gamma(5,1)</th>
-      <td>2000.0</td>
-      <td>4.950315</td>
-      <td>2.238334</td>
-      <td>0.361734</td>
-      <td>3.332061</td>
-      <td>4.605046</td>
-      <td>6.194679</td>
-      <td>16.912828</td>
-    </tr>
-    <tr>
-      <th>HN(0.5)</th>
-      <td>2000.0</td>
-      <td>0.393975</td>
-      <td>0.298890</td>
-      <td>0.000341</td>
-      <td>0.153811</td>
-      <td>0.332436</td>
-      <td>0.574717</td>
-      <td>1.817445</td>
+      <td>-0.007928</td>
+      <td>0.973466</td>
+      <td>-3.474540</td>
+      <td>-0.705628</td>
+      <td>0.003896</td>
+      <td>0.646462</td>
+      <td>3.729271</td>
     </tr>
   </tbody>
 </table>
@@ -285,13 +274,13 @@ ax.set_xlim(0, None)
 
 
 
-    (0.0, 94.5)
+    (0.0, 86.1)
 
 
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_12_1.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_13_1.png)
 
 
 
@@ -302,22 +291,6 @@ ax.set_xlim(0, None)
 from speclet.bayesian_models.lineage_hierarchical_nb import LineageHierNegBinomModel
 ```
 
-    [autoreload of speclet.bayesian_models.lineage_hierarchical_nb failed: Traceback (most recent call last):
-      File "/usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.10/site-packages/IPython/extensions/autoreload.py", line 257, in check
-        superreload(m, reload, self.old_objects)
-      File "/usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.10/site-packages/IPython/extensions/autoreload.py", line 480, in superreload
-        update_generic(old_obj, new_obj)
-      File "/usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.10/site-packages/IPython/extensions/autoreload.py", line 377, in update_generic
-        update(a, b)
-      File "/usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.10/site-packages/IPython/extensions/autoreload.py", line 345, in update_class
-        update_instances(old, new)
-      File "/usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.10/site-packages/IPython/extensions/autoreload.py", line 303, in update_instances
-        ref.__class__ = new
-      File "pydantic/main.py", line 357, in pydantic.main.BaseModel.__setattr__
-    ValueError: "LineageHierNegBinomModelConfig" object has no field "__class__"
-    ]
-
-
 
 ```python
 crc_model = LineageHierNegBinomModel(lineage="colorectal")
@@ -325,30 +298,21 @@ valid_crc_data = crc_model.data_processing_pipeline(crc_data.copy())
 ```
 
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/24/22 14:58:08] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Processing data for modeling.     <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#268" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">268</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/25/22 15:28:44] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Processing data for modeling.     <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#267" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">267</span></a>
 </pre>
 
 
 
-    INFO:speclet:Processing data for modeling.
 
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> LFC limits: <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-5.0</span>, <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.0</span><span style="font-weight: bold">)</span>           <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#269" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">269</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> LFC limits: <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-5.0</span>, <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.0</span><span style="font-weight: bold">)</span>           <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#268" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">268</span></a>
 </pre>
 
 
 
-    INFO:speclet:LFC limits: (-5.0, 5.0)
 
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/24/22 14:58:09] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> number of data points dropped: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span>  <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#320" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">320</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/25/22 15:28:45] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> number of data points dropped: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span>  <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#319" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">319</span></a>
 </pre>
 
-
-
-    WARNING:speclet:number of data points dropped: 0
 
 
 
@@ -358,100 +322,103 @@ pm.model_to_graphviz(crc_pymc_model)
 ```
 
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Processing data for modeling.     <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#268" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">268</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Processing data for modeling.     <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#267" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">267</span></a>
 </pre>
 
 
 
-    INFO:speclet:Processing data for modeling.
 
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> LFC limits: <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-5.0</span>, <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.0</span><span style="font-weight: bold">)</span>           <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#269" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">269</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> LFC limits: <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-5.0</span>, <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.0</span><span style="font-weight: bold">)</span>           <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#268" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">268</span></a>
 </pre>
 
 
 
-    INFO:speclet:LFC limits: (-5.0, 5.0)
 
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/24/22 14:58:10] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> number of data points dropped: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span>  <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#320" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">320</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/25/22 15:28:46] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> number of data points dropped: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span>  <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#319" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">319</span></a>
 </pre>
 
 
 
-    WARNING:speclet:number of data points dropped: 0
 
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Lineage: colorectal               <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#324" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">324</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> number of genes mutated in all    <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#439" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">439</span></a>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span>         cells lines: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>                    <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                              </span>
 </pre>
 
 
 
-    INFO:speclet:Lineage: colorectal
 
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of genes: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">103</span>              <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#325" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">325</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #008000; text-decoration-color: #008000">DEBUG   </span> Genes always mutated: APC         <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#442" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">442</span></a>
 </pre>
 
 
 
-    INFO:speclet:Number of genes: 103
 
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of sgRNA: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">162</span>              <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#326" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">326</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> cancer genes.          <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#495" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">495</span></a>
 </pre>
 
 
 
-    INFO:speclet:Number of sgRNA: 162
 
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of cell lines: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span>           <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#327" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">327</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #008000; text-decoration-color: #008000">DEBUG   </span> Dropped cancer genes: <span style="font-weight: bold">[</span><span style="color: #008000; text-decoration-color: #008000">'APC'</span>,     <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#496" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">496</span></a>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span>         <span style="color: #008000; text-decoration-color: #008000">'MDM2'</span><span style="font-weight: bold">]</span>                           <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                              </span>
 </pre>
 
 
 
-    INFO:speclet:Number of cell lines: 8
 
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of cancer genes: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span>         <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#328" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">328</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Lineage: colorectal               <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#323" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">323</span></a>
 </pre>
 
 
 
-    INFO:speclet:Number of cancer genes: 3
 
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of screens: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>              <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#329" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">329</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of genes: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">103</span>              <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#324" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">324</span></a>
 </pre>
 
 
 
-    INFO:speclet:Number of screens: 1
 
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of data points: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1296</span>       <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#330" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">330</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of sgRNA: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">162</span>              <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#325" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">325</span></a>
 </pre>
 
 
 
-    INFO:speclet:Number of data points: 1296
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of cell lines: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span>           <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#326" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">326</span></a>
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of cancer genes: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span>         <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#327" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">327</span></a>
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of screens: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>              <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#328" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">328</span></a>
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Number of data points: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1296</span>       <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#329" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">329</span></a>
+</pre>
+
+
+
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #008000; text-decoration-color: #008000">DEBUG   </span> shape of cancer gene matrix:      <a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///Users/admin/Developer/haigis-lab/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#364" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">364</span></a>
+<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span>         <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1296</span>, <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span><span style="font-weight: bold">)</span>                         <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                              </span>
+</pre>
 
 
 
 
 
 
-![svg](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_16_20.svg)
+
+![svg](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_17_15.svg)
 
 
 
@@ -465,7 +432,7 @@ with crc_pymc_model:
 
 print("prior predictive distribution")
 pm_pred_draws = pm_prior_pred.prior_predictive["ct_final"].values.squeeze()
-for q in np.arange(0, 1.01, 0.1):
+for q in [0, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 1]:
     res = np.quantile(pm_pred_draws, q=q)
     print(f"  {int(q*100)}%: {int(res):0,d}")
 
@@ -479,21 +446,37 @@ print(f"initial counts\n  min: {np.min(obs):,d},  max: {np.max(obs):,d}")
 
     prior predictive distribution
       0%: 0
-      10%: 36
-      20%: 95
+      1%: 2
+      10%: 41
+      20%: 99
       30%: 175
-      40%: 286
-      50%: 445
-      60%: 695
-      70%: 1,125
-      80%: 2,018
-      90%: 4,900
-      100%: 868,426,825,321,325,568
+      40%: 281
+      50%: 434
+      60%: 670
+      70%: 1,073
+      80%: 1,886
+      90%: 4,473
+      99%: 71,602
+      100%: 2,806,501,886,619
 
     final counts
       min: 0,  max: 9,819
     initial counts
       min: 57,  max: 4,741
+
+
+
+```python
+a = np.ones((4))
+b = np.ones((3))
+np.hstack([a, b])
+```
+
+
+
+
+    array([1., 1., 1., 1., 1., 1., 1.])
+
 
 
 
@@ -517,7 +500,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_18_0.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_20_0.png)
 
 
 
@@ -572,7 +555,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_19_0.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_21_0.png)
 
 
 
@@ -584,7 +567,7 @@ with crc_pymc_model:
     trace = pymc.sampling_jax.sample_numpyro_nuts(
         draws=1000,
         tune=1000,
-        target_accept=0.8,
+        target_accept=0.92,
         random_seed=SEED,
         idata_kwargs={"log_likelihood": False},
     )
@@ -592,7 +575,7 @@ with crc_pymc_model:
 ```
 
     Compiling...
-    Compilation time =  0:00:05.942657
+    Compilation time =  0:00:10.915332
     Sampling...
 
 
@@ -612,9 +595,9 @@ with crc_pymc_model:
       0%|          | 0/2000 [00:00<?, ?it/s]
 
 
-    Sampling time =  0:01:59.347372
+    Sampling time =  0:04:12.718245
     Transforming variables...
-    Transformation time =  0:00:01.970767
+    Transformation time =  0:00:04.213203
 
 
 
@@ -638,7 +621,7 @@ with crc_pymc_model:
 
 <div>
   <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [4000/4000 00:01<00:00]
+  100.00% [4000/4000 00:02<00:00]
 </div>
 
 
@@ -652,7 +635,7 @@ az.plot_energy(trace);
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_23_0.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_25_0.png)
 
 
 
@@ -670,7 +653,7 @@ trace.sample_stats.diverging.values.sum(axis=1)
 
 
 ```python
-az.plot_trace(trace, var_names=crc_model.vars_regex(), filter_vars="regex")
+az.plot_trace(trace, var_names=crc_model.vars_regex() + ["~^h$"], filter_vars="regex")
 plt.tight_layout();
 ```
 
@@ -679,7 +662,7 @@ plt.tight_layout();
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_25_1.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_27_1.png)
 
 
 
@@ -687,10 +670,10 @@ plt.tight_layout();
 ```python
 ax = az.plot_forest(
     trace,
-    var_names=["mu_mu_a", "mu_b", "mu_d", "^sigma.*$"],
+    var_names=["mu_mu_a", "mu_b", "mu_d", "mu_f", "mu_h", "^sigma.*$"],
     filter_vars="regex",
     combined=True,
-    figsize=(5, 3),
+    figsize=(5, 5),
 )
 ax[0].axvline(color="k", alpha=0.5, linewidth=1)
 plt.show()
@@ -698,7 +681,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_26_0.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_28_0.png)
 
 
 
@@ -774,189 +757,27 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_27_0.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_29_0.png)
 
 
 
 
 ```python
-az.plot_pair(
+top_mut_effect_genes = (
+    az.summary(trace, var_names=["f"])
+    .sort_values("mean")
+    .pipe(head_tail)
+    .pipe(extract_coords_param_names, "hugo_symbol")["hugo_symbol"]
+    .tolist()
+)
+ax = az.plot_forest(
     trace,
-    var_names=["mu_a", "b", "d"],
-    coords={"gene": ["BRAF"]},
-    scatter_kwargs={"alpha": 0.25},
+    var_names=["f"],
+    coords={"gene": top_mut_effect_genes},
+    combined=True,
+    figsize=(5, 6),
 )
-plt.tight_layout()
-plt.show()
-```
-
-
-
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_28_0.png)
-
-
-
-
-```python
-gene_vars = ["$\mu_a$", "$b$", "$d$"]
-gene_corr_post = (
-    az.summary(trace, var_names=["genes_chol_cov_corr"], kind="stats")
-    .pipe(extract_coords_param_names, names=["d0", "d1"])
-    .astype({"d0": int, "d1": int})
-    .assign(
-        p0=lambda d: [gene_vars[i] for i in d["d0"]],
-        p1=lambda d: [gene_vars[i] for i in d["d1"]],
-    )
-)
-gene_corr_post
-```
-
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>mean</th>
-      <th>sd</th>
-      <th>hdi_5.5%</th>
-      <th>hdi_94.5%</th>
-      <th>d0</th>
-      <th>d1</th>
-      <th>p0</th>
-      <th>p1</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>genes_chol_cov_corr[0, 0]</th>
-      <td>1.000</td>
-      <td>0.000</td>
-      <td>1.000</td>
-      <td>1.000</td>
-      <td>0</td>
-      <td>0</td>
-      <td>$\mu_a$</td>
-      <td>$\mu_a$</td>
-    </tr>
-    <tr>
-      <th>genes_chol_cov_corr[0, 1]</th>
-      <td>-0.082</td>
-      <td>0.235</td>
-      <td>-0.453</td>
-      <td>0.298</td>
-      <td>0</td>
-      <td>1</td>
-      <td>$\mu_a$</td>
-      <td>$b$</td>
-    </tr>
-    <tr>
-      <th>genes_chol_cov_corr[0, 2]</th>
-      <td>-0.146</td>
-      <td>0.372</td>
-      <td>-0.767</td>
-      <td>0.431</td>
-      <td>0</td>
-      <td>2</td>
-      <td>$\mu_a$</td>
-      <td>$d$</td>
-    </tr>
-    <tr>
-      <th>genes_chol_cov_corr[1, 0]</th>
-      <td>-0.082</td>
-      <td>0.235</td>
-      <td>-0.453</td>
-      <td>0.298</td>
-      <td>1</td>
-      <td>0</td>
-      <td>$b$</td>
-      <td>$\mu_a$</td>
-    </tr>
-    <tr>
-      <th>genes_chol_cov_corr[1, 1]</th>
-      <td>1.000</td>
-      <td>0.000</td>
-      <td>1.000</td>
-      <td>1.000</td>
-      <td>1</td>
-      <td>1</td>
-      <td>$b$</td>
-      <td>$b$</td>
-    </tr>
-    <tr>
-      <th>genes_chol_cov_corr[1, 2]</th>
-      <td>0.105</td>
-      <td>0.385</td>
-      <td>-0.501</td>
-      <td>0.721</td>
-      <td>1</td>
-      <td>2</td>
-      <td>$b$</td>
-      <td>$d$</td>
-    </tr>
-    <tr>
-      <th>genes_chol_cov_corr[2, 0]</th>
-      <td>-0.146</td>
-      <td>0.372</td>
-      <td>-0.767</td>
-      <td>0.431</td>
-      <td>2</td>
-      <td>0</td>
-      <td>$d$</td>
-      <td>$\mu_a$</td>
-    </tr>
-    <tr>
-      <th>genes_chol_cov_corr[2, 1]</th>
-      <td>0.105</td>
-      <td>0.385</td>
-      <td>-0.501</td>
-      <td>0.721</td>
-      <td>2</td>
-      <td>1</td>
-      <td>$d$</td>
-      <td>$b$</td>
-    </tr>
-    <tr>
-      <th>genes_chol_cov_corr[2, 2]</th>
-      <td>1.000</td>
-      <td>0.000</td>
-      <td>1.000</td>
-      <td>1.000</td>
-      <td>2</td>
-      <td>2</td>
-      <td>$d$</td>
-      <td>$d$</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
-
-
-```python
-plot_df = gene_corr_post.pivot_wider(
-    "p0", names_from="p1", values_from="mean"
-).set_index("p0")
-ax = sns.heatmap(plot_df, cmap="coolwarm", vmin=-1, vmax=1)
-ax.set_xlabel(None)
-ax.set_ylabel(None)
-plt.tight_layout()
+ax[0].axvline(0, color="k")
 plt.show()
 ```
 
@@ -968,46 +789,14 @@ plt.show()
 
 
 ```python
-N = 100
-
-pp_dist = trace.posterior_predictive["ct_final"]
-n_chains, n_draws, n_samples = pp_dist.shape
-draws_idx = np.random.choice(np.arange(n_draws), N // n_chains, replace=False)
-
-fig, ax = plt.subplots(figsize=(8, 5))
-
-pal = {
-    "draws": "tab:blue",
-    "median": "tab:orange",
-    "mean": "tab:red",
-    "observed": "black",
-}
-
-# Example draws.
-for c, d in product(range(n_chains), draws_idx):
-    values = np.log(pp_dist[c, d, :].values + 1)
-    sns.kdeplot(values, color=pal["draws"], alpha=0.1, ax=ax)
-
-# Average distributions.
-pp_dist_mean = np.log(pp_dist.median(axis=(0, 1)) + 1)
-pp_dist_mid = np.log(pp_dist.mean(axis=(0, 1)) + 1)
-sns.kdeplot(pp_dist_mean, color=pal["mean"], ax=ax)
-sns.kdeplot(pp_dist_mid, color=pal["median"], ax=ax)
-
-# Observed distribution.
-sns.kdeplot(np.log(trace.observed_data["ct_final"] + 1), ax=ax, color=pal["observed"])
-
-
-leg_handles: list[Line2D] = []
-for lbl, c in pal.items():
-    leg_handles.append(Line2D([0], [0], color=c, label=lbl))
-
-plt.legend(handles=leg_handles, loc="best")
-
-
-ax.set_xlabel("log10( final counts + 1 )")
-ax.set_ylabel("density")
-ax.set_title("Posterior predictive distribution")
+az.plot_pair(
+    trace,
+    var_names=["mu_a", "b", "d", "f"],
+    coords={"gene": ["BRAF"]},
+    scatter_kwargs={"alpha": 0.25},
+    figsize=(10, 10),
+)
+plt.tight_layout()
 plt.show()
 ```
 
@@ -1019,45 +808,107 @@ plt.show()
 
 
 ```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-az.plot_forest(trace, var_names=["b", "f"], combined=True)
+az.plot_pair(
+    trace,
+    var_names=["mu_mu_a", "mu_b", "mu_d", "mu_f", "mu_h"],
+    scatter_kwargs={"alpha": 0.25, "markersize": 1},
+    figsize=(10, 10),
+)
+plt.tight_layout()
 plt.show()
 ```
 
 
+
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_32_0.png)
+
+
+
+
 ```python
-w_post_summary = (
-    az.summary(trace, var_names="w", kind="stats")
+gene_effects = (
+    trace.posterior.get(["mu_a", "b", "d", "f", "h"])
+    .to_dataframe()
+    .groupby(["gene"])
+    .mean()
+)
+g = sns.pairplot(
+    gene_effects,
+    corner=True,
+    diag_kind="kde",
+    height=2,
+    aspect=1,
+    plot_kws={"edgecolor": None, "alpha": 0.7, "s": 10, "color": "tab:blue"},
+)
+g.map_lower(sns.kdeplot, levels=4, color="gray", alpha=0.5)
+g.map_lower(lambda *args, **kwargs: plt.gca().axhline(color="k", linewidth=0.7))
+g.map_lower(lambda *args, **kwargs: plt.gca().axvline(color="k", linewidth=0.7))
+plt.show()
+```
+
+
+
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_33_0.png)
+
+
+
+
+```python
+b_f_post = (
+    az.summary(trace, var_names=["f", "b"])
+    .pipe(extract_coords_param_names, names=["hugo_symbol"])
+    .assign(var_name=lambda d: [x[0] for x in d.index.values])
+    .pivot_wider("hugo_symbol", names_from="var_name", values_from="mean")
+    .set_index("hugo_symbol")
+)
+
+jp = sns.jointplot(
+    data=b_f_post,
+    x="b",
+    y="f",
+    marginal_kws={"kde": True},
+    joint_kws={"edgecolor": None, "alpha": 0.7},
+)
+ax = jp.ax_joint
+ax.axhline(0, color="k", alpha=0.5)
+ax.axvline(0, color="k", alpha=0.5)
+
+genes_to_label = list(trace.posterior.coords["cancer_gene"].values)
+genes_to_label += b_f_post[b_f_post["f"] < -0.14].index.tolist()
+genes_to_label += b_f_post[b_f_post["f"] > 0.075].index.tolist()
+genes_to_label += b_f_post[b_f_post["b"] < -0.03].index.tolist()
+genes_to_label += b_f_post[b_f_post["b"] > 0.03].index.tolist()
+genes_to_label = list(set(genes_to_label))
+for gene in genes_to_label:
+    data = b_f_post.query(f"hugo_symbol == '{gene}'")
+    assert len(data) == 1
+    ax.text(data["b"], data["f"], s=gene, alpha=0.9)
+
+
+plt.show()
+```
+
+
+
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_34_0.png)
+
+
+
+
+```python
+h_post_summary = (
+    az.summary(trace, var_names="h", kind="stats")
     .pipe(extract_coords_param_names, names=["hugo_symbol", "cancer_gene"])
     .pivot_wider("hugo_symbol", names_from="cancer_gene", values_from="mean")
     .set_index("hugo_symbol")
 )
 
-vmax = np.abs(w_post_summary.values).max()
+vmax = np.abs(h_post_summary.values).max()
 
 figsize = (3.3, 12)
 dendro_ratio = (0.1, figsize[0] * 0.1 / figsize[1])
 cm = sns.clustermap(
-    w_post_summary,
+    h_post_summary,
     z_score=None,
     cmap="coolwarm",
     vmin=-vmax,
@@ -1073,25 +924,14 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_37_0.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_35_0.png)
 
 
 
 
 ```python
-pik3ca_hits = w_post_summary.sort_values("PIK3CA").query("PIK3CA > 0.5").index.tolist()
-pik3ca_hits
-```
+pik3ca_hits = h_post_summary.sort_values("PIK3CA").query("PIK3CA > 0.5").index.tolist()
 
-
-
-
-    ['FBXL8', 'ERH', 'RABGGTA', 'MED4', 'KRAS', 'CTNNB1', 'SPTLC1', 'PHF5A']
-
-
-
-
-```python
 pik3ca_mut_map = (
     crc_data.copy()
     .query("hugo_symbol == 'PIK3CA'")[["depmap_id", "is_mutated"]]
@@ -1112,60 +952,173 @@ pik3ca_hits_data = (
     )
 )
 
+pal = {
+    False: "k",
+    True: "g",
+}
+
 fig, ax = plt.subplots(figsize=(8, 4))
 sns.boxplot(
     data=pik3ca_hits_data,
     x="hugo_symbol",
     y="lfc",
     hue="pik3ca_mut",
+    palette=pal,
     dodge=True,
     ax=ax,
     flierprops={"markersize": 0},
     boxprops={"alpha": 0.5},
 )
 sns.swarmplot(
-    data=pik3ca_hits_data, x="hugo_symbol", y="lfc", hue="pik3ca_mut", dodge=True, ax=ax
+    data=pik3ca_hits_data,
+    x="hugo_symbol",
+    y="lfc",
+    hue="pik3ca_mut",
+    dodge=True,
+    ax=ax,
+    palette=pal,
 )
-sns.move_legend(ax, "upper left", bbox_to_anchor=(1, 1))
+
+ax.set_title("$\mathit{PIK3CA}$ hits")
+ax.set_xlabel(None)
+ax.set_ylabel("log-fold change")
+ax.get_legend().remove()
+
+leg_lbl = {True: "mutant", False: "WT"}
+leg_handles = [
+    Line2D([0], [0], linewidth=0, marker="o", color=v, label=leg_lbl[k])
+    for k, v in pal.items()
+]
+ax.legend(
+    handles=leg_handles,
+    loc="upper left",
+    bbox_to_anchor=(1, 1.02),
+    title="$\mathit{PIK3CA}$ status",
+    frameon=False,
+)
 ```
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_39_0.png)
+
+    <matplotlib.legend.Legend at 0x15daa05b0>
+
+
+
+
+
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_36_1.png)
 
 
 
 
 ```python
-tissue_var_names = ["d", "h", "k", "m"] + list(
-    trace.posterior.coords["cancer_gene"].values
-)
-gene_vars_corr = (
-    az.summary(trace, "genes_chol_cov_corr", kind="stats")
-    .pipe(extract_coords_param_names, names=["var1", "var2"])
-    .astype({"var1": int, "var2": int})
+gene_vars = ["$\mu_a$", "$b$", "$d$", "$f$"]
+gene_vars += ["$h_{" + g + "}$" for g in trace.posterior.coords["cancer_gene"].values]
+gene_corr_post = (
+    az.summary(trace, var_names=["genes_chol_cov_corr"], kind="stats")
+    .pipe(extract_coords_param_names, names=["d0", "d1"])
+    .astype({"d0": int, "d1": int})
     .assign(
-        var1=lambda d: [tissue_var_names[i] for i in d["var1"]],
-        var2=lambda d: [tissue_var_names[i] for i in d["var2"]],
+        p0=lambda d: [gene_vars[i] for i in d["d0"]],
+        p1=lambda d: [gene_vars[i] for i in d["d1"]],
     )
 )
-gene_vars_corr.loc[gene_vars_corr["var1"] == gene_vars_corr["var2"], "mean"] = np.nan
-gene_vars_corr = gene_vars_corr.pivot_wider(
-    "var1", names_from="var2", values_from="mean"
-).set_index("var1")
 
-hm = sns.heatmap(gene_vars_corr, cmap="seismic", vmin=-1, vmax=1)
-sns.despine()
-hm.set_xlabel(None)
-hm.set_ylabel(None)
+plot_df = gene_corr_post.pivot_wider(
+    "p0", names_from="p1", values_from="mean"
+).set_index("p0")
+ax = sns.heatmap(plot_df, cmap="coolwarm", vmin=-1, vmax=1)
+ax.set_xlabel(None)
+ax.set_ylabel(None)
+plt.tight_layout()
 plt.show()
 ```
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_40_0.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_37_0.png)
 
 
+
+
+```python
+N = 100
+
+pp_dist = trace.posterior_predictive["ct_final"]
+n_chains, n_draws, n_samples = pp_dist.shape
+draws_idx = np.random.choice(np.arange(n_draws), N // n_chains, replace=False)
+
+fig, ax = plt.subplots(figsize=(8, 5))
+
+ppc_pal = {
+    "draws": "tab:blue",
+    "median": "tab:orange",
+    "mean": "tab:red",
+    "observed": "black",
+}
+
+# Example draws.
+for c, d in product(range(n_chains), draws_idx):
+    values = np.log(pp_dist[c, d, :].values + 1)
+    sns.kdeplot(values, color=ppc_pal["draws"], alpha=0.1, ax=ax)
+
+# Average distributions.
+pp_dist_mean = np.log(pp_dist.median(axis=(0, 1)) + 1)
+pp_dist_mid = np.log(pp_dist.mean(axis=(0, 1)) + 1)
+sns.kdeplot(pp_dist_mean, color=ppc_pal["mean"], ax=ax, alpha=0.5)
+sns.kdeplot(pp_dist_mid, color=ppc_pal["median"], ax=ax, alpha=0.5)
+
+# Observed distribution.
+sns.kdeplot(
+    np.log(trace.observed_data["ct_final"] + 1), ax=ax, color=ppc_pal["observed"]
+)
+
+
+ppc_leg_handles: list[Line2D] = []
+for lbl, c in ppc_pal.items():
+    ppc_leg_handles.append(Line2D([0], [0], color=c, label=lbl))
+
+plt.legend(handles=ppc_leg_handles, loc="best")
+
+
+ax.set_xlabel("log10( final counts + 1 )")
+ax.set_ylabel("density")
+ax.set_title("Posterior predictive distribution")
+plt.show()
+```
+
+
+
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_38_0.png)
+
+
+
+
+```python
+
+```
+
+
+```python
+
+```
+
+
+```python
+
+```
+
+
+```python
+
+```
+
+
+```python
+# az.plot_forest(trace, var_names=["b", "f"], combined=True)
+# plt.show()
+```
 
 ---
 
@@ -1175,44 +1128,11 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 10.99 minutes
-
-
 
 ```python
 %load_ext watermark
 %watermark -d -u -v -iv -b -h -m
 ```
-
-    The watermark extension is already loaded. To reload it, use:
-      %reload_ext watermark
-    Last updated: 2022-07-11
-
-    Python implementation: CPython
-    Python version       : 3.10.5
-    IPython version      : 8.4.0
-
-    Compiler    : Clang 13.0.1
-    OS          : Darwin
-    Release     : 21.5.0
-    Machine     : x86_64
-    Processor   : i386
-    CPU cores   : 4
-    Architecture: 64bit
-
-    Hostname: jhcookmac.harvardsecure.wireless.med.harvard.edu
-
-    Git branch: simplify
-
-    pandas    : 1.4.3
-    numpy     : 1.23.0
-    matplotlib: 3.5.2
-    seaborn   : 0.11.2
-    pymc      : 4.0.1
-    plotnine  : 0.0.0
-    arviz     : 0.12.1
-
-
 
 
 ```python
