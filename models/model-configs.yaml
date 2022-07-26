@@ -164,11 +164,12 @@
         gpu: "RTX 8000"
 
 
-- name: hnb-single-lineage-prostate-002
+- name: hnb-single-lineage-prostate-003
   description: "
     Single lineage hierarchical negative binomial model for prostate data from the
-    Broad. This model builds on 001 with a variable for the mutation of the target gene
-    and a variable for the mutation of cancer genes.
+    Broad. This model modifies the one used for 002 by using a Gamma distribution for
+    the SD of the varying gene effect multivariate normal instead of a an Exponential.
+    This shifts the prior distribution away from 0 to hopefully help with stability.
   "
   active: true
   model: LINEAGE_HIERARCHICAL_NB
