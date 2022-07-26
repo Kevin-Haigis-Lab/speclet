@@ -82,6 +82,7 @@ class LineageHierNegBinomModelConfig(BaseModel):
     lfc_limits: tuple[float, float] = (-5.0, 5.0)
     min_n_cancer_genes: int = 2
     min_frac_cancer_genes: float = 0.0
+    reduce_deterministic_vars: bool = True
 
 
 class LineageHierNegBinomModel:
@@ -108,6 +109,7 @@ class LineageHierNegBinomModel:
                 "Setting `min_n_cancer_genes` less than "
                 + "2 may result is some non-identifiability."
             )
+        self.reduce_deterministic_vars = self._config.reduce_deterministic_vars
         return None
 
     @property
@@ -328,6 +330,11 @@ class LineageHierNegBinomModel:
         logger.info(f"Number of screens: {model_data.SC}")
         logger.info(f"Number of data points: {model_data.N}")
 
+        if self.reduce_deterministic_vars:
+            logger.info("Configured to reduce the number of deterministic variables.")
+        else:
+            logger.info("Including all non-essential deterministic variables.")
+
         if model_data.G < 2:
             raise TooFewGenes(model_data.G)
         if model_data.C < 2:
@@ -377,7 +384,7 @@ class LineageHierNegBinomModel:
                 "genes_chol_cov",
                 eta=2,
                 n=n_gene_vars,
-                sd_dist=pm.Exponential.dist(2, shape=n_gene_vars),
+                sd_dist=pm.Gamma.dist(3, 4, shape=n_gene_vars),
                 compute_corr=True,
             )
             for i, var_name in enumerate(["mu_a", "b", "d", "f"]):
@@ -404,16 +411,29 @@ class LineageHierNegBinomModel:
             delta_a = pm.Normal("delta_a", 0, 1, dims="sgrna")
             a = pm.Deterministic("a", mu_a[s_to_g] + delta_a * sigma_a, dims="sgrna")
 
-            gene_effect = (
+            _gene_effect = (
                 a[s]
                 + b[g] * rna
                 + d[g] * cn_gene
                 + f[g] * mut
                 + at.sum(h[g, :] * cg_mut, axis=1)
             )
-            # eta = pm.Deterministic("eta", gene_effect + np.log(model_data.ct_initial))
-            eta = gene_effect + np.log(model_data.ct_initial)
-            mu = pmmath.exp(eta)
+            if self.reduce_deterministic_vars:
+                gene_effect = _gene_effect
+            else:
+                gene_effect = pm.Deterministic("gene_effect", _gene_effect)
+
+            _eta = gene_effect + np.log(model_data.ct_initial)
+            if self.reduce_deterministic_vars:
+                eta = _eta
+            else:
+                eta = pm.Deterministic("eta", _eta)
+
+            _mu = pmmath.exp(eta)
+            if self.reduce_deterministic_vars:
+                mu = _mu
+            else:
+                mu = pm.Deterministic("mu", _mu)
 
             alpha = pm.Gamma("alpha", 10, 1)
             pm.NegativeBinomial(
