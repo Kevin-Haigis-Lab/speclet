@@ -384,19 +384,19 @@ class LineageHierNegBinomModel:
                 "genes_chol_cov",
                 eta=2,
                 n=n_gene_vars,
-                sd_dist=pm.Gamma.dist(3, 4, shape=n_gene_vars),
+                sd_dist=pm.Gamma.dist(3, 5, shape=n_gene_vars),
                 compute_corr=True,
             )
             for i, var_name in enumerate(["mu_a", "b", "d", "f"]):
                 pm.Deterministic(f"sigma_{var_name}", g_sigmas[i])
-            pm.Deterministic("sigma_h", g_sigmas[4:])
+            pm.Deterministic("sigma_h", g_sigmas[4:], dims="cancer_gene")
 
             # Gene varying effects.
-            mu_mu_a = pm.Normal("mu_mu_a", 0, 0.5)
-            mu_b = pm.Normal("mu_b", -0.5, 0.5)
-            mu_d = pm.Normal("mu_d", 0, 0.2)
-            mu_f = pm.Normal("mu_f", 0, 0.2)
-            mu_h = pm.Normal("mu_h", 0, 0.1, dims="cancer_gene")
+            mu_mu_a = pm.Normal("mu_mu_a", 0, 0.25)  # initval=0
+            mu_b = pm.Normal("mu_b", 0, 0.1)
+            mu_d = pm.Normal("mu_d", 0, 0.1)
+            mu_f = 0  # pm.Normal("mu_f", 0, 0.1)
+            mu_h = [0] * n_CG  # pm.Normal("mu_h", 0, 0.1, dims="cancer_gene")
             _mu_genes = [mu_mu_a, mu_b, mu_d, mu_f] + [mu_h[i] for i in range(n_CG)]
             mu_genes = at.stack(_mu_genes, axis=0)
             delta_genes = pm.Normal("delta_genes", 0, 1, shape=(n_gene_vars, n_G))
@@ -407,7 +407,7 @@ class LineageHierNegBinomModel:
             f = pm.Deterministic("f", genes[:, 3], dims="gene")
             h = pm.Deterministic("h", genes[:, 4:], dims=("gene", "cancer_gene"))
 
-            sigma_a = pm.Exponential("sigma_a", 2)
+            sigma_a = pm.Gamma("sigma_a", 3, 5)
             delta_a = pm.Normal("delta_a", 0, 1, dims="sgrna")
             a = pm.Deterministic("a", mu_a[s_to_g] + delta_a * sigma_a, dims="sgrna")
 
@@ -435,11 +435,12 @@ class LineageHierNegBinomModel:
             else:
                 mu = pm.Deterministic("mu", _mu)
 
-            alpha = pm.Gamma("alpha", 10, 1)
+            # alpha = pm.Gamma("alpha", 10, 1)
+            alpha = pm.Exponential("alpha", 0.5)  # initval=10
             pm.NegativeBinomial(
                 "ct_final",
-                mu,
-                alpha,
+                mu=mu,
+                alpha=alpha,
                 observed=model_data.ct_final,
             )
         return model

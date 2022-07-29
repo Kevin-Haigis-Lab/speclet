@@ -31,7 +31,7 @@ snakemake \
     --cluster-config pipelines/010_011_smk-config.yaml \
     --keep-going \
     --printshellcmds #\
-    # --forceall
+    #--forceall
 
 
 # --conda-cleanup-envs  # use to clean up old conda envs
