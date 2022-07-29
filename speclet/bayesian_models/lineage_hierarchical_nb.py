@@ -239,7 +239,7 @@ class LineageHierNegBinomModel:
             C=indices.n_celllines,
             SC=batch_indices.n_screens,
             CG=len(cancer_genes),
-            ct_initial=data.counts_initial_adj.values.astype(np.float32),
+            ct_initial=data.counts_initial_adj.values.copy().astype(np.float32),
             ct_final=data.counts_final.values.astype(np.int32),
             sgrna_idx=indices.sgrna_idx.astype(np.int32),
             gene_idx=indices.gene_idx.astype(np.int32),
@@ -378,13 +378,20 @@ class LineageHierNegBinomModel:
         n_CG = model_data.CG
         n_gene_vars = 4 + n_CG
 
+        mu_mu_a_loc = np.log(
+            np.mean(model_data.ct_final) / (np.mean(model_data.ct_initial))
+        )
+        logger.debug(f"location for `mu_mu_a`: {mu_mu_a_loc:0.4f}")
+
         with pm.Model(coords=coords) as model:
             # Gene varying effects covariance matrix.
             g_chol, _, g_sigmas = pm.LKJCholeskyCov(
                 "genes_chol_cov",
                 eta=2,
                 n=n_gene_vars,
-                sd_dist=pm.Gamma.dist(3, 5, shape=n_gene_vars),
+                # sd_dist=pm.Gamma.dist(3, 5, shape=n_gene_vars),
+                # sd_dist=pm.Exponential.dist(5, shape=n_gene_vars),
+                sd_dist=pm.HalfNormal.dist(0.5, shape=n_gene_vars),
                 compute_corr=True,
             )
             for i, var_name in enumerate(["mu_a", "b", "d", "f"]):
@@ -392,7 +399,7 @@ class LineageHierNegBinomModel:
             pm.Deterministic("sigma_h", g_sigmas[4:], dims="cancer_gene")
 
             # Gene varying effects.
-            mu_mu_a = pm.Normal("mu_mu_a", 0, 0.25)  # initval=0
+            mu_mu_a = pm.Normal("mu_mu_a", mu_mu_a_loc, 0.2)  # initval=0
             mu_b = pm.Normal("mu_b", 0, 0.1)
             mu_d = pm.Normal("mu_d", 0, 0.1)
             mu_f = 0  # pm.Normal("mu_f", 0, 0.1)
@@ -407,7 +414,8 @@ class LineageHierNegBinomModel:
             f = pm.Deterministic("f", genes[:, 3], dims="gene")
             h = pm.Deterministic("h", genes[:, 4:], dims=("gene", "cancer_gene"))
 
-            sigma_a = pm.Gamma("sigma_a", 3, 5)
+            # sigma_a = pm.Gamma("sigma_a", 3, 5)
+            sigma_a = pm.HalfNormal("sigma_a", 0.5)
             delta_a = pm.Normal("delta_a", 0, 1, dims="sgrna")
             a = pm.Deterministic("a", mu_a[s_to_g] + delta_a * sigma_a, dims="sgrna")
 
