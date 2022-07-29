@@ -54,6 +54,126 @@ arviz_config()
 saved_model_dir = models_dir() / "hnb-single-lineage-prostate-002_PYMC_NUMPYRO"
 ```
 
+
+```python
+with open(saved_model_dir / "description.txt") as f:
+    model_description = "".join(list(f))
+
+print(model_description)
+```
+
+    name: 'hnb-single-lineage-prostate-002'
+    fit method: 'PYMC_NUMPYRO'
+
+    --------------------------------------------------------------------------------
+
+    CONFIGURATION
+
+    {
+        "name": "hnb-single-lineage-prostate-002",
+        "description": " Single lineage hierarchical negative binomial model for prostate data from the Broad. This model builds on 001 with a variable for the mutation of the target gene and a variable for the mutation of cancer genes. ",
+        "active": true,
+        "model": "LINEAGE_HIERARCHICAL_NB",
+        "data_file": "modeling_data/lineage-modeling-data/depmap-modeling-data_prostate.csv",
+        "model_kwargs": {
+            "lineage": "prostate"
+        },
+        "sampling_kwargs": {
+            "pymc_mcmc": null,
+            "pymc_advi": null,
+            "pymc_numpyro": {
+                "draws": 1000,
+                "tune": 1000,
+                "chains": 4,
+                "target_accept": 0.97,
+                "progress_bar": true,
+                "chain_method": "parallel",
+                "postprocessing_backend": "cpu",
+                "idata_kwargs": {
+                    "log_likelihood": false
+                },
+                "nuts_kwargs": null
+            }
+        }
+    }
+
+    --------------------------------------------------------------------------------
+
+    POSTERIOR
+
+    <xarray.Dataset>
+    Dimensions:                    (chain: 4, draw: 1000, cancer_gene: 1,
+                                    delta_genes_dim_0: 5, delta_genes_dim_1: 18119,
+                                    sgrna: 71062, genes_chol_cov_dim_0: 15,
+                                    genes_chol_cov_corr_dim_0: 5,
+                                    genes_chol_cov_corr_dim_1: 5,
+                                    genes_chol_cov_stds_dim_0: 5, sigma_h_dim_0: 1,
+                                    gene: 18119)
+    Coordinates:
+      * chain                      (chain) int64 0 1 2 3
+      * draw                       (draw) int64 0 1 2 3 4 5 ... 995 996 997 998 999
+      * cancer_gene                (cancer_gene) object 'ZFHX3'
+      * delta_genes_dim_0          (delta_genes_dim_0) int64 0 1 2 3 4
+      * delta_genes_dim_1          (delta_genes_dim_1) int64 0 1 2 ... 18117 18118
+      * sgrna                      (sgrna) object 'AAAAAAATCCAGCAATGCAG' ... 'TTT...
+      * genes_chol_cov_dim_0       (genes_chol_cov_dim_0) int64 0 1 2 3 ... 12 13 14
+      * genes_chol_cov_corr_dim_0  (genes_chol_cov_corr_dim_0) int64 0 1 2 3 4
+      * genes_chol_cov_corr_dim_1  (genes_chol_cov_corr_dim_1) int64 0 1 2 3 4
+      * genes_chol_cov_stds_dim_0  (genes_chol_cov_stds_dim_0) int64 0 1 2 3 4
+      * sigma_h_dim_0              (sigma_h_dim_0) int64 0
+      * gene                       (gene) object 'A1BG' 'A1CF' ... 'ZZEF1' 'ZZZ3'
+    Data variables: (12/23)
+        mu_mu_a                    (chain, draw) float64 ...
+        mu_b                       (chain, draw) float64 ...
+        mu_d                       (chain, draw) float64 ...
+        mu_f                       (chain, draw) float64 ...
+        mu_h                       (chain, draw, cancer_gene) float64 ...
+        delta_genes                (chain, draw, delta_genes_dim_0, delta_genes_dim_1) float64 ...
+        ...                         ...
+        mu_a                       (chain, draw, gene) float64 ...
+        b                          (chain, draw, gene) float64 ...
+        d                          (chain, draw, gene) float64 ...
+        f                          (chain, draw, gene) float64 ...
+        h                          (chain, draw, gene, cancer_gene) float64 ...
+        a                          (chain, draw, sgrna) float64 ...
+    Attributes:
+        created_at:           2022-07-25 17:29:16.063991
+        arviz_version:        0.12.1
+        previous_created_at:  ['2022-07-25 17:29:16.063991', '2022-07-25T21:25:43...
+
+    --------------------------------------------------------------------------------
+
+    SAMPLE STATS
+
+    <xarray.Dataset>
+    Dimensions:          (chain: 4, draw: 1000)
+    Coordinates:
+      * chain            (chain) int64 0 1 2 3
+      * draw             (draw) int64 0 1 2 3 4 5 6 ... 993 994 995 996 997 998 999
+    Data variables:
+        acceptance_rate  (chain, draw) float64 ...
+        step_size        (chain, draw) float64 ...
+        diverging        (chain, draw) bool ...
+        energy           (chain, draw) float64 ...
+        n_steps          (chain, draw) int64 ...
+        tree_depth       (chain, draw) int64 ...
+        lp               (chain, draw) float64 ...
+    Attributes:
+        created_at:           2022-07-25 17:29:16.063991
+        arviz_version:        0.12.1
+        previous_created_at:  ['2022-07-25 17:29:16.063991', '2022-07-25T21:25:43...
+
+    --------------------------------------------------------------------------------
+
+    MCMC DESCRIPTION
+
+    sampled 4 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 0, 0, 0, 0
+    percent divergences: 0.0, 0.0, 0.0, 0.0
+    BFMI: 0.649, 0.624, 1.298, 1.889
+    avg. step size: 0.021, 0.021, 0.0, 0.0
+
+
 ### Load posterior summary
 
 
@@ -390,32 +510,32 @@ prostate_mdl_data = prostate_model.make_data_structure(valid_prostate_data)
 ```
 
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/26/22 06:50:42] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Processing data for modeling.     <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#267" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">267</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/27/22 09:24:47] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Processing data for modeling.     <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#269" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">269</span></a>
 </pre>
 
 
 
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> LFC limits: <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-5.0</span>, <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.0</span><span style="font-weight: bold">)</span>           <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#268" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">268</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> LFC limits: <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-5.0</span>, <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.0</span><span style="font-weight: bold">)</span>           <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#270" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">270</span></a>
 </pre>
 
 
 
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/26/22 06:51:44] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> number of data points dropped: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span>  <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#319" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">319</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/27/22 09:26:10] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> number of data points dropped: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span>  <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#321" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">321</span></a>
 </pre>
 
 
 
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> number of genes mutated in all    <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#449" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">449</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[07/27/22 09:26:11] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> number of genes mutated in all    <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#470" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">470</span></a>
 <span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span>         cells lines: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span>                    <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                              </span>
 </pre>
 
 
 
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span> cancer genes.          <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#505" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">505</span></a>
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span> cancer genes.          <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#526" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">526</span></a>
 </pre>
 
 
@@ -429,7 +549,7 @@ sns.histplot(x=prostate_post_summary["r_hat"], binwidth=0.01, stat="proportion")
 
 
 
-![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_19_0.png)
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_20_0.png)
 
 
 
@@ -443,7 +563,7 @@ plt.show()
 
 
 
-![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_20_0.png)
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_21_0.png)
 
 
 
@@ -454,7 +574,55 @@ az.plot_energy(trace);
 
 
 
-![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_21_0.png)
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_22_0.png)
+
+
+
+
+```python
+energy = trace.sample_stats.energy.values
+marginal_e = pd.DataFrame((energy - energy.mean(axis=1)[:, None]).T).assign(
+    energy="marginal"
+)
+transition_e = pd.DataFrame((energy[:, :-1] - energy[:, 1:]).T).assign(
+    energy="transition"
+)
+energy_df = pd.concat([marginal_e, transition_e]).reset_index(drop=True)
+
+fig, axes = plt.subplots(2, 2, figsize=(8, 6))
+for i, ax in enumerate(axes.flatten()):
+    sns.kdeplot(data=energy_df, x=i, hue="energy", ax=ax)
+    ax.set_title(f"chain {i}")
+    ax.set_xlabel(None)
+
+fig.tight_layout()
+plt.show()
+```
+
+
+
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_23_0.png)
+
+
+
+
+```python
+HAPPY_CHAINS = [0, 1]
+UNHAPPY_CHAINS = [2, 3]
+
+trace.posterior = trace.posterior.drop_sel(chain=UNHAPPY_CHAINS)
+trace.sample_stats = trace.sample_stats.drop_sel(chain=UNHAPPY_CHAINS)
+trace.posterior_predictive = trace.posterior_predictive.drop_sel(chain=UNHAPPY_CHAINS)
+```
+
+
+```python
+az.plot_energy(trace);
+```
+
+
+
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_25_0.png)
 
 
 
@@ -468,7 +636,7 @@ plt.tight_layout()
 
 
 
-![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_22_0.png)
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_26_0.png)
 
 
 
@@ -480,7 +648,21 @@ plt.tight_layout()
 
 
 
-![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_23_0.png)
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_27_0.png)
+
+
+
+
+```python
+az.plot_forest(
+    trace, var_names=["^sigma_*"], filter_vars="regex", combined=True, figsize=(5, 3)
+)
+plt.tight_layout()
+```
+
+
+
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_28_0.png)
 
 
 
@@ -500,7 +682,7 @@ plt.show()
 
 
 
-![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_24_0.png)
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_29_0.png)
 
 
 
@@ -515,12 +697,7 @@ sgrna_to_gene_map = (
 
 
 ```python
-(
-    prostate_post_summary.query("var_name == 'mu_a'")
-    .sort_values("mean")
-    .reset_index(drop=True)
-    .pipe(head_tail, n=5)
-)
+az.summary(trace, var_names="mu_a").sort_values("mean").pipe(head_tail, n=5)
 ```
 
 
@@ -544,7 +721,6 @@ sgrna_to_gene_map = (
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>parameter</th>
       <th>mean</th>
       <th>sd</th>
       <th>hdi_5.5%</th>
@@ -554,531 +730,620 @@ sgrna_to_gene_map = (
       <th>ess_bulk</th>
       <th>ess_tail</th>
       <th>r_hat</th>
-      <th>var_name</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
-      <td>mu_a[KIF11]</td>
-      <td>-0.552</td>
-      <td>0.674</td>
-      <td>-1.298</td>
-      <td>0.122</td>
-      <td>0.334</td>
-      <td>0.256</td>
-      <td>5.0</td>
-      <td>12.0</td>
-      <td>2.18</td>
-      <td>mu_a</td>
+      <th>mu_a[KIF11]</th>
+      <td>-1.222</td>
+      <td>0.101</td>
+      <td>-1.359</td>
+      <td>-1.037</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>2054.0</td>
+      <td>1398.0</td>
+      <td>1.0</td>
     </tr>
     <tr>
-      <th>1</th>
-      <td>mu_a[HSPE1]</td>
-      <td>-0.463</td>
-      <td>0.586</td>
-      <td>-1.123</td>
-      <td>0.122</td>
-      <td>0.290</td>
-      <td>0.222</td>
-      <td>5.0</td>
-      <td>12.0</td>
-      <td>2.18</td>
-      <td>mu_a</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>mu_a[SPC24]</td>
-      <td>-0.461</td>
-      <td>0.584</td>
-      <td>-1.122</td>
-      <td>0.122</td>
-      <td>0.289</td>
-      <td>0.221</td>
-      <td>5.0</td>
-      <td>12.0</td>
-      <td>2.18</td>
-      <td>mu_a</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>mu_a[RAN]</td>
-      <td>-0.451</td>
-      <td>0.573</td>
-      <td>-1.094</td>
-      <td>0.122</td>
-      <td>0.284</td>
-      <td>0.217</td>
-      <td>5.0</td>
-      <td>12.0</td>
-      <td>2.18</td>
-      <td>mu_a</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>mu_a[EEF2]</td>
-      <td>-0.449</td>
-      <td>0.572</td>
-      <td>-1.094</td>
-      <td>0.122</td>
-      <td>0.283</td>
-      <td>0.216</td>
-      <td>5.0</td>
-      <td>12.0</td>
-      <td>2.18</td>
-      <td>mu_a</td>
-    </tr>
-    <tr>
-      <th>18114</th>
-      <td>mu_a[PRAMEF4]</td>
-      <td>0.257</td>
-      <td>0.153</td>
-      <td>0.117</td>
-      <td>0.468</td>
-      <td>0.069</td>
-      <td>0.052</td>
-      <td>5.0</td>
-      <td>14.0</td>
-      <td>2.16</td>
-      <td>mu_a</td>
-    </tr>
-    <tr>
-      <th>18115</th>
-      <td>mu_a[EPHA2]</td>
-      <td>0.257</td>
-      <td>0.154</td>
-      <td>0.116</td>
-      <td>0.471</td>
-      <td>0.069</td>
-      <td>0.052</td>
-      <td>5.0</td>
-      <td>14.0</td>
-      <td>2.15</td>
-      <td>mu_a</td>
-    </tr>
-    <tr>
-      <th>18116</th>
-      <td>mu_a[ARHGAP44]</td>
-      <td>0.259</td>
-      <td>0.154</td>
-      <td>0.117</td>
-      <td>0.468</td>
-      <td>0.070</td>
-      <td>0.053</td>
-      <td>5.0</td>
-      <td>14.0</td>
-      <td>2.15</td>
-      <td>mu_a</td>
-    </tr>
-    <tr>
-      <th>18117</th>
-      <td>mu_a[HLA-DQB1]</td>
-      <td>0.265</td>
-      <td>0.163</td>
-      <td>0.117</td>
-      <td>0.490</td>
-      <td>0.073</td>
-      <td>0.055</td>
-      <td>5.0</td>
-      <td>14.0</td>
-      <td>2.14</td>
-      <td>mu_a</td>
-    </tr>
-    <tr>
-      <th>18118</th>
-      <td>mu_a[TP53]</td>
-      <td>0.283</td>
-      <td>0.176</td>
-      <td>0.116</td>
-      <td>0.515</td>
-      <td>0.082</td>
-      <td>0.062</td>
-      <td>5.0</td>
-      <td>14.0</td>
-      <td>2.20</td>
-      <td>mu_a</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
-
-
-```python
-(
-    prostate_post_summary.query("var_name == 'b'")
-    .sort_values("mean")
-    .reset_index(drop=True)
-    .pipe(head_tail, n=5)
-)
-```
-
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>parameter</th>
-      <th>mean</th>
-      <th>sd</th>
-      <th>hdi_5.5%</th>
-      <th>hdi_94.5%</th>
-      <th>mcse_mean</th>
-      <th>mcse_sd</th>
-      <th>ess_bulk</th>
-      <th>ess_tail</th>
-      <th>r_hat</th>
-      <th>var_name</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>b[EP300]</td>
-      <td>-0.161</td>
-      <td>0.162</td>
-      <td>-0.352</td>
-      <td>0.001</td>
-      <td>0.080</td>
-      <td>0.061</td>
-      <td>5.0</td>
-      <td>27.0</td>
-      <td>2.1</td>
-      <td>b</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>b[TP63]</td>
-      <td>-0.091</td>
-      <td>0.094</td>
-      <td>-0.213</td>
-      <td>0.001</td>
-      <td>0.045</td>
-      <td>0.034</td>
-      <td>5.0</td>
-      <td>27.0</td>
-      <td>2.1</td>
-      <td>b</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>b[STAG2]</td>
-      <td>-0.088</td>
-      <td>0.091</td>
-      <td>-0.205</td>
-      <td>0.001</td>
-      <td>0.043</td>
-      <td>0.033</td>
-      <td>5.0</td>
-      <td>27.0</td>
-      <td>2.1</td>
-      <td>b</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>b[EBP]</td>
-      <td>-0.084</td>
-      <td>0.089</td>
-      <td>-0.205</td>
-      <td>0.001</td>
-      <td>0.041</td>
-      <td>0.031</td>
-      <td>5.0</td>
-      <td>27.0</td>
-      <td>2.1</td>
-      <td>b</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>b[FOXA1]</td>
-      <td>-0.083</td>
-      <td>0.086</td>
-      <td>-0.197</td>
-      <td>0.001</td>
-      <td>0.041</td>
-      <td>0.031</td>
-      <td>5.0</td>
-      <td>27.0</td>
-      <td>2.1</td>
-      <td>b</td>
-    </tr>
-    <tr>
-      <th>18114</th>
-      <td>b[ATP6V1F]</td>
-      <td>0.109</td>
-      <td>0.114</td>
-      <td>-0.003</td>
-      <td>0.254</td>
-      <td>0.055</td>
-      <td>0.042</td>
-      <td>5.0</td>
-      <td>28.0</td>
-      <td>2.1</td>
-      <td>b</td>
-    </tr>
-    <tr>
-      <th>18115</th>
-      <td>b[MRPL57]</td>
-      <td>0.111</td>
-      <td>0.117</td>
-      <td>-0.003</td>
-      <td>0.256</td>
-      <td>0.056</td>
-      <td>0.043</td>
-      <td>5.0</td>
-      <td>28.0</td>
-      <td>2.1</td>
-      <td>b</td>
-    </tr>
-    <tr>
-      <th>18116</th>
-      <td>b[GPI]</td>
-      <td>0.119</td>
-      <td>0.124</td>
-      <td>-0.003</td>
-      <td>0.274</td>
-      <td>0.060</td>
-      <td>0.046</td>
-      <td>5.0</td>
-      <td>28.0</td>
-      <td>2.1</td>
-      <td>b</td>
-    </tr>
-    <tr>
-      <th>18117</th>
-      <td>b[AIFM1]</td>
-      <td>0.124</td>
-      <td>0.130</td>
-      <td>-0.003</td>
-      <td>0.284</td>
-      <td>0.063</td>
-      <td>0.048</td>
-      <td>5.0</td>
-      <td>28.0</td>
-      <td>2.1</td>
-      <td>b</td>
-    </tr>
-    <tr>
-      <th>18118</th>
-      <td>b[NARS2]</td>
-      <td>0.125</td>
-      <td>0.130</td>
-      <td>-0.003</td>
-      <td>0.283</td>
-      <td>0.063</td>
-      <td>0.048</td>
-      <td>5.0</td>
-      <td>28.0</td>
-      <td>2.1</td>
-      <td>b</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
-
-
-```python
-(
-    prostate_post_summary.query("var_name == 'd'")
-    .sort_values("mean")
-    .reset_index(drop=True)
-    .pipe(head_tail, n=5)
-)
-```
-
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>parameter</th>
-      <th>mean</th>
-      <th>sd</th>
-      <th>hdi_5.5%</th>
-      <th>hdi_94.5%</th>
-      <th>mcse_mean</th>
-      <th>mcse_sd</th>
-      <th>ess_bulk</th>
-      <th>ess_tail</th>
-      <th>r_hat</th>
-      <th>var_name</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>d[CHMP3]</td>
-      <td>-0.138</td>
-      <td>0.122</td>
-      <td>-0.284</td>
-      <td>-0.018</td>
-      <td>0.059</td>
-      <td>0.045</td>
-      <td>5.0</td>
-      <td>48.0</td>
-      <td>2.04</td>
-      <td>d</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>d[ATP1A1]</td>
-      <td>-0.132</td>
-      <td>0.117</td>
-      <td>-0.276</td>
-      <td>-0.018</td>
-      <td>0.056</td>
-      <td>0.043</td>
-      <td>5.0</td>
-      <td>48.0</td>
-      <td>2.04</td>
-      <td>d</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>d[LONP1]</td>
-      <td>-0.114</td>
-      <td>0.099</td>
-      <td>-0.240</td>
-      <td>-0.018</td>
-      <td>0.048</td>
-      <td>0.036</td>
-      <td>5.0</td>
-      <td>48.0</td>
-      <td>2.04</td>
-      <td>d</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>d[TRIT1]</td>
-      <td>-0.114</td>
-      <td>0.099</td>
-      <td>-0.240</td>
-      <td>-0.018</td>
-      <td>0.048</td>
-      <td>0.036</td>
-      <td>5.0</td>
-      <td>48.0</td>
-      <td>2.04</td>
-      <td>d</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>d[UBE2N]</td>
-      <td>-0.113</td>
+      <th>mu_a[HSPE1]</th>
+      <td>-1.045</td>
       <td>0.097</td>
-      <td>-0.236</td>
-      <td>-0.018</td>
+      <td>-1.206</td>
+      <td>-0.888</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>2391.0</td>
+      <td>1443.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>mu_a[SPC24]</th>
+      <td>-1.040</td>
+      <td>0.102</td>
+      <td>-1.205</td>
+      <td>-0.883</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>2390.0</td>
+      <td>1609.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>mu_a[RAN]</th>
+      <td>-1.021</td>
+      <td>0.092</td>
+      <td>-1.176</td>
+      <td>-0.881</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>2320.0</td>
+      <td>1607.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>mu_a[EEF2]</th>
+      <td>-1.017</td>
+      <td>0.097</td>
+      <td>-1.181</td>
+      <td>-0.876</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>2073.0</td>
+      <td>1538.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>mu_a[PRAMEF4]</th>
+      <td>0.394</td>
+      <td>0.095</td>
+      <td>0.245</td>
+      <td>0.548</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>1904.0</td>
+      <td>1637.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>mu_a[ZNF334]</th>
+      <td>0.394</td>
+      <td>0.103</td>
+      <td>0.237</td>
+      <td>0.561</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>2323.0</td>
+      <td>1810.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>mu_a[ARHGAP44]</th>
+      <td>0.399</td>
+      <td>0.091</td>
+      <td>0.260</td>
+      <td>0.549</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>2032.0</td>
+      <td>1785.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>mu_a[HLA-DQB1]</th>
+      <td>0.412</td>
+      <td>0.102</td>
+      <td>0.251</td>
+      <td>0.574</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>2487.0</td>
+      <td>1477.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>mu_a[TP53]</th>
+      <td>0.447</td>
+      <td>0.089</td>
+      <td>0.314</td>
+      <td>0.595</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>2038.0</td>
+      <td>1420.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.summary(trace, var_names="b").sort_values("mean").pipe(head_tail, n=5)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>b[EP300]</th>
+      <td>-0.320</td>
+      <td>0.042</td>
+      <td>-0.384</td>
+      <td>-0.255</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3058.0</td>
+      <td>1299.0</td>
+      <td>1.01</td>
+    </tr>
+    <tr>
+      <th>b[TP63]</th>
+      <td>-0.180</td>
+      <td>0.041</td>
+      <td>-0.251</td>
+      <td>-0.119</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>5515.0</td>
+      <td>1715.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>b[STAG2]</th>
+      <td>-0.175</td>
+      <td>0.039</td>
+      <td>-0.233</td>
+      <td>-0.110</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>4220.0</td>
+      <td>1604.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>b[EBP]</th>
+      <td>-0.166</td>
       <td>0.047</td>
-      <td>0.036</td>
-      <td>5.0</td>
-      <td>48.0</td>
-      <td>2.04</td>
-      <td>d</td>
+      <td>-0.243</td>
+      <td>-0.094</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>4558.0</td>
+      <td>1411.0</td>
+      <td>1.00</td>
     </tr>
     <tr>
-      <th>18114</th>
-      <td>d[HCCS]</td>
-      <td>0.051</td>
-      <td>0.076</td>
-      <td>-0.020</td>
+      <th>b[TADA1]</th>
+      <td>-0.163</td>
+      <td>0.040</td>
+      <td>-0.229</td>
+      <td>-0.098</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>5474.0</td>
+      <td>1449.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>b[ATP6V1F]</th>
+      <td>0.219</td>
+      <td>0.043</td>
+      <td>0.155</td>
+      <td>0.291</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>5096.0</td>
+      <td>1408.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>b[MRPL57]</th>
+      <td>0.223</td>
+      <td>0.043</td>
       <td>0.154</td>
+      <td>0.292</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>4616.0</td>
+      <td>1486.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>b[GPI]</th>
+      <td>0.239</td>
+      <td>0.044</td>
+      <td>0.171</td>
+      <td>0.312</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>4311.0</td>
+      <td>1504.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>b[AIFM1]</th>
+      <td>0.250</td>
+      <td>0.045</td>
+      <td>0.173</td>
+      <td>0.319</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3708.0</td>
+      <td>1408.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>b[NARS2]</th>
+      <td>0.252</td>
+      <td>0.039</td>
+      <td>0.193</td>
+      <td>0.316</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>5685.0</td>
+      <td>1556.0</td>
+      <td>1.00</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.summary(trace, var_names="d").sort_values("mean").pipe(head_tail, n=5)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>d[CHMP3]</th>
+      <td>-0.257</td>
       <td>0.035</td>
-      <td>0.026</td>
-      <td>5.0</td>
-      <td>41.0</td>
-      <td>2.03</td>
-      <td>d</td>
+      <td>-0.310</td>
+      <td>-0.198</td>
+      <td>0.000</td>
+      <td>0.0</td>
+      <td>4968.0</td>
+      <td>1452.0</td>
+      <td>1.0</td>
     </tr>
     <tr>
-      <th>18115</th>
-      <td>d[ENO1]</td>
-      <td>0.051</td>
-      <td>0.075</td>
-      <td>-0.020</td>
-      <td>0.150</td>
-      <td>0.035</td>
-      <td>0.027</td>
-      <td>5.0</td>
-      <td>40.0</td>
-      <td>2.04</td>
-      <td>d</td>
+      <th>d[ATP1A1]</th>
+      <td>-0.245</td>
+      <td>0.041</td>
+      <td>-0.310</td>
+      <td>-0.181</td>
+      <td>0.001</td>
+      <td>0.0</td>
+      <td>4885.0</td>
+      <td>1378.0</td>
+      <td>1.0</td>
     </tr>
     <tr>
-      <th>18116</th>
-      <td>d[TARS2]</td>
-      <td>0.053</td>
-      <td>0.077</td>
-      <td>-0.020</td>
-      <td>0.154</td>
-      <td>0.036</td>
-      <td>0.027</td>
-      <td>5.0</td>
-      <td>40.0</td>
-      <td>2.04</td>
-      <td>d</td>
+      <th>d[LONP1]</th>
+      <td>-0.209</td>
+      <td>0.040</td>
+      <td>-0.275</td>
+      <td>-0.145</td>
+      <td>0.001</td>
+      <td>0.0</td>
+      <td>4753.0</td>
+      <td>1133.0</td>
+      <td>1.0</td>
     </tr>
     <tr>
-      <th>18117</th>
-      <td>d[MRPL39]</td>
-      <td>0.055</td>
-      <td>0.079</td>
-      <td>-0.020</td>
-      <td>0.161</td>
-      <td>0.037</td>
-      <td>0.028</td>
-      <td>5.0</td>
-      <td>40.0</td>
-      <td>2.04</td>
-      <td>d</td>
+      <th>d[TRIT1]</th>
+      <td>-0.209</td>
+      <td>0.040</td>
+      <td>-0.270</td>
+      <td>-0.142</td>
+      <td>0.001</td>
+      <td>0.0</td>
+      <td>4994.0</td>
+      <td>1335.0</td>
+      <td>1.0</td>
     </tr>
     <tr>
-      <th>18118</th>
-      <td>d[DMAC1]</td>
-      <td>0.057</td>
-      <td>0.081</td>
-      <td>-0.020</td>
-      <td>0.164</td>
+      <th>d[UBE2N]</th>
+      <td>-0.206</td>
       <td>0.038</td>
-      <td>0.029</td>
-      <td>5.0</td>
-      <td>40.0</td>
-      <td>2.04</td>
-      <td>d</td>
+      <td>-0.265</td>
+      <td>-0.143</td>
+      <td>0.001</td>
+      <td>0.0</td>
+      <td>4603.0</td>
+      <td>1518.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>d[HCCS]</th>
+      <td>0.121</td>
+      <td>0.043</td>
+      <td>0.051</td>
+      <td>0.187</td>
+      <td>0.001</td>
+      <td>0.0</td>
+      <td>5114.0</td>
+      <td>1574.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>d[ENO1]</th>
+      <td>0.122</td>
+      <td>0.038</td>
+      <td>0.060</td>
+      <td>0.183</td>
+      <td>0.001</td>
+      <td>0.0</td>
+      <td>4798.0</td>
+      <td>1430.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>d[TARS2]</th>
+      <td>0.124</td>
+      <td>0.039</td>
+      <td>0.055</td>
+      <td>0.180</td>
+      <td>0.001</td>
+      <td>0.0</td>
+      <td>5994.0</td>
+      <td>1017.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>d[MRPL39]</th>
+      <td>0.129</td>
+      <td>0.041</td>
+      <td>0.066</td>
+      <td>0.196</td>
+      <td>0.001</td>
+      <td>0.0</td>
+      <td>3744.0</td>
+      <td>1439.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>d[DMAC1]</th>
+      <td>0.133</td>
+      <td>0.041</td>
+      <td>0.063</td>
+      <td>0.195</td>
+      <td>0.001</td>
+      <td>0.0</td>
+      <td>5069.0</td>
+      <td>1532.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.summary(trace, var_names="h").sort_values("mean").pipe(head_tail, n=5)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>h[KIF11, ZFHX3]</th>
+      <td>-0.796</td>
+      <td>0.090</td>
+      <td>-0.944</td>
+      <td>-0.657</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3629.0</td>
+      <td>1434.0</td>
+      <td>1.01</td>
+    </tr>
+    <tr>
+      <th>h[ELL, ZFHX3]</th>
+      <td>-0.791</td>
+      <td>0.080</td>
+      <td>-0.912</td>
+      <td>-0.657</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>4479.0</td>
+      <td>1457.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>h[TRNT1, ZFHX3]</th>
+      <td>-0.766</td>
+      <td>0.082</td>
+      <td>-0.888</td>
+      <td>-0.633</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3645.0</td>
+      <td>1476.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>h[LONP1, ZFHX3]</th>
+      <td>-0.753</td>
+      <td>0.086</td>
+      <td>-0.888</td>
+      <td>-0.616</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3525.0</td>
+      <td>1384.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>h[ATP6V1B2, ZFHX3]</th>
+      <td>-0.742</td>
+      <td>0.078</td>
+      <td>-0.867</td>
+      <td>-0.623</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3487.0</td>
+      <td>1679.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>h[CHMP1B, ZFHX3]</th>
+      <td>0.194</td>
+      <td>0.067</td>
+      <td>0.088</td>
+      <td>0.303</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3437.0</td>
+      <td>1805.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>h[AFF4, ZFHX3]</th>
+      <td>0.218</td>
+      <td>0.073</td>
+      <td>0.104</td>
+      <td>0.332</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3646.0</td>
+      <td>1630.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>h[ELOA, ZFHX3]</th>
+      <td>0.238</td>
+      <td>0.071</td>
+      <td>0.122</td>
+      <td>0.348</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3578.0</td>
+      <td>1692.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>h[TP53, ZFHX3]</th>
+      <td>0.268</td>
+      <td>0.072</td>
+      <td>0.155</td>
+      <td>0.381</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3262.0</td>
+      <td>1644.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>h[EP300, ZFHX3]</th>
+      <td>0.468</td>
+      <td>0.073</td>
+      <td>0.349</td>
+      <td>0.584</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>2222.0</td>
+      <td>1590.0</td>
+      <td>1.00</td>
     </tr>
   </tbody>
 </table>
@@ -1098,7 +1363,7 @@ plt.show()
 
 
 
-![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_29_0.png)
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_35_0.png)
 
 
 
@@ -1113,7 +1378,7 @@ plt.show()
 
 
 
-![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_30_0.png)
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_36_0.png)
 
 
 
@@ -1147,7 +1412,7 @@ plt.show()
 
 
 
-![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_31_0.png)
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_37_0.png)
 
 
 
@@ -1302,13 +1567,13 @@ for gene in [eg_gene, "KIF11"]:
 
 
 
-![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_33_0.png)
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_39_0.png)
 
 
 
 
 
-![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_33_1.png)
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_39_1.png)
 
 
 
@@ -1378,7 +1643,7 @@ plt.show()
 
 
 
-![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_34_0.png)
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_40_0.png)
 
 
 
@@ -1451,10 +1716,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[0, 1]</th>
-      <td>-0.194</td>
-      <td>0.325</td>
-      <td>-0.487</td>
-      <td>0.474</td>
+      <td>-0.380</td>
+      <td>0.014</td>
+      <td>-0.403</td>
+      <td>-0.358</td>
       <td>0</td>
       <td>1</td>
       <td>mu_a</td>
@@ -1462,10 +1727,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[0, 2]</th>
-      <td>0.051</td>
-      <td>0.271</td>
-      <td>-0.506</td>
-      <td>0.457</td>
+      <td>0.106</td>
+      <td>0.016</td>
+      <td>0.083</td>
+      <td>0.134</td>
       <td>0</td>
       <td>2</td>
       <td>mu_a</td>
@@ -1473,10 +1738,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[0, 3]</th>
-      <td>-0.594</td>
-      <td>0.139</td>
-      <td>-0.812</td>
-      <td>-0.449</td>
+      <td>-0.476</td>
+      <td>0.034</td>
+      <td>-0.528</td>
+      <td>-0.419</td>
       <td>0</td>
       <td>3</td>
       <td>mu_a</td>
@@ -1484,10 +1749,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[0, 4]</th>
-      <td>0.563</td>
-      <td>0.295</td>
-      <td>0.150</td>
-      <td>0.864</td>
+      <td>0.843</td>
+      <td>0.010</td>
+      <td>0.828</td>
+      <td>0.859</td>
       <td>0</td>
       <td>4</td>
       <td>mu_a</td>
@@ -1495,10 +1760,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[1, 0]</th>
-      <td>-0.194</td>
-      <td>0.325</td>
-      <td>-0.487</td>
-      <td>0.474</td>
+      <td>-0.380</td>
+      <td>0.014</td>
+      <td>-0.403</td>
+      <td>-0.358</td>
       <td>1</td>
       <td>0</td>
       <td>b</td>
@@ -1517,10 +1782,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[1, 2]</th>
-      <td>-0.007</td>
-      <td>0.268</td>
-      <td>-0.535</td>
-      <td>0.437</td>
+      <td>-0.014</td>
+      <td>0.021</td>
+      <td>-0.050</td>
+      <td>0.018</td>
       <td>1</td>
       <td>2</td>
       <td>b</td>
@@ -1528,10 +1793,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[1, 3]</th>
-      <td>0.434</td>
-      <td>0.207</td>
-      <td>0.212</td>
-      <td>0.834</td>
+      <td>0.366</td>
+      <td>0.054</td>
+      <td>0.284</td>
+      <td>0.454</td>
       <td>1</td>
       <td>3</td>
       <td>b</td>
@@ -1539,10 +1804,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[1, 4]</th>
-      <td>-0.562</td>
-      <td>0.171</td>
-      <td>-0.935</td>
-      <td>-0.374</td>
+      <td>-0.538</td>
+      <td>0.017</td>
+      <td>-0.565</td>
+      <td>-0.512</td>
       <td>1</td>
       <td>4</td>
       <td>b</td>
@@ -1550,10 +1815,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[2, 0]</th>
-      <td>0.051</td>
-      <td>0.271</td>
-      <td>-0.506</td>
-      <td>0.457</td>
+      <td>0.106</td>
+      <td>0.016</td>
+      <td>0.083</td>
+      <td>0.134</td>
       <td>2</td>
       <td>0</td>
       <td>d</td>
@@ -1561,10 +1826,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[2, 1]</th>
-      <td>-0.007</td>
-      <td>0.268</td>
-      <td>-0.535</td>
-      <td>0.437</td>
+      <td>-0.014</td>
+      <td>0.021</td>
+      <td>-0.050</td>
+      <td>0.018</td>
       <td>2</td>
       <td>1</td>
       <td>d</td>
@@ -1583,10 +1848,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[2, 3]</th>
-      <td>-0.222</td>
-      <td>0.285</td>
-      <td>-0.866</td>
-      <td>0.054</td>
+      <td>-0.102</td>
+      <td>0.049</td>
+      <td>-0.181</td>
+      <td>-0.024</td>
       <td>2</td>
       <td>3</td>
       <td>d</td>
@@ -1594,10 +1859,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[2, 4]</th>
-      <td>0.281</td>
-      <td>0.323</td>
-      <td>0.065</td>
-      <td>0.967</td>
+      <td>0.123</td>
+      <td>0.017</td>
+      <td>0.093</td>
+      <td>0.148</td>
       <td>2</td>
       <td>4</td>
       <td>d</td>
@@ -1605,10 +1870,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[3, 0]</th>
-      <td>-0.594</td>
-      <td>0.139</td>
-      <td>-0.812</td>
-      <td>-0.449</td>
+      <td>-0.476</td>
+      <td>0.034</td>
+      <td>-0.528</td>
+      <td>-0.419</td>
       <td>3</td>
       <td>0</td>
       <td>f</td>
@@ -1616,10 +1881,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[3, 1]</th>
-      <td>0.434</td>
-      <td>0.207</td>
-      <td>0.212</td>
-      <td>0.834</td>
+      <td>0.366</td>
+      <td>0.054</td>
+      <td>0.284</td>
+      <td>0.454</td>
       <td>3</td>
       <td>1</td>
       <td>f</td>
@@ -1627,10 +1892,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[3, 2]</th>
-      <td>-0.222</td>
-      <td>0.285</td>
-      <td>-0.866</td>
-      <td>0.054</td>
+      <td>-0.102</td>
+      <td>0.049</td>
+      <td>-0.181</td>
+      <td>-0.024</td>
       <td>3</td>
       <td>2</td>
       <td>f</td>
@@ -1649,10 +1914,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[3, 4]</th>
-      <td>-0.743</td>
-      <td>0.084</td>
-      <td>-0.859</td>
-      <td>-0.638</td>
+      <td>-0.664</td>
+      <td>0.028</td>
+      <td>-0.705</td>
+      <td>-0.617</td>
       <td>3</td>
       <td>4</td>
       <td>f</td>
@@ -1660,10 +1925,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[4, 0]</th>
-      <td>0.563</td>
-      <td>0.295</td>
-      <td>0.150</td>
-      <td>0.864</td>
+      <td>0.843</td>
+      <td>0.010</td>
+      <td>0.828</td>
+      <td>0.859</td>
       <td>4</td>
       <td>0</td>
       <td>h[ZFHX3]</td>
@@ -1671,10 +1936,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[4, 1]</th>
-      <td>-0.562</td>
-      <td>0.171</td>
-      <td>-0.935</td>
-      <td>-0.374</td>
+      <td>-0.538</td>
+      <td>0.017</td>
+      <td>-0.565</td>
+      <td>-0.512</td>
       <td>4</td>
       <td>1</td>
       <td>h[ZFHX3]</td>
@@ -1682,10 +1947,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[4, 2]</th>
-      <td>0.281</td>
-      <td>0.323</td>
-      <td>0.065</td>
-      <td>0.967</td>
+      <td>0.123</td>
+      <td>0.017</td>
+      <td>0.093</td>
+      <td>0.148</td>
       <td>4</td>
       <td>2</td>
       <td>h[ZFHX3]</td>
@@ -1693,10 +1958,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[4, 3]</th>
-      <td>-0.743</td>
-      <td>0.084</td>
-      <td>-0.859</td>
-      <td>-0.638</td>
+      <td>-0.664</td>
+      <td>0.028</td>
+      <td>-0.705</td>
+      <td>-0.617</td>
       <td>4</td>
       <td>3</td>
       <td>h[ZFHX3]</td>
@@ -1728,7 +1993,431 @@ plt.show()
 
 
 
-![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_36_0.png)
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_42_0.png)
+
+
+
+
+```python
+cancer_genes = trace.posterior.coords["cancer_gene"].values.tolist()
+cancer_gene_mutants = (
+    valid_prostate_data.filter_column_isin("hugo_symbol", cancer_genes)[
+        ["hugo_symbol", "depmap_id", "is_mutated"]
+    ]
+    .drop_duplicates()
+    .assign(is_mutated=lambda d: d["is_mutated"].map({True: "X", False: ""}))
+    .pivot_wider("depmap_id", names_from="hugo_symbol", values_from="is_mutated")
+    .set_index("depmap_id")
+)
+cancer_gene_mutants
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>ZFHX3</th>
+    </tr>
+    <tr>
+      <th>depmap_id</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ACH-000115</th>
+      <td></td>
+    </tr>
+    <tr>
+      <th>ACH-000977</th>
+      <td>X</td>
+    </tr>
+    <tr>
+      <th>ACH-001453</th>
+      <td></td>
+    </tr>
+    <tr>
+      <th>ACH-001627</th>
+      <td>X</td>
+    </tr>
+    <tr>
+      <th>ACH-001648</th>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+az.plot_trace(trace, var_names=["mu_h", "sigma_h"], compact=False)
+plt.tight_layout()
+plt.show()
+```
+
+
+
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_44_0.png)
+
+
+
+
+```python
+h_post_summary = az.summary(trace, var_names=["h"], kind="stats").pipe(
+    extract_coords_param_names, names=["hugo_symbol", "cancer_gene"]
+)
+h_post_summary.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>hugo_symbol</th>
+      <th>cancer_gene</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>h[A1BG, ZFHX3]</th>
+      <td>0.034</td>
+      <td>0.083</td>
+      <td>-0.099</td>
+      <td>0.164</td>
+      <td>A1BG</td>
+      <td>ZFHX3</td>
+    </tr>
+    <tr>
+      <th>h[A1CF, ZFHX3]</th>
+      <td>0.083</td>
+      <td>0.074</td>
+      <td>-0.036</td>
+      <td>0.198</td>
+      <td>A1CF</td>
+      <td>ZFHX3</td>
+    </tr>
+    <tr>
+      <th>h[A2M, ZFHX3]</th>
+      <td>0.070</td>
+      <td>0.084</td>
+      <td>-0.062</td>
+      <td>0.207</td>
+      <td>A2M</td>
+      <td>ZFHX3</td>
+    </tr>
+    <tr>
+      <th>h[A2ML1, ZFHX3]</th>
+      <td>-0.043</td>
+      <td>0.074</td>
+      <td>-0.160</td>
+      <td>0.077</td>
+      <td>A2ML1</td>
+      <td>ZFHX3</td>
+    </tr>
+    <tr>
+      <th>h[A3GALT2, ZFHX3]</th>
+      <td>-0.012</td>
+      <td>0.071</td>
+      <td>-0.121</td>
+      <td>0.108</td>
+      <td>A3GALT2</td>
+      <td>ZFHX3</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+h_post_summary.sort_values("mean").pipe(head_tail, n=5)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>hugo_symbol</th>
+      <th>cancer_gene</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>h[KIF11, ZFHX3]</th>
+      <td>-0.796</td>
+      <td>0.090</td>
+      <td>-0.944</td>
+      <td>-0.657</td>
+      <td>KIF11</td>
+      <td>ZFHX3</td>
+    </tr>
+    <tr>
+      <th>h[ELL, ZFHX3]</th>
+      <td>-0.791</td>
+      <td>0.080</td>
+      <td>-0.912</td>
+      <td>-0.657</td>
+      <td>ELL</td>
+      <td>ZFHX3</td>
+    </tr>
+    <tr>
+      <th>h[TRNT1, ZFHX3]</th>
+      <td>-0.766</td>
+      <td>0.082</td>
+      <td>-0.888</td>
+      <td>-0.633</td>
+      <td>TRNT1</td>
+      <td>ZFHX3</td>
+    </tr>
+    <tr>
+      <th>h[LONP1, ZFHX3]</th>
+      <td>-0.753</td>
+      <td>0.086</td>
+      <td>-0.888</td>
+      <td>-0.616</td>
+      <td>LONP1</td>
+      <td>ZFHX3</td>
+    </tr>
+    <tr>
+      <th>h[ATP6V1B2, ZFHX3]</th>
+      <td>-0.742</td>
+      <td>0.078</td>
+      <td>-0.867</td>
+      <td>-0.623</td>
+      <td>ATP6V1B2</td>
+      <td>ZFHX3</td>
+    </tr>
+    <tr>
+      <th>h[CHMP1B, ZFHX3]</th>
+      <td>0.194</td>
+      <td>0.067</td>
+      <td>0.088</td>
+      <td>0.303</td>
+      <td>CHMP1B</td>
+      <td>ZFHX3</td>
+    </tr>
+    <tr>
+      <th>h[AFF4, ZFHX3]</th>
+      <td>0.218</td>
+      <td>0.073</td>
+      <td>0.104</td>
+      <td>0.332</td>
+      <td>AFF4</td>
+      <td>ZFHX3</td>
+    </tr>
+    <tr>
+      <th>h[ELOA, ZFHX3]</th>
+      <td>0.238</td>
+      <td>0.071</td>
+      <td>0.122</td>
+      <td>0.348</td>
+      <td>ELOA</td>
+      <td>ZFHX3</td>
+    </tr>
+    <tr>
+      <th>h[TP53, ZFHX3]</th>
+      <td>0.268</td>
+      <td>0.072</td>
+      <td>0.155</td>
+      <td>0.381</td>
+      <td>TP53</td>
+      <td>ZFHX3</td>
+    </tr>
+    <tr>
+      <th>h[EP300, ZFHX3]</th>
+      <td>0.468</td>
+      <td>0.073</td>
+      <td>0.349</td>
+      <td>0.584</td>
+      <td>EP300</td>
+      <td>ZFHX3</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+mu_h_post_summary = az.summary(trace, var_names="mu_h", kind="stats").pipe(
+    extract_coords_param_names, names=["cancer_gene"]
+)
+mu_h_post_summary
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>cancer_gene</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>mu_h[ZFHX3]</th>
+      <td>-0.041</td>
+      <td>0.002</td>
+      <td>-0.044</td>
+      <td>-0.039</td>
+      <td>ZFHX3</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+ax = sns.kdeplot(data=h_post_summary, x="mean", hue="cancer_gene")
+ax.set_xlabel(r"$\bar{h}_g$ posterior")
+ax.set_ylabel("density")
+ax.get_legend().set_title("cancer gene\ncomut.")
+plt.show()
+```
+
+
+
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_48_0.png)
+
+
+
+
+```python
+fig, axes = plt.subplots(
+    len(cancer_genes), 1, squeeze=False, figsize=(8, len(cancer_genes) * 5)
+)
+for ax, cg in zip(axes.flatten(), cancer_genes):
+    h_hits = (
+        h_post_summary.filter_column_isin("cancer_gene", [cg])
+        .sort_values("mean")
+        .pipe(head_tail, n=5)["hugo_symbol"]
+        .tolist()
+    )
+
+    h_hits_data = (
+        valid_prostate_data.filter_column_isin("hugo_symbol", h_hits)
+        .merge(cancer_gene_mutants.reset_index(), on="depmap_id")
+        .reset_index()
+        .astype({"hugo_symbol": str})
+        .assign(
+            hugo_symbol=lambda d: pd.Categorical(d["hugo_symbol"], categories=h_hits),
+            _cg_mut=lambda d: d[cg].map({"X": "mut.", "": "WT"}),
+        )
+    )
+    mut_pal = {"mut.": "tab:red", "WT": "gray"}
+    sns.boxplot(
+        data=h_hits_data,
+        x="hugo_symbol",
+        y="lfc",
+        hue="_cg_mut",
+        palette=mut_pal,
+        ax=ax,
+        showfliers=False,
+        boxprops={"alpha": 0.5},
+    )
+    sns.stripplot(
+        data=h_hits_data,
+        x="hugo_symbol",
+        y="lfc",
+        hue="_cg_mut",
+        dodge=True,
+        palette=mut_pal,
+        ax=ax,
+    )
+    ax.get_legend().set_title(cg)
+
+plt.tight_layout()
+plt.show()
+```
+
+
+
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_49_0.png)
 
 
 
@@ -1787,7 +2476,7 @@ plt.show()
 
 
 
-![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_38_0.png)
+![png](023_single-lineage-prostate-inspection_002_files/023_single-lineage-prostate-inspection_002_51_0.png)
 
 
 
@@ -1801,7 +2490,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 5.68 minutes
+    execution time: 21.09 minutes
 
 
 
@@ -1810,7 +2499,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-07-26
+    Last updated: 2022-07-27
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -1821,16 +2510,16 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1160.45.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-162.o2.rc.hms.harvard.edu
 
     Git branch: simplify
 
-    pandas    : 1.4.3
-    qnorm     : 0.8.1
     seaborn   : 0.11.2
-    matplotlib: 3.5.2
-    arviz     : 0.12.1
+    qnorm     : 0.8.1
     numpy     : 1.22.4
+    arviz     : 0.12.1
+    matplotlib: 3.5.2
+    pandas    : 1.4.3
