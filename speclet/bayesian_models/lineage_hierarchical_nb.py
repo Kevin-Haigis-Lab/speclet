@@ -12,6 +12,7 @@ import pymc as pm
 import pymc.math as pmmath
 from pandera import Check, Column, DataFrameSchema
 from pydantic import BaseModel
+from scipy.stats import rankdata
 
 from speclet.data_processing.common import get_cats, get_indices
 from speclet.data_processing.crispr import (
@@ -82,6 +83,7 @@ class LineageHierNegBinomModelConfig(BaseModel):
     lfc_limits: tuple[float, float] = (-5.0, 5.0)
     min_n_cancer_genes: int = 2
     min_frac_cancer_genes: float = 0.0
+    top_n_cancer_genes: int | None = None
     reduce_deterministic_vars: bool = True
 
 
@@ -104,6 +106,7 @@ class LineageHierNegBinomModel:
         self.lfc_limits = self._config.lfc_limits
         self.min_n_cancer_genes = self._config.min_n_cancer_genes
         self.min_frac_cancer_genes = self._config.min_frac_cancer_genes
+        self.top_n_cancer_genes = self._config.top_n_cancer_genes
         if self.min_n_cancer_genes < 2:
             logger.warning(
                 "Setting `min_n_cancer_genes` less than "
@@ -229,6 +232,7 @@ class LineageHierNegBinomModel:
             cancer_genes,
             min_n=self.min_n_cancer_genes,
             min_freq=self.min_frac_cancer_genes,
+            top_n_cg=self.top_n_cancer_genes,
         )
         coords["cancer_gene"] = cancer_genes
 
@@ -389,8 +393,6 @@ class LineageHierNegBinomModel:
                 "genes_chol_cov",
                 eta=2,
                 n=n_gene_vars,
-                # sd_dist=pm.Gamma.dist(3, 5, shape=n_gene_vars),
-                # sd_dist=pm.Exponential.dist(5, shape=n_gene_vars),
                 sd_dist=pm.HalfNormal.dist(0.5, shape=n_gene_vars),
                 compute_corr=True,
             )
@@ -399,7 +401,7 @@ class LineageHierNegBinomModel:
             pm.Deterministic("sigma_h", g_sigmas[4:], dims="cancer_gene")
 
             # Gene varying effects.
-            mu_mu_a = pm.Normal("mu_mu_a", mu_mu_a_loc, 0.2)  # initval=0
+            mu_mu_a = pm.Normal("mu_mu_a", mu_mu_a_loc, 0.2)
             mu_b = pm.Normal("mu_b", 0, 0.1)
             mu_d = pm.Normal("mu_d", 0, 0.1)
             mu_f = 0  # pm.Normal("mu_f", 0, 0.1)
@@ -414,7 +416,6 @@ class LineageHierNegBinomModel:
             f = pm.Deterministic("f", genes[:, 3], dims="gene")
             h = pm.Deterministic("h", genes[:, 4:], dims=("gene", "cancer_gene"))
 
-            # sigma_a = pm.Gamma("sigma_a", 3, 5)
             sigma_a = pm.HalfNormal("sigma_a", 0.5)
             delta_a = pm.Normal("delta_a", 0, 1, dims="sgrna")
             a = pm.Deterministic("a", mu_a[s_to_g] + delta_a * sigma_a, dims="sgrna")
@@ -443,8 +444,7 @@ class LineageHierNegBinomModel:
             else:
                 mu = pm.Deterministic("mu", _mu)
 
-            # alpha = pm.Gamma("alpha", 10, 1)
-            alpha = pm.Exponential("alpha", 0.5)  # initval=10
+            alpha = pm.Exponential("alpha", 0.5)
             pm.NegativeBinomial(
                 "ct_final",
                 mu=mu,
@@ -608,8 +608,26 @@ def _set_cancer_gene_rows_to_zero(
     return cancer_gene_mut_mat
 
 
+def _top_n_cancer_genes(
+    mut_mat: npt.NDArray[np.int32], cg: list[str], top_n: int
+) -> tuple[npt.NDArray[np.int32], list[str]]:
+    """Select only the top-n most frequently mutated cancer genes."""
+    n_muts = mut_mat.sum(axis=0)
+    mut_order = rankdata(n_muts, method="min") - 1
+    assert len(n_muts) == len(cg)
+    assert len(mut_order) == len(cg)
+    keep_idx = mut_order < top_n
+    new_cg = list(np.asarray(cg)[keep_idx])
+    new_mut_mat = mut_mat.copy()[:, keep_idx]
+    return new_mut_mat, new_cg
+
+
 def make_cancer_gene_comutation_matrix(
-    data: pd.DataFrame, cancer_genes: list[str], min_n: int = 1, min_freq: float = 0.0
+    data: pd.DataFrame,
+    cancer_genes: list[str],
+    min_n: int = 1,
+    min_freq: float = 0.0,
+    top_n_cg: int | None = None,
 ) -> tuple[npt.NDArray[np.int32], list[str]]:
     """Generate a cancer gene comutation matrix.
 
@@ -620,13 +638,14 @@ def make_cancer_gene_comutation_matrix(
         in order to use the cancer gene. Defaults to 1.
         min_freq (float, optional): Minimum fraction of cell lines (mutation frequency)
         with the cancer gene mutated in order to use the cancer gene. Defaults to 0.0.
+        top_n_cg (int | None, optional): Limit the cancer genes to the top-n most
+        frequently mutated. Defaults to `None` (to impose no limit).
 
     Returns:
         tuple[npt.NDArray[np.int32], list[str]]: Cancer gene comutation matrix of shape
         [num. data points x num. cancer gene] and the updated list of cancer genes.
     """
     c_by_g_matrix = _cell_line_by_cancer_gene_mutation_matrix(data, cancer_genes)
-
     c_by_g_matrix, new_cg = _trim_cancer_genes(
         c_by_g_matrix, cancer_genes, min_n=min_n, min_freq=min_freq
     )
@@ -636,6 +655,11 @@ def make_cancer_gene_comutation_matrix(
     c_by_g_matrix, new_merged_cg = _merge_colinear_cancer_genes(c_by_g_matrix, new_cg)
     if len(new_merged_cg) == 0:
         return np.zeros((len(data), 1), dtype=np.int32), new_merged_cg
+
+    if top_n_cg is not None and top_n_cg >= 0:
+        c_by_g_matrix, new_merged_cg = _top_n_cancer_genes(
+            mut_mat=c_by_g_matrix, cg=new_merged_cg, top_n=top_n_cg
+        )
 
     cell_line_idx = get_indices(data, "depmap_id")
     cg_mut_mat = c_by_g_matrix[cell_line_idx, :]
