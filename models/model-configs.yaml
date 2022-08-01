@@ -140,21 +140,24 @@
         gpu: "RTX 8000"
 
 
-- name: hnb-single-lineage-colorectal-004
+- name: hnb-single-lineage-colorectal-005
   description: "
     Single lineage hierarchical negative binomial model for colorectal data from the
-    Broad.
+    Broad. The number of cancer genes has been limited by having to be mutated in at
+    least 25% of cell lines. I have also increased the number of tuning steps from 1,000
+    to 2,000 and increased the target acceptance probability to 0.99.
   "
   active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_colorectal.csv"
   model_kwargs:
     lineage: "colorectal"
+    min_frac_cancer_genes: 0.25
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
-      tune: 1000 #2000
-      target_accept: 0.98
+      tune: 2000
+      target_accept: 0.99
       idata_kwargs:
         log_likelihood: false
       nuts_kwargs:
@@ -163,7 +166,7 @@
   slurm_resources:
     PYMC_NUMPYRO:
       mem: 64
-      time: 18
+      time: 22
       cores: 1
       gpu:
         gpu: "RTX 8000"
