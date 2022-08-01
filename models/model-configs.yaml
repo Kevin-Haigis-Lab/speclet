@@ -101,67 +101,15 @@
     lineage: "colorectal"
   sampling_kwargs:
     pymc_numpyro:
-      draws: 2000
-      tune: 700
+      draws: 1000
+      tune: 1000
       chain_method: "vectorized"
       target_accept: 0.99
   slurm_resources:
     PYMC_NUMPYRO:
-      mem: 64
-      time: 8
+      mem: 16
+      time: 4
       cores: 1
-
-
-- name: hnb-single-lineage-colorectal
-  description: "
-    Single lineage hierarchical negative binomial model for colorectal data from the
-    Broad. Only running this model with the Numpyro JAX backend.
-  "
-  active: false
-  model: LINEAGE_HIERARCHICAL_NB
-  data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_colorectal.csv"
-  model_kwargs:
-    lineage: "colorectal"
-  sampling_kwargs:
-    pymc_numpyro:
-      draws: 1000
-      tune: 500
-      target_accept: 0.98
-      idata_kwargs:
-        log_likelihood: false
-  slurm_resources:
-    PYMC_NUMPYRO:
-      mem: 150
-      time: 50
-      cores: 1
-      gpu:
-        gpu: "RTX 8000"
-
-
-- name: hnb-single-lineage-liver
-  description: "
-    Single lineage hierarchical negative binomial model for liver data from the
-    Broad. Only running this model with the Numpyro JAX backend.
-  "
-  active: false
-  model: LINEAGE_HIERARCHICAL_NB
-  data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_liver.csv"
-  model_kwargs:
-    lineage: "liver"
-  sampling_kwargs:
-    pymc_numpyro:
-      draws: 1000
-      tune: 500
-      target_accept: 0.98
-      idata_kwargs:
-        log_likelihood: false
-  slurm_resources:
-    PYMC_NUMPYRO:
-      mem: 32
-      time: 6
-      cores: 1
-      gpu:
-        gpu: "RTX 8000"
 
 
 - name: hnb-single-lineage-prostate-004
@@ -187,6 +135,63 @@
     PYMC_NUMPYRO:
       mem: 24
       time: 2
+      cores: 1
+      gpu:
+        gpu: "RTX 8000"
+
+
+- name: hnb-single-lineage-colorectal-004
+  description: "
+    Single lineage hierarchical negative binomial model for colorectal data from the
+    Broad.
+  "
+  active: true
+  model: LINEAGE_HIERARCHICAL_NB
+  data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_colorectal.csv"
+  model_kwargs:
+    lineage: "colorectal"
+  sampling_kwargs:
+    pymc_numpyro:
+      draws: 1000
+      tune: 1000 #2000
+      target_accept: 0.98
+      idata_kwargs:
+        log_likelihood: false
+      nuts_kwargs:
+        step_size: 0.01
+        # max_tree_depth: 12
+  slurm_resources:
+    PYMC_NUMPYRO:
+      mem: 64
+      time: 18
+      cores: 1
+      gpu:
+        gpu: "RTX 8000"
+
+
+- name: hnb-single-lineage-liver-004
+  description: "
+    Single lineage hierarchical negative binomial model for liver data from the
+    Broad. Only running this model with the Numpyro JAX backend (on GPUs).
+  "
+  active: true
+  model: LINEAGE_HIERARCHICAL_NB
+  data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_liver.csv"
+  model_kwargs:
+    lineage: "liver"
+  sampling_kwargs:
+    pymc_numpyro:
+      draws: 1000
+      tune: 1000
+      target_accept: 0.98
+      idata_kwargs:
+        log_likelihood: false
+      nuts_kwargs:
+        step_size: 0.01
+  slurm_resources:
+    PYMC_NUMPYRO:
+      mem: 32
+      time: 3
       cores: 1
       gpu:
         gpu: "RTX 8000"

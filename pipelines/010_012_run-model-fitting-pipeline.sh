@@ -25,7 +25,7 @@ snakemake \
     --snakefile $SNAKEFILE \
     --jobs 9995 \
     --restart-times 0 \
-    --latency-wait 120 \
+    --latency-wait 300 \
     --rerun-incomplete \
     --drmaa "${DRMAA_TEMPLATE}" \
     --cluster-config pipelines/010_011_smk-config.yaml \

@@ -30,8 +30,8 @@ sample_pymc_numpyro:
 combine_pymc_numpyro:
   partition: "short"
   cores: 1
-  mem: "200000"
-  time: "02:00:00"
+  mem: "250000"
+  time: "04:00:00"
   J: "pyro-comb"
 sample_pymc_advi:
   partition: "{params.partition}"
@@ -42,12 +42,12 @@ sample_pymc_advi:
 summarize_posterior:
   partition: "short"
   cores: 1
-  mem: "16000"
-  time: "2:00:00"
+  mem: "120000"
+  time: "8:00:00"
   J: "summary"
 execute_report:
   partition: "short"
   cores: 1
-  mem: "120000"
-  time: "06:00:00"
+  mem: "250000"
+  time: "10:00:00"
   J: "report"
