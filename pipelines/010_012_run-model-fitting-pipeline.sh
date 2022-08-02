@@ -24,7 +24,6 @@ DRMAA_TEMPLATE=" --account=park -c {cluster.cores} -p {cluster.partition} --mem=
 snakemake \
     --snakefile $SNAKEFILE \
     --jobs 9995 \
-    --restart-times 0 \
     --latency-wait 300 \
     --rerun-incomplete \
     --drmaa "${DRMAA_TEMPLATE}" \

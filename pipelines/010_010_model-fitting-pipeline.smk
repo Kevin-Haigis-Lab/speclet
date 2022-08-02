@@ -181,6 +181,7 @@ rule sample_pymc_numpyro:
     benchmark:
         BENCHMARK_DIR / "sample_pymc_mcmc/{model_name}_chain{chain}.tsv"
     priority: 30
+    retries: 3
     shell:
         get_aesara_flags("{wildcards.model_name}_{wildcards.chain}_mcmc") + " "
         "speclet/cli/fit_bayesian_model_cli.py"
@@ -191,9 +192,10 @@ rule sample_pymc_numpyro:
         "  --mcmc-chains 1"
         "  --mcmc-cores 1"
         "  --cache-name {params.cache_name}"
-        "  --seed {wildcards.chain}"
         "  --broad-only"
         "  --log-level DEBUG"
+        "  --check-sampling-stats"
+        # "  --seed {wildcards.chain}"
 
 
 rule combine_pymc_numpyro:

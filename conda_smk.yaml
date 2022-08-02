@@ -7,10 +7,10 @@ channels:
   - defaults
 dependencies:
   - python=3.10.*
-  - snakemake=7.3.*
+  - snakemake=7.12.*
   - aeppl
   - aesara
-  - arviz>=0.12.0
+  - arviz=0.12.*
   - black  # KEEP! used in pipeline
   - colorama
   - dask
@@ -24,7 +24,7 @@ dependencies:
   - nbconvert
   - nbqa  # KEEP! used in pipeline
   - numpy
-  - numpyro>=0.9.0
+  - numpyro=0.10.*
   - pandas
   - pandera
   - papermill
@@ -33,7 +33,7 @@ dependencies:
   - pretty_errors
   - pydantic
   - pyjanitor
-  - pymc>=4.1.0
+  - pymc=4.1.*
   - python-graphviz
   - rich
   - scikit-learn>=1.0.0
