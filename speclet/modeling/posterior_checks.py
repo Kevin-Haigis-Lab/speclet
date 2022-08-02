@@ -78,26 +78,38 @@ class CheckMarginalPosterior:
     """Check a marginal posterior has expected properties."""
 
     def __init__(
-        self, var_name: str, min_avg: float = -np.inf, max_avg: float = np.inf
+        self,
+        var_name: str,
+        min_avg: float = -np.inf,
+        max_avg: float = np.inf,
+        skip_if_missing: bool = False,
     ) -> None:
         """Check a marginal posterior distribution has expected properties.
 
         Args:
             var_name (str): Model variable name.
-            min_avg (float): Minimum value for the average of the marginal posterior
-            distribution.
-            max_avg (float): Maximum value for the average of the marginal posterior
-            distribution.
+            min_avg (float, optional): Minimum value for the average of the marginal
+            posterior distribution. Defaults to `-np.inf`.
+            max_avg (float, optional): Maximum value for the average of the marginal
+            posterior distribution. Defaults to `np.inf`.
+            skip_if_missing (bool): Skip the check (with a pass) if the variable is
+            missing. Defaults to `False`.
         """
         self.var_name = var_name
         self.min_avg = min_avg
         self.max_avg = max_avg
+        self.skip_if_missing = skip_if_missing
         return None
 
     def __call__(self, trace: az.InferenceData) -> CheckResult:
         """Check a marginal posterior distribution has expected properties."""
-        assert self.var_name in trace.posterior, f"{self.var_name} not in posterior."
         assert hasattr(trace, "posterior"), "No posterior data in trace object."
+        if self.var_name not in trace.posterior:
+            if self.skip_if_missing:
+                return True, f"No variable {self.var_name} - skipping check."
+            else:
+                raise BaseException(f"{self.var_name} not in posterior.")
+
         values = trace.posterior.get(self.var_name)
         assert values is not None, f"Could not get values for var {self.var_name}."
         avgs = values.mean(axis=1).values

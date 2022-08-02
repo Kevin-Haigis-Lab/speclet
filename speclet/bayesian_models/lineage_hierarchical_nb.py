@@ -33,6 +33,7 @@ from speclet.data_processing.validation import (
 from speclet.data_processing.vectors import squish_array
 from speclet.loggers import logger
 from speclet.managers.data_managers import CancerGeneDataManager as CancerGeneDM
+from speclet.modeling import mcmc_sampling_checks as mcmc_checks
 from speclet.project_enums import ModelFitMethod
 
 
@@ -452,6 +453,20 @@ class LineageHierNegBinomModel:
                 observed=model_data.ct_final,
             )
         return model
+
+    def posterior_sample_checks(self) -> list[mcmc_checks.SampleStatCheck]:
+        """Default posterior checks."""
+        checks: list[mcmc_checks.SampleStatCheck] = []
+        for var_name in ["sigma_mu_a", "sigma_b", "sigma_d", "sigma_f"]:
+            checks.append(
+                mcmc_checks.CheckMarginalPosterior(
+                    var_name=var_name,
+                    min_avg=0.001,
+                    max_avg=np.inf,
+                    skip_if_missing=True,
+                )
+            )
+        return checks
 
 
 def target_gene_is_mutated_vector(data: pd.DataFrame) -> npt.NDArray[np.int32]:
