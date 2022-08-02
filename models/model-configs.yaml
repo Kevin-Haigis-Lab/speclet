@@ -152,7 +152,7 @@
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_colorectal.csv"
   model_kwargs:
     lineage: "colorectal"
-    min_frac_cancer_genes: 0.25
+    min_frac_cancer_genes: 0.2
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000

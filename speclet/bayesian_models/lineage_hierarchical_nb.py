@@ -613,7 +613,7 @@ def _top_n_cancer_genes(
 ) -> tuple[npt.NDArray[np.int32], list[str]]:
     """Select only the top-n most frequently mutated cancer genes."""
     n_muts = mut_mat.sum(axis=0)
-    mut_order = rankdata(n_muts, method="min") - 1
+    mut_order = rankdata(-1 * n_muts, method="min") - 1
     assert len(n_muts) == len(cg)
     assert len(mut_order) == len(cg)
     keep_idx = mut_order < top_n
