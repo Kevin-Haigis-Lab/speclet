@@ -5,6 +5,7 @@
 from pathlib import Path
 from time import time
 
+import arviz as az
 import pandas as pd
 from dotenv import load_dotenv
 from typer import Typer
@@ -17,6 +18,7 @@ from speclet.loggers import logger, set_console_handler_level
 from speclet.managers.cache_manager import cache_posterior, get_posterior_cache_name
 from speclet.managers.data_managers import CrisprScreenDataManager, data_transformation
 from speclet.model_configuration import ModelingSamplingArguments
+from speclet.modeling import mcmc_sampling_checks as mcmc_check
 from speclet.modeling.fitting_arguments import (
     PymcSampleArguments,
     PymcSamplingNumpyroArguments,
@@ -90,6 +92,7 @@ def fit_bayesian_model(
     seed: int | None = None,
     broad_only: bool = False,
     log_level: str | None = None,
+    check_sampling_stats: bool = False,
 ) -> None:
     """Sample a Bayesian model.
 
@@ -109,6 +112,9 @@ def fit_bayesian_model(
         broad_only (bool, optional): Only include Broad screen data. Defaults to
         `False` to include all data.
         log_level (str | int | None, optional): Set a log level. Defaults to `None`.
+        check_sampling_stats (bool, optional): Whether to check the sampling statistics
+        at the end of sampling. Note, that a failed result will cause the program to
+        exit with an error.
     """
     tic = time()
     if log_level is not None:
@@ -139,7 +145,18 @@ def fit_bayesian_model(
     )
 
     logger.info("Sampling finished.")
+    assert hasattr(trace, "posterior"), "Missing posterior draws."
     print(trace.posterior.data_vars)
+
+    if check_sampling_stats:
+        logger.info("Checking sampling stats.")
+        res = _check_mcmc_sampling_efficiency(trace)
+        logger.info(res.message)
+        if res:
+            logger.info("Sampling statistics checks passed.")
+        else:
+            logger.error("Sampling statistics checks failed.")
+            raise mcmc_check.FailedSamplingStatisticsChecksError()
 
     if cache_name is None:
         logger.warning("No cache name provided - one will be generated automatically.")
@@ -151,6 +168,16 @@ def fit_bayesian_model(
     toc = time()
     logger.info(f"finished; execution time: {(toc - tic) / 60:.2f} minutes")
     return None
+
+
+def _check_mcmc_sampling_efficiency(
+    trace: az.InferenceData,
+) -> mcmc_check.SampleStatCheckResults:
+    checks = [
+        mcmc_check.CheckStepSize(),
+        mcmc_check.CheckBFMI(),
+    ]
+    return mcmc_check.check_mcmc_sampling(trace, checks)
 
 
 if __name__ == "__main__":

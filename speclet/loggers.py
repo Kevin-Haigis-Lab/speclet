@@ -12,13 +12,18 @@ from rich.logging import RichHandler
 def _get_console_handler() -> logging.Handler:
     handler = logging.StreamHandler()
     handler.setLevel(logging.DEBUG)
-    fmt = logging.Formatter("(%(levelname)s) %(message)s")
+    # fmt = logging.Formatter("(%(levelname)s) %(message)s")
+    fmt = logging.Formatter(
+        "[%(levelname)s] %(asctime)s "
+        + "[(%(filename)s:%(funcName)s:%(lineno)d] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
     handler.setFormatter(fmt)
     return handler
 
 
 def _get_rich_console_handler() -> RichHandler:
-    return RichHandler(level=logging.INFO)
+    return RichHandler(level=logging.INFO, omit_repeated_times=False)
 
 
 def _get_log_file() -> pathlib.Path:
@@ -43,8 +48,8 @@ def _get_file_handler() -> logging.Handler:
 logger = logging.getLogger("speclet")
 logger.setLevel(logging.DEBUG)
 if len(logger.handlers) == 0:
-    # logger.addHandler(_get_console_handler())
-    logger.addHandler(_get_rich_console_handler())
+    logger.addHandler(_get_console_handler())
+    # logger.addHandler(_get_rich_console_handler())
     logger.addHandler(_get_file_handler())
     # Update `_idx_console_loggers` in `set_console_handler_level()` if needed.
 
