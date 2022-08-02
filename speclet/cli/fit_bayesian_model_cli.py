@@ -10,6 +10,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from typer import Typer
 
+import speclet.modeling.posterior_checks as post_check
 from speclet import io
 from speclet import model_configuration as model_config
 from speclet.bayesian_models import get_bayesian_model
@@ -18,7 +19,6 @@ from speclet.loggers import logger, set_console_handler_level
 from speclet.managers.cache_manager import cache_posterior, get_posterior_cache_name
 from speclet.managers.data_managers import CrisprScreenDataManager, data_transformation
 from speclet.model_configuration import ModelingSamplingArguments
-from speclet.modeling import mcmc_sampling_checks as mcmc_check
 from speclet.modeling.fitting_arguments import (
     PymcSampleArguments,
     PymcSamplingNumpyroArguments,
@@ -75,6 +75,19 @@ def _augment_sampling_kwargs(
         sampling_kwargs.pymc_numpyro = PymcSamplingNumpyroArguments(chains=mcmc_chains)
 
     return sampling_kwargs
+
+
+def _check_mcmc_sampling_efficiency(
+    trace: az.InferenceData,
+    additional_checks: list[post_check.PosteriorCheck] | None = None,
+) -> post_check.PosteriorCheckResults:
+    checks = [
+        post_check.CheckStepSize(),
+        post_check.CheckBFMI(min_bfmi=0.2, max_bfmi=2.0),
+    ]
+    if additional_checks is not None:
+        checks += additional_checks
+    return post_check.check_mcmc_sampling(trace, checks)
 
 
 # ---- Main ----
@@ -150,13 +163,22 @@ def fit_bayesian_model(
 
     if check_sampling_stats:
         logger.info("Checking sampling stats.")
-        res = _check_mcmc_sampling_efficiency(trace)
+
+        model_checks: list[post_check.PosteriorCheck] | None = getattr(
+            model, "posterior_sample_checks", lambda: None
+        )()
+        if model_checks is None:
+            logger.debug("No posterior checks from model object.")
+        else:
+            msg = f"Recieved {len(model_checks)} posterior checks from the model."
+            logger.debug(msg)
+        res = _check_mcmc_sampling_efficiency(trace, model_checks)
         logger.info(res.message)
         if res:
             logger.info("Sampling statistics checks passed.")
         else:
             logger.error("Sampling statistics checks failed.")
-            raise mcmc_check.FailedSamplingStatisticsChecksError()
+            raise post_check.FailedSamplingStatisticsChecksError()
 
     if cache_name is None:
         logger.warning("No cache name provided - one will be generated automatically.")
@@ -168,16 +190,6 @@ def fit_bayesian_model(
     toc = time()
     logger.info(f"finished; execution time: {(toc - tic) / 60:.2f} minutes")
     return None
-
-
-def _check_mcmc_sampling_efficiency(
-    trace: az.InferenceData,
-) -> mcmc_check.SampleStatCheckResults:
-    checks = [
-        mcmc_check.CheckStepSize(),
-        mcmc_check.CheckBFMI(),
-    ]
-    return mcmc_check.check_mcmc_sampling(trace, checks)
 
 
 if __name__ == "__main__":

@@ -60,6 +60,24 @@ def test_check_marginal_posterior(
 
 
 @pytest.mark.parametrize(
+    ["var_name", "skip_if_missing", "pass_check"],
+    [("tau", False, True), ("fake-var", True, True)],
+)
+def test_check_marginal_posterior_if_missing_variable(
+    var_name: str,
+    skip_if_missing: bool,
+    pass_check: bool,
+    centered_eight_idata: az.InferenceData,
+) -> None:
+    check = post_checks.CheckMarginalPosterior(
+        var_name, skip_if_missing=skip_if_missing
+    )
+    res = check(centered_eight_idata)
+    assert res[0] == pass_check
+    return None
+
+
+@pytest.mark.parametrize(
     ["checks", "pass_check"],
     [
         (
