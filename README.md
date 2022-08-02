@@ -65,7 +65,7 @@ Second, a specific distribution of `jax` should be installed.
 At the time of writing, the following commands work, but I would recommend consulting the two links above if doing this again in the future.
 
 ```bash
-mamba install -c nvidia "cuda>=11.1" "cudnn>=8.2"
+mamba install --yes -c nvidia "cuda>=11.1" "cudnn>=8.2"
 pip install --upgrade "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 ```
 

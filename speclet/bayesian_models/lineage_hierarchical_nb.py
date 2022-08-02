@@ -14,6 +14,7 @@ from pandera import Check, Column, DataFrameSchema
 from pydantic import BaseModel
 from scipy.stats import rankdata
 
+import speclet.modeling.posterior_checks as post_checks
 from speclet.data_processing.common import get_cats, get_indices
 from speclet.data_processing.crispr import (
     add_useful_read_count_columns,
@@ -33,7 +34,6 @@ from speclet.data_processing.validation import (
 from speclet.data_processing.vectors import squish_array
 from speclet.loggers import logger
 from speclet.managers.data_managers import CancerGeneDataManager as CancerGeneDM
-from speclet.modeling import mcmc_sampling_checks as mcmc_checks
 from speclet.project_enums import ModelFitMethod
 
 
@@ -454,12 +454,12 @@ class LineageHierNegBinomModel:
             )
         return model
 
-    def posterior_sample_checks(self) -> list[mcmc_checks.SampleStatCheck]:
+    def posterior_sample_checks(self) -> list[post_checks.PosteriorCheck]:
         """Default posterior checks."""
-        checks: list[mcmc_checks.SampleStatCheck] = []
+        checks: list[post_checks.PosteriorCheck] = []
         for var_name in ["sigma_mu_a", "sigma_b", "sigma_d", "sigma_f"]:
             checks.append(
-                mcmc_checks.CheckMarginalPosterior(
+                post_checks.CheckMarginalPosterior(
                     var_name=var_name,
                     min_avg=0.001,
                     max_avg=np.inf,
