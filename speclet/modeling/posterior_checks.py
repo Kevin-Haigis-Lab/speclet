@@ -7,7 +7,7 @@ import arviz as az
 import numpy as np
 
 CheckResult = tuple[bool, str]
-SampleStatCheck = Callable[[az.InferenceData], CheckResult]
+PosteriorCheck = Callable[[az.InferenceData], CheckResult]
 
 
 class CheckBFMI:
@@ -118,8 +118,8 @@ class CheckMarginalPosterior:
 
 
 @dataclass
-class SampleStatCheckResults:
-    """Results of a sampling statistics check."""
+class PosteriorCheckResults:
+    """Results of a posteriors checks."""
 
     all_passed: bool
     message: str
@@ -137,23 +137,23 @@ def _get_checker_name(check: Any) -> str:
 
 
 class FailedSamplingStatisticsChecksError(BaseException):
-    """Failed sampling statistics checks."""
+    """Failed posterior check(s)."""
 
     ...
 
 
 def check_mcmc_sampling(
-    trace: az.InferenceData, checks: Iterable[SampleStatCheck]
-) -> SampleStatCheckResults:
-    """Check MCMC sampling statistics.
+    trace: az.InferenceData, checks: Iterable[PosteriorCheck]
+) -> PosteriorCheckResults:
+    """Check posterior attributes.
 
     Args:
-        trace (az.InferenceData): MCMC posterior.
+        trace (az.InferenceData): Posterior data.
         checks (Iterable[SampleStatCheck]): A collection of checks to run on the
-        posterior sampling statistics.
+        posterior data.
 
     Returns:
-        SampleStatCheckResults: Result of the checks.
+        PosteriorCheckResults: Result of the checks.
     """
     results: dict[str, CheckResult] = {}
     for check in checks:
@@ -162,6 +162,6 @@ def check_mcmc_sampling(
 
     all_passed = all([res[0] for res in results.values()])
     message = "\n".join([res[1] for res in results.values()])
-    return SampleStatCheckResults(
+    return PosteriorCheckResults(
         all_passed=all_passed, message=message, check_results=results
     )

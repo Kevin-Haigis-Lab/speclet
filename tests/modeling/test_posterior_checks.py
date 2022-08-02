@@ -2,7 +2,7 @@ import arviz as az
 import numpy as np
 import pytest
 
-import speclet.modeling.mcmc_sampling_checks as mcmc_checks
+import speclet.modeling.posterior_checks as post_checks
 
 
 def _mock_bfmi(trace: az.InferenceData) -> np.ndarray:
@@ -22,7 +22,7 @@ def test_check_bfmi(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(az, "bfmi", _mock_bfmi)
-    check = mcmc_checks.CheckBFMI(min_bfmi=min_bfmi, max_bfmi=max_bfmi)
+    check = post_checks.CheckBFMI(min_bfmi=min_bfmi, max_bfmi=max_bfmi)
     res = check(centered_eight_idata)
     assert res[0] == pass_check
     return None
@@ -37,7 +37,7 @@ def test_check_step_size(
     min_ss: float,
     pass_check: bool,
 ) -> None:
-    check = mcmc_checks.CheckStepSize(min_ss=min_ss)
+    check = post_checks.CheckStepSize(min_ss=min_ss)
     res = check(centered_eight_idata)
     assert res[0] == pass_check
     return None
@@ -53,7 +53,7 @@ def test_check_marginal_posterior(
     max_avg: float,
     pass_check: bool,
 ) -> None:
-    check = mcmc_checks.CheckMarginalPosterior("tau", min_avg=min_avg, max_avg=max_avg)
+    check = post_checks.CheckMarginalPosterior("tau", min_avg=min_avg, max_avg=max_avg)
     res = check(centered_eight_idata)
     assert res[0] == pass_check
     return None
@@ -64,17 +64,17 @@ def test_check_marginal_posterior(
     [
         (
             [
-                mcmc_checks.CheckBFMI(),
-                mcmc_checks.CheckStepSize(),
-                mcmc_checks.CheckMarginalPosterior("tau"),
+                post_checks.CheckBFMI(),
+                post_checks.CheckStepSize(),
+                post_checks.CheckMarginalPosterior("tau"),
             ],
             True,
         ),
         (
             [
-                mcmc_checks.CheckBFMI(min_bfmi=1.0),
-                mcmc_checks.CheckStepSize(),
-                mcmc_checks.CheckMarginalPosterior("tau"),
+                post_checks.CheckBFMI(min_bfmi=1.0),
+                post_checks.CheckStepSize(),
+                post_checks.CheckMarginalPosterior("tau"),
             ],
             False,
         ),
@@ -83,10 +83,10 @@ def test_check_marginal_posterior(
 def test_check_mcmc_sampling(
     centered_eight_idata: az.InferenceData,
     monkeypatch: pytest.MonkeyPatch,
-    checks: list[mcmc_checks.SampleStatCheck],
+    checks: list[post_checks.PosteriorCheck],
     pass_check: bool,
 ) -> None:
     monkeypatch.setattr(az, "bfmi", _mock_bfmi)
-    res = mcmc_checks.check_mcmc_sampling(centered_eight_idata, checks)
+    res = post_checks.check_mcmc_sampling(centered_eight_idata, checks)
     assert res.all_passed == pass_check
     assert len(res.check_results) == len(checks)
