@@ -117,7 +117,7 @@
     Single lineage hierarchical negative binomial model for prostate data from the
     Broad. This model modifies 003 by changing the priors on the standard deviation variables from Gammas to HalfNormals so that they include 0. A step size is also supplied to help with NUTS tuning the HMC sampler.
   "
-  active: true
+  active: false
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_prostate.csv"
   model_kwargs:
@@ -177,7 +177,7 @@
     Single lineage hierarchical negative binomial model for liver data from the
     Broad. Only running this model with the Numpyro JAX backend (on GPUs).
   "
-  active: true
+  active: false
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_liver.csv"
   model_kwargs:

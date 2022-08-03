@@ -139,9 +139,9 @@ print(model_description)
         h                          (chain, draw, gene, cancer_gene) float64 ...
         a                          (chain, draw, sgrna) float64 ...
     Attributes:
-        created_at:           2022-08-02 06:16:48.079730
+        created_at:           2022-08-03 03:07:25.920215
         arviz_version:        0.12.1
-        previous_created_at:  ['2022-08-02 06:16:48.079730', '2022-08-02T00:23:11...
+        previous_created_at:  ['2022-08-03 03:07:25.920215', '2022-08-03T06:06:14...
 
     --------------------------------------------------------------------------------
 
@@ -161,9 +161,9 @@ print(model_description)
         tree_depth       (chain, draw) int64 ...
         lp               (chain, draw) float64 ...
     Attributes:
-        created_at:           2022-08-02 06:16:48.079730
+        created_at:           2022-08-03 03:07:25.920215
         arviz_version:        0.12.1
-        previous_created_at:  ['2022-08-02 06:16:48.079730', '2022-08-02T00:23:11...
+        previous_created_at:  ['2022-08-03 03:07:25.920215', '2022-08-03T06:06:14...
 
     --------------------------------------------------------------------------------
 
@@ -172,8 +172,8 @@ print(model_description)
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0, 0, 0
     percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 0.816, 0.773, 0.733, 0.186
-    avg. step size: 0.007, 0.007, 0.007, 0.0
+    BFMI: 0.738, 0.731, 0.759, 0.698
+    avg. step size: 0.009, 0.01, 0.009, 0.01
 
 
 ### Load posterior summary
@@ -228,67 +228,67 @@ crc_post_summary.head()
       <td>0.001</td>
       <td>0.118</td>
       <td>0.121</td>
-      <td>0.000</td>
-      <td>0.000</td>
-      <td>24.0</td>
-      <td>2247.0</td>
-      <td>1.12</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2583.0</td>
+      <td>2932.0</td>
+      <td>1.0</td>
       <td>mu_mu_a</td>
     </tr>
     <tr>
       <th>1</th>
       <td>mu_b</td>
-      <td>-0.000</td>
-      <td>0.001</td>
       <td>-0.001</td>
-      <td>0.001</td>
       <td>0.000</td>
-      <td>0.000</td>
-      <td>7.0</td>
-      <td>35.0</td>
-      <td>1.53</td>
+      <td>-0.001</td>
+      <td>-0.000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>4301.0</td>
+      <td>3589.0</td>
+      <td>1.0</td>
       <td>mu_b</td>
     </tr>
     <tr>
       <th>2</th>
       <td>mu_d</td>
       <td>-0.022</td>
-      <td>0.001</td>
+      <td>0.000</td>
       <td>-0.023</td>
-      <td>-0.021</td>
-      <td>0.000</td>
-      <td>0.000</td>
-      <td>7.0</td>
-      <td>35.0</td>
-      <td>1.53</td>
+      <td>-0.022</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>4271.0</td>
+      <td>3631.0</td>
+      <td>1.0</td>
       <td>mu_d</td>
     </tr>
     <tr>
       <th>3</th>
       <td>sigma_a</td>
-      <td>0.149</td>
-      <td>0.058</td>
-      <td>0.048</td>
-      <td>0.184</td>
-      <td>0.029</td>
-      <td>0.022</td>
-      <td>7.0</td>
-      <td>11.0</td>
-      <td>1.60</td>
+      <td>0.182</td>
+      <td>0.001</td>
+      <td>0.181</td>
+      <td>0.183</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1168.0</td>
+      <td>2194.0</td>
+      <td>1.0</td>
       <td>sigma_a</td>
     </tr>
     <tr>
       <th>4</th>
       <td>alpha</td>
-      <td>7.470</td>
-      <td>0.671</td>
-      <td>6.302</td>
+      <td>7.858</td>
+      <td>0.007</td>
+      <td>7.848</td>
       <td>7.870</td>
-      <td>0.334</td>
-      <td>0.256</td>
-      <td>7.0</td>
-      <td>11.0</td>
-      <td>1.59</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3100.0</td>
+      <td>2713.0</td>
+      <td>1.0</td>
       <td>alpha</td>
     </tr>
   </tbody>
@@ -513,35 +513,13 @@ valid_crc_data = crc_model.data_processing_pipeline(crc_data.copy())
 crc_model_data = crc_model.make_data_structure(valid_crc_data)
 ```
 
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[08/02/22 11:38:26] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Processing data for modeling.     <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#273" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">273</span></a>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> LFC limits: <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-5.0</span>, <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5.0</span><span style="font-weight: bold">)</span>           <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#274" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">274</span></a>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[08/02/22 11:40:28] </span><span style="color: #800000; text-decoration-color: #800000">WARNING </span> number of data points dropped: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">25</span> <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#325" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">325</span></a>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[08/02/22 11:40:30] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> number of genes mutated in all    <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#478" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">478</span></a>
-<span style="color: #7fbfbf; text-decoration-color: #7fbfbf">                    </span>         cells lines: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span>                    <span style="color: #7f7f7f; text-decoration-color: #7f7f7f">                              </span>
-</pre>
-
-
-
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7fbfbf; text-decoration-color: #7fbfbf">[08/02/22 11:40:34] </span><span style="color: #000080; text-decoration-color: #000080">INFO    </span> Dropping <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">21</span> cancer genes.         <a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">lineage_hierarchical_nb.py</span></a><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">:</span><a href="file:///n/data1/hms/dbmi/park/Cook/speclet/speclet/bayesian_models/lineage_hierarchical_nb.py#534" target="_blank"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">534</span></a>
-</pre>
-
+    [INFO] 2022-08-03 06:59:50 [(lineage_hierarchical_nb.py:data_processing_pipeline:274] Processing data for modeling.
+    [INFO] 2022-08-03 06:59:50 [(lineage_hierarchical_nb.py:data_processing_pipeline:275] LFC limits: (-5.0, 5.0)
+    [WARNING] 2022-08-03 07:01:33 [(lineage_hierarchical_nb.py:data_processing_pipeline:326] number of data points dropped: 25
+    [INFO] 2022-08-03 07:01:36 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:493] number of genes mutated in all cells lines: 0
+    [DEBUG] 2022-08-03 07:01:36 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:496] Genes always mutated:
+    [INFO] 2022-08-03 07:01:39 [(lineage_hierarchical_nb.py:_trim_cancer_genes:549] Dropping 21 cancer genes.
+    [DEBUG] 2022-08-03 07:01:39 [(lineage_hierarchical_nb.py:_trim_cancer_genes:550] Dropped cancer genes: ['AKT1', 'AXIN1', 'BAX', 'ERBB3', 'GRIN2A', 'HIF1A', 'MAP2K1', 'MAX', 'MDM2', 'MLH1', 'MSH2', 'PIK3R1', 'POLE', 'PTPRT', 'SALL4', 'SFRP4', 'SMAD2', 'SMAD3', 'SMAD4', 'SRC', 'TGFBR2']
 
 
 
@@ -670,35 +648,35 @@ trace.sample_stats.get(stats).to_dataframe().groupby("chain").mean()
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.007457</td>
+      <td>0.008668</td>
       <td>511.0</td>
       <td>9.0</td>
-      <td>0.990548</td>
-      <td>1.912175e+07</td>
+      <td>0.988654</td>
+      <td>1.912181e+07</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0.007395</td>
+      <td>0.010030</td>
       <td>511.0</td>
       <td>9.0</td>
-      <td>0.991426</td>
-      <td>1.912176e+07</td>
+      <td>0.985516</td>
+      <td>1.912168e+07</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.007224</td>
+      <td>0.009039</td>
       <td>511.0</td>
       <td>9.0</td>
-      <td>0.991748</td>
-      <td>1.912174e+07</td>
+      <td>0.987882</td>
+      <td>1.912167e+07</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.000212</td>
-      <td>1023.0</td>
-      <td>10.0</td>
-      <td>0.979913</td>
-      <td>1.936050e+07</td>
+      <td>0.010094</td>
+      <td>511.0</td>
+      <td>9.0</td>
+      <td>0.984214</td>
+      <td>1.912171e+07</td>
     </tr>
   </tbody>
 </table>
@@ -708,78 +686,21 @@ trace.sample_stats.get(stats).to_dataframe().groupby("chain").mean()
 
 
 ```python
-az.plot_trace(trace, var_names=["mu_mu_a", "mu_b", "mu_d"], compact=False)
-plt.tight_layout()
+# HAPPY_CHAINS = [0, 1, 2]
+# SAD_CHAINS = [3]
+# trace.posterior = trace.posterior.sel({"chain": HAPPY_CHAINS})
+# trace.posterior_predictive = trace.posterior_predictive.sel({"chain": HAPPY_CHAINS})
 ```
 
 
-
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_26_0.png)
-
-
-
-
 ```python
-az.plot_trace(
-    trace, var_names=[f"sigma_{x}" for x in ["a", "mu_a", "b", "d", "f"]], compact=False
-)
+az.plot_trace(trace, var_names=["mu_mu_a", "mu_b", "mu_d"], compact=False)
 plt.tight_layout()
-plt.show()
 ```
 
 
 
 ![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_27_0.png)
-
-
-
-
-```python
-az.plot_trace(trace, var_names=["sigma_h"], compact=True)
-plt.tight_layout()
-plt.show()
-```
-
-
-
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_28_0.png)
-
-
-
-
-```python
-az.plot_trace(trace, var_names=["alpha"], compact=False)
-plt.tight_layout()
-plt.show()
-```
-
-
-
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_29_0.png)
-
-
-
-
-```python
-HAPPY_CHAINS = [0, 1, 2]
-SAD_CHAINS = [3]
-```
-
-
-```python
-trace.posterior = trace.posterior.sel({"chain": HAPPY_CHAINS})
-trace.posterior_predictive = trace.posterior_predictive.sel({"chain": HAPPY_CHAINS})
-```
-
-
-```python
-az.plot_trace(trace, var_names=["mu_mu_a", "mu_b", "mu_d"], compact=False)
-plt.tight_layout()
-```
-
-
-
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_32_0.png)
 
 
 
@@ -829,8 +750,8 @@ az.summary(trace, var_names=["mu_mu_a", "mu_b", "mu_d"])
       <td>0.121</td>
       <td>0.0</td>
       <td>0.0</td>
-      <td>1091.0</td>
-      <td>1974.0</td>
+      <td>2583.0</td>
+      <td>2932.0</td>
       <td>1.0</td>
     </tr>
     <tr>
@@ -841,8 +762,8 @@ az.summary(trace, var_names=["mu_mu_a", "mu_b", "mu_d"])
       <td>-0.000</td>
       <td>0.0</td>
       <td>0.0</td>
-      <td>3279.0</td>
-      <td>2570.0</td>
+      <td>4301.0</td>
+      <td>3589.0</td>
       <td>1.0</td>
     </tr>
     <tr>
@@ -853,8 +774,8 @@ az.summary(trace, var_names=["mu_mu_a", "mu_b", "mu_d"])
       <td>-0.022</td>
       <td>0.0</td>
       <td>0.0</td>
-      <td>2545.0</td>
-      <td>2292.0</td>
+      <td>4271.0</td>
+      <td>3631.0</td>
       <td>1.0</td>
     </tr>
   </tbody>
@@ -874,7 +795,7 @@ plt.show()
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_34_0.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_29_0.png)
 
 
 
@@ -887,7 +808,7 @@ plt.show()
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_35_0.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_30_0.png)
 
 
 
@@ -900,7 +821,7 @@ plt.show()
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_36_0.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_31_0.png)
 
 
 
@@ -914,7 +835,7 @@ plt.tight_layout()
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_37_0.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_32_0.png)
 
 
 
@@ -934,7 +855,7 @@ plt.show()
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_38_0.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_33_0.png)
 
 
 
@@ -988,141 +909,141 @@ crc_post_summary.query("var_name == 'mu_a'").sort_values("mean").pipe(head_tail,
     <tr>
       <th>12660</th>
       <td>mu_a[RAN]</td>
-      <td>-0.858</td>
-      <td>0.568</td>
-      <td>-1.264</td>
-      <td>0.119</td>
-      <td>0.281</td>
-      <td>0.215</td>
-      <td>7.0</td>
-      <td>20.0</td>
-      <td>1.54</td>
+      <td>-1.183</td>
+      <td>0.075</td>
+      <td>-1.304</td>
+      <td>-1.061</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2563.0</td>
+      <td>2617.0</td>
+      <td>1.0</td>
       <td>mu_a</td>
     </tr>
     <tr>
       <th>12332</th>
       <td>mu_a[PSMD7]</td>
-      <td>-0.769</td>
-      <td>0.517</td>
-      <td>-1.143</td>
-      <td>0.119</td>
-      <td>0.255</td>
-      <td>0.195</td>
-      <td>7.0</td>
-      <td>24.0</td>
-      <td>1.53</td>
+      <td>-1.062</td>
+      <td>0.077</td>
+      <td>-1.187</td>
+      <td>-0.943</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2712.0</td>
+      <td>2935.0</td>
+      <td>1.0</td>
       <td>mu_a</td>
     </tr>
     <tr>
       <th>7792</th>
       <td>mu_a[KIF11]</td>
-      <td>-0.741</td>
-      <td>0.501</td>
-      <td>-1.110</td>
-      <td>0.119</td>
-      <td>0.247</td>
-      <td>0.189</td>
-      <td>7.0</td>
-      <td>20.0</td>
-      <td>1.54</td>
+      <td>-1.023</td>
+      <td>0.074</td>
+      <td>-1.147</td>
+      <td>-0.913</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>2302.0</td>
+      <td>2828.0</td>
+      <td>1.0</td>
       <td>mu_a</td>
     </tr>
     <tr>
       <th>11849</th>
       <td>mu_a[POLR2L]</td>
-      <td>-0.738</td>
-      <td>0.499</td>
-      <td>-1.105</td>
-      <td>0.119</td>
-      <td>0.246</td>
-      <td>0.188</td>
-      <td>7.0</td>
-      <td>20.0</td>
-      <td>1.54</td>
+      <td>-1.020</td>
+      <td>0.074</td>
+      <td>-1.143</td>
+      <td>-0.904</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2806.0</td>
+      <td>2531.0</td>
+      <td>1.0</td>
       <td>mu_a</td>
     </tr>
     <tr>
       <th>13322</th>
       <td>mu_a[RPSA]</td>
-      <td>-0.722</td>
-      <td>0.489</td>
-      <td>-1.080</td>
-      <td>0.119</td>
-      <td>0.242</td>
-      <td>0.185</td>
-      <td>7.0</td>
-      <td>17.0</td>
-      <td>1.55</td>
+      <td>-1.006</td>
+      <td>0.075</td>
+      <td>-1.135</td>
+      <td>-0.893</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>2512.0</td>
+      <td>2916.0</td>
+      <td>1.0</td>
       <td>mu_a</td>
     </tr>
     <tr>
-      <th>4844</th>
-      <td>mu_a[EQTN]</td>
-      <td>0.322</td>
-      <td>0.137</td>
-      <td>0.118</td>
-      <td>0.474</td>
-      <td>0.059</td>
-      <td>0.044</td>
-      <td>7.0</td>
-      <td>23.0</td>
-      <td>1.53</td>
+      <th>13177</th>
+      <td>mu_a[ROCK2]</td>
+      <td>0.389</td>
+      <td>0.074</td>
+      <td>0.275</td>
+      <td>0.510</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2718.0</td>
+      <td>2902.0</td>
+      <td>1.0</td>
       <td>mu_a</td>
     </tr>
     <tr>
       <th>16407</th>
       <td>mu_a[TRIQK]</td>
-      <td>0.324</td>
-      <td>0.134</td>
-      <td>0.118</td>
-      <td>0.469</td>
-      <td>0.060</td>
-      <td>0.045</td>
-      <td>7.0</td>
-      <td>23.0</td>
-      <td>1.54</td>
+      <td>0.394</td>
+      <td>0.073</td>
+      <td>0.280</td>
+      <td>0.512</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2724.0</td>
+      <td>2752.0</td>
+      <td>1.0</td>
       <td>mu_a</td>
     </tr>
     <tr>
       <th>10472</th>
       <td>mu_a[OFD1]</td>
-      <td>0.329</td>
-      <td>0.137</td>
-      <td>0.118</td>
-      <td>0.477</td>
-      <td>0.061</td>
-      <td>0.046</td>
-      <td>7.0</td>
-      <td>23.0</td>
-      <td>1.54</td>
+      <td>0.400</td>
+      <td>0.071</td>
+      <td>0.295</td>
+      <td>0.519</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2491.0</td>
+      <td>3037.0</td>
+      <td>1.0</td>
       <td>mu_a</td>
     </tr>
     <tr>
       <th>17905</th>
       <td>mu_a[ZNF611]</td>
-      <td>0.337</td>
-      <td>0.142</td>
-      <td>0.118</td>
-      <td>0.488</td>
-      <td>0.064</td>
-      <td>0.048</td>
-      <td>7.0</td>
-      <td>24.0</td>
-      <td>1.54</td>
+      <td>0.413</td>
+      <td>0.072</td>
+      <td>0.304</td>
+      <td>0.529</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2441.0</td>
+      <td>2944.0</td>
+      <td>1.0</td>
       <td>mu_a</td>
     </tr>
     <tr>
       <th>8819</th>
       <td>mu_a[MAPK9]</td>
-      <td>0.345</td>
-      <td>0.149</td>
-      <td>0.118</td>
-      <td>0.509</td>
-      <td>0.066</td>
-      <td>0.049</td>
-      <td>7.0</td>
-      <td>24.0</td>
-      <td>1.53</td>
+      <td>0.423</td>
+      <td>0.083</td>
+      <td>0.283</td>
+      <td>0.549</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>2879.0</td>
+      <td>2834.0</td>
+      <td>1.0</td>
       <td>mu_a</td>
     </tr>
   </tbody>
@@ -1174,141 +1095,141 @@ crc_post_summary.query("var_name == 'b'").sort_values("mean").pipe(head_tail, 5)
     <tr>
       <th>31284</th>
       <td>b[RNGTT]</td>
-      <td>-0.068</td>
-      <td>0.042</td>
-      <td>-0.107</td>
-      <td>0.001</td>
-      <td>0.020</td>
+      <td>-0.090</td>
       <td>0.015</td>
-      <td>7.0</td>
-      <td>31.0</td>
-      <td>1.53</td>
+      <td>-0.115</td>
+      <td>-0.066</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>8053.0</td>
+      <td>2945.0</td>
+      <td>1.0</td>
       <td>b</td>
     </tr>
     <tr>
       <th>18806</th>
       <td>b[ANKLE2]</td>
-      <td>-0.067</td>
-      <td>0.041</td>
-      <td>-0.105</td>
-      <td>0.002</td>
-      <td>0.020</td>
+      <td>-0.090</td>
       <td>0.015</td>
-      <td>7.0</td>
-      <td>33.0</td>
-      <td>1.53</td>
-      <td>b</td>
-    </tr>
-    <tr>
-      <th>30883</th>
-      <td>b[RBM22]</td>
-      <td>-0.063</td>
-      <td>0.040</td>
-      <td>-0.101</td>
-      <td>0.002</td>
-      <td>0.019</td>
-      <td>0.014</td>
-      <td>7.0</td>
-      <td>20.0</td>
-      <td>1.54</td>
+      <td>-0.112</td>
+      <td>-0.064</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>9072.0</td>
+      <td>2635.0</td>
+      <td>1.0</td>
       <td>b</td>
     </tr>
     <tr>
       <th>30419</th>
       <td>b[PSMA6]</td>
-      <td>-0.063</td>
-      <td>0.039</td>
-      <td>-0.101</td>
-      <td>0.001</td>
-      <td>0.018</td>
-      <td>0.014</td>
-      <td>7.0</td>
-      <td>32.0</td>
-      <td>1.53</td>
+      <td>-0.084</td>
+      <td>0.016</td>
+      <td>-0.109</td>
+      <td>-0.056</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>8557.0</td>
+      <td>2802.0</td>
+      <td>1.0</td>
+      <td>b</td>
+    </tr>
+    <tr>
+      <th>30883</th>
+      <td>b[RBM22]</td>
+      <td>-0.084</td>
+      <td>0.016</td>
+      <td>-0.107</td>
+      <td>-0.057</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>7176.0</td>
+      <td>2830.0</td>
+      <td>1.0</td>
       <td>b</td>
     </tr>
     <tr>
       <th>30451</th>
       <td>b[PSMD7]</td>
-      <td>-0.061</td>
-      <td>0.039</td>
-      <td>-0.099</td>
-      <td>0.002</td>
-      <td>0.018</td>
-      <td>0.014</td>
-      <td>7.0</td>
-      <td>33.0</td>
-      <td>1.53</td>
+      <td>-0.082</td>
+      <td>0.017</td>
+      <td>-0.107</td>
+      <td>-0.055</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>8109.0</td>
+      <td>3167.0</td>
+      <td>1.0</td>
       <td>b</td>
     </tr>
     <tr>
-      <th>18748</th>
-      <td>b[AMIGO2]</td>
-      <td>0.026</td>
-      <td>0.020</td>
-      <td>0.000</td>
-      <td>0.051</td>
-      <td>0.007</td>
-      <td>0.006</td>
-      <td>8.0</td>
-      <td>56.0</td>
-      <td>1.43</td>
-      <td>b</td>
-    </tr>
-    <tr>
-      <th>33737</th>
-      <td>b[TGFB1]</td>
-      <td>0.026</td>
-      <td>0.019</td>
-      <td>0.001</td>
-      <td>0.050</td>
-      <td>0.007</td>
-      <td>0.005</td>
-      <td>8.0</td>
-      <td>95.0</td>
-      <td>1.41</td>
+      <th>24038</th>
+      <td>b[GET4]</td>
+      <td>0.034</td>
+      <td>0.015</td>
+      <td>0.011</td>
+      <td>0.059</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>8017.0</td>
+      <td>2648.0</td>
+      <td>1.0</td>
       <td>b</td>
     </tr>
     <tr>
       <th>33183</th>
       <td>b[STON1]</td>
-      <td>0.026</td>
-      <td>0.019</td>
-      <td>-0.000</td>
-      <td>0.050</td>
-      <td>0.007</td>
-      <td>0.006</td>
-      <td>8.0</td>
-      <td>37.0</td>
-      <td>1.47</td>
+      <td>0.035</td>
+      <td>0.014</td>
+      <td>0.012</td>
+      <td>0.056</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>10819.0</td>
+      <td>3014.0</td>
+      <td>1.0</td>
+      <td>b</td>
+    </tr>
+    <tr>
+      <th>18748</th>
+      <td>b[AMIGO2]</td>
+      <td>0.035</td>
+      <td>0.014</td>
+      <td>0.015</td>
+      <td>0.059</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>9299.0</td>
+      <td>2655.0</td>
+      <td>1.0</td>
       <td>b</td>
     </tr>
     <tr>
       <th>20819</th>
       <td>b[CDKN1C]</td>
-      <td>0.033</td>
-      <td>0.023</td>
-      <td>-0.001</td>
-      <td>0.060</td>
-      <td>0.010</td>
-      <td>0.007</td>
-      <td>7.0</td>
-      <td>35.0</td>
-      <td>1.50</td>
+      <td>0.045</td>
+      <td>0.015</td>
+      <td>0.021</td>
+      <td>0.068</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>7445.0</td>
+      <td>2837.0</td>
+      <td>1.0</td>
       <td>b</td>
     </tr>
     <tr>
       <th>20817</th>
       <td>b[CDKN1A]</td>
-      <td>0.043</td>
-      <td>0.027</td>
-      <td>0.000</td>
-      <td>0.072</td>
-      <td>0.012</td>
-      <td>0.009</td>
-      <td>7.0</td>
-      <td>28.0</td>
-      <td>1.53</td>
+      <td>0.057</td>
+      <td>0.015</td>
+      <td>0.032</td>
+      <td>0.080</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>8310.0</td>
+      <td>2461.0</td>
+      <td>1.0</td>
       <td>b</td>
     </tr>
   </tbody>
@@ -1360,141 +1281,141 @@ crc_post_summary.query("var_name == 'd'").sort_values("mean").pipe(head_tail, 5)
     <tr>
       <th>50218</th>
       <td>d[SIK3]</td>
-      <td>-0.090</td>
-      <td>0.044</td>
-      <td>-0.135</td>
-      <td>-0.020</td>
-      <td>0.020</td>
-      <td>0.015</td>
-      <td>7.0</td>
-      <td>34.0</td>
-      <td>1.53</td>
+      <td>-0.113</td>
+      <td>0.021</td>
+      <td>-0.147</td>
+      <td>-0.080</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>9276.0</td>
+      <td>2842.0</td>
+      <td>1.0</td>
       <td>d</td>
     </tr>
     <tr>
       <th>38694</th>
       <td>d[CCND1]</td>
-      <td>-0.089</td>
-      <td>0.043</td>
-      <td>-0.133</td>
-      <td>-0.020</td>
+      <td>-0.112</td>
       <td>0.020</td>
-      <td>0.015</td>
-      <td>7.0</td>
-      <td>34.0</td>
-      <td>1.53</td>
+      <td>-0.143</td>
+      <td>-0.077</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>10973.0</td>
+      <td>2728.0</td>
+      <td>1.0</td>
       <td>d</td>
     </tr>
     <tr>
       <th>41087</th>
       <td>d[ERBB2]</td>
-      <td>-0.088</td>
-      <td>0.044</td>
-      <td>-0.136</td>
-      <td>-0.020</td>
-      <td>0.019</td>
-      <td>0.015</td>
-      <td>7.0</td>
-      <td>35.0</td>
-      <td>1.53</td>
+      <td>-0.110</td>
+      <td>0.023</td>
+      <td>-0.147</td>
+      <td>-0.073</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>8812.0</td>
+      <td>2709.0</td>
+      <td>1.0</td>
       <td>d</td>
     </tr>
     <tr>
       <th>48547</th>
       <td>d[PSMB5]</td>
-      <td>-0.083</td>
-      <td>0.040</td>
-      <td>-0.125</td>
-      <td>-0.020</td>
-      <td>0.018</td>
-      <td>0.014</td>
-      <td>7.0</td>
-      <td>35.0</td>
-      <td>1.53</td>
+      <td>-0.104</td>
+      <td>0.021</td>
+      <td>-0.142</td>
+      <td>-0.073</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>6334.0</td>
+      <td>3126.0</td>
+      <td>1.0</td>
       <td>d</td>
     </tr>
     <tr>
       <th>50106</th>
       <td>d[SGK1]</td>
-      <td>-0.074</td>
-      <td>0.036</td>
-      <td>-0.116</td>
-      <td>-0.020</td>
-      <td>0.016</td>
-      <td>0.012</td>
-      <td>7.0</td>
-      <td>37.0</td>
-      <td>1.51</td>
+      <td>-0.093</td>
+      <td>0.022</td>
+      <td>-0.132</td>
+      <td>-0.061</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>10640.0</td>
+      <td>2608.0</td>
+      <td>1.0</td>
       <td>d</td>
     </tr>
     <tr>
       <th>43071</th>
       <td>d[HNRNPK]</td>
-      <td>0.081</td>
-      <td>0.062</td>
-      <td>-0.022</td>
-      <td>0.137</td>
-      <td>0.029</td>
-      <td>0.022</td>
-      <td>7.0</td>
-      <td>37.0</td>
-      <td>1.53</td>
+      <td>0.115</td>
+      <td>0.021</td>
+      <td>0.080</td>
+      <td>0.147</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>10445.0</td>
+      <td>2433.0</td>
+      <td>1.0</td>
       <td>d</td>
     </tr>
     <tr>
       <th>48080</th>
       <td>d[POLR2D]</td>
-      <td>0.082</td>
-      <td>0.062</td>
-      <td>-0.022</td>
-      <td>0.137</td>
-      <td>0.030</td>
-      <td>0.023</td>
-      <td>7.0</td>
-      <td>37.0</td>
-      <td>1.53</td>
+      <td>0.116</td>
+      <td>0.020</td>
+      <td>0.086</td>
+      <td>0.151</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>8419.0</td>
+      <td>2863.0</td>
+      <td>1.0</td>
       <td>d</td>
     </tr>
     <tr>
       <th>39248</th>
       <td>d[CIAO3]</td>
-      <td>0.083</td>
-      <td>0.063</td>
-      <td>-0.022</td>
-      <td>0.139</td>
-      <td>0.030</td>
-      <td>0.023</td>
-      <td>7.0</td>
-      <td>37.0</td>
-      <td>1.53</td>
+      <td>0.118</td>
+      <td>0.020</td>
+      <td>0.086</td>
+      <td>0.149</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>7065.0</td>
+      <td>3107.0</td>
+      <td>1.0</td>
       <td>d</td>
     </tr>
     <tr>
       <th>42214</th>
       <td>d[GINS2]</td>
-      <td>0.091</td>
-      <td>0.067</td>
-      <td>-0.022</td>
-      <td>0.150</td>
-      <td>0.032</td>
-      <td>0.025</td>
-      <td>7.0</td>
-      <td>37.0</td>
-      <td>1.53</td>
+      <td>0.129</td>
+      <td>0.021</td>
+      <td>0.094</td>
+      <td>0.159</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>9683.0</td>
+      <td>2769.0</td>
+      <td>1.0</td>
       <td>d</td>
     </tr>
     <tr>
       <th>47943</th>
       <td>d[PLK1]</td>
-      <td>0.114</td>
-      <td>0.080</td>
-      <td>-0.022</td>
-      <td>0.181</td>
-      <td>0.039</td>
-      <td>0.030</td>
-      <td>7.0</td>
-      <td>37.0</td>
-      <td>1.53</td>
+      <td>0.160</td>
+      <td>0.021</td>
+      <td>0.125</td>
+      <td>0.190</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>10820.0</td>
+      <td>2655.0</td>
+      <td>1.0</td>
       <td>d</td>
     </tr>
   </tbody>
@@ -1546,141 +1467,141 @@ crc_post_summary.query("var_name == 'h'").sort_values("mean").pipe(head_tail, 5)
     <tr>
       <th>186277</th>
       <td>h[RAN, MSH6]</td>
-      <td>-0.986</td>
-      <td>0.101</td>
-      <td>-1.174</td>
-      <td>-0.869</td>
-      <td>0.045</td>
-      <td>0.035</td>
-      <td>7.0</td>
-      <td>14.0</td>
-      <td>1.58</td>
-      <td>h</td>
-    </tr>
-    <tr>
-      <th>192235</th>
-      <td>h[RPSA, MSH6]</td>
-      <td>-0.907</td>
-      <td>0.121</td>
-      <td>-1.132</td>
-      <td>-0.778</td>
-      <td>0.056</td>
-      <td>0.043</td>
-      <td>7.0</td>
-      <td>11.0</td>
-      <td>1.59</td>
+      <td>-0.935</td>
+      <td>0.052</td>
+      <td>-1.019</td>
+      <td>-0.852</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2690.0</td>
+      <td>2749.0</td>
+      <td>1.0</td>
       <td>h</td>
     </tr>
     <tr>
       <th>111172</th>
       <td>h[DONSON, MSH6]</td>
-      <td>-0.904</td>
-      <td>0.099</td>
-      <td>-1.073</td>
-      <td>-0.789</td>
-      <td>0.044</td>
-      <td>0.034</td>
-      <td>7.0</td>
-      <td>13.0</td>
-      <td>1.57</td>
+      <td>-0.855</td>
+      <td>0.053</td>
+      <td>-0.944</td>
+      <td>-0.772</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2946.0</td>
+      <td>3117.0</td>
+      <td>1.0</td>
+      <td>h</td>
+    </tr>
+    <tr>
+      <th>192235</th>
+      <td>h[RPSA, MSH6]</td>
+      <td>-0.846</td>
+      <td>0.054</td>
+      <td>-0.938</td>
+      <td>-0.765</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2618.0</td>
+      <td>2965.0</td>
+      <td>1.0</td>
+      <td>h</td>
+    </tr>
+    <tr>
+      <th>183325</th>
+      <td>h[PSMD7, MSH6]</td>
+      <td>-0.838</td>
+      <td>0.054</td>
+      <td>-0.921</td>
+      <td>-0.751</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2952.0</td>
+      <td>3137.0</td>
+      <td>1.0</td>
       <td>h</td>
     </tr>
     <tr>
       <th>178978</th>
       <td>h[POLR2L, MSH6]</td>
-      <td>-0.904</td>
-      <td>0.127</td>
-      <td>-1.122</td>
-      <td>-0.768</td>
-      <td>0.059</td>
+      <td>-0.833</td>
+      <td>0.053</td>
+      <td>-0.915</td>
+      <td>-0.745</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2937.0</td>
+      <td>2991.0</td>
+      <td>1.0</td>
+      <td>h</td>
+    </tr>
+    <tr>
+      <th>111173</th>
+      <td>h[DONSON, PIK3CA]</td>
+      <td>0.624</td>
       <td>0.045</td>
-      <td>7.0</td>
-      <td>27.0</td>
-      <td>1.53</td>
+      <td>0.556</td>
+      <td>0.700</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3509.0</td>
+      <td>3278.0</td>
+      <td>1.0</td>
       <td>h</td>
     </tr>
     <tr>
-      <th>191290</th>
-      <td>h[RPL12, MSH6]</td>
-      <td>-0.884</td>
-      <td>0.171</td>
-      <td>-1.190</td>
-      <td>-0.719</td>
-      <td>0.082</td>
-      <td>0.063</td>
-      <td>7.0</td>
-      <td>33.0</td>
-      <td>1.53</td>
+      <th>192236</th>
+      <td>h[RPSA, PIK3CA]</td>
+      <td>0.624</td>
+      <td>0.045</td>
+      <td>0.559</td>
+      <td>0.700</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3784.0</td>
+      <td>3236.0</td>
+      <td>1.0</td>
       <td>h</td>
     </tr>
     <tr>
-      <th>178980</th>
-      <td>h[POLR2L, POLD1]</td>
+      <th>183326</th>
+      <td>h[PSMD7, PIK3CA]</td>
+      <td>0.627</td>
+      <td>0.045</td>
+      <td>0.554</td>
       <td>0.697</td>
-      <td>0.291</td>
-      <td>0.476</td>
-      <td>1.212</td>
-      <td>0.144</td>
-      <td>0.111</td>
-      <td>7.0</td>
-      <td>41.0</td>
-      <td>1.53</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3773.0</td>
+      <td>3040.0</td>
+      <td>1.0</td>
+      <td>h</td>
+    </tr>
+    <tr>
+      <th>178979</th>
+      <td>h[POLR2L, PIK3CA]</td>
+      <td>0.631</td>
+      <td>0.044</td>
+      <td>0.563</td>
+      <td>0.704</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>3964.0</td>
+      <td>3424.0</td>
+      <td>1.0</td>
       <td>h</td>
     </tr>
     <tr>
       <th>186278</th>
       <td>h[RAN, PIK3CA]</td>
-      <td>0.698</td>
-      <td>0.064</td>
-      <td>0.583</td>
-      <td>0.780</td>
-      <td>0.026</td>
-      <td>0.019</td>
-      <td>7.0</td>
-      <td>12.0</td>
-      <td>1.55</td>
-      <td>h</td>
-    </tr>
-    <tr>
-      <th>192237</th>
-      <td>h[RPSA, POLD1]</td>
-      <td>0.721</td>
-      <td>0.266</td>
-      <td>0.508</td>
-      <td>1.199</td>
-      <td>0.131</td>
-      <td>0.101</td>
-      <td>7.0</td>
-      <td>12.0</td>
-      <td>1.58</td>
-      <td>h</td>
-    </tr>
-    <tr>
-      <th>111174</th>
-      <td>h[DONSON, POLD1]</td>
-      <td>0.724</td>
-      <td>0.238</td>
-      <td>0.537</td>
-      <td>1.151</td>
-      <td>0.117</td>
-      <td>0.090</td>
-      <td>7.0</td>
-      <td>17.0</td>
-      <td>1.57</td>
-      <td>h</td>
-    </tr>
-    <tr>
-      <th>186279</th>
-      <td>h[RAN, POLD1]</td>
-      <td>0.748</td>
-      <td>0.272</td>
-      <td>0.537</td>
-      <td>1.251</td>
-      <td>0.134</td>
-      <td>0.103</td>
-      <td>7.0</td>
-      <td>13.0</td>
-      <td>1.59</td>
+      <td>0.727</td>
+      <td>0.045</td>
+      <td>0.655</td>
+      <td>0.798</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3450.0</td>
+      <td>3049.0</td>
+      <td>1.0</td>
       <td>h</td>
     </tr>
   </tbody>
@@ -1716,7 +1637,7 @@ for gene in example_genes:
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_45_1.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_40_1.png)
 
 
 
@@ -1726,7 +1647,7 @@ for gene in example_genes:
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_45_3.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_40_3.png)
 
 
 
@@ -1751,7 +1672,7 @@ for gene in example_genes:
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_46_1.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_41_1.png)
 
 
 
@@ -1761,7 +1682,7 @@ for gene in example_genes:
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_46_3.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_41_3.png)
 
 
 
@@ -1776,7 +1697,7 @@ plt.show()
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_47_0.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_42_0.png)
 
 
 
@@ -1820,62 +1741,62 @@ az.summary(trace, var_names="a", coords={"sgrna": sgrnas_sample})
   <tbody>
     <tr>
       <th>a[AAAAAAATCCAGCAATGCAG]</th>
-      <td>0.055</td>
-      <td>0.058</td>
-      <td>-0.034</td>
-      <td>0.150</td>
+      <td>0.054</td>
+      <td>0.061</td>
+      <td>-0.046</td>
+      <td>0.146</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>5413.0</td>
-      <td>2427.0</td>
+      <td>6608.0</td>
+      <td>3466.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>a[AAAAAACCCGTAGATAGCCT]</th>
-      <td>0.103</td>
-      <td>0.060</td>
-      <td>0.002</td>
-      <td>0.192</td>
+      <td>0.105</td>
+      <td>0.059</td>
+      <td>0.016</td>
+      <td>0.201</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>5665.0</td>
-      <td>2414.0</td>
+      <td>4887.0</td>
+      <td>2986.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>a[AAAAAAGAAGAAAAAACCAG]</th>
       <td>-0.312</td>
-      <td>0.062</td>
-      <td>-0.411</td>
-      <td>-0.215</td>
+      <td>0.063</td>
+      <td>-0.413</td>
+      <td>-0.211</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>5208.0</td>
-      <td>2460.0</td>
+      <td>7356.0</td>
+      <td>3314.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>a[AAAAAAGCTCAAGAAGGAGG]</th>
-      <td>0.125</td>
-      <td>0.058</td>
-      <td>0.032</td>
-      <td>0.213</td>
+      <td>0.124</td>
+      <td>0.061</td>
+      <td>0.031</td>
+      <td>0.224</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>5538.0</td>
-      <td>2579.0</td>
+      <td>5363.0</td>
+      <td>3289.0</td>
       <td>1.0</td>
     </tr>
     <tr>
       <th>a[AAAAAAGGCTGTAAAAGCGT]</th>
-      <td>-0.076</td>
-      <td>0.060</td>
-      <td>-0.171</td>
-      <td>0.017</td>
+      <td>-0.078</td>
+      <td>0.061</td>
+      <td>-0.175</td>
+      <td>0.018</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>4838.0</td>
-      <td>2575.0</td>
+      <td>4864.0</td>
+      <td>2978.0</td>
       <td>1.0</td>
     </tr>
   </tbody>
@@ -1927,197 +1848,197 @@ crc_post_summary.filter_string("var_name", "^sigma_*")
     <tr>
       <th>3</th>
       <td>sigma_a</td>
-      <td>0.149</td>
-      <td>0.058</td>
-      <td>0.048</td>
-      <td>0.184</td>
-      <td>0.029</td>
-      <td>0.022</td>
-      <td>7.0</td>
-      <td>11.0</td>
-      <td>1.60</td>
+      <td>0.182</td>
+      <td>0.001</td>
+      <td>0.181</td>
+      <td>0.183</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1168.0</td>
+      <td>2194.0</td>
+      <td>1.00</td>
       <td>sigma_a</td>
     </tr>
     <tr>
       <th>5</th>
       <td>sigma_mu_a</td>
-      <td>0.153</td>
-      <td>0.088</td>
-      <td>0.000</td>
-      <td>0.206</td>
-      <td>0.044</td>
-      <td>0.034</td>
-      <td>7.0</td>
-      <td>22.0</td>
-      <td>1.56</td>
+      <td>0.204</td>
+      <td>0.001</td>
+      <td>0.202</td>
+      <td>0.207</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1308.0</td>
+      <td>2271.0</td>
+      <td>1.00</td>
       <td>sigma_mu_a</td>
     </tr>
     <tr>
       <th>6</th>
       <td>sigma_b</td>
-      <td>0.015</td>
-      <td>0.008</td>
-      <td>0.001</td>
       <td>0.020</td>
-      <td>0.004</td>
-      <td>0.003</td>
-      <td>7.0</td>
-      <td>21.0</td>
-      <td>1.54</td>
+      <td>0.000</td>
+      <td>0.019</td>
+      <td>0.021</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1755.0</td>
+      <td>2824.0</td>
+      <td>1.00</td>
       <td>sigma_b</td>
     </tr>
     <tr>
       <th>7</th>
       <td>sigma_d</td>
-      <td>0.022</td>
-      <td>0.013</td>
+      <td>0.029</td>
       <td>0.000</td>
+      <td>0.029</td>
       <td>0.030</td>
-      <td>0.006</td>
-      <td>0.005</td>
-      <td>7.0</td>
-      <td>12.0</td>
-      <td>1.59</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1472.0</td>
+      <td>2580.0</td>
+      <td>1.00</td>
       <td>sigma_d</td>
     </tr>
     <tr>
       <th>8</th>
       <td>sigma_f</td>
-      <td>0.013</td>
-      <td>0.005</td>
-      <td>0.004</td>
-      <td>0.017</td>
+      <td>0.015</td>
       <td>0.002</td>
-      <td>0.002</td>
-      <td>7.0</td>
-      <td>27.0</td>
-      <td>1.57</td>
+      <td>0.012</td>
+      <td>0.018</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>493.0</td>
+      <td>2163.0</td>
+      <td>1.01</td>
       <td>sigma_f</td>
     </tr>
     <tr>
       <th>9</th>
       <td>sigma_h[APC]</td>
-      <td>0.068</td>
-      <td>0.066</td>
+      <td>0.030</td>
+      <td>0.001</td>
       <td>0.028</td>
-      <td>0.183</td>
-      <td>0.033</td>
-      <td>0.025</td>
-      <td>7.0</td>
-      <td>19.0</td>
-      <td>1.57</td>
+      <td>0.031</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1501.0</td>
+      <td>2552.0</td>
+      <td>1.00</td>
       <td>sigma_h</td>
     </tr>
     <tr>
       <th>10</th>
       <td>sigma_h[AXIN2]</td>
-      <td>0.029</td>
-      <td>0.006</td>
-      <td>0.019</td>
+      <td>0.032</td>
+      <td>0.001</td>
+      <td>0.031</td>
       <td>0.034</td>
-      <td>0.003</td>
-      <td>0.002</td>
-      <td>7.0</td>
-      <td>39.0</td>
-      <td>1.53</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2096.0</td>
+      <td>3146.0</td>
+      <td>1.00</td>
       <td>sigma_h</td>
     </tr>
     <tr>
       <th>11</th>
       <td>sigma_h[B2M]</td>
-      <td>0.062</td>
-      <td>0.029</td>
-      <td>0.012</td>
-      <td>0.080</td>
-      <td>0.014</td>
-      <td>0.011</td>
-      <td>7.0</td>
-      <td>53.0</td>
-      <td>1.54</td>
+      <td>0.079</td>
+      <td>0.001</td>
+      <td>0.077</td>
+      <td>0.081</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1533.0</td>
+      <td>2644.0</td>
+      <td>1.00</td>
       <td>sigma_h</td>
     </tr>
     <tr>
       <th>12</th>
       <td>sigma_h[FBXW7]</td>
-      <td>0.044</td>
-      <td>0.009</td>
-      <td>0.028</td>
+      <td>0.049</td>
+      <td>0.001</td>
+      <td>0.047</td>
       <td>0.050</td>
-      <td>0.004</td>
-      <td>0.003</td>
-      <td>7.0</td>
-      <td>38.0</td>
-      <td>1.54</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1851.0</td>
+      <td>3096.0</td>
+      <td>1.00</td>
       <td>sigma_h</td>
     </tr>
     <tr>
       <th>13</th>
       <td>sigma_h[KRAS]</td>
-      <td>0.067</td>
-      <td>0.032</td>
+      <td>0.048</td>
+      <td>0.001</td>
       <td>0.047</td>
-      <td>0.123</td>
-      <td>0.016</td>
-      <td>0.012</td>
-      <td>7.0</td>
-      <td>23.0</td>
-      <td>1.56</td>
+      <td>0.049</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1731.0</td>
+      <td>2370.0</td>
+      <td>1.00</td>
       <td>sigma_h</td>
     </tr>
     <tr>
       <th>14</th>
       <td>sigma_h[MSH6]</td>
-      <td>0.160</td>
-      <td>0.032</td>
+      <td>0.142</td>
+      <td>0.001</td>
       <td>0.140</td>
-      <td>0.216</td>
-      <td>0.016</td>
-      <td>0.012</td>
-      <td>7.0</td>
-      <td>22.0</td>
-      <td>1.56</td>
+      <td>0.144</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2087.0</td>
+      <td>3039.0</td>
+      <td>1.00</td>
       <td>sigma_h</td>
     </tr>
     <tr>
       <th>15</th>
       <td>sigma_h[PIK3CA]</td>
-      <td>0.109</td>
-      <td>0.005</td>
+      <td>0.107</td>
+      <td>0.001</td>
       <td>0.105</td>
-      <td>0.118</td>
-      <td>0.002</td>
-      <td>0.002</td>
-      <td>7.0</td>
-      <td>36.0</td>
-      <td>1.53</td>
+      <td>0.108</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2191.0</td>
+      <td>3228.0</td>
+      <td>1.00</td>
       <td>sigma_h</td>
     </tr>
     <tr>
       <th>16</th>
       <td>sigma_h[POLD1]</td>
-      <td>0.128</td>
-      <td>0.059</td>
+      <td>0.094</td>
+      <td>0.002</td>
       <td>0.092</td>
-      <td>0.233</td>
-      <td>0.029</td>
-      <td>0.023</td>
-      <td>7.0</td>
-      <td>27.0</td>
-      <td>1.54</td>
+      <td>0.097</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3197.0</td>
+      <td>2727.0</td>
+      <td>1.00</td>
       <td>sigma_h</td>
     </tr>
     <tr>
       <th>17</th>
       <td>sigma_h[UBR5]</td>
-      <td>0.061</td>
-      <td>0.023</td>
+      <td>0.047</td>
+      <td>0.002</td>
       <td>0.044</td>
-      <td>0.102</td>
-      <td>0.012</td>
-      <td>0.009</td>
-      <td>7.0</td>
-      <td>28.0</td>
-      <td>1.53</td>
+      <td>0.050</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2557.0</td>
+      <td>2971.0</td>
+      <td>1.00</td>
       <td>sigma_h</td>
     </tr>
   </tbody>
@@ -2197,8 +2118,8 @@ gene_corr_post
       <th>genes_chol_cov_corr[0, 1]</th>
       <td>0.508</td>
       <td>0.016</td>
-      <td>0.482</td>
-      <td>0.532</td>
+      <td>0.484</td>
+      <td>0.535</td>
       <td>0</td>
       <td>1</td>
       <td>mu_a</td>
@@ -2206,10 +2127,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[0, 2]</th>
-      <td>-0.372</td>
+      <td>-0.371</td>
       <td>0.012</td>
-      <td>-0.392</td>
-      <td>-0.354</td>
+      <td>-0.391</td>
+      <td>-0.352</td>
       <td>0</td>
       <td>2</td>
       <td>mu_a</td>
@@ -2217,10 +2138,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[0, 3]</th>
-      <td>-0.234</td>
+      <td>-0.237</td>
       <td>0.076</td>
-      <td>-0.352</td>
-      <td>-0.112</td>
+      <td>-0.353</td>
+      <td>-0.114</td>
       <td>0</td>
       <td>3</td>
       <td>mu_a</td>
@@ -2228,10 +2149,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[0, 4]</th>
-      <td>-0.330</td>
+      <td>-0.331</td>
       <td>0.022</td>
-      <td>-0.365</td>
-      <td>-0.294</td>
+      <td>-0.367</td>
+      <td>-0.296</td>
       <td>0</td>
       <td>4</td>
       <td>mu_a</td>
@@ -2252,8 +2173,8 @@ gene_corr_post
       <th>genes_chol_cov_corr[12, 8]</th>
       <td>-0.427</td>
       <td>0.038</td>
-      <td>-0.490</td>
-      <td>-0.368</td>
+      <td>-0.484</td>
+      <td>-0.365</td>
       <td>12</td>
       <td>8</td>
       <td>h[UBR5]</td>
@@ -2261,10 +2182,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[12, 9]</th>
-      <td>-0.340</td>
+      <td>-0.339</td>
       <td>0.032</td>
-      <td>-0.395</td>
-      <td>-0.293</td>
+      <td>-0.389</td>
+      <td>-0.289</td>
       <td>12</td>
       <td>9</td>
       <td>h[UBR5]</td>
@@ -2272,10 +2193,10 @@ gene_corr_post
     </tr>
     <tr>
       <th>genes_chol_cov_corr[12, 10]</th>
-      <td>0.454</td>
-      <td>0.033</td>
-      <td>0.404</td>
-      <td>0.508</td>
+      <td>0.452</td>
+      <td>0.032</td>
+      <td>0.403</td>
+      <td>0.503</td>
       <td>12</td>
       <td>10</td>
       <td>h[UBR5]</td>
@@ -2284,9 +2205,9 @@ gene_corr_post
     <tr>
       <th>genes_chol_cov_corr[12, 11]</th>
       <td>0.176</td>
-      <td>0.042</td>
-      <td>0.107</td>
-      <td>0.241</td>
+      <td>0.041</td>
+      <td>0.110</td>
+      <td>0.239</td>
       <td>12</td>
       <td>11</td>
       <td>h[UBR5]</td>
@@ -2319,7 +2240,7 @@ plt.show()
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_51_0.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_46_0.png)
 
 
 
@@ -2332,7 +2253,7 @@ plt.show()
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_52_0.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_47_0.png)
 
 
 
@@ -2357,7 +2278,7 @@ plt.show()
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_53_0.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_48_0.png)
 
 
 
@@ -2415,15 +2336,15 @@ h_post_summary.head()
     <tr>
       <th>0</th>
       <td>h[A1BG, APC]</td>
-      <td>0.011</td>
-      <td>0.039</td>
-      <td>-0.050</td>
-      <td>0.068</td>
-      <td>0.015</td>
-      <td>0.012</td>
-      <td>9.0</td>
-      <td>11.0</td>
-      <td>1.35</td>
+      <td>-0.004</td>
+      <td>0.024</td>
+      <td>-0.042</td>
+      <td>0.036</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>8417.0</td>
+      <td>2974.0</td>
+      <td>1.0</td>
       <td>h</td>
       <td>A1BG</td>
       <td>APC</td>
@@ -2431,15 +2352,15 @@ h_post_summary.head()
     <tr>
       <th>1</th>
       <td>h[A1BG, AXIN2]</td>
-      <td>0.005</td>
-      <td>0.024</td>
-      <td>-0.030</td>
-      <td>0.045</td>
-      <td>0.003</td>
-      <td>0.002</td>
-      <td>60.0</td>
-      <td>1993.0</td>
-      <td>1.16</td>
+      <td>0.008</td>
+      <td>0.027</td>
+      <td>-0.033</td>
+      <td>0.053</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>9075.0</td>
+      <td>2864.0</td>
+      <td>1.0</td>
       <td>h</td>
       <td>A1BG</td>
       <td>AXIN2</td>
@@ -2447,15 +2368,15 @@ h_post_summary.head()
     <tr>
       <th>2</th>
       <td>h[A1BG, B2M]</td>
-      <td>-0.014</td>
-      <td>0.052</td>
-      <td>-0.105</td>
-      <td>0.067</td>
-      <td>0.005</td>
-      <td>0.006</td>
-      <td>122.0</td>
-      <td>1119.0</td>
-      <td>1.34</td>
+      <td>-0.020</td>
+      <td>0.058</td>
+      <td>-0.113</td>
+      <td>0.070</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>11295.0</td>
+      <td>2671.0</td>
+      <td>1.0</td>
       <td>h</td>
       <td>A1BG</td>
       <td>B2M</td>
@@ -2463,15 +2384,15 @@ h_post_summary.head()
     <tr>
       <th>3</th>
       <td>h[A1BG, FBXW7]</td>
-      <td>0.018</td>
-      <td>0.035</td>
-      <td>-0.028</td>
-      <td>0.079</td>
-      <td>0.008</td>
-      <td>0.005</td>
-      <td>23.0</td>
-      <td>1431.0</td>
-      <td>1.11</td>
+      <td>0.026</td>
+      <td>0.037</td>
+      <td>-0.035</td>
+      <td>0.084</td>
+      <td>0.000</td>
+      <td>0.001</td>
+      <td>11959.0</td>
+      <td>2767.0</td>
+      <td>1.0</td>
       <td>h</td>
       <td>A1BG</td>
       <td>FBXW7</td>
@@ -2479,15 +2400,15 @@ h_post_summary.head()
     <tr>
       <th>4</th>
       <td>h[A1BG, KRAS]</td>
-      <td>0.027</td>
-      <td>0.035</td>
-      <td>-0.017</td>
-      <td>0.092</td>
       <td>0.013</td>
-      <td>0.011</td>
-      <td>9.0</td>
-      <td>12.0</td>
-      <td>1.38</td>
+      <td>0.025</td>
+      <td>-0.027</td>
+      <td>0.053</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>5381.0</td>
+      <td>3441.0</td>
+      <td>1.0</td>
       <td>h</td>
       <td>A1BG</td>
       <td>KRAS</td>
@@ -2543,162 +2464,162 @@ h_post_summary.sort_values("mean").pipe(head_tail, n=5)
     <tr>
       <th>113783</th>
       <td>h[RAN, MSH6]</td>
-      <td>-0.986</td>
-      <td>0.101</td>
-      <td>-1.174</td>
-      <td>-0.869</td>
-      <td>0.045</td>
-      <td>0.035</td>
-      <td>7.0</td>
-      <td>14.0</td>
-      <td>1.58</td>
+      <td>-0.935</td>
+      <td>0.052</td>
+      <td>-1.019</td>
+      <td>-0.852</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2690.0</td>
+      <td>2749.0</td>
+      <td>1.0</td>
       <td>h</td>
       <td>RAN</td>
-      <td>MSH6</td>
-    </tr>
-    <tr>
-      <th>119741</th>
-      <td>h[RPSA, MSH6]</td>
-      <td>-0.907</td>
-      <td>0.121</td>
-      <td>-1.132</td>
-      <td>-0.778</td>
-      <td>0.056</td>
-      <td>0.043</td>
-      <td>7.0</td>
-      <td>11.0</td>
-      <td>1.59</td>
-      <td>h</td>
-      <td>RPSA</td>
       <td>MSH6</td>
     </tr>
     <tr>
       <th>38678</th>
       <td>h[DONSON, MSH6]</td>
-      <td>-0.904</td>
-      <td>0.099</td>
-      <td>-1.073</td>
-      <td>-0.789</td>
-      <td>0.044</td>
-      <td>0.034</td>
-      <td>7.0</td>
-      <td>13.0</td>
-      <td>1.57</td>
+      <td>-0.855</td>
+      <td>0.053</td>
+      <td>-0.944</td>
+      <td>-0.772</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2946.0</td>
+      <td>3117.0</td>
+      <td>1.0</td>
       <td>h</td>
       <td>DONSON</td>
+      <td>MSH6</td>
+    </tr>
+    <tr>
+      <th>119741</th>
+      <td>h[RPSA, MSH6]</td>
+      <td>-0.846</td>
+      <td>0.054</td>
+      <td>-0.938</td>
+      <td>-0.765</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2618.0</td>
+      <td>2965.0</td>
+      <td>1.0</td>
+      <td>h</td>
+      <td>RPSA</td>
+      <td>MSH6</td>
+    </tr>
+    <tr>
+      <th>110831</th>
+      <td>h[PSMD7, MSH6]</td>
+      <td>-0.838</td>
+      <td>0.054</td>
+      <td>-0.921</td>
+      <td>-0.751</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2952.0</td>
+      <td>3137.0</td>
+      <td>1.0</td>
+      <td>h</td>
+      <td>PSMD7</td>
       <td>MSH6</td>
     </tr>
     <tr>
       <th>106484</th>
       <td>h[POLR2L, MSH6]</td>
-      <td>-0.904</td>
-      <td>0.127</td>
-      <td>-1.122</td>
-      <td>-0.768</td>
-      <td>0.059</td>
+      <td>-0.833</td>
+      <td>0.053</td>
+      <td>-0.915</td>
+      <td>-0.745</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2937.0</td>
+      <td>2991.0</td>
+      <td>1.0</td>
+      <td>h</td>
+      <td>POLR2L</td>
+      <td>MSH6</td>
+    </tr>
+    <tr>
+      <th>38679</th>
+      <td>h[DONSON, PIK3CA]</td>
+      <td>0.624</td>
       <td>0.045</td>
-      <td>7.0</td>
-      <td>27.0</td>
-      <td>1.53</td>
+      <td>0.556</td>
+      <td>0.700</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3509.0</td>
+      <td>3278.0</td>
+      <td>1.0</td>
       <td>h</td>
-      <td>POLR2L</td>
-      <td>MSH6</td>
+      <td>DONSON</td>
+      <td>PIK3CA</td>
     </tr>
     <tr>
-      <th>118796</th>
-      <td>h[RPL12, MSH6]</td>
-      <td>-0.884</td>
-      <td>0.171</td>
-      <td>-1.190</td>
-      <td>-0.719</td>
-      <td>0.082</td>
-      <td>0.063</td>
-      <td>7.0</td>
-      <td>33.0</td>
-      <td>1.53</td>
+      <th>119742</th>
+      <td>h[RPSA, PIK3CA]</td>
+      <td>0.624</td>
+      <td>0.045</td>
+      <td>0.559</td>
+      <td>0.700</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3784.0</td>
+      <td>3236.0</td>
+      <td>1.0</td>
       <td>h</td>
-      <td>RPL12</td>
-      <td>MSH6</td>
+      <td>RPSA</td>
+      <td>PIK3CA</td>
     </tr>
     <tr>
-      <th>106486</th>
-      <td>h[POLR2L, POLD1]</td>
+      <th>110832</th>
+      <td>h[PSMD7, PIK3CA]</td>
+      <td>0.627</td>
+      <td>0.045</td>
+      <td>0.554</td>
       <td>0.697</td>
-      <td>0.291</td>
-      <td>0.476</td>
-      <td>1.212</td>
-      <td>0.144</td>
-      <td>0.111</td>
-      <td>7.0</td>
-      <td>41.0</td>
-      <td>1.53</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3773.0</td>
+      <td>3040.0</td>
+      <td>1.0</td>
+      <td>h</td>
+      <td>PSMD7</td>
+      <td>PIK3CA</td>
+    </tr>
+    <tr>
+      <th>106485</th>
+      <td>h[POLR2L, PIK3CA]</td>
+      <td>0.631</td>
+      <td>0.044</td>
+      <td>0.563</td>
+      <td>0.704</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>3964.0</td>
+      <td>3424.0</td>
+      <td>1.0</td>
       <td>h</td>
       <td>POLR2L</td>
-      <td>POLD1</td>
+      <td>PIK3CA</td>
     </tr>
     <tr>
       <th>113784</th>
       <td>h[RAN, PIK3CA]</td>
-      <td>0.698</td>
-      <td>0.064</td>
-      <td>0.583</td>
-      <td>0.780</td>
-      <td>0.026</td>
-      <td>0.019</td>
-      <td>7.0</td>
-      <td>12.0</td>
-      <td>1.55</td>
+      <td>0.727</td>
+      <td>0.045</td>
+      <td>0.655</td>
+      <td>0.798</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3450.0</td>
+      <td>3049.0</td>
+      <td>1.0</td>
       <td>h</td>
       <td>RAN</td>
       <td>PIK3CA</td>
-    </tr>
-    <tr>
-      <th>119743</th>
-      <td>h[RPSA, POLD1]</td>
-      <td>0.721</td>
-      <td>0.266</td>
-      <td>0.508</td>
-      <td>1.199</td>
-      <td>0.131</td>
-      <td>0.101</td>
-      <td>7.0</td>
-      <td>12.0</td>
-      <td>1.58</td>
-      <td>h</td>
-      <td>RPSA</td>
-      <td>POLD1</td>
-    </tr>
-    <tr>
-      <th>38680</th>
-      <td>h[DONSON, POLD1]</td>
-      <td>0.724</td>
-      <td>0.238</td>
-      <td>0.537</td>
-      <td>1.151</td>
-      <td>0.117</td>
-      <td>0.090</td>
-      <td>7.0</td>
-      <td>17.0</td>
-      <td>1.57</td>
-      <td>h</td>
-      <td>DONSON</td>
-      <td>POLD1</td>
-    </tr>
-    <tr>
-      <th>113785</th>
-      <td>h[RAN, POLD1]</td>
-      <td>0.748</td>
-      <td>0.272</td>
-      <td>0.537</td>
-      <td>1.251</td>
-      <td>0.134</td>
-      <td>0.103</td>
-      <td>7.0</td>
-      <td>13.0</td>
-      <td>1.59</td>
-      <td>h</td>
-      <td>RAN</td>
-      <td>POLD1</td>
     </tr>
   </tbody>
 </table>
@@ -2717,7 +2638,7 @@ plt.show()
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_56_0.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_51_0.png)
 
 
 
@@ -2772,7 +2693,7 @@ plt.show()
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_57_0.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_52_0.png)
 
 
 
@@ -2812,7 +2733,7 @@ plt.show()
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_58_0.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_53_0.png)
 
 
 
@@ -2851,7 +2772,7 @@ plt.show()
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_59_0.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_54_0.png)
 
 
 
@@ -2874,7 +2795,7 @@ example_ppc_draws.shape
 
 
 
-    (39, 2842455)
+    (40, 2842455)
 
 
 
@@ -2944,7 +2865,7 @@ plt.show()
 
 
 
-![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_62_0.png)
+![png](028_single-lineage-colorectal-inspection_005_files/028_single-lineage-colorectal-inspection_005_57_0.png)
 
 
 
@@ -2958,7 +2879,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 14.32 minutes
+    execution time: 17.87 minutes
 
 
 
@@ -2967,7 +2888,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-08-02
+    Last updated: 2022-08-03
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -2975,21 +2896,21 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Compiler    : GCC 10.3.0
     OS          : Linux
-    Release     : 3.10.0-1160.71.1.el7.x86_64
+    Release     : 3.10.0-1160.45.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-a-16-44.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
 
     Git branch: simplify
 
-    arviz     : 0.12.1
     pandas    : 1.4.3
     seaborn   : 0.11.2
-    numpy     : 1.22.4
+    numpy     : 1.23.1
     matplotlib: 3.5.2
+    arviz     : 0.12.1
 
 
 
