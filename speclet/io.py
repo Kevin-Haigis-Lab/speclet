@@ -121,6 +121,16 @@ def data_path(to: str | DataFile) -> Path:
     return _dir / _data_file_map[to]
 
 
+def lineade_modeling_data_path(lineage: str) -> Path:
+    """Path to lineage modeling data file."""
+    return lineage_modeling_data_dir() / f"depmap-modeling-data_{lineage}.csv"
+
+
+def lineage_modeling_data_dir() -> Path:
+    """Path to lineage modeling data directory."""
+    return modeling_data_dir() / "lineage-modeling-data"
+
+
 def modeling_data_dir() -> Path:
     """Path to modeling data directory."""
     return project_root() / "modeling_data"

@@ -28,6 +28,16 @@ data_transformation = Callable[[pd.DataFrame], pd.DataFrame]
 
 SUPPORTED_DATA_FILES: Final[set[str]] = {".csv", ".tsv", ".pkl"}
 
+# Some common CRISPR data transformation functions.
+
+
+def broad_only(df: pd.DataFrame) -> pd.DataFrame:
+    """Filter for only Broad data.
+
+    Note that the index is reset before returning.
+    """
+    return df[df["screen"] == "broad"].reset_index(drop=True)
+
 
 class CrisprScreenDataManager:
     """Manage CRISPR screen data."""

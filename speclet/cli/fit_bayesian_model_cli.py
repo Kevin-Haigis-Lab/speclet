@@ -17,7 +17,9 @@ from speclet.bayesian_models import get_bayesian_model
 from speclet.cli import cli_helpers
 from speclet.loggers import logger, set_console_handler_level
 from speclet.managers.cache_manager import cache_posterior, get_posterior_cache_name
-from speclet.managers.data_managers import CrisprScreenDataManager, data_transformation
+from speclet.managers.data_managers import CrisprScreenDataManager
+from speclet.managers.data_managers import broad_only as broad_only_filter
+from speclet.managers.data_managers import data_transformation
 from speclet.model_configuration import ModelingSamplingArguments
 from speclet.modeling.fitting_arguments import (
     PymcSampleArguments,
@@ -37,17 +39,13 @@ app = Typer()
 # ---- Helpers ----
 
 
-def _broad_only(df: pd.DataFrame) -> pd.DataFrame:
-    return df[df["screen"] == "broad"].reset_index(drop=True)
-
-
 def _read_crispr_screen_data(
     file: io.DataFile | Path, broad_only: bool
 ) -> pd.DataFrame:
     """Read in CRISPR screen data."""
     trans: list[data_transformation] = []
     if broad_only:
-        trans = [_broad_only]
+        trans = [broad_only_filter]
     return CrisprScreenDataManager(data_file=file, transformations=trans).get_data(
         read_kwargs={"low_memory": False}
     )
