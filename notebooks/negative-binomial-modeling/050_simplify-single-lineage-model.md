@@ -121,7 +121,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_10_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_10_0.png)
 
 
 
@@ -242,7 +242,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_12_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_12_0.png)
 
 
 
@@ -270,7 +270,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_13_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_13_0.png)
 
 
 
@@ -418,7 +418,7 @@ ax.set_xlim(0, None)
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_15_1.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_15_1.png)
 
 
 
@@ -447,7 +447,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_16_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_16_0.png)
 
 
 
@@ -617,7 +617,7 @@ pm.model_to_graphviz(crc_pymc_model)
 
 
 
-![svg](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_21_1.svg)
+![svg](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_21_1.svg)
 
 
 
@@ -690,7 +690,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_23_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_23_0.png)
 
 
 
@@ -779,7 +779,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_24_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_24_0.png)
 
 
 
@@ -869,7 +869,7 @@ az.plot_energy(trace);
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_29_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_29_0.png)
 
 
 
@@ -916,7 +916,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_32_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_32_0.png)
 
 
 
@@ -1034,7 +1034,7 @@ plt.tight_layout();
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_37_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_37_0.png)
 
 
 
@@ -1052,7 +1052,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_38_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_38_0.png)
 
 
 
@@ -1070,7 +1070,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_39_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_39_0.png)
 
 
 
@@ -1091,7 +1091,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_40_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_40_0.png)
 
 
 
@@ -1107,7 +1107,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_41_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_41_0.png)
 
 
 
@@ -1183,7 +1183,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_42_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_42_0.png)
 
 
 
@@ -1209,7 +1209,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_43_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_43_0.png)
 
 
 
@@ -1228,7 +1228,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_44_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_44_0.png)
 
 
 
@@ -1246,7 +1246,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_45_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_45_0.png)
 
 
 
@@ -1268,7 +1268,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_46_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_46_0.png)
 
 
 
@@ -1291,25 +1291,25 @@ for var_name in ["mu_a", "b", "d", "h"]:
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_47_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_47_0.png)
 
 
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_47_1.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_47_1.png)
 
 
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_47_2.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_47_2.png)
 
 
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_47_3.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_47_3.png)
 
 
 
@@ -1331,13 +1331,13 @@ for var_name in ["k", "m"]:
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_48_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_48_0.png)
 
 
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_48_1.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_48_1.png)
 
 
 
@@ -1361,7 +1361,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_49_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_49_0.png)
 
 
 
@@ -1389,7 +1389,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_50_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_50_0.png)
 
 
 
@@ -1431,7 +1431,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_51_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_51_0.png)
 
 
 
@@ -1565,7 +1565,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_53_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_53_0.png)
 
 
 
@@ -1712,7 +1712,7 @@ ax.get_legend().remove()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_55_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_55_0.png)
 
 
 
@@ -1742,7 +1742,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_56_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_56_0.png)
 
 
 
@@ -1794,7 +1794,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_57_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_57_0.png)
 
 
 
