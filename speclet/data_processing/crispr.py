@@ -178,6 +178,50 @@ def zscale_rna_expression_by_gene_lineage(
     )
 
 
+def _median_center(
+    df: pd.DataFrame, col: str, new_col: str | None = None
+) -> pd.DataFrame:
+    if new_col is None:
+        new_col = col
+    df[new_col] = df[col] - df[col].median()
+    return df
+
+
+def grouped_copy_number_transform(
+    df: pd.DataFrame,
+    group: str,
+    cn_col: str = "copy_number",
+    new_col: str = "copy_number_scaled",
+    max_cn: float = 3,
+) -> pd.DataFrame:
+    """Custom transformation of copy number data (grouped).
+
+    Three-step transformation:
+        1. squish values to with [0, `max_cn`].
+        2. log2 scale
+        3. center using the *median* of the values (when grouped)
+
+    Args:
+        df (pd.DataFrame): Data.
+        group (str): Grouping column.
+        cn_col (str, optional): Copy number column. Defaults to "copy_number".
+        new_col (str, optional): New column. Defaults to "copy_number_scaled".
+        max_cn (float, optional): Maximum CN value before any new transformation.
+        Defaults to 3.
+
+    Returns:
+        pd.DataFrame: Modified data frame.
+    """
+    return (
+        df.copy()
+        .assign(__cn=lambda d: squish_array(d[cn_col], lower=0, upper=max_cn))
+        .assign(__cn=lambda d: np.log2(d["__cn"] + 1))
+        .groupby(group)
+        .apply(_median_center, col="__cn", new_col="__cn")
+        .rename(columns={"__cn": new_col})
+    )
+
+
 # ---- Indices ----
 
 

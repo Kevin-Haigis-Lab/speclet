@@ -184,35 +184,35 @@ df.groupby("dist").describe()
     <tr>
       <th>Exp(1)</th>
       <td>2000.0</td>
-      <td>0.972432</td>
-      <td>0.986340</td>
-      <td>0.000198</td>
-      <td>0.278158</td>
-      <td>0.663956</td>
-      <td>1.335396</td>
-      <td>7.988815</td>
+      <td>1.012595</td>
+      <td>0.994509</td>
+      <td>0.000140</td>
+      <td>0.288255</td>
+      <td>0.689725</td>
+      <td>1.434851</td>
+      <td>6.791824</td>
     </tr>
     <tr>
       <th>Exp(2)</th>
       <td>2000.0</td>
-      <td>0.489220</td>
-      <td>0.490304</td>
-      <td>0.000451</td>
-      <td>0.144273</td>
-      <td>0.333665</td>
-      <td>0.678242</td>
-      <td>3.546967</td>
+      <td>0.506641</td>
+      <td>0.518237</td>
+      <td>0.000392</td>
+      <td>0.140857</td>
+      <td>0.343037</td>
+      <td>0.706441</td>
+      <td>3.977542</td>
     </tr>
     <tr>
       <th>Exp(5)</th>
       <td>2000.0</td>
-      <td>0.202654</td>
-      <td>0.199902</td>
-      <td>0.000030</td>
-      <td>0.058442</td>
-      <td>0.140478</td>
-      <td>0.282869</td>
-      <td>1.757628</td>
+      <td>0.197972</td>
+      <td>0.197683</td>
+      <td>0.000059</td>
+      <td>0.056655</td>
+      <td>0.141262</td>
+      <td>0.274578</td>
+      <td>1.654531</td>
     </tr>
   </tbody>
 </table>
@@ -331,37 +331,48 @@ df.groupby("dist").describe()
   </thead>
   <tbody>
     <tr>
-      <th>N(0, 0.2)</th>
+      <th>HN(0, 0.1)</th>
       <td>2000.0</td>
-      <td>0.161230</td>
-      <td>0.121140</td>
-      <td>0.000015</td>
-      <td>0.064197</td>
-      <td>0.134718</td>
-      <td>0.232917</td>
-      <td>0.683173</td>
+      <td>0.078812</td>
+      <td>0.060205</td>
+      <td>8.945759e-06</td>
+      <td>0.032889</td>
+      <td>0.065870</td>
+      <td>0.112681</td>
+      <td>0.372105</td>
     </tr>
     <tr>
-      <th>N(0, 0.5)</th>
+      <th>HN(0, 0.2)</th>
       <td>2000.0</td>
-      <td>0.401247</td>
-      <td>0.297653</td>
-      <td>0.000474</td>
-      <td>0.167239</td>
-      <td>0.335496</td>
-      <td>0.577141</td>
-      <td>1.613630</td>
+      <td>0.152434</td>
+      <td>0.116645</td>
+      <td>1.051054e-05</td>
+      <td>0.060008</td>
+      <td>0.124844</td>
+      <td>0.221580</td>
+      <td>0.635148</td>
     </tr>
     <tr>
-      <th>N(0, 1.0)</th>
+      <th>HN(0, 0.5)</th>
       <td>2000.0</td>
-      <td>0.804711</td>
-      <td>0.601591</td>
-      <td>0.001345</td>
-      <td>0.327046</td>
-      <td>0.685587</td>
-      <td>1.160894</td>
-      <td>4.165369</td>
+      <td>0.389586</td>
+      <td>0.300212</td>
+      <td>5.334160e-07</td>
+      <td>0.148557</td>
+      <td>0.328635</td>
+      <td>0.558533</td>
+      <td>1.856494</td>
+    </tr>
+    <tr>
+      <th>HN(0, 1.0)</th>
+      <td>2000.0</td>
+      <td>0.805285</td>
+      <td>0.588467</td>
+      <td>4.470166e-04</td>
+      <td>0.334040</td>
+      <td>0.696870</td>
+      <td>1.154724</td>
+      <td>3.327433</td>
     </tr>
   </tbody>
 </table>
@@ -401,7 +412,7 @@ ax.set_xlim(0, None)
 
 
 
-    (0.0, 95.55)
+    (0.0, 81.9)
 
 
 
@@ -499,57 +510,57 @@ df.groupby("dist").describe()
     <tr>
       <th>eta=1</th>
       <td>2000.0</td>
-      <td>0.005520</td>
-      <td>0.572920</td>
-      <td>-0.999505</td>
-      <td>-0.475148</td>
-      <td>0.022753</td>
-      <td>0.494861</td>
-      <td>0.999503</td>
+      <td>-0.000320</td>
+      <td>0.582379</td>
+      <td>-0.998807</td>
+      <td>-0.500979</td>
+      <td>-0.010677</td>
+      <td>0.498216</td>
+      <td>0.999292</td>
     </tr>
     <tr>
       <th>eta=2</th>
       <td>2000.0</td>
-      <td>0.013978</td>
-      <td>0.441149</td>
-      <td>-0.973018</td>
-      <td>-0.328781</td>
-      <td>0.025443</td>
-      <td>0.350041</td>
-      <td>0.997856</td>
+      <td>0.001452</td>
+      <td>0.438550</td>
+      <td>-0.979901</td>
+      <td>-0.345057</td>
+      <td>0.011168</td>
+      <td>0.345382</td>
+      <td>0.971230</td>
     </tr>
     <tr>
       <th>eta=3</th>
       <td>2000.0</td>
-      <td>0.009973</td>
-      <td>0.378363</td>
-      <td>-0.943518</td>
-      <td>-0.271501</td>
-      <td>0.022653</td>
-      <td>0.279929</td>
-      <td>0.942282</td>
+      <td>-0.009275</td>
+      <td>0.379972</td>
+      <td>-0.934604</td>
+      <td>-0.292455</td>
+      <td>-0.010572</td>
+      <td>0.256676</td>
+      <td>0.961018</td>
     </tr>
     <tr>
       <th>eta=4</th>
       <td>2000.0</td>
-      <td>-0.008808</td>
-      <td>0.336488</td>
-      <td>-0.892826</td>
-      <td>-0.260546</td>
-      <td>-0.013883</td>
-      <td>0.242743</td>
-      <td>0.847976</td>
+      <td>-0.003365</td>
+      <td>0.335197</td>
+      <td>-0.842469</td>
+      <td>-0.240063</td>
+      <td>0.008574</td>
+      <td>0.237968</td>
+      <td>0.946423</td>
     </tr>
     <tr>
       <th>eta=5</th>
       <td>2000.0</td>
-      <td>-0.008150</td>
-      <td>0.300504</td>
-      <td>-0.815522</td>
-      <td>-0.219546</td>
-      <td>-0.006940</td>
-      <td>0.204711</td>
-      <td>0.844165</td>
+      <td>-0.001646</td>
+      <td>0.302402</td>
+      <td>-0.836391</td>
+      <td>-0.221336</td>
+      <td>-0.005099</td>
+      <td>0.221213</td>
+      <td>0.860850</td>
     </tr>
   </tbody>
 </table>
@@ -572,9 +583,9 @@ crc_model = LineageHierNegBinomModel(
 valid_crc_data = crc_model.data_processing_pipeline(crc_data.copy())
 ```
 
-    [INFO] 2022-08-03 07:11:29 [(lineage_hierarchical_nb.py:data_processing_pipeline:274] Processing data for modeling.
-    [INFO] 2022-08-03 07:11:29 [(lineage_hierarchical_nb.py:data_processing_pipeline:275] LFC limits: (-5.0, 5.0)
-    [WARNING] 2022-08-03 07:11:30 [(lineage_hierarchical_nb.py:data_processing_pipeline:326] number of data points dropped: 0
+    [INFO] 2022-08-03 10:04:13 [(lineage_hierarchical_nb.py:data_processing_pipeline:274] Processing data for modeling.
+    [INFO] 2022-08-03 10:04:13 [(lineage_hierarchical_nb.py:data_processing_pipeline:275] LFC limits: (-5.0, 5.0)
+    [WARNING] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:data_processing_pipeline:326] number of data points dropped: 0
 
 
 
@@ -583,23 +594,23 @@ crc_pymc_model = crc_model.pymc_model(crispr_data_manager.data.copy())
 pm.model_to_graphviz(crc_pymc_model)
 ```
 
-    [INFO] 2022-08-03 07:11:33 [(lineage_hierarchical_nb.py:data_processing_pipeline:274] Processing data for modeling.
-    [INFO] 2022-08-03 07:11:33 [(lineage_hierarchical_nb.py:data_processing_pipeline:275] LFC limits: (-5.0, 5.0)
-    [WARNING] 2022-08-03 07:11:33 [(lineage_hierarchical_nb.py:data_processing_pipeline:326] number of data points dropped: 0
-    [INFO] 2022-08-03 07:11:33 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:503] number of genes mutated in all cells lines: 1
-    [DEBUG] 2022-08-03 07:11:33 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:506] Genes always mutated: APC
-    [INFO] 2022-08-03 07:11:33 [(lineage_hierarchical_nb.py:_trim_cancer_genes:559] Dropping 2 cancer genes.
-    [DEBUG] 2022-08-03 07:11:33 [(lineage_hierarchical_nb.py:_trim_cancer_genes:560] Dropped cancer genes: ['APC', 'MDM2']
-    [INFO] 2022-08-03 07:11:33 [(lineage_hierarchical_nb.py:_pre_model_messages:330] Lineage: colorectal
-    [INFO] 2022-08-03 07:11:33 [(lineage_hierarchical_nb.py:_pre_model_messages:331] Number of genes: 103
-    [INFO] 2022-08-03 07:11:33 [(lineage_hierarchical_nb.py:_pre_model_messages:332] Number of sgRNA: 162
-    [INFO] 2022-08-03 07:11:33 [(lineage_hierarchical_nb.py:_pre_model_messages:333] Number of cell lines: 8
-    [INFO] 2022-08-03 07:11:33 [(lineage_hierarchical_nb.py:_pre_model_messages:334] Number of cancer genes: 3
-    [INFO] 2022-08-03 07:11:33 [(lineage_hierarchical_nb.py:_pre_model_messages:335] Number of screens: 1
-    [INFO] 2022-08-03 07:11:33 [(lineage_hierarchical_nb.py:_pre_model_messages:336] Number of data points: 1296
-    [INFO] 2022-08-03 07:11:33 [(lineage_hierarchical_nb.py:_pre_model_messages:341] Including all non-essential deterministic variables.
-    [DEBUG] 2022-08-03 07:11:33 [(lineage_hierarchical_nb.py:pymc_model:376] shape of cancer gene matrix: (1296, 3)
-    [DEBUG] 2022-08-03 07:11:33 [(lineage_hierarchical_nb.py:pymc_model:390] location for `mu_mu_a`: 0.1523
+    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:data_processing_pipeline:274] Processing data for modeling.
+    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:data_processing_pipeline:275] LFC limits: (-5.0, 5.0)
+    [WARNING] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:data_processing_pipeline:326] number of data points dropped: 0
+    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:526] number of genes mutated in all cells lines: 1
+    [DEBUG] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:529] Genes always mutated: APC
+    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_trim_cancer_genes:582] Dropping 2 cancer genes.
+    [DEBUG] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_trim_cancer_genes:583] Dropped cancer genes: ['APC', 'MDM2']
+    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_pre_model_messages:330] Lineage: colorectal
+    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_pre_model_messages:331] Number of genes: 103
+    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_pre_model_messages:332] Number of sgRNA: 162
+    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_pre_model_messages:333] Number of cell lines: 8
+    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_pre_model_messages:334] Number of cancer genes: 3
+    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_pre_model_messages:335] Number of screens: 1
+    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_pre_model_messages:336] Number of data points: 1296
+    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_pre_model_messages:341] Including all non-essential deterministic variables.
+    [DEBUG] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:pymc_model:377] shape of cancer gene matrix: (1296, 3)
+    [DEBUG] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:pymc_model:392] location for `mu_mu_a`: 0.1523
 
 
 
@@ -635,17 +646,17 @@ print(f"initial counts\n  min: {np.min(obs):,d},  max: {np.max(obs):,d}")
     prior predictive distribution
       0%: 0
       1%: 0
-      10%: 9
+      10%: 8
       20%: 48
-      30%: 109
-      40%: 193
-      50%: 312
-      60%: 489
-      70%: 779
-      80%: 1,326
-      90%: 2,770
-      99%: 19,399
-      100%: 43,367,957
+      30%: 107
+      40%: 190
+      50%: 308
+      60%: 485
+      70%: 772
+      80%: 1,311
+      90%: 2,737
+      99%: 18,874
+      100%: 46,891,488
 
     final counts
       min: 0,  max: 9,819
@@ -680,36 +691,6 @@ plt.show()
 
 
 ![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_23_0.png)
-
-
-
-
-```python
-eta_prior = np.random.choice(pm_prior_pred.prior["eta"].values.flatten(), 2000)
-ge_prior = np.random.choice(pm_prior_pred.prior["gene_effect"].values.flatten(), 4000)
-mu_prior = np.random.choice(pm_prior_pred.prior["mu_a"].values.flatten(), 4000)
-
-fig, axes = plt.subplots(ncols=3, figsize=(9, 3))
-sns.histplot(mu_prior, kde=True, ax=axes[0], binwidth=0.5, stat="proportion")
-sns.histplot(ge_prior, kde=True, ax=axes[1], binwidth=1, stat="proportion")
-sns.histplot(eta_prior, kde=True, ax=axes[2], binwidth=1, stat="proportion")
-axes[0].set_xlabel(r"$\mu_a$")
-axes[1].set_xlabel(r"gene effect")
-axes[2].set_xlabel(r"$\eta$")
-
-for ax in axes.flatten():
-    ax.set_ylabel(None)
-    ax.set_title(None)
-
-fig.supylabel("proportion")
-fig.suptitle("Prior predictive distribution")
-fig.tight_layout()
-plt.show()
-```
-
-
-
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_24_0.png)
 
 
 
@@ -798,7 +779,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_25_0.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_24_0.png)
 
 
 
@@ -813,14 +794,14 @@ with crc_pymc_model:
         target_accept=0.90,
         random_seed=SEED,
         idata_kwargs={"log_likelihood": False},
-        nuts_kwargs={"step_size": 0.1}
+        nuts_kwargs={"step_size": 0.1, "max_tree_depth": 12}
         # discard_tuned_samples=False,
     )
     pm.sample_posterior_predictive(trace, extend_inferencedata=True, random_seed=SEED)
 ```
 
     Compiling...
-    Compilation time =  0:02:10.179389
+    Compilation time =  0:00:14.379761
     Sampling...
 
 
@@ -840,9 +821,9 @@ with crc_pymc_model:
       0%|          | 0/1500 [00:00<?, ?it/s]
 
 
-    Sampling time =  0:06:24.170797
+    Sampling time =  0:02:02.673864
     Transforming variables...
-    Transformation time =  0:00:03.470697
+    Transformation time =  0:00:05.380985
 
 
 
@@ -869,7 +850,7 @@ with crc_pymc_model:
 
 <div>
   <progress value='2000' class='' max='2000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [2000/2000 00:03&lt;00:00]
+  100.00% [2000/2000 00:01&lt;00:00]
 </div>
 
 
@@ -888,7 +869,7 @@ az.plot_energy(trace);
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_30_0.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_29_0.png)
 
 
 
@@ -898,7 +879,7 @@ divs = trace.sample_stats["diverging"].values.sum(axis=1)
 print(f"divergences: {divs}")
 ```
 
-    divergences: [0 0 0 0]
+    divergences: [0 0 1 0]
 
 
 
@@ -935,7 +916,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_33_0.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_32_0.png)
 
 
 
@@ -982,31 +963,31 @@ trace.sample_stats.get(stat_cats).to_dataframe().groupby("chain").mean().round(3
   <tbody>
     <tr>
       <th>0</th>
-      <td>10187.087</td>
-      <td>0.096</td>
-      <td>63.0</td>
-      <td>0.886</td>
+      <td>10212.710</td>
+      <td>0.069</td>
+      <td>63.000</td>
+      <td>0.919</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>10185.433</td>
-      <td>0.078</td>
-      <td>63.0</td>
-      <td>0.881</td>
+      <td>10203.462</td>
+      <td>0.042</td>
+      <td>127.000</td>
+      <td>0.953</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>10188.284</td>
-      <td>0.077</td>
-      <td>63.0</td>
-      <td>0.915</td>
+      <td>10209.039</td>
+      <td>0.104</td>
+      <td>55.282</td>
+      <td>0.867</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>10181.837</td>
-      <td>0.008</td>
-      <td>1023.0</td>
-      <td>0.966</td>
+      <td>10208.635</td>
+      <td>0.044</td>
+      <td>127.000</td>
+      <td>0.914</td>
     </tr>
   </tbody>
 </table>
@@ -1051,22 +1032,40 @@ az.plot_trace(trace, var_names=crc_model.vars_regex() + ["~^h$"], filter_vars="r
 plt.tight_layout();
 ```
 
-    /usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.10/site-packages/arviz/utils.py:136: UserWarning: Items starting with ~: ['^celllines_chol_cov.*$', '^.*celllines$'] have not been found and will be ignored
 
 
-
-
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_38_1.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_37_0.png)
 
 
 
 
 ```python
 n_chains = len(trace.posterior.coords["chain"])
-fig, axes = plt.subplots(2, 2, figsize=(8, 8))
+fig, axes = plt.subplots(2, 2, figsize=(6, 5))
 for c, ax in enumerate(axes.flatten()):
     cor_mat = trace.posterior["genes_chol_cov_corr"][c, :, :, :].mean(axis=(0))
     sns.heatmap(cor_mat, vmin=-1, vmax=1, cmap="coolwarm", ax=ax)
+
+fig.tight_layout()
+plt.show()
+```
+
+
+
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_38_0.png)
+
+
+
+
+```python
+n_chains = len(trace.posterior.coords["chain"])
+fig, axes = plt.subplots(2, 2, figsize=(5, 4))
+for c, ax in enumerate(axes.flatten()):
+    cor_mat = trace.posterior["cells_chol_cov_corr"][c, :, :, :].mean(axis=(0))
+    sns.heatmap(cor_mat, vmin=-1, vmax=1, cmap="coolwarm", ax=ax)
+
+fig.tight_layout()
+plt.show()
 ```
 
 
@@ -1098,7 +1097,9 @@ plt.show()
 
 
 ```python
-axes = az.plot_forest(trace, var_names=["k"], combined=True, r_hat=True, figsize=(5, 3))
+axes = az.plot_forest(
+    trace, var_names=["k", "m"], combined=True, r_hat=True, figsize=(5, 6)
+)
 line = axes[0].axvline(color="gray")
 line.set_zorder(0)
 plt.show()
@@ -1235,7 +1236,7 @@ plt.show()
 ```python
 az.plot_pair(
     trace,
-    var_names=["mu_mu_a", "mu_b", "mu_d"],
+    var_names=["mu_mu_a", "mu_b", "mu_m"],
     scatter_kwargs={"alpha": 0.5, "markersize": 1},
     figsize=(5, 5),
 )
@@ -1246,6 +1247,121 @@ plt.show()
 
 
 ![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_45_0.png)
+
+
+
+
+```python
+az.plot_pair(
+    trace,
+    var_names=["d", "m"],
+    coords={
+        "gene": crc_data["hugo_symbol"].cat.categories[:3],
+        "cell_line": crc_data["depmap_id"].cat.categories[:2],
+    },
+    scatter_kwargs={"alpha": 0.5, "markersize": 1},
+    figsize=(9, 9),
+)
+plt.tight_layout()
+plt.show()
+```
+
+
+
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_46_0.png)
+
+
+
+
+```python
+for var_name in ["mu_a", "b", "d", "h"]:
+    az.plot_pair(
+        trace,
+        var_names=[var_name],
+        coords={
+            "gene": crc_data["hugo_symbol"].cat.categories[:5],
+            "cancer_gene": ["KRAS"],
+        },
+        scatter_kwargs={"alpha": 0.5, "markersize": 1},
+        figsize=(9, 9),
+    )
+    plt.tight_layout()
+    plt.show()
+```
+
+
+
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_47_0.png)
+
+
+
+
+
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_47_1.png)
+
+
+
+
+
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_47_2.png)
+
+
+
+
+
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_47_3.png)
+
+
+
+
+```python
+for var_name in ["k", "m"]:
+    az.plot_pair(
+        trace,
+        var_names=[var_name],
+        coords={
+            "cell_line": crc_data["depmap_id"].cat.categories[:5],
+        },
+        scatter_kwargs={"alpha": 0.5, "markersize": 1},
+        figsize=(9, 9),
+    )
+    plt.tight_layout()
+    plt.show()
+```
+
+
+
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_48_0.png)
+
+
+
+
+
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_48_1.png)
+
+
+
+
+```python
+cn_data = valid_crc_data[
+    ["hugo_symbol", "depmap_id", "cn_gene", "cn_cell_line"]
+].drop_duplicates()
+ax = sns.scatterplot(
+    data=cn_data,
+    x="cn_gene",
+    y="cn_cell_line",
+    hue="depmap_id",
+    s=10,
+    alpha=0.7,
+    edgecolor=None,
+)
+sns.move_legend(ax, loc="upper left", bbox_to_anchor=(1, 1))
+plt.show()
+```
+
+
+
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_49_0.png)
 
 
 
@@ -1273,7 +1389,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_46_0.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_50_0.png)
 
 
 
@@ -1299,10 +1415,10 @@ ax.axhline(0, color="k", alpha=0.5)
 ax.axvline(0, color="k", alpha=0.5)
 
 genes_to_label = list(trace.posterior.coords["cancer_gene"].values)
-genes_to_label += b_f_post[b_f_post["f"] < -0.15].index.tolist()
+genes_to_label += b_f_post[b_f_post["f"] < -0.1].index.tolist()
 genes_to_label += b_f_post[b_f_post["f"] > 0.1].index.tolist()
-genes_to_label += b_f_post[b_f_post["b"] < -0.04].index.tolist()
-genes_to_label += b_f_post[b_f_post["b"] > 0.04].index.tolist()
+genes_to_label += b_f_post[b_f_post["b"] < -0.03].index.tolist()
+genes_to_label += b_f_post[b_f_post["b"] > 0.03].index.tolist()
 genes_to_label = list(set(genes_to_label))
 for gene in genes_to_label:
     data = b_f_post.query(f"hugo_symbol == '{gene}'")
@@ -1315,7 +1431,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_47_0.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_51_0.png)
 
 
 
@@ -1449,7 +1565,102 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_49_0.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_53_0.png)
+
+
+
+
+```python
+cg_mut_labels = (
+    valid_crc_data.filter_column_isin(
+        "hugo_symbol", trace.posterior.coords["cancer_gene"].values
+    )[["hugo_symbol", "depmap_id", "is_mutated"]]
+    .drop_duplicates()
+    .pivot_wider("depmap_id", "hugo_symbol", "is_mutated")
+    .set_index("depmap_id")
+)
+_labels = []
+for i in range(len(cg_mut_labels)):
+    muts = cg_mut_labels.columns[cg_mut_labels.values[i, :]].tolist()
+    if len(muts) == 0:
+        _labels.append("WT")
+    else:
+        _labels.append(",".join(muts))
+
+cg_mut_labels["mut_label"] = _labels
+cg_mut_labels = cg_mut_labels[["mut_label"]].reset_index(drop=False)
+cg_mut_labels
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>depmap_id</th>
+      <th>mut_label</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ACH-000253</td>
+      <td>WT</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ACH-000286</td>
+      <td>KRAS</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ACH-000296</td>
+      <td>WT</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACH-000350</td>
+      <td>KRAS</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACH-000470</td>
+      <td>KRAS,FBXW7</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>ACH-000958</td>
+      <td>FBXW7,PIK3CA</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>ACH-001786</td>
+      <td>FBXW7,PIK3CA</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>ACH-002024</td>
+      <td>KRAS,PIK3CA</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 
 
@@ -1457,18 +1668,10 @@ plt.show()
 ```python
 pik3ca_hits = h_post_summary.sort_values("PIK3CA").query("PIK3CA > 0.5").index.tolist()
 
-pik3ca_mut_map = (
-    crc_data.copy()
-    .query("hugo_symbol == 'PIK3CA'")[["depmap_id", "is_mutated"]]
-    .drop_duplicates()
-    .reset_index(drop=True)
-    .rename(columns={"is_mutated": "pik3ca_mut"})
-)
-
 pik3ca_hits_data = (
     crc_data.copy()
     .filter_column_isin("hugo_symbol", pik3ca_hits)
-    .merge(pik3ca_mut_map, on="depmap_id")
+    .merge(cg_mut_labels, on="depmap_id")
     .reset_index(drop=True)
     .assign(
         hugo_symbol=lambda d: pd.Categorical(
@@ -1477,62 +1680,39 @@ pik3ca_hits_data = (
     )
 )
 
-pal = {
-    False: "k",
-    True: "g",
-}
 
-fig, ax = plt.subplots(figsize=(8, 4))
+fig, ax = plt.subplots(figsize=(10, 4))
 sns.boxplot(
     data=pik3ca_hits_data,
     x="hugo_symbol",
     y="lfc",
-    hue="pik3ca_mut",
-    palette=pal,
+    hue="mut_label",
     dodge=True,
     ax=ax,
     flierprops={"markersize": 0},
     boxprops={"alpha": 0.5},
 )
+sns.move_legend(ax, title="mutations", loc="upper left", bbox_to_anchor=(1, 1))
+ax.add_artist(ax.get_legend())
 sns.swarmplot(
     data=pik3ca_hits_data,
     x="hugo_symbol",
     y="lfc",
-    hue="pik3ca_mut",
+    hue="mut_label",
     dodge=True,
     ax=ax,
-    palette=pal,
+    s=4,
 )
 
 ax.set_title("$\mathit{PIK3CA}$ hits")
 ax.set_xlabel(None)
 ax.set_ylabel("log-fold change")
 ax.get_legend().remove()
-
-leg_lbl = {True: "mutant", False: "WT"}
-leg_handles = [
-    Line2D([0], [0], linewidth=0, marker="o", color=v, label=leg_lbl[k])
-    for k, v in pal.items()
-]
-ax.legend(
-    handles=leg_handles,
-    loc="upper left",
-    bbox_to_anchor=(1, 1.02),
-    title="$\mathit{PIK3CA}$ status",
-    frameon=False,
-)
 ```
 
 
 
-
-    <matplotlib.legend.Legend at 0x162eb6d10>
-
-
-
-
-
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_50_1.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_55_0.png)
 
 
 
@@ -1562,7 +1742,7 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_51_0.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_56_0.png)
 
 
 
@@ -1614,29 +1794,9 @@ plt.show()
 
 
 
-![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_52_0.png)
+![png](030_simplify-single-lineage-model_files/030_simplify-single-lineage-model_57_0.png)
 
 
-
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
 
 ---
 
@@ -1646,7 +1806,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 3.64 minutes
+    execution time: 6.84 minutes
 
 
 
@@ -1655,7 +1815,9 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-07-29
+    The watermark extension is already loaded. To reload it, use:
+      %reload_ext watermark
+    Last updated: 2022-08-03
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -1669,18 +1831,18 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 4
     Architecture: 64bit
 
-    Hostname: JHCookMac.local
+    Hostname: jhcookmac.harvardsecure.wireless.med.harvard.edu
 
     Git branch: simplify
 
-    pandas    : 1.4.3
-    arviz     : 0.12.1
-    pymc      : 4.1.3
-    seaborn   : 0.11.2
-    numpy     : 1.23.0
     aesara    : 2.7.7
+    pymc      : 4.1.3
     plotnine  : 0.0.0
+    arviz     : 0.12.1
+    seaborn   : 0.11.2
     matplotlib: 3.5.2
+    numpy     : 1.23.1
+    pandas    : 1.4.3
 
 
 

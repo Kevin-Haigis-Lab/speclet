@@ -21,8 +21,8 @@ from speclet.data_processing.crispr import (
     append_total_read_counts,
     common_indices,
     data_batch_indices,
+    grouped_copy_number_transform,
     set_achilles_categorical_columns,
-    zscale_cna_by_group,
     zscale_rna_expression_by_gene,
 )
 from speclet.data_processing.validation import (
@@ -67,8 +67,8 @@ class LineageHierNegBinomModelData:
     cellline_idx: npt.NDArray[np.int32]
     screen_idx: npt.NDArray[np.int32]
     copy_number: npt.NDArray[np.float32]
-    copy_number_z_gene: npt.NDArray[np.float32]
-    copy_number_z_cell: npt.NDArray[np.float32]
+    copy_number_gene: npt.NDArray[np.float32]
+    copy_number_cell: npt.NDArray[np.float32]
     log_rna_expr: npt.NDArray[np.float32]
     z_log_rna_gene: npt.NDArray[np.float32]
     m_log_rna_gene: npt.NDArray[np.float32]
@@ -159,8 +159,8 @@ class LineageHierNegBinomModel:
                 ),
                 "rna_expr": Column(float, nullable=False),
                 "z_rna_gene": Column(float, checks=[check_finite()]),
-                "z_cn_gene": Column(float, checks=[check_finite()]),
-                "z_cn_cell_line": Column(float, checks=[check_finite()]),
+                "cn_gene": Column(float, checks=[check_finite()]),
+                "cn_cell_line": Column(float, checks=[check_finite()]),
                 "is_mutated": Column(bool, nullable=False),
                 "screen": Column("category", nullable=False),
             }
@@ -173,8 +173,8 @@ class LineageHierNegBinomModel:
             "~^eta$",
             "~^delta_.*",
             "~.*effect$",
-            "~^celllines_chol_cov.*$",
-            "~^.*celllines$",
+            "~^cells_chol_cov.*$",
+            "~^.*cells$",
             "~^genes_chol_cov.*$",
             "~^.*genes$",
         ]
@@ -252,8 +252,8 @@ class LineageHierNegBinomModel:
             cellline_idx=indices.cellline_idx.astype(np.int32),
             screen_idx=batch_indices.screen_idx.astype(np.int32),
             copy_number=data.copy_number.values.astype(np.float32),
-            copy_number_z_gene=data.z_cn_gene.values.astype(np.float32),
-            copy_number_z_cell=data.z_cn_cell_line.values.astype(np.float32),
+            copy_number_gene=data.cn_gene.values.astype(np.float32),
+            copy_number_cell=data.cn_cell_line.values.astype(np.float32),
             log_rna_expr=data.rna_expr.values.astype(np.float32),
             z_log_rna_gene=data.z_rna_gene.values.astype(np.float32),
             m_log_rna_gene=data.m_rna_gene.values.astype(np.float32),
@@ -298,23 +298,23 @@ class LineageHierNegBinomModel:
                 center_metric="median",
             )
             .pipe(
-                zscale_cna_by_group,
-                groupby_cols=["hugo_symbol"],
-                new_col="z_cn_gene",
-                cn_max=7,
-                center=None,
+                grouped_copy_number_transform,
+                group="hugo_symbol",
+                cn_col="copy_number",
+                new_col="cn_gene",
+                max_cn=3,
             )
             .pipe(
-                zscale_cna_by_group,
-                groupby_cols=["depmap_id"],
-                new_col="z_cn_cell_line",
-                cn_max=7,
-                center=None,
+                grouped_copy_number_transform,
+                group="depmap_id",
+                cn_col="copy_number",
+                new_col="cn_cell_line",
+                max_cn=3,
             )
             .assign(
-                z_cn_gene=lambda d: squish_array(d["z_cn_gene"], lower=-5.0, upper=5.0),
-                z_cn_cell_line=lambda d: squish_array(
-                    d["z_cn_cell_line"], lower=-5.0, upper=5.0
+                cn_gene=lambda d: squish_array(d["cn_gene"], lower=-5.0, upper=5.0),
+                cn_cell_line=lambda d: squish_array(
+                    d["cn_cell_line"], lower=-5.0, upper=5.0
                 ),
             )
             .pipe(append_total_read_counts)
@@ -370,7 +370,8 @@ class LineageHierNegBinomModel:
         coords = model_data.coords
         # Data.
         rna = model_data.m_log_rna_gene
-        cn_gene = model_data.copy_number_z_gene
+        cn_gene = model_data.copy_number_gene
+        cn_cell = model_data.copy_number_cell
         mut = model_data.is_mutated
         cg_mut = model_data.comutation_matrix
         logger.debug(f"shape of cancer gene matrix: {cg_mut.shape}")
@@ -382,6 +383,7 @@ class LineageHierNegBinomModel:
         # Sizes.
         n_G = model_data.G
         n_CG = model_data.CG
+        n_C = model_data.C
         n_gene_vars = 4 + n_CG
 
         mu_mu_a_loc = np.log(
@@ -405,9 +407,9 @@ class LineageHierNegBinomModel:
             # Gene varying effects.
             mu_mu_a = pm.Normal("mu_mu_a", mu_mu_a_loc, 0.2)
             mu_b = pm.Normal("mu_b", 0, 0.1)
-            mu_d = pm.Normal("mu_d", 0, 0.1)
-            mu_f = 0  # pm.Normal("mu_f", 0, 0.1)
-            mu_h = [0] * n_CG  # pm.Normal("mu_h", 0, 0.1, dims="cancer_gene")
+            mu_d = 0  # Must be zero if CN for cell lines is a variable.
+            mu_f = 0
+            mu_h = [0] * n_CG
             _mu_genes = [mu_mu_a, mu_b, mu_d, mu_f] + [mu_h[i] for i in range(n_CG)]
             mu_genes = at.stack(_mu_genes, axis=0)
             delta_genes = pm.Normal("delta_genes", 0, 1, shape=(n_gene_vars, n_G))
@@ -434,10 +436,31 @@ class LineageHierNegBinomModel:
             else:
                 gene_effect = pm.Deterministic("gene_effect", _gene_effect)
 
-            sigma_k = pm.HalfNormal("sigma_k", 0.2)
-            delta_k = pm.Normal("delta_k", 0, 1, dims="cell_line")
-            k = pm.Deterministic("k", delta_k * sigma_k, dims="cell_line")
-            _cell_effect = k[c]
+            # Cell line varying effects covariance matrix.
+            n_cell_vars = 2
+            cl_chol, _, cl_sigmas = pm.LKJCholeskyCov(
+                "cells_chol_cov",
+                eta=2,
+                n=n_cell_vars,
+                sd_dist=pm.HalfNormal.dist(0.5, shape=n_cell_vars),
+                compute_corr=True,
+            )
+            for i, var_name in enumerate(["k", "m"]):
+                pm.Deterministic(f"sigma_{var_name}", cl_sigmas[i])
+
+            mu_k = 0
+            mu_m = pm.Normal("mu_m", 0, 0.1)
+            _mu_cells = [mu_k, mu_m]
+            mu_cells = at.stack(_mu_cells, axis=0)
+            delta_cells = pm.Normal("delta_cells", 0, 1, shape=(n_cell_vars, n_C))
+            cells = mu_cells + at.dot(cl_chol, delta_cells).T
+            k = pm.Deterministic("k", cells[:, 0], dims="cell_line")
+            m = pm.Deterministic("m", cells[:, 1], dims="cell_line")
+
+            # sigma_k = pm.HalfNormal("sigma_k", 0.2)
+            # delta_k = pm.Normal("delta_k", 0, 1, dims="cell_line")
+            # k = pm.Deterministic("k", delta_k * sigma_k, dims="cell_line")
+            _cell_effect = k[c] + m[c] * cn_cell
             if self.reduce_deterministic_vars:
                 cell_effect = _cell_effect
             else:
