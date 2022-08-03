@@ -112,12 +112,12 @@
       cores: 1
 
 
-- name: hnb-single-lineage-prostate-004
+- name: hnb-single-lineage-prostate-006
   description: "
     Single lineage hierarchical negative binomial model for prostate data from the
-    Broad. This model modifies 003 by changing the priors on the standard deviation variables from Gammas to HalfNormals so that they include 0. A step size is also supplied to help with NUTS tuning the HMC sampler.
+    Broad. Added a variable for cell line varying effect. (Skipped 005.)
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_prostate.csv"
   model_kwargs:
@@ -147,7 +147,7 @@
     least 25% of cell lines. I have also increased the number of tuning steps from 1,000
     to 2,000 and increased the target acceptance probability to 0.99.
   "
-  active: true
+  active: false
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_colorectal.csv"
   model_kwargs:

@@ -194,7 +194,7 @@ rule sample_pymc_numpyro:
         "  --cache-name {params.cache_name}"
         "  --broad-only"
         "  --log-level DEBUG"
-        "  --check-sampling-stats"
+        # "  --check-sampling-stats"
         # "  --seed {wildcards.chain}"
 
 
