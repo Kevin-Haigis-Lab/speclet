@@ -378,6 +378,7 @@ class LineageHierNegBinomModel:
         s_to_g = model_data.sgrna_to_gene_idx
         s = model_data.sgrna_idx
         g = model_data.gene_idx
+        c = model_data.cellline_idx
         # Sizes.
         n_G = model_data.G
         n_CG = model_data.CG
@@ -433,7 +434,16 @@ class LineageHierNegBinomModel:
             else:
                 gene_effect = pm.Deterministic("gene_effect", _gene_effect)
 
-            _eta = gene_effect + np.log(model_data.ct_initial)
+            sigma_k = pm.HalfNormal("sigma_k", 0.2)
+            delta_k = pm.Normal("delta_k", 0, 1, dims="cell_line")
+            k = pm.Deterministic("k", delta_k * sigma_k, dims="cell_line")
+            _cell_effect = k[c]
+            if self.reduce_deterministic_vars:
+                cell_effect = _cell_effect
+            else:
+                cell_effect = pm.Deterministic("cell_effect", _cell_effect)
+
+            _eta = gene_effect + cell_effect + np.log(model_data.ct_initial)
             if self.reduce_deterministic_vars:
                 eta = _eta
             else:
@@ -457,7 +467,7 @@ class LineageHierNegBinomModel:
     def posterior_sample_checks(self) -> list[post_checks.PosteriorCheck]:
         """Default posterior checks."""
         checks: list[post_checks.PosteriorCheck] = []
-        for var_name in ["sigma_mu_a", "sigma_b", "sigma_d", "sigma_f"]:
+        for var_name in ["sigma_mu_a", "sigma_b", "sigma_d", "sigma_f", "sigma_k"]:
             checks.append(
                 post_checks.CheckMarginalPosterior(
                     var_name=var_name,
