@@ -112,10 +112,14 @@
       cores: 1
 
 
-- name: hnb-single-lineage-prostate-006
+- name: hnb-single-lineage-prostate-007
   description: "
     Single lineage hierarchical negative binomial model for prostate data from the
-    Broad. Added a variable for cell line varying effect. (Skipped 005.)
+    Broad. Varying effect for cell line and varying effect for copy number per cell
+    line. This model also uses a different transformation for the copy number data. The
+    `max_tree_depth` is also increased with the intention to give the tuning process a
+    little more room to experiment with, but it should not be used as the tree depth for
+    the final draws.
   "
   active: true
   model: LINEAGE_HIERARCHICAL_NB
@@ -131,6 +135,7 @@
         log_likelihood: false
       nuts_kwargs:
         step_size: 0.01
+        max_tree_depth: 12
   slurm_resources:
     PYMC_NUMPYRO:
       mem: 24
@@ -140,12 +145,14 @@
         gpu: "RTX 8000"
 
 
-- name: hnb-single-lineage-colorectal-005
+- name: hnb-single-lineage-colorectal-007
   description: "
     Single lineage hierarchical negative binomial model for colorectal data from the
-    Broad. The number of cancer genes has been limited by having to be mutated in at
-    least 25% of cell lines. I have also increased the number of tuning steps from 1,000
-    to 2,000 and increased the target acceptance probability to 0.99.
+    Broad. Varying effect for cell line and varying effect for copy number per cell
+    line. This model also uses a different transformation for the copy number data. The
+    `max_tree_depth` is also increased with the intention to give the tuning process a
+    little more room to experiment with, but it should not be used as the tree depth for
+    the final draws.
   "
   active: false
   model: LINEAGE_HIERARCHICAL_NB
@@ -162,7 +169,7 @@
         log_likelihood: false
       nuts_kwargs:
         step_size: 0.01
-        # max_tree_depth: 12
+        max_tree_depth: 12
   slurm_resources:
     PYMC_NUMPYRO:
       mem: 64
@@ -172,10 +179,14 @@
         gpu: "RTX 8000"
 
 
-- name: hnb-single-lineage-liver-004
+- name: hnb-single-lineage-liver-007
   description: "
     Single lineage hierarchical negative binomial model for liver data from the
-    Broad. Only running this model with the Numpyro JAX backend (on GPUs).
+    Broad. Varying effect for cell line and varying effect for copy number per cell
+    line. This model also uses a different transformation for the copy number data. The
+    `max_tree_depth` is also increased with the intention to give the tuning process a
+    little more room to experiment with, but it should not be used as the tree depth for
+    the final draws.
   "
   active: false
   model: LINEAGE_HIERARCHICAL_NB
@@ -191,6 +202,7 @@
         log_likelihood: false
       nuts_kwargs:
         step_size: 0.01
+        max_tree_depth: 12
   slurm_resources:
     PYMC_NUMPYRO:
       mem: 32

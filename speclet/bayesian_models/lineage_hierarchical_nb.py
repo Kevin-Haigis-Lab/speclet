@@ -457,9 +457,6 @@ class LineageHierNegBinomModel:
             k = pm.Deterministic("k", cells[:, 0], dims="cell_line")
             m = pm.Deterministic("m", cells[:, 1], dims="cell_line")
 
-            # sigma_k = pm.HalfNormal("sigma_k", 0.2)
-            # delta_k = pm.Normal("delta_k", 0, 1, dims="cell_line")
-            # k = pm.Deterministic("k", delta_k * sigma_k, dims="cell_line")
             _cell_effect = k[c] + m[c] * cn_cell
             if self.reduce_deterministic_vars:
                 cell_effect = _cell_effect
@@ -494,7 +491,7 @@ class LineageHierNegBinomModel:
             checks.append(
                 post_checks.CheckMarginalPosterior(
                     var_name=var_name,
-                    min_avg=0.001,
+                    min_avg=0.0001,
                     max_avg=np.inf,
                     skip_if_missing=True,
                 )
