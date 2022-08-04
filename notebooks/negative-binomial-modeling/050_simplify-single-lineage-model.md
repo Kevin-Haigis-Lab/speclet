@@ -184,35 +184,35 @@ df.groupby("dist").describe()
     <tr>
       <th>Exp(1)</th>
       <td>2000.0</td>
-      <td>1.012595</td>
-      <td>0.994509</td>
-      <td>0.000140</td>
-      <td>0.288255</td>
-      <td>0.689725</td>
-      <td>1.434851</td>
-      <td>6.791824</td>
+      <td>0.983663</td>
+      <td>0.964538</td>
+      <td>0.000408</td>
+      <td>0.292732</td>
+      <td>0.687982</td>
+      <td>1.373694</td>
+      <td>6.920054</td>
     </tr>
     <tr>
       <th>Exp(2)</th>
       <td>2000.0</td>
-      <td>0.506641</td>
-      <td>0.518237</td>
-      <td>0.000392</td>
-      <td>0.140857</td>
-      <td>0.343037</td>
-      <td>0.706441</td>
-      <td>3.977542</td>
+      <td>0.513263</td>
+      <td>0.505108</td>
+      <td>0.000031</td>
+      <td>0.143502</td>
+      <td>0.352172</td>
+      <td>0.715797</td>
+      <td>3.042951</td>
     </tr>
     <tr>
       <th>Exp(5)</th>
       <td>2000.0</td>
-      <td>0.197972</td>
-      <td>0.197683</td>
-      <td>0.000059</td>
-      <td>0.056655</td>
-      <td>0.141262</td>
-      <td>0.274578</td>
-      <td>1.654531</td>
+      <td>0.196208</td>
+      <td>0.196223</td>
+      <td>0.000199</td>
+      <td>0.056934</td>
+      <td>0.135303</td>
+      <td>0.276373</td>
+      <td>2.118643</td>
     </tr>
   </tbody>
 </table>
@@ -333,46 +333,46 @@ df.groupby("dist").describe()
     <tr>
       <th>HN(0, 0.1)</th>
       <td>2000.0</td>
-      <td>0.078812</td>
-      <td>0.060205</td>
-      <td>8.945759e-06</td>
-      <td>0.032889</td>
-      <td>0.065870</td>
-      <td>0.112681</td>
-      <td>0.372105</td>
+      <td>0.078413</td>
+      <td>0.059666</td>
+      <td>0.000073</td>
+      <td>0.030497</td>
+      <td>0.066457</td>
+      <td>0.113902</td>
+      <td>0.406424</td>
     </tr>
     <tr>
       <th>HN(0, 0.2)</th>
       <td>2000.0</td>
-      <td>0.152434</td>
-      <td>0.116645</td>
-      <td>1.051054e-05</td>
-      <td>0.060008</td>
-      <td>0.124844</td>
-      <td>0.221580</td>
-      <td>0.635148</td>
+      <td>0.159563</td>
+      <td>0.122079</td>
+      <td>0.000009</td>
+      <td>0.064452</td>
+      <td>0.134065</td>
+      <td>0.226917</td>
+      <td>0.769463</td>
     </tr>
     <tr>
       <th>HN(0, 0.5)</th>
       <td>2000.0</td>
-      <td>0.389586</td>
-      <td>0.300212</td>
-      <td>5.334160e-07</td>
-      <td>0.148557</td>
-      <td>0.328635</td>
-      <td>0.558533</td>
-      <td>1.856494</td>
+      <td>0.398207</td>
+      <td>0.301296</td>
+      <td>0.000020</td>
+      <td>0.160773</td>
+      <td>0.338999</td>
+      <td>0.572368</td>
+      <td>1.992796</td>
     </tr>
     <tr>
       <th>HN(0, 1.0)</th>
       <td>2000.0</td>
-      <td>0.805285</td>
-      <td>0.588467</td>
-      <td>4.470166e-04</td>
-      <td>0.334040</td>
-      <td>0.696870</td>
-      <td>1.154724</td>
-      <td>3.327433</td>
+      <td>0.777302</td>
+      <td>0.579668</td>
+      <td>0.000762</td>
+      <td>0.323163</td>
+      <td>0.666724</td>
+      <td>1.116876</td>
+      <td>3.243683</td>
     </tr>
   </tbody>
 </table>
@@ -412,7 +412,7 @@ ax.set_xlim(0, None)
 
 
 
-    (0.0, 81.9)
+    (0.0, 77.7)
 
 
 
@@ -510,57 +510,57 @@ df.groupby("dist").describe()
     <tr>
       <th>eta=1</th>
       <td>2000.0</td>
-      <td>-0.000320</td>
-      <td>0.582379</td>
-      <td>-0.998807</td>
-      <td>-0.500979</td>
-      <td>-0.010677</td>
-      <td>0.498216</td>
-      <td>0.999292</td>
+      <td>-0.015908</td>
+      <td>0.571204</td>
+      <td>-0.998897</td>
+      <td>-0.507114</td>
+      <td>-0.035449</td>
+      <td>0.476805</td>
+      <td>0.999518</td>
     </tr>
     <tr>
       <th>eta=2</th>
       <td>2000.0</td>
-      <td>0.001452</td>
-      <td>0.438550</td>
-      <td>-0.979901</td>
-      <td>-0.345057</td>
-      <td>0.011168</td>
-      <td>0.345382</td>
-      <td>0.971230</td>
+      <td>-0.016226</td>
+      <td>0.446808</td>
+      <td>-0.979107</td>
+      <td>-0.355429</td>
+      <td>-0.016234</td>
+      <td>0.329381</td>
+      <td>0.988358</td>
     </tr>
     <tr>
       <th>eta=3</th>
       <td>2000.0</td>
-      <td>-0.009275</td>
-      <td>0.379972</td>
-      <td>-0.934604</td>
-      <td>-0.292455</td>
-      <td>-0.010572</td>
-      <td>0.256676</td>
-      <td>0.961018</td>
+      <td>-0.004747</td>
+      <td>0.377544</td>
+      <td>-0.961053</td>
+      <td>-0.292373</td>
+      <td>-0.000154</td>
+      <td>0.274535</td>
+      <td>0.919242</td>
     </tr>
     <tr>
       <th>eta=4</th>
       <td>2000.0</td>
-      <td>-0.003365</td>
-      <td>0.335197</td>
-      <td>-0.842469</td>
-      <td>-0.240063</td>
-      <td>0.008574</td>
-      <td>0.237968</td>
-      <td>0.946423</td>
+      <td>-0.001186</td>
+      <td>0.340021</td>
+      <td>-0.832965</td>
+      <td>-0.256562</td>
+      <td>-0.010075</td>
+      <td>0.251802</td>
+      <td>0.889437</td>
     </tr>
     <tr>
       <th>eta=5</th>
       <td>2000.0</td>
-      <td>-0.001646</td>
-      <td>0.302402</td>
-      <td>-0.836391</td>
-      <td>-0.221336</td>
-      <td>-0.005099</td>
-      <td>0.221213</td>
-      <td>0.860850</td>
+      <td>0.004004</td>
+      <td>0.301359</td>
+      <td>-0.785565</td>
+      <td>-0.216758</td>
+      <td>0.004583</td>
+      <td>0.216572</td>
+      <td>0.876719</td>
     </tr>
   </tbody>
 </table>
@@ -581,11 +581,16 @@ crc_model = LineageHierNegBinomModel(
     lineage="colorectal", reduce_deterministic_vars=False
 )
 valid_crc_data = crc_model.data_processing_pipeline(crc_data.copy())
+model_crc_data = crc_model.make_data_structure(valid_crc_data.copy())
 ```
 
-    [INFO] 2022-08-03 10:04:13 [(lineage_hierarchical_nb.py:data_processing_pipeline:274] Processing data for modeling.
-    [INFO] 2022-08-03 10:04:13 [(lineage_hierarchical_nb.py:data_processing_pipeline:275] LFC limits: (-5.0, 5.0)
-    [WARNING] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:data_processing_pipeline:326] number of data points dropped: 0
+    [INFO] 2022-08-04 07:50:41 [(lineage_hierarchical_nb.py:data_processing_pipeline:274] Processing data for modeling.
+    [INFO] 2022-08-04 07:50:41 [(lineage_hierarchical_nb.py:data_processing_pipeline:275] LFC limits: (-5.0, 5.0)
+    [WARNING] 2022-08-04 07:50:41 [(lineage_hierarchical_nb.py:data_processing_pipeline:326] number of data points dropped: 0
+    [INFO] 2022-08-04 07:50:41 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:523] number of genes mutated in all cells lines: 1
+    [DEBUG] 2022-08-04 07:50:41 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:526] Genes always mutated: APC
+    [INFO] 2022-08-04 07:50:42 [(lineage_hierarchical_nb.py:_trim_cancer_genes:579] Dropping 2 cancer genes.
+    [DEBUG] 2022-08-04 07:50:42 [(lineage_hierarchical_nb.py:_trim_cancer_genes:580] Dropped cancer genes: ['APC', 'MDM2']
 
 
 
@@ -594,23 +599,23 @@ crc_pymc_model = crc_model.pymc_model(crispr_data_manager.data.copy())
 pm.model_to_graphviz(crc_pymc_model)
 ```
 
-    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:data_processing_pipeline:274] Processing data for modeling.
-    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:data_processing_pipeline:275] LFC limits: (-5.0, 5.0)
-    [WARNING] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:data_processing_pipeline:326] number of data points dropped: 0
-    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:526] number of genes mutated in all cells lines: 1
-    [DEBUG] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:529] Genes always mutated: APC
-    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_trim_cancer_genes:582] Dropping 2 cancer genes.
-    [DEBUG] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_trim_cancer_genes:583] Dropped cancer genes: ['APC', 'MDM2']
-    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_pre_model_messages:330] Lineage: colorectal
-    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_pre_model_messages:331] Number of genes: 103
-    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_pre_model_messages:332] Number of sgRNA: 162
-    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_pre_model_messages:333] Number of cell lines: 8
-    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_pre_model_messages:334] Number of cancer genes: 3
-    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_pre_model_messages:335] Number of screens: 1
-    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_pre_model_messages:336] Number of data points: 1296
-    [INFO] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:_pre_model_messages:341] Including all non-essential deterministic variables.
-    [DEBUG] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:pymc_model:377] shape of cancer gene matrix: (1296, 3)
-    [DEBUG] 2022-08-03 10:04:14 [(lineage_hierarchical_nb.py:pymc_model:392] location for `mu_mu_a`: 0.1523
+    [INFO] 2022-08-04 07:50:44 [(lineage_hierarchical_nb.py:data_processing_pipeline:274] Processing data for modeling.
+    [INFO] 2022-08-04 07:50:44 [(lineage_hierarchical_nb.py:data_processing_pipeline:275] LFC limits: (-5.0, 5.0)
+    [WARNING] 2022-08-04 07:50:44 [(lineage_hierarchical_nb.py:data_processing_pipeline:326] number of data points dropped: 0
+    [INFO] 2022-08-04 07:50:44 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:523] number of genes mutated in all cells lines: 1
+    [DEBUG] 2022-08-04 07:50:44 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:526] Genes always mutated: APC
+    [INFO] 2022-08-04 07:50:45 [(lineage_hierarchical_nb.py:_trim_cancer_genes:579] Dropping 2 cancer genes.
+    [DEBUG] 2022-08-04 07:50:45 [(lineage_hierarchical_nb.py:_trim_cancer_genes:580] Dropped cancer genes: ['APC', 'MDM2']
+    [INFO] 2022-08-04 07:50:45 [(lineage_hierarchical_nb.py:_pre_model_messages:330] Lineage: colorectal
+    [INFO] 2022-08-04 07:50:45 [(lineage_hierarchical_nb.py:_pre_model_messages:331] Number of genes: 103
+    [INFO] 2022-08-04 07:50:45 [(lineage_hierarchical_nb.py:_pre_model_messages:332] Number of sgRNA: 162
+    [INFO] 2022-08-04 07:50:45 [(lineage_hierarchical_nb.py:_pre_model_messages:333] Number of cell lines: 8
+    [INFO] 2022-08-04 07:50:45 [(lineage_hierarchical_nb.py:_pre_model_messages:334] Number of cancer genes: 3
+    [INFO] 2022-08-04 07:50:45 [(lineage_hierarchical_nb.py:_pre_model_messages:335] Number of screens: 1
+    [INFO] 2022-08-04 07:50:45 [(lineage_hierarchical_nb.py:_pre_model_messages:336] Number of data points: 1296
+    [INFO] 2022-08-04 07:50:45 [(lineage_hierarchical_nb.py:_pre_model_messages:341] Including all non-essential deterministic variables.
+    [DEBUG] 2022-08-04 07:50:45 [(lineage_hierarchical_nb.py:pymc_model:377] shape of cancer gene matrix: (1296, 3)
+    [DEBUG] 2022-08-04 07:50:45 [(lineage_hierarchical_nb.py:pymc_model:392] location for `mu_mu_a`: 0.1523
 
 
 
@@ -801,7 +806,7 @@ with crc_pymc_model:
 ```
 
     Compiling...
-    Compilation time =  0:00:14.379761
+    Compilation time =  0:00:20.420327
     Sampling...
 
 
@@ -821,9 +826,9 @@ with crc_pymc_model:
       0%|          | 0/1500 [00:00<?, ?it/s]
 
 
-    Sampling time =  0:02:02.673864
+    Sampling time =  0:01:54.973105
     Transforming variables...
-    Transformation time =  0:00:05.380985
+    Transformation time =  0:00:05.283131
 
 
 
@@ -1806,7 +1811,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 6.84 minutes
+    execution time: 35.60 minutes
 
 
 
@@ -1815,9 +1820,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    The watermark extension is already loaded. To reload it, use:
-      %reload_ext watermark
-    Last updated: 2022-08-03
+    Last updated: 2022-08-04
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -1836,13 +1839,13 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Git branch: simplify
 
     aesara    : 2.7.7
-    pymc      : 4.1.3
     plotnine  : 0.0.0
-    arviz     : 0.12.1
+    pymc      : 4.1.3
+    pandas    : 1.4.3
     seaborn   : 0.11.2
     matplotlib: 3.5.2
+    arviz     : 0.12.1
     numpy     : 1.23.1
-    pandas    : 1.4.3
 
 
 

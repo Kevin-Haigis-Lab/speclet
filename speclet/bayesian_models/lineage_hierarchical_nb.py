@@ -418,19 +418,19 @@ class LineageHierNegBinomModel:
             b = pm.Deterministic("b", genes[:, 1], dims="gene")
             d = pm.Deterministic("d", genes[:, 2], dims="gene")
             f = pm.Deterministic("f", genes[:, 3], dims="gene")
-            h = pm.Deterministic("h", genes[:, 4:], dims=("gene", "cancer_gene"))
 
             sigma_a = pm.HalfNormal("sigma_a", 0.5)
             delta_a = pm.Normal("delta_a", 0, 1, dims="sgrna")
             a = pm.Deterministic("a", mu_a[s_to_g] + delta_a * sigma_a, dims="sgrna")
 
-            _gene_effect = (
-                a[s]
-                + b[g] * rna
-                + d[g] * cn_gene
-                + f[g] * mut
-                + at.sum(h[g, :] * cg_mut, axis=1)
-            )
+            _gene_effect = a[s] + b[g] * rna + d[g] * cn_gene + f[g] * mut
+
+            if n_CG > 0:
+                h = pm.Deterministic("h", genes[:, 4:], dims=("gene", "cancer_gene"))
+                _gene_effect = _gene_effect + at.sum(h[g, :] * cg_mut, axis=1)
+            else:
+                logger.warning("No cancer genes -> no variable `h` in model.")
+
             if self.reduce_deterministic_vars:
                 gene_effect = _gene_effect
             else:
@@ -633,24 +633,44 @@ def _merge_colinear_cancer_genes(
     return cg_mut_matrix, cancer_genes
 
 
-def _set_cancer_gene_rows_to_zero(
+def _get_cell_lines_with_gene_mutated(df: pd.DataFrame, gene: str) -> set[str]:
+    return set(
+        df.query(f"hugo_symbol == '{gene}' and is_mutated")["depmap_id"].unique()
+    )
+
+
+def _remove_comutation_collinearity(
     data: pd.DataFrame,
     cancer_gene_mut_mat: npt.NDArray[np.int32],
     cancer_genes: list[str],
 ) -> npt.NDArray[np.int32]:
-    """For cancer genes, set their co-mutation value to 0.
+    """Remove cases where the target gene is always mutated with a cancer gene.
 
-    This avoids colinearities between the comutation variables and the target gene
-    mutation variable.
-
-    Note that merged genes are accounted for by setting both genes to 0.
+    Prevents collinearity between the cancer gene comutation variable and target gene
+    mutation variable. This collinearity is always present for the cancer genes,
+    themselves, and this is automatically handled here, too.
     """
-    cancer_gene_mut_mat = cancer_gene_mut_mat.copy()
-    for j, merged_genes in enumerate(cancer_genes):
-        for gene in merged_genes.split("|"):
-            gene_idx = data["hugo_symbol"] == gene
-            cancer_gene_mut_mat[gene_idx, j] = 0
+    for i, cg in enumerate(cancer_genes):
+        cg_muts = _get_cell_lines_with_gene_mutated(data, cg)
+        for gene in data["hugo_symbol"].unique():
+            gene_muts = _get_cell_lines_with_gene_mutated(data, gene)
+            if cg_muts == gene_muts:
+                gene_idx = data["hugo_symbol"] == gene
+                cancer_gene_mut_mat[gene_idx, i] = 0
     return cancer_gene_mut_mat
+
+
+def _drop_cancer_genes_with_no_comutation(
+    cancer_gene_mut_mat: npt.NDArray[np.int32],
+    cancer_genes: list[str],
+) -> tuple[npt.NDArray[np.int32], list[str]]:
+    """Drop any columns and cancer genes with no mutations."""
+    any_muts = cancer_gene_mut_mat.sum(axis=0) > 0
+    if np.all(any_muts):
+        return cancer_gene_mut_mat, cancer_genes
+    new_cg_mut_mat = cancer_gene_mut_mat[:, any_muts]
+    new_cgs = list(np.asarray(cancer_genes)[any_muts])
+    return new_cg_mut_mat, new_cgs
 
 
 def _top_n_cancer_genes(
@@ -695,11 +715,11 @@ def make_cancer_gene_comutation_matrix(
         c_by_g_matrix, cancer_genes, min_n=min_n, min_freq=min_freq
     )
     if len(new_cg) == 0:
-        return np.zeros((len(data), 1), dtype=np.int32), new_cg
+        return np.array([], dtype=np.int32), new_cg
 
     c_by_g_matrix, new_merged_cg = _merge_colinear_cancer_genes(c_by_g_matrix, new_cg)
     if len(new_merged_cg) == 0:
-        return np.zeros((len(data), 1), dtype=np.int32), new_merged_cg
+        return np.array([], dtype=np.int32), new_merged_cg
 
     if top_n_cg is not None and top_n_cg >= 0:
         c_by_g_matrix, new_merged_cg = _top_n_cancer_genes(
@@ -708,7 +728,12 @@ def make_cancer_gene_comutation_matrix(
 
     cell_line_idx = get_indices(data, "depmap_id")
     cg_mut_mat = c_by_g_matrix[cell_line_idx, :]
-    cg_mut_mat = _set_cancer_gene_rows_to_zero(data, cg_mut_mat, new_merged_cg)
+    cg_mut_mat = _remove_comutation_collinearity(data, cg_mut_mat, new_merged_cg)
+    cg_mut_mat, new_merged_cg = _drop_cancer_genes_with_no_comutation(
+        cg_mut_mat, new_merged_cg
+    )
+    if len(new_merged_cg) == 0:
+        return np.array([], dtype=np.int32), new_merged_cg
 
     assert cg_mut_mat.shape[0] == len(data)
     assert cg_mut_mat.shape[1] == len(new_merged_cg)
