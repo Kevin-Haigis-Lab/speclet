@@ -135,11 +135,11 @@
         log_likelihood: false
       nuts_kwargs:
         step_size: 0.01
-        max_tree_depth: 12
+        max_tree_depth: 11
   slurm_resources:
     PYMC_NUMPYRO:
-      mem: 24
-      time: 2
+      mem: 16
+      time: 3
       cores: 1
       gpu:
         gpu: "RTX 8000"
