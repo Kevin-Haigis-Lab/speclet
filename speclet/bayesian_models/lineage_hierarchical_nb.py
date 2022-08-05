@@ -1,7 +1,6 @@
 """A hierarchical negative binomial generalized linear model for a single lineage."""
 
 from dataclasses import dataclass
-from itertools import product
 from typing import Any
 
 import aesara.tensor as at
@@ -12,10 +11,9 @@ import pymc as pm
 import pymc.math as pmmath
 from pandera import Check, Column, DataFrameSchema
 from pydantic import BaseModel
-from scipy.stats import rankdata
 
 import speclet.modeling.posterior_checks as post_checks
-from speclet.data_processing.common import get_cats, get_indices
+from speclet.data_processing.common import get_cats
 from speclet.data_processing.crispr import (
     add_useful_read_count_columns,
     append_total_read_counts,
@@ -34,6 +32,10 @@ from speclet.data_processing.validation import (
 from speclet.data_processing.vectors import squish_array
 from speclet.loggers import logger
 from speclet.managers.data_managers import CancerGeneDataManager as CancerGeneDM
+from speclet.modeling.cancer_gene_mutation_matrix import (
+    extract_mutation_matrix_and_cancer_genes,
+    make_cancer_gene_mutation_matrix,
+)
 from speclet.project_enums import ModelFitMethod
 
 
@@ -228,13 +230,20 @@ class LineageHierNegBinomModel:
         coords = self._model_coords(data, cancer_genes)
 
         is_mutated = target_gene_is_mutated_vector(data)
-        comutation_matrix, cancer_genes = make_cancer_gene_comutation_matrix(
+        cg_mutation_matrix = make_cancer_gene_mutation_matrix(
             data,
             cancer_genes,
             min_n=self.min_n_cancer_genes,
             min_freq=self.min_frac_cancer_genes,
             top_n_cg=self.top_n_cancer_genes,
         )
+        if cg_mutation_matrix is None:
+            comutation_matrix = np.array([0])
+            cancer_genes = []
+        else:
+            comutation_matrix, cancer_genes = extract_mutation_matrix_and_cancer_genes(
+                cg_mutation_matrix
+            )
         coords["cancer_gene"] = cancer_genes
 
         return LineageHierNegBinomModelData(
@@ -528,213 +537,3 @@ def target_gene_is_mutated_vector(data: pd.DataFrame) -> npt.NDArray[np.int32]:
     idx = np.asarray([g in always_mutated_genes for g in data["hugo_symbol"]])
     mut_ary[idx] = 0
     return mut_ary
-
-
-def _cell_line_by_cancer_gene_mutation_matrix(
-    data: pd.DataFrame, cancer_genes: list[str]
-) -> npt.NDArray[np.int32]:
-    """Create a binary matrix of [cancer gene x cell line].
-
-    I did this verbosely with a numpy matrix and iteration to make sure I didn't drop
-    any cell lines or cancer genes never mutated and to ensure the order of each group.
-    """
-    cells = get_cats(data, "depmap_id")
-    mat = np.zeros((len(cells), len(cancer_genes)))
-    mutations = (
-        data.copy()[["depmap_id", "hugo_symbol", "is_mutated"]]
-        .drop_duplicates()
-        .filter_column_isin("hugo_symbol", cancer_genes)
-        .reset_index(drop=True)
-        .astype({"is_mutated": np.int32})
-    )
-    for (i, cell), (j, gene) in product(enumerate(cells), enumerate(cancer_genes)):
-        _query = f"depmap_id == '{cell}' and hugo_symbol == '{gene}'"
-        is_mut = mutations.query(_query)["is_mutated"]
-        assert len(is_mut) == 1
-        mat[i, j] = is_mut.values[0]
-    return mat.astype(np.int32)
-
-
-def _trim_cancer_genes(
-    cg_mut_matrix: npt.NDArray[np.int32],
-    cancer_genes: list[str],
-    min_n: int = 1,
-    min_freq: float = 0.0,
-) -> tuple[npt.NDArray[np.int32], list[str]]:
-    """Trim cancer genes and mutation matrix to avoid colinearities.
-
-    Corrects for:
-        1. remove cancer genes never mutated (or above a threshold)
-        2. remove cancer genes always mutated
-        3. merge cancer genes that are perfectly co-mutated
-    """
-    # Identifying cancer genes to remove.
-    all_mut = np.all(cg_mut_matrix, axis=0)
-    low_n_mut = np.sum(cg_mut_matrix, axis=0) < min_n
-    low_freq_mut = np.mean(cg_mut_matrix, axis=0) < min_freq
-    drop_idx = all_mut + low_n_mut + low_freq_mut
-
-    # Logging.
-    _dropped_cancer_genes = list(np.asarray(cancer_genes)[drop_idx])
-    logger.info(f"Dropping {len(_dropped_cancer_genes)} cancer genes.")
-    logger.debug(f"Dropped cancer genes: {_dropped_cancer_genes}")
-
-    # Execute changes.
-    cg_mut_matrix = cg_mut_matrix[:, ~drop_idx]
-    cancer_genes = list(np.asarray(cancer_genes)[~drop_idx])
-    assert len(cancer_genes) == cg_mut_matrix.shape[1], "Shape mis-match."
-    return cg_mut_matrix, cancer_genes
-
-
-def _get_colinear_columns(mat: np.ndarray, col: int) -> list[int]:
-    col_vals = mat[:, col]
-    to_merge: list[int] = [col]
-    for i in range(mat.shape[1]):
-        if i == col:
-            continue
-        if np.all(col_vals == mat[:, i]):
-            to_merge.append(i)
-    return to_merge
-
-
-def _merge_colinear_columns(
-    mat: np.ndarray, colinear_cols: list[int], keep_pos: int
-) -> np.ndarray:
-    drop_cols = [c for c in colinear_cols if c != keep_pos]
-    keep_idx = np.array([i not in drop_cols for i in range(mat.shape[1])])
-    return mat[:, keep_idx]
-
-
-def _merge_cancer_genes(
-    genes: list[str], colinear_cols: list[int], keep_pos: int
-) -> list[str]:
-    merge_genes = [genes[i] for i in colinear_cols]
-    new_gene = "|".join(merge_genes)
-    genes[keep_pos] = new_gene
-    return [g for g in genes if g not in merge_genes]
-
-
-def _merge_colinear_cancer_genes(
-    cg_mut_matrix: npt.NDArray[np.int32], cancer_genes: list[str]
-) -> tuple[npt.NDArray[np.int32], list[str]]:
-    n_cg = len(cancer_genes) + 1
-    while n_cg != len(cancer_genes) and len(cancer_genes) > 0:
-        n_cg = len(cancer_genes)
-        for i in range(n_cg):
-            colinear_cols = _get_colinear_columns(cg_mut_matrix, i)
-            if len(colinear_cols) > 1:
-                cg_mut_matrix = _merge_colinear_columns(
-                    cg_mut_matrix, colinear_cols, keep_pos=i
-                )
-                cancer_genes = _merge_cancer_genes(
-                    cancer_genes, colinear_cols, keep_pos=i
-                )
-                break
-    return cg_mut_matrix, cancer_genes
-
-
-def _get_cell_lines_with_gene_mutated(df: pd.DataFrame, gene: str) -> set[str]:
-    return set(
-        df.query(f"hugo_symbol == '{gene}' and is_mutated")["depmap_id"].unique()
-    )
-
-
-def _remove_comutation_collinearity(
-    data: pd.DataFrame,
-    cancer_gene_mut_mat: npt.NDArray[np.int32],
-    cancer_genes: list[str],
-) -> npt.NDArray[np.int32]:
-    """Remove cases where the target gene is always mutated with a cancer gene.
-
-    Prevents collinearity between the cancer gene comutation variable and target gene
-    mutation variable. This collinearity is always present for the cancer genes,
-    themselves, and this is automatically handled here, too.
-    """
-    for i, cg in enumerate(cancer_genes):
-        cg_muts = _get_cell_lines_with_gene_mutated(data, cg)
-        for gene in data["hugo_symbol"].unique():
-            gene_muts = _get_cell_lines_with_gene_mutated(data, gene)
-            if cg_muts == gene_muts:
-                gene_idx = data["hugo_symbol"] == gene
-                cancer_gene_mut_mat[gene_idx, i] = 0
-    return cancer_gene_mut_mat
-
-
-def _drop_cancer_genes_with_no_comutation(
-    cancer_gene_mut_mat: npt.NDArray[np.int32],
-    cancer_genes: list[str],
-) -> tuple[npt.NDArray[np.int32], list[str]]:
-    """Drop any columns and cancer genes with no mutations."""
-    any_muts = cancer_gene_mut_mat.sum(axis=0) > 0
-    if np.all(any_muts):
-        return cancer_gene_mut_mat, cancer_genes
-    new_cg_mut_mat = cancer_gene_mut_mat[:, any_muts]
-    new_cgs = list(np.asarray(cancer_genes)[any_muts])
-    return new_cg_mut_mat, new_cgs
-
-
-def _top_n_cancer_genes(
-    mut_mat: npt.NDArray[np.int32], cg: list[str], top_n: int
-) -> tuple[npt.NDArray[np.int32], list[str]]:
-    """Select only the top-n most frequently mutated cancer genes."""
-    n_muts = mut_mat.sum(axis=0)
-    mut_order = rankdata(-1 * n_muts, method="min") - 1
-    assert len(n_muts) == len(cg)
-    assert len(mut_order) == len(cg)
-    keep_idx = mut_order < top_n
-    new_cg = list(np.asarray(cg)[keep_idx])
-    new_mut_mat = mut_mat.copy()[:, keep_idx]
-    return new_mut_mat, new_cg
-
-
-def make_cancer_gene_comutation_matrix(
-    data: pd.DataFrame,
-    cancer_genes: list[str],
-    min_n: int = 1,
-    min_freq: float = 0.0,
-    top_n_cg: int | None = None,
-) -> tuple[npt.NDArray[np.int32], list[str]]:
-    """Generate a cancer gene comutation matrix.
-
-    Args:
-        data (pd.DataFrame): CRISPR data frame.
-        cancer_genes (list[str]): List of cancer genes (in desired order).
-        min_n (int, optional): Minimum number of cell lines with the cancer gene mutated
-        in order to use the cancer gene. Defaults to 1.
-        min_freq (float, optional): Minimum fraction of cell lines (mutation frequency)
-        with the cancer gene mutated in order to use the cancer gene. Defaults to 0.0.
-        top_n_cg (int | None, optional): Limit the cancer genes to the top-n most
-        frequently mutated. Defaults to `None` (to impose no limit).
-
-    Returns:
-        tuple[npt.NDArray[np.int32], list[str]]: Cancer gene comutation matrix of shape
-        [num. data points x num. cancer gene] and the updated list of cancer genes.
-    """
-    c_by_g_matrix = _cell_line_by_cancer_gene_mutation_matrix(data, cancer_genes)
-    c_by_g_matrix, new_cg = _trim_cancer_genes(
-        c_by_g_matrix, cancer_genes, min_n=min_n, min_freq=min_freq
-    )
-    if len(new_cg) == 0:
-        return np.array([], dtype=np.int32), new_cg
-
-    c_by_g_matrix, new_merged_cg = _merge_colinear_cancer_genes(c_by_g_matrix, new_cg)
-    if len(new_merged_cg) == 0:
-        return np.array([], dtype=np.int32), new_merged_cg
-
-    if top_n_cg is not None and top_n_cg >= 0:
-        c_by_g_matrix, new_merged_cg = _top_n_cancer_genes(
-            mut_mat=c_by_g_matrix, cg=new_merged_cg, top_n=top_n_cg
-        )
-
-    cell_line_idx = get_indices(data, "depmap_id")
-    cg_mut_mat = c_by_g_matrix[cell_line_idx, :]
-    cg_mut_mat = _remove_comutation_collinearity(data, cg_mut_mat, new_merged_cg)
-    cg_mut_mat, new_merged_cg = _drop_cancer_genes_with_no_comutation(
-        cg_mut_mat, new_merged_cg
-    )
-    if len(new_merged_cg) == 0:
-        return np.array([], dtype=np.int32), new_merged_cg
-
-    assert cg_mut_mat.shape[0] == len(data)
-    assert cg_mut_mat.shape[1] == len(new_merged_cg)
-    return cg_mut_mat, new_merged_cg
