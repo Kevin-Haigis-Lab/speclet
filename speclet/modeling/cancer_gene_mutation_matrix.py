@@ -1,7 +1,7 @@
 """Cancer gene mutation matrix preparation."""
 
 from itertools import product
-from typing import Callable
+from typing import Callable, overload
 
 import numpy as np
 import numpy.typing as npt
@@ -306,20 +306,28 @@ def make_cancer_gene_mutation_matrix(
 
 
 def extract_mutation_matrix_and_cancer_genes(
-    cg_mut_mat: xr.DataArray | None,
+    cg_mut_mat: xr.DataArray,
 ) -> tuple[npt.NDArray[np.int32], list[str]]:
     """Convert the cancer gene mutation xarray DataArray to a numpy array and list.
 
     Args:
-        cg_mut_mat (xr.DataArray | None): Cancer gene mutation matrix.
+        cg_mut_mat (xr.DataArray): Cancer gene mutation matrix.
 
     Returns:
         tuple[npt.NDArray[np.int32], list[str]]: Standard Numpy matrix and the
         corresponding list of cancer genes.
     """
-    if cg_mut_mat is None:
-        return np.array([], dtype=np.int32), []
     return cg_mut_mat.values, cg_mut_mat.coords["cancer_gene"].values.tolist()
+
+
+@overload
+def convert_to_dataframe(cg_mut_mat: None) -> None:
+    ...
+
+
+@overload
+def convert_to_dataframe(cg_mut_mat: xr.DataArray) -> pd.DataFrame:
+    ...
 
 
 def convert_to_dataframe(cg_mut_mat: xr.DataArray | None) -> pd.DataFrame | None:
