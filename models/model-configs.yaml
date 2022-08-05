@@ -121,7 +121,7 @@
     little more room to experiment with, but it should not be used as the tree depth for
     the final draws.
   "
-  active: true
+  active: false
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_prostate.csv"
   model_kwargs:
@@ -188,11 +188,12 @@
     little more room to experiment with, but it should not be used as the tree depth for
     the final draws.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_liver.csv"
   model_kwargs:
     lineage: "liver"
+    min_frac_cancer_genes: 0.2
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -206,7 +207,7 @@
   slurm_resources:
     PYMC_NUMPYRO:
       mem: 32
-      time: 3
+      time: 8
       cores: 1
       gpu:
         gpu: "RTX 8000"
