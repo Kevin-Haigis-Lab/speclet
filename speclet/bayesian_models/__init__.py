@@ -30,6 +30,8 @@ class BayesianModel(Enum):
 class BayesianModelProtocol(Protocol):
     """Protocol for Bayesian model objects."""
 
+    version: str
+
     def __init__(self, **kwargs: Any) -> None:
         """Initialize with keyword-only arguments.
 

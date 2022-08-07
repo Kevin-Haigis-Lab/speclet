@@ -43,6 +43,8 @@ class NegativeBinomialModelData:
 class HierarchcalNegativeBinomialSecondTier:
     """A hierarchical negative binomial model with a second tier."""
 
+    version: str = "0.0.1"
+
     def __init__(self, **kwargs: Any) -> None:
         """Create a negative binomial Bayesian model object."""
         return None

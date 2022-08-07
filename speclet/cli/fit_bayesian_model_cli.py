@@ -2,6 +2,7 @@
 
 """CLI for standardized fitting Bayesian models."""
 
+from inspect import getdoc
 from pathlib import Path
 from time import time
 
@@ -13,7 +14,7 @@ from typer import Typer
 import speclet.modeling.posterior_checks as post_check
 from speclet import io
 from speclet import model_configuration as model_config
-from speclet.bayesian_models import get_bayesian_model
+from speclet.bayesian_models import BayesianModelProtocol, get_bayesian_model
 from speclet.cli import cli_helpers
 from speclet.loggers import logger, set_console_handler_level
 from speclet.managers.cache_manager import cache_posterior, get_posterior_cache_name
@@ -88,6 +89,19 @@ def _check_mcmc_sampling_efficiency(
     return post_check.check_mcmc_sampling(trace, checks)
 
 
+def _add_model_attributes(
+    model: BayesianModelProtocol, trace: az.InferenceData
+) -> None:
+    if (posterior := getattr(trace, "posterior")) is None:
+        return None
+    if (posterior_attrs := getattr(posterior, "attrs")) is None:
+        return None
+    posterior_attrs["model_name"] = type(model).__name__
+    posterior_attrs["model_version"] = model.version
+    posterior_attrs["model_doc"] = getdoc(model)
+    return None
+
+
 # ---- Main ----
 
 
@@ -154,10 +168,15 @@ def fit_bayesian_model(
         sampling_kwargs=sampling_kwargs_adj,
         seed=seed,
     )
-
     logger.info("Sampling finished.")
-    assert hasattr(trace, "posterior"), "Missing posterior draws."
-    print(trace.posterior.data_vars)
+
+    logger.info("Adding model attributes.")
+    _add_model_attributes(model, trace)
+
+    if (posterior := getattr(trace, "posterior", None)) is None:
+        raise AttributeError("Missing posterior draws.")
+
+    print(posterior.data_vars)
 
     if check_sampling_stats:
         logger.info("Checking sampling stats.")

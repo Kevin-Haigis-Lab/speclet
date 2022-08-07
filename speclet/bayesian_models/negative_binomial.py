@@ -29,6 +29,8 @@ class NegBinomModelData:
 class NegativeBinomialModel:
     """Negative binomial generalized linear model."""
 
+    version: str = "0.0.1"
+
     def __init__(self, **kwargs: Any) -> None:
         """Create a negative binomial Bayesian model object."""
         return None
