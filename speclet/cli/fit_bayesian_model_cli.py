@@ -5,17 +5,21 @@
 from pathlib import Path
 from time import time
 
+import arviz as az
 import pandas as pd
 from dotenv import load_dotenv
 from typer import Typer
 
+import speclet.modeling.posterior_checks as post_check
 from speclet import io
 from speclet import model_configuration as model_config
 from speclet.bayesian_models import get_bayesian_model
 from speclet.cli import cli_helpers
-from speclet.loggers import logger
+from speclet.loggers import logger, set_console_handler_level
 from speclet.managers.cache_manager import cache_posterior, get_posterior_cache_name
-from speclet.managers.data_managers import CrisprScreenDataManager, data_transformation
+from speclet.managers.data_managers import CrisprScreenDataManager
+from speclet.managers.data_managers import broad_only as broad_only_filter
+from speclet.managers.data_managers import data_transformation
 from speclet.model_configuration import ModelingSamplingArguments
 from speclet.modeling.fitting_arguments import (
     PymcSampleArguments,
@@ -35,17 +39,13 @@ app = Typer()
 # ---- Helpers ----
 
 
-def _broad_only(df: pd.DataFrame) -> pd.DataFrame:
-    return df[df["screen"] == "broad"].reset_index(drop=True)
-
-
 def _read_crispr_screen_data(
     file: io.DataFile | Path, broad_only: bool
 ) -> pd.DataFrame:
     """Read in CRISPR screen data."""
     trans: list[data_transformation] = []
     if broad_only:
-        trans = [_broad_only]
+        trans = [broad_only_filter]
     return CrisprScreenDataManager(data_file=file, transformations=trans).get_data(
         read_kwargs={"low_memory": False}
     )
@@ -75,6 +75,19 @@ def _augment_sampling_kwargs(
     return sampling_kwargs
 
 
+def _check_mcmc_sampling_efficiency(
+    trace: az.InferenceData,
+    additional_checks: list[post_check.PosteriorCheck] | None = None,
+) -> post_check.PosteriorCheckResults:
+    checks = [
+        post_check.CheckStepSize(min_ss=0.00005),
+        post_check.CheckBFMI(min_bfmi=0.2, max_bfmi=2.0),
+    ]
+    if additional_checks is not None:
+        checks += additional_checks
+    return post_check.check_mcmc_sampling(trace, checks)
+
+
 # ---- Main ----
 
 
@@ -89,6 +102,8 @@ def fit_bayesian_model(
     cache_name: str | None = None,
     seed: int | None = None,
     broad_only: bool = False,
+    log_level: str | None = None,
+    check_sampling_stats: bool = False,
 ) -> None:
     """Sample a Bayesian model.
 
@@ -107,8 +122,14 @@ def fit_bayesian_model(
         seed (Optional[int], optional): Random seed for models. Defaults to `None`.
         broad_only (bool, optional): Only include Broad screen data. Defaults to
         `False` to include all data.
+        log_level (str | int | None, optional): Set a log level. Defaults to `None`.
+        check_sampling_stats (bool, optional): Whether to check the sampling statistics
+        at the end of sampling. Note, that a failed result will cause the program to
+        exit with an error.
     """
     tic = time()
+    if log_level is not None:
+        set_console_handler_level(log_level)
     logger.info("Reading model configuration.")
     config = model_config.get_configuration_for_model(
         config_path=config_path, name=name
@@ -135,7 +156,27 @@ def fit_bayesian_model(
     )
 
     logger.info("Sampling finished.")
+    assert hasattr(trace, "posterior"), "Missing posterior draws."
     print(trace.posterior.data_vars)
+
+    if check_sampling_stats:
+        logger.info("Checking sampling stats.")
+
+        model_checks: list[post_check.PosteriorCheck] | None = getattr(
+            model, "posterior_sample_checks", lambda: None
+        )()
+        if model_checks is None:
+            logger.debug("No posterior checks from model object.")
+        else:
+            msg = f"Recieved {len(model_checks)} posterior checks from the model."
+            logger.debug(msg)
+        res = _check_mcmc_sampling_efficiency(trace, model_checks)
+        logger.info(res.message)
+        if res:
+            logger.info("Sampling statistics checks passed.")
+        else:
+            logger.error("Sampling statistics checks failed.")
+            raise post_check.FailedSamplingStatisticsChecksError()
 
     if cache_name is None:
         logger.warning("No cache name provided - one will be generated automatically.")

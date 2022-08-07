@@ -66,6 +66,10 @@ def get_partition(w: Wildcards, fit_method: ModelFitMethod) -> str:
     return create_resource_manager(w=w, fit_method=fit_method).partition
 
 
+def get_gres(w: Wildcards, fit_method: ModelFitMethod) -> str:
+    return create_resource_manager(w=w, fit_method=fit_method).gres
+
+
 # --- Rules ----
 
 
@@ -170,12 +174,14 @@ rule sample_pymc_numpyro:
         mem=lambda w: get_memory(w, ModelFitMethod.PYMC_NUMPYRO),
         time=lambda w: get_time(w, ModelFitMethod.PYMC_NUMPYRO),
         partition=lambda w: get_partition(w, ModelFitMethod.PYMC_NUMPYRO),
+        gres=lambda w: get_gres(w, ModelFitMethod.PYMC_NUMPYRO),
         config_file=MODEL_CONFIG,
         tempdir=TEMP_DIR,
         cache_name=lambda w: f"{w.model_name}_PYMC_NUMPYRO_chain{w.chain}",
     benchmark:
         BENCHMARK_DIR / "sample_pymc_mcmc/{model_name}_chain{chain}.tsv"
-    priority: 20
+    priority: 30
+    retries: 1
     shell:
         get_aesara_flags("{wildcards.model_name}_{wildcards.chain}_mcmc") + " "
         "speclet/cli/fit_bayesian_model_cli.py"
@@ -186,8 +192,10 @@ rule sample_pymc_numpyro:
         "  --mcmc-chains 1"
         "  --mcmc-cores 1"
         "  --cache-name {params.cache_name}"
-        "  --seed {wildcards.chain}"
         "  --broad-only"
+        "  --log-level DEBUG"
+        "  --check-sampling-stats"
+        # "  --seed {wildcards.chain}"
 
 
 rule combine_pymc_numpyro:

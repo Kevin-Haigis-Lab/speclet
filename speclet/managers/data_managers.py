@@ -28,6 +28,16 @@ data_transformation = Callable[[pd.DataFrame], pd.DataFrame]
 
 SUPPORTED_DATA_FILES: Final[set[str]] = {".csv", ".tsv", ".pkl"}
 
+# Some common CRISPR data transformation functions.
+
+
+def broad_only(df: pd.DataFrame) -> pd.DataFrame:
+    """Filter for only Broad data.
+
+    Note that the index is reset before returning.
+    """
+    return df[df["screen"] == "broad"].reset_index(drop=True)
+
 
 class CrisprScreenDataManager:
     """Manage CRISPR screen data."""
@@ -105,10 +115,11 @@ class CrisprScreenDataManager:
     def get_data(
         self,
         skip_transforms: bool = False,
+        skip_validation: bool = False,
         force_reread: bool = False,
         read_kwargs: dict[str, Any] | None = None,
     ) -> pd.DataFrame:
-        """Get the dataframe.
+        """Get the data frame.
 
         If the data has already been loaded, it is returned without re-reading from
         file.
@@ -116,6 +127,7 @@ class CrisprScreenDataManager:
         Args:
             skip_transforms (bool, optional): Skip data transformations. Defaults to
             False.
+            skip_validation (bool, optional): Skip data validation. Defaults to False.
             force_reread (bool, optional): Force the file to be read even if the data
             object already exists. Defaults to False.
             read_kwargs (dict[str, Any] | None, optional): Key-word arguments for the
@@ -125,7 +137,7 @@ class CrisprScreenDataManager:
             UnsupportedDataFileType: Data file type is not supported.
 
         Returns:
-            pd.DataFrame: Requested dataframe.
+            pd.DataFrame: Requested data frame.
         """
         if self._data is not None and not force_reread:
             return self._data
@@ -155,8 +167,9 @@ class CrisprScreenDataManager:
 
         if not skip_transforms:
             self._data = self.apply_transformations(self._data)
+        if not skip_validation:
+            self._data = self.apply_validation(self._data)
 
-        self._data = self.apply_validation(self._data)
         return self._data
 
     def set_data(self, data: pd.DataFrame, apply_transformations: bool = True) -> None:
@@ -242,9 +255,9 @@ class CrisprScreenDataManager:
         Returns:
             pd.DataFrame: Transformed dataframe.
         """
-        data = self._apply_default_transformations(data)
         for fxn in self._transformations:
             data = fxn(data)
+        data = self._apply_default_transformations(data)
         return data
 
     # ---- Validation ----

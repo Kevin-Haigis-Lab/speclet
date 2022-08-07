@@ -33,7 +33,7 @@ class BayesianModelProtocol(Protocol):
     def __init__(self, **kwargs: Any) -> None:
         """Initialize with keyword-only arguments.
 
-        Best practice is to pass this datainto a Pydantic configuration model.
+        Best practice is to pass this data into a Pydantic configuration model.
         """
         ...
 

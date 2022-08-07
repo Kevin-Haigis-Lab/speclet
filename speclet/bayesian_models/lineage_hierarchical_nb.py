@@ -1,27 +1,26 @@
 """A hierarchical negative binomial generalized linear model for a single lineage."""
 
 from dataclasses import dataclass
-from itertools import product
 from typing import Any
 
+import aesara.tensor as at
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import pymc as pm
 import pymc.math as pmmath
-from aesara import tensor as at
-from aesara.tensor.random.op import RandomVariable
 from pandera import Check, Column, DataFrameSchema
 from pydantic import BaseModel
 
+import speclet.modeling.posterior_checks as post_checks
 from speclet.data_processing.common import get_cats
 from speclet.data_processing.crispr import (
     add_useful_read_count_columns,
     append_total_read_counts,
     common_indices,
     data_batch_indices,
+    grouped_copy_number_transform,
     set_achilles_categorical_columns,
-    zscale_cna_by_group,
     zscale_rna_expression_by_gene,
 )
 from speclet.data_processing.validation import (
@@ -33,7 +32,10 @@ from speclet.data_processing.validation import (
 from speclet.data_processing.vectors import squish_array
 from speclet.loggers import logger
 from speclet.managers.data_managers import CancerGeneDataManager as CancerGeneDM
-from speclet.managers.data_managers import LineageGeneMap
+from speclet.modeling.cancer_gene_mutation_matrix import (
+    extract_mutation_matrix_and_cancer_genes,
+    make_cancer_gene_mutation_matrix,
+)
 from speclet.project_enums import ModelFitMethod
 
 
@@ -59,16 +61,19 @@ class LineageHierNegBinomModelData:
     C: int  # number of cell lines
     SC: int  # number of screens
     CG: int  # number of cancer genes
-    ct_initial: npt.NDArray[np.int32]
-    ct_final: npt.NDArray[np.float32]
+    ct_initial: npt.NDArray[np.float32]
+    ct_final: npt.NDArray[np.int32]
     sgrna_idx: npt.NDArray[np.int32]
     gene_idx: npt.NDArray[np.int32]
+    sgrna_to_gene_idx: npt.NDArray[np.int32]
     cellline_idx: npt.NDArray[np.int32]
     screen_idx: npt.NDArray[np.int32]
     copy_number: npt.NDArray[np.float32]
-    copy_number_z_gene: npt.NDArray[np.float32]
-    copy_number_z_cell: npt.NDArray[np.float32]
+    copy_number_gene: npt.NDArray[np.float32]
+    copy_number_cell: npt.NDArray[np.float32]
     log_rna_expr: npt.NDArray[np.float32]
+    z_log_rna_gene: npt.NDArray[np.float32]
+    m_log_rna_gene: npt.NDArray[np.float32]
     is_mutated: npt.NDArray[np.int32]
     comutation_matrix: npt.NDArray[np.int32]
     coords: dict[str, list[str]]
@@ -78,6 +83,11 @@ class LineageHierNegBinomModelConfig(BaseModel):
     """Single-lineage hierarchical negative binominal model configuration."""
 
     lineage: str
+    lfc_limits: tuple[float, float] = (-5.0, 5.0)
+    min_n_cancer_genes: int = 2
+    min_frac_cancer_genes: float = 0.0
+    top_n_cancer_genes: int | None = None
+    reduce_deterministic_vars: bool = True
 
 
 class LineageHierNegBinomModel:
@@ -91,9 +101,21 @@ class LineageHierNegBinomModel:
 
         Args:
             lineage (str): Lineage to model.
+            lfc_limits (tuple[float, float]): Data points with log-fold change values
+            outside of this range are dropped. Defaults to (-5, 5).
         """
         self._config = LineageHierNegBinomModelConfig(**kwargs)
         self.lineage = self._config.lineage
+        self.lfc_limits = self._config.lfc_limits
+        self.min_n_cancer_genes = self._config.min_n_cancer_genes
+        self.min_frac_cancer_genes = self._config.min_frac_cancer_genes
+        self.top_n_cancer_genes = self._config.top_n_cancer_genes
+        if self.min_n_cancer_genes < 2:
+            logger.warning(
+                "Setting `min_n_cancer_genes` less than "
+                + "2 may result is some non-identifiability."
+            )
+        self.reduce_deterministic_vars = self._config.reduce_deterministic_vars
         return None
 
     @property
@@ -109,6 +131,18 @@ class LineageHierNegBinomModel:
                     checks=[check_nonnegative(), check_finite()],
                     nullable=False,
                     coerce=True,
+                ),
+                "lfc": Column(
+                    float,
+                    checks=[
+                        Check.in_range(
+                            min_value=self.lfc_limits[0],
+                            max_value=self.lfc_limits[1],
+                            include_min=True,
+                            include_max=True,
+                        )
+                    ],
+                    nullable=False,
                 ),
                 "sgrna": Column("category"),
                 "hugo_symbol": Column(
@@ -127,9 +161,8 @@ class LineageHierNegBinomModel:
                 ),
                 "rna_expr": Column(float, nullable=False),
                 "z_rna_gene": Column(float, checks=[check_finite()]),
-                "log_rna_expr": Column(float, checks=[check_finite()]),
-                "z_cn_gene": Column(float, checks=[check_finite()]),
-                "z_cn_cell_line": Column(float, checks=[check_finite()]),
+                "cn_gene": Column(float, checks=[check_finite()]),
+                "cn_cell_line": Column(float, checks=[check_finite()]),
                 "is_mutated": Column(bool, nullable=False),
                 "screen": Column("category", nullable=False),
             }
@@ -142,8 +175,8 @@ class LineageHierNegBinomModel:
             "~^eta$",
             "~^delta_.*",
             "~.*effect$",
-            "~^celllines_chol_cov.*$",
-            "~^.*celllines$",
+            "~^cells_chol_cov.*$",
+            "~^.*cells$",
             "~^genes_chol_cov.*$",
             "~^.*genes$",
         ]
@@ -196,19 +229,22 @@ class LineageHierNegBinomModel:
         cancer_genes.sort()
         coords = self._model_coords(data, cancer_genes)
 
-        comutation_matrix = make_cancer_gene_mutation_matrix(
-            data, cancer_genes=cancer_genes, cell_lines=coords["cell_line"]
+        is_mutated = target_gene_is_mutated_vector(data)
+        cg_mutation_matrix = make_cancer_gene_mutation_matrix(
+            data,
+            cancer_genes,
+            min_n=self.min_n_cancer_genes,
+            min_freq=self.min_frac_cancer_genes,
+            top_n_cg=self.top_n_cancer_genes,
         )
-
-        n_cancer_genes = len(cancer_genes)
-        while n_cancer_genes == len(cancer_genes) and n_cancer_genes > 0:
-            n_cancer_genes = len(cancer_genes)
-            comutation_matrix, cancer_genes = drop_cancer_genes_without_wt_and_mutation(
-                comutation_matrix, cancer_genes
+        if cg_mutation_matrix is None:
+            comutation_matrix = np.array([0])
+            cancer_genes = []
+        else:
+            comutation_matrix, cancer_genes = extract_mutation_matrix_and_cancer_genes(
+                cg_mutation_matrix
             )
-
-        coords = self._model_coords(data, cancer_genes)
-        mut = augmented_mutation_data(data, cancer_genes=set(cancer_genes))
+        coords["cancer_gene"] = cancer_genes
 
         return LineageHierNegBinomModelData(
             N=data.shape[0],
@@ -217,17 +253,20 @@ class LineageHierNegBinomModel:
             C=indices.n_celllines,
             SC=batch_indices.n_screens,
             CG=len(cancer_genes),
-            ct_initial=data.counts_initial_adj.values.astype(np.int32),
+            ct_initial=data.counts_initial_adj.values.copy().astype(np.float32),
             ct_final=data.counts_final.values.astype(np.int32),
             sgrna_idx=indices.sgrna_idx.astype(np.int32),
             gene_idx=indices.gene_idx.astype(np.int32),
+            sgrna_to_gene_idx=indices.sgrna_to_gene_idx.astype(np.int32),
             cellline_idx=indices.cellline_idx.astype(np.int32),
             screen_idx=batch_indices.screen_idx.astype(np.int32),
             copy_number=data.copy_number.values.astype(np.float32),
-            copy_number_z_gene=data.z_cn_gene.values.astype(np.float32),
-            copy_number_z_cell=data.z_cn_cell_line.values.astype(np.float32),
-            log_rna_expr=data.log_rna_expr.values.astype(np.float32),
-            is_mutated=mut.astype(np.int32),
+            copy_number_gene=data.cn_gene.values.astype(np.float32),
+            copy_number_cell=data.cn_cell_line.values.astype(np.float32),
+            log_rna_expr=data.rna_expr.values.astype(np.float32),
+            z_log_rna_gene=data.z_rna_gene.values.astype(np.float32),
+            m_log_rna_gene=data.m_rna_gene.values.astype(np.float32),
+            is_mutated=is_mutated.astype(np.int32),
             comutation_matrix=comutation_matrix.astype(np.int32),
             coords=coords,
         )
@@ -241,39 +280,80 @@ class LineageHierNegBinomModel:
         Returns:
             pd.DataFrame: Processed and validated modeling data.
         """
-        return (
+        logger.info("Processing data for modeling.")
+        logger.info(f"LFC limits: {self.lfc_limits}")
+        min_lfc, max_lfc = self.lfc_limits
+        initial_size = data.shape[0]
+        data = (
             data.dropna(
                 axis=0,
                 how="any",
                 subset=["counts_final", "counts_initial", "copy_number"],
             )
-            .pipe(zscale_rna_expression_by_gene, new_col="z_rna_gene")
+            .query(f"{min_lfc} <= lfc <= {max_lfc}")
+            .reset_index(drop=True)
             .pipe(
-                zscale_cna_by_group,
-                groupby_cols=["hugo_symbol"],
-                new_col="z_cn_gene",
-                cn_max=7,
-                center=1,
+                zscale_rna_expression_by_gene,
+                new_col="z_rna_gene",
+                lower_bound=-5,
+                upper_bound=5,
+                center_metric="mean",
             )
             .pipe(
-                zscale_cna_by_group,
-                groupby_cols=["depmap_id"],
-                new_col="z_cn_cell_line",
-                cn_max=7,
-                center=1,
+                zscale_rna_expression_by_gene,
+                new_col="m_rna_gene",
+                lower_bound=-5,
+                upper_bound=5,
+                center_metric="median",
+            )
+            .pipe(
+                grouped_copy_number_transform,
+                group="hugo_symbol",
+                cn_col="copy_number",
+                new_col="cn_gene",
+                max_cn=3,
+            )
+            .pipe(
+                grouped_copy_number_transform,
+                group="depmap_id",
+                cn_col="copy_number",
+                new_col="cn_cell_line",
+                max_cn=3,
             )
             .assign(
-                z_cn_gene=lambda d: squish_array(d.z_cn_gene, lower=-5.0, upper=5.0),
-                z_cn_cell_line=lambda d: squish_array(
-                    d.z_cn_cell_line, lower=-5.0, upper=5.0
+                cn_gene=lambda d: squish_array(d["cn_gene"], lower=-5.0, upper=5.0),
+                cn_cell_line=lambda d: squish_array(
+                    d["cn_cell_line"], lower=-5.0, upper=5.0
                 ),
-                log_rna_expr=lambda d: np.log(d.rna_expr + 1.0),
             )
             .pipe(append_total_read_counts)
             .pipe(add_useful_read_count_columns)
             .pipe(set_achilles_categorical_columns, sort_cats=True, skip_if_cat=False)
             .pipe(self.validate_data)
         )
+        final_size = data.shape[0]
+        logger.warning(f"number of data points dropped: {initial_size - final_size}")
+        return data
+
+    def _pre_model_messages(self, model_data: LineageHierNegBinomModelData) -> None:
+        logger.info(f"Lineage: {self.lineage}")
+        logger.info(f"Number of genes: {model_data.G}")
+        logger.info(f"Number of sgRNA: {model_data.S}")
+        logger.info(f"Number of cell lines: {model_data.C}")
+        logger.info(f"Number of cancer genes: {model_data.CG}")
+        logger.info(f"Number of screens: {model_data.SC}")
+        logger.info(f"Number of data points: {model_data.N}")
+
+        if self.reduce_deterministic_vars:
+            logger.info("Configured to reduce the number of deterministic variables.")
+        else:
+            logger.info("Including all non-essential deterministic variables.")
+
+        if model_data.G < 2:
+            raise TooFewGenes(model_data.G)
+        if model_data.C < 2:
+            raise TooFewCellLines(model_data.C)
+        return None
 
     def pymc_model(
         self,
@@ -293,228 +373,167 @@ class LineageHierNegBinomModel:
         if not skip_data_processing:
             data = self.data_processing_pipeline(data)
         model_data = self.make_data_structure(data)
+        self._pre_model_messages(model_data)
 
         # Multi-dimensional parameter coordinates (labels).
         coords = model_data.coords
-        # Indexing arrays.
-        s = model_data.sgrna_idx
-        c = model_data.cellline_idx
-        g = model_data.gene_idx
-        s = model_data.screen_idx
         # Data.
-        cn_gene = model_data.copy_number_z_gene
-        cn_cell = model_data.copy_number_z_cell
-        rna = model_data.log_rna_expr
+        rna = model_data.m_log_rna_gene
+        cn_gene = model_data.copy_number_gene
+        cn_cell = model_data.copy_number_cell
         mut = model_data.is_mutated
-        M = model_data.comutation_matrix
-
-        n_C = model_data.C
+        cg_mut = model_data.comutation_matrix
+        logger.debug(f"shape of cancer gene matrix: {cg_mut.shape}")
+        # Indexing arrays.
+        s_to_g = model_data.sgrna_to_gene_idx
+        s = model_data.sgrna_idx
+        g = model_data.gene_idx
+        c = model_data.cellline_idx
+        # Sizes.
         n_G = model_data.G
         n_CG = model_data.CG
+        n_C = model_data.C
         n_gene_vars = 4 + n_CG
 
-        logger.info(f"Lineage: {self.lineage}")
-        logger.info(f"Number of genes: {model_data.G}")
-        logger.info(f"Number of sgRNA: {model_data.S}")
-        logger.info(f"Number of cell lines: {model_data.C}")
-        logger.info(f"Number of cancer genes: {model_data.CG}")
-        logger.info(f"Number of screens: {model_data.SC}")
-        logger.info(f"Number of data points: {model_data.N}")
-
-        if n_G < 2:
-            raise TooFewGenes(n_G)
-        if n_C < 2:
-            raise TooFewCellLines(n_C)
-
-        def _sigma_dist(name: str) -> RandomVariable:
-            return pm.HalfNormal(name, 1)
+        mu_mu_a_loc = np.log(
+            np.mean(model_data.ct_final) / (np.mean(model_data.ct_initial))
+        )
+        logger.debug(f"location for `mu_mu_a`: {mu_mu_a_loc:0.4f}")
 
         with pm.Model(coords=coords) as model:
-            z = pm.Normal("z", 0, 2.5, initval=0)
-
-            sigma_a = _sigma_dist("sigma_a")
-            delta_a = pm.Normal("delta_a", 0, 1, dims=("sgrna"))
-            a = pm.Deterministic("a", delta_a * sigma_a, dims=("sgrna"))
-
-            cl_chol, _, cl_sigmas = pm.LKJCholeskyCov(
-                "celllines_chol_cov", eta=2, n=2, sd_dist=pm.HalfNormal.dist(1)
-            )
-            pm.Deterministic("sigma_b", cl_sigmas[0])
-            pm.Deterministic("sigma_f", cl_sigmas[1])
-
-            mu_b = 0
-            mu_f = pm.Normal("mu_f", -0.5, 0.5)
-            mu_celllines = at.stack([mu_b, mu_f])
-            delta_celllines = pm.Normal("delta_celllines", 0, 1, shape=(n_C, 2))
-            celllines = pm.Deterministic(
-                "celllines", mu_celllines + at.dot(cl_chol, delta_celllines.T).T
-            )
-            b = pm.Deterministic("b", celllines[:, 0], dims="cell_line")
-            f = pm.Deterministic("f", celllines[:, 1], dims="cell_line")
-
+            # Gene varying effects covariance matrix.
             g_chol, _, g_sigmas = pm.LKJCholeskyCov(
-                "genes_chol_cov", eta=2, n=n_gene_vars, sd_dist=pm.HalfNormal.dist(1)
+                "genes_chol_cov",
+                eta=2,
+                n=n_gene_vars,
+                sd_dist=pm.HalfNormal.dist(0.5, shape=n_gene_vars),
+                compute_corr=True,
             )
-            for i, var_name in enumerate(["d", "h", "k", "m"]):
+            for i, var_name in enumerate(["mu_a", "b", "d", "f"]):
                 pm.Deterministic(f"sigma_{var_name}", g_sigmas[i])
+            pm.Deterministic("sigma_h", g_sigmas[4:], dims="cancer_gene")
+
+            # Gene varying effects.
+            mu_mu_a = pm.Normal("mu_mu_a", mu_mu_a_loc, 0.2)
+            mu_b = pm.Normal("mu_b", 0, 0.1)
+            mu_d = 0  # Must be zero if CN for cell lines is a variable.
+            mu_f = 0
+            mu_h = [0] * n_CG
+            _mu_genes = [mu_mu_a, mu_b, mu_d, mu_f] + [mu_h[i] for i in range(n_CG)]
+            mu_genes = at.stack(_mu_genes, axis=0)
+            delta_genes = pm.Normal("delta_genes", 0, 1, shape=(n_gene_vars, n_G))
+            genes = mu_genes + at.dot(g_chol, delta_genes).T
+            mu_a = pm.Deterministic("mu_a", genes[:, 0], dims="gene")
+            b = pm.Deterministic("b", genes[:, 1], dims="gene")
+            d = pm.Deterministic("d", genes[:, 2], dims="gene")
+            f = pm.Deterministic("f", genes[:, 3], dims="gene")
+
+            sigma_a = pm.HalfNormal("sigma_a", 0.5)
+            delta_a = pm.Normal("delta_a", 0, 1, dims="sgrna")
+            a = pm.Deterministic("a", mu_a[s_to_g] + delta_a * sigma_a, dims="sgrna")
+
+            _gene_effect = a[s] + b[g] * rna + d[g] * cn_gene + f[g] * mut
 
             if n_CG > 0:
-                pm.Deterministic("sigma_w", g_sigmas[4:])
-
-            mu_d = 0
-            mu_h = 0
-            mu_k = pm.Normal("mu_k", -0.5, 0.5)
-            mu_m = 0
-            mu_w = [0] * n_CG
-            mu_genes = at.stack([mu_d, mu_h, mu_k, mu_m] + mu_w)
-            delta_genes = pm.Normal("delta_genes", 0, 1, shape=(n_G, n_gene_vars))
-            genes = pm.Deterministic(
-                "genes", mu_genes + at.dot(g_chol, delta_genes.T).T
-            )
-            d = pm.Deterministic("d", genes[:, 0], dims="gene")
-            h = pm.Deterministic("h", genes[:, 1], dims="gene")
-            k = pm.Deterministic("k", genes[:, 2], dims="gene")
-            m = pm.Deterministic("m", genes[:, 3], dims="gene")
-
-            w: RandomVariable | np.ndarray
-            if n_CG > 0:
-                w = pm.Deterministic("w", genes[:, 4:], dims=("gene", "cancer_gene"))
+                h = pm.Deterministic("h", genes[:, 4:], dims=("gene", "cancer_gene"))
+                _gene_effect = _gene_effect + at.sum(h[g, :] * cg_mut, axis=1)
             else:
-                w = np.zeros((n_G, n_CG))
+                logger.warning("No cancer genes -> no variable `h` in model.")
 
-            p: RandomVariable | np.ndarray
-            if model_data.SC > 1:
-                # Multiple screens.
-                sigma_p = _sigma_dist("sigma_p")
-                delta_p = pm.Normal("delta_p", 0, 1, dims=("gene", "screen"))
-                p = pm.Deterministic("p", delta_p * sigma_p, dims=("gene", "screen"))
+            if self.reduce_deterministic_vars:
+                gene_effect = _gene_effect
             else:
-                # Single screen.
-                logger.warning("Only 1 screen detected - ignoring variable `p`.")
-                p = np.zeros(shape=(model_data.G, 1))
+                gene_effect = pm.Deterministic("gene_effect", _gene_effect)
 
-            gene_effect = pm.Deterministic(
-                "gene_effect",
-                d[g] + cn_gene * h[g] + rna * k[g] + mut * m[g] + at.dot(w, M)[g, c],
+            # Cell line varying effects covariance matrix.
+            n_cell_vars = 2
+            cl_chol, _, cl_sigmas = pm.LKJCholeskyCov(
+                "cells_chol_cov",
+                eta=2,
+                n=n_cell_vars,
+                sd_dist=pm.HalfNormal.dist(0.5, shape=n_cell_vars),
+                compute_corr=True,
             )
-            cell_effect = pm.Deterministic("cell_line_effect", b[c] + cn_cell * f[c])
-            eta = pm.Deterministic(
-                "eta", z + a[s] + gene_effect + cell_effect + p[g, s]
-            )
-            mu = pm.Deterministic("mu", pmmath.exp(eta))
+            for i, var_name in enumerate(["k", "m"]):
+                pm.Deterministic(f"sigma_{var_name}", cl_sigmas[i])
 
-            alpha = pm.Gamma("alpha", 2.0, 0.5)
+            mu_k = 0
+            mu_m = pm.Normal("mu_m", 0, 0.1)
+            _mu_cells = [mu_k, mu_m]
+            mu_cells = at.stack(_mu_cells, axis=0)
+            delta_cells = pm.Normal("delta_cells", 0, 1, shape=(n_cell_vars, n_C))
+            cells = mu_cells + at.dot(cl_chol, delta_cells).T
+            k = pm.Deterministic("k", cells[:, 0], dims="cell_line")
+            m = pm.Deterministic("m", cells[:, 1], dims="cell_line")
+
+            _cell_effect = k[c] + m[c] * cn_cell
+            if self.reduce_deterministic_vars:
+                cell_effect = _cell_effect
+            else:
+                cell_effect = pm.Deterministic("cell_effect", _cell_effect)
+
+            _eta = gene_effect + cell_effect + np.log(model_data.ct_initial)
+            if self.reduce_deterministic_vars:
+                eta = _eta
+            else:
+                eta = pm.Deterministic("eta", _eta)
+
+            _mu = pmmath.exp(eta)
+            if self.reduce_deterministic_vars:
+                mu = _mu
+            else:
+                mu = pm.Deterministic("mu", _mu)
+
+            alpha = pm.Exponential("alpha", 0.5)
             pm.NegativeBinomial(
                 "ct_final",
-                mu * model_data.ct_initial,
-                alpha,
+                mu=mu,
+                alpha=alpha,
                 observed=model_data.ct_final,
             )
         return model
 
+    def posterior_sample_checks(self) -> list[post_checks.PosteriorCheck]:
+        """Default posterior checks."""
+        checks: list[post_checks.PosteriorCheck] = []
+        for var_name in ["sigma_mu_a", "sigma_b", "sigma_d", "sigma_f", "sigma_k"]:
+            checks.append(
+                post_checks.CheckMarginalPosterior(
+                    var_name=var_name,
+                    min_avg=0.0001,
+                    max_avg=np.inf,
+                    skip_if_missing=True,
+                )
+            )
+        return checks
 
-def _collect_mutations_per_cell_line(data: pd.DataFrame) -> dict[str, set[str]]:
-    mut_data = (
-        data[["depmap_id", "hugo_symbol", "is_mutated"]]
+
+def target_gene_is_mutated_vector(data: pd.DataFrame) -> npt.NDArray[np.int32]:
+    """Create a target gene mutation vector.
+
+    Accounts for an issue that can lead to non-identifiability where the target gene is
+    mutated in all cell lines. This would be co-linear with the varying intercept.
+
+    Args:
+        data (pd.DataFrame): CRISPR data.
+
+    Returns:
+        npt.NDArray[np.int32]: Binary vector for if the target gene is mutated.
+    """
+    always_mutated_genes = (
+        data.copy()[["depmap_id", "hugo_symbol", "is_mutated"]]
         .drop_duplicates()
-        .query("is_mutated")
-        .reset_index(drop=True)
+        .groupby(["hugo_symbol"])["is_mutated"]
+        .mean()
+        .reset_index(drop=False)
+        .query("is_mutated >= 0.99")["hugo_symbol"]
+        .tolist()
     )
-    mutations: LineageGeneMap = {}
-    for cl in data.depmap_id.unique():
-        mutations[cl] = set(mut_data.query(f"depmap_id == '{cl}'").hugo_symbol.unique())
-    return mutations
-
-
-def make_cancer_gene_mutation_matrix(
-    data: pd.DataFrame, cancer_genes: list[str], cell_lines: list[str]
-) -> npt.NDArray[np.int_]:
-    """Make a cancer gene x cell line mutation matrix.
-
-    Args:
-        data (pd.DataFrame): DepMap data frame.
-        cancer_genes (list[str]): Sorted list of cancer genes.
-        cell_lines (list[str]): Sorted list of cell lines.
-
-    Returns:
-        npt.NDArray[np.int_]: Binary mutation matrix.
-    """
-    cell_mutations = _collect_mutations_per_cell_line(data)
-    mut_mat = np.zeros(shape=(len(cancer_genes), len(cell_lines)), dtype=int)
-    for (i, cg), (j, cell) in product(enumerate(cancer_genes), enumerate(cell_lines)):
-
-        if cg in cell_mutations[cell]:
-            mut_mat[i, j] = 1
-    return mut_mat
-
-
-def augmented_mutation_data(
-    data: pd.DataFrame, cancer_genes: set[str]
-) -> npt.NDArray[np.int_]:
-    """Augment mutation data to account for cancer gene co-mutations.
-
-    If the gene is in the collection of cancer genes, then set its mutation status in
-    the original data to 0. This will result in the mutation effect for cancer genes
-    being estimated in the co-mutation variable instead of the normal mutation effect
-    variable.
-
-    Args:
-        data (pd.DataFrame): DepMap data frame.
-        cancer_genes (set[str]): Collection of cancer genes.
-
-    Returns:
-        np.ndarray: Augmented mutation data.
-    """
-    mut = data["is_mutated"].values.astype(int)
-    for i, gene in enumerate(data["hugo_symbol"]):
-        if gene in cancer_genes:
-            mut[i] = 0
-    return mut
-
-
-def drop_cancer_genes_without_wt_and_mutation(
-    comutation_matrix: npt.NDArray[np.int32], cancer_genes: list[str]
-) -> tuple[npt.NDArray[np.int32], list[str]]:
-    """Drop cancer genes without any mutations.
-
-    Args:
-        comutation_matrix (npt.NDArray[np.int32]): Co-mutation matrix.
-        cancer_genes (list[str]): Ordered list of cancer genes.
-
-    Returns:
-        tuple[npt.NDArray[np.int32], list[str]]: Modified co-mutation matrix and list of
-        cancer genes.
-    """
-    any_muts = np.any(comutation_matrix, axis=1)
-    all_muts = np.all(comutation_matrix, axis=1)
-    assert any_muts.ndim == all_muts.ndim == 1
-    assert any_muts.shape[0] == all_muts.shape[0] == len(cancer_genes)
-    keep_idx = any_muts * ~all_muts
-    new_comut_mat = comutation_matrix.copy()[keep_idx, :]
-    new_cancer_genes = [g for g, i in zip(cancer_genes, keep_idx) if i]
-    return new_comut_mat, new_cancer_genes
-
-
-def genes_with_mutations_switch(
-    genes: npt.NDArray[np.str_], muts: npt.NDArray[np.int32]
-) -> npt.NDArray[np.bool_]:
-    """Make a switch array for if a gene has any mutations or not.
-
-    Args:
-        genes (npt.NDArray[np.str_]): Gene array from the data frame.
-        muts (npt.NDArray[np.int32]): Mutation data.
-
-    Returns:
-        npt.NDArray[np.bool_]: Boolean array where `True` marks genes with at least one
-        mutation and `False` for genes without any mutations.
-    """
-    assert genes.ndim == 1
-    assert muts.ndim == 1
-    assert len(genes) == len(muts)
-    switch_ary = np.ones_like(genes, dtype=np.bool_)
-    for gene in np.unique(genes):
-        g_idx = genes == gene
-        num_muts = np.sum(muts[g_idx] > 0)
-        if num_muts == 0:
-            switch_ary[g_idx] = False
-    return switch_ary
+    logger.info(
+        f"number of genes mutated in all cells lines: {len(always_mutated_genes)}"
+    )
+    logger.debug(f"Genes always mutated: {', '.join(always_mutated_genes)}")
+    mut_ary = data["is_mutated"].values.astype(np.int32)
+    idx = np.asarray([g in always_mutated_genes for g in data["hugo_symbol"]])
+    mut_ary[idx] = 0
+    return mut_ary

@@ -1,6 +1,7 @@
 name: speclet
 channels:
   - conda-forge
+  - nvidia
   - bioconda
   - r
   - defaults
@@ -8,7 +9,7 @@ dependencies:
   - python=3.10.*
   - aeppl
   - aesara
-  - arviz>=0.12.0
+  - arviz=0.12.*
   - black
   - colorama
   - coverage
@@ -23,8 +24,8 @@ dependencies:
   - ipython
   - ipywidgets
   - isort
-  - jax
-  - jaxlib
+  - jax>=0.3.0
+  - jaxlib>=0.3.0
   - jupyterlab
   - jupyterlab_code_formatter
   - jupyterlab-spellchecker
@@ -36,7 +37,7 @@ dependencies:
   - nbqa
   - nbterm
   - numpy>=1.22.0
-  - numpyro>=0.9.0
+  - numpyro=0.10.*
   - pandas>=1.3.0
   - pandera>=0.8.0
   - pandoc
@@ -49,7 +50,7 @@ dependencies:
   - pretty_errors
   - pydantic
   - pyjanitor
-  - pymc>=4.0.0
+  - pymc=4.1.*
   - pytest
   - pytest-cov
   - pytest-sugar

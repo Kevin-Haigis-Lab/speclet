@@ -18,17 +18,19 @@ source "$HOME/.bashrc"
 conda activate speclet_smk
 
 SNAKEFILE="pipelines/010_010_model-fitting-pipeline.smk"
+DRMAA_TEMPLATE=" --account=park -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J} --gres=gres:{cluster.gres}"
+
 
 snakemake \
     --snakefile $SNAKEFILE \
     --jobs 9995 \
-    --restart-times 0 \
-    --latency-wait 120 \
+    --latency-wait 300 \
     --rerun-incomplete \
-    --drmaa " --account=park -c {cluster.cores} -p {cluster.partition} --mem={cluster.mem} -t {cluster.time} -o {cluster.out} -e {cluster.err} -J {cluster.J}" \
+    --drmaa "${DRMAA_TEMPLATE}" \
     --cluster-config pipelines/010_011_smk-config.yaml \
     --keep-going \
-    --printshellcmds
+    --printshellcmds #\
+    #--forceall
 
 
 # --conda-cleanup-envs  # use to clean up old conda envs

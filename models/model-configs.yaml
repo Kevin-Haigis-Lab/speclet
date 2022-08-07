@@ -94,73 +94,34 @@
 
     Only running this model with the Numpyro JAX backend.
   "
-  active: true
+  active: false
   model: LINEAGE_HIERARCHICAL_NB
   data_file: DEPMAP_CRC_SUBSAMPLE
   model_kwargs:
     lineage: "colorectal"
   sampling_kwargs:
     pymc_numpyro:
-      draws: 2000
-      tune: 700
+      draws: 1000
+      tune: 1000
+      chain_method: "vectorized"
       target_accept: 0.99
   slurm_resources:
     PYMC_NUMPYRO:
-      mem: 64
-      time: 8
-      cores: 1
-
-- name: hnb-single-lineage-colorectal
-  description: "
-    Single lineage hierarchical negative binomial model for colorectal data from the
-    Broad. Only running this model with the Numpyro JAX backend.
-  "
-  active: true
-  model: LINEAGE_HIERARCHICAL_NB
-  data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_colorectal.csv"
-  model_kwargs:
-    lineage: "colorectal"
-  sampling_kwargs:
-    pymc_numpyro:
-      draws: 1000
-      tune: 500
-      target_accept: 0.98
-  slurm_resources:
-    PYMC_NUMPYRO:
-      mem: 150
-      time: 650
+      mem: 16
+      time: 4
       cores: 1
 
 
-- name: hnb-single-lineage-liver
-  description: "
-    Single lineage hierarchical negative binomial model for liver data from the
-    Broad. Only running this model with the Numpyro JAX backend.
-  "
-  active: true
-  model: LINEAGE_HIERARCHICAL_NB
-  data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_liver.csv"
-  model_kwargs:
-    lineage: "liver"
-  sampling_kwargs:
-    pymc_numpyro:
-      draws: 1000
-      tune: 500
-      target_accept: 0.98
-  slurm_resources:
-    PYMC_NUMPYRO:
-      mem: 100
-      time: 300
-      cores: 1
-
-
-
-- name: hnb-single-lineage-prostate
+- name: hnb-single-lineage-prostate-007
   description: "
     Single lineage hierarchical negative binomial model for prostate data from the
-    Broad. Only running this model with the Numpyro JAX backend.
+    Broad. Varying effect for cell line and varying effect for copy number per cell
+    line. This model also uses a different transformation for the copy number data. The
+    `max_tree_depth` is also increased with the intention to give the tuning process a
+    little more room to experiment with, but it should not be used as the tree depth for
+    the final draws.
   "
-  active: true
+  active: false
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_prostate.csv"
   model_kwargs:
@@ -168,10 +129,85 @@
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
-      tune: 500
+      tune: 1000
       target_accept: 0.98
+      idata_kwargs:
+        log_likelihood: false
+      nuts_kwargs:
+        step_size: 0.01
+        max_tree_depth: 11
   slurm_resources:
     PYMC_NUMPYRO:
-      mem: 100
-      time: 300
+      mem: 16
+      time: 3
       cores: 1
+      gpu:
+        gpu: "RTX 8000"
+
+
+- name: hnb-single-lineage-colorectal-007
+  description: "
+    Single lineage hierarchical negative binomial model for colorectal data from the
+    Broad. Varying effect for cell line and varying effect for copy number per cell
+    line. This model also uses a different transformation for the copy number data. The
+    `max_tree_depth` is also increased with the intention to give the tuning process a
+    little more room to experiment with, but it should not be used as the tree depth for
+    the final draws.
+  "
+  active: true
+  model: LINEAGE_HIERARCHICAL_NB
+  data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_colorectal.csv"
+  model_kwargs:
+    lineage: "colorectal"
+    min_frac_cancer_genes: 0.2
+  sampling_kwargs:
+    pymc_numpyro:
+      draws: 1000
+      tune: 1500
+      target_accept: 0.99
+      idata_kwargs:
+        log_likelihood: false
+      nuts_kwargs:
+        step_size: 0.01
+        max_tree_depth: 11
+  slurm_resources:
+    PYMC_NUMPYRO:
+      mem: 64
+      time: 20
+      cores: 1
+      gpu:
+        gpu: "RTX 8000"
+
+
+- name: hnb-single-lineage-liver-007
+  description: "
+    Single lineage hierarchical negative binomial model for liver data from the
+    Broad. Varying effect for cell line and varying effect for copy number per cell
+    line. This model also uses a different transformation for the copy number data. The
+    `max_tree_depth` is also increased with the intention to give the tuning process a
+    little more room to experiment with, but it should not be used as the tree depth for
+    the final draws.
+  "
+  active: false
+  model: LINEAGE_HIERARCHICAL_NB
+  data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_liver.csv"
+  model_kwargs:
+    lineage: "liver"
+    min_frac_cancer_genes: 0.2
+  sampling_kwargs:
+    pymc_numpyro:
+      draws: 1000
+      tune: 1000
+      target_accept: 0.98
+      idata_kwargs:
+        log_likelihood: false
+      nuts_kwargs:
+        step_size: 0.01
+        max_tree_depth: 12
+  slurm_resources:
+    PYMC_NUMPYRO:
+      mem: 32
+      time: 8
+      cores: 1
+      gpu:
+        gpu: "RTX 8000"

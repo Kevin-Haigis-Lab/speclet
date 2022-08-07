@@ -1,9 +1,11 @@
 """Common and general vector operations."""
 
-from typing import Callable
+from typing import Callable, Literal
 
 import numpy as np
 from scipy import stats
+
+from speclet.project_enums import assert_never
 
 
 def zscale(x: np.ndarray) -> np.ndarray:
@@ -16,6 +18,18 @@ def zscale(x: np.ndarray) -> np.ndarray:
         np.ndarray: Z-scaled array.
     """
     return stats.zscore(x)
+
+
+def mscale(x: np.ndarray) -> np.ndarray:
+    """Z-scale an array using the median to center.
+
+    Args:
+        x (np.ndarray): Numeric array.
+
+    Returns:
+        np.ndarray: Z-scaled array.
+    """
+    return (x - np.median(x)) / np.std(x)
 
 
 def squish(x: float, lower: float, upper: float) -> float:
@@ -58,6 +72,7 @@ def careful_zscore(
     x: np.ndarray,
     atol: float = 0.01,
     transform: NumpyTransform | None = None,
+    center_metric: Literal["mean", "median"] = "mean",
 ) -> np.ndarray:
     """Z-scale an array carefully.
 
@@ -84,17 +99,23 @@ def careful_zscore(
     if transform is None:
         transform = np_identity
 
+    z = np.zeros_like(x)
     if len(x) == 1:
         # If there is only one value, set z-scaled expr to 0.
-        return np.zeros_like(x)
+        return z
     elif np.allclose(x, 0.0, atol=atol):
         # If all values are close to 0, set value to 0.
-        return np.zeros_like(x)
+        return z
     elif np.allclose(x, np.mean(x), atol=atol):
         # If all values are about equal, set value to 0.
-        return np.zeros_like(x)
-    else:
+        return z
+
+    if center_metric == "mean":
         return zscale(transform(x))
+    elif center_metric == "median":
+        return zscale(transform(x))
+    else:
+        assert_never(center_metric)
 
 
 def index_array_by_list(ary: np.ndarray, idx: list[int]) -> np.ndarray:

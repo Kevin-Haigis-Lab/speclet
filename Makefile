@@ -10,6 +10,8 @@ help:
 	@echo "available commands"
 	@echo " - help               : information about available commands"
 	@echo " - pyenvs             : install Python virtual environments"
+	@echo " - pyenvs_o2          : install Python virtual environments on O2"
+	@echo " - gpu                : install dependnecies for using a GPU."
 	@echo " - renv               : install necessary R packages"
 	@echo " - envs               : install Python and R environments"
 	@echo " - download_data      : download data for the project"
@@ -34,6 +36,23 @@ pyenvs:
 	($(CONDA_SETUP) mamba env create -f conda.yaml)
 	@echo "Installing snakemake conda environment."
 	($(CONDA_SETUP) mamba env create -f conda_smk.yaml)
+
+pyenvs_o2:
+	@echo "Creating speclet conda environment."
+	($(CONDA_SETUP) conda create -n speclet --yes -c conda-forge "python=3.9" mamba)
+	($(CONDA_SETUP) conda activate speclet && mamba env update --name speclet --file conda.yaml)
+	($(CONDA_SETUP) conda deactivate)
+	@echo "Creating speclet_smk conda environment."
+	($(CONDA_SETUP) conda create -n speclet_smk --yes -c conda-forge "python=3.9" mamba)
+	($(CONDA_SETUP) conda activate speclet_smk && mamba env update --name speclet_smk --file conda_smk.yaml)
+	($(CONDA_SETUP) conda deactivate)
+	@echo "Done."
+
+gpu:
+	@echo "Installing dependencies for uing a GPU."
+	($(CONDA_SETUP) conda activate speclet && mamba install --yes -c nvidia "cuda>=11.1" "cudnn>=8.2")
+	($(CONDA_SETUP) conda activate speclet && pip install --upgrade "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html)
+	@echo "Done."
 
 renv:
 	@echo "Preparing R environment."

@@ -35,6 +35,7 @@ class SlurmPartition(Enum):
     SHORT = "short"
     MEDIUM = "medium"
     LONG = "long"
+    GPU_QUAD = "gpu_quad"
 
 
 @unique

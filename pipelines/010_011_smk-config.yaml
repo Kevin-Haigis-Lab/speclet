@@ -3,6 +3,7 @@ __default__:
   cores: 1
   mem: "1000"
   time: "00:10:00"
+  gres: "gpu:0"
   out: "logs/%j_{rule}.log"
   err: "logs/%j_{rule}.log"
   mail: "NONE"
@@ -24,12 +25,13 @@ sample_pymc_numpyro:
   cores: 1
   mem: "{params.mem}"
   time: "{params.time}"
+  gres: "{params.gres}"
   J: "pyro-mc"
 combine_pymc_numpyro:
   partition: "short"
   cores: 1
-  mem: "200000"
-  time: "03:00:00"
+  mem: "250000"
+  time: "04:00:00"
   J: "pyro-comb"
 sample_pymc_advi:
   partition: "{params.partition}"
@@ -39,13 +41,13 @@ sample_pymc_advi:
   J: "pymc-advi"
 summarize_posterior:
   partition: "short"
-  cores: 2
-  mem: "100000"
-  time: "06:00:00"
+  cores: 1
+  mem: "120000"
+  time: "8:00:00"
   J: "summary"
 execute_report:
   partition: "short"
   cores: 1
-  mem: "120000"
-  time: "08:00:00"
+  mem: "250000"
+  time: "10:00:00"
   J: "report"

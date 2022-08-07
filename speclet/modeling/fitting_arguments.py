@@ -1,5 +1,7 @@
 """Concerning arguments for fitting Bayesian models."""
 
+from typing import Any, Literal
+
 from pydantic import BaseModel, PositiveInt, confloat
 
 from speclet.types import BasicTypes, VIMethod
@@ -28,7 +30,10 @@ class PymcSamplingNumpyroArguments(BaseModel):
     chains: PositiveInt = 4
     target_accept: TargetAcceptFloat = 0.8  # type: ignore
     progress_bar: bool = True
-    chain_method: str = "parallel"
+    chain_method: Literal["sequential", "parallel", "vectorized"] = "parallel"
+    postprocessing_backend: Literal["cpu", "gpu"] = "cpu"
+    idata_kwargs: dict[str, Any] | None = None
+    nuts_kwargs: dict[str, Any] | None = None
 
 
 class PymcFitArguments(BaseModel):
