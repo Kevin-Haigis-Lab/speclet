@@ -1,7 +1,7 @@
 """Cancer gene mutation matrix preparation."""
 
 from itertools import product
-from typing import Callable, overload
+from typing import overload
 
 import numpy as np
 import numpy.typing as npt
@@ -168,35 +168,20 @@ def _transform_to_data_pt_by_cancer_gene(
     return cg_mut_mat
 
 
-def _get_cell_lines_with_gene_mutated(
-    df: pd.DataFrame, gene: str, gene_col: str, cell_line_col: str, mut_col: str
-) -> set[str]:
-    """Get the cell lines with a mutation in a specific gene."""
-    return set(
-        df.query(f"`{gene_col}` == '{gene}' and `{mut_col}`")[cell_line_col].unique()
+def _map_genes_to_mutant_cell_lines(
+    data: pd.DataFrame,
+    gene_col: str,
+    cell_line_col: str,
+    mut_col: str,
+) -> dict[str, set[str]]:
+    """Create a dictionary mapping genes to cell lines where they are mutated."""
+    return (
+        data.copy()
+        .loc[data[mut_col], :][[gene_col, cell_line_col]]
+        .groupby(gene_col)
+        .apply(lambda x: x[cell_line_col].toset())
+        .to_dict()
     )
-
-
-def _get_cell_lines_with_gene_mutated_memo(
-    gene_col: str, cell_line_col: str, mut_col: str
-) -> Callable[[pd.DataFrame, str], set[str]]:
-    """Provides a memoized wrapper around `_get_cell_lines_with_gene_mutated()`."""
-    memory: dict[str, set[str]] = {}
-
-    def _memo_fxn(_df: pd.DataFrame, _gene: str) -> set[str]:
-        if _gene in memory:
-            return memory[_gene]
-        muts = _get_cell_lines_with_gene_mutated(
-            df=_df,
-            gene=_gene,
-            gene_col=gene_col,
-            cell_line_col=cell_line_col,
-            mut_col=mut_col,
-        )
-        memory[_gene] = muts
-        return muts
-
-    return _memo_fxn
 
 
 def _remove_comutation_collinearity(
@@ -212,14 +197,13 @@ def _remove_comutation_collinearity(
     mutation variable. This collinearity is always present for the cancer genes,
     themselves, and this is automatically handled here, too.
     """
-    _cell_lines_with_gene_mut = _get_cell_lines_with_gene_mutated_memo(
-        gene_col=gene_col, cell_line_col=cell_line_col, mut_col=mut_col
+    is_mutated_lookup = _map_genes_to_mutant_cell_lines(
+        data, gene_col=gene_col, cell_line_col=cell_line_col, mut_col=mut_col
     )
-
     for i, cg in enumerate(cancer_gene_mut_mat.coords["cancer_gene"].values):
-        cg_muts = _cell_lines_with_gene_mut(data, cg)
+        cg_muts = is_mutated_lookup.get(cg)
         for gene in data[gene_col].unique():
-            gene_muts = _cell_lines_with_gene_mut(data, gene)
+            gene_muts = is_mutated_lookup.get(gene)
             if cg_muts == gene_muts:
                 gene_idx = data[gene_col] == gene
                 cancer_gene_mut_mat[gene_idx, i] = 0
