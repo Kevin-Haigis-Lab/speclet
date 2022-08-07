@@ -1,5 +1,3 @@
-from itertools import product
-
 import arviz as az
 import numpy as np
 import pandas as pd
@@ -83,37 +81,6 @@ class TestSummarizePosteriorPredictions:
             observed_y="y",
         )
         assert "error" in ppc_df.columns
-
-
-def test_extract_matrix_variable_indices() -> None:
-
-    n_i = 3
-    n_j = 4
-    i = list(range(n_i))
-    i_groups = np.array([f"i_{x}" for x in i])
-    j = list(range(n_j))
-    j_groups = np.array([f"j_{x}" for x in j])
-    var = [f"[{i},{j}]" for i, j in product(i, j)]
-    post_summary = pd.DataFrame({"index": var})
-
-    summary = azanal.extract_matrix_variable_indices(
-        post_summary,
-        col="index",
-        idx1=i_groups,
-        idx2=j_groups,
-        idx1name="i",
-        idx2name="j",
-    )
-
-    np.testing.assert_equal(
-        summary["i"].values.astype(str),
-        np.repeat(i_groups, int(len(summary) / len(i_groups))).astype(str),
-    )
-
-    np.testing.assert_equal(
-        summary["j"].values.astype(str),
-        np.tile(j_groups, int(len(summary) / len(j_groups))).astype(str),
-    )
 
 
 def test_get_hdi_colnames_from_az_summary(centered_eight_post: pd.DataFrame) -> None:
