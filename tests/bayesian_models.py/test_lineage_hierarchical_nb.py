@@ -4,7 +4,6 @@ import pytest
 from speclet.bayesian_models.lineage_hierarchical_nb import (
     LineageHierNegBinomModel as LHNBModel,
 )
-from speclet.modeling.pymc_helpers import get_variable_names
 
 
 @pytest.fixture
@@ -19,23 +18,22 @@ def crc_lhnb_model() -> LHNBModel:
     return LHNBModel(lineage="colorectal")
 
 
-def test_adjusting_to_number_of_screens(
+def test_raise_error_multiple_lineages(
     crc_data: pd.DataFrame, crc_lhnb_model: LHNBModel
 ) -> None:
-    crc_data["screen"] = ["broad"] * len(crc_data)
-    screen_params = ["sigma_p", "delta_p", "p"]
+    crc_data["lineage"] = (["colorectal", "bone"] * len(crc_data))[: len(crc_data)]
+    assert crc_data["lineage"].nunique() == 2
+    with pytest.raises(BaseException):
+        _ = crc_lhnb_model.pymc_model(crc_data)
+    return None
 
-    # Should drop the `p` variable.
-    model = crc_lhnb_model.pymc_model(crc_data)
-    for param in screen_params:
-        assert param not in get_variable_names(model)
 
-    # Should include the `p` variable.
-    crc_data["screen"] = (["sanger", "broad"] * len(crc_data))[: len(crc_data)]
-    model = LHNBModel(lineage="colorectal").pymc_model(crc_data)
-    for param in screen_params:
-        assert param in get_variable_names(model)
-
+def test_raise_error_wrong_lineage(
+    crc_data: pd.DataFrame, crc_lhnb_model: LHNBModel
+) -> None:
+    crc_data["lineage"] = ["bone"] * len(crc_data)
+    with pytest.raises(BaseException):
+        _ = crc_lhnb_model.pymc_model(crc_data)
     return None
 
 

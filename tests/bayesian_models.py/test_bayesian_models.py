@@ -6,6 +6,7 @@ import pandas as pd
 import pymc as pm
 import pymc.sampling_jax
 import pytest
+from pymc.backends.base import MultiTrace
 
 from speclet import bayesian_models as bayes
 from speclet.managers.data_managers import CrisprScreenDataManager
@@ -55,27 +56,30 @@ def test_all_bayesian_models_sample(
     model_obj = bayes.get_bayesian_model(bayesian_model)(
         **_model_kwargs(bayesian_model)
     )
-    n_draws = 103
+    n_draws = 3
 
     if bayesian_model is bayes.BayesianModel.LINEAGE_HIERARCHICAL_NB:
         valid_crispr_data = _modify_for_single_lineage(valid_crispr_data)
 
+    trace: az.InferenceData | MultiTrace | None = None
     if method is ModelFitMethod.PYMC_MCMC:
         with model_obj.pymc_model(data=valid_crispr_data):
             trace = pm.sample(
-                draws=n_draws, tune=100, cores=1, chains=1, return_inferencedata=True
+                draws=n_draws, tune=10, cores=1, chains=1, return_inferencedata=True
             )
     elif method is ModelFitMethod.PYMC_NUMPYRO:
         with model_obj.pymc_model(data=valid_crispr_data):
             trace = pymc.sampling_jax.sample_numpyro_nuts(
-                draws=n_draws, tune=100, chains=1
+                draws=n_draws, tune=10, chains=1
             )
     elif method is ModelFitMethod.PYMC_ADVI:
         with model_obj.pymc_model(data=valid_crispr_data):
-            approx = pm.fit(n=100)
+            approx = pm.fit(n=10)
             trace = pm.to_inference_data(trace=approx.sample(n_draws))
     else:
         assert_never(method)
 
     assert isinstance(trace, az.InferenceData)
-    assert trace["posterior"].coords.dims["draw"] == n_draws
+    posterior = trace.get("posterior")
+    assert posterior is not None
+    assert posterior.coords.dims["draw"] == n_draws
