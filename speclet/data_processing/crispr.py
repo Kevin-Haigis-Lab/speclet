@@ -438,6 +438,25 @@ _default_achilles_categorical_cols: Final[tuple[str, ...]] = (
 )
 
 
+def set_chromosome_categories(
+    data: pd.DataFrame, col: str, prefix: str = ""
+) -> pd.DataFrame:
+    """Set the categories for a chromosome column.
+
+    Args:
+        data (pd.DataFrame): Data frame.
+        col (str): Column with chromosome names.
+        prefix (str, optional): Prefix for the chromosome names (e.g. "chr"). Defaults
+        to "".
+
+    Returns:
+        pd.DataFrame: Modified data frame.
+    """
+    chrom_categories = [prefix + str(i) for i in range(1, 23)] + ["X"]
+    data[col] = data[col].cat.set_categories(chrom_categories)
+    return data
+
+
 def set_achilles_categorical_columns(
     data: pd.DataFrame,
     cols: Iterable[str] = _default_achilles_categorical_cols,
@@ -465,7 +484,7 @@ def set_achilles_categorical_columns(
     for col in cols:
         if col not in data.columns:
             continue
-        if skip_if_cat and data[col].dtype.name == "category":
+        if skip_if_cat and data[col].dtype == "category":
             continue
         data = data.astype({col: str}).pipe(
             dphelp.make_cat, col=col, ordered=ordered, sort_cats=sort_cats

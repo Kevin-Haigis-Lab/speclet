@@ -9,7 +9,10 @@ import pandas as pd
 import pandera as pa
 from pandera import Column, DataFrameSchema
 
-from speclet.data_processing.crispr import set_achilles_categorical_columns
+from speclet.data_processing.crispr import (
+    set_achilles_categorical_columns,
+    set_chromosome_categories,
+)
 from speclet.data_processing.validation import (
     check_between,
     check_finite,
@@ -193,7 +196,9 @@ class CrisprScreenDataManager:
     # ---- Transformations ----
 
     def _apply_default_transformations(self, data: pd.DataFrame) -> pd.DataFrame:
-        return set_achilles_categorical_columns(data, ordered=True, sort_cats=True)
+        return set_achilles_categorical_columns(
+            data, ordered=True, sort_cats=True
+        ).pipe(set_chromosome_categories, "sgrna_target_chr")
 
     def add_transformation(
         self, fxn: data_transformation | list[data_transformation]

@@ -21,9 +21,11 @@ from speclet.data_processing.crispr import (
     data_batch_indices,
     grouped_copy_number_transform,
     set_achilles_categorical_columns,
+    set_chromosome_categories,
     zscale_rna_expression_by_gene,
 )
 from speclet.data_processing.validation import (
+    check_chromosome_category_order,
     check_finite,
     check_nonnegative,
     check_single_unique_value,
@@ -161,12 +163,19 @@ class LineageHierNegBinomModel:
                 "copy_number": Column(
                     float, checks=[check_nonnegative(), check_finite()]
                 ),
-                "rna_expr": Column(float, nullable=False),
+                "rna_expr": Column(
+                    float, nullable=False, checks=[check_nonnegative(), check_finite()]
+                ),
                 "z_rna_gene": Column(float, checks=[check_finite()]),
                 "cn_gene": Column(float, checks=[check_finite()]),
                 "cn_cell_line": Column(float, checks=[check_finite()]),
                 "is_mutated": Column(bool, nullable=False),
                 "screen": Column("category", nullable=False),
+                "sgrna_target_chr": Column(
+                    "category",
+                    nullable=False,
+                    checks=[check_chromosome_category_order()],
+                ),
             }
         )
 
@@ -331,6 +340,7 @@ class LineageHierNegBinomModel:
             .pipe(append_total_read_counts)
             .pipe(add_useful_read_count_columns)
             .pipe(set_achilles_categorical_columns, sort_cats=True, skip_if_cat=False)
+            .pipe(set_chromosome_categories, col="sgrna_target_chr")
             .pipe(self.validate_data)
         )
         final_size = data.shape[0]
