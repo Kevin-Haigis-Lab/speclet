@@ -3,6 +3,7 @@
 """Summarize a model's posterior sample."""
 
 import json
+from inspect import getdoc
 from pathlib import Path
 
 import arviz as az
@@ -12,7 +13,7 @@ from typer import Typer
 
 from speclet import model_configuration as model_config
 from speclet.analysis.arviz_analysis import describe_mcmc
-from speclet.bayesian_models import get_bayesian_model
+from speclet.bayesian_models import BayesianModelProtocol, get_bayesian_model
 from speclet.cli import cli_helpers
 from speclet.loggers import logger
 from speclet.managers.cache_manager import (
@@ -36,6 +37,7 @@ def _hdi_prob() -> float:
 
 def _posterior_description(
     diagnostic_path: Path,
+    model: BayesianModelProtocol,
     name: str,
     config: BayesianModelConfiguration,
     trace: az.InferenceData,
@@ -44,7 +46,14 @@ def _posterior_description(
     output = ""
     br = "\n\n" + "-" * 80 + "\n\n"
 
-    output += f"name: '{name}'\n"
+    model_doc = getdoc(model)
+    if model_doc is None:
+        model_doc = "(None)"
+
+    output += f"config. name: '{name}'\n"
+    output += f"model name: '{type(model).__name__}'\n"
+    output += f"model version: '{model.version}'\n"
+    output += f"model description: {model_doc}"
     output += f"fit method: '{fit_method.value}'"
 
     output += br
@@ -55,15 +64,23 @@ def _posterior_description(
 
     output += br
 
-    logger.info("Recording posterior.")
-    output += "POSTERIOR\n\n"
-    output += str(trace.posterior)
+    if (posterior := trace.get("posterior")) is not None:
+        logger.info("Recording posterior.")
+        output += "POSTERIOR\n\n"
+        output += str(posterior)
+    else:
+        logger.warning("No posterior found.")
+        output += "(No posterior found.)"
 
     output += br
 
-    logger.info("Recording sample stats.")
-    output += "SAMPLE STATS\n\n"
-    output += str(trace.sample_stats)
+    if (sample_stats := trace.get("sample_stats")) is not None:
+        logger.info("Recording sample stats.")
+        output += "SAMPLE STATS\n\n"
+        output += str(sample_stats)
+    else:
+        logger.warning("No sampling stats found.")
+        output += "(No sampling stats found.)"
 
     output += br
 
@@ -168,7 +185,12 @@ def summarize_posterior(
     trace = get_cached_posterior(id=cache_name, cache_dir=cache_dir)
 
     _posterior_description(
-        description_path, name=name, config=config, trace=trace, fit_method=fit_method
+        description_path,
+        model=model,
+        name=name,
+        config=config,
+        trace=trace,
+        fit_method=fit_method,
     )
     _posterior_summary(
         posterior_summary_path, trace=trace, vars_regex=model.vars_regex(fit_method)
