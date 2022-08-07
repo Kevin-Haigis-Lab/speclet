@@ -1,7 +1,6 @@
 """Functions to aid in the analysis of ArviZ posterior data."""
 
 import datetime
-import re
 from typing import Any, Sequence
 
 import arviz as az
@@ -43,61 +42,6 @@ def extract_coords_param_names(
     for j, name in enumerate(names):
         post_summ[name] = coords_ary[:, j]
     return post_summ
-
-
-def extract_matrix_variable_indices(
-    d: pd.DataFrame,
-    col: str,
-    idx1: np.ndarray,
-    idx2: np.ndarray,
-    idx1name: str,
-    idx2name: str,
-) -> pd.DataFrame:
-    """Extract and annotating matrix (2D only) indices.
-
-    Args:
-        d (pd.DataFrame): The data frame produced by summarizing the posteriors of a
-          PyMC3 model.
-        col (str): The column with the 2D indices.
-        idx1 (np.ndarray): The values to use for the first index.
-        idx2 (np.ndarray): The values to use for the second index.
-        idx1name (str): The name to give the first index.
-        idx2name (str): The name to give the second index.
-
-    Returns:
-        pd.DataFrame: The modified data frame.
-    """
-    indices_list = [
-        [int(x) for x in re.findall("[0-9]+", s)] for s in d[[col]].to_numpy().flatten()
-    ]
-    indices_array = np.asarray(indices_list)
-    d[idx1name] = idx1[indices_array[:, 0]]
-    d[idx2name] = idx2[indices_array[:, 1]]
-    return d
-
-
-def extract_matrix_variable_coords(
-    d: pd.DataFrame, col: str, idx1name: str, idx2name: str
-) -> pd.DataFrame:
-    """Extract coordinates from the parameter names for matrix variables.
-
-    Args:
-        d (pd.DataFrame): Summary data frame.
-        col (str): Column containing the parameter names.
-        idx1name (str): Name for the first index.
-        idx2name (str): Name for the second index.
-
-    Returns:
-        pd.DataFrame: Modified data frame with the two new columns.
-    """
-    d[idx1name] = [re.findall(r"(?<=\[).+(?=,)", x)[0].strip() for x in d[col]]
-    d[idx2name] = [re.findall(r"(?<=, ).+(?=\])", x)[0].strip() for x in d[col]]
-    return d
-
-
-def _reshape_mcmc_chains_to_2d(a: np.ndarray) -> np.ndarray:
-    z = a.shape[2]
-    return a.reshape(1, -1, z).squeeze()
 
 
 def summarize_posterior_predictions(
@@ -160,11 +104,17 @@ def get_hdi_colnames_from_az_summary(df: pd.DataFrame) -> tuple[str, str]:
     return cols[0], cols[1]
 
 
-def _pretty_bfmi(data: az.InferenceData, decimals: int = 3) -> list[str]:
-    return np.round(az.bfmi(data), decimals).astype(str).tolist()
+def _get_average_sample_stat(data: az.InferenceData, name: str) -> list[float] | None:
+    sample_stat = data.get("sample_stats")
+    if sample_stat is None:
+        return None
+    values = sample_stat.get(name)
+    if values is None:
+        return None
+    return values.mean(dim="draw").values.tolist()
 
 
-def get_average_step_size(data: az.InferenceData) -> list[float]:
+def get_average_step_size(data: az.InferenceData) -> list[float] | None:
     """Get the average step size for each chain of MCMC.
 
     Args:
@@ -175,14 +125,19 @@ def get_average_step_size(data: az.InferenceData) -> list[float]:
     """
     possible_names = ["step_size", "stepsize"]
     for stat_name in possible_names:
-        step_sizes = data["sample_stats"].get(stat_name)
-        if step_sizes is not None:
-            return step_sizes.mean(axis=1).values.tolist()
-    raise AttributeError("Could not find the step size values for posterior object.")
+        if (res := _get_average_sample_stat(data, stat_name)) is not None:
+            return res
+    return None
 
 
-def _pretty_step_size(data: az.InferenceData, decimals: int = 3) -> list[str]:
-    return np.round(get_average_step_size(data), decimals).astype(str).tolist()
+def get_average_tree_depth(data: az.InferenceData) -> list[float] | None:
+    """Get the average tree depth if available."""
+    return _get_average_sample_stat(data, "tree_depth")
+
+
+def get_average_acceptance_prob(data: az.InferenceData) -> list[float] | None:
+    """Get the average acceptance probability if available."""
+    return _get_average_sample_stat(data, "acceptance_rate")
 
 
 def get_divergences(data: az.InferenceData) -> np.ndarray:
@@ -225,6 +180,8 @@ class MCMCDescription(BaseModel):
     pct_divergences: list[float]
     bfmi: list[float]
     avg_step_size: list[float] | None
+    avg_accept_prob: list[float] | None
+    avg_tree_depth: list[float] | None
 
     def _pretty_list(self, vals: Sequence[int | float], round: int = 3) -> str:
         return ", ".join(np.round(vals, round).astype(str).tolist())
@@ -255,6 +212,20 @@ class MCMCDescription(BaseModel):
             messages.append("avg. step size: unknown")
         else:
             messages.append(f"avg. step size: {self._pretty_list(self.avg_step_size)}")
+
+        if self.avg_accept_prob is None:
+            messages.append("avg. accept prob.: unknown")
+        else:
+            messages.append(
+                f"avg. accept prob.: {self._pretty_list(self.avg_accept_prob)}"
+            )
+
+        if self.avg_tree_depth is None:
+            messages.append("avg. tree depth: unknown")
+        else:
+            messages.append(
+                f"avg. tree depth: {self._pretty_list(self.avg_tree_depth)}"
+            )
         return "\n".join(messages)
 
 
@@ -287,24 +258,19 @@ def describe_mcmc(
         raise AttributeError("`sample_stats` attribute is not of type `xarray.Dataset`")
 
     # Date and duration.
-    created_at = sample_stats.get("created_at")
+    created_at = getattr(sample_stats, "created_at", None)
     duration: datetime.timedelta | None = None
-    if (duration_sec := sample_stats.get("sampling_time")) is not None:
+
+    if (duration_sec := getattr(sample_stats, "sampling_time", None)) is not None:
         duration = datetime.timedelta(seconds=duration_sec)
 
     # Sampling dimensions
-    n_tuning_steps: int | None = sample_stats.get("tuning_steps")
+    n_tuning_steps: int | None = getattr(sample_stats, "tuning_steps", None)
     n_draws: int = len(sample_stats.draw)
     n_chains: int = len(sample_stats.chain)
 
     # Divergences
     n_divergences, pct_divergences = get_divergence_summary(data)
-
-    # BFMI.
-    bfmi = az.bfmi(data).tolist()
-
-    # Average step size.
-    avg_step_size = get_average_step_size(data)
 
     mcmc_descr = MCMCDescription(
         created=created_at,
@@ -314,8 +280,10 @@ def describe_mcmc(
         n_draws=n_draws,
         n_divergences=n_divergences,
         pct_divergences=pct_divergences,
-        bfmi=bfmi,
-        avg_step_size=avg_step_size,
+        bfmi=az.bfmi(data).tolist(),
+        avg_step_size=get_average_step_size(data),
+        avg_accept_prob=get_average_acceptance_prob(data),
+        avg_tree_depth=get_average_tree_depth(data),
     )
 
     if not silent:

@@ -29,7 +29,7 @@ from matplotlib.lines import Line2D
 
 
 ```python
-from speclet.analysis.arviz_analysis import extract_coords_param_names
+from speclet.analysis.arviz_analysis import describe_mcmc, extract_coords_param_names
 from speclet.bayesian_models.lineage_hierarchical_nb import LineageHierNegBinomModel
 from speclet.data_processing.common import head_tail
 from speclet.io import DataFile, data_path
@@ -184,35 +184,35 @@ df.groupby("dist").describe()
     <tr>
       <th>Exp(1)</th>
       <td>2000.0</td>
-      <td>0.987511</td>
-      <td>0.941098</td>
-      <td>0.001320</td>
-      <td>0.282469</td>
-      <td>0.702319</td>
-      <td>1.413113</td>
-      <td>7.314379</td>
+      <td>1.004431</td>
+      <td>1.002062</td>
+      <td>0.000989</td>
+      <td>0.299602</td>
+      <td>0.715611</td>
+      <td>1.370826</td>
+      <td>8.855657</td>
     </tr>
     <tr>
       <th>Exp(2)</th>
       <td>2000.0</td>
-      <td>0.494138</td>
-      <td>0.494454</td>
-      <td>0.000304</td>
-      <td>0.148168</td>
-      <td>0.343012</td>
-      <td>0.690708</td>
-      <td>4.301374</td>
+      <td>0.501384</td>
+      <td>0.499321</td>
+      <td>0.000121</td>
+      <td>0.151409</td>
+      <td>0.338179</td>
+      <td>0.699095</td>
+      <td>4.200122</td>
     </tr>
     <tr>
       <th>Exp(5)</th>
       <td>2000.0</td>
-      <td>0.199270</td>
-      <td>0.203034</td>
-      <td>0.000039</td>
-      <td>0.059844</td>
-      <td>0.135940</td>
-      <td>0.270201</td>
-      <td>1.889470</td>
+      <td>0.202095</td>
+      <td>0.200053</td>
+      <td>0.000083</td>
+      <td>0.060100</td>
+      <td>0.140224</td>
+      <td>0.275023</td>
+      <td>1.403199</td>
     </tr>
   </tbody>
 </table>
@@ -333,46 +333,46 @@ df.groupby("dist").describe()
     <tr>
       <th>HN(0, 0.1)</th>
       <td>2000.0</td>
-      <td>0.078773</td>
-      <td>0.058920</td>
-      <td>0.000238</td>
-      <td>0.032667</td>
-      <td>0.067093</td>
-      <td>0.113422</td>
-      <td>0.321725</td>
+      <td>0.080161</td>
+      <td>0.060702</td>
+      <td>0.000063</td>
+      <td>0.033607</td>
+      <td>0.066828</td>
+      <td>0.114782</td>
+      <td>0.429192</td>
     </tr>
     <tr>
       <th>HN(0, 0.2)</th>
       <td>2000.0</td>
-      <td>0.161141</td>
-      <td>0.121962</td>
-      <td>0.000011</td>
-      <td>0.064464</td>
-      <td>0.136247</td>
-      <td>0.232477</td>
-      <td>0.766230</td>
+      <td>0.162718</td>
+      <td>0.123182</td>
+      <td>0.000160</td>
+      <td>0.064127</td>
+      <td>0.139831</td>
+      <td>0.238404</td>
+      <td>0.739642</td>
     </tr>
     <tr>
       <th>HN(0, 0.5)</th>
       <td>2000.0</td>
-      <td>0.389072</td>
-      <td>0.294415</td>
-      <td>0.000019</td>
-      <td>0.159532</td>
-      <td>0.327502</td>
-      <td>0.547573</td>
-      <td>1.875374</td>
+      <td>0.406164</td>
+      <td>0.305111</td>
+      <td>0.000417</td>
+      <td>0.163468</td>
+      <td>0.348269</td>
+      <td>0.580013</td>
+      <td>1.844951</td>
     </tr>
     <tr>
       <th>HN(0, 1.0)</th>
       <td>2000.0</td>
-      <td>0.783566</td>
-      <td>0.582628</td>
-      <td>0.000333</td>
-      <td>0.326765</td>
-      <td>0.670526</td>
-      <td>1.130155</td>
-      <td>3.364777</td>
+      <td>0.795054</td>
+      <td>0.602840</td>
+      <td>0.000103</td>
+      <td>0.329332</td>
+      <td>0.677567</td>
+      <td>1.140364</td>
+      <td>4.406250</td>
     </tr>
   </tbody>
 </table>
@@ -510,57 +510,57 @@ df.groupby("dist").describe()
     <tr>
       <th>eta=1</th>
       <td>2000.0</td>
-      <td>-0.020639</td>
-      <td>0.577520</td>
-      <td>-0.997240</td>
-      <td>-0.521119</td>
-      <td>-0.036630</td>
-      <td>0.488077</td>
-      <td>0.998603</td>
+      <td>-0.004073</td>
+      <td>0.583182</td>
+      <td>-0.999269</td>
+      <td>-0.521883</td>
+      <td>-0.017886</td>
+      <td>0.512324</td>
+      <td>0.999830</td>
     </tr>
     <tr>
       <th>eta=2</th>
       <td>2000.0</td>
-      <td>0.007028</td>
-      <td>0.449241</td>
-      <td>-0.985251</td>
-      <td>-0.351010</td>
-      <td>0.019441</td>
-      <td>0.353885</td>
-      <td>0.989104</td>
+      <td>0.001007</td>
+      <td>0.453277</td>
+      <td>-0.972660</td>
+      <td>-0.343626</td>
+      <td>-0.000968</td>
+      <td>0.348912</td>
+      <td>0.996988</td>
     </tr>
     <tr>
       <th>eta=3</th>
       <td>2000.0</td>
-      <td>0.004810</td>
-      <td>0.379125</td>
-      <td>-0.929154</td>
-      <td>-0.277673</td>
-      <td>0.016175</td>
-      <td>0.285917</td>
-      <td>0.930181</td>
+      <td>0.002012</td>
+      <td>0.382143</td>
+      <td>-0.964944</td>
+      <td>-0.289725</td>
+      <td>0.003653</td>
+      <td>0.296475</td>
+      <td>0.964445</td>
     </tr>
     <tr>
       <th>eta=4</th>
       <td>2000.0</td>
-      <td>0.006035</td>
-      <td>0.323950</td>
-      <td>-0.903282</td>
-      <td>-0.231161</td>
-      <td>0.008042</td>
-      <td>0.241769</td>
-      <td>0.866332</td>
+      <td>0.012468</td>
+      <td>0.327537</td>
+      <td>-0.884178</td>
+      <td>-0.229669</td>
+      <td>0.019025</td>
+      <td>0.255508</td>
+      <td>0.923625</td>
     </tr>
     <tr>
       <th>eta=5</th>
       <td>2000.0</td>
-      <td>-0.003324</td>
-      <td>0.301282</td>
-      <td>-0.858675</td>
-      <td>-0.223390</td>
-      <td>0.006455</td>
-      <td>0.211751</td>
-      <td>0.837248</td>
+      <td>-0.008338</td>
+      <td>0.306484</td>
+      <td>-0.894606</td>
+      <td>-0.231391</td>
+      <td>-0.004932</td>
+      <td>0.206752</td>
+      <td>0.868661</td>
     </tr>
   </tbody>
 </table>
@@ -575,6 +575,22 @@ df.groupby("dist").describe()
 from speclet.bayesian_models.lineage_hierarchical_nb import LineageHierNegBinomModel
 ```
 
+    [autoreload of speclet.bayesian_models.lineage_hierarchical_nb failed: Traceback (most recent call last):
+      File "/usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.10/site-packages/IPython/extensions/autoreload.py", line 257, in check
+        superreload(m, reload, self.old_objects)
+      File "/usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.10/site-packages/IPython/extensions/autoreload.py", line 480, in superreload
+        update_generic(old_obj, new_obj)
+      File "/usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.10/site-packages/IPython/extensions/autoreload.py", line 377, in update_generic
+        update(a, b)
+      File "/usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.10/site-packages/IPython/extensions/autoreload.py", line 345, in update_class
+        update_instances(old, new)
+      File "/usr/local/Caskroom/miniconda/base/envs/speclet/lib/python3.10/site-packages/IPython/extensions/autoreload.py", line 303, in update_instances
+        ref.__class__ = new
+      File "pydantic/main.py", line 357, in pydantic.main.BaseModel.__setattr__
+    ValueError: "LineageHierNegBinomModelConfig" object has no field "__class__"
+    ]
+
+
 
 ```python
 crc_model = LineageHierNegBinomModel(
@@ -584,14 +600,14 @@ valid_crc_data = crc_model.data_processing_pipeline(crc_data.copy())
 model_crc_data = crc_model.make_data_structure(valid_crc_data.copy())
 ```
 
-    [INFO] 2022-08-05 14:12:07 [(lineage_hierarchical_nb.py:data_processing_pipeline:285] Processing data for modeling.
-    [INFO] 2022-08-05 14:12:07 [(lineage_hierarchical_nb.py:data_processing_pipeline:286] LFC limits: (-5.0, 5.0)
-    [WARNING] 2022-08-05 14:12:07 [(lineage_hierarchical_nb.py:data_processing_pipeline:337] number of data points dropped: 0
-    [INFO] 2022-08-05 14:12:08 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:534] number of genes mutated in all cells lines: 1
-    [DEBUG] 2022-08-05 14:12:08 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:537] Genes always mutated: APC
-    [DEBUG] 2022-08-05 14:12:08 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:68] all_mut: {}
-    [INFO] 2022-08-05 14:12:08 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 2 cancer genes.
-    [DEBUG] 2022-08-05 14:12:08 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:79] Dropped cancer genes: ['APC', 'MDM2']
+    [INFO] 2022-08-07 09:01:54 [(lineage_hierarchical_nb.py:data_processing_pipeline:287] Processing data for modeling.
+    [INFO] 2022-08-07 09:01:54 [(lineage_hierarchical_nb.py:data_processing_pipeline:288] LFC limits: (-5.0, 5.0)
+    [WARNING] 2022-08-07 09:01:55 [(lineage_hierarchical_nb.py:data_processing_pipeline:339] number of data points dropped: 0
+    [INFO] 2022-08-07 09:01:55 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:536] number of genes mutated in all cells lines: 1
+    [DEBUG] 2022-08-07 09:01:55 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:539] Genes always mutated: APC
+    [DEBUG] 2022-08-07 09:01:55 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:68] all_mut: {}
+    [INFO] 2022-08-07 09:01:55 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 2 cancer genes.
+    [DEBUG] 2022-08-07 09:01:55 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:79] Dropped cancer genes: ['APC', 'MDM2']
 
 
 
@@ -608,35 +624,49 @@ model_crc_data.coords["cancer_gene"]
 
 
 ```python
+m = model_crc_data.comutation_matrix
+m.min(axis=0), m.max(axis=0)
+```
+
+
+
+
+    (array([-0.77077619, -0.9938461 , -0.77077619]),
+     array([1.29739347, 1.00619201, 1.29739347]))
+
+
+
+
+```python
 crc_pymc_model = crc_model.pymc_model(crispr_data_manager.data.copy())
 pm.model_to_graphviz(crc_pymc_model)
 ```
 
-    [INFO] 2022-08-05 14:13:09 [(lineage_hierarchical_nb.py:data_processing_pipeline:285] Processing data for modeling.
-    [INFO] 2022-08-05 14:13:09 [(lineage_hierarchical_nb.py:data_processing_pipeline:286] LFC limits: (-5.0, 5.0)
-    [WARNING] 2022-08-05 14:13:10 [(lineage_hierarchical_nb.py:data_processing_pipeline:337] number of data points dropped: 0
-    [INFO] 2022-08-05 14:13:10 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:534] number of genes mutated in all cells lines: 1
-    [DEBUG] 2022-08-05 14:13:10 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:537] Genes always mutated: APC
-    [DEBUG] 2022-08-05 14:13:10 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:68] all_mut: {}
-    [INFO] 2022-08-05 14:13:10 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 2 cancer genes.
-    [DEBUG] 2022-08-05 14:13:10 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:79] Dropped cancer genes: ['APC', 'MDM2']
-    [INFO] 2022-08-05 14:13:11 [(lineage_hierarchical_nb.py:_pre_model_messages:341] Lineage: colorectal
-    [INFO] 2022-08-05 14:13:11 [(lineage_hierarchical_nb.py:_pre_model_messages:342] Number of genes: 103
-    [INFO] 2022-08-05 14:13:11 [(lineage_hierarchical_nb.py:_pre_model_messages:343] Number of sgRNA: 162
-    [INFO] 2022-08-05 14:13:11 [(lineage_hierarchical_nb.py:_pre_model_messages:344] Number of cell lines: 8
-    [INFO] 2022-08-05 14:13:11 [(lineage_hierarchical_nb.py:_pre_model_messages:345] Number of cancer genes: 3
-    [INFO] 2022-08-05 14:13:11 [(lineage_hierarchical_nb.py:_pre_model_messages:346] Number of screens: 1
-    [INFO] 2022-08-05 14:13:11 [(lineage_hierarchical_nb.py:_pre_model_messages:347] Number of data points: 1296
-    [INFO] 2022-08-05 14:13:11 [(lineage_hierarchical_nb.py:_pre_model_messages:352] Including all non-essential deterministic variables.
-    [DEBUG] 2022-08-05 14:13:11 [(lineage_hierarchical_nb.py:pymc_model:388] shape of cancer gene matrix: (1296, 3)
-    [DEBUG] 2022-08-05 14:13:11 [(lineage_hierarchical_nb.py:pymc_model:403] location for `mu_mu_a`: 0.1523
+    [INFO] 2022-08-07 09:01:58 [(lineage_hierarchical_nb.py:data_processing_pipeline:287] Processing data for modeling.
+    [INFO] 2022-08-07 09:01:58 [(lineage_hierarchical_nb.py:data_processing_pipeline:288] LFC limits: (-5.0, 5.0)
+    [WARNING] 2022-08-07 09:01:59 [(lineage_hierarchical_nb.py:data_processing_pipeline:339] number of data points dropped: 0
+    [INFO] 2022-08-07 09:01:59 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:536] number of genes mutated in all cells lines: 1
+    [DEBUG] 2022-08-07 09:01:59 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:539] Genes always mutated: APC
+    [DEBUG] 2022-08-07 09:01:59 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:68] all_mut: {}
+    [INFO] 2022-08-07 09:01:59 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 2 cancer genes.
+    [DEBUG] 2022-08-07 09:01:59 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:79] Dropped cancer genes: ['APC', 'MDM2']
+    [INFO] 2022-08-07 09:02:00 [(lineage_hierarchical_nb.py:_pre_model_messages:343] Lineage: colorectal
+    [INFO] 2022-08-07 09:02:00 [(lineage_hierarchical_nb.py:_pre_model_messages:344] Number of genes: 103
+    [INFO] 2022-08-07 09:02:00 [(lineage_hierarchical_nb.py:_pre_model_messages:345] Number of sgRNA: 162
+    [INFO] 2022-08-07 09:02:00 [(lineage_hierarchical_nb.py:_pre_model_messages:346] Number of cell lines: 8
+    [INFO] 2022-08-07 09:02:00 [(lineage_hierarchical_nb.py:_pre_model_messages:347] Number of cancer genes: 3
+    [INFO] 2022-08-07 09:02:00 [(lineage_hierarchical_nb.py:_pre_model_messages:348] Number of screens: 1
+    [INFO] 2022-08-07 09:02:00 [(lineage_hierarchical_nb.py:_pre_model_messages:349] Number of data points: 1296
+    [INFO] 2022-08-07 09:02:00 [(lineage_hierarchical_nb.py:_pre_model_messages:354] Including all non-essential deterministic variables.
+    [DEBUG] 2022-08-07 09:02:00 [(lineage_hierarchical_nb.py:pymc_model:390] shape of cancer gene matrix: (1296, 3)
+    [DEBUG] 2022-08-07 09:02:00 [(lineage_hierarchical_nb.py:pymc_model:405] location for `mu_mu_a`: 0.1523
 
 
 
 
 
 
-![svg](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_22_1.svg)
+![svg](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_23_1.svg)
 
 
 
@@ -665,17 +695,17 @@ print(f"initial counts\n  min: {np.min(obs):,d},  max: {np.max(obs):,d}")
     prior predictive distribution
       0%: 0
       1%: 0
-      10%: 8
-      20%: 48
-      30%: 107
-      40%: 190
-      50%: 308
-      60%: 485
-      70%: 772
-      80%: 1,311
-      90%: 2,737
-      99%: 18,874
-      100%: 46,891,488
+      10%: 7
+      20%: 42
+      30%: 98
+      40%: 181
+      50%: 304
+      60%: 493
+      70%: 811
+      80%: 1,433
+      90%: 3,176
+      99%: 25,592
+      100%: 46,583,789
 
     final counts
       min: 0,  max: 9,819
@@ -709,7 +739,7 @@ plt.show()
 
 
 
-![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_24_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_25_0.png)
 
 
 
@@ -798,7 +828,7 @@ plt.show()
 
 
 
-![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_25_0.png)
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_26_0.png)
 
 
 
@@ -820,7 +850,7 @@ with crc_pymc_model:
 ```
 
     Compiling...
-    Compilation time =  0:00:16.416372
+    Compilation time =  0:00:23.104257
     Sampling...
 
 
@@ -840,9 +870,9 @@ with crc_pymc_model:
       0%|          | 0/1500 [00:00<?, ?it/s]
 
 
-    Sampling time =  0:02:01.515370
+    Sampling time =  0:02:25.782463
     Transforming variables...
-    Transformation time =  0:00:07.937862
+    Transformation time =  0:00:05.376335
 
 
 
@@ -869,7 +899,7 @@ with crc_pymc_model:
 
 <div>
   <progress value='2000' class='' max='2000' style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [2000/2000 00:03&lt;00:00]
+  100.00% [2000/2000 00:01&lt;00:00]
 </div>
 
 
@@ -883,22 +913,23 @@ saved_warmup = hasattr(trace, "warmup_sample_stats")
 
 
 ```python
-az.plot_energy(trace);
+describe_mcmc(trace);
 ```
 
+    date created: 2022-08-07 13:05
+    sampled 4 chains with (unknown) tuning steps and 500 draws
+    num. divergences: 0, 0, 0, 0
+    percent divergences: 0.0, 0.0, 0.0, 0.0
+    BFMI: 0.738, 0.736, 0.737, 0.727
+    avg. step size: 0.08, 0.074, 0.107, 0.091
+    avg. accept prob.: 0.87, 0.932, 0.849, 0.868
+    avg. tree depth: 6.0, 6.0, 5.002, 6.0
 
 
-![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_30_0.png)
 
 
+![png](050_simplify-single-lineage-model_files/050_simplify-single-lineage-model_31_1.png)
 
-
-```python
-divs = trace.sample_stats["diverging"].values.sum(axis=1)
-print(f"divergences: {divs}")
-```
-
-    divergences: [0 0 1 0]
 
 
 
@@ -941,7 +972,7 @@ plt.show()
 
 
 ```python
-stat_cats = ["energy", "step_size", "n_steps", "acceptance_rate"]
+stat_cats = ["energy", "step_size", "n_steps", "acceptance_rate", "tree_depth"]
 trace.sample_stats.get(stat_cats).to_dataframe().groupby("chain").mean().round(3)
 ```
 
@@ -970,9 +1001,11 @@ trace.sample_stats.get(stat_cats).to_dataframe().groupby("chain").mean().round(3
       <th>step_size</th>
       <th>n_steps</th>
       <th>acceptance_rate</th>
+      <th>tree_depth</th>
     </tr>
     <tr>
       <th>chain</th>
+      <th></th>
       <th></th>
       <th></th>
       <th></th>
@@ -982,31 +1015,35 @@ trace.sample_stats.get(stat_cats).to_dataframe().groupby("chain").mean().round(3
   <tbody>
     <tr>
       <th>0</th>
-      <td>10212.710</td>
-      <td>0.069</td>
+      <td>10201.482</td>
+      <td>0.080</td>
       <td>63.000</td>
-      <td>0.919</td>
+      <td>0.870</td>
+      <td>6.000</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>10203.462</td>
-      <td>0.042</td>
-      <td>127.000</td>
-      <td>0.953</td>
+      <td>10192.476</td>
+      <td>0.074</td>
+      <td>63.000</td>
+      <td>0.932</td>
+      <td>6.000</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>10209.039</td>
-      <td>0.104</td>
-      <td>55.282</td>
-      <td>0.867</td>
+      <td>10204.631</td>
+      <td>0.107</td>
+      <td>31.064</td>
+      <td>0.849</td>
+      <td>5.002</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>10208.635</td>
-      <td>0.044</td>
-      <td>127.000</td>
-      <td>0.914</td>
+      <td>10201.173</td>
+      <td>0.091</td>
+      <td>63.000</td>
+      <td>0.868</td>
+      <td>6.000</td>
     </tr>
   </tbody>
 </table>
@@ -1570,7 +1607,8 @@ dendro_ratio = (0.1, figsize[0] * 0.1 / figsize[1])
 cm = sns.clustermap(
     h_post_summary,
     z_score=None,
-    cmap="coolwarm",
+    cmap="seismic",
+    center=0,
     vmin=-vmax,
     vmax=vmax,
     figsize=figsize,
@@ -1685,7 +1723,7 @@ cg_mut_labels
 
 
 ```python
-pik3ca_hits = h_post_summary.sort_values("PIK3CA").query("PIK3CA > 0.5").index.tolist()
+pik3ca_hits = h_post_summary.sort_values("PIK3CA").query("PIK3CA > 0.3").index.tolist()
 
 pik3ca_hits_data = (
     crc_data.copy()
@@ -1825,7 +1863,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 7.59 minutes
+    execution time: 37.23 minutes
 
 
 
@@ -1834,7 +1872,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-08-05
+    Last updated: 2022-08-07
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -1852,14 +1890,14 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Git branch: simplify
 
-    numpy     : 1.23.1
-    arviz     : 0.12.1
     pymc      : 4.1.3
-    seaborn   : 0.11.2
-    plotnine  : 0.0.0
-    aesara    : 2.7.7
-    matplotlib: 3.5.2
+    arviz     : 0.12.1
+    numpy     : 1.23.1
     pandas    : 1.4.3
+    matplotlib: 3.5.2
+    plotnine  : 0.0.0
+    seaborn   : 0.11.2
+    aesara    : 2.7.7
 
 
 
