@@ -1,90 +1,3 @@
-
-# --- Hierarchical negative binomial model ---
-
-- name: hnb-small-data
-  description: "
-    Fit the model with a relatively small amount of data for testing purposes.
-  "
-  active: false
-  model: HIERARCHICAL_NB
-  data_file: DEPMAP_CRC_PANC_ESO_SUBSAMPLE
-  sampling_kwargs:
-    pymc_mcmc:
-      target_accept: 0.99
-      init: "adapt_diag"
-    pymc_numpyro:
-      target_accept: 0.99
-  slurm_resources:
-    PYMC_MCMC:
-      mem: 64
-      time: 48
-      cores: 1
-    PYMC_NUMPYRO:
-      mem: 64
-      time: 48
-      cores: 1
-
-- name: hnb-small-data_v2
-  description: "
-    Fit the model with a relatively small amount of data for testing purposes.
-    Changes from v1:
-      - only use Broad data and remove the screen batch effect `p`
-      - reduce the width of the prior for `z`
-      - replace priors on `sigma_*` with `HalfNormal(0, 1)`
-      - reduce target_accept to 0.98 to help with searching of posterior space
-      - update O2 resources based on past performance
-  "
-  active: false
-  model: HIERARCHICAL_NB
-  data_file: DEPMAP_CRC_PANC_ESO_SUBSAMPLE
-  sampling_kwargs:
-    pymc_mcmc:
-      target_accept: 0.98
-      init: "adapt_diag"
-    pymc_numpyro:
-      target_accept: 0.98
-  slurm_resources:
-    PYMC_MCMC:
-      mem: 16
-      time: 48
-      cores: 1
-    PYMC_NUMPYRO:
-      mem: 28
-      time: 32
-      cores: 1
-
-- name: hnb-largesub-data
-  description: "
-    Fit the model with a larger subs-sample of the full data set.
-    Notable features (compared to `hnb-small-data_v2`):
-      - (still) only use Broad data and remove the screen batch effect `p`
-      - widen the priors on `sigma_*` with `HalfNormal(0, 2.5)`
-      - reduce the number of tuning steps and increase the number of draws
-  "
-  active: false
-  model: HIERARCHICAL_NB
-  data_file: DEPMAP_CRC_PANC_ESO_LARGE_SUBSAMPLE
-  sampling_kwargs:
-    pymc_mcmc:
-      draws: 2000
-      tune: 700
-      target_accept: 0.98
-      init: "adapt_diag"
-    pymc_numpyro:
-      draws: 2000
-      tune: 700
-      target_accept: 0.98
-  slurm_resources:
-    PYMC_MCMC:
-      mem: 64
-      time: 200
-      cores: 1
-    PYMC_NUMPYRO:
-      mem: 72
-      time: 200
-      cores: 1
-
-
 # --- Single-lineage models ---
 
 - name: hnb-single-lineage-CRC-subsample
@@ -115,13 +28,12 @@
 - name: hnb-single-lineage-prostate-007
   description: "
     Single lineage hierarchical negative binomial model for prostate data from the
-    Broad. Varying effect for cell line and varying effect for copy number per cell
-    line. This model also uses a different transformation for the copy number data. The
-    `max_tree_depth` is also increased with the intention to give the tuning process a
-    little more room to experiment with, but it should not be used as the tree depth for
-    the final draws.
+    Broad.
+
+    Varying effects for each chromosome of each cell line has been nested under the
+    existing varying effects for cell line.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_prostate.csv"
   model_kwargs:
@@ -129,7 +41,7 @@
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
-      tune: 1000
+      tune: 1500
       target_accept: 0.98
       idata_kwargs:
         log_likelihood: false
@@ -138,8 +50,8 @@
         max_tree_depth: 11
   slurm_resources:
     PYMC_NUMPYRO:
-      mem: 16
-      time: 3
+      mem: 32
+      time: 8
       cores: 1
       gpu:
         gpu: "RTX 8000"
