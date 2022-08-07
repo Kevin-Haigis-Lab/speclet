@@ -93,6 +93,8 @@ class LineageHierNegBinomModelConfig(BaseModel):
 class LineageHierNegBinomModel:
     """A hierarchical negative binomial generalized linear model fora single lineage."""
 
+    version: str = "0.0.3"
+
     def __init__(self, **kwargs: Any) -> None:
         """Single-lineage hierarchical negative binominal model.
 

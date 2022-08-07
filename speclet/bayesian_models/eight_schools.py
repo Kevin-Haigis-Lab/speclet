@@ -22,6 +22,8 @@ class SchoolsData:
 class EightSchoolsModel:
     """Classic eight-schools example model."""
 
+    version: str = "0.0.0.9000"
+
     def __init__(self, **kwargs: Any) -> None:
         """Classic eight-schools example model."""
         return None

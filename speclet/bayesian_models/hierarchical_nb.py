@@ -71,6 +71,8 @@ class HierarchicalNegativeBinomialConfig:
 class HierarchicalNegativeBinomialModel:
     """A hierarchical negative binomial generalized linear model."""
 
+    version: str = "0.0.1"
+
     def __init__(self, **kwargs: Any) -> None:
         """Create a negative binomial Bayesian model object."""
         self._config = HierarchicalNegativeBinomialConfig()
