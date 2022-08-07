@@ -181,7 +181,7 @@ rule sample_pymc_numpyro:
     benchmark:
         BENCHMARK_DIR / "sample_pymc_mcmc/{model_name}_chain{chain}.tsv"
     priority: 30
-    retries: 3
+    retries: 1
     shell:
         get_aesara_flags("{wildcards.model_name}_{wildcards.chain}_mcmc") + " "
         "speclet/cli/fit_bayesian_model_cli.py"
