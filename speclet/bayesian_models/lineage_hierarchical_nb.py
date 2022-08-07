@@ -17,9 +17,11 @@ from speclet.data_processing.common import get_cats
 from speclet.data_processing.crispr import (
     add_useful_read_count_columns,
     append_total_read_counts,
+    chromosome_indices,
     common_indices,
     data_batch_indices,
     grouped_copy_number_transform,
+    make_chromosome_cellline_column,
     set_achilles_categorical_columns,
     set_chromosome_categories,
     zscale_rna_expression_by_gene,
@@ -63,21 +65,26 @@ class LineageHierNegBinomModelData:
     C: int  # number of cell lines
     SC: int  # number of screens
     CG: int  # number of cancer genes
-    ct_initial: npt.NDArray[np.float32]
-    ct_final: npt.NDArray[np.int32]
-    sgrna_idx: npt.NDArray[np.int32]
-    gene_idx: npt.NDArray[np.int32]
-    sgrna_to_gene_idx: npt.NDArray[np.int32]
-    cellline_idx: npt.NDArray[np.int32]
-    screen_idx: npt.NDArray[np.int32]
-    copy_number: npt.NDArray[np.float32]
-    copy_number_gene: npt.NDArray[np.float32]
-    copy_number_cell: npt.NDArray[np.float32]
-    log_rna_expr: npt.NDArray[np.float32]
-    z_log_rna_gene: npt.NDArray[np.float32]
-    m_log_rna_gene: npt.NDArray[np.float32]
-    is_mutated: npt.NDArray[np.int32]
-    comutation_matrix: npt.NDArray[np.int32]
+    CHROM: int  # number of chromosomes
+    ct_initial: npt.NDArray[np.float64]
+    ct_final: npt.NDArray[np.int64]
+    sgrna_idx: npt.NDArray[np.int64]
+    gene_idx: npt.NDArray[np.int64]
+    sgrna_to_gene_idx: npt.NDArray[np.int64]
+    sgrna_to_gene_map: pd.DataFrame
+    cellline_chromosome_idx: npt.NDArray[np.int64]
+    cellline_idx: npt.NDArray[np.int64]
+    chromosome_to_cellline_idx: npt.NDArray[np.int64]
+    chromosome_to_cellline_map: pd.DataFrame
+    screen_idx: npt.NDArray[np.int64]
+    copy_number: npt.NDArray[np.float64]
+    copy_number_gene: npt.NDArray[np.float64]
+    copy_number_cell: npt.NDArray[np.float64]
+    log_rna_expr: npt.NDArray[np.float64]
+    z_log_rna_gene: npt.NDArray[np.float64]
+    m_log_rna_gene: npt.NDArray[np.float64]
+    is_mutated: npt.NDArray[np.int64]
+    comutation_matrix: npt.NDArray[np.int64]
     coords: dict[str, list[str]]
 
 
@@ -156,7 +163,13 @@ class LineageHierNegBinomModel:
                         Check(check_unique_groups, groupby="sgrna"),
                     ],
                 ),
-                "depmap_id": Column("category"),
+                "depmap_id": Column(
+                    "category",
+                    checks=[
+                        # A "cell line-chromosome" maps to a single cell line.
+                        Check(check_unique_groups, groupby="cell_chrom"),
+                    ],
+                ),
                 "lineage": Column(
                     "category", checks=[check_single_unique_value(self.lineage)]
                 ),
@@ -176,6 +189,7 @@ class LineageHierNegBinomModel:
                     nullable=False,
                     checks=[check_chromosome_category_order()],
                 ),
+                "cell_chrom": Column("category", nullable=False),
             }
         )
 
@@ -215,6 +229,7 @@ class LineageHierNegBinomModel:
             "cell_line": get_cats(valid_data, "depmap_id"),
             "screen": get_cats(valid_data, "screen"),
             "cancer_gene": cancer_genes,
+            "cell_chrom": get_cats(valid_data, "cell_chrom"),
             "one": ["1"],
         }
 
@@ -223,6 +238,9 @@ class LineageHierNegBinomModel:
         # Indices
         indices = common_indices(data)
         batch_indices = data_batch_indices(data)
+        chrom_indices = chromosome_indices(
+            data, cell_chrom_col="cell_chrom", cell_line_col="depmap_id"
+        )
 
         # Cancer genes and mutations.
         lineage_cancer_genes = CancerGeneDM().cosmic_cancer_genes()[self.lineage]
@@ -261,24 +279,29 @@ class LineageHierNegBinomModel:
             N=data.shape[0],
             S=indices.n_sgrnas,
             G=indices.n_genes,
-            C=indices.n_celllines,
+            C=chrom_indices.n_celllines,
             SC=batch_indices.n_screens,
             CG=len(cancer_genes),
-            ct_initial=data.counts_initial_adj.values.copy().astype(np.float32),
-            ct_final=data.counts_final.values.astype(np.int32),
-            sgrna_idx=indices.sgrna_idx.astype(np.int32),
-            gene_idx=indices.gene_idx.astype(np.int32),
-            sgrna_to_gene_idx=indices.sgrna_to_gene_idx.astype(np.int32),
-            cellline_idx=indices.cellline_idx.astype(np.int32),
-            screen_idx=batch_indices.screen_idx.astype(np.int32),
-            copy_number=data.copy_number.values.astype(np.float32),
-            copy_number_gene=data.cn_gene.values.astype(np.float32),
-            copy_number_cell=data.cn_cell_line.values.astype(np.float32),
-            log_rna_expr=data.rna_expr.values.astype(np.float32),
-            z_log_rna_gene=data.z_rna_gene.values.astype(np.float32),
-            m_log_rna_gene=data.m_rna_gene.values.astype(np.float32),
-            is_mutated=is_mutated.astype(np.int32),
-            comutation_matrix=comutation_matrix.astype(np.int32),
+            CHROM=chrom_indices.n_chromosome_cell,
+            ct_initial=data.counts_initial_adj.values.copy().astype(np.float64),
+            ct_final=data.counts_final.values.astype(np.int64),
+            sgrna_idx=indices.sgrna_idx.astype(np.int64),
+            gene_idx=indices.gene_idx.astype(np.int64),
+            sgrna_to_gene_idx=indices.sgrna_to_gene_idx.astype(np.int64),
+            sgrna_to_gene_map=indices.sgrna_to_gene_map,
+            cellline_idx=indices.cellline_idx.astype(np.int64),
+            cellline_chromosome_idx=chrom_indices.cell_chrom_idx,
+            chromosome_to_cellline_idx=chrom_indices.chrom_to_cell_idx,
+            chromosome_to_cellline_map=chrom_indices.chrom_to_cell_map,
+            screen_idx=batch_indices.screen_idx.astype(np.int64),
+            copy_number=data.copy_number.values.astype(np.float64),
+            copy_number_gene=data.cn_gene.values.astype(np.float64),
+            copy_number_cell=data.cn_cell_line.values.astype(np.float64),
+            log_rna_expr=data.rna_expr.values.astype(np.float64),
+            z_log_rna_gene=data.z_rna_gene.values.astype(np.float64),
+            m_log_rna_gene=data.m_rna_gene.values.astype(np.float64),
+            is_mutated=is_mutated.astype(np.int64),
+            comutation_matrix=comutation_matrix.astype(np.int64),
             coords=coords,
         )
 
@@ -341,6 +364,12 @@ class LineageHierNegBinomModel:
             .pipe(add_useful_read_count_columns)
             .pipe(set_achilles_categorical_columns, sort_cats=True, skip_if_cat=False)
             .pipe(set_chromosome_categories, col="sgrna_target_chr")
+            .pipe(
+                make_chromosome_cellline_column,
+                chrom_col="sgrna_target_chr",
+                cell_line_col="depmap_id",
+                new_col="cell_chrom",
+            )
             .pipe(self.validate_data)
         )
         final_size = data.shape[0]
@@ -352,6 +381,7 @@ class LineageHierNegBinomModel:
         logger.info(f"Number of genes: {model_data.G}")
         logger.info(f"Number of sgRNA: {model_data.S}")
         logger.info(f"Number of cell lines: {model_data.C}")
+        logger.info(f"Number of chromosomes: {model_data.CHROM}")
         logger.info(f"Number of cancer genes: {model_data.CG}")
         logger.info(f"Number of screens: {model_data.SC}")
         logger.info(f"Number of data points: {model_data.N}")
@@ -400,7 +430,8 @@ class LineageHierNegBinomModel:
         s_to_g = model_data.sgrna_to_gene_idx
         s = model_data.sgrna_idx
         g = model_data.gene_idx
-        c = model_data.cellline_idx
+        chrom_to_cell = model_data.chromosome_to_cellline_idx
+        chrom = model_data.cellline_chromosome_idx
         # Sizes.
         n_G = model_data.G
         n_CG = model_data.CG
@@ -463,22 +494,34 @@ class LineageHierNegBinomModel:
                 "cells_chol_cov",
                 eta=2,
                 n=n_cell_vars,
-                sd_dist=pm.HalfNormal.dist(0.5, shape=n_cell_vars),
+                sd_dist=pm.HalfNormal.dist(0.2, shape=n_cell_vars),
                 compute_corr=True,
             )
-            for i, var_name in enumerate(["k", "m"]):
+            for i, var_name in enumerate(["mu_k", "mu_m"]):
                 pm.Deterministic(f"sigma_{var_name}", cl_sigmas[i])
 
-            mu_k = 0
-            mu_m = pm.Normal("mu_m", 0, 0.1)
-            _mu_cells = [mu_k, mu_m]
+            mu_mu_k = 0
+            mu_mu_m = pm.Normal("mu_mu_m", 0, 0.1)
+            _mu_cells = [mu_mu_k, mu_mu_m]
             mu_cells = at.stack(_mu_cells, axis=0)
             delta_cells = pm.Normal("delta_cells", 0, 1, shape=(n_cell_vars, n_C))
             cells = mu_cells + at.dot(cl_chol, delta_cells).T
-            k = pm.Deterministic("k", cells[:, 0], dims="cell_line")
-            m = pm.Deterministic("m", cells[:, 1], dims="cell_line")
+            mu_k = pm.Deterministic("mu_k", cells[:, 0], dims="cell_line")
+            mu_m = pm.Deterministic("mu_m", cells[:, 1], dims="cell_line")
 
-            _cell_effect = k[c] + m[c] * cn_cell
+            sigma_k = pm.HalfNormal("sigma_k", 0.1)
+            delta_k = pm.Normal("delta_k", 0, 1, dims="cell_chrom")
+            k = pm.Deterministic(
+                "k", mu_k[chrom_to_cell] + delta_k * sigma_k, dims="cell_chrom"
+            )
+
+            sigma_m = pm.HalfNormal("sigma_m", 0.1)
+            delta_m = pm.Normal("delta_m", 0, 1, dims="cell_chrom")
+            m = pm.Deterministic(
+                "m", mu_m[chrom_to_cell] + delta_m * sigma_m, dims="cell_chrom"
+            )
+
+            _cell_effect = k[chrom] + m[chrom] * cn_cell
             if self.reduce_deterministic_vars:
                 cell_effect = _cell_effect
             else:
@@ -520,7 +563,7 @@ class LineageHierNegBinomModel:
         return checks
 
 
-def target_gene_is_mutated_vector(data: pd.DataFrame) -> npt.NDArray[np.int32]:
+def target_gene_is_mutated_vector(data: pd.DataFrame) -> npt.NDArray[np.int64]:
     """Create a target gene mutation vector.
 
     Accounts for an issue that can lead to non-identifiability where the target gene is
@@ -530,7 +573,7 @@ def target_gene_is_mutated_vector(data: pd.DataFrame) -> npt.NDArray[np.int32]:
         data (pd.DataFrame): CRISPR data.
 
     Returns:
-        npt.NDArray[np.int32]: Binary vector for if the target gene is mutated.
+        npt.NDArray[np.int64]: Binary vector for if the target gene is mutated.
     """
     always_mutated_genes = (
         data.copy()[["depmap_id", "hugo_symbol", "is_mutated"]]
@@ -545,7 +588,7 @@ def target_gene_is_mutated_vector(data: pd.DataFrame) -> npt.NDArray[np.int32]:
         f"number of genes mutated in all cells lines: {len(always_mutated_genes)}"
     )
     logger.debug(f"Genes always mutated: {', '.join(always_mutated_genes)}")
-    mut_ary = data["is_mutated"].values.astype(np.int32)
+    mut_ary = data["is_mutated"].values.astype(np.int64)
     idx = np.asarray([g in always_mutated_genes for g in data["hugo_symbol"]])
     mut_ary[idx] = 0
     return mut_ary

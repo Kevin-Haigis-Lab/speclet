@@ -1,11 +1,12 @@
 """Functions for handling common modifications and processing of the Achilles data."""
 
 from pathlib import Path
-from typing import Final, Iterable, Literal
+from typing import Any, Final, Iterable, Literal
 
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 from speclet.data_processing import common as dphelp
 from speclet.data_processing.vectors import careful_zscore, squish_array
@@ -345,13 +346,14 @@ class CommonIndices(BaseModel):
     cellline_to_lineage_map: pd.DataFrame
     cellline_to_lineage_idx: np.ndarray
 
-    def __init__(self, **data: int | np.ndarray | pd.DataFrame):
+    def __init__(self, **data: Any):
         """Object to hold common indices used for modeling Achilles data."""
         super().__init__(**data)
         self.n_sgrnas = dphelp.nunique(self.sgrna_idx)
         self.n_genes = dphelp.nunique(self.gene_idx)
         self.n_celllines = dphelp.nunique(self.cellline_idx)
         self.n_lineages = dphelp.nunique(self.lineage_idx)
+        return None
 
     class Config:
         """Configuration for pydantic validation."""
@@ -393,11 +395,12 @@ class DataBatchIndices(BaseModel):
     batch_to_screen_map: pd.DataFrame
     batch_to_screen_idx: np.ndarray
 
-    def __init__(self, **data: int | np.ndarray | pd.DataFrame):
+    def __init__(self, **data: Any):
         """Object to hold indices relating to data screens and batches."""
         super().__init__(**data)
         self.n_batches = dphelp.nunique(self.batch_idx)
         self.n_screens = dphelp.nunique(self.screen_idx)
+        return None
 
     class Config:
         """Configuration for pydantic validation."""
@@ -422,6 +425,117 @@ def data_batch_indices(achilles_df: pd.DataFrame) -> DataBatchIndices:
         screen_idx=dphelp.get_indices(achilles_df, "screen"),
         batch_to_screen_map=batch_to_screen_map,
         batch_to_screen_idx=dphelp.get_indices(batch_to_screen_map, "screen"),
+    )
+
+
+class ChromosomeIndices(BaseModel):
+    """Chromosome and cell line indices."""
+
+    n_celllines: int
+    n_chromosome_cell: int
+    cell_chrom_idx: npt.NDArray[np.int64]
+    chrom_to_cell_idx: npt.NDArray[np.int64]
+    chrom_to_cell_map: pd.DataFrame
+
+    class Config:
+        """Configuration for pydantic validation."""
+
+        arbitrary_types_allowed = True
+
+    @validator("chrom_to_cell_map")
+    def _validate_chrom_to_cell_map(cls, v: pd.DataFrame) -> pd.DataFrame:
+        if not isinstance(v, pd.DataFrame):
+            raise TypeError("Chromosome-to-cell-line map is not a data frame.")
+        if "depmap_id" not in v.columns:
+            raise ValueError("Column 'depmap_id' not in chromosome-to-cell-line map.")
+        if "cell_chrom" not in v.columns:
+            raise ValueError("Column 'cell_chrom' not in chromosome-to-cell-line map.")
+        if len(set(v["cell_chrom"])) != len(v):
+            raise ValueError("Column 'cell_chrom' not uniquely mapped.")
+        return v
+
+    @validator("cell_chrom_idx", "chrom_to_cell_idx")
+    def _index_array(cls, v: npt.NDArray[np.int64]) -> npt.NDArray[np.int64]:
+        if not isinstance(v, np.ndarray):
+            raise TypeError("Index not a Numpy array.")
+        if v.dtype != np.int64:
+            raise TypeError(f"Index is an array of type {v.dtype} not 'int64'")
+        return v
+
+
+def make_chromosome_cellline_column(
+    data: pd.DataFrame,
+    chrom_col: str = "sgrna_target_chr",
+    cell_line_col: str = "depmap_id",
+    new_col: str = "cell_chrom",
+) -> pd.DataFrame:
+    """Add a column made by merging the cell line and chromosome.
+
+    Args:
+        data (pd.DataFrame): CRISPR data.
+        chrom_col (str, optional): Column with chromosome data. Defaults to
+        "sgrna_target_chr".
+        cell_line_col (str, optional): Column with cell line names. Defaults to
+        "depmap_id".
+        new_col (str, optional): New column to create. Defaults to "cell_chrom".
+
+    Returns:
+        pd.DataFrame: Modified data frame.
+    """
+    cell_chrom = [
+        f"{cell}__{chrom}" for chrom, cell in zip(data[chrom_col], data[cell_line_col])
+    ]
+    cell_chrom_cats = (
+        data.copy()
+        .assign(__cell_chrom_col=cell_chrom)[
+            [cell_line_col, chrom_col, "__cell_chrom_col"]
+        ]
+        .drop_duplicates()
+        .sort_values([cell_line_col, chrom_col])
+        .reset_index(drop=True)["__cell_chrom_col"]
+        .tolist()
+    )
+    assert len(cell_chrom_cats) == len(set(cell_chrom_cats))
+    data[new_col] = pd.Categorical(cell_chrom, categories=cell_chrom_cats, ordered=True)
+    return data
+
+
+def chromosome_indices(
+    data: pd.DataFrame,
+    cell_chrom_col: str = "cell_chrom",
+    cell_line_col: str = "depmap_id",
+) -> ChromosomeIndices:
+    """Generate indices helpful for dealing with chromosomes linked to cell lines.
+
+    Args:
+        data (pd.DataFrame): CRISPR data.
+        cell_chrom_col (str, optional): Column with the chromosome-cell line identifier.
+        Defaults to "cell_chrom".
+        cell_line_col (str, optional): Column with cell line names. Defaults to
+        "depmap_id".
+
+    Returns:
+        ChromosomeIndices: Data for indexing chromosomes mapped to cell lines.
+    """
+    chromosome_to_cell_map = (
+        data[[cell_line_col, cell_chrom_col]]
+        .drop_duplicates()
+        .sort_values(cell_chrom_col)
+        .reset_index(drop=True)
+    )
+    cell_chrom_idx, n_cell_chromosome = dphelp.get_indices_and_count(
+        data, cell_chrom_col
+    )
+    chrom_to_cell_idx, n_cell_lines = dphelp.get_indices_and_count(
+        chromosome_to_cell_map, cell_line_col
+    )
+    assert n_cell_lines == data[cell_line_col].nunique()
+    return ChromosomeIndices(
+        n_chromosome_cell=n_cell_chromosome,
+        n_celllines=n_cell_lines,
+        cell_chrom_idx=cell_chrom_idx.astype(np.int64),
+        chrom_to_cell_idx=chrom_to_cell_idx.astype(np.int64),
+        chrom_to_cell_map=chromosome_to_cell_map,
     )
 
 
