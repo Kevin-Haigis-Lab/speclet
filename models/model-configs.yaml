@@ -25,7 +25,7 @@
       cores: 1
 
 
-- name: hnb-single-lineage-prostate-007
+- name: hnb-single-lineage-prostate-008
   description: "
     Single lineage hierarchical negative binomial model for prostate data from the
     Broad.
@@ -66,7 +66,7 @@
     little more room to experiment with, but it should not be used as the tree depth for
     the final draws.
   "
-  active: true
+  active: false
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_colorectal.csv"
   model_kwargs:
