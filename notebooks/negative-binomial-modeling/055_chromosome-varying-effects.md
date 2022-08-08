@@ -96,14 +96,14 @@ valid_crc_data = crc_model.data_processing_pipeline(crc_data.copy())
 model_crc_data = crc_model.make_data_structure(valid_crc_data.copy())
 ```
 
-    [INFO] 2022-08-07 17:37:07 [(lineage_hierarchical_nb.py:data_processing_pipeline:318] Processing data for modeling.
-    [INFO] 2022-08-07 17:37:07 [(lineage_hierarchical_nb.py:data_processing_pipeline:319] LFC limits: (-5.0, 5.0)
-    [WARNING] 2022-08-07 17:37:07 [(lineage_hierarchical_nb.py:data_processing_pipeline:377] number of data points dropped: 0
-    [INFO] 2022-08-07 17:37:07 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:588] number of genes mutated in all cells lines: 1
-    [DEBUG] 2022-08-07 17:37:07 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:591] Genes always mutated: APC
-    [DEBUG] 2022-08-07 17:37:07 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:68] all_mut: {}
-    [INFO] 2022-08-07 17:37:07 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 2 cancer genes.
-    [DEBUG] 2022-08-07 17:37:07 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:79] Dropped cancer genes: ['APC', 'MDM2']
+    [INFO] 2022-08-08 09:20:50 [(lineage_hierarchical_nb.py:data_processing_pipeline:317] Processing data for modeling.
+    [INFO] 2022-08-08 09:20:50 [(lineage_hierarchical_nb.py:data_processing_pipeline:318] LFC limits: (-5.0, 5.0)
+    [WARNING] 2022-08-08 09:20:51 [(lineage_hierarchical_nb.py:data_processing_pipeline:376] number of data points dropped: 0
+    [INFO] 2022-08-08 09:20:51 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:597] number of genes mutated in all cells lines: 1
+    [DEBUG] 2022-08-08 09:20:51 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:600] Genes always mutated: APC
+    [DEBUG] 2022-08-08 09:20:51 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:68] all_mut: {}
+    [INFO] 2022-08-08 09:20:51 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 2 cancer genes.
+    [DEBUG] 2022-08-08 09:20:51 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:79] Dropped cancer genes: ['APC', 'MDM2']
 
 
 
@@ -124,25 +124,25 @@ crc_pymc_model = crc_model.pymc_model(crispr_data_manager.data.copy())
 pm.model_to_graphviz(crc_pymc_model)
 ```
 
-    [INFO] 2022-08-07 17:37:08 [(lineage_hierarchical_nb.py:data_processing_pipeline:318] Processing data for modeling.
-    [INFO] 2022-08-07 17:37:08 [(lineage_hierarchical_nb.py:data_processing_pipeline:319] LFC limits: (-5.0, 5.0)
-    [WARNING] 2022-08-07 17:37:09 [(lineage_hierarchical_nb.py:data_processing_pipeline:377] number of data points dropped: 0
-    [INFO] 2022-08-07 17:37:09 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:588] number of genes mutated in all cells lines: 1
-    [DEBUG] 2022-08-07 17:37:09 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:591] Genes always mutated: APC
-    [DEBUG] 2022-08-07 17:37:09 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:68] all_mut: {}
-    [INFO] 2022-08-07 17:37:09 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 2 cancer genes.
-    [DEBUG] 2022-08-07 17:37:09 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:79] Dropped cancer genes: ['APC', 'MDM2']
-    [INFO] 2022-08-07 17:37:09 [(lineage_hierarchical_nb.py:_pre_model_messages:381] Lineage: colorectal
-    [INFO] 2022-08-07 17:37:09 [(lineage_hierarchical_nb.py:_pre_model_messages:382] Number of genes: 103
-    [INFO] 2022-08-07 17:37:09 [(lineage_hierarchical_nb.py:_pre_model_messages:383] Number of sgRNA: 162
-    [INFO] 2022-08-07 17:37:09 [(lineage_hierarchical_nb.py:_pre_model_messages:384] Number of cell lines: 8
-    [INFO] 2022-08-07 17:37:09 [(lineage_hierarchical_nb.py:_pre_model_messages:385] Number of chromosomes: 176
-    [INFO] 2022-08-07 17:37:09 [(lineage_hierarchical_nb.py:_pre_model_messages:386] Number of cancer genes: 3
-    [INFO] 2022-08-07 17:37:09 [(lineage_hierarchical_nb.py:_pre_model_messages:387] Number of screens: 1
-    [INFO] 2022-08-07 17:37:09 [(lineage_hierarchical_nb.py:_pre_model_messages:388] Number of data points: 1296
-    [INFO] 2022-08-07 17:37:09 [(lineage_hierarchical_nb.py:_pre_model_messages:393] Including all non-essential deterministic variables.
-    [DEBUG] 2022-08-07 17:37:09 [(lineage_hierarchical_nb.py:pymc_model:429] shape of cancer gene matrix: (1296, 3)
-    [DEBUG] 2022-08-07 17:37:09 [(lineage_hierarchical_nb.py:pymc_model:445] location for `mu_mu_a`: 0.1523
+    [INFO] 2022-08-08 09:20:51 [(lineage_hierarchical_nb.py:data_processing_pipeline:317] Processing data for modeling.
+    [INFO] 2022-08-08 09:20:51 [(lineage_hierarchical_nb.py:data_processing_pipeline:318] LFC limits: (-5.0, 5.0)
+    [WARNING] 2022-08-08 09:20:52 [(lineage_hierarchical_nb.py:data_processing_pipeline:376] number of data points dropped: 0
+    [INFO] 2022-08-08 09:20:52 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:597] number of genes mutated in all cells lines: 1
+    [DEBUG] 2022-08-08 09:20:52 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:600] Genes always mutated: APC
+    [DEBUG] 2022-08-08 09:20:52 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:68] all_mut: {}
+    [INFO] 2022-08-08 09:20:52 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 2 cancer genes.
+    [DEBUG] 2022-08-08 09:20:52 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:79] Dropped cancer genes: ['APC', 'MDM2']
+    [INFO] 2022-08-08 09:20:52 [(lineage_hierarchical_nb.py:_pre_model_messages:380] Lineage: colorectal
+    [INFO] 2022-08-08 09:20:52 [(lineage_hierarchical_nb.py:_pre_model_messages:381] Number of genes: 103
+    [INFO] 2022-08-08 09:20:52 [(lineage_hierarchical_nb.py:_pre_model_messages:382] Number of sgRNA: 162
+    [INFO] 2022-08-08 09:20:52 [(lineage_hierarchical_nb.py:_pre_model_messages:383] Number of cell lines: 8
+    [INFO] 2022-08-08 09:20:52 [(lineage_hierarchical_nb.py:_pre_model_messages:384] Number of chromosomes: 176
+    [INFO] 2022-08-08 09:20:52 [(lineage_hierarchical_nb.py:_pre_model_messages:385] Number of cancer genes: 3
+    [INFO] 2022-08-08 09:20:52 [(lineage_hierarchical_nb.py:_pre_model_messages:386] Number of screens: 1
+    [INFO] 2022-08-08 09:20:52 [(lineage_hierarchical_nb.py:_pre_model_messages:387] Number of data points: 1296
+    [INFO] 2022-08-08 09:20:52 [(lineage_hierarchical_nb.py:_pre_model_messages:392] Including all non-essential deterministic variables.
+    [DEBUG] 2022-08-08 09:20:52 [(lineage_hierarchical_nb.py:pymc_model:428] shape of cancer gene matrix: (1296, 3)
+    [DEBUG] 2022-08-08 09:20:52 [(lineage_hierarchical_nb.py:pymc_model:444] location for `mu_mu_a`: 0.1523
 
 
 
@@ -178,17 +178,17 @@ print(f"initial counts\n  min: {np.min(obs):,d},  max: {np.max(obs):,d}")
     prior predictive distribution
       0%: 0
       1%: 0
-      10%: 9
-      20%: 50
-      30%: 112
-      40%: 195
-      50%: 313
-      60%: 486
-      70%: 762
-      80%: 1,274
-      90%: 2,594
-      99%: 16,315
-      100%: 51,505,825
+      10%: 12
+      20%: 65
+      30%: 133
+      40%: 216
+      50%: 325
+      60%: 474
+      70%: 697
+      80%: 1,078
+      90%: 1,944
+      99%: 8,228
+      100%: 396,583
 
     final counts
       min: 0,  max: 9,819
@@ -333,7 +333,7 @@ with crc_pymc_model:
 ```
 
     Compiling...
-    Compilation time =  0:00:16.629184
+    Compilation time =  0:00:18.711117
     Sampling...
 
 
@@ -353,9 +353,9 @@ with crc_pymc_model:
       0%|          | 0/1500 [00:00<?, ?it/s]
 
 
-    Sampling time =  0:03:42.611335
+    Sampling time =  0:05:11.439673
     Transforming variables...
-    Transformation time =  0:00:06.008289
+    Transformation time =  0:00:06.293092
 
 
 
@@ -394,14 +394,14 @@ with crc_pymc_model:
 describe_mcmc(trace);
 ```
 
-    date created: 2022-08-07 21:41
+    date created: 2022-08-08 13:26
     sampled 4 chains with (unknown) tuning steps and 500 draws
     num. divergences: 0, 0, 0, 0
     percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 0.831, 0.825, 0.906, 0.969
-    avg. step size: 0.034, 0.032, 0.046, 0.018
-    avg. accept prob.: 0.957, 0.946, 0.916, 0.983
-    avg. tree depth: 7.0, 7.0, 7.0, 8.0
+    BFMI: 0.798, 0.827, 0.881, 0.967
+    avg. step size: 0.013, 0.034, 0.012, 0.033
+    avg. accept prob.: 0.987, 0.941, 0.991, 0.961
+    avg. tree depth: 8.062, 7.0, 8.912, 7.0
 
 
 
@@ -455,35 +455,35 @@ trace.sample_stats.get(stat_cats).to_dataframe().groupby("chain").mean().round(3
   <tbody>
     <tr>
       <th>0</th>
-      <td>10889.138</td>
-      <td>0.034</td>
-      <td>127.0</td>
-      <td>0.957</td>
-      <td>7.0</td>
+      <td>10889.147</td>
+      <td>0.013</td>
+      <td>271.384</td>
+      <td>0.987</td>
+      <td>8.062</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>10890.874</td>
-      <td>0.032</td>
-      <td>127.0</td>
-      <td>0.946</td>
-      <td>7.0</td>
+      <td>10888.598</td>
+      <td>0.034</td>
+      <td>127.000</td>
+      <td>0.941</td>
+      <td>7.000</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>10887.237</td>
-      <td>0.046</td>
-      <td>127.0</td>
-      <td>0.916</td>
-      <td>7.0</td>
+      <td>10879.961</td>
+      <td>0.012</td>
+      <td>488.472</td>
+      <td>0.991</td>
+      <td>8.912</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>10892.429</td>
-      <td>0.018</td>
-      <td>255.0</td>
-      <td>0.983</td>
-      <td>8.0</td>
+      <td>10893.550</td>
+      <td>0.033</td>
+      <td>127.000</td>
+      <td>0.961</td>
+      <td>7.000</td>
     </tr>
   </tbody>
 </table>
@@ -514,6 +514,110 @@ plt.show()
 
 
 ![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_21_0.png)
+
+
+
+
+```python
+post_summary.sort_values("r_hat", ascending=False).head(5)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>sigma_b</th>
+      <td>0.039</td>
+      <td>0.023</td>
+      <td>0.001</td>
+      <td>0.068</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>274.0</td>
+      <td>518.0</td>
+      <td>1.02</td>
+    </tr>
+    <tr>
+      <th>b[KRAS]</th>
+      <td>0.032</td>
+      <td>0.055</td>
+      <td>-0.046</td>
+      <td>0.119</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>787.0</td>
+      <td>1321.0</td>
+      <td>1.01</td>
+    </tr>
+    <tr>
+      <th>b[EMC2]</th>
+      <td>0.003</td>
+      <td>0.043</td>
+      <td>-0.069</td>
+      <td>0.067</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2259.0</td>
+      <td>1467.0</td>
+      <td>1.01</td>
+    </tr>
+    <tr>
+      <th>b[CDK5RAP1]</th>
+      <td>-0.006</td>
+      <td>0.039</td>
+      <td>-0.071</td>
+      <td>0.051</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>2154.0</td>
+      <td>1219.0</td>
+      <td>1.01</td>
+    </tr>
+    <tr>
+      <th>b[ZNF283]</th>
+      <td>-0.013</td>
+      <td>0.046</td>
+      <td>-0.091</td>
+      <td>0.055</td>
+      <td>0.002</td>
+      <td>0.001</td>
+      <td>866.0</td>
+      <td>1228.0</td>
+      <td>1.01</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 
 
@@ -557,63 +661,63 @@ post_summary.sort_values("ess_bulk").head(5)
   <tbody>
     <tr>
       <th>sigma_b</th>
-      <td>0.040</td>
+      <td>0.039</td>
       <td>0.023</td>
       <td>0.001</td>
-      <td>0.070</td>
+      <td>0.068</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>262.0</td>
-      <td>697.0</td>
-      <td>1.03</td>
+      <td>274.0</td>
+      <td>518.0</td>
+      <td>1.02</td>
     </tr>
     <tr>
       <th>sigma_d</th>
-      <td>0.189</td>
-      <td>0.135</td>
-      <td>0.003</td>
-      <td>0.372</td>
-      <td>0.007</td>
-      <td>0.005</td>
-      <td>340.0</td>
-      <td>603.0</td>
+      <td>0.184</td>
+      <td>0.129</td>
+      <td>0.002</td>
+      <td>0.360</td>
+      <td>0.006</td>
+      <td>0.004</td>
+      <td>441.0</td>
+      <td>605.0</td>
       <td>1.01</td>
     </tr>
     <tr>
       <th>sigma_f</th>
-      <td>0.220</td>
-      <td>0.082</td>
-      <td>0.096</td>
-      <td>0.368</td>
+      <td>0.191</td>
+      <td>0.075</td>
+      <td>0.057</td>
+      <td>0.304</td>
       <td>0.004</td>
       <td>0.003</td>
-      <td>462.0</td>
-      <td>233.0</td>
-      <td>1.01</td>
-    </tr>
-    <tr>
-      <th>sigma_mu_k</th>
-      <td>0.042</td>
-      <td>0.026</td>
-      <td>0.000</td>
-      <td>0.074</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>481.0</td>
-      <td>501.0</td>
+      <td>451.0</td>
+      <td>299.0</td>
       <td>1.00</td>
     </tr>
     <tr>
       <th>b[MDM2]</th>
-      <td>-0.046</td>
-      <td>0.053</td>
-      <td>-0.130</td>
-      <td>0.026</td>
+      <td>-0.043</td>
+      <td>0.050</td>
+      <td>-0.120</td>
+      <td>0.024</td>
       <td>0.002</td>
       <td>0.002</td>
-      <td>521.0</td>
-      <td>1357.0</td>
-      <td>1.02</td>
+      <td>463.0</td>
+      <td>1205.0</td>
+      <td>1.01</td>
+    </tr>
+    <tr>
+      <th>b[SPTLC1]</th>
+      <td>0.046</td>
+      <td>0.060</td>
+      <td>-0.041</td>
+      <td>0.140</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>544.0</td>
+      <td>1416.0</td>
+      <td>1.01</td>
     </tr>
   </tbody>
 </table>
@@ -633,7 +737,7 @@ with az.rc_context(rc={"plot.max_subplots": 50}):
 
 
 
-![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_23_0.png)
+![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_24_0.png)
 
 
 
@@ -688,10 +792,10 @@ chromosome_post.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.000</td>
-      <td>0.036</td>
-      <td>-0.060</td>
-      <td>0.056</td>
+      <td>-0.001</td>
+      <td>0.033</td>
+      <td>-0.052</td>
+      <td>0.051</td>
       <td>ACH-000253__1</td>
       <td>k</td>
       <td>ACH-000253</td>
@@ -699,10 +803,10 @@ chromosome_post.head()
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.239</td>
-      <td>0.170</td>
-      <td>-0.531</td>
-      <td>0.008</td>
+      <td>-0.318</td>
+      <td>0.150</td>
+      <td>-0.567</td>
+      <td>-0.092</td>
       <td>ACH-000253__1</td>
       <td>m</td>
       <td>ACH-000253</td>
@@ -711,9 +815,9 @@ chromosome_post.head()
     <tr>
       <th>2</th>
       <td>0.002</td>
-      <td>0.037</td>
-      <td>-0.053</td>
-      <td>0.065</td>
+      <td>0.033</td>
+      <td>-0.046</td>
+      <td>0.062</td>
       <td>ACH-000253__2</td>
       <td>k</td>
       <td>ACH-000253</td>
@@ -721,10 +825,10 @@ chromosome_post.head()
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.243</td>
-      <td>0.167</td>
-      <td>-0.529</td>
-      <td>0.005</td>
+      <td>-0.321</td>
+      <td>0.153</td>
+      <td>-0.560</td>
+      <td>-0.087</td>
       <td>ACH-000253__2</td>
       <td>m</td>
       <td>ACH-000253</td>
@@ -732,10 +836,10 @@ chromosome_post.head()
     </tr>
     <tr>
       <th>4</th>
-      <td>0.003</td>
-      <td>0.037</td>
+      <td>0.002</td>
+      <td>0.033</td>
       <td>-0.052</td>
-      <td>0.063</td>
+      <td>0.053</td>
       <td>ACH-000253__3</td>
       <td>k</td>
       <td>ACH-000253</td>
@@ -764,13 +868,13 @@ for v, data_v in chromosome_post.groupby("var_name"):
 
 
 
-![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_25_0.png)
+![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_26_0.png)
 
 
 
 
 
-![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_25_1.png)
+![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_26_1.png)
 
 
 
@@ -800,6 +904,15 @@ for ax, (cell, data_c) in zip(axes.flatten(), chromosome_post.groupby("depmap_id
     )
     sns.scatterplot(data=plot_df, x="mean_k", y="mean_m", ax=ax, zorder=10)
     ax.set_title(cell)
+    ax.set_xlabel(None)
+    ax.set_ylabel(None)
+
+for ax in axes[-1, :]:
+    ax.set_xlabel("$k$")
+for ax in axes[:, 0]:
+    ax.set_ylabel("$m$")
+for ax in axes.flatten()[ncells:]:
+    ax.axis("off")
 
 fig.tight_layout()
 plt.show()
@@ -807,7 +920,7 @@ plt.show()
 
 
 
-![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_26_0.png)
+![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_27_0.png)
 
 
 
@@ -823,7 +936,7 @@ plt.show()
 
 
 
-![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_27_0.png)
+![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_28_0.png)
 
 
 
@@ -898,7 +1011,7 @@ plt.show()
 
 
 
-![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_28_0.png)
+![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_29_0.png)
 
 
 
@@ -924,7 +1037,7 @@ plt.show()
 
 
 
-![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_29_0.png)
+![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_30_0.png)
 
 
 
@@ -954,7 +1067,7 @@ plt.show()
 
 
 
-![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_30_0.png)
+![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_31_0.png)
 
 
 
@@ -984,7 +1097,7 @@ plt.show()
 
 
 
-![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_31_0.png)
+![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_32_0.png)
 
 
 
@@ -1036,7 +1149,7 @@ plt.show()
 
 
 
-![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_32_0.png)
+![png](055_chromosome-varying-effects_files/055_chromosome-varying-effects_33_0.png)
 
 
 
@@ -1048,7 +1161,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 7.53 minutes
+    execution time: 9.07 minutes
 
 
 
@@ -1057,7 +1170,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-08-07
+    Last updated: 2022-08-08
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -1075,14 +1188,14 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Git branch: varying-chromosome
 
-    pymc      : 4.1.3
-    matplotlib: 3.5.2
-    arviz     : 0.12.1
-    numpy     : 1.23.1
-    pandas    : 1.4.3
-    seaborn   : 0.11.2
     plotnine  : 0.0.0
+    arviz     : 0.12.1
+    matplotlib: 3.5.2
     aesara    : 2.7.7
+    numpy     : 1.23.1
+    seaborn   : 0.11.2
+    pandas    : 1.4.3
+    pymc      : 4.1.3
 
 
 

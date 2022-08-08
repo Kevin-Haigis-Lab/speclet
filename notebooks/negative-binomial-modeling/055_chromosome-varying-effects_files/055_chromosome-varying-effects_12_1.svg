@@ -8,21 +8,6 @@
  viewBox="0.00 0.00 2285.00 759.84" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 755.84)">
 <polygon fill="white" stroke="transparent" points="-4,4 -4,-755.84 2281,-755.84 2281,4 -4,4"/>
-<g id="clust3" class="cluster">
-<title>cluster7</title>
-<path fill="none" stroke="black" d="M218,-518.91C218,-518.91 342,-518.91 342,-518.91 348,-518.91 354,-524.91 354,-530.91 354,-530.91 354,-598.91 354,-598.91 354,-604.91 348,-610.91 342,-610.91 342,-610.91 218,-610.91 218,-610.91 212,-610.91 206,-604.91 206,-598.91 206,-598.91 206,-530.91 206,-530.91 206,-524.91 212,-518.91 218,-518.91"/>
-<text text-anchor="middle" x="342.5" y="-526.71" font-family="Times,serif" font-size="14.00">7</text>
-</g>
-<g id="clust10" class="cluster">
-<title>cluster3</title>
-<path fill="none" stroke="black" d="M1951,-629.88C1951,-629.88 2113,-629.88 2113,-629.88 2119,-629.88 2125,-635.88 2125,-641.88 2125,-641.88 2125,-731.84 2125,-731.84 2125,-737.84 2119,-743.84 2113,-743.84 2113,-743.84 1951,-743.84 1951,-743.84 1945,-743.84 1939,-737.84 1939,-731.84 1939,-731.84 1939,-641.88 1939,-641.88 1939,-635.88 1945,-629.88 1951,-629.88"/>
-<text text-anchor="middle" x="2113.5" y="-637.68" font-family="Times,serif" font-size="14.00">3</text>
-</g>
-<g id="clust12" class="cluster">
-<title>cluster2</title>
-<path fill="none" stroke="black" d="M2117,-518.91C2117,-518.91 2235,-518.91 2235,-518.91 2241,-518.91 2247,-524.91 2247,-530.91 2247,-530.91 2247,-598.91 2247,-598.91 2247,-604.91 2241,-610.91 2235,-610.91 2235,-610.91 2117,-610.91 2117,-610.91 2111,-610.91 2105,-604.91 2105,-598.91 2105,-598.91 2105,-530.91 2105,-530.91 2105,-524.91 2111,-518.91 2117,-518.91"/>
-<text text-anchor="middle" x="2235.5" y="-526.71" font-family="Times,serif" font-size="14.00">2</text>
-</g>
 <g id="clust1" class="cluster">
 <title>cluster28</title>
 <path fill="none" stroke="black" d="M312,-629.88C312,-629.88 474,-629.88 474,-629.88 480,-629.88 486,-635.88 486,-641.88 486,-641.88 486,-731.84 486,-731.84 486,-737.84 480,-743.84 474,-743.84 474,-743.84 312,-743.84 312,-743.84 306,-743.84 300,-737.84 300,-731.84 300,-731.84 300,-641.88 300,-641.88 300,-635.88 306,-629.88 312,-629.88"/>
@@ -32,6 +17,11 @@
 <title>cluster7 x 7</title>
 <path fill="none" stroke="black" d="M62,-518.91C62,-518.91 186,-518.91 186,-518.91 192,-518.91 198,-524.91 198,-530.91 198,-530.91 198,-598.91 198,-598.91 198,-604.91 192,-610.91 186,-610.91 186,-610.91 62,-610.91 62,-610.91 56,-610.91 50,-604.91 50,-598.91 50,-598.91 50,-530.91 50,-530.91 50,-524.91 56,-518.91 62,-518.91"/>
 <text text-anchor="middle" x="176" y="-526.71" font-family="Times,serif" font-size="14.00">7 x 7</text>
+</g>
+<g id="clust3" class="cluster">
+<title>cluster7</title>
+<path fill="none" stroke="black" d="M218,-518.91C218,-518.91 342,-518.91 342,-518.91 348,-518.91 354,-524.91 354,-530.91 354,-530.91 354,-598.91 354,-598.91 354,-604.91 348,-610.91 342,-610.91 342,-610.91 218,-610.91 218,-610.91 212,-610.91 206,-604.91 206,-598.91 206,-598.91 206,-530.91 206,-530.91 206,-524.91 212,-518.91 218,-518.91"/>
+<text text-anchor="middle" x="342.5" y="-526.71" font-family="Times,serif" font-size="14.00">7</text>
 </g>
 <g id="clust4" class="cluster">
 <title>clustercancer_gene (3)</title>
@@ -53,15 +43,30 @@
 <path fill="none" stroke="black" d="M817,-418.91C817,-418.91 901,-418.91 901,-418.91 907,-418.91 913,-424.91 913,-430.91 913,-430.91 913,-609.88 913,-609.88 913,-615.88 907,-621.88 901,-621.88 901,-621.88 817,-621.88 817,-621.88 811,-621.88 805,-615.88 805,-609.88 805,-609.88 805,-430.91 805,-430.91 805,-424.91 811,-418.91 817,-418.91"/>
 <text text-anchor="middle" x="873.5" y="-426.71" font-family="Times,serif" font-size="14.00">sgrna (162)</text>
 </g>
+<g id="clust8" class="cluster">
+<title>clustergene (103) x cancer_gene (3)</title>
+<path fill="none" stroke="black" d="M1059,-518.91C1059,-518.91 1211,-518.91 1211,-518.91 1217,-518.91 1223,-524.91 1223,-530.91 1223,-530.91 1223,-598.91 1223,-598.91 1223,-604.91 1217,-610.91 1211,-610.91 1211,-610.91 1059,-610.91 1059,-610.91 1053,-610.91 1047,-604.91 1047,-598.91 1047,-598.91 1047,-530.91 1047,-530.91 1047,-524.91 1053,-518.91 1059,-518.91"/>
+<text text-anchor="middle" x="1135" y="-526.71" font-family="Times,serif" font-size="14.00">gene (103) x cancer_gene (3)</text>
+</g>
 <g id="clust9" class="cluster">
 <title>cluster1296</title>
 <path fill="none" stroke="black" d="M817,-8C817,-8 1010,-8 1010,-8 1016,-8 1022,-14 1022,-20 1022,-20 1022,-398.91 1022,-398.91 1022,-404.91 1016,-410.91 1010,-410.91 1010,-410.91 817,-410.91 817,-410.91 811,-410.91 805,-404.91 805,-398.91 805,-398.91 805,-20 805,-20 805,-14 811,-8 817,-8"/>
 <text text-anchor="middle" x="1000" y="-15.8" font-family="Times,serif" font-size="14.00">1296</text>
 </g>
+<g id="clust10" class="cluster">
+<title>cluster3</title>
+<path fill="none" stroke="black" d="M1951,-629.88C1951,-629.88 2113,-629.88 2113,-629.88 2119,-629.88 2125,-635.88 2125,-641.88 2125,-641.88 2125,-731.84 2125,-731.84 2125,-737.84 2119,-743.84 2113,-743.84 2113,-743.84 1951,-743.84 1951,-743.84 1945,-743.84 1939,-737.84 1939,-731.84 1939,-731.84 1939,-641.88 1939,-641.88 1939,-635.88 1945,-629.88 1951,-629.88"/>
+<text text-anchor="middle" x="2113.5" y="-637.68" font-family="Times,serif" font-size="14.00">3</text>
+</g>
 <g id="clust11" class="cluster">
 <title>cluster2 x 2</title>
 <path fill="none" stroke="black" d="M1967,-518.91C1967,-518.91 2085,-518.91 2085,-518.91 2091,-518.91 2097,-524.91 2097,-530.91 2097,-530.91 2097,-598.91 2097,-598.91 2097,-604.91 2091,-610.91 2085,-610.91 2085,-610.91 1967,-610.91 1967,-610.91 1961,-610.91 1955,-604.91 1955,-598.91 1955,-598.91 1955,-530.91 1955,-530.91 1955,-524.91 1961,-518.91 1967,-518.91"/>
 <text text-anchor="middle" x="2075" y="-526.71" font-family="Times,serif" font-size="14.00">2 x 2</text>
+</g>
+<g id="clust12" class="cluster">
+<title>cluster2</title>
+<path fill="none" stroke="black" d="M2117,-518.91C2117,-518.91 2235,-518.91 2235,-518.91 2241,-518.91 2247,-524.91 2247,-530.91 2247,-530.91 2247,-598.91 2247,-598.91 2247,-604.91 2241,-610.91 2235,-610.91 2235,-610.91 2117,-610.91 2117,-610.91 2111,-610.91 2105,-604.91 2105,-598.91 2105,-598.91 2105,-530.91 2105,-530.91 2105,-524.91 2111,-518.91 2117,-518.91"/>
+<text text-anchor="middle" x="2235.5" y="-526.71" font-family="Times,serif" font-size="14.00">2</text>
 </g>
 <g id="clust13" class="cluster">
 <title>cluster2 x 8</title>
@@ -77,11 +82,6 @@
 <title>clustercell_chrom (176)</title>
 <path fill="none" stroke="black" d="M1243,-418.91C1243,-418.91 1436,-418.91 1436,-418.91 1442,-418.91 1448,-424.91 1448,-430.91 1448,-430.91 1448,-609.88 1448,-609.88 1448,-615.88 1442,-621.88 1436,-621.88 1436,-621.88 1243,-621.88 1243,-621.88 1237,-621.88 1231,-615.88 1231,-609.88 1231,-609.88 1231,-430.91 1231,-430.91 1231,-424.91 1237,-418.91 1243,-418.91"/>
 <text text-anchor="middle" x="1392.5" y="-426.71" font-family="Times,serif" font-size="14.00">cell_chrom (176)</text>
-</g>
-<g id="clust8" class="cluster">
-<title>clustergene (103) x cancer_gene (3)</title>
-<path fill="none" stroke="black" d="M1059,-518.91C1059,-518.91 1211,-518.91 1211,-518.91 1217,-518.91 1223,-524.91 1223,-530.91 1223,-530.91 1223,-598.91 1223,-598.91 1223,-604.91 1217,-610.91 1211,-610.91 1211,-610.91 1059,-610.91 1059,-610.91 1053,-610.91 1047,-604.91 1047,-598.91 1047,-598.91 1047,-530.91 1047,-530.91 1047,-524.91 1053,-518.91 1059,-518.91"/>
-<text text-anchor="middle" x="1135" y="-526.71" font-family="Times,serif" font-size="14.00">gene (103) x cancer_gene (3)</text>
 </g>
 <!-- genes_chol_cov -->
 <g id="node1" class="node">
@@ -119,8 +119,36 @@
 <path fill="none" stroke="black" d="M360.92,-663.31C345.3,-646.73 326.6,-626.88 311.12,-610.44"/>
 <polygon fill="black" stroke="black" points="313.65,-608.03 304.25,-603.15 308.56,-612.83 313.65,-608.03"/>
 </g>
-<!-- mu_a -->
+<!-- d -->
 <g id="node19" class="node">
+<title>d</title>
+<polygon fill="none" stroke="black" points="679.5,-602.91 588.5,-602.91 588.5,-549.91 679.5,-549.91 679.5,-602.91"/>
+<text text-anchor="middle" x="634" y="-587.71" font-family="Times,serif" font-size="14.00">d</text>
+<text text-anchor="middle" x="634" y="-572.71" font-family="Times,serif" font-size="14.00">~</text>
+<text text-anchor="middle" x="634" y="-557.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
+</g>
+<!-- genes_chol_cov&#45;&gt;d -->
+<g id="edge16" class="edge">
+<title>genes_chol_cov&#45;&gt;d</title>
+<path fill="none" stroke="black" d="M429.18,-664.39C445.64,-651.34 466.09,-637.63 487,-629.88 525.49,-615.63 540.94,-637.24 579,-621.88 586.53,-618.85 593.83,-614.41 600.53,-609.51"/>
+<polygon fill="black" stroke="black" points="602.97,-612.04 608.66,-603.11 598.64,-606.54 602.97,-612.04"/>
+</g>
+<!-- f -->
+<g id="node20" class="node">
+<title>f</title>
+<polygon fill="none" stroke="black" points="461.5,-602.91 370.5,-602.91 370.5,-549.91 461.5,-549.91 461.5,-602.91"/>
+<text text-anchor="middle" x="416" y="-587.71" font-family="Times,serif" font-size="14.00">f</text>
+<text text-anchor="middle" x="416" y="-572.71" font-family="Times,serif" font-size="14.00">~</text>
+<text text-anchor="middle" x="416" y="-557.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
+</g>
+<!-- genes_chol_cov&#45;&gt;f -->
+<g id="edge20" class="edge">
+<title>genes_chol_cov&#45;&gt;f</title>
+<path fill="none" stroke="black" d="M400.03,-660.72C402.92,-645.6 406.27,-628.15 409.15,-613.13"/>
+<polygon fill="black" stroke="black" points="412.61,-613.66 411.06,-603.18 405.74,-612.34 412.61,-613.66"/>
+</g>
+<!-- mu_a -->
+<g id="node21" class="node">
 <title>mu_a</title>
 <polygon fill="none" stroke="black" points="788.5,-602.91 697.5,-602.91 697.5,-549.91 788.5,-549.91 788.5,-602.91"/>
 <text text-anchor="middle" x="743" y="-587.71" font-family="Times,serif" font-size="14.00">mu_a</text>
@@ -128,50 +156,22 @@
 <text text-anchor="middle" x="743" y="-557.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
 </g>
 <!-- genes_chol_cov&#45;&gt;mu_a -->
-<g id="edge10" class="edge">
+<g id="edge8" class="edge">
 <title>genes_chol_cov&#45;&gt;mu_a</title>
 <path fill="none" stroke="black" d="M428.57,-664.27C445.07,-651.03 465.72,-637.2 487,-629.88 529.27,-615.35 646.16,-637.63 688,-621.88 695.76,-618.96 703.25,-614.49 710.07,-609.49"/>
 <polygon fill="black" stroke="black" points="712.67,-611.9 718.33,-602.95 708.32,-606.41 712.67,-611.9"/>
 </g>
-<!-- f -->
-<g id="node20" class="node">
-<title>f</title>
-<polygon fill="none" stroke="black" points="679.5,-602.91 588.5,-602.91 588.5,-549.91 679.5,-549.91 679.5,-602.91"/>
-<text text-anchor="middle" x="634" y="-587.71" font-family="Times,serif" font-size="14.00">f</text>
-<text text-anchor="middle" x="634" y="-572.71" font-family="Times,serif" font-size="14.00">~</text>
-<text text-anchor="middle" x="634" y="-557.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
-</g>
-<!-- genes_chol_cov&#45;&gt;f -->
-<g id="edge22" class="edge">
-<title>genes_chol_cov&#45;&gt;f</title>
-<path fill="none" stroke="black" d="M429.18,-664.39C445.64,-651.34 466.09,-637.63 487,-629.88 525.49,-615.63 540.94,-637.24 579,-621.88 586.53,-618.85 593.83,-614.41 600.53,-609.51"/>
-<polygon fill="black" stroke="black" points="602.97,-612.04 608.66,-603.11 598.64,-606.54 602.97,-612.04"/>
-</g>
 <!-- b -->
-<g id="node21" class="node">
-<title>b</title>
-<polygon fill="none" stroke="black" points="461.5,-602.91 370.5,-602.91 370.5,-549.91 461.5,-549.91 461.5,-602.91"/>
-<text text-anchor="middle" x="416" y="-587.71" font-family="Times,serif" font-size="14.00">b</text>
-<text text-anchor="middle" x="416" y="-572.71" font-family="Times,serif" font-size="14.00">~</text>
-<text text-anchor="middle" x="416" y="-557.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
-</g>
-<!-- genes_chol_cov&#45;&gt;b -->
-<g id="edge14" class="edge">
-<title>genes_chol_cov&#45;&gt;b</title>
-<path fill="none" stroke="black" d="M400.03,-660.72C402.92,-645.6 406.27,-628.15 409.15,-613.13"/>
-<polygon fill="black" stroke="black" points="412.61,-613.66 411.06,-603.18 405.74,-612.34 412.61,-613.66"/>
-</g>
-<!-- d -->
 <g id="node22" class="node">
-<title>d</title>
+<title>b</title>
 <polygon fill="none" stroke="black" points="570.5,-602.91 479.5,-602.91 479.5,-549.91 570.5,-549.91 570.5,-602.91"/>
-<text text-anchor="middle" x="525" y="-587.71" font-family="Times,serif" font-size="14.00">d</text>
+<text text-anchor="middle" x="525" y="-587.71" font-family="Times,serif" font-size="14.00">b</text>
 <text text-anchor="middle" x="525" y="-572.71" font-family="Times,serif" font-size="14.00">~</text>
 <text text-anchor="middle" x="525" y="-557.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
 </g>
-<!-- genes_chol_cov&#45;&gt;d -->
-<g id="edge18" class="edge">
-<title>genes_chol_cov&#45;&gt;d</title>
+<!-- genes_chol_cov&#45;&gt;b -->
+<g id="edge12" class="edge">
+<title>genes_chol_cov&#45;&gt;b</title>
 <path fill="none" stroke="black" d="M429.42,-664.26C447.98,-647.4 470.48,-626.95 488.99,-610.13"/>
 <polygon fill="black" stroke="black" points="491.6,-612.49 496.65,-603.17 486.89,-607.31 491.6,-612.49"/>
 </g>
@@ -184,64 +184,64 @@
 <text text-anchor="middle" x="1102" y="-557.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
 </g>
 <!-- genes_chol_cov&#45;&gt;h -->
-<g id="edge29" class="edge">
+<g id="edge27" class="edge">
 <title>genes_chol_cov&#45;&gt;h</title>
 <path fill="none" stroke="black" d="M428.48,-664.01C444.97,-650.72 465.63,-636.93 487,-629.88 546.21,-610.37 989.47,-643.35 1048,-621.88 1055.7,-619.06 1063.09,-614.63 1069.8,-609.64"/>
 <polygon fill="black" stroke="black" points="1072.33,-612.11 1077.91,-603.1 1067.93,-606.66 1072.33,-612.11"/>
 </g>
-<!-- sigma_b -->
-<g id="node7" class="node">
-<title>sigma_b</title>
+<!-- sigma_f -->
+<g id="node5" class="node">
+<title>sigma_f</title>
 <polygon fill="none" stroke="black" points="434.5,-502.91 343.5,-502.91 343.5,-449.91 434.5,-449.91 434.5,-502.91"/>
-<text text-anchor="middle" x="389" y="-487.71" font-family="Times,serif" font-size="14.00">sigma_b</text>
+<text text-anchor="middle" x="389" y="-487.71" font-family="Times,serif" font-size="14.00">sigma_f</text>
 <text text-anchor="middle" x="389" y="-472.71" font-family="Times,serif" font-size="14.00">~</text>
 <text text-anchor="middle" x="389" y="-457.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
-</g>
-<!-- genes_chol_cov_stds&#45;&gt;sigma_b -->
-<g id="edge4" class="edge">
-<title>genes_chol_cov_stds&#45;&gt;sigma_b</title>
-<path fill="none" stroke="black" d="M308.64,-549.66C322.16,-537.5 338.44,-522.87 352.8,-509.95"/>
-<polygon fill="black" stroke="black" points="355.46,-512.27 360.55,-502.98 350.78,-507.07 355.46,-512.27"/>
-</g>
-<!-- sigma_f -->
-<g id="node8" class="node">
-<title>sigma_f</title>
-<polygon fill="none" stroke="black" points="543.5,-502.91 452.5,-502.91 452.5,-449.91 543.5,-449.91 543.5,-502.91"/>
-<text text-anchor="middle" x="498" y="-487.71" font-family="Times,serif" font-size="14.00">sigma_f</text>
-<text text-anchor="middle" x="498" y="-472.71" font-family="Times,serif" font-size="14.00">~</text>
-<text text-anchor="middle" x="498" y="-457.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
 </g>
 <!-- genes_chol_cov_stds&#45;&gt;sigma_f -->
 <g id="edge6" class="edge">
 <title>genes_chol_cov_stds&#45;&gt;sigma_f</title>
+<path fill="none" stroke="black" d="M308.64,-549.66C322.16,-537.5 338.44,-522.87 352.8,-509.95"/>
+<polygon fill="black" stroke="black" points="355.46,-512.27 360.55,-502.98 350.78,-507.07 355.46,-512.27"/>
+</g>
+<!-- sigma_b -->
+<g id="node7" class="node">
+<title>sigma_b</title>
+<polygon fill="none" stroke="black" points="543.5,-502.91 452.5,-502.91 452.5,-449.91 543.5,-449.91 543.5,-502.91"/>
+<text text-anchor="middle" x="498" y="-487.71" font-family="Times,serif" font-size="14.00">sigma_b</text>
+<text text-anchor="middle" x="498" y="-472.71" font-family="Times,serif" font-size="14.00">~</text>
+<text text-anchor="middle" x="498" y="-457.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
+</g>
+<!-- genes_chol_cov_stds&#45;&gt;sigma_b -->
+<g id="edge4" class="edge">
+<title>genes_chol_cov_stds&#45;&gt;sigma_b</title>
 <path fill="none" stroke="black" d="M307.82,-549.63C321.83,-538.2 339.69,-525.81 358,-518.91 393.51,-505.53 406.99,-522.86 443,-510.91 445.93,-509.93 448.87,-508.78 451.78,-507.5"/>
 <polygon fill="black" stroke="black" points="453.48,-510.56 460.93,-503.02 450.41,-504.27 453.48,-510.56"/>
 </g>
-<!-- sigma_mu_a -->
+<!-- sigma_d -->
 <g id="node9" class="node">
-<title>sigma_mu_a</title>
+<title>sigma_d</title>
 <polygon fill="none" stroke="black" points="216.5,-502.91 125.5,-502.91 125.5,-449.91 216.5,-449.91 216.5,-502.91"/>
-<text text-anchor="middle" x="171" y="-487.71" font-family="Times,serif" font-size="14.00">sigma_mu_a</text>
+<text text-anchor="middle" x="171" y="-487.71" font-family="Times,serif" font-size="14.00">sigma_d</text>
 <text text-anchor="middle" x="171" y="-472.71" font-family="Times,serif" font-size="14.00">~</text>
 <text text-anchor="middle" x="171" y="-457.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
-</g>
-<!-- genes_chol_cov_stds&#45;&gt;sigma_mu_a -->
-<g id="edge3" class="edge">
-<title>genes_chol_cov_stds&#45;&gt;sigma_mu_a</title>
-<path fill="none" stroke="black" d="M251.36,-549.66C237.84,-537.5 221.56,-522.87 207.2,-509.95"/>
-<polygon fill="black" stroke="black" points="209.22,-507.07 199.45,-502.98 204.54,-512.27 209.22,-507.07"/>
-</g>
-<!-- sigma_d -->
-<g id="node14" class="node">
-<title>sigma_d</title>
-<polygon fill="none" stroke="black" points="325.5,-502.91 234.5,-502.91 234.5,-449.91 325.5,-449.91 325.5,-502.91"/>
-<text text-anchor="middle" x="280" y="-487.71" font-family="Times,serif" font-size="14.00">sigma_d</text>
-<text text-anchor="middle" x="280" y="-472.71" font-family="Times,serif" font-size="14.00">~</text>
-<text text-anchor="middle" x="280" y="-457.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
 </g>
 <!-- genes_chol_cov_stds&#45;&gt;sigma_d -->
 <g id="edge5" class="edge">
 <title>genes_chol_cov_stds&#45;&gt;sigma_d</title>
+<path fill="none" stroke="black" d="M251.36,-549.66C237.84,-537.5 221.56,-522.87 207.2,-509.95"/>
+<polygon fill="black" stroke="black" points="209.22,-507.07 199.45,-502.98 204.54,-512.27 209.22,-507.07"/>
+</g>
+<!-- sigma_mu_a -->
+<g id="node15" class="node">
+<title>sigma_mu_a</title>
+<polygon fill="none" stroke="black" points="325.5,-502.91 234.5,-502.91 234.5,-449.91 325.5,-449.91 325.5,-502.91"/>
+<text text-anchor="middle" x="280" y="-487.71" font-family="Times,serif" font-size="14.00">sigma_mu_a</text>
+<text text-anchor="middle" x="280" y="-472.71" font-family="Times,serif" font-size="14.00">~</text>
+<text text-anchor="middle" x="280" y="-457.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
+</g>
+<!-- genes_chol_cov_stds&#45;&gt;sigma_mu_a -->
+<g id="edge3" class="edge">
+<title>genes_chol_cov_stds&#45;&gt;sigma_mu_a</title>
 <path fill="none" stroke="black" d="M280,-549.66C280,-538.52 280,-525.29 280,-513.21"/>
 <polygon fill="black" stroke="black" points="283.5,-512.98 280,-502.98 276.5,-512.98 283.5,-512.98"/>
 </g>
@@ -259,68 +259,8 @@
 <path fill="none" stroke="black" d="M252.18,-549.62C238.18,-538.19 220.31,-525.8 202,-518.91 166.07,-505.39 152.39,-523.13 116,-510.91 113.11,-509.94 110.22,-508.79 107.36,-507.51"/>
 <polygon fill="black" stroke="black" points="108.87,-504.35 98.35,-503.03 105.75,-510.62 108.87,-504.35"/>
 </g>
-<!-- sigma_a -->
-<g id="node4" class="node">
-<title>sigma_a</title>
-<ellipse fill="none" stroke="black" cx="980" cy="-576.41" rx="58.88" ry="37.45"/>
-<text text-anchor="middle" x="980" y="-587.71" font-family="Times,serif" font-size="14.00">sigma_a</text>
-<text text-anchor="middle" x="980" y="-572.71" font-family="Times,serif" font-size="14.00">~</text>
-<text text-anchor="middle" x="980" y="-557.71" font-family="Times,serif" font-size="14.00">HalfNormal</text>
-</g>
-<!-- a -->
-<g id="node24" class="node">
-<title>a</title>
-<polygon fill="none" stroke="black" points="904.5,-502.91 813.5,-502.91 813.5,-449.91 904.5,-449.91 904.5,-502.91"/>
-<text text-anchor="middle" x="859" y="-487.71" font-family="Times,serif" font-size="14.00">a</text>
-<text text-anchor="middle" x="859" y="-472.71" font-family="Times,serif" font-size="14.00">~</text>
-<text text-anchor="middle" x="859" y="-457.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
-</g>
-<!-- sigma_a&#45;&gt;a -->
-<g id="edge26" class="edge">
-<title>sigma_a&#45;&gt;a</title>
-<path fill="none" stroke="black" d="M947.57,-545.09C937.92,-536.41 927.2,-527.09 917,-518.91 912.94,-515.65 908.65,-512.34 904.31,-509.09"/>
-<polygon fill="black" stroke="black" points="906.09,-506.05 895.96,-502.93 901.93,-511.68 906.09,-506.05"/>
-</g>
-<!-- mu_mu_a -->
-<g id="node5" class="node">
-<title>mu_mu_a</title>
-<ellipse fill="none" stroke="black" cx="547" cy="-698.36" rx="50.82" ry="37.45"/>
-<text text-anchor="middle" x="547" y="-709.66" font-family="Times,serif" font-size="14.00">mu_mu_a</text>
-<text text-anchor="middle" x="547" y="-694.66" font-family="Times,serif" font-size="14.00">~</text>
-<text text-anchor="middle" x="547" y="-679.66" font-family="Times,serif" font-size="14.00">Normal</text>
-</g>
-<!-- mu_mu_a&#45;&gt;mu_a -->
-<g id="edge9" class="edge">
-<title>mu_mu_a&#45;&gt;mu_a</title>
-<path fill="none" stroke="black" d="M568.29,-664.19C578.4,-651.27 591.64,-637.71 607,-629.88 639.23,-613.46 654.53,-635.61 688,-621.88 695.51,-618.8 702.81,-614.35 709.5,-609.44"/>
-<polygon fill="black" stroke="black" points="711.94,-611.97 717.63,-603.03 707.61,-606.47 711.94,-611.97"/>
-</g>
-<!-- mu_mu_a&#45;&gt;f -->
-<g id="edge21" class="edge">
-<title>mu_mu_a&#45;&gt;f</title>
-<path fill="none" stroke="black" d="M570.54,-664.9C582.54,-648.36 597.13,-628.25 609.29,-611.48"/>
-<polygon fill="black" stroke="black" points="612.36,-613.2 615.4,-603.05 606.7,-609.09 612.36,-613.2"/>
-</g>
-<!-- mu_mu_a&#45;&gt;b -->
-<g id="edge13" class="edge">
-<title>mu_mu_a&#45;&gt;b</title>
-<path fill="none" stroke="black" d="M524.53,-664.46C514.99,-652.35 503.06,-639.3 490,-629.88 482.24,-624.28 478.24,-626.76 470,-621.88 463.75,-618.18 457.47,-613.78 451.52,-609.21"/>
-<polygon fill="black" stroke="black" points="453.64,-606.43 443.64,-602.92 449.28,-611.9 453.64,-606.43"/>
-</g>
-<!-- mu_mu_a&#45;&gt;d -->
-<g id="edge17" class="edge">
-<title>mu_mu_a&#45;&gt;d</title>
-<path fill="none" stroke="black" d="M540.34,-661.04C537.54,-645.81 534.3,-628.14 531.52,-612.98"/>
-<polygon fill="black" stroke="black" points="534.93,-612.15 529.68,-602.95 528.05,-613.41 534.93,-612.15"/>
-</g>
-<!-- mu_mu_a&#45;&gt;h -->
-<g id="edge28" class="edge">
-<title>mu_mu_a&#45;&gt;h</title>
-<path fill="none" stroke="black" d="M567.73,-663.94C577.81,-650.81 591.19,-637.15 607,-629.88 651.52,-609.41 1002.02,-638.85 1048,-621.88 1055.69,-619.04 1063.08,-614.61 1069.79,-609.62"/>
-<polygon fill="black" stroke="black" points="1072.32,-612.08 1077.9,-603.08 1067.92,-606.63 1072.32,-612.08"/>
-</g>
 <!-- sigma_m -->
-<g id="node6" class="node">
+<g id="node4" class="node">
 <title>sigma_m</title>
 <ellipse fill="none" stroke="black" cx="1515" cy="-576.41" rx="58.88" ry="37.45"/>
 <text text-anchor="middle" x="1515" y="-587.71" font-family="Times,serif" font-size="14.00">sigma_m</text>
@@ -328,7 +268,7 @@
 <text text-anchor="middle" x="1515" y="-557.71" font-family="Times,serif" font-size="14.00">HalfNormal</text>
 </g>
 <!-- m -->
-<g id="node39" class="node">
+<g id="node37" class="node">
 <title>m</title>
 <polygon fill="none" stroke="black" points="1330.5,-502.91 1239.5,-502.91 1239.5,-449.91 1330.5,-449.91 1330.5,-502.91"/>
 <text text-anchor="middle" x="1285" y="-487.71" font-family="Times,serif" font-size="14.00">m</text>
@@ -341,76 +281,30 @@
 <path fill="none" stroke="black" d="M1487.15,-543.24C1477.09,-533.74 1464.98,-524.41 1452,-518.91 1406.06,-499.42 1387.54,-526.09 1340,-510.91 1336.91,-509.92 1333.82,-508.73 1330.76,-507.39"/>
 <polygon fill="black" stroke="black" points="1332.25,-504.22 1321.72,-502.99 1329.18,-510.51 1332.25,-504.22"/>
 </g>
-<!-- alpha -->
-<g id="node10" class="node">
-<title>alpha</title>
-<ellipse fill="none" stroke="black" cx="1088" cy="-187.43" rx="57.97" ry="37.45"/>
-<text text-anchor="middle" x="1088" y="-198.73" font-family="Times,serif" font-size="14.00">alpha</text>
-<text text-anchor="middle" x="1088" y="-183.73" font-family="Times,serif" font-size="14.00">~</text>
-<text text-anchor="middle" x="1088" y="-168.73" font-family="Times,serif" font-size="14.00">Exponential</text>
+<!-- sigma_k -->
+<g id="node6" class="node">
+<title>sigma_k</title>
+<ellipse fill="none" stroke="black" cx="1650" cy="-576.41" rx="58.88" ry="37.45"/>
+<text text-anchor="middle" x="1650" y="-587.71" font-family="Times,serif" font-size="14.00">sigma_k</text>
+<text text-anchor="middle" x="1650" y="-572.71" font-family="Times,serif" font-size="14.00">~</text>
+<text text-anchor="middle" x="1650" y="-557.71" font-family="Times,serif" font-size="14.00">HalfNormal</text>
 </g>
-<!-- ct_final -->
-<g id="node27" class="node">
-<title>ct_final</title>
-<ellipse fill="lightgrey" stroke="black" cx="950" cy="-76.48" rx="63.78" ry="37.45"/>
-<text text-anchor="middle" x="950" y="-87.78" font-family="Times,serif" font-size="14.00">ct_final</text>
-<text text-anchor="middle" x="950" y="-72.78" font-family="Times,serif" font-size="14.00">~</text>
-<text text-anchor="middle" x="950" y="-57.78" font-family="Times,serif" font-size="14.00">NegBinomial</text>
+<!-- k -->
+<g id="node39" class="node">
+<title>k</title>
+<polygon fill="none" stroke="black" points="1439.5,-502.91 1348.5,-502.91 1348.5,-449.91 1439.5,-449.91 1439.5,-502.91"/>
+<text text-anchor="middle" x="1394" y="-487.71" font-family="Times,serif" font-size="14.00">k</text>
+<text text-anchor="middle" x="1394" y="-472.71" font-family="Times,serif" font-size="14.00">~</text>
+<text text-anchor="middle" x="1394" y="-457.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
 </g>
-<!-- alpha&#45;&gt;ct_final -->
-<g id="edge57" class="edge">
-<title>alpha&#45;&gt;ct_final</title>
-<path fill="none" stroke="black" d="M1051.74,-157.8C1034.57,-144.24 1013.87,-127.9 995.64,-113.51"/>
-<polygon fill="black" stroke="black" points="997.48,-110.5 987.46,-107.05 993.14,-115.99 997.48,-110.5"/>
-</g>
-<!-- mu_b -->
-<g id="node11" class="node">
-<title>mu_b</title>
-<ellipse fill="none" stroke="black" cx="658" cy="-698.36" rx="41.94" ry="37.45"/>
-<text text-anchor="middle" x="658" y="-709.66" font-family="Times,serif" font-size="14.00">mu_b</text>
-<text text-anchor="middle" x="658" y="-694.66" font-family="Times,serif" font-size="14.00">~</text>
-<text text-anchor="middle" x="658" y="-679.66" font-family="Times,serif" font-size="14.00">Normal</text>
-</g>
-<!-- mu_b&#45;&gt;mu_a -->
-<g id="edge8" class="edge">
-<title>mu_b&#45;&gt;mu_a</title>
-<path fill="none" stroke="black" d="M679.64,-666.03C687.57,-654.62 696.65,-641.64 705,-629.88 709.3,-623.83 713.91,-617.41 718.38,-611.22"/>
-<polygon fill="black" stroke="black" points="721.32,-613.12 724.35,-602.96 715.65,-609.01 721.32,-613.12"/>
-</g>
-<!-- mu_b&#45;&gt;f -->
-<g id="edge20" class="edge">
-<title>mu_b&#45;&gt;f</title>
-<path fill="none" stroke="black" d="M650.8,-661.37C647.75,-646.12 644.2,-628.39 641.15,-613.16"/>
-<polygon fill="black" stroke="black" points="644.53,-612.2 639.14,-603.08 637.67,-613.58 644.53,-612.2"/>
-</g>
-<!-- mu_b&#45;&gt;b -->
-<g id="edge12" class="edge">
-<title>mu_b&#45;&gt;b</title>
-<path fill="none" stroke="black" d="M641.06,-663.98C632.66,-651.03 621.24,-637.5 607,-629.88 580.11,-615.51 498.39,-633.02 470,-621.88 462.45,-618.92 455.16,-614.48 448.51,-609.53"/>
-<polygon fill="black" stroke="black" points="450.45,-606.59 440.46,-603.06 446.07,-612.05 450.45,-606.59"/>
-</g>
-<!-- mu_b&#45;&gt;d -->
-<g id="edge16" class="edge">
-<title>mu_b&#45;&gt;d</title>
-<path fill="none" stroke="black" d="M639.45,-664.42C631,-652.01 619.96,-638.77 607,-629.88 596.33,-622.57 590.46,-627.9 579,-621.88 572.42,-618.43 565.9,-614.08 559.79,-609.47"/>
-<polygon fill="black" stroke="black" points="561.75,-606.56 551.74,-603.08 557.39,-612.04 561.75,-606.56"/>
-</g>
-<!-- mu_b&#45;&gt;h -->
-<g id="edge27" class="edge">
-<title>mu_b&#45;&gt;h</title>
-<path fill="none" stroke="black" d="M673.34,-663.09C680.93,-650.33 691.42,-637.18 705,-629.88 738.58,-611.85 1012.27,-635.18 1048,-621.88 1055.68,-619.02 1063.07,-614.58 1069.78,-609.59"/>
-<polygon fill="black" stroke="black" points="1072.31,-612.05 1077.89,-603.05 1067.91,-606.6 1072.31,-612.05"/>
-</g>
-<!-- sigma_mu_m -->
-<g id="node12" class="node">
-<title>sigma_mu_m</title>
-<polygon fill="none" stroke="black" points="2277,-502.91 2185,-502.91 2185,-449.91 2277,-449.91 2277,-502.91"/>
-<text text-anchor="middle" x="2231" y="-487.71" font-family="Times,serif" font-size="14.00">sigma_mu_m</text>
-<text text-anchor="middle" x="2231" y="-472.71" font-family="Times,serif" font-size="14.00">~</text>
-<text text-anchor="middle" x="2231" y="-457.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
+<!-- sigma_k&#45;&gt;k -->
+<g id="edge47" class="edge">
+<title>sigma_k&#45;&gt;k</title>
+<path fill="none" stroke="black" d="M1619.55,-544.36C1608.8,-534.93 1596.1,-525.37 1583,-518.91 1540.96,-498.17 1488.6,-487.71 1449.66,-482.48"/>
+<polygon fill="black" stroke="black" points="1449.92,-478.99 1439.56,-481.2 1449.04,-485.93 1449.92,-478.99"/>
 </g>
 <!-- mu_mu_m -->
-<g id="node13" class="node">
+<g id="node8" class="node">
 <title>mu_mu_m</title>
 <ellipse fill="none" stroke="black" cx="1875" cy="-698.36" rx="54.39" ry="37.45"/>
 <text text-anchor="middle" x="1875" y="-709.66" font-family="Times,serif" font-size="14.00">mu_mu_m</text>
@@ -426,7 +320,7 @@
 <text text-anchor="middle" x="1772" y="-557.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
 </g>
 <!-- mu_mu_m&#45;&gt;mu_m -->
-<g id="edge43" class="edge">
+<g id="edge45" class="edge">
 <title>mu_mu_m&#45;&gt;mu_m</title>
 <path fill="none" stroke="black" d="M1847.67,-665.53C1833.09,-648.56 1815.18,-627.69 1800.44,-610.53"/>
 <polygon fill="black" stroke="black" points="1803.09,-608.24 1793.92,-602.93 1797.77,-612.8 1803.09,-608.24"/>
@@ -440,32 +334,138 @@
 <text text-anchor="middle" x="1881" y="-557.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
 </g>
 <!-- mu_mu_m&#45;&gt;mu_k -->
-<g id="edge40" class="edge">
+<g id="edge42" class="edge">
 <title>mu_mu_m&#45;&gt;mu_k</title>
 <path fill="none" stroke="black" d="M1876.83,-660.72C1877.58,-645.75 1878.45,-628.48 1879.19,-613.56"/>
 <polygon fill="black" stroke="black" points="1882.71,-613.34 1879.71,-603.18 1875.72,-612.99 1882.71,-613.34"/>
 </g>
-<!-- sigma_k -->
-<g id="node15" class="node">
-<title>sigma_k</title>
-<ellipse fill="none" stroke="black" cx="1650" cy="-576.41" rx="58.88" ry="37.45"/>
-<text text-anchor="middle" x="1650" y="-587.71" font-family="Times,serif" font-size="14.00">sigma_k</text>
-<text text-anchor="middle" x="1650" y="-572.71" font-family="Times,serif" font-size="14.00">~</text>
-<text text-anchor="middle" x="1650" y="-557.71" font-family="Times,serif" font-size="14.00">HalfNormal</text>
+<!-- mu_mu_a -->
+<g id="node10" class="node">
+<title>mu_mu_a</title>
+<ellipse fill="none" stroke="black" cx="547" cy="-698.36" rx="50.82" ry="37.45"/>
+<text text-anchor="middle" x="547" y="-709.66" font-family="Times,serif" font-size="14.00">mu_mu_a</text>
+<text text-anchor="middle" x="547" y="-694.66" font-family="Times,serif" font-size="14.00">~</text>
+<text text-anchor="middle" x="547" y="-679.66" font-family="Times,serif" font-size="14.00">Normal</text>
 </g>
-<!-- k -->
-<g id="node38" class="node">
-<title>k</title>
-<polygon fill="none" stroke="black" points="1439.5,-502.91 1348.5,-502.91 1348.5,-449.91 1439.5,-449.91 1439.5,-502.91"/>
-<text text-anchor="middle" x="1394" y="-487.71" font-family="Times,serif" font-size="14.00">k</text>
-<text text-anchor="middle" x="1394" y="-472.71" font-family="Times,serif" font-size="14.00">~</text>
-<text text-anchor="middle" x="1394" y="-457.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
+<!-- mu_mu_a&#45;&gt;d -->
+<g id="edge18" class="edge">
+<title>mu_mu_a&#45;&gt;d</title>
+<path fill="none" stroke="black" d="M570.54,-664.9C582.54,-648.36 597.13,-628.25 609.29,-611.48"/>
+<polygon fill="black" stroke="black" points="612.36,-613.2 615.4,-603.05 606.7,-609.09 612.36,-613.2"/>
 </g>
-<!-- sigma_k&#45;&gt;k -->
-<g id="edge48" class="edge">
-<title>sigma_k&#45;&gt;k</title>
-<path fill="none" stroke="black" d="M1619.55,-544.36C1608.8,-534.93 1596.1,-525.37 1583,-518.91 1540.96,-498.17 1488.6,-487.71 1449.66,-482.48"/>
-<polygon fill="black" stroke="black" points="1449.92,-478.99 1439.56,-481.2 1449.04,-485.93 1449.92,-478.99"/>
+<!-- mu_mu_a&#45;&gt;f -->
+<g id="edge22" class="edge">
+<title>mu_mu_a&#45;&gt;f</title>
+<path fill="none" stroke="black" d="M524.53,-664.46C514.99,-652.35 503.06,-639.3 490,-629.88 482.24,-624.28 478.24,-626.76 470,-621.88 463.75,-618.18 457.47,-613.78 451.52,-609.21"/>
+<polygon fill="black" stroke="black" points="453.64,-606.43 443.64,-602.92 449.28,-611.9 453.64,-606.43"/>
+</g>
+<!-- mu_mu_a&#45;&gt;mu_a -->
+<g id="edge10" class="edge">
+<title>mu_mu_a&#45;&gt;mu_a</title>
+<path fill="none" stroke="black" d="M568.29,-664.19C578.4,-651.27 591.64,-637.71 607,-629.88 639.23,-613.46 654.53,-635.61 688,-621.88 695.51,-618.8 702.81,-614.35 709.5,-609.44"/>
+<polygon fill="black" stroke="black" points="711.94,-611.97 717.63,-603.03 707.61,-606.47 711.94,-611.97"/>
+</g>
+<!-- mu_mu_a&#45;&gt;b -->
+<g id="edge14" class="edge">
+<title>mu_mu_a&#45;&gt;b</title>
+<path fill="none" stroke="black" d="M540.34,-661.04C537.54,-645.81 534.3,-628.14 531.52,-612.98"/>
+<polygon fill="black" stroke="black" points="534.93,-612.15 529.68,-602.95 528.05,-613.41 534.93,-612.15"/>
+</g>
+<!-- mu_mu_a&#45;&gt;h -->
+<g id="edge29" class="edge">
+<title>mu_mu_a&#45;&gt;h</title>
+<path fill="none" stroke="black" d="M567.73,-663.94C577.81,-650.81 591.19,-637.15 607,-629.88 651.52,-609.41 1002.02,-638.85 1048,-621.88 1055.69,-619.04 1063.08,-614.61 1069.79,-609.62"/>
+<polygon fill="black" stroke="black" points="1072.32,-612.08 1077.9,-603.08 1067.92,-606.63 1072.32,-612.08"/>
+</g>
+<!-- alpha -->
+<g id="node11" class="node">
+<title>alpha</title>
+<ellipse fill="none" stroke="black" cx="1088" cy="-187.43" rx="57.97" ry="37.45"/>
+<text text-anchor="middle" x="1088" y="-198.73" font-family="Times,serif" font-size="14.00">alpha</text>
+<text text-anchor="middle" x="1088" y="-183.73" font-family="Times,serif" font-size="14.00">~</text>
+<text text-anchor="middle" x="1088" y="-168.73" font-family="Times,serif" font-size="14.00">Exponential</text>
+</g>
+<!-- ct_final -->
+<g id="node26" class="node">
+<title>ct_final</title>
+<ellipse fill="lightgrey" stroke="black" cx="950" cy="-76.48" rx="63.78" ry="37.45"/>
+<text text-anchor="middle" x="950" y="-87.78" font-family="Times,serif" font-size="14.00">ct_final</text>
+<text text-anchor="middle" x="950" y="-72.78" font-family="Times,serif" font-size="14.00">~</text>
+<text text-anchor="middle" x="950" y="-57.78" font-family="Times,serif" font-size="14.00">NegBinomial</text>
+</g>
+<!-- alpha&#45;&gt;ct_final -->
+<g id="edge58" class="edge">
+<title>alpha&#45;&gt;ct_final</title>
+<path fill="none" stroke="black" d="M1051.74,-157.8C1034.57,-144.24 1013.87,-127.9 995.64,-113.51"/>
+<polygon fill="black" stroke="black" points="997.48,-110.5 987.46,-107.05 993.14,-115.99 997.48,-110.5"/>
+</g>
+<!-- sigma_mu_m -->
+<g id="node12" class="node">
+<title>sigma_mu_m</title>
+<polygon fill="none" stroke="black" points="2277,-502.91 2185,-502.91 2185,-449.91 2277,-449.91 2277,-502.91"/>
+<text text-anchor="middle" x="2231" y="-487.71" font-family="Times,serif" font-size="14.00">sigma_mu_m</text>
+<text text-anchor="middle" x="2231" y="-472.71" font-family="Times,serif" font-size="14.00">~</text>
+<text text-anchor="middle" x="2231" y="-457.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
+</g>
+<!-- sigma_a -->
+<g id="node13" class="node">
+<title>sigma_a</title>
+<ellipse fill="none" stroke="black" cx="980" cy="-576.41" rx="58.88" ry="37.45"/>
+<text text-anchor="middle" x="980" y="-587.71" font-family="Times,serif" font-size="14.00">sigma_a</text>
+<text text-anchor="middle" x="980" y="-572.71" font-family="Times,serif" font-size="14.00">~</text>
+<text text-anchor="middle" x="980" y="-557.71" font-family="Times,serif" font-size="14.00">HalfNormal</text>
+</g>
+<!-- a -->
+<g id="node23" class="node">
+<title>a</title>
+<polygon fill="none" stroke="black" points="904.5,-502.91 813.5,-502.91 813.5,-449.91 904.5,-449.91 904.5,-502.91"/>
+<text text-anchor="middle" x="859" y="-487.71" font-family="Times,serif" font-size="14.00">a</text>
+<text text-anchor="middle" x="859" y="-472.71" font-family="Times,serif" font-size="14.00">~</text>
+<text text-anchor="middle" x="859" y="-457.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
+</g>
+<!-- sigma_a&#45;&gt;a -->
+<g id="edge24" class="edge">
+<title>sigma_a&#45;&gt;a</title>
+<path fill="none" stroke="black" d="M947.57,-545.09C937.92,-536.41 927.2,-527.09 917,-518.91 912.94,-515.65 908.65,-512.34 904.31,-509.09"/>
+<polygon fill="black" stroke="black" points="906.09,-506.05 895.96,-502.93 901.93,-511.68 906.09,-506.05"/>
+</g>
+<!-- mu_b -->
+<g id="node14" class="node">
+<title>mu_b</title>
+<ellipse fill="none" stroke="black" cx="658" cy="-698.36" rx="41.94" ry="37.45"/>
+<text text-anchor="middle" x="658" y="-709.66" font-family="Times,serif" font-size="14.00">mu_b</text>
+<text text-anchor="middle" x="658" y="-694.66" font-family="Times,serif" font-size="14.00">~</text>
+<text text-anchor="middle" x="658" y="-679.66" font-family="Times,serif" font-size="14.00">Normal</text>
+</g>
+<!-- mu_b&#45;&gt;d -->
+<g id="edge17" class="edge">
+<title>mu_b&#45;&gt;d</title>
+<path fill="none" stroke="black" d="M650.8,-661.37C647.75,-646.12 644.2,-628.39 641.15,-613.16"/>
+<polygon fill="black" stroke="black" points="644.53,-612.2 639.14,-603.08 637.67,-613.58 644.53,-612.2"/>
+</g>
+<!-- mu_b&#45;&gt;f -->
+<g id="edge21" class="edge">
+<title>mu_b&#45;&gt;f</title>
+<path fill="none" stroke="black" d="M641.06,-663.98C632.66,-651.03 621.24,-637.5 607,-629.88 580.11,-615.51 498.39,-633.02 470,-621.88 462.45,-618.92 455.16,-614.48 448.51,-609.53"/>
+<polygon fill="black" stroke="black" points="450.45,-606.59 440.46,-603.06 446.07,-612.05 450.45,-606.59"/>
+</g>
+<!-- mu_b&#45;&gt;mu_a -->
+<g id="edge9" class="edge">
+<title>mu_b&#45;&gt;mu_a</title>
+<path fill="none" stroke="black" d="M679.64,-666.03C687.57,-654.62 696.65,-641.64 705,-629.88 709.3,-623.83 713.91,-617.41 718.38,-611.22"/>
+<polygon fill="black" stroke="black" points="721.32,-613.12 724.35,-602.96 715.65,-609.01 721.32,-613.12"/>
+</g>
+<!-- mu_b&#45;&gt;b -->
+<g id="edge13" class="edge">
+<title>mu_b&#45;&gt;b</title>
+<path fill="none" stroke="black" d="M639.45,-664.42C631,-652.01 619.96,-638.77 607,-629.88 596.33,-622.57 590.46,-627.9 579,-621.88 572.42,-618.43 565.9,-614.08 559.79,-609.47"/>
+<polygon fill="black" stroke="black" points="561.75,-606.56 551.74,-603.08 557.39,-612.04 561.75,-606.56"/>
+</g>
+<!-- mu_b&#45;&gt;h -->
+<g id="edge28" class="edge">
+<title>mu_b&#45;&gt;h</title>
+<path fill="none" stroke="black" d="M673.34,-663.09C680.93,-650.33 691.42,-637.18 705,-629.88 738.58,-611.85 1012.27,-635.18 1048,-621.88 1055.68,-619.02 1063.07,-614.58 1069.78,-609.59"/>
+<polygon fill="black" stroke="black" points="1072.31,-612.05 1077.89,-603.05 1067.91,-606.6 1072.31,-612.05"/>
 </g>
 <!-- sigma_mu_k -->
 <g id="node16" class="node">
@@ -483,27 +483,27 @@
 <text text-anchor="middle" x="774" y="-694.66" font-family="Times,serif" font-size="14.00">~</text>
 <text text-anchor="middle" x="774" y="-679.66" font-family="Times,serif" font-size="14.00">Normal</text>
 </g>
+<!-- delta_genes&#45;&gt;d -->
+<g id="edge19" class="edge">
+<title>delta_genes&#45;&gt;d</title>
+<path fill="none" stroke="black" d="M748.02,-664.8C737,-652.59 723.38,-639.39 709,-629.88 700.67,-624.38 696.64,-626.9 688,-621.88 681.72,-618.23 675.43,-613.86 669.47,-609.3"/>
+<polygon fill="black" stroke="black" points="671.59,-606.52 661.58,-603.02 667.23,-611.99 671.59,-606.52"/>
+</g>
+<!-- delta_genes&#45;&gt;f -->
+<g id="edge23" class="edge">
+<title>delta_genes&#45;&gt;f</title>
+<path fill="none" stroke="black" d="M750.94,-664.01C739.91,-650.89 725.49,-637.23 709,-629.88 660.45,-608.27 519.71,-640.66 470,-621.88 462.33,-618.99 454.95,-614.52 448.24,-609.52"/>
+<polygon fill="black" stroke="black" points="450.11,-606.54 440.13,-602.98 445.72,-611.98 450.11,-606.54"/>
+</g>
 <!-- delta_genes&#45;&gt;mu_a -->
 <g id="edge11" class="edge">
 <title>delta_genes&#45;&gt;mu_a</title>
 <path fill="none" stroke="black" d="M764.7,-661.37C760.76,-646.12 756.18,-628.39 752.24,-613.16"/>
 <polygon fill="black" stroke="black" points="755.53,-611.89 749.64,-603.08 748.75,-613.64 755.53,-611.89"/>
 </g>
-<!-- delta_genes&#45;&gt;f -->
-<g id="edge23" class="edge">
-<title>delta_genes&#45;&gt;f</title>
-<path fill="none" stroke="black" d="M748.02,-664.8C737,-652.59 723.38,-639.39 709,-629.88 700.67,-624.38 696.64,-626.9 688,-621.88 681.72,-618.23 675.43,-613.86 669.47,-609.3"/>
-<polygon fill="black" stroke="black" points="671.59,-606.52 661.58,-603.02 667.23,-611.99 671.59,-606.52"/>
-</g>
 <!-- delta_genes&#45;&gt;b -->
 <g id="edge15" class="edge">
 <title>delta_genes&#45;&gt;b</title>
-<path fill="none" stroke="black" d="M750.94,-664.01C739.91,-650.89 725.49,-637.23 709,-629.88 660.45,-608.27 519.71,-640.66 470,-621.88 462.33,-618.99 454.95,-614.52 448.24,-609.52"/>
-<polygon fill="black" stroke="black" points="450.11,-606.54 440.13,-602.98 445.72,-611.98 450.11,-606.54"/>
-</g>
-<!-- delta_genes&#45;&gt;d -->
-<g id="edge19" class="edge">
-<title>delta_genes&#45;&gt;d</title>
 <path fill="none" stroke="black" d="M750.54,-663.87C739.53,-650.9 725.24,-637.39 709,-629.88 682.72,-617.74 605.93,-632.49 579,-621.88 571.45,-618.91 564.17,-614.46 557.52,-609.51"/>
 <polygon fill="black" stroke="black" points="559.46,-606.57 549.47,-603.04 555.07,-612.03 559.46,-606.57"/>
 </g>
@@ -513,40 +513,46 @@
 <path fill="none" stroke="black" d="M829,-689.2C886.18,-679.16 977.06,-658.72 1048,-621.88 1054.6,-618.46 1061.12,-614.13 1067.24,-609.53"/>
 <polygon fill="black" stroke="black" points="1069.63,-612.09 1075.29,-603.14 1065.28,-606.61 1069.63,-612.09"/>
 </g>
-<!-- mu_a&#45;&gt;a -->
-<g id="edge25" class="edge">
-<title>mu_a&#45;&gt;a</title>
-<path fill="none" stroke="black" d="M767.63,-549.79C777.66,-539.8 789.57,-528.47 801,-518.91 804.94,-515.61 809.12,-512.3 813.36,-509.06"/>
-<polygon fill="black" stroke="black" points="815.64,-511.73 821.55,-502.94 811.45,-506.12 815.64,-511.73"/>
-</g>
 <!-- gene_effect -->
-<g id="node26" class="node">
+<g id="node28" class="node">
 <title>gene_effect</title>
 <polygon fill="none" stroke="black" points="904.5,-402.91 813.5,-402.91 813.5,-349.91 904.5,-349.91 904.5,-402.91"/>
 <text text-anchor="middle" x="859" y="-387.71" font-family="Times,serif" font-size="14.00">gene_effect</text>
 <text text-anchor="middle" x="859" y="-372.71" font-family="Times,serif" font-size="14.00">~</text>
 <text text-anchor="middle" x="859" y="-357.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
 </g>
-<!-- f&#45;&gt;gene_effect -->
-<g id="edge34" class="edge">
-<title>f&#45;&gt;gene_effect</title>
+<!-- d&#45;&gt;gene_effect -->
+<g id="edge33" class="edge">
+<title>d&#45;&gt;gene_effect</title>
 <path fill="none" stroke="black" d="M657.75,-549.65C667.01,-539.85 677.83,-528.69 688,-518.91 736.32,-472.4 748.55,-460.7 801,-418.91 805.07,-415.66 809.37,-412.36 813.71,-409.12"/>
 <polygon fill="black" stroke="black" points="816.09,-411.71 822.07,-402.97 811.94,-406.08 816.09,-411.71"/>
+</g>
+<!-- f&#45;&gt;gene_effect -->
+<g id="edge31" class="edge">
+<title>f&#45;&gt;gene_effect</title>
+<path fill="none" stroke="black" d="M433.85,-549.66C443.22,-538.25 455.72,-525.85 470,-518.91 502.93,-502.89 521.31,-530.88 552,-510.91 591.37,-485.29 565.47,-445.77 604,-418.91 635.39,-397.02 738.21,-385.87 803.3,-380.87"/>
+<polygon fill="black" stroke="black" points="803.7,-384.35 813.41,-380.12 803.18,-377.37 803.7,-384.35"/>
+</g>
+<!-- mu_a&#45;&gt;a -->
+<g id="edge26" class="edge">
+<title>mu_a&#45;&gt;a</title>
+<path fill="none" stroke="black" d="M767.63,-549.79C777.66,-539.8 789.57,-528.47 801,-518.91 804.94,-515.61 809.12,-512.3 813.36,-509.06"/>
+<polygon fill="black" stroke="black" points="815.64,-511.73 821.55,-502.94 811.45,-506.12 815.64,-511.73"/>
 </g>
 <!-- b&#45;&gt;gene_effect -->
 <g id="edge32" class="edge">
 <title>b&#45;&gt;gene_effect</title>
-<path fill="none" stroke="black" d="M433.85,-549.66C443.22,-538.25 455.72,-525.85 470,-518.91 502.93,-502.89 521.31,-530.88 552,-510.91 591.37,-485.29 565.47,-445.77 604,-418.91 635.39,-397.02 738.21,-385.87 803.3,-380.87"/>
-<polygon fill="black" stroke="black" points="803.7,-384.35 813.41,-380.12 803.18,-377.37 803.7,-384.35"/>
-</g>
-<!-- d&#45;&gt;gene_effect -->
-<g id="edge31" class="edge">
-<title>d&#45;&gt;gene_effect</title>
 <path fill="none" stroke="black" d="M544.56,-549.82C553.96,-539 566,-527.04 579,-518.91 588.89,-512.72 594.09,-517.06 604,-510.91 652.33,-480.89 643.73,-447.35 693,-418.91 726.81,-399.39 769.65,-388.98 803.34,-383.46"/>
 <polygon fill="black" stroke="black" points="804.13,-386.88 813.48,-381.9 803.06,-379.96 804.13,-386.88"/>
 </g>
+<!-- a&#45;&gt;gene_effect -->
+<g id="edge34" class="edge">
+<title>a&#45;&gt;gene_effect</title>
+<path fill="none" stroke="black" d="M859,-449.66C859,-438.52 859,-425.29 859,-413.21"/>
+<polygon fill="black" stroke="black" points="862.5,-412.98 859,-402.98 855.5,-412.98 862.5,-412.98"/>
+</g>
 <!-- delta_a -->
-<g id="node23" class="node">
+<g id="node24" class="node">
 <title>delta_a</title>
 <ellipse fill="none" stroke="black" cx="859" cy="-576.41" rx="41.94" ry="37.45"/>
 <text text-anchor="middle" x="859" y="-587.71" font-family="Times,serif" font-size="14.00">delta_a</text>
@@ -554,16 +560,10 @@
 <text text-anchor="middle" x="859" y="-557.71" font-family="Times,serif" font-size="14.00">Normal</text>
 </g>
 <!-- delta_a&#45;&gt;a -->
-<g id="edge24" class="edge">
+<g id="edge25" class="edge">
 <title>delta_a&#45;&gt;a</title>
 <path fill="none" stroke="black" d="M859,-538.92C859,-530.5 859,-521.55 859,-513.16"/>
 <polygon fill="black" stroke="black" points="862.5,-512.92 859,-502.92 855.5,-512.92 862.5,-512.92"/>
-</g>
-<!-- a&#45;&gt;gene_effect -->
-<g id="edge33" class="edge">
-<title>a&#45;&gt;gene_effect</title>
-<path fill="none" stroke="black" d="M859,-449.66C859,-438.52 859,-425.29 859,-413.21"/>
-<polygon fill="black" stroke="black" points="862.5,-412.98 859,-402.98 855.5,-412.98 862.5,-412.98"/>
 </g>
 <!-- h&#45;&gt;gene_effect -->
 <g id="edge35" class="edge">
@@ -571,27 +571,21 @@
 <path fill="none" stroke="black" d="M1079.15,-549.82C1069.82,-539.83 1058.72,-528.5 1048,-518.91 1002.14,-477.86 945.06,-436.29 905.7,-408.93"/>
 <polygon fill="black" stroke="black" points="907.3,-405.78 897.08,-402.97 903.32,-411.54 907.3,-405.78"/>
 </g>
-<!-- eta -->
-<g id="node30" class="node">
-<title>eta</title>
-<polygon fill="none" stroke="black" points="995.5,-313.91 904.5,-313.91 904.5,-260.91 995.5,-260.91 995.5,-313.91"/>
-<text text-anchor="middle" x="950" y="-298.71" font-family="Times,serif" font-size="14.00">eta</text>
-<text text-anchor="middle" x="950" y="-283.71" font-family="Times,serif" font-size="14.00">~</text>
-<text text-anchor="middle" x="950" y="-268.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
-</g>
-<!-- gene_effect&#45;&gt;eta -->
-<g id="edge55" class="edge">
-<title>gene_effect&#45;&gt;eta</title>
-<path fill="none" stroke="black" d="M885.81,-349.77C895.17,-340.83 905.8,-330.66 915.69,-321.21"/>
-<polygon fill="black" stroke="black" points="918.26,-323.6 923.07,-314.16 913.42,-318.54 918.26,-323.6"/>
-</g>
 <!-- cell_effect -->
-<g id="node28" class="node">
+<g id="node27" class="node">
 <title>cell_effect</title>
 <polygon fill="none" stroke="black" points="1013.5,-402.91 922.5,-402.91 922.5,-349.91 1013.5,-349.91 1013.5,-402.91"/>
 <text text-anchor="middle" x="968" y="-387.71" font-family="Times,serif" font-size="14.00">cell_effect</text>
 <text text-anchor="middle" x="968" y="-372.71" font-family="Times,serif" font-size="14.00">~</text>
 <text text-anchor="middle" x="968" y="-357.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
+</g>
+<!-- eta -->
+<g id="node29" class="node">
+<title>eta</title>
+<polygon fill="none" stroke="black" points="995.5,-313.91 904.5,-313.91 904.5,-260.91 995.5,-260.91 995.5,-313.91"/>
+<text text-anchor="middle" x="950" y="-298.71" font-family="Times,serif" font-size="14.00">eta</text>
+<text text-anchor="middle" x="950" y="-283.71" font-family="Times,serif" font-size="14.00">~</text>
+<text text-anchor="middle" x="950" y="-268.71" font-family="Times,serif" font-size="14.00">Deterministic</text>
 </g>
 <!-- cell_effect&#45;&gt;eta -->
 <g id="edge54" class="edge">
@@ -599,25 +593,31 @@
 <path fill="none" stroke="black" d="M962.7,-349.77C961.03,-341.7 959.15,-332.64 957.37,-324.01"/>
 <polygon fill="black" stroke="black" points="960.78,-323.24 955.33,-314.16 953.93,-324.66 960.78,-323.24"/>
 </g>
+<!-- gene_effect&#45;&gt;eta -->
+<g id="edge55" class="edge">
+<title>gene_effect&#45;&gt;eta</title>
+<path fill="none" stroke="black" d="M885.81,-349.77C895.17,-340.83 905.8,-330.66 915.69,-321.21"/>
+<polygon fill="black" stroke="black" points="918.26,-323.6 923.07,-314.16 913.42,-318.54 918.26,-323.6"/>
+</g>
 <!-- mu -->
-<g id="node29" class="node">
+<g id="node30" class="node">
 <title>mu</title>
 <polygon fill="none" stroke="black" points="995.5,-213.93 904.5,-213.93 904.5,-160.93 995.5,-160.93 995.5,-213.93"/>
 <text text-anchor="middle" x="950" y="-198.73" font-family="Times,serif" font-size="14.00">mu</text>
 <text text-anchor="middle" x="950" y="-183.73" font-family="Times,serif" font-size="14.00">~</text>
 <text text-anchor="middle" x="950" y="-168.73" font-family="Times,serif" font-size="14.00">Deterministic</text>
 </g>
-<!-- mu&#45;&gt;ct_final -->
-<g id="edge58" class="edge">
-<title>mu&#45;&gt;ct_final</title>
-<path fill="none" stroke="black" d="M950,-160.89C950,-149.98 950,-136.89 950,-124.35"/>
-<polygon fill="black" stroke="black" points="953.5,-124 950,-114 946.5,-124 953.5,-124"/>
-</g>
 <!-- eta&#45;&gt;mu -->
 <g id="edge56" class="edge">
 <title>eta&#45;&gt;mu</title>
 <path fill="none" stroke="black" d="M950,-260.66C950,-249.53 950,-236.3 950,-224.23"/>
 <polygon fill="black" stroke="black" points="953.5,-224 950,-214 946.5,-224 953.5,-224"/>
+</g>
+<!-- mu&#45;&gt;ct_final -->
+<g id="edge57" class="edge">
+<title>mu&#45;&gt;ct_final</title>
+<path fill="none" stroke="black" d="M950,-160.89C950,-149.98 950,-136.89 950,-124.35"/>
+<polygon fill="black" stroke="black" points="953.5,-124 950,-114 946.5,-124 953.5,-124"/>
 </g>
 <!-- cells_chol_cov -->
 <g id="node31" class="node">
@@ -688,13 +688,13 @@
 <text text-anchor="middle" x="1750" y="-679.66" font-family="Times,serif" font-size="14.00">Normal</text>
 </g>
 <!-- delta_cells&#45;&gt;mu_m -->
-<g id="edge45" class="edge">
+<g id="edge43" class="edge">
 <title>delta_cells&#45;&gt;mu_m</title>
 <path fill="none" stroke="black" d="M1756.66,-661.04C1759.46,-645.81 1762.7,-628.14 1765.48,-612.98"/>
 <polygon fill="black" stroke="black" points="1768.95,-613.41 1767.32,-602.95 1762.07,-612.15 1768.95,-613.41"/>
 </g>
 <!-- delta_cells&#45;&gt;mu_k -->
-<g id="edge42" class="edge">
+<g id="edge40" class="edge">
 <title>delta_cells&#45;&gt;mu_k</title>
 <path fill="none" stroke="black" d="M1775.48,-665.3C1785.99,-653.3 1798.79,-640.11 1812,-629.88 1817.97,-625.26 1820.72,-626.08 1827,-621.88 1832.7,-618.07 1838.51,-613.78 1844.1,-609.4"/>
 <polygon fill="black" stroke="black" points="1846.5,-611.97 1852.11,-602.98 1842.12,-606.51 1846.5,-611.97"/>
@@ -711,26 +711,6 @@
 <path fill="none" stroke="black" d="M1863.16,-549.65C1853.79,-538.23 1841.28,-525.84 1827,-518.91 1761.81,-487.27 1551.03,-479.74 1449.57,-477.96"/>
 <polygon fill="black" stroke="black" points="1449.57,-474.46 1439.52,-477.79 1449.46,-481.46 1449.57,-474.46"/>
 </g>
-<!-- delta_k -->
-<g id="node37" class="node">
-<title>delta_k</title>
-<ellipse fill="none" stroke="black" cx="1394" cy="-576.41" rx="41.94" ry="37.45"/>
-<text text-anchor="middle" x="1394" y="-587.71" font-family="Times,serif" font-size="14.00">delta_k</text>
-<text text-anchor="middle" x="1394" y="-572.71" font-family="Times,serif" font-size="14.00">~</text>
-<text text-anchor="middle" x="1394" y="-557.71" font-family="Times,serif" font-size="14.00">Normal</text>
-</g>
-<!-- delta_k&#45;&gt;k -->
-<g id="edge47" class="edge">
-<title>delta_k&#45;&gt;k</title>
-<path fill="none" stroke="black" d="M1394,-538.92C1394,-530.5 1394,-521.55 1394,-513.16"/>
-<polygon fill="black" stroke="black" points="1397.5,-512.92 1394,-502.92 1390.5,-512.92 1397.5,-512.92"/>
-</g>
-<!-- k&#45;&gt;cell_effect -->
-<g id="edge52" class="edge">
-<title>k&#45;&gt;cell_effect</title>
-<path fill="none" stroke="black" d="M1376.11,-449.75C1366.73,-438.35 1354.23,-425.95 1340,-418.91 1285.74,-392.05 1113.41,-382.31 1023.62,-378.99"/>
-<polygon fill="black" stroke="black" points="1023.73,-375.49 1013.62,-378.63 1023.49,-382.49 1023.73,-375.49"/>
-</g>
 <!-- m&#45;&gt;cell_effect -->
 <g id="edge53" class="edge">
 <title>m&#45;&gt;cell_effect</title>
@@ -738,7 +718,7 @@
 <polygon fill="black" stroke="black" points="1024.33,-391.16 1013.74,-391.55 1022.26,-397.85 1024.33,-391.16"/>
 </g>
 <!-- delta_m -->
-<g id="node40" class="node">
+<g id="node38" class="node">
 <title>delta_m</title>
 <ellipse fill="none" stroke="black" cx="1285" cy="-576.41" rx="43.27" ry="37.45"/>
 <text text-anchor="middle" x="1285" y="-587.71" font-family="Times,serif" font-size="14.00">delta_m</text>
@@ -750,6 +730,26 @@
 <title>delta_m&#45;&gt;m</title>
 <path fill="none" stroke="black" d="M1285,-538.92C1285,-530.5 1285,-521.55 1285,-513.16"/>
 <polygon fill="black" stroke="black" points="1288.5,-512.92 1285,-502.92 1281.5,-512.92 1288.5,-512.92"/>
+</g>
+<!-- k&#45;&gt;cell_effect -->
+<g id="edge52" class="edge">
+<title>k&#45;&gt;cell_effect</title>
+<path fill="none" stroke="black" d="M1376.11,-449.75C1366.73,-438.35 1354.23,-425.95 1340,-418.91 1285.74,-392.05 1113.41,-382.31 1023.62,-378.99"/>
+<polygon fill="black" stroke="black" points="1023.73,-375.49 1013.62,-378.63 1023.49,-382.49 1023.73,-375.49"/>
+</g>
+<!-- delta_k -->
+<g id="node40" class="node">
+<title>delta_k</title>
+<ellipse fill="none" stroke="black" cx="1394" cy="-576.41" rx="41.94" ry="37.45"/>
+<text text-anchor="middle" x="1394" y="-587.71" font-family="Times,serif" font-size="14.00">delta_k</text>
+<text text-anchor="middle" x="1394" y="-572.71" font-family="Times,serif" font-size="14.00">~</text>
+<text text-anchor="middle" x="1394" y="-557.71" font-family="Times,serif" font-size="14.00">Normal</text>
+</g>
+<!-- delta_k&#45;&gt;k -->
+<g id="edge48" class="edge">
+<title>delta_k&#45;&gt;k</title>
+<path fill="none" stroke="black" d="M1394,-538.92C1394,-530.5 1394,-521.55 1394,-513.16"/>
+<polygon fill="black" stroke="black" points="1397.5,-512.92 1394,-502.92 1390.5,-512.92 1397.5,-512.92"/>
 </g>
 </g>
 </svg>

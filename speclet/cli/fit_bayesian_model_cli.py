@@ -81,7 +81,7 @@ def _check_mcmc_sampling_efficiency(
     additional_checks: list[post_check.PosteriorCheck] | None = None,
 ) -> post_check.PosteriorCheckResults:
     checks = [
-        post_check.CheckStepSize(min_ss=0.00005),
+        post_check.CheckStepSize(min_ss=0.00001),
         post_check.CheckBFMI(min_bfmi=0.2, max_bfmi=2.0),
     ]
     if additional_checks is not None:
@@ -191,7 +191,7 @@ def fit_bayesian_model(
             logger.debug(msg)
         res = _check_mcmc_sampling_efficiency(trace, model_checks)
         logger.info(res.message)
-        if res:
+        if res.all_passed:
             logger.info("Sampling statistics checks passed.")
         else:
             logger.error("Sampling statistics checks failed.")

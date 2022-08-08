@@ -64,8 +64,8 @@ class CheckStepSize:
             return True, "All average step sizes above minimum."
         else:
             n_fails = np.sum(res)
-            _ss = ",".join([f"{x:0.2e}" for x in avg_step_size])
-            return False, f"{n_fails} agf. step sizes less than threshold: {_ss}"
+            _ss = ",".join([f"{x:0.4e}" for x in avg_step_size])
+            return False, f"{n_fails} avg. step sizes less than threshold: {_ss}"
 
     def __str__(self) -> str:
         return "check_step_size"

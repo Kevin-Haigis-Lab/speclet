@@ -100,7 +100,7 @@ class LineageHierNegBinomModelConfig(BaseModel):
 
 
 class LineageHierNegBinomModel:
-    """A hierarchical negative binomial generalized linear model fora single lineage."""
+    """A hierarchical negative binomial generalized linear model for one lineage."""
 
     version: str = "0.0.3"
 
@@ -445,11 +445,12 @@ class LineageHierNegBinomModel:
 
         with pm.Model(coords=coords) as model:
             # Gene varying effects covariance matrix.
+            _g_sd_dists = [0.2, 0.1, 0.5, 0.2] + ([0.2] * n_CG)
             g_chol, _, g_sigmas = pm.LKJCholeskyCov(
                 "genes_chol_cov",
                 eta=2,
                 n=n_gene_vars,
-                sd_dist=pm.HalfNormal.dist(0.5, shape=n_gene_vars),
+                sd_dist=pm.HalfNormal.dist(_g_sd_dists, shape=n_gene_vars),
                 compute_corr=True,
             )
             for i, var_name in enumerate(["mu_a", "b", "d", "f"]):
@@ -494,14 +495,14 @@ class LineageHierNegBinomModel:
                 "cells_chol_cov",
                 eta=2,
                 n=n_cell_vars,
-                sd_dist=pm.HalfNormal.dist(0.2, shape=n_cell_vars),
+                sd_dist=pm.HalfNormal.dist([0.1, 0.2], shape=n_cell_vars),
                 compute_corr=True,
             )
             for i, var_name in enumerate(["mu_k", "mu_m"]):
                 pm.Deterministic(f"sigma_{var_name}", cl_sigmas[i])
 
             mu_mu_k = 0
-            mu_mu_m = pm.Normal("mu_mu_m", 0, 0.1)
+            mu_mu_m = pm.Normal("mu_mu_m", -0.2, 0.1)
             _mu_cells = [mu_mu_k, mu_mu_m]
             mu_cells = at.stack(_mu_cells, axis=0)
             delta_cells = pm.Normal("delta_cells", 0, 1, shape=(n_cell_vars, n_C))
@@ -551,7 +552,16 @@ class LineageHierNegBinomModel:
     def posterior_sample_checks(self) -> list[post_checks.PosteriorCheck]:
         """Default posterior checks."""
         checks: list[post_checks.PosteriorCheck] = []
-        for var_name in ["sigma_mu_a", "sigma_b", "sigma_d", "sigma_f", "sigma_k"]:
+        vars_to_check = [
+            "sigma_mu_a",
+            "sigma_b",
+            "sigma_d",
+            "sigma_f",
+            "sigma_k",
+            "sigma_mu_k",
+            "sigma_mu_m",
+        ]
+        for var_name in vars_to_check:
             checks.append(
                 post_checks.CheckMarginalPosterior(
                     var_name=var_name,
