@@ -98,7 +98,7 @@ def _automated_posterior_checks(
     additional_checks: list[post_check.PosteriorCheck] | None = None,
 ) -> post_check.PosteriorCheckResults:
     checks = [
-        post_check.CheckStepSize(min_ss=0.00001),
+        post_check.CheckStepSize(min_ss=0.0005),
         post_check.CheckBFMI(min_bfmi=0.2, max_bfmi=2.0),
     ]
     if additional_checks is not None:
