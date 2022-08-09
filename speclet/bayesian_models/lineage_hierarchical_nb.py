@@ -278,6 +278,15 @@ class LineageHierNegBinomModel:
             )
         coords["cancer_gene"] = cancer_genes
 
+        genes_params = ["mu_a", "b", "d", "f"]
+        genes_params += [f"h[{cg}]" for cg in cancer_genes]
+        coords["genes_params"] = genes_params
+        coords["genes_params_"] = genes_params.copy()
+
+        cells_params = ["mu_k", "mu_m"]
+        coords["cells_params"] = cells_params
+        coords["cells_params_"] = cells_params.copy()
+
         return LineageHierNegBinomModelData(
             N=data.shape[0],
             S=indices.n_sgrnas,
@@ -574,6 +583,15 @@ class LineageHierNegBinomModel:
                 )
             )
         return checks
+
+    def additional_variable_dims(self) -> dict[str, list[str]]:
+        """Additional dimensions for variables not included in the model spec."""
+        return {
+            "cells_chol_cov_stds": ["cells_params"],
+            "cells_chol_cov_corr": ["cells_params", "cells_params_"],
+            "genes_chol_cov_stds": ["genes_params"],
+            "genes_chol_cov_corr": ["genes_params", "genes_params_"],
+        }
 
 
 def target_gene_is_mutated_vector(data: pd.DataFrame) -> npt.NDArray[np.int64]:

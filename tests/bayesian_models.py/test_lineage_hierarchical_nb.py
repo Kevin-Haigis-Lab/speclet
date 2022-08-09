@@ -1,5 +1,8 @@
+import arviz as az
 import pandas as pd
+import pymc as pm
 import pytest
+from pymc.backends.base import MultiTrace
 
 from speclet.bayesian_models.lineage_hierarchical_nb import (
     LineageHierNegBinomModel as LHNBModel,
@@ -52,4 +55,32 @@ def test_raise_error_only_one_gene(
     crc_data["hugo_symbol"] = ["my-gene"] * len(crc_data)
     with pytest.raises(BaseException):
         _ = crc_lhnb_model.pymc_model(crc_data)
+    return None
+
+
+@pytest.mark.DEV
+@pytest.mark.slow
+def test_chol_cov_coords_pmsample(
+    crc_data: pd.DataFrame, crc_lhnb_model: LHNBModel
+) -> None:
+    trace: az.InferenceData | MultiTrace | None = None
+    with crc_lhnb_model.pymc_model(crc_data):
+        trace = pm.sample(
+            draws=10,
+            tune=10,
+            chains=1,
+            idata_kwargs={"dims": crc_lhnb_model.additional_variable_dims()},
+        )
+
+    assert isinstance(trace, az.InferenceData)
+    posterior = trace.get("posterior")
+    assert posterior is not None
+    # Genes
+    assert posterior["genes_chol_cov_stds"].dims[2] == "genes_params"
+    assert posterior["genes_chol_cov_corr"].dims[2] == "genes_params"
+    assert posterior["genes_chol_cov_corr"].dims[3] == "genes_params_"
+    # Cell lines
+    assert posterior["cells_chol_cov_stds"].dims[2] == "cells_params"
+    assert posterior["cells_chol_cov_corr"].dims[2] == "cells_params"
+    assert posterior["cells_chol_cov_corr"].dims[3] == "cells_params_"
     return None
