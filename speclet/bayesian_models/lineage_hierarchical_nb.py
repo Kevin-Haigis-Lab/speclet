@@ -196,15 +196,18 @@ class LineageHierNegBinomModel:
     def vars_regex(self, fit_method: ModelFitMethod | None = None) -> list[str]:
         """Regular expression to help with plotting only interesting variables."""
         _vars = [
-            "~^mu$",
-            "~^eta$",
             "~^delta_.*",
-            "~.*effect$",
             "~^cells_chol_cov.*$",
             "~^.*cells$",
             "~^genes_chol_cov.*$",
             "~^.*genes$",
         ]
+        if not self.reduce_deterministic_vars:
+            _vars += [
+                "~^mu$",
+                "~^eta$",
+                "~.*effect$",
+            ]
         return _vars
 
     def validate_data(self, data: pd.DataFrame) -> pd.DataFrame:
