@@ -1,7 +1,7 @@
 """Automated checks for successful MCMC sampling."""
 
 from dataclasses import dataclass
-from typing import Any, Callable, Iterable
+from typing import Any, Callable, Iterable, Literal
 
 import arviz as az
 import numpy as np
@@ -69,6 +69,60 @@ class CheckStepSize:
 
     def __str__(self) -> str:
         return "check_step_size"
+
+    def __repr__(self) -> str:
+        return str(self)
+
+
+EssMethod = Literal[
+    "bulk",
+    "tail",
+    "quantile",
+    "mean",
+    "sd",
+    "median",
+    "mad",
+    "z_scale",
+    "folded",
+    "identity",
+    "local",
+]
+
+
+class CheckEffectiveSampleSize:
+    """Check the ESS is above a certain threshold."""
+
+    def __init__(
+        self, var_name: str, min_ess: float, method: EssMethod = "bulk"
+    ) -> None:
+        """Check the ESS of a variable is above a threshold.
+
+        Args:
+            var_name (str): Variable name.
+            min_ess (float): Minimum ESS value.
+            method (EssMethod): ESS method. Defaults to 'bulk'.
+        """
+        self.var_name = var_name
+        self.min_ess = min_ess
+        self.method = method
+        return None
+
+    def __call__(self, trace: az.InferenceData) -> CheckResult:
+        """Check the ESS of a variable is above a threshold."""
+        ess = az.ess(trace, var_names=[self.var_name], method=self.method)[
+            self.var_name
+        ].values
+        ess_res = ess >= self.min_ess
+        if np.all(ess_res):
+            msg = f"Var '{self.var_name}' had ESS ({self.method}) ≥ {self.min_ess}"
+            return True, msg
+        else:
+            msg = f"Var '{self.var_name}' had ESS ({self.method}) ≤ {self.min_ess}"
+            msg += f" -- {list(ess)}"
+            return False, msg
+
+    def __str__(self) -> str:
+        return f"check-min-ess-{self.method}_{self.var_name}_min-{self.min_ess}"
 
     def __repr__(self) -> str:
         return str(self)
