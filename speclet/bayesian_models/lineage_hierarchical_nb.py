@@ -564,7 +564,7 @@ class LineageHierNegBinomModel:
     def posterior_sample_checks(self) -> list[post_checks.PosteriorCheck]:
         """Default posterior checks."""
         checks: list[post_checks.PosteriorCheck] = []
-        vars_to_check = [
+        marginal_checks = [
             "sigma_mu_a",
             "sigma_b",
             "sigma_d",
@@ -573,7 +573,7 @@ class LineageHierNegBinomModel:
             "sigma_mu_k",
             "sigma_mu_m",
         ]
-        for var_name in vars_to_check:
+        for var_name in marginal_checks:
             checks.append(
                 post_checks.CheckMarginalPosterior(
                     var_name=var_name,
@@ -582,6 +582,15 @@ class LineageHierNegBinomModel:
                     skip_if_missing=True,
                 )
             )
+
+        ess_checks = ["sigma_mu_a", "mu_mu_a"]
+        for var_name in ess_checks:
+            checks.append(
+                post_checks.CheckEffectiveSampleSize(
+                    var_name=var_name, min_frac_ess=0.05
+                )
+            )
+
         return checks
 
     def additional_variable_dims(self) -> dict[str, list[str]]:
