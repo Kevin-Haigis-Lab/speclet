@@ -58,7 +58,6 @@ def test_raise_error_only_one_gene(
     return None
 
 
-@pytest.mark.DEV
 @pytest.mark.slow
 def test_chol_cov_coords_pmsample(
     crc_data: pd.DataFrame, crc_lhnb_model: LHNBModel
@@ -83,4 +82,22 @@ def test_chol_cov_coords_pmsample(
     assert posterior["cells_chol_cov_stds"].dims[2] == "cells_params"
     assert posterior["cells_chol_cov_corr"].dims[2] == "cells_params"
     assert posterior["cells_chol_cov_corr"].dims[3] == "cells_params_"
+    # Some other variables (skipped - bug in PyMC, submitted PR)
+    # for v in ["b", "d"]:
+    #     assert posterior[v].dims[3] == "gene"
+    # for v in ["mu_k", "mu_m"]:
+    #     assert posterior[v].dims[3] == "cell_line"
+    return None
+
+
+def test_posterior_checks_use_available_variable_names(
+    crc_data: pd.DataFrame, crc_lhnb_model: LHNBModel
+) -> None:
+    model = crc_lhnb_model.pymc_model(crc_data)
+    _n_checks = 0
+    for check in crc_lhnb_model.posterior_sample_checks():
+        if (v := getattr(check, "var_name")) is not None:
+            _n_checks += 1
+            assert getattr(model, v) is not None
+    assert _n_checks > 1
     return None
