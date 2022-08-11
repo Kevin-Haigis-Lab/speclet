@@ -48,6 +48,6 @@ summarize_posterior:
 execute_report:
   partition: "short"
   cores: 1
-  mem: "250000"
-  time: "10:00:00"
+  mem: "{resources.mem}"
+  time: "{resources.time}"
   J: "report"

@@ -195,7 +195,6 @@ rule sample_pymc_numpyro:
         "  --broad-only"
         "  --log-level DEBUG"
         "  --check-sampling-stats"
-        # "  --seed {wildcards.chain}"
 
 
 rule combine_pymc_numpyro:
@@ -301,10 +300,26 @@ rule papermill_report:
         )
 
 
+def _report_ram_request(wildcards: Wildcards, attempt: int) -> str:
+    attempt_to_mem_map: dict[int, int] = {1: 50, 2: 100, 3: 250}
+    mem = attempt_to_mem_map.get(attempt, 250)
+    return str(mem * 1000)
+
+
+def _report_time_request(wildcards: Wildcards, attempt: int) -> str:
+    attempt_to_time_map: dict[int, str] = {1: "02", 2: "04", 3: "06"}
+    hr = attempt_to_time_map.get(attempt, "12")
+    return f"{hr}:00:00"
+
+
 rule execute_report:
     input:
         idata_path=MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "posterior.netcdf",
         notebook=rules.papermill_report.output.notebook,
+    resources:
+        mem=_report_ram_request,
+        time=_report_time_request,
+    retries: 3
     output:
         markdown=REPORTS_DIR / "{model_name}_{fit_method}.md",
     shell:
