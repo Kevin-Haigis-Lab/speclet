@@ -448,7 +448,17 @@ class LineageHierNegBinomModel:
         n_G = model_data.G
         n_CG = model_data.CG
         n_C = model_data.C
+        # Number of varying effects variables.
         n_gene_vars = 4 + n_CG
+        g_sd_dists = [0.2, 0.1, 0.5, 0.2] + ([0.2] * n_CG)
+        assert (
+            len(g_sd_dists) == n_gene_vars
+        ), "Varying gene effects SDs not correct length."
+        n_cell_vars = 2
+        c_sd_dists = [0.1, 0.2]
+        assert (
+            len(c_sd_dists) == n_cell_vars
+        ), "Varying cell effects SDs not correct length."
 
         mu_mu_a_loc = np.log(
             np.mean(model_data.ct_final) / (np.mean(model_data.ct_initial))
@@ -457,12 +467,12 @@ class LineageHierNegBinomModel:
 
         with pm.Model(coords=coords) as model:
             # Gene varying effects covariance matrix.
-            _g_sd_dists = [0.2, 0.1, 0.5, 0.2] + ([0.2] * n_CG)
+
             g_chol, _, g_sigmas = pm.LKJCholeskyCov(
                 "genes_chol_cov",
                 eta=2,
                 n=n_gene_vars,
-                sd_dist=pm.HalfNormal.dist(_g_sd_dists, shape=n_gene_vars),
+                sd_dist=pm.HalfNormal.dist(g_sd_dists, shape=n_gene_vars),
                 compute_corr=True,
             )
             for i, var_name in enumerate(["mu_a", "b", "d", "f"]):
@@ -502,12 +512,11 @@ class LineageHierNegBinomModel:
                 gene_effect = pm.Deterministic("gene_effect", _gene_effect)
 
             # Cell line varying effects covariance matrix.
-            n_cell_vars = 2
             cl_chol, _, cl_sigmas = pm.LKJCholeskyCov(
                 "cells_chol_cov",
                 eta=2,
                 n=n_cell_vars,
-                sd_dist=pm.HalfNormal.dist([0.1, 0.2], shape=n_cell_vars),
+                sd_dist=pm.HalfNormal.dist(c_sd_dists, shape=n_cell_vars),
                 compute_corr=True,
             )
             for i, var_name in enumerate(["mu_k", "mu_m"]):
