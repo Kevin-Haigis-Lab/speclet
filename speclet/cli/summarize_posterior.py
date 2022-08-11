@@ -53,7 +53,7 @@ def _posterior_description(
     output += f"config. name: '{name}'\n"
     output += f"model name: '{type(model).__name__}'\n"
     output += f"model version: '{model.version}'\n"
-    output += f"model description: {model_doc}"
+    output += f"model description: {model_doc}\n"
     output += f"fit method: '{fit_method.value}'"
 
     output += br

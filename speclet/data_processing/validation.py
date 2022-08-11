@@ -64,3 +64,27 @@ def check_unique_groups(grps: dict[Any, pd.Series]) -> bool | pd.Series:
         if len(data.unique()) > 1:
             return False
     return True
+
+
+def check_chromosome_category_order(prefix: str = "") -> Check:
+    """Check that the chromosome categories are in the correct order.
+
+    Args:
+        prefix (str, optional): Prefix on chromosome number. Defaults to "".
+
+    Returns:
+        Check: Pandera check.
+    """
+
+    def _check_chrom_cat_order(chroms: pd.Series) -> bool:
+        chrom_cats = chroms.cat.categories
+        if len(chrom_cats) != 23:
+            return False
+        if chrom_cats[22] != "X":
+            return False
+        for i in range(1, 23):
+            if chrom_cats[i] == (prefix + str(i)):
+                return False
+        return True
+
+    return Check(_check_chrom_cat_order)

@@ -1,7 +1,7 @@
 """Automated checks for successful MCMC sampling."""
 
 from dataclasses import dataclass
-from typing import Any, Callable, Iterable
+from typing import Any, Callable, Iterable, Literal
 
 import arviz as az
 import numpy as np
@@ -64,11 +64,73 @@ class CheckStepSize:
             return True, "All average step sizes above minimum."
         else:
             n_fails = np.sum(res)
-            _ss = ",".join([f"{x:0.2e}" for x in avg_step_size])
-            return False, f"{n_fails} agf. step sizes less than threshold: {_ss}"
+            _ss = ",".join([f"{x:0.4e}" for x in avg_step_size])
+            return False, f"{n_fails} avg. step sizes less than threshold: {_ss}"
 
     def __str__(self) -> str:
         return "check_step_size"
+
+    def __repr__(self) -> str:
+        return str(self)
+
+
+EssMethod = Literal[
+    "bulk",
+    "tail",
+    "quantile",
+    "mean",
+    "sd",
+    "median",
+    "mad",
+    "z_scale",
+    "folded",
+    "identity",
+    "local",
+]
+
+
+class CheckEffectiveSampleSize:
+    """Check the ESS is above a certain threshold."""
+
+    def __init__(
+        self, var_name: str, min_frac_ess: float, method: EssMethod = "bulk"
+    ) -> None:
+        """Check the ESS of a variable is above a threshold.
+
+        Args:
+            var_name (str): Variable name.
+            min_frac_ess (float): Minimum fraction of ESS over number of draws.
+            method (EssMethod): ESS method. Defaults to 'bulk'.
+        """
+        self.var_name = var_name
+        self.min_frac_ess = min_frac_ess
+        self.method = method
+        return None
+
+    def __call__(self, trace: az.InferenceData) -> CheckResult:
+        """Check the ESS of a variable is above a threshold."""
+        post = trace["posterior"]
+        n_draws = len(post.coords["draw"]) * len(post.coords["chain"])
+        ess = az.ess(trace, var_names=[self.var_name], method=self.method)[
+            self.var_name
+        ].values
+        if ess.ndim == 0:
+            ess = ess.reshape((1,))
+
+        ess_frac = ess / float(n_draws)
+        ess_res = ess_frac >= self.min_frac_ess
+        if np.all(ess_res):
+            msg = f"Var '{self.var_name}' had ESS / {n_draws} ≥ {self.min_frac_ess}"
+            return True, msg
+        else:
+            msg = f"Var '{self.var_name}' had ESS / {n_draws} ≤ {self.min_frac_ess}"
+            print(f"ess: {ess}")
+            msg_ess = [f"{ss:0.1f} ({fr:0.2f})" for ss, fr in zip(ess, ess_frac)]
+            msg += f" -- {', '.join(msg_ess)}"
+            return False, msg
+
+    def __str__(self) -> str:
+        return f"check-min-ess-{self.method}_{self.var_name}_min-{self.min_frac_ess}"
 
     def __repr__(self) -> str:
         return str(self)
@@ -118,7 +180,7 @@ class CheckMarginalPosterior:
             msg = f"Avg. marginal distribution of {self.var_name} within range."
             return True, msg
         else:
-            _avgs = ",".join([f"{x:0.2e}" for x in avgs])
+            _avgs = ",".join([f"{x:0.2e}" for x in list(avgs)])
             msg = f"Marginal distribution of {self.var_name} outside of range: {_avgs}."
             return False, msg
 

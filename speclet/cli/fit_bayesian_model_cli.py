@@ -27,9 +27,10 @@ from speclet.modeling.fitting_arguments import (
     PymcSamplingNumpyroArguments,
 )
 from speclet.modeling.model_fitting_api import fit_model
+from speclet.pipelines.slurm_interactions import cancel_current_slurm_job
 from speclet.project_enums import ModelFitMethod
 
-# ---- Setup ----
+# --- Setup ---
 
 
 load_dotenv()
@@ -37,7 +38,7 @@ cli_helpers.configure_pretty()
 app = Typer()
 
 
-# ---- Helpers ----
+# --- Helpers ---
 
 
 def _read_crispr_screen_data(
@@ -76,19 +77,6 @@ def _augment_sampling_kwargs(
     return sampling_kwargs
 
 
-def _check_mcmc_sampling_efficiency(
-    trace: az.InferenceData,
-    additional_checks: list[post_check.PosteriorCheck] | None = None,
-) -> post_check.PosteriorCheckResults:
-    checks = [
-        post_check.CheckStepSize(min_ss=0.00005),
-        post_check.CheckBFMI(min_bfmi=0.2, max_bfmi=2.0),
-    ]
-    if additional_checks is not None:
-        checks += additional_checks
-    return post_check.check_mcmc_sampling(trace, checks)
-
-
 def _add_model_attributes(
     model: BayesianModelProtocol, trace: az.InferenceData
 ) -> None:
@@ -102,7 +90,43 @@ def _add_model_attributes(
     return None
 
 
-# ---- Main ----
+# --- Automated posterior checks ---
+
+
+def _automated_posterior_checks(
+    trace: az.InferenceData,
+    additional_checks: list[post_check.PosteriorCheck] | None = None,
+) -> post_check.PosteriorCheckResults:
+    checks = [
+        post_check.CheckStepSize(min_ss=0.0005),
+        post_check.CheckBFMI(min_bfmi=0.2, max_bfmi=2.0),
+    ]
+    if additional_checks is not None:
+        msg = f"Recieved {len(additional_checks)} posterior checks from the model."
+        logger.debug(msg)
+        checks += additional_checks
+    return post_check.check_mcmc_sampling(trace, checks)
+
+
+def _handle_posterior_check_results(
+    res: post_check.PosteriorCheckResults, cancel_slurm_job: bool
+) -> None:
+    logger.info(res.message)
+    if res.all_passed:
+        logger.info("Sampling statistics checks passed.")
+        return None
+
+    logger.error("Sampling statistics checks failed.")
+
+    if cancel_slurm_job:
+        logger.error("Trying to cancel SLURM job.")
+        cancel_current_slurm_job()
+        logger.error("Unable to fail SLURM job.")
+
+    raise post_check.FailedSamplingStatisticsChecksError()
+
+
+# --- Main ---
 
 
 @app.command()
@@ -118,6 +142,7 @@ def fit_bayesian_model(
     broad_only: bool = False,
     log_level: str | None = None,
     check_sampling_stats: bool = False,
+    cancel_slurm_job: bool = True,
 ) -> None:
     """Sample a Bayesian model.
 
@@ -140,6 +165,9 @@ def fit_bayesian_model(
         check_sampling_stats (bool, optional): Whether to check the sampling statistics
         at the end of sampling. Note, that a failed result will cause the program to
         exit with an error.
+        cancel_slurm_job (bool, optional): If can find the SLURM job ID (`SLURM_JOB_ID`
+        environment variable), then cancel the job if the posterior checks fail.
+        Defaults to `True`.
     """
     tic = time()
     if log_level is not None:
@@ -184,18 +212,8 @@ def fit_bayesian_model(
         model_checks: list[post_check.PosteriorCheck] | None = getattr(
             model, "posterior_sample_checks", lambda: None
         )()
-        if model_checks is None:
-            logger.debug("No posterior checks from model object.")
-        else:
-            msg = f"Recieved {len(model_checks)} posterior checks from the model."
-            logger.debug(msg)
-        res = _check_mcmc_sampling_efficiency(trace, model_checks)
-        logger.info(res.message)
-        if res:
-            logger.info("Sampling statistics checks passed.")
-        else:
-            logger.error("Sampling statistics checks failed.")
-            raise post_check.FailedSamplingStatisticsChecksError()
+        res = _automated_posterior_checks(trace, model_checks)
+        _handle_posterior_check_results(res, cancel_slurm_job=cancel_slurm_job)
 
     if cache_name is None:
         logger.warning("No cache name provided - one will be generated automatically.")
