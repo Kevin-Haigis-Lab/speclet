@@ -79,6 +79,8 @@ def test_get_data_with_transforms() -> None:
 
 def test_fail_validation_completely_different(iris: pd.DataFrame) -> None:
     dm = CrisprDM(io.DataFile.DEPMAP_TEST_DATA)
+    iris["sgrna_target_chr"] = ["1"] * len(iris)
+    iris["depmap_id"] = ["a"] * len(iris)
     with pytest.raises(SchemaError):
         dm.apply_validation(iris)
     with pytest.raises(SchemaError):
