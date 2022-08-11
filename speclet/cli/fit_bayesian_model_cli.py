@@ -28,6 +28,7 @@ from speclet.modeling.fitting_arguments import (
 )
 from speclet.modeling.model_fitting_api import fit_model
 from speclet.pipelines.slurm_interactions import cancel_current_slurm_job
+from speclet.project_configuration import project_config_broad_only
 from speclet.project_enums import ModelFitMethod
 
 # --- Setup ---
@@ -139,7 +140,7 @@ def fit_bayesian_model(
     mcmc_cores: int = 4,
     cache_name: str | None = None,
     seed: int | None = None,
-    broad_only: bool = False,
+    broad_only: bool | None = None,
     log_level: str | None = None,
     check_sampling_stats: bool = False,
     cancel_slurm_job: bool = True,
@@ -176,6 +177,11 @@ def fit_bayesian_model(
     config = model_config.get_configuration_for_model(
         config_path=config_path, name=name
     )
+
+    if broad_only is None:
+        logger.info("Using project config option for `broad_only`.")
+        broad_only = project_config_broad_only()
+
     assert config is not None
     logger.info("Loading data.")
     data = _read_crispr_screen_data(config.data_file, broad_only=broad_only)

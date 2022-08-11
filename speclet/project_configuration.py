@@ -24,6 +24,7 @@ class ModelingConfig(BaseModel):
 
     highest_density_interval: float
     models_config: Path
+    broad_only: bool
 
 
 class FittingPipelineConfig(BaseModel):
@@ -111,6 +112,11 @@ def get_model_configuration_file() -> Path:
     return read_project_configuration().modeling.models_config
 
 
+def project_config_broad_only() -> bool:
+    """Get the project configuration for Broad data only."""
+    return read_project_configuration().modeling.broad_only
+
+
 # ---- Not in the YAML file ----
 
 
@@ -126,4 +132,4 @@ def on_hms_cluster() -> bool:
 
 def arviz_config() -> None:
     """Set common ArviZ defaults."""
-    az.rcParams["stats.hdi_prob"] = get_bayesian_modeling_constants().hdi_prob
+    az.rcparams.rcParams["stats.hdi_prob"] = get_bayesian_modeling_constants().hdi_prob
