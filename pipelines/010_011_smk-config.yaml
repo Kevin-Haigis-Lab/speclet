@@ -51,3 +51,9 @@ execute_report:
   mem: "{resources.mem}"
   time: "{resources.time}"
   J: "report"
+execute_lineage_report:
+  partition: "short"
+  cores: 2
+  mem: "{resources.mem}"
+  time: "{resources.time}"
+  J: "lin-rep"

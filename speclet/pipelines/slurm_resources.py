@@ -9,6 +9,7 @@ from typing import Final
 import yaml
 from pydantic import BaseModel, Field, PositiveInt
 
+from speclet.bayesian_models import BayesianModel
 from speclet.exceptions import ConfigurationNotFound
 from speclet.project_enums import ModelFitMethod, SlurmPartition
 
@@ -41,6 +42,7 @@ class ResourceConfiguration(BaseModel):
     """Resource requirement configuration."""
 
     name: str
+    model: BayesianModel
     active: bool = True
     slurm_resources: dict[ModelFitMethod, SlurmResources] = Field(default_factory=dict)
 

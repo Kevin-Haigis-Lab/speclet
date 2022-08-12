@@ -8,7 +8,8 @@ import pandas as pd
 
 from speclet import model_configuration as model_config
 from speclet.bayesian_models import BayesianModelProtocol, get_bayesian_model
-from speclet.io import models_dir
+from speclet.io import models_dir, project_root
+from speclet.loggers import logger
 from speclet.managers.cache_manager import get_posterior_cache_name
 from speclet.managers.data_managers import CrisprScreenDataManager, broad_only
 from speclet.project_configuration import (
@@ -87,6 +88,12 @@ class PosteriorDataManager:
             )
         return self._bayes_model
 
+    def read_description(self) -> str:
+        """Read the description file."""
+        desc_path = self.posterior_dir / "description.txt"
+        with open(desc_path, "r") as file:
+            return "".join(list(file))
+
     @property
     def posterior_summary(self) -> pd.DataFrame:
         """The summary of the model's posterior."""
@@ -110,8 +117,14 @@ class PosteriorDataManager:
         """Data used to fit the data."""
         if self._data is None:
             trans = [broad_only] if self._broad_only else []
+            data_file = self.config.data_file
+            if isinstance(data_file, Path) and not data_file.exists():
+                data_file = project_root() / data_file
+                if not data_file.exists():
+                    raise FileNotFoundError("Data file not found.")
+
             self._data = CrisprScreenDataManager(
-                self.config.data_file, transformations=trans
+                data_file, transformations=trans
             ).get_data(read_kwargs={"low_memory": False})
         return self._data
 
@@ -144,6 +157,16 @@ class PosteriorDataManager:
 
         self._model_data_struct = model_structure_fxn(self.valid_data)
         return self._model_data_struct
+
+    def load_all(self) -> None:
+        """Load all data objects now (instead of when first requested)."""
+        _ = self.data
+        try:
+            _ = self.valid_data
+            _ = self.model_data_struct
+        except NotImplementedError:
+            logger.debug("Data validation or model structure creation not available.")
+        return None
 
 
 class PosteriorDataManagers:

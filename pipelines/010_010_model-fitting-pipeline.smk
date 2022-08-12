@@ -10,7 +10,7 @@ from speclet.pipelines.snakemake_parsing_helpers import get_models_names_fit_met
 from speclet.pipelines.aesara_flags import get_aesara_flags
 from speclet.project_enums import ModelFitMethod
 from speclet.project_configuration import fitting_pipeline_config
-
+from speclet.bayesian_models import BayesianModel
 
 pipeline_config = fitting_pipeline_config()
 
@@ -28,7 +28,7 @@ if not BENCHMARK_DIR.exists():
     BENCHMARK_DIR.mkdir(parents=True)
 
 
-# --- Model configurations ----
+# --- Model configurations ---
 
 MODEL_CONFIG = pipeline_config.models_config
 model_configuration_lists = get_models_names_fit_methods(MODEL_CONFIG)
@@ -38,7 +38,13 @@ if len(model_configuration_lists) == 0:
     raise BaseException("No models to run in pipeline in the configuration file.")
 
 
-# --- Wildcard constrains ----
+# --- Organizing models ---
+
+lineage_models_lists = get_models_names_fit_methods(
+    MODEL_CONFIG, model_type=BayesianModel.LINEAGE_HIERARCHICAL_NB
+)
+
+# --- Wildcard constrains ---
 
 
 wildcard_constraints:
@@ -47,7 +53,7 @@ wildcard_constraints:
     chain="\d+",
 
 
-# --- Helpers ----
+# --- Helpers ---
 
 
 def create_resource_manager(w: Wildcards, fit_method: ModelFitMethod) -> SlurmRM:
@@ -70,12 +76,13 @@ def get_gres(w: Wildcards, fit_method: ModelFitMethod) -> str:
     return create_resource_manager(w=w, fit_method=fit_method).gres
 
 
-# --- Rules ----
+# --- Rules ---
 
 
 localrules:
     all,
     papermill_report,
+    papermill_lineage_report,
 
 
 rule all:
@@ -85,6 +92,12 @@ rule all:
             zip,
             model_name=model_configuration_lists.model_names,
             fit_method=model_configuration_lists.fit_methods,
+        ),
+        lineage_report=expand(
+            REPORTS_DIR / "{model_name}_{fit_method}_lineage-report.md",
+            zip,
+            model_name=lineage_models_lists.model_names,
+            fit_method=lineage_models_lists.fit_methods,
         ),
         description=expand(
             MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "description.txt",
@@ -292,7 +305,28 @@ rule papermill_report:
             output.notebook,
             parameters={
                 "MODEL_NAME": wildcards.model_name,
-                "FIT_METHOD_STR": wildcards.fit_method,
+                "FIT_METHOD": wildcards.fit_method,
+                "CONFIG_PATH": str(MODEL_CONFIG),
+                "ROOT_CACHE_DIR": str(MODEL_CACHE_DIR),
+            },
+            prepare_only=True,
+        )
+
+
+rule papermill_lineage_report:
+    input:
+        template_nb=REPORTS_DIR / "_lineage-model-report-template.ipynb",
+    output:
+        notebook=REPORTS_DIR / "{model_name}_{fit_method}_lineage-report.ipynb",
+    version:
+        "1.0"
+    run:
+        papermill.execute_notebook(
+            input.template_nb,
+            output.notebook,
+            parameters={
+                "MODEL_NAME": wildcards.model_name,
+                "FIT_METHOD": wildcards.fit_method,
                 "CONFIG_PATH": str(MODEL_CONFIG),
                 "ROOT_CACHE_DIR": str(MODEL_CACHE_DIR),
             },
@@ -301,14 +335,14 @@ rule papermill_report:
 
 
 def _report_ram_request(wildcards: Wildcards, attempt: int) -> str:
-    attempt_to_mem_map: dict[int, int] = {1: 50, 2: 100, 3: 250}
-    mem = attempt_to_mem_map.get(attempt, 250)
+    attempt_to_mem_map: dict[int, int] = {1: 100, 2: 170, 3: 250}
+    mem = attempt_to_mem_map[attempt]
     return str(mem * 1000)
 
 
 def _report_time_request(wildcards: Wildcards, attempt: int) -> str:
-    attempt_to_time_map: dict[int, str] = {1: "02", 2: "04", 3: "06"}
-    hr = attempt_to_time_map.get(attempt, "12")
+    attempt_to_time_map: dict[int, str] = {1: "03", 2: "08", 3: "12"}
+    hr = attempt_to_time_map[attempt]
     return f"{hr}:00:00"
 
 
@@ -319,9 +353,26 @@ rule execute_report:
     resources:
         mem=_report_ram_request,
         time=_report_time_request,
-    retries: 3
+    retries: 2
     output:
         markdown=REPORTS_DIR / "{model_name}_{fit_method}.md",
+    shell:
+        "jupyter nbconvert --to notebook --inplace --execute {input.notebook} && "
+        "nbqa isort --profile=black {input.notebook} && "
+        "nbqa black {input.notebook} && "
+        "jupyter nbconvert --to markdown {input.notebook}"
+
+
+rule execute_lineage_report:
+    input:
+        idata_path=MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "posterior.netcdf",
+        notebook=rules.papermill_lineage_report.output.notebook,
+    resources:
+        mem=_report_ram_request,
+        time=_report_time_request,
+    retries: 2
+    output:
+        markdown=REPORTS_DIR / "{model_name}_{fit_method}_lineage-report.md",
     shell:
         "jupyter nbconvert --to notebook --inplace --execute {input.notebook} && "
         "nbqa isort --profile=black {input.notebook} && "
