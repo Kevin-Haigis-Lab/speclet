@@ -54,7 +54,7 @@ class PosteriorDataManager:
         self.id = id if id is not None else name
 
         if config_path is None:
-            config_path = get_model_configuration_file()
+            config_path = project_root() / get_model_configuration_file()
         self._config_path = config_path
         self.config = model_config.get_configuration_for_model(
             config_path=config_path, name=name

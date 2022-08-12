@@ -27,8 +27,8 @@ TEMPLATE_CONFIG: Final[
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_{{LINEAGE}}.csv"
   model_kwargs:
     lineage: "{{LINEAGE}}"
-    min_n_cancer_genes: 3
-    min_frac_cancer_genes: 0.2
+    min_n_cancer_genes: {{MIN_N}}
+    min_frac_cancer_genes: {{MIN_FRAC}}
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -40,18 +40,36 @@ TEMPLATE_CONFIG: Final[
         step_size: 0.01
   slurm_resources:
     PYMC_NUMPYRO:
-      mem: 32
-      time: 8
+      mem: {{MEM}}
+      time: {{TIME}}
       cores: 1
       gpu:
         gpu: "RTX 8000"
 """
 
 
-def _make_config(lineage: str, active: bool) -> str:
-    return TEMPLATE_CONFIG.replace("{{LINEAGE}}", lineage).replace(
-        "{{ACTIVE}}", str(active).lower()
-    )
+def _make_config(
+    lineage: str,
+    active: bool,
+    memory_gb: int,
+    time_hr: int,
+    min_n_cancer_genes: int,
+    min_frac_cancer_genes: float,
+) -> str:
+    replacements: Final[dict[str, str]] = {
+        "{{LINEAGE}}": lineage,
+        "{{ACTIVE}}": str(active).lower(),
+        "{{MIN_N}}": str(min_n_cancer_genes),
+        "{{MIN_FRAC}}": str(min_frac_cancer_genes),
+        "{{TIME}}": str(time_hr),
+        "{{MEM}}": str(memory_gb),
+    }
+    config = TEMPLATE_CONFIG
+    for key, value in replacements.items():
+        _config = config.replace(key, value)
+        assert _config != config, f"No changes made for '{key}':'{value}'."
+        config = _config
+    return config
 
 
 def _list_lineages() -> list[str]:
@@ -86,7 +104,14 @@ def _insert_lineage_configs(config_file: Path, new_text: str) -> None:
 
 
 @app.command()
-def generate(config: Path | None = None, active: bool = True) -> None:
+def generate(
+    config: Path | None = None,
+    active: bool = True,
+    memory: int = 32,
+    time_hr: int = 10,
+    min_n_cancer_genes: int = 4,
+    min_frac_cancer_genes: float = 0.05,
+) -> None:
     """Autogenerate model configurations for all cell line lineages.
 
     Inserts model configurations for all lineages with data in the specific folder for
@@ -99,12 +124,30 @@ def generate(config: Path | None = None, active: bool = True) -> None:
         which results in using the default configuration in the project configuration.
         active (bool, optional): Mark the new configurations active or inactive.
         Defaults to `True` (active).
+        memory (int, optional): Pass the memory (GB) to be used for each configuration.
+        Defaults to 32.
+        time_hr (int, optional): Pass the time (hours) to be used for each
+        configuration. Defaults to 10.
+        min_n_cancer_genes (int, optional): Pass the `min_n_cancer_genes` to be used for
+        each configuration. Defaults to 4.
+        min_frac_cancer_genes (float, optional): Pass the `min_frac_cancer_genes` to be
+        used for each configuration. Defaults to 0.05.
     """
     rprint("[blue]Autogenerate cell line lineage configurations.[/blue]")
     if config is None:
         config = get_model_configuration_file()
 
-    lineage_configs = [_make_config(line, active=active) for line in _list_lineages()]
+    lineage_configs = [
+        _make_config(
+            line,
+            active=active,
+            memory_gb=memory,
+            time_hr=time_hr,
+            min_n_cancer_genes=min_n_cancer_genes,
+            min_frac_cancer_genes=min_frac_cancer_genes,
+        )
+        for line in _list_lineages()
+    ]
     _insert_lineage_configs(config, "\n".join(lineage_configs))
     rprint("Done! :party_popper:")
     return None
