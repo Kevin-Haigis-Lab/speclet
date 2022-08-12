@@ -197,10 +197,8 @@ class LineageHierNegBinomModel:
         """Regular expression to help with plotting only interesting variables."""
         _vars = [
             "~^delta_.*",
-            "~^cells_chol_cov.*$",
-            "~^.*cells$",
-            "~^genes_chol_cov.*$",
-            "~^.*genes$",
+            "~^.*cells.*$",
+            "~^.*genes.*$",
         ]
         if not self.reduce_deterministic_vars:
             _vars += [

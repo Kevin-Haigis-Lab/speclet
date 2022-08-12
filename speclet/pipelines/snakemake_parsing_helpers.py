@@ -4,6 +4,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, validate_arguments
 
+from speclet.bayesian_models import BayesianModel
 from speclet.pipelines import slurm_resources as slurm
 
 
@@ -20,21 +21,29 @@ class ParsedPipelineInformation(BaseModel):
 
 
 @validate_arguments
-def get_models_names_fit_methods(config_path: Path) -> ParsedPipelineInformation:
+def get_models_names_fit_methods(
+    config_path: Path, *, model_type: set[BayesianModel] | BayesianModel | None = None
+) -> ParsedPipelineInformation:
     """Get model names and fit methods for ease-of-use in snakemake workflow.
 
     Args:
         config_path (Path): Path to a configuration file.
+        model_type (BayesianModel | None, optional): Filter for a specific model or
+        group of models.
 
     Returns:
         ParsedPipelineInformation: The information in a useful format for use in a
         snakemake workflow.
     """
+    if isinstance(model_type, BayesianModel):
+        model_type = {model_type}
     configs = slurm.read_resource_configs(config_path)
     names: list[str] = []
     fit_methods: list[str] = []
     for config in configs:
         if not config.active:
+            continue
+        if model_type is not None and config.model not in model_type:
             continue
         fms = list(config.slurm_resources.keys())
         names += [config.name] * len(fms)
