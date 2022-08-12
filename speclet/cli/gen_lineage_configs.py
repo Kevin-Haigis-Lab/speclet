@@ -22,7 +22,7 @@ TEMPLATE_CONFIG: Final[
   description: "
     Single lineage hierarchical negative binomial model for {{LINEAGE}} data.
   "
-  active: true
+  active: {{ACTIVE}}
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_{{LINEAGE}}.csv"
   model_kwargs:
@@ -48,8 +48,10 @@ TEMPLATE_CONFIG: Final[
 """
 
 
-def _make_config(lineage: str) -> str:
-    return TEMPLATE_CONFIG.replace("{{LINEAGE}}", lineage)
+def _make_config(lineage: str, active: bool) -> str:
+    return TEMPLATE_CONFIG.replace("{{LINEAGE}}", lineage).replace(
+        "{{ACTIVE}}", str(active).lower()
+    )
 
 
 def _list_lineages() -> list[str]:
@@ -84,7 +86,7 @@ def _insert_lineage_configs(config_file: Path, new_text: str) -> None:
 
 
 @app.command()
-def insert(config: Path | None = None) -> None:
+def generate(config: Path | None = None, active: bool = True) -> None:
     """Autogenerate model configurations for all cell line lineages.
 
     Inserts model configurations for all lineages with data in the specific folder for
@@ -95,13 +97,15 @@ def insert(config: Path | None = None) -> None:
     Args:
         config (Path | None, optional): Model configuration file. Defaults to `None`
         which results in using the default configuration in the project configuration.
+        active (bool, optional): Mark the new configurations active or inactive.
+        Defaults to `True` (active).
     """
     rprint("[blue]Autogenerate cell line lineage configurations.[/blue]")
     if config is None:
         config = get_model_configuration_file()
 
-    lineage_configs = "\n".join([_make_config(line) for line in _list_lineages()])
-    _insert_lineage_configs(config, lineage_configs)
+    lineage_configs = [_make_config(line, active=active) for line in _list_lineages()]
+    _insert_lineage_configs(config, "\n".join(lineage_configs))
     rprint("Done! :party_popper:")
     return None
 
