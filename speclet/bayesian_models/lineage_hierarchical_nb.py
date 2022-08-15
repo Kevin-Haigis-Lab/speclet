@@ -475,7 +475,6 @@ class LineageHierNegBinomModel:
             )
             for i, var_name in enumerate(["mu_a", "b", "d", "f"]):
                 pm.Deterministic(f"sigma_{var_name}", g_sigmas[i])
-            pm.Deterministic("sigma_h", g_sigmas[4:], dims="cancer_gene")
 
             # Gene varying effects.
             mu_mu_a = pm.Normal("mu_mu_a", mu_mu_a_loc, 0.2)
@@ -499,6 +498,7 @@ class LineageHierNegBinomModel:
             _gene_effect = a[s] + b[g] * rna + d[g] * cn_gene + f[g] * mut
 
             if n_CG > 0:
+                pm.Deterministic("sigma_h", g_sigmas[4:], dims="cancer_gene")
                 h = pm.Deterministic("h", genes[:, 4:], dims=("gene", "cancer_gene"))
                 _gene_effect = _gene_effect + at.sum(h[g, :] * cg_mut, axis=1)
             else:
