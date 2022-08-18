@@ -46,31 +46,29 @@ def combine_mcmc_chains(
     assert model_config is not None
 
     cache_name = get_posterior_cache_name(model_name=name, fit_method=fit_method)
-    all_idata_objects: list[az.InferenceData] = []
+    merged_idata: az.InferenceData | None = None
     for chain_i in range(n_chains):
         logger.info(f"Gather MCMC chain #{chain_i}.")
         chain_id = f"{cache_name}_chain{chain_i}"
         post_man = PosteriorManager(id=chain_id, cache_dir=cache_dir)
-        if post_man.posterior_cache_exists:
-            _posterior = post_man.get()
-            assert _posterior is not None
-            all_idata_objects.append(_posterior)
-        else:
+        if not post_man.posterior_cache_exists:
             logger.error(f"Cache for chain #{chain_i} '{chain_id}' does not exist.")
             raise CacheDoesNotExistError(post_man.posterior_path)
+        _new_idata = post_man.get()
+        assert _new_idata is not None, "Posterior object not loaded."
+        if merged_idata is None:
+            logger.info("First posterior object - setting as `merged_idata`.")
+            merged_idata = _new_idata
+        else:
+            logger.info("Merging chains.")
+            az.concat(merged_idata, _new_idata, dim="chain", inplace=True)
 
-    if len(all_idata_objects) != n_chains:
-        msg = f"Expected {n_chains} but found {len(all_idata_objects)}."
-        logger.error(msg)
-        raise BaseException(msg)
-    else:
-        logger.info(f"Collected {len(all_idata_objects)} chains.")
-
-    logger.info("Merging all chains.")
-    combined_chains = az.concat(all_idata_objects, dim="chain")
-    assert isinstance(combined_chains, az.InferenceData)
+    logger.info("Iterated through all chains.")
+    assert merged_idata is not None, "Merged IData objects unsuccessful."
+    n_chains_final = len(merged_idata["posterior"].coords["chain"])
+    assert n_chains == n_chains_final, f"Expected {n_chains}, found {n_chains_final}."
     logger.info("Writing posterior samples to file.")
-    PosteriorManager(id=cache_name, cache_dir=output_dir).put(combined_chains)
+    PosteriorManager(id=cache_name, cache_dir=output_dir).put(merged_idata)
     logger.info("Finished writing posterior samples to file.")
     return None
 
