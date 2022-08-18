@@ -1,10 +1,18 @@
 """Cache manager for Bayesian model posterior sampling data."""
 
+import shutil
+import uuid
 from pathlib import Path
 
 import arviz as az
 
+from speclet.io import temp_dir
 from speclet.project_enums import ModelFitMethod
+
+
+def _make_temporary_filepath(original_path: Path) -> Path:
+    new_name = str(uuid.uuid4()) + "__" + original_path.name
+    return temp_dir() / new_name
 
 
 class PosteriorManager:
@@ -65,7 +73,9 @@ class PosteriorManager:
         self._make_dir()
         if self._posterior is None:
             return None
-        self._posterior.to_netcdf(str(self.posterior_path))
+        _path = _make_temporary_filepath(self.posterior_path)
+        self._posterior.to_netcdf(str(_path))
+        shutil.move(_path, self.posterior_path)
 
     def put(self, trace: az.InferenceData) -> None:
         """Put a new posterior object to file.

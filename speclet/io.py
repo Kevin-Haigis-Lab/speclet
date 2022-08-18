@@ -139,3 +139,8 @@ def modeling_data_dir() -> Path:
 def data_dir() -> Path:
     """Path to (raw) data directory."""
     return project_root() / "data"
+
+
+def temp_dir() -> Path:
+    """Temporary directory."""
+    return project_root() / "temp"
