@@ -348,6 +348,9 @@ def _report_time_request(wildcards: Wildcards, attempt: int) -> str:
 
 rule execute_report:
     input:
+        description=rules.summarize_posterior.output.description,
+        posterior_summary=rules.summarize_posterior.output.posterior_summary,
+        post_pred=rules.summarize_posterior.output.post_pred,
         idata_path=MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "posterior.netcdf",
         notebook=rules.papermill_report.output.notebook,
     resources:
@@ -365,6 +368,9 @@ rule execute_report:
 
 rule execute_lineage_report:
     input:
+        description=rules.summarize_posterior.output.description,
+        posterior_summary=rules.summarize_posterior.output.posterior_summary,
+        post_pred=rules.summarize_posterior.output.post_pred,
         idata_path=MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "posterior.netcdf",
         notebook=rules.papermill_lineage_report.output.notebook,
     resources:
