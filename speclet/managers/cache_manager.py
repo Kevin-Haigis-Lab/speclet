@@ -31,6 +31,7 @@ class PosteriorManager:
         """
         self.id = id
         self._posterior: az.InferenceData | None = None
+        self._posterior_predictive: az.InferenceData | None = None
         if isinstance(cache_dir, str):
             cache_dir = Path(cache_dir)
         self.cache_dir = cache_dir
@@ -46,9 +47,19 @@ class PosteriorManager:
         return self.cache_path / "posterior.netcdf"
 
     @property
+    def posterior_predictive_path(self) -> Path:
+        """Path to the cache file."""
+        return self.cache_path / "posterior-predictive.netcdf"
+
+    @property
     def posterior_cache_exists(self) -> bool:
         """The cache file exists."""
         return self.posterior_path.exists()
+
+    @property
+    def posterior_predictive_cache_exists(self) -> bool:
+        """The cache file exists."""
+        return self.posterior_predictive_path.exists()
 
     def _make_dir(self) -> None:
         """Make the cache directory for this posterior."""
@@ -60,34 +71,56 @@ class PosteriorManager:
         """Clear cached file."""
         if self.posterior_cache_exists:
             self.posterior_path.unlink(missing_ok=False)
-        return None
+        if self.posterior_predictive_cache_exists:
+            self.posterior_predictive_path.unlink(missing_ok=False)
 
     def clear(self) -> None:
         """Clear posterior from file and in-memory store."""
         self._posterior = None
+        self._posterior_predictive = None
         self.clear_cache()
-        return None
+
+    def write_posterior_to_file(self) -> None:
+        """Write the posterior data to file."""
+        if self._posterior is not None:
+            _path = _make_temporary_filepath(self.posterior_path)
+            self._posterior.to_netcdf(str(_path))
+            shutil.move(_path, self.posterior_path)
+
+    def write_posterior_predictive_to_file(self) -> None:
+        """Write the posterior predictive data to file."""
+        if self._posterior_predictive is not None:
+            _path = _make_temporary_filepath(self.posterior_predictive_path)
+            self._posterior_predictive.to_netcdf(str(_path))
+            shutil.move(_path, self.posterior_predictive_path)
 
     def write_to_file(self) -> None:
         """If currently in memory, force the posterior object to be written to file."""
         self._make_dir()
-        if self._posterior is None:
-            return None
-        _path = _make_temporary_filepath(self.posterior_path)
-        self._posterior.to_netcdf(str(_path))
-        shutil.move(_path, self.posterior_path)
+        self.write_posterior_to_file()
+        self.write_posterior_predictive_to_file()
 
-    def put(self, trace: az.InferenceData) -> None:
-        """Put a new posterior object to file.
+    def put_posterior(self, posterior_idata: az.InferenceData) -> None:
+        """Put a new posterior data object to file.
 
         Args:
-            trace (az.InferenceData): A model's posterior data.
+            posterior_idata (az.InferenceData): A model's posterior data.
         """
         self._make_dir()
-        self._posterior = trace
+        self._posterior = posterior_idata
         self.write_to_file()
 
-    def get(self, from_file: bool = False) -> az.InferenceData | None:
+    def put_posterior_predictive(self, post_pred_idata: az.InferenceData) -> None:
+        """Put a new posterior predictive data object to file.
+
+        Args:
+            post_pred_idata (az.InferenceData): A model's posterior data.
+        """
+        self._make_dir()
+        self._posterior_predictive = post_pred_idata
+        self.write_to_file()
+
+    def get_posterior(self, from_file: bool = False) -> az.InferenceData | None:
         """Get a model's posterior data.
 
         Args:
@@ -101,6 +134,25 @@ class PosteriorManager:
             return self._posterior
         elif self.posterior_cache_exists:
             return az.from_netcdf(str(self.posterior_path))
+        else:
+            return None
+
+    def get_posterior_predictive(
+        self, from_file: bool = False
+    ) -> az.InferenceData | None:
+        """Get a model's posterior predictive data.
+
+        Args:
+            from_file (bool, optional): Force re-reading from file. Defaults to False.
+
+        Returns:
+            Optional[az.InferenceData]: If it exists, the model's posterior predictive
+            data.
+        """
+        if not from_file and self._posterior_predictive is not None:
+            return self._posterior_predictive
+        elif self.posterior_predictive_cache_exists:
+            return az.from_netcdf(str(self.posterior_predictive_path))
         else:
             return None
 
@@ -127,7 +179,7 @@ def cache_posterior(posterior: az.InferenceData, id: str, cache_dir: Path) -> Pa
         cache_dir (Path): Directory to write to.
     """
     posterior_manager = PosteriorManager(id=id, cache_dir=cache_dir)
-    posterior_manager.put(posterior)
+    posterior_manager.put_posterior(posterior)
     return posterior_manager.posterior_path
 
 
@@ -145,7 +197,7 @@ def get_cached_posterior(id: str, cache_dir: Path) -> az.InferenceData:
         az.InferenceData: Posterior trace.
     """
     posterior_manager = PosteriorManager(id=id, cache_dir=cache_dir)
-    trace = posterior_manager.get()
+    trace = posterior_manager.get_posterior()
     if trace is None:
         raise FileNotFoundError(posterior_manager.posterior_path)
     return trace
