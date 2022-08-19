@@ -19,10 +19,7 @@ from speclet.bayesian_models import BayesianModelProtocol, get_bayesian_model
 from speclet.cli import cli_helpers
 from speclet.io import temp_dir
 from speclet.loggers import logger
-from speclet.managers.cache_manager import (
-    get_cached_posterior,
-    get_posterior_cache_name,
-)
+from speclet.managers.cache_manager import PosteriorManager, get_posterior_cache_name
 from speclet.model_configuration import BayesianModelConfiguration
 from speclet.project_configuration import get_bayesian_modeling_constants
 from speclet.project_enums import ModelFitMethod
@@ -154,6 +151,22 @@ def _posterior_predictions(
     return None
 
 
+def _get_posterior_data(
+    cache_name: str, cache_dir: Path
+) -> tuple[az.InferenceData, az.InferenceData]:
+    pm = PosteriorManager(id=cache_name, cache_dir=cache_dir)
+    posterior = pm.get_posterior()
+    assert posterior is not None, "Could not locate model posterior."
+
+    post_pred = posterior
+    if pm.posterior_predictive_cache_exists:
+        logger.debug("Using posterior predictive data from different file.")
+        post_pred = pm.get_posterior_predictive()
+        assert post_pred is not None
+
+    return posterior, post_pred
+
+
 @app.command()
 def summarize_posterior(
     name: str,
@@ -200,22 +213,27 @@ def summarize_posterior(
 
     logger.info("Retrieving Bayesian model object.")
     model = get_bayesian_model(config.model)(**config.model_kwargs)
-
-    logger.info("Reading model posterior from file.")
-    trace = get_cached_posterior(id=cache_name, cache_dir=cache_dir)
+    logger.info("Reading model posterior data from file.")
+    posterior_trace, post_pred_trace = _get_posterior_data(cache_name, cache_dir)
 
     _posterior_description(
         description_path,
         model=model,
         name=name,
         config=config,
-        trace=trace,
+        trace=posterior_trace,
         fit_method=fit_method,
     )
     _posterior_summary(
-        posterior_summary_path, trace=trace, vars_regex=model.vars_regex(fit_method)
+        posterior_summary_path,
+        trace=posterior_trace,
+        vars_regex=model.vars_regex(fit_method),
     )
-    _posterior_predictions(post_pred_path, trace=trace, thin=post_pred_thin)
+    _posterior_predictions(
+        post_pred_path,
+        trace=post_pred_trace,
+        thin=post_pred_thin,
+    )
     return None
 
 
