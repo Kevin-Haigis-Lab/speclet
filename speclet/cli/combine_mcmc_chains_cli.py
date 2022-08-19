@@ -2,6 +2,7 @@
 
 """Command line interface for merging MCMC chains for a single model."""
 
+import gc
 from pathlib import Path
 from typing import Callable
 
@@ -61,7 +62,7 @@ def _del_posterior_predictive_and_observed_data(
 
 
 def _del_posterior_and_observed_data(idata: az.InferenceData) -> az.InferenceData:
-    idata = _del_posterior_predictive(idata)
+    idata = _del_posterior(idata)
     idata = _del_observed_data(idata)
     return idata
 
@@ -143,6 +144,7 @@ def combine_mcmc_chains(
         logger.info("Finished writing posterior data to file.")
     else:
         logger.info("Merging and saving posterior and post. pred. separately.")
+
         # Merge and save posterior distribution data.
         logger.info("Merging and saving posterior.")
         combined_chains_posterior = _combine_mcmc_chains(
@@ -156,6 +158,12 @@ def combine_mcmc_chains(
             combined_chains_posterior
         )
         logger.info("Finished writing posterior data to file.")
+
+        # Free up memory.
+        logger.debug("Deleting posterior object.")
+        del combined_chains_posterior
+        logger.debug("Calling garbage collection.")
+        gc.collect()
 
         # Merge and save posterior predictive distribution data.
         logger.info("Merging and saving posterior predictive.")
