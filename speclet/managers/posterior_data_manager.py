@@ -11,6 +11,7 @@ from speclet.bayesian_models import BayesianModelProtocol, get_bayesian_model
 from speclet.io import models_dir, project_root
 from speclet.loggers import logger
 from speclet.managers.cache_manager import PosteriorManager as PosteriorCacheManager
+from speclet.managers.cache_manager import get_posterior_cache_name
 from speclet.managers.data_managers import CrisprScreenDataManager, broad_only
 from speclet.project_configuration import (
     get_model_configuration_file,
@@ -66,8 +67,11 @@ class PosteriorDataManager:
 
         if posterior_dir is None:
             posterior_dir = models_dir()
+        self._cache_name = get_posterior_cache_name(
+            model_name=self.name, fit_method=fit_method
+        )
         self.post_cache_manager = PosteriorCacheManager(
-            id=self.name, cache_dir=posterior_dir
+            id=self._cache_name, cache_dir=posterior_dir
         )
 
         # Properties to be acquired when needed.
