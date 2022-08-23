@@ -144,3 +144,16 @@ def data_dir() -> Path:
 def temp_dir() -> Path:
     """Temporary directory."""
     return project_root() / "temp"
+
+
+def tables_dir() -> Path:
+    """Tables directory."""
+    return project_root() / "tables"
+
+
+def notebook_table_dir(nb_name: str) -> Path:
+    """Get a path to a tables directory for a notebook."""
+    d = tables_dir() / nb_name
+    if not d.exists():
+        d.mkdir()
+    return d
