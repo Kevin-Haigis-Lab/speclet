@@ -194,7 +194,7 @@ rule sample_pymc_numpyro:
     benchmark:
         BENCHMARK_DIR / "sample_pymc_mcmc/{model_name}_chain{chain}.tsv"
     priority: 30
-    retries: 1
+    retries: 0
     shell:
         get_aesara_flags("{wildcards.model_name}_{wildcards.chain}_mcmc") + " "
         "speclet/cli/fit_bayesian_model_cli.py"
@@ -353,10 +353,6 @@ rule execute_report:
         post_pred=rules.summarize_posterior.output.post_pred,
         idata_path=MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "posterior.netcdf",
         notebook=rules.papermill_report.output.notebook,
-    resources:
-        mem=_report_ram_request,
-        time=_report_time_request,
-    retries: 2
     output:
         markdown=REPORTS_DIR / "{model_name}_{fit_method}.md",
     shell:
