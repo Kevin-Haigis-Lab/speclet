@@ -145,6 +145,8 @@ rule all:
         MODELING_DATA_DIR / "depmap_num-lines-per-lineage.csv",
         # check_lineage_data_files
         MODELING_DATA_DIR / "lineage-data-files-check.touch",
+        # check_sublineage_data_files
+        MODELING_DATA_DIR / "sublineage-data-files-check.touch",
         # rules.modeling_data_subsets.output
         MODELING_DATA_DIR / "depmap-modeling-data_crc.csv",
         MODELING_DATA_DIR / "depmap-modeling-data_crc-subsample.csv",
@@ -494,6 +496,20 @@ checkpoint data_per_lineage:
         "058_split-modeling-data-per-lineage.R"
 
 
+def aggregate_lineage_data_files(wildcards):
+    checkpoint_output = checkpoints.data_per_lineage.get(**wildcards).output[0]
+    return checkpoint_output
+
+
+rule check_lineage_data_files:
+    input:
+        aggregate_lineage_data_files,
+    output:
+        touch(MODELING_DATA_DIR / "lineage-data-files-check.touch"),
+    shell:
+        "echo 'files checked'"
+
+
 checkpoint data_per_sublineage:
     input:
         cell_line_info=rules.cell_line_info.output.cell_line_info,
@@ -508,16 +524,16 @@ checkpoint data_per_sublineage:
         "059_split-broad-modeling-data-per-sublineage.R"
 
 
-def aggregate_lineage_data_files(wildcards):
-    checkpoint_output = checkpoints.data_per_lineage.get(**wildcards).output[0]
+def aggregate_sublineage_data_files(wildcards):
+    checkpoint_output = checkpoints.data_per_sublineage.get(**wildcards).output[0]
     return checkpoint_output
 
 
-rule check_lineage_data_files:
+rule check_sublineage_data_files:
     input:
         aggregate_lineage_data_files,
     output:
-        touch(MODELING_DATA_DIR / "lineage-data-files-check.touch"),
+        touch(MODELING_DATA_DIR / "sublineage-data-files-check.touch"),
     shell:
         "echo 'files checked'"
 

@@ -3,7 +3,7 @@
 # Run munge pipeline.
 
 #SBATCH --account=park
-#SBATCH -c 2
+#SBATCH -c 1
 #SBATCH -p priority
 #SBATCH -t 0-12:00
 #SBATCH --mem 2G

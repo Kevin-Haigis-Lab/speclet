@@ -37,7 +37,7 @@ filter_and_write_lineage_data <- function(modeling_data, lineage) {
     return(NULL)
   }
   fname <- make_data_file_name(lineage)
-  print("Saving data for '{lineage}' ({n_cells} cell lines) to '{fname}'")
+  print(glue("Saving data for '{lineage}' ({n_cells} cell lines) to '{fname}'"))q
   write_csv(lineage_data, fname)
   return(NULL)
 }
@@ -54,26 +54,32 @@ filter_and_write_lineage_data <- function(modeling_data, lineage) {
 # Return:
 #   Lineage data with the modified `lineage` column.
 modify_lineage_sublineage_names <- function(modeling_data, lineage) {
+  print(glue("Modifying lineage names for '{lineage}'."))
   lineage_df <- modeling_data %>% filter(lineage == !!lineage)
   names_df <- lineage_df %>%
-    distinct(lineage, sublineage) %>%
-    mutate(lineage = glue("{lineage}_({sublineage})"))
+    distinct(lineage, lineage_subtype) %>%
+    mutate(lineage = glue("{lineage}_({lineage_subtype})"))
   lineage_df <- lineage_df %>%
     select(-lineage) %>%
-    left_join(names_df, by="sublineage")
+    left_join(names_df, by="lineage_subtype")
   return(lineage_df)
 }
 
 
 main <- function(modeling_df_file, out_dir) {
+  print("Running sub-lineage splitting process.")
   modeling_data <- data.table::fread(modeling_df_file, showProgress = FALSE) %>%
     as_tibble() %>%
-    filter(screen == "broad")
+    filter(screen == "broad") %>%
+    filter(!is.na(lineage_subtype))
 
-  lineages <- unique(modeling_data)
+  print("Successfully read in modeling data.")
+
+  lineages <- unique(unlist(modeling_data$lineage))
+  print(glue("Found {length(lineages)} lineages."))
   for (lineage in lineages) {
     print(glue("Processing lineage '{lineage}'."))
-    if (lineage in LUMP_LINEAGES) {
+    if (lineage %in% LUMP_LINEAGES) {
       filter_and_write_lineage_data(modeling_data, lineage)
     } else {
       mod_lineage_data <- modify_lineage_sublineage_names(modeling_data, lineage)
@@ -83,6 +89,7 @@ main <- function(modeling_df_file, out_dir) {
       }
     }
   }
+  print("Done!")
 }
 
 # --- Run ---
