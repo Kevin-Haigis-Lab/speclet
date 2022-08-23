@@ -18,13 +18,13 @@ app = Typer()
 TEMPLATE_CONFIG: Final[
     str
 ] = """
-- name: hnb-single-lineage-{{LINEAGE}}
+- name: "hnb-single-lineage-{{LINEAGE}}"
   description: "
     Single lineage hierarchical negative binomial model for {{LINEAGE}} data.
   "
   active: {{ACTIVE}}
   model: LINEAGE_HIERARCHICAL_NB
-  data_file: "modeling_data/lineage-modeling-data/depmap-modeling-data_{{LINEAGE}}.csv"
+  data_file: "modeling_data/{{DATA_DIR}}/depmap-modeling-data_{{LINEAGE}}.csv"
   model_kwargs:
     lineage: "{{LINEAGE}}"
     min_n_cancer_genes: {{MIN_N}}
@@ -49,6 +49,7 @@ TEMPLATE_CONFIG: Final[
 
 
 def _make_config(
+    data_dir_name: str,
     lineage: str,
     active: bool,
     memory_gb: int,
@@ -57,6 +58,7 @@ def _make_config(
     min_frac_cancer_genes: float,
 ) -> str:
     replacements: Final[dict[str, str]] = {
+        "{{DATA_DIR}}": data_dir_name,
         "{{LINEAGE}}": lineage,
         "{{ACTIVE}}": str(active).lower(),
         "{{MIN_N}}": str(min_n_cancer_genes),
@@ -72,8 +74,8 @@ def _make_config(
     return config
 
 
-def _list_lineages() -> list[str]:
-    lineage_files = [f for f in lineage_modeling_data_dir().iterdir()]
+def _list_lineages(data_dir: Path) -> list[str]:
+    lineage_files = [f for f in data_dir.iterdir()]
     lineage_files = [f for f in lineage_files if "depmap-modeling-data" in f.name]
     pattern = r"(?<=depmap-modeling-data_).*(?=\.csv)"
     lineages: list[str] = [re.findall(pattern, f.name)[0] for f in lineage_files]
@@ -105,11 +107,12 @@ def _insert_lineage_configs(config_file: Path, new_text: str) -> None:
 
 @app.command()
 def generate(
+    data_dir: Path | None = None,
     config: Path | None = None,
     active: bool = True,
-    memory: int = 32,
-    time_hr: int = 10,
-    min_n_cancer_genes: int = 4,
+    memory: int = 24,
+    time_hr: int = 8,
+    min_n_cancer_genes: int = 3,
     min_frac_cancer_genes: float = 0.05,
 ) -> None:
     """Autogenerate model configurations for all cell line lineages.
@@ -120,6 +123,8 @@ def generate(
     Inserts the configurations between '## >>> AUTO GEN LINEAGES >>>\n' and '## <<<\n'.
 
     Args:
+        data_dir (Path | None, optional): Directory with lineage data files. Defaults
+        to `None`.
         config (Path | None, optional): Model configuration file. Defaults to `None`
         which results in using the default configuration in the project configuration.
         active (bool, optional): Mark the new configurations active or inactive.
@@ -134,19 +139,23 @@ def generate(
         used for each configuration. Defaults to 0.05.
     """
     rprint("[blue]Autogenerate cell line lineage configurations.[/blue]")
+    if data_dir is None:
+        data_dir = lineage_modeling_data_dir()
+        rprint(f"[gray]Using lineages from '{data_dir}'.[/gray]")
     if config is None:
         config = get_model_configuration_file()
 
     lineage_configs = [
         _make_config(
-            line,
+            data_dir_name=data_dir.name,
+            lineage=line,
             active=active,
             memory_gb=memory,
             time_hr=time_hr,
             min_n_cancer_genes=min_n_cancer_genes,
             min_frac_cancer_genes=min_frac_cancer_genes,
         )
-        for line in _list_lineages()
+        for line in _list_lineages(data_dir)
     ]
     _insert_lineage_configs(config, "\n".join(lineage_configs))
     rprint("Done! :party_popper:")
