@@ -1,7 +1,7 @@
 """A hierarchical negative binomial generalized linear model for a single lineage."""
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Iterable, TypeVar
 
 import aesara.tensor as at
 import numpy as np
@@ -244,11 +244,7 @@ class LineageHierNegBinomModel:
         )
 
         # Cancer genes and mutations.
-        lineage_cancer_genes = CancerGeneDM().cosmic_cancer_genes()[self.lineage]
-        cancer_gene_set: set[str] = set()
-
-        for genes in lineage_cancer_genes.values():
-            cancer_gene_set = cancer_gene_set.union(genes)
+        cancer_gene_set = _get_cancer_genes_accounting_for_sublineage(self.lineage)
 
         # Only keep cancer genes that are included in the CRISPR screen data.
         cancer_gene_set = cancer_gene_set.intersection(data["hugo_symbol"])
@@ -639,3 +635,36 @@ def target_gene_is_mutated_vector(data: pd.DataFrame) -> npt.NDArray[np.int64]:
     idx = np.asarray([g in always_mutated_genes for g in data["hugo_symbol"]])
     mut_ary[idx] = 0
     return mut_ary
+
+
+T = TypeVar("T")
+
+
+def _flatten_collection_of_sets(sets: Iterable[set[T]]) -> set[T]:
+    all_values: set[T] = set()
+    for values in sets:
+        all_values = all_values.union(values)
+    return all_values
+
+
+def _get_cancer_genes_accounting_for_sublineage(
+    lineage: str, ignore_sublineage: bool = True
+) -> set[str]:
+    """Get the cancer genes accounting for sub-lineage.
+
+    The sub-lineage is extracted from the lineage name if a '(' is detected. If the
+    sub-lineage is not in the cancer gene dictionary, then all of the lineage cancer
+    genes are returned.
+    """
+    if "(" in lineage:
+        split_lineage = lineage.split("_(")[0]
+        lineage = split_lineage[0]
+        sublineage = split_lineage[1].replace(")", "")
+    else:
+        sublineage = None
+
+    lineage_genes = CancerGeneDM().cosmic_cancer_genes()[lineage]
+    if sublineage is None or ignore_sublineage or sublineage not in lineage_genes:
+        return _flatten_collection_of_sets(lineage_genes.values())
+    else:
+        return lineage_genes[sublineage]
