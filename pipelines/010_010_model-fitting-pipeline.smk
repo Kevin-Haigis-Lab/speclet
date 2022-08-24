@@ -48,7 +48,9 @@ lineage_models_lists = get_models_names_fit_methods(
 
 
 wildcard_constraints:
-    model_name="|".join(set(model_configuration_lists.model_names)),
+    model_name="|".join(set(model_configuration_lists.model_names))
+    .replace("(", "\(")
+    .replace(")", "\)"),
     fit_method="|".join(a.value for a in ModelFitMethod),
     chain="\d+",
 
@@ -178,6 +180,12 @@ rule combine_pymc_mcmc:
 # --- PyMC MCMC Numpyro backend ---
 
 
+def _generate_aesara_flag(w: Wildcards) -> str:
+    model_name, chain = w.model_name, w.chain
+    model_name = model_name.replace("(", "__").replace(")", "__")
+    return get_aesara_flags(f"{model_name}_{chain}_mcmc")
+
+
 rule sample_pymc_numpyro:
     output:
         idata_path=TEMP_DIR
@@ -191,22 +199,24 @@ rule sample_pymc_numpyro:
         config_file=MODEL_CONFIG,
         tempdir=TEMP_DIR,
         cache_name=lambda w: f"{w.model_name}_PYMC_NUMPYRO_chain{w.chain}",
+        aesara_flag=_generate_aesara_flag,
     benchmark:
         BENCHMARK_DIR / "sample_pymc_mcmc/{model_name}_chain{chain}.tsv"
     priority: 30
     retries: 0
     shell:
-        get_aesara_flags("{wildcards.model_name}_{wildcards.chain}_mcmc") + " "
+        # get_aesara_flags("{wildcards.model_name}_{wildcards.chain}_mcmc") + " "
+        "{params.aesara_flag} "
         "speclet/cli/fit_bayesian_model_cli.py"
-        '  "{wildcards.model_name}"'
+        "  '{wildcards.model_name}'"
         "  {params.config_file}"
         "  PYMC_NUMPYRO"
         "  {params.tempdir}"
         "  --mcmc-chains 1"
         "  --mcmc-cores 1"
-        "  --cache-name {params.cache_name}"
+        "  --cache-name '{params.cache_name}'"
         "  --broad-only"
-        "  --log-level DEBUG"
+        "  --log-level 'DEBUG'"
         "  --check-sampling-stats"
 
 
