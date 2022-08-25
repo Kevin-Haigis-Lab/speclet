@@ -236,9 +236,8 @@ rule combine_pymc_numpyro:
         config_file=MODEL_CONFIG,
         cache_dir=TEMP_DIR,
     shell:
-        get_aesara_flags("{wildcards.model_name}_combine-mcmc") + " "
         "speclet/cli/combine_mcmc_chains_cli.py"
-        "  {wildcards.model_name}"
+        "  '{wildcards.model_name}'"
         "  PYMC_NUMPYRO"
         "  {params.n_chains}"
         "  {params.config_file}"
@@ -292,13 +291,13 @@ rule summarize_posterior:
         cache_dir=MODEL_CACHE_DIR,
     shell:
         "speclet/cli/summarize_posterior.py"
-        '  "{wildcards.model_name}"'
+        "  '{wildcards.model_name}'"
         "  {params.config_file}"
         "  {wildcards.fit_method}"
-        "  {params.cache_dir}"
-        "  {output.description}"
-        "  {output.posterior_summary}"
-        "  {output.post_pred}"
+        "  '{params.cache_dir}'"
+        "  '{output.description}'"
+        "  '{output.posterior_summary}'"
+        "  '{output.post_pred}'"
         "  --post-pred-thin=40"
 
 
@@ -366,10 +365,10 @@ rule execute_report:
     output:
         markdown=REPORTS_DIR / "{model_name}_{fit_method}.md",
     shell:
-        "jupyter nbconvert --to notebook --inplace --execute {input.notebook} && "
-        "nbqa isort --profile=black {input.notebook} && "
-        "nbqa black {input.notebook} && "
-        "jupyter nbconvert --to markdown {input.notebook}"
+        "jupyter nbconvert --to notebook --inplace --execute '{input.notebook}' && "
+        "nbqa isort --profile=black '{input.notebook}' && "
+        "nbqa black '{input.notebook}' && "
+        "jupyter nbconvert --to markdown '{input.notebook}'"
 
 
 rule execute_lineage_report:
@@ -386,7 +385,7 @@ rule execute_lineage_report:
     output:
         markdown=REPORTS_DIR / "{model_name}_{fit_method}_lineage-report.md",
     shell:
-        "jupyter nbconvert --to notebook --inplace --execute {input.notebook} && "
-        "nbqa isort --profile=black {input.notebook} && "
-        "nbqa black {input.notebook} && "
-        "jupyter nbconvert --to markdown {input.notebook}"
+        "jupyter nbconvert --to notebook --inplace --execute '{input.notebook}' && "
+        "nbqa isort --profile=black '{input.notebook}' && "
+        "nbqa black '{input.notebook}' && "
+        "jupyter nbconvert --to markdown '{input.notebook}'"

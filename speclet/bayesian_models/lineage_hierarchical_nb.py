@@ -657,7 +657,7 @@ def _get_cancer_genes_accounting_for_sublineage(
     genes are returned.
     """
     if "(" in lineage:
-        split_lineage = lineage.split("_(")[0]
+        split_lineage = lineage.split("_(")
         lineage = split_lineage[0]
         sublineage = split_lineage[1].replace(")", "")
     else:
