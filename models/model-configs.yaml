@@ -104,7 +104,7 @@
   description: "
     Single lineage hierarchical negative binomial model for bile_duct_(cholangiocarcinoma) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_bile_duct_(cholangiocarcinoma).csv"
   model_kwargs:
@@ -133,7 +133,7 @@
   description: "
     Single lineage hierarchical negative binomial model for bile_duct_(gallbladder_adenocarcinoma) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_bile_duct_(gallbladder_adenocarcinoma).csv"
   model_kwargs:
@@ -162,7 +162,7 @@
   description: "
     Single lineage hierarchical negative binomial model for blood_(ALL) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_blood_(ALL).csv"
   model_kwargs:
@@ -191,7 +191,7 @@
   description: "
     Single lineage hierarchical negative binomial model for blood_(AML) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_blood_(AML).csv"
   model_kwargs:
@@ -249,7 +249,7 @@
   description: "
     Single lineage hierarchical negative binomial model for blood_(CML) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_blood_(CML).csv"
   model_kwargs:
@@ -278,7 +278,7 @@
   description: "
     Single lineage hierarchical negative binomial model for bone_(Ewing_sarcoma) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_bone_(Ewing_sarcoma).csv"
   model_kwargs:
@@ -336,7 +336,7 @@
   description: "
     Single lineage hierarchical negative binomial model for bone_(osteosarcoma) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_bone_(osteosarcoma).csv"
   model_kwargs:
@@ -365,7 +365,7 @@
   description: "
     Single lineage hierarchical negative binomial model for breast data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_breast.csv"
   model_kwargs:
@@ -394,7 +394,7 @@
   description: "
     Single lineage hierarchical negative binomial model for central_nervous_system_(glioma) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_central_nervous_system_(glioma).csv"
   model_kwargs:
@@ -423,7 +423,7 @@
   description: "
     Single lineage hierarchical negative binomial model for central_nervous_system_(medulloblastoma) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_central_nervous_system_(medulloblastoma).csv"
   model_kwargs:
@@ -452,7 +452,7 @@
   description: "
     Single lineage hierarchical negative binomial model for cervix_(cervical_carcinoma) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_cervix_(cervical_carcinoma).csv"
   model_kwargs:
@@ -481,7 +481,7 @@
   description: "
     Single lineage hierarchical negative binomial model for cervix_(cervical_squamous) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_cervix_(cervical_squamous).csv"
   model_kwargs:
@@ -510,7 +510,7 @@
   description: "
     Single lineage hierarchical negative binomial model for colorectal data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_colorectal.csv"
   model_kwargs:
@@ -539,7 +539,7 @@
   description: "
     Single lineage hierarchical negative binomial model for esophagus_(esophagus_adenocarcinoma) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_esophagus_(esophagus_adenocarcinoma).csv"
   model_kwargs:
@@ -568,7 +568,7 @@
   description: "
     Single lineage hierarchical negative binomial model for esophagus_(esophagus_squamous) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_esophagus_(esophagus_squamous).csv"
   model_kwargs:
@@ -626,7 +626,7 @@
   description: "
     Single lineage hierarchical negative binomial model for gastric_(gastric_adenocarcinoma) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_gastric_(gastric_adenocarcinoma).csv"
   model_kwargs:
@@ -655,7 +655,7 @@
   description: "
     Single lineage hierarchical negative binomial model for kidney_(renal_cell_carcinoma) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_kidney_(renal_cell_carcinoma).csv"
   model_kwargs:
@@ -684,7 +684,7 @@
   description: "
     Single lineage hierarchical negative binomial model for liver_(hepatocellular_carcinoma) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_liver_(hepatocellular_carcinoma).csv"
   model_kwargs:
@@ -713,7 +713,7 @@
   description: "
     Single lineage hierarchical negative binomial model for lung_(NSCLC) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_lung_(NSCLC).csv"
   model_kwargs:
@@ -742,7 +742,7 @@
   description: "
     Single lineage hierarchical negative binomial model for lung_(SCLC) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_lung_(SCLC).csv"
   model_kwargs:
@@ -771,7 +771,7 @@
   description: "
     Single lineage hierarchical negative binomial model for lung_(mesothelioma) data.
   "
-  active: false
+  active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_lung_(mesothelioma).csv"
   model_kwargs:
