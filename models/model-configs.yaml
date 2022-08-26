@@ -109,7 +109,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_bile_duct_(cholangiocarcinoma).csv"
   model_kwargs:
     lineage: "bile_duct_(cholangiocarcinoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -138,7 +138,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_bile_duct_(gallbladder_adenocarcinoma).csv"
   model_kwargs:
     lineage: "bile_duct_(gallbladder_adenocarcinoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -167,7 +167,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_blood_(ALL).csv"
   model_kwargs:
     lineage: "blood_(ALL)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -196,7 +196,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_blood_(AML).csv"
   model_kwargs:
     lineage: "blood_(AML)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -225,7 +225,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_blood_(CLL).csv"
   model_kwargs:
     lineage: "blood_(CLL)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -254,7 +254,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_blood_(CML).csv"
   model_kwargs:
     lineage: "blood_(CML)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -283,7 +283,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_bone_(Ewing_sarcoma).csv"
   model_kwargs:
     lineage: "bone_(Ewing_sarcoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -312,7 +312,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_bone_(chordoma).csv"
   model_kwargs:
     lineage: "bone_(chordoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -341,7 +341,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_bone_(osteosarcoma).csv"
   model_kwargs:
     lineage: "bone_(osteosarcoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -370,7 +370,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_breast.csv"
   model_kwargs:
     lineage: "breast"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -399,7 +399,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_central_nervous_system_(glioma).csv"
   model_kwargs:
     lineage: "central_nervous_system_(glioma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -428,7 +428,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_central_nervous_system_(medulloblastoma).csv"
   model_kwargs:
     lineage: "central_nervous_system_(medulloblastoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -457,7 +457,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_cervix_(cervical_carcinoma).csv"
   model_kwargs:
     lineage: "cervix_(cervical_carcinoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -486,7 +486,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_cervix_(cervical_squamous).csv"
   model_kwargs:
     lineage: "cervix_(cervical_squamous)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -515,7 +515,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_colorectal.csv"
   model_kwargs:
     lineage: "colorectal"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -544,7 +544,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_esophagus_(esophagus_adenocarcinoma).csv"
   model_kwargs:
     lineage: "esophagus_(esophagus_adenocarcinoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -573,7 +573,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_esophagus_(esophagus_squamous).csv"
   model_kwargs:
     lineage: "esophagus_(esophagus_squamous)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -602,7 +602,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_eye_(uveal_melanoma).csv"
   model_kwargs:
     lineage: "eye_(uveal_melanoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -631,7 +631,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_gastric_(gastric_adenocarcinoma).csv"
   model_kwargs:
     lineage: "gastric_(gastric_adenocarcinoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -660,7 +660,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_kidney_(renal_cell_carcinoma).csv"
   model_kwargs:
     lineage: "kidney_(renal_cell_carcinoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -689,7 +689,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_liver_(hepatocellular_carcinoma).csv"
   model_kwargs:
     lineage: "liver_(hepatocellular_carcinoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -718,7 +718,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_lung_(NSCLC).csv"
   model_kwargs:
     lineage: "lung_(NSCLC)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -747,7 +747,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_lung_(SCLC).csv"
   model_kwargs:
     lineage: "lung_(SCLC)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -776,7 +776,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_lung_(mesothelioma).csv"
   model_kwargs:
     lineage: "lung_(mesothelioma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -805,7 +805,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_lymphocyte_(hodgkin_lymphoma).csv"
   model_kwargs:
     lineage: "lymphocyte_(hodgkin_lymphoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -834,7 +834,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_lymphocyte_(lymphoma_unspecified).csv"
   model_kwargs:
     lineage: "lymphocyte_(lymphoma_unspecified)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -863,7 +863,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_lymphocyte_(non_hodgkin_lymphoma).csv"
   model_kwargs:
     lineage: "lymphocyte_(non_hodgkin_lymphoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -892,7 +892,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_ovary_(ovary_adenocarcinoma).csv"
   model_kwargs:
     lineage: "ovary_(ovary_adenocarcinoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -921,7 +921,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_pancreas.csv"
   model_kwargs:
     lineage: "pancreas"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -950,7 +950,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_peripheral_nervous_system_(neuroblastoma).csv"
   model_kwargs:
     lineage: "peripheral_nervous_system_(neuroblastoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -979,7 +979,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_plasma_cell_(multiple_myeloma).csv"
   model_kwargs:
     lineage: "plasma_cell_(multiple_myeloma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -1008,7 +1008,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_prostate.csv"
   model_kwargs:
     lineage: "prostate"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -1037,7 +1037,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_skin_(melanoma).csv"
   model_kwargs:
     lineage: "skin_(melanoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -1066,7 +1066,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_skin_(skin_squamous).csv"
   model_kwargs:
     lineage: "skin_(skin_squamous)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -1095,7 +1095,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_soft_tissue_(ATRT).csv"
   model_kwargs:
     lineage: "soft_tissue_(ATRT)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -1124,7 +1124,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_soft_tissue_(liposarcoma).csv"
   model_kwargs:
     lineage: "soft_tissue_(liposarcoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -1153,7 +1153,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_soft_tissue_(malignant_rhabdoid_tumor).csv"
   model_kwargs:
     lineage: "soft_tissue_(malignant_rhabdoid_tumor)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -1182,7 +1182,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_soft_tissue_(rhabdomyosarcoma).csv"
   model_kwargs:
     lineage: "soft_tissue_(rhabdomyosarcoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -1211,7 +1211,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_soft_tissue_(synovial_sarcoma).csv"
   model_kwargs:
     lineage: "soft_tissue_(synovial_sarcoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -1240,7 +1240,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_thyroid_(thyroid_carcinoma).csv"
   model_kwargs:
     lineage: "thyroid_(thyroid_carcinoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -1269,7 +1269,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_upper_aerodigestive.csv"
   model_kwargs:
     lineage: "upper_aerodigestive"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -1298,7 +1298,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_urinary_tract.csv"
   model_kwargs:
     lineage: "urinary_tract"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:
@@ -1327,7 +1327,7 @@
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_uterus_(endometrial_adenocarcinoma).csv"
   model_kwargs:
     lineage: "uterus_(endometrial_adenocarcinoma)"
-    min_n_cancer_genes: 3
+    min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
   sampling_kwargs:
     pymc_numpyro:

@@ -112,7 +112,7 @@ def generate(
     active: bool = True,
     memory: int = 24,
     time_hr: int = 8,
-    min_n_cancer_genes: int = 3,
+    min_n_cancer_genes: int = 4,
     min_frac_cancer_genes: float = 0.05,
 ) -> None:
     """Autogenerate model configurations for all cell line lineages.
