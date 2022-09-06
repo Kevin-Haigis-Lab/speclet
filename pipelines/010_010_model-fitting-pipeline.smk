@@ -220,6 +220,11 @@ rule sample_pymc_numpyro:
         "  --check-sampling-stats"
 
 
+def _get_thinning_value(wildcards: Wildcards, attempt: int) -> str:
+    """Thin by the attempt number."""
+    return str(attempt)
+
+
 rule combine_pymc_numpyro:
     input:
         chains=expand(
@@ -235,6 +240,9 @@ rule combine_pymc_numpyro:
         combined_cache_dir=MODEL_CACHE_DIR,
         config_file=MODEL_CONFIG,
         cache_dir=TEMP_DIR,
+    resources:
+        thin=_get_thinning_value,
+    retries: 2
     shell:
         "speclet/cli/combine_mcmc_chains_cli.py"
         "  '{wildcards.model_name}'"
@@ -243,6 +251,7 @@ rule combine_pymc_numpyro:
         "  {params.config_file}"
         "  {params.cache_dir}"
         "  {params.combined_cache_dir}"
+        "  --thin-post-pred {resources.thin}"
 
 
 # --- PyMC ADVI ---

@@ -14,6 +14,7 @@ from speclet.exceptions import CacheDoesNotExistError
 from speclet.loggers import logger, set_console_handler_level
 from speclet.managers.cache_manager import PosteriorManager, get_posterior_cache_name
 from speclet.model_configuration import get_configuration_for_model
+from speclet.modeling import pymc_helpers
 from speclet.project_enums import ModelFitMethod
 
 set_console_handler_level("DEBUG")
@@ -70,11 +71,27 @@ def _del_posterior_and_observed_data(idata: az.InferenceData) -> az.InferenceDat
 # --- Combine chains ---
 
 
+def _thin_posterior(trace: az.InferenceData, by: int | None) -> az.InferenceData:
+    if hasattr(trace, "posterior") and by is not None and 1 < by:
+        return pymc_helpers.thin_posterior(trace, by)
+    return trace
+
+
+def _thin_posterior_predictive(
+    trace: az.InferenceData, by: int | None
+) -> az.InferenceData:
+    if hasattr(trace, "posterior_predictive") and by is not None and 1 < by:
+        return pymc_helpers.thin_posterior_predictive(trace, by)
+    return trace
+
+
 def _combine_mcmc_chains(
     cache_name: str,
     cache_dir: Path,
     n_chains: int,
     chain_mod_fxn: IDataModifier | None = None,
+    thin_posterior: int | None = None,
+    thin_post_pred: int | None = None,
 ) -> az.InferenceData:
     all_idata_objects: list[az.InferenceData] = []
     for chain_i in range(n_chains):
@@ -86,6 +103,8 @@ def _combine_mcmc_chains(
             assert idata is not None, "Failed to get data."
             if chain_mod_fxn is not None:
                 idata = chain_mod_fxn(idata)
+            idata = _thin_posterior(idata, thin_posterior)
+            idata = _thin_posterior_predictive(idata, thin_post_pred)
             all_idata_objects.append(idata)
         else:
             logger.error(f"Cache for chain #{chain_i} '{chain_id}' does not exist.")
@@ -112,6 +131,8 @@ def combine_mcmc_chains(
     config_path: Path,
     cache_dir: Path,
     output_dir: Path,
+    thin_posterior: int = 1,
+    thin_post_pred: int = 1,
 ) -> None:
     """Combine multiple MCMC chains for a single model.
 
