@@ -1,13 +1,9 @@
 """Simple functions for common interactions with PyMC."""
 
-from math import floor
-
 import arviz as az
 import pymc as pm
 import xarray as xr
 from pymc.model import Variable as PyMCVariable
-
-from speclet.exceptions import RequiredArgumentError
 
 
 def get_random_variable_names(m: pm.Model) -> set[str]:
@@ -68,30 +64,26 @@ def get_posterior_names(data: az.InferenceData) -> list[str]:
         raise KeyError("Input ArviZ InferenceData object does not have posterior data.")
 
 
-def thin_posterior(
-    posterior: xr.DataArray,
-    thin_to: int | None = None,
-    step_size: int | None = None,
-) -> xr.DataArray:
-    """Thin a posterior to a specific number of values or by ever n steps.
+def thin(trace: az.InferenceData, by: int) -> az.InferenceData:
+    """Thin a posterior trace."""
+    thinned_trace = trace.sel(draw=slice(0, None, by))
+    assert isinstance(thinned_trace, az.InferenceData)
+    return thinned_trace
 
-    Args:
-        posterior (xr.DataArray): Posterior to thin.
-        thin_to (int, optional): Number of samples to thin the posterior down to.
-          Defaults to None.
-        step_size (Optional[int], optional): Size of the step for the thinning process.
-          Defaults to None.
 
-    Returns:
-        xr.DataArray: The thinned posterior distribution.
-    """
-    if thin_to is not None:
-        step_size = floor(posterior.shape[1] / thin_to)
-    elif step_size is None:
-        raise RequiredArgumentError(
-            "A value must be passed to either `thin_to` or `step_size`."
-        )
-    return posterior.sel(draw=slice(0, None, step_size))
+def thin_posterior(trace: az.InferenceData, by: int) -> az.InferenceData:
+    """Thin posterior draws."""
+    assert hasattr(trace, "posterior"), "No posterior data in trace."
+    trace.posterior = trace.posterior.sel(draw=slice(0, None, by))
+    return trace
+
+
+def thin_posterior_predictive(trace: az.InferenceData, by: int) -> az.InferenceData:
+    """Thin posterior predictive draws."""
+    _msg = "No posterior predictive data in trace."
+    assert hasattr(trace, "posterior_predictive"), _msg
+    trace.posterior_predictive = trace.posterior_predictive.sel(draw=slice(0, None, by))
+    return trace
 
 
 def get_one_chain(posterior: xr.DataArray, chain_num: int = 0) -> xr.DataArray:
