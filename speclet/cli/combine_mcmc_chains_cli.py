@@ -68,12 +68,14 @@ def _del_posterior_and_observed_data(idata: az.InferenceData) -> az.InferenceDat
     return idata
 
 
-# --- Combine chains ---
+# --- Thinning ---
 
 
 def _thin_posterior(trace: az.InferenceData, by: int | None) -> az.InferenceData:
     if hasattr(trace, "posterior") and by is not None and 1 < by:
-        return pymc_helpers.thin_posterior(trace, by)
+        logger.debug(f"Thinning posterior by {by}.")
+        trace = pymc_helpers.thin_posterior(trace, by)
+        print(trace.posterior)
     return trace
 
 
@@ -81,8 +83,13 @@ def _thin_posterior_predictive(
     trace: az.InferenceData, by: int | None
 ) -> az.InferenceData:
     if hasattr(trace, "posterior_predictive") and by is not None and 1 < by:
-        return pymc_helpers.thin_posterior_predictive(trace, by)
+        logger.debug(f"Thinning posterior predictions by {by}.")
+        trace = pymc_helpers.thin_posterior_predictive(trace, by)
+        print(trace.posterior_predictive)
     return trace
+
+
+# --- Combine chains ---
 
 
 def _combine_mcmc_chains(
@@ -156,7 +163,11 @@ def combine_mcmc_chains(
     cache_name = get_posterior_cache_name(model_name=name, fit_method=fit_method)
     if not model_config.split_posterior_when_combining_chains:
         combined_chains = _combine_mcmc_chains(
-            cache_name=cache_name, cache_dir=cache_dir, n_chains=n_chains
+            cache_name=cache_name,
+            cache_dir=cache_dir,
+            n_chains=n_chains,
+            thin_posterior=thin_posterior,
+            thin_post_pred=thin_post_pred,
         )
         logger.info("Writing posterior data to file.")
         PosteriorManager(id=cache_name, cache_dir=output_dir).put_posterior(
@@ -173,6 +184,8 @@ def combine_mcmc_chains(
             cache_dir=cache_dir,
             n_chains=n_chains,
             chain_mod_fxn=_del_posterior_predictive_and_observed_data,
+            thin_posterior=thin_posterior,
+            thin_post_pred=thin_post_pred,
         )
         logger.info("Writing posterior data to file.")
         PosteriorManager(id=cache_name, cache_dir=output_dir).put_posterior(
@@ -193,6 +206,8 @@ def combine_mcmc_chains(
             cache_dir=cache_dir,
             n_chains=n_chains,
             chain_mod_fxn=_del_posterior_and_observed_data,
+            thin_posterior=thin_posterior,
+            thin_post_pred=thin_post_pred,
         )
         logger.info("Writing posterior predictive data to file.")
         PosteriorManager(id=cache_name, cache_dir=output_dir).put_posterior_predictive(

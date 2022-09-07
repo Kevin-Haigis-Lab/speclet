@@ -222,7 +222,8 @@ rule sample_pymc_numpyro:
 
 def _get_thinning_value(wildcards: Wildcards, attempt: int) -> str:
     """Thin by the attempt number."""
-    return str(attempt)
+    thinnings = (1, 2, 4, 10, 20)
+    return str(thinnings[attempt - 1])
 
 
 rule combine_pymc_numpyro:
@@ -242,7 +243,7 @@ rule combine_pymc_numpyro:
         cache_dir=TEMP_DIR,
     resources:
         thin=_get_thinning_value,
-    retries: 2
+    retries: 4
     shell:
         "speclet/cli/combine_mcmc_chains_cli.py"
         "  '{wildcards.model_name}'"
