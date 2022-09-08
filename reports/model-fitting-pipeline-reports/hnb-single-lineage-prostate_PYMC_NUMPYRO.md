@@ -1,29 +1,22 @@
 # Model Report
 
+## Setup
+
+### Imports
+
 
 ```python
 import logging
-from itertools import product
-from time import time
-from typing import Optional
+from pathlib import Path
 
-import arviz as az
 import matplotlib.pyplot as plt
-import numpy as np
 import seaborn as sns
-from matplotlib.lines import Line2D
-from xarray import Dataset
 
-from speclet import model_configuration
-from speclet.analysis.arviz_analysis import describe_mcmc, summarize_rhat
-from speclet.bayesian_models import get_bayesian_model
+from speclet.analysis.arviz_analysis import describe_mcmc
 from speclet.io import project_root
 from speclet.loggers import set_console_handler_level
-from speclet.managers.cache_manager import (
-    get_cached_posterior,
-    get_posterior_cache_name,
-)
-from speclet.project_configuration import get_bayesian_modeling_constants
+from speclet.managers.posterior_data_manager import PosteriorDataManager
+from speclet.project_configuration import arviz_config
 from speclet.project_enums import ModelFitMethod
 ```
 
@@ -32,20 +25,17 @@ from speclet.project_enums import ModelFitMethod
 
 
 ```python
-notebook_tic = time()
-set_console_handler_level(logging.WARNING)
+set_console_handler_level(logging.INFO)
 %config InlineBackend.figure_format = "retina"
-HDI_PROB = get_bayesian_modeling_constants().hdi_prob
+arviz_config()
 ```
 
 Parameters for papermill:
 
 - `MODEL_NAME`: name of the model
-- `FIT_METHOD`: method used to fit the model; either "ADVI" or "MCMC"
+- `FIT_METHOD`: method used to fit the model
 - `CONFIG_PATH`: path to configuration file
 - `ROOT_CACHE_DIR`: path to the root caching directory
-
-## Setup
 
 ### Papermill parameters
 
@@ -53,7 +43,7 @@ Parameters for papermill:
 ```python
 CONFIG_PATH = ""
 MODEL_NAME = ""
-FIT_METHOD_STR = ""
+FIT_METHOD = ""
 ROOT_CACHE_DIR = ""
 ```
 
@@ -61,21 +51,19 @@ ROOT_CACHE_DIR = ""
 ```python
 # Parameters
 MODEL_NAME = "hnb-single-lineage-prostate"
-FIT_METHOD_STR = "PYMC_NUMPYRO"
+FIT_METHOD = "PYMC_NUMPYRO"
 CONFIG_PATH = "models/model-configs.yaml"
 ROOT_CACHE_DIR = "models"
 ```
 
 
 ```python
-FIT_METHOD = ModelFitMethod(FIT_METHOD_STR)
-model_config = model_configuration.get_configuration_for_model(
-    config_path=project_root() / CONFIG_PATH, name=MODEL_NAME
-)
-model = get_bayesian_model(model_config.model)(**model_config.model_kwargs)
-trace = get_cached_posterior(
-    get_posterior_cache_name(MODEL_NAME, FIT_METHOD),
-    cache_dir=project_root() / ROOT_CACHE_DIR,
+_fit_method = ModelFitMethod(FIT_METHOD)
+postman = PosteriorDataManager(
+    name=MODEL_NAME,
+    fit_method=_fit_method,
+    config_path=project_root() / Path(CONFIG_PATH),
+    posterior_dir=project_root() / Path(ROOT_CACHE_DIR),
 )
 ```
 
@@ -83,121 +71,36 @@ trace = get_cached_posterior(
 
 
 ```python
-if FIT_METHOD in {ModelFitMethod.PYMC_NUMPYRO, ModelFitMethod.PYMC_MCMC}:
-    print("R-HAT")
-    rhat_summ = summarize_rhat(trace)
-    print(rhat_summ)
-    print("=" * 60)
-    describe_mcmc(trace)
+def _plot_rhat_boxplots(pm: PosteriorDataManager) -> None:
+    fig, ax = plt.subplots(figsize=(8, 4))
+    sns.boxplot(data=pm.posterior_summary, x="var_name", y="r_hat", ax=ax)
+    ax.tick_params("x", rotation=90)
+    ax.set_ylabel(r"$\widehat{R}$")
+    ax.set_ylim(0.999, None)
+    plt.show()
+
+
+def _plot_ess_hist(pm: PosteriorDataManager) -> None:
+    fig, axes = plt.subplots(
+        nrows=1, ncols=2, sharex=False, sharey=False, figsize=(8, 4)
+    )
+    sns.histplot(data=pm.posterior_summary, x="ess_bulk", ax=axes[0])
+    axes[0].set_title("ESS (bulk)")
+    sns.histplot(data=pm.posterior_summary, x="ess_tail", ax=axes[1])
+    axes[1].set_title("ESS (tail)")
+    for ax in axes.flatten():
+        ax.set_xlim(0, None)
+    fig.tight_layout()
+    plt.show()
 ```
-
-    R-HAT
-
-
-    /home/jc604/.conda/envs/speclet_smk/lib/python3.10/site-packages/arviz/stats/diagnostics.py:586: RuntimeWarning: invalid value encountered in double_scalars
-      (between_chain_variance / within_chain_variance + num_samples - 1) / (num_samples)
-
-
-
-
-![png](hnb-single-lineage-prostate_PYMC_NUMPYRO_files/hnb-single-lineage-prostate_PYMC_NUMPYRO_10_2.png)
-
-
-
-                           count      mean       std       min       25%  \
-    var_name
-    a                    71062.0  1.000777  0.000908  0.999107  1.000109
-    alpha                    1.0  1.001556       NaN  1.001556  1.001556
-    b                    18119.0  1.001277  0.001223  0.999169  1.000383
-    d                    18119.0  1.001342  0.001277  0.999177  1.000404
-    delta_a              71062.0  1.000569  0.000754  0.999116  1.000024
-    delta_genes          54357.0  1.001098  0.001155  0.999163  1.000274
-    genes_chol_cov           6.0  1.001309  0.001317  0.999972  1.000276
-    genes_chol_cov_corr      8.0  1.000446  0.001140  0.999599  0.999684
-    genes_chol_cov_stds      3.0  1.001003  0.000895  1.000242  1.000510
-    mu_a                 18119.0  1.000632  0.000702  0.999226  1.000130
-    mu_b                     1.0  1.000047       NaN  1.000047  1.000047
-    mu_d                     1.0  0.999817       NaN  0.999817  0.999817
-    mu_mu_a                  1.0  1.003342       NaN  1.003342  1.003342
-    sigma_a                  1.0  1.001328       NaN  1.001328  1.001328
-    sigma_b                  1.0  1.000242       NaN  1.000242  1.000242
-    sigma_mu_a               1.0  1.000777       NaN  1.000777  1.000777
-
-                              50%       75%       max
-    var_name
-    a                    1.000592  1.001259  1.009886
-    alpha                1.001556  1.001556  1.001556
-    b                    1.001048  1.001935  1.008991
-    d                    1.001104  1.002017  1.010336
-    delta_a              1.000423  1.000955  1.007374
-    delta_genes          1.000841  1.001648  1.011007
-    genes_chol_cov       1.001160  1.001879  1.003462
-    genes_chol_cov_corr  0.999998  1.000664  1.002265
-    genes_chol_cov_stds  1.000777  1.001383  1.001989
-    mu_a                 1.000518  1.001013  1.005056
-    mu_b                 1.000047  1.000047  1.000047
-    mu_d                 0.999817  0.999817  0.999817
-    mu_mu_a              1.003342  1.003342  1.003342
-    sigma_a              1.001328  1.001328  1.001328
-    sigma_b              1.000242  1.000242  1.000242
-    sigma_mu_a           1.000777  1.000777  1.000777
-    ============================================================
-    sampled 4 chains with (unknown) tuning steps and 1,000 draws
-    num. divergences: 0, 0, 0, 0
-    percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 0.635, 0.622, 0.626, 0.572
-    avg. step size: 0.019, 0.02, 0.02, 0.02
-
-
-
-
-![png](hnb-single-lineage-prostate_PYMC_NUMPYRO_files/hnb-single-lineage-prostate_PYMC_NUMPYRO_10_4.png)
-
-
-
-## Model predictions
 
 
 ```python
-np.random.seed(333)
-
-pp: Dataset = trace.posterior_predictive["ct_final"]
-n_chains, n_draws, n_data = pp.shape
-n_rand = 10
-draws_idx = np.random.choice(np.arange(n_draws), n_rand, replace=False)
-
-fig, axes = plt.subplots(
-    nrows=2, ncols=1, figsize=(8, 10), squeeze=True, sharex=False, sharey=False
-)
-
-alpha = 0.2
-
-for c, d in product(range(n_chains), draws_idx):
-    draw = pp[c, d, :].values.flatten()
-    sns.kdeplot(x=draw, ax=axes[0], color="tab:blue", alpha=alpha)
-    sns.kdeplot(x=np.log10(draw + 1), ax=axes[1], color="tab:blue", alpha=alpha)
-
-avg_ppc = pp.median(axis=(0, 1))
-sns.kdeplot(x=avg_ppc, ax=axes[0], color="tab:orange", alpha=0.8)
-sns.kdeplot(x=np.log10(avg_ppc + 1), ax=axes[1], color="tab:orange", alpha=0.8)
-
-obs_data = trace.observed_data["ct_final"].values.flatten()
-sns.kdeplot(x=obs_data, ax=axes[0], color="black", alpha=0.8)
-sns.kdeplot(x=np.log10(obs_data + 1), ax=axes[1], color="black", alpha=0.8)
-
-axes[0].set_xlabel("ct_final")
-axes[1].set_xlabel(r"$\log_{10}($ ct_final $)$")
-
-leg_handles = [
-    Line2D([0], [0], color="tab:blue", label="draw"),
-    Line2D([0], [0], color="tab:orange", label="post. pred. median"),
-    Line2D([0], [0], color="black", label="observed"),
-]
-for ax in axes:
-    ax.legend(handles=leg_handles, loc="best")
-
-plt.tight_layout()
-plt.show()
+if postman.fit_method in {ModelFitMethod.PYMC_NUMPYRO, ModelFitMethod.PYMC_MCMC}:
+    _plot_rhat_boxplots(postman)
+    _plot_ess_hist(postman)
+    print("=" * 60)
+    describe_mcmc(postman.trace)
 ```
 
 
@@ -207,35 +110,29 @@ plt.show()
 
 
 
-```python
-has_log_likelihood = "log_likelihood" in trace
-```
+
+![png](hnb-single-lineage-prostate_PYMC_NUMPYRO_files/hnb-single-lineage-prostate_PYMC_NUMPYRO_12_1.png)
 
 
-```python
-if has_log_likelihood:
-    psis_loo = az.loo(trace, pointwise=True)
-    psis_loo
-```
+
+    ============================================================
+    date created: 2022-09-06 11:02
+    sampled 4 chains with (unknown) tuning steps and 1,000 draws
+    num. divergences: 0, 0, 0, 0
+    percent divergences: 0.0, 0.0, 0.0, 0.0
+    BFMI: 0.699, 0.634, 0.697, 0.653
+    avg. step size: 0.007, 0.008, 0.007, 0.007
+    avg. accept prob.: 0.988, 0.987, 0.987, 0.988
+    avg. tree depth: 9.0, 9.0, 9.0, 9.0
 
 
-```python
-if has_log_likelihood:
-    az.plot_khat(psis_loo)
-    plt.tight_layout()
-    plt.show()
-```
+
+
+![png](hnb-single-lineage-prostate_PYMC_NUMPYRO_files/hnb-single-lineage-prostate_PYMC_NUMPYRO_12_3.png)
+
+
 
 ---
-
-
-```python
-notebook_toc = time()
-print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
-```
-
-    execution time: 15.10 minutes
-
 
 
 ```python
@@ -243,7 +140,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-07-24
+    Last updated: 2022-09-07
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -251,19 +148,16 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Compiler    : GCC 10.3.0
     OS          : Linux
-    Release     : 3.10.0-1160.66.1.el7.x86_64
+    Release     : 3.10.0-1160.45.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 20
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-f-17-14.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-245.o2.rc.hms.harvard.edu
 
-    Git branch: simplify
+    Git branch: expand-lineages
 
-    arviz     : 0.12.1
-    logging   : 0.5.1.2
     matplotlib: 3.5.2
-    numpy     : 1.23.0
-    speclet   : 0.0.9000
+    logging   : 0.5.1.2
     seaborn   : 0.11.2

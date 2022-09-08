@@ -1,0 +1,129 @@
+config. name: 'hnb-single-lineage-peripheral_nervous_system_(neuroblastoma)'
+model name: 'LineageHierNegBinomModel'
+model version: '0.1.3'
+model description: A hierarchical negative binomial generalized linear model for one lineage.
+fit method: 'PYMC_NUMPYRO'
+
+--------------------------------------------------------------------------------
+
+CONFIGURATION
+
+{
+    "name": "hnb-single-lineage-peripheral_nervous_system_(neuroblastoma)",
+    "description": " Single lineage hierarchical negative binomial model for peripheral_nervous_system_(neuroblastoma) data. ",
+    "active": true,
+    "model": "LINEAGE_HIERARCHICAL_NB",
+    "data_file": "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_peripheral_nervous_system_(neuroblastoma).csv",
+    "model_kwargs": {
+        "lineage": "peripheral_nervous_system_(neuroblastoma)",
+        "min_n_cancer_genes": 4,
+        "min_frac_cancer_genes": 0.05
+    },
+    "sampling_kwargs": {
+        "pymc_mcmc": null,
+        "pymc_advi": null,
+        "pymc_numpyro": {
+            "draws": 1000,
+            "tune": 2000,
+            "chains": 4,
+            "target_accept": 0.99,
+            "progress_bar": true,
+            "chain_method": "parallel",
+            "postprocessing_backend": "cpu",
+            "idata_kwargs": {
+                "log_likelihood": false
+            },
+            "nuts_kwargs": {
+                "step_size": 0.01
+            }
+        }
+    },
+    "split_posterior_when_combining_chains": false
+}
+
+--------------------------------------------------------------------------------
+
+POSTERIOR
+
+<xarray.Dataset>
+Dimensions:                    (chain: 4, draw: 1000, delta_genes_dim_0: 4,
+                                delta_genes_dim_1: 18119, sgrna: 71062,
+                                delta_cells_dim_0: 2, delta_cells_dim_1: 20,
+                                cell_chrom: 460, genes_chol_cov_dim_0: 10,
+                                cells_chol_cov_dim_0: 3,
+                                genes_chol_cov_corr_dim_0: 4,
+                                genes_chol_cov_corr_dim_1: 4,
+                                genes_chol_cov_stds_dim_0: 4, gene: 18119,
+                                cells_chol_cov_corr_dim_0: 2,
+                                cells_chol_cov_corr_dim_1: 2,
+                                cells_chol_cov_stds_dim_0: 2, cell_line: 20)
+Coordinates: (12/18)
+  * chain                      (chain) int64 0 1 2 3
+  * draw                       (draw) int64 0 1 2 3 4 5 ... 995 996 997 998 999
+  * delta_genes_dim_0          (delta_genes_dim_0) int64 0 1 2 3
+  * delta_genes_dim_1          (delta_genes_dim_1) int64 0 1 2 ... 18117 18118
+  * sgrna                      (sgrna) object 'AAAAAAATCCAGCAATGCAG' ... 'TTT...
+  * delta_cells_dim_0          (delta_cells_dim_0) int64 0 1
+    ...                         ...
+  * genes_chol_cov_stds_dim_0  (genes_chol_cov_stds_dim_0) int64 0 1 2 3
+  * gene                       (gene) object 'A1BG' 'A1CF' ... 'ZZEF1' 'ZZZ3'
+  * cells_chol_cov_corr_dim_0  (cells_chol_cov_corr_dim_0) int64 0 1
+  * cells_chol_cov_corr_dim_1  (cells_chol_cov_corr_dim_1) int64 0 1
+  * cells_chol_cov_stds_dim_0  (cells_chol_cov_stds_dim_0) int64 0 1
+  * cell_line                  (cell_line) object 'ACH-000078' ... 'ACH-001674'
+Data variables: (12/33)
+    mu_mu_a                    (chain, draw) float64 ...
+    mu_b                       (chain, draw) float64 ...
+    delta_genes                (chain, draw, delta_genes_dim_0, delta_genes_dim_1) float64 ...
+    delta_a                    (chain, draw, sgrna) float64 ...
+    mu_mu_m                    (chain, draw) float64 ...
+    delta_cells                (chain, draw, delta_cells_dim_0, delta_cells_dim_1) float64 ...
+    ...                         ...
+    sigma_mu_k                 (chain, draw) float64 ...
+    sigma_mu_m                 (chain, draw) float64 ...
+    mu_k                       (chain, draw, cell_line) float64 ...
+    mu_m                       (chain, draw, cell_line) float64 ...
+    k                          (chain, draw, cell_chrom) float64 ...
+    m                          (chain, draw, cell_chrom) float64 ...
+Attributes:
+    created_at:           2022-09-06 11:07:19.897924
+    arviz_version:        0.12.1
+    model_name:           LineageHierNegBinomModel
+    model_version:        0.1.3
+    model_doc:            A hierarchical negative binomial generalized linear...
+    previous_created_at:  ['2022-09-06 11:07:19.897924', '2022-08-29T18:54:46...
+
+--------------------------------------------------------------------------------
+
+SAMPLE STATS
+
+<xarray.Dataset>
+Dimensions:          (chain: 4, draw: 1000)
+Coordinates:
+  * chain            (chain) int64 0 1 2 3
+  * draw             (draw) int64 0 1 2 3 4 5 6 ... 993 994 995 996 997 998 999
+Data variables:
+    acceptance_rate  (chain, draw) float64 ...
+    step_size        (chain, draw) float64 ...
+    diverging        (chain, draw) bool ...
+    energy           (chain, draw) float64 ...
+    n_steps          (chain, draw) int64 ...
+    tree_depth       (chain, draw) int64 ...
+    lp               (chain, draw) float64 ...
+Attributes:
+    created_at:           2022-09-06 11:07:19.897924
+    arviz_version:        0.12.1
+    previous_created_at:  ['2022-09-06 11:07:19.897924', '2022-08-29T18:54:46...
+
+--------------------------------------------------------------------------------
+
+MCMC DESCRIPTION
+
+date created: 2022-09-06 11:07
+sampled 4 chains with (unknown) tuning steps and 1,000 draws
+num. divergences: 0, 0, 0, 0
+percent divergences: 0.0, 0.0, 0.0, 0.0
+BFMI: 0.75, 0.848, 0.703, 0.757
+avg. step size: 0.008, 0.008, 0.008, 0.009
+avg. accept prob.: 0.989, 0.99, 0.99, 0.988
+avg. tree depth: 9.0, 9.001, 9.0, 10.0

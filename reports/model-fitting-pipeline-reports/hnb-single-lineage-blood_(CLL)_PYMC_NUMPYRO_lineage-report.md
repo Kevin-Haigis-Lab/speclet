@@ -106,7 +106,7 @@ print(postman.read_description())
         "data_file": "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_blood_(CLL).csv",
         "model_kwargs": {
             "lineage": "blood_(CLL)",
-            "min_n_cancer_genes": 3,
+            "min_n_cancer_genes": 4,
             "min_frac_cancer_genes": 0.05
         },
         "sampling_kwargs": {
@@ -176,12 +176,12 @@ print(postman.read_description())
         k                          (chain, draw, cell_chrom) float64 ...
         m                          (chain, draw, cell_chrom) float64 ...
     Attributes:
-        created_at:           2022-08-25 09:02:21.147914
+        created_at:           2022-09-06 11:03:55.500463
         arviz_version:        0.12.1
         model_name:           LineageHierNegBinomModel
         model_version:        0.1.3
         model_doc:            A hierarchical negative binomial generalized linear...
-        previous_created_at:  ['2022-08-25 09:02:21.147914', '2022-08-25T12:55:50...
+        previous_created_at:  ['2022-09-06 11:03:55.500463', '2022-08-25T12:55:50...
 
     --------------------------------------------------------------------------------
 
@@ -201,15 +201,15 @@ print(postman.read_description())
         tree_depth       (chain, draw) int64 ...
         lp               (chain, draw) float64 ...
     Attributes:
-        created_at:           2022-08-25 09:02:21.147914
+        created_at:           2022-09-06 11:03:55.500463
         arviz_version:        0.12.1
-        previous_created_at:  ['2022-08-25 09:02:21.147914', '2022-08-25T12:55:50...
+        previous_created_at:  ['2022-09-06 11:03:55.500463', '2022-08-25T12:55:50...
 
     --------------------------------------------------------------------------------
 
     MCMC DESCRIPTION
 
-    date created: 2022-08-25 09:02
+    date created: 2022-09-06 11:03
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0, 0, 0
     percent divergences: 0.0, 0.0, 0.0, 0.0
@@ -224,11 +224,11 @@ print(postman.read_description())
 postman.load_all()
 ```
 
-    [INFO] 2022-08-25 09:36:40 [(lineage_hierarchical_nb.py:data_processing_pipeline:323] Processing data for modeling.
-    [INFO] 2022-08-25 09:36:40 [(lineage_hierarchical_nb.py:data_processing_pipeline:324] LFC limits: (-5.0, 5.0)
-    [WARNING] 2022-08-25 09:37:50 [(lineage_hierarchical_nb.py:data_processing_pipeline:382] number of data points dropped: 0
-    [INFO] 2022-08-25 09:37:51 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:630] number of genes mutated in all cells lines: 0
-    [INFO] 2022-08-25 09:37:51 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 22 cancer genes.
+    [INFO] 2022-09-07 15:03:50 [(lineage_hierarchical_nb.py:data_processing_pipeline:323] Processing data for modeling.
+    [INFO] 2022-09-07 15:03:50 [(lineage_hierarchical_nb.py:data_processing_pipeline:324] LFC limits: (-5.0, 5.0)
+    [WARNING] 2022-09-07 15:04:59 [(lineage_hierarchical_nb.py:data_processing_pipeline:382] number of data points dropped: 0
+    [INFO] 2022-09-07 15:04:59 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:630] number of genes mutated in all cells lines: 0
+    [INFO] 2022-09-07 15:05:00 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 22 cancer genes.
 
 
 ## Fit diagnostics
@@ -280,7 +280,7 @@ if postman.fit_method in {ModelFitMethod.PYMC_NUMPYRO, ModelFitMethod.PYMC_MCMC}
 
 
     ============================================================
-    date created: 2022-08-25 09:02
+    date created: 2022-09-06 11:03
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0, 0, 0
     percent divergences: 0.0, 0.0, 0.0, 0.0
@@ -834,7 +834,7 @@ def _plot_corr_heatmap(
 
 ```python
 # TODO: change get from the trace when included in `posterior.coords`.
-genes_var_names = postman.model_data_struct.coords["genes_params"]
+genes_var_names = ["mu_a", "b", "d", "f"] + [f"h[{g}]" for g in cancer_genes]
 _plot_corr_heatmap(postman.trace, "genes_chol_cov_corr", var_names=genes_var_names)
 
 # TODO: change to use "cells_params" when that is included as a coord.
@@ -1032,7 +1032,7 @@ plt.show()
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-08-25
+    Last updated: 2022-09-07
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -1040,19 +1040,19 @@ plt.show()
 
     Compiler    : GCC 10.3.0
     OS          : Linux
-    Release     : 3.10.0-1160.66.1.el7.x86_64
+    Release     : 3.10.0-1160.76.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-h-17-52.o2.rc.hms.harvard.edu
+    Hostname: compute-h-17-50.o2.rc.hms.harvard.edu
 
     Git branch: expand-lineages
 
     seaborn   : 0.11.2
-    logging   : 0.5.1.2
+    arviz     : 0.12.1
     numpy     : 1.23.1
     matplotlib: 3.5.2
-    arviz     : 0.12.1
     pandas    : 1.4.3
+    logging   : 0.5.1.2
