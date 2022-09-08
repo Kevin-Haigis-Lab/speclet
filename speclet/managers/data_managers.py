@@ -5,6 +5,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Callable, Final
 
+import numpy as np
 import pandas as pd
 import pandera as pa
 from pandera import Column, DataFrameSchema
@@ -155,6 +156,7 @@ class CrisprScreenDataManager:
                 "p_dna_batch": str,
                 "screen": str,
                 "sgrna_target_chr": str,
+                "rna_expr": np.float64,
             }
 
         if self.data_file.suffix == ".csv":

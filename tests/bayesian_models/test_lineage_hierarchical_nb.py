@@ -58,6 +58,50 @@ def test_raise_error_only_one_gene(
     return None
 
 
+def _set_kras_mutants(data: pd.DataFrame) -> pd.DataFrame:
+    data = data.query("hugo_symbol != 'KRAS'").reset_index(drop=True)
+    copy_gene = data["hugo_symbol"].unique()[0]
+    cell_lines = data["depmap_id"].unique()
+    muts = cell_lines[: (len(cell_lines) // 2)]
+
+    kras_data = (
+        data.copy()
+        .query(f"hugo_symbol == '{copy_gene}'")
+        .reset_index(drop=True)
+        .assign(hugo_symbol="KRAS", sgrna="kras-fake-sgrna", is_mutated=False)
+    )
+    kras_data.loc[kras_data["depmap_id"].isin(muts), "is_mutated"] = True
+    return pd.concat([data, kras_data]).reset_index(drop=True)
+
+
+@pytest.mark.parametrize(["min_frac", "does_have_vars"], [(1.0, False), (0.0, True)])
+def test_var_h_only_when_cancer_genes(
+    crc_data: pd.DataFrame,
+    min_frac: float,
+    does_have_vars: bool,
+) -> None:
+    crc_data = _set_kras_mutants(crc_data)
+    model = LHNBModel(
+        lineage="colorectal", min_n_cancer_genes=0, min_frac_cancer_genes=min_frac
+    )
+    model_data = model.make_data_structure(model.data_processing_pipeline(crc_data))
+    if min_frac > 0:
+        assert model_data.CG == 0
+    else:
+        assert model_data.CG > 0
+
+    pm_model = model.pymc_model(crc_data)
+    var_names = [v.name for v in pm_model.unobserved_RVs]
+    print(var_names)
+    if does_have_vars:
+        assert "h" in var_names
+        assert "sigma_h" in var_names
+    else:
+        assert "h" not in var_names
+        assert "sigma_h" not in var_names
+    return None
+
+
 @pytest.mark.slow
 def test_chol_cov_coords_pmsample(
     crc_data: pd.DataFrame, crc_lhnb_model: LHNBModel

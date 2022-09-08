@@ -121,7 +121,7 @@ def data_path(to: str | DataFile) -> Path:
     return _dir / _data_file_map[to]
 
 
-def lineade_modeling_data_path(lineage: str) -> Path:
+def lineage_modeling_data_path(lineage: str) -> Path:
     """Path to lineage modeling data file."""
     return lineage_modeling_data_dir() / f"depmap-modeling-data_{lineage}.csv"
 
@@ -139,3 +139,21 @@ def modeling_data_dir() -> Path:
 def data_dir() -> Path:
     """Path to (raw) data directory."""
     return project_root() / "data"
+
+
+def temp_dir() -> Path:
+    """Temporary directory."""
+    return project_root() / "temp"
+
+
+def tables_dir() -> Path:
+    """Tables directory."""
+    return project_root() / "tables"
+
+
+def notebook_table_dir(nb_name: str) -> Path:
+    """Get a path to a tables directory for a notebook."""
+    d = tables_dir() / nb_name
+    if not d.exists():
+        d.mkdir()
+    return d

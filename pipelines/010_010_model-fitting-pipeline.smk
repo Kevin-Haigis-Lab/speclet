@@ -48,7 +48,9 @@ lineage_models_lists = get_models_names_fit_methods(
 
 
 wildcard_constraints:
-    model_name="|".join(set(model_configuration_lists.model_names)),
+    model_name="|".join(set(model_configuration_lists.model_names))
+    .replace("(", "\(")
+    .replace(")", "\)"),
     fit_method="|".join(a.value for a in ModelFitMethod),
     chain="\d+",
 
@@ -178,6 +180,12 @@ rule combine_pymc_mcmc:
 # --- PyMC MCMC Numpyro backend ---
 
 
+def _generate_aesara_flag(w: Wildcards) -> str:
+    model_name, chain = w.model_name, w.chain
+    model_name = model_name.replace("(", "__").replace(")", "__")
+    return get_aesara_flags(f"{model_name}_{chain}_mcmc")
+
+
 rule sample_pymc_numpyro:
     output:
         idata_path=TEMP_DIR
@@ -191,23 +199,31 @@ rule sample_pymc_numpyro:
         config_file=MODEL_CONFIG,
         tempdir=TEMP_DIR,
         cache_name=lambda w: f"{w.model_name}_PYMC_NUMPYRO_chain{w.chain}",
+        aesara_flag=_generate_aesara_flag,
     benchmark:
         BENCHMARK_DIR / "sample_pymc_mcmc/{model_name}_chain{chain}.tsv"
     priority: 30
-    retries: 1
+    retries: 0
     shell:
-        get_aesara_flags("{wildcards.model_name}_{wildcards.chain}_mcmc") + " "
+        # get_aesara_flags("{wildcards.model_name}_{wildcards.chain}_mcmc") + " "
+        "{params.aesara_flag} "
         "speclet/cli/fit_bayesian_model_cli.py"
-        '  "{wildcards.model_name}"'
+        "  '{wildcards.model_name}'"
         "  {params.config_file}"
         "  PYMC_NUMPYRO"
         "  {params.tempdir}"
         "  --mcmc-chains 1"
         "  --mcmc-cores 1"
-        "  --cache-name {params.cache_name}"
+        "  --cache-name '{params.cache_name}'"
         "  --broad-only"
-        "  --log-level DEBUG"
+        "  --log-level 'DEBUG'"
         "  --check-sampling-stats"
+
+
+def _get_thinning_value(wildcards: Wildcards, attempt: int) -> str:
+    """Thin by the attempt number."""
+    thinnings = (1, 2, 4, 10, 20)
+    return str(thinnings[attempt - 1])
 
 
 rule combine_pymc_numpyro:
@@ -225,15 +241,18 @@ rule combine_pymc_numpyro:
         combined_cache_dir=MODEL_CACHE_DIR,
         config_file=MODEL_CONFIG,
         cache_dir=TEMP_DIR,
+    resources:
+        thin=_get_thinning_value,
+    retries: 4
     shell:
-        get_aesara_flags("{wildcards.model_name}_combine-mcmc") + " "
         "speclet/cli/combine_mcmc_chains_cli.py"
-        "  {wildcards.model_name}"
+        "  '{wildcards.model_name}'"
         "  PYMC_NUMPYRO"
         "  {params.n_chains}"
         "  {params.config_file}"
         "  {params.cache_dir}"
         "  {params.combined_cache_dir}"
+        "  --thin-post-pred {resources.thin}"
 
 
 # --- PyMC ADVI ---
@@ -282,13 +301,13 @@ rule summarize_posterior:
         cache_dir=MODEL_CACHE_DIR,
     shell:
         "speclet/cli/summarize_posterior.py"
-        '  "{wildcards.model_name}"'
+        "  '{wildcards.model_name}'"
         "  {params.config_file}"
         "  {wildcards.fit_method}"
-        "  {params.cache_dir}"
-        "  {output.description}"
-        "  {output.posterior_summary}"
-        "  {output.post_pred}"
+        "  '{params.cache_dir}'"
+        "  '{output.description}'"
+        "  '{output.posterior_summary}'"
+        "  '{output.post_pred}'"
         "  --post-pred-thin=40"
 
 
@@ -348,23 +367,25 @@ def _report_time_request(wildcards: Wildcards, attempt: int) -> str:
 
 rule execute_report:
     input:
+        description=rules.summarize_posterior.output.description,
+        posterior_summary=rules.summarize_posterior.output.posterior_summary,
+        post_pred=rules.summarize_posterior.output.post_pred,
         idata_path=MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "posterior.netcdf",
         notebook=rules.papermill_report.output.notebook,
-    resources:
-        mem=_report_ram_request,
-        time=_report_time_request,
-    retries: 2
     output:
         markdown=REPORTS_DIR / "{model_name}_{fit_method}.md",
     shell:
-        "jupyter nbconvert --to notebook --inplace --execute {input.notebook} && "
-        "nbqa isort --profile=black {input.notebook} && "
-        "nbqa black {input.notebook} && "
-        "jupyter nbconvert --to markdown {input.notebook}"
+        "jupyter nbconvert --to notebook --inplace --execute '{input.notebook}' && "
+        "nbqa isort --profile=black '{input.notebook}' && "
+        "nbqa black '{input.notebook}' && "
+        "jupyter nbconvert --to markdown '{input.notebook}'"
 
 
 rule execute_lineage_report:
     input:
+        description=rules.summarize_posterior.output.description,
+        posterior_summary=rules.summarize_posterior.output.posterior_summary,
+        post_pred=rules.summarize_posterior.output.post_pred,
         idata_path=MODEL_CACHE_DIR / "{model_name}_{fit_method}" / "posterior.netcdf",
         notebook=rules.papermill_lineage_report.output.notebook,
     resources:
@@ -374,7 +395,7 @@ rule execute_lineage_report:
     output:
         markdown=REPORTS_DIR / "{model_name}_{fit_method}_lineage-report.md",
     shell:
-        "jupyter nbconvert --to notebook --inplace --execute {input.notebook} && "
-        "nbqa isort --profile=black {input.notebook} && "
-        "nbqa black {input.notebook} && "
-        "jupyter nbconvert --to markdown {input.notebook}"
+        "jupyter nbconvert --to notebook --inplace --execute '{input.notebook}' && "
+        "nbqa isort --profile=black '{input.notebook}' && "
+        "nbqa black '{input.notebook}' && "
+        "jupyter nbconvert --to markdown '{input.notebook}'"

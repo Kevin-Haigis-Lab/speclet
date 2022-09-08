@@ -10,6 +10,7 @@ from speclet import model_configuration as model_config
 from speclet.bayesian_models import BayesianModelProtocol, get_bayesian_model
 from speclet.io import models_dir, project_root
 from speclet.loggers import logger
+from speclet.managers.cache_manager import PosteriorManager as PosteriorCacheManager
 from speclet.managers.cache_manager import get_posterior_cache_name
 from speclet.managers.data_managers import CrisprScreenDataManager, broad_only
 from speclet.project_configuration import (
@@ -54,7 +55,7 @@ class PosteriorDataManager:
         self.id = id if id is not None else name
 
         if config_path is None:
-            config_path = get_model_configuration_file()
+            config_path = project_root() / get_model_configuration_file()
         self._config_path = config_path
         self.config = model_config.get_configuration_for_model(
             config_path=config_path, name=name
@@ -66,8 +67,11 @@ class PosteriorDataManager:
 
         if posterior_dir is None:
             posterior_dir = models_dir()
-        self.posterior_dir = posterior_dir / get_posterior_cache_name(
-            model_name=name, fit_method=fit_method
+        self._cache_name = get_posterior_cache_name(
+            model_name=self.name, fit_method=fit_method
+        )
+        self.post_cache_manager = PosteriorCacheManager(
+            id=self._cache_name, cache_dir=posterior_dir
         )
 
         # Properties to be acquired when needed.
@@ -88,6 +92,11 @@ class PosteriorDataManager:
             )
         return self._bayes_model
 
+    @property
+    def posterior_dir(self) -> Path:
+        """Model's posterior directory."""
+        return self.post_cache_manager.cache_path
+
     def read_description(self) -> str:
         """Read the description file."""
         desc_path = self.posterior_dir / "description.txt"
@@ -106,10 +115,23 @@ class PosteriorDataManager:
 
     @property
     def trace(self) -> az.InferenceData:
-        """Model posterior trace object."""
+        """Model posterior trace object.
+
+        If the model has a separate posterior predictive data file, the posterior is
+        extended with this property.
+        """
         if self._trace is not None:
             return self._trace
-        self._trace = az.from_netcdf(self.posterior_dir / "posterior.netcdf")
+
+        _trace = self.post_cache_manager.get_posterior()
+        assert _trace is not None, "Posterior data file not found."
+
+        if self.post_cache_manager.posterior_predictive_cache_exists:
+            _post_pred = self.post_cache_manager.get_posterior_predictive()
+            assert _post_pred is not None
+            _trace.extend(_post_pred, join="left")
+
+        self._trace = _trace
         return self._trace
 
     @property

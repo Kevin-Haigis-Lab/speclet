@@ -1,10 +1,11 @@
+from math import ceil
+
 import arviz as az
 import pandas as pd
 import pymc as pm
 import pytest
 from seaborn import load_dataset
 
-import speclet.exceptions
 from speclet.modeling import pymc_helpers as pmhelp
 
 
@@ -48,22 +49,48 @@ def test_get_posterior_names(centered_eight_idata: az.InferenceData) -> None:
     assert set(got_names) == expected_names
 
 
-@pytest.mark.parametrize(
-    "var_name, thinned_shape",
-    [("mu", (4, 100)), ("tau", (4, 100)), ("theta", (4, 100, 8))],
-)
+@pytest.mark.DEV
+@pytest.mark.parametrize("by", [1, 2, 4, 23, 61, 100000])
+def test_thin(
+    centered_eight_idata: az.InferenceData,
+    by: int,
+) -> None:
+    n_draws_post = centered_eight_idata.posterior.dims["draw"]
+    thinned_size = ceil(n_draws_post / by)
+    thinned = pmhelp.thin(centered_eight_idata, by=by)
+    assert thinned.posterior is not None
+    assert thinned.posterior.dims["draw"] == thinned_size
+    assert thinned.posterior_predictive.dims["draw"] == thinned_size
+
+
+@pytest.mark.parametrize("by", [1, 2, 4, 23, 61, 100000])
 def test_thin_posterior(
     centered_eight_idata: az.InferenceData,
-    var_name: str,
-    thinned_shape: tuple[int, ...],
+    by: int,
 ) -> None:
-    post = centered_eight_idata["posterior"][var_name]
-    thinned_post = pmhelp.thin_posterior(post, thin_to=100)
-    assert thinned_post.shape == thinned_shape
-    thinned_post = pmhelp.thin_posterior(post, step_size=5)
-    assert thinned_post.shape == thinned_shape
-    with pytest.raises(speclet.exceptions.RequiredArgumentError):
-        pmhelp.thin_posterior(post)
+    n_draws_post = centered_eight_idata.posterior.dims["draw"]
+    n_draws_post_pred = centered_eight_idata.posterior_predictive.dims["draw"]
+    thinned_size = ceil(n_draws_post / by)
+    thinned = pmhelp.thin_posterior(centered_eight_idata, by=by)
+    assert thinned is centered_eight_idata
+    assert thinned.posterior is not None
+    assert thinned.posterior.dims["draw"] == thinned_size
+    assert thinned.posterior_predictive.dims["draw"] == n_draws_post_pred
+
+
+@pytest.mark.parametrize("by", [1, 2, 4, 23, 61, 100000])
+def test_thin_posterior_predictive(
+    centered_eight_idata: az.InferenceData,
+    by: int,
+) -> None:
+    n_draws_post = centered_eight_idata.posterior.dims["draw"]
+    n_draws_post_pred = centered_eight_idata.posterior_predictive.dims["draw"]
+    thinned_size = ceil(n_draws_post_pred / by)
+    thinned = pmhelp.thin_posterior_predictive(centered_eight_idata, by=by)
+    assert thinned is centered_eight_idata
+    assert thinned.posterior is not None
+    assert thinned.posterior.dims["draw"] == n_draws_post
+    assert thinned.posterior_predictive.dims["draw"] == thinned_size
 
 
 @pytest.mark.parametrize("chain_num", list(range(4)))

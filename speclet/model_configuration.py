@@ -36,6 +36,7 @@ class BayesianModelConfiguration(BaseModel):
     sampling_kwargs: ModelingSamplingArguments = Field(
         default_factory=ModelingSamplingArguments
     )
+    split_posterior_when_combining_chains: bool = False
 
 
 class BayesianModelConfigurations(BaseModel):

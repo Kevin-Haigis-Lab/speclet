@@ -3,6 +3,8 @@
 """Summarize a model's posterior sample."""
 
 import json
+import shutil
+import uuid
 from inspect import getdoc
 from pathlib import Path
 
@@ -15,11 +17,9 @@ from speclet import model_configuration as model_config
 from speclet.analysis.arviz_analysis import describe_mcmc
 from speclet.bayesian_models import BayesianModelProtocol, get_bayesian_model
 from speclet.cli import cli_helpers
+from speclet.io import temp_dir
 from speclet.loggers import logger
-from speclet.managers.cache_manager import (
-    get_cached_posterior,
-    get_posterior_cache_name,
-)
+from speclet.managers.cache_manager import PosteriorManager, get_posterior_cache_name
 from speclet.model_configuration import BayesianModelConfiguration
 from speclet.project_configuration import get_bayesian_modeling_constants
 from speclet.project_enums import ModelFitMethod
@@ -98,6 +98,11 @@ def _posterior_description(
     return None
 
 
+def _make_temporary_filepath(original_path: Path) -> Path:
+    new_name = str(uuid.uuid4()) + "__" + original_path.name
+    return temp_dir() / new_name
+
+
 def _posterior_summary(
     posterior_summary_path: Path,
     trace: az.InferenceData,
@@ -108,8 +113,11 @@ def _posterior_summary(
         trace, var_names=vars_regex, filter_vars="regex", hdi_prob=_hdi_prob()
     )
     assert isinstance(post_summ, pd.DataFrame)
-    logger.info(f"Writing posterior summary to '{str(posterior_summary_path)}'.")
-    post_summ.to_csv(posterior_summary_path, index_label="parameter")
+    _path = _make_temporary_filepath(posterior_summary_path)
+    logger.info(f"Writing posterior summary to '{str(_path)}'.")
+    post_summ.to_csv(_path, index_label="parameter")
+    logger.info(f"Moving posterior summary to '{str(posterior_summary_path)}'.")
+    shutil.move(_path, posterior_summary_path)
     logger.info("Finished writing posterior summary.")
     return None
 
@@ -131,13 +139,32 @@ def _posterior_predictions(
     if n_post_preds != 1:
         raise BaseException(f"Only 1 post. pred. expected; found {n_post_preds}")
 
-    logger.info(f"Writing posterior predictions to '{str(post_pred_summary_path)}'.")
+    _path = _make_temporary_filepath(post_pred_summary_path)
+    logger.info(f"Writing posterior predictions to '{str(_path)}'.")
     # Iterating through a collection of length 1.
     for ppc_ary in ppc.values():
-        ppc_ary[:, ::thin, :].to_dataframe().to_csv(post_pred_summary_path)
+        ppc_ary[:, ::thin, :].to_dataframe().to_csv(_path)
 
+    logger.info(f"Moving posterior predictive to '{str(post_pred_summary_path)}'.")
+    shutil.move(_path, post_pred_summary_path)
     logger.info("Finished writing posterior predictions.")
     return None
+
+
+def _get_posterior_data(
+    cache_name: str, cache_dir: Path
+) -> tuple[az.InferenceData, az.InferenceData]:
+    pm = PosteriorManager(id=cache_name, cache_dir=cache_dir)
+    posterior = pm.get_posterior()
+    assert posterior is not None, "Could not locate model posterior."
+
+    post_pred = posterior
+    if pm.posterior_predictive_cache_exists:
+        logger.debug("Using posterior predictive data from different file.")
+        post_pred = pm.get_posterior_predictive()
+        assert post_pred is not None
+
+    return posterior, post_pred
 
 
 @app.command()
@@ -153,6 +180,12 @@ def summarize_posterior(
     cache_name: str | None = None,
 ) -> None:
     """Summarize a model posterior.
+
+    The posterior summaries are first writing to temporary files and then moved to their
+    final location. This prevents Snakemake from preemptively starting the next job
+    before the file has finished being writing to. It can also prevent errors in
+    mistakenly thinking the job has completed if it quits mid-writing, leaving a
+    partially-writing file.
 
     Args:
         name (str): Name of the model (corresponding to a model configuration).
@@ -180,22 +213,27 @@ def summarize_posterior(
 
     logger.info("Retrieving Bayesian model object.")
     model = get_bayesian_model(config.model)(**config.model_kwargs)
-
-    logger.info("Reading model posterior from file.")
-    trace = get_cached_posterior(id=cache_name, cache_dir=cache_dir)
+    logger.info("Reading model posterior data from file.")
+    posterior_trace, post_pred_trace = _get_posterior_data(cache_name, cache_dir)
 
     _posterior_description(
         description_path,
         model=model,
         name=name,
         config=config,
-        trace=trace,
+        trace=posterior_trace,
         fit_method=fit_method,
     )
     _posterior_summary(
-        posterior_summary_path, trace=trace, vars_regex=model.vars_regex(fit_method)
+        posterior_summary_path,
+        trace=posterior_trace,
+        vars_regex=model.vars_regex(fit_method),
     )
-    _posterior_predictions(post_pred_path, trace=trace, thin=post_pred_thin)
+    _posterior_predictions(
+        post_pred_path,
+        trace=post_pred_trace,
+        thin=post_pred_thin,
+    )
     return None
 
 

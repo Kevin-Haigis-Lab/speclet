@@ -124,6 +124,12 @@
         "time": "05:00:00",
         "J": "line-split"
     },
+    "data_per_sublineage": {
+        "cores": 4,
+        "mem": "50000",
+        "time": "02:00:00",
+        "J": "sublin-split"
+    },
     "modeling_data_subsets": {
         "cores": 4,
         "mem": "70000",

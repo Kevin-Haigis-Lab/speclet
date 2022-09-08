@@ -36,7 +36,9 @@ modeling_data <- as_tibble(modeling_data)
 lineages <- unique(modeling_data$lineage)
 
 lineage_data_file_name <- function(lineage) {
-    file.path(split_lineage_dir, glue::glue(file_name_template, .open = "::", .close = "::"))
+    file.path(
+        split_lineage_dir, glue::glue(file_name_template, .open = "::", .close = "::")
+    )
 }
 
 

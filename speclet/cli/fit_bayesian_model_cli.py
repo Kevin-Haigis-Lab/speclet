@@ -101,6 +101,7 @@ def _automated_posterior_checks(
     checks = [
         post_check.CheckStepSize(min_ss=0.0005),
         post_check.CheckBFMI(min_bfmi=0.2, max_bfmi=2.0),
+        post_check.CheckNoMissingDraws(),
     ]
     if additional_checks is not None:
         msg = f"Recieved {len(additional_checks)} posterior checks from the model."

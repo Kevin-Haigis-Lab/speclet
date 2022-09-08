@@ -166,13 +166,16 @@ class CheckMarginalPosterior:
     def __call__(self, trace: az.InferenceData) -> CheckResult:
         """Check a marginal posterior distribution has expected properties."""
         assert hasattr(trace, "posterior"), "No posterior data in trace object."
-        if self.var_name not in trace.posterior:
+        posterior = trace.get("posterior")
+        assert posterior is not None, "Could not get posterior."
+
+        if self.var_name not in posterior:
             if self.skip_if_missing:
                 return True, f"No variable {self.var_name} - skipping check."
             else:
                 raise BaseException(f"{self.var_name} not in posterior.")
 
-        values = trace.posterior.get(self.var_name)
+        values = posterior.get(self.var_name)
         assert values is not None, f"Could not get values for var {self.var_name}."
         avgs = values.mean(axis=1).values
         res = (self.min_avg <= avgs) * (avgs <= self.max_avg)
@@ -186,6 +189,37 @@ class CheckMarginalPosterior:
 
     def __str__(self) -> str:
         return f"marginal-posterior-{self.var_name}"
+
+    def __repr__(self) -> str:
+        return str(self)
+
+
+class CheckNoMissingDraws:
+    """Check there are no missing values in the posterior draws."""
+
+    def __init__(self) -> None:
+        """Check there are no missing values in the posterior draws."""
+        return None
+
+    def __call__(self, trace: az.InferenceData) -> CheckResult:
+        """Check there are no missing values in the posterior draws."""
+        assert hasattr(trace, "posterior"), "No posterior data in trace object."
+        posterior = trace.get("posterior")
+        assert posterior is not None, "Could not get posterior."
+
+        vars_with_missing: list[str] = []
+        for v in posterior.data_vars:
+            if np.any(np.isnan(posterior[v].values)):
+                vars_with_missing.append(str(v))
+
+        if len(vars_with_missing) == 0:
+            return True, "No missing values in the posterior."
+        else:
+            varnames = ", ".join(vars_with_missing)
+            return False, f"Missing data in variables: [{varnames}]."
+
+    def __str__(self) -> str:
+        return "missing-values"
 
     def __repr__(self) -> str:
         return str(self)
