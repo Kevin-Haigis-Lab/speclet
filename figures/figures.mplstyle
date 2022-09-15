@@ -1,0 +1,13 @@
+font.size: 7
+
+axes.labelsize: 8
+axes.titlepad: 2
+axes.spines.bottom: False
+axes.spines.left: False
+axes.spines.right: False
+axes.spines.top: False
+
+xtick.labelsize: 7
+ytick.labelsize: 7
+
+grid.linewidth: 0.5

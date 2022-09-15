@@ -157,3 +157,29 @@ def notebook_table_dir(nb_name: str) -> Path:
     if not d.exists():
         d.mkdir()
     return d
+
+
+# --- Figures ---
+
+
+def figures_dir() -> Path:
+    """Figures directory."""
+    return project_root() / "figures"
+
+
+def dissertation_figure_stylesheet() -> Path:
+    """Dissertation figure stylesheet."""
+    return figures_dir() / "figures.mplstyle"
+
+
+def figure_dir(num: int, ver: int) -> Path:
+    """Directory for a figure."""
+    d = figures_dir() / f"figure_{num:03d}-v{ver:03d}"
+    if not d.exists():
+        d.mkdir()
+    return d
+
+
+def figure_img_file(num: int, ver: int, name: str) -> Path:
+    """Path for a figure image file."""
+    return figure_dir(num, ver) / f"fig_{num:03d}-v{ver:03d}_{name}.png"
