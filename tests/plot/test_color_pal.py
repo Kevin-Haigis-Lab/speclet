@@ -1,17 +1,15 @@
-from enum import EnumMeta
-
 import pytest
+from matplotlib.lines import Line2D
 
-from speclet.plot import color_pal
+from speclet.plot.color_pal import ColorPalette, pal_to_legend_handles
 
 
 @pytest.mark.parametrize(
     "palette",
-    (color_pal.SeabornColor, color_pal.ModelColors, color_pal.FitMethodColors),
+    ({"a": "blue", "b": "green"}, {1: "tomato", 2: "salmon"}),
 )
-def test_make_pal(palette: EnumMeta) -> None:
-    pal_dict = color_pal.make_pal(palette)
-    assert isinstance(pal_dict, dict)
-    assert all([isinstance(k, str) for k in pal_dict.keys()])
-    assert all([isinstance(v, str) for v in pal_dict.values()])
-    assert len(pal_dict) > 0
+def test_pal_to_legend_handles(palette: ColorPalette) -> None:
+    leg = pal_to_legend_handles(palette)
+    assert isinstance(leg, list)
+    assert all([isinstance(i, Line2D) for i in leg])
+    assert len(leg) == len(palette)

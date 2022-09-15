@@ -1,10 +1,10 @@
 """My colors and color palettes."""
 
-from typing import Any
+from typing import Any, Hashable
 
 from matplotlib.lines import Line2D
 
-name = str
+name = Hashable
 color = str
 ColorPalette = dict[name, color]
 
