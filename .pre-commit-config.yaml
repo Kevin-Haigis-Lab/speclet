@@ -85,6 +85,8 @@ repos:
         additional_dependencies: [pydantic, mypy, types-python-dateutil, types-PyYAML]
         types: [jupyter]
         exclude: "munge/019_prepare-data-subsample.ipynb"
+    -   id: nbqa-flake8
+        args: ["--config=.flake8", "--extend-ignore=E402"]
 
 -   repo: https://github.com/MarcoGorelli/check-execution-order
     rev: v0.1.1
