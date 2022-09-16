@@ -7,6 +7,7 @@ channels:
   - defaults
 dependencies:
   - python=3.10.*
+  - adjusttext
   - aeppl
   - aesara
   - arviz=0.12.*
@@ -59,7 +60,7 @@ dependencies:
   - rich
   - scikit-learn>=1.0.0
   - scikit-misc
-  - seaborn
+  - seaborn=0.11.*
   - statsmodels
   - termcolor
   - typer

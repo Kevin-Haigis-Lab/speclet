@@ -146,6 +146,11 @@ def temp_dir() -> Path:
     return project_root() / "temp"
 
 
+def cache_dir() -> Path:
+    """Cache directory."""
+    return project_root() / "cache"
+
+
 def tables_dir() -> Path:
     """Tables directory."""
     return project_root() / "tables"
