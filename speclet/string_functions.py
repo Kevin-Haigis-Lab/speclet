@@ -1,7 +1,13 @@
 """Common string handling functions."""
 
+import hashlib
 import textwrap
 from typing import Iterable
+
+
+def str_hash(s: str) -> str:
+    """Consistently hash a string."""
+    return hashlib.sha256(s.encode()).hexdigest()
 
 
 def str_wrap(strings: str | Iterable[str], width: int = 80) -> Iterable[str]:
