@@ -13,22 +13,19 @@
 
 ```python
 import re
-from pathlib import Path
 from time import time
 from typing import Final
 
-import arviz as az
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import plotnine as gg
 import seaborn as sns
 ```
 
 
 ```python
 from speclet.analysis.arviz_analysis import extract_coords_param_names
-from speclet.io import DataFile, data_path, project_root
+from speclet.io import project_root
 from speclet.managers.posterior_data_manager import (
     PosteriorDataManager,
     PosteriorDataManagers,
