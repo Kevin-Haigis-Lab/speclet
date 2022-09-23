@@ -91,7 +91,9 @@ def get_sgrna_to_gene_map() -> pd.DataFrame:
         pd.DataFrame: Data frame with `sgrna` and `hugo_symbol` columns.
     """
     prostate_data = dd.read_csv(
-        _prostate_data_fp(), low_memory=False, dtype={"age": "float64"}
+        _prostate_data_fp(),
+        low_memory=False,
+        dtype={"age": "float64", "counts_final": "float64", "p_dna_batch": "object"},
     )
     if project_config_broad_only():
         prostate_data = prostate_data.query("screen == 'broad'")

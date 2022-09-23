@@ -258,6 +258,7 @@ models/*/*netcdf
 models/*/*csv
 models/*/*tsv
 temp
+tables/
 modeling_data/*
 .snakemake/
 .virtual_documents/
