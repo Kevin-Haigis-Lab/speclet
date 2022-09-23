@@ -1,14 +1,14 @@
 """My colors and color palettes."""
 
-from typing import Any
+from typing import Any, Mapping
 
 from matplotlib.lines import Line2D
 
 name = str
 color = str
-ColorPalette = dict[name, color]
 RGB = tuple[float, float, float]
 RGBA = tuple[float, float, float, float]
+ColorPalette = Mapping[name, color | RGB | RGBA]
 
 
 def lineage_color_pal() -> dict[str, RGB]:
