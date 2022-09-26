@@ -166,14 +166,18 @@ class PosteriorDataManager:
         if self._valid_data is not None:
             return self._valid_data
 
+        self._valid_data = self.validate_data(self.data.copy())
+        return self._valid_data
+
+    def validate_data(self, data: pd.DataFrame) -> pd.DataFrame:
+        """Run data through the validation pipeline for the model."""
         validation_fxn: Callable[..., pd.DataFrame] | None = getattr(
             self.bayes_model, "data_processing_pipeline", None
         )
         if validation_fxn is None:
             raise NotImplementedError("No validation pipeline for model.")
 
-        self._valid_data = validation_fxn(self.data.copy())
-        return self._valid_data
+        return validation_fxn(data)
 
     @property
     def model_data_struct(self) -> Any:

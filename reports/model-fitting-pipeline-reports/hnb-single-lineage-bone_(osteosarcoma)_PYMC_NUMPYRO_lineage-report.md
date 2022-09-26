@@ -176,12 +176,12 @@ print(postman.read_description())
         k                          (chain, draw, cell_chrom) float64 ...
         m                          (chain, draw, cell_chrom) float64 ...
     Attributes:
-        created_at:           2022-09-06 11:05:02.657508
+        created_at:           2022-09-19 15:17:37.662880
         arviz_version:        0.12.1
         model_name:           LineageHierNegBinomModel
         model_version:        0.1.3
         model_doc:            A hierarchical negative binomial generalized linear...
-        previous_created_at:  ['2022-09-06 11:05:02.657508', '2022-08-25T17:17:48...
+        previous_created_at:  ['2022-09-19 15:17:37.662880', '2022-09-19T19:10:58...
 
     --------------------------------------------------------------------------------
 
@@ -201,21 +201,21 @@ print(postman.read_description())
         tree_depth       (chain, draw) int64 ...
         lp               (chain, draw) float64 ...
     Attributes:
-        created_at:           2022-09-06 11:05:02.657508
+        created_at:           2022-09-19 15:17:37.662880
         arviz_version:        0.12.1
-        previous_created_at:  ['2022-09-06 11:05:02.657508', '2022-08-25T17:17:48...
+        previous_created_at:  ['2022-09-19 15:17:37.662880', '2022-09-19T19:10:58...
 
     --------------------------------------------------------------------------------
 
     MCMC DESCRIPTION
 
-    date created: 2022-09-06 11:05
+    date created: 2022-09-19 15:17
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0, 0, 0
     percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 0.719, 0.63, 0.769, 0.621
-    avg. step size: 0.009, 0.009, 0.009, 0.009
-    avg. accept prob.: 0.991, 0.99, 0.99, 0.989
+    BFMI: 0.701, 0.688, 0.669, 0.671
+    avg. step size: 0.009, 0.008, 0.008, 0.007
+    avg. accept prob.: 0.986, 0.99, 0.989, 0.991
     avg. tree depth: 9.0, 9.0, 9.0, 9.0
 
 
@@ -224,11 +224,11 @@ print(postman.read_description())
 postman.load_all()
 ```
 
-    [INFO] 2022-09-07 15:04:00 [(lineage_hierarchical_nb.py:data_processing_pipeline:323] Processing data for modeling.
-    [INFO] 2022-09-07 15:04:01 [(lineage_hierarchical_nb.py:data_processing_pipeline:324] LFC limits: (-5.0, 5.0)
-    [WARNING] 2022-09-07 15:05:24 [(lineage_hierarchical_nb.py:data_processing_pipeline:382] number of data points dropped: 4
-    [INFO] 2022-09-07 15:05:25 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:630] number of genes mutated in all cells lines: 0
-    [INFO] 2022-09-07 15:05:25 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 1 cancer genes.
+    [INFO] 2022-09-19 16:04:27 [(lineage_hierarchical_nb.py:data_processing_pipeline:323] Processing data for modeling.
+    [INFO] 2022-09-19 16:04:27 [(lineage_hierarchical_nb.py:data_processing_pipeline:324] LFC limits: (-5.0, 5.0)
+    [WARNING] 2022-09-19 16:05:48 [(lineage_hierarchical_nb.py:data_processing_pipeline:382] number of data points dropped: 4
+    [INFO] 2022-09-19 16:05:49 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:630] number of genes mutated in all cells lines: 0
+    [INFO] 2022-09-19 16:05:49 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 1 cancer genes.
 
 
 ## Fit diagnostics
@@ -280,13 +280,13 @@ if postman.fit_method in {ModelFitMethod.PYMC_NUMPYRO, ModelFitMethod.PYMC_MCMC}
 
 
     ============================================================
-    date created: 2022-09-06 11:05
+    date created: 2022-09-19 15:17
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0, 0, 0
     percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 0.719, 0.63, 0.769, 0.621
-    avg. step size: 0.009, 0.009, 0.009, 0.009
-    avg. accept prob.: 0.991, 0.99, 0.99, 0.989
+    BFMI: 0.701, 0.688, 0.669, 0.671
+    avg. step size: 0.009, 0.008, 0.008, 0.007
+    avg. accept prob.: 0.986, 0.99, 0.989, 0.991
     avg. tree depth: 9.0, 9.0, 9.0, 9.0
 
 
@@ -1032,7 +1032,7 @@ plt.show()
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-09-07
+    Last updated: 2022-09-19
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -1046,13 +1046,13 @@ plt.show()
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-a-16-133.o2.rc.hms.harvard.edu
+    Hostname: compute-h-17-50.o2.rc.hms.harvard.edu
 
-    Git branch: expand-lineages
+    Git branch: figures
 
     arviz     : 0.12.1
-    numpy     : 1.23.1
-    matplotlib: 3.5.2
-    seaborn   : 0.11.2
-    pandas    : 1.4.3
     logging   : 0.5.1.2
+    seaborn   : 0.11.2
+    matplotlib: 3.5.2
+    numpy     : 1.23.1
+    pandas    : 1.4.3
