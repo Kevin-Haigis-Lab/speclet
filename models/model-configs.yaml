@@ -511,6 +511,38 @@
   description: "
     Single lineage hierarchical negative binomial model for colorectal data.
   "
+  active: false
+  model: LINEAGE_HIERARCHICAL_NB
+  data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_colorectal.csv"
+  model_kwargs:
+    lineage: "colorectal"
+    min_n_cancer_genes: 4
+    min_frac_cancer_genes: 0.2
+  sampling_kwargs:
+    pymc_numpyro:
+      draws: 1000
+      tune: 2000
+      target_accept: 0.99
+      idata_kwargs:
+        log_likelihood: false
+      nuts_kwargs:
+        step_size: 0.01
+  slurm_resources:
+    PYMC_NUMPYRO:
+      mem: 54
+      time: 20
+      cores: 1
+      gpu:
+        gpu: "RTX 8000"
+
+
+- name: "hnb-single-lineage-colorectal__specific-cancer-genes"
+  description: "
+    Single lineage hierarchical negative binomial model for colorectal data.
+
+    This model uses a different list of cancer genes than those from CGC. Just reduced
+    the number to help with some weird fitting issues.
+  "
   active: true
   model: LINEAGE_HIERARCHICAL_NB
   data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_colorectal.csv"

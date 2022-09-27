@@ -1,7 +1,7 @@
 """A hierarchical negative binomial generalized linear model for a single lineage."""
 
 from dataclasses import dataclass
-from typing import Any, Iterable, TypeVar
+from typing import Any, Final, Iterable, TypeVar
 
 import aesara.tensor as at
 import numpy as np
@@ -652,10 +652,15 @@ def _get_cancer_genes_accounting_for_sublineage(
 ) -> set[str]:
     """Get the cancer genes accounting for sub-lineage.
 
+    Uses the pre-specified list of genes if available.
+
     The sub-lineage is extracted from the lineage name if a '(' is detected. If the
     sub-lineage is not in the cancer gene dictionary, then all of the lineage cancer
     genes are returned.
     """
+    if (genes := _specific_cancer_gene_sets(lineage)) is not None:
+        return genes
+
     if "(" in lineage:
         split_lineage = lineage.split("_(")
         lineage = split_lineage[0]
@@ -668,3 +673,10 @@ def _get_cancer_genes_accounting_for_sublineage(
         return _flatten_collection_of_sets(lineage_genes.values())
     else:
         return lineage_genes[sublineage]
+
+
+def _specific_cancer_gene_sets(lineage: str) -> set[str] | None:
+    SPECIFIC_CANCER_GENE_SETS: Final[dict[str, set[str]]] = {
+        "colorectal": {"KRAS", "APC", "PIK3CA", "FBXW7"},
+    }
+    return SPECIFIC_CANCER_GENE_SETS.get(lineage)
