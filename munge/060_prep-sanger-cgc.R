@@ -11,9 +11,10 @@ library(tidyverse)
 
 # --- Snakemake interfacing ---
 
-raw_cgc_file <- unlist(snakemake@input["cgc_input"])
-cgc_out_file <- unlist(snakemake@output["cgc_output"])
-
+# raw_cgc_file <- unlist(snakemake@input["cgc_input"])
+raw_cgc_file <- here::here("data", "sanger-cosmic", "cancer_gene_census.csv")
+# cgc_out_file <- unlist(snakemake@output["cgc_output"])
+cgc_out_file <- here::here("modeling_data", "sanger_cancer-gene-census.csv")
 
 # --- Data Processing ---
 
@@ -64,9 +65,9 @@ cgc_df <- read_csv(raw_cgc_file) %>%
   mutate(
     role_in_cancer = str_to_lower(role_in_cancer),
     role_in_cancer = ifelse(is.na(role_in_cancer), "unknown", role_in_cancer),
-    is_oncogene = str_detect("oncogene", role_in_cancer),
-    is_tsg = str_detect("tsg", role_in_cancer),
-    is_fusion = str_detect("fusion", role_in_cancer),
+    is_oncogene = str_detect(role_in_cancer, "oncogene"),
+    is_tsg = str_detect(role_in_cancer, "tsg"),
+    is_fusion = str_detect(role_in_cancer, "fusion"),
   ) %>%
   mutate(
     tumor_types_somatic = purrr::map_chr(
@@ -75,7 +76,7 @@ cgc_df <- read_csv(raw_cgc_file) %>%
     mutation_types = purrr::map_chr(mutation_types, clean_mutation_types),
     tissue_type = purrr::map_chr(tissue_type, clean_mutation_types)
   ) %>%
-  select(-role_in_cancer) %>%
+  # select(-role_in_cancer) %>%
   arrange(hugo_symbol, tier, hallmark, tumor_types_somatic)
 
 

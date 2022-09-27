@@ -13,25 +13,25 @@ library(tidyverse)
 
 # TODO: add to munge pipeline
 # Input
-bailey_supp_excel_file <- snakemake@input[["bailey_supp_excel"]]
-cgc_genes_df_file <- snakemake@input[["cgc_genes"]]
-depmap_cell_line_info_file <- snakemake@input[["cell_line_info"]]
-depmap_cancer_types_file <- snakemake@input[["depmap_cancer_map"]]
+# bailey_supp_excel_file <- snakemake@input[["bailey_supp_excel"]]
+# cgc_genes_df_file <- snakemake@input[["cgc_genes"]]
+# depmap_cell_line_info_file <- snakemake@input[["cell_line_info"]]
+# depmap_cancer_types_file <- snakemake@input[["depmap_cancer_map"]]
 
-# Output
-bailey_genes_df_file <- snakemake@output[["bailey_genes_df"]]
-bailey_gene_map_file <- snakemake@output[["bailey_genes_dict"]]
-cgc_gene_map_file <- snakemake@output[["cgc_genes_dict"]]
+# # Output
+# bailey_genes_df_file <- snakemake@output[["bailey_genes_df"]]
+# bailey_gene_map_file <- snakemake@output[["bailey_genes_dict"]]
+# cgc_gene_map_file <- snakemake@output[["cgc_genes_dict"]]
 
 # TODO: remove when finished dev
-# bailey_supp_excel_file <- "data/bailey-2018-cell/bailey-cancer-genes.xlsx"
-# cgc_genes_df_file <- "modeling_data/sanger_cancer-gene-census.csv"
-# depmap_cell_line_info_file <- "modeling_data/depmap_cell-line-info.csv"
-# depmap_cancer_types_file <- "data/depmap-lineage-cancer-types.tsv"
+bailey_supp_excel_file <- "data/bailey-2018-cell/bailey-cancer-genes.xlsx"
+cgc_genes_df_file <- "modeling_data/sanger_cancer-gene-census.csv"
+depmap_cell_line_info_file <- "modeling_data/depmap_cell-line-info.csv"
+depmap_cancer_types_file <- "data/depmap-lineage-cancer-types.tsv"
 
-# bailey_genes_df_file <- "modeling_data/bailey-cancer-genes.csv"
-# bailey_gene_map_file <- "modeling_data/bailey-cancer-genes-dict.json"
-# cgc_gene_map_file <- "modeling_data/cgc-cancer-genes-dict.json"
+bailey_genes_df_file <- "modeling_data/bailey-cancer-genes.csv"
+bailey_gene_map_file <- "modeling_data/bailey-cancer-genes-dict.json"
+cgc_gene_map_file <- "modeling_data/cgc-cancer-genes-dict.json"
 
 
 # --- DepMap lineages ---
