@@ -50,6 +50,20 @@ def lineage_color_pal() -> dict[str, RGB]:
     }
 
 
+def lineage_color_pal_short() -> dict[str, RGB]:
+    """Lineage color palette with shortened lineage names."""
+    mod_names = {
+        "central nervous system": "CNS",
+        "peripheral nervous system": "PNS",
+        "upper aerodigestive": "upper aero.",
+    }
+    mod_pal = {}
+    for ln, color in lineage_color_pal().items():
+        ln_mod = mod_names.get(ln, ln)
+        mod_pal[ln_mod] = color
+    return mod_pal
+
+
 def sublineage_color_pal() -> dict[str, RGB]:
     """Sublineage color palette."""
     return {
