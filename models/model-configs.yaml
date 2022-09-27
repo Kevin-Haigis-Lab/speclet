@@ -532,6 +532,7 @@
     lineage: "colorectal"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.2
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -564,6 +565,7 @@
     lineage: "colorectal"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.2
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
