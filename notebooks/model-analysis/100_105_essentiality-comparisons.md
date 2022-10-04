@@ -12,7 +12,6 @@
 
 
 ```python
-import os
 from fractions import Fraction
 from math import ceil
 from time import time
@@ -37,7 +36,7 @@ from speclet.analysis.sublineage_model_analysis import (
     sublineage_to_lineage_map,
 )
 from speclet.data_processing.vectors import squish_array
-from speclet.io import project_root, tables_dir, temp_dir
+from speclet.io import DataFile, data_path, notebook_output_and_stash_dirs
 from speclet.loggers import set_console_handler_level
 from speclet.managers.posterior_data_manager import PosteriorDataManager as PostDataMan
 from speclet.plot import set_speclet_theme
@@ -46,7 +45,7 @@ from speclet.plot.color_pal import (
     pal_to_legend_handles,
     sublineage_color_pal,
 )
-from speclet.project_configuration import arviz_config, get_model_configuration_file
+from speclet.project_configuration import arviz_config
 from speclet.string_functions import str_hash
 ```
 
@@ -63,23 +62,13 @@ set_speclet_theme()
 RANDOM_SEED = 709
 np.random.seed(RANDOM_SEED)
 arviz_config()
-
-# File paths
-config_path = project_root() / get_model_configuration_file()
-OUTPUT_DIR = tables_dir() / "100_015_essentiality_comparisons"
-if not OUTPUT_DIR.exists():
-    OUTPUT_DIR.mkdir()
 ```
 
 
 ```python
-STASH_DIR = temp_dir() / "100_105_notebook-stash"
-if not STASH_DIR.exists():
-    STASH_DIR.mkdir()
-
-if False:
-    for f in STASH_DIR.iterdir():
-        os.remove(f)
+OUTPUT_DIR, STASH_DIR = notebook_output_and_stash_dirs(
+    "100_015_essentiality_comparisons", clear_output=True, clear_stash=False
+)
 ```
 
 ### Data
@@ -167,6 +156,93 @@ sub_to_lineage, lineages = sublineage_to_lineage_map(postmen)
 sublineage_pal = sublineage_color_pal()
 lineage_pal = lineage_color_pal()
 ```
+
+#### CGC
+
+
+```python
+cgc = pd.read_csv(data_path(DataFile.CGC))
+cgc.head(3)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>hugo_symbol</th>
+      <th>tier</th>
+      <th>hallmark</th>
+      <th>tumor_types_somatic</th>
+      <th>tissue_type</th>
+      <th>role_in_cancer</th>
+      <th>mutation_types</th>
+      <th>is_oncogene</th>
+      <th>is_tsg</th>
+      <th>is_fusion</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>A1CF</td>
+      <td>2</td>
+      <td>False</td>
+      <td>melanoma</td>
+      <td>E</td>
+      <td>oncogene</td>
+      <td>Mis</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ABI1</td>
+      <td>1</td>
+      <td>True</td>
+      <td>AML</td>
+      <td>L</td>
+      <td>tsg, fusion</td>
+      <td>T</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ABL1</td>
+      <td>1</td>
+      <td>True</td>
+      <td>ALL;CML;T-ALL</td>
+      <td>L</td>
+      <td>oncogene, fusion</td>
+      <td>Mis;T</td>
+      <td>True</td>
+      <td>False</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
 
 ## Analysis
 
@@ -266,14 +342,14 @@ mu_a_post_df.head(3)
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.333</td>
+      <td>0.322</td>
       <td>0.122</td>
-      <td>0.119</td>
-      <td>0.509</td>
+      <td>0.134</td>
+      <td>0.522</td>
       <td>0.002</td>
       <td>0.002</td>
-      <td>2872.0</td>
-      <td>2826.0</td>
+      <td>2686.0</td>
+      <td>3015.0</td>
       <td>1.0</td>
       <td>mu_a</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -284,12 +360,12 @@ mu_a_post_df.head(3)
       <th>1</th>
       <td>0.268</td>
       <td>0.122</td>
-      <td>0.072</td>
-      <td>0.457</td>
+      <td>0.064</td>
+      <td>0.455</td>
       <td>0.002</td>
       <td>0.002</td>
-      <td>2596.0</td>
-      <td>2551.0</td>
+      <td>3291.0</td>
+      <td>2986.0</td>
       <td>1.0</td>
       <td>mu_a</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -298,14 +374,14 @@ mu_a_post_df.head(3)
     </tr>
     <tr>
       <th>2</th>
-      <td>0.174</td>
-      <td>0.126</td>
-      <td>-0.018</td>
-      <td>0.385</td>
+      <td>0.176</td>
+      <td>0.123</td>
+      <td>-0.025</td>
+      <td>0.365</td>
       <td>0.002</td>
       <td>0.002</td>
-      <td>3356.0</td>
-      <td>3180.0</td>
+      <td>3137.0</td>
+      <td>2943.0</td>
       <td>1.0</td>
       <td>mu_a</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -362,7 +438,7 @@ plt.show()
 
 
 
-![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_20_0.png)
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_22_0.png)
 
 
 
@@ -412,7 +488,7 @@ plt.show()
 
 
 
-![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_21_2.png)
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_23_2.png)
 
 
 
@@ -443,7 +519,7 @@ plt.show()
 
 
 
-![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_22_0.png)
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_24_0.png)
 
 
 
@@ -746,7 +822,7 @@ plt.show()
 
 
 
-![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_31_0.png)
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_33_0.png)
 
 
 
@@ -800,42 +876,42 @@ ssgsea_res.head(3)
   <tbody>
     <tr>
       <th>0</th>
-      <td>blood (ALL)</td>
-      <td>KEGG_2021_Human__Aminoacyl-tRNA biosynthesis</td>
-      <td>-7917.759220</td>
-      <td>-0.642896</td>
-      <td>25/66</td>
-      <td>21.06%</td>
-      <td>YARS2;FARSB;ACTR2;SEPSECS;SARS2;CARS2;RARS2;LE...</td>
-      <td>KEGG_2021_Human</td>
-      <td>Aminoacyl-tRNA biosynthesis</td>
-      <td>blood</td>
-    </tr>
-    <tr>
-      <th>1</th>
       <td>gastric (gastric adenocarcinoma)</td>
       <td>KEGG_2021_Human__Ribosome</td>
-      <td>-7851.762747</td>
-      <td>-0.637538</td>
+      <td>-7844.790982</td>
+      <td>-0.635352</td>
       <td>126/158</td>
-      <td>14.39%</td>
-      <td>RPL12;RPS4X;POLR2L;RPSA;RPS6;RPL7A;DONSON;RPL9...</td>
+      <td>14.40%</td>
+      <td>RPL12;RPS4X;RPS3A;POLR2L;RPS6;RPL7A;RPL17;KIF1...</td>
       <td>KEGG_2021_Human</td>
       <td>Ribosome</td>
       <td>gastric</td>
     </tr>
     <tr>
-      <th>2</th>
+      <th>1</th>
       <td>prostate</td>
       <td>KEGG_2021_Human__Aminoacyl-tRNA biosynthesis</td>
-      <td>-7810.956760</td>
-      <td>-0.634224</td>
+      <td>-7809.043506</td>
+      <td>-0.632457</td>
       <td>25/66</td>
-      <td>14.39%</td>
-      <td>BUB3;RUVBL2;MIS18A;AARS2;MARS2;TARS2;COPS8;NUD...</td>
+      <td>14.61%</td>
+      <td>FARSB;YARS2;AARS2;SNW1;MARS2;TARS2;RARS2;TSEN5...</td>
       <td>KEGG_2021_Human</td>
       <td>Aminoacyl-tRNA biosynthesis</td>
       <td>prostate</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>soft tissue (ATRT)</td>
+      <td>KEGG_2021_Human__Aminoacyl-tRNA biosynthesis</td>
+      <td>-7748.724477</td>
+      <td>-0.627572</td>
+      <td>25/66</td>
+      <td>15.27%</td>
+      <td>FARSB;RPS8;AURKB;RPS10;TINF2;AARS2;PSMC2;HARS2...</td>
+      <td>KEGG_2021_Human</td>
+      <td>Aminoacyl-tRNA biosynthesis</td>
+      <td>soft tissue</td>
     </tr>
   </tbody>
 </table>
@@ -868,34 +944,9 @@ plt.show()
 
 
 
-![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_34_0.png)
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_36_0.png)
 
 
-
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
 
 ### RNA covariate $b$
 
@@ -967,11 +1018,11 @@ rna_post.head(3)
       <td>-0.002</td>
       <td>0.029</td>
       <td>-0.049</td>
-      <td>0.045</td>
+      <td>0.044</td>
       <td>0.0</td>
       <td>0.001</td>
-      <td>8983.0</td>
-      <td>2342.0</td>
+      <td>9778.0</td>
+      <td>3024.0</td>
       <td>1.0</td>
       <td>b</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -980,14 +1031,14 @@ rna_post.head(3)
     </tr>
     <tr>
       <th>1</th>
-      <td>0.032</td>
-      <td>0.029</td>
-      <td>-0.011</td>
-      <td>0.082</td>
+      <td>0.033</td>
+      <td>0.030</td>
+      <td>-0.015</td>
+      <td>0.080</td>
       <td>0.0</td>
       <td>0.000</td>
-      <td>10585.0</td>
-      <td>2707.0</td>
+      <td>10302.0</td>
+      <td>2669.0</td>
       <td>1.0</td>
       <td>b</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -997,13 +1048,13 @@ rna_post.head(3)
     <tr>
       <th>2</th>
       <td>0.032</td>
-      <td>0.031</td>
-      <td>-0.018</td>
-      <td>0.079</td>
+      <td>0.030</td>
+      <td>-0.015</td>
+      <td>0.081</td>
       <td>0.0</td>
       <td>0.000</td>
-      <td>11338.0</td>
-      <td>2856.0</td>
+      <td>9712.0</td>
+      <td>2656.0</td>
       <td>1.0</td>
       <td>b</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -1046,7 +1097,7 @@ plt.show()
 
 
 
-![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_42_1.png)
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_39_1.png)
 
 
 
@@ -1068,7 +1119,7 @@ plt.show()
 
 
 
-![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_43_0.png)
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_40_0.png)
 
 
 
@@ -1131,66 +1182,66 @@ enrichr_res.head()
       <th>0</th>
       <td>KEGG_2021_Human</td>
       <td>Ribosome</td>
-      <td>114/158</td>
-      <td>2.596783e-83</td>
-      <td>6.881476e-81</td>
+      <td>125/158</td>
+      <td>6.256277e-63</td>
+      <td>1.945702e-60</td>
       <td>0</td>
       <td>0</td>
-      <td>27.685191</td>
-      <td>5264.623952</td>
-      <td>RPL4;RPL5;RPL3;RPL32;RPL31;RPL34;RPL8;RPL10A;R...</td>
+      <td>17.692284</td>
+      <td>2534.053073</td>
+      <td>RPL4;RPL5;RPL30;RPL3;RPL32;RPL31;RPL34;RPL8;RP...</td>
     </tr>
     <tr>
       <th>1</th>
       <td>KEGG_2021_Human</td>
       <td>Spliceosome</td>
-      <td>100/150</td>
-      <td>9.450310e-68</td>
-      <td>1.252166e-65</td>
+      <td>115/150</td>
+      <td>2.427687e-55</td>
+      <td>3.775054e-53</td>
       <td>0</td>
       <td>0</td>
-      <td>21.189252</td>
-      <td>3270.131777</td>
-      <td>EIF4A3;HNRNPU;EFTUD2;SNRPD2;SNRPD1;MAGOH;SNRPD...</td>
+      <td>15.301185</td>
+      <td>1924.204171</td>
+      <td>TCERG1;EIF4A3;HNRNPU;EFTUD2;SNRPD2;SNRPD1;MAGO...</td>
     </tr>
     <tr>
       <th>2</th>
       <td>KEGG_2021_Human</td>
       <td>RNA transport</td>
-      <td>98/186</td>
-      <td>9.314184e-53</td>
-      <td>8.227529e-51</td>
+      <td>121/186</td>
+      <td>1.392944e-45</td>
+      <td>1.444019e-43</td>
       <td>0</td>
       <td>0</td>
-      <td>11.760104</td>
-      <td>1408.924800</td>
-      <td>POP5;EIF4A1;POP7;NUP107;POP1;POP4;RPP30;EIF4A3...</td>
+      <td>8.667871</td>
+      <td>895.260325</td>
+      <td>CYFIP1;POP5;EIF4A1;POP7;NUP107;NUP188;POP1;GEM...</td>
     </tr>
     <tr>
       <th>3</th>
       <td>KEGG_2021_Human</td>
       <td>Amyotrophic lateral sclerosis</td>
-      <td>123/364</td>
-      <td>3.495920e-40</td>
-      <td>2.316047e-38</td>
+      <td>174/364</td>
+      <td>5.144932e-39</td>
+      <td>4.000185e-37</td>
       <td>0</td>
       <td>0</td>
-      <td>5.423133</td>
-      <td>492.701463</td>
-      <td>NUP107;NDUFA10;ACTB;PSMD8;PSMD6;PSMD7;PSMD4;PS...</td>
+      <td>4.296513</td>
+      <td>378.792608</td>
+      <td>NDUFA13;NUP107;NDUFA11;NUP188;NDUFA10;COX6A1;A...</td>
     </tr>
     <tr>
       <th>4</th>
       <td>KEGG_2021_Human</td>
-      <td>Cell cycle</td>
-      <td>66/124</td>
-      <td>3.100069e-36</td>
-      <td>1.643036e-34</td>
+      <td>Huntington disease</td>
+      <td>153/306</td>
+      <td>2.431717e-37</td>
+      <td>1.512528e-35</td>
       <td>0</td>
       <td>0</td>
-      <td>11.815973</td>
-      <td>966.093356</td>
-      <td>RB1;CDKN1A;MCM7;CCNH;BUB1B;SMC3;CDC20;CDC23;CC...</td>
+      <td>4.673869</td>
+      <td>394.040128</td>
+      <td>NDUFA13;NDUFA11;NDUFA10;COX6A1;PSMD8;PSMD9;PSM...</td>
     </tr>
   </tbody>
 </table>
@@ -1215,7 +1266,7 @@ plt.show()
 
 
 
-![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_45_0.png)
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_42_0.png)
 
 
 
@@ -1262,7 +1313,7 @@ plt.show()
 
 
 
-![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_47_1.png)
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_44_1.png)
 
 
 
@@ -1334,7 +1385,7 @@ plt.show()
 
 
 
-![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_49_0.png)
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_46_0.png)
 
 
 
@@ -1461,6 +1512,30 @@ genes_data.head()
     </tr>
     <tr>
       <th>1</th>
+      <td>AAGCAAATCTTGTAACCCCG</td>
+      <td>SNU869-311Cas9_RepA_p4_batch3</td>
+      <td>-3.200516</td>
+      <td>3</td>
+      <td>chr10_78010519_-</td>
+      <td>POLR3A</td>
+      <td>broad</td>
+      <td>False</td>
+      <td>10</td>
+      <td>78010519</td>
+      <td>...</td>
+      <td>0.717322</td>
+      <td>0.717322</td>
+      <td>0.004395</td>
+      <td>0.002008</td>
+      <td>34199190</td>
+      <td>1.071751e+06</td>
+      <td>1.087721</td>
+      <td>292.859410</td>
+      <td>ACH-000182__10</td>
+      <td>bile duct</td>
+    </tr>
+    <tr>
+      <th>2</th>
       <td>AATCAACCCACAGCTGCACA</td>
       <td>SNU869-311Cas9_RepA_p4_batch3</td>
       <td>0.048742</td>
@@ -1484,7 +1559,7 @@ genes_data.head()
       <td>bile duct</td>
     </tr>
     <tr>
-      <th>2</th>
+      <th>3</th>
       <td>AATCAGACTAGAAAGTGAAG</td>
       <td>SNU869-311Cas9_RepA_p4_batch3</td>
       <td>-2.082598</td>
@@ -1508,7 +1583,7 @@ genes_data.head()
       <td>bile duct</td>
     </tr>
     <tr>
-      <th>3</th>
+      <th>4</th>
       <td>AATCCAGCAGCACAATGCGA</td>
       <td>SNU869-311Cas9_RepA_p4_batch3</td>
       <td>-2.744204</td>
@@ -1529,30 +1604,6 @@ genes_data.head()
       <td>3.163794</td>
       <td>590.441480</td>
       <td>ACH-000182__1</td>
-      <td>bile duct</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>AATCCATGTACTGACCAGGA</td>
-      <td>SNU869-311Cas9_RepA_p4_batch3</td>
-      <td>-3.206978</td>
-      <td>3</td>
-      <td>chr10_60785756_-</td>
-      <td>CDK1</td>
-      <td>broad</td>
-      <td>False</td>
-      <td>10</td>
-      <td>60785756</td>
-      <td>...</td>
-      <td>0.126548</td>
-      <td>0.126548</td>
-      <td>0.004395</td>
-      <td>0.002008</td>
-      <td>34199190</td>
-      <td>1.071751e+06</td>
-      <td>1.000000</td>
-      <td>277.550760</td>
-      <td>ACH-000182__10</td>
       <td>bile duct</td>
     </tr>
   </tbody>
@@ -1586,7 +1637,7 @@ ax.tick_params("x", rotation=90, labelsize=7)
 
 
 
-![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_52_0.png)
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_49_0.png)
 
 
 
@@ -1622,7 +1673,7 @@ plt.show()
 
 
 
-![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_53_0.png)
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_50_0.png)
 
 
 
@@ -1727,27 +1778,27 @@ genes_mu_dfs.head(3)
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.788146</td>
-      <td>-1.046227</td>
-      <td>-0.486392</td>
+      <td>-0.777546</td>
+      <td>-1.061002</td>
+      <td>-0.495504</td>
       <td>-4.467267</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>MAK16</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.788809</td>
-      <td>-1.049067</td>
-      <td>-0.489957</td>
+      <td>-0.778243</td>
+      <td>-1.051019</td>
+      <td>-0.485800</td>
       <td>-4.458395</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>MAK16</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.789473</td>
-      <td>-1.046378</td>
-      <td>-0.487782</td>
+      <td>-0.778940</td>
+      <td>-1.060815</td>
+      <td>-0.496251</td>
       <td>-4.449524</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>MAK16</td>
@@ -1888,7 +1939,7 @@ plt.show()
 
 
 
-![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_56_0.png)
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_53_0.png)
 
 
 
@@ -2024,14 +2075,14 @@ a_post.head(3)
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.184</td>
+      <td>-0.183</td>
       <td>0.088</td>
-      <td>-0.331</td>
-      <td>-0.050</td>
-      <td>0.002</td>
+      <td>-0.321</td>
+      <td>-0.042</td>
       <td>0.001</td>
-      <td>3207.0</td>
-      <td>2774.0</td>
+      <td>0.001</td>
+      <td>3905.0</td>
+      <td>2442.0</td>
       <td>1.0</td>
       <td>a</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -2043,14 +2094,14 @@ a_post.head(3)
     </tr>
     <tr>
       <th>1</th>
-      <td>0.157</td>
-      <td>0.087</td>
-      <td>0.012</td>
-      <td>0.289</td>
-      <td>0.002</td>
+      <td>0.154</td>
+      <td>0.086</td>
+      <td>0.011</td>
+      <td>0.286</td>
       <td>0.001</td>
-      <td>3143.0</td>
-      <td>2473.0</td>
+      <td>0.001</td>
+      <td>3318.0</td>
+      <td>2794.0</td>
       <td>1.0</td>
       <td>a</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -2062,14 +2113,14 @@ a_post.head(3)
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.754</td>
+      <td>-0.755</td>
       <td>0.090</td>
-      <td>-0.886</td>
-      <td>-0.602</td>
+      <td>-0.903</td>
+      <td>-0.619</td>
       <td>0.002</td>
       <td>0.001</td>
-      <td>3554.0</td>
-      <td>2962.0</td>
+      <td>2798.0</td>
+      <td>2289.0</td>
       <td>1.0</td>
       <td>a</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -2169,7 +2220,7 @@ mu_a_post_draws.head()
       <td>0</td>
       <td>0</td>
       <td>KRAS</td>
-      <td>-0.098463</td>
+      <td>-0.155529</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>bile duct</td>
     </tr>
@@ -2178,7 +2229,7 @@ mu_a_post_draws.head()
       <td>0</td>
       <td>1</td>
       <td>KRAS</td>
-      <td>-0.091200</td>
+      <td>0.058041</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>bile duct</td>
     </tr>
@@ -2187,7 +2238,7 @@ mu_a_post_draws.head()
       <td>0</td>
       <td>2</td>
       <td>KRAS</td>
-      <td>-0.113728</td>
+      <td>-0.308829</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>bile duct</td>
     </tr>
@@ -2196,7 +2247,7 @@ mu_a_post_draws.head()
       <td>0</td>
       <td>3</td>
       <td>KRAS</td>
-      <td>-0.063856</td>
+      <td>-0.117697</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>bile duct</td>
     </tr>
@@ -2205,7 +2256,7 @@ mu_a_post_draws.head()
       <td>0</td>
       <td>4</td>
       <td>KRAS</td>
-      <td>-0.171355</td>
+      <td>-0.000908</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>bile duct</td>
     </tr>
@@ -2277,14 +2328,14 @@ mu_mu_a_post.head(3)
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.048</td>
-      <td>0.020</td>
-      <td>0.018</td>
-      <td>0.080</td>
+      <td>0.046</td>
+      <td>0.019</td>
+      <td>0.014</td>
+      <td>0.076</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>386.0</td>
-      <td>869.0</td>
+      <td>368.0</td>
+      <td>816.0</td>
       <td>1.01</td>
       <td>mu_mu_a</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -2292,14 +2343,14 @@ mu_mu_a_post.head(3)
     </tr>
     <tr>
       <th>1</th>
-      <td>0.058</td>
+      <td>0.057</td>
       <td>0.019</td>
       <td>0.028</td>
       <td>0.085</td>
+      <td>0.001</td>
       <td>0.000</td>
-      <td>0.000</td>
-      <td>1481.0</td>
-      <td>2214.0</td>
+      <td>1076.0</td>
+      <td>1947.0</td>
       <td>1.00</td>
       <td>mu_mu_a</td>
       <td>bile duct (gallbladder adenocarcinoma)</td>
@@ -2307,15 +2358,15 @@ mu_mu_a_post.head(3)
     </tr>
     <tr>
       <th>2</th>
-      <td>0.082</td>
-      <td>0.008</td>
-      <td>0.070</td>
-      <td>0.095</td>
+      <td>0.074</td>
+      <td>0.011</td>
+      <td>0.057</td>
+      <td>0.090</td>
+      <td>0.001</td>
       <td>0.000</td>
-      <td>0.000</td>
-      <td>685.0</td>
-      <td>1280.0</td>
-      <td>1.01</td>
+      <td>411.0</td>
+      <td>777.0</td>
+      <td>1.00</td>
       <td>mu_mu_a</td>
       <td>blood (ALL)</td>
       <td>blood</td>
@@ -2380,13 +2431,13 @@ fig.tight_layout()
 plt.show()
 ```
 
-    /tmp/ipykernel_11904/4037297813.py:47: UserWarning: Tight layout not applied. tight_layout cannot make axes width small enough to accommodate all axes decorations
+    /tmp/ipykernel_20279/4037297813.py:47: UserWarning: Tight layout not applied. tight_layout cannot make axes width small enough to accommodate all axes decorations
       fig.tight_layout()
 
 
 
 
-![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_64_1.png)
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_61_1.png)
 
 
 
@@ -2453,31 +2504,31 @@ sgrna_corrs.head()
     <tr>
       <th>0</th>
       <td>A1BG</td>
-      <td>0.197465</td>
+      <td>0.230000</td>
       <td>4</td>
     </tr>
     <tr>
       <th>1</th>
       <td>A1CF</td>
-      <td>0.188681</td>
+      <td>0.208491</td>
       <td>4</td>
     </tr>
     <tr>
       <th>2</th>
       <td>A2M</td>
-      <td>0.219075</td>
+      <td>0.220932</td>
       <td>4</td>
     </tr>
     <tr>
       <th>3</th>
       <td>A2ML1</td>
-      <td>0.403522</td>
+      <td>0.424786</td>
       <td>4</td>
     </tr>
     <tr>
       <th>4</th>
       <td>A3GALT2</td>
-      <td>0.039425</td>
+      <td>0.041029</td>
       <td>4</td>
     </tr>
   </tbody>
@@ -2500,7 +2551,7 @@ sns.kdeplot(data=sgrna_corrs.dropna(), x="spear_corr")
 
 
 
-![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_67_1.png)
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_64_1.png)
 
 
 
@@ -2537,7 +2588,7 @@ sns.scatterplot(
 
 
 
-![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_68_1.png)
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_65_1.png)
 
 
 
@@ -2559,7 +2610,7 @@ sns.boxplot(
 
 
 
-![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_69_1.png)
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_66_1.png)
 
 
 
@@ -2576,7 +2627,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 4.11 minutes
+    execution time: 27.87 minutes
 
 
 
@@ -2585,7 +2636,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-09-25
+    Last updated: 2022-10-04
 
     Python implementation: CPython
     Python version       : 3.10.6
@@ -2603,13 +2654,13 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 
     Git branch: figures
 
-    matplotlib: 3.5.3
     dask      : 2022.9.0
-    pandas    : 1.4.4
-    arviz     : 0.12.1
-    numpy     : 1.23.3
-    seaborn   : 0.11.2
     gseapy    : 0.13.0
+    pandas    : 1.4.4
+    numpy     : 1.23.3
+    arviz     : 0.12.1
+    matplotlib: 3.5.3
+    seaborn   : 0.11.2
 
 
 

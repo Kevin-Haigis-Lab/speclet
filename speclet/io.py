@@ -188,3 +188,28 @@ def figure_dir(num: int, ver: int) -> Path:
 def figure_img_file(num: int, ver: int, name: str) -> Path:
     """Path for a figure image file."""
     return figure_dir(num, ver) / f"fig_{num:03d}-v{ver:03d}_{name}.png"
+
+
+def _clear_dir(d: Path) -> None:
+    for fp in d.iterdir():
+        os.remove(fp)
+
+
+def notebook_output_and_stash_dirs(
+    name: str, clear_output: bool = True, clear_stash: bool = False
+) -> tuple[Path, Path]:
+    """Generate an output and stash directory."""
+    stash_dir = temp_dir() / f"{name}_stash"
+    if not stash_dir.exists():
+        stash_dir.mkdir()
+
+    if clear_stash:
+        _clear_dir(stash_dir)
+
+    output_dir = tables_dir() / name
+    if not output_dir.exists():
+        output_dir.mkdir()
+    elif clear_output:
+        _clear_dir(output_dir)
+
+    return output_dir, stash_dir
