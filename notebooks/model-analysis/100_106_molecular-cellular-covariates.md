@@ -13,7 +13,6 @@
 
 ```python
 import json
-import os
 from math import ceil
 from time import time
 
@@ -35,7 +34,7 @@ from speclet.analysis.sublineage_model_analysis import (
 )
 from speclet.data_processing.common import head_tail
 from speclet.data_processing.crispr import grouped_copy_number_transform
-from speclet.io import DataFile, data_path, tables_dir, temp_dir
+from speclet.io import DataFile, data_path, notebook_output_and_stash_dirs
 from speclet.managers.posterior_data_manager import PosteriorDataManager as PostDataMan
 from speclet.plot import set_speclet_theme
 from speclet.plot.color_pal import (
@@ -63,20 +62,9 @@ arviz_config()
 
 
 ```python
-STASH_DIR = temp_dir() / "100_106_molecular-cellular-covariates_stash"
-if not STASH_DIR.exists():
-    STASH_DIR.mkdir()
-
-if False:
-    for fp in STASH_DIR.iterdir():
-        os.remove(fp)
-```
-
-
-```python
-OUTPUT_DIR = tables_dir() / "100_106_molecular-cellular-covariates"
-if not OUTPUT_DIR.exists():
-    OUTPUT_DIR.mkdir()
+OUTPUT_DIR, STASH_DIR = notebook_output_and_stash_dirs(
+    "100_106_molecular-cellular-covariates"
+)
 ```
 
 ### Data
@@ -408,6 +396,9 @@ rna_cn_posterior = (
 rna_cn_posterior.head(5)
 ```
 
+    No posterior summary for 'skin (melanoma)'.
+
+
 
 
 
@@ -454,11 +445,11 @@ rna_cn_posterior.head(5)
       <td>-0.002</td>
       <td>0.029</td>
       <td>-0.049</td>
-      <td>0.045</td>
+      <td>0.044</td>
       <td>0.0</td>
       <td>0.001</td>
-      <td>8983.0</td>
-      <td>2342.0</td>
+      <td>9778.0</td>
+      <td>3024.0</td>
       <td>1.0</td>
       <td>b</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -470,14 +461,14 @@ rna_cn_posterior.head(5)
     <tr>
       <th>1</th>
       <td>b[A1CF]</td>
-      <td>0.032</td>
-      <td>0.029</td>
-      <td>-0.011</td>
-      <td>0.082</td>
+      <td>0.033</td>
+      <td>0.030</td>
+      <td>-0.015</td>
+      <td>0.080</td>
       <td>0.0</td>
       <td>0.000</td>
-      <td>10585.0</td>
-      <td>2707.0</td>
+      <td>10302.0</td>
+      <td>2669.0</td>
       <td>1.0</td>
       <td>b</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -490,13 +481,13 @@ rna_cn_posterior.head(5)
       <th>2</th>
       <td>b[A2M]</td>
       <td>0.032</td>
-      <td>0.031</td>
-      <td>-0.018</td>
-      <td>0.079</td>
+      <td>0.030</td>
+      <td>-0.015</td>
+      <td>0.081</td>
       <td>0.0</td>
       <td>0.000</td>
-      <td>11338.0</td>
-      <td>2856.0</td>
+      <td>9712.0</td>
+      <td>2656.0</td>
       <td>1.0</td>
       <td>b</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -508,14 +499,14 @@ rna_cn_posterior.head(5)
     <tr>
       <th>3</th>
       <td>b[A2ML1]</td>
-      <td>0.006</td>
-      <td>0.029</td>
+      <td>0.007</td>
+      <td>0.031</td>
       <td>-0.042</td>
-      <td>0.052</td>
+      <td>0.055</td>
       <td>0.0</td>
       <td>0.001</td>
-      <td>10087.0</td>
-      <td>2801.0</td>
+      <td>12171.0</td>
+      <td>2759.0</td>
       <td>1.0</td>
       <td>b</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -528,13 +519,13 @@ rna_cn_posterior.head(5)
       <th>4</th>
       <td>b[A3GALT2]</td>
       <td>-0.051</td>
-      <td>0.032</td>
-      <td>-0.102</td>
-      <td>-0.002</td>
+      <td>0.031</td>
+      <td>-0.101</td>
+      <td>-0.004</td>
       <td>0.0</td>
       <td>0.000</td>
-      <td>11099.0</td>
-      <td>2648.0</td>
+      <td>10082.0</td>
+      <td>2664.0</td>
       <td>1.0</td>
       <td>b</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -620,7 +611,7 @@ plt.show()
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_29_0.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_28_0.png)
 
 
 
@@ -647,7 +638,7 @@ plt.show()
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_30_0.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_29_0.png)
 
 
 
@@ -675,7 +666,7 @@ plt.show()
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_31_0.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_30_0.png)
 
 
 
@@ -800,7 +791,7 @@ plt.show()
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_42_0.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_41_0.png)
 
 
 
@@ -832,7 +823,7 @@ plt.show()
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_43_0.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_42_0.png)
 
 
 
@@ -915,37 +906,37 @@ total_ranked_genes.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>TIMELESS</td>
+      <td>LSM2</td>
       <td>b</td>
-      <td>0.972184</td>
-      <td>True</td>
+      <td>0.965865</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>PSMD6</td>
+      <td>HAUS4</td>
       <td>b</td>
-      <td>0.964844</td>
+      <td>0.959545</td>
       <td>True</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>POLR2I</td>
+      <td>PSMG4</td>
       <td>b</td>
-      <td>0.961532</td>
+      <td>0.958221</td>
       <td>True</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>CDC45</td>
+      <td>TIMELESS</td>
       <td>b</td>
-      <td>0.952536</td>
+      <td>0.956344</td>
       <td>True</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>SNRPF</td>
+      <td>SMC1A</td>
       <td>b</td>
-      <td>0.951708</td>
+      <td>0.953033</td>
       <td>True</td>
     </tr>
   </tbody>
@@ -991,126 +982,126 @@ total_ranked_genes.groupby("var_name").pipe(head_tail, n=5).sort_values(
   <tbody>
     <tr>
       <th>18118</th>
-      <td>MDM2</td>
+      <td>TIPARP</td>
       <td>b</td>
-      <td>0.031017</td>
+      <td>0.055108</td>
       <td>False</td>
     </tr>
     <tr>
       <th>18117</th>
-      <td>CCND1</td>
+      <td>MDM2</td>
       <td>b</td>
-      <td>0.037364</td>
+      <td>0.055163</td>
       <td>False</td>
     </tr>
     <tr>
       <th>18116</th>
-      <td>CFLAR</td>
+      <td>CCND1</td>
       <td>b</td>
-      <td>0.046802</td>
+      <td>0.058585</td>
       <td>False</td>
     </tr>
     <tr>
       <th>18115</th>
-      <td>NPM1</td>
+      <td>CFLAR</td>
       <td>b</td>
-      <td>0.049009</td>
+      <td>0.061041</td>
       <td>False</td>
     </tr>
     <tr>
       <th>18114</th>
-      <td>TIPARP</td>
+      <td>CDK6</td>
       <td>b</td>
-      <td>0.049782</td>
+      <td>0.071141</td>
       <td>False</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>SNRPF</td>
+      <td>SMC1A</td>
       <td>b</td>
-      <td>0.951708</td>
+      <td>0.953033</td>
       <td>True</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>CDC45</td>
+      <td>TIMELESS</td>
       <td>b</td>
-      <td>0.952536</td>
+      <td>0.956344</td>
       <td>True</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>POLR2I</td>
+      <td>PSMG4</td>
       <td>b</td>
-      <td>0.961532</td>
+      <td>0.958221</td>
       <td>True</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>PSMD6</td>
+      <td>HAUS4</td>
       <td>b</td>
-      <td>0.964844</td>
+      <td>0.959545</td>
       <td>True</td>
     </tr>
     <tr>
       <th>0</th>
-      <td>TIMELESS</td>
+      <td>LSM2</td>
       <td>b</td>
-      <td>0.972184</td>
-      <td>True</td>
+      <td>0.965865</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>36237</th>
       <td>CCND1</td>
       <td>d</td>
-      <td>0.100889</td>
+      <td>0.124676</td>
       <td>False</td>
     </tr>
     <tr>
       <th>36236</th>
       <td>CDKN2B</td>
       <td>d</td>
-      <td>0.141509</td>
+      <td>0.152740</td>
       <td>False</td>
     </tr>
     <tr>
       <th>36235</th>
-      <td>KRTAP12-2</td>
+      <td>SPRED2</td>
       <td>d</td>
-      <td>0.141840</td>
+      <td>0.152878</td>
       <td>False</td>
     </tr>
     <tr>
       <th>36234</th>
-      <td>PTPRD</td>
+      <td>SBF1</td>
       <td>d</td>
-      <td>0.150063</td>
+      <td>0.152906</td>
       <td>False</td>
     </tr>
     <tr>
       <th>36233</th>
-      <td>SBF1</td>
+      <td>IGFL1</td>
       <td>d</td>
-      <td>0.151333</td>
+      <td>0.154699</td>
       <td>False</td>
     </tr>
     <tr>
       <th>18123</th>
-      <td>RBM8A</td>
+      <td>RPL6</td>
       <td>d</td>
-      <td>0.987251</td>
+      <td>0.986809</td>
       <td>False</td>
     </tr>
     <tr>
       <th>18122</th>
-      <td>RPL6</td>
+      <td>DONSON</td>
       <td>d</td>
-      <td>0.988189</td>
-      <td>False</td>
+      <td>0.988382</td>
+      <td>True</td>
     </tr>
     <tr>
       <th>18121</th>
-      <td>DONSON</td>
+      <td>RPL4</td>
       <td>d</td>
       <td>0.989403</td>
       <td>True</td>
@@ -1119,14 +1110,14 @@ total_ranked_genes.groupby("var_name").pipe(head_tail, n=5).sort_values(
       <th>18120</th>
       <td>RAN</td>
       <td>d</td>
-      <td>0.991004</td>
+      <td>0.991859</td>
       <td>True</td>
     </tr>
     <tr>
       <th>18119</th>
       <td>RPS3A</td>
       <td>d</td>
-      <td>0.992660</td>
+      <td>0.991970</td>
       <td>False</td>
     </tr>
   </tbody>
@@ -1173,13 +1164,13 @@ for v in ["b", "d"]:
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_51_0.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_50_0.png)
 
 
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_51_1.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_50_1.png)
 
 
 
@@ -1199,7 +1190,7 @@ new_essential_genes = cn_total_ranked_genes.query(
 new_essential_genes
 ```
 
-    essential 90% cut-off: 0.9685
+    essential 90% cut-off: 0.9684
 
 
 
@@ -1234,399 +1225,364 @@ new_essential_genes
       <th>0</th>
       <td>RPS3A</td>
       <td>d</td>
-      <td>0.992660</td>
+      <td>0.991970</td>
       <td>False</td>
     </tr>
     <tr>
       <th>1</th>
       <td>RPL6</td>
       <td>d</td>
-      <td>0.988189</td>
+      <td>0.986809</td>
       <td>False</td>
     </tr>
     <tr>
       <th>2</th>
       <td>RBM8A</td>
       <td>d</td>
-      <td>0.987251</td>
+      <td>0.986727</td>
       <td>False</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>RPL17</td>
+      <td>RPSA</td>
       <td>d</td>
-      <td>0.985761</td>
+      <td>0.985595</td>
       <td>False</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>RPL34</td>
+      <td>RPL14</td>
       <td>d</td>
-      <td>0.984602</td>
+      <td>0.985264</td>
       <td>False</td>
     </tr>
     <tr>
       <th>5</th>
-      <td>ATP6V1B2</td>
+      <td>RPL34</td>
       <td>d</td>
-      <td>0.983664</td>
+      <td>0.984961</td>
       <td>False</td>
     </tr>
     <tr>
       <th>6</th>
-      <td>HSPE1</td>
+      <td>RPL17</td>
       <td>d</td>
-      <td>0.983664</td>
+      <td>0.984823</td>
       <td>False</td>
     </tr>
     <tr>
       <th>7</th>
-      <td>RPL14</td>
+      <td>HSPE1</td>
       <td>d</td>
-      <td>0.982560</td>
+      <td>0.983305</td>
       <td>False</td>
     </tr>
     <tr>
       <th>8</th>
-      <td>RPL23</td>
+      <td>RPS7</td>
       <td>d</td>
-      <td>0.981953</td>
+      <td>0.982643</td>
       <td>False</td>
     </tr>
     <tr>
       <th>9</th>
       <td>RPL7A</td>
       <td>d</td>
-      <td>0.981677</td>
+      <td>0.982284</td>
       <td>False</td>
     </tr>
     <tr>
       <th>10</th>
-      <td>RPS7</td>
+      <td>RRN3</td>
       <td>d</td>
-      <td>0.981677</td>
+      <td>0.981815</td>
       <td>False</td>
     </tr>
     <tr>
       <th>11</th>
-      <td>ESPL1</td>
+      <td>ATP6V1B2</td>
       <td>d</td>
-      <td>0.981566</td>
+      <td>0.981097</td>
       <td>False</td>
     </tr>
     <tr>
       <th>12</th>
-      <td>SF3B4</td>
+      <td>SRSF3</td>
       <td>d</td>
-      <td>0.980297</td>
+      <td>0.980490</td>
       <td>False</td>
     </tr>
     <tr>
       <th>13</th>
-      <td>RPS27A</td>
+      <td>SF3B5</td>
       <td>d</td>
-      <td>0.980076</td>
+      <td>0.980021</td>
       <td>False</td>
     </tr>
     <tr>
       <th>14</th>
-      <td>SRSF3</td>
+      <td>RPL23</td>
       <td>d</td>
-      <td>0.979800</td>
+      <td>0.979717</td>
       <td>False</td>
     </tr>
     <tr>
       <th>15</th>
-      <td>RRN3</td>
+      <td>RPL24</td>
       <td>d</td>
-      <td>0.979745</td>
+      <td>0.979579</td>
       <td>False</td>
     </tr>
     <tr>
       <th>16</th>
-      <td>RPL24</td>
+      <td>RPL7</td>
       <td>d</td>
-      <td>0.979524</td>
+      <td>0.978862</td>
       <td>False</td>
     </tr>
     <tr>
       <th>17</th>
-      <td>SNRNP25</td>
+      <td>ESPL1</td>
       <td>d</td>
-      <td>0.978310</td>
+      <td>0.978669</td>
       <td>False</td>
     </tr>
     <tr>
       <th>18</th>
-      <td>RPL7</td>
+      <td>SF3B4</td>
       <td>d</td>
-      <td>0.978034</td>
+      <td>0.978172</td>
       <td>False</td>
     </tr>
     <tr>
       <th>19</th>
       <td>EXOSC6</td>
       <td>d</td>
-      <td>0.977317</td>
+      <td>0.977924</td>
       <td>False</td>
     </tr>
     <tr>
       <th>20</th>
-      <td>SNRPD1</td>
+      <td>RPS27A</td>
       <td>d</td>
-      <td>0.977041</td>
+      <td>0.976461</td>
       <td>False</td>
     </tr>
     <tr>
       <th>21</th>
-      <td>SF3B5</td>
+      <td>SNRPA1</td>
       <td>d</td>
-      <td>0.976820</td>
+      <td>0.976130</td>
       <td>False</td>
     </tr>
     <tr>
       <th>22</th>
-      <td>CIAO3</td>
+      <td>DUT</td>
       <td>d</td>
-      <td>0.976544</td>
+      <td>0.976075</td>
       <td>False</td>
     </tr>
     <tr>
       <th>23</th>
-      <td>SS18L2</td>
+      <td>SNRPD1</td>
       <td>d</td>
-      <td>0.975495</td>
+      <td>0.975964</td>
       <td>False</td>
     </tr>
     <tr>
       <th>24</th>
-      <td>DUT</td>
+      <td>CIAO3</td>
       <td>d</td>
-      <td>0.975440</td>
+      <td>0.975799</td>
       <td>False</td>
     </tr>
     <tr>
       <th>25</th>
-      <td>RPS28</td>
+      <td>SS18L2</td>
       <td>d</td>
-      <td>0.975275</td>
+      <td>0.975551</td>
       <td>False</td>
     </tr>
     <tr>
       <th>26</th>
-      <td>PSMC2</td>
-      <td>d</td>
-      <td>0.974723</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>27</th>
-      <td>DPAGT1</td>
-      <td>d</td>
-      <td>0.974447</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>28</th>
-      <td>KRT8</td>
-      <td>d</td>
-      <td>0.974392</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>29</th>
-      <td>MAK16</td>
+      <td>SNRNP25</td>
       <td>d</td>
       <td>0.974336</td>
       <td>False</td>
     </tr>
     <tr>
-      <th>30</th>
+      <th>27</th>
+      <td>RSL24D1</td>
+      <td>d</td>
+      <td>0.974254</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>RPS17</td>
+      <td>d</td>
+      <td>0.974226</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>29</th>
       <td>LSM8</td>
       <td>d</td>
-      <td>0.974281</td>
+      <td>0.974033</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td>PSMA6</td>
+      <td>d</td>
+      <td>0.973812</td>
       <td>False</td>
     </tr>
     <tr>
       <th>31</th>
-      <td>RPSA</td>
+      <td>MAK16</td>
       <td>d</td>
-      <td>0.974005</td>
+      <td>0.973646</td>
       <td>False</td>
     </tr>
     <tr>
       <th>32</th>
-      <td>SNRPG</td>
+      <td>PHF5A</td>
       <td>d</td>
-      <td>0.973840</td>
+      <td>0.973039</td>
       <td>False</td>
     </tr>
     <tr>
       <th>33</th>
       <td>CFAP298</td>
       <td>d</td>
-      <td>0.973729</td>
+      <td>0.972653</td>
       <td>False</td>
     </tr>
     <tr>
       <th>34</th>
-      <td>RSL24D1</td>
+      <td>SNRPG</td>
       <td>d</td>
-      <td>0.973674</td>
+      <td>0.972487</td>
       <td>False</td>
     </tr>
     <tr>
       <th>35</th>
-      <td>MED11</td>
+      <td>LETM1</td>
       <td>d</td>
-      <td>0.973343</td>
+      <td>0.972322</td>
       <td>False</td>
     </tr>
     <tr>
       <th>36</th>
-      <td>PSMA6</td>
+      <td>SBDS</td>
       <td>d</td>
-      <td>0.973343</td>
+      <td>0.972046</td>
       <td>False</td>
     </tr>
     <tr>
       <th>37</th>
-      <td>LETM1</td>
+      <td>RPS24</td>
       <td>d</td>
-      <td>0.972846</td>
+      <td>0.971825</td>
       <td>False</td>
     </tr>
     <tr>
       <th>38</th>
-      <td>RPS19</td>
+      <td>RBM22</td>
       <td>d</td>
-      <td>0.972681</td>
+      <td>0.971549</td>
       <td>False</td>
     </tr>
     <tr>
       <th>39</th>
-      <td>RPS24</td>
+      <td>PSMA4</td>
       <td>d</td>
-      <td>0.972405</td>
+      <td>0.971466</td>
       <td>False</td>
     </tr>
     <tr>
       <th>40</th>
-      <td>DHX37</td>
+      <td>DPAGT1</td>
       <td>d</td>
-      <td>0.972294</td>
+      <td>0.971411</td>
       <td>False</td>
     </tr>
     <tr>
       <th>41</th>
-      <td>RPL5</td>
+      <td>CAPZB</td>
       <td>d</td>
-      <td>0.971466</td>
+      <td>0.971384</td>
       <td>False</td>
     </tr>
     <tr>
       <th>42</th>
-      <td>SNAPC5</td>
+      <td>PSMC2</td>
       <td>d</td>
-      <td>0.971466</td>
+      <td>0.971273</td>
       <td>False</td>
     </tr>
     <tr>
       <th>43</th>
-      <td>GTF3A</td>
-      <td>d</td>
-      <td>0.971246</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>44</th>
-      <td>LSM7</td>
-      <td>d</td>
-      <td>0.971025</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>45</th>
-      <td>PSMA4</td>
+      <td>SNAPC5</td>
       <td>d</td>
       <td>0.970804</td>
       <td>False</td>
     </tr>
     <tr>
-      <th>46</th>
-      <td>PHF5A</td>
+      <th>44</th>
+      <td>GTF3A</td>
       <td>d</td>
-      <td>0.970694</td>
+      <td>0.970363</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>45</th>
+      <td>RPS19</td>
+      <td>d</td>
+      <td>0.970142</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>46</th>
+      <td>LSM2</td>
+      <td>d</td>
+      <td>0.969893</td>
       <td>False</td>
     </tr>
     <tr>
       <th>47</th>
-      <td>LSM2</td>
+      <td>DHX37</td>
       <td>d</td>
-      <td>0.970528</td>
+      <td>0.969866</td>
       <td>False</td>
     </tr>
     <tr>
       <th>48</th>
-      <td>CDCA8</td>
+      <td>EIF3G</td>
       <td>d</td>
-      <td>0.970307</td>
+      <td>0.969728</td>
       <td>False</td>
     </tr>
     <tr>
       <th>49</th>
-      <td>ATP6V1F</td>
+      <td>CDCA8</td>
       <td>d</td>
-      <td>0.969700</td>
+      <td>0.969673</td>
       <td>False</td>
     </tr>
     <tr>
       <th>50</th>
-      <td>CAPZB</td>
+      <td>MED11</td>
       <td>d</td>
-      <td>0.969645</td>
+      <td>0.969673</td>
       <td>False</td>
     </tr>
     <tr>
       <th>51</th>
-      <td>EIF3G</td>
+      <td>FAU</td>
       <td>d</td>
-      <td>0.969535</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>52</th>
-      <td>SNRPA1</td>
-      <td>d</td>
-      <td>0.969535</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>53</th>
-      <td>RPS17</td>
-      <td>d</td>
-      <td>0.969314</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>54</th>
-      <td>CDC27</td>
-      <td>d</td>
-      <td>0.969204</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>55</th>
-      <td>PSMB3</td>
-      <td>d</td>
-      <td>0.968597</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>56</th>
-      <td>SBDS</td>
-      <td>d</td>
-      <td>0.968597</td>
+      <td>0.969148</td>
       <td>False</td>
     </tr>
   </tbody>
@@ -1649,9 +1605,11 @@ new_essentials_annotations = {
     "DHX37": "mitochondrial",
     "DPAGT1": "metabolism",
     "DUT": "mitochondrial",
+    "EIF3E": "translation",
     "EIF3G": "translation",
     "ESPL1": "cell cycle",
     "EXOSC6": "exosome",
+    "FAU": "ribosomal",
     "GTF3A": "transcription",
     "HSPE1": "mitochondrial",
     "KRT8": "cytoskeleton",
@@ -1661,16 +1619,19 @@ new_essentials_annotations = {
     "LSM8": "splicing",
     "MAK16": "translation",
     "MED11": "transcription",
+    "PAM16": "mitochondrial",
     "PHF5A": "transcription",
     "PSMA4": "proteasome",
     "PSMA6": "proteasome",
     "PSMB3": "proteasome",
     "PSMC2": "proteasome",
+    "RBM22": "splicing",
     "RBM8A": "splicing",
     "RPL14": "ribosomal",
     "RPL17": "ribosomal",
     "RPL23": "ribosomal",
     "RPL24": "ribosomal",
+    "RPL32": "ribosomal",
     "RPL34": "ribosomal",
     "RPL5": "ribosomal",
     "RPL6": "ribosomal",
@@ -1776,7 +1737,7 @@ plt.show()
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_55_1.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_54_1.png)
 
 
 
@@ -1892,7 +1853,7 @@ sns.kdeplot(dist_to_essentials["dist"])
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_59_1.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_58_1.png)
 
 
 
@@ -1929,7 +1890,7 @@ sns.violinplot(data=plt_df, x="gene_label", y="log_dist")
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_62_1.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_61_1.png)
 
 
 
@@ -1972,7 +1933,7 @@ sns.scatterplot(
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_63_1.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_62_1.png)
 
 
 
@@ -2001,13 +1962,13 @@ sns.clustermap(X, z_score=1, cmap="seismic", center=0)
 
 
 
-    <seaborn.matrix.ClusterGrid at 0x7ff54e89ed70>
+    <seaborn.matrix.ClusterGrid at 0x7fc3b9975c90>
 
 
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_64_2.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_63_2.png)
 
 
 
@@ -2085,7 +2046,7 @@ for v in ["b", "d"]:
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_72_1.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_71_1.png)
 
 
 
@@ -2094,7 +2055,7 @@ for v in ["b", "d"]:
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_72_3.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_71_3.png)
 
 
 
@@ -2115,6 +2076,9 @@ cell_effects = (
 )
 cell_effects.head(3)
 ```
+
+    No posterior summary for 'skin (melanoma)'.
+
 
 
 
@@ -2157,15 +2121,15 @@ cell_effects.head(3)
     <tr>
       <th>0</th>
       <td>mu_k[ACH-000182]</td>
-      <td>-0.025</td>
-      <td>0.023</td>
-      <td>-0.059</td>
+      <td>-0.024</td>
+      <td>0.022</td>
+      <td>-0.057</td>
       <td>0.013</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>437.0</td>
-      <td>901.0</td>
-      <td>1.01</td>
+      <td>476.0</td>
+      <td>944.0</td>
+      <td>1.00</td>
       <td>mu_k</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>ACH-000182</td>
@@ -2174,14 +2138,14 @@ cell_effects.head(3)
     <tr>
       <th>1</th>
       <td>mu_k[ACH-000209]</td>
-      <td>0.054</td>
+      <td>0.055</td>
       <td>0.022</td>
-      <td>0.021</td>
-      <td>0.091</td>
+      <td>0.022</td>
+      <td>0.092</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>456.0</td>
-      <td>1077.0</td>
+      <td>415.0</td>
+      <td>1040.0</td>
       <td>1.01</td>
       <td>mu_k</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -2191,14 +2155,14 @@ cell_effects.head(3)
     <tr>
       <th>2</th>
       <td>mu_k[ACH-000377]</td>
-      <td>-0.053</td>
+      <td>-0.051</td>
       <td>0.022</td>
-      <td>-0.087</td>
-      <td>-0.018</td>
+      <td>-0.082</td>
+      <td>-0.014</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>488.0</td>
-      <td>885.0</td>
+      <td>462.0</td>
+      <td>964.0</td>
       <td>1.01</td>
       <td>mu_k</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -2230,6 +2194,9 @@ chrom_effects = (
 )
 chrom_effects.head(3)
 ```
+
+    No posterior summary for 'skin (melanoma)'.
+
 
 
 
@@ -2274,14 +2241,14 @@ chrom_effects.head(3)
     <tr>
       <th>0</th>
       <td>k[ACH-000182__1]</td>
-      <td>0.056</td>
+      <td>0.058</td>
       <td>0.021</td>
-      <td>0.022</td>
-      <td>0.088</td>
+      <td>0.025</td>
+      <td>0.091</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>401.0</td>
-      <td>821.0</td>
+      <td>409.0</td>
+      <td>930.0</td>
       <td>1.01</td>
       <td>k</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -2293,14 +2260,14 @@ chrom_effects.head(3)
     <tr>
       <th>1</th>
       <td>k[ACH-000182__2]</td>
-      <td>-0.046</td>
-      <td>0.021</td>
-      <td>-0.080</td>
-      <td>-0.012</td>
+      <td>-0.045</td>
+      <td>0.022</td>
+      <td>-0.079</td>
+      <td>-0.010</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>465.0</td>
-      <td>1048.0</td>
+      <td>458.0</td>
+      <td>1026.0</td>
       <td>1.01</td>
       <td>k</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -2312,14 +2279,14 @@ chrom_effects.head(3)
     <tr>
       <th>2</th>
       <td>k[ACH-000182__3]</td>
-      <td>-0.027</td>
+      <td>-0.025</td>
       <td>0.022</td>
-      <td>-0.062</td>
-      <td>0.007</td>
+      <td>-0.059</td>
+      <td>0.011</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>493.0</td>
-      <td>1123.0</td>
+      <td>487.0</td>
+      <td>868.0</td>
       <td>1.01</td>
       <td>k</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -2361,7 +2328,7 @@ plt.show()
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_77_0.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_76_0.png)
 
 
 
@@ -2403,7 +2370,7 @@ plt.show()
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_78_0.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_77_0.png)
 
 
 
@@ -2472,7 +2439,7 @@ plt.show()
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_79_0.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_78_0.png)
 
 
 
@@ -2523,7 +2490,7 @@ for var_name in ["k", "m"]:
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_80_2.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_79_2.png)
 
 
 
@@ -2536,7 +2503,7 @@ for var_name in ["k", "m"]:
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_80_5.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_79_5.png)
 
 
 
@@ -2589,7 +2556,7 @@ plt.show()
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_84_0.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_83_0.png)
 
 
 
@@ -2667,6 +2634,7 @@ x_chrom_comparisons = pd.concat(
     Not both sexes for cervix (cervical squamous).
     Not both sexes for ovary (ovary adenocarcinoma).
     Not both sexes for prostate.
+    No trace for skin (melanoma).
     Not both sexes for soft tissue (liposarcoma).
     Not both sexes for soft tissue (synovial sarcoma).
     Not both sexes for uterus (endometrial adenocarcinoma).
@@ -2710,40 +2678,40 @@ x_chrom_comparisons.head()
       <th>0</th>
       <td>0</td>
       <td>0</td>
-      <td>0.032571</td>
-      <td>0.008090</td>
+      <td>0.007834</td>
+      <td>-0.031695</td>
       <td>bile duct (cholangiocarcinoma)</td>
     </tr>
     <tr>
       <th>1</th>
       <td>0</td>
       <td>1</td>
-      <td>0.012261</td>
-      <td>-0.010339</td>
+      <td>0.012195</td>
+      <td>-0.008549</td>
       <td>bile duct (cholangiocarcinoma)</td>
     </tr>
     <tr>
       <th>2</th>
       <td>0</td>
       <td>2</td>
-      <td>0.037411</td>
-      <td>0.026473</td>
+      <td>0.017923</td>
+      <td>0.000096</td>
       <td>bile duct (cholangiocarcinoma)</td>
     </tr>
     <tr>
       <th>3</th>
       <td>0</td>
       <td>3</td>
-      <td>0.012975</td>
-      <td>-0.028039</td>
+      <td>0.015091</td>
+      <td>-0.027006</td>
       <td>bile duct (cholangiocarcinoma)</td>
     </tr>
     <tr>
       <th>4</th>
       <td>0</td>
       <td>4</td>
-      <td>0.020753</td>
-      <td>0.018815</td>
+      <td>0.008400</td>
+      <td>-0.054511</td>
       <td>bile duct (cholangiocarcinoma)</td>
     </tr>
   </tbody>
@@ -2839,7 +2807,7 @@ plt.show()
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_91_0.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_90_0.png)
 
 
 
@@ -3026,7 +2994,7 @@ plt.show()
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_97_0.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_96_0.png)
 
 
 
@@ -3092,6 +3060,7 @@ tp53_draw_diffs = pd.concat(
     Skipping 'esophagus (esophagus squamous)'.
     Skipping 'eye (uveal melanoma)'.
     Skipping 'lung (SCLC)'.
+    No posterior for 'skin (melanoma).'
     Skipping 'soft tissue (malignant rhabdoid tumor)'.
     Skipping 'thyroid (thyroid carcinoma)'.
 
@@ -3185,7 +3154,7 @@ plt.show()
 
 
 
-![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_103_0.png)
+![png](100_106_molecular-cellular-covariates_files/100_106_molecular-cellular-covariates_102_0.png)
 
 
 
@@ -3197,7 +3166,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 13.75 minutes
+    execution time: 8.67 minutes
 
 
 
@@ -3206,7 +3175,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-09-26
+    Last updated: 2022-10-04
 
     Python implementation: CPython
     Python version       : 3.10.6
@@ -3217,19 +3186,19 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1160.76.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-a-16-171.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-231.o2.rc.hms.harvard.edu
 
     Git branch: figures
 
-    numpy     : 1.23.3
     json      : 2.0.9
     seaborn   : 0.11.2
     matplotlib: 3.5.3
     dask      : 2022.9.0
     pandas    : 1.4.4
+    numpy     : 1.23.3
 
 
 

@@ -13,11 +13,9 @@
 
 ```python
 import json
-import os
 from collections import Counter
 from itertools import combinations
 from math import ceil
-from pathlib import Path
 from time import time
 from typing import Collection
 
@@ -37,7 +35,7 @@ from speclet.analysis.sublineage_model_analysis import (
     load_sublineage_model_posteriors,
     sublineage_to_lineage_map,
 )
-from speclet.io import tables_dir, temp_dir
+from speclet.io import notebook_output_and_stash_dirs
 from speclet.managers.posterior_data_manager import PosteriorDataManager as PostDataMan
 from speclet.plot import align_legend_title, set_speclet_theme
 from speclet.plot.color_pal import (
@@ -62,32 +60,6 @@ set_speclet_theme()
 RANDOM_SEED = 709
 np.random.seed(RANDOM_SEED)
 arviz_config()
-```
-
-
-```python
-def _clear_dir(d: Path) -> None:
-    for fp in d.iterdir():
-        os.remove(fp)
-
-
-def notebook_output_and_stash_dirs(
-    name: str, clear_output: bool = True, clear_stash: bool = False
-) -> tuple[Path, Path]:
-    stash_dir = temp_dir() / f"{name}_stash"
-    if not stash_dir.exists():
-        stash_dir.mkdir()
-
-    if clear_stash:
-        _clear_dir(stash_dir)
-
-    output_dir = tables_dir() / name
-    if not output_dir.exists():
-        output_dir.mkdir()
-    elif clear_output:
-        _clear_dir(output_dir)
-
-    return output_dir, stash_dir
 ```
 
 
@@ -867,7 +839,7 @@ sns.clustermap(
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_25_1.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_24_1.png)
 
 
 
@@ -888,7 +860,7 @@ ax.tick_params("x", rotation=90, labelsize=7)
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_26_0.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_25_0.png)
 
 
 
@@ -958,7 +930,7 @@ ax.set_ylabel("density")
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_30_1.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_29_1.png)
 
 
 
@@ -1003,7 +975,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_32_0.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_31_0.png)
 
 
 
@@ -1030,7 +1002,7 @@ ax.axvline(0, c="k", zorder=1)
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_33_1.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_32_1.png)
 
 
 
@@ -1088,7 +1060,7 @@ ax.axvline(0, c="k", zorder=1)
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_34_1.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_33_1.png)
 
 
 
@@ -1130,7 +1102,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_37_0.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_36_0.png)
 
 
 
@@ -1323,7 +1295,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_40_0.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_39_0.png)
 
 
 
@@ -1354,7 +1326,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_41_1.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_40_1.png)
 
 
 
@@ -1383,7 +1355,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_42_1.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_41_1.png)
 
 
 
@@ -1454,7 +1426,7 @@ sns.boxplot(data=target_df, x="pik3ca_mut", y="lfc")
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_44_1.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_43_1.png)
 
 
 
@@ -1503,7 +1475,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_48_0.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_47_0.png)
 
 
 
@@ -1550,7 +1522,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_49_0.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_48_0.png)
 
 
 
@@ -1598,7 +1570,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_51_0.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_50_0.png)
 
 
 
@@ -1640,7 +1612,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_52_1.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_51_1.png)
 
 
 
