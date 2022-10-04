@@ -1,6 +1,7 @@
 """Paths and data input/output."""
 
 import os
+import shutil
 import warnings
 from enum import Enum, unique
 from pathlib import Path
@@ -192,7 +193,10 @@ def figure_img_file(num: int, ver: int, name: str) -> Path:
 
 def _clear_dir(d: Path) -> None:
     for fp in d.iterdir():
-        os.remove(fp)
+        if fp.is_file():
+            os.remove(fp)
+        elif fp.is_dir():
+            shutil.rmtree(fp)
 
 
 def notebook_output_and_stash_dirs(
