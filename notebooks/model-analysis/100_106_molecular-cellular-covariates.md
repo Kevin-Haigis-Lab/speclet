@@ -396,9 +396,6 @@ rna_cn_posterior = (
 rna_cn_posterior.head(5)
 ```
 
-    No posterior summary for 'skin (melanoma)'.
-
-
 
 
 
@@ -906,37 +903,37 @@ total_ranked_genes.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>LSM2</td>
+      <td>TIMELESS</td>
       <td>b</td>
-      <td>0.965865</td>
-      <td>False</td>
+      <td>0.968983</td>
+      <td>True</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>HAUS4</td>
+      <td>PSMD6</td>
       <td>b</td>
-      <td>0.959545</td>
+      <td>0.967934</td>
       <td>True</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>PSMG4</td>
+      <td>LSM2</td>
       <td>b</td>
-      <td>0.958221</td>
-      <td>True</td>
+      <td>0.960318</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>TIMELESS</td>
+      <td>POLR2I</td>
       <td>b</td>
-      <td>0.956344</td>
+      <td>0.959600</td>
       <td>True</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>SMC1A</td>
+      <td>HAUS4</td>
       <td>b</td>
-      <td>0.953033</td>
+      <td>0.958110</td>
       <td>True</td>
     </tr>
   </tbody>
@@ -982,142 +979,142 @@ total_ranked_genes.groupby("var_name").pipe(head_tail, n=5).sort_values(
   <tbody>
     <tr>
       <th>18118</th>
-      <td>TIPARP</td>
+      <td>CFLAR</td>
       <td>b</td>
-      <td>0.055108</td>
+      <td>0.050886</td>
       <td>False</td>
     </tr>
     <tr>
       <th>18117</th>
-      <td>MDM2</td>
+      <td>TIPARP</td>
       <td>b</td>
-      <td>0.055163</td>
+      <td>0.051051</td>
       <td>False</td>
     </tr>
     <tr>
       <th>18116</th>
-      <td>CCND1</td>
+      <td>MDM2</td>
       <td>b</td>
-      <td>0.058585</td>
+      <td>0.051769</td>
       <td>False</td>
     </tr>
     <tr>
       <th>18115</th>
-      <td>CFLAR</td>
+      <td>CCND1</td>
       <td>b</td>
-      <td>0.061041</td>
+      <td>0.055853</td>
       <td>False</td>
     </tr>
     <tr>
       <th>18114</th>
-      <td>CDK6</td>
+      <td>FERMT2</td>
       <td>b</td>
-      <td>0.071141</td>
+      <td>0.068216</td>
       <td>False</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>SMC1A</td>
+      <td>HAUS4</td>
       <td>b</td>
-      <td>0.953033</td>
+      <td>0.958110</td>
       <td>True</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>TIMELESS</td>
+      <td>POLR2I</td>
       <td>b</td>
-      <td>0.956344</td>
+      <td>0.959600</td>
       <td>True</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>PSMG4</td>
+      <td>LSM2</td>
       <td>b</td>
-      <td>0.958221</td>
-      <td>True</td>
+      <td>0.960318</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>HAUS4</td>
+      <td>PSMD6</td>
       <td>b</td>
-      <td>0.959545</td>
+      <td>0.967934</td>
       <td>True</td>
     </tr>
     <tr>
       <th>0</th>
-      <td>LSM2</td>
+      <td>TIMELESS</td>
       <td>b</td>
-      <td>0.965865</td>
-      <td>False</td>
+      <td>0.968983</td>
+      <td>True</td>
     </tr>
     <tr>
       <th>36237</th>
       <td>CCND1</td>
       <td>d</td>
-      <td>0.124676</td>
+      <td>0.103041</td>
       <td>False</td>
     </tr>
     <tr>
       <th>36236</th>
       <td>CDKN2B</td>
       <td>d</td>
-      <td>0.152740</td>
+      <td>0.145372</td>
       <td>False</td>
     </tr>
     <tr>
       <th>36235</th>
-      <td>SPRED2</td>
+      <td>SBF1</td>
       <td>d</td>
-      <td>0.152878</td>
+      <td>0.151609</td>
       <td>False</td>
     </tr>
     <tr>
       <th>36234</th>
-      <td>SBF1</td>
+      <td>PTPRD</td>
       <td>d</td>
-      <td>0.152906</td>
+      <td>0.152989</td>
       <td>False</td>
     </tr>
     <tr>
       <th>36233</th>
-      <td>IGFL1</td>
+      <td>NPY2R</td>
       <td>d</td>
-      <td>0.154699</td>
+      <td>0.158066</td>
       <td>False</td>
     </tr>
     <tr>
       <th>18123</th>
-      <td>RPL6</td>
+      <td>DONSON</td>
       <td>d</td>
-      <td>0.986809</td>
-      <td>False</td>
+      <td>0.987858</td>
+      <td>True</td>
     </tr>
     <tr>
       <th>18122</th>
-      <td>DONSON</td>
+      <td>RPL9</td>
       <td>d</td>
-      <td>0.988382</td>
+      <td>0.988796</td>
       <td>True</td>
     </tr>
     <tr>
       <th>18121</th>
       <td>RPL4</td>
       <td>d</td>
-      <td>0.989403</td>
+      <td>0.989348</td>
       <td>True</td>
     </tr>
     <tr>
       <th>18120</th>
       <td>RAN</td>
       <td>d</td>
-      <td>0.991859</td>
+      <td>0.991611</td>
       <td>True</td>
     </tr>
     <tr>
       <th>18119</th>
       <td>RPS3A</td>
       <td>d</td>
-      <td>0.991970</td>
+      <td>0.992604</td>
       <td>False</td>
     </tr>
   </tbody>
@@ -1190,7 +1187,7 @@ new_essential_genes = cn_total_ranked_genes.query(
 new_essential_genes
 ```
 
-    essential 90% cut-off: 0.9684
+    essential 90% cut-off: 0.9687
 
 
 
@@ -1225,364 +1222,385 @@ new_essential_genes
       <th>0</th>
       <td>RPS3A</td>
       <td>d</td>
-      <td>0.991970</td>
+      <td>0.992604</td>
       <td>False</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>RPL6</td>
+      <td>RBM8A</td>
       <td>d</td>
-      <td>0.986809</td>
+      <td>0.986865</td>
       <td>False</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>RBM8A</td>
+      <td>RPL6</td>
       <td>d</td>
-      <td>0.986727</td>
+      <td>0.986313</td>
       <td>False</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>RPSA</td>
+      <td>RPL14</td>
       <td>d</td>
-      <td>0.985595</td>
+      <td>0.985154</td>
       <td>False</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>RPL14</td>
+      <td>RPSA</td>
       <td>d</td>
-      <td>0.985264</td>
+      <td>0.984933</td>
       <td>False</td>
     </tr>
     <tr>
       <th>5</th>
       <td>RPL34</td>
       <td>d</td>
-      <td>0.984961</td>
+      <td>0.984547</td>
       <td>False</td>
     </tr>
     <tr>
       <th>6</th>
       <td>RPL17</td>
       <td>d</td>
-      <td>0.984823</td>
+      <td>0.983719</td>
       <td>False</td>
     </tr>
     <tr>
       <th>7</th>
       <td>HSPE1</td>
       <td>d</td>
-      <td>0.983305</td>
+      <td>0.983222</td>
       <td>False</td>
     </tr>
     <tr>
       <th>8</th>
-      <td>RPS7</td>
+      <td>RRN3</td>
       <td>d</td>
-      <td>0.982643</td>
+      <td>0.981842</td>
       <td>False</td>
     </tr>
     <tr>
       <th>9</th>
-      <td>RPL7A</td>
+      <td>RPS7</td>
       <td>d</td>
-      <td>0.982284</td>
+      <td>0.981677</td>
       <td>False</td>
     </tr>
     <tr>
       <th>10</th>
-      <td>RRN3</td>
+      <td>ATP6V1B2</td>
       <td>d</td>
-      <td>0.981815</td>
+      <td>0.981346</td>
       <td>False</td>
     </tr>
     <tr>
       <th>11</th>
-      <td>ATP6V1B2</td>
+      <td>RPL7A</td>
       <td>d</td>
-      <td>0.981097</td>
+      <td>0.981070</td>
       <td>False</td>
     </tr>
     <tr>
       <th>12</th>
-      <td>SRSF3</td>
+      <td>RPL7</td>
       <td>d</td>
-      <td>0.980490</td>
+      <td>0.980904</td>
       <td>False</td>
     </tr>
     <tr>
       <th>13</th>
-      <td>SF3B5</td>
+      <td>SRSF3</td>
       <td>d</td>
-      <td>0.980021</td>
+      <td>0.980904</td>
       <td>False</td>
     </tr>
     <tr>
       <th>14</th>
-      <td>RPL23</td>
+      <td>SF3B5</td>
       <td>d</td>
-      <td>0.979717</td>
+      <td>0.980242</td>
       <td>False</td>
     </tr>
     <tr>
       <th>15</th>
-      <td>RPL24</td>
+      <td>SF3B4</td>
       <td>d</td>
-      <td>0.979579</td>
+      <td>0.979524</td>
       <td>False</td>
     </tr>
     <tr>
       <th>16</th>
-      <td>RPL7</td>
+      <td>RPL23</td>
       <td>d</td>
-      <td>0.978862</td>
+      <td>0.979469</td>
       <td>False</td>
     </tr>
     <tr>
       <th>17</th>
       <td>ESPL1</td>
       <td>d</td>
-      <td>0.978669</td>
+      <td>0.979303</td>
       <td>False</td>
     </tr>
     <tr>
       <th>18</th>
-      <td>SF3B4</td>
+      <td>RPL24</td>
       <td>d</td>
-      <td>0.978172</td>
+      <td>0.978310</td>
       <td>False</td>
     </tr>
     <tr>
       <th>19</th>
       <td>EXOSC6</td>
       <td>d</td>
-      <td>0.977924</td>
+      <td>0.978034</td>
       <td>False</td>
     </tr>
     <tr>
       <th>20</th>
-      <td>RPS27A</td>
+      <td>SNRNP25</td>
       <td>d</td>
-      <td>0.976461</td>
+      <td>0.976268</td>
       <td>False</td>
     </tr>
     <tr>
       <th>21</th>
-      <td>SNRPA1</td>
+      <td>DUT</td>
       <td>d</td>
-      <td>0.976130</td>
+      <td>0.975992</td>
       <td>False</td>
     </tr>
     <tr>
       <th>22</th>
-      <td>DUT</td>
+      <td>PHF5A</td>
       <td>d</td>
-      <td>0.976075</td>
+      <td>0.975771</td>
       <td>False</td>
     </tr>
     <tr>
       <th>23</th>
       <td>SNRPD1</td>
       <td>d</td>
-      <td>0.975964</td>
+      <td>0.975716</td>
       <td>False</td>
     </tr>
     <tr>
       <th>24</th>
       <td>CIAO3</td>
       <td>d</td>
-      <td>0.975799</td>
+      <td>0.975330</td>
       <td>False</td>
     </tr>
     <tr>
       <th>25</th>
       <td>SS18L2</td>
       <td>d</td>
-      <td>0.975551</td>
+      <td>0.975330</td>
       <td>False</td>
     </tr>
     <tr>
       <th>26</th>
-      <td>SNRNP25</td>
+      <td>RPS27A</td>
       <td>d</td>
-      <td>0.974336</td>
+      <td>0.975275</td>
       <td>False</td>
     </tr>
     <tr>
       <th>27</th>
-      <td>RSL24D1</td>
+      <td>SNRPG</td>
       <td>d</td>
-      <td>0.974254</td>
+      <td>0.974612</td>
       <td>False</td>
     </tr>
     <tr>
       <th>28</th>
-      <td>RPS17</td>
+      <td>SBDS</td>
       <td>d</td>
-      <td>0.974226</td>
+      <td>0.974447</td>
       <td>False</td>
     </tr>
     <tr>
       <th>29</th>
       <td>LSM8</td>
       <td>d</td>
-      <td>0.974033</td>
+      <td>0.974171</td>
       <td>False</td>
     </tr>
     <tr>
       <th>30</th>
-      <td>PSMA6</td>
+      <td>MAK16</td>
       <td>d</td>
-      <td>0.973812</td>
+      <td>0.973950</td>
       <td>False</td>
     </tr>
     <tr>
       <th>31</th>
-      <td>MAK16</td>
+      <td>PSMA6</td>
       <td>d</td>
-      <td>0.973646</td>
+      <td>0.973840</td>
       <td>False</td>
     </tr>
     <tr>
       <th>32</th>
-      <td>PHF5A</td>
+      <td>RSL24D1</td>
       <td>d</td>
-      <td>0.973039</td>
+      <td>0.973784</td>
       <td>False</td>
     </tr>
     <tr>
       <th>33</th>
-      <td>CFAP298</td>
+      <td>RPS19</td>
       <td>d</td>
-      <td>0.972653</td>
+      <td>0.973343</td>
       <td>False</td>
     </tr>
     <tr>
       <th>34</th>
-      <td>SNRPG</td>
+      <td>ATP6V1F</td>
       <td>d</td>
-      <td>0.972487</td>
+      <td>0.972681</td>
       <td>False</td>
     </tr>
     <tr>
       <th>35</th>
-      <td>LETM1</td>
+      <td>CFAP298</td>
       <td>d</td>
-      <td>0.972322</td>
+      <td>0.972349</td>
       <td>False</td>
     </tr>
     <tr>
       <th>36</th>
-      <td>SBDS</td>
+      <td>PSMC2</td>
       <td>d</td>
-      <td>0.972046</td>
+      <td>0.972129</td>
       <td>False</td>
     </tr>
     <tr>
       <th>37</th>
-      <td>RPS24</td>
+      <td>LETM1</td>
       <td>d</td>
-      <td>0.971825</td>
+      <td>0.971963</td>
       <td>False</td>
     </tr>
     <tr>
       <th>38</th>
-      <td>RBM22</td>
+      <td>LSM2</td>
       <td>d</td>
-      <td>0.971549</td>
+      <td>0.971853</td>
       <td>False</td>
     </tr>
     <tr>
       <th>39</th>
       <td>PSMA4</td>
       <td>d</td>
-      <td>0.971466</td>
+      <td>0.971853</td>
       <td>False</td>
     </tr>
     <tr>
       <th>40</th>
-      <td>DPAGT1</td>
+      <td>RPS17</td>
       <td>d</td>
-      <td>0.971411</td>
+      <td>0.971742</td>
       <td>False</td>
     </tr>
     <tr>
       <th>41</th>
-      <td>CAPZB</td>
+      <td>DPAGT1</td>
       <td>d</td>
-      <td>0.971384</td>
+      <td>0.971577</td>
       <td>False</td>
     </tr>
     <tr>
       <th>42</th>
-      <td>PSMC2</td>
+      <td>MED11</td>
       <td>d</td>
-      <td>0.971273</td>
+      <td>0.971522</td>
       <td>False</td>
     </tr>
     <tr>
       <th>43</th>
-      <td>SNAPC5</td>
+      <td>CAPZB</td>
+      <td>d</td>
+      <td>0.971466</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>44</th>
+      <td>DHX37</td>
+      <td>d</td>
+      <td>0.970915</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>45</th>
+      <td>RPL5</td>
       <td>d</td>
       <td>0.970804</td>
       <td>False</td>
     </tr>
     <tr>
-      <th>44</th>
-      <td>GTF3A</td>
-      <td>d</td>
-      <td>0.970363</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>45</th>
-      <td>RPS19</td>
-      <td>d</td>
-      <td>0.970142</td>
-      <td>False</td>
-    </tr>
-    <tr>
       <th>46</th>
-      <td>LSM2</td>
+      <td>RBM22</td>
       <td>d</td>
-      <td>0.969893</td>
+      <td>0.970528</td>
       <td>False</td>
     </tr>
     <tr>
       <th>47</th>
-      <td>DHX37</td>
+      <td>SNAPC5</td>
       <td>d</td>
-      <td>0.969866</td>
+      <td>0.970418</td>
       <td>False</td>
     </tr>
     <tr>
       <th>48</th>
       <td>EIF3G</td>
       <td>d</td>
-      <td>0.969728</td>
+      <td>0.970363</td>
       <td>False</td>
     </tr>
     <tr>
       <th>49</th>
       <td>CDCA8</td>
       <td>d</td>
-      <td>0.969673</td>
+      <td>0.970087</td>
       <td>False</td>
     </tr>
     <tr>
       <th>50</th>
-      <td>MED11</td>
+      <td>GTF3A</td>
       <td>d</td>
-      <td>0.969673</td>
+      <td>0.970031</td>
       <td>False</td>
     </tr>
     <tr>
       <th>51</th>
+      <td>SNRPA1</td>
+      <td>d</td>
+      <td>0.970031</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>52</th>
+      <td>KRT8</td>
+      <td>d</td>
+      <td>0.969976</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>53</th>
+      <td>RPS24</td>
+      <td>d</td>
+      <td>0.969921</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>54</th>
       <td>FAU</td>
       <td>d</td>
-      <td>0.969148</td>
+      <td>0.969259</td>
       <td>False</td>
     </tr>
   </tbody>
@@ -1962,7 +1980,7 @@ sns.clustermap(X, z_score=1, cmap="seismic", center=0)
 
 
 
-    <seaborn.matrix.ClusterGrid at 0x7fc3b9975c90>
+    <seaborn.matrix.ClusterGrid at 0x7fe281bd6ad0>
 
 
 
@@ -2076,9 +2094,6 @@ cell_effects = (
 )
 cell_effects.head(3)
 ```
-
-    No posterior summary for 'skin (melanoma)'.
-
 
 
 
@@ -2194,9 +2209,6 @@ chrom_effects = (
 )
 chrom_effects.head(3)
 ```
-
-    No posterior summary for 'skin (melanoma)'.
-
 
 
 
@@ -2634,7 +2646,6 @@ x_chrom_comparisons = pd.concat(
     Not both sexes for cervix (cervical squamous).
     Not both sexes for ovary (ovary adenocarcinoma).
     Not both sexes for prostate.
-    No trace for skin (melanoma).
     Not both sexes for soft tissue (liposarcoma).
     Not both sexes for soft tissue (synovial sarcoma).
     Not both sexes for uterus (endometrial adenocarcinoma).
@@ -3060,7 +3071,6 @@ tp53_draw_diffs = pd.concat(
     Skipping 'esophagus (esophagus squamous)'.
     Skipping 'eye (uveal melanoma)'.
     Skipping 'lung (SCLC)'.
-    No posterior for 'skin (melanoma).'
     Skipping 'soft tissue (malignant rhabdoid tumor)'.
     Skipping 'thyroid (thyroid carcinoma)'.
 
@@ -3166,7 +3176,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 8.67 minutes
+    execution time: 3.20 minutes
 
 
 
@@ -3175,7 +3185,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-10-04
+    Last updated: 2022-10-06
 
     Python implementation: CPython
     Python version       : 3.10.6
@@ -3189,16 +3199,16 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-e-16-231.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-229.o2.rc.hms.harvard.edu
 
     Git branch: figures
 
-    json      : 2.0.9
-    seaborn   : 0.11.2
     matplotlib: 3.5.3
     dask      : 2022.9.0
-    pandas    : 1.4.4
+    json      : 2.0.9
+    seaborn   : 0.11.2
     numpy     : 1.23.3
+    pandas    : 1.4.4
 
 
 

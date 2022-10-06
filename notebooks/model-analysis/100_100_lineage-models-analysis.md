@@ -12,9 +12,7 @@
 
 
 ```python
-import re
 from time import time
-from typing import Final
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,16 +23,21 @@ import seaborn as sns
 
 ```python
 from speclet.analysis.arviz_analysis import extract_coords_param_names
-from speclet.io import project_root
+from speclet.analysis.sublineage_model_analysis import (
+    load_sublineage_model_posteriors,
+    sublineage_to_lineage_map,
+)
 from speclet.managers.posterior_data_manager import (
     PosteriorDataManager,
     PosteriorDataManagers,
 )
-from speclet.model_configuration import read_model_configurations
 from speclet.plot import set_speclet_theme
-from speclet.plot.color_pal import pal_to_legend_handles
-from speclet.project_configuration import arviz_config, get_model_configuration_file
-from speclet.project_enums import ModelFitMethod
+from speclet.plot.color_pal import (
+    lineage_color_pal,
+    pal_to_legend_handles,
+    sublineage_color_pal,
+)
+from speclet.project_configuration import arviz_config
 ```
 
 
@@ -50,9 +53,6 @@ set_speclet_theme()
 RANDOM_SEED = 709
 np.random.seed(RANDOM_SEED)
 arviz_config()
-
-# File paths
-config_path = project_root() / get_model_configuration_file()
 ```
 
 ### Data
@@ -61,45 +61,7 @@ config_path = project_root() / get_model_configuration_file()
 
 
 ```python
-model_configs = read_model_configurations(config_path, active_only=True)
-f"Number of configurations: {len(model_configs.configurations)}"
-```
-
-
-
-
-    'Number of configurations: 43'
-
-
-
-
-```python
-model_names = [c.name for c in model_configs.configurations]
-model_names.sort()
-pattern = r"(?<=hnb-single-lineage-).*$"
-sublineage_names = [re.findall(pattern, m)[0] for m in model_names]
-sublineage_names = [n.replace("_", " ") for n in sublineage_names]
-
-# Skip some lineages because they are incomplete at the moment.
-SKIP_LINEAGES: Final[list[str]] = [
-    # "blood",
-    # "colorectal",
-    # "bone",
-    # "central nervous system",
-    # "kidney",
-    # "lung",
-]
-for skip_line in SKIP_LINEAGES:
-    i = sublineage_names.index(skip_line)
-    _ = model_names.pop(i), sublineage_names.pop(i)
-
-
-postmen = PosteriorDataManagers(
-    names=model_names,
-    fit_methods=ModelFitMethod.PYMC_NUMPYRO,
-    config_paths=config_path,
-    keys=sublineage_names,
-)
+postmen = load_sublineage_model_posteriors()
 ```
 
 
@@ -170,50 +132,13 @@ len(postmen)
 
 
 ```python
-sub_to_lineage = {pm.id: pm.id.split(" (")[0] for pm in postmen.posteriors}
-lineages = list(set(sub_to_lineage.values()))
-lineages.sort()
-lineages
+sub_to_lineage, lineages = sublineage_to_lineage_map(postmen)
 ```
 
 
-
-
-    ['bile duct',
-     'blood',
-     'bone',
-     'breast',
-     'central nervous system',
-     'cervix',
-     'colorectal',
-     'esophagus',
-     'eye',
-     'gastric',
-     'kidney',
-     'liver',
-     'lung',
-     'lymphocyte',
-     'ovary',
-     'pancreas',
-     'peripheral nervous system',
-     'plasma cell',
-     'prostate',
-     'skin',
-     'soft tissue',
-     'thyroid',
-     'upper aerodigestive',
-     'urinary tract',
-     'uterus']
-
-
-
-
 ```python
-sublineage_cmap = sns.color_palette("Spectral", n_colors=len(postmen), as_cmap=False)
-sublineage_pal = {line: sublineage_cmap[i] for i, line in enumerate(sublineage_names)}
-
-lineage_cmap = sns.color_palette("terrain", n_colors=len(lineages), as_cmap=False)
-lineage_pal = {line: lineage_cmap[i] for i, line in enumerate(lineages)}
+sublineage_pal = sublineage_color_pal()
+lineage_pal = lineage_color_pal()
 ```
 
 ## Descriptions
@@ -236,9 +161,6 @@ post_dims = pd.concat([get_posterior_dimensions(pm) for pm in postmen.posteriors
 post_dims = post_dims.loc[:, ["dim_" not in cn for cn in post_dims.columns]]
 post_dims
 ```
-
-    Skipping skin (melanoma).
-
 
 
 
@@ -592,6 +514,16 @@ post_dims
       <td>5</td>
     </tr>
     <tr>
+      <th>skin (melanoma)</th>
+      <td>4</td>
+      <td>1000</td>
+      <td>71062</td>
+      <td>1311</td>
+      <td>18119</td>
+      <td>10.0</td>
+      <td>57</td>
+    </tr>
+    <tr>
       <th>skin (skin squamous)</th>
       <td>4</td>
       <td>1000</td>
@@ -740,9 +672,6 @@ mu_a_posteriors = summarize_variable_per_lineage(
 mu_a_posteriors.head()
 ```
 
-    Skipping skin (melanoma).
-
-
 
 
 
@@ -883,7 +812,7 @@ plt.show()
 
 
 
-![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_20_0.png)
+![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_19_0.png)
 
 
 
@@ -911,7 +840,7 @@ ax.set_ylim(0, 100)
 
 
 
-![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_21_1.png)
+![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_20_1.png)
 
 
 
@@ -949,77 +878,77 @@ mu_a_posterior_variability.sort_values(["variance"], ascending=False).head(15)
     <tr>
       <th>12642</th>
       <td>RAN</td>
-      <td>0.192826</td>
+      <td>0.192135</td>
     </tr>
     <tr>
       <th>16644</th>
       <td>TXNL4A</td>
-      <td>0.175411</td>
+      <td>0.175813</td>
     </tr>
     <tr>
       <th>7774</th>
       <td>KIF11</td>
-      <td>0.163853</td>
+      <td>0.165502</td>
     </tr>
     <tr>
       <th>16203</th>
       <td>TP53</td>
-      <td>0.159390</td>
+      <td>0.156218</td>
     </tr>
     <tr>
       <th>13236</th>
       <td>RPL4</td>
-      <td>0.150788</td>
+      <td>0.152957</td>
     </tr>
     <tr>
       <th>11831</th>
       <td>POLR2L</td>
-      <td>0.149881</td>
-    </tr>
-    <tr>
-      <th>12291</th>
-      <td>PSMB5</td>
-      <td>0.147942</td>
-    </tr>
-    <tr>
-      <th>6976</th>
-      <td>HSPE1</td>
-      <td>0.145863</td>
+      <td>0.151450</td>
     </tr>
     <tr>
       <th>669</th>
       <td>ANKLE2</td>
-      <td>0.145465</td>
+      <td>0.147340</td>
+    </tr>
+    <tr>
+      <th>6976</th>
+      <td>HSPE1</td>
+      <td>0.146923</td>
     </tr>
     <tr>
       <th>4599</th>
       <td>EIF1AX</td>
-      <td>0.145252</td>
+      <td>0.146134</td>
+    </tr>
+    <tr>
+      <th>12291</th>
+      <td>PSMB5</td>
+      <td>0.145099</td>
     </tr>
     <tr>
       <th>13199</th>
       <td>RPL12</td>
-      <td>0.142490</td>
-    </tr>
-    <tr>
-      <th>4428</th>
-      <td>DUX4</td>
-      <td>0.142252</td>
+      <td>0.143239</td>
     </tr>
     <tr>
       <th>13244</th>
       <td>RPL9</td>
-      <td>0.142117</td>
+      <td>0.142450</td>
     </tr>
     <tr>
-      <th>13321</th>
-      <td>RRM1</td>
-      <td>0.138344</td>
+      <th>4428</th>
+      <td>DUX4</td>
+      <td>0.141819</td>
     </tr>
     <tr>
-      <th>7951</th>
-      <td>KPNB1</td>
-      <td>0.136162</td>
+      <th>9694</th>
+      <td>NAA10</td>
+      <td>0.139711</td>
+    </tr>
+    <tr>
+      <th>13288</th>
+      <td>RPS4X</td>
+      <td>0.139244</td>
     </tr>
   </tbody>
 </table>
@@ -1040,9 +969,6 @@ k_posteriors = (
 )
 k_posteriors.head()
 ```
-
-    Skipping skin (melanoma).
-
 
 
 
@@ -1226,7 +1152,7 @@ plt.show()
 
 
 
-![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_24_1.png)
+![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_23_1.png)
 
 
 
@@ -1237,9 +1163,6 @@ f_posteriors = summarize_variable_per_lineage(
 )
 f_posteriors.head()
 ```
-
-    Skipping skin (melanoma).
-
 
 
 
@@ -1410,7 +1333,7 @@ plt.show()
 
 
 
-![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_28_1.png)
+![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_27_1.png)
 
 
 
@@ -1519,19 +1442,9 @@ fig.tight_layout()
 plt.show()
 ```
 
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
 
 
-
-
-![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_31_1.png)
+![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_30_0.png)
 
 
 
@@ -1559,9 +1472,6 @@ def get_all_cancer_genes(postmen: PosteriorDataManagers) -> dict[str, list[str]]
 cancer_genes = get_all_cancer_genes(postmen)
 cancer_genes
 ```
-
-    Skipping skin (melanoma).
-
 
 
 
@@ -1636,7 +1546,16 @@ cancer_genes
      'peripheral nervous system (neuroblastoma)': ['ALK'],
      'plasma cell (multiple myeloma)': [],
      'prostate': [],
-     'skin (melanoma)': [],
+     'skin (melanoma)': ['BRAF',
+      'CDKN2A',
+      'ERBB4',
+      'FAT4',
+      'GRIN2A',
+      'NRAS',
+      'POLE',
+      'PREX2',
+      'PTPRT',
+      'TRRAP'],
      'skin (skin squamous)': [],
      'soft tissue (ATRT)': [],
      'soft tissue (liposarcoma)': [],
@@ -1668,9 +1587,6 @@ h_post_summary = summarize_variable_per_lineage(
 )
 ```
 
-    Skipping skin (melanoma).
-
-
 
 ```python
 pik3ca_h_post_summary = (
@@ -1686,7 +1602,7 @@ sns.jointplot(
 
 
 
-![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_35_0.png)
+![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_34_0.png)
 
 
 
@@ -1698,7 +1614,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 6.57 minutes
+    execution time: 1.81 minutes
 
 
 
@@ -1707,7 +1623,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-10-04
+    Last updated: 2022-10-06
 
     Python implementation: CPython
     Python version       : 3.10.6
@@ -1721,14 +1637,14 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-e-16-231.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-229.o2.rc.hms.harvard.edu
 
     Git branch: figures
 
     re        : 2.2.1
     pandas    : 1.4.4
-    seaborn   : 0.11.2
     numpy     : 1.23.3
+    seaborn   : 0.11.2
     matplotlib: 3.5.3
 
 

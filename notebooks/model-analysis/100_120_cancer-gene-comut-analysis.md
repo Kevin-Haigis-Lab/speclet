@@ -290,9 +290,6 @@ synlet_post.to_csv(OUTPUT_DIR / "synthetic-lethal-posterior.csv", index=False)
 synlet_post.head()
 ```
 
-    Skipping skin (melanoma)
-
-
 
 
 
@@ -554,12 +551,18 @@ synlet_post.query("not hdi_zero_h").groupby(["lineage_subtype", "lineage"])[
     </tr>
     <tr>
       <th>16</th>
+      <td>skin (melanoma)</td>
+      <td>skin</td>
+      <td>35023</td>
+    </tr>
+    <tr>
+      <th>17</th>
       <td>urinary tract</td>
       <td>urinary tract</td>
       <td>12482</td>
     </tr>
     <tr>
-      <th>17</th>
+      <th>18</th>
       <td>uterus (endometrial adenocarcinoma)</td>
       <td>uterus</td>
       <td>44671</td>
@@ -702,12 +705,18 @@ synlet_post.query("not hdi_zero_h and hdi_zero_mu_a").groupby(
     </tr>
     <tr>
       <th>16</th>
+      <td>skin (melanoma)</td>
+      <td>skin</td>
+      <td>8622</td>
+    </tr>
+    <tr>
+      <th>17</th>
       <td>urinary tract</td>
       <td>urinary tract</td>
       <td>843</td>
     </tr>
     <tr>
-      <th>17</th>
+      <th>18</th>
       <td>uterus (endometrial adenocarcinoma)</td>
       <td>uterus</td>
       <td>8240</td>
@@ -833,7 +842,7 @@ sns.clustermap(
 
 
 
-    <seaborn.matrix.ClusterGrid at 0x7f61fd8e36d0>
+    <seaborn.matrix.ClusterGrid at 0x7f13f98693c0>
 
 
 
@@ -996,7 +1005,7 @@ ax.axvline(0, c="k", zorder=1)
 
 
 
-    <matplotlib.lines.Line2D at 0x7f61c9d935b0>
+    <matplotlib.lines.Line2D at 0x7f13c3a57e50>
 
 
 
@@ -1054,7 +1063,7 @@ ax.axvline(0, c="k", zorder=1)
 
 
 
-    <matplotlib.lines.Line2D at 0x7f61c9c6fbe0>
+    <matplotlib.lines.Line2D at 0x7f13c394ccd0>
 
 
 
@@ -1162,9 +1171,6 @@ gene_effect_corrs.to_csv(
 )
 gene_effect_corrs.head(5)
 ```
-
-    Skipping skin (melanoma)
-
 
 
 
@@ -1624,7 +1630,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 2.27 minutes
+    execution time: 2.57 minutes
 
 
 
@@ -1633,7 +1639,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-10-04
+    Last updated: 2022-10-06
 
     Python implementation: CPython
     Python version       : 3.10.6
@@ -1647,17 +1653,17 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-e-16-231.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-229.o2.rc.hms.harvard.edu
 
     Git branch: figures
 
-    arviz     : 0.12.1
-    numpy     : 1.23.3
+    json      : 2.0.9
     pandas    : 1.4.4
     dask      : 2022.9.0
-    json      : 2.0.9
     seaborn   : 0.11.2
+    arviz     : 0.12.1
     matplotlib: 3.5.3
+    numpy     : 1.23.3
 
 
 

@@ -300,9 +300,6 @@ mu_a_post_df.to_csv(OUTPUT_DIR / "mu_a-posterior-summaries.csv", index=False)
 mu_a_post_df.head(3)
 ```
 
-    Skipping skin (melanoma).
-
-
 
 
 
@@ -733,7 +730,7 @@ enrichr_res_up["term"].nunique(), enrichr_res_dn["term"].nunique()
 
 
 
-    (539, 354)
+    (540, 356)
 
 
 
@@ -972,9 +969,6 @@ rna_post = (
 rna_post.to_csv(OUTPUT_DIR / "rna-posterior-summary.csv", index=False)
 rna_post.head(3)
 ```
-
-    Skipping skin (melanoma).
-
 
 
 
@@ -1737,15 +1731,6 @@ genes_mu_dfs.to_csv(OUTPUT_DIR / "computed-rna-expression-effect.csv", index=Fal
 genes_mu_dfs.head(3)
 ```
 
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-
-
 
 
 
@@ -2030,9 +2015,6 @@ a_post.to_csv(OUTPUT_DIR / "guide-posterior-summary.csv", index=False)
 a_post.head(3)
 ```
 
-    Skipping skin (melanoma).
-
-
 
 
 
@@ -2182,9 +2164,6 @@ mu_a_post_draws.to_csv(OUTPUT_DIR / "kras-mu_a-posterior-draws.csv", index=False
 mu_a_post_draws.head()
 ```
 
-    Skipping skin (melanoma).
-
-
 
 
 
@@ -2286,9 +2265,6 @@ mu_mu_a_post = (
 mu_mu_a_post.to_csv(OUTPUT_DIR / "mu_mu_a-posterior-summary.csv", index=False)
 mu_mu_a_post.head(3)
 ```
-
-    Skipping skin (melanoma).
-
 
 
 
@@ -2431,7 +2407,7 @@ fig.tight_layout()
 plt.show()
 ```
 
-    /tmp/ipykernel_20279/4037297813.py:47: UserWarning: Tight layout not applied. tight_layout cannot make axes width small enough to accommodate all axes decorations
+    /tmp/ipykernel_8362/4037297813.py:47: UserWarning: Tight layout not applied. tight_layout cannot make axes width small enough to accommodate all axes decorations
       fig.tight_layout()
 
 
@@ -2504,31 +2480,31 @@ sgrna_corrs.head()
     <tr>
       <th>0</th>
       <td>A1BG</td>
-      <td>0.230000</td>
+      <td>0.246327</td>
       <td>4</td>
     </tr>
     <tr>
       <th>1</th>
       <td>A1CF</td>
-      <td>0.208491</td>
+      <td>0.215220</td>
       <td>4</td>
     </tr>
     <tr>
       <th>2</th>
       <td>A2M</td>
-      <td>0.220932</td>
+      <td>0.220291</td>
       <td>4</td>
     </tr>
     <tr>
       <th>3</th>
       <td>A2ML1</td>
-      <td>0.424786</td>
+      <td>0.420714</td>
       <td>4</td>
     </tr>
     <tr>
       <th>4</th>
       <td>A3GALT2</td>
-      <td>0.041029</td>
+      <td>0.041127</td>
       <td>4</td>
     </tr>
   </tbody>
@@ -2627,7 +2603,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 27.87 minutes
+    execution time: 9.40 minutes
 
 
 
@@ -2636,7 +2612,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-10-04
+    Last updated: 2022-10-06
 
     Python implementation: CPython
     Python version       : 3.10.6
@@ -2650,17 +2626,17 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-e-16-231.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-229.o2.rc.hms.harvard.edu
 
     Git branch: figures
 
-    dask      : 2022.9.0
-    gseapy    : 0.13.0
     pandas    : 1.4.4
     numpy     : 1.23.3
     arviz     : 0.12.1
-    matplotlib: 3.5.3
     seaborn   : 0.11.2
+    dask      : 2022.9.0
+    gseapy    : 0.13.0
+    matplotlib: 3.5.3
 
 
 
