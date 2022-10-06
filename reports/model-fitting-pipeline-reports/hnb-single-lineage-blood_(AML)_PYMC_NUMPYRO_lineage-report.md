@@ -107,7 +107,8 @@ print(postman.read_description())
         "model_kwargs": {
             "lineage": "blood_(AML)",
             "min_n_cancer_genes": 4,
-            "min_frac_cancer_genes": 0.05
+            "min_frac_cancer_genes": 0.05,
+            "top_n_cancer_genes": 10
         },
         "sampling_kwargs": {
             "pymc_mcmc": null,
@@ -136,27 +137,27 @@ print(postman.read_description())
     POSTERIOR
 
     <xarray.Dataset>
-    Dimensions:                    (chain: 4, draw: 1000, delta_genes_dim_0: 6,
+    Dimensions:                    (chain: 4, draw: 1000, delta_genes_dim_0: 7,
                                     delta_genes_dim_1: 18119, sgrna: 71062,
                                     delta_cells_dim_0: 2, delta_cells_dim_1: 25,
-                                    cell_chrom: 575, genes_chol_cov_dim_0: 21,
+                                    cell_chrom: 575, genes_chol_cov_dim_0: 28,
                                     cells_chol_cov_dim_0: 3,
-                                    genes_chol_cov_corr_dim_0: 6,
-                                    genes_chol_cov_corr_dim_1: 6,
-                                    genes_chol_cov_stds_dim_0: 6, gene: 18119,
-                                    cancer_gene: 2, cells_chol_cov_corr_dim_0: 2,
+                                    genes_chol_cov_corr_dim_0: 7,
+                                    genes_chol_cov_corr_dim_1: 7,
+                                    genes_chol_cov_stds_dim_0: 7, gene: 18119,
+                                    cancer_gene: 3, cells_chol_cov_corr_dim_0: 2,
                                     cells_chol_cov_corr_dim_1: 2,
                                     cells_chol_cov_stds_dim_0: 2, cell_line: 25)
     Coordinates: (12/19)
       * chain                      (chain) int64 0 1 2 3
       * draw                       (draw) int64 0 1 2 3 4 5 ... 995 996 997 998 999
-      * delta_genes_dim_0          (delta_genes_dim_0) int64 0 1 2 3 4 5
+      * delta_genes_dim_0          (delta_genes_dim_0) int64 0 1 2 3 4 5 6
       * delta_genes_dim_1          (delta_genes_dim_1) int64 0 1 2 ... 18117 18118
       * sgrna                      (sgrna) object 'AAAAAAATCCAGCAATGCAG' ... 'TTT...
       * delta_cells_dim_0          (delta_cells_dim_0) int64 0 1
         ...                         ...
       * gene                       (gene) object 'A1BG' 'A1CF' ... 'ZZEF1' 'ZZZ3'
-      * cancer_gene                (cancer_gene) object 'LRP1B' 'NRAS'
+      * cancer_gene                (cancer_gene) object 'KMT2A' 'LRP1B' 'NRAS'
       * cells_chol_cov_corr_dim_0  (cells_chol_cov_corr_dim_0) int64 0 1
       * cells_chol_cov_corr_dim_1  (cells_chol_cov_corr_dim_1) int64 0 1
       * cells_chol_cov_stds_dim_0  (cells_chol_cov_stds_dim_0) int64 0 1
@@ -176,12 +177,12 @@ print(postman.read_description())
         k                          (chain, draw, cell_chrom) float64 ...
         m                          (chain, draw, cell_chrom) float64 ...
     Attributes:
-        created_at:           2022-09-21 23:35:17.831383
+        created_at:           2022-09-28 04:39:42.148939
         arviz_version:        0.12.1
         model_name:           LineageHierNegBinomModel
         model_version:        0.1.3
         model_doc:            A hierarchical negative binomial generalized linear...
-        previous_created_at:  ['2022-09-21 23:35:17.831383', '2022-09-19T12:14:29...
+        previous_created_at:  ['2022-09-28 04:39:42.148939', '2022-09-28T07:24:54...
 
     --------------------------------------------------------------------------------
 
@@ -201,21 +202,21 @@ print(postman.read_description())
         tree_depth       (chain, draw) int64 ...
         lp               (chain, draw) float64 ...
     Attributes:
-        created_at:           2022-09-21 23:35:17.831383
+        created_at:           2022-09-28 04:39:42.148939
         arviz_version:        0.12.1
-        previous_created_at:  ['2022-09-21 23:35:17.831383', '2022-09-19T12:14:29...
+        previous_created_at:  ['2022-09-28 04:39:42.148939', '2022-09-28T07:24:54...
 
     --------------------------------------------------------------------------------
 
     MCMC DESCRIPTION
 
-    date created: 2022-09-21 23:35
+    date created: 2022-09-28 04:39
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0, 0, 0
     percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 0.639, 0.65, 0.759, 0.612
-    avg. step size: 0.009, 0.009, 0.009, 0.009
-    avg. accept prob.: 0.991, 0.99, 0.99, 0.991
+    BFMI: 0.714, 0.797, 0.723, 0.701
+    avg. step size: 0.009, 0.009, 0.01, 0.01
+    avg. accept prob.: 0.99, 0.991, 0.988, 0.988
     avg. tree depth: 9.0, 9.0, 9.0, 9.0
 
 
@@ -224,11 +225,11 @@ print(postman.read_description())
 postman.load_all()
 ```
 
-    [INFO] 2022-09-22 01:20:33 [(lineage_hierarchical_nb.py:data_processing_pipeline:323] Processing data for modeling.
-    [INFO] 2022-09-22 01:20:33 [(lineage_hierarchical_nb.py:data_processing_pipeline:324] LFC limits: (-5.0, 5.0)
-    [WARNING] 2022-09-22 01:22:12 [(lineage_hierarchical_nb.py:data_processing_pipeline:382] number of data points dropped: 71075
-    [INFO] 2022-09-22 01:22:14 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:630] number of genes mutated in all cells lines: 0
-    [INFO] 2022-09-22 01:22:15 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 20 cancer genes.
+    [INFO] 2022-09-28 06:34:29 [(lineage_hierarchical_nb.py:data_processing_pipeline:323] Processing data for modeling.
+    [INFO] 2022-09-28 06:34:29 [(lineage_hierarchical_nb.py:data_processing_pipeline:324] LFC limits: (-5.0, 5.0)
+    [WARNING] 2022-09-28 06:36:22 [(lineage_hierarchical_nb.py:data_processing_pipeline:382] number of data points dropped: 71075
+    [INFO] 2022-09-28 06:36:24 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:630] number of genes mutated in all cells lines: 0
+    [INFO] 2022-09-28 06:36:30 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 90 cancer genes.
 
 
 ## Fit diagnostics
@@ -280,13 +281,13 @@ if postman.fit_method in {ModelFitMethod.PYMC_NUMPYRO, ModelFitMethod.PYMC_MCMC}
 
 
     ============================================================
-    date created: 2022-09-21 23:35
+    date created: 2022-09-28 04:39
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0, 0, 0
     percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 0.639, 0.65, 0.759, 0.612
-    avg. step size: 0.009, 0.009, 0.009, 0.009
-    avg. accept prob.: 0.991, 0.99, 0.99, 0.991
+    BFMI: 0.714, 0.797, 0.723, 0.701
+    avg. step size: 0.009, 0.009, 0.01, 0.01
+    avg. accept prob.: 0.99, 0.991, 0.988, 0.988
     avg. tree depth: 9.0, 9.0, 9.0, 9.0
 
 
@@ -354,7 +355,7 @@ cancer_genes: list[str] = [] if _cgs is None else _cgs.values.tolist()
 print(cancer_genes)
 ```
 
-    ['LRP1B', 'NRAS']
+    ['KMT2A', 'LRP1B', 'NRAS']
 
 
 
@@ -506,9 +507,13 @@ if len(cancer_genes) > 0:
 
 
 
+    /home/jc604/.conda/envs/speclet_smk/lib/python3.10/site-packages/seaborn/matrix.py:654: UserWarning: Clustering large matrix with scipy. Installing `fastcluster` may give better performance.
+      warnings.warn(msg)
 
 
-![png](hnb-single-lineage-blood_%28AML%29_PYMC_NUMPYRO_lineage-report_files/hnb-single-lineage-blood_%28AML%29_PYMC_NUMPYRO_lineage-report_23_1.png)
+
+
+![png](hnb-single-lineage-blood_%28AML%29_PYMC_NUMPYRO_lineage-report_files/hnb-single-lineage-blood_%28AML%29_PYMC_NUMPYRO_lineage-report_23_2.png)
 
 
 
@@ -1052,7 +1057,7 @@ plt.show()
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-09-22
+    Last updated: 2022-09-28
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -1063,16 +1068,16 @@ plt.show()
     Release     : 3.10.0-1160.76.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-191.o2.rc.hms.harvard.edu
+    Hostname: compute-h-17-55.o2.rc.hms.harvard.edu
 
     Git branch: figures
 
-    arviz     : 0.12.1
-    seaborn   : 0.11.2
-    logging   : 0.5.1.2
-    numpy     : 1.23.1
     pandas    : 1.4.3
+    seaborn   : 0.11.2
     matplotlib: 3.5.2
+    arviz     : 0.12.1
+    numpy     : 1.23.1
+    logging   : 0.5.1.2

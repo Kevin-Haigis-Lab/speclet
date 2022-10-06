@@ -116,14 +116,14 @@ if postman.fit_method in {ModelFitMethod.PYMC_NUMPYRO, ModelFitMethod.PYMC_MCMC}
 
 
     ============================================================
-    date created: 2022-09-19 14:21
+    date created: 2022-09-28 06:24
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0, 0, 0
     percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 0.665, 0.767, 0.673, 0.737
-    avg. step size: 0.01, 0.009, 0.011, 0.01
-    avg. accept prob.: 0.987, 0.991, 0.987, 0.989
-    avg. tree depth: 10.0, 9.0, 10.0, 10.0
+    BFMI: 0.736, 0.652, 0.7, 0.652
+    avg. step size: 0.01, 0.004, 0.011, 0.012
+    avg. accept prob.: 0.988, 0.992, 0.988, 0.985
+    avg. tree depth: 10.0, 10.0, 10.0, 9.0
 
 
 
@@ -140,7 +140,7 @@ if postman.fit_method in {ModelFitMethod.PYMC_NUMPYRO, ModelFitMethod.PYMC_MCMC}
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-09-19
+    Last updated: 2022-09-28
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -151,10 +151,10 @@ if postman.fit_method in {ModelFitMethod.PYMC_NUMPYRO, ModelFitMethod.PYMC_MCMC}
     Release     : 3.10.0-1160.76.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-a-17-101.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-192.o2.rc.hms.harvard.edu
 
     Git branch: figures
 

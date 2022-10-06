@@ -17,7 +17,8 @@ CONFIGURATION
     "model_kwargs": {
         "lineage": "pancreas",
         "min_n_cancer_genes": 4,
-        "min_frac_cancer_genes": 0.05
+        "min_frac_cancer_genes": 0.05,
+        "top_n_cancer_genes": 10
     },
     "sampling_kwargs": {
         "pymc_mcmc": null,
@@ -46,27 +47,27 @@ CONFIGURATION
 POSTERIOR
 
 <xarray.Dataset>
-Dimensions:                    (chain: 4, draw: 1000, delta_genes_dim_0: 8,
+Dimensions:                    (chain: 4, draw: 1000, delta_genes_dim_0: 9,
                                 delta_genes_dim_1: 18119, sgrna: 71062,
                                 delta_cells_dim_0: 2, delta_cells_dim_1: 38,
-                                cell_chrom: 874, genes_chol_cov_dim_0: 36,
+                                cell_chrom: 874, genes_chol_cov_dim_0: 45,
                                 cells_chol_cov_dim_0: 3,
-                                genes_chol_cov_corr_dim_0: 8,
-                                genes_chol_cov_corr_dim_1: 8,
-                                genes_chol_cov_stds_dim_0: 8, gene: 18119,
-                                cancer_gene: 4, cells_chol_cov_corr_dim_0: 2,
+                                genes_chol_cov_corr_dim_0: 9,
+                                genes_chol_cov_corr_dim_1: 9,
+                                genes_chol_cov_stds_dim_0: 9, gene: 18119,
+                                cancer_gene: 5, cells_chol_cov_corr_dim_0: 2,
                                 cells_chol_cov_corr_dim_1: 2,
                                 cells_chol_cov_stds_dim_0: 2, cell_line: 38)
 Coordinates: (12/19)
   * chain                      (chain) int64 0 1 2 3
   * draw                       (draw) int64 0 1 2 3 4 5 ... 995 996 997 998 999
-  * delta_genes_dim_0          (delta_genes_dim_0) int64 0 1 2 3 4 5 6 7
+  * delta_genes_dim_0          (delta_genes_dim_0) int64 0 1 2 3 4 5 6 7 8
   * delta_genes_dim_1          (delta_genes_dim_1) int64 0 1 2 ... 18117 18118
   * sgrna                      (sgrna) object 'AAAAAAATCCAGCAATGCAG' ... 'TTT...
   * delta_cells_dim_0          (delta_cells_dim_0) int64 0 1
     ...                         ...
   * gene                       (gene) object 'A1BG' 'A1CF' ... 'ZZEF1' 'ZZZ3'
-  * cancer_gene                (cancer_gene) object 'KRAS' 'PREX2' ... 'SMAD4'
+  * cancer_gene                (cancer_gene) object 'EP300' 'KRAS' ... 'SMAD4'
   * cells_chol_cov_corr_dim_0  (cells_chol_cov_corr_dim_0) int64 0 1
   * cells_chol_cov_corr_dim_1  (cells_chol_cov_corr_dim_1) int64 0 1
   * cells_chol_cov_stds_dim_0  (cells_chol_cov_stds_dim_0) int64 0 1
@@ -86,12 +87,12 @@ Data variables: (12/35)
     k                          (chain, draw, cell_chrom) float64 ...
     m                          (chain, draw, cell_chrom) float64 ...
 Attributes:
-    created_at:           2022-09-21 19:10:02.362621
+    created_at:           2022-09-29 08:22:37.560156
     arviz_version:        0.12.1
     model_name:           LineageHierNegBinomModel
     model_version:        0.1.3
     model_doc:            A hierarchical negative binomial generalized linear...
-    previous_created_at:  ['2022-09-21 19:10:02.362621', '2022-09-20T09:14:30...
+    previous_created_at:  ['2022-09-29 08:22:37.560156', '2022-09-29T00:54:56...
 
 --------------------------------------------------------------------------------
 
@@ -111,19 +112,19 @@ Data variables:
     tree_depth       (chain, draw) int64 ...
     lp               (chain, draw) float64 ...
 Attributes:
-    created_at:           2022-09-21 19:10:02.362621
+    created_at:           2022-09-29 08:22:37.560156
     arviz_version:        0.12.1
-    previous_created_at:  ['2022-09-21 19:10:02.362621', '2022-09-20T09:14:30...
+    previous_created_at:  ['2022-09-29 08:22:37.560156', '2022-09-29T00:54:57...
 
 --------------------------------------------------------------------------------
 
 MCMC DESCRIPTION
 
-date created: 2022-09-21 19:10
+date created: 2022-09-29 08:22
 sampled 4 chains with (unknown) tuning steps and 1,000 draws
 num. divergences: 0, 0, 0, 0
 percent divergences: 0.0, 0.0, 0.0, 0.0
-BFMI: 0.782, 0.613, 0.717, 0.729
-avg. step size: 0.006, 0.007, 0.006, 0.007
-avg. accept prob.: 0.991, 0.989, 0.99, 0.989
-avg. tree depth: 10.0, 10.0, 10.0, 10.0
+BFMI: 0.775, 0.717, 0.708, 0.82
+avg. step size: 0.008, 0.007, 0.008, 0.007
+avg. accept prob.: 0.985, 0.988, 0.984, 0.988
+avg. tree depth: 9.0, 9.0, 9.0, 10.0
