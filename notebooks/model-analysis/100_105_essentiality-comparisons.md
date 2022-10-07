@@ -2407,7 +2407,7 @@ fig.tight_layout()
 plt.show()
 ```
 
-    /tmp/ipykernel_8362/4037297813.py:47: UserWarning: Tight layout not applied. tight_layout cannot make axes width small enough to accommodate all axes decorations
+    /tmp/ipykernel_19489/4037297813.py:47: UserWarning: Tight layout not applied. tight_layout cannot make axes width small enough to accommodate all axes decorations
       fig.tight_layout()
 
 
@@ -2595,6 +2595,40 @@ sns.boxplot(
 sgrna_corrs_mu_a.to_csv(OUTPUT_DIR / "sgrna-correlations.csv", index=False)
 ```
 
+## Comparing baseline effects of TSG with other genes
+
+
+```python
+tumor_supp_genes = cgc.query("is_tsg and not is_oncogene and not is_fusion")[
+    "hugo_symbol"
+].toset()
+tsg_mu_a_post = mu_a_post_df.copy().assign(
+    is_tsg=lambda d: d["hugo_symbol"].isin(tumor_supp_genes)
+)
+_, ax = plt.subplots(figsize=(6, 12))
+sns.boxplot(
+    data=tsg_mu_a_post,
+    x="mean",
+    y="lineage_subtype",
+    hue="is_tsg",
+    dodge=True,
+    # fliersize=1,
+    showfliers=False,
+    linewidth=0.5,
+    boxprops={"zorder": 10},
+    ax=ax,
+    zorder=10,
+)
+ax.axvline(0, c="k", lw=0.5, zorder=1)
+plt.show()
+```
+
+
+
+![png](100_105_essentiality-comparisons_files/100_105_essentiality-comparisons_69_0.png)
+
+
+
 ---
 
 
@@ -2603,7 +2637,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 9.40 minutes
+    execution time: 13.16 minutes
 
 
 
@@ -2612,7 +2646,9 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-10-06
+    The watermark extension is already loaded. To reload it, use:
+      %reload_ext watermark
+    Last updated: 2022-10-07
 
     Python implementation: CPython
     Python version       : 3.10.6
@@ -2623,19 +2659,19 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1160.76.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-229.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-161.o2.rc.hms.harvard.edu
 
     Git branch: figures
 
-    pandas    : 1.4.4
-    numpy     : 1.23.3
     arviz     : 0.12.1
     seaborn   : 0.11.2
     dask      : 2022.9.0
     gseapy    : 0.13.0
+    numpy     : 1.23.3
+    pandas    : 1.4.4
     matplotlib: 3.5.3
 
 
