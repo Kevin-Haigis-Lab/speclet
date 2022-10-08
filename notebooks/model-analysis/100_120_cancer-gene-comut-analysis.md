@@ -842,7 +842,7 @@ sns.clustermap(
 
 
 
-    <seaborn.matrix.ClusterGrid at 0x7f13f98693c0>
+    <seaborn.matrix.ClusterGrid at 0x7f751ef2e410>
 
 
 
@@ -1005,7 +1005,7 @@ ax.axvline(0, c="k", zorder=1)
 
 
 
-    <matplotlib.lines.Line2D at 0x7f13c3a57e50>
+    <matplotlib.lines.Line2D at 0x7f74e8303550>
 
 
 
@@ -1033,7 +1033,7 @@ def _assign_labels_for_kras_pik3ca_hdi_zero(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-kras_pik3ca_crc = (
+kras_pik3ca_crc_mua_filter = (
     synlet_post.query("lineage_subtype == 'colorectal'")
     .filter_column_isin("cancer_gene", ["KRAS", "PIK3CA"])
     .query("hdi_zero_mu_a")
@@ -1046,7 +1046,7 @@ kras_pik3ca_crc = (
 pal = {"neither": "grey", "KRAS": "tab:blue", "PIK3CA": "tab:green", "both": "tab:red"}
 
 ax = sns.scatterplot(
-    data=kras_pik3ca_crc,
+    data=kras_pik3ca_crc_mua_filter,
     x="mean_h_KRAS",
     y="mean_h_PIK3CA",
     hue="label",
@@ -1063,7 +1063,7 @@ ax.axvline(0, c="k", zorder=1)
 
 
 
-    <matplotlib.lines.Line2D at 0x7f13c394ccd0>
+    <matplotlib.lines.Line2D at 0x7f74e820c0a0>
 
 
 
@@ -1075,11 +1075,115 @@ ax.axvline(0, c="k", zorder=1)
 
 
 ```python
-GENE = "DONSON"
-crc_h_test = (
+kras_pik3ca_crc.query("KRAS < -0.06 and PIK3CA > 0.3")
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>hugo_symbol</th>
+      <th>KRAS</th>
+      <th>PIK3CA</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1243</th>
+      <td>ATP6V0C</td>
+      <td>-0.063</td>
+      <td>0.328</td>
+    </tr>
+    <tr>
+      <th>1250</th>
+      <td>ATP6V1B2</td>
+      <td>-0.066</td>
+      <td>0.330</td>
+    </tr>
+    <tr>
+      <th>2576</th>
+      <td>CDC123</td>
+      <td>-0.061</td>
+      <td>0.302</td>
+    </tr>
+    <tr>
+      <th>2603</th>
+      <td>CDC45</td>
+      <td>-0.062</td>
+      <td>0.312</td>
+    </tr>
+    <tr>
+      <th>4297</th>
+      <td>DONSON</td>
+      <td>-0.072</td>
+      <td>0.349</td>
+    </tr>
+    <tr>
+      <th>4523</th>
+      <td>EEF1A1</td>
+      <td>-0.062</td>
+      <td>0.306</td>
+    </tr>
+    <tr>
+      <th>11831</th>
+      <td>POLR2L</td>
+      <td>-0.068</td>
+      <td>0.310</td>
+    </tr>
+    <tr>
+      <th>12282</th>
+      <td>PSMA6</td>
+      <td>-0.070</td>
+      <td>0.301</td>
+    </tr>
+    <tr>
+      <th>12642</th>
+      <td>RAN</td>
+      <td>-0.062</td>
+      <td>0.364</td>
+    </tr>
+    <tr>
+      <th>13199</th>
+      <td>RPL12</td>
+      <td>-0.072</td>
+      <td>0.302</td>
+    </tr>
+    <tr>
+      <th>13321</th>
+      <td>RRM1</td>
+      <td>-0.081</td>
+      <td>0.315</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+GENES = ["DONSON", "ATP6V0C", "CDC123", "RAN"]
+crc_h_draws = (
     postmen["colorectal"]
     .trace.posterior.get("h")
-    .sel(gene=GENE, cancer_gene=["KRAS", "PIK3CA"])
+    .sel(gene=GENES, cancer_gene=["KRAS", "PIK3CA"])
 )
 ```
 
@@ -1087,33 +1191,123 @@ There is a correlation between genes, not the posterior draws, though
 
 
 ```python
+crc_h_draws.to_dataframe().reset_index().head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>chain</th>
+      <th>draw</th>
+      <th>gene</th>
+      <th>cancer_gene</th>
+      <th>h</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>0</td>
+      <td>DONSON</td>
+      <td>KRAS</td>
+      <td>-0.078336</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0</td>
+      <td>0</td>
+      <td>DONSON</td>
+      <td>PIK3CA</td>
+      <td>0.341975</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0</td>
+      <td>0</td>
+      <td>ATP6V0C</td>
+      <td>KRAS</td>
+      <td>-0.037784</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0</td>
+      <td>0</td>
+      <td>ATP6V0C</td>
+      <td>PIK3CA</td>
+      <td>0.291820</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0</td>
+      <td>0</td>
+      <td>CDC123</td>
+      <td>KRAS</td>
+      <td>-0.045881</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
 crc_h_test_df = (
-    crc_h_test.to_dataframe()
+    crc_h_draws.to_dataframe()
     .reset_index()
-    .pivot_wider(["chain", "draw"], names_from="cancer_gene", values_from="h")
+    .pivot_wider(["chain", "draw", "gene"], names_from="cancer_gene", values_from="h")
     .astype({"chain": "category"})
+    .rename(columns={"gene": "hugo_symbol"})
     .sample(frac=1)
 )
-_, ax = plt.subplots(figsize=(4, 4))
-sns.scatterplot(
-    data=crc_h_test_df,
-    x="KRAS",
-    y="PIK3CA",
-    hue="chain",
-    alpha=0.5,
-    s=10,
-    edgecolor=None,
-    zorder=10,
-    ax=ax,
-)
+crc_h_test_df.to_csv(OUTPUT_DIR / "kras-pik3ca-correlated-genes.csv", index=False)
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(6, 6))
+for ax, (g, df_g) in zip(axes.flatten(), crc_h_test_df.groupby("hugo_symbol")):
+    ax.set_title(g)
+    sns.scatterplot(
+        data=df_g,
+        x="KRAS",
+        y="PIK3CA",
+        hue="chain",
+        alpha=0.5,
+        s=10,
+        edgecolor=None,
+        zorder=10,
+        ax=ax,
+    )
+fig.tight_layout()
 plt.show()
 ```
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_36_0.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_38_0.png)
 
 
+
+
+```python
+
+```
 
 
 ```python
@@ -1301,7 +1495,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_39_0.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_42_0.png)
 
 
 
@@ -1332,7 +1526,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_40_1.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_43_1.png)
 
 
 
@@ -1361,7 +1555,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_41_1.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_44_1.png)
 
 
 
@@ -1432,13 +1626,18 @@ sns.boxplot(data=target_df, x="pik3ca_mut", y="lfc")
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_43_1.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_46_1.png)
 
 
 
 
 ```python
-
+(
+    get_mutation_data_for_genes(
+        postmen["colorectal"],
+        genes=postmen["colorectal"].trace.posterior.coords["cancer_gene"].values,
+    ).to_csv(OUTPUT_DIR / "kras-pik3ca-mutations-colorectal.csv", index=False)
+)
 ```
 
 
@@ -1481,7 +1680,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_47_0.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_50_0.png)
 
 
 
@@ -1528,7 +1727,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_48_0.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_51_0.png)
 
 
 
@@ -1576,7 +1775,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_50_0.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_53_0.png)
 
 
 
@@ -1618,7 +1817,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_51_1.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_54_1.png)
 
 
 
@@ -1630,7 +1829,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 2.57 minutes
+    execution time: 2.56 minutes
 
 
 
@@ -1639,7 +1838,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-10-06
+    Last updated: 2022-10-08
 
     Python implementation: CPython
     Python version       : 3.10.6
@@ -1653,17 +1852,17 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-e-16-229.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
 
     Git branch: figures
 
     json      : 2.0.9
-    pandas    : 1.4.4
-    dask      : 2022.9.0
-    seaborn   : 0.11.2
     arviz     : 0.12.1
     matplotlib: 3.5.3
     numpy     : 1.23.3
+    pandas    : 1.4.4
+    dask      : 2022.9.0
+    seaborn   : 0.11.2
 
 
 
