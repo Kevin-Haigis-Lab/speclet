@@ -187,8 +187,8 @@ def get_cancer_genes(pm: PostDataMan, stash: bool = True) -> list[str]:
 
 
 ```python
-def _zero_in_hdi(low: float, high: float) -> bool:
-    return low <= 0 <= high
+def _zero_in_hdi(low: float, high: float, mid: float = 0.0) -> bool:
+    return low <= mid <= high
 
 
 zero_in_hdi = np.vectorize(_zero_in_hdi)
@@ -266,8 +266,18 @@ def get_synthetic_lethal_posterior_parameters(
         ["hugo_symbol", "mean", "sd", "hdi_5.5%", "hdi_94.5%", "hdi_zero"]
     ]
 
-    res = h_post.merge(mu_a_post, on=["hugo_symbol"], suffixes=("_h", "_mu_a")).assign(
-        lineage_subtype=pm.id
+    mu_mu_a_post = get_variable_posterior_summary(pm, var_name="mu_mu_a", stash=stash)
+    assert mu_mu_a_post.shape[0] == 1
+    mu_mu_a_mean = mu_mu_a_post["mean"].values[0]
+
+    res = (
+        h_post.merge(mu_a_post, on=["hugo_symbol"], suffixes=("_h", "_mu_a"))
+        .assign(lineage_subtype=pm.id, mu_mu_a_mean=mu_mu_a_mean)
+        .assign(
+            hdi_mu_mu_a=lambda d: zero_in_hdi(
+                d["hdi_5.5%_mu_a"], d["hdi_94.5%_mu_a"], d["mu_mu_a_mean"]
+            )
+        )
     )
     return res
 ```
@@ -324,6 +334,8 @@ synlet_post.head()
       <th>hdi_94.5%_mu_a</th>
       <th>hdi_zero_mu_a</th>
       <th>lineage_subtype</th>
+      <th>mu_mu_a_mean</th>
+      <th>hdi_mu_mu_a</th>
       <th>lineage</th>
     </tr>
   </thead>
@@ -343,6 +355,8 @@ synlet_post.head()
       <td>0.522</td>
       <td>False</td>
       <td>bile duct (cholangiocarcinoma)</td>
+      <td>0.046</td>
+      <td>False</td>
       <td>bile duct</td>
     </tr>
     <tr>
@@ -360,6 +374,8 @@ synlet_post.head()
       <td>0.455</td>
       <td>False</td>
       <td>bile duct (cholangiocarcinoma)</td>
+      <td>0.046</td>
+      <td>False</td>
       <td>bile duct</td>
     </tr>
     <tr>
@@ -377,6 +393,8 @@ synlet_post.head()
       <td>0.365</td>
       <td>True</td>
       <td>bile duct (cholangiocarcinoma)</td>
+      <td>0.046</td>
+      <td>True</td>
       <td>bile duct</td>
     </tr>
     <tr>
@@ -394,6 +412,8 @@ synlet_post.head()
       <td>0.525</td>
       <td>False</td>
       <td>bile duct (cholangiocarcinoma)</td>
+      <td>0.046</td>
+      <td>False</td>
       <td>bile duct</td>
     </tr>
     <tr>
@@ -411,6 +431,8 @@ synlet_post.head()
       <td>0.308</td>
       <td>True</td>
       <td>bile duct (cholangiocarcinoma)</td>
+      <td>0.046</td>
+      <td>True</td>
       <td>bile duct</td>
     </tr>
   </tbody>
@@ -575,7 +597,7 @@ synlet_post.query("not hdi_zero_h").groupby(["lineage_subtype", "lineage"])[
 
 
 ```python
-synlet_post.query("not hdi_zero_h and hdi_zero_mu_a").groupby(
+synlet_post.query("not hdi_zero_h and hdi_mu_mu_a").groupby(
     ["lineage_subtype", "lineage"]
 )["hugo_symbol"].count().reset_index(drop=False)
 ```
@@ -611,31 +633,31 @@ synlet_post.query("not hdi_zero_h and hdi_zero_mu_a").groupby(
       <th>0</th>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>bile duct</td>
-      <td>56</td>
+      <td>58</td>
     </tr>
     <tr>
       <th>1</th>
       <td>blood (ALL)</td>
       <td>blood</td>
-      <td>8266</td>
+      <td>9662</td>
     </tr>
     <tr>
       <th>2</th>
       <td>blood (AML)</td>
       <td>blood</td>
-      <td>1484</td>
+      <td>546</td>
     </tr>
     <tr>
       <th>3</th>
       <td>breast</td>
       <td>breast</td>
-      <td>1148</td>
+      <td>463</td>
     </tr>
     <tr>
       <th>4</th>
       <td>central nervous system (glioma)</td>
       <td>central nervous system</td>
-      <td>2620</td>
+      <td>2138</td>
     </tr>
     <tr>
       <th>5</th>
@@ -647,79 +669,79 @@ synlet_post.query("not hdi_zero_h and hdi_zero_mu_a").groupby(
       <th>6</th>
       <td>colorectal</td>
       <td>colorectal</td>
-      <td>1019</td>
+      <td>398</td>
     </tr>
     <tr>
       <th>7</th>
       <td>esophagus (esophagus squamous)</td>
       <td>esophagus</td>
-      <td>291</td>
+      <td>272</td>
     </tr>
     <tr>
       <th>8</th>
       <td>gastric (gastric adenocarcinoma)</td>
       <td>gastric</td>
-      <td>2679</td>
+      <td>2353</td>
     </tr>
     <tr>
       <th>9</th>
       <td>kidney (renal cell carcinoma)</td>
       <td>kidney</td>
-      <td>1114</td>
+      <td>1460</td>
     </tr>
     <tr>
       <th>10</th>
       <td>liver (hepatocellular carcinoma)</td>
       <td>liver</td>
-      <td>146</td>
+      <td>69</td>
     </tr>
     <tr>
       <th>11</th>
       <td>lung (NSCLC)</td>
       <td>lung</td>
-      <td>2262</td>
+      <td>1618</td>
     </tr>
     <tr>
       <th>12</th>
       <td>lung (SCLC)</td>
       <td>lung</td>
-      <td>495</td>
+      <td>96</td>
     </tr>
     <tr>
       <th>13</th>
       <td>ovary (ovary adenocarcinoma)</td>
       <td>ovary</td>
-      <td>1498</td>
+      <td>1785</td>
     </tr>
     <tr>
       <th>14</th>
       <td>pancreas</td>
       <td>pancreas</td>
-      <td>833</td>
+      <td>764</td>
     </tr>
     <tr>
       <th>15</th>
       <td>peripheral nervous system (neuroblastoma)</td>
       <td>peripheral nervous system</td>
-      <td>1081</td>
+      <td>136</td>
     </tr>
     <tr>
       <th>16</th>
       <td>skin (melanoma)</td>
       <td>skin</td>
-      <td>8622</td>
+      <td>12787</td>
     </tr>
     <tr>
       <th>17</th>
       <td>urinary tract</td>
       <td>urinary tract</td>
-      <td>843</td>
+      <td>182</td>
     </tr>
     <tr>
       <th>18</th>
       <td>uterus (endometrial adenocarcinoma)</td>
       <td>uterus</td>
-      <td>8240</td>
+      <td>9745</td>
     </tr>
   </tbody>
 </table>
@@ -842,7 +864,7 @@ sns.clustermap(
 
 
 
-    <seaborn.matrix.ClusterGrid at 0x7f751ef2e410>
+    <seaborn.matrix.ClusterGrid at 0x7f30e88799f0>
 
 
 
@@ -1005,13 +1027,102 @@ ax.axvline(0, c="k", zorder=1)
 
 
 
-    <matplotlib.lines.Line2D at 0x7f74e8303550>
+    <matplotlib.lines.Line2D at 0x7f30b1e58310>
 
 
 
 
 
 ![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_32_1.png)
+
+
+
+
+```python
+synlet_post.head(2)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>hugo_symbol</th>
+      <th>cancer_gene</th>
+      <th>mean_h</th>
+      <th>sd_h</th>
+      <th>hdi_5.5%_h</th>
+      <th>hdi_94.5%_h</th>
+      <th>hdi_zero_h</th>
+      <th>mean_mu_a</th>
+      <th>sd_mu_a</th>
+      <th>hdi_5.5%_mu_a</th>
+      <th>hdi_94.5%_mu_a</th>
+      <th>hdi_zero_mu_a</th>
+      <th>lineage_subtype</th>
+      <th>mu_mu_a_mean</th>
+      <th>hdi_mu_mu_a</th>
+      <th>lineage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>A1BG</td>
+      <td>BRAF</td>
+      <td>0.014</td>
+      <td>0.009</td>
+      <td>-0.001</td>
+      <td>0.028</td>
+      <td>True</td>
+      <td>0.322</td>
+      <td>0.122</td>
+      <td>0.134</td>
+      <td>0.522</td>
+      <td>False</td>
+      <td>bile duct (cholangiocarcinoma)</td>
+      <td>0.046</td>
+      <td>False</td>
+      <td>bile duct</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>A1CF</td>
+      <td>BRAF</td>
+      <td>0.015</td>
+      <td>0.009</td>
+      <td>0.001</td>
+      <td>0.030</td>
+      <td>False</td>
+      <td>0.268</td>
+      <td>0.122</td>
+      <td>0.064</td>
+      <td>0.455</td>
+      <td>False</td>
+      <td>bile duct (cholangiocarcinoma)</td>
+      <td>0.046</td>
+      <td>False</td>
+      <td>bile duct</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 
 
@@ -1036,7 +1147,7 @@ def _assign_labels_for_kras_pik3ca_hdi_zero(df: pd.DataFrame) -> pd.DataFrame:
 kras_pik3ca_crc_mua_filter = (
     synlet_post.query("lineage_subtype == 'colorectal'")
     .filter_column_isin("cancer_gene", ["KRAS", "PIK3CA"])
-    .query("hdi_zero_mu_a")
+    .query("hdi_mu_mu_a")
     .pivot_wider(
         "hugo_symbol", names_from="cancer_gene", values_from=["mean_h", "hdi_zero_h"]
     )
@@ -1063,13 +1174,13 @@ ax.axvline(0, c="k", zorder=1)
 
 
 
-    <matplotlib.lines.Line2D at 0x7f74e820c0a0>
+    <matplotlib.lines.Line2D at 0x7f30b1d853f0>
 
 
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_33_1.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_34_1.png)
 
 
 
@@ -1300,7 +1411,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_38_0.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_39_0.png)
 
 
 
@@ -1495,7 +1606,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_42_0.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_43_0.png)
 
 
 
@@ -1526,14 +1637,14 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_43_1.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_44_1.png)
 
 
 
 
 ```python
 crc_synlet = synlet_post.query("lineage_subtype == 'colorectal'").reset_index(drop=True)
-sl_hits = crc_synlet.query("not hdi_zero_h and hdi_zero_mu_a")["hugo_symbol"].toset()
+sl_hits = crc_synlet.query("not hdi_zero_h and hdi_mu_mu_a")["hugo_symbol"].toset()
 print(f"number of genes: {len(sl_hits)}")
 crc_synlet_X = (
     crc_synlet.filter_column_isin("hugo_symbol", sl_hits)
@@ -1550,12 +1661,12 @@ sns.clustermap(
 plt.show()
 ```
 
-    number of genes: 686
+    number of genes: 335
 
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_44_1.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_45_1.png)
 
 
 
@@ -1626,7 +1737,7 @@ sns.boxplot(data=target_df, x="pik3ca_mut", y="lfc")
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_46_1.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_47_1.png)
 
 
 
@@ -1680,7 +1791,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_50_0.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_51_0.png)
 
 
 
@@ -1694,7 +1805,7 @@ df = (
         f"lineage_subtype == '{LINEAGE}' and cancer_gene == '{CANCER_GENE}'"
     )
     .assign(known_sl=lambda d: d["hugo_symbol"] == SL_GENE)
-    .query("hdi_zero_mu_a")
+    .query("hdi_mu_mu_a")
     .sort_values("mean_h", ascending=False)
     .assign(order=lambda d: np.arange(len(d)))
     .sort_values("known_sl")
@@ -1714,6 +1825,7 @@ ax.axhline(0, lw=0.8, c="k", zorder=1)
 
 hits = df.query("mean_h < -0.05")["hugo_symbol"].tolist()
 hits += df.query("mean_h > 0.05")["hugo_symbol"].tolist()
+print(hits)
 texts = []
 for hit in hits:
     d = df.query(f"hugo_symbol == '{hit}'")
@@ -1725,9 +1837,12 @@ adjust_text(texts, ax=ax)
 plt.show()
 ```
 
+    ['SLC25A10', 'CREBBP', 'GGNBP2', 'UBR5', 'TAF5L', 'CDK6', 'FZR1', 'DHX29', 'SMARCA2', 'NCS1', 'CNOT4', 'BATF2', 'RGCC', 'IL31', 'IRF1', 'ZFP91']
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_51_0.png)
+
+
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_52_1.png)
 
 
 
@@ -1770,12 +1885,13 @@ sns.stripplot(
     zorder=20,
 )
 ax.axhline(0, lw=0.8, c="k", zorder=1)
+ax.tick_params(rotation=90)
 plt.show()
 ```
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_53_0.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_54_0.png)
 
 
 
@@ -1787,7 +1903,7 @@ lung_smarca4 = (
     .filter_string("lineage_subtype", "lung")
     .reset_index(drop=True)
 )
-_genes = lung_smarca4.query("hdi_zero_mu_a")["hugo_symbol"].toset()
+_genes = lung_smarca4.query("hdi_mu_mu_a")["hugo_symbol"].toset()
 df = lung_smarca4.filter_column_isin("hugo_symbol", _genes).pivot_wider(
     "hugo_symbol", names_from="lineage_subtype", values_from="mean_h"
 )
@@ -1817,7 +1933,7 @@ plt.show()
 
 
 
-![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_54_1.png)
+![png](100_120_cancer-gene-comut-analysis_files/100_120_cancer-gene-comut-analysis_55_1.png)
 
 
 
@@ -1829,7 +1945,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 2.56 minutes
+    execution time: 3.24 minutes
 
 
 
@@ -1838,7 +1954,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-10-08
+    Last updated: 2022-10-11
 
     Python implementation: CPython
     Python version       : 3.10.6
@@ -1849,20 +1965,20 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1160.76.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-233.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-170.o2.rc.hms.harvard.edu
 
     Git branch: figures
 
-    json      : 2.0.9
     arviz     : 0.12.1
-    matplotlib: 3.5.3
-    numpy     : 1.23.3
-    pandas    : 1.4.4
     dask      : 2022.9.0
+    matplotlib: 3.5.3
     seaborn   : 0.11.2
+    pandas    : 1.4.4
+    numpy     : 1.23.3
+    json      : 2.0.9
 
 
 

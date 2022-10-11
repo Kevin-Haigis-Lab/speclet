@@ -10,10 +10,6 @@
 %autoreload 2
 ```
 
-    The autoreload extension is already loaded. To reload it, use:
-      %reload_ext autoreload
-
-
 
 ```python
 from fractions import Fraction
@@ -245,25 +241,6 @@ raf_params.to_csv(OUTPUT_DIR / "raf-genes-model-parameters.csv", index=False)
 ras_params.to_csv(OUTPUT_DIR / "ras-genes-model-parameters.csv", index=False)
 ```
 
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-    Skipping skin (melanoma).
-
-
 
 ```python
 def extract_sublineage(s: str) -> str:
@@ -404,7 +381,7 @@ ax.legend(loc="upper left", bbox_to_anchor=(1, 1), title="lineage", ncol=2)
 
 
 
-    <matplotlib.legend.Legend at 0x7f02fd1e7cd0>
+    <matplotlib.legend.Legend at 0x7f1cd674d720>
 
 
 
@@ -766,8 +743,8 @@ def get_parameter_summaries(
 
 
 ```python
-def _hdi_contains_zero(low: float, high: float) -> bool:
-    return low < 0 < high
+def _hdi_contains_zero(low: float, high: float, mid: float = 0.0) -> bool:
+    return low < mid < high
 
 
 hdi_contains_zero = np.vectorize(_hdi_contains_zero)
@@ -787,9 +764,6 @@ f_post = (
 f_post.to_csv(OUTPUT_DIR / "f-posterior-summary.csv", index=False)
 f_post.head()
 ```
-
-    Skipping skin (melanoma).
-
 
 
 
@@ -928,23 +902,161 @@ f_post.head()
 
 
 ```python
+mu_mu_a_post = (
+    pd.concat(
+        [get_parameter_summaries(pm, var_name="mu_mu_a") for pm in postmen.posteriors]
+    )
+    .reset_index(drop=True)
+    .assign(lineage=lambda d: d["lineage_subtype"].map(sub_to_lineage))
+)
+mu_mu_a_post.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>parameter</th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>var_name</th>
+      <th>lineage_subtype</th>
+      <th>lineage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>mu_mu_a</td>
+      <td>0.046</td>
+      <td>0.019</td>
+      <td>0.014</td>
+      <td>0.076</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>368.0</td>
+      <td>816.0</td>
+      <td>1.01</td>
+      <td>mu_mu_a</td>
+      <td>bile duct (cholangiocarcinoma)</td>
+      <td>bile duct</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>mu_mu_a</td>
+      <td>0.057</td>
+      <td>0.019</td>
+      <td>0.028</td>
+      <td>0.085</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>1076.0</td>
+      <td>1947.0</td>
+      <td>1.00</td>
+      <td>mu_mu_a</td>
+      <td>bile duct (gallbladder adenocarcinoma)</td>
+      <td>bile duct</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>mu_mu_a</td>
+      <td>0.074</td>
+      <td>0.011</td>
+      <td>0.057</td>
+      <td>0.090</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>411.0</td>
+      <td>777.0</td>
+      <td>1.00</td>
+      <td>mu_mu_a</td>
+      <td>blood (ALL)</td>
+      <td>blood</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>mu_mu_a</td>
+      <td>0.092</td>
+      <td>0.005</td>
+      <td>0.084</td>
+      <td>0.100</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>684.0</td>
+      <td>1167.0</td>
+      <td>1.01</td>
+      <td>mu_mu_a</td>
+      <td>blood (AML)</td>
+      <td>blood</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>mu_mu_a</td>
+      <td>0.077</td>
+      <td>0.025</td>
+      <td>0.042</td>
+      <td>0.111</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>940.0</td>
+      <td>1056.0</td>
+      <td>1.00</td>
+      <td>mu_mu_a</td>
+      <td>blood (CLL)</td>
+      <td>blood</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+_mu_mu_a_to_merge = mu_mu_a_post[["lineage_subtype", "mean"]].rename(
+    columns={"mean": "mu_mu_a_mean"}
+)
 mu_a_post = (
     pd.concat(
-        [
-            get_parameter_summaries(pm, var_name="mu_a")
-            for pm in postmen.as_dict().values()
-        ]
+        [get_parameter_summaries(pm, var_name="mu_a") for pm in postmen.posteriors]
     )
     .reset_index(drop=True)
     .pipe(extract_coords_param_names, col="parameter", names=["hugo_symbol"])
     .assign(lineage=lambda d: d["lineage_subtype"].map(sub_to_lineage))
     .assign(zero_hdi=lambda d: hdi_contains_zero(d["hdi_5.5%"], d["hdi_94.5%"]))
+    .merge(_mu_mu_a_to_merge, on="lineage_subtype")
+    .assign(
+        zero_mu_a=lambda d: hdi_contains_zero(
+            d["hdi_5.5%"], d["hdi_94.5%"], mid=d["mu_mu_a_mean"]
+        )
+    )
 )
 mu_a_post.head()
 ```
-
-    Skipping skin (melanoma).
-
 
 
 
@@ -982,6 +1094,8 @@ mu_a_post.head()
       <th>hugo_symbol</th>
       <th>lineage</th>
       <th>zero_hdi</th>
+      <th>mu_mu_a_mean</th>
+      <th>zero_mu_a</th>
     </tr>
   </thead>
   <tbody>
@@ -1002,6 +1116,8 @@ mu_a_post.head()
       <td>A1BG</td>
       <td>bile duct</td>
       <td>False</td>
+      <td>0.046</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>1</th>
@@ -1019,6 +1135,8 @@ mu_a_post.head()
       <td>bile duct (cholangiocarcinoma)</td>
       <td>A1CF</td>
       <td>bile duct</td>
+      <td>False</td>
+      <td>0.046</td>
       <td>False</td>
     </tr>
     <tr>
@@ -1038,6 +1156,8 @@ mu_a_post.head()
       <td>A2M</td>
       <td>bile duct</td>
       <td>True</td>
+      <td>0.046</td>
+      <td>True</td>
     </tr>
     <tr>
       <th>3</th>
@@ -1056,6 +1176,8 @@ mu_a_post.head()
       <td>A2ML1</td>
       <td>bile duct</td>
       <td>False</td>
+      <td>0.046</td>
+      <td>False</td>
     </tr>
     <tr>
       <th>4</th>
@@ -1073,6 +1195,8 @@ mu_a_post.head()
       <td>bile duct (cholangiocarcinoma)</td>
       <td>A3GALT2</td>
       <td>bile duct</td>
+      <td>True</td>
+      <td>0.046</td>
       <td>True</td>
     </tr>
   </tbody>
@@ -1103,7 +1227,7 @@ sns.clustermap(
 )
 ```
 
-    number of genes in heatmap: 2984
+    number of genes in heatmap: 3028
 
 
     /home/jc604/.conda/envs/speclet/lib/python3.10/site-packages/seaborn/matrix.py:654: UserWarning: Clustering large matrix with scipy. Installing `fastcluster` may give better performance.
@@ -1113,13 +1237,13 @@ sns.clustermap(
 
 
 
-    <seaborn.matrix.ClusterGrid at 0x7f02f5c997b0>
+    <seaborn.matrix.ClusterGrid at 0x7f1ccc4150f0>
 
 
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_37_3.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_38_3.png)
 
 
 
@@ -1143,7 +1267,7 @@ sns.clustermap(
 )
 ```
 
-    number of genes in heatmap: 2050
+    number of genes in heatmap: 2069
 
 
     /home/jc604/.conda/envs/speclet/lib/python3.10/site-packages/seaborn/matrix.py:654: UserWarning: Clustering large matrix with scipy. Installing `fastcluster` may give better performance.
@@ -1153,13 +1277,13 @@ sns.clustermap(
 
 
 
-    <seaborn.matrix.ClusterGrid at 0x7f02d2e44520>
+    <seaborn.matrix.ClusterGrid at 0x7f1ccc4142b0>
 
 
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_38_3.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_39_3.png)
 
 
 
@@ -1305,7 +1429,159 @@ f_post.head()
 
 
 ```python
-_zero_mu_a = mu_a_post.query("mean < 0 or zero_hdi")[
+mu_a_post.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>parameter</th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_5.5%</th>
+      <th>hdi_94.5%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+      <th>var_name</th>
+      <th>lineage_subtype</th>
+      <th>hugo_symbol</th>
+      <th>lineage</th>
+      <th>zero_hdi</th>
+      <th>mu_mu_a_mean</th>
+      <th>zero_mu_a</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>mu_a[A1BG]</td>
+      <td>0.322</td>
+      <td>0.122</td>
+      <td>0.134</td>
+      <td>0.522</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>2686.0</td>
+      <td>3015.0</td>
+      <td>1.0</td>
+      <td>mu_a</td>
+      <td>bile duct (cholangiocarcinoma)</td>
+      <td>A1BG</td>
+      <td>bile duct</td>
+      <td>False</td>
+      <td>0.046</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>mu_a[A1CF]</td>
+      <td>0.268</td>
+      <td>0.122</td>
+      <td>0.064</td>
+      <td>0.455</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>3291.0</td>
+      <td>2986.0</td>
+      <td>1.0</td>
+      <td>mu_a</td>
+      <td>bile duct (cholangiocarcinoma)</td>
+      <td>A1CF</td>
+      <td>bile duct</td>
+      <td>False</td>
+      <td>0.046</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>mu_a[A2M]</td>
+      <td>0.176</td>
+      <td>0.123</td>
+      <td>-0.025</td>
+      <td>0.365</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>3137.0</td>
+      <td>2943.0</td>
+      <td>1.0</td>
+      <td>mu_a</td>
+      <td>bile duct (cholangiocarcinoma)</td>
+      <td>A2M</td>
+      <td>bile duct</td>
+      <td>True</td>
+      <td>0.046</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>mu_a[A2ML1]</td>
+      <td>0.320</td>
+      <td>0.125</td>
+      <td>0.122</td>
+      <td>0.525</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>3025.0</td>
+      <td>3113.0</td>
+      <td>1.0</td>
+      <td>mu_a</td>
+      <td>bile duct (cholangiocarcinoma)</td>
+      <td>A2ML1</td>
+      <td>bile duct</td>
+      <td>False</td>
+      <td>0.046</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>mu_a[A3GALT2]</td>
+      <td>0.114</td>
+      <td>0.124</td>
+      <td>-0.087</td>
+      <td>0.308</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>2949.0</td>
+      <td>3087.0</td>
+      <td>1.0</td>
+      <td>mu_a</td>
+      <td>bile duct (cholangiocarcinoma)</td>
+      <td>A3GALT2</td>
+      <td>bile duct</td>
+      <td>True</td>
+      <td>0.046</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+_zero_or_neg_mu_a = mu_a_post.query("mean < mu_mu_a_mean or zero_mu_a")[
     ["lineage_subtype", "hugo_symbol"]
 ].reset_index(drop=True)
 _negative_f = f_post.query("not zero_hdi and mean < 0")[
@@ -1313,7 +1589,7 @@ _negative_f = f_post.query("not zero_hdi and mean < 0")[
 ].reset_index(drop=True)
 
 driver_f_post = _negative_f.merge(
-    _zero_mu_a, on=["hugo_symbol", "lineage_subtype"], how="inner"
+    _zero_or_neg_mu_a, on=["hugo_symbol", "lineage_subtype"], how="inner"
 ).reset_index(drop=True)
 
 driver_f_post.to_csv(OUTPUT_DIR / "new-drivers-f-post.csv", index=False)
@@ -1321,7 +1597,7 @@ print(f"number of driver hits: {driver_f_post['hugo_symbol'].nunique()}")
 driver_f_post.head()
 ```
 
-    number of driver hits: 1907
+    number of driver hits: 1997
 
 
 
@@ -1353,31 +1629,31 @@ driver_f_post.head()
   <tbody>
     <tr>
       <th>0</th>
-      <td>BRAF</td>
+      <td>ADAMTSL3</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>bile duct</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>CDC16</td>
+      <td>BRAF</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>bile duct</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>CELA2A</td>
+      <td>CDC16</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>bile duct</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>CTNNB1</td>
+      <td>CELA2A</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>bile duct</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>DDX47</td>
+      <td>CNTN5</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>bile duct</td>
     </tr>
@@ -1543,7 +1819,7 @@ plt.show()
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_44_0.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_46_0.png)
 
 
 
@@ -1553,7 +1829,7 @@ plt.show()
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_44_2.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_46_2.png)
 
 
 
@@ -1582,7 +1858,7 @@ plt.show()
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_45_0.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_47_0.png)
 
 
 
@@ -1605,7 +1881,7 @@ plt.show()
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_46_0.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_48_0.png)
 
 
 
@@ -1625,21 +1901,21 @@ plt.show()
 ```
 
       hugo_symbol  lineage_subtype
-    0    SNRNP200               10
-    1      ANKLE2               10
-    2       TTC27               10
-    3      PDCD11               10
-    4        MDN1                9
-    5       UTP20                9
-    6       HCFC1                8
-    7        MCM2                8
-    8       POLD1                8
-    9       LONP1                8
+    0      ANKLE2               11
+    1      PDCD11               10
+    2    SNRNP200               10
+    3       TTC27               10
+    4       UTP20                9
+    5       LONP1                9
+    6        MDN1                9
+    7       CDC45                8
+    8        URB1                8
+    9       PRPF8                8
 
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_47_1.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_49_1.png)
 
 
 
@@ -1670,7 +1946,7 @@ plt.show()
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_48_0.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_50_0.png)
 
 
 
@@ -1723,7 +1999,7 @@ driver_mutations_f_post.sort_values("mean").query(
   </thead>
   <tbody>
     <tr>
-      <th>4023</th>
+      <th>4169</th>
       <td>f[CDC45]</td>
       <td>-0.656</td>
       <td>0.081</td>
@@ -1743,7 +2019,7 @@ driver_mutations_f_post.sort_values("mean").query(
       <td>False</td>
     </tr>
     <tr>
-      <th>3825</th>
+      <th>3967</th>
       <td>f[DDX54]</td>
       <td>-0.481</td>
       <td>0.075</td>
@@ -1763,7 +2039,7 @@ driver_mutations_f_post.sort_values("mean").query(
       <td>False</td>
     </tr>
     <tr>
-      <th>29</th>
+      <th>31</th>
       <td>f[POLR3A]</td>
       <td>-0.432</td>
       <td>0.102</td>
@@ -1783,7 +2059,7 @@ driver_mutations_f_post.sort_values("mean").query(
       <td>False</td>
     </tr>
     <tr>
-      <th>4086</th>
+      <th>4234</th>
       <td>f[ESPL1]</td>
       <td>-0.426</td>
       <td>0.076</td>
@@ -1803,7 +2079,27 @@ driver_mutations_f_post.sort_values("mean").query(
       <td>False</td>
     </tr>
     <tr>
-      <th>3931</th>
+      <th>1364</th>
+      <td>f[PIK3R1]</td>
+      <td>-0.413</td>
+      <td>0.060</td>
+      <td>-0.509</td>
+      <td>-0.317</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>4910.0</td>
+      <td>2987.0</td>
+      <td>1.00</td>
+      <td>f</td>
+      <td>central nervous system (glioma)</td>
+      <td>PIK3R1</td>
+      <td>central nervous system</td>
+      <td>False</td>
+      <td>5</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>4073</th>
       <td>f[SBNO1]</td>
       <td>-0.383</td>
       <td>0.076</td>
@@ -1823,7 +2119,7 @@ driver_mutations_f_post.sort_values("mean").query(
       <td>False</td>
     </tr>
     <tr>
-      <th>4125</th>
+      <th>4274</th>
       <td>f[HERC2]</td>
       <td>-0.356</td>
       <td>0.076</td>
@@ -1843,7 +2139,7 @@ driver_mutations_f_post.sort_values("mean").query(
       <td>False</td>
     </tr>
     <tr>
-      <th>2135</th>
+      <th>2184</th>
       <td>f[PDCD11]</td>
       <td>-0.306</td>
       <td>0.068</td>
@@ -1863,7 +2159,7 @@ driver_mutations_f_post.sort_values("mean").query(
       <td>False</td>
     </tr>
     <tr>
-      <th>1333</th>
+      <th>1354</th>
       <td>f[NAT10]</td>
       <td>-0.304</td>
       <td>0.068</td>
@@ -1883,7 +2179,7 @@ driver_mutations_f_post.sort_values("mean").query(
       <td>False</td>
     </tr>
     <tr>
-      <th>2101</th>
+      <th>2150</th>
       <td>f[INTS1]</td>
       <td>-0.299</td>
       <td>0.064</td>
@@ -1903,7 +2199,7 @@ driver_mutations_f_post.sort_values("mean").query(
       <td>False</td>
     </tr>
     <tr>
-      <th>1625</th>
+      <th>1658</th>
       <td>f[UBR4]</td>
       <td>-0.297</td>
       <td>0.067</td>
@@ -1923,7 +2219,27 @@ driver_mutations_f_post.sort_values("mean").query(
       <td>False</td>
     </tr>
     <tr>
-      <th>3237</th>
+      <th>3766</th>
+      <td>f[ESF1]</td>
+      <td>-0.292</td>
+      <td>0.062</td>
+      <td>-0.390</td>
+      <td>-0.193</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3526.0</td>
+      <td>3103.0</td>
+      <td>1.00</td>
+      <td>f</td>
+      <td>skin (melanoma)</td>
+      <td>ESF1</td>
+      <td>skin</td>
+      <td>False</td>
+      <td>7</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>3306</th>
       <td>f[RPS5]</td>
       <td>-0.288</td>
       <td>0.072</td>
@@ -1943,7 +2259,7 @@ driver_mutations_f_post.sort_values("mean").query(
       <td>False</td>
     </tr>
     <tr>
-      <th>4192</th>
+      <th>4344</th>
       <td>f[NACA]</td>
       <td>-0.275</td>
       <td>0.075</td>
@@ -1963,7 +2279,7 @@ driver_mutations_f_post.sort_values("mean").query(
       <td>False</td>
     </tr>
     <tr>
-      <th>2598</th>
+      <th>2649</th>
       <td>f[DOCK2]</td>
       <td>-0.272</td>
       <td>0.081</td>
@@ -1983,7 +2299,7 @@ driver_mutations_f_post.sort_values("mean").query(
       <td>False</td>
     </tr>
     <tr>
-      <th>2607</th>
+      <th>2658</th>
       <td>f[DYNC1H1]</td>
       <td>-0.268</td>
       <td>0.079</td>
@@ -2003,7 +2319,7 @@ driver_mutations_f_post.sort_values("mean").query(
       <td>False</td>
     </tr>
     <tr>
-      <th>3415</th>
+      <th>3494</th>
       <td>f[HERC2]</td>
       <td>-0.262</td>
       <td>0.077</td>
@@ -2023,7 +2339,7 @@ driver_mutations_f_post.sort_values("mean").query(
       <td>False</td>
     </tr>
     <tr>
-      <th>3241</th>
+      <th>3310</th>
       <td>f[SBNO1]</td>
       <td>-0.256</td>
       <td>0.072</td>
@@ -2043,7 +2359,27 @@ driver_mutations_f_post.sort_values("mean").query(
       <td>False</td>
     </tr>
     <tr>
-      <th>4161</th>
+      <th>3790</th>
+      <td>f[PPP6C]</td>
+      <td>-0.239</td>
+      <td>0.063</td>
+      <td>-0.333</td>
+      <td>-0.132</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>4756.0</td>
+      <td>2524.0</td>
+      <td>1.00</td>
+      <td>f</td>
+      <td>skin (melanoma)</td>
+      <td>PPP6C</td>
+      <td>skin</td>
+      <td>False</td>
+      <td>5</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>4313</th>
       <td>f[MAU2]</td>
       <td>-0.236</td>
       <td>0.073</td>
@@ -2060,66 +2396,6 @@ driver_mutations_f_post.sort_values("mean").query(
       <td>urinary tract</td>
       <td>False</td>
       <td>4</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>3095</th>
-      <td>f[EP400]</td>
-      <td>-0.233</td>
-      <td>0.066</td>
-      <td>-0.342</td>
-      <td>-0.134</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>6665.0</td>
-      <td>2922.0</td>
-      <td>1.00</td>
-      <td>f</td>
-      <td>ovary (ovary adenocarcinoma)</td>
-      <td>EP400</td>
-      <td>ovary</td>
-      <td>False</td>
-      <td>5</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>1815</th>
-      <td>f[URB1]</td>
-      <td>-0.230</td>
-      <td>0.056</td>
-      <td>-0.316</td>
-      <td>-0.139</td>
-      <td>0.001</td>
-      <td>0.000</td>
-      <td>8150.0</td>
-      <td>2626.0</td>
-      <td>1.00</td>
-      <td>f</td>
-      <td>liver (hepatocellular carcinoma)</td>
-      <td>URB1</td>
-      <td>liver</td>
-      <td>False</td>
-      <td>6</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>1569</th>
-      <td>f[DYNC1H1]</td>
-      <td>-0.227</td>
-      <td>0.061</td>
-      <td>-0.326</td>
-      <td>-0.132</td>
-      <td>0.001</td>
-      <td>0.001</td>
-      <td>5028.0</td>
-      <td>3053.0</td>
-      <td>1.00</td>
-      <td>f</td>
-      <td>esophagus (esophagus squamous)</td>
-      <td>DYNC1H1</td>
-      <td>esophagus</td>
-      <td>False</td>
-      <td>5</td>
       <td>False</td>
     </tr>
   </tbody>
@@ -2181,7 +2457,7 @@ plt.show()
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_51_1.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_53_1.png)
 
 
 
@@ -2243,7 +2519,7 @@ plt.show()
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_53_0.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_55_0.png)
 
 
 
@@ -2335,12 +2611,12 @@ synlet_enrichr.head()
       <td>KEGG_2021_Human</td>
       <td>Thyroid cancer</td>
       <td>3/37</td>
-      <td>0.000055</td>
-      <td>0.007251</td>
+      <td>0.000064</td>
+      <td>0.008403</td>
       <td>0</td>
       <td>0</td>
-      <td>47.518283</td>
-      <td>466.129654</td>
+      <td>45.076923</td>
+      <td>435.530191</td>
       <td>CTNNB1;BRAF;KRAS</td>
       <td>3/37</td>
       <td>3</td>
@@ -2353,12 +2629,12 @@ synlet_enrichr.head()
       <td>KEGG_2021_Human</td>
       <td>Endometrial cancer</td>
       <td>3/58</td>
-      <td>0.000212</td>
-      <td>0.013984</td>
+      <td>0.000245</td>
+      <td>0.016182</td>
       <td>0</td>
       <td>0</td>
-      <td>29.343980</td>
-      <td>248.235427</td>
+      <td>27.836364</td>
+      <td>231.418175</td>
       <td>CTNNB1;BRAF;KRAS</td>
       <td>3/58</td>
       <td>3</td>
@@ -2371,12 +2647,12 @@ synlet_enrichr.head()
       <td>KEGG_2021_Human</td>
       <td>Long-term potentiation</td>
       <td>3/67</td>
-      <td>0.000325</td>
-      <td>0.014295</td>
+      <td>0.000376</td>
+      <td>0.016530</td>
       <td>0</td>
       <td>0</td>
-      <td>25.206081</td>
-      <td>202.456936</td>
+      <td>23.911058</td>
+      <td>188.580692</td>
       <td>GRIN2A;BRAF;KRAS</td>
       <td>3/67</td>
       <td>3</td>
@@ -2389,12 +2665,12 @@ synlet_enrichr.head()
       <td>KEGG_2021_Human</td>
       <td>Alcoholism</td>
       <td>4/186</td>
-      <td>0.000509</td>
-      <td>0.016813</td>
+      <td>0.000615</td>
+      <td>0.019942</td>
       <td>0</td>
       <td>0</td>
-      <td>12.074481</td>
-      <td>91.550005</td>
+      <td>11.437825</td>
+      <td>84.569422</td>
       <td>GRIN2A;GNB1;BRAF;KRAS</td>
       <td>2/93</td>
       <td>2</td>
@@ -2407,12 +2683,12 @@ synlet_enrichr.head()
       <td>KEGG_2021_Human</td>
       <td>Colorectal cancer</td>
       <td>3/86</td>
-      <td>0.000676</td>
-      <td>0.017287</td>
+      <td>0.000781</td>
+      <td>0.019942</td>
       <td>0</td>
       <td>0</td>
-      <td>19.417454</td>
-      <td>141.733071</td>
+      <td>18.419833</td>
+      <td>131.800576</td>
       <td>CTNNB1;BRAF;KRAS</td>
       <td>3/86</td>
       <td>3</td>
@@ -2477,7 +2753,7 @@ plt.show()
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_57_0.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_59_0.png)
 
 
 
@@ -2515,7 +2791,7 @@ plt.show()
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_59_1.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_61_1.png)
 
 
 
@@ -2538,7 +2814,7 @@ plt.show()
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_60_0.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_62_0.png)
 
 
 
@@ -2565,12 +2841,12 @@ ax.tick_params(labelsize=6)
 plt.show()
 ```
 
-    (42, 103)
+    (43, 105)
 
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_61_1.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_63_1.png)
 
 
 
@@ -2683,7 +2959,7 @@ sns.kdeplot(data=f_post_blood, x="mean", hue="lineage_subtype");
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_64_1.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_66_1.png)
 
 
 
@@ -2891,7 +3167,7 @@ plt.show()
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_66_0.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_68_0.png)
 
 
 
@@ -2908,8 +3184,8 @@ print(squamous)
 print(adeno)
 ```
 
-    {'lung (SCLC)', 'skin (skin squamous)', 'cervix (cervical squamous)', 'esophagus (esophagus squamous)'}
-    {'lung (NSCLC)', 'esophagus (esophagus adenocarcinoma)', 'uterus (endometrial adenocarcinoma)', 'ovary (ovary adenocarcinoma)', 'gastric (gastric adenocarcinoma)', 'bile duct (gallbladder adenocarcinoma)', 'prostate', 'colorectal', 'pancreas'}
+    {'lung (SCLC)', 'esophagus (esophagus squamous)', 'skin (skin squamous)', 'cervix (cervical squamous)'}
+    {'esophagus (esophagus adenocarcinoma)', 'colorectal', 'lung (NSCLC)', 'uterus (endometrial adenocarcinoma)', 'prostate', 'gastric (gastric adenocarcinoma)', 'pancreas', 'bile duct (gallbladder adenocarcinoma)', 'ovary (ovary adenocarcinoma)'}
 
 
 
@@ -3093,7 +3369,7 @@ plt.show()
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_70_0.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_72_0.png)
 
 
 
@@ -3163,7 +3439,7 @@ plt.show()
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_73_0.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_75_0.png)
 
 
 
@@ -3230,7 +3506,7 @@ plt.show()
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_75_0.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_77_0.png)
 
 
 
@@ -3238,59 +3514,65 @@ plt.show()
 
 
 ```python
-# skin_f_post = f_post.filter_string("lineage_subtype", "skin").reset_index(drop=True)
-# skin_f_post_X = skin_f_post.pivot_wider(
-#     "hugo_symbol", names_from="lineage_subtype", values_from="mean"
-# )
+skin_f_post = f_post.filter_string("lineage_subtype", "skin").reset_index(drop=True)
+skin_f_post_X = skin_f_post.pivot_wider(
+    "hugo_symbol", names_from="lineage_subtype", values_from="mean"
+)
 
 
-# hits = skin_f_post_X.query("`skin (melanoma)` < -0.15")["hugo_symbol"].tolist()
-# hits += skin_f_post_X.query("`skin (melanoma)` > 0.15")["hugo_symbol"].tolist()
-# hits += skin_f_post_X.query("`skin (skin squamous)` < -0.1")["hugo_symbol"].tolist()
-# hits += skin_f_post_X.query("`skin (skin squamous)` > 0.1")["hugo_symbol"].tolist()
-# hits = sorted(list(set(hits)))
-# skin_f_post_X["hit"] = skin_f_post_X["hugo_symbol"].isin(hits)
+hits = skin_f_post_X.query("`skin (melanoma)` < -0.15")["hugo_symbol"].tolist()
+hits += skin_f_post_X.query("`skin (melanoma)` > 0.15")["hugo_symbol"].tolist()
+hits += skin_f_post_X.query("`skin (skin squamous)` < -0.1")["hugo_symbol"].tolist()
+hits += skin_f_post_X.query("`skin (skin squamous)` > 0.1")["hugo_symbol"].tolist()
+hits = sorted(list(set(hits)))
+skin_f_post_X["hit"] = skin_f_post_X["hugo_symbol"].isin(hits)
 
-# _, ax = plt.subplots(figsize=(5, 5))
-# ax.axhline(0, c="k", lw=0.5, zorder=1)
-# ax.axvline(0, c="k", lw=0.5, zorder=1)
-# sns.scatterplot(
-#     data=skin_f_post_X,
-#     x="skin (melanoma)",
-#     y="skin (skin squamous)",
-#     hue="hit",
-#     alpha=0.5,
-#     edgecolor=None,
-#     s=5,
-#     zorder=10,
-#     ax=ax,
-# )
+_, ax = plt.subplots(figsize=(5, 5))
+ax.axhline(0, c="k", lw=0.5, zorder=1)
+ax.axvline(0, c="k", lw=0.5, zorder=1)
+sns.scatterplot(
+    data=skin_f_post_X,
+    x="skin (melanoma)",
+    y="skin (skin squamous)",
+    hue="hit",
+    alpha=0.5,
+    edgecolor=None,
+    s=5,
+    zorder=10,
+    ax=ax,
+)
 
-# texts = []
-# for gene in hits:
-#     df = skin_f_post_X.query(f"hugo_symbol == '{gene}'")
-#     t = ax.text(
-#         df["skin (melanoma)"].values[0],
-#         df["skin (skin squamous)"].values[0],
-#         f"${gene}$",
-#         size=6,
-#         zorder=20,
-#     )
-#     texts.append(t)
+texts = []
+for gene in hits:
+    df = skin_f_post_X.query(f"hugo_symbol == '{gene}'")
+    t = ax.text(
+        df["skin (melanoma)"].values[0],
+        df["skin (skin squamous)"].values[0],
+        f"${gene}$",
+        size=6,
+        zorder=20,
+    )
+    texts.append(t)
 
-# adjust_text(
-#     texts=texts,
-#     ax=ax,
-#     text_from_points=False,
-#     force_points=(0, 0),
-#     force_objects=(0, 0),
-#     ha="left",
-#     va="bottom",
-# )
+adjust_text(
+    texts=texts,
+    ax=ax,
+    text_from_points=False,
+    force_points=(0, 0),
+    force_objects=(0, 0),
+    ha="left",
+    va="bottom",
+)
 
-# ax.get_legend().remove()
-# plt.show()
+ax.get_legend().remove()
+plt.show()
 ```
+
+
+
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_79_0.png)
+
+
 
 #### Esophagus
 
@@ -3359,14 +3641,14 @@ plt.show()
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_79_0.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_81_0.png)
 
 
 
 
 ```python
 specific_lineages = []
-for df in [cervix_f_post, lung_f_post, esophag_f_post]:  # skin_f_post
+for df in [cervix_f_post, lung_f_post, skin_f_post, esophag_f_post]:
     specific_lineages += list(set(df["lineage_subtype"]))
 specific_lineages.sort()
 genes = f_post["hugo_symbol"].unique().tolist()
@@ -3456,13 +3738,13 @@ ax.legend(loc="upper left", bbox_to_anchor=(1, 1), ncol=2)
 
 
 
-    <matplotlib.legend.Legend at 0x7f02c10ef4f0>
+    <matplotlib.legend.Legend at 0x7f1cbf222f50>
 
 
 
 
 
-![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_82_2.png)
+![png](100_110_gene-mutation-effect_files/100_110_gene-mutation-effect_84_2.png)
 
 
 
@@ -3474,7 +3756,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 1.90 minutes
+    execution time: 3.86 minutes
 
 
 
@@ -3483,9 +3765,7 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    The watermark extension is already loaded. To reload it, use:
-      %reload_ext watermark
-    Last updated: 2022-10-04
+    Last updated: 2022-10-11
 
     Python implementation: CPython
     Python version       : 3.10.6
@@ -3496,18 +3776,18 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
     Release     : 3.10.0-1160.76.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 28
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-e-16-231.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-170.o2.rc.hms.harvard.edu
 
     Git branch: figures
 
     matplotlib: 3.5.3
     dask      : 2022.9.0
-    pandas    : 1.4.4
     numpy     : 1.23.3
     seaborn   : 0.11.2
+    pandas    : 1.4.4
     gseapy    : 0.13.0
 
 
