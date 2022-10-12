@@ -108,10 +108,15 @@ class PosteriorDataManager:
         """The summary of the model's posterior."""
         if self._posterior_summary is not None:
             return self._posterior_summary
-        self._posterior_summary = pd.read_csv(
-            self.posterior_dir / "posterior-summary.csv"
-        ).assign(var_name=lambda d: [x.split("[")[0] for x in d["parameter"]])
+        self._posterior_summary = pd.read_csv(self.posterior_summary_file).assign(
+            var_name=lambda d: [x.split("[")[0] for x in d["parameter"]]
+        )
         return self._posterior_summary
+
+    @property
+    def posterior_summary_file(self) -> Path:
+        """Posterior summary file path."""
+        return self.posterior_dir / "posterior-summary.csv"
 
     @property
     def trace(self) -> az.InferenceData:
