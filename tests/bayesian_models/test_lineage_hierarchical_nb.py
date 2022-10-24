@@ -152,4 +152,4 @@ def test_posterior_checks_use_available_variable_names(
 
 def test_specific_colorectal_cancer_genes_used() -> None:
     cancer_genes = _get_cancer_genes_accounting_for_sublineage("colorectal")
-    assert cancer_genes == {"KRAS", "APC", "FBXW7", "PIK3CA"}
+    assert cancer_genes == {"KRAS", "APC", "PIK3CA", "FBXW7", "TP53"}
