@@ -116,14 +116,14 @@ if postman.fit_method in {ModelFitMethod.PYMC_NUMPYRO, ModelFitMethod.PYMC_MCMC}
 
 
     ============================================================
-    date created: 2022-09-06 11:03
+    date created: 2022-09-29 02:54
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0, 0, 0
     percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 0.69, 0.641, 0.721, 0.819
-    avg. step size: 0.01, 0.011, 0.01, 0.01
-    avg. accept prob.: 0.991, 0.988, 0.985, 0.991
-    avg. tree depth: 9.0, 9.145, 9.509, 9.0
+    BFMI: 0.773, 0.788, 0.733, 0.682
+    avg. step size: 0.011, 0.011, 0.01, 0.01
+    avg. accept prob.: 0.986, 0.986, 0.989, 0.989
+    avg. tree depth: 10.0, 10.0, 9.0, 9.0
 
 
 
@@ -140,7 +140,7 @@ if postman.fit_method in {ModelFitMethod.PYMC_NUMPYRO, ModelFitMethod.PYMC_MCMC}
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-09-06
+    Last updated: 2022-09-29
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -148,16 +148,16 @@ if postman.fit_method in {ModelFitMethod.PYMC_NUMPYRO, ModelFitMethod.PYMC_MCMC}
 
     Compiler    : GCC 10.3.0
     OS          : Linux
-    Release     : 3.10.0-1160.66.1.el7.x86_64
+    Release     : 3.10.0-1160.76.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 20
+    CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-f-17-09.o2.rc.hms.harvard.edu
+    Hostname: compute-a-16-160.o2.rc.hms.harvard.edu
 
-    Git branch: expand-lineages
+    Git branch: figures
 
-    seaborn   : 0.11.2
     matplotlib: 3.5.2
+    seaborn   : 0.11.2
     logging   : 0.5.1.2

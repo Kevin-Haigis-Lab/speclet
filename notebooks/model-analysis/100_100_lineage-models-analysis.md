@@ -12,32 +12,32 @@
 
 
 ```python
-import re
-from pathlib import Path
 from time import time
-from typing import Final
 
-import arviz as az
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import plotnine as gg
 import seaborn as sns
 ```
 
 
 ```python
 from speclet.analysis.arviz_analysis import extract_coords_param_names
-from speclet.io import DataFile, data_path, project_root
+from speclet.analysis.sublineage_model_analysis import (
+    load_sublineage_model_posteriors,
+    sublineage_to_lineage_map,
+)
 from speclet.managers.posterior_data_manager import (
     PosteriorDataManager,
     PosteriorDataManagers,
 )
-from speclet.model_configuration import read_model_configurations
 from speclet.plot import set_speclet_theme
-from speclet.plot.color_pal import pal_to_legend_handles
-from speclet.project_configuration import arviz_config, get_model_configuration_file
-from speclet.project_enums import ModelFitMethod
+from speclet.plot.color_pal import (
+    lineage_color_pal,
+    pal_to_legend_handles,
+    sublineage_color_pal,
+)
+from speclet.project_configuration import arviz_config
 ```
 
 
@@ -53,9 +53,6 @@ set_speclet_theme()
 RANDOM_SEED = 709
 np.random.seed(RANDOM_SEED)
 arviz_config()
-
-# File paths
-config_path = project_root() / get_model_configuration_file()
 ```
 
 ### Data
@@ -64,45 +61,7 @@ config_path = project_root() / get_model_configuration_file()
 
 
 ```python
-model_configs = read_model_configurations(config_path, active_only=True)
-f"Number of configurations: {len(model_configs.configurations)}"
-```
-
-
-
-
-    'Number of configurations: 43'
-
-
-
-
-```python
-model_names = [c.name for c in model_configs.configurations]
-model_names.sort()
-pattern = r"(?<=hnb-single-lineage-).*$"
-sublineage_names = [re.findall(pattern, m)[0] for m in model_names]
-sublineage_names = [n.replace("_", " ") for n in sublineage_names]
-
-# Skip some lineages because they are incomplete at the moment.
-SKIP_LINEAGES: Final[list[str]] = [
-    # "blood",
-    # "colorectal",
-    # "bone",
-    # "central nervous system",
-    # "kidney",
-    # "lung",
-]
-for skip_line in SKIP_LINEAGES:
-    i = sublineage_names.index(skip_line)
-    _ = model_names.pop(i), sublineage_names.pop(i)
-
-
-postmen = PosteriorDataManagers(
-    names=model_names,
-    fit_methods=ModelFitMethod.PYMC_NUMPYRO,
-    config_paths=config_path,
-    keys=sublineage_names,
-)
+postmen = load_sublineage_model_posteriors()
 ```
 
 
@@ -173,50 +132,13 @@ len(postmen)
 
 
 ```python
-sub_to_lineage = {pm.id: pm.id.split(" (")[0] for pm in postmen.posteriors}
-lineages = list(set(sub_to_lineage.values()))
-lineages.sort()
-lineages
+sub_to_lineage, lineages = sublineage_to_lineage_map(postmen)
 ```
 
 
-
-
-    ['bile duct',
-     'blood',
-     'bone',
-     'breast',
-     'central nervous system',
-     'cervix',
-     'colorectal',
-     'esophagus',
-     'eye',
-     'gastric',
-     'kidney',
-     'liver',
-     'lung',
-     'lymphocyte',
-     'ovary',
-     'pancreas',
-     'peripheral nervous system',
-     'plasma cell',
-     'prostate',
-     'skin',
-     'soft tissue',
-     'thyroid',
-     'upper aerodigestive',
-     'urinary tract',
-     'uterus']
-
-
-
-
 ```python
-sublineage_cmap = sns.color_palette("Spectral", n_colors=len(postmen), as_cmap=False)
-sublineage_pal = {line: sublineage_cmap[i] for i, line in enumerate(sublineage_names)}
-
-lineage_cmap = sns.color_palette("terrain", n_colors=len(lineages), as_cmap=False)
-lineage_pal = {line: lineage_cmap[i] for i, line in enumerate(lineages)}
+sublineage_pal = sublineage_color_pal()
+lineage_pal = lineage_color_pal()
 ```
 
 ## Descriptions
@@ -224,9 +146,15 @@ lineage_pal = {line: lineage_cmap[i] for i, line in enumerate(lineages)}
 
 ```python
 def get_posterior_dimensions(pm: PosteriorDataManager) -> pd.DataFrame:
-    return pd.DataFrame(
-        {k: v for k, v in pm.trace.posterior.dims.items()}, index=[pm.id]
-    )
+    try:
+        res = pd.DataFrame(
+            {k: v for k, v in pm.trace.posterior.dims.items()}, index=[pm.id]
+        )
+    except AssertionError:
+        print(f"Skipping {pm.id}.")
+        return pd.DataFrame()
+
+    return res
 
 
 post_dims = pd.concat([get_posterior_dimensions(pm) for pm in postmen.posteriors])
@@ -260,8 +188,8 @@ post_dims
       <th>sgrna</th>
       <th>cell_chrom</th>
       <th>gene</th>
-      <th>cell_line</th>
       <th>cancer_gene</th>
+      <th>cell_line</th>
     </tr>
   </thead>
   <tbody>
@@ -272,8 +200,8 @@ post_dims
       <td>71062</td>
       <td>713</td>
       <td>18119</td>
+      <td>1.0</td>
       <td>31</td>
-      <td>NaN</td>
     </tr>
     <tr>
       <th>bile duct (gallbladder adenocarcinoma)</th>
@@ -282,8 +210,8 @@ post_dims
       <td>71062</td>
       <td>138</td>
       <td>18119</td>
-      <td>6</td>
       <td>NaN</td>
+      <td>6</td>
     </tr>
     <tr>
       <th>blood (ALL)</th>
@@ -292,8 +220,8 @@ post_dims
       <td>71062</td>
       <td>345</td>
       <td>18119</td>
+      <td>11.0</td>
       <td>15</td>
-      <td>6.0</td>
     </tr>
     <tr>
       <th>blood (AML)</th>
@@ -302,8 +230,8 @@ post_dims
       <td>71062</td>
       <td>575</td>
       <td>18119</td>
+      <td>3.0</td>
       <td>25</td>
-      <td>2.0</td>
     </tr>
     <tr>
       <th>blood (CLL)</th>
@@ -312,8 +240,8 @@ post_dims
       <td>71062</td>
       <td>92</td>
       <td>18119</td>
-      <td>4</td>
       <td>NaN</td>
+      <td>4</td>
     </tr>
     <tr>
       <th>blood (CML)</th>
@@ -322,8 +250,8 @@ post_dims
       <td>71062</td>
       <td>161</td>
       <td>18119</td>
-      <td>7</td>
       <td>NaN</td>
+      <td>7</td>
     </tr>
     <tr>
       <th>bone (Ewing sarcoma)</th>
@@ -332,8 +260,8 @@ post_dims
       <td>71062</td>
       <td>368</td>
       <td>18119</td>
-      <td>16</td>
       <td>NaN</td>
+      <td>16</td>
     </tr>
     <tr>
       <th>bone (chordoma)</th>
@@ -342,8 +270,8 @@ post_dims
       <td>71062</td>
       <td>92</td>
       <td>18119</td>
-      <td>4</td>
       <td>NaN</td>
+      <td>4</td>
     </tr>
     <tr>
       <th>bone (osteosarcoma)</th>
@@ -352,8 +280,8 @@ post_dims
       <td>71062</td>
       <td>207</td>
       <td>18119</td>
-      <td>9</td>
       <td>NaN</td>
+      <td>9</td>
     </tr>
     <tr>
       <th>breast</th>
@@ -362,8 +290,8 @@ post_dims
       <td>71062</td>
       <td>874</td>
       <td>18119</td>
+      <td>5.0</td>
       <td>38</td>
-      <td>2.0</td>
     </tr>
     <tr>
       <th>central nervous system (glioma)</th>
@@ -372,8 +300,8 @@ post_dims
       <td>71062</td>
       <td>1173</td>
       <td>18119</td>
+      <td>10.0</td>
       <td>51</td>
-      <td>7.0</td>
     </tr>
     <tr>
       <th>central nervous system (medulloblastoma)</th>
@@ -382,8 +310,8 @@ post_dims
       <td>71062</td>
       <td>161</td>
       <td>18119</td>
+      <td>1.0</td>
       <td>7</td>
-      <td>NaN</td>
     </tr>
     <tr>
       <th>cervix (cervical carcinoma)</th>
@@ -392,8 +320,8 @@ post_dims
       <td>71062</td>
       <td>115</td>
       <td>18119</td>
-      <td>5</td>
       <td>NaN</td>
+      <td>5</td>
     </tr>
     <tr>
       <th>cervix (cervical squamous)</th>
@@ -402,8 +330,8 @@ post_dims
       <td>71062</td>
       <td>115</td>
       <td>18119</td>
-      <td>5</td>
       <td>NaN</td>
+      <td>5</td>
     </tr>
     <tr>
       <th>colorectal</th>
@@ -412,8 +340,8 @@ post_dims
       <td>71062</td>
       <td>920</td>
       <td>18119</td>
+      <td>5.0</td>
       <td>40</td>
-      <td>9.0</td>
     </tr>
     <tr>
       <th>esophagus (esophagus adenocarcinoma)</th>
@@ -422,8 +350,8 @@ post_dims
       <td>71062</td>
       <td>115</td>
       <td>18119</td>
-      <td>5</td>
       <td>NaN</td>
+      <td>5</td>
     </tr>
     <tr>
       <th>esophagus (esophagus squamous)</th>
@@ -432,8 +360,8 @@ post_dims
       <td>71062</td>
       <td>460</td>
       <td>18119</td>
-      <td>20</td>
       <td>1.0</td>
+      <td>20</td>
     </tr>
     <tr>
       <th>eye (uveal melanoma)</th>
@@ -442,8 +370,8 @@ post_dims
       <td>71062</td>
       <td>115</td>
       <td>18119</td>
-      <td>5</td>
       <td>NaN</td>
+      <td>5</td>
     </tr>
     <tr>
       <th>gastric (gastric adenocarcinoma)</th>
@@ -452,8 +380,8 @@ post_dims
       <td>71062</td>
       <td>644</td>
       <td>18119</td>
-      <td>28</td>
       <td>6.0</td>
+      <td>28</td>
     </tr>
     <tr>
       <th>kidney (renal cell carcinoma)</th>
@@ -462,8 +390,8 @@ post_dims
       <td>71062</td>
       <td>552</td>
       <td>18119</td>
+      <td>5.0</td>
       <td>24</td>
-      <td>4.0</td>
     </tr>
     <tr>
       <th>liver (hepatocellular carcinoma)</th>
@@ -472,8 +400,8 @@ post_dims
       <td>71062</td>
       <td>460</td>
       <td>18119</td>
-      <td>20</td>
       <td>1.0</td>
+      <td>20</td>
     </tr>
     <tr>
       <th>lung (NSCLC)</th>
@@ -482,8 +410,8 @@ post_dims
       <td>71062</td>
       <td>1909</td>
       <td>18119</td>
-      <td>83</td>
       <td>10.0</td>
+      <td>83</td>
     </tr>
     <tr>
       <th>lung (SCLC)</th>
@@ -492,8 +420,8 @@ post_dims
       <td>71062</td>
       <td>437</td>
       <td>18119</td>
-      <td>19</td>
       <td>2.0</td>
+      <td>19</td>
     </tr>
     <tr>
       <th>lung (mesothelioma)</th>
@@ -502,8 +430,8 @@ post_dims
       <td>71062</td>
       <td>299</td>
       <td>18119</td>
-      <td>13</td>
       <td>NaN</td>
+      <td>13</td>
     </tr>
     <tr>
       <th>lymphocyte (hodgkin lymphoma)</th>
@@ -512,8 +440,8 @@ post_dims
       <td>71062</td>
       <td>92</td>
       <td>18119</td>
-      <td>4</td>
       <td>NaN</td>
+      <td>4</td>
     </tr>
     <tr>
       <th>lymphocyte (lymphoma unspecified)</th>
@@ -522,8 +450,8 @@ post_dims
       <td>71062</td>
       <td>115</td>
       <td>18119</td>
-      <td>5</td>
       <td>NaN</td>
+      <td>5</td>
     </tr>
     <tr>
       <th>lymphocyte (non hodgkin lymphoma)</th>
@@ -532,8 +460,8 @@ post_dims
       <td>71062</td>
       <td>460</td>
       <td>18119</td>
-      <td>20</td>
       <td>NaN</td>
+      <td>20</td>
     </tr>
     <tr>
       <th>ovary (ovary adenocarcinoma)</th>
@@ -542,8 +470,8 @@ post_dims
       <td>71062</td>
       <td>966</td>
       <td>18119</td>
+      <td>6.0</td>
       <td>42</td>
-      <td>5.0</td>
     </tr>
     <tr>
       <th>pancreas</th>
@@ -552,8 +480,8 @@ post_dims
       <td>71062</td>
       <td>874</td>
       <td>18119</td>
+      <td>5.0</td>
       <td>38</td>
-      <td>4.0</td>
     </tr>
     <tr>
       <th>peripheral nervous system (neuroblastoma)</th>
@@ -562,8 +490,8 @@ post_dims
       <td>71062</td>
       <td>460</td>
       <td>18119</td>
+      <td>1.0</td>
       <td>20</td>
-      <td>NaN</td>
     </tr>
     <tr>
       <th>plasma cell (multiple myeloma)</th>
@@ -572,8 +500,8 @@ post_dims
       <td>71062</td>
       <td>483</td>
       <td>18119</td>
-      <td>21</td>
       <td>NaN</td>
+      <td>21</td>
     </tr>
     <tr>
       <th>prostate</th>
@@ -582,8 +510,8 @@ post_dims
       <td>71062</td>
       <td>115</td>
       <td>18119</td>
-      <td>5</td>
       <td>NaN</td>
+      <td>5</td>
     </tr>
     <tr>
       <th>skin (melanoma)</th>
@@ -592,8 +520,8 @@ post_dims
       <td>71062</td>
       <td>1311</td>
       <td>18119</td>
+      <td>10.0</td>
       <td>57</td>
-      <td>9.0</td>
     </tr>
     <tr>
       <th>skin (skin squamous)</th>
@@ -602,8 +530,8 @@ post_dims
       <td>71062</td>
       <td>92</td>
       <td>18119</td>
-      <td>4</td>
       <td>NaN</td>
+      <td>4</td>
     </tr>
     <tr>
       <th>soft tissue (ATRT)</th>
@@ -612,8 +540,8 @@ post_dims
       <td>71062</td>
       <td>115</td>
       <td>18119</td>
-      <td>5</td>
       <td>NaN</td>
+      <td>5</td>
     </tr>
     <tr>
       <th>soft tissue (liposarcoma)</th>
@@ -622,8 +550,8 @@ post_dims
       <td>71062</td>
       <td>161</td>
       <td>18119</td>
-      <td>7</td>
       <td>NaN</td>
+      <td>7</td>
     </tr>
     <tr>
       <th>soft tissue (malignant rhabdoid tumor)</th>
@@ -632,8 +560,8 @@ post_dims
       <td>71062</td>
       <td>184</td>
       <td>18119</td>
-      <td>8</td>
       <td>NaN</td>
+      <td>8</td>
     </tr>
     <tr>
       <th>soft tissue (rhabdomyosarcoma)</th>
@@ -642,8 +570,8 @@ post_dims
       <td>71062</td>
       <td>230</td>
       <td>18119</td>
-      <td>10</td>
       <td>NaN</td>
+      <td>10</td>
     </tr>
     <tr>
       <th>soft tissue (synovial sarcoma)</th>
@@ -652,8 +580,8 @@ post_dims
       <td>71062</td>
       <td>115</td>
       <td>18119</td>
-      <td>5</td>
       <td>NaN</td>
+      <td>5</td>
     </tr>
     <tr>
       <th>thyroid (thyroid carcinoma)</th>
@@ -662,8 +590,8 @@ post_dims
       <td>71062</td>
       <td>207</td>
       <td>18119</td>
-      <td>9</td>
       <td>NaN</td>
+      <td>9</td>
     </tr>
     <tr>
       <th>upper aerodigestive</th>
@@ -672,8 +600,8 @@ post_dims
       <td>71062</td>
       <td>1058</td>
       <td>18119</td>
-      <td>46</td>
       <td>NaN</td>
+      <td>46</td>
     </tr>
     <tr>
       <th>urinary tract</th>
@@ -682,8 +610,8 @@ post_dims
       <td>71062</td>
       <td>690</td>
       <td>18119</td>
+      <td>2.0</td>
       <td>30</td>
-      <td>NaN</td>
     </tr>
     <tr>
       <th>uterus (endometrial adenocarcinoma)</th>
@@ -692,8 +620,8 @@ post_dims
       <td>71062</td>
       <td>414</td>
       <td>18119</td>
+      <td>12.0</td>
       <td>18</td>
-      <td>9.0</td>
     </tr>
   </tbody>
 </table>
@@ -713,11 +641,16 @@ def summarize_variable_per_lineage(
     posteriors = pd.DataFrame()
 
     for lineage, lineage_pm in postmen.as_dict().items():
-        post = (
-            lineage_pm.posterior_summary.query(f"var_name == '{var_name}'")
-            .reset_index(drop=True)
-            .assign(lineage=lineage)
-        )
+        try:
+            post = (
+                lineage_pm.posterior_summary.query(f"var_name == '{var_name}'")
+                .reset_index(drop=True)
+                .assign(lineage=lineage)
+            )
+        except FileNotFoundError:
+            print(f"Skipping {lineage_pm.id}.")
+            continue
+
         if len(post) == 0:
             continue
 
@@ -779,14 +712,14 @@ mu_a_posteriors.head()
     <tr>
       <th>0</th>
       <td>mu_a[A1BG]</td>
-      <td>0.337</td>
-      <td>0.125</td>
-      <td>0.136</td>
-      <td>0.535</td>
+      <td>0.322</td>
+      <td>0.122</td>
+      <td>0.134</td>
+      <td>0.522</td>
       <td>0.002</td>
       <td>0.002</td>
-      <td>3351.0</td>
-      <td>2677.0</td>
+      <td>2686.0</td>
+      <td>3015.0</td>
       <td>1.0</td>
       <td>mu_a</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -796,13 +729,13 @@ mu_a_posteriors.head()
       <th>1</th>
       <td>mu_a[A1CF]</td>
       <td>0.268</td>
-      <td>0.124</td>
-      <td>0.069</td>
-      <td>0.462</td>
+      <td>0.122</td>
+      <td>0.064</td>
+      <td>0.455</td>
       <td>0.002</td>
       <td>0.002</td>
-      <td>3071.0</td>
-      <td>3020.0</td>
+      <td>3291.0</td>
+      <td>2986.0</td>
       <td>1.0</td>
       <td>mu_a</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -811,14 +744,14 @@ mu_a_posteriors.head()
     <tr>
       <th>2</th>
       <td>mu_a[A2M]</td>
-      <td>0.178</td>
-      <td>0.127</td>
-      <td>-0.026</td>
-      <td>0.374</td>
+      <td>0.176</td>
+      <td>0.123</td>
+      <td>-0.025</td>
+      <td>0.365</td>
       <td>0.002</td>
       <td>0.002</td>
-      <td>2829.0</td>
-      <td>3058.0</td>
+      <td>3137.0</td>
+      <td>2943.0</td>
       <td>1.0</td>
       <td>mu_a</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -827,14 +760,14 @@ mu_a_posteriors.head()
     <tr>
       <th>3</th>
       <td>mu_a[A2ML1]</td>
-      <td>0.315</td>
-      <td>0.128</td>
+      <td>0.320</td>
+      <td>0.125</td>
       <td>0.122</td>
-      <td>0.527</td>
+      <td>0.525</td>
       <td>0.002</td>
       <td>0.002</td>
-      <td>3615.0</td>
-      <td>3519.0</td>
+      <td>3025.0</td>
+      <td>3113.0</td>
       <td>1.0</td>
       <td>mu_a</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -843,14 +776,14 @@ mu_a_posteriors.head()
     <tr>
       <th>4</th>
       <td>mu_a[A3GALT2]</td>
-      <td>0.109</td>
-      <td>0.126</td>
-      <td>-0.091</td>
-      <td>0.316</td>
+      <td>0.114</td>
+      <td>0.124</td>
+      <td>-0.087</td>
+      <td>0.308</td>
       <td>0.002</td>
       <td>0.002</td>
-      <td>3645.0</td>
-      <td>3260.0</td>
+      <td>2949.0</td>
+      <td>3087.0</td>
       <td>1.0</td>
       <td>mu_a</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -879,7 +812,7 @@ plt.show()
 
 
 
-![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_20_0.png)
+![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_19_0.png)
 
 
 
@@ -907,7 +840,7 @@ ax.set_ylim(0, 100)
 
 
 
-![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_21_1.png)
+![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_20_1.png)
 
 
 
@@ -945,77 +878,77 @@ mu_a_posterior_variability.sort_values(["variance"], ascending=False).head(15)
     <tr>
       <th>12642</th>
       <td>RAN</td>
-      <td>0.174340</td>
+      <td>0.192135</td>
     </tr>
     <tr>
       <th>16644</th>
       <td>TXNL4A</td>
-      <td>0.159995</td>
+      <td>0.175813</td>
     </tr>
     <tr>
       <th>7774</th>
       <td>KIF11</td>
-      <td>0.159251</td>
+      <td>0.165502</td>
     </tr>
     <tr>
       <th>16203</th>
       <td>TP53</td>
-      <td>0.154458</td>
-    </tr>
-    <tr>
-      <th>12291</th>
-      <td>PSMB5</td>
-      <td>0.152744</td>
-    </tr>
-    <tr>
-      <th>4599</th>
-      <td>EIF1AX</td>
-      <td>0.147346</td>
-    </tr>
-    <tr>
-      <th>669</th>
-      <td>ANKLE2</td>
-      <td>0.145652</td>
-    </tr>
-    <tr>
-      <th>2438</th>
-      <td>CCND1</td>
-      <td>0.143914</td>
-    </tr>
-    <tr>
-      <th>11831</th>
-      <td>POLR2L</td>
-      <td>0.138049</td>
-    </tr>
-    <tr>
-      <th>13304</th>
-      <td>RPSA</td>
-      <td>0.137469</td>
-    </tr>
-    <tr>
-      <th>9694</th>
-      <td>NAA10</td>
-      <td>0.135083</td>
-    </tr>
-    <tr>
-      <th>17350</th>
-      <td>YRDC</td>
-      <td>0.133543</td>
+      <td>0.156218</td>
     </tr>
     <tr>
       <th>13236</th>
       <td>RPL4</td>
-      <td>0.133500</td>
+      <td>0.152957</td>
+    </tr>
+    <tr>
+      <th>11831</th>
+      <td>POLR2L</td>
+      <td>0.151450</td>
+    </tr>
+    <tr>
+      <th>669</th>
+      <td>ANKLE2</td>
+      <td>0.147340</td>
     </tr>
     <tr>
       <th>6976</th>
       <td>HSPE1</td>
-      <td>0.133208</td>
+      <td>0.146923</td>
+    </tr>
+    <tr>
+      <th>4599</th>
+      <td>EIF1AX</td>
+      <td>0.146134</td>
+    </tr>
+    <tr>
+      <th>12291</th>
+      <td>PSMB5</td>
+      <td>0.145099</td>
+    </tr>
+    <tr>
+      <th>13199</th>
+      <td>RPL12</td>
+      <td>0.143239</td>
+    </tr>
+    <tr>
+      <th>13244</th>
+      <td>RPL9</td>
+      <td>0.142450</td>
+    </tr>
+    <tr>
+      <th>4428</th>
+      <td>DUX4</td>
+      <td>0.141819</td>
+    </tr>
+    <tr>
+      <th>9694</th>
+      <td>NAA10</td>
+      <td>0.139711</td>
     </tr>
     <tr>
       <th>13288</th>
       <td>RPS4X</td>
-      <td>0.132881</td>
+      <td>0.139244</td>
     </tr>
   </tbody>
 </table>
@@ -1080,14 +1013,14 @@ k_posteriors.head()
     <tr>
       <th>0</th>
       <td>k[ACH-000182__1]</td>
-      <td>0.052</td>
+      <td>0.058</td>
       <td>0.021</td>
-      <td>0.018</td>
-      <td>0.084</td>
+      <td>0.025</td>
+      <td>0.091</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>532.0</td>
-      <td>670.0</td>
+      <td>409.0</td>
+      <td>930.0</td>
       <td>1.01</td>
       <td>k</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -1099,14 +1032,14 @@ k_posteriors.head()
     <tr>
       <th>1</th>
       <td>k[ACH-000182__2]</td>
-      <td>-0.055</td>
+      <td>-0.045</td>
       <td>0.022</td>
-      <td>-0.087</td>
-      <td>-0.018</td>
+      <td>-0.079</td>
+      <td>-0.010</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>377.0</td>
-      <td>685.0</td>
+      <td>458.0</td>
+      <td>1026.0</td>
       <td>1.01</td>
       <td>k</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -1118,14 +1051,14 @@ k_posteriors.head()
     <tr>
       <th>2</th>
       <td>k[ACH-000182__3]</td>
-      <td>-0.030</td>
+      <td>-0.025</td>
       <td>0.022</td>
-      <td>-0.066</td>
-      <td>0.003</td>
+      <td>-0.059</td>
+      <td>0.011</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>477.0</td>
-      <td>988.0</td>
+      <td>487.0</td>
+      <td>868.0</td>
       <td>1.01</td>
       <td>k</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -1137,14 +1070,14 @@ k_posteriors.head()
     <tr>
       <th>3</th>
       <td>k[ACH-000182__4]</td>
+      <td>0.027</td>
       <td>0.023</td>
-      <td>0.024</td>
-      <td>-0.013</td>
-      <td>0.062</td>
+      <td>-0.007</td>
+      <td>0.067</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>447.0</td>
-      <td>1049.0</td>
+      <td>500.0</td>
+      <td>1280.0</td>
       <td>1.01</td>
       <td>k</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -1156,14 +1089,14 @@ k_posteriors.head()
     <tr>
       <th>4</th>
       <td>k[ACH-000182__5]</td>
-      <td>-0.046</td>
-      <td>0.024</td>
-      <td>-0.082</td>
-      <td>-0.007</td>
+      <td>-0.041</td>
+      <td>0.023</td>
+      <td>-0.077</td>
+      <td>-0.003</td>
       <td>0.001</td>
       <td>0.001</td>
-      <td>554.0</td>
-      <td>836.0</td>
+      <td>465.0</td>
+      <td>831.0</td>
       <td>1.01</td>
       <td>k</td>
       <td>bile duct (cholangiocarcinoma)</td>
@@ -1214,11 +1147,12 @@ plt.show()
 ```
 
     /home/jc604/.conda/envs/speclet/lib/python3.10/site-packages/seaborn/matrix.py:654: UserWarning: Clustering large matrix with scipy. Installing `fastcluster` may give better performance.
+      warnings.warn(msg)
 
 
 
 
-![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_24_1.png)
+![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_23_1.png)
 
 
 
@@ -1271,14 +1205,14 @@ f_posteriors.head()
       <th>0</th>
       <td>f[A1BG]</td>
       <td>-0.004</td>
-      <td>0.117</td>
-      <td>-0.188</td>
+      <td>0.118</td>
+      <td>-0.191</td>
       <td>0.188</td>
       <td>0.001</td>
       <td>0.002</td>
-      <td>9718.0</td>
-      <td>2826.0</td>
-      <td>1.00</td>
+      <td>11435.0</td>
+      <td>2669.0</td>
+      <td>1.0</td>
       <td>f</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>A1BG</td>
@@ -1286,15 +1220,15 @@ f_posteriors.head()
     <tr>
       <th>1</th>
       <td>f[A1CF]</td>
-      <td>-0.010</td>
-      <td>0.096</td>
-      <td>-0.162</td>
-      <td>0.143</td>
+      <td>-0.017</td>
+      <td>0.095</td>
+      <td>-0.160</td>
+      <td>0.141</td>
       <td>0.001</td>
       <td>0.002</td>
-      <td>9056.0</td>
-      <td>2534.0</td>
-      <td>1.00</td>
+      <td>11474.0</td>
+      <td>3054.0</td>
+      <td>1.0</td>
       <td>f</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>A1CF</td>
@@ -1303,14 +1237,14 @@ f_posteriors.head()
       <th>2</th>
       <td>f[A2M]</td>
       <td>-0.008</td>
-      <td>0.093</td>
-      <td>-0.159</td>
-      <td>0.141</td>
+      <td>0.089</td>
+      <td>-0.156</td>
+      <td>0.127</td>
       <td>0.001</td>
       <td>0.002</td>
-      <td>10978.0</td>
-      <td>2870.0</td>
-      <td>1.01</td>
+      <td>11872.0</td>
+      <td>2954.0</td>
+      <td>1.0</td>
       <td>f</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>A2M</td>
@@ -1318,15 +1252,15 @@ f_posteriors.head()
     <tr>
       <th>3</th>
       <td>f[A2ML1]</td>
-      <td>0.017</td>
-      <td>0.088</td>
-      <td>-0.126</td>
-      <td>0.155</td>
+      <td>0.015</td>
+      <td>0.092</td>
+      <td>-0.141</td>
+      <td>0.158</td>
       <td>0.001</td>
       <td>0.002</td>
-      <td>10213.0</td>
-      <td>2477.0</td>
-      <td>1.00</td>
+      <td>11758.0</td>
+      <td>2482.0</td>
+      <td>1.0</td>
       <td>f</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>A2ML1</td>
@@ -1334,15 +1268,15 @@ f_posteriors.head()
     <tr>
       <th>4</th>
       <td>f[A3GALT2]</td>
-      <td>0.075</td>
-      <td>0.100</td>
-      <td>-0.079</td>
-      <td>0.241</td>
+      <td>0.074</td>
+      <td>0.104</td>
+      <td>-0.092</td>
+      <td>0.237</td>
       <td>0.001</td>
-      <td>0.001</td>
-      <td>8710.0</td>
-      <td>2902.0</td>
-      <td>1.00</td>
+      <td>0.002</td>
+      <td>11281.0</td>
+      <td>2660.0</td>
+      <td>1.0</td>
       <td>f</td>
       <td>bile duct (cholangiocarcinoma)</td>
       <td>A3GALT2</td>
@@ -1394,11 +1328,12 @@ plt.show()
 ```
 
     /home/jc604/.conda/envs/speclet/lib/python3.10/site-packages/seaborn/matrix.py:654: UserWarning: Clustering large matrix with scipy. Installing `fastcluster` may give better performance.
+      warnings.warn(msg)
 
 
 
 
-![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_28_1.png)
+![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_27_1.png)
 
 
 
@@ -1419,11 +1354,15 @@ def filter_posterior_summmary_parameter(
 ) -> pd.DataFrame:
     res: list[pd.DataFrame] = []
     for lineage, lineage_pm in postmen.as_dict().items():
-        res.append(
-            lineage_pm.posterior_summary.filter_string("parameter", pattern).assign(
-                lineage=lineage
-            )
-        )
+        try:
+            df = lineage_pm.posterior_summary.filter_string(
+                "parameter", pattern
+            ).assign(lineage=lineage)
+        except FileNotFoundError:
+            print(f"Skipping {lineage_pm.id}.")
+            df = pd.DataFrame()
+
+        res.append(df)
 
     res_df = pd.concat(res)
     if var_names is not None:
@@ -1505,16 +1444,20 @@ plt.show()
 
 
 
-![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_31_0.png)
+![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_30_0.png)
 
 
 
 
 ```python
 def get_cancer_genes(pm: PosteriorDataManager) -> list[str]:
-    if (cgs := pm.trace.posterior.coords.get("cancer_gene")) is None:
+    try:
+        if (cgs := pm.trace.posterior.coords.get("cancer_gene")) is None:
+            return []
+        return cgs.values.tolist()
+    except AssertionError:
+        print(f"Skipping {pm.id}.")
         return []
-    return cgs.values.tolist()
 
 
 def get_all_cancer_genes(postmen: PosteriorDataManagers) -> dict[str, list[str]]:
@@ -1533,35 +1476,40 @@ cancer_genes
 
 
 
-    {'bile duct (cholangiocarcinoma)': [],
+    {'bile duct (cholangiocarcinoma)': ['BRAF'],
      'bile duct (gallbladder adenocarcinoma)': [],
-     'blood (ALL)': ['DNMT3A', 'FAT1', 'FLT3', 'LRP1B', 'NRAS', 'XPO1'],
-     'blood (AML)': ['LRP1B', 'NRAS'],
+     'blood (ALL)': ['BCORL1',
+      'CREBBP',
+      'CUX1',
+      'EP300',
+      'FAT1',
+      'LRP1B',
+      'MECOM',
+      'MN1',
+      'NRAS',
+      'PML',
+      'RPL22'],
+     'blood (AML)': ['KMT2A', 'LRP1B', 'NRAS'],
      'blood (CLL)': [],
      'blood (CML)': [],
      'bone (Ewing sarcoma)': [],
      'bone (chordoma)': [],
      'bone (osteosarcoma)': [],
-     'breast': ['BRCA2', 'PIK3CA'],
+     'breast': ['ARID1A', 'BRCA2', 'NOTCH1', 'PIK3CA', 'TP53'],
      'central nervous system (glioma)': ['APC',
       'CDKN2C',
       'EGFR',
       'KMT2C',
+      'KMT2D',
       'MLH1',
       'MTOR',
-      'PTEN'],
-     'central nervous system (medulloblastoma)': [],
+      'NF1',
+      'PTEN',
+      'TP53'],
+     'central nervous system (medulloblastoma)': ['TP53'],
      'cervix (cervical carcinoma)': [],
      'cervix (cervical squamous)': [],
-     'colorectal': ['APC',
-      'AXIN2',
-      'B2M',
-      'FBXW7',
-      'KRAS',
-      'MSH6',
-      'PIK3CA',
-      'POLD1',
-      'UBR5'],
+     'colorectal': ['APC', 'FBXW7', 'KRAS', 'PIK3CA', 'TP53'],
      'esophagus (esophagus adenocarcinoma)': [],
      'esophagus (esophagus squamous)': ['LRP1B'],
      'eye (uveal melanoma)': [],
@@ -1571,16 +1519,16 @@ cancer_genes
       'PTPN13',
       'PTPRT',
       'ZFHX3'],
-     'kidney (renal cell carcinoma)': ['MTOR', 'PBRM1', 'SETD2', 'VHL'],
+     'kidney (renal cell carcinoma)': ['KMT2D', 'MTOR', 'PBRM1', 'SETD2', 'VHL'],
      'liver (hepatocellular carcinoma)': ['AXIN1'],
-     'lung (NSCLC)': ['DDR2',
+     'lung (NSCLC)': ['ALK',
       'DROSHA',
       'EGFR',
+      'ERBB4',
       'KDR',
       'KEAP1',
       'PTPN13',
       'RB1',
-      'RBM10',
       'SMARCA4',
       'STK11'],
      'lung (SCLC)': ['RB1', 'SMARCA4'],
@@ -1590,19 +1538,21 @@ cancer_genes
      'lymphocyte (non hodgkin lymphoma)': [],
      'ovary (ovary adenocarcinoma)': ['BRCA1',
       'BRCA2',
+      'CTNNB1',
       'LRP1B',
       'PIK3R1',
       'SMARCA4'],
-     'pancreas': ['KRAS', 'PREX2', 'RNF43', 'SMAD4'],
-     'peripheral nervous system (neuroblastoma)': [],
+     'pancreas': ['EP300', 'KRAS', 'PREX2', 'RNF43', 'SMAD4'],
+     'peripheral nervous system (neuroblastoma)': ['ALK'],
      'plasma cell (multiple myeloma)': [],
      'prostate': [],
-     'skin (melanoma)': ['CDKN2A',
+     'skin (melanoma)': ['BRAF',
+      'CDKN2A',
+      'ERBB4',
       'FAT4',
       'GRIN2A',
       'NRAS',
       'POLE',
-      'PPP6C',
       'PREX2',
       'PTPRT',
       'TRRAP'],
@@ -1614,10 +1564,13 @@ cancer_genes
      'soft tissue (synovial sarcoma)': [],
      'thyroid (thyroid carcinoma)': [],
      'upper aerodigestive': [],
-     'urinary tract': [],
+     'urinary tract': ['FGFR3', 'KDM6A'],
      'uterus (endometrial adenocarcinoma)': ['ATR',
+      'BCL9L',
       'CTCF',
+      'CUX1',
       'FBXW7',
+      'FGFR2',
       'MLH1',
       'MSH2',
       'MTOR',
@@ -1649,7 +1602,7 @@ sns.jointplot(
 
 
 
-![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_35_0.png)
+![png](100_100_lineage-models-analysis_files/100_100_lineage-models-analysis_34_0.png)
 
 
 
@@ -1661,7 +1614,7 @@ notebook_toc = time()
 print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
-    execution time: 1.89 minutes
+    execution time: 1.81 minutes
 
 
 
@@ -1670,31 +1623,29 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-09-08
+    Last updated: 2022-10-06
 
     Python implementation: CPython
-    Python version       : 3.10.5
-    IPython version      : 8.4.0
+    Python version       : 3.10.6
+    IPython version      : 8.5.0
 
-    Compiler    : GCC 10.3.0
+    Compiler    : GCC 10.4.0
     OS          : Linux
     Release     : 3.10.0-1160.76.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 32
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-a-17-108.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-229.o2.rc.hms.harvard.edu
 
-    Git branch: expand-lineages
+    Git branch: figures
 
     re        : 2.2.1
-    arviz     : 0.12.1
-    matplotlib: 3.5.2
-    plotnine  : 0.0.0
-    pandas    : 1.4.3
-    numpy     : 1.23.1
+    pandas    : 1.4.4
+    numpy     : 1.23.3
     seaborn   : 0.11.2
+    matplotlib: 3.5.3
 
 
 

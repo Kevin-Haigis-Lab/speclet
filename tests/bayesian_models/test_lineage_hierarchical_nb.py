@@ -7,6 +7,9 @@ from pymc.backends.base import MultiTrace
 from speclet.bayesian_models.lineage_hierarchical_nb import (
     LineageHierNegBinomModel as LHNBModel,
 )
+from speclet.bayesian_models.lineage_hierarchical_nb import (
+    _get_cancer_genes_accounting_for_sublineage,
+)
 
 
 @pytest.fixture
@@ -145,3 +148,8 @@ def test_posterior_checks_use_available_variable_names(
             assert getattr(model, v) is not None
     assert _n_checks > 1
     return None
+
+
+def test_specific_colorectal_cancer_genes_used() -> None:
+    cancer_genes = _get_cancer_genes_accounting_for_sublineage("colorectal")
+    assert cancer_genes == {"KRAS", "APC", "PIK3CA", "FBXW7", "TP53"}

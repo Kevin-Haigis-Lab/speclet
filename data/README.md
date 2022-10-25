@@ -29,3 +29,7 @@ Below is a description of the copy number data values from a [post](https://foru
 
 Therefore, to get the original relative copy number values, use the following transformation: `cn = (2^x) - 1`.
 To be clear, the average value of the relative copy number is 1.
+
+### mRNA expression
+
+> Gene expression TPM values of the protein coding genes for DepMap cell lines. Values are inferred from RNA-seq data using the RSEM tool and are reported after $\log_2$ transformation, using a pseudo-count of 1; $\log_2(\text{TPM}+1)$.

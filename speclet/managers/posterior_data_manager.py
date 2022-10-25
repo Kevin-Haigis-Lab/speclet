@@ -8,7 +8,7 @@ import pandas as pd
 
 from speclet import model_configuration as model_config
 from speclet.bayesian_models import BayesianModelProtocol, get_bayesian_model
-from speclet.io import models_dir, project_root
+from speclet.io import DataFile, data_path, models_dir, project_root
 from speclet.loggers import logger
 from speclet.managers.cache_manager import PosteriorManager as PosteriorCacheManager
 from speclet.managers.cache_manager import get_posterior_cache_name
@@ -108,10 +108,15 @@ class PosteriorDataManager:
         """The summary of the model's posterior."""
         if self._posterior_summary is not None:
             return self._posterior_summary
-        self._posterior_summary = pd.read_csv(
-            self.posterior_dir / "posterior-summary.csv"
-        ).assign(var_name=lambda d: [x.split("[")[0] for x in d["parameter"]])
+        self._posterior_summary = pd.read_csv(self.posterior_summary_file).assign(
+            var_name=lambda d: [x.split("[")[0] for x in d["parameter"]]
+        )
         return self._posterior_summary
+
+    @property
+    def posterior_summary_file(self) -> Path:
+        """Posterior summary file path."""
+        return self.posterior_dir / "posterior-summary.csv"
 
     @property
     def trace(self) -> az.InferenceData:
@@ -139,16 +144,26 @@ class PosteriorDataManager:
         """Data used to fit the data."""
         if self._data is None:
             trans = [broad_only] if self._broad_only else []
-            data_file = self.config.data_file
-            if isinstance(data_file, Path) and not data_file.exists():
-                data_file = project_root() / data_file
-                if not data_file.exists():
-                    raise FileNotFoundError("Data file not found.")
-
             self._data = CrisprScreenDataManager(
-                data_file, transformations=trans
+                self.data_file, transformations=trans
             ).get_data(read_kwargs={"low_memory": False})
         return self._data
+
+    @property
+    def data_file(self) -> Path:
+        """Path to data file."""
+        data_file = self.config.data_file
+        if isinstance(data_file, Path):
+            if data_file.exists():
+                return data_file
+            elif (project_root() / data_file).exists():
+                return project_root() / data_file
+            else:
+                raise FileNotFoundError("Data file cannot be located.")
+        elif isinstance(data_file, DataFile):
+            return data_path(data_file)
+        else:
+            raise ValueError(f"Unexpected data file path type: {type(data_file)}")
 
     @property
     def valid_data(self) -> pd.DataFrame:
@@ -156,14 +171,18 @@ class PosteriorDataManager:
         if self._valid_data is not None:
             return self._valid_data
 
+        self._valid_data = self.validate_data(self.data.copy())
+        return self._valid_data
+
+    def validate_data(self, data: pd.DataFrame) -> pd.DataFrame:
+        """Run data through the validation pipeline for the model."""
         validation_fxn: Callable[..., pd.DataFrame] | None = getattr(
             self.bayes_model, "data_processing_pipeline", None
         )
         if validation_fxn is None:
             raise NotImplementedError("No validation pipeline for model.")
 
-        self._valid_data = validation_fxn(self.data.copy())
-        return self._valid_data
+        return validation_fxn(data)
 
     @property
     def model_data_struct(self) -> Any:

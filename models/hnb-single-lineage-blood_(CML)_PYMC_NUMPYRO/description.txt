@@ -17,7 +17,8 @@ CONFIGURATION
     "model_kwargs": {
         "lineage": "blood_(CML)",
         "min_n_cancer_genes": 4,
-        "min_frac_cancer_genes": 0.05
+        "min_frac_cancer_genes": 0.05,
+        "top_n_cancer_genes": 10
     },
     "sampling_kwargs": {
         "pymc_mcmc": null,
@@ -86,12 +87,12 @@ Data variables: (12/33)
     k                          (chain, draw, cell_chrom) float64 ...
     m                          (chain, draw, cell_chrom) float64 ...
 Attributes:
-    created_at:           2022-09-06 11:03:55.358405
+    created_at:           2022-09-28 09:51:39.515363
     arviz_version:        0.12.1
     model_name:           LineageHierNegBinomModel
     model_version:        0.1.3
     model_doc:            A hierarchical negative binomial generalized linear...
-    previous_created_at:  ['2022-09-06 11:03:55.358405', '2022-08-28T06:31:44...
+    previous_created_at:  ['2022-09-28 09:51:39.515363', '2022-09-28T13:46:47...
 
 --------------------------------------------------------------------------------
 
@@ -111,19 +112,19 @@ Data variables:
     tree_depth       (chain, draw) int64 ...
     lp               (chain, draw) float64 ...
 Attributes:
-    created_at:           2022-09-06 11:03:55.358405
+    created_at:           2022-09-28 09:51:39.515363
     arviz_version:        0.12.1
-    previous_created_at:  ['2022-09-06 11:03:55.358405', '2022-08-28T06:31:44...
+    previous_created_at:  ['2022-09-28 09:51:39.515363', '2022-09-28T13:46:47...
 
 --------------------------------------------------------------------------------
 
 MCMC DESCRIPTION
 
-date created: 2022-09-06 11:03
+date created: 2022-09-28 09:51
 sampled 4 chains with (unknown) tuning steps and 1,000 draws
 num. divergences: 0, 0, 0, 0
 percent divergences: 0.0, 0.0, 0.0, 0.0
-BFMI: 0.721, 0.724, 0.607, 0.606
-avg. step size: 0.011, 0.01, 0.01, 0.011
-avg. accept prob.: 0.988, 0.99, 0.989, 0.986
+BFMI: 0.638, 0.714, 0.788, 0.666
+avg. step size: 0.009, 0.009, 0.008, 0.009
+avg. accept prob.: 0.989, 0.99, 0.99, 0.988
 avg. tree depth: 9.0, 9.0, 9.0, 9.0

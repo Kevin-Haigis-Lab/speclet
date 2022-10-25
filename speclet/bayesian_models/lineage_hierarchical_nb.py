@@ -1,7 +1,7 @@
 """A hierarchical negative binomial generalized linear model for a single lineage."""
 
 from dataclasses import dataclass
-from typing import Any, Iterable, TypeVar
+from typing import Any, Final, Iterable, TypeVar
 
 import aesara.tensor as at
 import numpy as np
@@ -289,8 +289,8 @@ class LineageHierNegBinomModel:
             SC=batch_indices.n_screens,
             CG=len(cancer_genes),
             CHROM=chrom_indices.n_chromosome_cell,
-            ct_initial=data.counts_initial_adj.values.copy().astype(np.float64),
-            ct_final=data.counts_final.values.astype(np.int64),
+            ct_initial=data["counts_initial_adj"].values.copy().astype(np.float64),
+            ct_final=data["counts_final"].values.astype(np.int64),
             sgrna_idx=indices.sgrna_idx.astype(np.int64),
             gene_idx=indices.gene_idx.astype(np.int64),
             sgrna_to_gene_idx=indices.sgrna_to_gene_idx.astype(np.int64),
@@ -300,12 +300,12 @@ class LineageHierNegBinomModel:
             chromosome_to_cellline_idx=chrom_indices.chrom_to_cell_idx,
             chromosome_to_cellline_map=chrom_indices.chrom_to_cell_map,
             screen_idx=batch_indices.screen_idx.astype(np.int64),
-            copy_number=data.copy_number.values.astype(np.float64),
-            copy_number_gene=data.cn_gene.values.astype(np.float64),
-            copy_number_cell=data.cn_cell_line.values.astype(np.float64),
-            log_rna_expr=data.rna_expr.values.astype(np.float64),
-            z_log_rna_gene=data.z_rna_gene.values.astype(np.float64),
-            m_log_rna_gene=data.m_rna_gene.values.astype(np.float64),
+            copy_number=data["copy_number"].values.astype(np.float64),
+            copy_number_gene=data["cn_gene"].values.astype(np.float64),
+            copy_number_cell=data["cn_cell_line"].values.astype(np.float64),
+            log_rna_expr=data["rna_expr"].values.astype(np.float64),
+            z_log_rna_gene=data["z_rna_gene"].values.astype(np.float64),
+            m_log_rna_gene=data["m_rna_gene"].values.astype(np.float64),
             is_mutated=is_mutated.astype(np.int64),
             comutation_matrix=comutation_matrix.astype(np.int64),
             coords=coords,
@@ -652,10 +652,15 @@ def _get_cancer_genes_accounting_for_sublineage(
 ) -> set[str]:
     """Get the cancer genes accounting for sub-lineage.
 
+    Uses the pre-specified list of genes if available.
+
     The sub-lineage is extracted from the lineage name if a '(' is detected. If the
     sub-lineage is not in the cancer gene dictionary, then all of the lineage cancer
     genes are returned.
     """
+    if (genes := _specific_cancer_gene_sets(lineage)) is not None:
+        return genes
+
     if "(" in lineage:
         split_lineage = lineage.split("_(")
         lineage = split_lineage[0]
@@ -668,3 +673,10 @@ def _get_cancer_genes_accounting_for_sublineage(
         return _flatten_collection_of_sets(lineage_genes.values())
     else:
         return lineage_genes[sublineage]
+
+
+def _specific_cancer_gene_sets(lineage: str) -> set[str] | None:
+    SPECIFIC_CANCER_GENE_SETS: Final[dict[str, set[str]]] = {
+        "colorectal": {"KRAS", "APC", "PIK3CA", "FBXW7", "TP53"},
+    }
+    return SPECIFIC_CANCER_GENE_SETS.get(lineage)

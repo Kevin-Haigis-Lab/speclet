@@ -1,0 +1,20 @@
+
+font.size: 7
+font.family: sans-serif
+font.sans-serif: Computer Modern Sans Serif
+
+text.usetex: True
+mathtext.fontset: cm
+# text.latex.preamble: \usepackage[cm]{sfmath}
+
+axes.labelsize: 8
+axes.titlepad: 2
+axes.spines.bottom: False
+axes.spines.left: False
+axes.spines.right: False
+axes.spines.top: False
+
+xtick.labelsize: 7
+ytick.labelsize: 7
+
+grid.linewidth: 0.5

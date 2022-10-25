@@ -7,6 +7,7 @@ channels:
   - defaults
 dependencies:
   - python=3.10.*
+  - adjusttext
   - aeppl
   - aesara
   - arviz=0.12.*
@@ -30,16 +31,16 @@ dependencies:
   - jupyterlab_code_formatter
   - jupyterlab-spellchecker
   - mamba
-  - matplotlib>=3.5.0
+  - matplotlib=3.5.*
   - mypy
   - nbconvert
   - nbformat
   - nbqa
   - nbterm
-  - numpy>=1.22.0
+  - numpy=1.23.*
   - numpyro=0.10.*
-  - pandas>=1.3.0
-  - pandera>=0.8.0
+  - pandas=1.4.*
+  - pandera=0.8.*
   - pandoc
   - papermill
   - patsy
@@ -59,7 +60,7 @@ dependencies:
   - rich
   - scikit-learn>=1.0.0
   - scikit-misc
-  - seaborn
+  - seaborn=0.11.*
   - statsmodels
   - termcolor
   - typer

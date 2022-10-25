@@ -203,7 +203,7 @@ rule sample_pymc_numpyro:
     benchmark:
         BENCHMARK_DIR / "sample_pymc_mcmc/{model_name}_chain{chain}.tsv"
     priority: 30
-    retries: 0
+    retries: 1
     shell:
         # get_aesara_flags("{wildcards.model_name}_{wildcards.chain}_mcmc") + " "
         "{params.aesara_flag} "
@@ -222,7 +222,7 @@ rule sample_pymc_numpyro:
 
 def _get_thinning_value(wildcards: Wildcards, attempt: int) -> str:
     """Thin by the attempt number."""
-    thinnings = (1, 2, 4, 10, 20)
+    thinnings = (1, 1, 2, 4, 10, 20)  # Two attempts with no thinning.
     return str(thinnings[attempt - 1])
 
 
@@ -243,7 +243,7 @@ rule combine_pymc_numpyro:
         cache_dir=TEMP_DIR,
     resources:
         thin=_get_thinning_value,
-    retries: 4
+    retries: 5
     shell:
         "speclet/cli/combine_mcmc_chains_cli.py"
         "  '{wildcards.model_name}'"

@@ -107,7 +107,8 @@ print(postman.read_description())
         "model_kwargs": {
             "lineage": "urinary_tract",
             "min_n_cancer_genes": 4,
-            "min_frac_cancer_genes": 0.05
+            "min_frac_cancer_genes": 0.05,
+            "top_n_cancer_genes": 10
         },
         "sampling_kwargs": {
             "pymc_mcmc": null,
@@ -136,32 +137,32 @@ print(postman.read_description())
     POSTERIOR
 
     <xarray.Dataset>
-    Dimensions:                    (chain: 4, draw: 1000, delta_genes_dim_0: 4,
+    Dimensions:                    (chain: 4, draw: 1000, delta_genes_dim_0: 6,
                                     delta_genes_dim_1: 18119, sgrna: 71062,
                                     delta_cells_dim_0: 2, delta_cells_dim_1: 30,
-                                    cell_chrom: 690, genes_chol_cov_dim_0: 10,
+                                    cell_chrom: 690, genes_chol_cov_dim_0: 21,
                                     cells_chol_cov_dim_0: 3,
-                                    genes_chol_cov_corr_dim_0: 4,
-                                    genes_chol_cov_corr_dim_1: 4,
-                                    genes_chol_cov_stds_dim_0: 4, gene: 18119,
-                                    cells_chol_cov_corr_dim_0: 2,
+                                    genes_chol_cov_corr_dim_0: 6,
+                                    genes_chol_cov_corr_dim_1: 6,
+                                    genes_chol_cov_stds_dim_0: 6, gene: 18119,
+                                    cancer_gene: 2, cells_chol_cov_corr_dim_0: 2,
                                     cells_chol_cov_corr_dim_1: 2,
                                     cells_chol_cov_stds_dim_0: 2, cell_line: 30)
-    Coordinates: (12/18)
+    Coordinates: (12/19)
       * chain                      (chain) int64 0 1 2 3
       * draw                       (draw) int64 0 1 2 3 4 5 ... 995 996 997 998 999
-      * delta_genes_dim_0          (delta_genes_dim_0) int64 0 1 2 3
+      * delta_genes_dim_0          (delta_genes_dim_0) int64 0 1 2 3 4 5
       * delta_genes_dim_1          (delta_genes_dim_1) int64 0 1 2 ... 18117 18118
       * sgrna                      (sgrna) object 'AAAAAAATCCAGCAATGCAG' ... 'TTT...
       * delta_cells_dim_0          (delta_cells_dim_0) int64 0 1
         ...                         ...
-      * genes_chol_cov_stds_dim_0  (genes_chol_cov_stds_dim_0) int64 0 1 2 3
       * gene                       (gene) object 'A1BG' 'A1CF' ... 'ZZEF1' 'ZZZ3'
+      * cancer_gene                (cancer_gene) object 'FGFR3' 'KDM6A'
       * cells_chol_cov_corr_dim_0  (cells_chol_cov_corr_dim_0) int64 0 1
       * cells_chol_cov_corr_dim_1  (cells_chol_cov_corr_dim_1) int64 0 1
       * cells_chol_cov_stds_dim_0  (cells_chol_cov_stds_dim_0) int64 0 1
       * cell_line                  (cell_line) object 'ACH-000011' ... 'ACH-001416'
-    Data variables: (12/33)
+    Data variables: (12/35)
         mu_mu_a                    (chain, draw) float64 ...
         mu_b                       (chain, draw) float64 ...
         delta_genes                (chain, draw, delta_genes_dim_0, delta_genes_dim_1) float64 ...
@@ -176,12 +177,12 @@ print(postman.read_description())
         k                          (chain, draw, cell_chrom) float64 ...
         m                          (chain, draw, cell_chrom) float64 ...
     Attributes:
-        created_at:           2022-09-06 11:09:07.312755
+        created_at:           2022-09-28 06:39:11.324534
         arviz_version:        0.12.1
         model_name:           LineageHierNegBinomModel
         model_version:        0.1.3
         model_doc:            A hierarchical negative binomial generalized linear...
-        previous_created_at:  ['2022-09-06 11:09:07.312755', '2022-08-30T15:49:04...
+        previous_created_at:  ['2022-09-28 06:39:11.324534', '2022-09-28T10:25:14...
 
     --------------------------------------------------------------------------------
 
@@ -201,22 +202,22 @@ print(postman.read_description())
         tree_depth       (chain, draw) int64 ...
         lp               (chain, draw) float64 ...
     Attributes:
-        created_at:           2022-09-06 11:09:07.312755
+        created_at:           2022-09-28 06:39:11.324534
         arviz_version:        0.12.1
-        previous_created_at:  ['2022-09-06 11:09:07.312755', '2022-08-30T15:49:04...
+        previous_created_at:  ['2022-09-28 06:39:11.324534', '2022-09-28T10:25:14...
 
     --------------------------------------------------------------------------------
 
     MCMC DESCRIPTION
 
-    date created: 2022-09-06 11:09
+    date created: 2022-09-28 06:39
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0, 0, 0
     percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 0.755, 0.673, 0.69, 0.766
-    avg. step size: 0.008, 0.007, 0.008, 0.007
-    avg. accept prob.: 0.989, 0.99, 0.989, 0.989
-    avg. tree depth: 10.0, 10.0, 10.0, 10.0
+    BFMI: 0.694, 0.644, 0.711, 0.728
+    avg. step size: 0.008, 0.008, 0.008, 0.008
+    avg. accept prob.: 0.988, 0.987, 0.989, 0.989
+    avg. tree depth: 9.0, 9.0, 9.0, 9.0
 
 
 
@@ -224,11 +225,11 @@ print(postman.read_description())
 postman.load_all()
 ```
 
-    [INFO] 2022-09-07 14:59:49 [(lineage_hierarchical_nb.py:data_processing_pipeline:323] Processing data for modeling.
-    [INFO] 2022-09-07 14:59:49 [(lineage_hierarchical_nb.py:data_processing_pipeline:324] LFC limits: (-5.0, 5.0)
-    [WARNING] 2022-09-07 15:01:41 [(lineage_hierarchical_nb.py:data_processing_pipeline:382] number of data points dropped: 25
-    [INFO] 2022-09-07 15:01:43 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:630] number of genes mutated in all cells lines: 0
-    [INFO] 2022-09-07 15:01:44 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 5 cancer genes.
+    [INFO] 2022-09-28 08:33:56 [(lineage_hierarchical_nb.py:data_processing_pipeline:323] Processing data for modeling.
+    [INFO] 2022-09-28 08:33:56 [(lineage_hierarchical_nb.py:data_processing_pipeline:324] LFC limits: (-5.0, 5.0)
+    [WARNING] 2022-09-28 08:35:57 [(lineage_hierarchical_nb.py:data_processing_pipeline:382] number of data points dropped: 25
+    [INFO] 2022-09-28 08:36:00 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:630] number of genes mutated in all cells lines: 0
+    [INFO] 2022-09-28 08:36:01 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 8 cancer genes.
 
 
 ## Fit diagnostics
@@ -280,14 +281,14 @@ if postman.fit_method in {ModelFitMethod.PYMC_NUMPYRO, ModelFitMethod.PYMC_MCMC}
 
 
     ============================================================
-    date created: 2022-09-06 11:09
+    date created: 2022-09-28 06:39
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0, 0, 0
     percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 0.755, 0.673, 0.69, 0.766
-    avg. step size: 0.008, 0.007, 0.008, 0.007
-    avg. accept prob.: 0.989, 0.99, 0.989, 0.989
-    avg. tree depth: 10.0, 10.0, 10.0, 10.0
+    BFMI: 0.694, 0.644, 0.711, 0.728
+    avg. step size: 0.008, 0.008, 0.008, 0.008
+    avg. accept prob.: 0.988, 0.987, 0.989, 0.989
+    avg. tree depth: 9.0, 9.0, 9.0, 9.0
 
 
 
@@ -308,13 +309,9 @@ plt.tight_layout()
 plt.show()
 ```
 
-    /home/jc604/.conda/envs/speclet_smk/lib/python3.10/site-packages/arviz/utils.py:136: UserWarning: Items starting with ~: ['^h$'] have not been found and will be ignored
-      warnings.warn(
 
 
-
-
-![png](hnb-single-lineage-urinary_tract_PYMC_NUMPYRO_lineage-report_files/hnb-single-lineage-urinary_tract_PYMC_NUMPYRO_lineage-report_18_1.png)
+![png](hnb-single-lineage-urinary_tract_PYMC_NUMPYRO_lineage-report_files/hnb-single-lineage-urinary_tract_PYMC_NUMPYRO_lineage-report_18_0.png)
 
 
 
@@ -358,7 +355,7 @@ cancer_genes: list[str] = [] if _cgs is None else _cgs.values.tolist()
 print(cancer_genes)
 ```
 
-    []
+    ['FGFR3', 'KDM6A']
 
 
 
@@ -503,6 +500,18 @@ if len(cancer_genes) > 0:
     )
     plt.show()
 ```
+
+
+
+![png](hnb-single-lineage-urinary_tract_PYMC_NUMPYRO_lineage-report_files/hnb-single-lineage-urinary_tract_PYMC_NUMPYRO_lineage-report_23_0.png)
+
+
+
+
+
+![png](hnb-single-lineage-urinary_tract_PYMC_NUMPYRO_lineage-report_files/hnb-single-lineage-urinary_tract_PYMC_NUMPYRO_lineage-report_23_1.png)
+
+
 
 
 ```python
@@ -889,6 +898,18 @@ if len(cancer_genes) > 1:
 ```
 
 
+
+![png](hnb-single-lineage-urinary_tract_PYMC_NUMPYRO_lineage-report_files/hnb-single-lineage-urinary_tract_PYMC_NUMPYRO_lineage-report_31_0.png)
+
+
+
+
+
+![png](hnb-single-lineage-urinary_tract_PYMC_NUMPYRO_lineage-report_files/hnb-single-lineage-urinary_tract_PYMC_NUMPYRO_lineage-report_31_1.png)
+
+
+
+
 ```python
 top_n = 5
 top_b_hits = (
@@ -1032,7 +1053,7 @@ plt.show()
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-09-07
+    Last updated: 2022-09-28
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -1040,19 +1061,19 @@ plt.show()
 
     Compiler    : GCC 10.3.0
     OS          : Linux
-    Release     : 3.10.0-1160.66.1.el7.x86_64
+    Release     : 3.10.0-1160.76.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
     CPU cores   : 32
     Architecture: 64bit
 
-    Hostname: compute-h-17-54.o2.rc.hms.harvard.edu
+    Hostname: compute-h-17-50.o2.rc.hms.harvard.edu
 
-    Git branch: expand-lineages
+    Git branch: figures
 
+    arviz     : 0.12.1
     pandas    : 1.4.3
     matplotlib: 3.5.2
-    logging   : 0.5.1.2
     numpy     : 1.23.1
-    arviz     : 0.12.1
     seaborn   : 0.11.2
+    logging   : 0.5.1.2

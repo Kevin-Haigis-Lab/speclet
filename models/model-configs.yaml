@@ -111,6 +111,7 @@
     lineage: "bile_duct_(cholangiocarcinoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -140,6 +141,7 @@
     lineage: "bile_duct_(gallbladder_adenocarcinoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -169,6 +171,7 @@
     lineage: "blood_(ALL)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -198,6 +201,7 @@
     lineage: "blood_(AML)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -227,6 +231,7 @@
     lineage: "blood_(CLL)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -256,6 +261,7 @@
     lineage: "blood_(CML)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -286,6 +292,7 @@
     lineage: "bone_(Ewing_sarcoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -315,6 +322,7 @@
     lineage: "bone_(chordoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -344,6 +352,7 @@
     lineage: "bone_(osteosarcoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -373,6 +382,7 @@
     lineage: "breast"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -402,6 +412,7 @@
     lineage: "central_nervous_system_(glioma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -431,6 +442,7 @@
     lineage: "central_nervous_system_(medulloblastoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -460,6 +472,7 @@
     lineage: "cervix_(cervical_carcinoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -489,6 +502,7 @@
     lineage: "cervix_(cervical_squamous)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -518,6 +532,40 @@
     lineage: "colorectal"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.2
+    top_n_cancer_genes: 10
+  sampling_kwargs:
+    pymc_numpyro:
+      draws: 1000
+      tune: 2000
+      target_accept: 0.99
+      idata_kwargs:
+        log_likelihood: false
+      nuts_kwargs:
+        step_size: 0.01
+  slurm_resources:
+    PYMC_NUMPYRO:
+      mem: 54
+      time: 20
+      cores: 1
+      gpu:
+        gpu: "RTX 8000"
+
+
+- name: "hnb-single-lineage-colorectal__specific-cancer-genes"
+  description: "
+    Single lineage hierarchical negative binomial model for colorectal data.
+
+    This model uses a different list of cancer genes than those from CGC. Just reduced
+    the number to help with some weird fitting issues.
+  "
+  active: false
+  model: LINEAGE_HIERARCHICAL_NB
+  data_file: "modeling_data/sublineage-broad-modeling-data/depmap-modeling-data_colorectal.csv"
+  model_kwargs:
+    lineage: "colorectal"
+    min_n_cancer_genes: 4
+    min_frac_cancer_genes: 0.2
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -547,6 +595,7 @@
     lineage: "esophagus_(esophagus_adenocarcinoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -576,6 +625,7 @@
     lineage: "esophagus_(esophagus_squamous)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -605,6 +655,7 @@
     lineage: "eye_(uveal_melanoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -634,6 +685,7 @@
     lineage: "gastric_(gastric_adenocarcinoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -663,6 +715,7 @@
     lineage: "kidney_(renal_cell_carcinoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -692,6 +745,7 @@
     lineage: "liver_(hepatocellular_carcinoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -722,6 +776,7 @@
     lineage: "lung_(NSCLC)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -751,6 +806,7 @@
     lineage: "lung_(SCLC)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -780,6 +836,7 @@
     lineage: "lung_(mesothelioma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -809,6 +866,7 @@
     lineage: "lymphocyte_(hodgkin_lymphoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -838,6 +896,7 @@
     lineage: "lymphocyte_(lymphoma_unspecified)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -867,6 +926,7 @@
     lineage: "lymphocyte_(non_hodgkin_lymphoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -896,6 +956,7 @@
     lineage: "ovary_(ovary_adenocarcinoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -925,6 +986,7 @@
     lineage: "pancreas"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -954,6 +1016,7 @@
     lineage: "peripheral_nervous_system_(neuroblastoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -983,6 +1046,7 @@
     lineage: "plasma_cell_(multiple_myeloma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -1012,6 +1076,7 @@
     lineage: "prostate"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -1042,6 +1107,7 @@
     lineage: "skin_(melanoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -1071,6 +1137,7 @@
     lineage: "skin_(skin_squamous)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -1100,6 +1167,7 @@
     lineage: "soft_tissue_(ATRT)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -1129,6 +1197,7 @@
     lineage: "soft_tissue_(liposarcoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -1158,6 +1227,7 @@
     lineage: "soft_tissue_(malignant_rhabdoid_tumor)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -1187,6 +1257,7 @@
     lineage: "soft_tissue_(rhabdomyosarcoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -1216,6 +1287,7 @@
     lineage: "soft_tissue_(synovial_sarcoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -1245,6 +1317,7 @@
     lineage: "thyroid_(thyroid_carcinoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -1274,6 +1347,7 @@
     lineage: "upper_aerodigestive"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -1303,6 +1377,7 @@
     lineage: "urinary_tract"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000
@@ -1332,6 +1407,7 @@
     lineage: "uterus_(endometrial_adenocarcinoma)"
     min_n_cancer_genes: 4
     min_frac_cancer_genes: 0.05
+    top_n_cancer_genes: 10
   sampling_kwargs:
     pymc_numpyro:
       draws: 1000

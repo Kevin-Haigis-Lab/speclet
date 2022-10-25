@@ -193,7 +193,7 @@ def grouped_copy_number_transform(
     group: str,
     cn_col: str = "copy_number",
     new_col: str = "copy_number_scaled",
-    max_cn: float = 3,
+    max_cn: float = 3.0,
 ) -> pd.DataFrame:
     """Custom transformation of copy number data (grouped).
 
@@ -208,7 +208,7 @@ def grouped_copy_number_transform(
         cn_col (str, optional): Copy number column. Defaults to "copy_number".
         new_col (str, optional): New column. Defaults to "copy_number_scaled".
         max_cn (float, optional): Maximum CN value before any new transformation.
-        Defaults to 3.
+        Therefore, restricting the "relative copy number." Defaults to 3.
 
     Returns:
         pd.DataFrame: Modified data frame.
@@ -216,7 +216,7 @@ def grouped_copy_number_transform(
     return (
         df.copy()
         .assign(__cn=lambda d: squish_array(d[cn_col], lower=0, upper=max_cn))
-        .assign(__cn=lambda d: np.log2(d["__cn"] + 1))
+        .assign(__cn=lambda d: (2 ** d["__cn"]) - 1)
         .groupby(group)
         .apply(_median_center, col="__cn", new_col="__cn")
         .rename(columns={"__cn": new_col})

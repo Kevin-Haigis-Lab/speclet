@@ -3,29 +3,25 @@
 %autoreload 2
 ```
 
+
 ```python
 import warnings
-from pathlib import Path
 from time import time
 
-import dask
 import dask.dataframe as dd
-import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+import pandas as pd  # noqa: F401
 import plotnine as gg
 import seaborn as sns
-from dask.distributed import Client, progress
+from dask.distributed import Client
 ```
 
+
 ```python
-from src.data_processing import achilles as achelp
-from src.data_processing import common as dphelp
-from src.io import cache_io, data_io
-from src.loggers import logger
-from src.plot.color_pal import SeabornColor
+from speclet.io import DataFile, data_path
 ```
+
 
 ```python
 notebook_tic = time()
@@ -48,10 +44,14 @@ np.random.seed(RANDOM_SEED)
 
 ## Setup
 
+
 ```python
 client = Client(n_workers=4, threads_per_worker=4, memory_limit="16GB")
 client
 ```
+
+
+
 
 <div>
     <div style="width: 24px; height: 24px; background-color: #e1e1e1; border: 3px solid #9D9D9D; border-radius: 5px; position: absolute;"> </div>
@@ -109,6 +109,7 @@ client
     <td style="text-align: left;"><strong>Status:</strong> running</td>
     <td style="text-align: left;"><strong>Using processes:</strong> True</td>
 </tr>
+
 
         </table>
 
@@ -347,18 +348,24 @@ client
 </div>
             </details>
 
+
     </div>
 </div>
 
+
+
+
 ```python
-data_path = data_io.data_path(data_io.DataFile.DEPMAP_DATA)
-if data_path.exists():
-    print(f"data file: '{data_path.as_posix()}'")
+depmap_data_path = data_path(DataFile.DEPMAP_DATA)
+if depmap_data_path.exists():
+    print(f"data file: '{depmap_data_path.as_posix()}'")
 else:
-    raise FileNotFoundError(data_path)
+    raise FileNotFoundError(depmap_data_path)
 ```
 
     data file: '/n/data1/hms/dbmi/park/Cook/speclet/modeling_data/depmap_modeling_dataframe.csv'
+
+
 
 ```python
 data_types: dict[str, str] = {"age": "float64"}
@@ -370,9 +377,13 @@ screen_data = dd.read_csv(data_path, dtype=data_types, low_memory=False)
 
 ## Basic statistics
 
+
 ```python
 screen_data.head()
 ```
+
+
+
 
 <div>
 <style scoped>
@@ -541,9 +552,15 @@ screen_data.head()
 <p>5 rows × 24 columns</p>
 </div>
 
+
+
+
 ```python
 screen_data.columns
 ```
+
+
+
 
     Index(['sgrna', 'replicate_id', 'lfc', 'p_dna_batch', 'genome_alignment',
            'hugo_symbol', 'screen', 'multiple_hits_on_gene', 'sgrna_target_chr',
@@ -552,6 +569,9 @@ screen_data.columns
            'any_cosmic_hotspot', 'is_mutated', 'copy_number', 'lineage',
            'primary_or_metastasis', 'is_male', 'age'],
           dtype='object')
+
+
+
 
 ```python
 print("stats for all data:")
@@ -572,9 +592,12 @@ for col, lbl in {
       num cell lines: 1,028
       num lineages: 27
 
+
+
 ```python
 broad_screen_data = screen_data.query("screen == 'broad'")
 ```
+
 
 ```python
 print("stats for broad data:")
@@ -595,9 +618,12 @@ for col, lbl in {
       num cell lines: 895
       num lineages: 27
 
+
+
 ```python
 gene_sgrna_map = broad_screen_data[["hugo_symbol", "sgrna"]].drop_duplicates().compute()
 ```
+
 
 ```python
 guides_per_gene = (
@@ -616,11 +642,19 @@ ax.set_ylabel("count")
 plt.show()
 ```
 
+
+
 ![png](001_001_basic-data-statistics-and-plots_files/001_001_basic-data-statistics-and-plots_15_0.png)
+
+
+
 
 ```python
 guides_per_gene.sort_values("sgrna", ascending=False).head()
 ```
+
+
+
 
 <div>
 <style scoped>
@@ -674,19 +708,32 @@ guides_per_gene.sort_values("sgrna", ascending=False).head()
 </table>
 </div>
 
+
+
+
 ```python
 sampled_dataset = screen_data.sample(frac=0.001).compute().reset_index(drop=True)
 ```
+
 
 ```python
 sampled_dataset.shape
 ```
 
+
+
+
     (91453, 24)
+
+
+
 
 ```python
 sampled_dataset.head()
 ```
+
+
+
 
 <div>
 <style scoped>
@@ -855,6 +902,9 @@ sampled_dataset.head()
 <p>5 rows × 24 columns</p>
 </div>
 
+
+
+
 ```python
 fg = sns.displot(data=sampled_dataset, x="lfc", kde=True)
 ax = fg.axes[0][0]
@@ -863,7 +913,12 @@ ax.set_ylabel("density")
 plt.show()
 ```
 
+
+
 ![png](001_001_basic-data-statistics-and-plots_files/001_001_basic-data-statistics-and-plots_20_0.png)
+
+
+
 
 ```python
 sns.jointplot(
@@ -871,7 +926,12 @@ sns.jointplot(
 );
 ```
 
+
+
 ![png](001_001_basic-data-statistics-and-plots_files/001_001_basic-data-statistics-and-plots_21_0.png)
+
+
+
 
 ```python
 g = sns.jointplot(
@@ -885,7 +945,12 @@ g.ax_joint.set_xscale("log")
 g.ax_joint.set_yscale("log");
 ```
 
+
+
 ![png](001_001_basic-data-statistics-and-plots_files/001_001_basic-data-statistics-and-plots_22_0.png)
+
+
+
 
 ```python
 g = sns.relplot(
@@ -903,9 +968,14 @@ for ax in g.axes:
     ax[0].set_xscale("log")
 ```
 
+
+
 ![png](001_001_basic-data-statistics-and-plots_files/001_001_basic-data-statistics-and-plots_23_0.png)
 
+
+
 ---
+
 
 ```python
 notebook_toc = time()
@@ -913,6 +983,8 @@ print(f"execution time: {(notebook_toc - notebook_tic) / 60:.2f} minutes")
 ```
 
     execution time: 21.66 minutes
+
+
 
 ```python
 %load_ext watermark

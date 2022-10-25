@@ -1,6 +1,7 @@
 """Paths and data input/output."""
 
 import os
+import shutil
 import warnings
 from enum import Enum, unique
 from pathlib import Path
@@ -146,6 +147,11 @@ def temp_dir() -> Path:
     return project_root() / "temp"
 
 
+def cache_dir() -> Path:
+    """Cache directory."""
+    return project_root() / "cache"
+
+
 def tables_dir() -> Path:
     """Tables directory."""
     return project_root() / "tables"
@@ -157,3 +163,57 @@ def notebook_table_dir(nb_name: str) -> Path:
     if not d.exists():
         d.mkdir()
     return d
+
+
+# --- Figures ---
+
+
+def figures_dir() -> Path:
+    """Figures directory."""
+    return project_root() / "figures"
+
+
+def dissertation_figure_stylesheet() -> Path:
+    """Dissertation figure stylesheet."""
+    return figures_dir() / "figures.mplstyle"
+
+
+def figure_dir(num: int, ver: int) -> Path:
+    """Directory for a figure."""
+    d = figures_dir() / f"figure_{num:03d}-v{ver:03d}"
+    if not d.exists():
+        d.mkdir()
+    return d
+
+
+def figure_img_file(num: int, ver: int, name: str) -> Path:
+    """Path for a figure image file."""
+    return figure_dir(num, ver) / f"fig_{num:03d}-v{ver:03d}_{name}.png"
+
+
+def _clear_dir(d: Path) -> None:
+    for fp in d.iterdir():
+        if fp.is_file():
+            os.remove(fp)
+        elif fp.is_dir():
+            shutil.rmtree(fp)
+
+
+def notebook_output_and_stash_dirs(
+    name: str, clear_output: bool = True, clear_stash: bool = False
+) -> tuple[Path, Path]:
+    """Generate an output and stash directory."""
+    stash_dir = temp_dir() / f"{name}_stash"
+    if not stash_dir.exists():
+        stash_dir.mkdir()
+
+    if clear_stash:
+        _clear_dir(stash_dir)
+
+    output_dir = tables_dir() / name
+    if not output_dir.exists():
+        output_dir.mkdir()
+    elif clear_output:
+        _clear_dir(output_dir)
+
+    return output_dir, stash_dir

@@ -1,6 +1,4 @@
-# *speclet* - Bayesian modeling of genome-wide CRISPR-Cas9 LOF screens
-
-**Use Bayesian data analysis to create informative models of genome-wide CRISPR-Cas9 loss-of-function genetic screens.**
+# *speclet* - A Bayesian hierarchical model to discover tissue-specific cancer driver genes and synthetic lethal interactions from CRISPR/Cas9 LoF screens
 
 [![python](https://img.shields.io/badge/Python-3.10-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org)
 [![jupyerlab](https://img.shields.io/badge/Jupyter-Lab-F37626.svg?style=flat&logo=jupyter)](https://jupyter.org) <br>
@@ -13,6 +11,8 @@
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![pydocstyle](https://img.shields.io/badge/pydocstyle-enabled-AD4CD3)](http://www.pydocstyle.org/en/stable/) <br>
 [![License: GPLv3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+![speclet model diagram](speclet-model.png)
 
 ---
 

@@ -11,8 +11,6 @@ import seaborn as sns
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from speclet.plot.color_pal import SeabornColor
-
 
 def plot_all_priors(
     prior_predictive: dict[str, np.ndarray],
@@ -109,7 +107,7 @@ def plot_vi_hist(
     return (
         gg.ggplot(d, gg.aes(x="step"))
         + gg.geom_line(gg.aes(y=y), size=0.5, alpha=0.75, color="black")
-        + gg.geom_line(gg.aes(y=rolling_y), size=0.5, alpha=0.9, color=SeabornColor.RED)
+        + gg.geom_line(gg.aes(y=rolling_y), size=0.5, alpha=0.9, color="tab:red")
         + gg.scale_x_continuous(expand=(0, 0), limits=_x_lims)
         + gg.scale_y_continuous(expand=(0.02, 0, 0.02, 0), limits=_y_lims)
         + gg.labs(

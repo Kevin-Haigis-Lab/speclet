@@ -107,7 +107,8 @@ print(postman.read_description())
         "model_kwargs": {
             "lineage": "lung_(NSCLC)",
             "min_n_cancer_genes": 4,
-            "min_frac_cancer_genes": 0.05
+            "min_frac_cancer_genes": 0.05,
+            "top_n_cancer_genes": 10
         },
         "sampling_kwargs": {
             "pymc_mcmc": null,
@@ -156,7 +157,7 @@ print(postman.read_description())
       * delta_cells_dim_0          (delta_cells_dim_0) int64 0 1
         ...                         ...
       * gene                       (gene) object 'A1BG' 'A1CF' ... 'ZZEF1' 'ZZZ3'
-      * cancer_gene                (cancer_gene) object 'DDR2' 'DROSHA' ... 'STK11'
+      * cancer_gene                (cancer_gene) object 'ALK' 'DROSHA' ... 'STK11'
       * cells_chol_cov_corr_dim_0  (cells_chol_cov_corr_dim_0) int64 0 1
       * cells_chol_cov_corr_dim_1  (cells_chol_cov_corr_dim_1) int64 0 1
       * cells_chol_cov_stds_dim_0  (cells_chol_cov_stds_dim_0) int64 0 1
@@ -176,12 +177,12 @@ print(postman.read_description())
         k                          (chain, draw, cell_chrom) float64 ...
         m                          (chain, draw, cell_chrom) float64 ...
     Attributes:
-        created_at:           2022-09-07 23:33:38.834104
+        created_at:           2022-09-29 18:12:05.390794
         arviz_version:        0.12.1
         model_name:           LineageHierNegBinomModel
         model_version:        0.1.3
         model_doc:            A hierarchical negative binomial generalized linear...
-        previous_created_at:  ['2022-09-07 23:33:38.834104', '2022-08-27T09:29:23...
+        previous_created_at:  ['2022-09-29 18:12:05.390794', '2022-09-29T14:07:22...
 
     --------------------------------------------------------------------------------
 
@@ -201,21 +202,21 @@ print(postman.read_description())
         tree_depth       (chain, draw) int64 ...
         lp               (chain, draw) float64 ...
     Attributes:
-        created_at:           2022-09-07 23:33:38.834104
+        created_at:           2022-09-29 18:12:05.390794
         arviz_version:        0.12.1
-        previous_created_at:  ['2022-09-07 23:33:38.834104', '2022-08-27T09:29:23...
+        previous_created_at:  ['2022-09-29 18:12:05.390794', '2022-09-29T14:07:22...
 
     --------------------------------------------------------------------------------
 
     MCMC DESCRIPTION
 
-    date created: 2022-09-07 23:33
+    date created: 2022-09-29 18:12
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0, 0, 0
     percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 0.733, 0.69, 0.722, 0.68
-    avg. step size: 0.007, 0.007, 0.008, 0.008
-    avg. accept prob.: 0.988, 0.987, 0.986, 0.985
+    BFMI: 0.714, 0.658, 0.662, 0.826
+    avg. step size: 0.007, 0.007, 0.008, 0.009
+    avg. accept prob.: 0.989, 0.987, 0.984, 0.982
     avg. tree depth: 9.0, 9.0, 9.0, 9.0
 
 
@@ -224,11 +225,11 @@ print(postman.read_description())
 postman.load_all()
 ```
 
-    [INFO] 2022-09-08 03:46:13 [(lineage_hierarchical_nb.py:data_processing_pipeline:323] Processing data for modeling.
-    [INFO] 2022-09-08 03:46:13 [(lineage_hierarchical_nb.py:data_processing_pipeline:324] LFC limits: (-5.0, 5.0)
-    [WARNING] 2022-09-08 03:50:00 [(lineage_hierarchical_nb.py:data_processing_pipeline:382] number of data points dropped: 64
-    [INFO] 2022-09-08 03:50:07 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:630] number of genes mutated in all cells lines: 0
-    [INFO] 2022-09-08 03:50:13 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 7 cancer genes.
+    [INFO] 2022-09-30 02:52:51 [(lineage_hierarchical_nb.py:data_processing_pipeline:323] Processing data for modeling.
+    [INFO] 2022-09-30 02:52:51 [(lineage_hierarchical_nb.py:data_processing_pipeline:324] LFC limits: (-5.0, 5.0)
+    [WARNING] 2022-09-30 02:56:21 [(lineage_hierarchical_nb.py:data_processing_pipeline:382] number of data points dropped: 64
+    [INFO] 2022-09-30 02:56:27 [(lineage_hierarchical_nb.py:target_gene_is_mutated_vector:630] number of genes mutated in all cells lines: 0
+    [INFO] 2022-09-30 02:56:35 [(cancer_gene_mutation_matrix.py:_trim_cancer_genes:77] Dropping 18 cancer genes.
 
 
 ## Fit diagnostics
@@ -280,13 +281,13 @@ if postman.fit_method in {ModelFitMethod.PYMC_NUMPYRO, ModelFitMethod.PYMC_MCMC}
 
 
     ============================================================
-    date created: 2022-09-07 23:33
+    date created: 2022-09-29 18:12
     sampled 4 chains with (unknown) tuning steps and 1,000 draws
     num. divergences: 0, 0, 0, 0
     percent divergences: 0.0, 0.0, 0.0, 0.0
-    BFMI: 0.733, 0.69, 0.722, 0.68
-    avg. step size: 0.007, 0.007, 0.008, 0.008
-    avg. accept prob.: 0.988, 0.987, 0.986, 0.985
+    BFMI: 0.714, 0.658, 0.662, 0.826
+    avg. step size: 0.007, 0.007, 0.008, 0.009
+    avg. accept prob.: 0.989, 0.987, 0.984, 0.982
     avg. tree depth: 9.0, 9.0, 9.0, 9.0
 
 
@@ -354,7 +355,7 @@ cancer_genes: list[str] = [] if _cgs is None else _cgs.values.tolist()
 print(cancer_genes)
 ```
 
-    ['DDR2', 'DROSHA', 'EGFR', 'KDR', 'KEAP1', 'PTPN13', 'RB1', 'RBM10', 'SMARCA4', 'STK11']
+    ['ALK', 'DROSHA', 'EGFR', 'ERBB4', 'KDR', 'KEAP1', 'PTPN13', 'RB1', 'SMARCA4', 'STK11']
 
 
 
@@ -1056,7 +1057,7 @@ plt.show()
 %watermark -d -u -v -iv -b -h -m
 ```
 
-    Last updated: 2022-09-08
+    Last updated: 2022-09-30
 
     Python implementation: CPython
     Python version       : 3.10.5
@@ -1067,16 +1068,16 @@ plt.show()
     Release     : 3.10.0-1160.71.1.el7.x86_64
     Machine     : x86_64
     Processor   : x86_64
-    CPU cores   : 20
+    CPU cores   : 28
     Architecture: 64bit
 
-    Hostname: compute-f-17-14.o2.rc.hms.harvard.edu
+    Hostname: compute-e-16-179.o2.rc.hms.harvard.edu
 
-    Git branch: expand-lineages
+    Git branch: figures
 
     seaborn   : 0.11.2
-    arviz     : 0.12.1
-    logging   : 0.5.1.2
     numpy     : 1.23.1
     pandas    : 1.4.3
     matplotlib: 3.5.2
+    logging   : 0.5.1.2
+    arviz     : 0.12.1
