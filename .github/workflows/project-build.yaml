@@ -1,9 +1,9 @@
 name: "project-build"
 
 on:
-  workflow_dispatch:
-  schedule:
-    - cron:  '0 3 * * MON'
+  # workflow_dispatch:
+  # schedule:
+  #   - cron:  '0 3 * * MON'
   push:
     branches:
       - master
