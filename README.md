@@ -14,12 +14,17 @@
 
 ![speclet model diagram](speclet-model.png)
 
+The *speclet* model accounts for cell line- and chromosome-specific differences while simultaneously measuring the effect of targeting each gene across multiple molecular covariates including copy number, mRNA expression, and mutation status.
+The effect of the presence of mutations to key driver and tumor suppressor genes is also included to identify putative synthetic lethal interactions.
+The results of this project have been published in Chapter 4 of my Ph.D. dissertation available here: "Studying the tissue-specificity of cancer driver genes through *KRAS* and genetic dependency screens" (link to come soon).
+
 ---
+
+## Setup
 
 > Many setup and running commands have been added as `make` commands.
 > Run `make help` to see the options available.
 
-## Setup
 
 ### Python virtual environments
 
@@ -148,7 +153,7 @@ make munge # or `make munge_o2` if on O2 HPC
 
 ### Notebooks
 
-Exploratory and small-scale analyses are conducted in the ["notebooks/"](notebooks/) directory.
+Exploration and analyses are conducted in the ["notebooks/"](notebooks/) directory.
 Subdirectories divide related notebooks.
 See the README in that directory for further details.
 
@@ -210,22 +215,18 @@ The most recent results can be seen [here](https://github.com/Kevin-Haigis-Lab/s
 
 ### Pipelines
 
-Each individual pipeline can be run through a `bash` script or a `make`command.
+Each individual pipeline can be run through a `bash` script or a `make` command.
 See the pipelines [README](pipelines/README.md) for full details.
 
 ### Notebooks
 
-The notebooks contain the majority of the model analysis.
-They are still a work in progress and this section will be updated when a full build-system is available.
-
-```bash
-# TODO
-```
+The notebooks contain the analyses of the models and additional exploration of the data and other model designs.
+See the ["notebooks/"](notebooks/) directory for information the running these analyses.
 
 ### Full project build
 
 The entire project can be installed from scratch and all analysis run with the following `make` command.
 
 ```bash
-make build  # or `build_o2` on O2 HPC
+make build  # or `build_o2` on the O2 HPC
 ```
